@@ -1,0 +1,51 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:local="clr-namespace:ByteSync.ViewModels.Sessions.Local"
+             xmlns:local1="clr-namespace:ByteSync.Views.Sessions.Local"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Sessions.Local.LocalSessionPartsView">
+    
+    <Design.DataContext>
+        <local:LocalSessionPartsViewModel />
+    </Design.DataContext>
+    
+    <StackPanel Orientation="Vertical">
+        
+        <ItemsControl Margin="12 12 12 0" Background="{DynamicResource BlockBackColor}"
+                      Items="{Binding Parts}" IsVisible="{Binding !!Parts.Count}"
+                      IsEnabled="{Binding Path=IsFileSystemSelectionEnabled}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Vertical"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <local1:PartView Margin="0 0 0 6"/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        
+        <StackPanel Orientation="Horizontal" Margin="12">
+            <Button Classes="GenericButton Accent"
+                    Command="{Binding Path=AddDirectoryCommand}" HorizontalAlignment="Left" Margin="0 0 12 0" IsEnabled="{Binding Path=IsFileSystemSelectionEnabled}">
+                <StackPanel Orientation="Horizontal" Margin="0">
+                    <misc:Icon Value="SolidFolderPlus" />
+                    <TextBlock Text="{localizations:Loc SessionMachine_AddDirectory, True}" />
+                </StackPanel>
+            </Button>
+        
+            <Button Classes="GenericButton Accent"
+                    Command="{Binding Path=AddFileCommand}" HorizontalAlignment="Left" Margin="0" IsEnabled="{Binding Path=IsFileSystemSelectionEnabled}">
+                <StackPanel Orientation="Horizontal" Margin="0">
+                    <misc:Icon Value="SolidFilePlus" />
+                    <TextBlock Text="{localizations:Loc SessionMachine_AddFile, True}" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

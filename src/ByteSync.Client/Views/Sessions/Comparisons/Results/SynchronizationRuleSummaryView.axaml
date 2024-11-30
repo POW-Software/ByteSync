@@ -1,0 +1,81 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:results="clr-namespace:ByteSync.ViewModels.Sessions.Comparisons.Results"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Sessions.Comparisons.Results.SynchronizationRuleSummaryView">
+     
+    
+    <Design.DataContext>
+        <results:SynchronizationRuleSummaryViewModel />
+    </Design.DataContext>
+    
+    
+    <Grid>
+        <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+           <StackPanel Orientation="Horizontal" >
+               <Interaction.Behaviors>
+                   <!-- InputElement pour les évènements : http://reference.avaloniaui.net/api/Avalonia.Input/InputElement/ -->
+                   <EventTriggerBehavior EventName="PointerPressed">
+                       <InvokeCommandAction Command="{Binding EditCommand}"></InvokeCommandAction>
+                   </EventTriggerBehavior>
+               </Interaction.Behaviors>
+               
+               <StackPanel.Styles>
+                   <!-- Styles : https://docs.avaloniaui.net/docs/styling/styles -->
+                   <!-- Selectors : https://docs.avaloniaui.net/docs/styling/selectors -->
+                   <Style Selector="StackPanel:pointerover">
+                       <Setter Property="StackPanel.Background" Value="{DynamicResource OtherMemberBackGround}" />
+                       <Setter Property="StackPanel.Cursor" Value="Hand" />
+                   </Style>
+                   <Style Selector="StackPanel">
+                       <Setter Property="StackPanel.Background" Value="{DynamicResource Gray8}" />
+                       <Setter Property="StackPanel.Cursor" Value="Arrow" />
+                   </Style>
+               </StackPanel.Styles>
+
+               
+               <StackPanel Orientation="Horizontal" IsVisible="{Binding IsIconVisible}" Background="Transparent">
+                   <misc:Icon FontSize="14" Value="{Binding IconName}"  Margin="3 0" />
+               
+                   <Label Content="{Binding ElementType}" 
+                          FontStyle="Italic" VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
+                   
+                   <Border BorderBrush="{DynamicResource SystemChromeMediumColor}" BorderThickness="1,0,1,0" Margin="6 0 6,0" />
+               </StackPanel>
+
+               
+               <Label Content="{Binding Mode}" FontStyle="Italic" VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
+               <Label Content="{Binding Conditions}" FontWeight="DemiBold" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+               <Label Content="{Binding Then}" FontStyle="Italic" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+               <Label Content="{Binding Actions}" FontWeight="DemiBold" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+
+               <Button Command="{Binding Path=DuplicateCommand}" 
+                       HorizontalAlignment="Left" VerticalAlignment="Stretch"
+                       Margin="3 0 0 0" BorderThickness="0" 
+                       Focusable="False" Cursor="Hand" 
+                       Background="Transparent" CornerRadius="0">
+
+                   <StackPanel Orientation="Horizontal" Background="Transparent" Cursor="Hand" VerticalAlignment="Center">
+                       <misc:Icon FontSize="12" Value="RegularDuplicate" VerticalAlignment="Center" Margin="0 1 0 0" />
+                       
+                   </StackPanel>
+               </Button>
+               
+               <Button Command="{Binding Path=RemoveCommand}" 
+                       HorizontalAlignment="Left" VerticalAlignment="Stretch"
+                       Margin="3 0 0 0" BorderThickness="0" 
+                       Focusable="False" Cursor="Hand" 
+                       Background="Transparent" CornerRadius="0">
+
+                   <StackPanel Orientation="Horizontal" Background="Transparent" Cursor="Hand" VerticalAlignment="Center">
+                       <misc:Icon FontSize="12" Value="RegularX" VerticalAlignment="Center" Margin="0 1 0 0" />
+                       
+                   </StackPanel>
+               </Button>
+           </StackPanel>
+       </StackPanel>
+   </Grid>
+</UserControl>

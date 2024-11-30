@@ -1,0 +1,403 @@
+﻿using System.Collections.ObjectModel;
+using ByteSync.Business.Actions.Local;
+using ByteSync.Business.Comparisons;
+using ByteSync.Common.Business.Inventories;
+using ByteSync.Common.Helpers;
+using ByteSync.Interfaces.Controls.Comparisons;
+using ByteSync.Interfaces.Controls.Synchronizations;
+using ByteSync.Interfaces.Repositories;
+using ByteSync.Models.Comparisons.Result;
+using ByteSync.ViewModels.Sessions.Comparisons.Results;
+using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
+
+namespace ByteSync.Services.Comparisons;
+
+class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
+{
+    private readonly IAtomicActionConsistencyChecker _atomicActionConsistencyChecker;
+    private readonly IAtomicActionRepository _atomicActionRepository;
+
+    public SynchronizationRuleMatcher(IAtomicActionConsistencyChecker atomicActionConsistencyChecker, 
+        IAtomicActionRepository atomicActionRepository)
+    {
+        _atomicActionConsistencyChecker = atomicActionConsistencyChecker;
+        _atomicActionRepository = atomicActionRepository;
+    }
+
+    public void MakeMatches(ICollection<ComparisonItem> comparisonItems, ICollection<SynchronizationRule> synchronizationRules)
+    {
+        foreach (var comparisonItem in comparisonItems)
+        {
+            MakeMatches(comparisonItem, synchronizationRules);
+        }
+    }
+
+    public void MakeMatches(ComparisonItem comparisonItem, ICollection<SynchronizationRule> synchronizationRules)
+    {
+        var initialAtomicActions = _atomicActionRepository.GetAtomicActions(comparisonItem);
+        var actionsToRemove = initialAtomicActions.Where(a => a.IsFromSynchronizationRule).ToList();
+        _atomicActionRepository.Remove(actionsToRemove);
+        
+        HashSet<AtomicAction> atomicActions = GetAppliableActions(comparisonItem, synchronizationRules);
+        _atomicActionRepository.AddOrUpdate(atomicActions);
+    }
+
+    public void RemoveDeleted(ObservableCollection<ComparisonItemViewModel> comparisonItems, 
+        SynchronizationRuleSummaryViewModel synchronizationRuleSummaryViewModel)
+    {
+        foreach (var comparisonItemViewModel in comparisonItems)
+        {
+            comparisonItemViewModel.TD_SynchronizationActions
+                .RemoveAll(sa => sa.IsFromSynchronizationRule && 
+                                 Equals(sa.AtomicAction.SynchronizationRule, synchronizationRuleSummaryViewModel.SynchronizationRule));
+        }
+    }
+
+    private HashSet<AtomicAction> GetAppliableActions(ComparisonItem comparisonItem, 
+        ICollection<SynchronizationRule> synchronizationRules)
+    {
+        HashSet<AtomicAction> result = new HashSet<AtomicAction>();
+
+        var matchingSynchronizationRules = synchronizationRules.Where(sr => ConditionsMatch(sr, comparisonItem)).ToList();
+        
+        var atomicActions = _atomicActionConsistencyChecker.GetAppliableActions(matchingSynchronizationRules);
+        foreach (var atomicAction in atomicActions)
+        {
+            // Maintenant, on doit contrôler que l'action est applicable
+            // En effet, la condition peut correspondre sans que l'action décidée soit applicable puisqu'il n'y a pas de 
+            // corrélation entre les deux
+            // Ex :
+            //  - Condition: A.Contenu 'Non égal' à B et Action: Copier A vers B
+            //          => La condition fonctionne si A n'existe pas et que B existe
+            //          => L'action ne pourra toutefois pas fonctionner quand A n'existe pas
+
+            var clonedAtomicAction = atomicAction.CloneNew();
+            
+            var checkResult = _atomicActionConsistencyChecker.CheckCanAdd(clonedAtomicAction, comparisonItem);
+            if (checkResult.IsOK)
+            {
+                clonedAtomicAction.ComparisonItem = comparisonItem;
+                result.Add(clonedAtomicAction);
+            }
+        }
+
+        return result;
+    }
+
+    private bool ConditionsMatch(SynchronizationRule synchronizationRule, ComparisonItem comparisonItem)
+    {
+        if (synchronizationRule.Conditions.Count == 0)
+        {
+            return false;
+        }
+
+        if (synchronizationRule.FileSystemType != comparisonItem.FileSystemType)
+        {
+            return false;
+        }
+            
+        var areAllConditionsOK = true;
+        var isOneConditionOK = false;
+
+        foreach (var condition in synchronizationRule.Conditions)
+        {
+            var isConditionOK = ConditionMatches(condition, comparisonItem);
+
+            if (!isConditionOK)
+            {
+                areAllConditionsOK = false;
+            }
+            else
+            {
+                isOneConditionOK = true;
+            }
+        }
+
+        if (synchronizationRule.ConditionMode == ConditionModes.All)
+        {
+            return areAllConditionsOK;
+        }
+        else
+        {
+            return isOneConditionOK;
+        }
+    }
+
+    private bool ConditionMatches(AtomicCondition condition, ComparisonItem comparisonItem)
+    {
+        switch (condition.ComparisonElement)
+        {
+            case ComparisonElement.Content:
+                return ConditionMatchesContent(condition, comparisonItem);
+            case ComparisonElement.Size:
+                return ConditionMatchesSize(condition, comparisonItem);
+            case ComparisonElement.Date:
+                return ConditionMatchesDate(condition, comparisonItem);
+            case ComparisonElement.Presence:
+                return ConditionMatchesPresence(condition, comparisonItem);
+            default:
+                return false;
+        }
+    }
+
+    private bool ConditionMatchesContent(AtomicCondition condition, ComparisonItem comparisonItem)
+    {
+        bool? result = null;
+
+        if (comparisonItem.FileSystemType == FileSystemTypes.Directory)
+        {
+            // au 08/09/2022 : impossible de travailler sur le Content pour les Directory
+            return false;
+        }
+            
+        var contentIdentitySource = ExtractContentIdentity(condition.Source, comparisonItem);
+        var contentIdentityDestination = ExtractContentIdentity(condition.Destination, comparisonItem);
+
+        if (contentIdentitySource != null && contentIdentitySource.HasAnalysisError
+            || contentIdentityDestination != null && contentIdentityDestination.HasAnalysisError)
+        {
+            return false;
+        }
+
+        switch (condition.ConditionOperator)
+        {
+            case ConditionOperatorTypes.Equals:
+                if (contentIdentitySource == null && contentIdentityDestination != null)
+                {
+                    result = false;
+                }
+                else if (contentIdentitySource != null && contentIdentityDestination == null)
+                {
+                    result = false;
+                }
+                else
+                {
+                    result = Equals(contentIdentitySource?.Core!.SignatureHash, contentIdentityDestination?.Core!.SignatureHash);
+                }
+                    
+                break;
+            case ConditionOperatorTypes.NotEquals: // Peut être manquant sur B
+                if (contentIdentitySource == null && contentIdentityDestination != null)
+                {
+                    result = true;
+                }
+                else if (contentIdentitySource != null && contentIdentityDestination == null)
+                {
+                    result = true;
+                }
+                else
+                {
+                    result = ! Equals(contentIdentitySource?.Core!.SignatureHash, contentIdentityDestination?.Core!.SignatureHash);
+                }
+                break;
+        }
+            
+        if (result == null)
+        {
+            throw new ArgumentOutOfRangeException("ConditionMatchesContent " + condition.ConditionOperator);
+        }
+
+        return result.Value;
+    }
+        
+    private bool ExistsOn(DataPart? dataPart, ComparisonItem comparisonItem)
+    {
+        if (dataPart == null)
+        {
+            return false;
+        }
+            
+        var contentIdentity = LocalizeContentIdentity(dataPart, comparisonItem);
+
+        if (comparisonItem.FileSystemType == FileSystemTypes.File)
+        {
+            return contentIdentity?.Core != null;
+        }
+        else
+        {
+            return contentIdentity != null;
+        }
+    }
+
+    private ContentIdentity? ExtractContentIdentity(DataPart? dataPart, ComparisonItem comparisonItem)
+    {
+        if (dataPart == null)
+        {
+            return null;
+        }
+            
+        var contentIdentity = LocalizeContentIdentity(dataPart, comparisonItem);
+        return contentIdentity;
+    }
+        
+    private bool ConditionMatchesSize(AtomicCondition condition, ComparisonItem comparisonItem)
+    {
+        var sizeSource = ExtractSize(condition.Source, comparisonItem);
+
+        long? sizeDestination;
+        if (condition.Destination is { IsVirtual: false })   
+        {
+            sizeDestination = ExtractSize(condition.Destination, comparisonItem);
+        }
+        else
+        {
+            var size = (long)condition.Size!;
+            var sizeUnitPower = (int)condition.SizeUnit! - 1;
+
+            sizeDestination = size * (long)Math.Pow(1024, sizeUnitPower);
+        }
+
+        if (sizeSource == null || sizeDestination == null)
+        {
+            return false;
+        }
+
+        var result = false;
+        switch (condition.ConditionOperator)
+        {
+            case ConditionOperatorTypes.Equals:
+                result = sizeSource == sizeDestination;
+                break;
+            case ConditionOperatorTypes.NotEquals:
+                result = sizeSource != sizeDestination;
+                break;
+            case ConditionOperatorTypes.IsSmallerThan:
+                result = sizeSource < sizeDestination;
+                break;
+            case ConditionOperatorTypes.IsBiggerThan:
+                result = sizeSource > sizeDestination;
+                break;
+        }
+
+        return result;
+    }
+
+    private long? ExtractSize(DataPart dataPart, ComparisonItem comparisonItem)
+    {
+        var contentIdentity = LocalizeContentIdentity(dataPart, comparisonItem);
+        return contentIdentity?.Core?.Size;
+    }
+
+    private bool ConditionMatchesDate(AtomicCondition condition, ComparisonItem comparisonItem)
+    {
+        var lastWriteTimeSource = ExtractDate(condition.Source, comparisonItem);
+
+        DateTime? lastWriteTimeDestination;
+        if (condition.Destination is { IsVirtual: false })
+        {
+            lastWriteTimeDestination = ExtractDate(condition.Destination, comparisonItem);
+        }
+        else
+        {
+            lastWriteTimeDestination = condition.DateTime!;
+                
+            // Dans les conditions, les dateTimes sont trimées à la minutes.
+            // On le contrôle, et si c'est le cas, on trime lastWriteTimeSource
+            if (lastWriteTimeSource != null && 
+                lastWriteTimeDestination.Value.Second == 0 && lastWriteTimeDestination.Value.Millisecond == 0)
+            {
+                lastWriteTimeSource = lastWriteTimeSource.Value.Trim(TimeSpan.TicksPerMinute);
+            }
+        }
+
+        if (lastWriteTimeSource == null)
+        {
+            return false;
+        }
+
+        var result = false;
+        switch (condition.ConditionOperator)
+        {
+            case ConditionOperatorTypes.Equals:
+                result = lastWriteTimeDestination != null && lastWriteTimeSource == lastWriteTimeDestination;
+                break;
+            case ConditionOperatorTypes.NotEquals:
+                result = lastWriteTimeDestination != null && lastWriteTimeSource != lastWriteTimeDestination;
+                break;
+            case ConditionOperatorTypes.IsNewerThan: 
+                // 13:01:2023, Pour newer, on accepte que la date soit nulle, c'est à dire que le fichier n'existe pas
+                result = (condition.Destination is { IsVirtual: false } && lastWriteTimeDestination == null) || 
+                         (lastWriteTimeDestination != null && lastWriteTimeSource > lastWriteTimeDestination);
+                break;
+            case ConditionOperatorTypes.IsOlderThan:
+                result = lastWriteTimeDestination != null && lastWriteTimeSource < lastWriteTimeDestination;
+                break;
+        }
+
+        return result;
+    }
+
+    private DateTime? ExtractDate(DataPart dataPart, ComparisonItem comparisonItem)
+    {
+        var contentIdentity = LocalizeContentIdentity(dataPart, comparisonItem);
+            
+        if (contentIdentity != null)
+        {
+            foreach (var pair in contentIdentity.InventoryPartsByLastWriteTimes)
+            {
+                if (pair.Value.Contains(dataPart.GetAppliableInventoryPart()))
+                {
+                    return pair.Key;
+                }
+            }
+        }
+
+        return null;
+    }
+        
+    private bool ConditionMatchesPresence(AtomicCondition condition, ComparisonItem comparisonItem)
+    {
+        bool? result = null;
+            
+        if (condition.ConditionOperator.In(ConditionOperatorTypes.ExistsOn, ConditionOperatorTypes.NotExistsOn))
+        {
+            var existsOnSource = ExistsOn(condition.Source, comparisonItem);
+            var existsOnDestination = ExistsOn(condition.Destination, comparisonItem);
+                
+            switch (condition.ConditionOperator)
+            {
+                case ConditionOperatorTypes.ExistsOn:
+                    result = existsOnSource && existsOnDestination;
+                    break;
+                case ConditionOperatorTypes.NotExistsOn:
+                    result = existsOnSource && !existsOnDestination;
+                    break;
+            }
+        }
+
+        if (result == null)
+        {
+            throw new ArgumentOutOfRangeException("ConditionMatchesPresence " + condition.ConditionOperator);
+        }
+            
+        return result.Value;
+    }
+
+    private ContentIdentity? LocalizeContentIdentity(DataPart dataPart, ComparisonItem comparisonItem)
+    {
+        if (dataPart.Inventory != null)
+        {
+            foreach (var contentIdentity in comparisonItem.ContentIdentities)
+            {
+                if (contentIdentity.GetInventories().Contains(dataPart.Inventory))
+                {
+                    return contentIdentity;
+                }
+            }
+        }
+        else if (dataPart.InventoryPart != null)
+        {
+            foreach (var contentIdentity in comparisonItem.ContentIdentities)
+            {
+                var inventoryParts = contentIdentity.GetInventoryParts();
+
+                if (inventoryParts.Contains(dataPart.InventoryPart))
+                {
+                    return contentIdentity;
+                }
+            }
+        }
+
+        return null;
+    }
+}

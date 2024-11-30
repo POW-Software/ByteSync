@@ -1,0 +1,21 @@
+meta {
+  name: DateIsCopied (C2)
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{root-url}}/session/{{sessionId}}/synchronization/dateIsCopied
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: {{jwtToken2}}
+}
+
+body:json {
+  [
+    "{{actionGroupId2}}"
+  ]
+}

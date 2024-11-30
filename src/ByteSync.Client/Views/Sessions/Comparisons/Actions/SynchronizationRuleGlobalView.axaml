@@ -1,0 +1,182 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:actions1="clr-namespace:ByteSync.Views.Sessions.Comparisons.Actions"
+             xmlns:actions="clr-namespace:ByteSync.ViewModels.Sessions.Comparisons.Actions"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Sessions.Comparisons.Actions.SynchronizationRuleGlobalView">
+
+    <Design.DataContext>
+        <actions:SynchronizationRuleGlobalViewModel />
+    </Design.DataContext>
+
+    
+    <Grid Background="{DynamicResource Gray7}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Classes="GroupBoxHeader" Text="{localizations:Loc SynchronizationRulesGlobal_Conditions, True}"></TextBlock>
+                
+                <StackPanel Orientation="Vertical" Margin="3 0" HorizontalAlignment="Stretch">
+                    <StackPanel Orientation="Horizontal"
+                                IsVisible="{Binding ShowFileSystemTypeSelection}" Margin="0 0 0 0">
+                        <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_FileSystemType}" VerticalAlignment="Center" Margin="3 0"/>
+                        
+                        <ComboBox Classes="PowComboBox" Items="{Binding Path=FileSystemTypes}" Margin="3 0"
+                                  SelectedItem="{Binding Path=SelectedFileSystemType}" VerticalContentAlignment="Center">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Label Content="{Binding Description}" VerticalAlignment="Center" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        
+                    </StackPanel>
+                    
+                    <!-- Permet de faire des séparateurs avec Dash, remplace les Borders vides avec épaisseur de 2 en Avalonia -->
+                    <Rectangle Height="1" IsVisible="{Binding ShowFileSystemTypeSelection}"  HorizontalAlignment="Stretch"
+                               StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
+                               StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="0 10"/>
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_If}" VerticalAlignment="Center" Margin="3 0"/>
+                        
+                        <ComboBox Classes="PowComboBox" Items="{Binding Path=ConditionModes}" Margin="3 0"
+                                  SelectedItem="{Binding Path=SelectedConditionMode}" VerticalContentAlignment="Center">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Label Content="{Binding Description}" VerticalAlignment="Center" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        
+                        <TextBlock Text="{Binding Path=TextAfterConditionModesComboBox}" VerticalAlignment="Center" Margin="3 0"/>
+                        <!--Foreground="{DynamicResource MahApps.Brushes.Gray1}"-->
+                    </StackPanel>
+
+                    <!-- <ItemsControl mvvm:RegionManager.RegionName="{x:Static inf:RegionNames.SynchronizationRulesConditionsRegion}"> -->
+                    <ItemsControl Items="{Binding Conditions}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical" Margin="40 10 6 10" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <actions1:AtomicConditionEditView Margin="0 5" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="3 9"
+                            Command="{Binding Path=AddConditionCommand}" MaxHeight="26">
+                        <StackPanel Orientation="Horizontal">
+                            <misc:Icon FontSize="12" Value="RegularPlusCircle" />
+                            <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_AddCondition}" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+                
+                
+
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="0 21">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Classes="GroupBoxHeader" Text="{localizations:Loc SynchronizationRulesGlobal_Actions, True}"></TextBlock>
+                
+                <StackPanel Orientation="Vertical" Margin="3 0">
+                    <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_DoTheFollowingActions}" VerticalAlignment="Center" Margin="3 0"/>
+
+                    <!-- <ItemsControl mvvm:RegionManager.RegionName="{x:Static inf:RegionNames.SynchronizationRulesActionsRegion}"> -->
+                    <ItemsControl Items="{Binding Actions}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical" Margin="40 10 6 10"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <actions1:AtomicActionEditView Margin="0 5"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="3 9" Command="{Binding Path=AddActionCommand}" MaxHeight="26">
+                        <StackPanel Orientation="Horizontal">
+                            <misc:Icon FontSize="12" Value="RegularPlusCircle" />
+                            <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_AddAction}" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+            </StackPanel>
+        </Grid>
+
+        <!--Style="{StaticResource MahApps.Styles.Button.Square.Accent}" -->
+        
+        <DockPanel Grid.Row="2" Background="{DynamicResource Gray8}">
+            <Button Classes="GenericButton Accent" 
+                    DockPanel.Dock="Left" HorizontalAlignment="Left" Margin="6 9" Command="{Binding Path=SaveCommand}" MaxHeight="30">
+
+                <StackPanel Orientation="Horizontal" Margin="2">
+                    <misc:Icon FontSize="12" Value="RegularSave" /> 
+                    
+                    <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_Save}" Margin="6 0 0 0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Classes="GenericButton"
+                        HorizontalAlignment="Right" Margin="6 9" Command="{Binding Path=ResetCommand}" MaxHeight="30">
+
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon FontSize="12" Value="RegularReset" /> 
+                        
+                        <!--<iconPacks:PackIconBoxIcons Kind="RegularReset"
+                                                    Margin="0"
+                                                    Width="12"
+                                                    Height="12"
+                                                    VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}"/>-->
+                        <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_Reset}" Margin="6 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}" />
+                    </StackPanel>
+                </Button>
+
+                <Button Classes="GenericButton"
+                        HorizontalAlignment="Right" Margin="6 9" Command="{Binding Path=CancelCommand}" MaxHeight="30">
+
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon FontSize="12" Value="RegularExit" /> 
+                        
+                        <!--<iconPacks:PackIconBoxIcons Kind="RegularExit"
+                                                    Margin="0"
+                                                    Width="12"
+                                                    Height="12"
+                                                    VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}"/>-->
+                        <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_Cancel}" Margin="6 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+        </DockPanel>
+        
+        <StackPanel Grid.Row="3" Orientation="Vertical" HorizontalAlignment="Center" Margin="24"
+                    IsVisible="{Binding Path=ShowWarning}">
+            <StackPanel MinWidth="300" MaxWidth="450" HorizontalAlignment="Center" Background="{DynamicResource OtherMemberBackGround}">
+                <Label>
+                    <TextBlock Text="{Binding SaveWarning}" TextWrapping="Wrap" />
+                </Label>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

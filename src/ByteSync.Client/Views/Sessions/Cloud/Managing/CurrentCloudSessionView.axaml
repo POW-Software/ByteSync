@@ -1,0 +1,105 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:managing="clr-namespace:ByteSync.ViewModels.Sessions.Cloud.Managing"
+             xmlns:settings="clr-namespace:ByteSync.Views.Sessions.Settings"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="1500" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Sessions.Cloud.Managing.CurrentCloudSessionView">
+    
+    <Design.DataContext>
+        <managing:CurrentCloudSessionViewModel />
+    </Design.DataContext>
+    
+    <Grid>
+        
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" DockPanel.Dock="Left">
+            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 3 0 9">
+
+                <StackPanel Orientation="Vertical" Margin="3">
+                    <Label Content="{localizations:Loc StartComparison_SessionId}"></Label>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Text="{Binding SessionId}" MinWidth="180" IsReadOnly="True" CaretBrush="Transparent"/>
+                        
+                        <Button Classes="GenericButton" Margin="6 0"
+                                Command="{Binding Path=CopyCommand}" CommandParameter="{Binding SessionId}" HorizontalAlignment="Left"  >
+                            <StackPanel Orientation="Horizontal">
+                                <misc:Icon FontSize="14" Value="RegularCopy" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Orientation="Vertical" Margin="18,3,3,3">
+                    <Label Content="{localizations:Loc StartComparison_SessionPassword}" ></Label>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Text="{Binding SessionPassword}" MinWidth="180" IsReadOnly="True" CaretBrush="Transparent"/>
+                        
+                        <Button Classes="GenericButton" Margin="6 0"
+                                Command="{Binding Path=CopyCommand}" CommandParameter="{Binding SessionPassword}" HorizontalAlignment="Left"  >
+                            <StackPanel Orientation="Horizontal">
+                                <misc:Icon FontSize="14" Value="RegularCopy" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+                
+                <StackPanel Orientation="Vertical" Margin="18,3,3,3" IsVisible="False">
+                    <Label Content="{localizations:Loc StartComparison_SessionProfile}" ></Label>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Text="{Binding ProfileName}" MaxWidth="240" IsReadOnly="True"/>
+                    </StackPanel>
+                </StackPanel>
+                
+                <!-- Reset Session -->
+                <Button Classes="GenericButton" Margin="18,3,3,5"
+                        Command="{Binding Path=RestartSessionCommand}" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                        IsVisible="{Binding Path=ShowRestartSessionAndSaveProfile}">
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon FontSize="12" Value="RegularRecycle" />
+                        <TextBlock Text="{localizations:Loc CloudSession_RestartSession}" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Save Profile -->
+                <Button Classes="GenericButton" Margin="18,3,3,5"
+                        Command="{Binding Path=CreateCloudSessionProfileCommand}" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                        IsVisible="False">
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon FontSize="12" Value="RegularSave" />
+                        <TextBlock Text="{localizations:Loc CloudSession_SaveProfile}" />
+                    </StackPanel>
+                </Button>
+                
+                <!-- Quitter -->
+                <Button Classes="GenericButton" Margin="18,3,3,5"
+                        Command="{Binding Path=QuitSessionCommand}" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon FontSize="12" Value="RegularLogOut" />
+                        <TextBlock Text="{localizations:Loc CloudSession_QuitSession}" />
+                    </StackPanel>
+                </Button>
+                
+                <StackPanel Orientation="Horizontal" Height="32" Margin="10" VerticalAlignment="Bottom"
+                            IsVisible="{Binding IsCloudSessionFatalError}"> 
+                    <misc:Icon FontSize="24" Value="RegularErrorCircle" Foreground="{DynamicResource SystemAccentColor}"
+                               VerticalAlignment="Center" Margin="6 0" />
+                    <TextBlock Text="{localizations:Loc CurrentCloudSession_FatalError}" 
+                               VerticalAlignment="Center" Margin="0" FontWeight="Bold" FontSize="16"/>
+                </StackPanel>
+
+            </WrapPanel>
+            
+            <!-- Permet de faire des séparateurs avec Dash, remplace les Borders vides avec épaisseur de 2 en Avalonia -->
+            <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
+                       StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
+            
+            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 9 0 3">
+                <settings:SessionSettingsEditView DockPanel.Dock="Right" DataContext="{Binding SessionSettingsEditViewModel}" HorizontalContentAlignment="Right"
+                                                  Margin="24 0"/>
+            </WrapPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

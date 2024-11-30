@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>default</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Azure.Identity" Version="1.12.0" />
+      <PackageReference Include="Azure.Storage.Blobs" Version="12.22.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+      <PackageReference Include="Microsoft.Azure.SignalR" Version="1.27.0" />
+      <PackageReference Include="Microsoft.Azure.SignalR.Management" Version="1.25.2" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="8.0.8" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
+      <PackageReference Include="Polly" Version="8.3.1" />
+      <PackageReference Include="RedLock.net" Version="2.3.2" />
+      <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ByteSync.Common\ByteSync.Common.csproj" />
+    </ItemGroup>
+
+</Project>

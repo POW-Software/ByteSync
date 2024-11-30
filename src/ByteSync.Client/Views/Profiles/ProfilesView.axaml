@@ -1,0 +1,183 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:home="clr-namespace:ByteSync.ViewModels.Home"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:profiles="clr-namespace:ByteSync.ViewModels.Profiles"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Profiles.ProfilesView">
+    
+    <Design.DataContext>
+        <profiles:ProfilesViewModel />
+    </Design.DataContext>
+    
+    <StackPanel Orientation="Vertical">
+        <TextBlock FontSize="18" Margin="18 18 18 0" Text="{localizations:Loc ProfilesView_SavedProfiled, True}"/>
+        
+        <!-- Classes="NoHeaders" HeadersVisibility="None" -->
+        <DataGrid AutoGenerateColumns="False" Margin="18" Items="{Binding Path=Profiles}" 
+                  IsReadOnly="True" x:Name="TheGrid"   >
+            
+            <DataGrid.Styles>
+                <!-- https://github.com/AvaloniaUI/Avalonia/issues/5023 -->
+                <Style Selector="DataGridCell.AlignRight">
+                    <Setter Property="HorizontalAlignment" Value="Right" />
+                </Style>
+            </DataGrid.Styles>
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Name}"  Width="Auto" FontSize="14">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{localizations:Loc ProfilesView_Name}" Classes="PowDataGridHeader"/>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                
+                <DataGridTextColumn Binding="{Binding Type, Converter={StaticResource ProfileTypeConverter}}" 
+                                    Width="Auto" FontSize="14" IsReadOnly="True">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{localizations:Loc ProfilesView_Type}" Classes="PowDataGridHeader"/>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                
+                <DataGridTextColumn Binding="{Binding Members}" Width="Auto" FontSize="14" CellStyleClasses="AlignRight">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{localizations:Loc ProfilesView_Members}" Classes="PowDataGridHeader"/>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                
+                <DataGridTextColumn Binding="{Binding Creation}" Width="Auto" FontSize="14">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="{localizations:Loc ProfilesView_CreationDate}" Classes="PowDataGridHeader"/>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+
+                <DataGridTemplateColumn Header="{localizations:Loc ProfilesView_Actions}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            
+                                <StackPanel Orientation="Horizontal" IsVisible="{Binding IsLobbyManagedByMe}">
+                                    
+                                    <!-- Synchronization -->
+                                    <Button Classes="GenericButton"
+                                            Command="{Binding Path=DataContext.StartProfileSynchronizationCommand,RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
+                                            CommandParameter="{Binding}"
+                                            Width="32" BorderThickness="0" Margin="3 0" HorizontalAlignment="Center">
+
+                                        <StackPanel>
+                                            <misc:Icon FontSize="16" Value="RegularSync" />
+                                        </StackPanel>
+                                        
+                                        <ToolTip.Tip>
+                                            <StackPanel Classes="HelpTT">
+                                                <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Header_Synchronization}" />
+                                                <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Content_Synchronization}" />
+                                            </StackPanel>
+                                        </ToolTip.Tip>
+                                    </Button>
+                                    
+                                    <!-- Inventory -->
+                                    <Button Classes="GenericButton"
+                                            Command="{Binding Path=DataContext.StartProfileInventoryCommand,RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
+                                            CommandParameter="{Binding}"
+                                            Width="32" BorderThickness="0" Margin="3 0" HorizontalAlignment="Center">
+
+                                        <StackPanel>
+                                            <misc:Icon FontSize="16" Value="RegularGlassesAlt" />
+                                        </StackPanel>
+                                        
+                                        <ToolTip.Tip>
+                                            <StackPanel Classes="HelpTT">
+                                                <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Header_Inventory}" />
+                                                <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Content_Inventory}" />
+                                            </StackPanel>
+                                        </ToolTip.Tip>
+                                    </Button>
+                                </StackPanel>
+                                
+                                <!-- Join -->
+                                <Grid IsVisible="{Binding !IsLobbyManagedByMe}" Width="76" >
+                                    <Button Classes="GenericButton"
+                                            Command="{Binding Path=DataContext.JoinProfileCommand,RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
+                                            CommandParameter="{Binding}"
+                                            Width="32" BorderThickness="0" Margin="3 0" HorizontalAlignment="Center">
+
+                                        <StackPanel>
+                                            <misc:Icon FontSize="14" Value="RegularSubdirectoryRight" />
+                                        </StackPanel>
+                                        
+                                        <ToolTip.Tip>
+                                            <StackPanel Classes="HelpTT">
+                                                <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Header_Join}" />
+                                                <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Content_Join}" />
+                                            </StackPanel>
+                                        </ToolTip.Tip>
+                                    </Button>
+                                </Grid>
+                                
+                                <!-- Details -->
+                                <StackPanel Orientation="Horizontal" >
+                                    <Button Classes="GenericButton"
+                                            Command="{Binding Path=DataContext.ShowProfileDetailsCommand,RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
+                                            CommandParameter="{Binding}"
+                                            Width="32" BorderThickness="0" Margin="3 0" HorizontalAlignment="Center">
+
+                                        <StackPanel>
+                                            <misc:Icon FontSize="16" Value="RegularDetail" />
+                                        </StackPanel>
+                                        
+                                        <ToolTip.Tip>
+                                            <StackPanel Classes="HelpTT">
+                                                <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Header_Details}" />
+                                                <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Content_Details}" />
+                                            </StackPanel>
+                                        </ToolTip.Tip>
+                                    </Button>
+                                </StackPanel>
+                            
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{localizations:Loc ProfilesView_Actions}" Classes="PowDataGridHeader"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                </DataGridTemplateColumn>
+                
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <!-- Delete -->
+                            <Button Classes="GenericButton"
+                                    Command="{Binding Path=DataContext.DeleteProfileCommand,RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" 
+                                    CommandParameter="{Binding}"
+                                    Width="32" BorderThickness="0" HorizontalAlignment="Center">
+                                
+                                <StackPanel>
+                                    <misc:Icon FontSize="14" Value="RegularX"/>
+                                </StackPanel>
+                                
+                                <ToolTip.Tip>
+                                    <StackPanel Classes="HelpTT">
+                                        <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Header_Delete}" />
+                                        <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Content_Delete}" />
+                                    </StackPanel>
+                                </ToolTip.Tip>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{localizations:Loc General_Delete}" Classes="PowDataGridHeader"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </StackPanel>
+</UserControl>

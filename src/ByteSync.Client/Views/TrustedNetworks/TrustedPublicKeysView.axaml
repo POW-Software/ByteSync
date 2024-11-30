@@ -1,0 +1,64 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:headers="clr-namespace:ByteSync.ViewModels.Headers"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:trustedNetworks="clr-namespace:ByteSync.ViewModels.TrustedNetworks"
+             xmlns:trustedNetworks1="clr-namespace:ByteSync.Views.TrustedNetworks"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.TrustedNetworks.TrustedPublicKeysView">
+    
+    <Design.DataContext>
+        <trustedNetworks:TrustedPublicKeysViewModel />
+    </Design.DataContext>
+    
+    
+    <DataGrid AutoGenerateColumns="False" Margin="12" Items="{Binding Path=TrustedPublicKeys}" 
+              IsReadOnly="True" x:Name="TrustedPublicKeysGrid" 
+              LoadingRow="TrustedPublicKeysGrid_OnLoadingRow">
+
+        <DataGrid.Columns>
+            <DataGridTextColumn Binding="{Binding ClientId}" Width="Auto" FontSize="14">
+                <DataGridTextColumn.Header>
+                    <TextBlock Text="{localizations:Loc TrustedPublicKeysView_ClientIdentifier}" Classes="PowDataGridHeader"/>
+                </DataGridTextColumn.Header>
+            </DataGridTextColumn>
+            <DataGridTextColumn Binding="{Binding PublicKey}" Width="Auto" FontSize="14">
+                <DataGridTextColumn.Header>
+                    <TextBlock Text="{localizations:Loc TrustedPublicKeysView_PublicKey}" Classes="PowDataGridHeader"/>
+                </DataGridTextColumn.Header>
+            </DataGridTextColumn>
+            <DataGridTextColumn Binding="{Binding ValidationDateTimeUtc, StringFormat={}{0:g}}" 
+                                Width="Auto" FontSize="14">
+                <DataGridTextColumn.Header>
+                    <TextBlock Text="{localizations:Loc TrustedPublicKeysView_ValidationDate}" Classes="PowDataGridHeader"/>
+                </DataGridTextColumn.Header>
+            </DataGridTextColumn>
+
+                
+            <DataGridTemplateColumn>
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <Button Classes="GenericButton"
+                                Command="{Binding Path=DataContext.DeleteTrustedPublicKeyCommand,RelativeSource={RelativeSource AncestorType={x:Type trustedNetworks1:TrustedNetworkView}}}" 
+                                CommandParameter="{Binding}"
+                                Width="32" BorderThickness="0" HorizontalAlignment="Center">
+                                
+                            <StackPanel>
+                                <misc:Icon FontSize="16" Value="RegularX"/>
+                            </StackPanel>
+                        </Button>
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+                    
+                <DataGridTemplateColumn.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{localizations:Loc General_Delete}" Classes="PowDataGridHeader"/>
+                    </DataTemplate>
+                </DataGridTemplateColumn.HeaderTemplate>
+            </DataGridTemplateColumn>
+        </DataGrid.Columns>
+    </DataGrid>
+</UserControl>

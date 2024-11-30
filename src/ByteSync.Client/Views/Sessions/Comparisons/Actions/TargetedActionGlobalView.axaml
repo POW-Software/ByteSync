@@ -1,0 +1,105 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:actions1="clr-namespace:ByteSync.Views.Sessions.Comparisons.Actions"
+             xmlns:actions="clr-namespace:ByteSync.ViewModels.Sessions.Comparisons.Actions"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             
+             x:Class="ByteSync.Views.Sessions.Comparisons.Actions.TargetedActionGlobalView">
+   
+    <Design.DataContext>
+        <actions:TargetedActionGlobalViewModel />
+    </Design.DataContext>
+    
+    <Grid Background="{DynamicResource Gray7}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+
+
+
+        <Grid Grid.Row="0" Margin="0 0 0 21">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Classes="GroupBoxHeader" Text="{localizations:Loc TargetedActionEditionGlobal_Actions, True}"></TextBlock>
+                
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="{localizations:Loc TargetedActionEditionGlobal_DoTheFollowingAction}"></Label>
+                </StackPanel>
+
+                <ItemsControl IsEnabled="{Binding CanEditAction}" Items="{Binding Actions}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical" Margin="40 10"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <actions1:AtomicActionEditView Margin="0 5"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                
+            </StackPanel>
+        </Grid>
+
+        <DockPanel Grid.Row="1" Background="{DynamicResource Gray8}">
+            <Button Classes="GenericButton Accent"
+                    DockPanel.Dock="Left" HorizontalAlignment="Left" Margin="6 9" Command="{Binding Path=SaveCommand}" MaxHeight="30">
+
+                <StackPanel Orientation="Horizontal" Margin="2">
+                    <misc:Icon FontSize="12" Value="RegularSave" />
+                    
+                    <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_Save}" Margin="6 0 0 0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Classes="GenericButton" 
+                        HorizontalAlignment="Right" Margin="6 9" Command="{Binding Path=ResetCommand}" MaxHeight="30">
+
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon FontSize="12" Value="RegularReset"  />
+                        
+                        <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_Reset}" Margin="6 0 0 0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button Classes="GenericButton"
+                        HorizontalAlignment="Right" Margin="6 9" Command="{Binding Path=CancelCommand}" MaxHeight="30">
+
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon FontSize="12" Value="RegularExit" />
+                        
+                        <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_Cancel}" Margin="6 0 0 0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+        </DockPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Vertical" HorizontalAlignment="Center" Margin="24"
+            IsVisible="{Binding Path=ShowWarning}">
+            <StackPanel MinWidth="300" MaxWidth="450" HorizontalAlignment="Center" Background="{DynamicResource OtherMemberBackGround}">
+                <Label>
+                    <TextBlock Text="{Binding SaveWarning}" TextWrapping="Wrap" />
+                </Label>
+
+                <Button HorizontalAlignment="Center" Margin="6 9" Command="{Binding Path=SaveValidItemsCommand}" MaxHeight="30"
+                        IsVisible="{Binding Path=ShowSaveValidItemsCommand}" BorderThickness="0" >
+
+                    <StackPanel Orientation="Horizontal" Margin="2">
+                        <misc:Icon FontSize="12" Value="RegularSave" />
+                        
+                        <TextBlock Text="{localizations:Loc TargetedActionEditionGlobal_SaveForValidItems}" Margin="6 0 0 0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,53 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:inventories="clr-namespace:ByteSync.ViewModels.Sessions.Inventories"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Sessions.Inventories.InventoryBeforeStartView">
+
+    <Design.DataContext>
+        <inventories:InventoryBeforeStartViewModel />
+    </Design.DataContext>
+    
+    <Grid>
+        <StackPanel MinWidth="300" MaxWidth="450" Margin="12"
+                    IsVisible="{Binding CanCurrentUserStartInventory}"
+                    HorizontalAlignment="Center" Orientation="Vertical">
+            <Button Classes="AccentButton"
+                    Command="{Binding Path=StartInventoryCommand}" HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <Button.CommandParameter>
+                    <system:Boolean>True</system:Boolean>
+                </Button.CommandParameter>
+
+                <StackPanel Orientation="Horizontal">
+                    <misc:Icon FontSize="12" Value="RegularPlay" />
+                    <TextBlock Text="{localizations:Loc InventoryProcess_StartAllInventories}" />
+                </StackPanel>
+            </Button>
+
+            <TextBlock FontWeight="Bold" Text="{Binding StartInventoryErrorMessage}" MaxWidth="500" Margin="0 12 0 0"
+                       IsVisible="{Binding StartInventoryErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                       HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+        </StackPanel>
+
+        <!-- IsVisible="{Binding ShowWaitingForInventoriesStart}" -->
+        <StackPanel MinWidth="300" Margin="12"
+                    IsVisible="{Binding !CanCurrentUserStartInventory}"
+                    HorizontalAlignment="Center">
+
+            <TextBlock FontWeight="Bold" Text="{Binding WaitingForInventoryStartMessage}" MaxWidth="500"
+                       IsVisible="{Binding StartInventoryErrorMessage, Converter={x:Static StringConverters.IsNullOrEmpty}}"
+                       HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+
+            <TextBlock FontWeight="Bold" Text="{Binding StartInventoryErrorMessage}" MaxWidth="500" Margin="0 12 0 0"
+                       IsVisible="{Binding StartInventoryErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                       HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+        </StackPanel>
+    </Grid>
+
+</UserControl>

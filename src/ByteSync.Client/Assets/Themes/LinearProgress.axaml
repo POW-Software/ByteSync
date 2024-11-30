@@ -1,0 +1,182 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:ByteSync.Views.Misc">
+  
+  <!-- Basé sur https://github.com/Deadpikle/AvaloniaProgressRing/blob/master/AvaloniaProgressRing/Styles/ProgressRing.xaml -->
+  <Style Selector="local|LinearProgress">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource SystemAccentColor}" />
+    <Setter Property="IsHitTestVisible" Value="False" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="MinHeight" Value="20" />
+    <Setter Property="MinWidth" Value="20" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          
+          <!--MaxWidth="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=MaxSideLength}"
+          MaxHeight="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=MaxSideLength}"-->
+          
+          <Border
+            x:Name="ExternalBorder"
+            Background="{TemplateBinding Background}"
+            BorderThickness="{TemplateBinding BorderThickness}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            CornerRadius="0"
+            Padding="{TemplateBinding Padding}"
+            IsVisible="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsActive}">
+            
+            <Grid ColumnDefinitions="2*, *, 2*, *, 2*, *, 2*">
+              
+              <!-- Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RectangleWidth}" -->
+              <!-- Margin="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RectangleMargin}" -->
+              
+              <Border Grid.Column="0"  x:Name="R1"
+                  Height="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RectangleHeight}"
+                  CornerRadius="2"
+                  Background="Transparent" 
+                  BorderBrush="{DynamicResource TextControlBorderBrush}"
+                  BorderThickness="1"/>
+                
+              <Border Grid.Column="2" x:Name="R2"
+                  Height="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RectangleHeight}"
+                  CornerRadius="2"
+                  Background="Transparent" 
+                  BorderBrush="{DynamicResource TextControlBorderBrush}"
+                  BorderThickness="1"/>
+              
+              <Border Grid.Column="4" x:Name="R3"
+                  Height="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RectangleHeight}"
+                  CornerRadius="2"
+                  Background="Transparent" 
+                  BorderBrush="{DynamicResource TextControlBorderBrush}"
+                  BorderThickness="1"/>
+              
+              <Border Grid.Column="6" x:Name="R4"
+                  Height="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RectangleHeight}"
+                  CornerRadius="2"
+                  Background="Transparent" 
+                  BorderBrush="{DynamicResource TextControlBorderBrush}"
+                  BorderThickness="1"/>
+                  
+            </Grid>
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  
+  <Style Selector="local|LinearProgress:active /template/ Border#R1"  >
+    <Style.Animations>
+      <Animation Duration="0:0:4.0" IterationCount="Infinite" Delay="0" FillMode="None">
+        <KeyFrame KeyTime="0:0:0.0">
+          <Setter Property="Background" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"/>
+          <Setter Property="BorderBrush" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:0.950">
+          <Setter Property="Background" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"/>
+          <Setter Property="BorderBrush" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:1.0">
+          <Setter Property="Background" Value="Transparent"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:3.999">
+          <Setter Property="Background" Value="Transparent"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+        </KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+  
+  <Style Selector="local|LinearProgress:active /template/ Border#R2"  >
+    <Style.Animations>
+      <Animation Duration="0:0:4.0" IterationCount="Infinite" Delay="0" FillMode="None">
+        <KeyFrame KeyTime="0:0:0.0">
+          <Setter Property="Background" Value="Transparent"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:0.999">
+          <Setter Property="Background" Value="Transparent"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:1.0">
+          <Setter Property="Background" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"/>
+          <Setter Property="BorderBrush" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:1.950">
+          <Setter Property="Background" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"/>
+          <Setter Property="BorderBrush" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:2.0">
+          <Setter Property="Background" Value="Transparent"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:4.0">
+          <Setter Property="Background" Value="Transparent"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+        </KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+  
+  <Style Selector="local|LinearProgress:active /template/ Border#R3"  >
+    <Style.Animations>
+      <Animation Duration="0:0:4.0" IterationCount="Infinite" Delay="0" FillMode="None">
+        <KeyFrame KeyTime="0:0:0.0">
+          <Setter Property="Background" Value="Transparent"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:1.999">
+          <Setter Property="Background" Value="Transparent"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:2.0">
+          <Setter Property="Background" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"/>
+          <Setter Property="BorderBrush" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:2.950">
+          <Setter Property="Background" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"/>
+          <Setter Property="BorderBrush" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:3.0">
+          <Setter Property="Background" Value="Transparent"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:4.0">
+          <Setter Property="Background" Value="Transparent"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+        </KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+  
+  <Style Selector="local|LinearProgress:active /template/ Border#R4"  >
+    <Style.Animations>
+      <Animation Duration="0:0:4.0" IterationCount="Infinite" Delay="0" FillMode="None">
+        <KeyFrame KeyTime="0:0:0.0">
+          <Setter Property="Background" Value="Transparent"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:2.999">
+          <Setter Property="Background" Value="Transparent"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:3.0">
+          <Setter Property="Background" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"/>
+          <Setter Property="BorderBrush" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:3.950">
+          <Setter Property="Background" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"/>
+          <Setter Property="BorderBrush" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"/>
+        </KeyFrame>
+        <KeyFrame KeyTime="0:0:4.0">
+          <Setter Property="Background" Value="Transparent"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+        </KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+</Styles>

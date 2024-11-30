@@ -1,0 +1,78 @@
+﻿using System.Reactive;
+using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.ViewModels.Profiles;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+
+namespace ByteSync.ViewModels.Home;
+
+public class HomeMainViewModel : ViewModelBase, IRoutableViewModel
+{
+    private IWebAccessor _webAccessor;
+    private readonly ISessionService _sessionService;
+
+    public HomeMainViewModel()
+    {
+            
+    }
+        
+    public HomeMainViewModel(IScreen screen, IWebAccessor webAccessor, ISessionService sessionService,
+        ProfilesViewModel profilesViewModel)
+    {
+        HostScreen = screen;
+
+        _webAccessor = webAccessor;
+        _sessionService = sessionService;
+
+        CloudSynchronizationCommand = ReactiveCommand.CreateFromTask(() =>
+            _sessionService.InitiateCloudSessionMode());
+        
+        LocalSynchronizationCommand = ReactiveCommand.CreateFromTask(() =>
+            _sessionService.InitiateLocalSessionMode());
+            //_sessionService.StartLocalSession(null));
+
+        OpenSupportCommand = ReactiveCommand.CreateFromTask(() => 
+            _webAccessor.OpenSupportUrl());
+
+        Profiles = profilesViewModel;
+    }
+
+    public string? UrlPathSegment { get; } = Guid.NewGuid().ToString().Substring(0, 5);
+        
+    public IScreen HostScreen { get; } 
+
+    public ReactiveCommand<Unit, Unit> CloudSynchronizationCommand { get; set; }
+    
+    public ReactiveCommand<Unit, Unit> LocalSynchronizationCommand { get; set; }
+
+    public ReactiveCommand<Unit, Unit> OpenSupportCommand { get; set; }
+    
+    [Reactive]
+    internal ProfilesViewModel Profiles { get; set; }
+
+    // private void CloudSynchronization()
+    // {
+    //     _sessionService.CreateOrJoinCloudSession();
+    //     
+    //     // Log.Information("Entering Cloud Synchronization mode");
+    //     // _navigationEventsHub.RaiseNavigateToCloudSynchronizationRequested();
+    // }
+    
+    // private async Task LocalSynchronization()
+    // {
+    //     await _sessionService.StartLocalSession(null);
+    //     
+    //     // // Log.Information("Entering Local Synchronization mode");
+    //     // // _navigationEventsHub.RaiseNavigateToLocalSynchronizationRequested();
+    //     //
+    //     // var manager = Locator.Current.GetService<ICloudSessionManager>()!;
+    //     // await manager.StartLocalSession(null);
+    //
+    // }
+
+    // private void OpenSupport()
+    // {
+    //     _webAccessor.OpenSupportUrl();
+    // }
+}

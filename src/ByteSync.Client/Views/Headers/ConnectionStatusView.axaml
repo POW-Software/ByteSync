@@ -1,0 +1,21 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:headers="clr-namespace:ByteSync.ViewModels.Headers"
+             xmlns:converters="clr-namespace:ByteSync.Services.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Headers.ConnectionStatusView">
+    
+    <Design.DataContext>
+        <headers:ConnectionStatusViewModel />
+    </Design.DataContext>
+    
+    <StackPanel Orientation="Vertical">
+        <Border Background="{Binding BadgeBrush}" CornerRadius="4" VerticalAlignment="Stretch" >
+            <TextBlock Text="{Binding Text}" FontWeight="Bold"
+                       Margin="12 6" Foreground="{DynamicResource BlockBackColor}" 
+                       VerticalAlignment="Center"/>
+        </Border>
+    </StackPanel>
+</UserControl>

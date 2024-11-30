@@ -1,0 +1,71 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:results="clr-namespace:ByteSync.Views.Sessions.Comparisons.Results"
+             xmlns:results1="clr-namespace:ByteSync.ViewModels.Sessions.Comparisons.Results"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="850" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Sessions.Comparisons.Results.ManageSynchronizationRulesView">
+    
+    <Design.DataContext>
+        <results1:ManageSynchronizationRulesViewModel />
+    </Design.DataContext>
+    
+    
+    <Grid Margin="3 0">
+        <StackPanel Orientation="Vertical">
+            <!-- Upper line -->
+            <StackPanel Orientation="Horizontal">
+                <!-- Add Button -->
+                <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="3" 
+                        Command="{Binding Path=AddSynchronizationRuleCommand}" 
+                        MaxHeight="26">
+
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon Value="RegularPlus" />
+                        <TextBlock Text="{localizations:Loc ManageSynchronizationRulesView_AddSynchronizationRule}"/>
+                    </StackPanel>
+                </Button>
+                
+                <!-- ImportFromProfile Button -->
+                <!-- <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="3"  -->
+                <!--         Command="{Binding Path=ImportRulesFromProfileCommand}"  -->
+                <!--         MaxHeight="26"> -->
+                <!-- -->
+                <!--     <StackPanel Orientation="Horizontal"> -->
+                <!--         <misc:Icon Value="RegularImport" /> -->
+                <!--         <TextBlock Text="{localizations:Loc ManageSynchronizationRulesView_ImportFromProfile}"/> -->
+                <!--     </StackPanel> -->
+                <!-- </Button> -->
+
+                <!-- Clear Button -->
+                <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="3" 
+                        Command="{Binding Path=ClearSynchronizationRulesCommand}" 
+                        MaxHeight="26">
+
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon Value="RegularTrash" />
+                        <TextBlock Text="{localizations:Loc ManageSynchronizationRulesView_ClearSynchronizationRules}" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+            
+            <ItemsControl Items="{Binding SynchronizationRules}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" Margin="3 3" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <results:SynchronizationRuleSummaryView Margin="0 3"/> 
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </Grid>
+</UserControl>

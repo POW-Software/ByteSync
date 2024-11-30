@@ -1,0 +1,23 @@
+trigger:
+- none
+
+stages:
+- stage: BuildWindows
+  displayName: 'Build Windows'
+
+  pool:
+    vmImage: 'windows-2019'
+
+  jobs:
+  - job: BuildWindowsJob
+    displayName: 'Build Windows Job'
+
+    steps:
+    
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore'
+      inputs:
+        command: 'restore'
+        projects: '**/ByteSyncClient.csproj'
+        feedsToUse: 'select'
+        vstsFeed: '445947ab-2dd5-4bc2-981d-4833c686f07f/c93933c7-5162-4a5e-aac7-f03e8bbf1bab'

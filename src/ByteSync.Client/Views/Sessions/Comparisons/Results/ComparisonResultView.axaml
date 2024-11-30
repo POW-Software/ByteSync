@@ -1,0 +1,241 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:results="clr-namespace:ByteSync.Views.Sessions.Comparisons.Results"
+             xmlns:results1="clr-namespace:ByteSync.ViewModels.Sessions.Comparisons.Results"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Sessions.Comparisons.Results.ComparisonResultView">
+
+    <Design.DataContext>
+        <results1:ComparisonResultViewModel />
+    </Design.DataContext>
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="ContentIdentityDataTemplate">
+            <results:ContentIdentityView />
+        </DataTemplate>
+
+        <DataTemplate x:Key="SynchronizationActionDataTemplate">
+            <results:SynchronizationActionView />
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid Margin="6">
+        <StackPanel Orientation="Vertical" IsVisible="{Binding !AreResultsLoaded}"
+                    HorizontalAlignment="Center" Margin="12">
+
+            <TextBlock FontWeight="Bold" Text="{localizations:Loc ComparisonResult_WaitingForResults}" IsVisible="{Binding !IsResultLoadingError}"
+                       MaxWidth="500"
+                       HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+
+            <TextBlock FontWeight="Bold" Text="{localizations:Loc ComparisonResult_ErrorDuringComparison}" IsVisible="{Binding IsResultLoadingError}"
+                       MaxWidth="500"
+                       HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" IsVisible="{Binding AreResultsLoaded}">
+            <WrapPanel Orientation="Horizontal" Margin="0 0 0 6">
+
+                <WrapPanel Orientation="Horizontal" Margin="0 3 12 0">
+                    <StackPanel Orientation="Vertical">
+                        <TextBox Watermark="{localizations:Loc ComparisonResult_Filter}" VerticalAlignment="Bottom" Classes="clearButton"
+                                 Text="{Binding Path=FilterText}" />
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" DataContext="{Binding PageParameters}">
+                            <Button HorizontalAlignment="Left" Margin="3 3 3 3" VerticalAlignment="Bottom"
+                                    Command="{Binding Path=FirstPageCommand}"
+                                    Background="Transparent" MaxHeight="26">
+
+                                <StackPanel Orientation="Horizontal">
+                                    <misc:Icon FontSize="12" Value="RegularChevronsLeft"
+                                               Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button HorizontalAlignment="Left" Margin="3 3 3 3" VerticalAlignment="Bottom"
+                                    Command="{Binding Path=PreviousPageCommand}"
+                                    Background="Transparent" MaxHeight="26">
+
+                                <StackPanel Orientation="Horizontal">
+                                    <misc:Icon FontSize="12" Value="RegularChevronLeft"
+                                               Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <Label Content="Page" VerticalContentAlignment="Center" />
+                            <Label Content="{Binding Path=CurrentPage}" VerticalContentAlignment="Center" />
+                            <Label Content="/" VerticalContentAlignment="Center" />
+                            <Label Content="{Binding Path=PageCount}" VerticalContentAlignment="Center" />
+
+                            <Button HorizontalAlignment="Left" Margin="3 3 3 3" VerticalAlignment="Bottom"
+                                    Command="{Binding Path=NextPageCommand}"
+                                    Background="Transparent" MaxHeight="26">
+
+                                <StackPanel Orientation="Horizontal">
+                                    <misc:Icon FontSize="12" Value="RegularChevronRight"
+                                               Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button HorizontalAlignment="Left" Margin="3 3 3 3" VerticalAlignment="Bottom"
+                                    Command="{Binding Path=LastPageCommand}"
+                                    Background="Transparent" MaxHeight="26">
+
+                                <StackPanel Orientation="Horizontal">
+                                    <misc:Icon FontSize="12" Value="RegularChevronsRight"
+                                               Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Boutons Add/Delete Manual Actions -->
+                    <StackPanel Orientation="Vertical" Margin="6 0 0 0" IsVisible="{Binding CanManageActions}"
+                                IsEnabled="{Binding !IsCloudProfileSession}">
+                        <Button Classes="GenericButton" HorizontalAlignment="Stretch" Margin="3 0 3 3" VerticalAlignment="Bottom"
+                                Command="{Binding Path=AddManualActionCommand}"
+                                Height="26">
+                            <StackPanel Orientation="Horizontal">
+                                <misc:Icon Value="RegularPlus" />
+                                <TextBlock Text="{localizations:Loc ComparisonResult_AddTargetedAction}" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="GenericButton" HorizontalAlignment="Stretch" Margin="3 0" VerticalAlignment="Bottom"
+                                Command="{Binding Path=DeleteManualActionsCommand}"
+                                Height="26">
+                            <StackPanel Orientation="Horizontal">
+                                <misc:Icon Value="RegularTrash" />
+                                <TextBlock Text="{localizations:Loc ComparisonResult_DeleteTargetedActions}" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </WrapPanel>
+ 
+                <ContentControl Content="{Binding ManageSynchronizationRules}" IsVisible="{Binding CanManageActions}" IsEnabled="{Binding !IsCloudProfileSession}"
+                                Margin="0 0 0 0 " MinWidth="200"
+                                Background="{DynamicResource SystemChromeMediumColor}" />
+            </WrapPanel>
+
+            <DataGrid Name="DataGrid" AutoGenerateColumns="False" Margin="3 3 3 0" Items="{Binding Path=ComparisonItems}"
+                      IsReadOnly="True" x:Name="TheGrid" CanUserResizeColumns="True" SelectionMode="Extended"
+                      Width="{Binding Path=Width, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=Grid,AncestorLevel=1}}"
+                      HeadersVisibility="Column" Background="Transparent" GridLinesVisibility="Horizontal"
+                      SelectionChanged="TheGrid_OnSelectionChanged"
+                      MinHeight="{Binding Path=GridMinHeight}" VerticalScrollBarVisibility="Hidden">
+
+                <DataGrid.Columns>
+
+                    <!--Element / PathIdentity           Header="{l:Loc ComparisonResult_Element}" -->
+                    <DataGridTemplateColumn Width="Auto" CanUserResize="True">
+
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="{Binding PathHeader}" Classes="PowDataGridHeader" />
+                        </DataGridTemplateColumn.Header>
+
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="0" CornerRadius="4" Margin="4" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="{Binding PathIdentity.LinkingKeyValue}" />
+                                    </StackPanel>
+                                </Border>
+
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+
+                    <!-- Header="{Binding InventoryAName}" -->
+                    <DataGridTemplateColumn Width="Auto" CanUserResize="True">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="{Binding InventoryAName}" Classes="PowDataGridHeader" />
+                        </DataGridTemplateColumn.Header>
+
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ItemsControl Items="{Binding ContentIdentitiesA}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumnBVisible}">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="{Binding InventoryBName}" Classes="PowDataGridHeader" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ItemsControl Items="{Binding ContentIdentitiesB}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+
+                    <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumnCVisible}">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="{Binding InventoryCName}" Classes="PowDataGridHeader" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ItemsControl Items="{Binding ContentIdentitiesC}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumnDVisible}">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="{Binding InventoryDName}" Classes="PowDataGridHeader" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ItemsControl Items="{Binding ContentIdentitiesD}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumnEVisible}">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="{Binding InventoryEName}" Classes="PowDataGridHeader" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ItemsControl Items="{Binding ContentIdentitiesE}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+
+                    <DataGridTemplateColumn Width="Auto" CanUserResize="True">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="{localizations:Loc ComparisonResult_Status}" Classes="PowDataGridHeader" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <results:StatusView DataContext="{Binding StatusViewModel}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="Auto" CanUserResize="True">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="{localizations:Loc ComparisonResult_Actions}" Classes="PowDataGridHeader" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ItemsControl Items="{Binding SynchronizationActions}"
+                                              ItemTemplate="{StaticResource SynchronizationActionDataTemplate}"
+                                              VerticalAlignment="Center" />
+
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+    </Grid>
+</UserControl>

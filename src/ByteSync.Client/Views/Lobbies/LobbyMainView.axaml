@@ -1,0 +1,193 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:lobbies="clr-namespace:ByteSync.ViewModels.Lobbies"
+             xmlns:lobbies1="clr-namespace:ByteSync.Views.Lobbies"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:settings="clr-namespace:ByteSync.Views.Sessions.Settings"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Lobbies.LobbyMainView">
+    
+    <Design.DataContext>
+        <lobbies:LobbyMainViewModel />
+    </Design.DataContext>
+    
+    <Grid Background="{DynamicResource VeryLightGray}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" >
+            <StackPanel Orientation="Vertical" Background="{DynamicResource VeryLightGray}">
+                
+                <Grid Background="{DynamicResource SettingsHeaderColor}" MinHeight="88">
+                    
+                    <StackPanel Orientation="Vertical">
+                    
+                        <Grid ColumnDefinitions="*, Auto, *" Margin="18">
+                            
+                            <StackPanel Grid.Column="1"  Orientation="Vertical" MinWidth="250" Margin="48 0"  VerticalAlignment="Center">
+                                <!-- Nom du profil -->
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Margin="3 0" FontSize="20" Text="{localizations:Loc LobbyMainView_Profile}" VerticalAlignment="Center"/>
+                                    <TextBlock Margin="3 0" FontSize="20" Text="{Binding ProfileName}" FontWeight="Bold" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                
+                                <!-- Mode d'exécution -->
+                                <!-- IsVisible="{Binding LobbyId, Converter={x:Static ObjectConverters.IsNotNull}}" -->
+                                <StackPanel Orientation="Horizontal" Margin="0 9 0 0 " HorizontalAlignment="Center" 
+                                            IsVisible="{Binding IsSynchronizationMode}">
+                                    <misc:Icon FontSize="24" Value="RegularSync" Foreground="{DynamicResource AccentTextForeGround}" 
+                                               HorizontalAlignment="Center" Margin="3 0"></misc:Icon>
+                                
+                                    <TextBlock FontSize="16" Text="{localizations:Loc LobbyMainView_ExecutionMode_Synchronization}" Foreground="{DynamicResource AccentTextForeGround}" 
+                                               HorizontalAlignment="Center" Margin="3 0"/>
+                                </StackPanel>
+                                
+                                <StackPanel Orientation="Horizontal" Margin="0 9 0 0 " HorizontalAlignment="Center" 
+                                            IsVisible="{Binding IsInventoryMode}">
+                                    <misc:Icon FontSize="24" Value="RegularGlassesAlt" Foreground="{DynamicResource AccentTextForeGround}" 
+                                               HorizontalAlignment="Center" Margin="3 0"></misc:Icon>
+                                
+                                    <TextBlock FontSize="16" Text="{localizations:Loc LobbyMainView_ExecutionMode_Inventory}" Foreground="{DynamicResource AccentTextForeGround}" 
+                                               HorizontalAlignment="Center" Margin="3 0"/>
+                                </StackPanel>
+                            </StackPanel>
+                            
+                            <!--Bouton Quit // Mode Lobby-->
+                            <Button Grid.Column="2" Classes="GenericButton" Height="32" VerticalAlignment="Center" 
+                                    Command="{Binding Path=CancelCommand}" Margin="24 3 6 3" 
+                                    IsVisible="{Binding !IsDetailsLobbyOnly}">
+                                <StackPanel Orientation="Horizontal">
+                                    <misc:Icon FontSize="16"  Value="RegularX" />
+                                    <TextBlock Text="{localizations:Loc LobbyMainView_QuitLobby, True}" />
+                                </StackPanel>
+                            </Button>  
+                            
+                            <!-- Bouton Quit // Mode Details-->
+                            <Button Grid.Column="2" Classes="GenericButton" Height="32" VerticalAlignment="Center" 
+                                    Command="{Binding Path=CancelCommand}" Margin="24 3 6 3" 
+                                    IsVisible="{Binding IsDetailsLobbyOnly}">
+                                <StackPanel Orientation="Horizontal">
+                                    <misc:Icon FontSize="16"  Value="RegularX" />
+                                    <TextBlock Text="{localizations:Loc General_Quit, True}" />
+                                </StackPanel>
+                            </Button> 
+
+                        </Grid>
+                        
+                        <!-- Mode Details-->
+                        <StackPanel Orientation="Vertical" IsVisible="{Binding IsDetailsLobbyOnly}">
+                            <!-- Permet de faire des séparateurs avec Dash, remplace les Borders vides avec épaisseur de 2 en Avalonia -->
+                            <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
+                                       StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
+                            
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="6">
+                                <!--Bouton Synchronisation -->
+                                <Button Classes="GenericButton" Height="32" VerticalAlignment="Center" 
+                                        Command="{Binding Path=StartSynchronizationLobbyCommand}" Margin="6 3" 
+                                        IsVisible="{Binding IsFirstLobbyMember}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <misc:Icon FontSize="16"  Value="RegularSync" />
+                                        <TextBlock Text="{localizations:Loc ProfilesView_LaunchSynchronization, True}" />
+                                    </StackPanel>
+                                </Button>  
+                                
+                                <!-- Bouton Inventaire-->
+                                <Button Classes="GenericButton" Height="32" VerticalAlignment="Center" 
+                                        Command="{Binding Path=StartInventoryLobbyCommand}" Margin="6 3" 
+                                        IsVisible="{Binding IsFirstLobbyMember}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <misc:Icon FontSize="16"  Value="RegularGlassesAlt" />
+                                        <TextBlock Text="{localizations:Loc ProfilesView_LaunchInventory, True}" />
+                                    </StackPanel>
+                                </Button>  
+                                
+                                <!-- Bouton Join-->
+                                <Button Classes="GenericButton" Height="32" VerticalAlignment="Center" 
+                                        Command="{Binding Path=JoinLobbyCommand}" Margin="6 3" 
+                                        IsVisible="{Binding !IsFirstLobbyMember}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <misc:Icon FontSize="16"  Value="RegularSubdirectoryRight" />
+                                        <TextBlock Text="{localizations:Loc ProfilesView_JoinProfile, True}" />
+                                    </StackPanel>
+                                </Button>  
+                            </StackPanel>
+                            
+                        </StackPanel>
+                        
+                        <!-- Permet de faire des séparateurs avec Dash, remplace les Borders vides avec épaisseur de 2 en Avalonia -->
+                        <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
+                                   StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
+                        
+                        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="12" IsEnabled="False">
+                            <settings:SessionSettingsEditView DockPanel.Dock="Right" DataContext="{Binding SessionSettingsEditViewModel}" HorizontalContentAlignment="Right"
+                                                              Margin="24 0"/>
+                        </WrapPanel>
+                        
+                        
+                        
+                        <!--<WrapPanel Orientation="Horizontal" Margin="12" HorizontalAlignment="Center">
+                             <Grid ColumnDefinitions="Auto, Auto" RowDefinitions="Auto, Auto">
+                                 
+                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="{l:Loc LobbyMainView_Members}" Margin="6 3"></TextBlock>
+                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Members.Count}" Margin="6 3"></TextBlock>
+                                 
+                                 <TextBlock Grid.Row="1" Grid.Column="0" Text="{l:Loc LobbyMainView_ExecutionMode}" Margin="6 3"></TextBlock>
+                                 <TextBlock Grid.Row="1" Grid.Column="1" 
+                                            Text="{Binding ProfileDetails.Options.ExecutionMode, Converter={StaticResource ExecutionModeConverter}}" 
+                                            Margin="6 3"></TextBlock>
+                             </Grid>
+                        </WrapPanel>-->
+                    </StackPanel>
+                    
+                </Grid>
+
+                <!-- Membres de la Session -->
+                <StackPanel Orientation="Vertical" Background="{DynamicResource BlockBackColor}" 
+                            HorizontalAlignment="Stretch" Margin="6">
+                    
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                        <TextBlock FontSize="18" Margin="18 18 18 0" Text="{localizations:Loc LobbyMainView_SessionMembers, True}"/>
+                    
+                        <ItemsControl Items="{Binding Members}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <lobbies1:LobbyMemberView/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </StackPanel>
+                
+                <!-- Règles de Synchronisation -->
+                <StackPanel Orientation="Vertical" Background="{DynamicResource BlockBackColor}" 
+                            HorizontalAlignment="Stretch" Margin="6">
+                    
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                        <TextBlock FontSize="18" Margin="18 18 18 0" Text="{localizations:Loc LobbyMainView_SynchronizationRules, True}"/>
+                    
+                        <ItemsControl Items="{Binding SynchronizationRules}" IsVisible="{Binding SynchronizationRules.Count}" Margin="6">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <lobbies1:LobbySynchronizationRuleView/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        
+                        <TextBlock  Margin="12" Text="{localizations:Loc LobbyMainView_NoSynchronizationRule}" IsVisible="{Binding !SynchronizationRules.Count}"/>
+                    </StackPanel>
+                </StackPanel>
+                
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

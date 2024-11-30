@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <LangVersion>default</LangVersion>
+    <Nullable>enable</Nullable>
+    <PackageId>ByteSync.Common</PackageId>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Control\**" />
+    <EmbeddedResource Remove="Control\**" />
+    <None Remove="Control\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="System.IO.Abstractions" Version="21.0.2" />
+  </ItemGroup>
+
+</Project>

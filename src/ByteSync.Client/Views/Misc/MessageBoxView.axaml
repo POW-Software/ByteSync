@@ -1,0 +1,59 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:misc="clr-namespace:ByteSync.ViewModels.Misc"
+             xmlns:business="clr-namespace:ByteSync.Business"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Misc.MessageBoxView">
+    
+    <Design.DataContext>
+        <misc:MessageBoxViewModel />
+    </Design.DataContext>
+    
+    <Grid Background="{DynamicResource MahApps.Brushes.Gray7}">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" MinWidth="400" Margin="12 0 12 0">
+
+            <TextBlock Text="{Binding Message}" IsVisible="{Binding Message, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                       TextWrapping="Wrap" MaxWidth="450" Margin="6" VerticalAlignment="Center" TextAlignment="Left"/> 
+            
+            <ContentControl IsVisible="{Binding MessageContent, Converter={x:Static ObjectConverters.IsNotNull}}" 
+                            Margin="6" VerticalAlignment="Center" Content="{Binding MessageContent}" />
+            
+            <Border BorderBrush="Silver" BorderThickness="0,1,0,1" Margin="0,8" />
+            
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="6">
+                <Button Classes="GenericButton" Height="32" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                        IsVisible="{Binding ShowOK}"
+                        Command="{Binding Path=OKButtonCommand}" Margin="3" Content="{localizations:Loc MessageBox_OK}" >
+                </Button>
+                
+                <Button Classes="GenericButton" Height="32" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                        IsVisible="{Binding ShowYesNo}"
+                        Command="{Binding Path=AnyButtonCommand}" Margin="3" Content="{localizations:Loc MessageBox_Yes}" >
+                    <Button.CommandParameter>
+                        <business:MessageBoxResult>Yes</business:MessageBoxResult>
+                    </Button.CommandParameter>
+                </Button>
+                
+                <Button Classes="GenericButton" Height="32" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                        IsVisible="{Binding ShowYesNo}"
+                        Command="{Binding Path=AnyButtonCommand}" Margin="3" Content="{localizations:Loc MessageBox_No}" >
+                    <Button.CommandParameter>
+                        <business:MessageBoxResult>No</business:MessageBoxResult>
+                    </Button.CommandParameter>
+                </Button>
+                
+                <Button Classes="GenericButton" Height="32" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                        IsVisible="{Binding ShowCancel}"
+                        Command="{Binding Path=AnyButtonCommand}" Margin="3" Content="{localizations:Loc MessageBox_Cancel}" >
+                    <Button.CommandParameter>
+                        <business:MessageBoxResult>Cancel</business:MessageBoxResult>
+                    </Button.CommandParameter>
+                </Button>
+                
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,22 @@
+meta {
+  name: ErrorOnTarget
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{root-url}}/session/{{sessionId}}/synchronization/errors
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: {{jwtToken1}}
+}
+
+body:json {
+  [
+      "{{actionGroupId1}}",
+      "{{actionGroupId2}}"
+  ]
+}

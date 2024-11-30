@@ -1,0 +1,56 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:actions="clr-namespace:ByteSync.ViewModels.Sessions.Comparisons.Actions"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:lobbies="clr-namespace:ByteSync.Views.Lobbies"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Sessions.Comparisons.Actions.ImportRulesFromProfileView">
+    
+    <Design.DataContext>
+        <actions:ImportRulesFromProfileViewModel />
+    </Design.DataContext>
+    
+    <Grid Background="{DynamicResource MahApps.Brushes.Gray7}">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" MinWidth="500" Margin="0">
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{localizations:Loc ImportRulesFromProfileView_Profile}" Margin="6 6 6 12" VerticalAlignment="Center"/>
+                <ComboBox x:Name="AccentSelector" Classes="PowComboBox"
+                          Margin="6 6 6 12"
+                          VerticalAlignment="Center" HorizontalAlignment="Center"
+                          SelectedItem="{Binding SelectedSessionProfile}"
+                          BorderThickness="0"
+                          Items="{Binding AvailableSessionProfiles}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}"  />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+            
+            <misc:LinearProgress Width="48" Height="32" 
+                                 Margin="20,0,0,3"  HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                                 IsActive="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+            
+            <ItemsControl Items="{Binding CloudSessionProfileSynchronizationRules}" IsVisible="{Binding CloudSessionProfileSynchronizationRules.Count}" Margin="6">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <lobbies:LobbySynchronizationRuleView/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            
+            <ContentControl Content="{Binding Error}" Margin="6" MaxWidth="400"/>
+            
+        </StackPanel>
+    </Grid>
+</UserControl>

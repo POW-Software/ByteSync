@@ -1,0 +1,8 @@
+﻿namespace ByteSync.Common.Business.EndPoints;
+
+public class PublicKeyInfo
+{
+    public string ClientId { get; set; } = null!;
+
+    public byte[] PublicKey { get; set; } = null!;
+}

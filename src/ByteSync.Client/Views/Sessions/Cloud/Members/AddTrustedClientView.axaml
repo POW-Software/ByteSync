@@ -1,0 +1,305 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:members="clr-namespace:ByteSync.ViewModels.Sessions.Cloud.Members"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="800"
+             x:Class="ByteSync.Views.Sessions.Cloud.Members.AddTrustedClientView">
+   
+    <Design.DataContext>
+        <members:AddTrustedClientViewModel />
+    </Design.DataContext>
+    
+    <UserControl.Styles>
+        <Style Selector="StackPanel.apparition">
+            <Style.Animations>
+                <Animation Duration="0:0:1.5"> 
+                    <KeyFrame Cue="0%">
+                        <Setter Property="Opacity" Value="0.0"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="Opacity" Value="1.0"/>
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+    </UserControl.Styles>
+    
+    <StackPanel Background="{DynamicResource Gray7}" MinWidth="540">
+        <StackPanel Orientation="Vertical">
+            
+            <TextBlock Text="{localizations:Loc AddTrustedClient_Introduction_OnJoiningMemberSide}" IsVisible="{Binding IsJoinerSide}"
+                HorizontalAlignment="Center" MaxWidth="500" Margin="12" TextWrapping="WrapWithOverflow"></TextBlock>
+            
+            <TextBlock Text="{localizations:Loc AddTrustedClient_Introduction_OnSessionMemberSide}" IsVisible="{Binding !IsJoinerSide}"
+                       HorizontalAlignment="Center" MaxWidth="500" Margin="12" TextWrapping="WrapWithOverflow"></TextBlock>
+            
+            <!-- Permet de faire des séparateurs avec Dash, remplace les Borders vides avec épaisseur de 2 en Avalonia -->
+            <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
+                       StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
+            
+            <StackPanel Orientation="Vertical" Classes="apparition">
+                
+                <!-- Demande X/N -->
+                <!--<StackPanel IsVisible="{Binding IsJoinerSide}"
+                                Orientation="Horizontal" HorizontalAlignment="Center" Margin="6">
+                    <TextBlock Text="{l:Loc AddTrustedClient_Client}" 
+                               FontWeight="Bold" Margin="6 0" VerticalAlignment="Center" FontSize="18"/>
+                    
+                    <TextBlock Text="{Binding TrustDataParameters.CurrentClientIndex}" 
+                               FontWeight="Bold" Margin="3 0" VerticalAlignment="Center" FontSize="18"/>
+                    <TextBlock Text="/" 
+                               FontWeight="Bold" Margin="3 0" VerticalAlignment="Center" FontSize="18"/>
+                    <TextBlock Text="{Binding TrustDataParameters.ClientsCount}" 
+                               FontWeight="Bold" Margin="3 0" VerticalAlignment="Center" FontSize="18"/>
+                </StackPanel>-->
+                
+                <StackPanel Margin="0 " 
+                      HorizontalAlignment="Center">
+                    
+                    <!-- Ce Client -->
+                    <TextBlock FontSize="18" Margin="18 18 18 0" Text="{localizations:Loc TrustedNetworkView_ThisClient, True}"/>
+                    
+                    <Grid ColumnDefinitions="*, *">
+                
+                        <StackPanel Grid.Column="0" Orientation="Vertical" Margin="12 0">
+                            <TextBlock Text="{localizations:Loc TrustedPublicKeysView_ClientIdentifier}" Margin="12 9 12 3" HorizontalAlignment="Center" FontSize="14"
+                                       FontWeight="Bold"></TextBlock>
+                            <TextBlock Text="{Binding MyClientId}" Margin="3 0 3 9" HorizontalAlignment="Center"></TextBlock>
+                        </StackPanel>
+            
+                        <StackPanel Grid.Column="1" Orientation="Vertical" Margin="12 0">
+                            <TextBlock Text="{localizations:Loc TrustedNetworkView_PublicKey}" Margin="12 9 12 3" HorizontalAlignment="Center" FontSize="14"
+                                       FontWeight="Bold"></TextBlock>
+                            <TextBlock Text="{Binding MyPublicKey}" Margin="3 0 3 9" HorizontalAlignment="Center"></TextBlock>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!-- Client à ajouter -->
+                    <StackPanel Orientation="Horizontal" Margin="0 6 0 0">
+                    
+                        <TextBlock FontSize="18" Margin="18 18 9 0" VerticalAlignment="Center" 
+                                   Text="{localizations:Loc AddTrustedClient_ClientToAdd, True}"/>
+                        
+                        <!-- X / Y -->
+                        <StackPanel IsVisible="{Binding IsJoinerSide}" Background="{StaticResource OtherMemberBackGround}"
+                                    Orientation="Horizontal" HorizontalAlignment="Center" Margin="9 18 18 0">
+                        
+                            <TextBlock Text="{Binding TrustDataParameters.CurrentClientIndex}" 
+                                       FontWeight="Bold" Margin="3 0" VerticalAlignment="Center" FontSize="18"/>
+                            <TextBlock Text="/" 
+                                       FontWeight="Bold" Margin="3 0" VerticalAlignment="Center" FontSize="18"/>
+                            <TextBlock Text="{Binding TrustDataParameters.ClientsCount}" 
+                                       FontWeight="Bold" Margin="3 0" VerticalAlignment="Center" FontSize="18"/>
+                        </StackPanel>
+                    
+                    </StackPanel>
+                    
+                    <Grid ColumnDefinitions="*, *">
+                
+                        <StackPanel Grid.Column="0" Orientation="Vertical" Margin="12 0">
+                            <TextBlock Text="{localizations:Loc TrustedPublicKeysView_ClientIdentifier}" Margin="12 9 12 3" HorizontalAlignment="Center" FontSize="14"
+                                       FontWeight="Bold"></TextBlock>
+                            <TextBlock Text="{Binding OtherClientId}" Margin="3 0 3 9" HorizontalAlignment="Center"></TextBlock>
+                        </StackPanel>
+            
+                        <StackPanel Grid.Column="1" Orientation="Vertical" Margin="12 0">
+                            <TextBlock Text="{localizations:Loc TrustedNetworkView_PublicKey}" Margin="12 9 12 3" HorizontalAlignment="Center" FontSize="14"
+                                       FontWeight="Bold"></TextBlock>
+                            <TextBlock Text="{Binding OtherClientKey}" Margin="3 0 3 9" HorizontalAlignment="Center"></TextBlock>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!--<TextBlock Grid.Row="1" Grid.Column="0" Text="{l:Loc AddTrustedClient_OtherClientId}" Margin="3" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding OtherClientId}" 
+                               FontWeight="Bold" Margin="3" VerticalAlignment="Center"/>
+                    
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{l:Loc AddTrustedClient_MyClientId}" Margin="3" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding MyClientId}" 
+                               Margin="3" VerticalAlignment="Center"/>-->
+                    
+                </StackPanel>
+            
+            </StackPanel>
+            
+            <!-- Permet de faire des séparateurs avec Dash, remplace les Borders vides avec épaisseur de 2 en Avalonia -->
+            <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
+                       StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6 12 6 6"/>
+            
+            <!-- Security Words -->
+            <StackPanel HorizontalAlignment="Center" Margin="12 0 12 12" Classes="apparition">
+                
+                <StackPanel Orientation="Vertical" Margin="6 0 6 6">
+                
+                    <TextBlock FontSize="18" Margin="3 18 18 6" Text="{localizations:Loc AddTrustedClientView_ControlChain, True}"/>
+                    
+                    <!-- <TextBlock Text="{l:Loc AddTrustedClientView_ControlChain}" HorizontalAlignment="Center" Margin="3" -->
+                    <!--            FontSize="16" FontWeight="Bold"></TextBlock> -->
+                    
+                    <Grid ColumnDefinitions="Auto, Auto, Auto, Auto, Auto, Auto" RowDefinitions="Auto, Auto, Auto" HorizontalAlignment="Center">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding SafetyKeyParts[0]}" Margin="3 6" MinWidth="70"></TextBlock>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SafetyKeyParts[1]}" Margin="3 6" MinWidth="70"></TextBlock>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding SafetyKeyParts[2]}" Margin="3 6" MinWidth="70"></TextBlock>
+                        <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding SafetyKeyParts[3]}" Margin="3 6" MinWidth="70"></TextBlock>
+                        
+                        <TextBlock Grid.Row="0" Grid.Column="4" Text="{Binding SafetyKeyParts[4]}" Margin="3 6" MinWidth="70"></TextBlock>
+                        <TextBlock Grid.Row="0" Grid.Column="5" Text="{Binding SafetyKeyParts[5]}" Margin="3 6" MinWidth="70"></TextBlock>
+                        
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding SafetyKeyParts[6]}" Margin="3 6"></TextBlock>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SafetyKeyParts[7]}" Margin="3 6"></TextBlock>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding SafetyKeyParts[8]}" Margin="3 6"></TextBlock>
+                        <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding SafetyKeyParts[9]}" Margin="3 6"></TextBlock>
+                        <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding SafetyKeyParts[10]}" Margin="3 6"></TextBlock>
+                        <TextBlock Grid.Row="1" Grid.Column="5" Text="{Binding SafetyKeyParts[11]}" Margin="3 6"></TextBlock>
+                    </Grid>
+                    
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="3 9"
+                            Command="{Binding Path=CopyToClipboardCommand}" >
+                        <StackPanel Orientation="Horizontal">
+                            <misc:Icon  Value="RegularCopy" />
+                            <TextBlock Text="{localizations:Loc AddTrustedClient_CopyToClipboard, True}" />
+                        </StackPanel>
+                    </Button>
+                    
+                    <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="3 9"
+                            Command="{Binding Path=CheckClipboardCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <misc:Icon Value="RegularCheckCircle"/>
+                            <TextBlock Text="{localizations:Loc AddTrustedClient_CheckTheClipboard, True}" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                            IsVisible="{Binding Path=IsCopyToClipboardOK}" Margin="3">
+                    <misc:Icon FontSize="16" Value="RegularCheckCircle" Margin="6 0" VerticalAlignment="Center" 
+                                Foreground="{DynamicResource AccentTextForeGround}" />
+                    <TextBlock Text="{localizations:Loc AddTrustedClient_CopyToClipboardOK}" VerticalAlignment="Center"
+                               Foreground="{DynamicResource AccentTextForeGround}" FontWeight="Bold"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                            IsVisible="{Binding Path=IsCopyToClipboardError}" Margin="3">
+                    <misc:Icon FontSize="16" Value="RegularCheckCircle" Margin="6 0" VerticalAlignment="Center" 
+                                Foreground="{DynamicResource AccentTextForeGround}" />
+                    <TextBlock Text="{localizations:Loc AddTrustedClient_CopyToClipboardError}" VerticalAlignment="Center"
+                               Foreground="{DynamicResource AccentTextForeGround}" FontWeight="Bold"/>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                            IsVisible="{Binding Path=IsClipboardCheckOK}" Margin="3">
+                    <misc:Icon FontSize="16" Value="RegularCheckCircle" Margin="6 0" VerticalAlignment="Center" 
+                                Foreground="{DynamicResource AccentTextForeGround}" />
+                    <TextBlock Text="{localizations:Loc AddTrustedClient_ClipboardCheckOK}" VerticalAlignment="Center"
+                               Foreground="{DynamicResource AccentTextForeGround}" FontWeight="Bold"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                            IsVisible="{Binding Path=IsClipboardCheckError}" Margin="3">
+                    <misc:Icon FontSize="16" Value="RegularErrorCircle" Margin="6 0" VerticalAlignment="Center" 
+                                Foreground="{DynamicResource AccentTextForeGround}"  />
+                    <TextBlock Text="{localizations:Loc AddTrustedClient_ClipboardCheckFailed}" VerticalAlignment="Center"
+                               Foreground="{DynamicResource AccentTextForeGround}" FontWeight="Bold"/>
+                </StackPanel>
+                
+            </StackPanel>
+            
+            <!-- Permet de faire des séparateurs avec Dash, remplace les Borders vides avec épaisseur de 2 en Avalonia -->
+            <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
+                       StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
+            
+            
+            <!-- Validate / Reject Buttons -->
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="3 9"
+                        Command="{Binding Path=ValidateClientCommand}" >
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon FontSize="16" Value="RegularCheckShield" />
+                        <TextBlock Text="{localizations:Loc AddTrustedClient_AddToTrustedNetwork, True}" />
+                    </StackPanel>
+                </Button>
+                
+                <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="3 9"
+                        Command="{Binding Path=RejectClientCommand}" >
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon FontSize="16" Value="RegularShieldX" />
+                        <TextBlock Text="{localizations:Loc AddTrustedClient_RejectClient, True}" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+            
+            <Grid RowDefinitions="Auto, Auto">
+                <StackPanel Grid.Row="0" Orientation="Vertical" IsVisible="{Binding IsWaitingForOtherParty}" HorizontalAlignment="Stretch">
+
+                    <!-- Permet de faire des séparateurs avec Dash, remplace les Borders vides avec épaisseur de 2 en Avalonia -->
+                    <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}"
+                               StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6" />
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+
+                        <Grid VerticalAlignment="Bottom" Height="32">
+                            <TextBlock Text="{localizations:Loc AddTrustedClient_WaitingForOtherParty}"
+                                       FontWeight="Bold" Margin="6 0" VerticalAlignment="Center" />
+                        </Grid>
+
+                        <misc:LinearProgress Width="48" Height="32"
+                                             Margin="6,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                             IsActive="{Binding IsWaitingForOtherParty}" IsVisible="{Binding IsWaitingForOtherParty}"
+                                             />
+
+                    </StackPanel>
+
+                    <Button Classes="GenericButton" HorizontalAlignment="Center" Margin="3 6"
+                            Command="{Binding Path=CancelCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <misc:Icon FontSize="16" Value="RegularX" />
+                            <TextBlock Text="{localizations:Loc General_Cancel, True}" />
+                        </StackPanel>
+                    </Button>
+
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center" Margin="12">
+                    <!-- Success -->
+                    <misc:Icon FontSize="48" Value="SolidCheckCircle" Foreground="{DynamicResource AccentTextForeGround}"
+                               Opacity="0">
+                        <Interaction.Behaviors>
+                            <DataTriggerBehavior Binding="{Binding ShowSuccess}" ComparisonCondition="Equal" Value="True">
+                                <ChangePropertyAction PropertyName="Opacity" Value="1" />
+                            </DataTriggerBehavior>
+                        </Interaction.Behaviors>
+
+                        <misc:Icon.Transitions>
+                            <Transitions>
+                                <DoubleTransition Property="Opacity" Duration="0:0:0.5" />
+                            </Transitions>
+                        </misc:Icon.Transitions> <!-- -->
+                    </misc:Icon>
+
+                    <!-- Error -->
+                    <misc:Icon FontSize="48" Value="RegularErrorCircle" Foreground="{DynamicResource AccentTextForeGround}"
+                               Opacity="0">
+                        <Interaction.Behaviors>
+                            <DataTriggerBehavior Binding="{Binding ShowError}" ComparisonCondition="Equal" Value="True">
+                                <ChangePropertyAction PropertyName="Opacity" Value="1" />
+                            </DataTriggerBehavior>
+                        </Interaction.Behaviors>
+
+                        <misc:Icon.Transitions>
+                            <Transitions>
+                                <DoubleTransition Property="Opacity" Duration="0:0:0.5" />
+                            </Transitions>
+                        </misc:Icon.Transitions> <!-- -->
+                    </misc:Icon>
+                </StackPanel>
+            </Grid>
+            
+
+            
+        </StackPanel>
+        
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,43 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:inventories="clr-namespace:ByteSync.ViewModels.Sessions.Inventories"
+             xmlns:local="clr-namespace:ByteSync.Views.Sessions.Inventories"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Sessions.Inventories.InventoryProcessView">
+    
+    <Design.DataContext>
+        <inventories:InventoryProcessViewModel />
+    </Design.DataContext>
+    
+    <Grid Margin="6">
+        <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+
+            <!--Before HasLocalInventoryStarted--> 
+            <Grid IsVisible="{Binding !HasLocalInventoryStarted}">
+                <local:InventoryBeforeStartView DataContext="{Binding InventoryBeforeStartViewModel}"/>
+            </Grid>
+
+
+            <!--Details, after HasLocalInventoryStarted-->      
+            <Grid IsVisible="{Binding HasLocalInventoryStarted}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" MaxWidth="600"></ColumnDefinition>
+                    <ColumnDefinition Width="*" MaxWidth="600"></ColumnDefinition>
+                    <ColumnDefinition Width="*" MaxWidth="600"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <!-- Main Status -->
+                <local:InventoryMainStatusView Grid.Column="0" DataContext="{Binding InventoryMainStatusViewModel}"/>
+
+                <!-- Identification -->
+                <local:InventoryIdentificationView Grid.Column="1" DataContext="{Binding InventoryIdentificationViewModel}"/>
+
+                <!-- Analysis -->
+                <local:InventoryAnalysisView Grid.Column="2" DataContext="{Binding InventoryAnalysisViewModel}"/>
+            </Grid>
+
+        </StackPanel>
+    </Grid>
+</UserControl>

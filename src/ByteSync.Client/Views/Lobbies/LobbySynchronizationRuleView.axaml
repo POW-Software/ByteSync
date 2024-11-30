@@ -1,0 +1,38 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:lobbies="clr-namespace:ByteSync.ViewModels.Lobbies"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Lobbies.LobbySynchronizationRuleView">
+   
+    <Design.DataContext>
+        <lobbies:LobbySynchronizationRuleViewModel />
+    </Design.DataContext>
+    
+    <Grid Margin="6">
+        <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+           <StackPanel Orientation="Horizontal" Background="{DynamicResource Gray8}" > <!--SystemChromeHighColor-->
+               
+               <StackPanel Orientation="Horizontal" IsVisible="{Binding IsIconVisible}">
+                   <misc:Icon FontSize="14" Value="{Binding IconName}"  Margin="3 0" />
+               
+                   <Label Content="{Binding ElementType}" 
+                          FontStyle="Italic" VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
+                   
+                   <Border BorderBrush="{DynamicResource BlockBackColor}" BorderThickness="1,0,1,0" Margin="6 0 6,0" />
+               </StackPanel>
+
+               
+               <Label Content="{Binding Mode}" FontStyle="Italic" VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
+               <Label Content="{Binding Conditions}" FontWeight="DemiBold" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+               <Label Content="{Binding Then}" FontStyle="Italic" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+               <Label Content="{Binding Actions}" FontWeight="DemiBold" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+               
+               
+           </StackPanel>
+       </StackPanel>
+   </Grid>
+    
+</UserControl>

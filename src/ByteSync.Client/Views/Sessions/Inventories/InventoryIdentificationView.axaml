@@ -1,0 +1,65 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:inventories="clr-namespace:ByteSync.ViewModels.Sessions.Inventories"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Sessions.Inventories.InventoryIdentificationView">
+
+    <Design.DataContext>
+        <inventories:InventoryIdentificationViewModel />
+    </Design.DataContext>
+
+    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+        <StackPanel Orientation="Vertical" Height="60"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+            <misc:LinearProgress Width="80" Height="60"
+                                 IsActive="{Binding IsIdentificationRunning}"
+                                 IsVisible="{Binding IsIdentificationRunning}" />
+
+            <misc:Icon FontSize="60"
+                       Value="{Binding IdentificationStatus, 
+                                        Converter={StaticResource InventoryProcessStatusToIconConverter}}"
+                       Foreground="{DynamicResource HomeCloudSynchronizationBackGround}"
+                       IsVisible="{Binding !IsIdentificationRunning}"
+                       Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center" />
+
+        </StackPanel>
+
+        <Label Height="30" VerticalContentAlignment="Center"
+               Content="{Binding IdentificationStatus, Converter={StaticResource InventoryProcessStatusToTextConverter}, 
+                                    ConverterParameter='InventoryProcess_Identification'}"
+               HorizontalContentAlignment="Center" FontWeight="Bold" Margin="6" />
+
+        <Grid HorizontalAlignment="Center" Margin="3 12 3 0" Height="100">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_IdentifiedFiles}"
+                   Classes="InventoryStatusDescription" />
+            <Label Grid.Row="0" Grid.Column="1" Content="{Binding IdentifiedFiles, FallbackValue=0}"
+                   HorizontalContentAlignment="Right" />
+
+            <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc InventoryProcess_IdentifiedDirectories}"
+                   Classes="InventoryStatusDescription" />
+            <Label Grid.Row="1" Grid.Column="1" Content="{Binding IdentifiedDirectories, FallbackValue=0}"
+                   HorizontalContentAlignment="Right" />
+
+            <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc InventoryProcess_TotalSize}"
+                   Classes="InventoryStatusDescription" />
+            <Label Grid.Row="2" Grid.Column="1" Content="{Binding IdentifiedSize, FallbackValue=0, 
+                        Converter={StaticResource FormatKbSizeConverter}}"
+                   HorizontalContentAlignment="Right" />
+        </Grid>
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,39 @@
+meta {
+  name: UploadFinished
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{root-url}}/session/{{sessionId}}/file/uploadFinished
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: {{jwtToken1}}
+}
+
+body:json {
+  {
+    "SessionId": "{{sessionId}}",
+    "SharedFileDefinition": {
+      "Id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "SessionId": "{{sessionId}}",
+      "FullId": "{{client1FullId}}",
+      "SharedFileType": 4,
+      "ActionsGroupIds": [
+        "{{actionGroupId1}}"
+      ],
+      "AdditionalName": "additionalNameValue",
+      "IV": "AQIDBAUGBwgJAAECAwQFBg==",
+      "IsMultiFileZip": false,
+      "UploadedFileLength": 1024
+    },
+    "PartNumber": null,
+    "TotalParts": 1,
+    "ActionsGroupIds": [
+      "{{actionGroupId1}}"
+    ]
+  }
+}

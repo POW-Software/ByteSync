@@ -1,0 +1,138 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:actions1="clr-namespace:ByteSync.ViewModels.Sessions.Comparisons.Actions"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Sessions.Comparisons.Actions.AtomicConditionEditView">
+    
+    <Design.DataContext>
+        <actions1:AtomicConditionEditViewModel />
+    </Design.DataContext>
+
+    
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <DockPanel>
+                    <Grid DockPanel.Dock="Left" MinWidth="1000" >
+                        <Grid.ColumnDefinitions>
+
+                            <!--Source-->
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+
+                            <ColumnDefinition Width="Auto" MinWidth="210"></ColumnDefinition>
+
+                            <!--Destination--> <!-- DateTime, Size et SizeUnit -->
+                            <ColumnDefinition Width="Auto" MinWidth="240"></ColumnDefinition>
+                            
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="3 0" VerticalAlignment="Center">
+                            <ComboBox Classes="PowComboBox"  x:Name="SourceDataComboBox" Margin="0 0" MinWidth="100"
+                                  Items="{Binding Path=ConditionSources}"
+                                  PlaceholderText="{localizations:Loc AtomicConditionEdit_Source}"
+                                  SelectedItem="{Binding Path=SelectedSource}"> 
+                                
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}"  />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                                
+                            </ComboBox>
+                            
+                            <TextBlock Text="." FontWeight="ExtraBold" VerticalAlignment="Center" Margin="3 0"/>
+
+                            <ComboBox Classes="PowComboBox" x:Name="SourceTypeComboBox" Margin="0 0" MinWidth="160"
+                                      Items="{Binding Path=ComparisonElements}" 
+                                      PlaceholderText="{localizations:Loc AtomicConditionEdit_ComparisonElement}"
+                                      SelectedItem="{Binding Path=SelectedComparisonElement}">
+                                
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Description}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+
+                        <ComboBox Classes="PowComboBox" Grid.Column="1" x:Name="OperatorComboBox" Margin="24 0"
+                                  Items="{Binding Path=ComparisonOperators}"
+                                  PlaceholderText="{localizations:Loc AtomicConditionEdit_ComparisonOperator}"
+                                  SelectedItem="{Binding Path=SelectedComparisonOperator}" VerticalAlignment="Center">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Description}" FontFamily="{Binding}"  />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        
+                        <Grid Grid.Column="2" RowDefinitions="Auto, Auto">
+                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                <ComboBox Classes="PowComboBox" x:Name="DestinationComboBox" Margin="3 0"
+                                          Items="{Binding Path=ConditionDestinations}" 
+                                          PlaceholderText="{localizations:Loc AtomicConditionEdit_Destination}"
+                                          SelectedItem="{Binding Path=SelectedDestination}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" FontFamily="{Binding}"  />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                            
+                                </ComboBox>
+                                
+                                
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                <DatePicker Classes="Pow" Margin="3 0" IsVisible="{Binding Path=IsDateVisible}"
+                                            SelectedDate="{Binding Path=SelectedDateTime}" VerticalAlignment="Center"/>
+
+                                <TimePicker Classes="Pow" Margin="3 0" IsVisible="{Binding Path=IsDateVisible}" 
+                                            SelectedTime="{Binding Path=SelectedTime}" VerticalAlignment="Center"></TimePicker>
+
+                                <!-- 10/03/2022 Marge haut de 4 pour respecter le décalage erreur dans DatePicker et TimePicker !!! -->
+                                <NumericUpDown Margin="3 4 3 0" MinWidth="140"
+                                               IsVisible="{Binding Path=IsSizeVisible}"
+                                               Value="{Binding SelectedSize}"/>
+
+                                <!-- 10/03/2022 Marge haut de 4 pour respecter le décalage erreur dans DatePicker et TimePicker !!! -->
+                                <ComboBox Classes="PowComboBox" x:Name="SizeUnitComboBox" Margin="3 4 3 0" MinWidth="60"
+                                          IsVisible="{Binding Path=IsSizeVisible}"
+                                          Items="{Binding Path=SizeUnits}"
+                                          SelectedItem="{Binding Path=SelectedSizeUnit}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding ShortName}" FontFamily="{Binding}"  />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                        
+                    </Grid>
+
+                    <StackPanel  DockPanel.Dock="Right" Orientation="Horizontal" Margin="18 0">
+                        <Button Classes="GenericButton"
+                                Command="{Binding Path=SwapSidesCommand}" HorizontalAlignment="Left" Margin="3 0" BorderThickness="0" >
+                            <StackPanel Orientation="Horizontal">
+                                <misc:Icon FontSize="14" Value="PowLeftRight" />
+                            </StackPanel>
+                        </Button>
+                        
+                        <Button Classes="GenericButton"
+                                Command="{Binding Path=RemoveCommand}" HorizontalAlignment="Left" Margin="3 0" BorderThickness="0" >
+                            <StackPanel Orientation="Horizontal">
+                                <misc:Icon FontSize="14" Value="RegularMinusCircle" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </DockPanel>
+                
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

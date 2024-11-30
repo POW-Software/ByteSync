@@ -1,0 +1,128 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:profiles="clr-namespace:ByteSync.ViewModels.Profiles"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:behaviors="clr-namespace:ByteSync.Views.Behaviors"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Profiles.CreateSessionProfileView">
+    
+    <Design.DataContext>
+        <profiles:CreateSessionProfileViewModel />
+    </Design.DataContext>
+    
+    <Grid Background="{DynamicResource MahApps.Brushes.Gray7}" >
+        <StackPanel MinWidth="550" >
+            <StackPanel Margin="12 0 12 0" Orientation="Vertical" HorizontalAlignment="Center">
+                <Grid RowDefinitions="Auto, Auto" ColumnDefinitions="Auto, Auto" HorizontalAlignment="Center">
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{localizations:Loc CreateCloudSessionProfileView_ProfileName}" 
+                            Margin="6" VerticalAlignment="Center" />
+                    <AutoCompleteBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=ProfileName}" Name="AutoCompleteBoxProfile" 
+                            Margin="6" VerticalAlignment="Center" Width="250" 
+                            Items="{Binding SuggestedItems}">
+                        <Interaction.Behaviors>
+                            <behaviors:AutoCompleteZeroMinimumPrefixLengthDropdownBehavior/>
+                        </Interaction.Behaviors>
+                    </AutoCompleteBox>
+                    
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{localizations:Loc CreateCloudSessionProfileView_ProfileType}"
+                               Margin="6" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Path=ProfileType, Converter={StaticResource ProfileTypeConverter}}"
+                               Margin="6" VerticalAlignment="Center"></TextBlock>
+                </Grid>
+                
+                <!-- Permet de faire des séparateurs avec Dash, remplace les Borders vides avec épaisseur de 2 en Avalonia -->
+                <Rectangle IsVisible="{Binding ShowWarning}" Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
+                           StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6 18 6,18"/>
+                
+                <!-- Background="{DynamicResource OtherMemberBackGround}" -->
+                <StackPanel IsVisible="{Binding ShowWarning}" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <misc:Icon FontSize="24" Value="RegularError" Foreground="{DynamicResource SystemAccentColor}"
+                               Margin="6" VerticalAlignment="Center"/>
+                    
+                    <TextBlock Text="{localizations:Loc CreateCloudSessionProfileView_AlreadyAProfileWithSameName }"
+                               Margin="6" VerticalAlignment="Center" TextAlignment="Center" />
+                </StackPanel>
+
+                
+            </StackPanel>
+
+            <!-- Boutons de controle -->
+            <DockPanel Background="{DynamicResource Gray8}" Margin=" 0 32 0 0">
+                <Button Classes="GenericButton Accent"
+                        DockPanel.Dock="Left" HorizontalAlignment="Left" Margin="6 9" Command="{Binding Path=SaveCommand}" MaxHeight="30">
+
+                    <StackPanel Orientation="Horizontal" Margin="2">
+                        <misc:Icon FontSize="12" Value="RegularSave" />
+                    
+                        <TextBlock Text="{localizations:Loc General_Save, True}" Margin="6 0 0 0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Classes="GenericButton" 
+                            HorizontalAlignment="Right" Margin="6 9" Command="{Binding Path=ResetCommand}" MaxHeight="30">
+
+                        <StackPanel Orientation="Horizontal">
+                            <misc:Icon FontSize="12" Value="RegularReset"  />
+                        
+                            <TextBlock Text="{localizations:Loc General_Reset, True}" Margin="6 0 0 0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Classes="GenericButton"
+                            HorizontalAlignment="Right" Margin="6 9" Command="{Binding Path=CancelCommand}" MaxHeight="30">
+
+                        <StackPanel Orientation="Horizontal">
+                            <misc:Icon FontSize="12" Value="RegularExit" />
+                        
+                            <TextBlock Text="{localizations:Loc General_Cancel, True}" Margin="6 0 0 0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </DockPanel>
+            
+            <!-- Affichage du resultat -->
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin=" 0 48 0 0">
+                
+                <Grid>
+
+                    <misc:LinearProgress Width="48" Height="48" 
+                                         Margin="20,0,0,3"  HorizontalAlignment="Center"
+                                         IsActive="{Binding IsCreatingProfile}" IsVisible="{Binding IsCreatingProfile}"/>
+                    
+                    <StackPanel Height="48" IsVisible="{Binding ShowSuccess}">
+                        <misc:Icon FontSize="48" Value="SolidCheckCircle" Foreground="{DynamicResource HomeCloudSynchronizationBackGround}"
+                                   Opacity="0">
+                        
+                            <Interaction.Behaviors>
+                                <DataTriggerBehavior Binding="{Binding ShowSuccess}" ComparisonCondition="Equal" Value="True">
+                                    <ChangePropertyAction PropertyName="Opacity" Value="1" />
+                                </DataTriggerBehavior>
+                            
+                                <!--<DataTriggerBehavior Binding="{Binding ShowSuccess}" ComparisonCondition="Equal" Value="False">
+                                    <ChangePropertyAction PropertyName="Opacity" Value="0" />
+                                </DataTriggerBehavior>-->
+                            </Interaction.Behaviors>
+                        
+                            <misc:Icon.Transitions>
+                                <Transitions>
+                                    <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+                                </Transitions>
+                            </misc:Icon.Transitions>
+                        
+                        </misc:Icon>
+                    </StackPanel>
+                    
+
+                </Grid>
+                
+                <ContentControl Content="{Binding Error}" Margin="6" MaxWidth="500"/>
+                
+            </StackPanel>
+        </StackPanel>
+        
+    </Grid>
+</UserControl>

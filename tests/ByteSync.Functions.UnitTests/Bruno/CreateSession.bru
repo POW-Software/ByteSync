@@ -1,0 +1,50 @@
+meta {
+  name: CreateSession
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{root-url}}/session
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: {{jwtToken1}}
+}
+
+body:json {
+  {
+    "LobbyId": null,
+    "CreatorProfileClientId": null,
+    "SessionSettings": {
+      "Data": "SGVsbG8gd29ybGQ=",
+      "IV": "SGVsbG8gd29ybGQ="
+    },
+    "CreatorPublicKeyInfo": {
+      "ClientId": "{{clientId1}}",
+      "PublicKey": "SGVsbG8gd29ybGQ="
+    }
+  }
+}
+
+script:pre-request {
+  function generateRandomString(length) {
+      var result           = '';
+      var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      var charactersLength = characters.length;
+      for ( var i = 0; i < length; i++ ) {
+          result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      }
+      return result;
+  }
+  
+  var randomString = generateRandomString(6);
+  bru.setEnvVar("randomString", randomString);
+}
+
+script:post-response {
+  var sessionId = res.getBody().Value.CloudSession.SessionId;
+  bru.setEnvVar("sessionId", sessionId);
+}

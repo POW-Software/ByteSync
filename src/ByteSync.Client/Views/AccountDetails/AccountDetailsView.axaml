@@ -1,0 +1,67 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:accountDetails="clr-namespace:ByteSync.ViewModels.AccountDetails"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.AccountDetails.AccountDetailsView">
+    <Design.DataContext>
+        <accountDetails:AccountDetailsViewModel />
+    </Design.DataContext>
+    
+    <Grid MinWidth="500" >
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" MinWidth="450" Margin="12 0 12 0">
+            <TextBlock Text="{Binding AccountEmail}" Margin="12 12 12 9" HorizontalAlignment="Center" FontSize="14"
+                       FontWeight="Bold"></TextBlock>
+
+            <Button Margin="6" Command="{Binding Path=LogOutCommand}" HorizontalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <misc:Icon FontSize="20" Value="RegularLogOut" Foreground="{DynamicResource Gray1}"
+                               Margin="2" VerticalAlignment="Center"/>
+                    
+                    <TextBlock Text="{localizations:Loc AccountDetails_LogOut}" Margin="4" VerticalAlignment="Center" Foreground="{DynamicResource Gray1}" />
+                </StackPanel>
+            </Button>
+            <TextBlock Text="{localizations:Loc MainWindow_OnClose_ConfirmMessage}" Margin="0 0 0 12" 
+                       IsVisible="{Binding !CanLogOutOrShutdown}"
+                       HorizontalAlignment="Center" />
+
+
+            <Border BorderBrush="{DynamicResource MahApps.Brushes.Gray8}" BorderThickness="0,1,0,1" Margin="0,8" />
+
+            <Grid Margin="0 6 0 6" HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="{localizations:Loc AccountDetails_Serial}" Margin="6"></TextBlock>
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SerialNumber}" Margin="6"></TextBlock>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="{localizations:Loc AccountDetails_Product}" Margin="6"></TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ProductName}" Margin="6"></TextBlock>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="{localizations:Loc AccountDetails_Subscription}" Margin="6"></TextBlock>
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Subscription}" Margin="6"></TextBlock>
+                
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="{localizations:Loc AccountDetails_AllowedRemoteSyncVolume}" Margin="6"></TextBlock>
+                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="6">
+                    <TextBlock Text="{Binding AllowedCloudSynchronizationVolumeInBytes,
+                        Converter={StaticResource FormatKbSizeConverter}, ConverterParameter='true//N0'}" Margin="0 0 3 0"/>
+                    <TextBlock Text="{localizations:Loc AccountDetails_PerMonth}" Margin="0"/>
+                </StackPanel>
+
+            </Grid>
+            
+            <ContentControl Content="{Binding UsageStatistics}" MinHeight="350" MinWidth="500"/>
+            
+        </StackPanel>
+    </Grid>
+</UserControl>

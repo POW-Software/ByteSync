@@ -1,0 +1,108 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:actions="clr-namespace:ByteSync.ViewModels.Sessions.Comparisons.Actions"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Sessions.Comparisons.Actions.AtomicActionEditView">
+    
+    <Design.DataContext>
+        <actions:AtomicActionEditViewModel />
+    </Design.DataContext>
+    
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+               
+
+                <DockPanel>
+                    <Grid DockPanel.Dock="Left" MinWidth="1000" >
+                        <Grid.ColumnDefinitions>
+
+                            <!--0 : Action-->
+                            <ColumnDefinition Width="Auto" MinWidth="320"></ColumnDefinition>
+
+                            <!--1 : From-->
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+
+                            <!--2 : Source-->
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+
+                            <!--3 : To-->
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+
+                            <!--4 : Destination -->
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        
+                        <ComboBox Classes="PowComboBox" Grid.Column="0" x:Name="ActionComboBox" Margin="0 0" MinWidth="190"
+                                  Items="{Binding Path=Actions}" PlaceholderText="{localizations:Loc AtomicActionEdit_Action}"
+                                  SelectedItem="{Binding Path=SelectedAction}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Description}" FontFamily="{Binding}"  />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <TextBlock Grid.Column="1" FontWeight="SemiBold" Text="{localizations:Loc AtomicActionEdit_From}" 
+                                   VerticalAlignment="Center" Margin="24 0 3 0"
+                                   IsVisible="{Binding Path=IsSourceVisible}" />
+
+                        <ComboBox Classes="PowComboBox" Grid.Column="2" x:Name="SourceComboBox" Margin="0 0" MinWidth="140"
+                                  IsVisible="{Binding Path=IsSourceVisible}"
+                                  Items="{Binding Path=Sources}" 
+                                  PlaceholderText="{localizations:Loc AtomicActionEdit_Source}"
+                                  SelectedItem="{Binding Path=SelectedSource}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}" FontFamily="{Binding}"  />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <TextBlock Grid.Column="3" FontWeight="SemiBold" Text="{localizations:Loc AtomicActionEdit_To}" 
+                                   VerticalAlignment="Center" Margin="18 0 3 0"
+                                   IsVisible="{Binding Path=IsDestinationToVisible}"/>
+                        
+                        <TextBlock Grid.Column="3" FontWeight="SemiBold" Text="{localizations:Loc AtomicActionEdit_On}" 
+                                   VerticalAlignment="Center" Margin="18 0 3 0"
+                                   IsVisible="{Binding Path=IsDestinationOnVisible}"/>
+
+                        <ComboBox Classes="PowComboBox" Grid.Column="4" x:Name="DestinationComboBox" Margin="0 0" MinWidth="140"
+                                  IsVisible="{Binding Path=IsDestinationVisible}"
+                                  Items="{Binding Path=Destinations}" 
+                                  PlaceholderText="{localizations:Loc AtomicActionEdit_Destination}"
+                                  SelectedItem="{Binding Path=SelectedDestination}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}" FontFamily="{Binding}"  />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                    </Grid>
+
+                    <StackPanel  DockPanel.Dock="Right" Orientation="Horizontal" Margin="18 0">
+                        <Button Classes="GenericButton"
+                                Command="{Binding Path=SwapSidesCommand}" HorizontalAlignment="Left" Margin="3 0" BorderThickness="0" >
+                            <StackPanel Orientation="Horizontal">
+                                <misc:Icon FontSize="14" Value="PowLeftRight" />
+                            </StackPanel>
+                        </Button>
+                        
+                        <Button Classes="GenericButton"
+                                Command="{Binding Path=RemoveCommand}" HorizontalAlignment="Left" Margin="3 0" BorderThickness="0"
+                                IsVisible="{Binding Path=ShowDeleteButton}">
+                            <StackPanel Orientation="Horizontal">
+                                <misc:Icon FontSize="14" Value="RegularMinusCircle" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </DockPanel>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

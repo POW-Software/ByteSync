@@ -1,0 +1,97 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:headers="clr-namespace:ByteSync.ViewModels.Headers"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Headers.UpdateDetailsView">
+
+    <Design.DataContext>
+        <headers:UpdateDetailsViewModel />
+    </Design.DataContext>
+    
+    <Grid>
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" MinWidth="400" Margin="12 6 12 6">
+            <TextBlock Text="{Binding AvailableUpdatesMessage}" Margin="6" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+            
+            <ItemsControl Items="{Binding SoftwareVersions}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" Margin="12" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Margin="0 15" 
+                                    IsEnabled="{Binding Path=DataContext.SelectedVersion,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, 
+                                        Converter={x:Static ObjectConverters.IsNull}}">
+                            <TextBlock Text="{Binding Level}" Width="100" 
+                                       VerticalAlignment="Center" Margin="6 0"/>
+                            
+                            <TextBlock Text="{Binding Version}" Width="110" 
+                                       VerticalAlignment="Center" Margin="6 0"/>
+                            
+                            <Button Classes="LinkButtonLight" 
+                                    Command="{Binding Path=DataContext.ShowReleaseNotesCommand,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" 
+                                    CommandParameter="{Binding}"
+                                    VerticalAlignment="Center" Margin="12 0">
+                                <TextBlock Text="{localizations:Loc Login_AvailableUpdate_ReleaseNotes}" TextDecorations="Underline" />
+                            </Button>
+                            
+                            <Button Classes="GenericButton"
+                                    Command="{Binding Path=DataContext.RunUpdateCommand,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" 
+                                    CommandParameter="{Binding}"
+                                    Content="{localizations:Loc UpdateDetails_Update}" VerticalAlignment="Center" Margin="12 0 6 0"></Button>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            
+            <!-- <Button Margin="6" Command="{Binding Path=RunUpdateCommand}" HorizontalAlignment="Center"> -->
+            <!--     <StackPanel Orientation="Horizontal"> -->
+            <!--         <misc:Icon FontSize="20" Value="RegularSync" Foreground="{DynamicResource SystemBaseMediumColor}" -->
+            <!--                    Margin="2" VerticalAlignment="Center"/> -->
+            <!--         <TextBlock Text="{localizations:Loc UpdateDetails_Update}" Margin="4" VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}" /> -->
+            <!--     </StackPanel> -->
+            <!-- </Button> -->
+            
+            <StackPanel Orientation="Vertical" IsVisible="{Binding SelectedVersion, Converter={x:Static ObjectConverters.IsNotNull}}" 
+                        HorizontalAlignment="Stretch">
+                <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
+                           StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
+                
+                <StackPanel Orientation="Horizontal" Margin="0 6 0 0" HorizontalAlignment="Center">
+                    <TextBlock Margin="6 0" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" FontWeight="Bold"
+                               Text="{localizations:Loc UpdateDetails_UpdatingToVersion}" ></TextBlock> 
+                    
+                    <TextBlock Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" FontWeight="Bold"
+                               Text="{Binding SelectedVersion.Version}"></TextBlock> 
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" Margin="0 6 0 6" HorizontalAlignment="Center">
+                    <TextBlock Margin="6 0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Text="{Binding SelectedVersion.Level}" /> 
+                    
+                    <TextBlock Margin="6 0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Text="-" /> 
+                    
+                    <Button Classes="LinkButtonLight" 
+                            Command="{Binding Path=ShowReleaseNotesCommand}" 
+                            CommandParameter="{Binding SelectedVersion}"
+                            VerticalAlignment="Center" Margin="6 0">
+                        <TextBlock Text="{localizations:Loc Login_AvailableUpdate_ReleaseNotes}" />
+                    </Button> 
+                </StackPanel>
+                
+                <TextBlock Text="{Binding Progress}" Margin="12" FontSize="16"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                
+            </StackPanel>
+            
+            <ContentControl Content="{Binding Error}" Margin="6" MaxWidth="400"/>
+
+        </StackPanel>
+    </Grid>
+</UserControl>

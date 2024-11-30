@@ -1,0 +1,103 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:results="clr-namespace:ByteSync.ViewModels.Sessions.Comparisons.Results"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:converters="clr-namespace:ByteSync.Services.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Sessions.Comparisons.Results.SynchronizationActionView">
+    
+    <Design.DataContext>
+        <results:SynchronizationActionViewModel />
+    </Design.DataContext>
+    
+    <UserControl.Resources>
+        <converters:BooleanToCursorConverter x:Key="TrueToCursorConverter" True="Hand" False="Arrow" />
+    </UserControl.Resources>
+    
+    <Grid Margin="4" >
+        <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="2 0">
+            
+            <StackPanel.Styles>
+                <!-- Styles : https://docs.avaloniaui.net/docs/styling/styles -->
+                <!-- Selectors : https://docs.avaloniaui.net/docs/styling/selectors -->
+                <Style Selector="StackPanel:pointerover">
+                    <Setter Property="StackPanel.Background" Value="{DynamicResource OtherMemberBackGround}" />
+                    <Setter Property="StackPanel.Cursor" Value="{Binding Path=IsEditableOrRemovable, Converter={StaticResource TrueToCursorConverter}}" />
+                </Style>
+                <Style Selector="StackPanel">
+                    <Setter Property="StackPanel.Background" Value="{DynamicResource VeryLightGray}" />
+                    <Setter Property="StackPanel.Cursor" Value="Arrow" />
+                </Style>
+            </StackPanel.Styles>
+            
+            <Grid  HorizontalAlignment="Stretch"><!--Background="{DynamicResource MahApps.Brushes.Gray10}"-->
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="18"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <!--
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="MouseLeftButtonUp">
+                        <b:InvokeCommandAction Command="{Binding EditCommand}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+
+                <Grid.Style>
+                    <Style TargetType="{x:Type Grid}">
+                        <Style.Triggers> 
+
+                            <Trigger Property="StackPanel.IsMouseOver" Value="True" >
+                                <Setter Property="StackPanel.Background" Value="{Binding MouseOverBrush}" />
+                                <Setter Property="StackPanel.Cursor" Value="{Binding Path=IsEditableOrRemovable, Converter={StaticResource TrueToCursorConverter}}" />
+                            </Trigger>
+                            <Trigger Property="StackPanel.IsMouseOver" Value="False">
+                                <Setter Property="StackPanel.Background" Value="{Binding MahAppsGray10Brush}" />
+                                <Setter Property="StackPanel.Cursor" Value="{Binding Path=IsEditableOrRemovable, Converter={StaticResource TrueToCursorConverter}}" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                -->
+
+              
+                <Label Grid.Column="0" Content="{Binding Letter}" VerticalAlignment="Center" VerticalContentAlignment="Center" 
+                       HorizontalAlignment="Center"
+                       FontSize="12" FontWeight="Bold"/>
+
+                <Border Grid.Column="1" BorderBrush="Silver" BorderThickness="1,0,0,0" Margin="0,1"></Border>
+
+                <Label Grid.Column="2" Content="{Binding Actions}" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Center"/>
+
+                <Button Grid.Column="3" Command="{Binding Path=RemoveCommand}" 
+                        HorizontalAlignment="Left" VerticalAlignment="Stretch"
+                        Margin="0" BorderThickness="0" 
+                        Focusable="False" Cursor="Hand" IsVisible="{Binding Path=IsEditableOrRemovable}" 
+                        Background="Transparent" CornerRadius="0">
+                    <!--<Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.Square}">
+
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="Width" Value="24" />
+                        </Style>
+                    </Button.Style>-->
+
+                    <StackPanel Orientation="Horizontal" Background="Transparent" Cursor="Hand" VerticalAlignment="Center">
+                        <misc:Icon FontSize="12" Value="RegularX" VerticalAlignment="Center" Margin="0 1 0 0"/>
+                        
+                        <!--<iconPacks:PackIconBoxIcons Kind="RegularX"
+                                                    Margin="0"
+                                                    Width="12"
+                                                    Height="12"
+                                                    VerticalAlignment="Center" />-->
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</UserControl>

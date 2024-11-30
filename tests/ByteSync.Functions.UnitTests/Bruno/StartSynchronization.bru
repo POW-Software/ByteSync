@@ -1,0 +1,59 @@
+meta {
+  name: StartSynchronization
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{root-url}}/session/{{sessionId}}/synchronization/start
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: {{jwtToken1}}
+}
+
+body:json {
+  {
+    "SessionId": "{{sessionId}}",
+    "ActionsGroupDefinitions": [
+      {
+        "ActionsGroupId": "{{actionGroupId1}}",
+        "Operator": 1,
+        "Source": "{{client1FullId}}",
+        "Targets": ["{{client2FullId}}", "client3"],
+        "FileSystemType": 2,
+        "Size": null,
+        "CreationTimeUtc": "{{now}}",
+        "LastWriteTimeUtc": "{{now}}"
+      },
+      {
+        "ActionsGroupId": "{{actionGroupId2}}",
+        "Operator": 2,
+        "Source": "{{client1FullId}}",
+        "Targets": ["{{client2FullId}}"],
+        "FileSystemType": 2,
+        "Size": null,
+        "CreationTimeUtc": "{{yesterday}}",
+        "LastWriteTimeUtc": "{{yesterday}}"
+      }
+    ]
+  }
+}
+
+script:pre-request {
+  const moment = require('moment');
+  
+  function getRandomInt32() {
+      return Math.floor(Math.random() * Math.pow(2, 31));
+  }
+  
+  bru.setEnvVar("actionGroupId1", getRandomInt32());
+  bru.setEnvVar("actionGroupId2", getRandomInt32());
+  
+  const now = moment();
+  const yesterday = moment().subtract(1, 'days')
+  bru.setEnvVar("now", now.format("YYYY-MM-DDTHH:mm:ssZ"));
+  bru.setEnvVar("yesterday", yesterday.format("YYYY-MM-DDTHH:mm:ssZ"));
+}

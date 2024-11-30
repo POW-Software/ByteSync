@@ -1,0 +1,71 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:trustedNetworks="clr-namespace:ByteSync.ViewModels.TrustedNetworks"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.TrustedNetworks.TrustedNetworkView">
+    
+    <Design.DataContext>
+        <trustedNetworks:TrustedNetworkViewModel />
+    </Design.DataContext>
+    
+    <Grid Background="{DynamicResource MahApps.Brushes.Gray7}" >
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" MinWidth="400" Margin="12 0 12 0">
+            
+            <Button Classes="GenericButton" HorizontalAlignment="Center" Margin="3 9"
+                    Command="{Binding Path=RenewPublicKeyCommand}" >
+                <StackPanel Orientation="Horizontal">
+                    <misc:Icon Value="RegularRecycle" />
+                    <TextBlock Text="{localizations:Loc TrustedNetworkView_RenewPublicKeyAndDeleteTrustedClients, True}" />
+                </StackPanel>
+            </Button>
+            
+            <!-- Permet de faire des séparateurs avec Dash, remplace les Borders vides avec épaisseur de 2 en Avalonia -->
+            <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
+                       StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
+            
+            <!-- Ce Client -->
+            <TextBlock FontSize="18" Margin="18 18 18 0" Text="{localizations:Loc TrustedNetworkView_ThisClient, True}"/>
+            
+            <Grid ColumnDefinitions="*, *">
+                
+                <StackPanel Grid.Column="0" Orientation="Vertical" Margin="12 0">
+                    <TextBlock Text="{localizations:Loc TrustedPublicKeysView_ClientIdentifier}" Margin="12 12 12 3" HorizontalAlignment="Center" FontSize="14"
+                               FontWeight="Bold"></TextBlock>
+                    <TextBlock Text="{Binding MyClientId}" Margin="3 3 3 9" HorizontalAlignment="Center"></TextBlock>
+                </StackPanel>
+            
+                <StackPanel Grid.Column="1" Orientation="Vertical" Margin="12 0">
+                    <TextBlock Text="{localizations:Loc TrustedNetworkView_PublicKey}" Margin="12 12 12 3" HorizontalAlignment="Center" FontSize="14"
+                               FontWeight="Bold"></TextBlock>
+                    <TextBlock Text="{Binding MyPublicKey}" Margin="3 3 3 9" HorizontalAlignment="Center"></TextBlock>
+                </StackPanel>
+            </Grid>
+            
+
+            
+            
+            <!-- Permet de faire des séparateurs avec Dash, remplace les Borders vides avec épaisseur de 2 en Avalonia -->
+            <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
+                       StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
+            
+            <!-- Clients de Confiance -->
+            <TextBlock FontSize="18" Margin="18 18 18 0" Text="{localizations:Loc TrustedNetworkView_TrustedClients, True}"/>
+            
+            <ContentControl MaxHeight="300" Content="{Binding TrustedPublicKeys}" HorizontalAlignment="Stretch"
+                            Margin="6"  />
+            
+            <StackPanel Margin="0 12 0 0" IsVisible="{Binding ConfirmationQuestion, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
+                           StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
+                
+                <ContentControl Content="{Binding ConfirmationQuestion}" HorizontalAlignment="Stretch"
+                                Margin="6"  />
+            </StackPanel>
+
+        </StackPanel>
+    </Grid>
+</UserControl>

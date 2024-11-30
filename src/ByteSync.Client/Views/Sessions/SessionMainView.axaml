@@ -1,0 +1,63 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sessions="clr-namespace:ByteSync.ViewModels.Sessions"
+             xmlns:members="clr-namespace:ByteSync.Views.Sessions.Cloud.Members"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Sessions.SessionMainView">
+    
+    <Design.DataContext>
+        <sessions:SessionMainViewModel />
+    </Design.DataContext>
+    
+    <Grid RowDefinitions="Auto,*,Auto" Background="{DynamicResource VeryLightGray}">
+        <Grid Grid.Row="1" Background="{DynamicResource VeryLightGray}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                <StackPanel Orientation="Vertical">
+
+                    <StackPanel Orientation="Vertical" Margin="0 0 0 6" >
+                        <Grid Background="{DynamicResource SettingsHeaderColor}" MinHeight="88" IsVisible="{Binding IsCloudSessionMode}"> 
+                            <ContentControl Margin="15 0" VerticalAlignment="Center"
+                                            Content="{Binding CloudSessionManagement}" />
+                        </Grid>
+                        
+                        <Grid Background="{DynamicResource SettingsHeaderColor}" MinHeight="88" IsVisible="{Binding !IsCloudSessionMode}"> 
+                            <ContentControl Margin="15 0" VerticalAlignment="Center"
+                                            Content="{Binding LocalSessionManagement}" />
+                        </Grid>
+                        
+                    </StackPanel>
+                    
+                    <ItemsControl IsVisible="{Binding IsCloudSession}" Margin="6" Background="{DynamicResource BlockBackColor}"
+                                  Items="{Binding Machines}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel  Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <members:SessionMachineView/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    
+                    <ContentControl Content="{Binding LocalSessionParts}" Background="{DynamicResource BlockBackColor}"
+                                    IsVisible="{Binding !IsCloudSession}" Margin="6" />
+                    
+                    <ContentControl Content="{Binding InventoryProcess}" Background="{DynamicResource BlockBackColor}"
+                                    IsVisible="{Binding IsInventoryVisible}" MinHeight="320" Margin="6" />
+                    
+                    <ContentControl Content="{Binding ComparisonResult}" Background="{DynamicResource BlockBackColor}"
+                                    IsVisible="{Binding IsComparisonVisible}" Margin="6" />
+                    
+                    <ContentControl Content="{Binding SynchronizationProcess}" Background="{DynamicResource BlockBackColor}"
+                                    IsVisible="{Binding ComparisonResult.AreResultsLoaded}" MinHeight="185" Margin="6" /> <!--IsVisible="{Binding IsSynchronizationVisible}"-->
+
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+    </Grid>
+</UserControl>

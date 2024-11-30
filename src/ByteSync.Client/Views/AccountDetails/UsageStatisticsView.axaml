@@ -1,0 +1,81 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:avalonia="clr-namespace:LiveChartsCore.SkiaSharpView.Avalonia;assembly=LiveChartsCore.SkiaSharpView.Avalonia"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:accountDetails="clr-namespace:ByteSync.ViewModels.AccountDetails"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.AccountDetails.UsageStatisticsView">
+    
+    <Design.DataContext>
+        <accountDetails:UsageStatisticsViewModel />
+    </Design.DataContext>
+    
+    <Grid RowDefinitions="Auto, Auto, 300, Auto" Margin="6 0">
+        <TextBlock Grid.Row="0" FontSize="18" Margin="18 30 9 0" VerticalAlignment="Center"
+                   Text="{localizations:Loc UsageStatisticsView_UsageStatistics, True}"/>
+        
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button HorizontalAlignment="Left" Margin="3 3 3 3" VerticalAlignment="Bottom"
+                    Command="{Binding Path=PreviousPeriodCommand}"
+                    Background="Transparent" MaxHeight="26">
+
+                <StackPanel Orientation="Horizontal">
+                    <misc:Icon FontSize="12" Value="RegularChevronLeft"
+                               Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+            
+            <Label Content="{Binding Path=Year}" VerticalContentAlignment="Center" Margin="3 0"></Label>
+
+            <Button HorizontalAlignment="Left" Margin="3 3 3 3" VerticalAlignment="Bottom"
+                    Command="{Binding Path=NextPeriodCommand}"
+                    Background="Transparent" MaxHeight="26">
+
+                <StackPanel Orientation="Horizontal">
+                    <misc:Icon FontSize="12" Value="RegularChevronRight" 
+                               Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+            
+        <avalonia:CartesianChart Grid.Row="2" 
+                                 Series="{Binding Series}" 
+                                 XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" Sections="{Binding Sections}"
+                                 AnimationsSpeed="00:00:00.200">
+        </avalonia:CartesianChart>
+        
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="12 0">
+                <TextBlock Text="{localizations:Loc UsageStatisticsView_ShowPreviousPeriod}" Margin="3 6" VerticalAlignment="Center"/>
+                <!-- <TextBlock Text="{Binding PreviousYear}" Margin="3 6" VerticalAlignment="Center"/> -->
+                <ToggleSwitch Classes="Pow" Margin="6" IsChecked="{Binding ShowPreviousPeriod}" VerticalAlignment="Center"
+                              HorizontalAlignment="Center"
+                              OffContent="" OnContent="">
+                </ToggleSwitch>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="12 0">
+                <TextBlock Text="{localizations:Loc UsageStatisticsView_ShowLimit}" Margin="3 6" VerticalAlignment="Center"/>
+                <ToggleSwitch Classes="Pow" Margin="6" IsChecked="{Binding ShowLimit}" VerticalAlignment="Center"
+                              HorizontalAlignment="Center"
+                              OffContent="" OnContent="">
+                </ToggleSwitch>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="12 0">
+                <TextBlock Text="{localizations:Loc UsageStatisticsView_ProgressiveScale}" Margin="3 6" VerticalAlignment="Center"/>
+                <ToggleSwitch Classes="Pow" Margin="6" IsChecked="{Binding UseProgressiveScale}" VerticalAlignment="Center"
+                              HorizontalAlignment="Center"
+                              OffContent="" OnContent="">
+                </ToggleSwitch>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+    
+    <!-- <Grid> -->
+    <!--     <avalonia:CartesianChart -->
+    <!--                              Series="{Binding Series}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}"> -->
+    <!--     </avalonia:CartesianChart> -->
+    <!-- </Grid> -->
+</UserControl>

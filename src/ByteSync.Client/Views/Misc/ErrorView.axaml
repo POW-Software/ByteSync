@@ -1,0 +1,23 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:misc1="clr-namespace:ByteSync.ViewModels.Misc"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Misc.ErrorView">
+
+    <Design.DataContext>
+        <misc1:ErrorViewModel />
+    </Design.DataContext>
+    
+    <Grid ColumnDefinitions="Auto, *" HorizontalAlignment="Center" IsVisible="{Binding Path=ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+        
+        <misc:Icon Grid.Column="0" FontSize="24" Value="RegularErrorCircle" Foreground="{DynamicResource SystemAccentColor}"
+                   VerticalAlignment="Center" Margin="0 0 9 0" />
+            
+        <TextBlock Grid.Column="1" Text="{Binding Path=ErrorMessage}" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0"/>
+        
+    </Grid>
+    
+</UserControl>

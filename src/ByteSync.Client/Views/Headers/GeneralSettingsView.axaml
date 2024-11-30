@@ -1,0 +1,134 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:headers="clr-namespace:ByteSync.ViewModels.Headers"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Headers.GeneralSettingsView">
+    
+    <Design.DataContext>
+        <headers:GeneralSettingsViewModel />
+    </Design.DataContext>
+    
+    <Grid Background="{DynamicResource MahApps.Brushes.Gray7}">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" MinWidth="400" Margin="12 0 12 0">
+
+            <Grid RowDefinitions="Auto, Auto, Auto, Auto" Margin="0 6 0 6" HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="3"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="{localizations:Loc AccountDetails_Locale}" Margin="6" VerticalAlignment="Center"/>
+
+                <ContentControl Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" 
+                                Content="{Binding Locale}" Margin="6"></ContentControl>
+
+                <!-- Theme -->
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="{localizations:Loc AccountDetails_DarkMode}" Margin="6 12 6 6" VerticalAlignment="Center"/>
+                <ToggleSwitch Name="tsDarkMode" Classes="Pow" Grid.Row="1" Grid.Column="2" Margin="6 12 6 6" IsChecked="{Binding IsDarkMode}"
+                              HorizontalAlignment="Center"
+                              OffContent=""
+                              OnContent="">
+                </ToggleSwitch>
+                
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="{localizations:Loc AccountDetails_Theme}" Margin="6 6 6 12" VerticalAlignment="Center"/>
+                <ComboBox Grid.Row="2" Grid.Column="2" x:Name="AccentSelector" Classes="PowComboBox"
+                          Margin="6 6 6 12"
+                          VerticalAlignment="Center" HorizontalAlignment="Center"
+                          SelectedItem="{Binding SelectedThemeName}"
+                          BorderThickness="0"
+                          Items="{Binding AvailableThemesNames}">
+                    
+                    <!-- <ComboBox.ItemTemplate> -->
+                    <!--     <DataTemplate> -->
+                    <!--         <StackPanel Orientation="Horizontal"> -->
+                    <!--             <TextBlock Text="{Binding Mode}" /> -->
+                    <!--             <TextBlock Text=" / " /> -->
+                    <!--             <TextBlock Text="{Binding Name}" /> -->
+                    <!--         </StackPanel> -->
+                    <!--     </DataTemplate> -->
+                    <!-- </ComboBox.ItemTemplate> -->
+                </ComboBox>
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="{localizations:Loc AccountDetails_Zoom}" Margin="6" VerticalAlignment="Center"></TextBlock>
+                <StackPanel Grid.Row="3" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="6">
+                    <Button HorizontalAlignment="Center" Command="{Binding Path=ZoomInCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <misc:Icon FontSize="12" Value="RegularPlus" Foreground="{DynamicResource SystemBaseMediumColor}"
+                                       Margin="2" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <TextBlock Name="tblZoomLevel" Margin="6" MinWidth="50" TextAlignment="Center"></TextBlock>
+
+                    <Button HorizontalAlignment="Center" Command="{Binding Path=ZoomOutCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <misc:Icon FontSize="12" Value="RegularMinus" Foreground="{DynamicResource SystemBaseMediumColor}"
+                                       Margin="2" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                </StackPanel>
+
+                
+            </Grid>
+
+            <Border BorderBrush="{DynamicResource MahApps.Brushes.Gray8}" BorderThickness="0,1,0,1" Margin="0,8" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+
+                <Button Margin="6" Command="{Binding Path=ExploreAppDataCommand}" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon FontSize="20" Value="RegularRightArrowCircle" Foreground="{DynamicResource SystemBaseMediumColor}"
+                                   Margin="2" VerticalAlignment="Center"/>
+                        <TextBlock Text="{localizations:Loc AccountDetails_ExploreAppData}" Margin="4" VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}" />
+                    </StackPanel>
+                </Button>
+
+                <Button Margin="6" Command="{Binding Path=OpenLogCommand}" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon FontSize="20" Value="RegularNotepad" Foreground="{DynamicResource SystemBaseMediumColor}"
+                                   Margin="2" VerticalAlignment="Center"/>
+                        <TextBlock Text="{localizations:Loc AccountDetails_OpenLog}" Margin="4" VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+            <Border BorderBrush="{DynamicResource MahApps.Brushes.Gray8}" BorderThickness="0,1,0,1" Margin="0,8" />
+
+            <Button Margin="6" Command="{Binding Path=VisitPowSoftwareCommand}" HorizontalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <misc:Icon FontSize="20" Value="RegularWorld" Foreground="{DynamicResource SystemBaseMediumColor}"
+                               Margin="2" VerticalAlignment="Center"/>
+                    <TextBlock Text="{localizations:Loc AccountDetails_VisitPowWebSite}" Margin="4" VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}" />
+                </StackPanel>
+            </Button>
+            
+            <!--<Button Margin="6" Command="{Binding Path=RestartApplicationCommand}" HorizontalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <misc:Icon FontSize="20" Value="RegularWorld" Foreground="{DynamicResource SystemBaseMediumColor}"
+                               Margin="2" VerticalAlignment="Center"/>
+                    <TextBlock Text="{localizations:Loc AccountDetails_RestartApplication}" Margin="4" VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}" />
+                </StackPanel>
+            </Button>-->
+
+            <Border BorderBrush="{DynamicResource MahApps.Brushes.Gray8}" BorderThickness="0,1,0,1" Margin="0,8" />
+
+            <DockPanel Margin="0 6 0 6">
+                <Button Classes="LinkButton" Command="{Binding OpenPrivacyCommand}" 
+                        HorizontalAlignment="Left" DockPanel.Dock="Left">
+                    <TextBlock Text="{localizations:Loc LoginForm_Privacy}" ></TextBlock>
+                </Button>
+                
+                <Button Classes="LinkButton" Command="{Binding OpenTermsOfUseCommand}" 
+                        HorizontalAlignment="Right" DockPanel.Dock="Right">
+                    <TextBlock Text="{localizations:Loc LoginForm_TermsOfUse}" ></TextBlock>
+                </Button>
+            </DockPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

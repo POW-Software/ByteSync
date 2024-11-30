@@ -1,0 +1,32 @@
+meta {
+  name: Login C2
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{root-url}}/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+      "Email": null,
+      "Serial": null,
+      "ClientId": "{{clientId2}}",
+      "ClientInstanceId": "{{clientInstanceId2}}",
+      "Machinename": "MyMachine",
+      "Version": "2025.1.0.0",
+      "OsPlatform": 1
+  }
+}
+
+script:post-response {
+  var token = res.getBody().Value.AuthenticationTokens.JwtToken;
+  
+  bru.setEnvVar("jwtToken2", token);
+  bru.setEnvVar("clientId2", "CID_2");
+  bru.setEnvVar("clientInstanceId2", "CIID_2");
+  bru.setEnvVar("client2FullId", "CID_2" + "_" + "CIID_2");
+}

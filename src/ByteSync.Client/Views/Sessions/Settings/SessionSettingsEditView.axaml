@@ -1,0 +1,82 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:settings="clr-namespace:ByteSync.ViewModels.Sessions.Settings"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="500"
+             x:Class="ByteSync.Views.Sessions.Settings.SessionSettingsEditView">
+   
+    <Design.DataContext>
+        <settings:SessionSettingsEditViewModel />
+    </Design.DataContext>
+    
+    <WrapPanel Orientation="Horizontal" IsEnabled="{Binding CanEditSettings}"> 
+        <!-- Colonne DataType -->
+        <StackPanel Orientation="Vertical" Margin="0 0 36 0">
+            <TextBlock Margin="3"
+                       Text="{localizations:Loc SessionSettings_DataType}" VerticalAlignment="Center" />
+            <ComboBox Margin="3" VerticalAlignment="Center" MinWidth="110" 
+                      Items="{Binding Path=AvailableDataTypes}" SelectedItem="{Binding Path=DataType}" >
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Description}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
+        
+        <!-- Block Linking -->
+        <StackPanel Orientation="Horizontal" Margin="0 0 36 0">
+            <!-- Colonne LinkingKey -->
+            <StackPanel Orientation="Vertical">
+                <TextBlock Margin="3"
+                           Text="{localizations:Loc SessionSettings_LinkingKey}" VerticalAlignment="Center" />
+                <ComboBox Margin="3" VerticalAlignment="Center" MinWidth="110" 
+                          Items="{Binding Path=AvailableLinkingKeys}" SelectedItem="{Binding Path=LinkingKey}" >
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Description}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+        </StackPanel>
+    
+        <!-- Colonne avec les checkBoxes -->
+        <StackPanel Orientation="Vertical" Margin="0 0 36 0">
+            <CheckBox Margin="3 3 3 0" Name="CheckBoxExcludeHiddenFiles" 
+                Content="{localizations:Loc SessionSettings_ExcludeHiddenFiles}" IsChecked="{Binding ExcludeHiddenFiles}"></CheckBox>
+            <CheckBox Margin="3 3 3 0"
+                      Content="{localizations:Loc SessionSettings_ExcludeSystemFiles}" IsChecked="{Binding ExcludeSystemFiles}"></CheckBox>
+        </StackPanel>
+        
+        <!-- Colonne de droite -->
+        <StackPanel Orientation="Vertical" Margin="0 0 0 0">
+            <TextBlock Margin="3"
+                       Text="{localizations:Loc SessionSettings_AnalysisMode}" VerticalAlignment="Center" />
+            <ComboBox Margin="3" VerticalAlignment="Center" MinWidth="110" 
+                      Items="{Binding Path=AvailableAnalysisModes}" SelectedItem="{Binding Path=AnalysisMode}" >
+                 <!-- IsHitTestVisible="False" Focusable="False" //  https://stackoverflow.com/questions/921921/a-read-only-checkbox-in-c-sharp-wpf -->
+                
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Description}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
+        
+        <!-- Colonne de droite -->
+        <StackPanel Orientation="Vertical" Margin="0" IsVisible="False">
+            <!-- https://docs.avaloniaui.net/docs/data-binding/binding-to-controls -->
+            <TextBlock Margin="3"
+                       Text="{localizations:Loc SessionSettings_Extensions}" Height="{Binding #CheckBoxExcludeHiddenFiles.Height}"></TextBlock>
+            <TextBox Margin="3" 
+                     MinWidth="160" MaxWidth="160" Text="{Binding Extensions}"></TextBox>
+        </StackPanel>
+        
+    </WrapPanel>
+
+    
+</UserControl>
