@@ -57,7 +57,7 @@ public class FileSystemAccessor : IFileSystemAccessor
         }
         else
         {
-            // todo: Implémenter traitement sur Linux et Mac
+            // need to implement for Linux and Mac
                 
             FileInfo fileInfo = new FileInfo(filePath);
 

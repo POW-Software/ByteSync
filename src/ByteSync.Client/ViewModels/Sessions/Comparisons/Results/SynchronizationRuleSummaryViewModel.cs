@@ -69,19 +69,6 @@ public class SynchronizationRuleSummaryViewModel : ViewModelBase
         UpdateAutomaticAction(synchronizationRule);
         
         UpdateElementType();
-        
-        // this.WhenActivated(disposables =>
-        // {
-        //     Observable.FromEventPattern<PropertyChangedEventArgs>(_localizationService, nameof(_localizationService.PropertyChanged))
-        //         .ObserveOn(RxApp.MainThreadScheduler)
-        //         .Subscribe(_ => OnLocaleUpdated())
-        //         .DisposeWith(disposables);
-        //     
-        //     Observable.FromEventPattern<SynchronizationStartedEventArgs>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.SynchronizationStarted))
-        //         .ObserveOn(RxApp.MainThreadScheduler)
-        //         .Subscribe(evt => OnSynchronizationStarted(evt.EventArgs))
-        //         .DisposeWith(disposables);
-        // });
     }
 
     public ReactiveCommand<Unit, Unit> RemoveCommand { get; set; }
@@ -130,23 +117,18 @@ public class SynchronizationRuleSummaryViewModel : ViewModelBase
     private void Remove()
     {
         _synchronizationRuleRepository.Remove(SynchronizationRule);
-        // _cloudSessionEventsHub.RaiseSynchronizationRuleRemoved(this);
     }
     
     private void Duplicate()
     {
         _dialogService.ShowFlyout(nameof(Resources.Shell_DuplicateSynchronizationRule), false,
             _flyoutElementViewModelFactory.BuilSynchronizationRuleGlobalViewModel(SynchronizationRule, true));
-        // _navigationEventsHub.RaiseSynchronizationRuleDuplicationRequested(SynchronizationRule);
-        // _synchronizationRulesService.CloneSynchronizationRule(SynchronizationRule);
     }
 
     private void Edit(Avalonia.Input.PointerPressedEventArgs _)
     {
         _dialogService.ShowFlyout(nameof(Resources.Shell_DuplicateSynchronizationRule), false,
             _flyoutElementViewModelFactory.BuilSynchronizationRuleGlobalViewModel(SynchronizationRule, false));
-        
-        // _navigationEventsHub.RaiseSynchronizationRuleEditionRequested(SynchronizationRule);
     }
 
     public void UpdateAutomaticAction(SynchronizationRule synchronizationRule)

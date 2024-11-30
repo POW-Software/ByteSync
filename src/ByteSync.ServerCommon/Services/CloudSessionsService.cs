@@ -208,8 +208,6 @@ public class CloudSessionsService : ICloudSessionsService
     {
         SessionMemberData? joiner = null;
         
-        // TODO https://dev.azure.com/PowSoftware/ByteSync/_workitems/edit/17/
-
         var updateResult = await _cloudSessionsRepository.Update(parameters.SessionId, cloudSessionData =>
         {
             if (cloudSessionData is { IsSessionActivated: false, IsSessionRemoved: false })
@@ -378,8 +376,6 @@ public class CloudSessionsService : ICloudSessionsService
 
                 innerCloudSessionData = cloudSessionData;
                 innerQuitter = quitter;
-
-                // TODO : remover de synchronizationReposity
             }
 
             return quitter != null;

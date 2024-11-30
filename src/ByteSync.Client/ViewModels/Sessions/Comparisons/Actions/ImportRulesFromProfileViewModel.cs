@@ -125,8 +125,6 @@ public class ImportRulesFromProfileViewModel : ActivableViewModelBase
                 
                 CloudSessionProfileSynchronizationRules.Add(lobbySynchronizationRuleViewModel);
             }
-
-            // CloudSessionProfileSynchronizationRules.AddAll(profileDetails.SynchronizationRules);
             
             if (!_synchronizationRulesConverter.CheckAllDataPartsAreMappable(profileDetails.SynchronizationRules))
             {
@@ -138,8 +136,7 @@ public class ImportRulesFromProfileViewModel : ActivableViewModelBase
                     
                 return;
             }
-
-            // On les applique
+            
             SynchronizationRuleViewModels = _synchronizationRulesConverter.ConvertToSynchronizationRuleViewModels(profileDetails.SynchronizationRules);
         }
         catch (Exception ex)

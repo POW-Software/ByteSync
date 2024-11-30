@@ -19,7 +19,6 @@ public class AskCloudSessionPasswordExchangeKeyParameters
         
     public PublicKeyInfo PublicKeyInfo { get; set; }
     
-    // Todo 0512 LobbyId doit être contrôlé par le serveur
     public string? LobbyId { get; set; }
     
     public string? ProfileClientId { get; set; }

@@ -35,7 +35,6 @@ namespace ByteSync.ViewModels.Sessions.Cloud.Members;
 
 public class SessionMachineViewModel : ActivableViewModelBase
 {
-    private readonly ICloudSessionEventsHub _cloudSessionEventsHub;
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;
     private readonly IPathItemsService _pathItemsService;
@@ -50,12 +49,10 @@ public class SessionMachineViewModel : ActivableViewModelBase
 
     }
 
-    public SessionMachineViewModel(SessionMemberInfo sessionMemberInfo, ICloudSessionEventsHub cloudSessionEventsHub, 
-        ISessionService sessionService, IPathItemsService pathItemsService, ILocalizationService localizationService,
-        IEnvironmentService environmentService, IPathItemProxyFactory pathItemProxyFactory,
+    public SessionMachineViewModel(SessionMemberInfo sessionMemberInfo, ISessionService sessionService, IPathItemsService pathItemsService, 
+        ILocalizationService localizationService, IEnvironmentService environmentService, IPathItemProxyFactory pathItemProxyFactory,
         IPathItemRepository pathItemRepository, ISessionMemberRepository sessionMemberRepository)
     {
-        _cloudSessionEventsHub = cloudSessionEventsHub;
         _sessionService = sessionService;
         _pathItemsService = pathItemsService;
         _localizationService = localizationService;
@@ -88,16 +85,6 @@ public class SessionMachineViewModel : ActivableViewModelBase
         }
 #endif
 
-        // PathItems = _pathItemsService.GetPathItems(SessionMemberInfo)!;
-
-        // PathItems.CollectionChanged += (sender, args) =>
-        // {
-        //     if (args.Action == NotifyCollectionChangedAction.Remove)
-        //     {
-        //         ReCodePathItems();
-        //     }
-        // };
-
         RemovePathItemCommand = ReactiveCommand.CreateFromTask<PathItemProxy>(RemovePathItem);
 
         // https://stackoverflow.com/questions/58479606/how-do-you-update-the-canexecute-value-after-the-reactivecommand-has-been-declar
@@ -107,12 +94,6 @@ public class SessionMachineViewModel : ActivableViewModelBase
         AddFileCommand = ReactiveCommand.CreateFromTask(AddFiles, canRun);
         Observable.Merge(AddDirectoryCommand.IsExecuting, AddFileCommand.IsExecuting)
             .Select(executing => !executing).Subscribe(canRun);
-        
-        // this.WhenAnyValue(
-        //         x => x.IsInventoryRunning, x => x.IsProfileSession, 
-        //         (isInventoryRunning, isProfileSession) 
-        //             => !isInventoryRunning && !isProfileSession)
-        //     .ToPropertyEx(this, x => x.IsFileSystemSelectionEnabled);
 
         var pathItemsObservable = _pathItemRepository.ObservableCache.Connect()
             .Filter(pathItem => pathItem.BelongsTo(sessionMemberInfo))
@@ -125,20 +106,6 @@ public class SessionMachineViewModel : ActivableViewModelBase
         
         this.WhenActivated(disposables =>
         {
-            // IsProfileSession = _sessionService.IsProfileSession;
-
-            // todo 040423
-            // var inventoriesService = Locator.Current.GetService<IInventoryService>()!;
-            // if (inventoriesService.LocalInventoryGlobalStatus.In(LocalInventoryGlobalStatus.RunningIdentification, LocalInventoryGlobalStatus.RunningAnalysis))
-            // {
-            //     IsInventoryRunning = true;
-            // }
-            //
-            // _inventoryService.InventoryProcessData.MainStatus.DistinctUntilChanged()
-            //     .Where(status => status == LocalInventoryPartStatus.Running)
-            //     .Subscribe(_ => IsInventoryRunning = true)
-            //     .DisposeWith(disposables);
-            
             pathItemsObservable.DisposeWith(disposables);
 
             _sessionService.SessionStatusObservable.CombineLatest(_sessionService.RunSessionProfileInfoObservable)
@@ -147,16 +114,6 @@ public class SessionMachineViewModel : ActivableViewModelBase
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .ToPropertyEx(this, x => x.IsFileSystemSelectionEnabled)
                 .DisposeWith(disposables);
-
-            // Observable.FromEventPattern<EventArgs>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.SessionResetted))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnSessionResetted())
-            //     .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<InventoryStatusChangedEventArgs>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.InventoryStatusChanged))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(evt => OnInventoryStatusChanged(evt.EventArgs))
-            //     .DisposeWith(disposables);
             
             _sessionMemberRepository.Watch(sessionMemberInfo)
                 .Subscribe(item =>
@@ -181,14 +138,6 @@ public class SessionMachineViewModel : ActivableViewModelBase
         {
             void DebugAddDesktopPathItem(string folderName)
             {
-                // PathItem pathItem = new PathItem();
-                // pathItem.Path = IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName);
-                // pathItem.Type = FileSystemTypes.Directory;
-
-                // pathItem.Code = MachineLetter + (PathItems.Count + 1);
-                //
-                // PathItems.Add(new PathItemViewModel(pathItem, _localizationService));
-                
                 var allPathItems = _pathItemRepository.Elements.Where(pi => pi.BelongsTo(SessionMemberInfo)).ToList();
                 
                 if (allPathItems.Any(pi => pi.Path.Equals(IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
@@ -259,31 +208,11 @@ public class SessionMachineViewModel : ActivableViewModelBase
 
             if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_MYDATA))
             {
-                // PathItem pathItem = new PathItem();
-                // pathItem.Path = @"D:\MyData";
-                // pathItem.Type = FileSystemTypes.Directory;
-                //
-                // // pathItem.Code = MachineLetter + (PathItems.Count + 1);
-                //
-                // // PathItems.Add(new PathItemViewModel(pathItem, _localizationService));
-                //
-                // _pathItemsService.AddPathItem(pathItem);
-                
                 _pathItemsService.CreateAndAddPathItem(@"D:\MyData", FileSystemTypes.Directory);
             }
 
             if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_SAMPLEDATA))
             {
-                // PathItem pathItem = new PathItem();
-                // pathItem.Path = @"E:\SampleData";
-                // pathItem.Type = FileSystemTypes.Directory;
-                //
-                // // pathItem.Code = MachineLetter + (PathItems.Count + 1);
-                //
-                // // PathItems.Add(new PathItemViewModel(pathItem, _localizationService));
-                //
-                // _pathItemsService.AddPathItem(pathItem);
-                
                 _pathItemsService.CreateAndAddPathItem(@"E:\SampleData", FileSystemTypes.Directory);
             }
         }
@@ -309,24 +238,12 @@ public class SessionMachineViewModel : ActivableViewModelBase
 
     [Reactive]
     public string EmailAddress { get; set; }
-
-    // [Reactive]
-    // public string IpAddress { get; set; }
         
     [Reactive]
     public bool IsLocalMachine { get; set; }
     
     [Reactive]
     public DateTimeOffset JoinedSessionOn { get; set; } 
-        
-    // [Reactive]
-    // public bool IsSessionActivated { get; set; }
-    
-    // [Reactive]
-    // public bool IsInventoryRunning { get; set; }
-    //
-    // [Reactive]
-    // public bool IsProfileSession { get; set; }
     
     [Reactive]
     public bool HasQuittedSessionAfterActivation { get; set; }
@@ -341,22 +258,11 @@ public class SessionMachineViewModel : ActivableViewModelBase
 
     public ReadOnlyObservableCollection<PathItemProxy> PathItems => _data;
     
-    // internal ObservableCollectionExtended<PathItemViewModel> PathItems { get; set; }
-        
     internal SessionMemberInfo SessionMemberInfo { get; private set; }
 
     private async Task RemovePathItem(PathItemProxy pathItem)
     {
         await _pathItemsService.RemovePathItem(pathItem.PathItem);
-        
-        // bool isRemoved = await _cloudSessionManager.SetPathItemRemoved(pathItem.PathItem);
-        //
-        // if (isRemoved)
-        // {
-        //     PathItems.Remove(pathItem);
-        //     
-        //     // ReCodePathItems();
-        // }
     }
 
     private async Task AddDirectory()
@@ -485,59 +391,6 @@ public class SessionMachineViewModel : ActivableViewModelBase
 
     private void UpdateLetter()
     {
-        MachineLetter = SessionMemberInfo.Letter; // ((char) ('A' + SessionMemberInfo.PositionInList)).ToString();
-    
-        // ReCodePathItems();
+        MachineLetter = SessionMemberInfo.Letter;
     }
-    //
-    // public void SetPositionInList(int index)
-    // {
-    //     if (SessionMemberInfo.PositionInList != index)
-    //     {
-    //         SessionMemberInfo.PositionInList = index;
-    //
-    //         UpdateLetter();
-    //     }
-    // }
-    //
-    // private void ReCodePathItems()
-    // {
-    //     int cpt = 1;
-    //     foreach (var pathItemViewModel in PathItems)
-    //     {
-    //         pathItemViewModel.Code = MachineLetter + cpt;
-    //
-    //         cpt += 1;
-    //     }
-    // }
-
-    // private void OnLocalInventoryStarted()
-    // {
-    //     IsInventoryRunning = true;
-    // }
-    //
-    // private void OnSessionResetted()
-    // {
-    //     IsInventoryRunning = false;
-    // }
-    
-    
-    // private void OnInventoryStatusChanged(InventoryStatusChangedEventArgs eventArgs)
-    // {
-    //     // if (eventArgs.IsLocal && eventArgs.NewStatus.In(LocalInventoryGlobalStatus.InventoryCancelled, LocalInventoryGlobalStatus.InventoryError))
-    //     // {
-    //     //     IsInventoryRunning = false;
-    //     // }
-    //     
-    //     if (Equals(SessionMemberInfo.Endpoint, eventArgs.Endpoint))
-    //     {
-    //         UpdateStatus(eventArgs.NewStatus);
-    //     }
-    // }
-
-    // private void OnSessionActivated()
-    // {
-    //     // 08/09/2022 : Est-ce encore utile ???
-    //     IsSessionActivated = true;
-    // }
 }

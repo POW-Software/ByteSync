@@ -124,9 +124,8 @@ public class SessionProfileLocalDataManager : ISessionProfileLocalDataManager
         var joinLobbyParameters = new GetProfileDetailsPasswordParameters();
         joinLobbyParameters.CloudSessionProfileId = cloudSessionProfile.ProfileId;
         joinLobbyParameters.ProfileClientId = cloudSessionProfile.ProfileClientId;
-
-        // todo fix this
-        var profileDetailsPassword = "temp_refactoring"; //  await _connectionManager.HubWrapper.GetProfileDetailsPassword(joinLobbyParameters);
+        
+        var profileDetailsPassword = "temp_refactoring";
 
         if (profileDetailsPassword != null)
         {

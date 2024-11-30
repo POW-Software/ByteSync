@@ -78,22 +78,4 @@ public class SafetyWordsComputer
 
         return result.ToArray();
     }
-
-    // private double ConvertHexToDouble(string hexa)
-    // {
-    //     // 05/11/2022 : pourrait être amélioré avec https://stackoverflow.com/questions/51445431/base64-encoding-of-a-sha256-string ???
-    //     
-    //     double result = 0;
-    //     int pow = 0;
-    //     for (int i = hexa.Length - 1; i >= 0; i--)
-    //     {
-    //         int hexNumber = int.Parse(hexa[i].ToString(), System.Globalization.NumberStyles.HexNumber);
-    //         double value = hexNumber * Math.Pow(16, pow);
-    //         result += value;
-    //
-    //         pow += 1;
-    //     }
-    //
-    //     return result;
-    // }
 }

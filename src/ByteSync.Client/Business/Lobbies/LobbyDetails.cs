@@ -48,8 +48,7 @@ public class LobbyDetails
     public ManualResetEvent LobbyEndedEvent { get; set; }
     
     public ManualResetEvent SecurityCheckProcessEndedWithSuccess { get; set; }
-
-    // todo attention à sa gestion et à son reset : peut être passer en auto reset event
+    
     public AutoResetEvent ExpectedMemberWaitHandler { get; set; }
 
     public LobbyMemberViewModel LocalLobbyMemberViewModel

@@ -122,8 +122,6 @@ public class DataInventoryStarter : IDataInventoryStarter
 
     public async Task<StartInventoryResult> StartDataInventory(bool isLaunchedByUser)
     {
-        // InventoryProcessData inventoryProcessData = new InventoryProcessData();
-
         var session = _sessionService.CurrentSession;
         
         if (session == null)
@@ -172,8 +170,6 @@ public class DataInventoryStarter : IDataInventoryStarter
     {
         try
         {
-            // todo 050523 : ajouter de quoi contrôler qu'on est OK
-                
             Log.Information("The Data Inventory has been started by another client (ClientInstanceId:{ClientInstanceId})", 
                 inventoryStartedDto.ClientInstanceId);
                 
@@ -187,14 +183,9 @@ public class DataInventoryStarter : IDataInventoryStarter
             Log.Error(ex, "OnStartInventory");
         }
     }
-
-
-
+    
     public IObservable<bool> CanCurrentUserStartInventory()
     {
-        // IsProfileSessionInventory = _sessionService.IsProfileSession
-        //     && _sessionService.RunSessionProfileInfo.Value!.LobbySessionMode.In(LobbySessionModes.RunInventory, LobbySessionModes.RunSynchronization);
-        
         var observable = _sessionService.SessionObservable.CombineLatest(_sessionMemberRepository.IsCurrentUserFirstSessionMemberObservable,
                 _sessionService.RunSessionProfileInfoObservable, _sessionService.HasSessionBeenResettedObservable)
             .Select(tuple => new
@@ -221,63 +212,10 @@ public class DataInventoryStarter : IDataInventoryStarter
                 }
 
                 return true;
-                //
-                // if (tuple.Session is CloudSession)
-                // {
-                //     if (!tuple.IsFirstSessionMember)
-                //     {
-                //         return false;
-                //     }
-                //     if (tuple.IsProfileSession && !tuple.HasSessionBeenResetted)
-                //     {
-                //         return false;
-                //     }
-                // }
-                // else
-                // {
-                //     
-                // }
             });
 
         return observable;
     }
-    //
-    // private async Task<StartInventoryResult> DoStartDataInventory(AbstractSession session, InventoryProcessData? inventoryProcessData)
-    // {
-    //     var sessionSettings = _sessionDataHolder.SessionSettings;
-    //     if (sessionSettings == null)
-    //     {
-    //         return StartInventoryResult.BuildFrom(StartInventoryStatuses.UndefinedSettings);
-    //     }
-    //     
-    //     FinalizeSessionSettings(sessionSettings);
-    //
-    //     StartInventoryResult? result = CheckPathItems(session);
-    //     if (result != null) return result;
-    //
-    //     
-    //     // todo : remonter également les autres paramètres pour contrôle par les aux parties de l'égalité des paramètres
-    //     
-    //     result = await SendSessionSettings(session, sessionSettings);
-    //
-    //     if (result.IsOK)
-    //     {
-    //         _sessionDataHolder.SetSessionSettings(sessionSettings);
-    //         _sessionDataHolder.SetSessionActivated();
-    //
-    //         inventoryProcessData ??= new InventoryProcessData();
-    //         _sessionDataHolder.SetInventoryProcessData(inventoryProcessData);
-    //         
-    //         await _dataInventoryRunner.RunDataInventory();
-    //         // _sessionDataHolder.SetLocalInventoryStarted();
-    //
-    //         return result;
-    //     }
-    //     else
-    //     {
-    //         return result;
-    //     }
-    // }
 
     private async Task<StartInventoryResult> SendSessionSettings(AbstractSession session, SessionSettings sessionSettings)
     {

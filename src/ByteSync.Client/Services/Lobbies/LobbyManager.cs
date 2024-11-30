@@ -143,8 +143,7 @@ public class LobbyManager : ILobbyManager
 
             var runLocalSessionProfileInfo =
                 new RunLocalSessionProfileInfo(localSessionProfile, sessionProfileDetails, lobbySessionMode);
-
-            // var sessionManager = Locator.Current.GetService<ICloudSessionManager>()!;
+            
             await _sessionService.StartLocalSession(runLocalSessionProfileInfo);
         }
     }
@@ -183,7 +182,6 @@ public class LobbyManager : ILobbyManager
             var runLocalSessionProfileInfo =
                 new RunLocalSessionProfileInfo(localSessionProfile, sessionProfileDetails, LobbySessionModes.LoadOnly);
             
-            // var sessionManager = Locator.Current.GetService<ICloudSessionManager>()!;
             await _sessionService.StartLocalSession(runLocalSessionProfileInfo);
         }
     }

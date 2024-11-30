@@ -50,29 +50,4 @@ public class HomeMainViewModel : ViewModelBase, IRoutableViewModel
     
     [Reactive]
     internal ProfilesViewModel Profiles { get; set; }
-
-    // private void CloudSynchronization()
-    // {
-    //     _sessionService.CreateOrJoinCloudSession();
-    //     
-    //     // Log.Information("Entering Cloud Synchronization mode");
-    //     // _navigationEventsHub.RaiseNavigateToCloudSynchronizationRequested();
-    // }
-    
-    // private async Task LocalSynchronization()
-    // {
-    //     await _sessionService.StartLocalSession(null);
-    //     
-    //     // // Log.Information("Entering Local Synchronization mode");
-    //     // // _navigationEventsHub.RaiseNavigateToLocalSynchronizationRequested();
-    //     //
-    //     // var manager = Locator.Current.GetService<ICloudSessionManager>()!;
-    //     // await manager.StartLocalSession(null);
-    //
-    // }
-
-    // private void OpenSupport()
-    // {
-    //     _webAccessor.OpenSupportUrl();
-    // }
 }
