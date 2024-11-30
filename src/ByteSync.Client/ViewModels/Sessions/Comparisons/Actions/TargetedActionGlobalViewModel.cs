@@ -27,31 +27,19 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
     private readonly INavigationEventsHub _navigationEventsHub;
     private readonly IComparisonItemActionsManager _comparisonItemActionsManager;
     private readonly IAtomicActionConsistencyChecker _atomicActionConsistencyChecker;
-    private readonly IAtomicActionRepository _atomicActionRepository;
     private readonly IActionEditViewModelFactory _actionEditViewModelFactory;
 
     public const string SYNCHRONIZATION_ACTION_PARAMETER = "SynchronizationAction";
 
     public TargetedActionGlobalViewModel() 
     {
-#if DEBUG
-        // ShowWarning = true;
-#endif
+
     }
-    
-    // public TargetedActionGlobalViewModel(ComparisonResultViewModel requester, 
-    //     List<ComparisonItemViewModel> comparisonItemViewModels) 
-    //     : this (requester, comparisonItemViewModels, null, null, null, null, null)
-    // {
-    // #if DEBUG
-    //     // ShowWarning = true;
-    // #endif
-    // }
 
     public TargetedActionGlobalViewModel(List<ComparisonItem> comparisonItems, 
         INavigationEventsHub navigationEventsHub, ILocalizationService localizationService,
         IComparisonItemActionsManager comparisonItemActionsManager, IAtomicActionConsistencyChecker atomicActionConsistencyChecker,
-        IAtomicActionRepository atomicActionRepository, IActionEditViewModelFactory actionEditViewModelFactory)
+        IActionEditViewModelFactory actionEditViewModelFactory)
     {
         ComparisonItems = comparisonItems;
 
@@ -61,7 +49,6 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         _localizationService = localizationService;
         _comparisonItemActionsManager = comparisonItemActionsManager;
         _atomicActionConsistencyChecker = atomicActionConsistencyChecker;
-        _atomicActionRepository = atomicActionRepository;
         _actionEditViewModelFactory = actionEditViewModelFactory;
 
         Actions = new ObservableCollection<AtomicActionEditViewModel>();
@@ -94,8 +81,6 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         ResetWarning();
 
         Reset();
-
-        // _actionEditionEventsHub.GetEvent<SynchronizationActionEditionChanged>().Subscribe(OnSynchronizationActionEditionChanged);
         
         this.WhenActivated(disposables =>
         {
@@ -103,18 +88,6 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => OnLocaleChanged())
                 .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<GenericEventArgs<AtomicActionEditViewModel>>(_actionEditionEventsHub, 
-            //         nameof(_actionEditionEventsHub.AtomicActionInputChanged))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnAtomicInputChanged())
-            //     .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<GenericEventArgs<AtomicConditionEditViewModel>>(_actionEditionEventsHub, 
-            //         nameof(_actionEditionEventsHub.AtomicConditionInputChanged))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnAtomicInputChanged())
-            //     .DisposeWith(disposables);
         });
     }
 
@@ -128,16 +101,11 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
 
     public ReactiveCommand<Unit, Unit> SaveValidItemsCommand { get; set; }
 
-    // private ComparisonResult ComparisonResult { get; set; }
-
     internal AtomicAction? BaseSynchronizationAction { get; set; }
-        
-    // [Reactive] // faut-il Reactive ici ? => Ben non, pas de setter
     internal ObservableCollection<AtomicActionEditViewModel> Actions { get; }
     
     private FileSystemTypes FileSystemType { get; }
-
-    // Utilisation de Fody
+    
     public extern bool ShowWarning { [ObservableAsProperty]get; }
 
     [Reactive]
@@ -188,8 +156,6 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         {
             var result = _atomicActionConsistencyChecker.CheckCanAdd(atomicAction, ComparisonItems);
             
-            
-            // var atomicActionConsistencyChecker = new AtomicActionConsistencyChecker(atomicAction, ComparisonItemViewModels);
             if (result.IsOK)
             {
                 ResetWarning();
@@ -197,7 +163,6 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
                 _comparisonItemActionsManager.AddTargetedAction(atomicAction, ComparisonItems);
 
                 _navigationEventsHub.RaiseCloseFlyoutRequested();
-                // _synchronizationActionsService.UpdateSharedSynchronizationActions();
             }
             else
             {
@@ -216,14 +181,12 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         else
         {
             var result = _atomicActionConsistencyChecker.CheckCanAdd(atomicAction, ComparisonItems);
-            // var atomicActionConsistencyChecker = new AtomicActionConsistencyChecker(atomicAction, ComparisonItemViewModels);
             
             ResetWarning();
 
             _comparisonItemActionsManager.AddTargetedAction(atomicAction, result.ValidComparisons);
 
             _navigationEventsHub.RaiseCloseFlyoutRequested();
-            // _synchronizationActionsService.UpdateSharedSynchronizationActions();
         }
     }
 
@@ -276,10 +239,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
 
         var atomicActionEditViewModel = _actionEditViewModelFactory.BuildAtomicActionEditViewModel(FileSystemType, false,
             ComparisonItems, BaseSynchronizationAction);
-            
-            // new AtomicActionEditViewModel(FileSystemType, false, 
-            // ComparisonItemViewModels, _actionEditionEventsHub);
-            
+
         atomicActionEditViewModel.PropertyChanged += AtomicActionEditViewModelOnPropertyChanged;
             
         atomicActionEditViewModel.SetSynchronizationAction(BaseSynchronizationAction!);

@@ -15,10 +15,8 @@ public class AutoCompleteZeroMinimumPrefixLengthDropdownBehavior : Behavior<Auto
         {
             if (AssociatedObject is not null)
             {
-                AssociatedObject.KeyUp += OnKeyUp;
-                // AssociatedObject.PointerPressed += OnPointerPressed;
+                AssociatedObject.KeyUp += OnKeyUp; ;
                 AssociatedObject.PointerReleased += OnPointerReleased;
-                // AssociatedObject.GotFocus += OnGotFocus;
             }
 
             base.OnAttached();
@@ -29,9 +27,7 @@ public class AutoCompleteZeroMinimumPrefixLengthDropdownBehavior : Behavior<Auto
             if (AssociatedObject is not null)
             {
                 AssociatedObject.KeyUp -= OnKeyUp;
-                // AssociatedObject.PointerPressed -= OnPointerPressed;
                 AssociatedObject.PointerReleased -= OnPointerReleased;
-                // AssociatedObject.GotFocus -= OnGotFocus;
             }
 
             base.OnDetaching();
@@ -57,37 +53,17 @@ public class AutoCompleteZeroMinimumPrefixLengthDropdownBehavior : Behavior<Auto
                 ShowDropdown();
             }
         }
-        
-        // private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
-        // {
-        //     if (e.ClickCount == 2 && e.Pointer.IsPrimary
-        //                           && string.IsNullOrEmpty(AssociatedObject?.Text)
-        //                           && (!AssociatedObject?.IsDropDownOpen ?? false))
-        //     {
-        //         ShowDropdown();
-        //     }
-        // }
-        
-        // private void OnGotFocus(object? sender, GotFocusEventArgs e)
-        // {
-        //     if (string.IsNullOrEmpty(AssociatedObject?.Text))
-        //     {
-        //         ShowDropdown();
-        //     }
-        // }
 
         private void ShowDropdown()
         {
             if (AssociatedObject is not null && !AssociatedObject.IsDropDownOpen)
             {
-                // todo : ajouter test unitaire pour contrôler existance des méthodes
                 typeof(AutoCompleteBox).GetMethod("PopulateDropDown", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
                     .Invoke(AssociatedObject, new object[] { AssociatedObject, EventArgs.Empty });
                 
                 typeof(AutoCompleteBox).GetMethod("OpeningDropDown", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
                     .Invoke(AssociatedObject, new object[] { false });
-
-                // todo : ajouter test unitaire pour contrôler existance du field
+                
                 //opening the dropdown does not set this automatically.
                 //We *must* set the field and not the property as we need to avoid the changed event being raised (which prevents the dropdown opening).
                 var iddo = typeof(AutoCompleteBox).GetField("_isDropDownOpen", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);

@@ -37,7 +37,7 @@ public class SessionResetter : ISessionResetter
                 }
                 else
                 {
-                    // todo: sessionId is not expected, how to deal with that?
+                    // sessionId is not expected, how to deal with that?
                 }
             });
     }

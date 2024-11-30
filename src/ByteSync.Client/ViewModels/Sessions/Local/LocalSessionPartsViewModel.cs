@@ -185,25 +185,10 @@ public class LocalSessionPartsViewModel : ActivableViewModelBase
         IsFileSystemSelectionEnabled = false;
     }
 
-    // private void OnInventoryStatusChanged(InventoryStatusChangedEventArgs eventArgs)
-    // {
-    //     if (eventArgs.IsLocal && eventArgs.NewStatus.In(SessionMemberGeneralStatus.InventoryCancelled, SessionMemberGeneralStatus.InventoryError))
-    //     {
-    //         IsFileSystemSelectionEnabled = true;
-    //     }
-    // }
-
     private void OnLocaleChanged()
     {
-        // todo 090523    
-            
-        //foreach (PathItemViewModel pathItemViewModel in Parts)
-        //{
-        //    pathItemViewModel.OnLocaleChanged(_localizationService);
-        //}
-    }
 
-    // public ObservableCollection<PathItemViewModel> Parts { get; }
+    }
     
     public ReactiveCommand<Unit, Unit> AddDirectoryCommand { get; set; }
     
@@ -255,34 +240,8 @@ public class LocalSessionPartsViewModel : ActivableViewModelBase
         }
     }
 
-    /*
-    private async Task HandleNewPathItem(string path, FileSystemTypes fileSystemType)
-    {
-        var newPathItem = new PathItem();
-        newPathItem.Path = path;
-        newPathItem.Type = fileSystemType;
-
-        newPathItem.Code = ((char)('A' + Parts.Count)).ToString();
-
-        if (await _pathItemChecker.CheckPathItem(newPathItem))
-        {
-            PathItemViewModel partViewModel = new PathItemViewModel(newPathItem, _localizationService);
-            Parts.Add(partViewModel);
-        }
-    }*/
-
     private async Task RemovePathItem(PathItemProxy pathItemProxy)
     {
         await _pathItemsService.RemovePathItem(pathItemProxy.PathItem);
-        
-        /*
-        Parts.Remove(pathItemViewModel);
-
-        var pathItems = _pathItemsService.CurrentMemberPathItems.Items.ToList();
-        foreach (var pathItem in pathItems)
-        {
-            pathItem.Code = ((char)('A' + pathItems.IndexOf(pathItem))).ToString();
-        }
-        */
     }
 }

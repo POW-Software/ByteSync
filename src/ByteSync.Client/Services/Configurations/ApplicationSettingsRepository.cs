@@ -28,9 +28,6 @@ class ApplicationSettingsRepository : IApplicationSettingsRepository
         _configurationReader = configurationReader;
         _configurationWriter = configurationWriter;
 
-        // todo 220523
-        // _navigationEventsHub.LogInSucceeded += OnLogInSucceeded;
-
         SyncRoot = new object();
     }
 
@@ -98,29 +95,7 @@ class ApplicationSettingsRepository : IApplicationSettingsRepository
                     
                 // on controle le format du fichier, pour mise à jour éventuelle
                 var needUpdate = CheckFormatVersion(applicationSettings);
-
-                // if (applicationSettings.ZoomLevel is < 75 or > 150 || applicationSettings.ZoomLevel % 5 != 0)
-                // {
-                //     applicationSettings.ZoomLevel = 100;
-                // }
-
-                // _uxEventsHub.RaiseZoomLevelChanged(applicationSettings.ZoomLevel);
-
-                // Theme? theme = null;
-                // if (applicationSettings.Theme.IsNotEmpty())
-                // {
-                //     theme = _themeManager.FindTheme(applicationSettings.Theme!);
-                // }
-                //
-                // if (theme == null)
-                // {
-                //     _themeManager.UseDefaultTheme();
-                // }
-                // else
-                // {
-                //     _themeManager.ChangeTheme(theme);
-                // }
-
+                
                 Log.Information("Application Settings loaded from {configurationPath}", ApplicationSettingsPath);
 
                 ApplicationSettings = applicationSettings;
@@ -162,10 +137,6 @@ class ApplicationSettingsRepository : IApplicationSettingsRepository
                 }
             }
         }
-        // finally
-        // {
-        //     _localizationManager.Initialize(GetCurrentApplicationSettings());
-        // }
     }
 
     private bool CheckFormatVersion(ApplicationSettings applicationSettings)
@@ -258,8 +229,6 @@ class ApplicationSettingsRepository : IApplicationSettingsRepository
 
         ApplicationSettings = applicationSettings;
 
-        // _themeManager.UseDefaultTheme();
-
         SaveApplicationSettings();
     }
 
@@ -330,9 +299,6 @@ class ApplicationSettingsRepository : IApplicationSettingsRepository
             var applicationSettings = (ApplicationSettings)ApplicationSettings!.Clone();
             
             applicationSettings.SetEncryptionPassword(EncryptionPassword);
-                
-            // applicationSettings.CultureCode = _localizationManager.CurrentCultureDefinition?.Code ?? "";
-            // applicationSettings.Theme = _themeManager.SelectedTheme?.Key ?? "";
 
             try
             {
@@ -346,53 +312,4 @@ class ApplicationSettingsRepository : IApplicationSettingsRepository
             }
         }
     }
-
-    // public void ApplicationZoomIn()
-    // {
-    //     TryUpdateApplicationZoomIn(5);
-    // }
-    //     
-    // public void ApplicationZoomOut()
-    // {
-    //     TryUpdateApplicationZoomIn(-5);
-    // }
-    //
-    // private void TryUpdateApplicationZoomIn(int zoomIncrement)
-    // {
-    //     int newZoomValueCandidate;
-    //     bool hasValueChanged = false;
-    //     lock (SyncRoot)
-    //     {
-    //         newZoomValueCandidate = ApplicationSettings.ZoomLevel + zoomIncrement;
-    //             
-    //         if (newZoomValueCandidate is >= ZoomConstants.MIN_ZOOM_LEVEL and <= ZoomConstants.MAX_ZOOM_LEVEL)
-    //         {
-    //             ApplicationSettings.ZoomLevel = newZoomValueCandidate;
-    //             hasValueChanged = true;
-    //         }
-    //     }
-    //
-    //     if (hasValueChanged)
-    //     {
-    //         SaveApplicationSettings();
-    //             
-    //         _uxEventsHub.RaiseZoomLevelChanged(newZoomValueCandidate);
-    //     }
-    // }
-
-    // todo 220523
-    // private void OnLogInSucceeded(object? sender, LogInSucceededEventArgs logInSucceededEventArgs)
-    // {
-    //     ByteSyncEndpoint byteSyncEndpoint = logInSucceededEventArgs.ByteSyncEndpoint;
-    //
-    //     lock (SyncRoot)
-    //     {
-    //         ApplicationSettings.DecodedEmail = byteSyncEndpoint.Email;
-    //         ApplicationSettings.DecodedSerial = byteSyncEndpoint.Serial;
-    //     }
-    //         
-    //     SaveApplicationSettings();
-    //         
-    //     ProductSerialDescription = logInSucceededEventArgs.ProductSerialDescription;
-    // }
 }

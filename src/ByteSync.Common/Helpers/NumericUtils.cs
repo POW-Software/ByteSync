@@ -6,7 +6,7 @@ public static class NumericUtils
 {
     public static double ConvertHexToDouble(string hexa)
     {
-        // 05/11/2022 : pourrait être amélioré avec https://stackoverflow.com/questions/51445431/base64-encoding-of-a-sha256-string ???
+        // might be improved with https://stackoverflow.com/questions/51445431/base64-encoding-of-a-sha256-string ???
         
         double result = 0;
         int pow = 0;

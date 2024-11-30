@@ -282,15 +282,9 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
                 await Task.Delay(TimeSpan.FromSeconds(3));
                 ShowError = false;
             }
-
-            // 08/12/2022 : On ferme systématiquement (notamment pour permettre remplacement par nouveau flyout de validation)
+            
             Container.CanCloseCurrentFlyout = true;
             _navigationEventsHub.RaiseCloseFlyoutRequested();
-            // if (!isSuccess || TrustDataParameters.CurrentClientIndex == TrustDataParameters.ClientsCount)
-            // {
-            //     Container.CanCloseCurrentFlyout = true;
-            //     _navigationEventsHub.RaiseCloseFlyoutRequested();
-            // }
         }
         catch (Exception ex)
         {
@@ -305,7 +299,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
             Log.Warning("Current user rejected Public Key {@publicKey}", TrustedPublicKey);
         
             var task = _publicKeysTruster.OnPublicKeyValidationFinished(PublicKeyCheckData!, TrustDataParameters, false);
-            // On annule aussi, sinon, on continue à attendre la réponse de l'autre
+            // We also cancel, otherwise, we continue to wait for the other's response
             var task2 = _publicKeysTruster.OnPublicKeyValidationCanceled(PublicKeyCheckData!, TrustDataParameters);
         
             ShowError = true;

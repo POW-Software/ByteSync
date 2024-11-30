@@ -47,8 +47,6 @@ public class SynchronizationStarter : ISynchronizationStarter
     
     public async Task StartSynchronization(bool isLaunchedByUser)
     {
-        // await _synchronizationLooper.InitializeData();
-
         var session = _sessionService.CurrentSession;
         
         if (session != null)
@@ -83,13 +81,7 @@ public class SynchronizationStarter : ISynchronizationStarter
     
     private async Task StartCloudSessionSynchronization(CloudSession cloudSession)
     {
-        // await _synchronizationStartFactory.Clear();
-        var synchronizationData = await _synchronizationStartFactory.PrepareSharedData();  
-        // BuildSynchronizationStartData(out var sharedActionsGroups, out var synchronizationData);
-
-        // Log.Information("Starting the Data Synchronization");
-        
-        
+        var synchronizationData = await _synchronizationStartFactory.PrepareSharedData();
         
         await UploadSynchronizationStartData(cloudSession, synchronizationData);
 
@@ -104,15 +96,7 @@ public class SynchronizationStarter : ISynchronizationStarter
 
         try
         {
-            // await _synchronizationService.SetSynchronizationStartData(synchronizationData);
-            // await _sessionDataHolder.SetSynchronizationStarted(synchronizationStart);
-
             await _synchronizationService.OnSynchronizationStarted(synchronization);
-
-            // var synchronizationProgress = 
-            //     MiscBuilder.BuildSynchronizationProgress(cloudSession, actionsGroupDefinitions, synchronization);
-            //
-            // await _synchronizationLooper.CloudSessionSynchronizationLoop(synchronizationData.SharedActionsGroups, synchronizationProgress);
         }
         catch (Exception ex)
         {
@@ -148,61 +132,8 @@ public class SynchronizationStarter : ISynchronizationStarter
         return localSharedFile;
     }
     
-    private async Task StartLocalSessionSynchronization()
+    private Task StartLocalSessionSynchronization()
     {
-        /* todo 050523
-        try
-        {
-            IsLocalSynchronizationAbortRequested = false;
-
-            BuildSynchronizationStartData(out var sharedActionsGroups, out var synchronizationData);
-            
-            // On traite les fichiers en premier, puis les répertoires
-            // False en premier == FileSystemTypes.File
-            // True en second == FileSystemTypes.Directory
-            sharedActionsGroups = sharedActionsGroups.OrderBy(g => g.IsDirectory).ToList();
-            
-            // Log.Information("Starting the Synchronization");
-
-            var synchronizationActionDefinitions = new List<ActionsGroupDefinition>();
-            foreach (var sharedActionsGroup in sharedActionsGroups)
-            {
-                synchronizationActionDefinitions.Add(sharedActionsGroup.GetDefinition());
-            }
-
-            var synchronizationStart = MiscBuilder.BuildSynchronizationStart(LocalSession!, CurrentMachineEndpoint);
-            var synchronizationProgress =
-                MiscBuilder.BuildSynchronizationProgress(LocalSession!, synchronizationActionDefinitions, synchronizationStart);
-
-            await SetSynchronizationStartData(synchronizationData);
-            await _sessionDataHolder.SetSynchronizationStarted(synchronizationStart);
-
-            await LocalSessionSynchronizationLoop(sharedActionsGroups, synchronizationProgress);
-            
-            SynchronizationProgressInfo synchronizationProgressInfo = MiscBuilder.BuildSynchronizationProgressData(synchronizationProgress, null);
-            _sessionDataHolder.OnSynchronizationProgressChanged(synchronizationProgressInfo);
-
-            SynchronizationEnd synchronizationEnd;
-            if (IsLocalSynchronizationAbortRequested)
-            {
-                synchronizationEnd = MiscBuilder.BuildSynchronizationEnd(LocalSession!, SynchronizationEndStatuses.Abortion);
-            }
-            else
-            {
-                synchronizationEnd = MiscBuilder.BuildSynchronizationEnd(LocalSession!, SynchronizationEndStatuses.Regular);
-            }
-
-            _sessionDataHolder.SetSynchronizationEnded(synchronizationEnd);
-        }
-        catch (Exception)
-        {
-            var synchronizationEnd = MiscBuilder.BuildSynchronizationEnd(LocalSession!, SynchronizationEndStatuses.Error);
-            _sessionDataHolder.SetSynchronizationEnded(synchronizationEnd);
-            
-            throw;
-        }
-        */
+        return Task.CompletedTask;
     }
-    
-
 }

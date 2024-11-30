@@ -73,12 +73,6 @@ public class LoginViewModel : ViewModelBase, IRoutableViewModel
         AgreesBetaWarning = true;
     #endif
 
-        // todo 220523
-        // if (_commandLineModeHandler.IsAutoLogin())
-        // {
-        //     SignIn();
-        // }
-    
         WaitForNextVersion();
     }
 
@@ -180,7 +174,7 @@ public class LoginViewModel : ViewModelBase, IRoutableViewModel
                 stringWarnings.Add(
                     _localizationService[nameof(Resources.Login_SigninError_VersionNotAllowed)]);
                 break;
-            case InitialConnectionStatus.UnknownOsPlatform: // todo: add proper warning
+            case InitialConnectionStatus.UnknownOsPlatform: // need proper warning?
                 stringWarnings.Add(
                     _localizationService[nameof(Resources.Login_SigninError_UnknownError)]);
                 break;

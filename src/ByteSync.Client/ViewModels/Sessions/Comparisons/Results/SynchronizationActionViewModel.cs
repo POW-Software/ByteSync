@@ -23,8 +23,6 @@ public class SynchronizationActionViewModel : ViewModelBase, IDisposable
     {
 #if DEBUG
         Letter = "M";
-
-        // IsEditableOrRemovable = true;
 #endif
     }
 
@@ -54,8 +52,6 @@ public class SynchronizationActionViewModel : ViewModelBase, IDisposable
         _localizationService.CurrentCultureObservable.ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(_ => SetTexts())
             .DisposeWith(_compositeDisposable);
-
-        // IsEditableOrRemovable = !atomicAction.IsFromSynchronizationRule && ! _sessionDataHolder.HasSynchronizationStarted;
         
         SetTexts();
     }
@@ -70,9 +66,6 @@ public class SynchronizationActionViewModel : ViewModelBase, IDisposable
 
     [Reactive]
     public string Letter { get; set; }
-
-    // [Reactive]
-    // public bool IsEditableOrRemovable { get; set; }
     
     public extern bool IsEditableOrRemovable { [ObservableAsProperty] get; }
 
@@ -99,14 +92,6 @@ public class SynchronizationActionViewModel : ViewModelBase, IDisposable
     {
 
     }
-
-    // /// <summary>
-    // /// Doit être appelé depuis le UIThread
-    // /// </summary>
-    // internal void OnSynchronizationStarted()
-    // {
-    //     IsEditableOrRemovable = false;
-    // }
 
     public void OnLocaleChanged()
     {

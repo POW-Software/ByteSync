@@ -95,16 +95,6 @@ class CloudSessionConnector : ICloudSessionConnector
         
         _connectionManager.HubPushHandler2.OnReconnected
             .Subscribe(OnReconnected);
-        
-        // _eventAggregator.GetEvent<OnServerYouGaveAWrongPassword>().Subscribe(OnYouGaveAWrongPassword);
-        // _eventAggregator.GetEvent<OnServerAskCloudSessionPasswordExchangeKey>().Subscribe(OnCloudSessionPasswordExchangeKeyAsked);
-        // _eventAggregator.GetEvent<OnServerGiveCloudSessionPasswordExchangeKey>().Subscribe(OnCloudSessionPasswordExchangeKeyGiven);
-        // _eventAggregator.GetEvent<OnServerCheckCloudSessionPasswordExchangeKey>().Subscribe(OnCheckCloudSessionPasswordExchangeKey);
-        
-        // _eventAggregator.GetEvent<OnServerReconnected>().Subscribe(OnReconnected);
-        
-        // todo 220523
-        // _navigationEventsHub.LogOutRequested += async (_, _) => await OnLogOutRequested();
     }
 
     public async Task<CloudSessionResult?> CreateSession(RunCloudSessionProfileInfo? lobbySessionDetails)
@@ -550,7 +540,6 @@ class CloudSessionConnector : ICloudSessionConnector
 
     private async Task OnCloudSessionPasswordExchangeKeyAskedAsync(AskCloudSessionPasswordExchangeKeyPush pushData)
     {
-        // todo 05/05/23 : checker numéro de session
         var isTrusted = _publicKeysManager.IsTrusted(pushData.PublicKeyInfo);
         if (!isTrusted)
         {
@@ -633,68 +622,14 @@ class CloudSessionConnector : ICloudSessionConnector
             Log.Error(ex, "OnCheckCloudSessionPasswordExchangeKey");
         }
     }
-    
-    // todo 220523
-    // private async Task OnLogOutRequested()
-    // {
-    //     if (_sessionService.CurrentSession != null)
-    //     {
-    //         try
-    //         {
-    //             await QuitSession();
-    //         }
-    //         catch (Exception ex)
-    //         {
-    //             Log.Error(ex, "OnLogOutRequested.QuitSession");
-    //         }
-    //     }   
-    //     
-    //     _sessionService.ClearCloudSession();
-    //     await ClearConnectionData();
-    // }
         
     private async void OnReconnected(string sessionId)
     {
-        // todo 050523 : contrôler numéro de session
         
-        // var cloudSessionDetails =
-        //     await _connectionManager.HubWrapper.GetCloudSessionDetails(sessionId);
-        
-        // todo 090523: What operations should be performed?
-        // _sessionService.SetCloudSessionDetails(cloudSessionDetails);
-
-        // _cloudSessionEventsHub.RaiseReconnected();
-        
-        // try
-        // {
-        //     if (_sessionDataHolder.CheckCloudSession(sessionId))
-        //     {
-        //         // On vient d'être reconnecté à la session.
-        //         // On a pu manquer des messages
-        //         // On de se "resynchroniser avec l'état de la session"
-        //
-        //         var cloudSessionDetails =
-        //             await _connectionManager.HubWrapper.GetCloudSessionDetails(sessionId);
-        //         _sessionDataHolder.SetCloudSessionDetails(cloudSessionDetails);
-        //
-        //         _cloudSessionEventsHub.RaiseReconnected();
-        //     }
-        // }
-        // catch (Exception ex)
-        // {
-        //     Log.Error(ex, "OnReconnected");
-        // }
     }
 
     private async void HandleOnCheckCloudSessionPasswordExchangeKey(AskJoinCloudSessionParameters parameters)
     {
-        // todo 050523 : contrôler numéro de session
-        
-        // if (!_sessionDataHolder.CheckCloudSession(parameters.SessionId))
-        // {
-        //     Log.Here().Error(UNKNOWN_RECEIVED_SESSION_ID, parameters.SessionId);
-        //     return;
-        // }
         if (!_connectionManager.ClientInstanceId.Equals(parameters.ValidatorInstanceId))
         {
             Log.Here().Warning("unexpected password check request received with ValidatorId {validatorId}", parameters.ValidatorInstanceId);

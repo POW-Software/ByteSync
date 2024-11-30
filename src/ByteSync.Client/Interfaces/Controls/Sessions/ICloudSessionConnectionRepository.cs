@@ -7,14 +7,6 @@ namespace ByteSync.Interfaces.Controls.Sessions
 {
     public interface ICloudSessionConnectionRepository : IRepository<CloudSessionConnectionData>
     {
-        // public BehaviorSubject<ConnectionStatuses> ConnectionStatus { get; }
-
-
-        
-        // bool IsJoiningSession();
-        
-        // bool IsCreatingOrJoiningSession();
-        
         void SetAesEncryptionKey(byte[] aesEncryptionKey);
         
         byte[]? GetAesEncryptionKey();

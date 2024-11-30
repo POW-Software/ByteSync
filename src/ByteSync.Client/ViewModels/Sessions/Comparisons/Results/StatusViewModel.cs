@@ -147,19 +147,6 @@ public class StatusViewModel : ViewModelBase, IDisposable
             return _mahAppsGray10Brush;
         }
     }
-        
-    // public Brush? MainBackColorBrush
-    // {
-    //     get
-    //     {
-    //         if (_mainBackColorBrush == null)
-    //         {
-    //             _themeManager.GetResource("StatusMainBackGroundBrush", out _mainBackColorBrush);
-    //         }
-    //
-    //         return _mainBackColorBrush;
-    //     }
-    // }
     
     private Brush? MainBackgroundBrush
     {

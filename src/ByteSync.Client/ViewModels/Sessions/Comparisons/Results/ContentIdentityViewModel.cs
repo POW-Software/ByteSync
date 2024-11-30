@@ -27,11 +27,7 @@ public class ContentIdentityViewModel : ViewModelBase
         ContentIdentity = new ContentIdentity(contentIdentityCore);
         
         DateAndInventoryParts = new ObservableCollection<DateAndInventoryPartsViewModel>();
-            
-        //SignatureHash = "SignatureHash";
-        //LastWriteTimeUtc = "DateTime.UtcNow";
-        //Size = LastWriteTimeUtc.Millisecond;
-        //Source = "C:\\Test";
+        
         FillDateAndInventoryParts();
         FillStringData();
         SetHashOrWarnIcon();
@@ -52,8 +48,6 @@ public class ContentIdentityViewModel : ViewModelBase
         _sessionService = sessionDataHolder;
         _dateAndInventoryPartsViewModelFactory = dateAndInventoryPartsViewModelFactory;
         
-        // _localizationService = localizationService ?? Locator.Current.GetService<ILocalizationService>()!;
-        
         DateAndInventoryParts = new ObservableCollection<DateAndInventoryPartsViewModel>();
         
         FillDateAndInventoryParts();
@@ -65,7 +59,7 @@ public class ContentIdentityViewModel : ViewModelBase
         HasAnalysisError = ContentIdentity.HasAnalysisError;
         if (HasAnalysisError)
         {
-            ShowToolTipDelay = 400; // Avalonia.Controls.ToolTip.cs => ShowDelayProperty
+            ShowToolTipDelay = 400;
         }
         else if (LinkingKeyNameTooltip.IsNotEmpty())
         {
@@ -75,8 +69,6 @@ public class ContentIdentityViewModel : ViewModelBase
         {
             ShowToolTipDelay = int.MaxValue;
         }
-
-        // _localizationService.PropertyChanged += OnLocaleChanged;
     }
 
     public ComparisonItemViewModel ComparisonItemViewModel { get; }
@@ -141,15 +133,6 @@ public class ContentIdentityViewModel : ViewModelBase
                 SignatureHash = onErrorFileDescription!.AnalysisErrorType.Truncate(32);
                 ErrorType = onErrorFileDescription.AnalysisErrorType;
                 ErrorDescription = onErrorFileDescription.AnalysisErrorDescription;
-
-                // signatureInfo.ErrorType = fileDescription.AnalysisErrorType;
-                //         signatureInfo.ErrorDescription = fileDescription.AnalysisErrorDescription;
-
-                // SignatureInfo signatureInfo = ContentIdentity.GetErrorSignatureInfo(); // ContentIdentity.SignatureInfosByInventoryParts.First().Value.First();
-                //
-                // SignatureHash = signatureInfo.ErrorType.Truncate(32);
-                // ErrorType = signatureInfo.ErrorType;
-                // ErrorDescription = signatureInfo.ErrorDescription;
             }
             else
             {
@@ -222,9 +205,7 @@ public class ContentIdentityViewModel : ViewModelBase
             if (inventoryPartsOK.Count > 0)
             {
                 var dateAndInventoryPartsViewModel = _dateAndInventoryPartsViewModelFactory.CreateDateAndInventoryPartsViewModel(this, pair.Key.ToLocalTime(), inventoryPartsOK);
-                
-                // DateAndInventoryPartsViewModel dateAndInventoryPartsViewModel =
-                //     new DateAndInventoryPartsViewModel(pair.Key.ToLocalTime(), inventoryPartsOK, this, _sessionService);
+
                 DateAndInventoryParts.Add(dateAndInventoryPartsViewModel);
             }
         }

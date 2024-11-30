@@ -104,18 +104,9 @@ public class SessionService : ISessionService
     public bool CheckSession(string? sessionId)
     {
         var isOK = sessionId.IsNotEmpty(true) && sessionId!.Equals(SessionId);
-
-        // todo 090523 we have to log here if isOK is false
         
         return isOK;
     }
-
-    // public async Task CreateOrJoinCloudSession()
-    // {
-    //     _sessionStatus.OnNext(SessionStatus.CreateOrJoinCloudSession);
-    //
-    //     await _navigationEventsHub.RaiseNavigateToCloudSynchronizationRequested();
-    // }
 
     public async Task StartLocalSession(RunLocalSessionProfileInfo? runLocalSessionProfileInfo)
     {

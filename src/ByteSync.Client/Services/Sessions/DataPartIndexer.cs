@@ -82,8 +82,7 @@ public class DataPartIndexer : IDataPartIndexer
             return null;
         }
     }
-
-    // todo 040423 : Remap should be used again
+    
     public void Remap(ICollection<SynchronizationRule> synchronizationRules)
     {
         foreach (var synchronizationRule in synchronizationRules)

@@ -49,59 +49,5 @@ public class SynchronizationDataReceiver : ISynchronizationDataReceiver
         await _synchronizationDataLogger.LogReceivedSynchronizationData(sharedSynchronizationStartData);
 
         await _synchronizationService.OnSynchronizationDataTransmitted(sharedSynchronizationStartData);
-
-
-
-        /* todo 050523
-        await RunAsync(synchronizationStartData.SessionId, cloudSessionLocalDetails =>
-        {
-            if (cloudSessionLocalDetails is { HasSynchronizationStarted: false })
-            {
-                cloudSessionLocalDetails.SharedActionsGroups.Clear();
-                cloudSessionLocalDetails.SharedActionsGroups.AddAll(synchronizationStartData.SharedActionsGroups);
-
-                _uiHelper.ClearAndAddOnUI(cloudSessionLocalDetails.SharedAtomicActions, synchronizationStartData.SharedAtomicActions)
-                    .ContinueWith(_ =>
-                    {
-                        cloudSessionLocalDetails.RegisterActionsGroupsAndAtomicActionsLinks();
-                    })
-                    .ContinueWith(_ =>
-                    {
-                        cloudSessionLocalDetails.SynchronizationDataReady.Set();
-                    });
-
-                Log.Information("The Data Synchronization actions have been set:");
-                if (synchronizationStartData.SharedAtomicActions.Count == 0)
-                {
-                    Log.Information(" - No action to perform");
-                }
-                else
-                {
-                    Log.Information(" - {Count} action(s) to perform", synchronizationStartData.SharedAtomicActions.Count);
-                }
-                foreach (var synchronizationRule in synchronizationStartData.LooseSynchronizationRules)
-                {
-                    var descriptionBuilder = new SynchronizationRuleDescriptionBuilder(synchronizationRule);
-                    descriptionBuilder.BuildDescription(" | ");
-                    var description = $"{descriptionBuilder.Mode} [{descriptionBuilder.Conditions}] {descriptionBuilder.Then} " +
-                                      $"[{descriptionBuilder.Actions}]";
-
-                    Log.Information(" - Synchronization Rule: {Description}", description);
-                }
-                foreach (var sharedAtomicAction in synchronizationStartData.SharedAtomicActions.Where(a => !a.IsFromSynchronizationRule))
-                {
-                    var descriptionBuilder = new SharedAtomicActionDescriptionBuilder();
-                    var description = $"{sharedAtomicAction.PathIdentity.LinkingData} ({sharedAtomicAction.PathIdentity.FileSystemType}) - " +
-                                      $"{descriptionBuilder.GetDescription(sharedAtomicAction)}";
-
-                    Log.Information(" - Targeted Action: {LinkingData} ({FileSystemType}) - {Description}",
-                        sharedAtomicAction.PathIdentity.LinkingData, sharedAtomicAction.PathIdentity.FileSystemType, description);
-                }
-            }
-        });
-
-        await WaitForSynchronizationDataReadyAsync();
-
-        */
     }
 }

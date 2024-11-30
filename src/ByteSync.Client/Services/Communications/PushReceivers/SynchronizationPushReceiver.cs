@@ -37,7 +37,7 @@ public class SynchronizationPushReceiver : IPushReceiver
                 }
                 else
                 {
-                    // todo: sessionId is not expected, how to deal with that?
+                    // sessionId is not expected, how to deal with that?
                 }
             });
         
@@ -52,7 +52,7 @@ public class SynchronizationPushReceiver : IPushReceiver
                 }
                 else
                 {
-                    // todo: sessionId is not expected, how to deal with that?
+                    // sessionId is not expected, how to deal with that?
                 }
             });
     }
