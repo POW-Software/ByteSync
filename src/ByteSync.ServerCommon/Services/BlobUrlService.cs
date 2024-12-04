@@ -96,11 +96,24 @@ public class BlobUrlService : IBlobUrlService
 
     private async Task<BlobContainerClient> BuildBlobContainerClient(StorageSharedKeyCredential storageSharedKeyCredential)
     {
-        var container = new BlobContainerClient(new Uri(_blobStorageSettings.Url), storageSharedKeyCredential);
+        Uri containerUri = BuildContainerUri();
+        
+        var container = new BlobContainerClient(containerUri, storageSharedKeyCredential);
         
         await container.CreateIfNotExistsAsync();
 
         return container;
+    }
+
+    private Uri BuildContainerUri()
+    {
+        string endpoint = _blobStorageSettings.Endpoint.TrimEnd('/');
+        string container = _blobStorageSettings.Container.TrimStart('/').TrimEnd('/') + "/";
+
+        Uri baseUri = new Uri(endpoint);
+        Uri fullUri = new Uri(baseUri, container);
+
+        return fullUri;
     }
 
     private string GetServerFileName(SharedFileDefinition sharedFileDefinition, int partNumber)

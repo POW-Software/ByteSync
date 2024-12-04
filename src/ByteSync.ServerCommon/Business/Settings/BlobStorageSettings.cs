@@ -6,5 +6,7 @@ public class BlobStorageSettings
     
     public string AccountKey { get; set; } = null!;
     
-    public string Url { get; set; } = null!;
+    public string Endpoint { get; set; } = null!;
+    
+    public string Container { get; set; } = null!;
 }
