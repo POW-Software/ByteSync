@@ -57,6 +57,8 @@ public class PolicyFactory : IPolicyFactory
 
     public AsyncRetryPolicy<RestResponse> BuildRestPolicy(string resource)
     {
+        resource = "/" + resource.TrimStart('/');
+        
         var retryPolicy = Policy
             .HandleResult<RestResponse>(x => !x.IsSuccessful)
             .Or<WebSocketException>()
@@ -64,10 +66,10 @@ public class PolicyFactory : IPolicyFactory
             {
                 var exception = iRestResponse.Exception ?? iRestResponse.Result.ErrorException;
                 
-                _logger.LogError("ApiOperation failed (Attempt number {AttemptNumber}). Resource: {resource}, HttpStatusCode:{HttpStatusCode}? " +
+                _logger.LogError("ApiOperation failed (Attempt {AttemptNumber}). Resource: {resource}, HttpStatusCode:{HttpStatus}({HttpStatusCode}), " +
                                  "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
                                  "Waiting {WaitingTime} seconds before retry", 
-                    retryCount, resource, iRestResponse.Result.StatusCode,  
+                    retryCount, resource, iRestResponse.Result.StatusCode, (int) iRestResponse.Result.StatusCode,
                     exception?.GetType().FullName!, exception?.Message!, 
                     timeSpan);
                 

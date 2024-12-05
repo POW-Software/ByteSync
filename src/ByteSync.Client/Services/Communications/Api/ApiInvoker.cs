@@ -64,7 +64,7 @@ public class ApiInvoker : IApiInvoker
         var attempt = 0;
         var restResponse = await policy.ExecuteAsync(async () =>
         {
-            Log.Debug("{Uri}: Attempt {Attempt}", resource, ++attempt);
+            Log.Debug("{Uri}: Attempt {Attempt}", "/" + resource.TrimStart('/'), ++attempt);
             return await restClient.ExecuteAsync(restRequest);
         });
         
