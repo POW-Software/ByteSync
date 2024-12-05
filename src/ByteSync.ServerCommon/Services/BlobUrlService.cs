@@ -33,10 +33,6 @@ public class BlobUrlService : IBlobUrlService
 
     private async Task<string> ComputeUrl(SharedFileDefinition sharedFileDefinition, int partNumber, BlobSasPermissions permission)
     {
-        // string accountName = _blobStorageSection.GetSection("Account").Value;
-        // string accountKey = _blobStorageSection.GetSection("Key").Value;
-        // string url = _blobStorageSection.GetSection("Url").Value;
-
         var storageSharedKeyCredential = BuildStorageSharedKeyCredential();
         var container = await BuildBlobContainerClient(storageSharedKeyCredential);
 
@@ -75,20 +71,6 @@ public class BlobUrlService : IBlobUrlService
 
         return blobUriBuilder.ToUri().ToString();
     }
-
-    // private BlobContainerClient BuildBlobContainerClient()
-    // {
-    //     // string accountName = _blobStorageSection.GetSection("Account").Value;
-    //     // string accountKey = _blobStorageSection.GetSection("Key").Value;
-    //     // string url = _blobStorageSection.GetSection("Url").Value;
-    //     
-    //     var storageSharedKeyCredential = new StorageSharedKeyCredential(_blobStorageSettings.AccountName, _blobStorageSettings.AccountKey);
-    //
-    //     var container = new BlobContainerClient(new Uri(_blobStorageSettings.Url), storageSharedKeyCredential);
-    //     
-    //     return container;
-    // }
-
     private StorageSharedKeyCredential BuildStorageSharedKeyCredential()
     {
         return new StorageSharedKeyCredential(_blobStorageSettings.AccountName, _blobStorageSettings.AccountKey);

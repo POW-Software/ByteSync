@@ -8,9 +8,9 @@ namespace ByteSync.Interfaces;
 
 public interface IPolicyFactory
 {
-    AsyncRetryPolicy BuildHubPolicy();
+    // AsyncRetryPolicy BuildHubPolicy();
     
-    AsyncRetryPolicy<RestResponse> BuildRestPolicy();
+    AsyncRetryPolicy<RestResponse> BuildRestPolicy(string resource);
     
     AsyncRetryPolicy<HttpResponseMessage> BuildHttpPolicy(int? maxAttempts = null);
     
