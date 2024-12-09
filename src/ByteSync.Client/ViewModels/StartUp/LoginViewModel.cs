@@ -62,7 +62,7 @@ public class LoginViewModel : ViewModelBase, IRoutableViewModel
         // IsBetaVersion = false;
     #endif
 
-        Version = VersionHelper.GetVersionString(_environmentService.CurrentVersion);
+        Version = VersionHelper.GetVersionString(_environmentService.ApplicationVersion);
 
         var userSettings = _applicationSettingsRepository.GetCurrentApplicationSettings();
         Email = userSettings.DecodedEmail;
@@ -233,7 +233,7 @@ public class LoginViewModel : ViewModelBase, IRoutableViewModel
     
     private void OpenCurrentVersionReleaseNotes()
     {
-        _webAccessor.OpenReleaseNotes(_environmentService.CurrentVersion);
+        _webAccessor.OpenReleaseNotes(_environmentService.ApplicationVersion);
     }
 
     private void OpenAboutTheOpenBeta()

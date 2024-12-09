@@ -53,19 +53,19 @@ class ConnectionConstantsService : IConnectionConstantsService
         }
         else
         {
-            if (_environmentService.Arguments.Contains(DebugArguments.CF_API_URL_LOCAL_DEBUG))
+            if (_environmentService.Arguments.Contains(RegularArguments.CF_API_URL_LOCAL_DEBUG))
             {
                 return _configuration["LocalDebugUrl"]!;
             }
-            else if (_environmentService.Arguments.Contains(DebugArguments.CF_API_URL_DEVELOPMENT))
+            else if (_environmentService.Arguments.Contains(RegularArguments.CF_API_URL_DEVELOPMENT))
             {
                 return _configuration["DevelopmentUrl"]!;
             }
-            else if (_environmentService.Arguments.Contains(DebugArguments.CF_API_URL_STAGING))
+            else if (_environmentService.Arguments.Contains(RegularArguments.CF_API_URL_STAGING))
             {
                 return _configuration["StagingUrl"]!;
             }
-            else if (_environmentService.Arguments.Contains(DebugArguments.CF_API_URL_PRODUCTION))
+            else if (_environmentService.Arguments.Contains(RegularArguments.CF_API_URL_PRODUCTION))
             {
                 return _configuration["ProductionUrl"]!;
             }

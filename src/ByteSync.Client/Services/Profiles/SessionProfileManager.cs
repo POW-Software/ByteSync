@@ -234,7 +234,7 @@ public class SessionProfileManager : ISessionProfileManager
         cloudSessionProfile.ProfileClientId = cloudSessionProfileData.RequesterProfileClientId;
         cloudSessionProfile.MembersProfileClientIds = cloudSessionProfileData.Slots.Select(t => t.ProfileClientId).ToList();
 
-        cloudSessionProfile.CreatedWithVersion = _environmentService.CurrentVersion.ToString();
+        cloudSessionProfile.CreatedWithVersion = _environmentService.ApplicationVersion.ToString();
 
         return cloudSessionProfile;
     }
@@ -247,7 +247,7 @@ public class SessionProfileManager : ISessionProfileManager
         localSessionProfile.ProfileId = localSessionProfileDetails.LocalSessionProfileId;
         localSessionProfile.CreationDatetime = localSessionProfileDetails.CreationDatetime;
         
-        localSessionProfile.CreatedWithVersion = _environmentService.CurrentVersion.ToString();
+        localSessionProfile.CreatedWithVersion = _environmentService.ApplicationVersion.ToString();
 
         return localSessionProfile;
     }

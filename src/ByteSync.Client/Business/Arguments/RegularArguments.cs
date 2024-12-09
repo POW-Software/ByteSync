@@ -1,6 +1,6 @@
 ﻿namespace ByteSync.Business.Arguments;
 
-public class RegularArguments
+public static class RegularArguments
 {
     internal const string WAIT_AFTER_RESTART = "-wait-after-restart";
         
@@ -17,4 +17,12 @@ public class RegularArguments
     internal const string SYNCHRONIZE = "-synchronize";
         
     internal const string NO_GUI = "-no-gui";
+    
+    internal const string CF_API_URL_LOCAL_DEBUG = "-use-local-api";
+    
+    internal const string CF_API_URL_DEVELOPMENT = "-use-development-api";
+    
+    internal const string CF_API_URL_STAGING = "-use-staging-api";
+    
+    internal const string CF_API_URL_PRODUCTION = "-use-production-api";
 }

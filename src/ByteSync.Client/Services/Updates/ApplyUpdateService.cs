@@ -9,6 +9,7 @@ using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Updates;
+using ByteSync.Services.Misc;
 using PowSoftware.Common.Business.Versions;
 using Serilog;
 using Splat;
@@ -72,8 +73,8 @@ public class ApplyUpdateService : IApplyUpdateService
         ComputeApplicationBaseDirectory();
         ComputeDownloadLocation();
         ComputeUnzipLocation();
-            
-        var currentVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
+
+        var currentVersion = VersionHelper.GetVersionString(_environmentService.ApplicationVersion);
 
         Log.Information("UpdateApplier: Current Version: {CurrentVersion}, Update version:{Version}", currentVersion, softwareVersion.Version);
         Log.Information("UpdateApplier: ApplicationLauncherFullName:{ApplicationLauncherFullName}", ApplicationLauncherFullName);

@@ -77,7 +77,7 @@ class UpdateService : IUpdateService
     {
         try
         {
-            var version = _environmentService.CurrentVersion;
+            var version = _environmentService.ApplicationVersion;
 
             var updates = _availableUpdatesLister.GetAvailableUpdates();
                 
