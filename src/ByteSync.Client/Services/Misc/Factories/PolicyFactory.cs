@@ -23,24 +23,6 @@ public class PolicyFactory : IPolicyFactory
     }
     
     private const int MAX_RETRIES = 4;
-    
-    // public AsyncRetryPolicy BuildHubPolicy()
-    // {
-    //     var policy = Policy
-    //         .Handle<WebSocketException>()
-    //         .Or<InvalidOperationException>(e => e.Message.Contains("The 'InvokeCoreAsync' method cannot be called if the connection is not active"))
-    //         .Or<HubException>(e => !e.Message.Contains("InvalidDataException"))
-    //         .WaitAndRetryAsync(MAX_RETRIES, SleepDurationProvider, onRetryAsync: async (exception, timeSpan, retryCount, _) =>
-    //         {
-    //             _logger.LogError("HubOperation failed (Attempt number {AttemptNumber}). ExceptionType:{ExceptionType}, " +
-    //                           "ExceptionMessage:{ExceptionMessage}. Waiting {WaitingTime} seconds before retry", 
-    //                 retryCount, exception.GetType().FullName, exception.Message, timeSpan);
-    //
-    //             await Task.CompletedTask;
-    //         });
-    //
-    //     return policy;
-    // }
 
     private TimeSpan SleepDurationProvider(int retryAttempt)
     {
