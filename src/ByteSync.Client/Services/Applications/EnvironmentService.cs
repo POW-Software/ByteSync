@@ -186,8 +186,7 @@ public class EnvironmentService : IEnvironmentService
     {
         get
         {
-            if (ExecutionMode == ExecutionMode.Debug 
-                && Arguments.Any(a => a.StartsWith(DebugArguments.SET_APPLICATION_VERSION)))
+            if (Arguments.Any(a => a.StartsWith(DebugArguments.SET_APPLICATION_VERSION)))
             {
                 var versionString = Arguments
                     .First(a => a.StartsWith(DebugArguments.SET_APPLICATION_VERSION))
