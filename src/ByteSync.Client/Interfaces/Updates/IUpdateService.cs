@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using ByteSync.Common.Business.Versions;
 using DynamicData;
-using PowSoftware.Common.Business.Versions;
 
 namespace ByteSync.Interfaces.Updates;
 

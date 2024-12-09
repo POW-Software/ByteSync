@@ -1,12 +1,12 @@
 ﻿using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Controls;
 using ByteSync.Common.Helpers;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
 using ICSharpCode.SharpZipLib.Zip;
-using PowSoftware.Common.Business.Versions;
 using Serilog;
 
 namespace ByteSync.Services.Updates;

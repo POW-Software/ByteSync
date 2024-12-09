@@ -2,9 +2,9 @@
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
+using ByteSync.Common.Business.Versions;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
 using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
-using PowSoftware.Common.Business.Versions;
 
 namespace ByteSync.Business.Events
 {

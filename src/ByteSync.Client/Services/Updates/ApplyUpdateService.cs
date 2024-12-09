@@ -5,12 +5,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Business.Arguments;
 using ByteSync.Business.Updates;
+using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Updates;
 using ByteSync.Services.Misc;
-using PowSoftware.Common.Business.Versions;
 using Serilog;
 using Splat;
 

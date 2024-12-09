@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using ByteSync.Common.Business.Auth;
 using ByteSync.Common.Business.Misc;
+using ByteSync.Common.Business.Versions;
 using ByteSync.Functions.IntegrationTests.Helpers.Autofac;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Loaders;
@@ -8,7 +9,6 @@ using ByteSync.ServerCommon.Repositories;
 using ByteSync.ServerCommon.Services;
 using FakeItEasy;
 using FluentAssertions;
-using PowSoftware.Common.Business.Versions;
 
 namespace ByteSync.Functions.IntegrationTests.Services;
 
