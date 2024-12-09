@@ -55,8 +55,8 @@ public class ClientSoftwareVersionService : IClientSoftwareVersionService
             return false;
         }
 
-        var mandatory = new Version(clientSoftwareVersionSettings.MandatoryVersion.Version);
-        var provided = new Version(loginData.Version);
+        var mandatory = NormalizeVersion(clientSoftwareVersionSettings.MandatoryVersion.Version);
+        var provided = NormalizeVersion(loginData.Version);
 
         bool result = mandatory <= provided;
         
@@ -67,5 +67,16 @@ public class ClientSoftwareVersionService : IClientSoftwareVersionService
         }
 
         return result;
+    }
+    
+    private Version NormalizeVersion(string version)
+    {
+        var versionParts = version.Split('.');
+        while (versionParts.Length < 4)
+        {
+            version += ".0";
+            versionParts = version.Split('.');
+        }
+        return new Version(version);
     }
 }

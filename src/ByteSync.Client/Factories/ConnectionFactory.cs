@@ -74,7 +74,7 @@ public class ConnectionFactory : IConnectionFactory
             ClientInstanceId = _environmentService.ClientInstanceId,
             Machinename = _environmentService.MachineName,
             OsPlatform = _environmentService.OSPlatform,
-            Version = VersionHelper.GetVersionString(_environmentService.CurrentVersion),
+            Version = VersionHelper.GetVersionString(_environmentService.ApplicationVersion),
             Token = tokens.RefreshToken
         };
         
@@ -146,7 +146,7 @@ public class ConnectionFactory : IConnectionFactory
             ClientId =  _environmentService.ClientId,
             ClientInstanceId = _environmentService.ClientInstanceId,
             OsPlatform = _environmentService.OSPlatform,
-            Version = VersionHelper.GetVersionString(_environmentService.CurrentVersion),
+            Version = VersionHelper.GetVersionString(_environmentService.ApplicationVersion),
         };
         
         var authenticationResponse = await _authApiClient.Login(loginData);

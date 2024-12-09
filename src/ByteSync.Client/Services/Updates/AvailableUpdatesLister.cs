@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
+using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces.Updates;
-using PowSoftware.Common.Business.Versions;
 
 namespace ByteSync.Services.Updates;
 

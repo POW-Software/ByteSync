@@ -32,12 +32,12 @@ public class EnvironmentService : IEnvironmentService
     
     private void SetAssemblyFullName()
     {
-        AssemblyFullName = Environment.GetCommandLineArgs()[0];
+        AssemblyFullName = Arguments[0];
     }
     
     private void SetIsPortableApplication()
     {
-        var applicationLauncherFullName = Environment.GetCommandLineArgs()[0].ToLower();
+        var applicationLauncherFullName = Arguments[0].ToLower();
 
         var programsDirectoriresCandidates = BuildProgramsDirectoriresCandidates(
             Environment.SpecialFolder.CommonProgramFiles,
@@ -166,9 +166,9 @@ public class EnvironmentService : IEnvironmentService
         {
             string machineName;
                 
-            if (Environment.GetCommandLineArgs().Any(a => a.StartsWith(RegularArguments.SET_MACHINE_NAME)))
+            if (Arguments.Any(a => a.StartsWith(RegularArguments.SET_MACHINE_NAME)))
             {
-                machineName = Environment.GetCommandLineArgs()
+                machineName = Arguments
                     .First(a => a.StartsWith(RegularArguments.SET_MACHINE_NAME))
                     .Substring(RegularArguments.SET_MACHINE_NAME.Length);
                     
@@ -182,10 +182,20 @@ public class EnvironmentService : IEnvironmentService
         }
     }
     
-    public Version CurrentVersion
+    public Version ApplicationVersion
     {
         get
         {
+            if (ExecutionMode == ExecutionMode.Debug 
+                && Arguments.Any(a => a.StartsWith(DebugArguments.SET_APPLICATION_VERSION)))
+            {
+                var versionString = Arguments
+                    .First(a => a.StartsWith(DebugArguments.SET_APPLICATION_VERSION))
+                    .Substring(DebugArguments.SET_APPLICATION_VERSION.Length);
+                
+                return new Version(versionString);
+            }
+            
             return Assembly.GetExecutingAssembly().GetName().Version!;
         }
     }

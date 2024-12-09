@@ -1,6 +1,7 @@
 ﻿using System.Reactive.Subjects;
 using ByteSync.Business;
 using ByteSync.Business.Navigations;
+using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Navigations;
@@ -10,7 +11,6 @@ using DynamicData;
 using Moq;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
-using PowSoftware.Common.Business.Versions;
 
 namespace ByteSync.Tests.ViewModels.Headers;
 

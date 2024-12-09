@@ -21,16 +21,13 @@ public static class DebugArguments
     internal const string ADD_PATHITEM_SAMPLEDATA = "-add-pathItem-SampleData";
 
     internal const string FORCE_SLOW = "-force-slow";
-        
-    internal const string CF_API_URL_LOCAL_DEBUG = "-cf-api-url-local-debug";
-    internal const string CF_API_URL_DEVELOPMENT = "-cf-api-url-development";
-    internal const string CF_API_URL_STAGING = "-cf-api-url-staging";
-    internal const string CF_API_URL_PRODUCTION = "--api-url-production";
 
     internal const string LADM_USE_STANDARD_APPDATA = "-ladm-use-standard-appdata";
     internal const string LADM_USE_APPDATA = "-ladm-use-appdata";
 
     internal const string UM_FORCE_SHOW_UPDATE = "-um-force-show-update";
+    
+    internal const string SET_APPLICATION_VERSION = "-set-application-version";
 
 
     public static bool ForceSlow => Environment.GetCommandLineArgs().Contains(FORCE_SLOW);

@@ -1,4 +1,4 @@
-﻿using PowSoftware.Common.Business.Versions;
+﻿using ByteSync.Common.Business.Versions;
 
 namespace ByteSync.Interfaces.Updates;
 

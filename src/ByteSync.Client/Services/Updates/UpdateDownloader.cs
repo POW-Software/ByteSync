@@ -3,8 +3,8 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Business.Updates;
+using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Helpers;
-using PowSoftware.Common.Business.Versions;
 using Serilog;
 
 namespace ByteSync.Services.Updates;

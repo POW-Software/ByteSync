@@ -1,7 +1,7 @@
-﻿using ByteSync.Services.Updates;
+﻿using ByteSync.Common.Business.Versions;
+using ByteSync.Services.Updates;
 using ByteSync.TestsCommon;
 using NUnit.Framework.Legacy;
-using PowSoftware.Common.Business.Versions;
 
 namespace ByteSync.Client.IntegrationTests.Services.Updates;
 

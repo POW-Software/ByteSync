@@ -2,10 +2,10 @@
 using System.Threading.Tasks;
 using ByteSync.Business.Arguments;
 using ByteSync.Common.Business.Lobbies;
+using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Automating;
 using ByteSync.Interfaces.Updates;
-using PowSoftware.Common.Business.Versions;
 using Serilog;
 using Splat;
 

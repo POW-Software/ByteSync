@@ -1,9 +1,9 @@
 ﻿using ByteSync.Assets.Resources;
+using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Services.Misc;
-using PowSoftware.Common.Business.Versions;
 using Splat;
 
 namespace ByteSync.ViewModels.Headers;

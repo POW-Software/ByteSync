@@ -25,7 +25,7 @@ public interface IEnvironmentService
     
     public bool IsPortableApplication { get; }
     
-    Version CurrentVersion { get; }
+    Version ApplicationVersion { get; }
     
     string ClientId { get; }
     

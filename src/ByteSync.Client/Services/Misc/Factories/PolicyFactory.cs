@@ -10,31 +10,19 @@ using Microsoft.AspNetCore.SignalR;
 using Polly;
 using Polly.Retry;
 using RestSharp;
-using Serilog;
 
 namespace ByteSync.Services.Misc.Factories;
 
 public class PolicyFactory : IPolicyFactory
 {
-    private const int MAX_RETRIES = 4;
-    
-    public AsyncRetryPolicy BuildHubPolicy()
+    private readonly ILogger<PolicyFactory> _logger;
+
+    public PolicyFactory(ILogger<PolicyFactory> logger)
     {
-        var policy = Policy
-            .Handle<WebSocketException>()
-            .Or<InvalidOperationException>(e => e.Message.Contains("The 'InvokeCoreAsync' method cannot be called if the connection is not active"))
-            .Or<HubException>(e => !e.Message.Contains("InvalidDataException"))
-            .WaitAndRetryAsync(MAX_RETRIES, SleepDurationProvider, onRetryAsync: async (exception, timeSpan, retryCount, _) =>
-            {
-                Log.Error("HubOperation failed (Attempt number {AttemptNumber}). ExceptionType:{ExceptionType}, " +
-                          "ExceptionMessage:{ExceptionMessage}. Waiting {WaitingTime} seconds before retry", 
-                    retryCount, exception.GetType().FullName, exception.Message, timeSpan);
-
-                await Task.CompletedTask;
-            });
-
-        return policy;
+        _logger = logger;
     }
+    
+    private const int MAX_RETRIES = 4;
 
     private TimeSpan SleepDurationProvider(int retryAttempt)
     {
@@ -49,18 +37,29 @@ public class PolicyFactory : IPolicyFactory
         return result;
     }
 
-    public AsyncRetryPolicy<RestResponse> BuildRestPolicy()
+    public AsyncRetryPolicy<RestResponse> BuildRestPolicy(string resource)
     {
+        resource = "/" + resource.TrimStart('/');
+        
         var retryPolicy = Policy
             .HandleResult<RestResponse>(x => !x.IsSuccessful)
             .Or<WebSocketException>()
             .WaitAndRetryAsync(MAX_RETRIES, SleepDurationProvider, onRetryAsync: async (iRestResponse, timeSpan, retryCount, _) =>
             {
-                Log.Error("HubOperation failed (Attempt number {AttemptNumber}). HttpStatusCode:{HttpStatusCode}? " +
-                          "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
-                          "Uri:{Uri}. Waiting {WaitingTime} seconds before retry", 
-                    retryCount, iRestResponse.Result.StatusCode, iRestResponse.Result?.ResponseUri?.ToString() ?? "", 
-                    iRestResponse.Exception?.GetType().Name!, iRestResponse.Exception?.Message!, timeSpan);
+                var exception = iRestResponse.Exception ?? iRestResponse.Result.ErrorException;
+                
+                _logger.LogError("ApiOperation failed (Attempt {AttemptNumber}). Resource: {resource}, HttpStatusCode:{HttpStatus}({HttpStatusCode}), " +
+                                 "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
+                                 "Waiting {WaitingTime} seconds before retry", 
+                    retryCount, resource, iRestResponse.Result.StatusCode, (int) iRestResponse.Result.StatusCode,
+                    exception?.GetType().FullName!, exception?.Message!, 
+                    timeSpan);
+                
+                if (exception?.InnerException != null)
+                {
+                    _logger.LogError("ApiOperation InnerExceptionType:{InnerExceptionType}, InnerExceptionMessage:{InnerExceptionMessage}", 
+                        exception.InnerException.GetType().FullName!, exception.InnerException.Message);
+                }
 
                 await Task.CompletedTask;
             });
@@ -82,9 +81,9 @@ public class PolicyFactory : IPolicyFactory
             .Or<HttpRequestException>(e => e.InnerException is SocketException)
             .WaitAndRetryAsync(maxRetries.Value, SleepDurationProvider, onRetryAsync: async (responseMessage, timeSpan, retryCount, _) =>
             {
-                Log.Error("HttpOperation failed (Attempt number {AttemptNumber}). HttpStatusCode:{HttpStatusCode}. " +
-                          "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
-                          "Waiting {WaitingTime} seconds before retry", 
+                _logger.LogError("HttpOperation failed (Attempt number {AttemptNumber}). HttpStatusCode:{HttpStatusCode}. " +
+                                 "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
+                                 "Waiting {WaitingTime} seconds before retry", 
                     retryCount, responseMessage.Result?.StatusCode!, responseMessage.Exception?.GetType().Name!, responseMessage.Exception?.Message!, timeSpan);
 
                 await Task.CompletedTask;
@@ -100,9 +99,9 @@ public class PolicyFactory : IPolicyFactory
             .Or<RequestFailedException>(e => e.Status == 403)
             .WaitAndRetryAsync(MAX_RETRIES, SleepDurationProvider, onRetryAsync: async (response, timeSpan, retryCount, _) =>
             {
-                Log.Error("FileTransferOperation failed (Attempt number {AttemptNumber}). ResponseCode:{ResponseCode}" +
-                          "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
-                          "Waiting {WaitingTime} seconds before retry", 
+                _logger.LogError("FileTransferOperation failed (Attempt number {AttemptNumber}). ResponseCode:{ResponseCode}" +
+                                 "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
+                                 "Waiting {WaitingTime} seconds before retry", 
                     retryCount, response.Result?.Status!, response.Exception?.GetType().Name!, response.Exception?.Message!, timeSpan);
                 await Task.CompletedTask;
             });
@@ -117,9 +116,9 @@ public class PolicyFactory : IPolicyFactory
             .Or<RequestFailedException>(e => e.Status == 403)
             .WaitAndRetryAsync(MAX_RETRIES, SleepDurationProvider, onRetryAsync: async (response, timeSpan, retryCount, _) =>
             {
-                Log.Error("FileTransferOperation failed (Attempt number {AttemptNumber}). ResponseCode:{ResponseCode}" +
-                          "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
-                          "Waiting {WaitingTime} seconds before retry", 
+                _logger.LogError("FileTransferOperation failed (Attempt number {AttemptNumber}). ResponseCode:{ResponseCode}" +
+                                 "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
+                                 "Waiting {WaitingTime} seconds before retry", 
                     retryCount, response.Result?.GetRawResponse().Status!, response.Exception?.GetType().Name!, response.Exception?.Message!, timeSpan);
                 await Task.CompletedTask;
             });

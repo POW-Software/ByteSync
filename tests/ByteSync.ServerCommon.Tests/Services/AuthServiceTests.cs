@@ -1,6 +1,7 @@
 ﻿using ByteSync.Common.Business.Auth;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Business.Serials;
+using ByteSync.Common.Business.Versions;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Settings;
@@ -10,7 +11,6 @@ using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Services;
 using FakeItEasy;
-using PowSoftware.Common.Business.Versions;
 
 namespace ByteSync.ServerCommon.Tests.Services;
 

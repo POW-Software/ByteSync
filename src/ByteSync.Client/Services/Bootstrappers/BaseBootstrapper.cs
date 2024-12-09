@@ -39,7 +39,7 @@ public abstract class BaseBootstrapper : IBootstrapper
         _logger.LogInformation($"*************************************************");
         _logger.LogInformation($"***     ByteSync - Application Startup       ****");
         _logger.LogInformation($"*************************************************");
-        _logger.LogInformation($"Version: {_environmentService.CurrentVersion}");
+        _logger.LogInformation($"Version: {_environmentService.ApplicationVersion}");
         _logger.LogInformation($"MachineName: {_environmentService.MachineName}");
         _logger.LogInformation(
             $"OS: {RuntimeInformation.OSDescription}{(Environment.Is64BitOperatingSystem ? " (64 bits)" : "")}");

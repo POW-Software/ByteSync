@@ -57,14 +57,14 @@ public class ApiInvoker : IApiInvoker
     {
         var restRequest = await BuildRequest(httpVerb, resource, additionalHeaders, requestObject);
 
-        var policy = _policyFactory.BuildRestPolicy();
+        var policy = _policyFactory.BuildRestPolicy(resource);
         var apiUrl = await _connectionConstantsService.GetApiUrl();
         var restClient = new RestClient(apiUrl);
         
         var attempt = 0;
         var restResponse = await policy.ExecuteAsync(async () =>
         {
-            Log.Debug("{Uri}: Attempt {Attempt}", resource, ++attempt);
+            Log.Debug("{Uri}: Attempt {Attempt}", "/" + resource.TrimStart('/'), ++attempt);
             return await restClient.ExecuteAsync(restRequest);
         });
         

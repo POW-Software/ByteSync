@@ -1,4 +1,4 @@
-﻿namespace PowSoftware.Common.Business.Versions;
+﻿namespace ByteSync.Common.Business.Versions;
 
 public class SoftwareVersionFile
 {

@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls.Mixins;
 using ByteSync.Business.Navigations;
+using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
@@ -11,7 +12,6 @@ using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Updates;
 using ByteSync.ViewModels.Misc;
 using DynamicData;
-using PowSoftware.Common.Business.Versions;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

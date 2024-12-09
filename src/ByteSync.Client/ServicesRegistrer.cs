@@ -261,7 +261,6 @@ public static class ServicesRegistrer
         builder.RegisterType<CloudProxy>().SingleInstance().AsImplementedInterfaces();
         builder.RegisterType<NavigationService>().SingleInstance().AsImplementedInterfaces();
         
-        builder.RegisterType<HubInvoker>().AsImplementedInterfaces();
         builder.RegisterType<ApiInvoker>().AsImplementedInterfaces();
         
         builder.RegisterType<HubPushHandler2>().SingleInstance().AsImplementedInterfaces();

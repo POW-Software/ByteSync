@@ -3,10 +3,10 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Business.Arguments;
+using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Updates;
 using DynamicData;
-using PowSoftware.Common.Business.Versions;
 
 namespace ByteSync.Services.Updates;
 
@@ -77,7 +77,7 @@ class UpdateService : IUpdateService
     {
         try
         {
-            var version = _environmentService.CurrentVersion;
+            var version = _environmentService.ApplicationVersion;
 
             var updates = _availableUpdatesLister.GetAvailableUpdates();
                 
