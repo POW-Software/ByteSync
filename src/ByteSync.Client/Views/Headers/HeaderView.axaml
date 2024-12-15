@@ -30,21 +30,7 @@
                     </Image>
 
                     <TextBlock VerticalAlignment="Center" Margin="0 0 20 0">ByteSync</TextBlock>
-
-                    <!--<Button Classes="GenericButton" Margin="10"
-                            Command="{Binding Path=GoHomeCommand}" HorizontalAlignment="Left" 
-                            IsVisible="False"> ~1~"{Binding IsNavigateToHomeVisible}"@1@
-                        <StackPanel Orientation="Horizontal">
-                            <misc:Icon FontSize="20" Value="RegularHomeAlt" Margin="2" />
-                        </StackPanel>
-
-                        <ToolTip.Tip>
-                            <StackPanel>
-                                <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5" Text="{localizations:Loc Shell_Home}"></TextBlock>
-                                <TextBlock Text="{localizations:Loc Header_Home_Tooltip}"> </TextBlock>
-                            </StackPanel>
-                        </ToolTip.Tip>
-                    </Button>-->
+                    
                 </StackPanel>
 
                 <!-- TITRE CENTRAL -->
@@ -60,8 +46,6 @@
                 <StackPanel Grid.Column="2" HorizontalAlignment="Right" Orientation="Horizontal" VerticalAlignment="Center"
                             Margin="6 0">
                     
-                    <!-- <headers1:ConnectionStatusView/> -->
-                    
                     <ContentControl Content="{Binding ConnectionStatus}" Margin="3" VerticalContentAlignment="Center" />
                     
                     <!-- Update -->
@@ -70,7 +54,6 @@
                             IsVisible="{Binding ShowUpdateObservable}"
                             HorizontalAlignment="Left" >
                         
-                        <!-- 06/04/2022: il semble compliqué de gérer les classes depuis le ViewModel. Voila pourquoi j'utilise les Interactions-->
                         <Interaction.Behaviors>
                             <DataTriggerBehavior Binding="{Binding IsAVersionMandatory}" ComparisonCondition="Equal" Value="true">
                                 <ChangePropertyAction TargetObject="{Binding #UpdateButton}" PropertyName="Background" Value="{StaticResource PowAccentButtonBackGround}" />
