@@ -143,9 +143,9 @@ public class CommandLineModeHandler : ICommandLineModeHandler
 
         SoftwareVersion? softwareVersion;
         if (Arguments.Any(a =>
-                a.Equals(PriorityLevel.Mandatory.ToString(), StringComparison.InvariantCultureIgnoreCase)))
+                a.Equals(PriorityLevel.Minimal.ToString(), StringComparison.InvariantCultureIgnoreCase)))
         {
-            softwareVersion = softwareVersions.FirstOrDefault(v => v.Level == PriorityLevel.Mandatory);
+            softwareVersion = softwareVersions.FirstOrDefault(v => v.Level == PriorityLevel.Minimal);
         }
         else if (Arguments.Any(a =>
                      a.Equals(PriorityLevel.Recommended.ToString(), StringComparison.InvariantCultureIgnoreCase)))

@@ -36,7 +36,7 @@ public class ClientSoftwareVersionSettingsLoader : IClientSoftwareVersionSetting
 
             if (softwareUpdates != null)
             {
-                newMandatoryVersionCandidate = softwareUpdates.FirstOrDefault(u => u.Level == PriorityLevel.Mandatory);
+                newMandatoryVersionCandidate = softwareUpdates.FirstOrDefault(u => u.Level == PriorityLevel.Minimal);
             }
         });
         

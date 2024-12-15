@@ -23,7 +23,7 @@ public class SoftwareVersionProxy
 
         Level = SoftwareVersion.Level switch
         {
-            PriorityLevel.Mandatory => _localizationService[nameof(Resources.SoftwareVersionViewModel_Mandatory)].UppercaseFirst(),
+            PriorityLevel.Minimal => _localizationService[nameof(Resources.SoftwareVersionViewModel_Mandatory)].UppercaseFirst(),
             PriorityLevel.Recommended => _localizationService[nameof(Resources.SoftwareVersionViewModel_Recommended)].UppercaseFirst(),
             PriorityLevel.Optional => _localizationService[nameof(Resources.SoftwareVersionViewModel_Optional)].UppercaseFirst(),
             PriorityLevel.Unknown => "",

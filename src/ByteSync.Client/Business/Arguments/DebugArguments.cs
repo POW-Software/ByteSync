@@ -24,8 +24,6 @@ public static class DebugArguments
 
     internal const string LADM_USE_STANDARD_APPDATA = "-ladm-use-standard-appdata";
     internal const string LADM_USE_APPDATA = "-ladm-use-appdata";
-
-    internal const string UM_FORCE_SHOW_UPDATE = "-um-force-show-update";
     
     internal const string SET_APPLICATION_VERSION = "-set-application-version";
 

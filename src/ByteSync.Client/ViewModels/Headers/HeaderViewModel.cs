@@ -80,7 +80,7 @@ public class HeaderViewModel : ActivableViewModelBase
 
             _updateService.NextVersions
                 .Connect()
-                .Filter(softwareVersion => softwareVersion.Level == PriorityLevel.Mandatory)
+                .Filter(softwareVersion => softwareVersion.Level == PriorityLevel.Minimal)
                 .QueryWhenChanged(query => query.Count)
                 .Select(c => c > 0)
                 .ToPropertyEx(this, x => x.IsAVersionMandatory)

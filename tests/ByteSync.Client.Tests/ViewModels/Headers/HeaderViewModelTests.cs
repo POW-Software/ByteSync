@@ -36,7 +36,7 @@ public class HeaderViewModelTests
         // Arrange
         var testSoftwareVersion = new SoftwareVersion 
         { 
-            Level = PriorityLevel.Mandatory,
+            Level = PriorityLevel.Minimal,
             Version = "1.0.0"
         };
 
@@ -114,7 +114,7 @@ public class HeaderViewModelTests
         // Arrange
         var testSoftwareVersion = new SoftwareVersion 
         { 
-            Level = PriorityLevel.Mandatory,
+            Level = PriorityLevel.Minimal,
             Version = "1.0.0"
         };
 

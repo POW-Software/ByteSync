@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using ByteSync.Business.Arguments;
 using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Updates;
@@ -34,9 +33,48 @@ class UpdateService : IUpdateService
     
     public IObservableCache<SoftwareVersion, string> NextVersions { get; set; }
 
-    public Task SearchNextAvailableVersionsAsync()
+    public async Task SearchNextAvailableVersionsAsync()
     {
-        return Task.Run(GetNextAvailableVersions);
+        try
+        {
+            var updates = await _availableUpdatesLister.GetAvailableUpdates();
+                
+            List<SoftwareVersion> applicableUpdates = new List<SoftwareVersion>();
+            foreach (var softwareUpdate in updates)
+            {
+                Version updateVersion = new Version(softwareUpdate.Version);
+
+                if (updateVersion > _environmentService.ApplicationVersion)
+                {
+                    applicableUpdates.Add(softwareUpdate);
+                }
+            }
+
+            var nextAvailableVersions = applicableUpdates.OrderBy(u => new Version(u.Version)).ToList();
+            
+            if (nextAvailableVersions.Count == 0)
+            {
+                _logger.LogInformation("UpdateManager.GetNextAvailableVersions: no available update found");
+            }
+            else
+            {
+                _logger.LogInformation("UpdateManager.GetNextAvailableVersions: {count} available update(s) found", nextAvailableVersions.Count);
+
+                foreach (var softwareVersion in nextAvailableVersions)
+                {
+                    _logger.LogInformation("UpdateManager.GetNextAvailableVersions: - {version}, {level}", 
+                        softwareVersion.Version, softwareVersion.Level);
+                }
+            }
+
+            UpdateCache(nextAvailableVersions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "UpdateManager.GetNextAvailableVersions");
+            
+            NextVersionsCache.Clear();
+        }
     }
 
     public async Task<bool> UpdateAsync(SoftwareVersion softwareVersion, CancellationToken cancellationToken)
@@ -71,61 +109,6 @@ class UpdateService : IUpdateService
         }
 
         return softwareFileVersion;
-    }
-
-    private void GetNextAvailableVersions()
-    {
-        try
-        {
-            var version = _environmentService.ApplicationVersion;
-
-            var updates = _availableUpdatesLister.GetAvailableUpdates();
-                
-            List<SoftwareVersion> applicableUpdates = new List<SoftwareVersion>();
-            foreach (var softwareUpdate in updates)
-            {
-                Version updateVersion = new Version(softwareUpdate.Version);
-
-                if (updateVersion > version)
-                {
-                    applicableUpdates.Add(softwareUpdate);
-                }
-            }
-
-            var nextAvailableVersions = applicableUpdates.OrderBy(u => new Version(u.Version)).ToList();
-
-        #if DEBUG
-            if (nextAvailableVersions.Count == 0)
-            {
-                if (Environment.GetCommandLineArgs().Contains(DebugArguments.UM_FORCE_SHOW_UPDATE))
-                {
-                    nextAvailableVersions = updates;
-                }
-            }
-        #endif
-            if (nextAvailableVersions.Count == 0)
-            {
-                _logger.LogInformation("UpdateManager.GetNextAvailableVersions: no available update found");
-            }
-            else
-            {
-                _logger.LogInformation("UpdateManager.GetNextAvailableVersions: {count} available update(s) found", nextAvailableVersions.Count);
-
-                foreach (var softwareVersion in nextAvailableVersions)
-                {
-                    _logger.LogInformation("UpdateManager.GetNextAvailableVersions: - {version}, {level}", 
-                        softwareVersion.Version, softwareVersion.Level);
-                }
-            }
-
-            UpdateCache(nextAvailableVersions);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "UpdateManager.GetNextAvailableVersions");
-            
-            NextVersionsCache.Clear();
-        }
     }
 
     private void UpdateCache(List<SoftwareVersion> nextAvailableVersions)
