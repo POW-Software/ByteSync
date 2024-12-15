@@ -57,6 +57,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         
         ShowReleaseNotesCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(ShowReleaseNotes);
         RunUpdateCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(RunUpdate);
+        DownloadUpdateCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(DownloadUpdate);
 
         _availableUpdateRepository.ObservableCache
             .Connect() // make the source an observable change set
@@ -88,6 +89,8 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
     public ReactiveCommand<SoftwareVersionProxy, Unit> ShowReleaseNotesCommand { get; }
     
     public ReactiveCommand<SoftwareVersionProxy, Unit> RunUpdateCommand { get; }
+    
+    public ReactiveCommand<SoftwareVersionProxy, Unit> DownloadUpdateCommand { get; }
     
     public ReadOnlyObservableCollection<SoftwareVersionProxy> SoftwareVersions => _bindingData;
         
@@ -177,6 +180,11 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         {
             Container.CanCloseCurrentFlyout = true;
         }
+    }
+    
+    private async Task DownloadUpdate(SoftwareVersionProxy? softwareVersionViewModel)
+    {
+        await _webAccessor.OpenByteSyncWebSite();
     }
         
     private void UpdateManager_ProgressReported(object? sender, UpdateProgress e)
