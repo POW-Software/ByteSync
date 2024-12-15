@@ -58,20 +58,20 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         ShowReleaseNotesCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(ShowReleaseNotes);
         RunUpdateCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(RunUpdate);
 
+        _availableUpdateRepository.ObservableCache
+            .Connect() // make the source an observable change set
+            .Transform(sw => _softwareVersionProxyFactory.CreateSoftwareVersionProxy(sw))
+            .Sort(SortExpressionComparer<SoftwareVersionProxy>.Descending(proxy => proxy.Version))
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Bind(out _bindingData)
+            .DisposeMany()
+            .Subscribe();
+        
         this.WhenActivated(disposables =>
         {
             this.WhenAnyValue(x => x.SoftwareVersions, x => x.SoftwareVersions.Count)
                 .Subscribe(_ => SetAvailableUpdate())
                 .DisposeWith(disposables);
-
-            _availableUpdateRepository.ObservableCache
-                .Connect() // make the source an observable change set
-                .Transform(sw => _softwareVersionProxyFactory.CreateSoftwareVersionProxy(sw))
-                .Sort(SortExpressionComparer<SoftwareVersionProxy>.Descending(proxy => proxy.Version))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Bind(out _bindingData)
-                .DisposeMany()
-                .Subscribe();
             
             // _updateService.NextAvailableVersionsObservable
             //     .Subscribe(FillSoftwareVersions)

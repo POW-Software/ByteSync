@@ -288,6 +288,7 @@ public static class ServicesRegistrer
         builder.RegisterType<InventoryAnalysisViewModel>().InstancePerLifetimeScope().AsSelf();
         
         builder.RegisterType<PathItemProxy>();
+        builder.RegisterType<SoftwareVersionProxy>();
 
          builder.RegisterType<PushReceiversStarter>().As<IPushReceiversStarter>().SingleInstance();
         
