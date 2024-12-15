@@ -1,8 +1,7 @@
 ﻿using ByteSync.Business.SessionMembers;
-using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.ViewModels.Sessions.Cloud.Members;
 
-namespace ByteSync.Interfaces.Factories;
+namespace ByteSync.Interfaces.Factories.ViewModels;
 
 public interface ISessionMachineViewModelFactory
 {

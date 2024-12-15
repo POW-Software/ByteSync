@@ -10,6 +10,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Converters;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.Inventories;

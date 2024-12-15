@@ -10,7 +10,7 @@ using ByteSync.ViewModels.Sessions.Cloud.Members;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions;
 using ByteSync.ViewModels.TrustedNetworks;
 
-namespace ByteSync.Interfaces.Factories;
+namespace ByteSync.Interfaces.Factories.ViewModels;
 
 public interface IFlyoutElementViewModelFactory
 {

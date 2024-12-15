@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces.Controls.Applications;
+using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Updates;
 using DynamicData;
 
@@ -14,24 +15,18 @@ class UpdateService : IUpdateService
     private readonly IAvailableUpdatesLister _availableUpdatesLister;
     private readonly IEnvironmentService _environmentService;
     private readonly IApplyUpdateService _applyUpdateService;
+    private readonly IAvailableUpdateRepository _availableUpdateRepository;
     private readonly ILogger<UpdateService> _logger;
 
     public UpdateService(IAvailableUpdatesLister availableUpdatesLister, IEnvironmentService environmentService, IApplyUpdateService applyUpdateService,
-        ILogger<UpdateService> logger)
+        IAvailableUpdateRepository availableUpdateRepository, ILogger<UpdateService> logger)
     {
         _availableUpdatesLister = availableUpdatesLister;
         _environmentService = environmentService;
         _applyUpdateService = applyUpdateService;
+        _availableUpdateRepository = availableUpdateRepository;
         _logger = logger;
-        
-        NextVersionsCache = new SourceCache<SoftwareVersion, string>(softwareVersion => softwareVersion.Version);
-        
-        NextVersions = NextVersionsCache.Connect().Publish().AsObservableCache();
     }
-
-    private SourceCache<SoftwareVersion, string> NextVersionsCache { get; set; }
-    
-    public IObservableCache<SoftwareVersion, string> NextVersions { get; set; }
 
     public async Task SearchNextAvailableVersionsAsync()
     {
@@ -66,14 +61,14 @@ class UpdateService : IUpdateService
                         softwareVersion.Version, softwareVersion.Level);
                 }
             }
-
-            UpdateCache(nextAvailableVersions);
+            
+            _availableUpdateRepository.UpdateAvailableUpdates(nextAvailableVersions);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "UpdateManager.GetNextAvailableVersions");
             
-            NextVersionsCache.Clear();
+            _availableUpdateRepository.Clear();
         }
     }
 
@@ -111,23 +106,23 @@ class UpdateService : IUpdateService
         return softwareFileVersion;
     }
 
-    private void UpdateCache(List<SoftwareVersion> nextAvailableVersions)
-    {
-        foreach (SoftwareVersion softwareVersion in nextAvailableVersions)
-        {
-            NextVersionsCache.AddOrUpdate(softwareVersion);
-        }
-
-        var currentKeys = NextVersionsCache.Keys.ToList();
-
-        foreach (var key in currentKeys)
-        {
-            var itemInUpdateCollection = nextAvailableVersions.FirstOrDefault(item => item.Version.Equals(key));
-
-            if (itemInUpdateCollection == null)
-            {
-                NextVersionsCache.RemoveKey(key);
-            }
-        }
-    }
+    // private void UpdateCache(List<SoftwareVersion> nextAvailableVersions)
+    // {
+    //     foreach (SoftwareVersion softwareVersion in nextAvailableVersions)
+    //     {
+    //         NextVersionsCache.AddOrUpdate(softwareVersion);
+    //     }
+    //
+    //     var currentKeys = NextVersionsCache.Keys.ToList();
+    //
+    //     foreach (var key in currentKeys)
+    //     {
+    //         var itemInUpdateCollection = nextAvailableVersions.FirstOrDefault(item => item.Version.Equals(key));
+    //
+    //         if (itemInUpdateCollection == null)
+    //         {
+    //             NextVersionsCache.RemoveKey(key);
+    //         }
+    //     }
+    // }
 }

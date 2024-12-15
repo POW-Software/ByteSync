@@ -1,8 +1,8 @@
 ﻿using Autofac;
 using ByteSync.Business.PathItems;
-using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Factories.Proxies;
 
-namespace ByteSync.Factories;
+namespace ByteSync.Factories.Proxies;
 
 public class PathItemProxyFactory : IPathItemProxyFactory
 {

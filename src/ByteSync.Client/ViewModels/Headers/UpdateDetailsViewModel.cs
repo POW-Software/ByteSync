@@ -9,6 +9,8 @@ using ByteSync.Business.Updates;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Factories.Proxies;
+using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Updates;
 using ByteSync.ViewModels.Misc;
 using DynamicData;
@@ -22,27 +24,32 @@ namespace ByteSync.ViewModels.Headers;
 public class UpdateDetailsViewModel : FlyoutElementViewModel
 {
     private readonly IUpdateService _updateService;
+    private readonly IAvailableUpdateRepository _availableUpdateRepository;
     private readonly ILocalizationService _localizationService;
     private readonly IWebAccessor _webAccessor;
     private readonly IUpdateProgressRepository _updateProgressRepository;
+    private readonly ISoftwareVersionProxyFactory _softwareVersionProxyFactory;
 
     public UpdateDetailsViewModel()
     {
 
     }
 
-    public UpdateDetailsViewModel(IUpdateService updateManager, ILocalizationService localizationService,
-        IWebAccessor webAccessor, IUpdateProgressRepository updateProgressRepository)
+    public UpdateDetailsViewModel(IUpdateService updateService, IAvailableUpdateRepository availableAvailableUpdateRepository, 
+        ILocalizationService localizationService, IWebAccessor webAccessor, IUpdateProgressRepository updateProgressRepository,
+        ISoftwareVersionProxyFactory softwareVersionProxyFactory)
     {
         AvailableUpdatesMessage = "";
         Progress = "";
 
         CancellationTokenSource = new CancellationTokenSource();
 
-        _updateService = updateManager;
+        _updateService = updateService;
+        _availableUpdateRepository = availableAvailableUpdateRepository;
         _localizationService = localizationService;
         _webAccessor = webAccessor;
         _updateProgressRepository = updateProgressRepository;
+        _softwareVersionProxyFactory = softwareVersionProxyFactory;
 
         Error = new ErrorViewModel();
         
@@ -57,9 +64,9 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
                 .Subscribe(_ => SetAvailableUpdate())
                 .DisposeWith(disposables);
 
-            _updateService.NextVersions
+            _availableUpdateRepository.ObservableCache
                 .Connect() // make the source an observable change set
-                .Transform(sw => new SoftwareVersionProxy(sw))
+                .Transform(sw => _softwareVersionProxyFactory.CreateSoftwareVersionProxy(sw))
                 .Sort(SortExpressionComparer<SoftwareVersionProxy>.Descending(proxy => proxy.Version))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Bind(out _bindingData)

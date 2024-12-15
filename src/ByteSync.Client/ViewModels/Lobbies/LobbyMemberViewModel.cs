@@ -8,6 +8,7 @@ using ByteSync.Business.PathItems;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Factories.Proxies;
 using ByteSync.Interfaces.Lobbies;
 using ByteSync.Services.Lobbies;
 using ReactiveUI;

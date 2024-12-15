@@ -5,7 +5,6 @@
              xmlns:headers="clr-namespace:ByteSync.ViewModels.Headers"
              xmlns:misc="clr-namespace:ByteSync.Views.Misc"
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
-             xmlns:headers1="clr-namespace:ByteSync.Views.Headers"
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
              x:Class="ByteSync.Views.Headers.HeaderView">
     
@@ -107,7 +106,7 @@
                         </ToolTip.Tip>
                     </Button>
 
-                    <!-- Paramètres -->
+                    <!-- Parameters -->
                     <Button Classes="GenericButton" Margin="3"
                             Command="{Binding Path=ViewGeneralSettingsCommand}" 
                             HorizontalAlignment="Left" >

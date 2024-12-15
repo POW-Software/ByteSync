@@ -19,6 +19,7 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Factories.Proxies;
 using ByteSync.Interfaces.Repositories;
 using DynamicData;
 using DynamicData.Binding;

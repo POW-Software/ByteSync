@@ -1,10 +1,9 @@
 ﻿using Autofac;
 using ByteSync.Business.SessionMembers;
-using ByteSync.Common.Business.Sessions.Cloud;
-using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.ViewModels.Sessions.Cloud.Members;
 
-namespace ByteSync.Factories;
+namespace ByteSync.Factories.ViewModels;
 
 public class SessionMachineViewModelFactory : ISessionMachineViewModelFactory
 {
