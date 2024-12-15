@@ -105,24 +105,4 @@ class UpdateService : IUpdateService
 
         return softwareFileVersion;
     }
-
-    // private void UpdateCache(List<SoftwareVersion> nextAvailableVersions)
-    // {
-    //     foreach (SoftwareVersion softwareVersion in nextAvailableVersions)
-    //     {
-    //         NextVersionsCache.AddOrUpdate(softwareVersion);
-    //     }
-    //
-    //     var currentKeys = NextVersionsCache.Keys.ToList();
-    //
-    //     foreach (var key in currentKeys)
-    //     {
-    //         var itemInUpdateCollection = nextAvailableVersions.FirstOrDefault(item => item.Version.Equals(key));
-    //
-    //         if (itemInUpdateCollection == null)
-    //         {
-    //             NextVersionsCache.RemoveKey(key);
-    //         }
-    //     }
-    // }
 }
