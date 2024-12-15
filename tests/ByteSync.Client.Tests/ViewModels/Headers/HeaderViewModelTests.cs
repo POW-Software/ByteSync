@@ -5,6 +5,7 @@ using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Navigations;
+using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Updates;
 using ByteSync.ViewModels.Headers;
 using DynamicData;
@@ -18,14 +19,14 @@ namespace ByteSync.Tests.ViewModels.Headers;
 public class HeaderViewModelTests
 {
     private readonly Mock<IWebAccessor> _webAccessorMock;
-    private readonly Mock<IUpdateService> _updateServiceMock;
+    private readonly Mock<IAvailableUpdateRepository> _updateServiceMock;
     private readonly Mock<ILocalizationService> _localizationServiceMock;
     private readonly Mock<INavigationService> _navigationServiceMock;
     
     public HeaderViewModelTests()
     {
         _webAccessorMock = new Mock<IWebAccessor>();
-        _updateServiceMock = new Mock<IUpdateService>();
+        _updateServiceMock = new Mock<IAvailableUpdateRepository>();
         _localizationServiceMock = new Mock<ILocalizationService>();
         _navigationServiceMock = new Mock<INavigationService>();
     }
@@ -52,7 +53,7 @@ public class HeaderViewModelTests
             .Returns(new Subject<CultureDefinition>());
         
         _updateServiceMock
-            .Setup(s => s.NextVersions)
+            .Setup(s => s.ObservableCache)
             .Returns(observable);
         
         sourceCache.AddOrUpdate(testSoftwareVersion);
@@ -91,7 +92,7 @@ public class HeaderViewModelTests
             .Returns(new Subject<CultureDefinition>());
         
         _updateServiceMock
-            .Setup(s => s.NextVersions)
+            .Setup(s => s.ObservableCache)
             .Returns(observable);
         
         sourceCache.AddOrUpdate(testSoftwareVersion);
@@ -130,7 +131,7 @@ public class HeaderViewModelTests
             .Returns(new Subject<CultureDefinition>());
         
         _updateServiceMock
-            .Setup(s => s.NextVersions)
+            .Setup(s => s.ObservableCache)
             .Returns(observable);
         
         sourceCache.AddOrUpdate(testSoftwareVersion);
