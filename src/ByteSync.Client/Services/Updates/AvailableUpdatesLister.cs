@@ -4,11 +4,19 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces.Updates;
+using Microsoft.Extensions.Configuration;
 
 namespace ByteSync.Services.Updates;
 
 class AvailableUpdatesLister : IAvailableUpdatesLister
 {
+    private readonly IConfiguration _configuration;
+
+    public AvailableUpdatesLister(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+    
     public async Task<List<SoftwareVersion>> GetAvailableUpdates()
     {
         string contents;
@@ -37,7 +45,7 @@ class AvailableUpdatesLister : IAvailableUpdatesLister
         
     private string BuildUrl(string fileToDownload)
     {
-        string baseUrl = "https://powbytesyncupdates.blob.core.windows.net/updates/";
+        string baseUrl = _configuration["UpdatesDefinitionDirectoryUrl"]!;
 
         string fileUrl = fileToDownload.TrimStart('/');
 
