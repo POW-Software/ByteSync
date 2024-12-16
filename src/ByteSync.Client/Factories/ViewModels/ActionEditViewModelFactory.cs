@@ -1,11 +1,11 @@
 ﻿using Autofac;
 using ByteSync.Business.Actions.Local;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions;
 
-namespace ByteSync.Factories;
+namespace ByteSync.Factories.ViewModels;
 
 public class ActionEditViewModelFactory : IActionEditViewModelFactory
 {

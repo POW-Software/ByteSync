@@ -70,7 +70,7 @@ public class AuthService_Tests
             MandatoryVersion = new SoftwareVersion
             {
                 ProductCode = "BS",
-                Level = PriorityLevel.Mandatory,
+                Level = PriorityLevel.Minimal,
                 Version = version
             }
         };

@@ -11,6 +11,7 @@ using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions.Misc;
 using ReactiveUI;

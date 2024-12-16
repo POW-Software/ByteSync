@@ -10,6 +10,7 @@ using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;

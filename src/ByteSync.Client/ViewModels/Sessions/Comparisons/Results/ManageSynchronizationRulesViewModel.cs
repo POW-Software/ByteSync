@@ -5,6 +5,7 @@ using ByteSync.Assets.Resources;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
 using DynamicData;
 using ReactiveUI;

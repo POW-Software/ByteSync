@@ -1,6 +1,6 @@
 ﻿using ByteSync.Business.PathItems;
 
-namespace ByteSync.Interfaces.Factories;
+namespace ByteSync.Interfaces.Factories.Proxies;
 
 public interface IPathItemProxyFactory
 {

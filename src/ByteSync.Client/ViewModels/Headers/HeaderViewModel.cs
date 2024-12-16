@@ -9,6 +9,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.EventsHubs;
+using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Updates;
 using ByteSync.ViewModels.Misc;
 using DynamicData;
@@ -21,7 +22,7 @@ public class HeaderViewModel : ActivableViewModelBase
 {
     private readonly INavigationEventsHub _navigationEventsHub;
     private readonly IWebAccessor _webAccessor;
-    private readonly IUpdateService _updateService;
+    private readonly IAvailableUpdateRepository _availableUpdateRepository;
     
     private readonly ILocalizationService _localizationService;
     private readonly INavigationService _navigationService;
@@ -38,12 +39,12 @@ public class HeaderViewModel : ActivableViewModelBase
     }
         
     public HeaderViewModel(FlyoutContainerViewModel flyoutContainerViewModel, ConnectionStatusViewModel connectionStatusViewModel,
-        INavigationEventsHub navigationEventsHub, IWebAccessor webAccessor, IUpdateService updateManager,
+        INavigationEventsHub navigationEventsHub, IWebAccessor webAccessor, IAvailableUpdateRepository availableAvailableUpdateRepository,
         ILocalizationService localizationService, INavigationService navigationService)
     {
         _navigationEventsHub = navigationEventsHub;
         _webAccessor = webAccessor;
-        _updateService = updateManager;
+        _availableUpdateRepository = availableAvailableUpdateRepository;
         _localizationService = localizationService;
         _navigationService = navigationService;
 
@@ -78,15 +79,15 @@ public class HeaderViewModel : ActivableViewModelBase
                 .Subscribe(OnNavigated)
                 .DisposeWith(disposables);
 
-            _updateService.NextVersions
+            _availableUpdateRepository.ObservableCache
                 .Connect()
-                .Filter(softwareVersion => softwareVersion.Level == PriorityLevel.Mandatory)
+                .Filter(softwareVersion => softwareVersion.Level == PriorityLevel.Minimal)
                 .QueryWhenChanged(query => query.Count)
                 .Select(c => c > 0)
                 .ToPropertyEx(this, x => x.IsAVersionMandatory)
                 .DisposeWith(disposables);
 
-            _updateService.NextVersions
+            _availableUpdateRepository.ObservableCache
                 .Connect()
                 .QueryWhenChanged(query => query.Count)
                 .Select(c => c > 0)

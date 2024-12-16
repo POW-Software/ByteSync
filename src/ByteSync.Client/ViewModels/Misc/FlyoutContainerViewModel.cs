@@ -13,6 +13,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

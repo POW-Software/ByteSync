@@ -1,9 +1,9 @@
 ﻿using Autofac;
 using ByteSync.Business.Actions.Local;
-using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
 
-namespace ByteSync.Factories;
+namespace ByteSync.Factories.ViewModels;
 
 public class SynchronizationActionViewModelFactory : ISynchronizationActionViewModelFactory
 {

@@ -1619,4 +1619,7 @@ Do you want to save this new Session Profile with this name?</value>
   <data name="SessionMachine_Status_UnknownStatus" xml:space="preserve">
     <value>Unknown synchronization status</value>
   </data>
+  <data name="UpdateDetails_Download" xml:space="preserve">
+    <value>Download</value>
+  </data>
 </root>

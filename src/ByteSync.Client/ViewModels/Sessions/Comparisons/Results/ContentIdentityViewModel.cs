@@ -4,6 +4,7 @@ using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;

@@ -9,6 +9,8 @@ using ByteSync.Business.Updates;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Factories.Proxies;
+using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Updates;
 using ByteSync.ViewModels.Misc;
 using DynamicData;
@@ -22,27 +24,32 @@ namespace ByteSync.ViewModels.Headers;
 public class UpdateDetailsViewModel : FlyoutElementViewModel
 {
     private readonly IUpdateService _updateService;
+    private readonly IAvailableUpdateRepository _availableUpdateRepository;
     private readonly ILocalizationService _localizationService;
     private readonly IWebAccessor _webAccessor;
     private readonly IUpdateProgressRepository _updateProgressRepository;
+    private readonly ISoftwareVersionProxyFactory _softwareVersionProxyFactory;
 
     public UpdateDetailsViewModel()
     {
 
     }
 
-    public UpdateDetailsViewModel(IUpdateService updateManager, ILocalizationService localizationService,
-        IWebAccessor webAccessor, IUpdateProgressRepository updateProgressRepository)
+    public UpdateDetailsViewModel(IUpdateService updateService, IAvailableUpdateRepository availableAvailableUpdateRepository, 
+        ILocalizationService localizationService, IWebAccessor webAccessor, IUpdateProgressRepository updateProgressRepository,
+        ISoftwareVersionProxyFactory softwareVersionProxyFactory)
     {
         AvailableUpdatesMessage = "";
         Progress = "";
 
         CancellationTokenSource = new CancellationTokenSource();
 
-        _updateService = updateManager;
+        _updateService = updateService;
+        _availableUpdateRepository = availableAvailableUpdateRepository;
         _localizationService = localizationService;
         _webAccessor = webAccessor;
         _updateProgressRepository = updateProgressRepository;
+        _softwareVersionProxyFactory = softwareVersionProxyFactory;
 
         Error = new ErrorViewModel();
         
@@ -50,21 +57,22 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         
         ShowReleaseNotesCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(ShowReleaseNotes);
         RunUpdateCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(RunUpdate);
+        DownloadUpdateCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(DownloadUpdate);
 
+        _availableUpdateRepository.ObservableCache
+            .Connect() // make the source an observable change set
+            .Transform(sw => _softwareVersionProxyFactory.CreateSoftwareVersionProxy(sw))
+            .Sort(SortExpressionComparer<SoftwareVersionProxy>.Descending(proxy => proxy.Version))
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Bind(out _bindingData)
+            .DisposeMany()
+            .Subscribe();
+        
         this.WhenActivated(disposables =>
         {
             this.WhenAnyValue(x => x.SoftwareVersions, x => x.SoftwareVersions.Count)
                 .Subscribe(_ => SetAvailableUpdate())
                 .DisposeWith(disposables);
-
-            _updateService.NextVersions
-                .Connect() // make the source an observable change set
-                .Transform(sw => new SoftwareVersionProxy(sw))
-                .Sort(SortExpressionComparer<SoftwareVersionProxy>.Descending(proxy => proxy.Version))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Bind(out _bindingData)
-                .DisposeMany()
-                .Subscribe();
             
             // _updateService.NextAvailableVersionsObservable
             //     .Subscribe(FillSoftwareVersions)
@@ -81,6 +89,8 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
     public ReactiveCommand<SoftwareVersionProxy, Unit> ShowReleaseNotesCommand { get; }
     
     public ReactiveCommand<SoftwareVersionProxy, Unit> RunUpdateCommand { get; }
+    
+    public ReactiveCommand<SoftwareVersionProxy, Unit> DownloadUpdateCommand { get; }
     
     public ReadOnlyObservableCollection<SoftwareVersionProxy> SoftwareVersions => _bindingData;
         
@@ -170,6 +180,11 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         {
             Container.CanCloseCurrentFlyout = true;
         }
+    }
+    
+    private async Task DownloadUpdate(SoftwareVersionProxy? softwareVersionViewModel)
+    {
+        await _webAccessor.OpenByteSyncWebSite();
     }
         
     private void UpdateManager_ProgressReported(object? sender, UpdateProgress e)

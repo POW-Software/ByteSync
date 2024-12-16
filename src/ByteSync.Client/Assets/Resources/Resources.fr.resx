@@ -1493,4 +1493,7 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	<data name="SessionMachine_Status_UnknownStatus" xml:space="preserve">
 		<value>État de synchronisation inconnu</value>
 	</data>
+	<data name="UpdateDetails_Download" xml:space="preserve">
+		<value>Télécharger</value>
+	</data>
 </root>

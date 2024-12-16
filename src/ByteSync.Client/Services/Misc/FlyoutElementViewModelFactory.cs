@@ -4,6 +4,7 @@ using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Profiles;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.ViewModels.AccountDetails;
 using ByteSync.ViewModels.Headers;

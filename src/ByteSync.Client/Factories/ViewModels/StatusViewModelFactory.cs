@@ -1,10 +1,10 @@
 ﻿using Autofac;
-using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.Inventories;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
 
-namespace ByteSync.Factories;
+namespace ByteSync.Factories.ViewModels;
 
 public class StatusViewModelFactory : IStatusViewModelFactory
 {
