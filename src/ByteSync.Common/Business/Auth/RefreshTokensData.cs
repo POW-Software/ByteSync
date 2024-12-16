@@ -4,13 +4,11 @@ namespace ByteSync.Common.Business.Auth;
 
 public class RefreshTokensData
 {
-    public string Token { get; set; }
+    public string Token { get; set; } = null!;
 
-    public string ClientInstanceId { get; set; }
+    public string ClientInstanceId { get; set; } = null!;
     
-    public string Machinename { get; set; }
+    public string Version { get; set; } = null!;
     
-    public string Version { get; set; }
-    
-    public OSPlatforms? OsPlatform { get; set; }
+    public OSPlatforms? OsPlatform { get; set; } = null!;
 }
