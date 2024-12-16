@@ -10,5 +10,5 @@ public class RefreshTokensData
     
     public string Version { get; set; } = null!;
     
-    public OSPlatforms? OsPlatform { get; set; } = null!;
+    public OSPlatforms? OsPlatform { get; set; }
 }
