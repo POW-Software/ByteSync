@@ -22,7 +22,7 @@ class AvailableUpdatesLister : IAvailableUpdatesLister
         string contents;
         using (var httpClient = new HttpClient())
         {
-            string url = BuildUrl("updates.json");
+            string url = _configuration["UpdatesDefinitionUrl"]!;
         
             contents = await httpClient.GetStringAsync(url);
         }
@@ -34,23 +34,5 @@ class AvailableUpdatesLister : IAvailableUpdatesLister
         var softwareVersions = JsonSerializer.Deserialize<List<SoftwareVersion>>(contents, options);
 
         return softwareVersions!;
-    }
-        
-    public string GetUrl(SoftwareVersionFile softwareFileVersion)
-    {
-        string result = BuildUrl(softwareFileVersion.FileName);
-
-        return result;
-    }
-        
-    private string BuildUrl(string fileToDownload)
-    {
-        string baseUrl = _configuration["UpdatesDefinitionDirectoryUrl"]!;
-
-        string fileUrl = fileToDownload.TrimStart('/');
-
-        string url = baseUrl + fileUrl;
-
-        return url;
     }
 }

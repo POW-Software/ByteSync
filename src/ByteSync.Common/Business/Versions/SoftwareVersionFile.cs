@@ -3,6 +3,8 @@
 public class SoftwareVersionFile
 {
     public string FileName { get; set; } = null!;
+    
+    public string FileUri { get; set; } = null!;
         
     public Platform Platform { get; set; }
         

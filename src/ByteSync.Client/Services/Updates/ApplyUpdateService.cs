@@ -63,7 +63,7 @@ public class ApplyUpdateService : IApplyUpdateService
             }
         }
 
-        FileToDownload = _availableUpdatesLister.GetUrl(softwareVersionFile);
+        FileToDownload = softwareVersionFile.FileUri;
             
         var applicationRestarter = Locator.Current.GetService<IApplicationRestarter>()!;
         ApplicationLauncherFullName = applicationRestarter.ApplicationLauncherFullName;
