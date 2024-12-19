@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using ByteSync.Business.Actions.Shared;
+using ByteSync.Business.Communications.Downloading;
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Inventories;
@@ -22,11 +23,12 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
     private readonly ISynchronizationActionRemoteUploader _synchronizationActionRemoteUploader;
     private readonly ISynchronizationService _synchronizationService;
     private readonly ISynchronizationApiClient _synchronizationApiClient;
+    private readonly IDatesSetter _datesSetter;
     private readonly ILogger<SynchronizationActionHandler> _logger;
 
     public SynchronizationActionHandler(ISessionService sessionDataHolder, IConnectionService connectionService, IDeltaManager deltaManager, 
         ISynchronizationActionServerInformer synchronizationActionServerInformer, ISynchronizationActionRemoteUploader synchronizationActionRemoteUploader,
-        ISynchronizationService synchronizationService, ISynchronizationApiClient synchronizationApiClient,
+        ISynchronizationService synchronizationService, ISynchronizationApiClient synchronizationApiClient, IDatesSetter datesSetter,
         ILogger<SynchronizationActionHandler> logger)
     {
         _sessionService = sessionDataHolder;
@@ -36,6 +38,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         _synchronizationActionRemoteUploader = synchronizationActionRemoteUploader;
         _synchronizationService = synchronizationService;
         _synchronizationApiClient = synchronizationApiClient;
+        _datesSetter = datesSetter;
         _logger = logger;
     }
 
@@ -163,58 +166,64 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
     {
         if (sharedActionsGroup.IsSynchronizeContentOnly)
         {
-            _logger.LogInformation("{Type:l}: resetting CreationTime and LastWriteTime  on {fileInfo}",
-                $"Synchronization.{sharedActionsGroup.Operator}", destinationFullName);
+            _datesSetter.SetDates(sharedActionsGroup, destinationFullName, null);
             
-            File.SetLastWriteTimeUtc(destinationFullName, DateTime.UtcNow);
-            File.SetCreationTimeUtc(destinationFullName, DateTime.UtcNow);
+            // _logger.LogInformation("{Type:l}: resetting CreationTime and LastWriteTime  on {fileInfo}",
+            //     $"Synchronization.{sharedActionsGroup.Operator}", destinationFullName);
+            //
+            // File.SetLastWriteTimeUtc(destinationFullName, DateTime.UtcNow);
+            // File.SetCreationTimeUtc(destinationFullName, DateTime.UtcNow);
         }
         else
         {
-            var creationTimeUtcSource = File.GetCreationTimeUtc(sourceFullName);
-            var creationTimeUtcDestination = File.GetCreationTimeUtc(destinationFullName);
-
-            if (creationTimeUtcSource != creationTimeUtcDestination)
-            {
-                SetCreationTimeUtc(sharedActionsGroup, destinationFullName, creationTimeUtcSource);
-            }
+            var downloadTargetDates = DownloadTargetDates.FromSharedActionsGroup(sharedActionsGroup);
+            _datesSetter.SetDates(sharedActionsGroup, destinationFullName, downloadTargetDates);
             
-            var lastWriteTimeUtcSource = File.GetLastWriteTimeUtc(sourceFullName);
-            var lastWriteTimeUtcDestination = File.GetLastWriteTimeUtc(destinationFullName);
-
-            if (lastWriteTimeUtcSource != lastWriteTimeUtcDestination)
-            {
-                SetLastWriteTimeUtc(sharedActionsGroup, destinationFullName, lastWriteTimeUtcSource);
-            }
+            // var creationTimeUtcSource = File.GetCreationTimeUtc(sourceFullName);
+            // var creationTimeUtcDestination = File.GetCreationTimeUtc(destinationFullName);
+            //
+            // if (creationTimeUtcSource != creationTimeUtcDestination)
+            // {
+            //     SetCreationTimeUtc(sharedActionsGroup, destinationFullName, creationTimeUtcSource);
+            // }
+            //
+            // var lastWriteTimeUtcSource = File.GetLastWriteTimeUtc(sourceFullName);
+            // var lastWriteTimeUtcDestination = File.GetLastWriteTimeUtc(destinationFullName);
+            //
+            // if (lastWriteTimeUtcSource != lastWriteTimeUtcDestination)
+            // {
+            //     SetLastWriteTimeUtc(sharedActionsGroup, destinationFullName, lastWriteTimeUtcSource);
+            // }
         }
     }
     
     private void ApplyDatesFromSharedActionsGroup(SharedActionsGroup sharedActionsGroup, string destinationFullName)
     {
+        DownloadTargetDates? downloadTargetDates = null;
+        
         if (sharedActionsGroup.IsSynchronizeContentAndDate || sharedActionsGroup.IsSynchronizeDate)
         {
-            SetCreationTimeUtc(sharedActionsGroup, destinationFullName, sharedActionsGroup.CreationTimeUtc.GetValueOrDefault());
-            SetLastWriteTimeUtc(sharedActionsGroup, destinationFullName, sharedActionsGroup.LastWriteTimeUtc.GetValueOrDefault());
+            downloadTargetDates = DownloadTargetDates.FromSharedActionsGroup(sharedActionsGroup);
         }
+        
+        _datesSetter.SetDates(sharedActionsGroup, destinationFullName, downloadTargetDates);
     }
     
-    private void SetCreationTimeUtc(SharedActionsGroup sharedActionsGroup, string destinationFullName, DateTime creationTimeUtcSource)
-    {
-        _logger.LogInformation("{Type:l}: setting CreationTime on {fileInfo}",
-            $"Synchronization.{sharedActionsGroup.Operator}", destinationFullName);
-
-        File.SetCreationTimeUtc(destinationFullName, creationTimeUtcSource);
-    }
-
-    private void SetLastWriteTimeUtc(SharedActionsGroup sharedActionsGroup, string destinationFullName, DateTime lastWriteTimeUtcSource)
-    {
-        _logger.LogInformation("{Type:l}: setting LastWriteTime on {fileInfo}",
-            $"Synchronization.{sharedActionsGroup.Operator}", destinationFullName);
-
-        File.SetLastWriteTimeUtc(destinationFullName, lastWriteTimeUtcSource);
-    }
-
-    
+    // private void SetCreationTimeUtc(SharedActionsGroup sharedActionsGroup, string destinationFullName, DateTime creationTimeUtcSource)
+    // {
+    //     _logger.LogInformation("{Type:l}: setting CreationTime on {fileInfo}",
+    //         $"Synchronization.{sharedActionsGroup.Operator}", destinationFullName);
+    //
+    //     File.SetCreationTimeUtc(destinationFullName, creationTimeUtcSource);
+    // }
+    //
+    // private void SetLastWriteTimeUtc(SharedActionsGroup sharedActionsGroup, string destinationFullName, DateTime lastWriteTimeUtcSource)
+    // {
+    //     _logger.LogInformation("{Type:l}: setting LastWriteTime on {fileInfo}",
+    //         $"Synchronization.{sharedActionsGroup.Operator}", destinationFullName);
+    //
+    //     File.SetLastWriteTimeUtc(destinationFullName, lastWriteTimeUtcSource);
+    // }
 
     private HashSet<SharedDataPart> GetLocalTargets(SharedActionsGroup sharedActionsGroup)
     {

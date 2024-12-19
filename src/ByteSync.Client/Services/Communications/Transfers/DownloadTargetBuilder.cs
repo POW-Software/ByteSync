@@ -82,7 +82,7 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder
 
                     if (sharedActionsGroup.IsSynchronizeContentAndDate)
                     {
-                        datesPerActionsGroupId.Add(actionsGroupId, new DownloadTargetDates(sharedActionsGroup));
+                        datesPerActionsGroupId.Add(actionsGroupId, DownloadTargetDates.FromSharedActionsGroup(sharedActionsGroup));
                     }
                 }
             }
@@ -115,7 +115,7 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder
                 
                 if (sharedActionsGroup.IsSynchronizeContentAndDate)
                 {
-                    datesPerActionsGroupId.Add(sharedActionsGroup.ActionsGroupId, new DownloadTargetDates(sharedActionsGroup));
+                    datesPerActionsGroupId.Add(sharedActionsGroup.ActionsGroupId, DownloadTargetDates.FromSharedActionsGroup(sharedActionsGroup));
                 }
             }
         }

@@ -78,6 +78,7 @@ public class ComparisonItemActionsManager : IComparisonItemActionsManager
     {
         comparisonItemViewModel.TargetedActions.Clear();
 
+        // WHAT !!!
         comparisonItemViewModel.TD_SynchronizationActions.RemoveAll(savm => savm.IsTargeted);
         
         ResetActionsFromSynchronizationRules(comparisonItemViewModel);

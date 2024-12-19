@@ -4,13 +4,23 @@ namespace ByteSync.Business.Communications.Downloading;
 
 public class DownloadTargetDates
 {
-    public DownloadTargetDates(SharedActionsGroup sharedActionsGroup)
+    public DownloadTargetDates()
     {
-        CreationTimeUtc = sharedActionsGroup.CreationTimeUtc!.Value;
-        LastWriteTimeUtc = sharedActionsGroup.LastWriteTimeUtc!.Value;
+
     }
 
     public DateTime CreationTimeUtc { get; set; }
     
     public DateTime LastWriteTimeUtc { get; set; }
+    
+    public static DownloadTargetDates FromSharedActionsGroup(SharedActionsGroup sharedActionsGroup)
+    {
+        var downloadTargetDates = new DownloadTargetDates
+        {
+            CreationTimeUtc =  sharedActionsGroup.CreationTimeUtc!.Value,
+            LastWriteTimeUtc = sharedActionsGroup.LastWriteTimeUtc!.Value
+        };
+
+        return downloadTargetDates;
+    }
 }
