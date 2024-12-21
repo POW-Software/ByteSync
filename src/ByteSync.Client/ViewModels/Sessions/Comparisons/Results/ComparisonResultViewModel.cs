@@ -38,6 +38,7 @@ public class ComparisonResultViewModel : ActivableViewModelBase
     private readonly IComparisonItemViewModelFactory _comparisonItemViewModelFactory;
     private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly IFlyoutElementViewModelFactory _flyoutElementViewModelFactory;
+    private readonly IComparisonItemRepository _comparisonItemRepository;
 
     private const int PAGE_SIZE = 10;
 
@@ -49,7 +50,8 @@ public class ComparisonResultViewModel : ActivableViewModelBase
     public ComparisonResultViewModel(ISessionService sessionService, ILocalizationService localizationService, 
         IDialogService dialogService, IInventoryService inventoriesService, IComparisonItemsService comparisonItemsService, IThemeService themeService, 
         IComparisonItemViewModelFactory comparisonItemViewModelFactory, ISessionMemberRepository sessionMemberRepository, 
-        IFlyoutElementViewModelFactory flyoutElementViewModelFactory, ManageSynchronizationRulesViewModel manageSynchronizationRulesViewModel)
+        IFlyoutElementViewModelFactory flyoutElementViewModelFactory, ManageSynchronizationRulesViewModel manageSynchronizationRulesViewModel,
+        IComparisonItemRepository comparisonItemRepository)
     {
         _sessionService = sessionService;
         _localizationService = localizationService;
@@ -60,6 +62,7 @@ public class ComparisonResultViewModel : ActivableViewModelBase
         _comparisonItemViewModelFactory = comparisonItemViewModelFactory;
         _sessionMemberRepository = sessionMemberRepository;
         _flyoutElementViewModelFactory = flyoutElementViewModelFactory;
+        _comparisonItemRepository = comparisonItemRepository;
         
         ManageSynchronizationRules = manageSynchronizationRulesViewModel;
 
@@ -108,7 +111,7 @@ public class ComparisonResultViewModel : ActivableViewModelBase
             .DistinctUntilChanged()
             .Sample(TimeSpan.FromMilliseconds(100));
 
-        _comparisonItemsService.ComparisonItems
+        _comparisonItemRepository.ObservableCache
             .Connect() // make the source an observable change set
             .Filter(filter)
             // .Transform(comparisonItem => _comparisonItemViewModelFactory.CreateSynchronizationActionViewModel(comparisonItem))
