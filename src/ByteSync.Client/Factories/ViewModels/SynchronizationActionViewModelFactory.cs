@@ -2,6 +2,7 @@
 using ByteSync.Business.Actions.Local;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
+using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
 
 namespace ByteSync.Factories.ViewModels;
 
@@ -14,10 +15,11 @@ public class SynchronizationActionViewModelFactory : ISynchronizationActionViewM
         _context = context;
     }
     
-    public SynchronizationActionViewModel CreateSynchronizationActionViewModel(AtomicAction atomicAction)
+    public SynchronizationActionViewModel CreateSynchronizationActionViewModel(AtomicAction atomicAction, ComparisonItemViewModel comparisonItemViewModel)
     {
         var result = _context.Resolve<SynchronizationActionViewModel>(
-            new TypedParameter(typeof(AtomicAction), atomicAction));
+            new TypedParameter(typeof(AtomicAction), atomicAction),
+            new TypedParameter(typeof(ComparisonItemViewModel), comparisonItemViewModel));
         
         return result;
     }

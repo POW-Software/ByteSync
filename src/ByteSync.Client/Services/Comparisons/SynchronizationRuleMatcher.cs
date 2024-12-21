@@ -38,22 +38,11 @@ class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
         var actionsToRemove = initialAtomicActions.Where(a => a.IsFromSynchronizationRule).ToList();
         _atomicActionRepository.Remove(actionsToRemove);
         
-        HashSet<AtomicAction> atomicActions = GetAppliableActions(comparisonItem, synchronizationRules);
+        HashSet<AtomicAction> atomicActions = GetApplicableActions(comparisonItem, synchronizationRules);
         _atomicActionRepository.AddOrUpdate(atomicActions);
     }
 
-    public void RemoveDeleted(ObservableCollection<ComparisonItemViewModel> comparisonItems, 
-        SynchronizationRuleSummaryViewModel synchronizationRuleSummaryViewModel)
-    {
-        foreach (var comparisonItemViewModel in comparisonItems)
-        {
-            comparisonItemViewModel.TD_SynchronizationActions
-                .RemoveAll(sa => sa.IsFromSynchronizationRule && 
-                                 Equals(sa.AtomicAction.SynchronizationRule, synchronizationRuleSummaryViewModel.SynchronizationRule));
-        }
-    }
-
-    private HashSet<AtomicAction> GetAppliableActions(ComparisonItem comparisonItem, 
+    private HashSet<AtomicAction> GetApplicableActions(ComparisonItem comparisonItem, 
         ICollection<SynchronizationRule> synchronizationRules)
     {
         HashSet<AtomicAction> result = new HashSet<AtomicAction>();
@@ -63,14 +52,6 @@ class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
         var atomicActions = _atomicActionConsistencyChecker.GetAppliableActions(matchingSynchronizationRules);
         foreach (var atomicAction in atomicActions)
         {
-            // Maintenant, on doit contrôler que l'action est applicable
-            // En effet, la condition peut correspondre sans que l'action décidée soit applicable puisqu'il n'y a pas de 
-            // corrélation entre les deux
-            // Ex :
-            //  - Condition: A.Contenu 'Non égal' à B et Action: Copier A vers B
-            //          => La condition fonctionne si A n'existe pas et que B existe
-            //          => L'action ne pourra toutefois pas fonctionner quand A n'existe pas
-
             var clonedAtomicAction = atomicAction.CloneNew();
             
             var checkResult = _atomicActionConsistencyChecker.CheckCanAdd(clonedAtomicAction, comparisonItem);
@@ -146,7 +127,6 @@ class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
 
         if (comparisonItem.FileSystemType == FileSystemTypes.Directory)
         {
-            // au 08/09/2022 : impossible de travailler sur le Content pour les Directory
             return false;
         }
             
@@ -176,7 +156,7 @@ class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
                 }
                     
                 break;
-            case ConditionOperatorTypes.NotEquals: // Peut être manquant sur B
+            case ConditionOperatorTypes.NotEquals:
                 if (contentIdentitySource == null && contentIdentityDestination != null)
                 {
                     result = true;
@@ -290,9 +270,7 @@ class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
         else
         {
             lastWriteTimeDestination = condition.DateTime!;
-                
-            // Dans les conditions, les dateTimes sont trimées à la minutes.
-            // On le contrôle, et si c'est le cas, on trime lastWriteTimeSource
+            
             if (lastWriteTimeSource != null && 
                 lastWriteTimeDestination.Value.Second == 0 && lastWriteTimeDestination.Value.Millisecond == 0)
             {
@@ -315,7 +293,6 @@ class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
                 result = lastWriteTimeDestination != null && lastWriteTimeSource != lastWriteTimeDestination;
                 break;
             case ConditionOperatorTypes.IsNewerThan: 
-                // 13:01:2023, Pour newer, on accepte que la date soit nulle, c'est à dire que le fichier n'existe pas
                 result = (condition.Destination is { IsVirtual: false } && lastWriteTimeDestination == null) || 
                          (lastWriteTimeDestination != null && lastWriteTimeSource > lastWriteTimeDestination);
                 break;
