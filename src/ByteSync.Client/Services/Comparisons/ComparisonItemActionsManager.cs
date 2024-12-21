@@ -64,8 +64,6 @@ public class ComparisonItemActionsManager : IComparisonItemActionsManager
 
     public void ClearTargetedActions(ComparisonItemViewModel comparisonItemViewModel)
     {
-        // comparisonItemViewModel.ClearTargetedActions();
-
         var atomicActions = comparisonItemViewModel.SynchronizationActions
             .Select(sa => sa.AtomicAction)
             .Where(a => a.IsTargeted);
@@ -73,15 +71,6 @@ public class ComparisonItemActionsManager : IComparisonItemActionsManager
         _atomicActionRepository.Remove(atomicActions);
         
         ResetActionsFromSynchronizationRules(comparisonItemViewModel);
-
-        // foreach (var VARIABLE in atomicActions)
-        // {
-        //     
-        // }
-        //
-        // comparisonItemViewModel.ComparisonItem.
-        //
-        // ResetActionsFromSynchronizationRules(comparisonItemViewModel);
     }
 
     public void RemoveTargetedAction(ComparisonItemViewModel comparisonItemViewModel, SynchronizationActionViewModel synchronizationActionViewModel)
