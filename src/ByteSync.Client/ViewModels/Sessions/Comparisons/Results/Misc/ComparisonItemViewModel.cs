@@ -63,14 +63,12 @@ public class ComparisonItemViewModel : IDisposable
 
         _atomicActionRepository.ObservableCache.Connect()
             .Filter(sa => sa.PathIdentity != null && Equals(sa.PathIdentity, ComparisonItem.PathIdentity))
-            .Transform(sa => _synchronizationActionViewModelFactory.CreateSynchronizationActionViewModel(sa))
+            .Transform(sa => _synchronizationActionViewModelFactory.CreateSynchronizationActionViewModel(sa, this))
             .DisposeMany() // dispose when no longer required
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _data)
             .Subscribe()
             .DisposeWith(_compositeDisposable);
-        
-        TargetedActions = new HashSet<AtomicAction>();
 
         PathIdentity = comparisonItem.PathIdentity;
 
@@ -110,12 +108,8 @@ public class ComparisonItemViewModel : IDisposable
     internal HashSet<ContentIdentityViewModel> ContentIdentitiesE { get; }
 
     internal List<HashSet<ContentIdentityViewModel>> ContentIdentitiesList { get; set; }
-
-    internal ObservableCollection<SynchronizationActionViewModel> TD_SynchronizationActions { get; }
     
     public ReadOnlyObservableCollection<SynchronizationActionViewModel> SynchronizationActions => _data;
-
-    internal HashSet<AtomicAction> TargetedActions { get; }
 
     internal StatusViewModel StatusViewModel { get; private set; }
     

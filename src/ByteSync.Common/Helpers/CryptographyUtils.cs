@@ -66,29 +66,6 @@ public static class CryptographyUtils
         return result;
     }
         
-    public static string ComputeSHA512FromText(string text)
-    {
-        using var sha512 = SHA512.Create();
-
-        byte[] hashValue = sha512.ComputeHash(Encoding.UTF8.GetBytes(text));
-            
-        string result = BitConverter.ToString(hashValue).Replace("-", String.Empty);
-
-        return result;
-    }
-        
-    public static string ComputeMD5(byte[] bytes)
-    {
-        // Use input string to calculate MD5 hash
-        using MD5 md5 = MD5.Create();
-
-        byte[] hashValue = md5.ComputeHash(bytes);
-
-        string result = BitConverter.ToString(hashValue).Replace("-", String.Empty);
-
-        return result;
-    }
-        
     public static string ComputeMD5FromText(string text)
     {
         // Use input string to calculate MD5 hash
@@ -103,20 +80,9 @@ public static class CryptographyUtils
         
     public static string ComputeSHA1(byte[] bytes)
     {
-        using SHA1Managed sha1 = new SHA1Managed();
+        using var sha1 = SHA1.Create();
             
         byte[] hashValue = sha1.ComputeHash(bytes);
-            
-        string result = BitConverter.ToString(hashValue).Replace("-", String.Empty);
-
-        return result;
-    }
-        
-    public static string ComputeSHA1FromText(string input)
-    {
-        using SHA1Managed sha1 = new SHA1Managed();
-            
-        byte[] hashValue = sha1.ComputeHash(Encoding.UTF8.GetBytes(input));
             
         string result = BitConverter.ToString(hashValue).Replace("-", String.Empty);
 

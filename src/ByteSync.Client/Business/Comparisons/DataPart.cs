@@ -53,7 +53,7 @@ namespace ByteSync.Business.Comparisons
             }
         }
 
-        public InventoryPart GetAppliableInventoryPart()
+        public InventoryPart GetApplicableInventoryPart()
         {
             if (InventoryPart != null)
             {

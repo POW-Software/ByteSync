@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using ByteSync.Business.Actions.Shared;
+using ByteSync.Business.Communications.Downloading;
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Inventories;
@@ -22,11 +23,12 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
     private readonly ISynchronizationActionRemoteUploader _synchronizationActionRemoteUploader;
     private readonly ISynchronizationService _synchronizationService;
     private readonly ISynchronizationApiClient _synchronizationApiClient;
+    private readonly IFileDatesSetter _fileDatesSetter;
     private readonly ILogger<SynchronizationActionHandler> _logger;
 
     public SynchronizationActionHandler(ISessionService sessionDataHolder, IConnectionService connectionService, IDeltaManager deltaManager, 
         ISynchronizationActionServerInformer synchronizationActionServerInformer, ISynchronizationActionRemoteUploader synchronizationActionRemoteUploader,
-        ISynchronizationService synchronizationService, ISynchronizationApiClient synchronizationApiClient,
+        ISynchronizationService synchronizationService, ISynchronizationApiClient synchronizationApiClient, IFileDatesSetter fileDatesSetter,
         ILogger<SynchronizationActionHandler> logger)
     {
         _sessionService = sessionDataHolder;
@@ -36,6 +38,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         _synchronizationActionRemoteUploader = synchronizationActionRemoteUploader;
         _synchronizationService = synchronizationService;
         _synchronizationApiClient = synchronizationApiClient;
+        _fileDatesSetter = fileDatesSetter;
         _logger = logger;
     }
 
@@ -136,7 +139,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 
                 File.Copy(sourceFullName, destinationFullName, true);
 
-                ApplyDatesFromLocalSource(sharedActionsGroup, destinationFullName, sourceFullName);
+                await ApplyDatesFromLocalSource(sharedActionsGroup, destinationFullName, sourceFullName);
             }
             else
             {
@@ -146,7 +149,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 {
                     await _deltaManager.ApplyDelta(destinationFullName, deltaFullName);
 
-                    ApplyDatesFromSharedActionsGroup(sharedActionsGroup, destinationFullName);
+                    await ApplyDatesFromSharedActionsGroup(sharedActionsGroup, destinationFullName);
                 }
                 finally
                 {
@@ -159,62 +162,30 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, _synchronizationApiClient.AssertLocalCopyIsDone);
     }
 
-    private void ApplyDatesFromLocalSource(SharedActionsGroup sharedActionsGroup, string destinationFullName, string sourceFullName)
+    private async Task ApplyDatesFromLocalSource(SharedActionsGroup sharedActionsGroup, string destinationFullName, string sourceFullName)
     {
         if (sharedActionsGroup.IsSynchronizeContentOnly)
         {
-            _logger.LogInformation("{Type:l}: resetting CreationTime and LastWriteTime  on {fileInfo}",
-                $"Synchronization.{sharedActionsGroup.Operator}", destinationFullName);
-            
-            File.SetLastWriteTimeUtc(destinationFullName, DateTime.UtcNow);
-            File.SetCreationTimeUtc(destinationFullName, DateTime.UtcNow);
+            await _fileDatesSetter.SetDates(sharedActionsGroup, destinationFullName, null);
         }
         else
         {
-            var creationTimeUtcSource = File.GetCreationTimeUtc(sourceFullName);
-            var creationTimeUtcDestination = File.GetCreationTimeUtc(destinationFullName);
-
-            if (creationTimeUtcSource != creationTimeUtcDestination)
-            {
-                SetCreationTimeUtc(sharedActionsGroup, destinationFullName, creationTimeUtcSource);
-            }
-            
-            var lastWriteTimeUtcSource = File.GetLastWriteTimeUtc(sourceFullName);
-            var lastWriteTimeUtcDestination = File.GetLastWriteTimeUtc(destinationFullName);
-
-            if (lastWriteTimeUtcSource != lastWriteTimeUtcDestination)
-            {
-                SetLastWriteTimeUtc(sharedActionsGroup, destinationFullName, lastWriteTimeUtcSource);
-            }
+            var downloadTargetDates = DownloadTargetDates.FromSharedActionsGroup(sharedActionsGroup);
+            await _fileDatesSetter.SetDates(sharedActionsGroup, destinationFullName, downloadTargetDates);
         }
     }
     
-    private void ApplyDatesFromSharedActionsGroup(SharedActionsGroup sharedActionsGroup, string destinationFullName)
+    private async Task ApplyDatesFromSharedActionsGroup(SharedActionsGroup sharedActionsGroup, string destinationFullName)
     {
+        DownloadTargetDates? downloadTargetDates = null;
+        
         if (sharedActionsGroup.IsSynchronizeContentAndDate || sharedActionsGroup.IsSynchronizeDate)
         {
-            SetCreationTimeUtc(sharedActionsGroup, destinationFullName, sharedActionsGroup.CreationTimeUtc.GetValueOrDefault());
-            SetLastWriteTimeUtc(sharedActionsGroup, destinationFullName, sharedActionsGroup.LastWriteTimeUtc.GetValueOrDefault());
+            downloadTargetDates = DownloadTargetDates.FromSharedActionsGroup(sharedActionsGroup);
         }
+        
+        await _fileDatesSetter.SetDates(sharedActionsGroup, destinationFullName, downloadTargetDates);
     }
-    
-    private void SetCreationTimeUtc(SharedActionsGroup sharedActionsGroup, string destinationFullName, DateTime creationTimeUtcSource)
-    {
-        _logger.LogInformation("{Type:l}: setting CreationTime on {fileInfo}",
-            $"Synchronization.{sharedActionsGroup.Operator}", destinationFullName);
-
-        File.SetCreationTimeUtc(destinationFullName, creationTimeUtcSource);
-    }
-
-    private void SetLastWriteTimeUtc(SharedActionsGroup sharedActionsGroup, string destinationFullName, DateTime lastWriteTimeUtcSource)
-    {
-        _logger.LogInformation("{Type:l}: setting LastWriteTime on {fileInfo}",
-            $"Synchronization.{sharedActionsGroup.Operator}", destinationFullName);
-
-        File.SetLastWriteTimeUtc(destinationFullName, lastWriteTimeUtcSource);
-    }
-
-    
 
     private HashSet<SharedDataPart> GetLocalTargets(SharedActionsGroup sharedActionsGroup)
     {
@@ -251,11 +222,9 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         var fullNames = sharedActionsGroup.GetTargetsFullNames(CurrentEndPoint);
         foreach (var destinationPath in fullNames)
         {
-            // FileInfo fileInfo = new FileInfo(destinationPath);
-
             if (File.Exists(destinationPath))
             {
-                ApplyDatesFromSharedActionsGroup(sharedActionsGroup, destinationPath);
+                await ApplyDatesFromSharedActionsGroup(sharedActionsGroup, destinationPath);
 
                 await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, 
                     _synchronizationApiClient.AssertDateIsCopied);
@@ -290,10 +259,6 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 _logger.LogInformation("{Type:l}: deleting {fileInfo}", 
                     $"Synchronization.{sharedActionsGroup.Operator}", directoryInfo.FullName);
                 
-                // Important: échoue si répertoire contient des fichiers
-                // Dans SynchronizationActionsRunner, ordonnancement : opérations effectuées sur les répertoires
-                // après les opérations sur les fichiers
-                // Par contre, on peut supprimer si contient des répertoires
                 var subFilesCount = directoryInfo.GetFiles("*", SearchOption.AllDirectories).Length;
                 directoryInfo.Delete(subFilesCount == 0);
             }

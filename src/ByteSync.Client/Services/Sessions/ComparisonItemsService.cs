@@ -2,14 +2,12 @@
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using ByteSync.Business;
-using ByteSync.Business.Inventories;
 using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Services.Comparisons;
-using DynamicData;
 
 namespace ByteSync.Services.Sessions;
 
@@ -18,19 +16,17 @@ public class ComparisonItemsService : IComparisonItemsService
     private readonly ISessionService _sessionService;
     private readonly IInventoryService _inventoryService;
     private readonly IDataPartIndexer _dataPartIndexer;
+    private readonly IComparisonItemRepository _comparisonItemRepository;
     private readonly IInventoryFileRepository _inventoryFileRepository;
 
     public ComparisonItemsService(ISessionService sessionService, IInventoryService inventoriesService, IInventoryFileRepository inventoryFileRepository, 
-        IDataPartIndexer dataPartIndexer)
+        IComparisonItemRepository comparisonItemRepository, IDataPartIndexer dataPartIndexer)
     {
         _sessionService = sessionService;
         _inventoryService = inventoriesService;
         _inventoryFileRepository = inventoryFileRepository;
+        _comparisonItemRepository = comparisonItemRepository;
         _dataPartIndexer = dataPartIndexer;
-        
-        ComparisonItemsCache = new SourceCache<ComparisonItem, PathIdentity>(comparisonItem => comparisonItem.PathIdentity);
-        
-        ComparisonItems = ComparisonItemsCache.AsObservableCache();
         
         ComparisonResult = new ReplaySubject<ComparisonResult?>(1);
         ComparisonResult.OnNext(null);
@@ -48,7 +44,7 @@ public class ComparisonItemsService : IComparisonItemsService
             .Where(c => c != null)
             .Subscribe(comparisonResult =>
             {
-                ComparisonItemsCache.AddOrUpdate(comparisonResult!.ComparisonItems);
+                _comparisonItemRepository.AddOrUpdate(comparisonResult!.ComparisonItems);
                 ApplySynchronizationRules();
             });
         
@@ -56,20 +52,16 @@ public class ComparisonItemsService : IComparisonItemsService
             .Where(x => x == null)
             .Subscribe(_ =>
             {
-                ComparisonItemsCache.Clear();
+                _comparisonItemRepository.Clear();
             });
         
         _sessionService.SessionStatusObservable
             .Where(x => x == SessionStatus.Preparation)
             .Subscribe(_ =>
             {
-                ComparisonItemsCache.Clear();
+                _comparisonItemRepository.Clear();
             });
     }
-
-    public SourceCache<ComparisonItem, PathIdentity> ComparisonItemsCache { get; set; }
-
-    public IObservableCache<ComparisonItem, PathIdentity> ComparisonItems { get; }
     
     public ISubject<ComparisonResult?> ComparisonResult { get; set; }
 

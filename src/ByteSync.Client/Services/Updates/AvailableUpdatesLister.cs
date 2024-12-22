@@ -4,17 +4,25 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces.Updates;
+using Microsoft.Extensions.Configuration;
 
 namespace ByteSync.Services.Updates;
 
 class AvailableUpdatesLister : IAvailableUpdatesLister
 {
+    private readonly IConfiguration _configuration;
+
+    public AvailableUpdatesLister(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+    
     public async Task<List<SoftwareVersion>> GetAvailableUpdates()
     {
         string contents;
         using (var httpClient = new HttpClient())
         {
-            string url = BuildUrl("updates.json");
+            string url = _configuration["UpdatesDefinitionUrl"]!;
         
             contents = await httpClient.GetStringAsync(url);
         }
@@ -26,23 +34,5 @@ class AvailableUpdatesLister : IAvailableUpdatesLister
         var softwareVersions = JsonSerializer.Deserialize<List<SoftwareVersion>>(contents, options);
 
         return softwareVersions!;
-    }
-        
-    public string GetUrl(SoftwareVersionFile softwareFileVersion)
-    {
-        string result = BuildUrl(softwareFileVersion.FileName);
-
-        return result;
-    }
-        
-    private string BuildUrl(string fileToDownload)
-    {
-        string baseUrl = "https://powbytesyncupdates.blob.core.windows.net/updates/";
-
-        string fileUrl = fileToDownload.TrimStart('/');
-
-        string url = baseUrl + fileUrl;
-
-        return url;
     }
 }

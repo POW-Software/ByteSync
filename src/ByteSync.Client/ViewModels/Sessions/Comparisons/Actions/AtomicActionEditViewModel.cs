@@ -205,7 +205,7 @@ public class AtomicActionEditViewModel : BaseAtomicEditViewModel
             {
                 foreach (var dataPart in Destinations)
                 {
-                    var contentIdentities = comparisonItem.GetContentIdentities(dataPart.GetAppliableInventoryPart());
+                    var contentIdentities = comparisonItem.GetContentIdentities(dataPart.GetApplicableInventoryPart());
                         
                     if (SelectedAction is { ActionOperatorType: ActionOperatorTypes.Create } 
                         && contentIdentities.Count == 0)

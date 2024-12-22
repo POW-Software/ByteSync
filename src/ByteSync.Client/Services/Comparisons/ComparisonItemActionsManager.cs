@@ -1,10 +1,10 @@
 ﻿using ByteSync.Business.Actions.Local;
 using ByteSync.Common.Business.Actions;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
+using ByteSync.ViewModels.Sessions.Comparisons.Results;
 using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
 
 namespace ByteSync.Services.Comparisons;
@@ -62,31 +62,30 @@ public class ComparisonItemActionsManager : IComparisonItemActionsManager
         }
     }
 
-    public void RemoveTargetedAction(AtomicAction atomicAction, ComparisonItemViewModel comparisonItemViewModel)
-    {
-        if (atomicAction.IsTargeted)
-        {
-            comparisonItemViewModel.TargetedActions.Remove(atomicAction);
-            
-            comparisonItemViewModel.TD_SynchronizationActions.RemoveAll(savm => savm.IsTargeted && savm.AtomicAction.Equals(atomicAction));
-            
-            ResetActionsFromSynchronizationRules(comparisonItemViewModel);
-        }
-    }
-
     public void ClearTargetedActions(ComparisonItemViewModel comparisonItemViewModel)
     {
-        comparisonItemViewModel.TargetedActions.Clear();
+        var atomicActions = comparisonItemViewModel.SynchronizationActions
+            .Select(sa => sa.AtomicAction)
+            .Where(a => a.IsTargeted);
 
-        comparisonItemViewModel.TD_SynchronizationActions.RemoveAll(savm => savm.IsTargeted);
+        _atomicActionRepository.Remove(atomicActions);
         
         ResetActionsFromSynchronizationRules(comparisonItemViewModel);
     }
-    
+
+    public void RemoveTargetedAction(ComparisonItemViewModel comparisonItemViewModel, SynchronizationActionViewModel synchronizationActionViewModel)
+    {
+        var atomicAction = synchronizationActionViewModel.AtomicAction;
+        if (atomicAction.IsTargeted)
+        {
+            _atomicActionRepository.Remove(atomicAction);
+        }
+        
+        ResetActionsFromSynchronizationRules(comparisonItemViewModel);
+    }
+
     private void ResetActionsFromSynchronizationRules(ComparisonItemViewModel comparisonItemViewModel)
     {
-        comparisonItemViewModel.TD_SynchronizationActions.RemoveAll(savm => savm.IsFromSynchronizationRule);
-        
         _synchronizationRuleMatcher.MakeMatches(comparisonItemViewModel.ComparisonItem,
             _synchronizationRuleRepository.Elements.ToList());
     }

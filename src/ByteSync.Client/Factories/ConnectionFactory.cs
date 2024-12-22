@@ -72,7 +72,6 @@ public class ConnectionFactory : IConnectionFactory
         var refreshTokensData = new RefreshTokensData
         {
             ClientInstanceId = _environmentService.ClientInstanceId,
-            Machinename = _environmentService.MachineName,
             OsPlatform = _environmentService.OSPlatform,
             Version = VersionHelper.GetVersionString(_environmentService.ApplicationVersion),
             Token = tokens.RefreshToken

@@ -10,8 +10,6 @@ public class UsageStatisticsPeriod
         UploadedVolumePerSubPeriod = new List<UsageStatisticsSubPeriod>();
     }
     
-    public string Name { get; set; }
-    
     public List<UsageStatisticsSubPeriod> UploadedVolumePerSubPeriod { get; set; }
 
     public long GetMaxUploadedVolume()

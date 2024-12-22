@@ -3,22 +3,25 @@ using ByteSync.Common.Business.Versions;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Loaders;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Polly;
 
 namespace ByteSync.ServerCommon.Loaders;
 
 public class ClientSoftwareVersionSettingsLoader : IClientSoftwareVersionSettingsLoader
 {
+    private readonly AppSettings _appSettings;
     private readonly ILogger<ClientSoftwareVersionSettingsLoader> _logger;
 
-    public ClientSoftwareVersionSettingsLoader(ILogger<ClientSoftwareVersionSettingsLoader> logger)
+    public ClientSoftwareVersionSettingsLoader(IOptions<AppSettings> appSettings, ILogger<ClientSoftwareVersionSettingsLoader> logger)
     {
+        _appSettings = appSettings.Value;
         _logger = logger;
     }
 
     public async Task<ClientSoftwareVersionSettings> Load()
     {
-        SoftwareVersion newMandatoryVersionCandidate = null;
+        SoftwareVersion? newMandatoryVersionCandidate = null;
 
         var policy = Policy
             .Handle<Exception>()
@@ -29,16 +32,21 @@ public class ClientSoftwareVersionSettingsLoader : IClientSoftwareVersionSetting
             string contents;
             using (var wc = new HttpClient())
             {
-                contents = await wc.GetStringAsync("https://powgeneral1.blob.core.windows.net/pow-bytesync-pub/updates.json");
+                contents = await wc.GetStringAsync(_appSettings.UpdatesDefinitionUrl);
             }
 
-            var softwareUpdates = JsonSerializer.Deserialize<List<SoftwareVersion>>(contents);
+            var softwareUpdates = JsonSerializer.Deserialize<List<SoftwareVersion>>(contents)!;
 
             if (softwareUpdates != null)
             {
                 newMandatoryVersionCandidate = softwareUpdates.FirstOrDefault(u => u.Level == PriorityLevel.Minimal);
             }
         });
+        
+        if (newMandatoryVersionCandidate == null)
+        {
+            throw new Exception("Failed to load mandatory version");
+        }
         
         _logger.LogInformation("MandatoryVersion is now: {version}", newMandatoryVersionCandidate!.Version);
 

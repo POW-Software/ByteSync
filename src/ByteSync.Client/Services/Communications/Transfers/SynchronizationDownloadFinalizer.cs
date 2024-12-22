@@ -13,13 +13,15 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
 {
     private readonly IDeltaManager _deltaManager;
     private readonly ITemporaryFileManagerFactory _temporaryFileManagerFactory;
+    private readonly IFileDatesSetter _fileDatesSetter;
     private readonly ILogger<SynchronizationDownloadFinalizer> _logger;
 
     public SynchronizationDownloadFinalizer(IDeltaManager deltaManager, ITemporaryFileManagerFactory temporaryFileManagerFactory,
-        ILogger<SynchronizationDownloadFinalizer> logger)
+        IFileDatesSetter fileDatesSetter, ILogger<SynchronizationDownloadFinalizer> logger)
     {
         _deltaManager = deltaManager;
         _temporaryFileManagerFactory = temporaryFileManagerFactory;
+        _fileDatesSetter = fileDatesSetter;
         _logger = logger;
     }
     
@@ -55,7 +57,6 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
                         
                         await using (var stream = entry.Open())
                         {
-                            // On fait une copie en memoryStream, sinon, on rencontre des erreurs si on travaille directement sur le "stream"
                             using (var reader = new MemoryStream())
                             {
                                 await stream.CopyToAsync(reader);
@@ -64,12 +65,11 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
                             }
                         }
 
-                        await SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
+                        await _fileDatesSetter.SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
                     }
                 }
                 else
                 {
-                    // Synchro full
                     foreach (var finalDestination in finalDestinations)
                     {
                         _logger.LogInformation("{SharedFileDefinitionId}: Extracting to :{FinalDestination}", 
@@ -88,7 +88,7 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
                         {
                             entry.ExtractToFile(destinationTemporaryPath);
                             temporaryFileManager.ValidateTemporaryFile();
-                            await SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
+                            await _fileDatesSetter.SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
                         }
                         catch (Exception ex)
                         {
@@ -122,7 +122,7 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
                 
                 await _deltaManager.ApplyDelta(finalDestination, deltaFullName);
 
-                await SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
+                await _fileDatesSetter.SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
             }
             
             DeleteTemporaryDownloadedFile(downloadDestination);
@@ -133,7 +133,7 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
             
             foreach (var downloadDestination in downloadTarget.AllFinalDestinations)
             {
-                tasks.Add(SetDates(sharedFileDefinition, downloadDestination, downloadTargetDates));
+                tasks.Add(_fileDatesSetter.SetDates(sharedFileDefinition, downloadDestination, downloadTargetDates));
             }
             
             await Task.WhenAll(tasks);
@@ -144,20 +144,5 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
     {
         _logger.LogInformation("Deleting temporary downloaded file {temporaryDownloadedFile}", temporaryDownloadedFile);
         File.Delete(temporaryDownloadedFile);
-    }
-
-    private Task SetDates(SharedFileDefinition sharedFileDefinition, string fullName, DownloadTargetDates? downloadTargetDates)
-    {
-        return Task.Run(() =>
-        {
-            if (downloadTargetDates != null)
-            {
-                _logger.LogInformation("{sharedFileDefinitionId}: Setting CreationTime and LastWriteTime on {FinalDestination}", 
-                    sharedFileDefinition.Id, fullName);
-                
-                File.SetCreationTimeUtc(fullName, downloadTargetDates.CreationTimeUtc);
-                File.SetLastWriteTimeUtc(fullName, downloadTargetDates.LastWriteTimeUtc);
-            }
-        });
     }
 }

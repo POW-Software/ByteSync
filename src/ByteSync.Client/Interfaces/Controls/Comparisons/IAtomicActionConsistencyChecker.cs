@@ -10,5 +10,5 @@ public interface IAtomicActionConsistencyChecker
     
     AtomicActionConsistencyCheckCanAddResult CheckCanAdd(AtomicAction atomicAction, ICollection<ComparisonItem> comparisonItems);
     
-    List<AtomicAction> GetAppliableActions(ICollection<SynchronizationRule> synchronizationRules);
+    List<AtomicAction> GetApplicableActions(ICollection<SynchronizationRule> synchronizationRules);
 }

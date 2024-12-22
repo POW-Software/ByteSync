@@ -19,12 +19,13 @@ public class ExceptionEnricher : ILogEventEnricher
         }
     }
 
-    private T FindException<T>(Exception exception) where T : Exception
+    private T? FindException<T>(Exception? exception) where T : Exception
     {
         if (exception is null)
         {
             return null;
         }
+        
         if (exception is T)
         {
             return exception as T;

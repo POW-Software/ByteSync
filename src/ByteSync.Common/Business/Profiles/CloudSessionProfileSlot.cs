@@ -2,6 +2,6 @@
 
 public class CloudSessionProfileSlot
 {
-    public string ProfileClientId { get; set; }
-    public string ClientId { get; set; }
+    public string ProfileClientId { get; set; } = null!;
+    public string ClientId { get; set; } = null!;
 }
