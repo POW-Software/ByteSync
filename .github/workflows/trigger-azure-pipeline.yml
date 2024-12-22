@@ -3,12 +3,32 @@ name: Trigger Azure Pipeline on PR Commit
 on:
   pull_request:
     branches:
-      - master             # pr destination branch is master
+      - master             
     types: [synchronize, opened]
+    paths:
+      - 'src/ByteSync.Common/**'
+      - 'src/ByteSync.Functions/**'
+      - 'src/ByteSync.ServerCommon/**'
+      - 'tests/ByteSync.Common.Tests/**'
+      - 'tests/ByteSync.Functions.IntegrationTests/**'
+      - 'tests/ByteSync.Functions.UnitTests/**'
+      - 'tests/ByteSync.ServerCommon.Tests/**'
+      - 'tests/ByteSync.TestsCommon/**'
+
   push:
     branches:
       - master
-  workflow_dispatch:       # allows manual trigger
+    paths:
+      - 'src/ByteSync.Common/**'
+      - 'src/ByteSync.Functions/**'
+      - 'src/ByteSync.ServerCommon/**'
+      - 'tests/ByteSync.Common.Tests/**'
+      - 'tests/ByteSync.Functions.IntegrationTests/**'
+      - 'tests/ByteSync.Functions.UnitTests/**'
+      - 'tests/ByteSync.ServerCommon.Tests/**'
+      - 'tests/ByteSync.TestsCommon/**'
+
+  workflow_dispatch:      
  
 jobs:
   trigger-azure-pipeline:
