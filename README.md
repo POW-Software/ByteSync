@@ -29,7 +29,7 @@
 ## Installation
 
 ### Download
-1. Visit our [official website](https://www.bytesyncapp/com).
+1. Visit our [official website](https://www.bytesyncapp.com).
 2. Download the right version for your operating system.
 
 ### Build from Source (Optional)
