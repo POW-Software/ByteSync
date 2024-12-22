@@ -53,7 +53,7 @@ Coming soon...
 ---
 
 ## Support
-If you encounter any issues, please open an [issue](https://github.com/POW-Software/ByteSync/issues) on GitHub. For other questions, feel free to reach out at [contact@pow-software.com].
+If you encounter any issues, please open an [issue](https://github.com/POW-Software/ByteSync/issues) on GitHub.
 
 ---
 
