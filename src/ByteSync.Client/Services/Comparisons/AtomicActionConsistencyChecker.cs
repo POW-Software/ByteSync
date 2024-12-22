@@ -42,7 +42,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         return result;
     }
 
-    public List<AtomicAction> GetAppliableActions(ICollection<SynchronizationRule> synchronizationRules)
+    public List<AtomicAction> GetApplicableActions(ICollection<SynchronizationRule> synchronizationRules)
     {
         List<AtomicAction> appliableActions = new List<AtomicAction>();
 
@@ -173,7 +173,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
                 // var contentIdentityViewsSource =
                 //     comparisonItemViewModel.GetContentIdentityViews(synchronizationAction.Source.GetAppliableInventory());
 
-                var sourceInventoryPart = atomicAction.Source.GetAppliableInventoryPart();
+                var sourceInventoryPart = atomicAction.Source.GetApplicableInventoryPart();
                     
                 var contentIdentitiesSources = comparisonItem.GetContentIdentities(sourceInventoryPart);
 
@@ -191,7 +191,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
                 }
                     
                     
-                var targetInventoryPart = atomicAction.Destination.GetAppliableInventoryPart();
+                var targetInventoryPart = atomicAction.Destination.GetApplicableInventoryPart();
                 var contentIdentityViewsTargets = comparisonItem.GetContentIdentities(targetInventoryPart);
 
                 // On ne peut pas envoyer sur un InventoryPartTypes.File qui n'est pas présent
@@ -230,7 +230,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
 
         if (atomicAction.IsSynchronizeDate || atomicAction.IsDelete)
         {
-            var targetInventoryPart = atomicAction.Destination.GetAppliableInventoryPart();
+            var targetInventoryPart = atomicAction.Destination.GetApplicableInventoryPart();
             var contentIdentitiesTargets = comparisonItem.GetContentIdentities(targetInventoryPart);
                 
             if (contentIdentitiesTargets.Count == 0)
@@ -242,7 +242,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
             
         if (atomicAction.IsCreate)
         {
-            var targetInventoryPart = atomicAction.Destination.GetAppliableInventoryPart();
+            var targetInventoryPart = atomicAction.Destination.GetApplicableInventoryPart();
                 
             // On ne peut rien faire sur une target de type InventoryPartTypes.File
             if (targetInventoryPart.InventoryPartType == FileSystemTypes.File)

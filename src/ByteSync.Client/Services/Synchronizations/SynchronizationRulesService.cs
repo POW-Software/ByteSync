@@ -24,14 +24,7 @@ public class SynchronizationRulesService : ISynchronizationRulesService
         _synchronizationRuleMatcher = synchronizationRuleMatcher;
         _comparisonItemRepository = comparisonItemRepository;
         _synchronizationRulesConverter = synchronizationRulesConverter;
-        
-        // SynchronizationRulesCache = new SourceCache<SynchronizationRule, string>(synchronizationRule => synchronizationRule.SynchronizationRuleId);
-        // SynchronizationRules = SynchronizationRulesCache.Connect().Publish().AsObservableCache();
     }
-
-    // private SourceCache<SynchronizationRule, string> SynchronizationRulesCache { get; set; }
-    //
-    // public IObservableCache<SynchronizationRule, string> SynchronizationRules { get; set; }
     
     public void AddSynchronizationRule(SynchronizationRule synchronizationRule)
     {
@@ -43,24 +36,8 @@ public class SynchronizationRulesService : ISynchronizationRulesService
         _dataPartIndexer.Remap(allSynchronizationRules);
         _synchronizationRuleMatcher.MakeMatches(allComparisonItems, allSynchronizationRules);
         
-        // var allSynchronizationRules = SynchronizationRules!.Select(vm => vm.SynchronizationRule).ToList();
-        // await _uiHelper.ExecuteOnUi(() =>
-        // {
-        //     SynchronizationRuleMatcher synchronizationRuleMatcher = new SynchronizationRuleMatcher(this);
-        //     synchronizationRuleMatcher.MakeMatches(ComparisonItems, allSynchronizationRules);
-        // });
-        
-        
-        
-        // _comparisonItemsService.ApplySynchronizationRules();
-        
         _synchronizationRuleRepository.AddOrUpdate(synchronizationRule);
     }
-
-    // public void ClearSynchronizationRules()
-    // {
-    //     SynchronizationRulesCache.Clear();
-    // }
 
     public List<LooseSynchronizationRule> GetLooseSynchronizationRules()
     {

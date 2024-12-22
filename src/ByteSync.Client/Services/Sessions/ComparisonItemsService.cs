@@ -2,14 +2,12 @@
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using ByteSync.Business;
-using ByteSync.Business.Inventories;
 using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Services.Comparisons;
-using DynamicData;
 
 namespace ByteSync.Services.Sessions;
 
@@ -64,10 +62,6 @@ public class ComparisonItemsService : IComparisonItemsService
                 _comparisonItemRepository.Clear();
             });
     }
-
-    // public SourceCache<ComparisonItem, PathIdentity> ComparisonItemsCache { get; set; }
-    //
-    // public IObservableCache<ComparisonItem, PathIdentity> ComparisonItems { get; }
     
     public ISubject<ComparisonResult?> ComparisonResult { get; set; }
 

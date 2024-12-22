@@ -16,7 +16,6 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Results;
 
 public class SynchronizationActionViewModel : ViewModelBase, IDisposable
 {
-    // private readonly IAtomicActionRepository _atomicActionRepository;
     private readonly ISynchronizationService _synchronizationService;
     private readonly ILocalizationService _localizationService;
     private readonly IComparisonItemActionsManager _comparisonItemActionsManager;
@@ -35,7 +34,6 @@ public class SynchronizationActionViewModel : ViewModelBase, IDisposable
         IComparisonItemActionsManager comparisonItemActionsManager)
         : this()
     {
-        // _atomicActionRepository = atomicActionRepository;
         _localizationService = localizationService;
         _synchronizationService = synchronizationService;
         _comparisonItemActionsManager = comparisonItemActionsManager;
@@ -92,11 +90,6 @@ public class SynchronizationActionViewModel : ViewModelBase, IDisposable
     private void Remove()
     {
         _comparisonItemActionsManager.RemoveTargetedAction(ComparisonItemViewModel, this);
-        
-        // if (!IsFromSynchronizationRule)
-        // {
-        //     _atomicActionRepository.Remove(AtomicAction);
-        // }
     }
 
     private void Edit()

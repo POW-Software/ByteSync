@@ -167,33 +167,11 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         if (sharedActionsGroup.IsSynchronizeContentOnly)
         {
             await _fileDatesSetter.SetDates(sharedActionsGroup, destinationFullName, null);
-            
-            // _logger.LogInformation("{Type:l}: resetting CreationTime and LastWriteTime  on {fileInfo}",
-            //     $"Synchronization.{sharedActionsGroup.Operator}", destinationFullName);
-            //
-            // File.SetLastWriteTimeUtc(destinationFullName, DateTime.UtcNow);
-            // File.SetCreationTimeUtc(destinationFullName, DateTime.UtcNow);
         }
         else
         {
             var downloadTargetDates = DownloadTargetDates.FromSharedActionsGroup(sharedActionsGroup);
             await _fileDatesSetter.SetDates(sharedActionsGroup, destinationFullName, downloadTargetDates);
-            
-            // var creationTimeUtcSource = File.GetCreationTimeUtc(sourceFullName);
-            // var creationTimeUtcDestination = File.GetCreationTimeUtc(destinationFullName);
-            //
-            // if (creationTimeUtcSource != creationTimeUtcDestination)
-            // {
-            //     SetCreationTimeUtc(sharedActionsGroup, destinationFullName, creationTimeUtcSource);
-            // }
-            //
-            // var lastWriteTimeUtcSource = File.GetLastWriteTimeUtc(sourceFullName);
-            // var lastWriteTimeUtcDestination = File.GetLastWriteTimeUtc(destinationFullName);
-            //
-            // if (lastWriteTimeUtcSource != lastWriteTimeUtcDestination)
-            // {
-            //     SetLastWriteTimeUtc(sharedActionsGroup, destinationFullName, lastWriteTimeUtcSource);
-            // }
         }
     }
     
@@ -208,22 +186,6 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         
         await _fileDatesSetter.SetDates(sharedActionsGroup, destinationFullName, downloadTargetDates);
     }
-    
-    // private void SetCreationTimeUtc(SharedActionsGroup sharedActionsGroup, string destinationFullName, DateTime creationTimeUtcSource)
-    // {
-    //     _logger.LogInformation("{Type:l}: setting CreationTime on {fileInfo}",
-    //         $"Synchronization.{sharedActionsGroup.Operator}", destinationFullName);
-    //
-    //     File.SetCreationTimeUtc(destinationFullName, creationTimeUtcSource);
-    // }
-    //
-    // private void SetLastWriteTimeUtc(SharedActionsGroup sharedActionsGroup, string destinationFullName, DateTime lastWriteTimeUtcSource)
-    // {
-    //     _logger.LogInformation("{Type:l}: setting LastWriteTime on {fileInfo}",
-    //         $"Synchronization.{sharedActionsGroup.Operator}", destinationFullName);
-    //
-    //     File.SetLastWriteTimeUtc(destinationFullName, lastWriteTimeUtcSource);
-    // }
 
     private HashSet<SharedDataPart> GetLocalTargets(SharedActionsGroup sharedActionsGroup)
     {
@@ -260,11 +222,9 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         var fullNames = sharedActionsGroup.GetTargetsFullNames(CurrentEndPoint);
         foreach (var destinationPath in fullNames)
         {
-            // FileInfo fileInfo = new FileInfo(destinationPath);
-
             if (File.Exists(destinationPath))
             {
-                ApplyDatesFromSharedActionsGroup(sharedActionsGroup, destinationPath);
+                await ApplyDatesFromSharedActionsGroup(sharedActionsGroup, destinationPath);
 
                 await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, 
                     _synchronizationApiClient.AssertDateIsCopied);
@@ -299,10 +259,6 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 _logger.LogInformation("{Type:l}: deleting {fileInfo}", 
                     $"Synchronization.{sharedActionsGroup.Operator}", directoryInfo.FullName);
                 
-                // Important: échoue si répertoire contient des fichiers
-                // Dans SynchronizationActionsRunner, ordonnancement : opérations effectuées sur les répertoires
-                // après les opérations sur les fichiers
-                // Par contre, on peut supprimer si contient des répertoires
                 var subFilesCount = directoryInfo.GetFiles("*", SearchOption.AllDirectories).Length;
                 directoryInfo.Delete(subFilesCount == 0);
             }

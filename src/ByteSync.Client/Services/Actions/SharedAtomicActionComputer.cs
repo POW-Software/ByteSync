@@ -48,7 +48,7 @@ public class SharedAtomicActionComputer : ISharedAtomicActionComputer
 
         if (atomicAction.IsDelete)
         {
-            var targetContentIdentities = atomicAction.ComparisonItem!.GetContentIdentities(target!.GetAppliableInventoryPart());
+            var targetContentIdentities = atomicAction.ComparisonItem!.GetContentIdentities(target!.GetApplicableInventoryPart());
 
             targetSharedDataParts = new HashSet<SharedDataPart>();
             foreach (var contentIdentity in targetContentIdentities)
@@ -65,8 +65,8 @@ public class SharedAtomicActionComputer : ISharedAtomicActionComputer
         }
         else if (atomicAction.IsSynchronizeContent || atomicAction.IsSynchronizeDate)
         {
-            var sourceContentIdentities = atomicAction.ComparisonItem!.GetContentIdentities(source!.GetAppliableInventoryPart());
-            var targetContentIdentities = atomicAction.ComparisonItem!.GetContentIdentities(target!.GetAppliableInventoryPart());
+            var sourceContentIdentities = atomicAction.ComparisonItem!.GetContentIdentities(source!.GetApplicableInventoryPart());
+            var targetContentIdentities = atomicAction.ComparisonItem!.GetContentIdentities(target!.GetApplicableInventoryPart());
 
             if (sourceContentIdentities.Count != 1)
             {
@@ -76,8 +76,8 @@ public class SharedAtomicActionComputer : ISharedAtomicActionComputer
             var sourceContentIdentity = sourceContentIdentities.Single();
 
             size = sourceContentIdentity.Core?.Size;
-            lastWriteTimeUtc = sourceContentIdentity.GetLastWriteTimeUtc(source.GetAppliableInventoryPart());
-            creationTimeUtc = sourceContentIdentity.GetCreationTimeUtc(source.GetAppliableInventoryPart());
+            lastWriteTimeUtc = sourceContentIdentity.GetLastWriteTimeUtc(source.GetApplicableInventoryPart());
+            creationTimeUtc = sourceContentIdentity.GetCreationTimeUtc(source.GetApplicableInventoryPart());
                 
             if (targetContentIdentities.Count > 0)
             {
@@ -91,7 +91,7 @@ public class SharedAtomicActionComputer : ISharedAtomicActionComputer
                     if (!Equals(targetContentIdentity.Core?.SignatureHash,
                             sourceContentIdentity.Core?.SignatureHash) ||
                         targetContentIdentity.Core?.Size != size ||
-                        targetContentIdentity.GetLastWriteTimeUtc(target.GetAppliableInventoryPart()) != lastWriteTimeUtc)
+                        targetContentIdentity.GetLastWriteTimeUtc(target.GetApplicableInventoryPart()) != lastWriteTimeUtc)
                     {
                         targetSharedDataParts.AddAll(BuildSharedDataPart(target, targetContentIdentity));
                     }
@@ -154,7 +154,7 @@ public class SharedAtomicActionComputer : ISharedAtomicActionComputer
     {
         var result = new HashSet<SharedDataPart>();
             
-        var fileSystemDescriptions = contentIdentity.GetFileSystemDescriptions(dataPart.GetAppliableInventoryPart());
+        var fileSystemDescriptions = contentIdentity.GetFileSystemDescriptions(dataPart.GetApplicableInventoryPart());
 
         foreach (var fileSystemDescription in fileSystemDescriptions)
         {
@@ -184,11 +184,11 @@ public class SharedAtomicActionComputer : ISharedAtomicActionComputer
         string? signatureHash = null, bool hasAnalysisError = false)
     {
         var inventory = dataPart.GetAppliableInventory();
-        var inventoryPart = dataPart.GetAppliableInventoryPart();
+        var inventoryPart = dataPart.GetApplicableInventoryPart();
             
         SharedDataPart sharedDataPart = new SharedDataPart(
             dataPart.Name,
-            dataPart.GetAppliableInventoryPart().InventoryPartType,
+            dataPart.GetApplicableInventoryPart().InventoryPartType,
             inventory.Endpoint.ClientInstanceId,
             inventory.Letter,
             inventoryPart.RootPath,

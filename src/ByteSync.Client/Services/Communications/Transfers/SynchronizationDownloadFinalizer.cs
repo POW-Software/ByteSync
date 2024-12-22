@@ -57,7 +57,6 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
                         
                         await using (var stream = entry.Open())
                         {
-                            // On fait une copie en memoryStream, sinon, on rencontre des erreurs si on travaille directement sur le "stream"
                             using (var reader = new MemoryStream())
                             {
                                 await stream.CopyToAsync(reader);
@@ -71,7 +70,6 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
                 }
                 else
                 {
-                    // Synchro full
                     foreach (var finalDestination in finalDestinations)
                     {
                         _logger.LogInformation("{SharedFileDefinitionId}: Extracting to :{FinalDestination}", 
@@ -125,7 +123,6 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
                 await _deltaManager.ApplyDelta(finalDestination, deltaFullName);
 
                 await _fileDatesSetter.SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
-                // await SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
             }
             
             DeleteTemporaryDownloadedFile(downloadDestination);
@@ -148,27 +145,4 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
         _logger.LogInformation("Deleting temporary downloaded file {temporaryDownloadedFile}", temporaryDownloadedFile);
         File.Delete(temporaryDownloadedFile);
     }
-
-    // private Task SetDates(SharedFileDefinition sharedFileDefinition, string fullName, DownloadTargetDates? downloadTargetDates)
-    // {
-    //     return Task.Run(() =>
-    //     {
-    //         if (downloadTargetDates != null)
-    //         {
-    //             _logger.LogInformation("{sharedFileDefinitionId}: Setting CreationTime and LastWriteTime on {FinalDestination}", 
-    //                 sharedFileDefinition.Id, fullName);
-    //             
-    //             File.SetCreationTimeUtc(fullName, downloadTargetDates.CreationTimeUtc);
-    //             File.SetLastWriteTimeUtc(fullName, downloadTargetDates.LastWriteTimeUtc);
-    //         }
-    //         else
-    //         {
-    //             _logger.LogInformation("{sharedFileDefinitionId}: Setting CreationTime and LastWriteTime on {FinalDestination} to now", 
-    //                 sharedFileDefinition.Id, fullName);
-    //             
-    //             File.SetCreationTimeUtc(fullName, DateTime.UtcNow);
-    //             File.SetLastWriteTimeUtc(fullName, DateTime.UtcNow);
-    //         }
-    //     });
-    // }
 }

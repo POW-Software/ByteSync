@@ -49,7 +49,7 @@ class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
 
         var matchingSynchronizationRules = synchronizationRules.Where(sr => ConditionsMatch(sr, comparisonItem)).ToList();
         
-        var atomicActions = _atomicActionConsistencyChecker.GetAppliableActions(matchingSynchronizationRules);
+        var atomicActions = _atomicActionConsistencyChecker.GetApplicableActions(matchingSynchronizationRules);
         foreach (var atomicAction in atomicActions)
         {
             var clonedAtomicAction = atomicAction.CloneNew();
@@ -312,7 +312,7 @@ class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
         {
             foreach (var pair in contentIdentity.InventoryPartsByLastWriteTimes)
             {
-                if (pair.Value.Contains(dataPart.GetAppliableInventoryPart()))
+                if (pair.Value.Contains(dataPart.GetApplicableInventoryPart()))
                 {
                     return pair.Key;
                 }
