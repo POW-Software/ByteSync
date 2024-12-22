@@ -5,7 +5,7 @@ using ByteSync.Common.Business.SharedFiles;
 
 namespace ByteSync.Interfaces.Controls.Synchronizations;
 
-public interface IDatesSetter
+public interface IFileDatesSetter
 {
     Task SetDates(SharedFileDefinition sharedFileDefinition, string finalDestination, DownloadTargetDates? downloadTargetDates);
     

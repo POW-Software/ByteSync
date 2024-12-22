@@ -13,15 +13,15 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
 {
     private readonly IDeltaManager _deltaManager;
     private readonly ITemporaryFileManagerFactory _temporaryFileManagerFactory;
-    private readonly IDatesSetter _datesSetter;
+    private readonly IFileDatesSetter _fileDatesSetter;
     private readonly ILogger<SynchronizationDownloadFinalizer> _logger;
 
     public SynchronizationDownloadFinalizer(IDeltaManager deltaManager, ITemporaryFileManagerFactory temporaryFileManagerFactory,
-        IDatesSetter datesSetter, ILogger<SynchronizationDownloadFinalizer> logger)
+        IFileDatesSetter fileDatesSetter, ILogger<SynchronizationDownloadFinalizer> logger)
     {
         _deltaManager = deltaManager;
         _temporaryFileManagerFactory = temporaryFileManagerFactory;
-        _datesSetter = datesSetter;
+        _fileDatesSetter = fileDatesSetter;
         _logger = logger;
     }
     
@@ -66,7 +66,7 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
                             }
                         }
 
-                        await _datesSetter.SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
+                        await _fileDatesSetter.SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
                     }
                 }
                 else
@@ -90,7 +90,7 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
                         {
                             entry.ExtractToFile(destinationTemporaryPath);
                             temporaryFileManager.ValidateTemporaryFile();
-                            await _datesSetter.SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
+                            await _fileDatesSetter.SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
                         }
                         catch (Exception ex)
                         {
@@ -124,7 +124,7 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
                 
                 await _deltaManager.ApplyDelta(finalDestination, deltaFullName);
 
-                await _datesSetter.SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
+                await _fileDatesSetter.SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
                 // await SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
             }
             
@@ -136,7 +136,7 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
             
             foreach (var downloadDestination in downloadTarget.AllFinalDestinations)
             {
-                tasks.Add(_datesSetter.SetDates(sharedFileDefinition, downloadDestination, downloadTargetDates));
+                tasks.Add(_fileDatesSetter.SetDates(sharedFileDefinition, downloadDestination, downloadTargetDates));
             }
             
             await Task.WhenAll(tasks);

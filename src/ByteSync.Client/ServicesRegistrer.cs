@@ -144,7 +144,7 @@ public static class ServicesRegistrer
         builder.RegisterType<FileUploader>().AsImplementedInterfaces();
         builder.RegisterType<FileDownloader>().AsImplementedInterfaces();
         builder.RegisterType<DeltaManager>().AsImplementedInterfaces();
-        builder.RegisterType<DatesSetter>().AsImplementedInterfaces();
+        builder.RegisterType<FileDatesSetter>().AsImplementedInterfaces();
         builder.RegisterType<SlicerEncrypter>().AsImplementedInterfaces();
         builder.RegisterType<MergerDecrypter>().AsImplementedInterfaces();
         builder.RegisterType<DownloadManager>().AsImplementedInterfaces(); 

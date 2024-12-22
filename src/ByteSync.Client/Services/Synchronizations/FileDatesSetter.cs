@@ -7,11 +7,11 @@ using ByteSync.Interfaces.Controls.Synchronizations;
 
 namespace ByteSync.Services.Synchronizations;
 
-public class DatesSetter : IDatesSetter
+public class FileDatesSetter : IFileDatesSetter
 {
-    private readonly ILogger<DatesSetter> _logger;
+    private readonly ILogger<FileDatesSetter> _logger;
 
-    public DatesSetter(ILogger<DatesSetter> logger)
+    public FileDatesSetter(ILogger<FileDatesSetter> logger)
     {
         _logger = logger;
     }

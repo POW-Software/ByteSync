@@ -37,7 +37,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         RegisterType<CloudSessionLocalDataManager, ICloudSessionLocalDataManager>();
         RegisterType<TemporaryFileManagerFactory, ITemporaryFileManagerFactory>();
         RegisterType<TemporaryFileManager, ITemporaryFileManager>();
-        RegisterType<DatesSetter, IDatesSetter>();
+        RegisterType<FileDatesSetter, IFileDatesSetter>();
         RegisterType<ComparisonResultPreparer>();
         RegisterType<SynchronizationActionHandler>();
         BuildMoqContainer();

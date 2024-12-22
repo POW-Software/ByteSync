@@ -23,12 +23,12 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
     private readonly ISynchronizationActionRemoteUploader _synchronizationActionRemoteUploader;
     private readonly ISynchronizationService _synchronizationService;
     private readonly ISynchronizationApiClient _synchronizationApiClient;
-    private readonly IDatesSetter _datesSetter;
+    private readonly IFileDatesSetter _fileDatesSetter;
     private readonly ILogger<SynchronizationActionHandler> _logger;
 
     public SynchronizationActionHandler(ISessionService sessionDataHolder, IConnectionService connectionService, IDeltaManager deltaManager, 
         ISynchronizationActionServerInformer synchronizationActionServerInformer, ISynchronizationActionRemoteUploader synchronizationActionRemoteUploader,
-        ISynchronizationService synchronizationService, ISynchronizationApiClient synchronizationApiClient, IDatesSetter datesSetter,
+        ISynchronizationService synchronizationService, ISynchronizationApiClient synchronizationApiClient, IFileDatesSetter fileDatesSetter,
         ILogger<SynchronizationActionHandler> logger)
     {
         _sessionService = sessionDataHolder;
@@ -38,7 +38,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         _synchronizationActionRemoteUploader = synchronizationActionRemoteUploader;
         _synchronizationService = synchronizationService;
         _synchronizationApiClient = synchronizationApiClient;
-        _datesSetter = datesSetter;
+        _fileDatesSetter = fileDatesSetter;
         _logger = logger;
     }
 
@@ -166,7 +166,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
     {
         if (sharedActionsGroup.IsSynchronizeContentOnly)
         {
-            await _datesSetter.SetDates(sharedActionsGroup, destinationFullName, null);
+            await _fileDatesSetter.SetDates(sharedActionsGroup, destinationFullName, null);
             
             // _logger.LogInformation("{Type:l}: resetting CreationTime and LastWriteTime  on {fileInfo}",
             //     $"Synchronization.{sharedActionsGroup.Operator}", destinationFullName);
@@ -177,7 +177,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         else
         {
             var downloadTargetDates = DownloadTargetDates.FromSharedActionsGroup(sharedActionsGroup);
-            await _datesSetter.SetDates(sharedActionsGroup, destinationFullName, downloadTargetDates);
+            await _fileDatesSetter.SetDates(sharedActionsGroup, destinationFullName, downloadTargetDates);
             
             // var creationTimeUtcSource = File.GetCreationTimeUtc(sourceFullName);
             // var creationTimeUtcDestination = File.GetCreationTimeUtc(destinationFullName);
@@ -206,7 +206,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
             downloadTargetDates = DownloadTargetDates.FromSharedActionsGroup(sharedActionsGroup);
         }
         
-        await _datesSetter.SetDates(sharedActionsGroup, destinationFullName, downloadTargetDates);
+        await _fileDatesSetter.SetDates(sharedActionsGroup, destinationFullName, downloadTargetDates);
     }
     
     // private void SetCreationTimeUtc(SharedActionsGroup sharedActionsGroup, string destinationFullName, DateTime creationTimeUtcSource)
