@@ -139,7 +139,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 
                 File.Copy(sourceFullName, destinationFullName, true);
 
-                ApplyDatesFromLocalSource(sharedActionsGroup, destinationFullName, sourceFullName);
+                await ApplyDatesFromLocalSource(sharedActionsGroup, destinationFullName, sourceFullName);
             }
             else
             {
@@ -149,7 +149,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 {
                     await _deltaManager.ApplyDelta(destinationFullName, deltaFullName);
 
-                    ApplyDatesFromSharedActionsGroup(sharedActionsGroup, destinationFullName);
+                    await ApplyDatesFromSharedActionsGroup(sharedActionsGroup, destinationFullName);
                 }
                 finally
                 {
@@ -162,11 +162,11 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, _synchronizationApiClient.AssertLocalCopyIsDone);
     }
 
-    private void ApplyDatesFromLocalSource(SharedActionsGroup sharedActionsGroup, string destinationFullName, string sourceFullName)
+    private async Task ApplyDatesFromLocalSource(SharedActionsGroup sharedActionsGroup, string destinationFullName, string sourceFullName)
     {
         if (sharedActionsGroup.IsSynchronizeContentOnly)
         {
-            _datesSetter.SetDates(sharedActionsGroup, destinationFullName, null);
+            await _datesSetter.SetDates(sharedActionsGroup, destinationFullName, null);
             
             // _logger.LogInformation("{Type:l}: resetting CreationTime and LastWriteTime  on {fileInfo}",
             //     $"Synchronization.{sharedActionsGroup.Operator}", destinationFullName);
@@ -177,7 +177,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         else
         {
             var downloadTargetDates = DownloadTargetDates.FromSharedActionsGroup(sharedActionsGroup);
-            _datesSetter.SetDates(sharedActionsGroup, destinationFullName, downloadTargetDates);
+            await _datesSetter.SetDates(sharedActionsGroup, destinationFullName, downloadTargetDates);
             
             // var creationTimeUtcSource = File.GetCreationTimeUtc(sourceFullName);
             // var creationTimeUtcDestination = File.GetCreationTimeUtc(destinationFullName);
@@ -197,7 +197,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         }
     }
     
-    private void ApplyDatesFromSharedActionsGroup(SharedActionsGroup sharedActionsGroup, string destinationFullName)
+    private async Task ApplyDatesFromSharedActionsGroup(SharedActionsGroup sharedActionsGroup, string destinationFullName)
     {
         DownloadTargetDates? downloadTargetDates = null;
         
@@ -206,7 +206,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
             downloadTargetDates = DownloadTargetDates.FromSharedActionsGroup(sharedActionsGroup);
         }
         
-        _datesSetter.SetDates(sharedActionsGroup, destinationFullName, downloadTargetDates);
+        await _datesSetter.SetDates(sharedActionsGroup, destinationFullName, downloadTargetDates);
     }
     
     // private void SetCreationTimeUtc(SharedActionsGroup sharedActionsGroup, string destinationFullName, DateTime creationTimeUtcSource)
