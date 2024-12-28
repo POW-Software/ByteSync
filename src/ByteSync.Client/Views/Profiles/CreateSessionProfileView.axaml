@@ -13,7 +13,7 @@
         <profiles:CreateSessionProfileViewModel />
     </Design.DataContext>
     
-    <Grid Background="{DynamicResource MahApps.Brushes.Gray7}" >
+    <Grid>
         <StackPanel MinWidth="550" >
             <StackPanel Margin="12 0 12 0" Orientation="Vertical" HorizontalAlignment="Center">
                 <Grid RowDefinitions="Auto, Auto" ColumnDefinitions="Auto, Auto" HorizontalAlignment="Center">

@@ -23,7 +23,6 @@ namespace ByteSync.ViewModels.Headers;
 
 public class HeaderViewModel : ActivableViewModelBase
 {
-    private readonly INavigationEventsHub _navigationEventsHub;
     private readonly IWebAccessor _webAccessor;
     private readonly IAvailableUpdateRepository _availableUpdateRepository;
     
@@ -38,16 +37,16 @@ public class HeaderViewModel : ActivableViewModelBase
     }
         
     public HeaderViewModel(FlyoutContainerViewModel flyoutContainerViewModel, ConnectionStatusViewModel connectionStatusViewModel,
-        INavigationEventsHub navigationEventsHub, IWebAccessor webAccessor, IAvailableUpdateRepository availableAvailableUpdateRepository,
+        IWebAccessor webAccessor, IAvailableUpdateRepository availableAvailableUpdateRepository,
         ILocalizationService localizationService, INavigationService navigationService, IDialogService dialogService,
         IFlyoutElementViewModelFactory flyoutElementViewModelFactory)
     {
-        _navigationEventsHub = navigationEventsHub;
         _webAccessor = webAccessor;
         _availableUpdateRepository = availableAvailableUpdateRepository;
         _localizationService = localizationService;
         _navigationService = navigationService;
         _dialogService = dialogService;
+        _flyoutElementViewModelFactory = flyoutElementViewModelFactory;
 
         FlyoutContainer = flyoutContainerViewModel;
         ConnectionStatus = connectionStatusViewModel;
@@ -58,7 +57,7 @@ public class HeaderViewModel : ActivableViewModelBase
         ViewAccountCommand = ReactiveCommand.Create(ViewAccount, canView);
         ViewTrustedNetworkCommand = ReactiveCommand.Create(ViewTrustedNetwork, canView);
         ViewGeneralSettingsCommand = ReactiveCommand.Create(ViewGeneralSettings, canView);
-        ViewApplicationInfoCommand = ReactiveCommand.Create(ViewApplicationInfo, canView);
+        ViewAboutApplicationCommand = ReactiveCommand.Create(ViewAboutApplication, canView);
         ShowUpdateCommand = ReactiveCommand.Create(ViewUpdateDetails, canView);
 
         OpenSupportCommand = ReactiveCommand.Create(OpenSupport);
@@ -111,7 +110,7 @@ public class HeaderViewModel : ActivableViewModelBase
 
     public ReactiveCommand<Unit, Unit> ViewGeneralSettingsCommand { get; private set; }
     
-    public ReactiveCommand<Unit, Unit> ViewApplicationInfoCommand { get; private set; }
+    public ReactiveCommand<Unit, Unit> ViewAboutApplicationCommand { get; private set; }
         
     public ReactiveCommand<Unit, Unit> GoHomeCommand { get; private set; }
 
@@ -168,9 +167,9 @@ public class HeaderViewModel : ActivableViewModelBase
         // _navigationEventsHub.RaiseViewGeneralSettingsRequested();
     }
     
-    private void ViewApplicationInfo()
+    private void ViewAboutApplication()
     {
-        _dialogService.ShowFlyout(nameof(Resources.Shell_ApplicationInfo), true, _flyoutElementViewModelFactory.BuildApplicationInfoViewModel());
+        _dialogService.ShowFlyout(nameof(Resources.Shell_AboutApplication), true, _flyoutElementViewModelFactory.BuildAboutApplicationViewModel());
         
         // _navigationEventsHub.RaiseViewApplicationInfoRequested();
     }
@@ -184,7 +183,7 @@ public class HeaderViewModel : ActivableViewModelBase
 
     private void OpenSupport()
     {
-        _webAccessor.OpenSupportUrl();
+        _webAccessor.OpenDocumentationUrl();
     }
 
     private void OnNavigated(NavigationDetails navigationDetails)

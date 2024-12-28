@@ -122,8 +122,6 @@
 
             </StackPanel>
         </Grid>
-
-        <!--Style="{StaticResource MahApps.Styles.Button.Square.Accent}" -->
         
         <DockPanel Grid.Row="2" Background="{DynamicResource Gray8}">
             <Button Classes="GenericButton Accent" 
@@ -142,12 +140,6 @@
 
                     <StackPanel Orientation="Horizontal">
                         <misc:Icon FontSize="12" Value="RegularReset" /> 
-                        
-                        <!--<iconPacks:PackIconBoxIcons Kind="RegularReset"
-                                                    Margin="0"
-                                                    Width="12"
-                                                    Height="12"
-                                                    VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}"/>-->
                         <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_Reset}" Margin="6 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}" />
                     </StackPanel>
                 </Button>
@@ -157,12 +149,6 @@
 
                     <StackPanel Orientation="Horizontal">
                         <misc:Icon FontSize="12" Value="RegularExit" /> 
-                        
-                        <!--<iconPacks:PackIconBoxIcons Kind="RegularExit"
-                                                    Margin="0"
-                                                    Width="12"
-                                                    Height="12"
-                                                    VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}"/>-->
                         <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_Cancel}" Margin="6 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}" />
                     </StackPanel>
                 </Button>

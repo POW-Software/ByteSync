@@ -106,12 +106,12 @@
                         </ToolTip.Tip>
                     </Button>
                     
-                    <!-- Parameters -->
+                    <!-- AboutApplication -->
                     <Button Classes="GenericButton" Margin="3"
-                            Command="{Binding Path=ViewApplicationInfoCommand}" 
+                            Command="{Binding Path=ViewAboutApplicationCommand}" 
                             HorizontalAlignment="Left" >
                         <StackPanel Orientation="Horizontal">
-                            <misc:Icon FontSize="20" Value="RegularCog" Margin="2" />
+                            <misc:Icon FontSize="20" Value="RegularInfoCircle" Margin="2" />
                         </StackPanel>
 
                         <ToolTip.Tip>

@@ -33,7 +33,7 @@ public class HomeMainViewModel : ViewModelBase, IRoutableViewModel
             //_sessionService.StartLocalSession(null));
 
         OpenSupportCommand = ReactiveCommand.CreateFromTask(() => 
-            _webAccessor.OpenSupportUrl());
+            _webAccessor.OpenDocumentationUrl());
 
         Profiles = profilesViewModel;
     }

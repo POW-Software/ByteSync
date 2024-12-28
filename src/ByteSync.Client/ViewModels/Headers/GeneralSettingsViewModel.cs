@@ -20,9 +20,6 @@ namespace ByteSync.ViewModels.Headers;
 
 public class GeneralSettingsViewModel : FlyoutElementViewModel
 {
-    private readonly ILocalApplicationDataManager _localApplicationDataManager;
-    private readonly IWebAccessor _webAccessor;
-    private readonly IFileSystemAccessor _fileSystemAccessor;
     private readonly IThemeService _themeService;
     private readonly IZoomService _zoomService;
     private readonly IApplicationRestarter _applicationRestarter;
@@ -32,28 +29,15 @@ public class GeneralSettingsViewModel : FlyoutElementViewModel
     {
     }
 
-    public GeneralSettingsViewModel(ILocalApplicationDataManager localApplicationDataManager, IWebAccessor webAccessor, 
-        IFileSystemAccessor fileSystemAccessor, IThemeService themeManager, IZoomService zoomService,
+    public GeneralSettingsViewModel(IThemeService themeManager, IZoomService zoomService,
         IApplicationRestarter applicationRestarter, ILogger<GeneralSettingsViewModel> logger)
     {
-        _localApplicationDataManager = localApplicationDataManager;
-        _webAccessor = webAccessor;
-        _fileSystemAccessor = fileSystemAccessor;
         _themeService = themeManager;
         _zoomService = zoomService;
         _applicationRestarter = applicationRestarter;
         _logger = logger;
 
         Locale = Services.ContainerProvider.Container.Resolve<SelectLocaleViewModel>();
-
-        VisitPowSoftwareCommand = ReactiveCommand.CreateFromTask(VisitPowSoftware);
-        VisitPowSoftwareCommand.ThrownExceptions.Subscribe(OnCommandException);
-            
-        ExploreAppDataCommand = ReactiveCommand.CreateFromTask(ExploreAppData);
-        ExploreAppDataCommand.ThrownExceptions.Subscribe(OnCommandException);
-            
-        OpenLogCommand = ReactiveCommand.CreateFromTask(OpenLogAsync);
-        OpenLogCommand.ThrownExceptions.Subscribe(OnCommandException);
 
         RestartApplicationCommand = ReactiveCommand.CreateFromTask(RestartApplication);
         RestartApplicationCommand.ThrownExceptions.Subscribe(OnCommandException);
@@ -63,9 +47,6 @@ public class GeneralSettingsViewModel : FlyoutElementViewModel
             
         var canZoomOut = this.WhenAnyValue(x => x.ZoomLevel, (zoomLevel) => zoomLevel > ZoomConstants.MIN_ZOOM_LEVEL);
         ZoomOutCommand = ReactiveCommand.Create(() => _zoomService.ApplicationZoomOut(), canZoomOut);
-
-        OpenPrivacyCommand = ReactiveCommand.CreateFromTask(OpenPrivacy);
-        OpenTermsOfUseCommand = ReactiveCommand.CreateFromTask(OpenTermsOfUse);
 
         AvailableThemesNames = new ObservableCollection<string>(_themeService.AvailableThemes
             .Select(t => t.Name)
@@ -100,17 +81,10 @@ public class GeneralSettingsViewModel : FlyoutElementViewModel
                 .DisposeWith(disposables);
         });
     }
-
-    public ReactiveCommand<Unit, Unit> VisitPowSoftwareCommand { get; }
         
     private ReactiveCommand<Unit, Unit> RestartApplicationCommand { get; }
-    public ReactiveCommand<Unit, Unit> ExploreAppDataCommand { get; }
-    public ReactiveCommand<Unit, Unit> OpenLogCommand { get; }
     public ReactiveCommand<Unit, Unit> ZoomInCommand { get; }
     public ReactiveCommand<Unit, Unit> ZoomOutCommand { get; }
-
-    public ReactiveCommand<Unit, Unit> OpenPrivacyCommand { get; }
-    public ReactiveCommand<Unit, Unit> OpenTermsOfUseCommand { get; }
     
     public extern int ZoomLevel { [ObservableAsProperty] get; }
 
@@ -124,49 +98,10 @@ public class GeneralSettingsViewModel : FlyoutElementViewModel
 
     [Reactive]
     public bool IsDarkMode { get; set; }
-
-    private async Task VisitPowSoftware()
-    {
-        await _webAccessor.OpenByteSyncWebSite();
-    }
-
-    private async Task ExploreAppData()
-    {
-        await _fileSystemAccessor.OpenDirectory(_localApplicationDataManager.ApplicationDataPath);
-    }
-
-    private async Task OpenLogAsync()
-    {
-        var logFilePath = _localApplicationDataManager.DebugLogFilePath;
-
-        if (logFilePath.IsNullOrEmpty(true))
-        {
-            logFilePath = _localApplicationDataManager.LogFilePath;
-        }
-
-        if (logFilePath != null)
-        {
-            await _fileSystemAccessor.OpenFile(logFilePath);
-        }
-        else
-        {
-            _logger.LogError("GeneralSettingsViewModel.OpenLogAsync: Unable to find log file path");
-        }
-    }
         
     private async Task RestartApplication()
     {
         await _applicationRestarter.RestartAndScheduleShutdown(3);
-    }
-
-    private async Task OpenPrivacy()
-    {
-        await _webAccessor.OpenPrivacy();
-    }
-
-    private async Task OpenTermsOfUse()
-    {
-        await _webAccessor.OpenTermsOfUse();
     }
 
     private void UpdateTheme()
@@ -178,5 +113,4 @@ public class GeneralSettingsViewModel : FlyoutElementViewModel
     {
         _logger.LogError(exception, "An error has occured");
     }
-   
 }

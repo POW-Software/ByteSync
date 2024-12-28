@@ -165,7 +165,7 @@
   <data name="AccountDetails_LogOut" xml:space="preserve">
     <value>Log out</value>
   </data>
-  <data name="AccountDetails_VisitPowWebSite" xml:space="preserve">
+  <data name="AboutApplication_VisitByteSyncWebSite" xml:space="preserve">
     <value>Visit ByteSync Website</value>
   </data>
   <data name="AccountDetails_Theme" xml:space="preserve">
@@ -1621,5 +1621,32 @@ Do you want to save this new Session Profile with this name?</value>
   </data>
   <data name="UpdateDetails_Download" xml:space="preserve">
     <value>Download</value>
+  </data>
+  <data name="Shell_AboutApplication" xml:space="preserve">
+    <value>About ByteSync</value>
+  </data>
+  <data name="AboutApplication_ApplicationVersion" xml:space="preserve">
+    <value>Application version:</value>
+  </data>
+  <data name="AboutApplication_DeploymentMode" xml:space="preserve">
+    <value>Deployment mode:</value>
+  </data>
+  <data name="AboutApplication_DeploymentMode_Portable" xml:space="preserve">
+    <value>Portable</value>
+  </data>
+  <data name="AboutApplication_DeploymentMode_Installed" xml:space="preserve">
+    <value>Installation</value>
+  </data>
+  <data name="AboutApplication_MachineName" xml:space="preserve">
+    <value>Machine Name:</value>
+  </data>
+  <data name="AboutApplication_OperatingSystem" xml:space="preserve">
+    <value>Operating System:</value>
+  </data>
+  <data name="AboutApplication_OSS" xml:space="preserve">
+    <value>ByteSync is an open-source application licensed under the MIT license</value>
+  </data>
+  <data name="AboutApplication_VisitByteSyncRepository" xml:space="preserve">
+    <value>Visit ByteSync's GitHub repository</value>
   </data>
 </root>

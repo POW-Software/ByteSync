@@ -4,9 +4,11 @@ namespace ByteSync.Interfaces.Controls.Communications
 {
     public interface IWebAccessor
     {
-        Task OpenSupportUrl();
+        Task OpenDocumentationUrl();
 
         Task OpenByteSyncWebSite();
+        
+        Task OpenByteSyncRepository();
 
         Task OpenPrivacy();
 

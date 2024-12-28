@@ -34,5 +34,5 @@ public interface IFlyoutElementViewModelFactory
     SynchronizationRuleGlobalViewModel BuildSynchronizationRuleGlobalViewModel(SynchronizationRule? baseAutomaticAction = null, 
         bool isCloneMode = false);
 
-    FlyoutElementViewModel BuildApplicationInfoViewModel();
+    FlyoutElementViewModel BuildAboutApplicationViewModel();
 }

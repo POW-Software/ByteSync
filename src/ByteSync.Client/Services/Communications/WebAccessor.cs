@@ -15,7 +15,7 @@ class WebAccessor : IWebAccessor
         _localizationService = localizationManager ?? Locator.Current.GetService<ILocalizationService>();
     }
 
-    public async Task OpenSupportUrl()
+    public async Task OpenDocumentationUrl()
     {
         var languageCode = "";
 
@@ -24,7 +24,7 @@ class WebAccessor : IWebAccessor
             languageCode = "fr/";
         }
 
-        var url = $"https://www.bytesyncapp.com/{languageCode}support/";
+        var url = $"https://www.bytesyncapp.com/{languageCode}documentation/";
 
         await DoOpenUrlAsync(url);
     }
@@ -37,6 +37,13 @@ class WebAccessor : IWebAccessor
         {
             url = "https://www.bytesyncapp.com/fr/";
         }
+
+        await DoOpenUrlAsync(url);
+    }
+
+    public async Task OpenByteSyncRepository()
+    {
+        var url = "https://github.com/POW-Software/ByteSync";
 
         await DoOpenUrlAsync(url);
     }

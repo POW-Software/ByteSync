@@ -12,7 +12,7 @@
         <trustedNetworks:TrustedNetworkViewModel />
     </Design.DataContext>
     
-    <Grid Background="{DynamicResource MahApps.Brushes.Gray7}" >
+    <Grid>
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" MinWidth="400" Margin="12 0 12 0">
             
             <Button Classes="GenericButton" HorizontalAlignment="Center" Margin="3 9"

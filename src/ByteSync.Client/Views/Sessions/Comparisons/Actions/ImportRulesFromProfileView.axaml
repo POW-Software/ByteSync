@@ -13,7 +13,7 @@
         <actions:ImportRulesFromProfileViewModel />
     </Design.DataContext>
     
-    <Grid Background="{DynamicResource MahApps.Brushes.Gray7}">
+    <Grid>
         <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" MinWidth="500" Margin="0">
 
             <StackPanel Orientation="Horizontal">

@@ -132,9 +132,9 @@ namespace ByteSync.Assets.Resources {
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Visit POW Software Website.
         /// </summary>
-        internal static string AccountDetails_VisitPowWebSite {
+        internal static string AboutApplication_VisitByteSyncWebSite {
             get {
-                return ResourceManager.GetString("AccountDetails_VisitPowWebSite", resourceCulture);
+                return ResourceManager.GetString("AboutApplication_VisitByteSyncWebSite", resourceCulture);
             }
         }
         
@@ -1701,6 +1701,12 @@ namespace ByteSync.Assets.Resources {
         internal static string Shell_GeneralSettings {
             get {
                 return ResourceManager.GetString("Shell_GeneralSettings", resourceCulture);
+            }
+        }
+        
+        internal static string Shell_AboutApplication {
+            get {
+                return ResourceManager.GetString("Shell_AboutApplication", resourceCulture);
             }
         }
         

@@ -57,7 +57,7 @@
   <data name="AccountDetails_LogOut" xml:space="preserve">
 	  <value>Déconnexion</value>
   </data>
-	<data name="AccountDetails_VisitPowWebSite" xml:space="preserve">
+	<data name="AboutApplication_VisitByteSyncWebSite" xml:space="preserve">
 		<value>Visiter le site web ByteSync</value>
 	</data>
   <data name="AccountDetails_Theme" xml:space="preserve">
@@ -1495,5 +1495,26 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	</data>
 	<data name="UpdateDetails_Download" xml:space="preserve">
 		<value>Télécharger</value>
+	</data>
+	<data name="Shell_AboutApplication" xml:space="preserve">
+		<value>A propos de ByteSync</value>
+	</data>
+	<data name="AboutApplication_ApplicationVersion" xml:space="preserve">
+		<value>Version de l'application :</value>
+	</data>
+	<data name="AboutApplication_DeploymentMode" xml:space="preserve">
+		<value>Mode de déploiement</value>
+	</data>
+	<data name="AboutApplication_MachineName" xml:space="preserve">
+		<value>Nom de la machine :</value>
+	</data>
+	<data name="AboutApplication_OperatingSystem" xml:space="preserve">
+		<value>Système d'exploitation :</value>
+	</data>
+	<data name="AboutApplication_OSS" xml:space="preserve">
+		<value>ByteSync est une application open source sous licence MIT</value>
+	</data>
+	<data name="AboutApplication_VisitByteSyncRepository" xml:space="preserve">
+		<value>Visiter le dépôt GitHub de ByteSync</value>
 	</data>
 </root>
