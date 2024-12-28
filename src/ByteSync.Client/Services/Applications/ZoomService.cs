@@ -68,6 +68,6 @@ public class ZoomService : IZoomService
     {
         return zoomLevelCandidate >= ZoomConstants.MIN_ZOOM_LEVEL &&
                zoomLevelCandidate <= ZoomConstants.MAX_ZOOM_LEVEL &&
-               zoomLevelCandidate % 5 != 0;
+               zoomLevelCandidate % 5 == 0;
     }
 }

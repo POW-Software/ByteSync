@@ -42,16 +42,6 @@
                           SelectedItem="{Binding SelectedThemeName}"
                           BorderThickness="0"
                           Items="{Binding AvailableThemesNames}">
-                    
-                    <!-- <ComboBox.ItemTemplate> -->
-                    <!--     <DataTemplate> -->
-                    <!--         <StackPanel Orientation="Horizontal"> -->
-                    <!--             <TextBlock Text="{Binding Mode}" /> -->
-                    <!--             <TextBlock Text=" / " /> -->
-                    <!--             <TextBlock Text="{Binding Name}" /> -->
-                    <!--         </StackPanel> -->
-                    <!--     </DataTemplate> -->
-                    <!-- </ComboBox.ItemTemplate> -->
                 </ComboBox>
 
                 <TextBlock Grid.Row="3" Grid.Column="0" Text="{localizations:Loc AccountDetails_Zoom}" Margin="6" VerticalAlignment="Center"></TextBlock>

@@ -47,42 +47,31 @@ public class GeneralSettingsViewModel : FlyoutElementViewModel
         Locale = Services.ContainerProvider.Container.Resolve<SelectLocaleViewModel>();
 
         VisitPowSoftwareCommand = ReactiveCommand.CreateFromTask(VisitPowSoftware);
-        VisitPowSoftwareCommand.ThrownExceptions.Subscribe(OnCommmandException);
+        VisitPowSoftwareCommand.ThrownExceptions.Subscribe(OnCommandException);
             
         ExploreAppDataCommand = ReactiveCommand.CreateFromTask(ExploreAppData);
-        ExploreAppDataCommand.ThrownExceptions.Subscribe(OnCommmandException);
+        ExploreAppDataCommand.ThrownExceptions.Subscribe(OnCommandException);
             
         OpenLogCommand = ReactiveCommand.CreateFromTask(OpenLogAsync);
-        OpenLogCommand.ThrownExceptions.Subscribe(OnCommmandException);
+        OpenLogCommand.ThrownExceptions.Subscribe(OnCommandException);
 
         RestartApplicationCommand = ReactiveCommand.CreateFromTask(RestartApplication);
-        RestartApplicationCommand.ThrownExceptions.Subscribe(OnCommmandException);
+        RestartApplicationCommand.ThrownExceptions.Subscribe(OnCommandException);
 
         var canZoomIn = this.WhenAnyValue(x => x.ZoomLevel, (zoomLevel) => zoomLevel < ZoomConstants.MAX_ZOOM_LEVEL);
         ZoomInCommand = ReactiveCommand.Create(() => _zoomService.ApplicationZoomIn(), canZoomIn);
             
         var canZoomOut = this.WhenAnyValue(x => x.ZoomLevel, (zoomLevel) => zoomLevel > ZoomConstants.MIN_ZOOM_LEVEL);
-        ZoomOutCommand = ReactiveCommand.Create(() => _zoomService.ApplicationZoomIn(), canZoomOut);
+        ZoomOutCommand = ReactiveCommand.Create(() => _zoomService.ApplicationZoomOut(), canZoomOut);
 
         OpenPrivacyCommand = ReactiveCommand.CreateFromTask(OpenPrivacy);
         OpenTermsOfUseCommand = ReactiveCommand.CreateFromTask(OpenTermsOfUse);
-        
-        // ZoomLevelValue = $"{_signinManager.ZoomLevel} %";
-        // ZoomLevel = _applicationSettingsManager.GetCurrentApplicationSettings().ZoomLevel;
-
-        // SelectedThemeName = _themeManager.SelectedTheme!.Name;
-
-        // this.RaiseAndSetIfChanged(ref _mySelectedTheme, _themeManager.SelectedTheme);
 
         AvailableThemesNames = new ObservableCollection<string>(_themeService.AvailableThemes
             .Select(t => t.Name)
             .Distinct()
             .OrderBy(n => n)
             .ToList());
-
-        // SelectedThemeName = _themeService.SelectedTheme!.Name;
-        //
-        // IsDarkMode = _themeService.SelectedTheme!.Mode == ThemeModes.Dark;
 
         this.WhenAnyValue(x => x.SelectedThemeName)
             .Where(x => x != null)
@@ -109,21 +98,6 @@ public class GeneralSettingsViewModel : FlyoutElementViewModel
                     IsDarkMode = t.IsDarkMode;
                 })
                 .DisposeWith(disposables);
-            
-            // _themeService.SelectedTheme
-            //     .Select(t => t.Name)
-            //     .ToProperty(this, x => x.SelectedThemeName)
-            //     .DisposeWith(disposables);
-            //
-            // _themeService.SelectedTheme
-            //     .Select(t => t.IsDarkMode)
-            //     .ToPropertyEx(this, x => x.IsDarkMode)
-            //     .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<GenericEventArgs<int>>(_uxEventsHub, nameof(_uxEventsHub.ZoomLevelChanged))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(args => OnZoomLevelChanged(args.EventArgs.Value))
-            //     .DisposeWith(disposables);
         });
     }
 
@@ -185,16 +159,6 @@ public class GeneralSettingsViewModel : FlyoutElementViewModel
         await _applicationRestarter.RestartAndScheduleShutdown(3);
     }
 
-    // private void ZoomIn()
-    // {
-    //     _applicationSettingsManager.ApplicationZoomIn();
-    // }
-    //
-    // private void ZoomOut()
-    // {
-    //     _applicationSettingsManager.ApplicationZoomOut();
-    // }
-
     private async Task OpenPrivacy()
     {
         await _webAccessor.OpenPrivacy();
@@ -208,30 +172,9 @@ public class GeneralSettingsViewModel : FlyoutElementViewModel
     private void UpdateTheme()
     {
         _themeService.SelectTheme(SelectedThemeName, IsDarkMode);
-        
-        // var selectedTheme = _themeService.SelectedTheme!;
-        //
-        // if (!selectedTheme.Name.Equals(SelectedThemeName) || selectedTheme.IsDarkMode != IsDarkMode)
-        // {
-        //     _themeService.SelectTheme(SelectedThemeName, IsDarkMode);
-        // }
-        
-        
-        // if (SelectedTheme != null && !SelectedTheme.Equals(_themeManager.SelectedTheme))
-        // {
-        //     _themeManager.ChangeTheme(SelectedTheme);
-        //
-        //     _applicationSettingsManager.SaveApplicationSettings();
-        // }
     }
-
-    // private void OnZoomLevelChanged(int obj)
-    // {
-    //     ZoomLevel = obj;
-    //     // ZoomLevelValue = $"{obj} %";
-    // }
         
-    private void OnCommmandException(Exception exception)
+    private void OnCommandException(Exception exception)
     {
         _logger.LogError(exception, "An error has occured");
     }
