@@ -10,6 +10,7 @@ using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Services.Communications;
 using ByteSync.ViewModels.Misc;
@@ -24,20 +25,18 @@ namespace ByteSync.ViewModels.Sessions.Cloud.Members;
 public class AddTrustedClientViewModel : FlyoutElementViewModel
 {
     private readonly IPublicKeysManager _publicKeysManager;
-    private readonly INavigationEventsHub _navigationEventsHub;
+    private readonly IDialogService _dialogService;
     private readonly IApplicationSettingsRepository _applicationSettingsRepository;
     private readonly IPublicKeysTruster _publicKeysTruster;
 
-    public AddTrustedClientViewModel() : this(null, new TrustDataParameters())
+    public AddTrustedClientViewModel()
     {
     #if DEBUG
         if (Design.IsDesignMode)
         {
-            // BuildIntroduction();
             MyClientId = Environment.MachineName;
             IsWaitingForOtherParty = true;
             IsJoinerSide = true;
-            // IpAddress = "0.0.0.1";
 
             var safetyKey = "";
             for (var i = 0; i < 16; i++)
@@ -53,8 +52,8 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
     }
 
     public AddTrustedClientViewModel(PublicKeyCheckData? publicKeyCheckData, TrustDataParameters trustDataParameters,
-        IPublicKeysManager? publicKeysManager = null, INavigationEventsHub? navigationEventsHub = null, 
-        IApplicationSettingsRepository? applicationSettingsManager = null, IPublicKeysTruster? publicKeysTruster = null) 
+        IPublicKeysManager publicKeysManager, IDialogService dialogService, 
+        IApplicationSettingsRepository applicationSettingsManager, IPublicKeysTruster publicKeysTruster) 
     {
     #if DEBUG
         if (Design.IsDesignMode)
@@ -62,11 +61,11 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
             return;
         }
     #endif
-        
-        _publicKeysManager = publicKeysManager ?? Locator.Current.GetService<IPublicKeysManager>()!;
-        _navigationEventsHub = navigationEventsHub ?? Locator.Current.GetService<INavigationEventsHub>()!;
-        _applicationSettingsRepository = applicationSettingsManager ?? Locator.Current.GetService<IApplicationSettingsRepository>()!;
-        _publicKeysTruster = publicKeysTruster ?? Locator.Current.GetService<IPublicKeysTruster>()!;
+
+        _publicKeysManager = publicKeysManager;
+        _dialogService = dialogService;
+        _applicationSettingsRepository = applicationSettingsManager;
+        _publicKeysTruster = publicKeysTruster;
 
         if (publicKeyCheckData == null)
         {
@@ -284,7 +283,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
             }
             
             Container.CanCloseCurrentFlyout = true;
-            _navigationEventsHub.RaiseCloseFlyoutRequested();
+            _dialogService.CloseFlyout();
         }
         catch (Exception ex)
         {
@@ -309,7 +308,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
             await Task.WhenAll(task, task2);
         
             Container.CanCloseCurrentFlyout = true;
-            _navigationEventsHub.RaiseCloseFlyoutRequested();
+            _dialogService.CloseFlyout();
         }
         catch (Exception ex)
         {

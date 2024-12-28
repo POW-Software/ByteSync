@@ -11,15 +11,15 @@ public class NavigationEventsHub : INavigationEventsHub
 {
     // public event EventHandler<EventArgs>? LogOutRequested;
     
-    public event EventHandler<EventArgs>? CloseFlyoutRequested;
+    // public event EventHandler<EventArgs>? CloseFlyoutRequested;
     
-    public event EventHandler<EventArgs>? ViewAccountRequested;
+    // public event EventHandler<EventArgs>? ViewAccountRequested;
+    //
+    // public event EventHandler<EventArgs>? ViewTrustedNetworkRequested;
     
-    public event EventHandler<EventArgs>? ViewTrustedNetworkRequested;
+    // public event EventHandler<EventArgs>? ViewGeneralSettingsRequested;
     
-    public event EventHandler<EventArgs>? ViewGeneralSettingsRequested;
-    
-    public event EventHandler<EventArgs>? ViewUpdateDetailsRequested;
+    // public event EventHandler<EventArgs>? ViewUpdateDetailsRequested;
     
     // public event EventHandler<EventArgs>? NavigateToHomeRequested;
     
@@ -54,30 +54,30 @@ public class NavigationEventsHub : INavigationEventsHub
     //     Task.Run(() => LogOutRequested?.Invoke(this, EventArgs.Empty));
     // }
 
-    public void RaiseCloseFlyoutRequested()
-    {
-        Task.Run(() => CloseFlyoutRequested?.Invoke(this, EventArgs.Empty));
-    }
+    // public void RaiseCloseFlyoutRequested()
+    // {
+    //     Task.Run(() => CloseFlyoutRequested?.Invoke(this, EventArgs.Empty));
+    // }
 
-    public void RaiseViewAccountRequested()
-    {
-        Task.Run(() => ViewAccountRequested?.Invoke(this, EventArgs.Empty));
-    }
+    // public void RaiseViewAccountRequested()
+    // {
+    //     Task.Run(() => ViewAccountRequested?.Invoke(this, EventArgs.Empty));
+    // }
+    //
+    // public void RaiseViewTrustedNetworkRequested()
+    // {
+    //     Task.Run(() => ViewTrustedNetworkRequested?.Invoke(this, EventArgs.Empty));
+    // }
 
-    public void RaiseViewTrustedNetworkRequested()
-    {
-        Task.Run(() => ViewTrustedNetworkRequested?.Invoke(this, EventArgs.Empty));
-    }
+    // public void RaiseViewGeneralSettingsRequested()
+    // {
+    //     Task.Run(() => ViewGeneralSettingsRequested?.Invoke(this, EventArgs.Empty));
+    // }
 
-    public void RaiseViewGeneralSettingsRequested()
-    {
-        Task.Run(() => ViewGeneralSettingsRequested?.Invoke(this, EventArgs.Empty));
-    }
-
-    public void RaiseViewUpdateDetailsRequested()
-    {
-        Task.Run(() => ViewUpdateDetailsRequested?.Invoke(this, EventArgs.Empty));
-    }
+    // public void RaiseViewUpdateDetailsRequested()
+    // {
+    //     Task.Run(() => ViewUpdateDetailsRequested?.Invoke(this, EventArgs.Empty));
+    // }
 
     // public void RaiseNavigateToHomeRequested()
     // {

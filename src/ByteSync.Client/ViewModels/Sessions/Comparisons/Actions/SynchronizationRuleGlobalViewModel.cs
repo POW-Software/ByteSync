@@ -9,6 +9,7 @@ using ByteSync.Business.Sessions;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
+using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Factories.ViewModels;
@@ -22,7 +23,7 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Actions;
 
 public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
 {
-    private readonly INavigationEventsHub _navigationEventsHub;
+    private readonly IDialogService _dialogService;
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;
     private readonly IActionEditViewModelFactory _actionEditViewModelFactory;
@@ -32,11 +33,11 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
     {
     }
     
-    public SynchronizationRuleGlobalViewModel(INavigationEventsHub navigationEventsHub, 
+    public SynchronizationRuleGlobalViewModel(IDialogService dialogService, 
         ISessionService sessionService, ILocalizationService localizationService, IActionEditViewModelFactory actionEditViewModelFactory, 
         ISynchronizationRulesService synchronizationRulesService, SynchronizationRule? baseAutomaticAction, bool isCloneMode)
     {
-        _navigationEventsHub = navigationEventsHub;
+        _dialogService = dialogService;
         _sessionService = sessionService;
         _localizationService = localizationService;
         _actionEditViewModelFactory = actionEditViewModelFactory;
@@ -241,7 +242,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
 
                 // _actionEditionEventsHub.RaiseSynchronizationRuleSaved(synchronizationRule);
 
-                _navigationEventsHub.RaiseCloseFlyoutRequested();
+                _dialogService.CloseFlyout();
             }
             else
             {
@@ -401,7 +402,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
 
     private void Cancel()
     {
-        _navigationEventsHub.RaiseCloseFlyoutRequested();
+        _dialogService.CloseFlyout();
 
         Reset();
     }

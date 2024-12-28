@@ -10,15 +10,15 @@ public interface INavigationEventsHub
 {
     // public event EventHandler<EventArgs>? LogOutRequested;
     
-    public event EventHandler<EventArgs>? CloseFlyoutRequested;
+    // public event EventHandler<EventArgs>? CloseFlyoutRequested;
     
-    public event EventHandler<EventArgs>? ViewAccountRequested;
+    // public event EventHandler<EventArgs>? ViewAccountRequested;
+    //
+    // public event EventHandler<EventArgs>? ViewTrustedNetworkRequested;
     
-    public event EventHandler<EventArgs>? ViewTrustedNetworkRequested;
+    // public event EventHandler<EventArgs>? ViewGeneralSettingsRequested;
     
-    public event EventHandler<EventArgs>? ViewGeneralSettingsRequested;
-    
-    public event EventHandler<EventArgs>? ViewUpdateDetailsRequested;
+    // public event EventHandler<EventArgs>? ViewUpdateDetailsRequested;
     
     // public event EventHandler<EventArgs>? NavigateToHomeRequested;
     
@@ -50,15 +50,15 @@ public interface INavigationEventsHub
 
     // void RaiseLogOutRequested();
     
-    void RaiseCloseFlyoutRequested();
+    // void RaiseCloseFlyoutRequested();
     
-    void RaiseViewAccountRequested();
+    // void RaiseViewAccountRequested();
     
-    void RaiseViewTrustedNetworkRequested();
+    // void RaiseViewTrustedNetworkRequested();
     
-    void RaiseViewGeneralSettingsRequested();
+    // void RaiseViewGeneralSettingsRequested();
     
-    void RaiseViewUpdateDetailsRequested();
+    // void RaiseViewUpdateDetailsRequested();
     
     // void RaiseNavigateToHomeRequested();
     

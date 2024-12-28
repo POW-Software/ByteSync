@@ -2,13 +2,16 @@
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls.Mixins;
+using ByteSync.Assets.Resources;
 using ByteSync.Business.Navigations;
 using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Navigations;
+using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.EventsHubs;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Updates;
 using ByteSync.ViewModels.Misc;
@@ -26,12 +29,8 @@ public class HeaderViewModel : ActivableViewModelBase
     
     private readonly ILocalizationService _localizationService;
     private readonly INavigationService _navigationService;
-
-
-    // public HeaderViewModel(FlyoutContainerViewModel flyoutContainerViewModel) : this (flyoutContainerViewModel, null, null, null, null, null)
-    // {
-    //         
-    // }
+    private readonly IDialogService _dialogService;
+    private readonly IFlyoutElementViewModelFactory _flyoutElementViewModelFactory;
 
     public HeaderViewModel()
     {
@@ -40,13 +39,15 @@ public class HeaderViewModel : ActivableViewModelBase
         
     public HeaderViewModel(FlyoutContainerViewModel flyoutContainerViewModel, ConnectionStatusViewModel connectionStatusViewModel,
         INavigationEventsHub navigationEventsHub, IWebAccessor webAccessor, IAvailableUpdateRepository availableAvailableUpdateRepository,
-        ILocalizationService localizationService, INavigationService navigationService)
+        ILocalizationService localizationService, INavigationService navigationService, IDialogService dialogService,
+        IFlyoutElementViewModelFactory flyoutElementViewModelFactory)
     {
         _navigationEventsHub = navigationEventsHub;
         _webAccessor = webAccessor;
         _availableUpdateRepository = availableAvailableUpdateRepository;
         _localizationService = localizationService;
         _navigationService = navigationService;
+        _dialogService = dialogService;
 
         FlyoutContainer = flyoutContainerViewModel;
         ConnectionStatus = connectionStatusViewModel;
@@ -57,7 +58,8 @@ public class HeaderViewModel : ActivableViewModelBase
         ViewAccountCommand = ReactiveCommand.Create(ViewAccount, canView);
         ViewTrustedNetworkCommand = ReactiveCommand.Create(ViewTrustedNetwork, canView);
         ViewGeneralSettingsCommand = ReactiveCommand.Create(ViewGeneralSettings, canView);
-        ShowUpdateCommand = ReactiveCommand.Create(ShowUpdate, canView);
+        ViewApplicationInfoCommand = ReactiveCommand.Create(ViewApplicationInfo, canView);
+        ShowUpdateCommand = ReactiveCommand.Create(ViewUpdateDetails, canView);
 
         OpenSupportCommand = ReactiveCommand.Create(OpenSupport);
         GoHomeCommand = ReactiveCommand.Create(() => _navigationService.NavigateTo(NavigationPanel.Home));
@@ -108,6 +110,8 @@ public class HeaderViewModel : ActivableViewModelBase
     public ReactiveCommand<Unit, Unit> ViewTrustedNetworkCommand { get; private set; }
 
     public ReactiveCommand<Unit, Unit> ViewGeneralSettingsCommand { get; private set; }
+    
+    public ReactiveCommand<Unit, Unit> ViewApplicationInfoCommand { get; private set; }
         
     public ReactiveCommand<Unit, Unit> GoHomeCommand { get; private set; }
 
@@ -144,28 +148,43 @@ public class HeaderViewModel : ActivableViewModelBase
 
     private void ViewAccount()
     {
-        _navigationEventsHub.RaiseViewAccountRequested();
+        _dialogService.ShowFlyout(nameof(Resources.Shell_Account), true, _flyoutElementViewModelFactory.BuildAccountDetailsViewModel());
+        
+        // _navigationEventsHub.RaiseViewAccountRequested();
     }
     
     private void ViewTrustedNetwork()
     {
-        _navigationEventsHub.RaiseViewTrustedNetworkRequested();
+        _dialogService.ShowFlyout(nameof(Resources.Shell_TrustedNetwork), true, _flyoutElementViewModelFactory.BuildTrustedNetworkViewModel());
+        
+        // _navigationEventsHub.RaiseViewTrustedNetworkRequested();
     }
 
 
     private void ViewGeneralSettings()
     {
-        _navigationEventsHub.RaiseViewGeneralSettingsRequested();
+        _dialogService.ShowFlyout(nameof(Resources.Shell_GeneralSettings), true, _flyoutElementViewModelFactory.BuildGeneralSettingsViewModel());
+        
+        // _navigationEventsHub.RaiseViewGeneralSettingsRequested();
+    }
+    
+    private void ViewApplicationInfo()
+    {
+        _dialogService.ShowFlyout(nameof(Resources.Shell_ApplicationInfo), true, _flyoutElementViewModelFactory.BuildApplicationInfoViewModel());
+        
+        // _navigationEventsHub.RaiseViewApplicationInfoRequested();
+    }
+    
+    private void ViewUpdateDetails()
+    {
+        _dialogService.ShowFlyout(nameof(Resources.Shell_Update), true, _flyoutElementViewModelFactory.BuildUpdateDetailsViewModel());
+        
+        // _navigationEventsHub.RaiseViewUpdateDetailsRequested();
     }
 
     private void OpenSupport()
     {
         _webAccessor.OpenSupportUrl();
-    }
-        
-    private void ShowUpdate()
-    {
-        _navigationEventsHub.RaiseViewUpdateDetailsRequested();
     }
 
     private void OnNavigated(NavigationDetails navigationDetails)

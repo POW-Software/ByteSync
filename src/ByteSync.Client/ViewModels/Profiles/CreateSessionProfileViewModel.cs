@@ -7,6 +7,7 @@ using Avalonia.Controls;
 using ByteSync.Business.Profiles;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Profiles;
 using ByteSync.ViewModels.Misc;
@@ -21,10 +22,10 @@ public class CreateSessionProfileViewModel : FlyoutElementViewModel
 {
     private readonly ISessionService _sessionService;
     private readonly ISessionProfileManager _sessionProfileManager;
-    private readonly INavigationEventsHub _navigationEventsHub;
+    private readonly IDialogService _dialogService;
     private readonly ISessionProfileLocalDataManager _sessionProfileLocalDataManager;
 
-    public CreateSessionProfileViewModel() : this(ProfileTypes.Cloud)
+    public CreateSessionProfileViewModel()
     {
     #if DEBUG
         if (Design.IsDesignMode)
@@ -34,14 +35,14 @@ public class CreateSessionProfileViewModel : FlyoutElementViewModel
     #endif
     }
     
-    public CreateSessionProfileViewModel(ProfileTypes profileType, ISessionService? sessionService = null, 
-        ISessionProfileManager? sessionProfileManager = null, INavigationEventsHub? navigationEventsHub = null,
-        ISessionProfileLocalDataManager? sessionProfileLocalDataManager = null)
+    public CreateSessionProfileViewModel(ProfileTypes profileType, ISessionService sessionService, 
+        ISessionProfileManager sessionProfileManager, IDialogService dialogService,
+        ISessionProfileLocalDataManager sessionProfileLocalDataManager)
     {
-        _sessionService = sessionService ?? Locator.Current.GetService<ISessionService>()!;
-        _sessionProfileManager = sessionProfileManager ?? Locator.Current.GetService<ISessionProfileManager>()!;
-        _navigationEventsHub = navigationEventsHub ?? Locator.Current.GetService<INavigationEventsHub>()!;
-        _sessionProfileLocalDataManager = sessionProfileLocalDataManager ?? Locator.Current.GetService<ISessionProfileLocalDataManager>()!;
+        _sessionService = sessionService;
+        _sessionProfileManager = sessionProfileManager;
+        _dialogService = dialogService;
+        _sessionProfileLocalDataManager = sessionProfileLocalDataManager;
 
         ProfileName = "";
         ProfileType = profileType;
@@ -153,7 +154,7 @@ public class CreateSessionProfileViewModel : FlyoutElementViewModel
             await Task.Delay(TimeSpan.FromSeconds(3.5));
             ShowSuccess = false;
 
-            _navigationEventsHub.RaiseCloseFlyoutRequested();
+            _dialogService.CloseFlyout();
         }
         catch (Exception ex)
         {
@@ -184,6 +185,6 @@ public class CreateSessionProfileViewModel : FlyoutElementViewModel
 
     private void Cancel()
     {
-        _navigationEventsHub.RaiseCloseFlyoutRequested();
+        _dialogService.CloseFlyout();
     }
 }

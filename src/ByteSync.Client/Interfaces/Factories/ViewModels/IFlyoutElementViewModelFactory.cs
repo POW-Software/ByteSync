@@ -5,6 +5,7 @@ using ByteSync.Common.Business.EndPoints;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.ViewModels.AccountDetails;
 using ByteSync.ViewModels.Headers;
+using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Profiles;
 using ByteSync.ViewModels.Sessions.Cloud.Members;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions;
@@ -32,4 +33,6 @@ public interface IFlyoutElementViewModelFactory
     
     SynchronizationRuleGlobalViewModel BuildSynchronizationRuleGlobalViewModel(SynchronizationRule? baseAutomaticAction = null, 
         bool isCloneMode = false);
+
+    FlyoutElementViewModel BuildApplicationInfoViewModel();
 }

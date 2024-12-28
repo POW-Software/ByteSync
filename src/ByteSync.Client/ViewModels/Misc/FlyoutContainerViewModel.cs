@@ -82,31 +82,31 @@ public class FlyoutContainerViewModel : ActivableViewModelBase, IDialogView
 
             // IsFlyoutContainerVisible = false;
             
-            Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.ViewAccountRequested))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => OnViewAccountRequested())
-                .DisposeWith(disposables);
+            // Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.ViewAccountRequested))
+            //     .ObserveOn(RxApp.MainThreadScheduler)
+            //     .Subscribe(_ => OnViewAccountRequested())
+            //     .DisposeWith(disposables);
+            //
+            // Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.ViewTrustedNetworkRequested))
+            //     .ObserveOn(RxApp.MainThreadScheduler)
+            //     .Subscribe(_ => OnViewTrustedNetworkRequested())
+            //     .DisposeWith(disposables);
             
-            Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.ViewTrustedNetworkRequested))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => OnViewTrustedNetworkRequested())
-                .DisposeWith(disposables);
+            // Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.ViewGeneralSettingsRequested))
+            //     .ObserveOn(RxApp.MainThreadScheduler)
+            //     .Subscribe(_ => OnViewGeneralSettingsRequested())
+            //     .DisposeWith(disposables);
             
-            Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.ViewGeneralSettingsRequested))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => OnViewGeneralSettingsRequested())
-                .DisposeWith(disposables);
-            
-            Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.ViewUpdateDetailsRequested))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => OnViewUpdateDetailsRequested())
-                .DisposeWith(disposables);
+            // Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.ViewUpdateDetailsRequested))
+            //     .ObserveOn(RxApp.MainThreadScheduler)
+            //     .Subscribe(_ => OnViewUpdateDetailsRequested())
+            //     .DisposeWith(disposables);
 
-            Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.CloseFlyoutRequested))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => OnCloseFlyoutRequested())
-                .DisposeWith(disposables);
-            
+            // Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.CloseFlyoutRequested))
+            //     .ObserveOn(RxApp.MainThreadScheduler)
+            //     .Subscribe(_ => OnCloseFlyoutRequested())
+            //     .DisposeWith(disposables);
+            //
             // Observable.FromEventPattern<ManualActionCreationRequestedArgs>(_navigationEventsHub, nameof(_navigationEventsHub.ManualActionCreationRequested))
             //     .ObserveOn(RxApp.MainThreadScheduler)
             //     .Subscribe(args => OnManualActionCreationRequested(args.EventArgs))
@@ -162,31 +162,31 @@ public class FlyoutContainerViewModel : ActivableViewModelBase, IDialogView
     [Reactive]
     public bool CanCloseCurrentFlyout { get; set; }
 
-    private void OnViewAccountRequested()
-    {
-        ShowFlyout(nameof(Resources.Shell_Account), true, _flyoutElementViewModelFactory.BuildAccountDetailsViewModel());
-    }
+    // private void OnViewAccountRequested()
+    // {
+    //     ShowFlyout(nameof(Resources.Shell_Account), true, _flyoutElementViewModelFactory.BuildAccountDetailsViewModel());
+    // }
+    //
+    // private void OnViewTrustedNetworkRequested()
+    // {
+    //     ShowFlyout(nameof(Resources.Shell_TrustedNetwork), true, _flyoutElementViewModelFactory.BuildTrustedNetworkViewModel());
+    // }
+    //
+    // private void OnViewUpdateDetailsRequested()
+    // {
+    //     ShowFlyout(nameof(Resources.Shell_Update), true, _flyoutElementViewModelFactory.BuildUpdateDetailsViewModel());
+    // }
+    //
+    // private void OnViewGeneralSettingsRequested()
+    // {
+    //     ShowFlyout(nameof(Resources.Shell_GeneralSettings), true, _flyoutElementViewModelFactory.BuildGeneralSettingsViewModel());
+    // }
     
-    private void OnViewTrustedNetworkRequested()
-    {
-        ShowFlyout(nameof(Resources.Shell_TrustedNetwork), true, _flyoutElementViewModelFactory.BuildTrustedNetworkViewModel());
-    }
-    
-    private void OnViewUpdateDetailsRequested()
-    {
-        ShowFlyout(nameof(Resources.Shell_Update), true, _flyoutElementViewModelFactory.BuildUpdateDetailsViewModel());
-    }
-    
-    private void OnViewGeneralSettingsRequested()
-    {
-        ShowFlyout(nameof(Resources.Shell_GeneralSettings), true, _flyoutElementViewModelFactory.BuildGeneralSettingsViewModel());
-    }
-    
-    private void OnCloseFlyoutRequested()
-    {
-        CloseFlyout();
-    }
-    
+    // private void OnCloseFlyoutRequested()
+    // {
+    //     CloseFlyout();
+    // }
+    //
     private void OnCloseFlyoutRequested(object? sender, EventArgs e)
     {
         CloseFlyout();
