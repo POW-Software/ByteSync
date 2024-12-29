@@ -2,15 +2,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:startUp="clr-namespace:ByteSync.ViewModels.StartUp"
              xmlns:misc="clr-namespace:ByteSync.ViewModels.Misc"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="ByteSync.Views.Misc.SelectLocaleView"
->
-    
-    <!--<UserControl.DataContext>
-        <startUp:SelectLocaleViewModel></startUp:SelectLocaleViewModel>
-    </UserControl.DataContext>-->
+             x:Class="ByteSync.Views.Misc.SelectLocaleView">
     
     <Design.DataContext>
         <misc:SelectLocaleViewModel />
