@@ -62,9 +62,6 @@ public class HeaderViewModel : ActivableViewModelBase
 
         OpenSupportCommand = ReactiveCommand.Create(OpenSupport);
         GoHomeCommand = ReactiveCommand.Create(() => _navigationService.NavigateTo(NavigationPanel.Home));
-        DebugForceDisconnectionCommand = ReactiveCommand.CreateFromTask(DebugForceDisconnection);
-
-        // NextAvailableVersions = new List<SoftwareVersion>();
 
         IsNavigateToHomeVisible = false;
         IsAccountVisible = true;
@@ -118,8 +115,6 @@ public class HeaderViewModel : ActivableViewModelBase
         
     public ReactiveCommand<Unit, Unit> ShowUpdateCommand { get; set; }
     
-    public ReactiveCommand<Unit, Unit> DebugForceDisconnectionCommand { get; set; }
-    
     [Reactive]
     public ViewModelBase ConnectionStatus { get; set; }
 
@@ -148,37 +143,27 @@ public class HeaderViewModel : ActivableViewModelBase
     private void ViewAccount()
     {
         _dialogService.ShowFlyout(nameof(Resources.Shell_Account), true, _flyoutElementViewModelFactory.BuildAccountDetailsViewModel());
-        
-        // _navigationEventsHub.RaiseViewAccountRequested();
     }
     
     private void ViewTrustedNetwork()
     {
         _dialogService.ShowFlyout(nameof(Resources.Shell_TrustedNetwork), true, _flyoutElementViewModelFactory.BuildTrustedNetworkViewModel());
-        
-        // _navigationEventsHub.RaiseViewTrustedNetworkRequested();
     }
 
 
     private void ViewGeneralSettings()
     {
         _dialogService.ShowFlyout(nameof(Resources.Shell_GeneralSettings), true, _flyoutElementViewModelFactory.BuildGeneralSettingsViewModel());
-        
-        // _navigationEventsHub.RaiseViewGeneralSettingsRequested();
     }
     
     private void ViewAboutApplication()
     {
         _dialogService.ShowFlyout(nameof(Resources.Shell_AboutApplication), true, _flyoutElementViewModelFactory.BuildAboutApplicationViewModel());
-        
-        // _navigationEventsHub.RaiseViewApplicationInfoRequested();
     }
     
     private void ViewUpdateDetails()
     {
         _dialogService.ShowFlyout(nameof(Resources.Shell_Update), true, _flyoutElementViewModelFactory.BuildUpdateDetailsViewModel());
-        
-        // _navigationEventsHub.RaiseViewUpdateDetailsRequested();
     }
 
     private void OpenSupport()
@@ -209,21 +194,5 @@ public class HeaderViewModel : ActivableViewModelBase
         {
             Title = _localizationService[TitleLocalizationName!];
         }
-    }
-
-    private Task DebugForceDisconnection()
-    {
-        return Task.CompletedTask;
-        
-        // var connectionManager = Locator.Current.GetService<IConnectionManager>()!;
-        //
-        // try
-        // {
-        //     await connectionManager.DebugForceDisconnection();
-        // }
-        // catch (Exception ex)
-        // {
-        //     Log.Error(ex, "QuitSession error");
-        // }
     }
 }
