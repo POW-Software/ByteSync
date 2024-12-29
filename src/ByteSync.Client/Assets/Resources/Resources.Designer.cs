@@ -2652,6 +2652,18 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
+        public static string DeploymentMode_Portable {
+            get {
+                return ResourceManager.GetString("DeploymentMode_Portable", resourceCulture);
+            }
+        }
+        
+        public static string DeploymentMode_Installation {
+            get {
+                return ResourceManager.GetString("DeploymentMode_Installation", resourceCulture);
+            }
+        }
+        
         public static string AddTrustedClient_Introduction_OnSessionMemberSide {
             get {
                 return ResourceManager.GetString("AddTrustedClient_Introduction_OnSessionMemberSide", resourceCulture);

@@ -6,6 +6,7 @@
     <Application.Resources>
         <converters:FormatKbSizeConverter x:Key="FormatKbSizeConverter" />
         <converters:LobbyMemberStatusConverter x:Key="LobbyMemberStatusConverter" />
+        <converters:BoolToDeploymentModeConverter x:Key="BoolToDeploymentModeConverter" />
         <converters:ProfileTypeConverter x:Key="ProfileTypeConverter" />
         <converters:ExecutionModeConverter x:Key="ExecutionModeConverter" />
         <converters:LocalInventoryPartStatusToIconConverter x:Key="InventoryProcessStatusToIconConverter" />

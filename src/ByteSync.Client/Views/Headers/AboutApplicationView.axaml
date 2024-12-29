@@ -53,7 +53,8 @@
                 <!-- Deployment Mode -->
                 <TextBlock Grid.Row="6" Grid.Column="0" Text="{localizations:Loc AboutApplication_DeploymentMode}" Margin="6" 
                            VerticalAlignment="Center"/>
-                <TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding DeploymentMode}" Margin="6" VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding DeploymentMode, Converter={StaticResource BoolToDeploymentModeConverter}}" 
+                           Margin="6" VerticalAlignment="Center"/>
 
                 <!-- Machine Name -->
                 <TextBlock Grid.Row="7" Grid.Column="0" Text="{localizations:Loc AboutApplication_MachineName}" Margin="6" 

@@ -1664,4 +1664,10 @@ Do you want to save this new Session Profile with this name?</value>
   <data name="AboutApplication_ClientInstanceId" xml:space="preserve">
     <value>Client Instance ID:</value>
   </data>
+  <data name="DeploymentMode_Portable" xml:space="preserve">
+    <value>Portable</value>
+  </data>
+  <data name="DeploymentMode_Installation" xml:space="preserve">
+    <value>Installation</value>
+  </data>
 </root>

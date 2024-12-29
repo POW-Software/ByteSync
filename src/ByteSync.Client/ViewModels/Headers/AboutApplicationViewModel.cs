@@ -35,8 +35,6 @@ public class AboutApplicationViewModel : FlyoutElementViewModel
         _localApplicationDataManager = localApplicationDataManager;
         _logger = logger;
         
-        DeploymentMode = _environmentService.IsPortableApplication ? "Portable" : "Installed";
-        
         VisitByteSyncWebSiteCommand = ReactiveCommand.CreateFromTask(VisitByteSyncWebSite);
         VisitByteSyncWebSiteCommand.ThrownExceptions.Subscribe(OnCommandException);
         
@@ -65,8 +63,7 @@ public class AboutApplicationViewModel : FlyoutElementViewModel
 
     public string ApplicationVersion => VersionHelper.GetVersionString(_environmentService.ApplicationVersion);
     
-    [Reactive]
-    public string DeploymentMode { get; set; }
+    public bool DeploymentMode => _environmentService.IsPortableApplication;
 
     public string ClientId => _environmentService.ClientId;
     
