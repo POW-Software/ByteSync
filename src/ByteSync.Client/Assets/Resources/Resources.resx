@@ -166,7 +166,7 @@
     <value>Log out</value>
   </data>
   <data name="AboutApplication_VisitByteSyncWebSite" xml:space="preserve">
-    <value>Visit ByteSync Website</value>
+    <value>Visit the ByteSync Website</value>
   </data>
   <data name="AccountDetails_Theme" xml:space="preserve">
     <value>Theme:</value>
@@ -1643,10 +1643,19 @@ Do you want to save this new Session Profile with this name?</value>
   <data name="AboutApplication_OperatingSystem" xml:space="preserve">
     <value>Operating System:</value>
   </data>
-  <data name="AboutApplication_OSS" xml:space="preserve">
-    <value>ByteSync is an open-source application licensed under the MIT license</value>
+  <data name="AboutApplication_OSS_Publisher" xml:space="preserve">
+    <value>ByteSync is an open-source application licensed under the MIT license, published by POW Software.</value>
   </data>
   <data name="AboutApplication_VisitByteSyncRepository" xml:space="preserve">
-    <value>Visit ByteSync's GitHub repository</value>
+    <value>Visit the ByteSync GitHub repository</value>
+  </data>
+  <data name="Header_ApplicationInfo" xml:space="preserve">
+    <value>About ByteSync</value>
+  </data>
+  <data name="Header_ApplicationInfo_Tooltip" xml:space="preserve">
+    <value>Display application information.</value>
+  </data>
+  <data name="AboutApplication_VisitPowSoftwareWebSite" xml:space="preserve">
+    <value>Visit the POW Software WebSite</value>
   </data>
 </root>

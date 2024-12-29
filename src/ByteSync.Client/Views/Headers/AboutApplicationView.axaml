@@ -15,7 +15,7 @@
     <Grid>
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" MinWidth="400" Margin="12 0 12 0">
 
-            <Grid RowDefinitions="Auto, Auto, Auto, Auto" Margin="0 6 0 6" HorizontalAlignment="Center">
+            <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto" Margin="0 6 0 6" HorizontalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                     <ColumnDefinition Width="3"></ColumnDefinition>
@@ -27,20 +27,35 @@
                            VerticalAlignment="Center"/>
                 <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding ApplicationVersion}" Margin="6" VerticalAlignment="Center"/>
                 
+                <!-- <Rectangle Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}"  -->
+                <!--            StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/> -->
+                
+                <!-- ByteSync WebSite -->
+                <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="6" Command="{Binding Path=VisitByteSyncWebSiteCommand}" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon FontSize="20" Value="RegularWorld" Foreground="{DynamicResource SystemBaseMediumColor}"
+                                   Margin="2" VerticalAlignment="Center"/>
+                        <TextBlock Text="{localizations:Loc AboutApplication_VisitByteSyncWebSite}" Margin="4" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                
+                <Rectangle Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
+                           StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
+                
                 <!-- Deployment Mode -->
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="{localizations:Loc AboutApplication_DeploymentMode}" Margin="6" 
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="{localizations:Loc AboutApplication_DeploymentMode}" Margin="6" 
                            VerticalAlignment="Center"/>
-                <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding DeploymentMode}" Margin="6" VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding DeploymentMode}" Margin="6" VerticalAlignment="Center"/>
 
                 <!-- Machine Name -->
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="{localizations:Loc AboutApplication_MachineName}" Margin="6" 
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="{localizations:Loc AboutApplication_MachineName}" Margin="6" 
                            VerticalAlignment="Center"/>
-                <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding MachineName}" Margin="6" VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding MachineName}" Margin="6" VerticalAlignment="Center"/>
                 
                 <!-- Operating System -->
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="{localizations:Loc AboutApplication_OperatingSystem}" Margin="6" 
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="{localizations:Loc AboutApplication_OperatingSystem}" Margin="6" 
                            VerticalAlignment="Center"/>
-                <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding OperatingSystem}" Margin="6" VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding OperatingSystem}" Margin="6" VerticalAlignment="Center"/>
                 
             </Grid>
             
@@ -68,27 +83,23 @@
             
             <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
                        StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
-
-            <!-- Operating System -->
-            <Button Margin="6" Command="{Binding Path=VisitByteSyncWebSiteCommand}" HorizontalAlignment="Center">
-                <StackPanel Orientation="Horizontal">
-                    <misc:Icon FontSize="20" Value="RegularWorld" Foreground="{DynamicResource SystemBaseMediumColor}"
-                               Margin="2" VerticalAlignment="Center"/>
-                    <TextBlock Text="{localizations:Loc AboutApplication_VisitByteSyncWebSite}" Margin="4" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
             
-            <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
-                       StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
-            
-            <TextBlock Text="{localizations:Loc AboutApplication_OSS}" Margin="6" 
-                       VerticalAlignment="Center"/>
+            <TextBlock Text="{localizations:Loc AboutApplication_OSS_Publisher}" Margin="6" MaxWidth="400" TextWrapping="Wrap"
+                       VerticalAlignment="Center" HorizontalAlignment="Left"/>
             
             <Button Margin="6" Command="{Binding Path=VisitByteSyncRepositoryCommand}" HorizontalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
-                    <misc:Icon FontSize="20" Value="RegularWorld" Foreground="{DynamicResource SystemBaseMediumColor}"
+                    <misc:Icon FontSize="20" Value="LogosGithub" Foreground="{DynamicResource SystemBaseMediumColor}"
                                Margin="2" VerticalAlignment="Center"/>
                     <TextBlock Text="{localizations:Loc AboutApplication_VisitByteSyncRepository}" Margin="4" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            
+            <Button Margin="6" Command="{Binding Path=VisitPowSoftwareWebSiteCommand}" HorizontalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <misc:Icon FontSize="20" Value="RegularWorld" Foreground="{DynamicResource SystemBaseMediumColor}"
+                               Margin="2" VerticalAlignment="Center"/>
+                    <TextBlock Text="{localizations:Loc AboutApplication_VisitPowSoftwareWebSite}" Margin="4" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>
             

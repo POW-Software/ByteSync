@@ -42,6 +42,9 @@ public class AboutApplicationViewModel : FlyoutElementViewModel
         
         VisitByteSyncRepositoryCommand = ReactiveCommand.CreateFromTask(VisitByteSyncRepository);
         VisitByteSyncRepositoryCommand.ThrownExceptions.Subscribe(OnCommandException);
+        
+        VisitPowSoftwareWebSiteCommand = ReactiveCommand.CreateFromTask(VisitPowSoftwareWebSite);
+        VisitPowSoftwareWebSiteCommand.ThrownExceptions.Subscribe(OnCommandException);
             
         ExploreAppDataCommand = ReactiveCommand.CreateFromTask(ExploreAppData);
         ExploreAppDataCommand.ThrownExceptions.Subscribe(OnCommandException);
@@ -55,6 +58,8 @@ public class AboutApplicationViewModel : FlyoutElementViewModel
     public ReactiveCommand<Unit, Unit> VisitByteSyncWebSiteCommand { get; }
     
     public ReactiveCommand<Unit, Unit> VisitByteSyncRepositoryCommand { get; }
+    
+    public ReactiveCommand<Unit, Unit> VisitPowSoftwareWebSiteCommand { get; }
     
     public ReactiveCommand<Unit, Unit> OpenLogCommand { get; }
 
@@ -75,6 +80,11 @@ public class AboutApplicationViewModel : FlyoutElementViewModel
     private async Task VisitByteSyncRepository()
     {
         await _webAccessor.OpenByteSyncRepository();
+    }
+    
+    private async Task VisitPowSoftwareWebSite()
+    {
+        await _webAccessor.OpenPowSoftwareWebSite();
     }
     
     private async Task ExploreAppData()

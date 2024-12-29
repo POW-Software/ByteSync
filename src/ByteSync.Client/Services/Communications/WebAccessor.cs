@@ -40,6 +40,18 @@ class WebAccessor : IWebAccessor
 
         await DoOpenUrlAsync(url);
     }
+    
+    public async Task OpenPowSoftwareWebSite()
+    {
+        var url = "https://www.pow-software.com";
+
+        if (Equals(_localizationService.CurrentCultureDefinition?.Code, "fr"))
+        {
+            url = "https://www.pow-software.com/fr/";
+        }
+
+        await DoOpenUrlAsync(url);
+    }
 
     public async Task OpenByteSyncRepository()
     {

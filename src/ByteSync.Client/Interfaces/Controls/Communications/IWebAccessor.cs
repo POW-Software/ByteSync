@@ -25,5 +25,7 @@ namespace ByteSync.Interfaces.Controls.Communications
         Task OpenJoinBeta();
         
         Task OpenAboutOpenBeta();
+        
+        Task OpenPowSoftwareWebSite();
     }
 }
