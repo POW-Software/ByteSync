@@ -99,6 +99,7 @@
   <ItemGroup>
     <UpToDateCheckInput Remove="Assets\Resources\Resources.en.resx" />
     <UpToDateCheckInput Remove="Views\Sessions\Members\SessionMachineView.axaml" />
+    <UpToDateCheckInput Remove="Views\StartUp\LoginView.axaml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\Resources\Resources.Designer.cs">

@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
-using Splat;
 
 namespace ByteSync.Services.Communications;
 
@@ -10,9 +9,9 @@ class WebAccessor : IWebAccessor
 {
     private readonly ILocalizationService _localizationService;
 
-    public WebAccessor(ILocalizationService? localizationManager = null)
+    public WebAccessor(ILocalizationService localizationManager)
     {
-        _localizationService = localizationManager ?? Locator.Current.GetService<ILocalizationService>();
+        _localizationService = localizationManager;
     }
 
     public async Task OpenDocumentationUrl()
@@ -60,37 +59,13 @@ class WebAccessor : IWebAccessor
         await DoOpenUrlAsync(url);
     }
 
-    public async Task OpenPrivacy()
-    {
-        var url = "https://www.bytesyncapp.com/support/manual/getting-started/privacy-policy/";
-
-        if (Equals(_localizationService.CurrentCultureDefinition?.Code, "fr"))
-        {
-            url = "https://www.bytesyncapp.com/fr/support/manuel/demarrage/politique-de-confidentialite/";
-        }
-
-        await DoOpenUrlAsync(url);
-    }
-
-    public async Task OpenTermsOfUse()
-    {
-        var url = "https://www.bytesyncapp.com/support/manual/getting-started/terms-of-use/";
-
-        if (Equals(_localizationService.CurrentCultureDefinition?.Code, "fr"))
-        {
-            url = "https://www.bytesyncapp.com/fr/support/manuel/demarrage/conditions-dutilisation/";
-        }
-
-        await DoOpenUrlAsync(url);
-    }
-
     public async Task OpenReleaseNotes()
     {
-        var url = "https://www.bytesyncapp.com/support/manual/release-notes/";
+        var url = "https://www.bytesyncapp.com/documentation/release-notes/";
 
         if (Equals(_localizationService.CurrentCultureDefinition?.Code, "fr"))
         {
-            url = "https://www.bytesyncapp.com/fr/support/manuel/notes-de-version/";
+            url = "https://www.bytesyncapp.com/fr/documentation/notes-de-version/";
         }
 
         await DoOpenUrlAsync(url);
@@ -146,42 +121,6 @@ class WebAccessor : IWebAccessor
             {
                 url = "https://www.bytesyncapp.com/fr/support/manuel/demarrage/conditions-dutilisation/";
             }
-        }
-
-        await DoOpenUrlAsync(url);
-    }
-
-    public async Task OpenPricing()
-    {
-        var url = "https://www.bytesyncapp.com/#pricing";
-
-        if (Equals(_localizationService.CurrentCultureDefinition?.Code, "fr"))
-        {
-            url = "https://www.bytesyncapp.com/fr/#tarifs";
-        }
-
-        await DoOpenUrlAsync(url);
-    }
-
-    public async Task OpenJoinBeta()
-    {
-        var url = "https://www.bytesyncapp.com/#beta";
-
-        if (Equals(_localizationService.CurrentCultureDefinition?.Code, "fr"))
-        {
-            url = "https://www.bytesyncapp.com/fr/#beta";
-        }
-
-        await DoOpenUrlAsync(url);
-    }
-
-    public async Task OpenAboutOpenBeta()
-    {
-        var url = "https://www.bytesyncapp.com/blog/bytesync-open-beta/";
-
-        if (Equals(_localizationService.CurrentCultureDefinition?.Code, "fr"))
-        {
-            url = "https://www.bytesyncapp.com/fr/blog/beta-ouverte-de-bytesync/";
         }
 
         await DoOpenUrlAsync(url);

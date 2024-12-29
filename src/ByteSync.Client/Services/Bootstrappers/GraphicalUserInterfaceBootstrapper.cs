@@ -12,11 +12,9 @@ using ByteSync.Interfaces.Updates;
 using ByteSync.ViewModels.Home;
 using ByteSync.ViewModels.Lobbies;
 using ByteSync.ViewModels.Sessions;
-using ByteSync.ViewModels.StartUp;
 using ByteSync.Views.Home;
 using ByteSync.Views.Lobbies;
 using ByteSync.Views.Sessions;
-using ByteSync.Views.StartUp;
 using ReactiveUI;
 using Splat;
 using Splat.Serilog;
@@ -131,8 +129,7 @@ public class GraphicalUserInterfaceBootstrapper : BaseBootstrapper
     {
         // https://www.reactiveui.net/docs/handbook/view-location/
         // Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetExecutingAssembly());
-            
-        Locator.CurrentMutable.Register(() => new LoginView(), typeof(IViewFor<LoginViewModel>));
+        
         Locator.CurrentMutable.Register(() => new HomeMainView(), typeof(IViewFor<HomeMainViewModel>));
         Locator.CurrentMutable.Register(() => new SessionMainView(), typeof(IViewFor<SessionMainViewModel>));
         Locator.CurrentMutable.Register(() => new LobbyMainView(), typeof(IViewFor<LobbyMainViewModel>));
