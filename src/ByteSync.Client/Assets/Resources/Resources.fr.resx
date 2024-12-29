@@ -501,9 +501,9 @@ Voulez-vous continuer ?</value>
   <data name="Header_Account_Tooltip" xml:space="preserve">
 	  <value>Afficher les détails de votre compte.</value>
   </data>
-  <data name="Header_Support_Tooltip" xml:space="preserve">
-	  <value>Aller sur l'aide en ligne sur www.bytesyncapp.com.</value>
-  </data>
+	<data name="Header_Documentation_Tooltip" xml:space="preserve">
+		<value>Consulter la documentation en ligne sur le site web de ByteSync.</value>
+	</data>
 	<data name="Header_Home_Tooltip" xml:space="preserve">
 		<value>Revenir à la page d'accueil de POW ByteSync.</value>
 	</data>

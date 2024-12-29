@@ -106,6 +106,21 @@
                         </ToolTip.Tip>
                     </Button>
                     
+                    <!-- Documentation -->
+                    <Button Classes="GenericButton" Margin="3"
+                            Command="{Binding Path=OpenSupportCommand}" HorizontalAlignment="Left"  >
+                        <StackPanel Orientation="Horizontal">
+                            <misc:Icon FontSize="20" Value="RegularBookOpen" Margin="2"/>
+                        </StackPanel>
+
+                        <ToolTip.Tip>
+                            <StackPanel Classes="ByteSyncToolTip">
+                                <TextBlock Text="{localizations:Loc Header_Documentation}"/>
+                                <TextBlock Text="{localizations:Loc Header_Documentation_Tooltip}"/>
+                            </StackPanel>
+                        </ToolTip.Tip>
+                    </Button>
+                    
                     <!-- AboutApplication -->
                     <Button Classes="GenericButton" Margin="3"
                             Command="{Binding Path=ViewAboutApplicationCommand}" 
@@ -118,21 +133,6 @@
                             <StackPanel Classes="ByteSyncToolTip">
                                 <TextBlock Text="{localizations:Loc Header_ApplicationInfo}"/>
                                 <TextBlock Text="{localizations:Loc Header_ApplicationInfo_Tooltip}"/>
-                            </StackPanel>
-                        </ToolTip.Tip>
-                    </Button>
-                    
-                    <!-- Support -->
-                    <Button Classes="GenericButton" Margin="3"
-                            Command="{Binding Path=OpenSupportCommand}" HorizontalAlignment="Left"  >
-                        <StackPanel Orientation="Horizontal">
-                            <misc:Icon FontSize="20" Value="RegularHelpCircle" Margin="2"/>
-                        </StackPanel>
-
-                        <ToolTip.Tip>
-                            <StackPanel Classes="ByteSyncToolTip">
-                                <TextBlock Text="{localizations:Loc Header_Support}"/>
-                                <TextBlock Text="{localizations:Loc Header_Support_Tooltip}"/>
                             </StackPanel>
                         </ToolTip.Tip>
                     </Button>

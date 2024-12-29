@@ -807,18 +807,18 @@ namespace ByteSync.Assets.Resources {
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Support.
         /// </summary>
-        internal static string Header_Support {
+        internal static string Header_Documentation {
             get {
-                return ResourceManager.GetString("Header_Support", resourceCulture);
+                return ResourceManager.GetString("Header_Documentation", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Go to online help on www.pow-software.com.
         /// </summary>
-        internal static string Header_Support_Tooltip {
+        internal static string Header_Documentation_Tooltip {
             get {
-                return ResourceManager.GetString("Header_Support_Tooltip", resourceCulture);
+                return ResourceManager.GetString("Header_Documentation_Tooltip", resourceCulture);
             }
         }
         
