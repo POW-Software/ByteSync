@@ -65,8 +65,7 @@ public class DataInventoryStarter : IDataInventoryStarter
                 }
                 catch (Exception e)
                 {
-                    Log.Error("An erro");
-                    // handle the exception, e.g. log it
+                    Log.Error(e, "An unexpected error occurred while checking the inventory auto-start");
                 }
                 return Unit.Default;
             })
@@ -147,7 +146,10 @@ public class DataInventoryStarter : IDataInventoryStarter
         FinalizeSessionSettings(sessionSettings);
 
         var result = CheckPathItems(session);
-        if (result != null) return result;
+        if (result != null)
+        {
+            return result;
+        }
 
         // todo : remonter également les autres paramètres pour contrôle par les aux parties de l'égalité des paramètres
         
