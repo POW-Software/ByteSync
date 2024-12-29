@@ -7,7 +7,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Lobbies;
 
-public class LobbySynchronizationRuleViewModel : ActivableViewModelBase
+public class LobbySynchronizationRuleViewModel : ActivatableViewModelBase
 {
     private readonly ILocalizationService _localizationService;
     private readonly IDescriptionBuilderFactory _descriptionBuilderFactory;

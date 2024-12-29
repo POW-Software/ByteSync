@@ -4,7 +4,7 @@ using ReactiveUI;
 
 namespace ByteSync.ViewModels.TrustedNetworks;
 
-public class TrustedPublicKeysViewModel : ActivableViewModelBase
+public class TrustedPublicKeysViewModel : ActivatableViewModelBase
 {
     private readonly IPublicKeysManager _publicKeysManager;
 

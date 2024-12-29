@@ -15,7 +15,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Inventories;
 
-public class InventoryMainStatusViewModel : ActivableViewModelBase
+public class InventoryMainStatusViewModel : ActivatableViewModelBase
 {
     private readonly IInventoryService _inventoryService;
     private readonly ISessionService _sessionService;

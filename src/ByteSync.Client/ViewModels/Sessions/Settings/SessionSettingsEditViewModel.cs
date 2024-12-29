@@ -13,7 +13,7 @@ using Serilog;
 
 namespace ByteSync.ViewModels.Sessions.Settings;
 
-public class SessionSettingsEditViewModel : ActivableViewModelBase
+public class SessionSettingsEditViewModel : ActivatableViewModelBase
 {
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;

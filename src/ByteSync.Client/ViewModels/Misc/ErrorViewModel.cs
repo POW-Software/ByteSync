@@ -8,7 +8,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Misc;
 
-public class ErrorViewModel : ActivableViewModelBase 
+public class ErrorViewModel : ActivatableViewModelBase 
 {
     private readonly ILocalizationService _localizationService;
 

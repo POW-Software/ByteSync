@@ -34,7 +34,7 @@ using Splat;
 
 namespace ByteSync.ViewModels.Sessions.Cloud.Members;
 
-public class SessionMachineViewModel : ActivableViewModelBase
+public class SessionMachineViewModel : ActivatableViewModelBase
 {
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;

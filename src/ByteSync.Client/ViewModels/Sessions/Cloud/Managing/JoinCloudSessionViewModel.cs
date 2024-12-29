@@ -18,7 +18,7 @@ using Serilog;
 
 namespace ByteSync.ViewModels.Sessions.Cloud.Managing;
 
-public class JoinCloudSessionViewModel : ActivableViewModelBase
+public class JoinCloudSessionViewModel : ActivatableViewModelBase
 {
     private readonly ICloudSessionConnector _cloudSessionConnector;
     private readonly ICloudSessionEventsHub _cloudSessionEventsHub;

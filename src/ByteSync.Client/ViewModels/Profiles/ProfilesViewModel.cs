@@ -14,7 +14,7 @@ using Splat;
 
 namespace ByteSync.ViewModels.Profiles;
 
-public class ProfilesViewModel : ActivableViewModelBase
+public class ProfilesViewModel : ActivatableViewModelBase
 {
     private readonly ISessionProfileLocalDataManager _sessionProfileLocalDataManager;
     private readonly ILobbyManager _lobbyManager;

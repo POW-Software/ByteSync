@@ -17,7 +17,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Misc;
 
-public class FlyoutContainerViewModel : ActivableViewModelBase, IDialogView
+public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
 {
     private readonly INavigationEventsHub _navigationEventsHub;
     private readonly ILocalizationService _localizationService;

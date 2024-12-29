@@ -15,7 +15,7 @@ using Serilog;
 
 namespace ByteSync.ViewModels.Sessions.Inventories;
 
-public class InventoryBeforeStartViewModel : ActivableViewModelBase
+public class InventoryBeforeStartViewModel : ActivatableViewModelBase
 {
     private readonly ILocalizationService _localizationService;
     private readonly ISessionService _sessionService;

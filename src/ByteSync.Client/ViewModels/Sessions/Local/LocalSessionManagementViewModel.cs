@@ -13,7 +13,7 @@ using Splat;
 
 namespace ByteSync.ViewModels.Sessions.Local;
 
-public class LocalSessionManagementViewModel : ActivableViewModelBase
+public class LocalSessionManagementViewModel : ActivatableViewModelBase
 {
     private readonly ISessionInterruptor _sessionInterruptor;
     private readonly INavigationEventsHub _navigationEventsHub;

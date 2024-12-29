@@ -12,7 +12,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Headers;
 
-public class ConnectionStatusViewModel : ActivableViewModelBase
+public class ConnectionStatusViewModel : ActivatableViewModelBase
 {
     private readonly IConnectionService _connectionService;
     private readonly ILocalizationService _localizationService;

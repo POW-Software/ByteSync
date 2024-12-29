@@ -29,7 +29,7 @@ using Splat;
 
 namespace ByteSync.ViewModels.Sessions.Local;
 
-public class LocalSessionPartsViewModel : ActivableViewModelBase
+public class LocalSessionPartsViewModel : ActivatableViewModelBase
 {
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;

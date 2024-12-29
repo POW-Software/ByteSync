@@ -19,7 +19,7 @@ using CloudSessionProfileDetails = ByteSync.Business.Profiles.CloudSessionProfil
 
 namespace ByteSync.ViewModels.Lobbies;
 
-public class LobbyMainViewModel : ActivableViewModelBase, IRoutableViewModel
+public class LobbyMainViewModel : ActivatableViewModelBase, IRoutableViewModel
 {
     private readonly ILobbyManager _lobbyManager;
     private readonly ILobbyRepository _lobbyRepository;
