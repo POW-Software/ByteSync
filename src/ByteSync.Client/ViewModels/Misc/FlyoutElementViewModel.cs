@@ -2,7 +2,7 @@
 
 namespace ByteSync.ViewModels.Misc;
 
-public abstract class FlyoutElementViewModel : ActivableViewModelBase
+public abstract class FlyoutElementViewModel : ActivatableViewModelBase
 {
     public event EventHandler? CloseFlyoutRequested;
     

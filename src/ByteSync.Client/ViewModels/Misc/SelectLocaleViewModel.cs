@@ -45,8 +45,6 @@ class SelectLocaleViewModel : ViewModelBase, IActivatableViewModel
                 .Subscribe(_ => OnLocaleChanged())
                 .DisposeWith(disposables);
         });
-
-        // TranslationSource.GetInstance().PropertyChanged += TranslationSource_PropertyChanged;
     }
 
     public ViewModelActivator Activator { get; }
@@ -63,12 +61,4 @@ class SelectLocaleViewModel : ViewModelBase, IActivatableViewModel
             SelectedCulture = _localizationService.CurrentCultureDefinition;
         }
     }
-    
-    // private void TranslationSource_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    // {
-    //     if (!Equals(_localizationManager.CurrentCultureDefinition, SelectedCulture))
-    //     {
-    //         SelectedCulture = _localizationManager.CurrentCultureDefinition;
-    //     }
-    // }
 }

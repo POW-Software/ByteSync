@@ -2,9 +2,9 @@
 
 namespace ByteSync.ViewModels;
 
-public abstract class ActivableViewModelBase : ViewModelBase, IActivatableViewModel
+public abstract class ActivatableViewModelBase : ViewModelBase, IActivatableViewModel
 {
-    protected ActivableViewModelBase()
+    protected ActivatableViewModelBase()
     {
         Activator = new ViewModelActivator();
     }

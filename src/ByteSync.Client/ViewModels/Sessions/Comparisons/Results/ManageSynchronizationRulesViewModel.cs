@@ -12,7 +12,7 @@ using ReactiveUI;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Results;
 
-public class ManageSynchronizationRulesViewModel : ActivableViewModelBase
+public class ManageSynchronizationRulesViewModel : ActivatableViewModelBase
 {
     private readonly ISynchronizationRuleRepository _synchronizationRuleRepository;
     private readonly ISynchronizationService _synchronizationService;

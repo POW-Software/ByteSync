@@ -21,7 +21,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Headers;
 
-public class HeaderViewModel : ActivableViewModelBase
+public class HeaderViewModel : ActivatableViewModelBase
 {
     private readonly IWebAccessor _webAccessor;
     private readonly IAvailableUpdateRepository _availableUpdateRepository;

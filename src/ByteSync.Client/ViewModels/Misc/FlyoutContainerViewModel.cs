@@ -6,20 +6,18 @@ using Avalonia.Controls.Mixins;
 using Avalonia.Threading;
 using ByteSync.Assets.Resources;
 using ByteSync.Business;
-using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Events;
 using ByteSync.Business.Profiles;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.EventsHubs;
-using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Misc;
 
-public class FlyoutContainerViewModel : ActivableViewModelBase, IDialogView
+public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
 {
     private readonly INavigationEventsHub _navigationEventsHub;
     private readonly ILocalizationService _localizationService;

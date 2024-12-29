@@ -16,7 +16,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Lobbies;
 
-public class LobbyMemberViewModel : ActivableViewModelBase
+public class LobbyMemberViewModel : ActivatableViewModelBase
 {
     private readonly ILobbyRepository _lobbyRepository;
     private readonly ILocalizationService _localizationService;

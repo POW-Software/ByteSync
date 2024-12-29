@@ -16,7 +16,7 @@ using Serilog;
 
 namespace ByteSync.ViewModels.Sessions.Inventories;
 
-public class InventoryProcessViewModel : ActivableViewModelBase
+public class InventoryProcessViewModel : ActivatableViewModelBase
 {
     private readonly IInventoryService _inventoryService;
     private readonly IDialogService _dialogService;

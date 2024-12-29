@@ -17,7 +17,7 @@ using Serilog;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Actions;
 
-public class ImportRulesFromProfileViewModel : ActivableViewModelBase
+public class ImportRulesFromProfileViewModel : ActivatableViewModelBase
 {
     private readonly ISessionService _sessionService;
     private readonly ISessionProfileLocalDataManager _sessionProfileLocalDataManager;

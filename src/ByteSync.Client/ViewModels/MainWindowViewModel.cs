@@ -17,7 +17,7 @@ using Serilog;
 
 namespace ByteSync.ViewModels;
 
-public partial class MainWindowViewModel : ActivableViewModelBase, IScreen
+public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
 {
     private readonly ISessionService _sessionService;
     private readonly ICloudSessionConnector _cloudSessionConnector;

@@ -27,7 +27,7 @@ using Serilog;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Results;
 
-public class ComparisonResultViewModel : ActivableViewModelBase 
+public class ComparisonResultViewModel : ActivatableViewModelBase 
 {
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;

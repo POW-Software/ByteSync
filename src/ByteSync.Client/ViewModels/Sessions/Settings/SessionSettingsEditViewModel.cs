@@ -6,7 +6,6 @@ using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Sessions;
-using ByteSync.Interfaces.EventsHubs;
 using ByteSync.ViewModels.Sessions.Cloud.Managing;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -14,9 +13,8 @@ using Serilog;
 
 namespace ByteSync.ViewModels.Sessions.Settings;
 
-public class SessionSettingsEditViewModel : ActivableViewModelBase
+public class SessionSettingsEditViewModel : ActivatableViewModelBase
 {
-    private readonly ICloudSessionEventsHub _cloudSessionEventsHub;
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;
     private readonly IDataInventoryStarter _dataInventoryStarter;
@@ -30,20 +28,11 @@ public class SessionSettingsEditViewModel : ActivableViewModelBase
         
     }
 #endif
-    
-    // public SessionSettingsEditViewModel(SessionSettings sessionSettings) : this (null, null)
-    // {
-    //     ImportSettings(sessionSettings);
-    //
-    //     ListenEvents = false;
-    // }
 
-    public SessionSettingsEditViewModel(ICloudSessionEventsHub cloudSessionEventsHub, ISessionService sessionService,
-        ILocalizationService localizationService, IDataInventoryStarter dataInventoryStarter,
+    public SessionSettingsEditViewModel(ISessionService sessionService, ILocalizationService localizationService, IDataInventoryStarter dataInventoryStarter,
         AnalysisModeViewModelFactory analysisModeViewModelFactory, DataTypeViewModelFactory dataTypeViewModelFactory, 
         LinkingKeyViewModelFactory linkingKeyViewModelFactory, SessionSettings? sessionSettings)
     {
-        _cloudSessionEventsHub = cloudSessionEventsHub;
         _sessionService = sessionService;
         _localizationService = localizationService;
         _dataInventoryStarter = dataInventoryStarter;
@@ -51,24 +40,24 @@ public class SessionSettingsEditViewModel : ActivableViewModelBase
         _dataTypeViewModelFactory = dataTypeViewModelFactory;
         _linkingKeyViewModelFactory = linkingKeyViewModelFactory;
         
-        AvailableAnalysisModes = new ObservableCollection<AnalysisModeViewModel>();
-        AvailableAnalysisModes.Add(_analysisModeViewModelFactory.Invoke(AnalysisModes.Smart));
-        AvailableAnalysisModes.Add(_analysisModeViewModelFactory.Invoke(AnalysisModes.Checksum));
+        AvailableAnalysisModes =
+        [
+            _analysisModeViewModelFactory.Invoke(AnalysisModes.Smart),
+            _analysisModeViewModelFactory.Invoke(AnalysisModes.Checksum)
+        ];
 
-        AvailableDataTypes = new ObservableCollection<DataTypeViewModel>();
-        AvailableDataTypes.Add(_dataTypeViewModelFactory.Invoke(DataTypes.FilesDirectories));
-        AvailableDataTypes.Add(_dataTypeViewModelFactory.Invoke(DataTypes.Files));
-        AvailableDataTypes.Add(_dataTypeViewModelFactory.Invoke(DataTypes.Directories));
+        AvailableDataTypes =
+        [
+            _dataTypeViewModelFactory.Invoke(DataTypes.FilesDirectories),
+            _dataTypeViewModelFactory.Invoke(DataTypes.Files),
+            _dataTypeViewModelFactory.Invoke(DataTypes.Directories)
+        ];
 
-        AvailableLinkingKeys = new ObservableCollection<LinkingKeyViewModel>();
-        AvailableLinkingKeys.Add(_linkingKeyViewModelFactory.Invoke(LinkingKeys.RelativePath));
-        AvailableLinkingKeys.Add(_linkingKeyViewModelFactory.Invoke(LinkingKeys.Name));
-        
-        // this.WhenAnyValue(
-        //         x => x.IsSessionCreatedByMe, x => x.IsSessionActivated, x => x.IsCloudSession, x => x.IsProfileSession,
-        //         (isSessionCreatedByMe, isSessionActivated, isCloudSession, isProfileSession) 
-        //             => (!isCloudSession || isSessionCreatedByMe) && !isSessionActivated && !(isCloudSession && isProfileSession))
-        //     .ToPropertyEx(this, x => x.CanEditSettings);
+        AvailableLinkingKeys =
+        [
+            _linkingKeyViewModelFactory.Invoke(LinkingKeys.RelativePath),
+            _linkingKeyViewModelFactory.Invoke(LinkingKeys.Name)
+        ];
 
         Extensions = "";
         
@@ -86,68 +75,38 @@ public class SessionSettingsEditViewModel : ActivableViewModelBase
                 .Subscribe(OnSessionSettingsUpdated)
                 .DisposeWith(disposables);
             
-            _dataInventoryStarter.CanCurrentUserStartInventory()
+            _dataInventoryStarter.CanCurrentUserStartInventory().CombineLatest(_sessionService.SessionStatusObservable,
+                    (canCurrentUserStartInventory, sessionStatus) => canCurrentUserStartInventory && sessionStatus == SessionStatus.Preparation)
                 .ToPropertyEx(this, x => x.CanEditSettings)
                 .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<CloudSessionSettingsEventArgs>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.SessionSettingsUpdated))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(evt => OnSessionSettingsUpdated(evt.EventArgs.SessionSettings))
-            //     .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<EventArgs>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.SessionActivated))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => IsSessionActivated = true)
-            //     .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<EventArgs>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.SessionResetted))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnSessionResetted())
-            //     .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<EventArgs>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.MemberQuittedSession))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnMemberQuittedSession())
-            //     .DisposeWith(disposables);
             
             _localizationService.CurrentCultureObservable
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => OnLocaleUpdated())
                 .DisposeWith(disposables);
 
-            // IsCloudSession = _sessionService.IsCloudSession;
-            // IsSessionCreatedByMe = _sessionService.IsCloudSessionCreatedByMe;
-            // IsSessionActivated = _sessionService.IsSessionActivated;
-            // IsProfileSession = _sessionService.IsProfileSession;
-
             ImportSettings(sessionSettings);
             
             this.WhenAnyValue(x => x.ExcludeHiddenFiles, x => x.ExcludeSystemFiles, x => x.LinkingKey,
                     x => x.DataType,
                     x => x.AnalysisMode, x => x.Extensions)
-                // .Throttle(TimeSpan.FromSeconds(0.8), RxApp.TaskpoolScheduler)
                 .Skip(1)
                 .Subscribe(_ => SendUpdate());
         });
     }
 
-    // private void OnSessionResetted()
-    // {
-    //     IsSessionActivated = false;
-    // }
-
     private void OnLocaleUpdated()
     {
-        // Les comboBox ne mettent pas à jour le "SelectedText" quand on change la Description d'un des Items
-        // Pour rafraichir le "SelectedText" du comboBox, on doit forcer l'affectation
-        //  => IsUpdatingLocale permet d'éviter d'envoyer la MAJ des Settings
+        // comboBoxes don't update the SelectedText when you change the Description of one of the Items
+        // To refresh the “SelectedText” of the comboBox, you must force the assignment
+        // => IsUpdatingLocale avoids sending the Settings Update
         IsUpdatingLocale = true;
         
         foreach (var dataTypeViewModel in AvailableDataTypes)
         {
             dataTypeViewModel.UpdateDescription();
         }
-        // On force pour rafraichir le combo
+        // Force to refresh the combo
         var dataType = DataType;
         DataType = null;
         DataType = dataType;
@@ -156,7 +115,7 @@ public class SessionSettingsEditViewModel : ActivableViewModelBase
         {
             linkingKeyViewModel.UpdateDescription();
         }
-        // On force pour rafraichir le combo
+        // Force to refresh the combo
         var linkingKey = LinkingKey;
         LinkingKey = null;
         LinkingKey = linkingKey;
@@ -165,7 +124,7 @@ public class SessionSettingsEditViewModel : ActivableViewModelBase
         {
             analysisModeViewModel.UpdateDescription();
         }
-        // On force pour rafraichir le combo
+        // Force to refresh the combo
         var analysisMode = AnalysisMode;
         AnalysisMode = null;
         AnalysisMode = analysisMode;
@@ -202,18 +161,6 @@ public class SessionSettingsEditViewModel : ActivableViewModelBase
     public ObservableCollection<LinkingKeyViewModel> AvailableLinkingKeys { get; set; }
     
     public extern bool CanEditSettings { [ObservableAsProperty] get; }
-
-    // [Reactive]
-    // public bool IsCloudSession { get; set; }
-    //
-    // [Reactive]
-    // public bool IsSessionCreatedByMe { get; set; }
-    //
-    // [Reactive]
-    // public bool IsSessionActivated { get; set; }
-    //
-    // [Reactive]
-    // public bool IsProfileSession { get; set; }
     
     private async void SendUpdate()
     {
@@ -300,9 +247,4 @@ public class SessionSettingsEditViewModel : ActivableViewModelBase
             Extensions = cloudSessionSettings.Extensions;
         }
     }
-    
-    // private void OnMemberQuittedSession()
-    // {
-    //     IsSessionCreatedByMe = _sessionService.IsCloudSessionCreatedByMe;
-    // }
 }

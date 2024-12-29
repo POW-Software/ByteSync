@@ -30,7 +30,6 @@ public class HomeMainViewModel : ViewModelBase, IRoutableViewModel
         
         LocalSynchronizationCommand = ReactiveCommand.CreateFromTask(() =>
             _sessionService.InitiateLocalSessionMode());
-            //_sessionService.StartLocalSession(null));
 
         OpenSupportCommand = ReactiveCommand.CreateFromTask(() => 
             _webAccessor.OpenDocumentationUrl());
