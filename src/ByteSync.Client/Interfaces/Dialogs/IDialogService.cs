@@ -11,4 +11,6 @@ public interface IDialogService
     Task<MessageBoxResult?> ShowMessageBoxAsync(MessageBoxViewModel messageBoxViewModel);
 
     void ShowFlyout(string titleKey, bool toggle, FlyoutElementViewModel flyout);
+    
+    void CloseFlyout();
 }

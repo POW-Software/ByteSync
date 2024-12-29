@@ -30,4 +30,9 @@ public class DialogService : IDialogService
     {
         _dialogView.ShowFlyout(titleKey, toggle, flyout);
     }
+
+    public void CloseFlyout()
+    {
+        _dialogView.CloseFlyout();
+    }
 }

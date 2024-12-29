@@ -2,13 +2,16 @@
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls.Mixins;
+using ByteSync.Assets.Resources;
 using ByteSync.Business.Navigations;
 using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Navigations;
+using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.EventsHubs;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Updates;
 using ByteSync.ViewModels.Misc;
@@ -20,18 +23,13 @@ namespace ByteSync.ViewModels.Headers;
 
 public class HeaderViewModel : ActivableViewModelBase
 {
-    private readonly INavigationEventsHub _navigationEventsHub;
     private readonly IWebAccessor _webAccessor;
     private readonly IAvailableUpdateRepository _availableUpdateRepository;
     
     private readonly ILocalizationService _localizationService;
     private readonly INavigationService _navigationService;
-
-
-    // public HeaderViewModel(FlyoutContainerViewModel flyoutContainerViewModel) : this (flyoutContainerViewModel, null, null, null, null, null)
-    // {
-    //         
-    // }
+    private readonly IDialogService _dialogService;
+    private readonly IFlyoutElementViewModelFactory _flyoutElementViewModelFactory;
 
     public HeaderViewModel()
     {
@@ -39,14 +37,16 @@ public class HeaderViewModel : ActivableViewModelBase
     }
         
     public HeaderViewModel(FlyoutContainerViewModel flyoutContainerViewModel, ConnectionStatusViewModel connectionStatusViewModel,
-        INavigationEventsHub navigationEventsHub, IWebAccessor webAccessor, IAvailableUpdateRepository availableAvailableUpdateRepository,
-        ILocalizationService localizationService, INavigationService navigationService)
+        IWebAccessor webAccessor, IAvailableUpdateRepository availableAvailableUpdateRepository,
+        ILocalizationService localizationService, INavigationService navigationService, IDialogService dialogService,
+        IFlyoutElementViewModelFactory flyoutElementViewModelFactory)
     {
-        _navigationEventsHub = navigationEventsHub;
         _webAccessor = webAccessor;
         _availableUpdateRepository = availableAvailableUpdateRepository;
         _localizationService = localizationService;
         _navigationService = navigationService;
+        _dialogService = dialogService;
+        _flyoutElementViewModelFactory = flyoutElementViewModelFactory;
 
         FlyoutContainer = flyoutContainerViewModel;
         ConnectionStatus = connectionStatusViewModel;
@@ -57,13 +57,11 @@ public class HeaderViewModel : ActivableViewModelBase
         ViewAccountCommand = ReactiveCommand.Create(ViewAccount, canView);
         ViewTrustedNetworkCommand = ReactiveCommand.Create(ViewTrustedNetwork, canView);
         ViewGeneralSettingsCommand = ReactiveCommand.Create(ViewGeneralSettings, canView);
-        ShowUpdateCommand = ReactiveCommand.Create(ShowUpdate, canView);
+        ViewAboutApplicationCommand = ReactiveCommand.Create(ViewAboutApplication, canView);
+        ShowUpdateCommand = ReactiveCommand.Create(ViewUpdateDetails, canView);
 
         OpenSupportCommand = ReactiveCommand.Create(OpenSupport);
         GoHomeCommand = ReactiveCommand.Create(() => _navigationService.NavigateTo(NavigationPanel.Home));
-        DebugForceDisconnectionCommand = ReactiveCommand.CreateFromTask(DebugForceDisconnection);
-
-        // NextAvailableVersions = new List<SoftwareVersion>();
 
         IsNavigateToHomeVisible = false;
         IsAccountVisible = true;
@@ -108,14 +106,14 @@ public class HeaderViewModel : ActivableViewModelBase
     public ReactiveCommand<Unit, Unit> ViewTrustedNetworkCommand { get; private set; }
 
     public ReactiveCommand<Unit, Unit> ViewGeneralSettingsCommand { get; private set; }
+    
+    public ReactiveCommand<Unit, Unit> ViewAboutApplicationCommand { get; private set; }
         
     public ReactiveCommand<Unit, Unit> GoHomeCommand { get; private set; }
 
     public ReactiveCommand<Unit, Unit> OpenSupportCommand { get; set; }
         
     public ReactiveCommand<Unit, Unit> ShowUpdateCommand { get; set; }
-    
-    public ReactiveCommand<Unit, Unit> DebugForceDisconnectionCommand { get; set; }
     
     [Reactive]
     public ViewModelBase ConnectionStatus { get; set; }
@@ -144,28 +142,33 @@ public class HeaderViewModel : ActivableViewModelBase
 
     private void ViewAccount()
     {
-        _navigationEventsHub.RaiseViewAccountRequested();
+        _dialogService.ShowFlyout(nameof(Resources.Shell_Account), true, _flyoutElementViewModelFactory.BuildAccountDetailsViewModel());
     }
     
     private void ViewTrustedNetwork()
     {
-        _navigationEventsHub.RaiseViewTrustedNetworkRequested();
+        _dialogService.ShowFlyout(nameof(Resources.Shell_TrustedNetwork), true, _flyoutElementViewModelFactory.BuildTrustedNetworkViewModel());
     }
 
 
     private void ViewGeneralSettings()
     {
-        _navigationEventsHub.RaiseViewGeneralSettingsRequested();
+        _dialogService.ShowFlyout(nameof(Resources.Shell_GeneralSettings), true, _flyoutElementViewModelFactory.BuildGeneralSettingsViewModel());
+    }
+    
+    private void ViewAboutApplication()
+    {
+        _dialogService.ShowFlyout(nameof(Resources.Shell_AboutApplication), true, _flyoutElementViewModelFactory.BuildAboutApplicationViewModel());
+    }
+    
+    private void ViewUpdateDetails()
+    {
+        _dialogService.ShowFlyout(nameof(Resources.Shell_Update), true, _flyoutElementViewModelFactory.BuildUpdateDetailsViewModel());
     }
 
     private void OpenSupport()
     {
-        _webAccessor.OpenSupportUrl();
-    }
-        
-    private void ShowUpdate()
-    {
-        _navigationEventsHub.RaiseViewUpdateDetailsRequested();
+        _webAccessor.OpenDocumentationUrl();
     }
 
     private void OnNavigated(NavigationDetails navigationDetails)
@@ -191,21 +194,5 @@ public class HeaderViewModel : ActivableViewModelBase
         {
             Title = _localizationService[TitleLocalizationName!];
         }
-    }
-
-    private Task DebugForceDisconnection()
-    {
-        return Task.CompletedTask;
-        
-        // var connectionManager = Locator.Current.GetService<IConnectionManager>()!;
-        //
-        // try
-        // {
-        //     await connectionManager.DebugForceDisconnection();
-        // }
-        // catch (Exception ex)
-        // {
-        //     Log.Error(ex, "QuitSession error");
-        // }
     }
 }

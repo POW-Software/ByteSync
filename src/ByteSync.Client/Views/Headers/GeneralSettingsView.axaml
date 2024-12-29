@@ -12,7 +12,7 @@
         <headers:GeneralSettingsViewModel />
     </Design.DataContext>
     
-    <Grid Background="{DynamicResource MahApps.Brushes.Gray7}">
+    <Grid>
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" MinWidth="400" Margin="12 0 12 0">
 
             <Grid RowDefinitions="Auto, Auto, Auto, Auto" Margin="0 6 0 6" HorizontalAlignment="Center">
@@ -42,16 +42,6 @@
                           SelectedItem="{Binding SelectedThemeName}"
                           BorderThickness="0"
                           Items="{Binding AvailableThemesNames}">
-                    
-                    <!-- <ComboBox.ItemTemplate> -->
-                    <!--     <DataTemplate> -->
-                    <!--         <StackPanel Orientation="Horizontal"> -->
-                    <!--             <TextBlock Text="{Binding Mode}" /> -->
-                    <!--             <TextBlock Text=" / " /> -->
-                    <!--             <TextBlock Text="{Binding Name}" /> -->
-                    <!--         </StackPanel> -->
-                    <!--     </DataTemplate> -->
-                    <!-- </ComboBox.ItemTemplate> -->
                 </ComboBox>
 
                 <TextBlock Grid.Row="3" Grid.Column="0" Text="{localizations:Loc AccountDetails_Zoom}" Margin="6" VerticalAlignment="Center"></TextBlock>
@@ -73,62 +63,9 @@
                     </Button>
 
                 </StackPanel>
-
                 
             </Grid>
-
-            <Border BorderBrush="{DynamicResource MahApps.Brushes.Gray8}" BorderThickness="0,1,0,1" Margin="0,8" />
-
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-
-                <Button Margin="6" Command="{Binding Path=ExploreAppDataCommand}" HorizontalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <misc:Icon FontSize="20" Value="RegularRightArrowCircle" Foreground="{DynamicResource SystemBaseMediumColor}"
-                                   Margin="2" VerticalAlignment="Center"/>
-                        <TextBlock Text="{localizations:Loc AccountDetails_ExploreAppData}" Margin="4" VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}" />
-                    </StackPanel>
-                </Button>
-
-                <Button Margin="6" Command="{Binding Path=OpenLogCommand}" HorizontalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <misc:Icon FontSize="20" Value="RegularNotepad" Foreground="{DynamicResource SystemBaseMediumColor}"
-                                   Margin="2" VerticalAlignment="Center"/>
-                        <TextBlock Text="{localizations:Loc AccountDetails_OpenLog}" Margin="4" VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}" />
-                    </StackPanel>
-                </Button>
-            </StackPanel>
-
-            <Border BorderBrush="{DynamicResource MahApps.Brushes.Gray8}" BorderThickness="0,1,0,1" Margin="0,8" />
-
-            <Button Margin="6" Command="{Binding Path=VisitPowSoftwareCommand}" HorizontalAlignment="Center">
-                <StackPanel Orientation="Horizontal">
-                    <misc:Icon FontSize="20" Value="RegularWorld" Foreground="{DynamicResource SystemBaseMediumColor}"
-                               Margin="2" VerticalAlignment="Center"/>
-                    <TextBlock Text="{localizations:Loc AccountDetails_VisitPowWebSite}" Margin="4" VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}" />
-                </StackPanel>
-            </Button>
-            
-            <!--<Button Margin="6" Command="{Binding Path=RestartApplicationCommand}" HorizontalAlignment="Center">
-                <StackPanel Orientation="Horizontal">
-                    <misc:Icon FontSize="20" Value="RegularWorld" Foreground="{DynamicResource SystemBaseMediumColor}"
-                               Margin="2" VerticalAlignment="Center"/>
-                    <TextBlock Text="{localizations:Loc AccountDetails_RestartApplication}" Margin="4" VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}" />
-                </StackPanel>
-            </Button>-->
-
-            <Border BorderBrush="{DynamicResource MahApps.Brushes.Gray8}" BorderThickness="0,1,0,1" Margin="0,8" />
-
-            <DockPanel Margin="0 6 0 6">
-                <Button Classes="LinkButton" Command="{Binding OpenPrivacyCommand}" 
-                        HorizontalAlignment="Left" DockPanel.Dock="Left">
-                    <TextBlock Text="{localizations:Loc LoginForm_Privacy}" ></TextBlock>
-                </Button>
-                
-                <Button Classes="LinkButton" Command="{Binding OpenTermsOfUseCommand}" 
-                        HorizontalAlignment="Right" DockPanel.Dock="Right">
-                    <TextBlock Text="{localizations:Loc LoginForm_TermsOfUse}" ></TextBlock>
-                </Button>
-            </DockPanel>
+           
         </StackPanel>
     </Grid>
 </UserControl>

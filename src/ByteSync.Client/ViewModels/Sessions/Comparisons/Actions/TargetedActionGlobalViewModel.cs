@@ -9,10 +9,8 @@ using ByteSync.Business.Comparisons;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Comparisons;
-using ByteSync.Interfaces.EventsHubs;
-using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
-using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.ViewModels.Misc;
 using ReactiveUI;
@@ -25,7 +23,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
     readonly ObservableAsPropertyHelper<bool> _canEditAction;
 
     private readonly ILocalizationService _localizationService;
-    private readonly INavigationEventsHub _navigationEventsHub;
+    private readonly IDialogService _dialogService;
     private readonly IComparisonItemActionsManager _comparisonItemActionsManager;
     private readonly IAtomicActionConsistencyChecker _atomicActionConsistencyChecker;
     private readonly IActionEditViewModelFactory _actionEditViewModelFactory;
@@ -38,7 +36,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
     }
 
     public TargetedActionGlobalViewModel(List<ComparisonItem> comparisonItems, 
-        INavigationEventsHub navigationEventsHub, ILocalizationService localizationService,
+        IDialogService dialogService, ILocalizationService localizationService,
         IComparisonItemActionsManager comparisonItemActionsManager, IAtomicActionConsistencyChecker atomicActionConsistencyChecker,
         IActionEditViewModelFactory actionEditViewModelFactory)
     {
@@ -46,7 +44,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
 
         FileSystemType = ComparisonItems.Select(civm => civm.FileSystemType).ToHashSet().Single();
         
-        _navigationEventsHub = navigationEventsHub;
+        _dialogService = dialogService;
         _localizationService = localizationService;
         _comparisonItemActionsManager = comparisonItemActionsManager;
         _atomicActionConsistencyChecker = atomicActionConsistencyChecker;
@@ -163,7 +161,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
                 
                 _comparisonItemActionsManager.AddTargetedAction(atomicAction, ComparisonItems);
 
-                _navigationEventsHub.RaiseCloseFlyoutRequested();
+                _dialogService.CloseFlyout();
             }
             else
             {
@@ -187,7 +185,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
 
             _comparisonItemActionsManager.AddTargetedAction(atomicAction, result.ValidComparisons);
 
-            _navigationEventsHub.RaiseCloseFlyoutRequested();
+            _dialogService.CloseFlyout();
         }
     }
 

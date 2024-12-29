@@ -9,8 +9,7 @@ using ByteSync.Business.Sessions;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
-using ByteSync.Interfaces.EventsHubs;
-using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions.Misc;
@@ -22,7 +21,7 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Actions;
 
 public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
 {
-    private readonly INavigationEventsHub _navigationEventsHub;
+    private readonly IDialogService _dialogService;
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;
     private readonly IActionEditViewModelFactory _actionEditViewModelFactory;
@@ -32,11 +31,11 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
     {
     }
     
-    public SynchronizationRuleGlobalViewModel(INavigationEventsHub navigationEventsHub, 
+    public SynchronizationRuleGlobalViewModel(IDialogService dialogService, 
         ISessionService sessionService, ILocalizationService localizationService, IActionEditViewModelFactory actionEditViewModelFactory, 
         ISynchronizationRulesService synchronizationRulesService, SynchronizationRule? baseAutomaticAction, bool isCloneMode)
     {
-        _navigationEventsHub = navigationEventsHub;
+        _dialogService = dialogService;
         _sessionService = sessionService;
         _localizationService = localizationService;
         _actionEditViewModelFactory = actionEditViewModelFactory;
@@ -64,7 +63,6 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
 
         BaseAutomaticAction = baseAutomaticAction;
         IsCloneMode = isCloneMode;
-        // ComparisonResult = _sessionDataHolder.ComparisonResult; 
 
         Reset();
 
@@ -91,31 +89,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => OnLocaleChanged())
                 .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<GenericEventArgs<AtomicActionEditViewModel>>(_actionEditionEventsHub, nameof(_actionEditionEventsHub.AtomicActionRemoved))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(evt => OnAtomicActionRemoved(evt.EventArgs.Value))
-            //     .DisposeWith(disposables);
-            //
-            // Observable.FromEventPattern<GenericEventArgs<AtomicConditionEditViewModel>>(_actionEditionEventsHub, nameof(_actionEditionEventsHub.AtomicConditionRemoved))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(evt => OnAtomicConditionRemoved(evt.EventArgs.Value))
-            //     .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<GenericEventArgs<AtomicActionEditViewModel>>(_actionEditionEventsHub, 
-            //         nameof(_actionEditionEventsHub.AtomicActionInputChanged))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnAtomicInputChanged())
-            //     .DisposeWith(disposables);
-            //
-            // Observable.FromEventPattern<GenericEventArgs<AtomicConditionEditViewModel>>(_actionEditionEventsHub, 
-            //         nameof(_actionEditionEventsHub.AtomicConditionInputChanged))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnAtomicInputChanged())
-            //     .DisposeWith(disposables);
         });
-        
-        // TranslationSource.GetInstance().PropertyChanged += TranslationSource_PropertyChanged;
     }
 
     public ReactiveCommand<Unit, Unit> AddConditionCommand { get; set; }
@@ -150,10 +124,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
     [Reactive]
     public string SaveWarning { get; set; }
 
-    // private ComparisonResult ComparisonResult { get; }
-
     public SynchronizationRule? BaseAutomaticAction { get; }
-    
     
     public bool IsCloneMode { get; }
     
@@ -206,10 +177,6 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
         atomicConditionEditViewModel.RemoveRequested += OnConditionRemoveRequested;
         
         Conditions.Add(atomicConditionEditViewModel);
-
-        //region.Activate();
-
-        //_regionManager.RequestNavigate(RegionNames.SynchronizationRulesConditionsRegion, nameof(SynchronizationRuleEditView));
     }
 
     private void AddAction()
@@ -221,10 +188,6 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
         atomicActionEditViewModel.RemoveRequested += OnActionRemoveRequested;
         
         Actions.Add(atomicActionEditViewModel);
-
-        //region.Activate();
-
-        //_regionManager.RequestNavigate(RegionNames.SynchronizationRulesConditionsRegion, nameof(SynchronizationRuleEditView));
     }
 
     private void Save()
@@ -239,9 +202,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
                 
                 _synchronizationRulesService.AddSynchronizationRule(synchronizationRule);
 
-                // _actionEditionEventsHub.RaiseSynchronizationRuleSaved(synchronizationRule);
-
-                _navigationEventsHub.RaiseCloseFlyoutRequested();
+                _dialogService.CloseFlyout();
             }
             else
             {
@@ -327,8 +288,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
     {
         Conditions.Clear();
         Actions.Clear();
-
-
+        
         AddCondition();
         AddAction();
     }
@@ -359,21 +319,6 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
         }
     }
 
-    // private void OnAtomicActionRemoved(AtomicActionEditViewModel atomicActionEditViewModel)
-    // {
-    //     Actions.Remove(atomicActionEditViewModel);
-    // }
-    //
-    // private void OnAtomicConditionRemoved(AtomicConditionEditViewModel atomicConditionEditViewModel)
-    // {
-    //     Conditions.Remove(atomicConditionEditViewModel);
-    // }
-    
-    // private void OnAtomicInputChanged()
-    // {
-    //     ShowWarning = false;
-    // }
-    //
     private void OnConditionOrActionPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         ShowWarning = false;
@@ -401,7 +346,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
 
     private void Cancel()
     {
-        _navigationEventsHub.RaiseCloseFlyoutRequested();
+        _dialogService.CloseFlyout();
 
         Reset();
     }

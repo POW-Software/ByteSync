@@ -2,7 +2,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:startUp="clr-namespace:ByteSync.ViewModels.StartUp"
              xmlns:misc="clr-namespace:ByteSync.Views.Misc"
              xmlns:home="clr-namespace:ByteSync.ViewModels.Home"
              xmlns:home1="clr-namespace:ByteSync.Views.Home"
@@ -32,11 +31,6 @@
             <Style Selector="Button.LocalSynchronization:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background" Value="{DynamicResource HomeLocalSynchronizationPointerOverBackGround}" />
             </Style>
-            
-            <!-- Avec ça, on peut afficher un Cursor lors du survol, mais ca n'est pas cohérent avec les autres boutons -->
-            <!--<Style Selector="Button.CloudSynchronization:pointerover">
-                <Setter Property="Cursor" Value="Hand" />
-            </Style>-->
 
         </Grid.Styles>
         
@@ -59,7 +53,7 @@
                         </Grid>
                         
                         <ToolTip.Tip>
-                            <StackPanel Classes="HelpTT">
+                            <StackPanel Classes="ByteSyncToolTip">
                                 <TextBlock Text="{localizations:Loc HomeView_CloudSynchronization_ToolTip_Header}"/>
                                 <TextBlock Text="{localizations:Loc HomeView_CloudSynchronization_ToolTip_Content}"/>
                             </StackPanel>
@@ -69,32 +63,8 @@
                         <ToolTip.ShowDelay>1000</ToolTip.ShowDelay>
                     </Button>
                     
-                    <!-- Local Synchronization -->
-                    <!-- <Button Width="400" BorderThickness="0" Margin="6" Padding="0" Classes="LocalSynchronization" -->
-                    <!--         Command="{Binding LocalSynchronizationCommand}"> -->
-                    <!--     <Grid Margin="0" Height="140"> -->
-                    <!--          -->
-                    <!--         <misc:Icon FontSize="48" Value="RegularRotateLeft" Foreground="{DynamicResource BlockBackColor}" -->
-                    <!--                    Margin="2" VerticalAlignment="Center"/> -->
-                    <!--          -->
-                    <!--         <TextBlock Text="{localizations:Loc OperationSelection_LocalSynchronization}" -->
-                    <!--                    HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="6"  -->
-                    <!--                    FontSize="18" FontWeight="Bold" Foreground="{DynamicResource BlockBackColor}"/> -->
-                    <!--     </Grid> -->
-                    <!--      -->
-                    <!--     <ToolTip.Tip> -->
-                    <!--         <StackPanel Classes="HelpTT"> -->
-                    <!--             <TextBlock Text="{localizations:Loc HomeView_LocalSynchronization_ToolTip_Header}"/> -->
-                    <!--             <TextBlock Text="{localizations:Loc HomeView_LocalSynchronization_ToolTip_Content}"/> -->
-                    <!--         </StackPanel> -->
-                    <!--     </ToolTip.Tip> -->
-                    <!--     <ToolTip.Placement>Bottom</ToolTip.Placement> -->
-                    <!--     <ToolTip.VerticalOffset>10</ToolTip.VerticalOffset> -->
-                    <!--     <ToolTip.ShowDelay>1000</ToolTip.ShowDelay> -->
-                    <!-- </Button> -->
                 </WrapPanel>
-                    
-                <!-- <ContentControl MinHeight="200" HorizontalAlignment="Center" Content="{Binding Profiles}" Margin="6 30 6 0"  /> -->
+                
             </StackPanel>
             
         </Grid>

@@ -71,7 +71,7 @@
                                         </StackPanel>
                                         
                                         <ToolTip.Tip>
-                                            <StackPanel Classes="HelpTT">
+                                            <StackPanel Classes="ByteSyncToolTip">
                                                 <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Header_Synchronization}" />
                                                 <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Content_Synchronization}" />
                                             </StackPanel>
@@ -89,7 +89,7 @@
                                         </StackPanel>
                                         
                                         <ToolTip.Tip>
-                                            <StackPanel Classes="HelpTT">
+                                            <StackPanel Classes="ByteSyncToolTip">
                                                 <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Header_Inventory}" />
                                                 <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Content_Inventory}" />
                                             </StackPanel>
@@ -109,7 +109,7 @@
                                         </StackPanel>
                                         
                                         <ToolTip.Tip>
-                                            <StackPanel Classes="HelpTT">
+                                            <StackPanel Classes="ByteSyncToolTip">
                                                 <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Header_Join}" />
                                                 <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Content_Join}" />
                                             </StackPanel>
@@ -129,7 +129,7 @@
                                         </StackPanel>
                                         
                                         <ToolTip.Tip>
-                                            <StackPanel Classes="HelpTT">
+                                            <StackPanel Classes="ByteSyncToolTip">
                                                 <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Header_Details}" />
                                                 <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Content_Details}" />
                                             </StackPanel>
@@ -162,7 +162,7 @@
                                 </StackPanel>
                                 
                                 <ToolTip.Tip>
-                                    <StackPanel Classes="HelpTT">
+                                    <StackPanel Classes="ByteSyncToolTip">
                                         <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Header_Delete}" />
                                         <TextBlock Text="{localizations:Loc ProfilesView_Tooltip_Content_Delete}" />
                                     </StackPanel>

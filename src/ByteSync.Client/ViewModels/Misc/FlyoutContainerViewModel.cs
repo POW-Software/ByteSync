@@ -79,53 +79,6 @@ public class FlyoutContainerViewModel : ActivableViewModelBase, IDialogView
                 DoCloseFlyout();
                 HasBeenActivatedOnce = true;
             }
-
-            // IsFlyoutContainerVisible = false;
-            
-            Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.ViewAccountRequested))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => OnViewAccountRequested())
-                .DisposeWith(disposables);
-            
-            Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.ViewTrustedNetworkRequested))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => OnViewTrustedNetworkRequested())
-                .DisposeWith(disposables);
-            
-            Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.ViewGeneralSettingsRequested))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => OnViewGeneralSettingsRequested())
-                .DisposeWith(disposables);
-            
-            Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.ViewUpdateDetailsRequested))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => OnViewUpdateDetailsRequested())
-                .DisposeWith(disposables);
-
-            Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.CloseFlyoutRequested))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => OnCloseFlyoutRequested())
-                .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<ManualActionCreationRequestedArgs>(_navigationEventsHub, nameof(_navigationEventsHub.ManualActionCreationRequested))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(args => OnManualActionCreationRequested(args.EventArgs))
-            //     .DisposeWith(disposables);
-            //
-            // Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.SynchronizationRuleCreationRequested))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnSynchronizationRuleCreationRequested())
-            //     .DisposeWith(disposables);
-
-            // Observable.FromEventPattern<GenericEventArgs<SynchronizationRule>>(_navigationEventsHub, nameof(_navigationEventsHub.SynchronizationRuleEditionRequested))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(args => OnSynchronizationRuleEditionRequested(args.EventArgs.Value))
-            //     .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<GenericEventArgs<SynchronizationRule>>(_navigationEventsHub, nameof(_navigationEventsHub.SynchronizationRuleDuplicationRequested))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(args => OnSynchronizationRuleDuplicationRequested(args.EventArgs.Value))
-            //     .DisposeWith(disposables);
             
             Observable.FromEventPattern<TrustKeyDataRequestedArgs>(_navigationEventsHub, nameof(_navigationEventsHub.TrustKeyDataRequested))
                 .ObserveOn(RxApp.MainThreadScheduler)
@@ -161,31 +114,6 @@ public class FlyoutContainerViewModel : ActivableViewModelBase, IDialogView
     
     [Reactive]
     public bool CanCloseCurrentFlyout { get; set; }
-
-    private void OnViewAccountRequested()
-    {
-        ShowFlyout(nameof(Resources.Shell_Account), true, _flyoutElementViewModelFactory.BuildAccountDetailsViewModel());
-    }
-    
-    private void OnViewTrustedNetworkRequested()
-    {
-        ShowFlyout(nameof(Resources.Shell_TrustedNetwork), true, _flyoutElementViewModelFactory.BuildTrustedNetworkViewModel());
-    }
-    
-    private void OnViewUpdateDetailsRequested()
-    {
-        ShowFlyout(nameof(Resources.Shell_Update), true, _flyoutElementViewModelFactory.BuildUpdateDetailsViewModel());
-    }
-    
-    private void OnViewGeneralSettingsRequested()
-    {
-        ShowFlyout(nameof(Resources.Shell_GeneralSettings), true, _flyoutElementViewModelFactory.BuildGeneralSettingsViewModel());
-    }
-    
-    private void OnCloseFlyoutRequested()
-    {
-        CloseFlyout();
-    }
     
     private void OnCloseFlyoutRequested(object? sender, EventArgs e)
     {
@@ -200,32 +128,6 @@ public class FlyoutContainerViewModel : ActivableViewModelBase, IDialogView
 
         return result;
     }
-    
-    // private void OnManualActionCreationRequested(ManualActionCreationRequestedArgs argsEventArgs)
-    // {
-    //     ShowFlyout(nameof(Resources.Shell_CreateTargetedAction), false,
-    //         () => new TargetedActionGlobalViewModel(argsEventArgs.Requester, argsEventArgs.ComparisonItemViewModels));
-    //     
-    //     // ShowFlyout(nameof(Resources.Shell_CreateTargetedAction), false,
-    //     //     () => _flyoutElementViewModelFactory.BuildTargetedActionGlobalViewModel(argsEventArgs.Requester, argsEventArgs.ComparisonItemViewModels));
-    // }
-    
-    // private void OnSynchronizationRuleCreationRequested()
-    // {
-    //     ShowFlyout(nameof(Resources.Shell_CreateSynchronizationRule), false, _flyoutElementViewModelFactory.BuildSynchronizationRuleGlobalViewModel());
-    // }
-
-    // private void OnSynchronizationRuleEditionRequested(SynchronizationRule synchronizationRule)
-    // {
-    //     ShowFlyout(nameof(Resources.Shell_EditSynchronizationRule), false, 
-    //         _flyoutElementViewModelFactory.BuilSynchronizationRuleGlobalViewModel(synchronizationRule, false));
-    // }
-    //
-    // private void OnSynchronizationRuleDuplicationRequested(SynchronizationRule synchronizationRule)
-    // {
-    //     ShowFlyout(nameof(Resources.Shell_DuplicateSynchronizationRule), false, 
-    //         _flyoutElementViewModelFactory.BuilSynchronizationRuleGlobalViewModel(synchronizationRule, true));
-    // }
     
     private void OnTrustKeyDataRequested(TrustKeyDataRequestedArgs trustKeyDataRequestedArgs)
     {

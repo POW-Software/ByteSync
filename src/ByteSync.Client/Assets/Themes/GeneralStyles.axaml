@@ -344,15 +344,15 @@
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     
-    <!-- <Style Selector="StackPanel.HelpTT TextBlock:nth-child(0)"> -->
-    <!-- <Style Selector="StackPanel.HelpTT TextBlock"> -->
-    <Style Selector="StackPanel.HelpTT > TextBlock">
+    <!-- <Style Selector="StackPanel.ByteSyncToolTip TextBlock:nth-child(0)"> -->
+    <!-- <Style Selector="StackPanel.ByteSyncToolTip TextBlock"> -->
+    <Style Selector="StackPanel.ByteSyncToolTip > TextBlock">
 	    <Setter Property="TextWrapping" Value="Wrap" />
 	    <Setter Property="MaxWidth" Value="440" />
 	    <Setter Property="FontSize" Value="14" />
     </Style>
     
-    <Style Selector="StackPanel.HelpTT > TextBlock:nth-child(1)">
+    <Style Selector="StackPanel.ByteSyncToolTip > TextBlock:nth-child(1)">
 	    <Setter Property="FontWeight" Value="Bold" />
 	    <Setter Property="FontSize" Value="15" />
 	    <Setter Property="Margin" Value="0,0,0,5" />

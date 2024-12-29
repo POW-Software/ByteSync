@@ -26,10 +26,10 @@ public class EnvironmentService : IEnvironmentService
         SetIsPortableApplication();
     }
     
-    public string ClientId { get; private set; }
-    
-    public string ClientInstanceId { get; private set; }
-    
+    public string ClientId { get; private set; } = null!;
+
+    public string ClientInstanceId { get; private set; } = null!;
+
     private void SetAssemblyFullName()
     {
         AssemblyFullName = Arguments[0];
@@ -39,7 +39,7 @@ public class EnvironmentService : IEnvironmentService
     {
         var applicationLauncherFullName = Arguments[0].ToLower();
 
-        var programsDirectoriresCandidates = BuildProgramsDirectoriresCandidates(
+        var programsDirectoriresCandidates = BuildProgramsDirectoriesCandidates(
             Environment.SpecialFolder.CommonProgramFiles,
             Environment.SpecialFolder.CommonProgramFilesX86,
             Environment.SpecialFolder.ProgramFiles,
@@ -73,7 +73,7 @@ public class EnvironmentService : IEnvironmentService
         IsPortableApplication = isPortableApplication;
     }
     
-    private HashSet<string> BuildProgramsDirectoriresCandidates(params Environment.SpecialFolder[] specialFolders)
+    private HashSet<string> BuildProgramsDirectoriesCandidates(params Environment.SpecialFolder[] specialFolders)
     {
         var result = new HashSet<string>();
         foreach (var specialFolder in specialFolders)
@@ -156,7 +156,7 @@ public class EnvironmentService : IEnvironmentService
         return IsAutoLogin();
     }
     
-    public bool IsPortableApplication { get; private set; } = false;
+    public bool IsPortableApplication { get; private set; }
         
     public string AssemblyFullName { get; private set; }  = null!;
 

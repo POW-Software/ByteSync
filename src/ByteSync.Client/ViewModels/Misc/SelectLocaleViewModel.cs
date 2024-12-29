@@ -33,7 +33,7 @@ class SelectLocaleViewModel : ViewModelBase, IActivatableViewModel
             {
                 if (culture != null)
                 {
-                    Log.Information("SelectLocaleViewModel: user is changing the culture to {@culture}", culture);
+                    Log.Information("SelectLocaleViewModel: user is changing the culture to {CultureCode}", culture.Code);
                     _localizationService.SetCurrentCulture(culture);
                 }
             });

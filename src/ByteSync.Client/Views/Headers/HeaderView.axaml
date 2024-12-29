@@ -67,28 +67,12 @@
                         </StackPanel>
 
                         <ToolTip.Tip>
-                            <StackPanel Classes="HelpTT">
+                            <StackPanel Classes="ByteSyncToolTip">
                                 <TextBlock Text="{localizations:Loc Header_Update}"/>
                                 <TextBlock Text="{localizations:Loc Header_Update_Tooltip}"/>
                             </StackPanel>
                         </ToolTip.Tip>
                     </Button>
-                    
-                    <!-- Account -->
-                    <!-- <Button Classes="GenericButton" Margin="3" -->
-                    <!--         Command="{Binding Path=ViewAccountCommand}" IsVisible="{Binding IsAccountVisible}"  -->
-                    <!--         HorizontalAlignment="Left" > -->
-                    <!--     <StackPanel Orientation="Horizontal"> -->
-                    <!--         <misc:Icon FontSize="20" Value="RegularUser" Margin="2" /> -->
-                    <!--     </StackPanel> -->
-                    <!-- -->
-                    <!--     <ToolTip.Tip> -->
-                    <!--         <StackPanel Classes="HelpTT"> -->
-                    <!--             <TextBlock Text="{localizations:Loc Shell_Account}"/> -->
-                    <!--             <TextBlock Text="{localizations:Loc Header_Account_Tooltip}"/> -->
-                    <!--         </StackPanel> -->
-                    <!--     </ToolTip.Tip> -->
-                    <!-- </Button> -->
                     
                     <!-- Trusted Network -->
                     <Button Classes="GenericButton" Margin="3"
@@ -99,7 +83,7 @@
                         </StackPanel>
 
                         <ToolTip.Tip>
-                            <StackPanel Classes="HelpTT">
+                            <StackPanel Classes="ByteSyncToolTip">
                                 <TextBlock Text="{localizations:Loc Header_TrustedNetwork}"/>
                                 <TextBlock Text="{localizations:Loc Header_TrustedNetwork_Tooltip}"/>
                             </StackPanel>
@@ -115,24 +99,40 @@
                         </StackPanel>
 
                         <ToolTip.Tip>
-                            <StackPanel Classes="HelpTT">
+                            <StackPanel Classes="ByteSyncToolTip">
                                 <TextBlock Text="{localizations:Loc Header_GeneralSettings}"/>
                                 <TextBlock Text="{localizations:Loc Header_GeneralSettings_Tooltip}"/>
                             </StackPanel>
                         </ToolTip.Tip>
                     </Button>
                     
-                    <!-- Support -->
+                    <!-- Documentation -->
                     <Button Classes="GenericButton" Margin="3"
                             Command="{Binding Path=OpenSupportCommand}" HorizontalAlignment="Left"  >
                         <StackPanel Orientation="Horizontal">
-                            <misc:Icon FontSize="20" Value="RegularHelpCircle" Margin="2"/>
+                            <misc:Icon FontSize="20" Value="RegularBookOpen" Margin="2"/>
                         </StackPanel>
 
                         <ToolTip.Tip>
-                            <StackPanel Classes="HelpTT">
-                                <TextBlock Text="{localizations:Loc Header_Support}"/>
-                                <TextBlock Text="{localizations:Loc Header_Support_Tooltip}"/>
+                            <StackPanel Classes="ByteSyncToolTip">
+                                <TextBlock Text="{localizations:Loc Header_Documentation}"/>
+                                <TextBlock Text="{localizations:Loc Header_Documentation_Tooltip}"/>
+                            </StackPanel>
+                        </ToolTip.Tip>
+                    </Button>
+                    
+                    <!-- AboutApplication -->
+                    <Button Classes="GenericButton" Margin="3"
+                            Command="{Binding Path=ViewAboutApplicationCommand}" 
+                            HorizontalAlignment="Left" >
+                        <StackPanel Orientation="Horizontal">
+                            <misc:Icon FontSize="20" Value="RegularInfoCircle" Margin="2" />
+                        </StackPanel>
+
+                        <ToolTip.Tip>
+                            <StackPanel Classes="ByteSyncToolTip">
+                                <TextBlock Text="{localizations:Loc Header_ApplicationInfo}"/>
+                                <TextBlock Text="{localizations:Loc Header_ApplicationInfo_Tooltip}"/>
                             </StackPanel>
                         </ToolTip.Tip>
                     </Button>

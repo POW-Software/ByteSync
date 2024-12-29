@@ -8,6 +8,7 @@ using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.ViewModels.AccountDetails;
 using ByteSync.ViewModels.Headers;
+using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Profiles;
 using ByteSync.ViewModels.Sessions.Cloud.Members;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions;
@@ -88,6 +89,13 @@ public class FlyoutElementViewModelFactory : IFlyoutElementViewModelFactory
         var result = _context.Resolve<SynchronizationRuleGlobalViewModel>(
             new TypedParameter(typeof(SynchronizationRule), baseAutomaticAction),
             TypedParameter.From(isCloneMode));
+
+        return result;
+    }
+
+    public FlyoutElementViewModel BuildAboutApplicationViewModel()
+    {
+        var result = _context.Resolve<AboutApplicationViewModel>();
 
         return result;
     }

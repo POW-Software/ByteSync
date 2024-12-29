@@ -5,6 +5,8 @@ using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Navigations;
+using ByteSync.Interfaces.Dialogs;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Updates;
 using ByteSync.ViewModels.Headers;
@@ -22,13 +24,17 @@ public class HeaderViewModelTests
     private readonly Mock<IAvailableUpdateRepository> _updateServiceMock;
     private readonly Mock<ILocalizationService> _localizationServiceMock;
     private readonly Mock<INavigationService> _navigationServiceMock;
-    
+    private readonly Mock<IDialogService> _dialogServiceMock;
+    private readonly Mock<IFlyoutElementViewModelFactory> _flyoutElementViewModelFactoryMock;
+
     public HeaderViewModelTests()
     {
         _webAccessorMock = new Mock<IWebAccessor>();
         _updateServiceMock = new Mock<IAvailableUpdateRepository>();
         _localizationServiceMock = new Mock<ILocalizationService>();
         _navigationServiceMock = new Mock<INavigationService>();
+        _dialogServiceMock = new Mock<IDialogService>();
+        _flyoutElementViewModelFactoryMock = new Mock<IFlyoutElementViewModelFactory>();
     }
 
     [Test]
@@ -58,8 +64,8 @@ public class HeaderViewModelTests
         
         sourceCache.AddOrUpdate(testSoftwareVersion);
 
-        var headerViewModel = new HeaderViewModel(null, null, null, _webAccessorMock.Object, _updateServiceMock.Object, 
-            _localizationServiceMock.Object, _navigationServiceMock.Object);
+        var headerViewModel = new HeaderViewModel(null, null, _webAccessorMock.Object, _updateServiceMock.Object, 
+            _localizationServiceMock.Object, _navigationServiceMock.Object, _dialogServiceMock.Object, _flyoutElementViewModelFactoryMock.Object);
 
         // Act
         // Normally you would need to simulate the activation of the ViewModel, but since the WhenActivated logic is inside the constructor, it gets activated immediately.
@@ -97,8 +103,8 @@ public class HeaderViewModelTests
         
         sourceCache.AddOrUpdate(testSoftwareVersion);
 
-        var headerViewModel = new HeaderViewModel(null, null, null, _webAccessorMock.Object, _updateServiceMock.Object, 
-            _localizationServiceMock.Object, _navigationServiceMock.Object);
+        var headerViewModel = new HeaderViewModel(null, null, _webAccessorMock.Object, _updateServiceMock.Object, 
+            _localizationServiceMock.Object, _navigationServiceMock.Object, _dialogServiceMock.Object, _flyoutElementViewModelFactoryMock.Object);
 
         // Act
         // Normally you would need to simulate the activation of the ViewModel, but since the WhenActivated logic is inside the constructor, it gets activated immediately.
@@ -136,8 +142,8 @@ public class HeaderViewModelTests
         
         sourceCache.AddOrUpdate(testSoftwareVersion);
 
-        var headerViewModel = new HeaderViewModel(null, null, null, _webAccessorMock.Object, _updateServiceMock.Object, 
-            _localizationServiceMock.Object, _navigationServiceMock.Object);
+        var headerViewModel = new HeaderViewModel(null, null,  _webAccessorMock.Object, _updateServiceMock.Object, 
+            _localizationServiceMock.Object, _navigationServiceMock.Object, _dialogServiceMock.Object, _flyoutElementViewModelFactoryMock.Object);
 
         // Act
         // Normally you would need to simulate the activation of the ViewModel, but since the WhenActivated logic is inside the constructor, it gets activated immediately.
