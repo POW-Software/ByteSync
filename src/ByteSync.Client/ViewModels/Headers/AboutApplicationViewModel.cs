@@ -68,6 +68,10 @@ public class AboutApplicationViewModel : FlyoutElementViewModel
     [Reactive]
     public string DeploymentMode { get; set; }
 
+    public string ClientId => _environmentService.ClientId;
+    
+    public string ClientInstanceId => _environmentService.ClientInstanceId;
+    
     public string MachineName => _environmentService.MachineName;
     
     public string OperatingSystem => $"{RuntimeInformation.OSDescription}{(Environment.Is64BitOperatingSystem ? " (64 bits)" : "")}";

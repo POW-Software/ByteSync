@@ -15,7 +15,8 @@
     <Grid>
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" MinWidth="400" Margin="12 0 12 0">
 
-            <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto" Margin="0 6 0 6" HorizontalAlignment="Center">
+            <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto" 
+                  Margin="0 6 0 6" HorizontalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                     <ColumnDefinition Width="3"></ColumnDefinition>
@@ -26,9 +27,6 @@
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="{localizations:Loc AboutApplication_ApplicationVersion}" Margin="6" 
                            VerticalAlignment="Center"/>
                 <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding ApplicationVersion}" Margin="6" VerticalAlignment="Center"/>
-                
-                <!-- <Rectangle Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}"  -->
-                <!--            StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/> -->
                 
                 <!-- ByteSync WebSite -->
                 <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="6" Command="{Binding Path=VisitByteSyncWebSiteCommand}" HorizontalAlignment="Center">
@@ -42,20 +40,30 @@
                 <Rectangle Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
                            StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
                 
-                <!-- Deployment Mode -->
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="{localizations:Loc AboutApplication_DeploymentMode}" Margin="6" 
+                <!-- Client Id -->
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="{localizations:Loc AboutApplication_ClientId}" Margin="6" 
                            VerticalAlignment="Center"/>
-                <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding DeploymentMode}" Margin="6" VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding ClientId}" Margin="6" VerticalAlignment="Center"/>
+                
+                <!-- Client Instance Id -->
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="{localizations:Loc AboutApplication_ClientInstanceId}" Margin="6" 
+                           VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding ClientInstanceId}" Margin="6" VerticalAlignment="Center"/>
+                
+                <!-- Deployment Mode -->
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="{localizations:Loc AboutApplication_DeploymentMode}" Margin="6" 
+                           VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding DeploymentMode}" Margin="6" VerticalAlignment="Center"/>
 
                 <!-- Machine Name -->
-                <TextBlock Grid.Row="5" Grid.Column="0" Text="{localizations:Loc AboutApplication_MachineName}" Margin="6" 
+                <TextBlock Grid.Row="7" Grid.Column="0" Text="{localizations:Loc AboutApplication_MachineName}" Margin="6" 
                            VerticalAlignment="Center"/>
-                <TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding MachineName}" Margin="6" VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="7" Grid.Column="2" Text="{Binding MachineName}" Margin="6" VerticalAlignment="Center"/>
                 
                 <!-- Operating System -->
-                <TextBlock Grid.Row="6" Grid.Column="0" Text="{localizations:Loc AboutApplication_OperatingSystem}" Margin="6" 
+                <TextBlock Grid.Row="8" Grid.Column="0" Text="{localizations:Loc AboutApplication_OperatingSystem}" Margin="6" 
                            VerticalAlignment="Center"/>
-                <TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding OperatingSystem}" Margin="6" VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="8" Grid.Column="2" Text="{Binding OperatingSystem}" Margin="6" VerticalAlignment="Center"/>
                 
             </Grid>
             
@@ -84,7 +92,8 @@
             <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
                        StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
             
-            <TextBlock Text="{localizations:Loc AboutApplication_OSS_Publisher}" Margin="6" MaxWidth="400" TextWrapping="Wrap"
+            <TextBlock Text="{localizations:Loc AboutApplication_OSS_Publisher}" Margin="6" MaxWidth="450" 
+                       TextWrapping="Wrap"
                        VerticalAlignment="Center" HorizontalAlignment="Left"/>
             
             <Button Margin="6" Command="{Binding Path=VisitByteSyncRepositoryCommand}" HorizontalAlignment="Center">

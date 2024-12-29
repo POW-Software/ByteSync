@@ -1644,7 +1644,7 @@ Do you want to save this new Session Profile with this name?</value>
     <value>Operating System:</value>
   </data>
   <data name="AboutApplication_OSS_Publisher" xml:space="preserve">
-    <value>ByteSync is an open-source application licensed under the MIT license, published by POW Software.</value>
+    <value>ByteSync is an open-source application licensed under the MIT license, published by POW Software. This software is provided "as is," without any warranty, express or implied.</value>
   </data>
   <data name="AboutApplication_VisitByteSyncRepository" xml:space="preserve">
     <value>Visit the ByteSync GitHub repository</value>
@@ -1657,5 +1657,11 @@ Do you want to save this new Session Profile with this name?</value>
   </data>
   <data name="AboutApplication_VisitPowSoftwareWebSite" xml:space="preserve">
     <value>Visit the POW Software WebSite</value>
+  </data>
+  <data name="AboutApplication_ClientId" xml:space="preserve">
+    <value>Client ID:</value>
+  </data>
+  <data name="AboutApplication_ClientInstanceId" xml:space="preserve">
+    <value>Client Instance ID:</value>
   </data>
 </root>
