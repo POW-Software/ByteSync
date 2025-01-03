@@ -160,7 +160,7 @@ public class AuthServiceTests
         A.CallTo(() => _mockClientSoftwareVersionService.GetClientSoftwareVersionSettings())
             .Returns(new ClientSoftwareVersionSettings
             {
-                MandatoryVersion = new SoftwareVersion { Version = "1.0.0" }
+                MinimalVersion = new SoftwareVersion { Version = "1.0.0" }
             });
         
         A.CallTo(() => _mockClientSoftwareVersionService.IsClientVersionAllowed(A<LoginData>.Ignored))

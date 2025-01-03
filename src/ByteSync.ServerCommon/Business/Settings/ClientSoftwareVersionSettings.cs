@@ -4,5 +4,5 @@ namespace ByteSync.ServerCommon.Business.Settings;
 
 public class ClientSoftwareVersionSettings
 {
-    public SoftwareVersion? MandatoryVersion { get; set; }
+    public SoftwareVersion? MinimalVersion { get; set; }
 }

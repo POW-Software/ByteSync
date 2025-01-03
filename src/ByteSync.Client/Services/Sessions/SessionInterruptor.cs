@@ -52,7 +52,10 @@ public class SessionInterruptor : ISessionInterruptor
 
         if (canQuitWithoutMessage)
         {
-            await _cloudSessionConnector.QuitSession();
+            if (_sessionService.CurrentSession != null)
+            {
+                await _cloudSessionConnector.QuitSession();
+            }
         }
         else
         {

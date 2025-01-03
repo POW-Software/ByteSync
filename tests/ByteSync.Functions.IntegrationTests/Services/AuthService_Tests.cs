@@ -67,7 +67,7 @@ public class AuthService_Tests
 
         ClientSoftwareVersionSettings clientSoftwareVersionSettings = new ClientSoftwareVersionSettings()
         {
-            MandatoryVersion = new SoftwareVersion
+            MinimalVersion = new SoftwareVersion
             {
                 ProductCode = "BS",
                 Level = PriorityLevel.Minimal,
