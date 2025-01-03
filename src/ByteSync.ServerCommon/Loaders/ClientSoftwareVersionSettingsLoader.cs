@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using ByteSync.Common.Business.Versions;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Loaders;
@@ -36,7 +37,11 @@ public class ClientSoftwareVersionSettingsLoader : IClientSoftwareVersionSetting
                 contents = await wc.GetStringAsync(_appSettings.UpdatesDefinitionUrl);
             }
 
-            var softwareUpdates = JsonSerializer.Deserialize<List<SoftwareVersion>>(contents)!;
+            var options = new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter() }
+            };
+            var softwareUpdates = JsonSerializer.Deserialize<List<SoftwareVersion>>(contents, options)!;
 
             if (softwareUpdates != null)
             {
