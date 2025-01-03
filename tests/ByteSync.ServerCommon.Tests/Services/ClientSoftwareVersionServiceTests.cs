@@ -70,7 +70,7 @@ public class ClientSoftwareVersionServiceTests
         // Arrange
         var settings = new ClientSoftwareVersionSettings
         {
-            MandatoryVersion = new SoftwareVersion { Version = "1.0.0" }
+            MinimalVersion = new SoftwareVersion { Version = "1.0.0" }
         };
         A.CallTo(() => _mockClientSoftwareVersionSettingsRepository.GetUnique())
             .Returns(Task.FromResult<ClientSoftwareVersionSettings?>(settings));
@@ -89,7 +89,7 @@ public class ClientSoftwareVersionServiceTests
         // Arrange
         var settings = new ClientSoftwareVersionSettings
         {
-            MandatoryVersion = new SoftwareVersion { Version = "2023.1.1.0" }
+            MinimalVersion = new SoftwareVersion { Version = "2023.1.1.0" }
         };
         A.CallTo(() => _mockClientSoftwareVersionSettingsRepository.GetUnique())
             .Returns(Task.FromResult<ClientSoftwareVersionSettings?>(settings));
@@ -108,7 +108,7 @@ public class ClientSoftwareVersionServiceTests
         // Arrange
         var settings = new ClientSoftwareVersionSettings
         {
-            MandatoryVersion = new SoftwareVersion { Version = "1.0.1" }
+            MinimalVersion = new SoftwareVersion { Version = "1.0.1" }
         };
         A.CallTo(() => _mockClientSoftwareVersionSettingsRepository.GetUnique())
             .Returns(Task.FromResult<ClientSoftwareVersionSettings?>(settings));
@@ -127,7 +127,7 @@ public class ClientSoftwareVersionServiceTests
         // Arrange
         var settings = new ClientSoftwareVersionSettings
         {
-            MandatoryVersion = new SoftwareVersion { Version = "1.0.1.0" }
+            MinimalVersion = new SoftwareVersion { Version = "1.0.1.0" }
         };
         A.CallTo(() => _mockClientSoftwareVersionSettingsRepository.GetUnique())
             .Returns(Task.FromResult<ClientSoftwareVersionSettings?>(settings));

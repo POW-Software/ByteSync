@@ -50,12 +50,12 @@ public class ClientSoftwareVersionService : IClientSoftwareVersionService
         
         var clientSoftwareVersionSettings = await GetClientSoftwareVersionSettings();
                 
-        if (clientSoftwareVersionSettings?.MandatoryVersion == null)
+        if (clientSoftwareVersionSettings?.MinimalVersion == null)
         {
             return false;
         }
 
-        var mandatory = NormalizeVersion(clientSoftwareVersionSettings.MandatoryVersion.Version);
+        var mandatory = NormalizeVersion(clientSoftwareVersionSettings.MinimalVersion.Version);
         var provided = NormalizeVersion(loginData.Version);
 
         bool result = mandatory <= provided;
@@ -63,7 +63,7 @@ public class ClientSoftwareVersionService : IClientSoftwareVersionService
         if (!result)
         {
             _logger.LogWarning("Client version {Version} is not allowed, mandatory version is {MandatoryVersion}", loginData.Version, 
-                clientSoftwareVersionSettings.MandatoryVersion.Version);
+                clientSoftwareVersionSettings.MinimalVersion.Version);
         }
 
         return result;

@@ -163,7 +163,7 @@ class CloudSessionConnector : ICloudSessionConnector
 
         if (session == null)
         {
-            Log.Information("Can not quit Session : unknown Session");
+            Log.Information("Can not quit Session: unknown Session");
             return;
         }
 

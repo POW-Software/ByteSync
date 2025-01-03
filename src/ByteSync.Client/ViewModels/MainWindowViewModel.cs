@@ -65,48 +65,6 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
                     InitPageTransition();
                 })
                 .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.NavigateToCloudSynchronizationRequested))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnNavigateToCloudSynchronizationRequested())
-            //     .DisposeWith(disposables);
-            //
-            // Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.NavigateToLocalSynchronizationRequested))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnNavigateToLocalSynchronizationRequested())
-            //     .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.NavigateToLobbyRequested))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnNavigateToLobbyRequested())
-            //     .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.NavigateToProfileDetailsRequested))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnNavigateToProfileDetailsRequested())
-            //     .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<LogInSucceededEventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.LogInSucceeded))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnLogInSucceeded())
-            //     .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.LogOutRequested))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnLogOutRequested())
-            //     .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.NavigateToHomeRequested))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnNavigateToHomeRequested())
-            //     .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<EventArgs>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.CloudSessionQuitted))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnCloudSessionQuitted())
-            //     .DisposeWith(disposables);
-            
-            // ApplyZoomLevel(_applicationSettingsManager.GetCurrentApplicationSettings().ZoomLevel);
         });
     }
 
@@ -123,9 +81,10 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
     
     private void InitPageTransition()
     {
-        // La PageTransition est initialement nulle pour éviter le Crossfade lors du chargement initial de l'application
-        // Dès que l'utilisateur sera connecté, on active les transitions sur la base de la valeur par défaut
+        // The PageTransition is initially null to avoid the Crossfade during the initial loading of the application
+        // As soon as the user is connected, we activate the transitions based on the default value
         // https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.ReactiveUI/TransitioningContentControl.cs
+        
         if (PageTransition == null)
         {
             var crossFade = new CrossFade(TimeSpan.FromSeconds(0.5));
@@ -133,92 +92,8 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
         }
     }
 
-    // private void OnNavigateToCloudSynchronizationRequested()
-    // {
-    //     // _sessionService.SessionMode = SessionModes.Cloud;
-    //     
-    //     Router.NavigateAndReset.Execute(new SessionMainViewModel(this));
-    //         
-    //     // NavigationInfos navigationInfos = new NavigationInfos
-    //     // { IconName = "RegularAnalyse", 
-    //     //     TitleLocalizationName = nameof(Resources.OperationSelection_CloudSynchronization), 
-    //     //     IsHome = false };
-    //     //
-    //     // _navigationEventsHub.RaiseNavigated(navigationInfos);
-    // }
-    //
-    // private void OnNavigateToLocalSynchronizationRequested()
-    // {
-    //     Router.NavigateAndReset.Execute(new SessionMainViewModel(this));
-    //         
-    //     // NavigationInfos navigationInfos = new NavigationInfos
-    //     // { IconName = "RegularRotateLeft", 
-    //     //     TitleLocalizationName = nameof(Resources.OperationSelection_LocalSynchronization), 
-    //     //     IsHome = false };
-    //     //
-    //     // _navigationEventsHub.RaiseNavigated(navigationInfos);
-    // }
-    
-    // private void OnNavigateToLobbyRequested()
-    // {
-    //     Router.NavigateAndReset.Execute(new LobbyMainViewModel(this));
-    //     
-    //     // await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(delegate
-    //     // {
-    //     //     Router.NavigateAndReset.Execute(new LobbyMainViewModel(this));
-    //     //     
-    //     //     NavigationInfos navigationInfos = new NavigationInfos
-    //     //     { IconName = "RegularUnite", 
-    //     //         TitleLocalizationName = nameof(Resources.OperationSelection_Lobby), 
-    //     //         IsHome = false };
-    //     //
-    //     //     _navigationEventsHub.RaiseNavigated(navigationInfos);
-    //     // });
-    // }
-    //
-    //
-    // private void OnNavigateToProfileDetailsRequested()
-    // {
-    //     Router.NavigateAndReset.Execute(new LobbyMainViewModel(this));
-    //     
-    //     // await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(delegate
-    //     // {
-    //     //     Router.NavigateAndReset.Execute(new LobbyMainViewModel(this));
-    //     //     
-    //     //     NavigationInfos navigationInfos = new NavigationInfos
-    //     //     { IconName = "RegularDetail", 
-    //     //         TitleLocalizationName = nameof(Resources.OperationSelection_ProfileDetails), 
-    //     //         IsHome = false };
-    //     //
-    //     //     _navigationEventsHub.RaiseNavigated(navigationInfos);
-    //     // });
-    // }
-
-    // private void OnLogOutRequested()
-    // {
-    //     Avalonia.Threading.Dispatcher.UIThread.Post(delegate
-    //     {
-    //         Router.NavigateAndReset.Execute(new LoginViewModel(this));
-    //         
-    //         FlyoutContainer.CloseFlyout();
-    //         // IsFlyoutContainerVisible = false;
-    //         // FlyoutContainer.Content = null;
-    //         
-    //         NavigationInfos navigationInfos = new NavigationInfos { IsLogin = true };
-    //         
-    //         _navigationEventsHub.RaiseNavigated(navigationInfos);
-    //         // _eventAggregator.GetEvent<Navigated>().Publish(navigationInfos);
-    //     });
-    // }
-
-    // private void ApplyZoomLevel(int zoomLevel)
-    // {
-    //     ZoomLevel = (1d / 100) * zoomLevel;
-    // }
-
     public async Task<bool> OnCloseWindowRequested(bool isCtrlDown)
     {
-        // Le FlyoutContainer ne peut pas être fermé (ex: MAJ en cours) et sortie de l'application non forcée par isCtrlDown
         if (!FlyoutContainer.CanCloseCurrentFlyout && !isCtrlDown)
         {
             return false;
@@ -230,8 +105,6 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
         
         if (!canQuit)
         {
-            // Si on est dans une session, on indique à l'utilisateur qu'il doit quitter au préalable.
-            
             var messageBoxViewModel = _messageBoxViewModelFactory.CreateMessageBoxViewModel(
                 nameof(Resources.MainWindow_OnClose_ConfirmTitle), nameof(Resources.MainWindow_OnClose_ConfirmMessage));
             messageBoxViewModel.ShowOK = true;
@@ -244,15 +117,13 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
         {
             if (!canLogOutOrShutdown && isCtrlDown)
             {
-                // Sortie forcée car isCtrlDown
                 Log.Warning("Forced closing of the application because the Ctrl key is pressed...");
             }
             
             try
             {
-                if (_sessionService.SessionObservable != null)
+                if (_sessionService.CurrentSession != null)
                 {
-                    // On doit quitter la session
                     await _cloudSessionConnector.QuitSession();
                 }
             }

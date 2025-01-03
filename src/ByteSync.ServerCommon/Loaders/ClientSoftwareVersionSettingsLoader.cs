@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using ByteSync.Common.Business.Versions;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Loaders;
@@ -21,7 +22,7 @@ public class ClientSoftwareVersionSettingsLoader : IClientSoftwareVersionSetting
 
     public async Task<ClientSoftwareVersionSettings> Load()
     {
-        SoftwareVersion? newMandatoryVersionCandidate = null;
+        SoftwareVersion? newMinimalVersionCandidate = null;
 
         var policy = Policy
             .Handle<Exception>()
@@ -32,27 +33,32 @@ public class ClientSoftwareVersionSettingsLoader : IClientSoftwareVersionSetting
             string contents;
             using (var wc = new HttpClient())
             {
+                _logger.LogInformation("Loading minimal version from {url}", _appSettings.UpdatesDefinitionUrl);
                 contents = await wc.GetStringAsync(_appSettings.UpdatesDefinitionUrl);
             }
 
-            var softwareUpdates = JsonSerializer.Deserialize<List<SoftwareVersion>>(contents)!;
+            var options = new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter() }
+            };
+            var softwareUpdates = JsonSerializer.Deserialize<List<SoftwareVersion>>(contents, options)!;
 
             if (softwareUpdates != null)
             {
-                newMandatoryVersionCandidate = softwareUpdates.FirstOrDefault(u => u.Level == PriorityLevel.Minimal);
+                newMinimalVersionCandidate = softwareUpdates.FirstOrDefault(u => u.Level == PriorityLevel.Minimal);
             }
         });
         
-        if (newMandatoryVersionCandidate == null)
+        if (newMinimalVersionCandidate == null)
         {
-            throw new Exception("Failed to load mandatory version");
+            throw new Exception("Failed to load minimal version");
         }
         
-        _logger.LogInformation("MandatoryVersion is now: {version}", newMandatoryVersionCandidate!.Version);
+        _logger.LogInformation("Minimal version is now: {version}", newMinimalVersionCandidate!.Version);
 
         ClientSoftwareVersionSettings clientSoftwareVersionSettings = new ClientSoftwareVersionSettings
         {
-            MandatoryVersion = newMandatoryVersionCandidate
+            MinimalVersion = newMinimalVersionCandidate
         };
 
         return clientSoftwareVersionSettings;
