@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.IO.Compression;
-using ByteSync.Common.Controls.JSon;
-using Newtonsoft.Json;
+using ByteSync.Services.Misc;
 using Serilog;
 
 namespace ByteSync.Services.Inventories;
@@ -94,8 +93,7 @@ class InventorySaver
 
     public void WriteInventory()
     {
-        var settings = JsonSerializerSettingsHelper.BuildSettings(true, true, true);
-        var json = JsonConvert.SerializeObject(InventoryBuilder.Inventory, Formatting.Indented, settings);
+        var json = JsonHelper.Serialize(InventoryBuilder.Inventory);
 
         if (ZipArchive != null)
         {

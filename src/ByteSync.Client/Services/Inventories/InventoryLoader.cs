@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using System.IO.Compression;
-using ByteSync.Common.Controls.JSon;
+using System.Text.Json;
+using ByteSync.Common.Controls.Json;
 using ByteSync.Models.Inventories;
-using Newtonsoft.Json;
 
 namespace ByteSync.Services.Inventories;
 
@@ -26,21 +26,37 @@ class InventoryLoader : IDisposable
     private Inventory Load()
     {
         var inventoryFile = ZipArchive.GetEntry("inventory.json");
-
-        using (var entryStream = inventoryFile!.Open())
+        
+        if (inventoryFile == null)
         {
-            using (var streamReader = new StreamReader(entryStream))
-            {
-                using (var jsonTextReader = new JsonTextReader(streamReader))
-                {
-                    var settings = JsonSerializerSettingsHelper.BuildSettings(true, true, true);
-                    var serializer = JsonSerializer.Create(settings);
-
-                    var inventory = serializer.Deserialize<Inventory>(jsonTextReader);
-                    return inventory;
-                }
-            }
+            throw new FileNotFoundException("inventory.json not found in the archive.");
         }
+
+        using var entryStream = inventoryFile!.Open();
+        var options = JsonSerializerOptionsHelper.BuildOptions(true, true, true);
+            
+        var inventory = JsonSerializer.Deserialize<Inventory>(entryStream, options);
+
+        if (inventory == null)
+        {
+            throw new InvalidOperationException("Failed to deserialize inventory.json.");
+        }
+        
+        return inventory;
+
+        // return inventory;
+        //
+        // using (var streamReader = new StreamReader(entryStream))
+        // {
+        //     using (var jsonTextReader = new JsonTextReader(streamReader))
+        //     {
+        //         var settings = JsonSerializerSettingsHelper.BuildSettings(true, true, true);
+        //         var serializer = JsonSerializer.Create(settings);
+        //
+        //         var inventory = serializer.Deserialize<Inventory>(jsonTextReader);
+        //         return inventory;
+        //     }
+        // }
     }
 
     public MemoryStream GetSignature(string guid)

@@ -1,8 +1,7 @@
 ﻿using System.IO;
 using System.IO.Compression;
 using ByteSync.Business.Actions.Shared;
-using ByteSync.Common.Controls.JSon;
-using Newtonsoft.Json;
+using ByteSync.Services.Misc;
 
 namespace ByteSync.Services.Actions;
 
@@ -17,8 +16,7 @@ public class SynchronizationDataSaver
     {
         using ZipArchive zipArchive = ZipFile.Open(localPath, ZipArchiveMode.Create);
         
-        JsonSerializerSettings settings = JsonSerializerSettingsHelper.BuildSettings(true, true, true);
-        string json = JsonConvert.SerializeObject(sharedSynchronizationStartData, Formatting.Indented, settings);
+        string json = JsonHelper.Serialize(sharedSynchronizationStartData);
 
         var inventoryFile = zipArchive.CreateEntry("synchronization_start_data.json");
 
@@ -36,9 +34,8 @@ public class SynchronizationDataSaver
         using var entryStream = synchronizationActionsFile!.Open();
         using var streamWriter = new StreamReader(entryStream);
         var json = streamWriter.ReadToEnd();
-
-        JsonSerializerSettings settings = JsonSerializerSettingsHelper.BuildSettings(true, true, true);
-        var sharedSynchronizationData = JsonConvert.DeserializeObject<SharedSynchronizationStartData>(json, settings);
+        
+        var sharedSynchronizationData = JsonHelper.Deserialize<SharedSynchronizationStartData>(json);
 
         return sharedSynchronizationData;
     }

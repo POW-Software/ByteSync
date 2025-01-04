@@ -1,11 +1,9 @@
 ﻿using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Models.FileSystems;
-using Newtonsoft.Json;
 
 namespace ByteSync.Models.Inventories
 {
-    [JsonObject(IsReference = true)] 
     public class InventoryPart
     {
         public InventoryPart()

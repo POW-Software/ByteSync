@@ -1,10 +1,10 @@
 ﻿using System.Text;
-using ByteSync.Common.Controls.JSon;
+using System.Text.Json;
+using ByteSync.Common.Controls.Json;
 using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
-using Newtonsoft.Json;
 using StackExchange.Redis;
 
 namespace ByteSync.ServerCommon.Repositories;
@@ -149,7 +149,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
         string? serializedElement = await _cacheService.GetDatabase().StringGetAsync(cacheKey);
         if (serializedElement.IsNotEmpty())
         {
-            cachedElement = JsonConvert.DeserializeObject<T>(serializedElement!);
+            cachedElement = JsonSerializer.Deserialize<T>(serializedElement!);
         }
 
         return cachedElement;
@@ -158,10 +158,11 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
     public async Task<UpdateEntityResult<T>> SetElement(string cacheKey, T createdOrUpdatedElement, IDatabaseAsync database)
     {
         // https://stackoverflow.com/questions/13510204/json-net-self-referencing-loop-detected
-        var settings = JsonSerializerSettingsHelper.BuildSettings(true, true, false);
-        settings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+        var settings = JsonSerializerOptionsHelper.BuildOptions(true, true, false);
+        // settings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+        settings.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
         
-        string serializedElement = JsonConvert.SerializeObject(createdOrUpdatedElement, settings);
+        string serializedElement = JsonSerializer.Serialize(createdOrUpdatedElement, settings); // JsonConvert.SerializeObject(createdOrUpdatedElement, settings);
 
         if (database is ITransaction)
         {
