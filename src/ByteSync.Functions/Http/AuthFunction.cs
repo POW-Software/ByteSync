@@ -3,8 +3,6 @@ using ByteSync.Common.Business.Auth;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -56,33 +54,35 @@ public class AuthFunction
     }
     
     [Function("RefreshTokens")]
-    public async Task<IActionResult> RefreshTokens([HttpTrigger(AuthorizationLevel.Anonymous, "post", "get", Route = "auth/refreshTokens")] HttpRequestData req, 
+    public async Task<HttpResponseData> RefreshTokens([HttpTrigger(AuthorizationLevel.Anonymous, "post", "get", Route = "auth/refreshTokens")] HttpRequestData req, 
         FunctionContext executionContext)
     {
+        var response = req.CreateResponse();
         try
         {
             var refreshTokensData = await FunctionHelper.DeserializeRequestBody<RefreshTokensData>(req);
                 
-            var response = await _authService.RefreshTokens(refreshTokensData, GetIpAddress(req));
+            var authResult = await _authService.RefreshTokens(refreshTokensData, GetIpAddress(req));
 
-            if (response.IsSuccess)
+            if (authResult.IsSuccess)
             {
-                return new OkObjectResult(response);
+                response.StatusCode = HttpStatusCode.OK;
+                await response.WriteAsJsonAsync(authResult);
             }
             else
             {
-                return new UnauthorizedObjectResult(response);
+                response.StatusCode = HttpStatusCode.Unauthorized;
+                await response.WriteAsJsonAsync(authResult);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while refreshing tokens");
-            
-            return new ObjectResult(new { error = "An internal server error occurred." })
-            {
-                StatusCode = StatusCodes.Status500InternalServerError
-            };
+            response.StatusCode = HttpStatusCode.InternalServerError;
+            await response.WriteAsJsonAsync(new { error = "An internal server error occurred." });
         }
+        
+        return response;
     }
 
     private string GetIpAddress(HttpRequestData req)
