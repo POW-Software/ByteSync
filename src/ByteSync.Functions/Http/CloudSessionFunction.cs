@@ -1,9 +1,9 @@
-﻿using ByteSync.Common.Business.Sessions;
+﻿using System.Net;
+using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
+using ByteSync.Functions.Constants;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Interfaces.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -20,12 +20,12 @@ public class CloudSessionFunction
         _cloudSessionsService = cloudSessionsService;
         _logger = loggerFactory.CreateLogger<CloudSessionFunction>();
     }
-    
         
     [Function("CreateCloudSessionFunction")]
-    public async Task<IActionResult> Create([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session")] HttpRequestData req,
+    public async Task<HttpResponseData> Create([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session")] HttpRequestData req,
         FunctionContext executionContext)
     {
+        var response = req.CreateResponse();
         try
         {
             var client = FunctionHelper.GetClientFromContext(executionContext);
@@ -33,24 +33,26 @@ public class CloudSessionFunction
             
             var cloudSessionResult = await _cloudSessionsService.CreateCloudSession(createCloudSessionParameters, client);
             
-            return new OkObjectResult(cloudSessionResult);
+            response.StatusCode = HttpStatusCode.OK;
+            await response.WriteAsJsonAsync(cloudSessionResult);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while creating session");
             
-            return new ObjectResult(new { error = "An internal server error occurred." })
-            {
-                StatusCode = StatusCodes.Status500InternalServerError
-            };
+            response.StatusCode = HttpStatusCode.InternalServerError;
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
         }
+        
+        return response;
     }
     
     [Function("AskPasswordExchangeKeyFunction")]
-    public async Task<IActionResult> AskPasswordExchangeKey(
+    public async Task<HttpResponseData> AskPasswordExchangeKey(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/askPasswordExchangeKey")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
+        var response = req.CreateResponse();
         try
         {
             var client = FunctionHelper.GetClientFromContext(executionContext);
@@ -58,92 +60,99 @@ public class CloudSessionFunction
             
             var result = await _cloudSessionsService.AskCloudSessionPasswordExchangeKey(client, parameters);
             
-            return new OkObjectResult(result);
+            response.StatusCode = HttpStatusCode.OK;
+            await response.WriteAsJsonAsync(result);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while asking PasswordExchangeKey for session {sessionId}", sessionId);
             
-            return new ObjectResult(new { error = "An internal server error occurred." })
-            {
-                StatusCode = StatusCodes.Status500InternalServerError
-            };
+            response.StatusCode = HttpStatusCode.InternalServerError;
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
         }
+        
+        return response;
     }
     
     [Function("GetMembersInstanceIdsFunction")]
-    public async Task<IActionResult> GetMembersInstanceIds(
+    public async Task<HttpResponseData> GetMembersInstanceIds(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/membersInstanceIds")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
+        var response = req.CreateResponse();
         try
         {
             var membersInstanceIds = await _cloudSessionsService.GetMembersInstanceIds(sessionId);
             
-            return new OkObjectResult(membersInstanceIds);
+            response.StatusCode = HttpStatusCode.OK;
+            await response.WriteAsJsonAsync(membersInstanceIds);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while getting members ids for session {sessionId}", sessionId);
             
-            return new ObjectResult(new { error = "An internal server error occurred." })
-            {
-                StatusCode = StatusCodes.Status500InternalServerError
-            };
+            response.StatusCode = HttpStatusCode.InternalServerError;
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
         }
+        
+        return response;
     }
     
     [Function("GetMembersFunction")]
-    public async Task<IActionResult> GetMembers(
+    public async Task<HttpResponseData> GetMembers(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/members")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
+        var response = req.CreateResponse();
         try
         {
             var members = await _cloudSessionsService.GetSessionMembersInfosAsync(sessionId);
             
-            return new OkObjectResult(members);
+            response.StatusCode = HttpStatusCode.OK;
+            await response.WriteAsJsonAsync(members);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while getting members for session {sessionId}", sessionId);
             
-            return new ObjectResult(new { error = "An internal server error occurred." })
-            {
-                StatusCode = StatusCodes.Status500InternalServerError
-            };
+            response.StatusCode = HttpStatusCode.InternalServerError;
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
         }
+        
+        return response;
     }
     
     [Function("ValidateJoinCloudSessionFunction")]
-    public async Task<IActionResult> ValidateJoinCloudSession(
+    public async Task<HttpResponseData> ValidateJoinCloudSession(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/validateJoin")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
+        HttpResponseData response;
         try
         {
             var parameters = await FunctionHelper.DeserializeRequestBody<ValidateJoinCloudSessionParameters>(req);
 
             await _cloudSessionsService.ValidateJoinCloudSession(parameters).ConfigureAwait(false);
             
-            return new OkResult();
+            response = req.CreateResponse(HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while validating joining session {sessionId}", sessionId);
             
-            return new ObjectResult(new { error = "An internal server error occurred." })
-            {
-                StatusCode = StatusCodes.Status500InternalServerError
-            };
+            response = req.CreateResponse(HttpStatusCode.InternalServerError);
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
         }
+        
+        return response;
     }
     
     [Function("FinalizeJoinCloudSessionFunction")]
-    public async Task<IActionResult> FinalizeJoinCloudSession(
+    public async Task<HttpResponseData> FinalizeJoinCloudSession(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/finalizeJoin")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
+        var response = req.CreateResponse();
         try
         {
             var client = FunctionHelper.GetClientFromContext(executionContext);
@@ -151,24 +160,26 @@ public class CloudSessionFunction
 
             var result = await _cloudSessionsService.FinalizeJoinCloudSession(client, parameters).ConfigureAwait(false);
             
-            return new OkObjectResult(result);
+            response.StatusCode = HttpStatusCode.OK;
+            await response.WriteAsJsonAsync(result);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while finalizing joining session {sessionId}", sessionId);
             
-            return new ObjectResult(new { error = "An internal server error occurred." })
-            {
-                StatusCode = StatusCodes.Status500InternalServerError
-            };
+            response = req.CreateResponse(HttpStatusCode.InternalServerError);
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
         }
+        
+        return response;
     }
     
     [Function("AskJoinCloudSessionFunction")]
-    public async Task<IActionResult> AskJoinCloudSession(
+    public async Task<HttpResponseData> AskJoinCloudSession(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/askJoin")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
+        var response = req.CreateResponse();
         try
         {
             var client = FunctionHelper.GetClientFromContext(executionContext);
@@ -176,24 +187,26 @@ public class CloudSessionFunction
 
             var result = await _cloudSessionsService.AskJoinCloudSession(client, parameters).ConfigureAwait(false);
             
-            return new OkObjectResult(result);
+            response.StatusCode = HttpStatusCode.OK;
+            await response.WriteAsJsonAsync(result);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while asking for joining session {sessionId}", sessionId);
             
-            return new ObjectResult(new { error = "An internal server error occurred." })
-            {
-                StatusCode = StatusCodes.Status500InternalServerError
-            };
+            response = req.CreateResponse(HttpStatusCode.InternalServerError);
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
         }
+        
+        return response;
     }
     
     [Function("GiveCloudSessionPasswordExchangeKeyFunction")]
-    public async Task<IActionResult> GiveCloudSessionPasswordExchangeKey(
+    public async Task<HttpResponseData> GiveCloudSessionPasswordExchangeKey(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/givePassworkExchangeKey")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
+        HttpResponseData response;
         try
         {
             var client = FunctionHelper.GetClientFromContext(executionContext);
@@ -201,24 +214,25 @@ public class CloudSessionFunction
 
             await _cloudSessionsService.GiveCloudSessionPasswordExchangeKey(client, parameters).ConfigureAwait(false);
             
-            return new OkResult();
+            response = req.CreateResponse(HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while giving password exchange key for session {sessionId}", sessionId);
             
-            return new ObjectResult(new { error = "An internal server error occurred." })
-            {
-                StatusCode = StatusCodes.Status500InternalServerError
-            };
+            response = req.CreateResponse(HttpStatusCode.InternalServerError);
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
         }
+        
+        return response;
     }
     
     [Function("InformPasswordIsWrongFunction")]
-    public async Task<IActionResult> InformPasswordIsWrong(
+    public async Task<HttpResponseData> InformPasswordIsWrong(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/informPasswordIsWrong")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
+        HttpResponseData response;
         try
         {
             var client = FunctionHelper.GetClientFromContext(executionContext);
@@ -226,24 +240,25 @@ public class CloudSessionFunction
 
             await _cloudSessionsService.InformPasswordIsWrong(client, sessionId, clientInstanceId).ConfigureAwait(false);
             
-            return new OkResult();
+            response = req.CreateResponse(HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while informing that password is wrong for session {sessionId}", sessionId);
             
-            return new ObjectResult(new { error = "An internal server error occurred." })
-            {
-                StatusCode = StatusCodes.Status500InternalServerError
-            };
+            response = req.CreateResponse(HttpStatusCode.InternalServerError);
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
         }
+        
+        return response;
     }
     
     [Function("UpdateSettingsFunction")]
-    public async Task<IActionResult> UpdateSettings(
+    public async Task<HttpResponseData> UpdateSettings(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/updateSettings")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
+        HttpResponseData response;
         try
         {
             var client = FunctionHelper.GetClientFromContext(executionContext);
@@ -251,64 +266,66 @@ public class CloudSessionFunction
 
             await _cloudSessionsService.UpdateSessionSettings(client, sessionId, settings).ConfigureAwait(false);
             
-            return new OkResult();
+            response = req.CreateResponse(HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error while quitting session {sessionId}", sessionId);
+           _logger.LogError(ex, "Error while updating settings for session {sessionId}", sessionId);
             
-            return new ObjectResult(new { error = "An internal server error occurred." })
-            {
-                StatusCode = StatusCodes.Status500InternalServerError
-            };
+            response = req.CreateResponse(HttpStatusCode.InternalServerError);
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
         }
+        
+        return response;
     }
     
     [Function("QuitFunction")]
-    public async Task<IActionResult> Quit(
+    public async Task<HttpResponseData> Quit(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/quit")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
+        HttpResponseData response;
         try
         {
             var client = FunctionHelper.GetClientFromContext(executionContext);
 
             await _cloudSessionsService.QuitCloudSession(client, sessionId).ConfigureAwait(false);
             
-            return new OkResult();
+            response = req.CreateResponse(HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while quitting session {sessionId}", sessionId);
             
-            return new ObjectResult(new { error = "An internal server error occurred." })
-            {
-                StatusCode = StatusCodes.Status500InternalServerError
-            };
+            response = req.CreateResponse(HttpStatusCode.InternalServerError);
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
         }
+        
+        return response;
     }
         
     [Function("ResetFunction")]
-    public async Task<IActionResult> Reset(
+    public async Task<HttpResponseData> Reset(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/reset")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
+        HttpResponseData response;
         try
         {
             var client = FunctionHelper.GetClientFromContext(executionContext);
 
             await _cloudSessionsService.ResetSession(sessionId, client).ConfigureAwait(false);
             
-            return new OkResult();
+            response = req.CreateResponse(HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while resetting session {sessionId}", sessionId);
             
-            return new ObjectResult(new { error = "An internal server error occurred." })
-            {
-                StatusCode = StatusCodes.Status500InternalServerError
-            };
+            response = req.CreateResponse(HttpStatusCode.InternalServerError);
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
         }
+        
+        return response;
     }
 }

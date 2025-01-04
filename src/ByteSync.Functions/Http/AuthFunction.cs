@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using ByteSync.Common.Business.Auth;
+using ByteSync.Functions.Constants;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -47,7 +48,7 @@ public class AuthFunction
         {
             _logger.LogError(ex, "Error while logging in");
             response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = "An internal server error occurred." });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
         }
         
         return response;
@@ -79,7 +80,7 @@ public class AuthFunction
         {
             _logger.LogError(ex, "Error while refreshing tokens");
             response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = "An internal server error occurred." });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
         }
         
         return response;

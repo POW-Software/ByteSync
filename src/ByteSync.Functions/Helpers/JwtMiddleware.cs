@@ -2,7 +2,6 @@
 using System.Net;
 using System.Text;
 using ByteSync.Functions.Http;
-using ByteSync.Functions.SignalR;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Repositories;
