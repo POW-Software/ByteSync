@@ -148,9 +148,6 @@ var host = new HostBuilder()
         
         var serviceProvider = services.BuildServiceProvider();
         
-        // var logger = serviceProvider.GetService<ILogger<Program>>();
-        // logger?.LogInformation("Current Environment: {EnvironmentName}", hostContext.HostingEnvironment.EnvironmentName);
-        
         var config = serviceProvider.GetService<IConfiguration>()!;
         var appSettingsSection = config.GetSection("AppSettings");
         services.Configure<RedisSettings>(config.GetSection("Redis"));

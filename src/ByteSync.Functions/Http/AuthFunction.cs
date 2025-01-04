@@ -24,33 +24,35 @@ public class AuthFunction
 
     [AllowAnonymous]
     [Function("Login")]
-    public async Task<IActionResult> Login([HttpTrigger(AuthorizationLevel.Anonymous, "post", "get", Route = "auth/login")] HttpRequestData req, 
+    public async Task<HttpResponseData> Login([HttpTrigger(AuthorizationLevel.Anonymous, "post", "get", Route = "auth/login")] HttpRequestData req, 
         FunctionContext executionContext)
     {
+        var response = req.CreateResponse();
         try
         {
             var loginData = await FunctionHelper.DeserializeRequestBody<LoginData>(req);
                 
-            var response = await _authService.Authenticate(loginData, GetIpAddress(req));
+            var authResult  = await _authService.Authenticate(loginData, GetIpAddress(req));
 
-            if (response.IsSuccess)
+            if (authResult.IsSuccess)
             {
-                return new OkObjectResult(response);
+                response.StatusCode = HttpStatusCode.OK;
+                await response.WriteAsJsonAsync(authResult);
             }
             else
             {
-                return new UnauthorizedObjectResult(response);
+                response.StatusCode = HttpStatusCode.Unauthorized;
+                await response.WriteAsJsonAsync(authResult);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while logging in");
-            
-            return new ObjectResult(new { error = "An internal server error occurred." })
-            {
-                StatusCode = StatusCodes.Status500InternalServerError
-            };
+            response.StatusCode = HttpStatusCode.InternalServerError;
+            await response.WriteAsJsonAsync(new { error = "An internal server error occurred." });
         }
+        
+        return response;
     }
     
     [Function("RefreshTokens")]

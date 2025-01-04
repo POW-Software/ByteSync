@@ -1,5 +1,8 @@
-﻿namespace ByteSync.Common.Business.Auth;
+﻿using System.Text.Json.Serialization;
 
+namespace ByteSync.Common.Business.Auth;
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum InitialConnectionStatus
 {
     Success = 1,

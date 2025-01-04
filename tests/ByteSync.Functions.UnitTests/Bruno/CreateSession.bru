@@ -45,6 +45,6 @@ script:pre-request {
 }
 
 script:post-response {
-  var sessionId = res.getBody().Value.CloudSession.SessionId;
+  var sessionId = res.getBody().CloudSession.SessionId;
   bru.setEnvVar("sessionId", sessionId);
 }

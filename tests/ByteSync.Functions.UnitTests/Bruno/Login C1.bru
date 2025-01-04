@@ -23,7 +23,7 @@ body:json {
 }
 
 script:post-response {
-  var token = res.getBody().Value.AuthenticationTokens.JwtToken;
+  var token = res.getBody().AuthenticationTokens.JwtToken;
   
   bru.setEnvVar("jwtToken1", token);
   bru.setEnvVar("clientId1", "CID_1");

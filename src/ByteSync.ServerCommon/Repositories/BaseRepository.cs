@@ -149,7 +149,8 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
         string? serializedElement = await _cacheService.GetDatabase().StringGetAsync(cacheKey);
         if (serializedElement.IsNotEmpty())
         {
-            cachedElement = JsonSerializer.Deserialize<T>(serializedElement!);
+            var settings = JsonSerializerOptionsHelper.BuildOptions(true, true, false);
+            cachedElement = JsonSerializer.Deserialize<T>(serializedElement!, settings);
         }
 
         return cachedElement;

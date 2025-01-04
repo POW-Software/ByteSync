@@ -4,8 +4,6 @@ using ByteSync.Exceptions;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Services.Communications;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using RestSharp;
 using Serilog;
 
@@ -107,6 +105,7 @@ public class ApiInvoker : IApiInvoker
         
         if (restResponse.Content != null)
         {
+            /*
             var jsonObject = JObject.Parse(restResponse.Content);
             
             var statusCode = jsonObject["StatusCode"]?.ToObject<int>();
@@ -142,6 +141,9 @@ public class ApiInvoker : IApiInvoker
             {
                 throw new ApiException(jsonObject["Value"]!.ToString());
             }
+             */
+            
+            return default!;
         }
         else
         {

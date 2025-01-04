@@ -1,5 +1,8 @@
-﻿namespace ByteSync.Common.Business.Serials;
+﻿using System.Text.Json.Serialization;
 
+namespace ByteSync.Common.Business.Serials;
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum SerialStatus
 {
     OK = 1,
