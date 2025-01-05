@@ -35,20 +35,17 @@ public class AuthFunction
 
             if (authResult.IsSuccess)
             {
-                response.StatusCode = HttpStatusCode.OK;
-                await response.WriteAsJsonAsync(authResult);
+                await response.WriteAsJsonAsync(authResult, HttpStatusCode.OK);
             }
             else
             {
-                response.StatusCode = HttpStatusCode.Unauthorized;
-                await response.WriteAsJsonAsync(authResult);
+                await response.WriteAsJsonAsync(authResult, HttpStatusCode.Unauthorized);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while logging in");
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -67,20 +64,17 @@ public class AuthFunction
 
             if (authResult.IsSuccess)
             {
-                response.StatusCode = HttpStatusCode.OK;
-                await response.WriteAsJsonAsync(authResult);
+                await response.WriteAsJsonAsync(authResult, HttpStatusCode.OK);
             }
             else
             {
-                response.StatusCode = HttpStatusCode.Unauthorized;
-                await response.WriteAsJsonAsync(authResult);
+                await response.WriteAsJsonAsync(authResult, HttpStatusCode.Unauthorized);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while refreshing tokens");
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;

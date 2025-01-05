@@ -35,15 +35,13 @@ public class CloudSessionProfileFunction
 
             var result = await _cloudSessionProfileService.CreateCloudSessionProfile(sessionId, client);
             
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(result);
+            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while creating cloud session profile");
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
 
         return response;
@@ -64,17 +62,15 @@ public class CloudSessionProfileFunction
 
             var result = await _cloudSessionProfileService.GetCloudSessionProfileData(parameters, client);
             
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(result);
+            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, 
                 "Error while getting cloud session profile data for cloudSessionProfileId: {cloudSessionProfileId}",
                 cloudSessionProfileId);
-
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
 
         return response;
@@ -93,17 +89,15 @@ public class CloudSessionProfileFunction
 
             var result = await _cloudSessionProfileService.GetProfileDetailsPassword(parameters, client);
             
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(result);
+            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, 
                 "Error while getting profile details password for cloudSessionProfileId: {cloudSessionProfileId}",
                 cloudSessionProfileId);
-
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
 
         return response;
@@ -122,17 +116,15 @@ public class CloudSessionProfileFunction
 
             var result = await _cloudSessionProfileService.DeleteCloudSessionProfile(parameters, client);
             
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(result);
+            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, 
                 "Error while deleting cloud session profile with cloudSessionProfileId: {cloudSessionProfileId}",
                 cloudSessionProfileId);
-
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
 
         return response;

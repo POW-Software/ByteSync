@@ -41,16 +41,14 @@ public class FileTransferFunction
                 transferParameters.SharedFileDefinition,
                 transferParameters.PartNumber!.Value
             );
-
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(url);
+            
+            await response.WriteAsJsonAsync(url, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while getting upload file url for sessionId {sessionId}", sessionId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
 
         return response;
@@ -75,16 +73,14 @@ public class FileTransferFunction
                 transferParameters.SharedFileDefinition,
                 transferParameters.PartNumber!.Value
             );
-
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(url);
+            
+            await response.WriteAsJsonAsync(url, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while getting download file url for sessionId {sessionId}", sessionId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
 
         return response;
@@ -111,8 +107,7 @@ public class FileTransferFunction
         {
             _logger.LogError(ex, "Error while asserting file part is uploaded for sessionId {sessionId}", sessionId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
 
         return response;
@@ -144,8 +139,7 @@ public class FileTransferFunction
         {
             _logger.LogError(ex, "Error while asserting file part is downloaded for sessionId {sessionId}", sessionId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
 
         return response;
@@ -172,8 +166,7 @@ public class FileTransferFunction
         {
             _logger.LogError(ex, "Error while asserting upload is finished for sessionId {sessionId}", sessionId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
 
         return response;
@@ -204,8 +197,7 @@ public class FileTransferFunction
         {
             _logger.LogError(ex, "Error while asserting download is finished for sessionId {sessionId}", sessionId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
 
         return response;

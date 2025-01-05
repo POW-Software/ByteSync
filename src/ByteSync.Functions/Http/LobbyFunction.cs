@@ -35,15 +35,14 @@ public class LobbyFunction
             var parameters = await FunctionHelper.DeserializeRequestBody<JoinLobbyParameters>(req);
             
             var result = await _lobbyService.TryJoinLobby(parameters, client);
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(result);
+
+            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while joining lobby with cloudSessionProfileId: {cloudSessionProfileId}", cloudSessionProfileId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -70,8 +69,7 @@ public class LobbyFunction
         {
             _logger.LogError(ex, "Error sending cloud session credentials for lobby: {lobbyId}", lobbyId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -97,8 +95,7 @@ public class LobbyFunction
         {
             _logger.LogError(ex, "Error while quitting lobby with lobbyId: {lobbyId}", lobbyId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -125,8 +122,7 @@ public class LobbyFunction
         {
             _logger.LogError(ex, "Error while sending lobby check infos for lobbyId: {lobbyId}", lobbyId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -153,8 +149,7 @@ public class LobbyFunction
         {
             _logger.LogError(ex, "Error while updating lobby member status for lobbyId: {lobbyId}", lobbyId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;

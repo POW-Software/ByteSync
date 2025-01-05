@@ -34,15 +34,14 @@ public class InventoryFunction
             var client = FunctionHelper.GetClientFromContext(executionContext);
             
             var result = await _inventoryService.StartInventory(sessionId, client);
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(result);
+
+            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while starting inventory with sessionId: {sessionId}", sessionId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -62,15 +61,14 @@ public class InventoryFunction
             var localInventoryStatusParameters = await FunctionHelper.DeserializeRequestBody<UpdateSessionMemberGeneralStatusParameters>(req);
             
             var result = await _inventoryService.SetLocalInventoryStatus(client, localInventoryStatusParameters);
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(result);
+
+            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while setting local inventory status: {sessionId}", sessionId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -90,15 +88,14 @@ public class InventoryFunction
             var encryptedPathItem = await FunctionHelper.DeserializeRequestBody<EncryptedPathItem>(req);
             
             var result = await _inventoryService.AddPathItem(sessionId, client, encryptedPathItem);
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(result);
+
+            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while adding pathItem to an inventory with sessionId: {sessionId}", sessionId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -118,15 +115,14 @@ public class InventoryFunction
             var encryptedPathItem = await FunctionHelper.DeserializeRequestBody<EncryptedPathItem>(req);
 
             var result = await _inventoryService.RemovePathItem(sessionId, client, encryptedPathItem);
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(result);
+
+            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while removing pathItem from an inventory with sessionId: {sessionId}", sessionId);
-
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -145,15 +141,13 @@ public class InventoryFunction
         {
             var result = await _inventoryService.GetPathItems(sessionId, clientInstanceId);
             
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(result);
+            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while getting pathItems from an inventory with sessionId: {sessionId}", sessionId);
-
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;

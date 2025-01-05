@@ -34,15 +34,14 @@ public class TrustFunction
             var parameters = await FunctionHelper.DeserializeRequestBody<TrustCheckParameters>(req);
 
             var result = await _trustService.StartTrustCheck(client, parameters);
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(result);
+
+            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while starting trust check");
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -68,8 +67,7 @@ public class TrustFunction
         {
             _logger.LogError(ex, "Error while giving member public key check data");
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -95,8 +93,7 @@ public class TrustFunction
         {
             _logger.LogError(ex, "Error while sending digital signatures");
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -122,8 +119,7 @@ public class TrustFunction
         {
             _logger.LogError(ex, "Error while setting auth checked");
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -149,8 +145,7 @@ public class TrustFunction
         {
             _logger.LogError(ex, "Error while requesting trust public key");
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -176,8 +171,7 @@ public class TrustFunction
         {
             _logger.LogError(ex, "Error while informing public key validation is finished");
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;

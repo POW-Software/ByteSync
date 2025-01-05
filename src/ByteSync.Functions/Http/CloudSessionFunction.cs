@@ -33,15 +33,13 @@ public class CloudSessionFunction
             
             var cloudSessionResult = await _cloudSessionsService.CreateCloudSession(createCloudSessionParameters, client);
             
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(cloudSessionResult);
+            await response.WriteAsJsonAsync(cloudSessionResult, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while creating session");
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -60,15 +58,13 @@ public class CloudSessionFunction
             
             var result = await _cloudSessionsService.AskCloudSessionPasswordExchangeKey(client, parameters);
             
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(result);
+            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while asking PasswordExchangeKey for session {sessionId}", sessionId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -84,15 +80,13 @@ public class CloudSessionFunction
         {
             var membersInstanceIds = await _cloudSessionsService.GetMembersInstanceIds(sessionId);
             
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(membersInstanceIds);
+            await response.WriteAsJsonAsync(membersInstanceIds, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while getting members ids for session {sessionId}", sessionId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -108,15 +102,13 @@ public class CloudSessionFunction
         {
             var members = await _cloudSessionsService.GetSessionMembersInfosAsync(sessionId);
             
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(members);
+            await response.WriteAsJsonAsync(members, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while getting members for session {sessionId}", sessionId);
             
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -141,7 +133,7 @@ public class CloudSessionFunction
             _logger.LogError(ex, "Error while validating joining session {sessionId}", sessionId);
             
             response = req.CreateResponse(HttpStatusCode.InternalServerError);
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -160,15 +152,13 @@ public class CloudSessionFunction
 
             var result = await _cloudSessionsService.FinalizeJoinCloudSession(client, parameters).ConfigureAwait(false);
             
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(result);
+            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while finalizing joining session {sessionId}", sessionId);
             
-            response = req.CreateResponse(HttpStatusCode.InternalServerError);
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
@@ -187,15 +177,13 @@ public class CloudSessionFunction
 
             var result = await _cloudSessionsService.AskJoinCloudSession(client, parameters).ConfigureAwait(false);
             
-            response.StatusCode = HttpStatusCode.OK;
-            await response.WriteAsJsonAsync(result);
+            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while asking for joining session {sessionId}", sessionId);
             
-            response = req.CreateResponse(HttpStatusCode.InternalServerError);
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR });
+            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
         }
         
         return response;
