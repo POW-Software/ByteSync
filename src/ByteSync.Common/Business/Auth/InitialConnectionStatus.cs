@@ -7,7 +7,9 @@ public enum InitialConnectionStatus
 {
     Success = 1,
     VersionNotAllowed = 2,
-    UnknownOsPlatform = 3,
-    ClientAlreadyConnected = 4,
-    UnknownError = 10,
+    UndefinedClientId = 3,
+    UndefinedClientInstanceId = 4,
+    UnknownOsPlatform = 5,
+    ClientAlreadyConnected = 10,
+    UnknownError = 11,
 }

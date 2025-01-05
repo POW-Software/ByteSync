@@ -42,6 +42,18 @@ public class AuthService : IAuthService
             authenticationResponse = new InitialAuthenticationResponse(InitialConnectionStatus.VersionNotAllowed);
             return authenticationResponse;
         }
+        
+        if (loginData.ClientId.IsNullOrEmpty())
+        {
+            authenticationResponse = new InitialAuthenticationResponse(InitialConnectionStatus.UndefinedClientId);
+            return authenticationResponse;
+        }
+        
+        if (loginData.ClientInstanceId.IsNullOrEmpty())
+        {
+            authenticationResponse = new InitialAuthenticationResponse(InitialConnectionStatus.UndefinedClientInstanceId);
+            return authenticationResponse;
+        }
             
         if (loginData.OsPlatform == null || loginData.OsPlatform == OSPlatforms.Undefined)
         {

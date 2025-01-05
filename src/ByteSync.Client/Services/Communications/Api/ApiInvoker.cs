@@ -201,21 +201,7 @@ public class ApiInvoker : IApiInvoker
         {
             if (handleResult)
             {
-                try
-                {
-                    var result = JsonHelper.Deserialize<T>(content);
-                    if (result == null)
-                    {
-                        throw new ApiException("Failed to deserialize the response content.");
-                    }
-
-                    return result;
-                }
-                catch (JsonException ex)
-                {
-                    _logger.LogError(ex, "JSON deserialization error.");
-                    throw new ApiException("Failed to deserialize the response content.", ex);
-                }
+                return DeserializeContent<T>(content);
             }
             else
             {
@@ -227,31 +213,52 @@ public class ApiInvoker : IApiInvoker
             string errorMessage = "An error occurred while invoking the API.";
 
             // Tenter de désérialiser le message d'erreur si présent
-            if (!string.IsNullOrWhiteSpace(content))
+            if (!string.IsNullOrWhiteSpace(content) && handleResult)
             {
-                try
-                {
-                    var errorObj = JsonHelper.Deserialize<Dictionary<string, string>>(content);
-                    if (errorObj != null)
-                    {
-                        if (errorObj.ContainsKey("error"))
-                        {
-                            errorMessage = errorObj["error"];
-                        }
-                        else if (errorObj.ContainsKey("message"))
-                        {
-                            errorMessage = errorObj["message"];
-                        }
-                    }
-                }
-                catch (JsonException)
-                {
-                    // Si la désérialisation échoue, conserver le message d'erreur générique
-                }
+                return DeserializeContent<T>(content);
+                
+                // try
+                // {
+                //     var errorObj = JsonHelper.Deserialize<Dictionary<string, string>>(content);
+                //     if (errorObj != null)
+                //     {
+                //         if (errorObj.ContainsKey("error"))
+                //         {
+                //             errorMessage = errorObj["error"];
+                //         }
+                //         else if (errorObj.ContainsKey("message"))
+                //         {
+                //             errorMessage = errorObj["message"];
+                //         }
+                //     }
+                // }
+                // catch (JsonException)
+                // {
+                //     // Si la désérialisation échoue, conserver le message d'erreur générique
+                // }
             }
 
             _logger.LogError("API call failed with status code {StatusCode}: {ErrorMessage}", response.StatusCode, errorMessage);
             throw new ApiException($"API call failed with status code {response.StatusCode}: {errorMessage}");
+        }
+    }
+
+    private T DeserializeContent<T>(string content)
+    {
+        try
+        {
+            var result = JsonHelper.Deserialize<T>(content);
+            if (result == null)
+            {
+                throw new ApiException("Failed to deserialize the response content.");
+            }
+
+            return result;
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "JSON deserialization error.");
+            throw new ApiException("Failed to deserialize the response content.", ex);
         }
     }
 }
