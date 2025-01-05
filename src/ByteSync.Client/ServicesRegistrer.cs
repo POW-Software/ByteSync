@@ -91,8 +91,7 @@ public static class ServicesRegistrer
         var builder = new ContainerBuilder();
         
         var serviceCollection = new ServiceCollection();
-
-        // Configurer les services via IServiceCollection
+        
         ConfigureServices(serviceCollection);
         
         builder.Populate(serviceCollection);
@@ -322,25 +321,12 @@ public static class ServicesRegistrer
     
     private static void ConfigureServices(IServiceCollection services)
     {
-        // Configurer HttpClient avec une politique de retry via Polly
         services.AddHttpClient("ApiClient")
             .AddPolicyHandler(GetRetryPolicy());
-
-        // // Enregistrer ApiInvoker
-        // services.AddTransient<IApiInvoker, ApiInvoker>();
-        //
-        // // Enregistrer les autres dépendances
-        // services.AddTransient<IAuthenticationTokensRepository, AuthenticationTokensRepository>();
-        // services.AddTransient<IConnectionConstantsService, ConnectionConstantsService>();
-        // services.AddSingleton<IPolicyFactory, PolicyFactory>();
-        //
-        // // Configurer le logger
-        // services.AddLogging(configure => configure.AddConsole());
     }
     
     private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
     {
-        // Exemple de politique de retry avec 3 tentatives et délai exponentiel
         return HttpPolicyExtensions
             .HandleTransientHttpError()
             .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
