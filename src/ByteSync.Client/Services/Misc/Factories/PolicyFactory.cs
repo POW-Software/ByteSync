@@ -1,15 +1,12 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
-using System.Net.WebSockets;
 using System.Threading.Tasks;
 using Azure;
 using Azure.Storage.Blobs.Models;
 using ByteSync.Interfaces;
-using Microsoft.AspNetCore.SignalR;
 using Polly;
 using Polly.Retry;
-using RestSharp;
 
 namespace ByteSync.Services.Misc.Factories;
 
@@ -37,35 +34,35 @@ public class PolicyFactory : IPolicyFactory
         return result;
     }
 
-    public AsyncRetryPolicy<RestResponse> BuildRestPolicy(string resource)
-    {
-        resource = "/" + resource.TrimStart('/');
-        
-        var retryPolicy = Policy
-            .HandleResult<RestResponse>(x => !x.IsSuccessful)
-            .Or<WebSocketException>()
-            .WaitAndRetryAsync(MAX_RETRIES, SleepDurationProvider, onRetryAsync: async (iRestResponse, timeSpan, retryCount, _) =>
-            {
-                var exception = iRestResponse.Exception ?? iRestResponse.Result.ErrorException;
-                
-                _logger.LogError("ApiOperation failed (Attempt {AttemptNumber}). Resource: {resource}, HttpStatusCode:{HttpStatus}({HttpStatusCode}), " +
-                                 "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
-                                 "Waiting {WaitingTime} seconds before retry", 
-                    retryCount, resource, iRestResponse.Result.StatusCode, (int) iRestResponse.Result.StatusCode,
-                    exception?.GetType().FullName!, exception?.Message!, 
-                    timeSpan);
-                
-                if (exception?.InnerException != null)
-                {
-                    _logger.LogError("ApiOperation InnerExceptionType:{InnerExceptionType}, InnerExceptionMessage:{InnerExceptionMessage}", 
-                        exception.InnerException.GetType().FullName!, exception.InnerException.Message);
-                }
-
-                await Task.CompletedTask;
-            });
-
-        return retryPolicy;
-    }
+    // public AsyncRetryPolicy<RestResponse> BuildRestPolicy(string resource)
+    // {
+    //     resource = "/" + resource.TrimStart('/');
+    //     
+    //     var retryPolicy = Policy
+    //         .HandleResult<RestResponse>(x => !x.IsSuccessful)
+    //         .Or<WebSocketException>()
+    //         .WaitAndRetryAsync(MAX_RETRIES, SleepDurationProvider, onRetryAsync: async (iRestResponse, timeSpan, retryCount, _) =>
+    //         {
+    //             var exception = iRestResponse.Exception ?? iRestResponse.Result.ErrorException;
+    //             
+    //             _logger.LogError("ApiOperation failed (Attempt {AttemptNumber}). Resource: {resource}, HttpStatusCode:{HttpStatus}({HttpStatusCode}), " +
+    //                              "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
+    //                              "Waiting {WaitingTime} seconds before retry", 
+    //                 retryCount, resource, iRestResponse.Result.StatusCode, (int) iRestResponse.Result.StatusCode,
+    //                 exception?.GetType().FullName!, exception?.Message!, 
+    //                 timeSpan);
+    //             
+    //             if (exception?.InnerException != null)
+    //             {
+    //                 _logger.LogError("ApiOperation InnerExceptionType:{InnerExceptionType}, InnerExceptionMessage:{InnerExceptionMessage}", 
+    //                     exception.InnerException.GetType().FullName!, exception.InnerException.Message);
+    //             }
+    //
+    //             await Task.CompletedTask;
+    //         });
+    //
+    //     return retryPolicy;
+    // }
 
     public AsyncRetryPolicy<HttpResponseMessage> BuildHttpPolicy(int? maxAttempts = null)
     {

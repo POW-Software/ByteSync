@@ -16,16 +16,14 @@ public class ApiInvoker : IApiInvoker
     private readonly HttpClient _httpClient;
     private readonly IAuthenticationTokensRepository _authenticationTokensRepository;
     private readonly IConnectionConstantsService _connectionConstantsService;
-    private readonly IPolicyFactory _policyFactory;
     private readonly ILogger<ApiInvoker> _logger;
     
     public ApiInvoker(IHttpClientFactory httpClientFactory, IAuthenticationTokensRepository authenticationTokensRepository, 
-        IConnectionConstantsService connectionConstantsService, IPolicyFactory policyFactory, ILogger<ApiInvoker> logger)
+        IConnectionConstantsService connectionConstantsService, ILogger<ApiInvoker> logger)
     {
         _httpClient = httpClientFactory.CreateClient("ApiClient");
         _authenticationTokensRepository = authenticationTokensRepository;
         _connectionConstantsService = connectionConstantsService;
-        _policyFactory = policyFactory;
         _logger = logger;
     }
 
