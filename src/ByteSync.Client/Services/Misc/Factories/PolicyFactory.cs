@@ -1,7 +1,4 @@
-﻿using System.Net;
-using System.Net.Http;
-using System.Net.Sockets;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Azure;
 using Azure.Storage.Blobs.Models;
 using ByteSync.Interfaces;
@@ -33,62 +30,6 @@ public class PolicyFactory : IPolicyFactory
         
         return result;
     }
-
-    // public AsyncRetryPolicy<RestResponse> BuildRestPolicy(string resource)
-    // {
-    //     resource = "/" + resource.TrimStart('/');
-    //     
-    //     var retryPolicy = Policy
-    //         .HandleResult<RestResponse>(x => !x.IsSuccessful)
-    //         .Or<WebSocketException>()
-    //         .WaitAndRetryAsync(MAX_RETRIES, SleepDurationProvider, onRetryAsync: async (iRestResponse, timeSpan, retryCount, _) =>
-    //         {
-    //             var exception = iRestResponse.Exception ?? iRestResponse.Result.ErrorException;
-    //             
-    //             _logger.LogError("ApiOperation failed (Attempt {AttemptNumber}). Resource: {resource}, HttpStatusCode:{HttpStatus}({HttpStatusCode}), " +
-    //                              "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
-    //                              "Waiting {WaitingTime} seconds before retry", 
-    //                 retryCount, resource, iRestResponse.Result.StatusCode, (int) iRestResponse.Result.StatusCode,
-    //                 exception?.GetType().FullName!, exception?.Message!, 
-    //                 timeSpan);
-    //             
-    //             if (exception?.InnerException != null)
-    //             {
-    //                 _logger.LogError("ApiOperation InnerExceptionType:{InnerExceptionType}, InnerExceptionMessage:{InnerExceptionMessage}", 
-    //                     exception.InnerException.GetType().FullName!, exception.InnerException.Message);
-    //             }
-    //
-    //             await Task.CompletedTask;
-    //         });
-    //
-    //     return retryPolicy;
-    // }
-
-    public AsyncRetryPolicy<HttpResponseMessage> BuildHttpPolicy(int? maxAttempts = null)
-    {
-        int? maxRetries = maxAttempts - 1;
-        if (maxRetries == null || maxRetries < 1)
-        {
-            maxRetries = MAX_RETRIES;
-        }
-        
-        var retryPolicy = Policy
-            .HandleResult<HttpResponseMessage>(x => !x.IsSuccessStatusCode 
-                && x.StatusCode != HttpStatusCode.Forbidden && x.StatusCode != HttpStatusCode.Unauthorized)
-            .Or<HttpRequestException>(e => e.InnerException is SocketException)
-            .WaitAndRetryAsync(maxRetries.Value, SleepDurationProvider, onRetryAsync: async (responseMessage, timeSpan, retryCount, _) =>
-            {
-                _logger.LogError("HttpOperation failed (Attempt number {AttemptNumber}). HttpStatusCode:{HttpStatusCode}. " +
-                                 "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
-                                 "Waiting {WaitingTime} seconds before retry", 
-                    retryCount, responseMessage.Result?.StatusCode!, responseMessage.Exception?.GetType().Name!, responseMessage.Exception?.Message!, timeSpan);
-
-                await Task.CompletedTask;
-            });
-
-        return retryPolicy;
-    }
-    
 
     public AsyncRetryPolicy<Response> BuildFileDownloadPolicy()
     {
