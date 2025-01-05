@@ -59,15 +59,12 @@ public class DataEncrypter : IDataEncrypter
 
     public T Encrypt<T>(object data) where T : IEncryptedSessionData, new()
     {
-        // Préparation de AES
         var aes = Aes.Create();
         aes.Key = _cloudSessionConnectionRepository.GetAesEncryptionKey()!;
         aes.GenerateIV();
-
-        // Sérialisation
+        
         string json = JsonHelper.Serialize(data);
-
-        // Chiffrement AES
+        
         using MemoryStream ms = new MemoryStream();
         using var encryptor = aes.CreateEncryptor();
         using CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write);
@@ -86,12 +83,10 @@ public class DataEncrypter : IDataEncrypter
     
     public T Decrypt<T>(IEncryptedSessionData encryptedSessionData)
     {
-        // Préparation de AES
         var aes = Aes.Create();
         aes.Key = _cloudSessionConnectionRepository.GetAesEncryptionKey()!;
         aes.IV = encryptedSessionData.IV;
         
-        // Déchiffrement AES
         string json;
         using MemoryStream ms = new MemoryStream(encryptedSessionData.Data);
         using var decryptor = aes.CreateDecryptor();
@@ -100,11 +95,9 @@ public class DataEncrypter : IDataEncrypter
         {
             json = streamReader.ReadToEnd();
         }
-
-        // Désérialisation
+        
         T decryptedData = JsonHelper.Deserialize<T>(json);
 
         return decryptedData;
     }
-
 }

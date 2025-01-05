@@ -8,8 +8,7 @@ public class JsonHelper
     public static string Serialize<T>(T data, bool includeTypeNames = true)
     {
         var options = GetJsonSerializerOptions<T>(includeTypeNames);
-
-        // Sérialisation en chaîne JSON avec options
+        
         string json = JsonSerializer.Serialize(data, options);
 
         return json;
@@ -19,7 +18,6 @@ public class JsonHelper
     {
         var options = GetJsonSerializerOptions<T>(includeTypeNames);
 
-        // Désérialisation depuis une chaîne JSON avec options
         var data = JsonSerializer.Deserialize<T>(json, options);
 
         if (data == null)
@@ -33,7 +31,6 @@ public class JsonHelper
 
     private static JsonSerializerOptions GetJsonSerializerOptions<T>(bool includeTypeNames)
     {
-        // Construire les options avec les paramètres personnalisés
         var options = JsonSerializerOptionsHelper.BuildOptions(true, true, includeTypeNames);
 
         return options;
