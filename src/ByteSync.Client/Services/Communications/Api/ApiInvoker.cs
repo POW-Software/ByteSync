@@ -6,24 +6,23 @@ using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Services.Misc;
 using RestSharp;
-using Serilog;
 
 namespace ByteSync.Services.Communications.Api;
 
-// Issu de https://gist.github.com/pedrovasconcellos/cf2b8dcde14313e19a891408c3404337
-// Mais adapté
 public class ApiInvoker : IApiInvoker
 {
     private readonly IAuthenticationTokensRepository _authenticationTokensRepository;
     private readonly IConnectionConstantsService _connectionConstantsService;
     private readonly IPolicyFactory _policyFactory;
+    private readonly ILogger<ApiInvoker> _logger;
 
     public ApiInvoker(IAuthenticationTokensRepository authenticationTokensRepository, IConnectionConstantsService connectionConstantsService,
-        IPolicyFactory policyFactory)
+        IPolicyFactory policyFactory, ILogger<ApiInvoker> logger)
     {
         _authenticationTokensRepository = authenticationTokensRepository;
         _connectionConstantsService = connectionConstantsService;
         _policyFactory = policyFactory;
+        _logger = logger;
     }
 
     public Task<T> GetAsync<T>(string resource)
@@ -46,7 +45,7 @@ public class ApiInvoker : IApiInvoker
         return DoInvokeRestAsync<object>(Method.Post, resource, null, postObject, false);
     }
 
-    public async Task<T> InvokeRestAsync<T>(Method httpVerb, string resource, Dictionary<string, string>? additionalHeaders, object? requestObject)
+    private async Task<T> InvokeRestAsync<T>(Method httpVerb, string resource, Dictionary<string, string>? additionalHeaders, object? requestObject)
     {
         return await DoInvokeRestAsync<T>(httpVerb, resource, additionalHeaders, requestObject, true);
     }
@@ -63,7 +62,7 @@ public class ApiInvoker : IApiInvoker
         var attempt = 0;
         var restResponse = await policy.ExecuteAsync(async () =>
         {
-            Log.Debug("{Uri}: Attempt {Attempt}", "/" + resource.TrimStart('/'), ++attempt);
+            _logger.LogDebug("{Uri}: Attempt {Attempt}", "/" + resource.TrimStart('/'), ++attempt);
             return await restClient.ExecuteAsync(restRequest);
         });
         
