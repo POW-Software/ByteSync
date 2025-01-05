@@ -8,15 +8,15 @@ public class TypeNameHandlingConverter : JsonConverter<object>
 {
     public override object Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        throw new NotImplementedException("La désérialisation avec noms de type n'est pas implémentée.");
+        throw new NotImplementedException("Deserialization with type names not implemented.");
     }
 
     public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
     {
         writer.WriteStartObject();
-        writer.WriteString("$type", value.GetType().FullName); // Écrit le nom complet du type
+        writer.WriteString("$type", value.GetType().FullName);
         writer.WritePropertyName("data");
-        JsonSerializer.Serialize(writer, value, value.GetType(), options); // Sérialise l'objet
+        JsonSerializer.Serialize(writer, value, value.GetType(), options);
         writer.WriteEndObject();
     }
 }

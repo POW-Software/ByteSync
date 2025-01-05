@@ -160,10 +160,8 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
     {
         // https://stackoverflow.com/questions/13510204/json-net-self-referencing-loop-detected
         var settings = JsonSerializerOptionsHelper.BuildOptions(true, true, false);
-        // settings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
-        settings.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
         
-        string serializedElement = JsonSerializer.Serialize(createdOrUpdatedElement, settings); // JsonConvert.SerializeObject(createdOrUpdatedElement, settings);
+        string serializedElement = JsonSerializer.Serialize(createdOrUpdatedElement, settings);
 
         if (database is ITransaction)
         {
