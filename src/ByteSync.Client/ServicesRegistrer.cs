@@ -1,7 +1,9 @@
 ﻿using System.IO;
 using System.IO.Abstractions;
+using System.Net.Http;
 using System.Reflection;
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using ByteSync.Business.Configurations;
 using ByteSync.Business.Lobbies;
 using ByteSync.Business.Misc;
@@ -54,6 +56,9 @@ using ByteSync.ViewModels.Sessions.Cloud.Managing;
 using ByteSync.ViewModels.Sessions.Inventories;
 using ByteSync.ViewModels.Sessions.Settings;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Polly;
+using Polly.Extensions.Http;
 using Prism.Events;
 using ReactiveUI;
 using Serilog.Extensions.Autofac.DependencyInjection;
@@ -84,6 +89,13 @@ public static class ServicesRegistrer
             .Build();
         
         var builder = new ContainerBuilder();
+        
+        var serviceCollection = new ServiceCollection();
+
+        // Configurer les services via IServiceCollection
+        ConfigureServices(serviceCollection);
+        
+        builder.Populate(serviceCollection);
         
         builder.RegisterInstance(configuration).As<IConfiguration>();
         
@@ -306,5 +318,35 @@ public static class ServicesRegistrer
         ContainerProvider.Container = container;
 
         return container;
+    }
+    
+    private static void ConfigureServices(IServiceCollection services)
+    {
+        // Configurer HttpClient avec une politique de retry via Polly
+        services.AddHttpClient("ApiClient")
+            .AddPolicyHandler(GetRetryPolicy());
+
+        // // Enregistrer ApiInvoker
+        // services.AddTransient<IApiInvoker, ApiInvoker>();
+        //
+        // // Enregistrer les autres dépendances
+        // services.AddTransient<IAuthenticationTokensRepository, AuthenticationTokensRepository>();
+        // services.AddTransient<IConnectionConstantsService, ConnectionConstantsService>();
+        // services.AddSingleton<IPolicyFactory, PolicyFactory>();
+        //
+        // // Configurer le logger
+        // services.AddLogging(configure => configure.AddConsole());
+    }
+    
+    private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+    {
+        // Exemple de politique de retry avec 3 tentatives et délai exponentiel
+        return HttpPolicyExtensions
+            .HandleTransientHttpError()
+            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                onRetry: (outcome, timespan, retryCount, context) =>
+                {
+                    // Optionnel : log ou autre action lors de la tentative de retry
+                });
     }
 }

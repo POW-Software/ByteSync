@@ -91,6 +91,7 @@ public class PolicyFactory : IPolicyFactory
 
         return retryPolicy;
     }
+    
 
     public AsyncRetryPolicy<Response> BuildFileDownloadPolicy()
     {

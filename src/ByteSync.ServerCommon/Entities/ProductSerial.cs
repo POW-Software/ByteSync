@@ -1,6 +1,6 @@
-﻿using ByteSync.Common.Business.Misc;
+﻿using System.Text.Json.Serialization;
+using ByteSync.Common.Business.Misc;
 using ByteSync.ServerCommon.Constants;
-using Newtonsoft.Json;
 
 namespace ByteSync.ServerCommon.Entities;
 
@@ -10,25 +10,25 @@ public class ProductSerial : ICloneable
     {
     }
 
-    [JsonProperty(PropertyName = "id")]
+    [JsonPropertyName("id")]
     public string Id { get; set; }
 
-    [JsonProperty(PropertyName = "serialNumber")]
+    [JsonPropertyName("serialNumber")]
     public string SerialNumber { get; set; }
 
-    [JsonProperty(PropertyName = "email")]
+    [JsonPropertyName("email")]
     public string Email { get; set; }
 
-    [JsonProperty(PropertyName = "productName")]
+    [JsonPropertyName("productName")]
     public string ProductName { get; set; }
 
-    [JsonProperty(PropertyName = "expirationDate")]
+    [JsonPropertyName("expirationDate")]
     public DateTime? ExpirationDate { get; set; }
 
-    [JsonProperty(PropertyName = "priceId")]
+    [JsonPropertyName("priceId")]
     public string PriceId { get; set; }
 
-    [JsonProperty(PropertyName = "lastValidityCheck")]
+    [JsonPropertyName("lastValidityCheck")]
     public DateTime LastValidityCheck { get; set; }
 
     public bool IsFreeVersion
