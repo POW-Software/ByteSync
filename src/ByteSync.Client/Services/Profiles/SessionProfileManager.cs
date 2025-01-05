@@ -21,6 +21,7 @@ using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Profiles;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
+using ByteSync.Services.Misc;
 using Serilog;
 
 namespace ByteSync.Services.Profiles;
@@ -283,8 +284,7 @@ public class SessionProfileManager : ISessionProfileManager
         using var zipArchive = ZipFile.Open(localPath, ZipArchiveMode.Update);
         
         // Gestion du fichier info
-        var settings = JsonSerializerOptionsHelper.BuildOptions(true, true, true);
-        var json = JsonSerializer.Serialize(cloudSessionProfile, settings);
+        var json = JsonHelper.Serialize(cloudSessionProfile);
         var infoFile = zipArchive.CreateEntry("info.json");
         using var entryStream = infoFile.Open();
         using var streamWriter = new StreamWriter(entryStream);
@@ -311,9 +311,7 @@ public class SessionProfileManager : ISessionProfileManager
     {
         using var zipArchive = ZipFile.Open(localPath, ZipArchiveMode.Create);
         
-        var settings = JsonSerializerOptionsHelper.BuildOptions(true, true, true);
-        
-        var json = JsonSerializer.Serialize(localSessionProfileDetails, settings);
+        var json = JsonHelper.Serialize(localSessionProfileDetails);
         var encrypted = CryptographyUtils.Encrypt(json, _applicationSettingsRepository.EncryptionPassword);
         var detailsAFile = zipArchive.CreateEntry("details_A.json");
         using (var detailsAStream = detailsAFile.Open())
@@ -324,7 +322,7 @@ public class SessionProfileManager : ISessionProfileManager
             }
         }
 
-        json = JsonSerializer.Serialize(localSessionProfile, settings);
+        json = JsonSerializer.Serialize(localSessionProfile);
         var infoFile = zipArchive.CreateEntry("info.json");
         using var entryStream = infoFile.Open();
         using var streamWriter = new StreamWriter(entryStream);
@@ -335,8 +333,7 @@ public class SessionProfileManager : ISessionProfileManager
     {
         using var zipArchive = ZipFile.Open(localPath, ZipArchiveMode.Create);
         
-        var settings = JsonSerializerOptionsHelper.BuildOptions(true, true, true);
-        var json = JsonSerializer.Serialize(cloudSessionProfileDetails, settings);
+        var json = JsonHelper.Serialize(cloudSessionProfileDetails);
 
         var encrypted = CryptographyUtils.Encrypt(json, profileDetailsPassword);
 

@@ -35,7 +35,6 @@ public class DeltaManager : IDeltaManager
 
         using var targetInventoryLoader = new InventoryLoader(targetInventoryPath);
         
-        // On utilise RSync pour calculer le delta
         var deltaBuilder = new DeltaBuilder();
 
         await using var targetMemoryStream = targetInventoryLoader.GetSignature(sharedDataPart.SignatureGuid!);
@@ -69,7 +68,7 @@ public class DeltaManager : IDeltaManager
 
         try
         {
-            // Il faut le bloc, sinon les dispose ne se font pas et le validate temporary file plante
+            // This block is necessary, otherwise the disposals do not occur and the validate temporary file crashes
             {
                 await using var basisStream = new FileStream(destinationFullName, FileMode.Open, FileAccess.Read, FileShare.Read);
                 await using var newFileStream = new FileStream(destinationTemporaryPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);

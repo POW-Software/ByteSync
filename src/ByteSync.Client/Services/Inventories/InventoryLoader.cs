@@ -1,8 +1,7 @@
 ﻿using System.IO;
 using System.IO.Compression;
-using System.Text.Json;
-using ByteSync.Common.Controls.Json;
 using ByteSync.Models.Inventories;
+using ByteSync.Services.Misc;
 
 namespace ByteSync.Services.Inventories;
 
@@ -33,9 +32,8 @@ class InventoryLoader : IDisposable
         }
 
         using var entryStream = inventoryFile!.Open();
-        var options = JsonSerializerOptionsHelper.BuildOptions(true, true, true);
-            
-        var inventory = JsonSerializer.Deserialize<Inventory>(entryStream, options);
+        
+        var inventory = JsonHelper.Deserialize<Inventory>(entryStream);
 
         if (inventory == null)
         {

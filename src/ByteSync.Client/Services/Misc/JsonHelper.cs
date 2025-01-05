@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.IO;
+using System.Text.Json;
 using ByteSync.Common.Controls.Json;
 
 namespace ByteSync.Services.Misc;
@@ -27,8 +28,21 @@ public class JsonHelper
 
         return data;
     }
+    
+    public static T Deserialize<T>(Stream stream, bool includeTypeNames = true)
+    {
+        var options = GetJsonSerializerOptions<T>(includeTypeNames);
 
+        var data = JsonSerializer.Deserialize<T>(stream, options);
 
+        if (data == null)
+        {
+            throw new InvalidOperationException("Failed to deserialize JSON.");
+        }
+
+        return data;
+    }
+    
     private static JsonSerializerOptions GetJsonSerializerOptions<T>(bool includeTypeNames)
     {
         var options = JsonSerializerOptionsHelper.BuildOptions(true, true, includeTypeNames);
