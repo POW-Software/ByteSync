@@ -7,15 +7,17 @@ namespace ByteSync.ViewModels.TrustedNetworks;
 public class TrustedPublicKeysViewModel : ActivatableViewModelBase
 {
     private readonly IPublicKeysManager _publicKeysManager;
+    private readonly ILogger<TrustedPublicKeysViewModel> _logger;
 
     public TrustedPublicKeysViewModel()
     {
 
     }
 
-    public TrustedPublicKeysViewModel(IPublicKeysManager publicKeysManager)
+    public TrustedPublicKeysViewModel(IPublicKeysManager publicKeysManager, ILogger<TrustedPublicKeysViewModel> logger)
     {
         _publicKeysManager = publicKeysManager;
+        _logger = logger;
 
         TrustedPublicKeys = new ObservableCollection<TrustedPublicKeyViewModel>();
 
@@ -31,13 +33,20 @@ public class TrustedPublicKeysViewModel : ActivatableViewModelBase
 
     public void Refresh()
     {
-        var trustedPublicKeys = _publicKeysManager.GetTrustedPublicKeys();
-
-        TrustedPublicKeys.Clear();
-        foreach (var trustedPublicKey in trustedPublicKeys!)
+        try
         {
-            var trustedPublicKeyViewModel = new TrustedPublicKeyViewModel(trustedPublicKey);
-            TrustedPublicKeys.Add(trustedPublicKeyViewModel);
+            var trustedPublicKeys = _publicKeysManager.GetTrustedPublicKeys();
+
+            TrustedPublicKeys.Clear();
+            foreach (var trustedPublicKey in trustedPublicKeys!)
+            {
+                var trustedPublicKeyViewModel = new TrustedPublicKeyViewModel(trustedPublicKey);
+                TrustedPublicKeys.Add(trustedPublicKeyViewModel);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to refresh trusted public keys");
         }
     }
 }
