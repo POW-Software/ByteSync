@@ -6,18 +6,18 @@ namespace ByteSync.Services.Misc;
 
 public class JsonHelper
 {
-    public static string Serialize<T>(T data, bool includeTypeNames = true)
+    public static string Serialize<T>(T data)
     {
-        var options = GetJsonSerializerOptions<T>(includeTypeNames);
+        var options = GetJsonSerializerOptions<T>();
         
         string json = JsonSerializer.Serialize(data, options);
 
         return json;
     }
 
-    public static T Deserialize<T>(string json, bool includeTypeNames = true)
+    public static T Deserialize<T>(string json)
     {
-        var options = GetJsonSerializerOptions<T>(includeTypeNames);
+        var options = GetJsonSerializerOptions<T>();
 
         var data = JsonSerializer.Deserialize<T>(json, options);
 
@@ -29,9 +29,9 @@ public class JsonHelper
         return data;
     }
     
-    public static T Deserialize<T>(Stream stream, bool includeTypeNames = true)
+    public static T Deserialize<T>(Stream stream)
     {
-        var options = GetJsonSerializerOptions<T>(includeTypeNames);
+        var options = GetJsonSerializerOptions<T>();
 
         var data = JsonSerializer.Deserialize<T>(stream, options);
 
@@ -43,9 +43,9 @@ public class JsonHelper
         return data;
     }
     
-    private static JsonSerializerOptions GetJsonSerializerOptions<T>(bool includeTypeNames)
+    private static JsonSerializerOptions GetJsonSerializerOptions<T>()
     {
-        var options = JsonSerializerOptionsHelper.BuildOptions(true, true, includeTypeNames);
+        var options = JsonSerializerOptionsHelper.BuildOptions(true, true);
 
         return options;
     }

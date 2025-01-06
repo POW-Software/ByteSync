@@ -1,12 +1,12 @@
 ﻿using Autofac;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Common.Business.EndPoints;
+using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
-using ByteSync.TestsCommon;
 using Moq;
 
 namespace ByteSync.Client.IntegrationTests.TestHelpers;
@@ -34,7 +34,10 @@ public class TestContextGenerator
     {
         var currentEndPoint = new ByteSyncEndpoint
         {
-            ClientInstanceId = $"CII_A"
+            ClientId = "CI_A",
+            ClientInstanceId = "CII_A",
+            IpAddress = "localhost",
+            OSPlatform = OSPlatforms.Windows
         };
         
         var mockEnvironmentService = _container.Resolve<Mock<IEnvironmentService>>();

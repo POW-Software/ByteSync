@@ -114,7 +114,7 @@ public class ApiInvoker : IApiInvoker
             //
             
             
-            var json = JsonHelper.Serialize(requestObject, false);
+            var json = JsonHelper.Serialize(requestObject);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
         }
 

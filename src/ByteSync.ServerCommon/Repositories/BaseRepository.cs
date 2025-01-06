@@ -149,7 +149,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
         string? serializedElement = await _cacheService.GetDatabase().StringGetAsync(cacheKey);
         if (serializedElement.IsNotEmpty())
         {
-            var settings = JsonSerializerOptionsHelper.BuildOptions(true, true, false);
+            var settings = JsonSerializerOptionsHelper.BuildOptions(true, true);
             cachedElement = JsonSerializer.Deserialize<T>(serializedElement!, settings);
         }
 
@@ -159,7 +159,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
     public async Task<UpdateEntityResult<T>> SetElement(string cacheKey, T createdOrUpdatedElement, IDatabaseAsync database)
     {
         // https://stackoverflow.com/questions/13510204/json-net-self-referencing-loop-detected
-        var settings = JsonSerializerOptionsHelper.BuildOptions(true, true, false);
+        var settings = JsonSerializerOptionsHelper.BuildOptions(true, true);
         
         string serializedElement = JsonSerializer.Serialize(createdOrUpdatedElement, settings);
 

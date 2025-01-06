@@ -354,7 +354,7 @@ public class InventoryBuilder
     {
         if (fileSystemDescription.RelativePath.IsNotEmpty())
         {
-            inventoryPart.FileSystemDescriptions.Add(fileSystemDescription);
+            inventoryPart.AddFileSystemDescription(fileSystemDescription);
 
             if (fileSystemDescription is FileDescription fileDescription)
             {

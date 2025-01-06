@@ -3,13 +3,11 @@ using ByteSync.Business.Inventories;
 using ByteSync.Business.Sessions;
 using ByteSync.Client.IntegrationTests.TestHelpers.Business;
 using ByteSync.Common.Business.EndPoints;
-using ByteSync.Common.Helpers;
+using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Services.Comparisons;
 using ByteSync.Services.Inventories;
-using ByteSync.TestsCommon;
-using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
 
 namespace ByteSync.Client.IntegrationTests.TestHelpers;
 
@@ -41,7 +39,6 @@ public class ComparisonResultPreparer
         InventoryDatas.Clear();
         foreach (var inventoryData in inventoryDatas)
         {
-            // on resette le InventoryBuilder
             inventoryData.InventoryBuilder = null;
 
             Add(inventoryData);
@@ -73,7 +70,10 @@ public class ComparisonResultPreparer
             
             var endpoint = new ByteSyncEndpoint
             {
-                ClientInstanceId = $"CII_{inventoryData.Letter}"
+                ClientId = $"CI_{inventoryData.Letter}",
+                ClientInstanceId = $"CII_{inventoryData.Letter}",
+                IpAddress = "localhost",
+                OSPlatform = OSPlatforms.Windows
             };
             InventoryBuilder inventoryBuilder = new InventoryBuilder(inventoryData.Letter, SessionSettings, new InventoryProcessData(), endpoint, 
                 $"Machine{inventoryData.Letter}");

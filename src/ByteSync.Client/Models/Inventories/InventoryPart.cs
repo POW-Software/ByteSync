@@ -8,16 +8,15 @@ namespace ByteSync.Models.Inventories
     {
         public InventoryPart()
         {
-            FileSystemDescriptions = new List<FileSystemDescription>();
+            FileDescriptions = new List<FileDescription>();
+            DirectoryDescriptions = new List<DirectoryDescription>();
         }
 
-        public InventoryPart(Inventory inventory, string rootPath, FileSystemTypes inventoryPartType)
+        public InventoryPart(Inventory inventory, string rootPath, FileSystemTypes inventoryPartType) : this()
         {
             Inventory = inventory;
             RootPath = rootPath;
             InventoryPartType = inventoryPartType;
-
-            FileSystemDescriptions = new List<FileSystemDescription>();
         }
 
         public Inventory Inventory { get; set; }
@@ -25,46 +24,12 @@ namespace ByteSync.Models.Inventories
         public string RootPath { get; set; }
 
         public FileSystemTypes InventoryPartType { get; set; }
-
-        public List<FileSystemDescription> FileSystemDescriptions { get; set; }
-
+        
         public string Code { get; set; }
 
-        public List<FileDescription> FileDescriptions
-        {
-            get
-            {
-                List<FileDescription> fileDescriptions = new List<FileDescription>();
+        public List<FileDescription> FileDescriptions { get; set; }
 
-                foreach (FileSystemDescription fileSystemDescription in FileSystemDescriptions)
-                {
-                    if (fileSystemDescription is FileDescription fileDescription)
-                    {
-                        fileDescriptions.Add(fileDescription);
-                    }
-                }
-
-                return fileDescriptions;
-            }
-        }
-
-        public List<DirectoryDescription> DirectoryDescriptions
-        {
-            get
-            {
-                List<DirectoryDescription> directoryDescriptions = new List<DirectoryDescription>();
-
-                foreach (FileSystemDescription fileSystemDescription in FileSystemDescriptions)
-                {
-                    if (fileSystemDescription is DirectoryDescription directoryDescription)
-                    {
-                        directoryDescriptions.Add(directoryDescription);
-                    }
-                }
-
-                return directoryDescriptions;
-            }
-        }
+        public List<DirectoryDescription> DirectoryDescriptions { get; set; }
 
         public string RootName
         {
@@ -121,6 +86,18 @@ namespace ByteSync.Models.Inventories
 #pragma warning disable 162
             return base.ToString();
 #pragma warning restore 162
+        }
+
+        public void AddFileSystemDescription(FileSystemDescription fileSystemDescription)
+        {
+            if (fileSystemDescription.FileSystemType == FileSystemTypes.File)
+            {
+                FileDescriptions.Add((FileDescription) fileSystemDescription);
+            }
+            else
+            {
+                DirectoryDescriptions.Add((DirectoryDescription) fileSystemDescription);
+            }
         }
     }
 }
