@@ -13,6 +13,7 @@ using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Common.Controls;
 using ByteSync.Common.Interfaces;
+using ByteSync.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Communications;
 using ByteSync.Interfaces.Controls.Applications;
@@ -322,17 +323,35 @@ public static class ServicesRegistrer
     private static void ConfigureServices(IServiceCollection services)
     {
         services.AddHttpClient("ApiClient")
-            .AddPolicyHandler(GetRetryPolicy());
+            .AddPolicyHandler((serviceProvider, request) =>
+            {
+                var logger = serviceProvider.GetRequiredService<ILogger<RetryPolicyLogger>>();
+                return GetRetryPolicy(request, logger);
+            });
     }
-    
-    private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+
+    private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(HttpRequestMessage request, ILogger<RetryPolicyLogger> logger)
     {
         return HttpPolicyExtensions
             .HandleTransientHttpError()
             .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                onRetry: (outcome, timespan, retryCount, context) =>
+                onRetry: (outcome, timespan, retryAttempt, _) =>
                 {
-                    // Optionnel : log ou autre action lors de la tentative de retry
+                    var requestInfo = $"{request.Method} {request.RequestUri}";
+
+                    if (outcome.Exception != null)
+                    {
+                        logger.LogWarning(outcome.Exception, 
+                            "Retry attempt {RetryCount} for {Request} after {Delay} seconds due to exception",
+                            retryAttempt, requestInfo, timespan.TotalSeconds);
+                    }
+                    else
+                    {
+                        logger.LogWarning(
+                            "Retry attempt {RetryCount} for {Request} after {Delay} seconds due to HTTP status code {StatusCode}",
+                            retryAttempt, requestInfo, timespan.TotalSeconds, outcome.Result?.StatusCode);
+                    }
+
                 });
     }
 }
