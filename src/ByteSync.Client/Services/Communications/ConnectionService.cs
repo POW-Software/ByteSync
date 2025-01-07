@@ -82,13 +82,9 @@ public class ConnectionService : IConnectionService, IDisposable
         {
             _logger.LogInformation("Starting connection");
 
-            // ConnectionMode = ConnectionModes.On;
-
             ConnectionStatusSubject.OnNext(ConnectionStatuses.Connecting);
 
             var result = await _connectionFactory.BuildConnection();
-            
-            
             
             ConnectionSubject.OnNext(result.HubConnection);
             

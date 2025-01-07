@@ -1,8 +1,7 @@
 ﻿using System.IO;
 using System.IO.Compression;
-using ByteSync.Common.Controls.JSon;
 using ByteSync.Models.Inventories;
-using Newtonsoft.Json;
+using ByteSync.Services.Misc;
 
 namespace ByteSync.Services.Inventories;
 
@@ -26,40 +25,33 @@ class InventoryLoader : IDisposable
     private Inventory Load()
     {
         var inventoryFile = ZipArchive.GetEntry("inventory.json");
-
-        using (var entryStream = inventoryFile!.Open())
+        
+        if (inventoryFile == null)
         {
-            using (var streamReader = new StreamReader(entryStream))
-            {
-                using (var jsonTextReader = new JsonTextReader(streamReader))
-                {
-                    var settings = JsonSerializerSettingsHelper.BuildSettings(true, true, true);
-                    var serializer = JsonSerializer.Create(settings);
-
-                    var inventory = serializer.Deserialize<Inventory>(jsonTextReader);
-                    return inventory;
-                }
-            }
+            throw new FileNotFoundException("inventory.json not found in the archive.");
         }
+
+        using var entryStream = inventoryFile!.Open();
+        
+        var inventory = JsonHelper.Deserialize<Inventory>(entryStream);
+
+        if (inventory == null)
+        {
+            throw new InvalidOperationException("Failed to deserialize inventory.json.");
+        }
+        
+        return inventory;
     }
 
     public MemoryStream GetSignature(string guid)
     {
         var entryName = GetEntryName(guid);
-
         var entry = ZipArchive.GetEntry(entryName);
-
-        //var signatureFile = ZipArchive.CreateEntry($"{directoryName}/{guid}.sign");
-
+        
         var memoryStream = new MemoryStream();
         using (var entryStream = entry.Open())
         {
             entryStream.CopyTo(memoryStream);
-
-            //using (var streamWriter = new StreamWriter(entryStream))
-            //{
-            //    streamWriter.Write(json);
-            //}
         }
 
         memoryStream.Position = 0;

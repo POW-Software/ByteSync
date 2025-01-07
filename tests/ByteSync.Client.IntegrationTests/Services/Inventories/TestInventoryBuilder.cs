@@ -170,7 +170,6 @@ public class TestInventoryBuilder : IntegrationTest
 
         inventory = inventoryBuilder.Inventory;
         ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
-        ClassicAssert.AreEqual(6, inventory.InventoryParts[0].FileSystemDescriptions.Count);
         ClassicAssert.AreEqual(2, inventory.InventoryParts[0].DirectoryDescriptions.Count);
         ClassicAssert.AreEqual(4, inventory.InventoryParts[0].FileDescriptions.Count);
 
@@ -228,7 +227,7 @@ public class TestInventoryBuilder : IntegrationTest
 
         inventory = inventoryBuilder.Inventory;
         ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
-        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].FileSystemDescriptions.Count);
+        ClassicAssert.AreEqual(0, inventory.InventoryParts[0].DirectoryDescriptions.Count);
         ClassicAssert.AreEqual(1, inventory.InventoryParts[0].FileDescriptions.Count);
         ClassicAssert.AreEqual("/file1.txt", inventory.InventoryParts[0].FileDescriptions[0].RelativePath);
         ClassicAssert.AreEqual("file1.txt", inventory.InventoryParts[0].FileDescriptions[0].Name); 
@@ -280,7 +279,7 @@ public class TestInventoryBuilder : IntegrationTest
         
         inventory = inventoryBuilder.Inventory!;
         ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
-        ClassicAssert.AreEqual(3, inventory.InventoryParts[0].FileSystemDescriptions.Count);
+        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
         ClassicAssert.AreEqual(2, inventory.InventoryParts[0].FileDescriptions.Count);
     }
 
@@ -329,7 +328,7 @@ public class TestInventoryBuilder : IntegrationTest
 
         inventory = inventoryBuilder.Inventory!;
         ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
-        ClassicAssert.AreEqual(3 + expectedHiddenFiles, inventory.InventoryParts[0].FileSystemDescriptions.Count);
+        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
         ClassicAssert.AreEqual(2 + expectedHiddenFiles, inventory.InventoryParts[0].FileDescriptions.Count);
     }
         
@@ -380,7 +379,7 @@ public class TestInventoryBuilder : IntegrationTest
 
         inventory = inventoryBuilder.Inventory!;
         ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
-        ClassicAssert.AreEqual(3 + expectedSystemFiles, inventory.InventoryParts[0].FileSystemDescriptions.Count);
+        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
         ClassicAssert.AreEqual(2 + expectedSystemFiles, inventory.InventoryParts[0].FileDescriptions.Count);
             
         ClassicAssert.AreEqual(expectedSystemFiles / 3, 
@@ -444,7 +443,7 @@ public class TestInventoryBuilder : IntegrationTest
 
         inventory = inventoryBuilder.Inventory!;
         ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
-        ClassicAssert.AreEqual(3 + expectedAdditionalFiles, inventory.InventoryParts[0].FileSystemDescriptions.Count);
+        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
         ClassicAssert.AreEqual(2 + expectedAdditionalFiles, inventory.InventoryParts[0].FileDescriptions.Count);
     }
         
@@ -537,7 +536,7 @@ public class TestInventoryBuilder : IntegrationTest
 
         inventory = inventoryBuilder.Inventory!;
         inventory.InventoryParts.Count.Should().Be(1);
-        inventory.InventoryParts[0].FileSystemDescriptions.Count.Should().Be(3);
+        inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(1);
         inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(2);
     }
 

@@ -8,7 +8,7 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Profiles;
-using Newtonsoft.Json;
+using ByteSync.Services.Misc;
 using Serilog;
 
 namespace ByteSync.Services.Profiles;
@@ -158,7 +158,7 @@ public class SessionProfileLocalDataManager : ISessionProfileLocalDataManager
             var decrypted1 = CryptographyUtils.Decrypt(detailsAContent, _applicationSettingsRepository.EncryptionPassword);
             var decrypted2 = CryptographyUtils.Decrypt(decrypted1, profileDetailsPassword);
 
-            var cloudSessionProfileDetails = JsonConvert.DeserializeObject<CloudSessionProfileDetails>(decrypted2);
+            var cloudSessionProfileDetails = JsonHelper.Deserialize<CloudSessionProfileDetails>(decrypted2);
 
             return cloudSessionProfileDetails!;
         });
@@ -179,7 +179,7 @@ public class SessionProfileLocalDataManager : ISessionProfileLocalDataManager
 
             var decrypted1 = CryptographyUtils.Decrypt(detailsAContent, _applicationSettingsRepository.EncryptionPassword);
 
-            var localSessionProfileDetails = JsonConvert.DeserializeObject<LocalSessionProfileDetails>(decrypted1);
+            var localSessionProfileDetails = JsonHelper.Deserialize<LocalSessionProfileDetails>(decrypted1);
 
             return localSessionProfileDetails!;
         });
@@ -225,7 +225,7 @@ public class SessionProfileLocalDataManager : ISessionProfileLocalDataManager
             
             var content = infoStreamReader.ReadToEnd();
             
-            var sessionProfile = JsonConvert.DeserializeObject<T>(content);
+            var sessionProfile = JsonHelper.Deserialize<T>(content);
             
             // var lastRunInfo = directoryInfo.GetFiles().
 

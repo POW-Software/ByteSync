@@ -5,6 +5,11 @@ namespace ByteSync.ServerCommon.Business.Sessions;
 
 public class SharedFileData
 {
+    public SharedFileData()
+    {
+        
+    }
+    
     public SharedFileData(SharedFileDefinition sharedFileDefinition, ICollection<string> recipients)
     {
         SharedFileDefinition = sharedFileDefinition;
@@ -26,9 +31,9 @@ public class SharedFileData
         DownloadedBy = new Dictionary<int, HashSet<string>>();
     }
 
-    public SharedFileDefinition SharedFileDefinition { get; set; }
+    public SharedFileDefinition SharedFileDefinition { get; set; } = null!;
 
-    public HashSet<int> UploadedPartsNumbers { get; set; }
+    public HashSet<int> UploadedPartsNumbers { get; set; } = null!;
 
     public bool IsFullyUploaded
     {
@@ -40,10 +45,10 @@ public class SharedFileData
 
     public int? TotalParts { get; set; }
         
-    public List<string> Recipients { get; set; }
-        
-    public Dictionary<int, HashSet<string>> DownloadedBy { get; set; }
-        
+    public List<string> Recipients { get; set; } = null!;
+
+    public Dictionary<int, HashSet<string>> DownloadedBy { get; set; } = null!;
+
     public bool IsFullyDownloaded 
     {
         get
@@ -66,9 +71,9 @@ public class SharedFileData
 
     public bool IsPartFullyDownloaded(int partNumber)
     {
-        if (DownloadedBy.ContainsKey(partNumber))
+        if (DownloadedBy.TryGetValue(partNumber, out var value))
         {
-            return Recipients.HaveSameElements(DownloadedBy[partNumber]);
+            return Recipients.HaveSameElements(value);
         }
 
         return false;

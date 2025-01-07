@@ -1,13 +1,15 @@
 ﻿using System.IO;
 using System.IO.Compression;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml;
 using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Business.Communications;
 using ByteSync.Business.Profiles;
 using ByteSync.Common.Business.Profiles;
 using ByteSync.Common.Business.SharedFiles;
-using ByteSync.Common.Controls.JSon;
+using ByteSync.Common.Controls.Json;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
@@ -19,7 +21,7 @@ using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Profiles;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
-using Newtonsoft.Json;
+using ByteSync.Services.Misc;
 using Serilog;
 
 namespace ByteSync.Services.Profiles;
@@ -262,7 +264,7 @@ public class SessionProfileManager : ISessionProfileManager
         var detailsAContent = detailsAStreamReader.ReadToEnd();
         var decrypted = CryptographyUtils.Decrypt(detailsAContent, cloudSessionProfileData.ProfileDetailsPassword);
 
-        var cloudSessionProfileDetails = JsonConvert.DeserializeObject<CloudSessionProfileDetails>(decrypted);
+        var cloudSessionProfileDetails = JsonSerializer.Deserialize<CloudSessionProfileDetails>(decrypted);
 
         var isOK = cloudSessionProfileDetails != null &&
                    cloudSessionProfileDetails.CloudSessionProfileId.Equals(cloudSessionProfileData.CloudSessionProfileId);
@@ -282,8 +284,7 @@ public class SessionProfileManager : ISessionProfileManager
         using var zipArchive = ZipFile.Open(localPath, ZipArchiveMode.Update);
         
         // Gestion du fichier info
-        var settings = JsonSerializerSettingsHelper.BuildSettings(true, true, true);
-        var json = JsonConvert.SerializeObject(cloudSessionProfile, Formatting.Indented, settings);
+        var json = JsonHelper.Serialize(cloudSessionProfile);
         var infoFile = zipArchive.CreateEntry("info.json");
         using var entryStream = infoFile.Open();
         using var streamWriter = new StreamWriter(entryStream);
@@ -310,9 +311,7 @@ public class SessionProfileManager : ISessionProfileManager
     {
         using var zipArchive = ZipFile.Open(localPath, ZipArchiveMode.Create);
         
-        var settings = JsonSerializerSettingsHelper.BuildSettings(true, true, true);
-        
-        var json = JsonConvert.SerializeObject(localSessionProfileDetails, Formatting.Indented, settings);
+        var json = JsonHelper.Serialize(localSessionProfileDetails);
         var encrypted = CryptographyUtils.Encrypt(json, _applicationSettingsRepository.EncryptionPassword);
         var detailsAFile = zipArchive.CreateEntry("details_A.json");
         using (var detailsAStream = detailsAFile.Open())
@@ -323,7 +322,7 @@ public class SessionProfileManager : ISessionProfileManager
             }
         }
 
-        json = JsonConvert.SerializeObject(localSessionProfile, Formatting.Indented, settings);
+        json = JsonSerializer.Serialize(localSessionProfile);
         var infoFile = zipArchive.CreateEntry("info.json");
         using var entryStream = infoFile.Open();
         using var streamWriter = new StreamWriter(entryStream);
@@ -334,8 +333,7 @@ public class SessionProfileManager : ISessionProfileManager
     {
         using var zipArchive = ZipFile.Open(localPath, ZipArchiveMode.Create);
         
-        var settings = JsonSerializerSettingsHelper.BuildSettings(true, true, true);
-        var json = JsonConvert.SerializeObject(cloudSessionProfileDetails, Formatting.Indented, settings);
+        var json = JsonHelper.Serialize(cloudSessionProfileDetails);
 
         var encrypted = CryptographyUtils.Encrypt(json, profileDetailsPassword);
 

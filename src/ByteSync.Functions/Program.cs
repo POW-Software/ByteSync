@@ -1,7 +1,9 @@
 ﻿using System.Reflection;
+using System.Text.Json;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Azure.Identity;
+using ByteSync.Common.Controls.Json;
 using ByteSync.Common.Interfaces.Hub;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Business.Settings;
@@ -146,10 +148,12 @@ var host = new HostBuilder()
             if (appInsightsLoggerProvider != default) options.Rules.Remove(appInsightsLoggerProvider);
         });
         
-        var serviceProvider = services.BuildServiceProvider();
+        services.Configure<JsonSerializerOptions>(options =>
+        {
+            JsonSerializerOptionsHelper.SetOptions(options);
+        });
         
-        // var logger = serviceProvider.GetService<ILogger<Program>>();
-        // logger?.LogInformation("Current Environment: {EnvironmentName}", hostContext.HostingEnvironment.EnvironmentName);
+        var serviceProvider = services.BuildServiceProvider();
         
         var config = serviceProvider.GetService<IConfiguration>()!;
         var appSettingsSection = config.GetSection("AppSettings");

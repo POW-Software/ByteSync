@@ -1,7 +1,9 @@
 ﻿using System.IO;
 using System.IO.Abstractions;
+using System.Net.Http;
 using System.Reflection;
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using ByteSync.Business.Configurations;
 using ByteSync.Business.Lobbies;
 using ByteSync.Business.Misc;
@@ -11,6 +13,7 @@ using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Common.Controls;
 using ByteSync.Common.Interfaces;
+using ByteSync.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Communications;
 using ByteSync.Interfaces.Controls.Applications;
@@ -54,6 +57,9 @@ using ByteSync.ViewModels.Sessions.Cloud.Managing;
 using ByteSync.ViewModels.Sessions.Inventories;
 using ByteSync.ViewModels.Sessions.Settings;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Polly;
+using Polly.Extensions.Http;
 using Prism.Events;
 using ReactiveUI;
 using Serilog.Extensions.Autofac.DependencyInjection;
@@ -84,6 +90,12 @@ public static class ServicesRegistrer
             .Build();
         
         var builder = new ContainerBuilder();
+        
+        var serviceCollection = new ServiceCollection();
+        
+        ConfigureServices(serviceCollection);
+        
+        builder.Populate(serviceCollection);
         
         builder.RegisterInstance(configuration).As<IConfiguration>();
         
@@ -306,5 +318,40 @@ public static class ServicesRegistrer
         ContainerProvider.Container = container;
 
         return container;
+    }
+    
+    private static void ConfigureServices(IServiceCollection services)
+    {
+        services.AddHttpClient("ApiClient")
+            .AddPolicyHandler((serviceProvider, request) =>
+            {
+                var logger = serviceProvider.GetRequiredService<ILogger<RetryPolicyLogger>>();
+                return GetRetryPolicy(request, logger);
+            });
+    }
+
+    private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(HttpRequestMessage request, ILogger<RetryPolicyLogger> logger)
+    {
+        return HttpPolicyExtensions
+            .HandleTransientHttpError()
+            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                onRetry: (outcome, timespan, retryAttempt, _) =>
+                {
+                    var requestInfo = $"{request.Method} {request.RequestUri}";
+
+                    if (outcome.Exception != null)
+                    {
+                        logger.LogWarning(outcome.Exception, 
+                            "Retry attempt {RetryCount} for {Request} after {Delay} seconds due to exception",
+                            retryAttempt, requestInfo, timespan.TotalSeconds);
+                    }
+                    else
+                    {
+                        logger.LogWarning(
+                            "Retry attempt {RetryCount} for {Request} after {Delay} seconds due to HTTP status code {StatusCode}",
+                            retryAttempt, requestInfo, timespan.TotalSeconds, outcome.Result?.StatusCode);
+                    }
+
+                });
     }
 }

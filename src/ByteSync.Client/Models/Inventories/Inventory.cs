@@ -1,9 +1,7 @@
 ﻿using ByteSync.Common.Business.EndPoints;
-using Newtonsoft.Json;
 
 namespace ByteSync.Models.Inventories
 {
-    [JsonObject(IsReference = true)] 
     public class Inventory
     {
         public Inventory()
