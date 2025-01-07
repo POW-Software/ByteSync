@@ -74,7 +74,7 @@ public delegate DataTypeViewModel DataTypeViewModelFactory(DataTypes dataType);
 public delegate LinkingKeyViewModel LinkingKeyViewModelFactory(LinkingKeys linkingKey);
 public delegate LobbyMemberViewModel LobbyMemberViewModelFactory(LobbyMember lobbyMember);
 
-public static class ServicesRegistrer
+public static class ServiceRegistrar
 {
     public static IContainer RegisterComponents()
     {

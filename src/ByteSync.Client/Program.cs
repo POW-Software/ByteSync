@@ -36,7 +36,7 @@ namespace ByteSync
                 Thread.Sleep(TimeSpan.FromSeconds(5));
             }
             
-            var container = ServicesRegistrer.RegisterComponents();
+            var container = ServiceRegistrar.RegisterComponents();
             
             IBootstrapperFactory bootstrapperFactory = container.Resolve<IBootstrapperFactory>();
             var bootstrapper = bootstrapperFactory.CreateBootstrapper();
