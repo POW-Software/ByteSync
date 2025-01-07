@@ -5,11 +5,9 @@ using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using ByteSync.Business.Configurations;
-using ByteSync.Business.Lobbies;
 using ByteSync.Business.Misc;
 using ByteSync.Business.Navigations;
 using ByteSync.Business.PathItems;
-using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Common.Controls;
 using ByteSync.Common.Interfaces;
@@ -53,9 +51,7 @@ using ByteSync.ViewModels.Lobbies;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Profiles;
 using ByteSync.ViewModels.Sessions;
-using ByteSync.ViewModels.Sessions.Cloud.Managing;
 using ByteSync.ViewModels.Sessions.Inventories;
-using ByteSync.ViewModels.Sessions.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
@@ -65,14 +61,7 @@ using ReactiveUI;
 using Serilog.Extensions.Autofac.DependencyInjection;
 using Splat.Autofac;
 
-
 namespace ByteSync;
-
-public delegate AnalysisModeViewModel AnalysisModeViewModelFactory(AnalysisModes analysisMode);
-public delegate SessionSettingsEditViewModel SessionSettingsEditViewModelFactory(SessionSettings? sessionSettings);
-public delegate DataTypeViewModel DataTypeViewModelFactory(DataTypes dataType);
-public delegate LinkingKeyViewModel LinkingKeyViewModelFactory(LinkingKeys linkingKey);
-public delegate LobbyMemberViewModel LobbyMemberViewModelFactory(LobbyMember lobbyMember);
 
 public static class ServiceRegistrar
 {

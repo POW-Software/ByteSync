@@ -11,6 +11,7 @@ using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.EventsHubs;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.ViewModels.Sessions.Settings;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -32,30 +33,21 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
 
     public CurrentCloudSessionViewModel(ISessionService sessionService, ICloudSessionEventsHub cloudSessionEventsHub,
         ISessionInterruptor sessionInterruptor, INavigationEventsHub navigationEventsHub,
-        IDataInventoryStarter dataInventoryStarter, SessionSettingsEditViewModelFactory sessionSettingsEditViewModel)
+        IDataInventoryStarter dataInventoryStarter, ISessionSettingsEditViewModelFactory sessionSettingsEditViewModel)
     {
         _sessionService = sessionService;
         _cloudSessionEventsHub = cloudSessionEventsHub;
         _sessionInterruptor = sessionInterruptor;
         _navigationEventsHub = navigationEventsHub;
         _dataInventoryStarter = dataInventoryStarter;
-        
-        SessionSettingsEditViewModel = sessionSettingsEditViewModel!.Invoke(null);
+
+        SessionSettingsEditViewModel = sessionSettingsEditViewModel.CreateSessionSettingsEditViewModel(null);
 
         CopyCommand = ReactiveCommand.CreateFromTask<string>(Copy);
 
         QuitSessionCommand = ReactiveCommand.CreateFromTask(QuitSession);
-        
-        // var canRestartSession = this.WhenAnyValue(x => x.IsCloudSessionActivated, (bool isCloudSessionActivated) => isCloudSessionActivated) ;
-        // RestartSessionCommand = ReactiveCommand.CreateFromTask(RestartSession, canRestartSession);
 
         CreateCloudSessionProfileCommand = ReactiveCommand.CreateFromTask(CreateCloudSessionProfile);
-
-        // this.WhenAnyValue(
-        //         x => x.IsSessionCreatedByMe, x => x.IsProfileSession,
-        //         (isSessionCreatedByMe, isProfileSession) 
-        //             => (isSessionCreatedByMe && !isProfileSession))
-        //     .ToPropertyEx(this, x => x.ShowRestartSessionAndSaveProfile);
         
         IsCloudSessionFatalError = false;
         
@@ -77,21 +69,6 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
                 .Subscribe(evt => OnCloudSessionOnFatalError(evt.EventArgs.Value))
                 .DisposeWith(disposables);
             
-            // Observable.FromEventPattern<EventArgs>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.SessionActivated))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnSessionActivated())
-            //     .DisposeWith(disposables);
-            //
-            // Observable.FromEventPattern<EventArgs>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.MemberQuittedSession))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnMemberQuittedSession())
-            //     .DisposeWith(disposables);
-            //
-            // Observable.FromEventPattern<EventArgs>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.SessionResetted))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnSessionResetted())
-            //     .DisposeWith(disposables);
-            
             this.HandleActivation(disposables);
         });
     }
@@ -100,9 +77,6 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
     {
         SessionId = _sessionService.SessionId;
         SessionPassword = _sessionService.CloudSessionPassword;
-        // IsSessionCreatedByMe = _sessionService.IsCloudSessionCreatedByMe;
-        // IsCloudSessionActivated = _sessionService.IsSessionActivated;
-        // IsProfileSession = _sessionService.IsProfileSession;
         ProfileName = _sessionService.CurrentRunSessionProfileInfo?.ProfileName;
         
 #if DEBUG
@@ -139,15 +113,6 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
     
     [Reactive]
     public bool IsCloudSessionFatalError { get; set; }
-    
-    // [Reactive]
-    // public bool IsSessionCreatedByMe { get; set; }
-    
-    // [Reactive]
-    // public bool IsCloudSessionActivated { get; set; }
-    
-    // [Reactive]
-    // public bool IsProfileSession { get; set; }
     
     public extern bool ShowRestartSessionAndSaveProfile { [ObservableAsProperty] get; }
         
@@ -216,19 +181,4 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
     {
         IsCloudSessionFatalError = true;
     }
-    
-    // private void OnSessionActivated()
-    // {
-    //     IsCloudSessionActivated = true;
-    // }
-    //
-    // private void OnSessionResetted()
-    // {
-    //     IsCloudSessionActivated = false;
-    // }
-    
-    // private void OnMemberQuittedSession()
-    // {
-    //     IsSessionCreatedByMe = _sessionService.IsCloudSessionCreatedByMe;
-    // }
 }
