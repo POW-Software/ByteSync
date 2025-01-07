@@ -5,6 +5,7 @@ using ByteSync.Business.Profiles;
 using ByteSync.Common.Business.Lobbies;
 using ByteSync.Common.Business.Lobbies.Connections;
 using ByteSync.Common.Business.SharedFiles;
+using ByteSync.Common.Controls.Json;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Profiles;

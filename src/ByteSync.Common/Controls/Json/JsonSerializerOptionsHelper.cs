@@ -5,26 +5,10 @@ namespace ByteSync.Common.Controls.Json;
 
 public static class JsonSerializerOptionsHelper
 {
-    public static JsonSerializerOptions BuildOptions(bool writablePropertiesOnly, bool useUtcDateTimes)
+    public static JsonSerializerOptions BuildOptions()
     {
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            ReferenceHandler = ReferenceHandler.Preserve,
-            Converters = { new JsonStringEnumConverter() }
-        };
-
-        if (writablePropertiesOnly)
-        {
-            options.IgnoreReadOnlyProperties = true;
-            options.IgnoreReadOnlyFields = true;
-        }
-
-        if (useUtcDateTimes)
-        {
-            options.Converters.Add(new UtcDateTimeConverter());
-        }
+        var options = new JsonSerializerOptions();
+        SetOptions(options);
 
         return options;
     }
