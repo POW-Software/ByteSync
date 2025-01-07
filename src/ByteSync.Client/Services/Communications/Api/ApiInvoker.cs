@@ -4,7 +4,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using ByteSync.Common.Helpers;
 using ByteSync.Exceptions;
-using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Services.Misc;
@@ -57,14 +56,8 @@ public class ApiInvoker : IApiInvoker
     {
         using var request = await BuildRequest(httpMethod, resource, additionalHeaders, requestObject);
 
-        // var policy = _policyFactory.BuildHttpPolicy(resource);
-        var apiUrl = await _connectionConstantsService.GetApiUrl();
-        // var restClient = new RestClient(apiUrl);
-        
-        
         try
         {
-            // Envoyer la requête sans appliquer de politique supplémentaire
             var response = await _httpClient.SendAsync(request);
             return await HandleResponse<T>(handleResult, response);
         }
@@ -73,17 +66,6 @@ public class ApiInvoker : IApiInvoker
             _logger.LogError(ex, "Exception occurred while invoking API: {Resource}", resource);
             throw new ApiException("An error occurred while invoking the API.", ex);
         }
-        
-        
-        // var attempt = 0;
-        // var restResponse = await policy.ExecuteAsync(async () =>
-        // {
-        //     _logger.LogDebug("{Uri}: Attempt {Attempt}", "/" + resource.TrimStart('/'), ++attempt);
-        //     // return await restClient.ExecuteAsync(restRequest);
-        //     return await _httpClient.SendAsync(request);
-        // });
-        //
-        // return await HandleResponse<T>(handleResult, restResponse);
     }
 
     private async Task<HttpRequestMessage> BuildRequest(HttpMethod httpMethod, string resource, Dictionary<string, string>? additionalHeaders,
@@ -109,89 +91,12 @@ public class ApiInvoker : IApiInvoker
         
         if (httpMethod != HttpMethod.Get && requestObject != null)
         {
-            // restRequest.RequestFormat = DataFormat.Json;
-            // restRequest.AddJsonBody(requestObject);
-            //
-            
-            
             var json = JsonHelper.Serialize(requestObject);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
         }
 
         return request;
     }
-
-//     private static T HandleResult<T>(bool handleResult, HttpResponseMessage restResponse)
-//     {
-//         if (!restResponse.IsSuccessful)
-//         {
-//             throw new ApiException($"An error occurred while invoking the API: {restResponse.StatusCode}");  
-//         }
-//         
-//         if (restResponse.Content != null)
-//         {
-//             if (handleResult)
-//             {
-//                 var result = JsonHelper.Deserialize<T>(restResponse.Content);
-//                 return result;
-//             }
-//             else
-//             {
-//                 return default!;
-//             }
-//
-//             /*
-//             var jsonObject = JObject.Parse(restResponse.Content);
-//
-//             var statusCode = jsonObject["StatusCode"]?.ToObject<int>();
-//             if (statusCode == 200)
-//             {
-//                 if (handleResult)
-//                 {
-//                     var valueContent = jsonObject["Value"]!.ToString();
-//
-//                     if (typeof(T) == typeof(string))
-//                     {
-//                         var result = (T)(object)valueContent;
-//
-//                         return result;
-//                     }
-//                     else
-//                     {
-//                         if (typeof(T) == typeof(bool))
-//                         {
-//                             valueContent = valueContent.ToLower();
-//                         }
-//                         var result = JsonConvert.DeserializeObject<T>(valueContent);
-//
-//                         return result!;
-//                     }
-//                 }
-//                 else
-//                 {
-//                     return default!;
-//                 }
-//             }
-//             else
-//             {
-//                 throw new ApiException(jsonObject["Value"]!.ToString());
-//             }
-//              */
-//             
-//             return default!;
-//         }
-//         else
-//         {
-//             if (handleResult)
-//             {
-//                 throw new ApiException("response content is null"); 
-//             }
-//             else
-//             {
-//                 return default!;
-//             }
-//         }
-//     }
 
     private async Task<T> HandleResponse<T>(bool handleResult, HttpResponseMessage response)
     {
@@ -211,31 +116,10 @@ public class ApiInvoker : IApiInvoker
         else
         {
             string errorMessage = "An error occurred while invoking the API.";
-
-            // Tenter de désérialiser le message d'erreur si présent
+            
             if (!string.IsNullOrWhiteSpace(content) && handleResult)
             {
                 return DeserializeContent<T>(content);
-                
-                // try
-                // {
-                //     var errorObj = JsonHelper.Deserialize<Dictionary<string, string>>(content);
-                //     if (errorObj != null)
-                //     {
-                //         if (errorObj.ContainsKey("error"))
-                //         {
-                //             errorMessage = errorObj["error"];
-                //         }
-                //         else if (errorObj.ContainsKey("message"))
-                //         {
-                //             errorMessage = errorObj["message"];
-                //         }
-                //     }
-                // }
-                // catch (JsonException)
-                // {
-                //     // Si la désérialisation échoue, conserver le message d'erreur générique
-                // }
             }
 
             _logger.LogError("API call failed with status code {StatusCode}: {ErrorMessage}", response.StatusCode, errorMessage);
@@ -257,7 +141,7 @@ public class ApiInvoker : IApiInvoker
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "JSON deserialization error.");
+            _logger.LogError(ex, "JSON deserialization error");
             throw new ApiException("Failed to deserialize the response content.", ex);
         }
     }

@@ -41,39 +41,17 @@ class InventoryLoader : IDisposable
         }
         
         return inventory;
-
-        // return inventory;
-        //
-        // using (var streamReader = new StreamReader(entryStream))
-        // {
-        //     using (var jsonTextReader = new JsonTextReader(streamReader))
-        //     {
-        //         var settings = JsonSerializerSettingsHelper.BuildSettings(true, true, true);
-        //         var serializer = JsonSerializer.Create(settings);
-        //
-        //         var inventory = serializer.Deserialize<Inventory>(jsonTextReader);
-        //         return inventory;
-        //     }
-        // }
     }
 
     public MemoryStream GetSignature(string guid)
     {
         var entryName = GetEntryName(guid);
-
         var entry = ZipArchive.GetEntry(entryName);
-
-        //var signatureFile = ZipArchive.CreateEntry($"{directoryName}/{guid}.sign");
-
+        
         var memoryStream = new MemoryStream();
         using (var entryStream = entry.Open())
         {
             entryStream.CopyTo(memoryStream);
-
-            //using (var streamWriter = new StreamWriter(entryStream))
-            //{
-            //    streamWriter.Write(json);
-            //}
         }
 
         memoryStream.Position = 0;
