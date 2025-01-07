@@ -1,8 +1,6 @@
 ﻿using System.IO;
 using System.IO.Compression;
-using System.Text.Json;
 using System.Threading.Tasks;
-using System.Xml;
 using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Business.Communications;
@@ -264,10 +262,9 @@ public class SessionProfileManager : ISessionProfileManager
         var detailsAContent = detailsAStreamReader.ReadToEnd();
         var decrypted = CryptographyUtils.Decrypt(detailsAContent, cloudSessionProfileData.ProfileDetailsPassword);
 
-        var cloudSessionProfileDetails = JsonSerializer.Deserialize<CloudSessionProfileDetails>(decrypted);
+        var cloudSessionProfileDetails = JsonHelper.Deserialize<CloudSessionProfileDetails>(decrypted);
 
-        var isOK = cloudSessionProfileDetails != null &&
-                   cloudSessionProfileDetails.CloudSessionProfileId.Equals(cloudSessionProfileData.CloudSessionProfileId);
+        var isOK = cloudSessionProfileDetails.CloudSessionProfileId.Equals(cloudSessionProfileData.CloudSessionProfileId);
 
         if (isOK)
         {
@@ -322,7 +319,7 @@ public class SessionProfileManager : ISessionProfileManager
             }
         }
 
-        json = JsonSerializer.Serialize(localSessionProfile);
+        json = JsonHelper.Serialize(localSessionProfile);
         var infoFile = zipArchive.CreateEntry("info.json");
         using var entryStream = infoFile.Open();
         using var streamWriter = new StreamWriter(entryStream);

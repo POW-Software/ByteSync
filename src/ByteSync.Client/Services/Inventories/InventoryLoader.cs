@@ -31,7 +31,7 @@ class InventoryLoader : IDisposable
             throw new FileNotFoundException("inventory.json not found in the archive.");
         }
 
-        using var entryStream = inventoryFile!.Open();
+        using var entryStream = inventoryFile.Open();
         
         var inventory = JsonHelper.Deserialize<Inventory>(entryStream);
 

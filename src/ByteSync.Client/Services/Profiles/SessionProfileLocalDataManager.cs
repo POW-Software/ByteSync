@@ -161,7 +161,7 @@ public class SessionProfileLocalDataManager : ISessionProfileLocalDataManager
 
             var cloudSessionProfileDetails = JsonHelper.Deserialize<CloudSessionProfileDetails>(decrypted2);
 
-            return cloudSessionProfileDetails!;
+            return cloudSessionProfileDetails;
         });
     }
     
@@ -227,8 +227,6 @@ public class SessionProfileLocalDataManager : ISessionProfileLocalDataManager
             var content = infoStreamReader.ReadToEnd();
             
             var sessionProfile = JsonHelper.Deserialize<T>(content);
-            
-            // var lastRunInfo = directoryInfo.GetFiles().
 
             return sessionProfile;
         }

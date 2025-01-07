@@ -1,6 +1,5 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-using ByteSync.Common.Business.Versions;
+﻿using ByteSync.Common.Business.Versions;
+using ByteSync.Common.Controls.Json;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Loaders;
 using Microsoft.Extensions.Logging;
@@ -36,12 +35,8 @@ public class ClientSoftwareVersionSettingsLoader : IClientSoftwareVersionSetting
                 _logger.LogInformation("Loading minimal version from {url}", _appSettings.UpdatesDefinitionUrl);
                 contents = await wc.GetStringAsync(_appSettings.UpdatesDefinitionUrl);
             }
-
-            var options = new JsonSerializerOptions
-            {
-                Converters = { new JsonStringEnumConverter() }
-            };
-            var softwareUpdates = JsonSerializer.Deserialize<List<SoftwareVersion>>(contents, options)!;
+            
+            var softwareUpdates = JsonHelper.Deserialize<List<SoftwareVersion>>(contents)!;
 
             if (softwareUpdates != null)
             {
