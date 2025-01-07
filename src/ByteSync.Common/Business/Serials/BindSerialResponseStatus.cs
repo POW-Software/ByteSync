@@ -1,8 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿namespace ByteSync.Common.Business.Serials;
 
-namespace ByteSync.Common.Business.Serials;
-
-[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum BindSerialResponseStatus
 {
     OK = 1,

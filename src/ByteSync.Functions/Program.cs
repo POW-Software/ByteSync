@@ -1,7 +1,9 @@
 ﻿using System.Reflection;
+using System.Text.Json;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Azure.Identity;
+using ByteSync.Common.Controls.Json;
 using ByteSync.Common.Interfaces.Hub;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Business.Settings;
@@ -144,6 +146,11 @@ var host = new HostBuilder()
             var appInsightsLoggerProvider = options.Rules.FirstOrDefault(rule => rule.ProviderName == "Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider");
 
             if (appInsightsLoggerProvider != default) options.Rules.Remove(appInsightsLoggerProvider);
+        });
+        
+        services.Configure<JsonSerializerOptions>(options =>
+        {
+            JsonSerializerOptionsHelper.SetOptions(options);
         });
         
         var serviceProvider = services.BuildServiceProvider();

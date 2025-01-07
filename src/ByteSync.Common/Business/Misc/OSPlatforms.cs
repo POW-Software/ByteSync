@@ -1,8 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿namespace ByteSync.Common.Business.Misc;
 
-namespace ByteSync.Common.Business.Misc;
-
-[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum OSPlatforms
 {
     Undefined = 0,

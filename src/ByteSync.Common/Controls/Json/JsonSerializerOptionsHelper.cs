@@ -11,7 +11,8 @@ public static class JsonSerializerOptionsHelper
         {
             WriteIndented = true,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            ReferenceHandler = ReferenceHandler.Preserve
+            ReferenceHandler = ReferenceHandler.Preserve,
+            Converters = { new JsonStringEnumConverter() }
         };
 
         if (writablePropertiesOnly)
@@ -26,5 +27,17 @@ public static class JsonSerializerOptionsHelper
         }
 
         return options;
+    }
+
+    public static void SetOptions(JsonSerializerOptions options)
+    {
+        options.WriteIndented = true;
+        options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        options.ReferenceHandler = ReferenceHandler.Preserve;
+        options.Converters.Add(new JsonStringEnumConverter());
+        options.Converters.Add(new UtcDateTimeConverter());
+        
+        options.IgnoreReadOnlyProperties = true;
+        options.IgnoreReadOnlyFields = true;
     }
 }
