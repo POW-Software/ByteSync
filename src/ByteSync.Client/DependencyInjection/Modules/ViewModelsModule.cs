@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Autofac;
+﻿using Autofac;
 using ByteSync.Business.Navigations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.ViewModels;
