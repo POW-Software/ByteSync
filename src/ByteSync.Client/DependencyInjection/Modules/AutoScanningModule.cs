@@ -67,7 +67,7 @@ public class AutoScanningModule : Module
             .AsImplementedInterfaces();
         
         builder.RegisterAssemblyTypes(executingAssembly)
-            .Where(t => t.Name.EndsWith("Repository") && t.Name != "ApplicationSettingsRepository")
+            .Where(t => t.Name.EndsWith("Repository"))
             .SingleInstance()
             .AsImplementedInterfaces();
         
