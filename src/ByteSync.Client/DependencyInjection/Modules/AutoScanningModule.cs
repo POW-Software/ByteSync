@@ -12,7 +12,11 @@ public class AutoScanningModule : Module
         var executingAssembly = Assembly.GetExecutingAssembly();
         
         builder.RegisterAssemblyTypes(executingAssembly)
-            .Where(t => t.IsClass && !t.IsAbstract && t.GetInterfaces().Any())
+            .Where(t => t.IsClass
+                        && !t.IsAbstract 
+                        && t.GetInterfaces().Any()
+                        && t.Namespace != null 
+                        && t.Namespace.StartsWith("ByteSync.Services"))
             .AsImplementedInterfaces()
             .InstancePerLifetimeScope();
         
