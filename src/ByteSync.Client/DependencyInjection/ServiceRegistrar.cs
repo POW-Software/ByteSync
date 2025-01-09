@@ -26,7 +26,9 @@ public static class ServiceRegistrar
         // builder.RegisterModule<KeyedTypesModule>();
         // builder.RegisterModule<SingletonsModule>();
         
-        
+        var serviceCollection = new ServiceCollection();
+        ConfigureServices(serviceCollection);
+        builder.Populate(serviceCollection);
         
         // builder.RegisterModule<GenericTypesModule>();
         builder.RegisterModule<ConfigurationModule>();
@@ -46,17 +48,23 @@ public static class ServiceRegistrar
         // builder.RegisterModule<CommunicationModule>(); // Exemple de module supplémentaire
 
         // Configuration supplémentaire
-        var serviceCollection = new ServiceCollection();
-        ConfigureServices(serviceCollection);
-        builder.Populate(serviceCollection);
-
+        // var serviceCollection = new ServiceCollection();
+        // ConfigureServices(serviceCollection);
+        // builder.Populate(serviceCollection);
+        //
         var autofacResolver = builder.UseAutofacDependencyResolver();
         builder.RegisterInstance(autofacResolver);
-
+        
         autofacResolver.InitializeReactiveUI();
 
         var container = builder.Build();
         ContainerProvider.Container = container;
+        
+        // using (var scope = container.BeginLifetimeScope())
+        // {
+        //     var logger = scope.Resolve<ILogger<AutoScanningModule>>();
+        //     logger.LogInformation("Test de log après la construction du conteneur.");
+        // }
 
         return container;
     }
