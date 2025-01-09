@@ -17,11 +17,6 @@ public class ViewModelsModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        // builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
-        //     .Where(t => t.Name.EndsWith("ViewModel"))
-        //     .AsSelf()
-        //     .InstancePerLifetimeScope();
-
         builder.RegisterType<MainWindowViewModel>()
             .SingleInstance()
             .AsSelf()
