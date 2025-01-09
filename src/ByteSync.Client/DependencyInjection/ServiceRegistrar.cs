@@ -1,16 +1,10 @@
-﻿using System.Net.Http;
-using System.Reflection;
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
+﻿using Autofac;
 using ByteSync.DependencyInjection.Modules;
-using ByteSync.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
+using ByteSync.Interfaces.Controls.Bootstrapping;
 using ByteSync.Services;
-using ByteSync.Services.Configurations;
 using Microsoft.Extensions.DependencyInjection;
-using Polly;
-using Polly.Extensions.Http;
 using ReactiveUI;
 using Splat.Autofac;
 
@@ -41,7 +35,11 @@ public static class ServiceRegistrar
         var container = builder.Build();
         ContainerProvider.Container = container;
 
+        LogBootstrapHeader(container);
+        
         FeedClientId(container);
+
+        LogBootstrap(container);
 
         return container;
     }
@@ -55,13 +53,21 @@ public static class ServiceRegistrar
         
         var applicationSettings = applicationSettingsRepository.GetCurrentApplicationSettings();
         environmentService.SetClientId(applicationSettings.ClientId);
-            
-        // logger.LogInformation("Test de log après la construction du conteneur.");
-
-
-        // var applicationSettingsRepository = new ApplicationSettingsRepository(
-        //     localApplicationDataManager, configurationReader, configurationWriter);
-        // var applicationSettings = applicationSettingsRepository.GetCurrentApplicationSettings();
-        // environmentService.SetClientId(applicationSettings.ClientId);
+    }
+    
+    private static void LogBootstrapHeader(IContainer container)
+    {
+        using var scope = container.BeginLifetimeScope();
+        
+        var logger = scope.Resolve<IBootstrapLogger>();
+        logger.LogBootstrapHeader();
+    }
+    
+    private static void LogBootstrap(IContainer container)
+    {
+        using var scope = container.BeginLifetimeScope();
+        
+        var logger = scope.Resolve<IBootstrapLogger>();
+        logger.LogBootstrapContent();
     }
 }
