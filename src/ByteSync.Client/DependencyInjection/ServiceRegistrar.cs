@@ -27,8 +27,9 @@ public static class ServiceRegistrar
         // builder.RegisterModule<SingletonsModule>();
         
         var serviceCollection = new ServiceCollection();
-        ConfigureServices(serviceCollection);
-        builder.Populate(serviceCollection);
+        // ConfigureServices(serviceCollection);
+        // builder.Populate(serviceCollection);
+        builder.RegisterModule(new ServiceCollectionModule(serviceCollection));
         
         // builder.RegisterModule<GenericTypesModule>();
         builder.RegisterModule<ConfigurationModule>();
@@ -44,7 +45,7 @@ public static class ServiceRegistrar
         // builder.RegisterModule<ServicesModule>();
         // builder.RegisterModule<RepositoriesModule>();
         builder.RegisterModule<ViewModelsModule>();
-        builder.RegisterModule<PoliciesModule>();
+        // builder.RegisterModule<PoliciesModule>();
         // builder.RegisterModule<CommunicationModule>(); // Exemple de module supplémentaire
 
         // Configuration supplémentaire
@@ -86,9 +87,9 @@ public static class ServiceRegistrar
         
         var serviceCollection = new ServiceCollection();
         
-        ConfigureServices(serviceCollection);
-        
-        builder.Populate(serviceCollection);
+        // ConfigureServices(serviceCollection);
+        //
+        // builder.Populate(serviceCollection);
         
         // builder.RegisterInstance(configuration).As<IConfiguration>();
         
@@ -314,38 +315,38 @@ public static class ServiceRegistrar
         return container;
     }
     
-    private static void ConfigureServices(IServiceCollection services)
-    {
-        services.AddHttpClient("ApiClient")
-            .AddPolicyHandler((serviceProvider, request) =>
-            {
-                var logger = serviceProvider.GetRequiredService<ILogger<RetryPolicyLogger>>();
-                return GetRetryPolicy(request, logger);
-            });
-    }
-
-    private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(HttpRequestMessage request, ILogger<RetryPolicyLogger> logger)
-    {
-        return HttpPolicyExtensions
-            .HandleTransientHttpError()
-            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                onRetry: (outcome, timespan, retryAttempt, _) =>
-                {
-                    var requestInfo = $"{request.Method} {request.RequestUri}";
-
-                    if (outcome.Exception != null)
-                    {
-                        logger.LogWarning(outcome.Exception, 
-                            "Retry attempt {RetryCount} for {Request} after {Delay} seconds due to exception",
-                            retryAttempt, requestInfo, timespan.TotalSeconds);
-                    }
-                    else
-                    {
-                        logger.LogWarning(
-                            "Retry attempt {RetryCount} for {Request} after {Delay} seconds due to HTTP status code {StatusCode}",
-                            retryAttempt, requestInfo, timespan.TotalSeconds, outcome.Result?.StatusCode);
-                    }
-
-                });
-    }
+    // private static void ConfigureServices(IServiceCollection services)
+    // {
+    //     services.AddHttpClient("ApiClient")
+    //         .AddPolicyHandler((serviceProvider, request) =>
+    //         {
+    //             var logger = serviceProvider.GetRequiredService<ILogger<RetryPolicyLogger>>();
+    //             return GetRetryPolicy(request, logger);
+    //         });
+    // }
+    //
+    // private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(HttpRequestMessage request, ILogger<RetryPolicyLogger> logger)
+    // {
+    //     return HttpPolicyExtensions
+    //         .HandleTransientHttpError()
+    //         .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+    //             onRetry: (outcome, timespan, retryAttempt, _) =>
+    //             {
+    //                 var requestInfo = $"{request.Method} {request.RequestUri}";
+    //
+    //                 if (outcome.Exception != null)
+    //                 {
+    //                     logger.LogWarning(outcome.Exception, 
+    //                         "Retry attempt {RetryCount} for {Request} after {Delay} seconds due to exception",
+    //                         retryAttempt, requestInfo, timespan.TotalSeconds);
+    //                 }
+    //                 else
+    //                 {
+    //                     logger.LogWarning(
+    //                         "Retry attempt {RetryCount} for {Request} after {Delay} seconds due to HTTP status code {StatusCode}",
+    //                         retryAttempt, requestInfo, timespan.TotalSeconds, outcome.Result?.StatusCode);
+    //                 }
+    //
+    //             });
+    // }
 }
