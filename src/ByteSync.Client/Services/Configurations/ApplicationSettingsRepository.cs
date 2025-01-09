@@ -5,7 +5,6 @@ using ByteSync.Common.Business.Serials;
 using ByteSync.Common.Helpers;
 using ByteSync.Common.Interfaces;
 using ByteSync.Interfaces;
-using Serilog;
 
 namespace ByteSync.Services.Configurations;
 
@@ -14,19 +13,22 @@ class ApplicationSettingsRepository : IApplicationSettingsRepository
     private readonly ILocalApplicationDataManager _localApplicationDataManager;
     private readonly IConfigurationReader<ApplicationSettings> _configurationReader;
     private readonly IConfigurationWriter<ApplicationSettings> _configurationWriter;
+    private readonly ILogger<ApplicationSettingsRepository> _logger;
         
     private ProductSerialDescription? _productSerialDescription;
     private string? _encryptionPassword;
-
+    
     public const string APPLICATION_SETTINGS_LAST_FORMAT_VERSION = "1.5";
 
 
     public ApplicationSettingsRepository(ILocalApplicationDataManager localApplicationDataManager, 
-        IConfigurationReader<ApplicationSettings> configurationReader, IConfigurationWriter<ApplicationSettings> configurationWriter)
+        IConfigurationReader<ApplicationSettings> configurationReader, IConfigurationWriter<ApplicationSettings> configurationWriter,
+        ILogger<ApplicationSettingsRepository> logger)
     {
         _localApplicationDataManager = localApplicationDataManager;
         _configurationReader = configurationReader;
         _configurationWriter = configurationWriter;
+        _logger = logger;
 
         SyncRoot = new object();
     }
@@ -96,20 +98,20 @@ class ApplicationSettingsRepository : IApplicationSettingsRepository
                 // on controle le format du fichier, pour mise à jour éventuelle
                 var needUpdate = CheckFormatVersion(applicationSettings);
                 
-                Log.Information("Application Settings loaded from {configurationPath}", ApplicationSettingsPath);
+                _logger.LogInformation("Application Settings loaded from {configurationPath}", ApplicationSettingsPath);
 
                 ApplicationSettings = applicationSettings;
 
                 if (needUpdate)
                 {
-                    Log.Information("Application Settings has beed updated and need to be saved");
+                    _logger.LogInformation("Application Settings has beed updated and need to be saved");
                         
                     SaveApplicationSettings();
                 }
             }
             else
             {
-                Log.Information("Application Settings not found in {configurationPath}", ApplicationSettingsPath);
+                _logger.LogInformation("Application Settings not found in {configurationPath}", ApplicationSettingsPath);
                     
                 hasTriedInitialization = true;
                 InitializeApplicationSettings();
@@ -117,22 +119,21 @@ class ApplicationSettingsRepository : IApplicationSettingsRepository
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "ApplicationSettingsManager: Error while loading or initializing Application Settings");
+            _logger.LogError(ex, "ApplicationSettingsManager: Error while loading or initializing Application Settings");
 
             if (!hasTriedInitialization)
             {
                 try
                 {
-                    Log.Warning("Trying to initialize Application Settings");
+                    _logger.LogWarning("Trying to initialize Application Settings");
                         
                     InitializeApplicationSettings();
                 }
                 catch (Exception ex2)
                 {
-                    Log.Error(ex2, "ApplicationSettingsManager: Error while initializing Application Settings");
-                    Log.Warning("Application Settings will be set as default");
-                        
-                    // Tout a échoué, on load les valeurs par défaut
+                    _logger.LogError(ex2, "ApplicationSettingsManager: Error while initializing Application Settings");
+                    _logger.LogWarning("Application Settings will be set as default");
+                    
                     ApplicationSettings = new ApplicationSettings();
                 }
             }
@@ -223,7 +224,7 @@ class ApplicationSettingsRepository : IApplicationSettingsRepository
 
     private void InitializeApplicationSettings()
     {
-        Log.Information("Initializing Application Settings");
+        _logger.LogInformation("Initializing Application Settings");
             
         var applicationSettings = PrepareApplicationSettings();
 
@@ -304,11 +305,11 @@ class ApplicationSettingsRepository : IApplicationSettingsRepository
             {
                 _configurationWriter.SaveConfiguration(applicationSettings, ApplicationSettingsPath);
 
-                Log.Information("Application Settings saved to {ApplicationSettingsPath}", ApplicationSettingsPath);
+                _logger.LogInformation("Application Settings saved to {ApplicationSettingsPath}", ApplicationSettingsPath);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "ApplicationSettingsManager: can not save user settings");
+                _logger.LogError(ex, "ApplicationSettingsManager: can not save user settings");
             }
         }
     }

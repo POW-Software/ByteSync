@@ -19,10 +19,8 @@ namespace ByteSync.DependencyInjection.Modules;
 
         protected override void Load(ContainerBuilder builder)
         {
-            // Appliquer la configuration des services
             ConfigureServices(_services);
-
-            // Intégrer IServiceCollection dans Autofac
+            
             builder.Populate(_services);
         }
 
@@ -34,8 +32,6 @@ namespace ByteSync.DependencyInjection.Modules;
                     var logger = serviceProvider.GetRequiredService<ILogger<RetryPolicyLogger>>();
                     return GetRetryPolicy(request, logger);
                 });
-
-            // Ajoutez ici d'autres configurations de services si nécessaire
         }
 
         private IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(HttpRequestMessage request, ILogger<RetryPolicyLogger> logger)

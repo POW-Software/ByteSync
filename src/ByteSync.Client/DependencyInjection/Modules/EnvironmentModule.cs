@@ -37,21 +37,21 @@ public class EnvironmentModule : Module
         var loggerConfiguration = loggerService.BuildLoggerConfiguration();
         builder.RegisterSerilog(loggerConfiguration);
         
-        builder.RegisterType<FileSystemAccessor>().AsImplementedInterfaces();
+        // builder.RegisterType<FileSystemAccessor>().AsImplementedInterfaces();
 
 
-        var configurationReader = new ConfigurationReader<ApplicationSettings>(fileSystem);
-        builder.RegisterInstance<IConfigurationReader<ApplicationSettings>>(configurationReader);
+        // var configurationReader = new ConfigurationReader<ApplicationSettings>(fileSystem);
+        // builder.RegisterInstance<IConfigurationReader<ApplicationSettings>>(configurationReader);
+        //
+        // var configurationWriter = new ConfigurationWriter<ApplicationSettings>(fileSystem);
+        // builder.RegisterInstance<IConfigurationWriter<ApplicationSettings>>(configurationWriter);
 
-        var configurationWriter = new ConfigurationWriter<ApplicationSettings>(fileSystem);
-        builder.RegisterInstance<IConfigurationWriter<ApplicationSettings>>(configurationWriter);
+        // var applicationSettingsRepository = new ApplicationSettingsRepository(
+        //     localApplicationDataManager, configurationReader, configurationWriter);
+        // var applicationSettings = applicationSettingsRepository.GetCurrentApplicationSettings();
+        // environmentService.SetClientId(applicationSettings.ClientId);
 
-        var applicationSettingsRepository = new ApplicationSettingsRepository(
-            localApplicationDataManager, configurationReader, configurationWriter);
-        var applicationSettings = applicationSettingsRepository.GetCurrentApplicationSettings();
-        environmentService.SetClientId(applicationSettings.ClientId);
-
-        builder.RegisterInstance(applicationSettingsRepository).As<IApplicationSettingsRepository>();
+        // builder.RegisterInstance(applicationSettingsRepository).As<IApplicationSettingsRepository>();
         
         builder.RegisterType<GraphicalUserInterfaceBootstrapper>().Keyed<IBootstrapper>(OperationMode.GraphicalUserInterface);
         builder.RegisterType<CommandLineBootstrapper>().Keyed<IBootstrapper>(OperationMode.CommandLine);

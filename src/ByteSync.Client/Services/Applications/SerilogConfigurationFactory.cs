@@ -18,15 +18,11 @@ public class SerilogConfigurationFactory
     private readonly ILocalApplicationDataManager _localApplicationDataManager;
     private readonly IEnvironmentService _environmentService;
 
-
-
     public SerilogConfigurationFactory(ILocalApplicationDataManager localApplicationDataManager, IEnvironmentService environmentService)
     {
         _localApplicationDataManager = localApplicationDataManager;
         _environmentService = environmentService;
     }
-    
-
     
     public LoggerConfiguration BuildLoggerConfiguration()
     {
@@ -105,68 +101,4 @@ public class SerilogConfigurationFactory
 
         return loggerConfiguration;
     }
-    
-    // public void Initialize()
-    // {
-    //     // https://blog.datalust.co/serilog-tutorial/
-    //     // https://stackoverflow.com/questions/53515182/lower-log-level-for-quartz
-    //
-    //     
-    //
-    //     //Log.Logger = loggerConfiguration.CreateLogger();
-    //
-    //     Log.Information($"*************************************************");
-    //     Log.Information($"***     ByteSync - Application Startup       ****");
-    //     Log.Information($"*************************************************");
-    //     Log.Information($"Version: {_environmentService.CurrentVersion}");
-    //     Log.Information($"MachineName: {_environmentService.MachineName}");
-    //     Log.Information(
-    //         $"OS: {System.Runtime.InteropServices.RuntimeInformation.OSDescription}{(Environment.Is64BitOperatingSystem ? " (64 bits)" : "")}");
-    //     Log.Information($"AssemblyFullName: {_environmentService.AssemblyFullName}");
-    //     Log.Information($"DeploymentMode: {(_environmentService.IsPortableApplication ? "Portable" : "Installed")}");
-    //     Log.Information($"*************************************************");
-    //
-    // #if DEBUG
-    //     Log.Information(" | Running in DEBUG Mode |");
-    //     Log.Information($"*************************************************");
-    // #endif
-    //
-    //     Log.Information("Command Line Arguments:");
-    //     var commandLineArgs = Environment.GetCommandLineArgs();
-    //     for (int i = 0; i < commandLineArgs.Length; i++)
-    //     {
-    //         Log.Information(" - Argument {i}: {arg}", i + 1, commandLineArgs[i]);
-    //     }
-    //
-    //     Log.Information($"*************************************************");
-    //
-    //     if (Environment.GetCommandLineArgs().Contains(RegularArguments.LOG_DEBUG))
-    //     {
-    //         Log.Information("LoggingLevel: Debug ({Arg})", RegularArguments.LOG_DEBUG);
-    //         Log.Information($"*************************************************");
-    //     }
-    //
-    //     Log.Information("ApplicationDataPath: '{applicationDataPath}'", _localApplicationDataManager.ApplicationDataPath);
-    //
-    //     LogSpecialFolders();
-    // }
-    //
-    // private void LogSpecialFolders()
-    // {
-    //     // 23/03/2022 Journalisation DEBUG pour obtenir les chemins sur macOS et Linux, à retirer ultérieurement
-    //     string programs = Environment.GetFolderPath(Environment.SpecialFolder.Programs);
-    //     string commonProgramFiles = Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles);
-    //     string commonProgramFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86);
-    //     string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-    //     string programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
-    //     string applicationData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-    //     string commonApplicationData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-    //     Log.Debug("programs: '{programs}'", programs);
-    //     Log.Debug("cprogramFiles: '{cprogramFiles}'", commonProgramFiles);
-    //     Log.Debug("cprogramFilesX86: '{cprogramFilesX86}'", commonProgramFilesX86);
-    //     Log.Debug("programFiles: '{programFiles}'", programFiles);
-    //     Log.Debug("programFilesX86: '{programFilesX86}'", programFilesX86);
-    //     Log.Debug("globalApplicationDataPath: '{globalApplicationDataPath}'", applicationData);
-    //     Log.Debug("commonApplicationDataPath: '{commonApplicationDataPath}'", commonApplicationData);
-    // }
 }
