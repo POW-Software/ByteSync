@@ -28,7 +28,7 @@ public class EnvironmentModule : Module
         builder.RegisterType<LocalApplicationDataManager>()
             .As<ILocalApplicationDataManager>()
             .SingleInstance()
-            .WithParameter("environmentService", new EnvironmentService());
+            .WithParameter("environmentService", environmentService);
 
         var localApplicationDataManager = new LocalApplicationDataManager(environmentService);
         builder.RegisterInstance(localApplicationDataManager).As<ILocalApplicationDataManager>().SingleInstance();
@@ -36,22 +36,6 @@ public class EnvironmentModule : Module
         var loggerService = new SerilogConfigurationFactory(localApplicationDataManager, environmentService);
         var loggerConfiguration = loggerService.BuildLoggerConfiguration();
         builder.RegisterSerilog(loggerConfiguration);
-        
-        // builder.RegisterType<FileSystemAccessor>().AsImplementedInterfaces();
-
-
-        // var configurationReader = new ConfigurationReader<ApplicationSettings>(fileSystem);
-        // builder.RegisterInstance<IConfigurationReader<ApplicationSettings>>(configurationReader);
-        //
-        // var configurationWriter = new ConfigurationWriter<ApplicationSettings>(fileSystem);
-        // builder.RegisterInstance<IConfigurationWriter<ApplicationSettings>>(configurationWriter);
-
-        // var applicationSettingsRepository = new ApplicationSettingsRepository(
-        //     localApplicationDataManager, configurationReader, configurationWriter);
-        // var applicationSettings = applicationSettingsRepository.GetCurrentApplicationSettings();
-        // environmentService.SetClientId(applicationSettings.ClientId);
-
-        // builder.RegisterInstance(applicationSettingsRepository).As<IApplicationSettingsRepository>();
         
         builder.RegisterType<GraphicalUserInterfaceBootstrapper>().Keyed<IBootstrapper>(OperationMode.GraphicalUserInterface);
         builder.RegisterType<CommandLineBootstrapper>().Keyed<IBootstrapper>(OperationMode.CommandLine);

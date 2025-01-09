@@ -16,7 +16,8 @@ public class AutoScanningModule : Module
                         && !t.IsAbstract 
                         && t.GetInterfaces().Any()
                         && t.Namespace != null 
-                        && t.Namespace.StartsWith("ByteSync.Services"))
+                        && t.Namespace.StartsWith("ByteSync.Services")
+                        && !t.Name.EndsWith("Service"))
             .AsImplementedInterfaces()
             .InstancePerLifetimeScope();
         

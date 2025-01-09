@@ -37,10 +37,7 @@ public class BootstrapLogger : IBootstrapLogger
             _logger.LogInformation(" | Running in DEBUG Mode |");
             _logger.LogInformation($"*************************************************");
         }
-    }
-
-    public void LogBootstrapContent()
-    {
+        
         _logger.LogInformation("Command Line Arguments:");
         for (int i = 0; i < _environmentService.Arguments.Length; i++)
         {
@@ -56,8 +53,18 @@ public class BootstrapLogger : IBootstrapLogger
         }
 
         _logger.LogInformation("ApplicationDataPath: '{applicationDataPath}'", _localApplicationDataManager.ApplicationDataPath);
+    }
 
+    public void LogBootstrapContent()
+    {
         LogSpecialFolders();
+        
+        _logger.LogInformation($"*************************************************");
+        
+        _logger.LogInformation("Client Id: {ClientInstanceId}", _environmentService.ClientId);
+        _logger.LogInformation("Client InstanceId: {ClientInstanceId}", _environmentService.ClientInstanceId);
+        
+        _logger.LogInformation($"*************************************************");
     }
     
     private void LogSpecialFolders()

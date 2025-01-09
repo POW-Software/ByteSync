@@ -91,7 +91,6 @@ public class ConnectionService : IConnectionService, IDisposable
             if (result.HubConnection != null)
             {
                 CurrentEndPoint = result.EndPoint!;
-                _logger.LogInformation("Client InstanceId is {ClientInstanceId}", CurrentEndPoint.ClientInstanceId);
                 
                 ConnectionStatusSubject.OnNext(ConnectionStatuses.Connected);
             }
