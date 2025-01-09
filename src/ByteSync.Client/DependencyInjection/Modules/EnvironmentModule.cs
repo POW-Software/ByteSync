@@ -1,9 +1,6 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
-using ByteSync.Business.Configurations;
 using ByteSync.Business.Misc;
-using ByteSync.Common.Controls;
-using ByteSync.Common.Interfaces;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Bootstrapping;
