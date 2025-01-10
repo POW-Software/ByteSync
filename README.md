@@ -42,16 +42,6 @@ dotnet build
 
 ---
 
-## Usage
-Coming soon...
-
----
-
-## Contributing
-Coming soon...
-
----
-
 ## Support
 If you encounter any issues, please open an [issue](https://github.com/POW-Software/ByteSync/issues) on GitHub.
 
