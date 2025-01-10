@@ -24,7 +24,6 @@ public static class ServiceRegistrar
         builder.RegisterModule<AutoDetectionModule>();
         builder.RegisterModule<ConfigurationModule>();
         builder.RegisterModule<EnvironmentModule>();
-        // builder.RegisterModule<AutoDetectionModule>();
         builder.RegisterModule<GenericTypesModule>();
         builder.RegisterModule<KeyedTypesModule>();
         builder.RegisterModule<SingletonsModule>();

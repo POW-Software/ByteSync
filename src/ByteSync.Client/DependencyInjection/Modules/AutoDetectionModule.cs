@@ -26,7 +26,7 @@ public class AutoDetectionModule : Module
             .AsImplementedInterfaces();
         
         builder.RegisterAssemblyTypes(executingAssembly)
-            .Where(t => t.Name.EndsWith("Manager"))
+            .Where(t => t.Name.EndsWith("Manager") && t.Name != "LocalApplicationDataManager")
             .AsImplementedInterfaces();
         
         builder.RegisterAssemblyTypes(executingAssembly)
