@@ -9,9 +9,11 @@ using ByteSync.Common.Business.Lobbies;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Controls;
 using ByteSync.Common.Helpers;
+using ByteSync.Factories.ViewModels;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Lobbies;
 using ByteSync.ViewModels.Lobbies;
 using Prism.Events;
@@ -26,12 +28,12 @@ public class LobbyRepository : BaseRepository<LobbyDetails>, ILobbyRepository
     private readonly ICloudProxy _connectionManager;
     private readonly IPublicKeysManager _publicKeysManager;
     private readonly IUIHelper _uiHelper;
-    private readonly LobbyMemberViewModelFactory _lobbyMemberViewModelFactory;
+    private readonly ILobbyMemberViewModelFactory _lobbyMemberViewModelFactory;
     private readonly ILobbyApiClient _lobbyApiClient;
 
     internal const string LOCAL_LOBBY_PREFIX = "Local_Lobby_";
     
-    public LobbyRepository(LobbyMemberViewModelFactory lobbyMemberViewModelFactory, IEventAggregator eventAggregator, ICloudProxy connectionManager, 
+    public LobbyRepository(ILobbyMemberViewModelFactory lobbyMemberViewModelFactory, IEventAggregator eventAggregator, ICloudProxy connectionManager, 
         IPublicKeysManager publicKeysManager, IUIHelper uiHelper, ILobbyApiClient lobbyApiClient)
     {
         _lobbyMemberViewModelFactory = lobbyMemberViewModelFactory;
@@ -437,7 +439,7 @@ public class LobbyRepository : BaseRepository<LobbyDetails>, ILobbyRepository
 
                 var lobbyMember = new LobbyMember(cloudSessionProfileMember, lobbyMemberInfo);
 
-                newLobbyDetails.LobbyMembersViewModels.Add(_lobbyMemberViewModelFactory.Invoke(lobbyMember));
+                newLobbyDetails.LobbyMembersViewModels.Add(_lobbyMemberViewModelFactory.CreateLobbyMemberViewModel(lobbyMember));
             }
         });
     }

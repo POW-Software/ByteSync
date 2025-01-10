@@ -18,18 +18,15 @@ public class ConnectionFactory : IConnectionFactory
     private readonly IAuthenticationTokensRepository _authenticationTokensRepository;
     private readonly IEnvironmentService _environmentService;
     private readonly IConnectionConstantsService _connectionConstantsService;
-    private readonly IApplicationSettingsRepository _applicationSettingsRepository;
     private readonly IAuthApiClient _authApiClient;
     private readonly ILogger<ConnectionFactory> _logger;
 
     public ConnectionFactory(IAuthenticationTokensRepository authenticationTokensRepository, IEnvironmentService environmentService,
-        IConnectionConstantsService connectionConstantsService, IApplicationSettingsRepository applicationSettingsRepository, 
-        IAuthApiClient authApiClient, ILogger<ConnectionFactory> logger)
+        IConnectionConstantsService connectionConstantsService,IAuthApiClient authApiClient, ILogger<ConnectionFactory> logger)
     {
         _authenticationTokensRepository = authenticationTokensRepository;
         _environmentService = environmentService;
         _connectionConstantsService = connectionConstantsService;
-        _applicationSettingsRepository = applicationSettingsRepository;
         _authApiClient = authApiClient;
         _logger = logger;
 

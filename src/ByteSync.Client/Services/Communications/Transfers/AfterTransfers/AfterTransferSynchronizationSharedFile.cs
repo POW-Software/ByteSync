@@ -34,28 +34,10 @@ public class AfterTransferSynchronizationSharedFile : IAfterTransferSharedFile
         await _synchronizationService.SynchronizationProcessData.SynchronizationDataTransmitted.WaitUntilTrue();
         
         await _synchronizationApiClient.InformSynchronizationActionError(sharedFileDefinition);
-        
-        // _synchronizationService.SynchronizationProcessData.SynchronizationDataTransmitted.
-        //
-        // if (_synchronizationService.SynchronizationProcessData.SynchronizationDataTransmitted.Value)
-        // {
-        //     
-        // }
-        //
-        //
-        // throw new NotImplementedException();
-        
-        // await _connectionManager.HubWrapper
-        //     .AssertSynchronizationActionError(tuple.sessionId, tuple.sharedFileDefinition);
     }
 
     public async Task OnUploadFinishedError(SharedFileDefinition sharedFileDefinition, Exception exception)
     {
-        // throw new NotImplementedException();
-        
-        // await _connectionManager.HubWrapper
-        //     .AssertSynchronizationActionError(tuple.sessionId, tuple.sharedFileDefinition);
-        
         await _synchronizationService.SynchronizationProcessData.SynchronizationDataTransmitted.WaitUntilTrue();
         
         await _synchronizationApiClient.InformSynchronizationActionError(sharedFileDefinition);

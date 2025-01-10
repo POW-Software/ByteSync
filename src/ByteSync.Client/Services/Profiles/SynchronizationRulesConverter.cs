@@ -2,7 +2,6 @@
 using ByteSync.Business.Actions.Loose;
 using ByteSync.Interfaces.Controls.Profiles;
 using ByteSync.Interfaces.Controls.Sessions;
-using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
 

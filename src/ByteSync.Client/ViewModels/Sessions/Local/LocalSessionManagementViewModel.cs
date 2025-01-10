@@ -5,6 +5,7 @@ using ByteSync.Business.Sessions;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.EventsHubs;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.ViewModels.Sessions.Settings;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -27,14 +28,14 @@ public class LocalSessionManagementViewModel : ActivatableViewModelBase
     
     internal LocalSessionManagementViewModel(ISessionInterruptor? sessionQuitChecker = null, INavigationEventsHub? navigationEventsHub = null,
         ICloudSessionEventsHub? cloudSessionEventsHub = null, ISessionService? sessionDataHolder = null, 
-        SessionSettingsEditViewModelFactory? sessionSettingsEditViewModelFactory = null)
+        ISessionSettingsEditViewModelFactory? sessionSettingsEditViewModelFactory = null)
     {
         _sessionInterruptor = sessionQuitChecker ?? Locator.Current.GetService<ISessionInterruptor>()!;
         _navigationEventsHub = navigationEventsHub ?? Locator.Current.GetService<INavigationEventsHub>()!;
         _cloudSessionEventsHub = cloudSessionEventsHub ?? Locator.Current.GetService<ICloudSessionEventsHub>()!;
         _sessionService = sessionDataHolder ?? Locator.Current.GetService<ISessionService>()!;
 
-        SessionSettingsEditViewModel = sessionSettingsEditViewModelFactory.Invoke(null);
+        SessionSettingsEditViewModel = sessionSettingsEditViewModelFactory.CreateSessionSettingsEditViewModel(null);
         
         QuitSessionCommand = ReactiveCommand.CreateFromTask(QuitSession);
         

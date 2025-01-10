@@ -18,6 +18,8 @@ public interface IEnvironmentService
     public bool IsAutoLogin();
 
     public bool IsAutoRunProfile();
+
+    public void SetClientId(string clientId);
         
     string AssemblyFullName { get; }
 

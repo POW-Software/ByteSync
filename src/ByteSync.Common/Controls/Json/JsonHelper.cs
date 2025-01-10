@@ -1,8 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text.Json;
-using ByteSync.Common.Controls.Json;
 
-namespace ByteSync.Services.Misc;
+namespace ByteSync.Common.Controls.Json;
 
 public class JsonHelper
 {
@@ -45,7 +45,7 @@ public class JsonHelper
     
     private static JsonSerializerOptions GetJsonSerializerOptions<T>()
     {
-        var options = JsonSerializerOptionsHelper.BuildOptions(true, true);
+        var options = JsonSerializerOptionsHelper.BuildOptions();
 
         return options;
     }

@@ -1,8 +1,7 @@
 ﻿using System.Net.Http;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ByteSync.Common.Business.Versions;
+using ByteSync.Common.Controls.Json;
 using ByteSync.Interfaces.Updates;
 using Microsoft.Extensions.Configuration;
 
@@ -26,12 +25,8 @@ class AvailableUpdatesLister : IAvailableUpdatesLister
         
             contents = await httpClient.GetStringAsync(url);
         }
-
-        var options = new JsonSerializerOptions
-        {
-            Converters = { new JsonStringEnumConverter() }
-        };
-        var softwareVersions = JsonSerializer.Deserialize<List<SoftwareVersion>>(contents, options);
+        
+        var softwareVersions = JsonHelper.Deserialize<List<SoftwareVersion>>(contents);
 
         return softwareVersions!;
     }

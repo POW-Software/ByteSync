@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using ByteSync.Common.Controls.Json;
+﻿using ByteSync.Common.Controls.Json;
 using ByteSync.ServerCommon.Business.Auth;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -22,8 +21,7 @@ public static class FunctionHelper
     {
         string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
         
-        var options = JsonSerializerOptionsHelper.BuildOptions(true, true);
-        var deserializedObject = JsonSerializer.Deserialize<T>(requestBody, options);
+        var deserializedObject = JsonHelper.Deserialize<T>(requestBody);
         if (deserializedObject == null)
         {
             throw new ArgumentNullException(nameof(deserializedObject), "Deserialized object cannot be null");

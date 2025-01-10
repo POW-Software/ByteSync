@@ -6,6 +6,7 @@ using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.ViewModels.Sessions.Cloud.Managing;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -18,9 +19,9 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;
     private readonly IDataInventoryStarter _dataInventoryStarter;
-    private readonly AnalysisModeViewModelFactory _analysisModeViewModelFactory;
-    private readonly DataTypeViewModelFactory _dataTypeViewModelFactory;
-    private readonly LinkingKeyViewModelFactory _linkingKeyViewModelFactory;
+    private readonly IAnalysisModeViewModelFactory _analysisModeViewModelFactory;
+    private readonly IDataTypeViewModelFactory _dataTypeViewModelFactory;
+    private readonly ILinkingKeyViewModelFactory _linkingKeyViewModelFactory;
 
 #if DEBUG
     public SessionSettingsEditViewModel()
@@ -30,33 +31,33 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
 #endif
 
     public SessionSettingsEditViewModel(ISessionService sessionService, ILocalizationService localizationService, IDataInventoryStarter dataInventoryStarter,
-        AnalysisModeViewModelFactory analysisModeViewModelFactory, DataTypeViewModelFactory dataTypeViewModelFactory, 
-        LinkingKeyViewModelFactory linkingKeyViewModelFactory, SessionSettings? sessionSettings)
+        IAnalysisModeViewModelFactory analysisModeViewModelFactory, IDataTypeViewModelFactory dataTypeViewModelFactory, 
+        ILinkingKeyViewModelFactory linkingKeyViewModelFactory, SessionSettings? sessionSettings)
     {
         _sessionService = sessionService;
         _localizationService = localizationService;
         _dataInventoryStarter = dataInventoryStarter;
-        _analysisModeViewModelFactory = analysisModeViewModelFactory;
+        _analysisModeViewModelFactory = analysisModeViewModelFactory ?? throw new ArgumentNullException(nameof(analysisModeViewModelFactory));
         _dataTypeViewModelFactory = dataTypeViewModelFactory;
         _linkingKeyViewModelFactory = linkingKeyViewModelFactory;
         
         AvailableAnalysisModes =
         [
-            _analysisModeViewModelFactory.Invoke(AnalysisModes.Smart),
-            _analysisModeViewModelFactory.Invoke(AnalysisModes.Checksum)
+            _analysisModeViewModelFactory.CreateAnalysisModeViewModel(AnalysisModes.Smart),
+            _analysisModeViewModelFactory.CreateAnalysisModeViewModel(AnalysisModes.Checksum)
         ];
 
         AvailableDataTypes =
         [
-            _dataTypeViewModelFactory.Invoke(DataTypes.FilesDirectories),
-            _dataTypeViewModelFactory.Invoke(DataTypes.Files),
-            _dataTypeViewModelFactory.Invoke(DataTypes.Directories)
+            _dataTypeViewModelFactory.CreateDataTypeViewModel(DataTypes.FilesDirectories),
+            _dataTypeViewModelFactory.CreateDataTypeViewModel(DataTypes.Files),
+            _dataTypeViewModelFactory.CreateDataTypeViewModel(DataTypes.Directories)
         ];
 
         AvailableLinkingKeys =
         [
-            _linkingKeyViewModelFactory.Invoke(LinkingKeys.RelativePath),
-            _linkingKeyViewModelFactory.Invoke(LinkingKeys.Name)
+            _linkingKeyViewModelFactory.CreateLinkingKeyViewModel(LinkingKeys.RelativePath),
+            _linkingKeyViewModelFactory.CreateLinkingKeyViewModel(LinkingKeys.Name)
         ];
 
         Extensions = "";

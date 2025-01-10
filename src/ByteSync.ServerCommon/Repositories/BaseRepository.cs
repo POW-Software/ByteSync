@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Text.Json;
 using ByteSync.Common.Controls.Json;
 using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Repositories;
@@ -149,8 +148,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
         string? serializedElement = await _cacheService.GetDatabase().StringGetAsync(cacheKey);
         if (serializedElement.IsNotEmpty())
         {
-            var settings = JsonSerializerOptionsHelper.BuildOptions(true, true);
-            cachedElement = JsonSerializer.Deserialize<T>(serializedElement!, settings);
+            cachedElement = JsonHelper.Deserialize<T>(serializedElement!);
         }
 
         return cachedElement;
@@ -158,10 +156,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
     
     public async Task<UpdateEntityResult<T>> SetElement(string cacheKey, T createdOrUpdatedElement, IDatabaseAsync database)
     {
-        // https://stackoverflow.com/questions/13510204/json-net-self-referencing-loop-detected
-        var settings = JsonSerializerOptionsHelper.BuildOptions(true, true);
-        
-        string serializedElement = JsonSerializer.Serialize(createdOrUpdatedElement, settings);
+        string serializedElement = JsonHelper.Serialize(createdOrUpdatedElement);
 
         if (database is ITransaction)
         {

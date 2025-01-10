@@ -9,6 +9,7 @@ using ByteSync.Business.Profiles;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Lobbies;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Lobbies;
 using ByteSync.Services.Lobbies;
 using ByteSync.ViewModels.Sessions.Settings;
@@ -35,7 +36,7 @@ public class LobbyMainViewModel : ActivatableViewModelBase, IRoutableViewModel
     }
 
     public LobbyMainViewModel(IScreen screen, ILobbyManager lobbyManager, ILobbyRepository lobbyRepository, ILocalizationService localizationService,
-        SessionSettingsEditViewModelFactory sessionSettingsEditViewModelFactory, 
+        ISessionSettingsEditViewModelFactory sessionSettingsEditViewModelFactory, 
         ILobbySynchronizationRuleViewModelFactory lobbySynchronizationRuleViewModelFactory)
     {
         HostScreen = screen;
@@ -50,7 +51,7 @@ public class LobbyMainViewModel : ActivatableViewModelBase, IRoutableViewModel
         #if DEBUG
             if (Design.IsDesignMode)
             {
-                SessionSettingsEditViewModel = sessionSettingsEditViewModelFactory!.Invoke(SessionSettings.BuildDefault());
+                SessionSettingsEditViewModel = sessionSettingsEditViewModelFactory.CreateSessionSettingsEditViewModel(SessionSettings.BuildDefault());
                 LobbyId = "DesignLobbyId";
                 return;
             }
@@ -80,7 +81,7 @@ public class LobbyMainViewModel : ActivatableViewModelBase, IRoutableViewModel
         
         ProfileName = ProfileDetails.Name;
         
-        SessionSettingsEditViewModel = sessionSettingsEditViewModelFactory!.Invoke(ProfileDetails.Options.Settings);
+        SessionSettingsEditViewModel = sessionSettingsEditViewModelFactory.CreateSessionSettingsEditViewModel(ProfileDetails.Options.Settings);
 
         this.WhenAnyValue(x => x.Members[0].LobbyMember.LobbyMemberInfo)
             .ObserveOn(RxApp.MainThreadScheduler)

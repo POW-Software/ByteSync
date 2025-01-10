@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using ByteSync.Business.Actions.Local;
-using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
 

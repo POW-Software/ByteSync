@@ -62,7 +62,7 @@ public class GraphicalUserInterfaceBootstrapper : BaseBootstrapper
         // // LoggerService
         // _loggerService.Initialize();
 
-        LogBootstrap();
+        // LogBootstrap();
         
         // Application Settings
         // _applicationSettingsRepository.Initialize();

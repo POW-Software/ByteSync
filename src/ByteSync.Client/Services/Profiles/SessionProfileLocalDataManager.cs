@@ -5,6 +5,7 @@ using ByteSync.Business.Profiles;
 using ByteSync.Common.Business.Lobbies;
 using ByteSync.Common.Business.Lobbies.Connections;
 using ByteSync.Common.Business.SharedFiles;
+using ByteSync.Common.Controls.Json;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Profiles;
@@ -160,7 +161,7 @@ public class SessionProfileLocalDataManager : ISessionProfileLocalDataManager
 
             var cloudSessionProfileDetails = JsonHelper.Deserialize<CloudSessionProfileDetails>(decrypted2);
 
-            return cloudSessionProfileDetails!;
+            return cloudSessionProfileDetails;
         });
     }
     
@@ -226,8 +227,6 @@ public class SessionProfileLocalDataManager : ISessionProfileLocalDataManager
             var content = infoStreamReader.ReadToEnd();
             
             var sessionProfile = JsonHelper.Deserialize<T>(content);
-            
-            // var lastRunInfo = directoryInfo.GetFiles().
 
             return sessionProfile;
         }
