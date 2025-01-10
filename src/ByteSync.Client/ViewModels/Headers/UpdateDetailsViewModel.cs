@@ -11,6 +11,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Factories.Proxies;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Repositories.Updates;
 using ByteSync.Interfaces.Updates;
 using ByteSync.ViewModels.Misc;
 using DynamicData;
@@ -26,7 +27,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
     private readonly IAvailableUpdateRepository _availableUpdateRepository;
     private readonly ILocalizationService _localizationService;
     private readonly IWebAccessor _webAccessor;
-    private readonly IUpdateProgressRepository _updateProgressRepository;
+    private readonly IUpdateRepository _updateRepository;
     private readonly ISoftwareVersionProxyFactory _softwareVersionProxyFactory;
     private readonly ILogger<UpdateDetailsViewModel> _logger;
     
@@ -38,7 +39,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
     }
 
     public UpdateDetailsViewModel(IUpdateService updateService, IAvailableUpdateRepository availableAvailableUpdateRepository, 
-        ILocalizationService localizationService, IWebAccessor webAccessor, IUpdateProgressRepository updateProgressRepository,
+        ILocalizationService localizationService, IWebAccessor webAccessor, IUpdateRepository updateRepository,
         ISoftwareVersionProxyFactory softwareVersionProxyFactory, ILogger<UpdateDetailsViewModel> logger)
     {
         AvailableUpdatesMessage = "";
@@ -50,7 +51,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         _availableUpdateRepository = availableAvailableUpdateRepository;
         _localizationService = localizationService;
         _webAccessor = webAccessor;
-        _updateProgressRepository = updateProgressRepository;
+        _updateRepository = updateRepository;
         _softwareVersionProxyFactory = softwareVersionProxyFactory;
         _logger = logger;
 
@@ -81,7 +82,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
             //     .Subscribe(FillSoftwareVersions)
             //     .DisposeWith(disposables);
 
-            _updateProgressRepository.Progress.ProgressChanged += UpdateManager_ProgressReported;
+            _updateRepository.Progress.ProgressChanged += UpdateManager_ProgressReported;
         });
     }
 

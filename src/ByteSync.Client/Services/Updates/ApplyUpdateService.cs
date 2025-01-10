@@ -8,6 +8,7 @@ using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
+using ByteSync.Interfaces.Repositories.Updates;
 using ByteSync.Interfaces.Updates;
 using ByteSync.Services.Misc;
 
@@ -17,40 +18,43 @@ public class ApplyUpdateService : IApplyUpdateService
 {
     private readonly IEnvironmentService _environmentService;
     private readonly ILocalApplicationDataManager _localApplicationDataManager;
+    private readonly IUpdateRepository _updateRepository;
     private readonly IUpdateHelperService _updateHelperService;
+    private readonly IUpdateDownloader _updateDownloader;
     private readonly IApplicationRestarter _applicationRestarter;
+    private readonly IUpdateExistingFilesBackuper _updateExistingFilesBackuper;
+    private readonly IUpdateExtractor _updateExtractor;
     private readonly ILogger<ApplyUpdateService> _logger;
 
     public ApplyUpdateService(IEnvironmentService environmentService, ILocalApplicationDataManager localApplicationDataManager, 
-        IUpdateProgressRepository updateProgressRepository, IUpdateHelperService updateHelperService,
-        IApplicationRestarter applicationRestarter, ILogger<ApplyUpdateService> logger)
+        IUpdateRepository updateRepository, IUpdateHelperService updateHelperService, IUpdateDownloader updateDownloader,
+        IApplicationRestarter applicationRestarter, IUpdateExistingFilesBackuper updateExistingFilesBackuper, 
+        IUpdateExtractor updateExtractor, ILogger<ApplyUpdateService> logger)
     {
         _environmentService = environmentService;
         _localApplicationDataManager = localApplicationDataManager;
+        _updateRepository = updateRepository;
         _updateHelperService = updateHelperService;
+        _updateDownloader = updateDownloader;
         _applicationRestarter = applicationRestarter;
+        _updateExistingFilesBackuper = updateExistingFilesBackuper;
+        _updateExtractor = updateExtractor;
         _logger = logger;
-        
-        Progress = updateProgressRepository.Progress;
     }
 
     public string ApplicationLauncherFullName { get; private set; }
         
-    public string? ApplicationBaseDirectory { get; private set; }
-        
-    public IProgress<UpdateProgress> Progress { get; }
-        
-    public string FileToDownload { get; private set; }
-        
-    public string DownloadLocation { get; private set; }
-        
-    public string UnzipLocation { get; private set; }
-        
-    public SoftwareVersionFile SoftwareVersionFile { get; private set; }
+    // public string? ApplicationBaseDirectory { get; private set; }
+    //     
+    // public string FileToDownload { get; private set; }
+    //     
+    // public string DownloadLocation { get; private set; }
+    //     
+    // public string UnzipLocation { get; private set; }
 
     public async Task<bool> Update(SoftwareVersion softwareVersion, SoftwareVersionFile softwareVersionFile, CancellationToken cancellationToken)
     {
-        SoftwareVersionFile = softwareVersionFile;
+        _updateRepository.UpdateData = new UpdateData { SoftwareVersionFile = softwareVersionFile };
             
         _logger.LogInformation("UpdateApplier: Starting update");
 
@@ -63,7 +67,7 @@ public class ApplyUpdateService : IApplyUpdateService
             }
         }
 
-        FileToDownload = softwareVersionFile.FileUri;
+        // FileToDownload = softwareVersionFile.FileUri;
         
         ApplicationLauncherFullName = _applicationRestarter.ApplicationLauncherFullName;
         // ApplicationBaseDirectory = new FileInfo(ApplicationLauncherFullName).Directory!.FullName;
@@ -76,45 +80,45 @@ public class ApplyUpdateService : IApplyUpdateService
 
         _logger.LogInformation("ApplyUpdateService: Current Version: {CurrentVersion}, Update version:{Version}", currentVersion, softwareVersion.Version);
         _logger.LogInformation("ApplyUpdateService: ApplicationLauncherFullName:{ApplicationLauncherFullName}", ApplicationLauncherFullName);
-        _logger.LogInformation("ApplyUpdateService: ApplicationBaseDirectory:{ApplicationBaseDirectory}", ApplicationBaseDirectory);
-        _logger.LogInformation("ApplyUpdateService: FileToDownload:{FileToDownload}", FileToDownload);
+        _logger.LogInformation("ApplyUpdateService: ApplicationBaseDirectory:{ApplicationBaseDirectory}", _updateRepository.UpdateData.ApplicationBaseDirectory);
+        _logger.LogInformation("ApplyUpdateService: FileToDownload:{FileToDownload}", _updateRepository.UpdateData.FileToDownload);
         _logger.LogInformation("ApplyUpdateService: Platform:{Platform}", softwareVersionFile.Platform);
         _logger.LogInformation("ApplyUpdateService: Level:{Level}", softwareVersion.Level);
-        _logger.LogInformation("ApplyUpdateService: DownloadLocation:{DownloadLocation}", DownloadLocation);
-        _logger.LogInformation("ApplyUpdateService: UnzipLocation:{UnzipLocation}", UnzipLocation);
+        _logger.LogInformation("ApplyUpdateService: DownloadLocation:{DownloadLocation}", _updateRepository.UpdateData.DownloadLocation);
+        _logger.LogInformation("ApplyUpdateService: UnzipLocation:{UnzipLocation}", _updateRepository.UpdateData.UnzipLocation);
 
             
         // Téléchargement et contrôle du fichier téléchargé
-        var updateDownloader = new UpdateDownloader(SoftwareVersionFile, Progress);
-        await updateDownloader.Download(FileToDownload, DownloadLocation, cancellationToken); 
+        // var updateDownloader = new UpdateDownloader(SoftwareVersionFile, Progress);
+        await _updateDownloader.DownloadAsync(cancellationToken); 
         if (cancellationToken.IsCancellationRequested)
         {
             return false;
         }
-        await updateDownloader.CheckDownload();
+        await _updateDownloader.CheckDownloadAsync();
 
         if (cancellationToken.IsCancellationRequested)
         {
             return false;
         }
             
-        // On force UpdateExtractor à loader sharpziplib
-        var updateUnzipper = new UpdateExtractor();
-        updateUnzipper.Bump();
+        // // On force UpdateExtractor à loader sharpziplib
+        // var updateUnzipper = new UpdateExtractor();
+        // updateUnzipper.Bump();
             
         // Renommage des fichiers existants
-        Progress.Report(new UpdateProgress(UpdateProgressStatus.BackingUpExistingFiles));
-        var updateRenamer = new UpdateExistingFilesBackuper(softwareVersionFile);
-        await updateRenamer.BackupExistingFilesAsync(ApplicationBaseDirectory!);
+        ReportProgress(new UpdateProgress(UpdateProgressStatus.BackingUpExistingFiles));
+        // var updateRenamer = new UpdateExistingFilesBackuper(softwareVersionFile);
+        await _updateExistingFilesBackuper.BackupExistingFilesAsync(cancellationToken);
         if (cancellationToken.IsCancellationRequested)
         {
             return false;
         }
             
         // Décompression
-        Progress.Report(new UpdateProgress(UpdateProgressStatus.Extracting));
-        updateUnzipper = new UpdateExtractor();
-        await updateUnzipper.ExtractAsync(SoftwareVersionFile, DownloadLocation, UnzipLocation);
+        ReportProgress(new UpdateProgress(UpdateProgressStatus.Extracting));
+        // updateUnzipper = new UpdateExtractor();
+        await _updateExtractor.ExtractAsync();
         if (cancellationToken.IsCancellationRequested)
         {
             return false;
@@ -135,21 +139,21 @@ public class ApplyUpdateService : IApplyUpdateService
         // CheckPermissions();
 
         // Lancement et fermeture du programme actuel
-        Progress.Report(new UpdateProgress(UpdateProgressStatus.RestartingApplication));
+        ReportProgress(new UpdateProgress(UpdateProgressStatus.RestartingApplication));
         if (!Environment.GetCommandLineArgs().Any(a => a.Equals(RegularArguments.UPDATE)))
         {
             _logger.LogInformation("UpdateApplier: Update applied successfully, restarting the application");
             await _applicationRestarter.StartNewInstance();
                 
             // Suppression du fichier zip téléchargé et du répertoire de décompression
-            DeleteSnippets(updateRenamer.BackedUpFileSystemInfos);
+            DeleteSnippets(_updateExistingFilesBackuper.BackedUpFileSystemInfos);
                 
             await _applicationRestarter.Shutdown(1);
         }
         else
         {
             // Suppression du fichier zip téléchargé et du répertoire de décompression
-            DeleteSnippets(updateRenamer.BackedUpFileSystemInfos);
+            DeleteSnippets(_updateExistingFilesBackuper.BackedUpFileSystemInfos);
                 
             await _applicationRestarter.Shutdown(0);
         }
@@ -157,14 +161,21 @@ public class ApplyUpdateService : IApplyUpdateService
         return true;
     }
 
+    private void ReportProgress(UpdateProgress updateProgress)
+    {
+        ((IProgress<UpdateProgress>) _updateRepository.Progress).Report(updateProgress);
+    }
+
     private void ComputeApplicationBaseDirectory()
     {
-        ApplicationBaseDirectory = _updateHelperService.GetApplicationBaseDirectory()?.FullName;
+        var applicationBaseDirectory = _updateHelperService.GetApplicationBaseDirectory()?.FullName;
 
-        if (ApplicationBaseDirectory == null)
+        if (applicationBaseDirectory == null)
         {
             throw new ApplicationException("Unable to guess ApplicationBaseDirectory");
         }
+
+        _updateRepository.UpdateData.ApplicationBaseDirectory = applicationBaseDirectory;
 
         // var applicationLauncher = new FileInfo(ApplicationLauncherFullName);
         //
@@ -248,12 +259,12 @@ public class ApplyUpdateService : IApplyUpdateService
         // Suppression du fichier zip téléchargé
         try
         {
-            _logger.LogInformation("UpdateApplier: Deleting snippet {DownloadLocation}", DownloadLocation);
-            File.Delete(DownloadLocation);
+            _logger.LogInformation("UpdateApplier: Deleting snippet {DownloadLocation}", _updateRepository.UpdateData.DownloadLocation);
+            File.Delete(_updateRepository.UpdateData.DownloadLocation);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Cannot delete snippet at {DownloadLocation}", DownloadLocation);
+            _logger.LogError(ex, "Cannot delete snippet at {DownloadLocation}", _updateRepository.UpdateData.DownloadLocation);
         }
             
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -287,7 +298,7 @@ public class ApplyUpdateService : IApplyUpdateService
 
     private void ComputeDownloadLocation()
     {
-        string nameCandidate = SoftwareVersionFile.FileName;
+        string nameCandidate = _updateRepository.UpdateData.SoftwareVersionFile.FileName;
 
         string fullName = IOUtils.Combine(_localApplicationDataManager.ApplicationDataPath, nameCandidate);
         if (File.Exists(fullName))
@@ -297,27 +308,17 @@ public class ApplyUpdateService : IApplyUpdateService
             do
             {
                 cpt += 1;
-                nameCandidate = $"{cpt}_{SoftwareVersionFile.FileName}";
+                nameCandidate = $"{cpt}_{_updateRepository.UpdateData.SoftwareVersionFile.FileName}";
                 fullName = IOUtils.Combine(_localApplicationDataManager.ApplicationDataPath, nameCandidate);
             } 
             while (File.Exists(fullName));
         }
-
-        DownloadLocation = fullName;
+        
+        _updateRepository.UpdateData.DownloadLocation = fullName;
     }
         
     private void ComputeUnzipLocation()
     {
-        // string fullName;
-        // int cpt = 0;
-        // do
-        // {
-        //     cpt += 1;
-        //     string nameCandidate = $"update_unzip_{cpt}";
-        //     fullName = IOUtils.Combine(ApplicationBaseDirectory, nameCandidate);
-        // }
-        // while (File.Exists(fullName));
-            
-        UnzipLocation = ApplicationBaseDirectory;
+        _updateRepository.UpdateData.UnzipLocation = _updateRepository.UpdateData.ApplicationBaseDirectory;
     }
 }

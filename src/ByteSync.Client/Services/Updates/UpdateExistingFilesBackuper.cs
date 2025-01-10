@@ -1,43 +1,53 @@
 ﻿using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
-using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Helpers;
-using Serilog;
+using ByteSync.Interfaces.Repositories.Updates;
+using ByteSync.Interfaces.Updates;
 
 namespace ByteSync.Services.Updates;
 
-public class UpdateExistingFilesBackuper
+public class UpdateExistingFilesBackuper : IUpdateExistingFilesBackuper
 {
+    private readonly IUpdateRepository _updateRepository;
+    private readonly ILogger<UpdateExistingFilesBackuper> _logger;
+
     public const string BAK_EXTENSION = "pow_upd_bak";
     
-    public UpdateExistingFilesBackuper(SoftwareVersionFile softwareVersionFile)
+    public UpdateExistingFilesBackuper(IUpdateRepository updateRepository, ILogger<UpdateExistingFilesBackuper> logger)
     {
-        SoftwareVersionFile = softwareVersionFile;
+        _updateRepository = updateRepository;
+        _logger = logger;
 
         BackedUpFileSystemInfos = new List<Tuple<string, string>>();
     }
     
-    private SoftwareVersionFile SoftwareVersionFile { get; }
-    
     public List<Tuple<string, string>> BackedUpFileSystemInfos { get; }
 
-    public async Task BackupExistingFilesAsync(string applicationBaseDirectory)
+    public async Task BackupExistingFilesAsync(CancellationToken cancellationToken)
     {
-        await Task.Run(() => BackupExistingFiles(applicationBaseDirectory));
+        await Task.Run(() => BackupExistingFiles(cancellationToken));
     }
 
-    private void BackupExistingFiles(string applicationBaseDirectory)
+    private void BackupExistingFiles(CancellationToken cancellationToken)
     {
-        DirectoryInfo applicationBaseDirectoryInfo = new DirectoryInfo(applicationBaseDirectory);
+        DirectoryInfo applicationBaseDirectoryInfo = new DirectoryInfo(_updateRepository.UpdateData.ApplicationBaseDirectory);
         
         foreach (var fileSystemInfo in applicationBaseDirectoryInfo.GetFileSystemInfos())
         {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                _logger.LogWarning("UpdateExistingFilesBackuper.BackupExistingFiles: Cancellation requested");
+                
+                return;
+            }
+            
             if (fileSystemInfo is DirectoryInfo)
             {
                 if (!fileSystemInfo.Name.Equals("Contents", StringComparison.InvariantCultureIgnoreCase) &&
                     !fileSystemInfo.Name.Equals("ByteSync.app", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    Log.Information("UpdateExistingFilesBackuper.BackupExistingFiles: ignored directory {directory}", fileSystemInfo.FullName);
+                    _logger.LogInformation("UpdateExistingFilesBackuper.BackupExistingFiles: ignored directory {directory}", fileSystemInfo.FullName);
                     
                     continue;
                 }
@@ -55,7 +65,7 @@ public class UpdateExistingFilesBackuper
                     (fi.Name.StartsWith("unins", StringComparison.InvariantCultureIgnoreCase)
                      && fi.Extension.Equals(".exe", StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    Log.Information("UpdateExistingFilesBackuper.BackupExistingFiles: ignored file {file}", fileSystemInfo.FullName);
+                    _logger.LogInformation("UpdateExistingFilesBackuper.BackupExistingFiles: ignored file {file}", fileSystemInfo.FullName);
                     
                     continue;
                 }
@@ -72,7 +82,7 @@ public class UpdateExistingFilesBackuper
                 backupDestination = $"{fileSystemInfo.FullName}.{BAK_EXTENSION}{cpt}";
             }
             
-            Log.Information("UpdateExistingFilesBackuper: Renaming {Source} to {Destination}", previousFullName, backupDestination);
+            _logger.LogInformation("UpdateExistingFilesBackuper: Renaming {Source} to {Destination}", previousFullName, backupDestination);
 
             if (fileSystemInfo is FileInfo fileInfo)
             {
