@@ -5,7 +5,7 @@ using Module = Autofac.Module;
 
 namespace ByteSync.DependencyInjection.Modules;
 
-public class AutoScanningModule : Module
+public class AutoDetectionModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
@@ -18,6 +18,15 @@ public class AutoScanningModule : Module
                         && t.Namespace != null 
                         && t.Namespace.StartsWith("ByteSync.Services")
                         && !t.Name.EndsWith("Service"))
+            .AsImplementedInterfaces()
+            .InstancePerLifetimeScope();
+        
+        builder.RegisterAssemblyTypes(executingAssembly)
+            .Where(t => t.IsClass
+                        && !t.IsAbstract 
+                        && t.GetInterfaces().Any()
+                        && t.Namespace != null 
+                        && t.Namespace.StartsWith("ByteSync.Common.Controls"))
             .AsImplementedInterfaces()
             .InstancePerLifetimeScope();
         

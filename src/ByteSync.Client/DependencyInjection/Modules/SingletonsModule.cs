@@ -1,5 +1,5 @@
-﻿using Autofac;
-using ByteSync.Interfaces.Controls.Bootstrapping;
+﻿using System.IO.Abstractions;
+using Autofac;
 using ByteSync.Services.Bootstrappers;
 using ByteSync.Services.Communications;
 using ByteSync.Services.Communications.SignalR;
@@ -11,6 +11,8 @@ public class SingletonsModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
+        builder.RegisterType<FileSystem>().SingleInstance().As<IFileSystem>();
+        
         builder.RegisterType<CloudProxy>().SingleInstance().AsImplementedInterfaces();
         builder.RegisterType<NavigationService>().SingleInstance().AsImplementedInterfaces();
         

@@ -2,7 +2,9 @@
 using ByteSync.Business.Misc;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Communications;
+using ByteSync.Interfaces.Controls.Bootstrapping;
 using ByteSync.Interfaces.Controls.TimeTracking;
+using ByteSync.Services.Bootstrappers;
 using ByteSync.Services.Communications.Transfers.AfterTransfers;
 using ByteSync.Services.TimeTracking;
 
@@ -21,5 +23,8 @@ public class KeyedTypesModule : Module
         builder.RegisterType<AfterTransferSynchronizationSharedFile>().Keyed<IAfterTransferSharedFile>(SharedFileTypes.FullSynchronization);
         builder.RegisterType<AfterTransferInventorySharedFile>().Keyed<IAfterTransferSharedFile>(SharedFileTypes.BaseInventory);
         builder.RegisterType<AfterTransferInventorySharedFile>().Keyed<IAfterTransferSharedFile>(SharedFileTypes.FullInventory);
+        
+        builder.RegisterType<GraphicalUserInterfaceBootstrapper>().Keyed<IBootstrapper>(OperationMode.GraphicalUserInterface);
+        builder.RegisterType<CommandLineBootstrapper>().Keyed<IBootstrapper>(OperationMode.CommandLine);
     }
 }
