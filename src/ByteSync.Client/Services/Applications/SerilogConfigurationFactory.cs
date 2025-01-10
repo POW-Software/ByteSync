@@ -43,6 +43,7 @@ public class SerilogConfigurationFactory
             .MinimumLevel.Override("ReactiveUI", LogEventLevel.Warning)
             .MinimumLevel.Override("Avalonia", LogEventLevel.Warning)
             .MinimumLevel.Override("System.Net.Http", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.Extensions.Http", LogEventLevel.Warning)
             .Enrich.FromLogContext()
             .Enrich.With<ExceptionEnricher>()
             .WriteTo.Async(a => a.File(new ConditionalFormatter(),

@@ -27,7 +27,5 @@ public class EnvironmentModule : Module
         var loggerService = new SerilogConfigurationFactory(localApplicationDataManager, environmentService);
         var loggerConfiguration = loggerService.BuildLoggerConfiguration();
         builder.RegisterSerilog(loggerConfiguration);
-
-        builder.RegisterType<EventAggregator>().As<IEventAggregator>();
     }
 }

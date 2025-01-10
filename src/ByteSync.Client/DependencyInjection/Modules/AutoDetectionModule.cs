@@ -10,25 +10,15 @@ public class AutoDetectionModule : Module
     protected override void Load(ContainerBuilder builder)
     {
         var executingAssembly = Assembly.GetExecutingAssembly();
-        
         builder.RegisterAssemblyTypes(executingAssembly)
             .Where(t => t.IsClass
-                        && !t.IsAbstract 
+                        && !t.IsAbstract
                         && t.GetInterfaces().Any()
-                        && t.Namespace != null 
+                        && t.Namespace != null
                         && t.Namespace.StartsWith("ByteSync.Services")
-                        && !t.Name.EndsWith("Service"))
-            .AsImplementedInterfaces()
-            .InstancePerLifetimeScope();
-        
-        builder.RegisterAssemblyTypes(executingAssembly)
-            .Where(t => t.IsClass
-                        && !t.IsAbstract 
-                        && t.GetInterfaces().Any()
-                        && t.Namespace != null 
-                        && t.Namespace.StartsWith("ByteSync.Common.Controls"))
-            .AsImplementedInterfaces()
-            .InstancePerLifetimeScope();
+                        && !t.Name.EndsWith("Service")
+                        && !t.Namespace.Contains("PushReceivers"))
+            .AsImplementedInterfaces();
         
         builder.RegisterAssemblyTypes(executingAssembly)
             .Where(t => t.Name.EndsWith("Service") && t.Name != "EnvironmentService")
@@ -85,11 +75,10 @@ public class AutoDetectionModule : Module
             .AssignableTo<IPushReceiver>()
             .As<IPushReceiver>()
             .SingleInstance();
-        
+
         builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
             .Where(t => t.Name.EndsWith("ViewModel"))
-            .AsSelf()
-            .InstancePerLifetimeScope();
+            .AsSelf();
 
         builder.RegisterAssemblyTypes(executingAssembly)
             .Where(t => t.Name.EndsWith("Proxy"));

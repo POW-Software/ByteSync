@@ -1,8 +1,10 @@
 ﻿using Autofac;
+using ByteSync.Common.Interfaces;
 using ByteSync.DependencyInjection.Modules;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Bootstrapping;
+using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Services;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
@@ -19,13 +21,15 @@ public static class ServiceRegistrar
         var serviceCollection = new ServiceCollection();
         builder.RegisterModule(new ServiceCollectionModule(serviceCollection));
         
+        builder.RegisterModule<AutoDetectionModule>();
         builder.RegisterModule<ConfigurationModule>();
         builder.RegisterModule<EnvironmentModule>();
-        builder.RegisterModule<AutoDetectionModule>();
+        // builder.RegisterModule<AutoDetectionModule>();
         builder.RegisterModule<GenericTypesModule>();
         builder.RegisterModule<KeyedTypesModule>();
         builder.RegisterModule<SingletonsModule>();
         builder.RegisterModule<ViewModelsModule>();
+        builder.RegisterModule<ExternalAssembliesModule>();
 
         var autofacResolver = builder.UseAutofacDependencyResolver();
         builder.RegisterInstance(autofacResolver);
