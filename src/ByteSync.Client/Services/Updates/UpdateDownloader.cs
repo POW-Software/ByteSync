@@ -116,7 +116,7 @@ public class UpdateDownloader : IUpdateDownloader
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error disposing HttpClient.");
+            _logger.LogError(ex, "Error disposing HttpClient");
         }
 
         // _httpClient.GetAsync()
@@ -211,7 +211,7 @@ public class UpdateDownloader : IUpdateDownloader
 
         if (isValid)
         {
-            _logger.LogInformation("Downloaded file checksum is valid.");
+            _logger.LogInformation("Downloaded file checksum is valid");
         }
         else
         {
