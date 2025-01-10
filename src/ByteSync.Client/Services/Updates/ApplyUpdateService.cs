@@ -10,26 +10,26 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Updates;
 using ByteSync.Services.Misc;
-using Serilog;
-using Splat;
 
 namespace ByteSync.Services.Updates;
 
 public class ApplyUpdateService : IApplyUpdateService
 {
-    private readonly IAvailableUpdatesLister _availableUpdatesLister;
     private readonly IEnvironmentService _environmentService;
     private readonly ILocalApplicationDataManager _localApplicationDataManager;
     private readonly IUpdateHelperService _updateHelperService;
+    private readonly IApplicationRestarter _applicationRestarter;
+    private readonly ILogger<ApplyUpdateService> _logger;
 
-    public ApplyUpdateService(IAvailableUpdatesLister availableUpdatesLister, IEnvironmentService environmentService,
-        ILocalApplicationDataManager localApplicationDataManager, IUpdateProgressRepository updateProgressRepository,
-        IUpdateHelperService updateHelperService)
+    public ApplyUpdateService(IEnvironmentService environmentService, ILocalApplicationDataManager localApplicationDataManager, 
+        IUpdateProgressRepository updateProgressRepository, IUpdateHelperService updateHelperService,
+        IApplicationRestarter applicationRestarter, ILogger<ApplyUpdateService> logger)
     {
-        _availableUpdatesLister = availableUpdatesLister;
         _environmentService = environmentService;
         _localApplicationDataManager = localApplicationDataManager;
         _updateHelperService = updateHelperService;
+        _applicationRestarter = applicationRestarter;
+        _logger = logger;
         
         Progress = updateProgressRepository.Progress;
     }
@@ -52,7 +52,7 @@ public class ApplyUpdateService : IApplyUpdateService
     {
         SoftwareVersionFile = softwareVersionFile;
             
-        Log.Information("UpdateApplier: Starting update");
+        _logger.LogInformation("UpdateApplier: Starting update");
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
@@ -64,9 +64,8 @@ public class ApplyUpdateService : IApplyUpdateService
         }
 
         FileToDownload = softwareVersionFile.FileUri;
-            
-        var applicationRestarter = Locator.Current.GetService<IApplicationRestarter>()!;
-        ApplicationLauncherFullName = applicationRestarter.ApplicationLauncherFullName;
+        
+        ApplicationLauncherFullName = _applicationRestarter.ApplicationLauncherFullName;
         // ApplicationBaseDirectory = new FileInfo(ApplicationLauncherFullName).Directory!.FullName;
 
         ComputeApplicationBaseDirectory();
@@ -75,14 +74,14 @@ public class ApplyUpdateService : IApplyUpdateService
 
         var currentVersion = VersionHelper.GetVersionString(_environmentService.ApplicationVersion);
 
-        Log.Information("UpdateApplier: Current Version: {CurrentVersion}, Update version:{Version}", currentVersion, softwareVersion.Version);
-        Log.Information("UpdateApplier: ApplicationLauncherFullName:{ApplicationLauncherFullName}", ApplicationLauncherFullName);
-        Log.Information("UpdateApplier: ApplicationBaseDirectory:{ApplicationBaseDirectory}", ApplicationBaseDirectory);
-        Log.Information("UpdateApplier: FileToDownload:{FileToDownload}", FileToDownload);
-        Log.Information("UpdateApplier: Platform:{Platform}", softwareVersionFile.Platform);
-        Log.Information("UpdateApplier: Level:{Level}", softwareVersion.Level);
-        Log.Information("UpdateApplier: DownloadLocation:{DownloadLocation}", DownloadLocation);
-        Log.Information("UpdateApplier: UnzipLocation:{UnzipLocation}", UnzipLocation);
+        _logger.LogInformation("ApplyUpdateService: Current Version: {CurrentVersion}, Update version:{Version}", currentVersion, softwareVersion.Version);
+        _logger.LogInformation("ApplyUpdateService: ApplicationLauncherFullName:{ApplicationLauncherFullName}", ApplicationLauncherFullName);
+        _logger.LogInformation("ApplyUpdateService: ApplicationBaseDirectory:{ApplicationBaseDirectory}", ApplicationBaseDirectory);
+        _logger.LogInformation("ApplyUpdateService: FileToDownload:{FileToDownload}", FileToDownload);
+        _logger.LogInformation("ApplyUpdateService: Platform:{Platform}", softwareVersionFile.Platform);
+        _logger.LogInformation("ApplyUpdateService: Level:{Level}", softwareVersion.Level);
+        _logger.LogInformation("ApplyUpdateService: DownloadLocation:{DownloadLocation}", DownloadLocation);
+        _logger.LogInformation("ApplyUpdateService: UnzipLocation:{UnzipLocation}", UnzipLocation);
 
             
         // Téléchargement et contrôle du fichier téléchargé
@@ -127,8 +126,8 @@ public class ApplyUpdateService : IApplyUpdateService
         // await updateReplacer.ReplaceFilesAsync(UnzipLocation, ApplicationBaseDirectory);
         // // await updateReplacer.DeleteBackupData();
 
-        applicationRestarter.RefreshApplicationLauncherFullName();
-        ApplicationLauncherFullName = applicationRestarter.ApplicationLauncherFullName;
+        _applicationRestarter.RefreshApplicationLauncherFullName();
+        ApplicationLauncherFullName = _applicationRestarter.ApplicationLauncherFullName;
             
         // Suppression du fichier zip téléchargé et du répertoire de décompression
         //DeleteSnippets(updateRenamer.BackedUpFileSystemInfos);
@@ -139,20 +138,20 @@ public class ApplyUpdateService : IApplyUpdateService
         Progress.Report(new UpdateProgress(UpdateProgressStatus.RestartingApplication));
         if (!Environment.GetCommandLineArgs().Any(a => a.Equals(RegularArguments.UPDATE)))
         {
-            Log.Information("UpdateApplier: Update applied successfully, restarting the application");
-            await applicationRestarter.StartNewInstance();
+            _logger.LogInformation("UpdateApplier: Update applied successfully, restarting the application");
+            await _applicationRestarter.StartNewInstance();
                 
             // Suppression du fichier zip téléchargé et du répertoire de décompression
             DeleteSnippets(updateRenamer.BackedUpFileSystemInfos);
                 
-            await applicationRestarter.Shutdown(1);
+            await _applicationRestarter.Shutdown(1);
         }
         else
         {
             // Suppression du fichier zip téléchargé et du répertoire de décompression
             DeleteSnippets(updateRenamer.BackedUpFileSystemInfos);
                 
-            await applicationRestarter.Shutdown(0);
+            await _applicationRestarter.Shutdown(0);
         }
 
         return true;
@@ -249,12 +248,12 @@ public class ApplyUpdateService : IApplyUpdateService
         // Suppression du fichier zip téléchargé
         try
         {
-            Log.Information("UpdateApplier: Deleting snippet {DownloadLocation}", DownloadLocation);
+            _logger.LogInformation("UpdateApplier: Deleting snippet {DownloadLocation}", DownloadLocation);
             File.Delete(DownloadLocation);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Cannot delete snippet at {DownloadLocation}", DownloadLocation);
+            _logger.LogError(ex, "Cannot delete snippet at {DownloadLocation}", DownloadLocation);
         }
             
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -263,7 +262,7 @@ public class ApplyUpdateService : IApplyUpdateService
             {
                 try
                 {
-                    Log.Information("UpdateApplier: Deleting snippet {FileLocation}", backedUpFileSystemInfo.Item2);
+                    _logger.LogInformation("UpdateApplier: Deleting snippet {FileLocation}", backedUpFileSystemInfo.Item2);
 
                     if (File.Exists(backedUpFileSystemInfo.Item2))
                     {
@@ -275,12 +274,12 @@ public class ApplyUpdateService : IApplyUpdateService
                     }
                     else
                     {
-                        Log.Information("UpdateApplier: Can not delete snippet {FileLocation}. No such file or directory", backedUpFileSystemInfo.Item2);
+                        _logger.LogInformation("UpdateApplier: Can not delete snippet {FileLocation}. No such file or directory", backedUpFileSystemInfo.Item2);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Cannot delete snippet at {FileLocation}", backedUpFileSystemInfo.Item2);
+                    _logger.LogError(ex, "Cannot delete snippet at {FileLocation}", backedUpFileSystemInfo.Item2);
                 }
             }
         }

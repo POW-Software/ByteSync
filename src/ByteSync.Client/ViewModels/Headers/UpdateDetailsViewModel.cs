@@ -17,7 +17,6 @@ using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Serilog;
 
 namespace ByteSync.ViewModels.Headers;
 
@@ -29,6 +28,9 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
     private readonly IWebAccessor _webAccessor;
     private readonly IUpdateProgressRepository _updateProgressRepository;
     private readonly ISoftwareVersionProxyFactory _softwareVersionProxyFactory;
+    private readonly ILogger<UpdateDetailsViewModel> _logger;
+    
+    private ReadOnlyObservableCollection<SoftwareVersionProxy> _bindingData;
 
     public UpdateDetailsViewModel()
     {
@@ -37,7 +39,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
 
     public UpdateDetailsViewModel(IUpdateService updateService, IAvailableUpdateRepository availableAvailableUpdateRepository, 
         ILocalizationService localizationService, IWebAccessor webAccessor, IUpdateProgressRepository updateProgressRepository,
-        ISoftwareVersionProxyFactory softwareVersionProxyFactory)
+        ISoftwareVersionProxyFactory softwareVersionProxyFactory, ILogger<UpdateDetailsViewModel> logger)
     {
         AvailableUpdatesMessage = "";
         Progress = "";
@@ -50,6 +52,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         _webAccessor = webAccessor;
         _updateProgressRepository = updateProgressRepository;
         _softwareVersionProxyFactory = softwareVersionProxyFactory;
+        _logger = logger;
 
         Error = new ErrorViewModel();
         
@@ -81,8 +84,6 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
             _updateProgressRepository.Progress.ProgressChanged += UpdateManager_ProgressReported;
         });
     }
-    
-    private ReadOnlyObservableCollection<SoftwareVersionProxy> _bindingData;
 
     private CancellationTokenSource CancellationTokenSource { get; }
 
@@ -151,7 +152,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "UpdateDetailsViewModel: An error occurred while opening the release notes");
+            _logger.LogError(ex, "UpdateDetailsViewModel: An error occurred while opening the release notes");
 
             Error.SetException(ex);
         }
@@ -172,7 +173,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "UpdateDetailsViewModel: An error occurred during the update");
+            _logger.LogError(ex, "UpdateDetailsViewModel: An error occurred during the update");
 
             Error.SetException(ex);
         }

@@ -33,22 +33,18 @@
                             <TextBlock Text="{Binding Version}" Width="110" 
                                        VerticalAlignment="Center" Margin="6 0"/>
                             
-                            <!-- <Button Classes="LinkButtonLight"  -->
-                            <!--         Command="{Binding Path=DataContext.ShowReleaseNotesCommand,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"  -->
-                            <!--         CommandParameter="{Binding}" -->
-                            <!--         VerticalAlignment="Center" Margin="12 0"> -->
-                            <!--     <TextBlock Text="{localizations:Loc Login_AvailableUpdate_ReleaseNotes}" TextDecorations="Underline" /> -->
-                            <!-- </Button> -->
-                            <!-- -->
-                            <!-- <Button Classes="GenericButton" -->
-                            <!--         Command="{Binding Path=DataContext.RunUpdateCommand,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"  -->
-                            <!--         CommandParameter="{Binding}" -->
-                            <!--         Content="{localizations:Loc UpdateDetails_Update}" VerticalAlignment="Center" Margin="12 0 6 0"/> -->
+                            <Button Classes="LinkButtonLight"
+                                    Command="{Binding Path=DataContext.ShowReleaseNotesCommand,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                    CommandParameter="{Binding}"
+                                    VerticalAlignment="Center" Margin="12 0">
+                                <TextBlock Text="{localizations:Loc Login_AvailableUpdate_ReleaseNotes}" TextDecorations="Underline" />
+                            </Button>
                             
                             <Button Classes="GenericButton"
-                                    Command="{Binding Path=DataContext.DownloadUpdateCommand,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" 
+                                    Command="{Binding Path=DataContext.RunUpdateCommand,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
                                     CommandParameter="{Binding}"
-                                    Content="{localizations:Loc UpdateDetails_Download}" VerticalAlignment="Center" Margin="12 0 6 0"/>
+                                    Content="{localizations:Loc UpdateDetails_Update}" VerticalAlignment="Center" Margin="12 0 6 0"/>
+                            
                         </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
