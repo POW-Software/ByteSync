@@ -88,11 +88,11 @@ class WebAccessor : IWebAccessor
 
     private string GetReleaseNotesUrl()
     {
-        var url = "https://www.bytesyncapp.com/support/manual/release-notes/";
+        var url = "https://www.bytesyncapp.com/documentation/release-notes/";
 
         if (Equals(_localizationService.CurrentCultureDefinition?.Code, "fr"))
         {
-            url = "https://www.bytesyncapp.com/fr/support/manuel/notes-de-version/";
+            url = "https://www.bytesyncapp.com/fr/documentation/notes-de-version/";
         }
 
         return url;
@@ -102,24 +102,9 @@ class WebAccessor : IWebAccessor
     {
         if (Equals(_localizationService.CurrentCultureDefinition?.Code, "fr"))
         {
-            if (Equals(url, "https://www.bytesyncapp.com/#pricing"))
+            if (Equals(url, "https://www.bytesyncapp.com/documentation/"))
             {
-                url = "www.bytesyncapp.com/fr/#tarifs";
-            }
-
-            if (Equals(url, "https://www.bytesyncapp.com/support/"))
-            {
-                url = "https://www.bytesyncapp.com/fr/support/";
-            }
-
-            if (Equals(url, "https://www.bytesyncapp.com/support/manual/getting-started/privacy-policy/"))
-            {
-                url = "https://www.bytesyncapp.com/fr/support/manuel/demarrage/politique-de-confidentialite/";
-            }
-
-            if (Equals(url, "https://www.bytesyncapp.com/support/manual/getting-started/terms-of-use/"))
-            {
-                url = "https://www.bytesyncapp.com/fr/support/manuel/demarrage/conditions-dutilisation/";
+                url = "https://www.bytesyncapp.com/fr/documentation/";
             }
         }
 

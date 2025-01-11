@@ -1,216 +1,167 @@
-﻿using System.IO;
-using System.Text;
+﻿using System.Formats.Tar;
+using System.IO;
+using System.IO.Compression;
 using System.Threading.Tasks;
 using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Controls;
-using ByteSync.Common.Helpers;
-using ICSharpCode.SharpZipLib.GZip;
-using ICSharpCode.SharpZipLib.Tar;
-using ICSharpCode.SharpZipLib.Zip;
-using Serilog;
+using ByteSync.Interfaces.Repositories.Updates;
+using ByteSync.Interfaces.Updates;
 
 namespace ByteSync.Services.Updates;
 
-public class UpdateExtractor
-{
-    public async Task ExtractAsync(SoftwareVersionFile softwareVersionFile, string downloadLocation, string unzipLocation)
+public class UpdateExtractor : IUpdateExtractor
     {
-        await Task.Run(() => Extract(softwareVersionFile, downloadLocation, unzipLocation));
-    }
+        private readonly IUpdateRepository _updateRepository;
+        private readonly ILogger<UpdateExtractor> _logger;
 
-    public void Extract(SoftwareVersionFile softwareVersionFile, string downloadLocation, string unzipLocation)
-    {
-        bool canExtract = false;
-            
-        // windows
-        if (softwareVersionFile.Platform.In(Platform.Windows)
-            && softwareVersionFile.FileName.ToLower().EndsWith(".zip"))
+        public UpdateExtractor(IUpdateRepository updateRepository, ILogger<UpdateExtractor> logger)
         {
-            canExtract = ExtractWindows(downloadLocation, unzipLocation);
-        }
-            
-        // macos
-        if (softwareVersionFile.Platform.In(Platform.Osx)
-            && softwareVersionFile.FileName.ToLower().EndsWith(".zip"))
-        {
-            canExtract = ExtractMacOs(downloadLocation, unzipLocation);
+            _updateRepository = updateRepository;
+            _logger = logger;
         }
 
-        // linux
-        if (softwareVersionFile.Platform.In(Platform.Linux)
-            && softwareVersionFile.FileName.ToLower().EndsWith(".tar.gz"))
+        public async Task ExtractAsync()
         {
-            canExtract = ExtractLinux(downloadLocation, unzipLocation);
-        }
+            var softwareVersionFile = _updateRepository.UpdateData.SoftwareVersionFile;
+            var downloadLocation = _updateRepository.UpdateData.DownloadLocation;
+            var unzipLocation = _updateRepository.UpdateData.UnzipLocation;
 
-        if (!canExtract)
-        {
-            throw new Exception("Cannot extract archive with provided parameters");
-        }
-    }
-
-    private static bool ExtractWindows(string downloadLocation, string unzipLocation)
-    {
-        bool canExtract;
-        canExtract = true;
-
-        Log.Information("UpdateExtractor: Extracting {DownloadLocation} to {UnzipLocation}", downloadLocation,
-            unzipLocation);
-
-        FastZip fastZip = new FastZip();
-        fastZip.ExtractZip(downloadLocation, unzipLocation, null);
-            
-        return canExtract;
-    }
-
-    private bool ExtractMacOs(string downloadLocation, string unzipLocation)
-    {
-        bool canExtract;
-        // Pour MacOS, on utilise le fichier ByteSync.app.zip.
-        // On le décompresse dans ByteSync.app.
-        // Problème, ByteSync.app.zip contient à la racine le répertoire ByteSync.app. 
-        // => On doit donc décompresser, puis déplacer
-
-        canExtract = true;
-
-        Log.Information("UpdateExtractor: Extracting {DownloadLocation} to {UnzipLocation}", downloadLocation,
-            unzipLocation);
-
-        // FastZip fastZip = new FastZip();
-        // fastZip.ExtractZip(downloadLocation, unzipLocation, null);
-            
-        DirectoryInfo unzipDirectoryInfo = new DirectoryInfo(unzipLocation);
-
-        // Pour dézipper, il y a habituellement la commande unzip qui est disponible
-        // unzip a l'avantage de garder les permissions des fichiers
-        // Si unzip n'est pas disponible, on utilise FastZip et on restaure la permission sur ByteSync
-        if (UnixHelper.CommandExists("unzip"))
-        {
-            // Extraction avec unzip
-            GetCommandRunner().RunCommand("unzip", $"-qq \"{downloadLocation}\" -d \"{unzipLocation}\"");
-        }
-        else
-        {
-            // Extraction avec FastZip
-            FastZip fastZip = new FastZip();
-            fastZip.ExtractZip(downloadLocation, unzipLocation, null);
-                
-            // restauration de la permission
-            ApplyPermission(unzipLocation);
-        }
-            
-        var byteSyncAppSubDir = unzipDirectoryInfo
-            .GetDirectories().Single(d => d.Name.Equals("ByteSync.app"));
-
-        // var expectedFilesSystemsCount = byteSyncAppSubDir.GetFileSystemInfos("*", SearchOption.AllDirectories).Length - 1;
-
-        var contentsDirectory = byteSyncAppSubDir
-            .GetDirectories().Single(d => d.Name.Equals("Contents"));
-
-        var destination = IOUtils.Combine(unzipLocation, contentsDirectory.Name);
-        contentsDirectory.MoveTo(destination);
-
-        // MoveTo peut prendre plus ou moins de temps, on doit attendre que les fichiers soient présents 
-        // dans la destination
-        // Log.Information("UpdateExtractor: Waiting for update content moved to {destination}", destination);
-        // Thread.Sleep(300); // On commence par une attente initiale de 300 ms
-        // var destinationDirectoryInfo = new DirectoryInfo(destination);
-        // var filesSystemCount = destinationDirectoryInfo.GetFileSystemInfos("*", SearchOption.AllDirectories).Length;
-        // int cpt = 0;
-        // while (filesSystemCount < expectedFilesSystemsCount && cpt < 15)
-        // {
-        //     cpt += 1;
-        //     Log.Information("UpdateExtractor: Waiting 1 second");
-        //     Thread.Sleep(1000); // On attend que le déplacement se poursuive : 1 sec
-        //
-        //     destinationDirectoryInfo = new DirectoryInfo(destination);
-        //     filesSystemCount = destinationDirectoryInfo.GetFileSystemInfos("*", SearchOption.AllDirectories).Length;
-        // }
-        //
-        // if (filesSystemCount < expectedFilesSystemsCount)
-        // {
-        //     // Echec
-        //     throw new ApplicationException("UpdateExtractor: Unable to extract data");
-        // }
-        // else
-        // {
-        //     //  Thread.Sleep(50);
-        // }
-
-        byteSyncAppSubDir.Delete();
-            
-        return canExtract;
-    }
-
-    private bool ExtractLinux(string downloadLocation, string unzipLocation)
-    {
-        bool canExtract;
-        canExtract = true;
-
-        Log.Information("UpdateExtractor: Untarring {DownloadLocation} to '{UnzipLocation}", downloadLocation,
-            unzipLocation);
-
-        // https://stackoverflow.com/questions/38120651/unzip-tar-gz-with-sharpziplib
-        using var inStream = File.OpenRead(downloadLocation);
-        using var gzipStream = new GZipInputStream(inStream);
-
-        using var tarArchive = TarArchive.CreateInputTarArchive(gzipStream, Encoding.UTF8);
-        tarArchive.ExtractContents(unzipLocation);
-
-        ApplyPermission(unzipLocation);
-
-        return canExtract;
-    }
-        
-    private void ApplyPermission(string unzipLocation)
-    {
-        var unzipDirectory = new DirectoryInfo(unzipLocation);
-
-        if (UnixHelper.CommandExists("chmod"))
-        {
-            //var byteSyncFileBeforeMove2 = unzipDirectory.GetFiles("ByteSync", SearchOption.AllDirectories).Where(f => f.Name.Equals("ByteSync"));
-
-            var byteSyncFileBeforeMove = unzipDirectory.GetFiles("ByteSync", SearchOption.AllDirectories)
-                .Where(f => f.Name.Equals("ByteSync"))
-                .MaxBy(f => f.LastWriteTime);
-            if (byteSyncFileBeforeMove != null)
+            bool canExtract = softwareVersionFile.Platform switch
             {
-                Log.Information("UpdateExtractor: Executing chmod u+x on {path}", byteSyncFileBeforeMove.FullName);
-                GetCommandRunner().RunCommand("chmod", $"+x \"{byteSyncFileBeforeMove.FullName}\"");
+                Platform.Windows when softwareVersionFile.FileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) => 
+                    await ExtractWindowsAsync(downloadLocation, unzipLocation),
+                
+                Platform.Osx when softwareVersionFile.FileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) => 
+                    await ExtractMacOsAsync(downloadLocation, unzipLocation),
+
+                Platform.Linux when softwareVersionFile.FileName.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase) => 
+                    await ExtractLinuxAsync(downloadLocation, unzipLocation),
+
+                _ => false
+            };
+
+            if (!canExtract)
+            {
+                throw new InvalidOperationException("Cannot extract the archive with the provided parameters.");
+            }
+        }
+
+        private async Task<bool> ExtractWindowsAsync(string downloadLocation, string unzipLocation)
+        {
+            try
+            {
+                _logger.LogInformation("Extracting {DownloadLocation} to {UnzipLocation} for Windows", downloadLocation, unzipLocation);
+                await Task.Run(() => ZipFile.ExtractToDirectory(downloadLocation, unzipLocation, overwriteFiles: true));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error extracting ZIP archive for Windows");
+                return false;
+            }
+        }
+
+        private async Task<bool> ExtractMacOsAsync(string downloadLocation, string unzipLocation)
+        {
+            try
+            {
+                _logger.LogInformation("Extracting {DownloadLocation} to {UnzipLocation} for macOS", downloadLocation, unzipLocation);
+
+                if (UnixHelper.CommandExists("unzip"))
+                {
+                    await GetCommandRunner().RunCommandAsync("unzip", $"-qq \"{downloadLocation}\" -d \"{unzipLocation}\"");
+                }
+                else
+                {
+                    await Task.Run(() => ZipFile.ExtractToDirectory(downloadLocation, unzipLocation, overwriteFiles: true));
+                    ApplyPermission(unzipLocation);
+                }
+
+                // Move specific macOS directories
+                var byteSyncAppPath = Path.Combine(unzipLocation, "ByteSync.app");
+                var contentsPath = Path.Combine(byteSyncAppPath, "Contents");
+                var destinationPath = Path.Combine(unzipLocation, "Contents");
+
+                if (Directory.Exists(contentsPath))
+                {
+                    Directory.Move(contentsPath, destinationPath);
+                    Directory.Delete(byteSyncAppPath, recursive: true);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error extracting archive for macOS");
+                return false;
+            }
+        }
+
+        private async Task<bool> ExtractLinuxAsync(string downloadLocation, string unzipLocation)
+        {
+            try
+            {
+                _logger.LogInformation("Extracting {DownloadLocation} to {UnzipLocation} for Linux", downloadLocation, unzipLocation);
+                
+                using var fileStream = new FileStream(downloadLocation, FileMode.Open, FileAccess.Read);
+                using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
+                using var tarReader = new TarReader(gzipStream);
+
+                TarEntry? entry;
+                while ((entry = await tarReader.GetNextEntryAsync()) != null)
+                {
+                    var destinationPath = Path.Combine(unzipLocation, entry.Name);
+
+                    switch (entry.EntryType)
+                    {
+                        case TarEntryType.Directory:
+                            Directory.CreateDirectory(destinationPath);
+                            break;
+                        case TarEntryType.RegularFile:
+                            Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
+                            await entry.ExtractToFileAsync(destinationPath, false);
+                            break;
+                        default:
+                            _logger.LogWarning("Unsupported entry type {EntryType} for {EntryName}", entry.EntryType, entry.Name);
+                            break;
+                    }
+                }
+
+                ApplyPermission(unzipLocation);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error extracting TAR.GZ archive for Linux");
+                return false;
+            }
+        }
+            
+        private void ApplyPermission(string unzipLocation)
+        {
+            if (UnixHelper.CommandExists("chmod"))
+            {
+                var byteSyncFile = Directory.GetFiles(unzipLocation, "ByteSync", SearchOption.AllDirectories)
+                                             .OrderByDescending(f => File.GetLastWriteTime(f))
+                                             .FirstOrDefault();
+                if (byteSyncFile != null)
+                {
+                    _logger.LogInformation("Applying execute permissions to {Path}", byteSyncFile);
+                    GetCommandRunner().RunCommand("chmod", $"+x \"{byteSyncFile}\"");
+                }
+                else
+                {
+                    _logger.LogWarning("ByteSync file not found; cannot update permissions");
+                }
             }
             else
             {
-                Log.Warning("UpdateExtractor: ByteSync file not found, can not update permissions");
+                _logger.LogWarning("The 'chmod' command is missing; cannot update permissions");
             }
         }
-        else
+
+        private CommandRunner GetCommandRunner()
         {
-            Log.Warning("UpdateExtractor: Can not update permissions because chmod command is missing");
+            return new CommandRunner { LogLevel = CommandRunner.LogLevels.Minimal, NeedBash = true };
         }
     }
-
-    // private static bool CommandExists(string commandName)
-    // {
-    //     bool? result = null;
-    //     Action<string, string> handler = (standardOutput, standardError) =>
-    //     {
-    //         result = standardOutput.IsNotEmpty() && standardError.IsNotEmpty();
-    //     };
-    //     
-    //     CommandRunner.RunCommand("command", $"\"-v {commandName}\"", null, handler);
-    //
-    //     return result!.Value;
-    // }
-        
-    private CommandRunner GetCommandRunner()
-    {
-        CommandRunner commandRunner = new CommandRunner { LogLevel = CommandRunner.LogLevels.Minimal, NeedBash = true };
-
-        return commandRunner;
-    }
-
-    public void Bump()
-    {
-        var _ = new FastZip();
-    }
-}

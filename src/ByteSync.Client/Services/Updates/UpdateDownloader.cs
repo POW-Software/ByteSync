@@ -1,158 +1,153 @@
-﻿using System.ComponentModel;
-using System.Net;
+﻿using System.IO;
+using System.Net.Http;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Business.Updates;
-using ByteSync.Common.Business.Versions;
-using ByteSync.Common.Helpers;
-using Serilog;
+using ByteSync.Interfaces.Repositories.Updates;
+using ByteSync.Interfaces.Updates;
 
 namespace ByteSync.Services.Updates;
 
-public class UpdateDownloader
+public class UpdateDownloader : IUpdateDownloader
 {
-    private WebClient? _webClient;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IUpdateRepository _updateRepository;
+    private readonly ILogger<UpdateDownloader> _logger;
 
-    public UpdateDownloader(SoftwareVersionFile softwareVersionFile, IProgress<UpdateProgress> progress)
+    public UpdateDownloader(IHttpClientFactory httpClientFactory, IUpdateRepository updateRepository, ILogger<UpdateDownloader> logger)
     {
-        SyncRoot = new object();
-            
-        SoftwareVersionFile = softwareVersionFile;
-
-        DownloadFileCompleted = new ManualResetEvent(false);
-
-        Progress = progress;
-
-        ErrorCount = 0;
+        _httpClientFactory = httpClientFactory;
+        _updateRepository = updateRepository;
+        _logger = logger;
+        
     }
 
-    private object SyncRoot { get; }
-        
-    public bool IsCancelled { get; set; }
-        
-    public bool IsFullyDownloaded { get; set; }
-        
-    public int ErrorCount { get; set; }
-        
-    public IProgress<UpdateProgress> Progress { get; set; }
-
-    private ManualResetEvent DownloadFileCompleted { get; }
-
-    public SoftwareVersionFile SoftwareVersionFile { get; }
-        
-    public string FileToDownload { get; set; }
-        
-    public string DownloadLocation { get; set; }
-        
-    public async Task<bool> Download(string fileToDownload, string downloadLocation, CancellationToken cancellationToken)
+    public async Task DownloadAsync(CancellationToken cancellationToken)
     {
-        // https://github.com/NetSparkleUpdater/NetSparkle/blob/develop/src/NetSparkle/Downloaders/WebClientFileDownloader.cs
-        // https://stackoverflow.com/questions/10332506/aborting-a-webclient-downloadfileasync-operation/10332941
+        var httpClient = _httpClientFactory.CreateClient("DownloadUpdateClient");
+        
+        var fileUri = _updateRepository.UpdateData.FileToDownload;
+        var destinationPath = _updateRepository.UpdateData.DownloadLocation;
 
-        Log.Information("UpdateDownloader: Starting download from '{fileToDownload}' to '{downloadLocation}'", fileToDownload, downloadLocation);
-            
-        FileToDownload = fileToDownload;
-        DownloadLocation = downloadLocation;
-            
-        DoDownload();
-
-        await Task.Run(() =>
+        if (string.IsNullOrWhiteSpace(fileUri))
         {
-            DownloadFileCompleted.WaitOne();
-        });
-
-        return true;
-    }
-
-    private void DoDownload()
-    {
-        Progress.Report(new UpdateProgress(UpdateProgressStatus.Downloading, 0));
-            
-        if (_webClient != null)
-        {
-            _webClient.DownloadProgressChanged -= WebClient_DownloadProgressChanged;
-            _webClient.DownloadFileCompleted -= WebClient_DownloadFileCompleted;
-            // can't re-use WebClient, so cancel old requests
-            // and start a new request as needed
-            if (_webClient.IsBusy)
-            {
-                try
-                {
-                    _webClient.CancelAsync();
-                }
-                catch
-                {
-                }
-            }
+            throw new ArgumentException("The file URI cannot be empty.", nameof(fileUri));
         }
 
-        _webClient = new WebClient
+        if (string.IsNullOrWhiteSpace(destinationPath))
         {
-            UseDefaultCredentials = true,
-            Proxy = { Credentials = CredentialCache.DefaultNetworkCredentials },
-        };
-
-        _webClient.DownloadProgressChanged += WebClient_DownloadProgressChanged;
-        _webClient.DownloadFileCompleted += WebClient_DownloadFileCompleted;
-
-        _webClient.DownloadFileAsync(new Uri(FileToDownload, UriKind.Absolute), DownloadLocation);
-    }
-
-    private void WebClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
-    {
-        // https://blog.stephencleary.com/2012/02/reporting-progress-from-async-tasks.html
-        Progress.Report(new UpdateProgress(UpdateProgressStatus.Downloading, e.ProgressPercentage));
-    }
-
-    private void WebClient_DownloadFileCompleted(object? sender, AsyncCompletedEventArgs e)
-    {
-        bool retryDownload = false;
-            
-        lock (SyncRoot)
-        {
-            if (e.Cancelled)
-            {
-                IsCancelled = true;
-                DownloadFileCompleted.Set();
-            }
-            else if (e.Error != null)
-            {
-                Log.Error(e.Error, "UpdateDownloader: Error during download");
-                ErrorCount += 1;
-
-                if (ErrorCount < 3)
-                {
-                    retryDownload = true;
-                }
-                else
-                {
-                    DownloadFileCompleted.Set();
-                }
-            }
-            else
-            {
-                IsFullyDownloaded = true;
-                Progress.Report(new UpdateProgress(UpdateProgressStatus.Downloading, 100));
-                DownloadFileCompleted.Set();
-            }
+            throw new ArgumentException("The destination path cannot be empty.", nameof(destinationPath));
         }
 
-        if (retryDownload)
+        await HandleDownloadAsync(cancellationToken, httpClient, fileUri, destinationPath);
+
+        DisposeClient(httpClient);
+        
+        await CheckDownloadAsync(cancellationToken);
+    }
+
+    private async Task HandleDownloadAsync(CancellationToken cancellationToken, HttpClient httpClient, string fileUri, string destinationPath)
+    {
+        try
         {
-            DoDownload();
+            using var response = await httpClient.GetAsync(fileUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+
+            response.EnsureSuccessStatusCode();
+            
+            var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+            var canReportProgress = totalBytes != -1;
+
+            var directory = Path.GetDirectoryName(destinationPath);
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+            
+            await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            await using var fileStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 8192, useAsync: true);
+
+            var totalRead = 0L;
+            var buffer = new byte[8192];
+            int bytesRead;
+            int lastProgress = 0;
+            
+            while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
+            {
+                await fileStream.WriteAsync(buffer, 0, bytesRead, cancellationToken);
+                totalRead += bytesRead;
+
+                if (canReportProgress)
+                {
+                    int currentProgress = (int)(totalRead * 100 / totalBytes);
+                    if (currentProgress - lastProgress >= 1 || currentProgress == 100)
+                    {
+                        _updateRepository.ReportProgress(new UpdateProgress(UpdateProgressStatus.Downloading, currentProgress));
+                        lastProgress = currentProgress;
+                    }
+                }
+            }
+            
+            if (canReportProgress && lastProgress < 100)
+            {
+                _updateRepository.ReportProgress(new UpdateProgress(UpdateProgressStatus.Downloading, 100));
+            }
+        }
+        catch (HttpRequestException httpEx)
+        {
+            throw new InvalidOperationException($"HTTP request error: {{httpEx.Message}}", httpEx);
+        }
+        catch (IOException ioEx)
+        {
+            throw new InvalidOperationException($"File writing error: {{ioEx.Message}}", ioEx);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"An unexpected error occurred: {{ex.Message}}", ex);
         }
     }
 
-    public async Task CheckDownload()
+    private void DisposeClient(HttpClient httpClient)
     {
-        if (IsFullyDownloaded)
+        try
         {
-            string sha256 = CryptographyUtils.ComputeSHA256(DownloadLocation);
-
-            if (sha256.Equals(SoftwareVersionFile.PortableZipSha256, StringComparison.CurrentCultureIgnoreCase))
-            {
-                    
-            } 
+            httpClient.Dispose();
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error disposing HttpClient");
+        }
+    }
+
+    private async Task CheckDownloadAsync(CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+        
+        string sha256 = await ComputeSha256Async(_updateRepository.UpdateData.DownloadLocation);
+        bool isValid = sha256.Equals(_updateRepository.UpdateData.SoftwareVersionFile.PortableZipSha256, StringComparison.OrdinalIgnoreCase);
+
+        if (isValid)
+        {
+            _logger.LogInformation("Downloaded file checksum is valid");
+        }
+        else
+        {
+            throw new InvalidOperationException("Downloaded file checksum is invalid.");
+        }
+    }
+
+    private async Task<string> ComputeSha256Async(string filePath)
+    {
+        using var sha256 = SHA256.Create();
+        await using var fileStream = File.OpenRead(filePath);
+        var hash = await sha256.ComputeHashAsync(fileStream);
+        return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
     }
 }
