@@ -4,7 +4,7 @@ namespace ByteSync.Business.Updates;
 
 public class UpdateData
 {
-    public SoftwareVersionFile SoftwareVersionFile { get; set; } = null!;
+    public SoftwareVersionFile SoftwareVersionFile { get; init; } = null!;
     
     public string ApplicationBaseDirectory { get; set; } = null!;
     

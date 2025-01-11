@@ -14,4 +14,9 @@ public class UpdateRepository : IUpdateRepository
     public Progress<UpdateProgress> Progress { get; }
     
     public UpdateData UpdateData { get; set; }
+    
+    public void ReportProgress(UpdateProgress updateProgress)
+    {
+        ((IProgress<UpdateProgress>)Progress).Report(updateProgress);
+    }
 }

@@ -7,4 +7,6 @@ public interface IUpdateRepository
     public Progress<UpdateProgress> Progress { get; }
     
     UpdateData UpdateData { get; set; }
+    
+    void ReportProgress(UpdateProgress updateProgress);
 }
