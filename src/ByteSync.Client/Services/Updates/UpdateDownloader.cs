@@ -40,6 +40,15 @@ public class UpdateDownloader : IUpdateDownloader
             throw new ArgumentException("The destination path cannot be empty.", nameof(destinationPath));
         }
 
+        await HandleDownloadAsync(cancellationToken, httpClient, fileUri, destinationPath);
+
+        DisposeClient(httpClient);
+        
+        await CheckDownloadAsync(cancellationToken);
+    }
+
+    private async Task HandleDownloadAsync(CancellationToken cancellationToken, HttpClient httpClient, string fileUri, string destinationPath)
+    {
         try
         {
             using var response = await httpClient.GetAsync(fileUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
@@ -100,7 +109,10 @@ public class UpdateDownloader : IUpdateDownloader
         {
             throw new InvalidOperationException($"An unexpected error occurred: {{ex.Message}}", ex);
         }
+    }
 
+    private void DisposeClient(HttpClient httpClient)
+    {
         try
         {
             httpClient.Dispose();
@@ -111,8 +123,13 @@ public class UpdateDownloader : IUpdateDownloader
         }
     }
 
-    public async Task CheckDownloadAsync()
+    private async Task CheckDownloadAsync(CancellationToken cancellationToken)
     {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+        
         string sha256 = await ComputeSha256Async(_updateRepository.UpdateData.DownloadLocation);
         bool isValid = sha256.Equals(_updateRepository.UpdateData.SoftwareVersionFile.PortableZipSha256, StringComparison.OrdinalIgnoreCase);
 
