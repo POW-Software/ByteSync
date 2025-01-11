@@ -50,14 +50,6 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             
-            <!-- <Button Margin="6" Command="{Binding Path=RunUpdateCommand}" HorizontalAlignment="Center"> -->
-            <!--     <StackPanel Orientation="Horizontal"> -->
-            <!--         <misc:Icon FontSize="20" Value="RegularSync" Foreground="{DynamicResource SystemBaseMediumColor}" -->
-            <!--                    Margin="2" VerticalAlignment="Center"/> -->
-            <!--         <TextBlock Text="{localizations:Loc UpdateDetails_Update}" Margin="4" VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}" /> -->
-            <!--     </StackPanel> -->
-            <!-- </Button> -->
-            
             <StackPanel Orientation="Vertical" IsVisible="{Binding SelectedVersion, Converter={x:Static ObjectConverters.IsNotNull}}" 
                         HorizontalAlignment="Stretch">
                 <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
