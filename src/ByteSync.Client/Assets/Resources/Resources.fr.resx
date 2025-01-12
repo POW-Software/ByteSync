@@ -1002,6 +1002,9 @@ Veuillez interrompre l'inventaire ou la synchronisation au préalable.</value>
 	<data name="UpdateDetails_BackingUpExistingFiles" xml:space="preserve">
 		<value>sauvegarde des fichiers existants</value>
 	</data>
+	<data name="UpdateDetails_MovingNewFiles" xml:space="preserve">
+		<value>déplacement des nouveaux fichiers</value>
+	</data>
 	<data name="UpdateDetails_Downloading" xml:space="preserve">
 		<value>téléchargement de la mise à jour</value>
 	</data>

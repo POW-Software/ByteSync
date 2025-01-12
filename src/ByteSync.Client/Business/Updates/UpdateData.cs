@@ -8,9 +8,9 @@ public class UpdateData
     
     public string ApplicationBaseDirectory { get; set; } = null!;
     
-    public string DownloadLocation { get; set; }= null!;
+    public string DownloadLocation { get; set; } = null!;
     
-    public string UnzipLocation { get; set; }= null!;
+    public string UnzipLocation { get; set; } = null!;
     
     public string FileToDownload => SoftwareVersionFile.FileUri;
 }

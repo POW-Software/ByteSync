@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using ByteSync.Business.Updates;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Repositories.Updates;
 using ByteSync.Interfaces.Updates;
@@ -11,8 +12,6 @@ public class UpdateExistingFilesBackuper : IUpdateExistingFilesBackuper
 {
     private readonly IUpdateRepository _updateRepository;
     private readonly ILogger<UpdateExistingFilesBackuper> _logger;
-
-    public const string BAK_EXTENSION = "pow_upd_bak";
     
     public UpdateExistingFilesBackuper(IUpdateRepository updateRepository, ILogger<UpdateExistingFilesBackuper> logger)
     {
@@ -74,12 +73,12 @@ public class UpdateExistingFilesBackuper : IUpdateExistingFilesBackuper
             string previousFullName = fileSystemInfo.FullName;
             
             int cpt = 0;
-            var backupDestination = $"{fileSystemInfo.FullName}.{BAK_EXTENSION}{cpt}";
+            var backupDestination = $"{fileSystemInfo.FullName}.{UpdateConstants.BAK_EXTENSION}{cpt}";
             
             while (File.Exists(backupDestination) || Directory.Exists(backupDestination))
             {
                 cpt += 1;
-                backupDestination = $"{fileSystemInfo.FullName}.{BAK_EXTENSION}{cpt}";
+                backupDestination = $"{fileSystemInfo.FullName}.{UpdateConstants.BAK_EXTENSION}{cpt}";
             }
             
             _logger.LogInformation("UpdateExistingFilesBackuper: Renaming {Source} to {Destination}", previousFullName, backupDestination);

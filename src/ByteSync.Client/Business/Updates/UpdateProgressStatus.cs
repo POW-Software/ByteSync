@@ -6,6 +6,7 @@
         Extracting,
         UpdatingFiles,
         BackingUpExistingFiles,
+        MovingNewFiles,
         RestartingApplication
     }
 }

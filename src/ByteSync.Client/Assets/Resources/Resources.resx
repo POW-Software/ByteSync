@@ -1131,6 +1131,9 @@ Please stop the inventory or synchronization first.</value>
   <data name="UpdateDetails_BackingUpExistingFiles" xml:space="preserve">
     <value>backing up existing files</value>
   </data>
+  <data name="UpdateDetails_MovingNewFiles" xml:space="preserve">
+    <value>moving new files</value>
+  </data>
   <data name="UpdateDetails_UpdatingToVersion" xml:space="preserve">
     <value>Updating to version</value>
   </data>

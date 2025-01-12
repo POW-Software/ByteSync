@@ -23,13 +23,14 @@ public class ApplyUpdateService : IApplyUpdateService
     private readonly IUpdateDownloader _updateDownloader;
     private readonly IApplicationRestarter _applicationRestarter;
     private readonly IUpdateExistingFilesBackuper _updateExistingFilesBackuper;
+    private readonly IUpdateNewFilesMover _updateNewFilesMover;
     private readonly IUpdateExtractor _updateExtractor;
     private readonly ILogger<ApplyUpdateService> _logger;
 
     public ApplyUpdateService(IEnvironmentService environmentService, ILocalApplicationDataManager localApplicationDataManager, 
         IUpdateRepository updateRepository, IUpdateHelperService updateHelperService, IUpdateDownloader updateDownloader,
         IApplicationRestarter applicationRestarter, IUpdateExistingFilesBackuper updateExistingFilesBackuper, 
-        IUpdateExtractor updateExtractor, ILogger<ApplyUpdateService> logger)
+        IUpdateNewFilesMover updateNewFilesMover, IUpdateExtractor updateExtractor, ILogger<ApplyUpdateService> logger)
     {
         _environmentService = environmentService;
         _localApplicationDataManager = localApplicationDataManager;
@@ -38,6 +39,7 @@ public class ApplyUpdateService : IApplyUpdateService
         _updateDownloader = updateDownloader;
         _applicationRestarter = applicationRestarter;
         _updateExistingFilesBackuper = updateExistingFilesBackuper;
+        _updateNewFilesMover = updateNewFilesMover;
         _updateExtractor = updateExtractor;
         _logger = logger;
     }
@@ -82,6 +84,13 @@ public class ApplyUpdateService : IApplyUpdateService
         {
             return false;
         }
+        
+        ReportProgress(new UpdateProgress(UpdateProgressStatus.Extracting));
+        await _updateExtractor.ExtractAsync();
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return false;
+        }
 
         ReportProgress(new UpdateProgress(UpdateProgressStatus.BackingUpExistingFiles));
         await _updateExistingFilesBackuper.BackupExistingFilesAsync(cancellationToken);
@@ -90,8 +99,8 @@ public class ApplyUpdateService : IApplyUpdateService
             return false;
         }
         
-        ReportProgress(new UpdateProgress(UpdateProgressStatus.Extracting));
-        await _updateExtractor.ExtractAsync();
+        ReportProgress(new UpdateProgress(UpdateProgressStatus.MovingNewFiles));
+        await _updateNewFilesMover.MoveNewFiles(cancellationToken);
         if (cancellationToken.IsCancellationRequested)
         {
             return false;
@@ -201,6 +210,7 @@ public class ApplyUpdateService : IApplyUpdateService
         
     private void ComputeUnzipLocation()
     {
-        _updateRepository.UpdateData.UnzipLocation = _updateRepository.UpdateData.ApplicationBaseDirectory;
+        _updateRepository.UpdateData.UnzipLocation = IOUtils.Combine(_updateRepository.UpdateData.ApplicationBaseDirectory, 
+            $"{UpdateConstants.UPDATE_UNZIP_EXTRACT_START_NAME}{DateTime.Now:yyyy-MM-dd_HH-mm-ss}");
     }
 }
