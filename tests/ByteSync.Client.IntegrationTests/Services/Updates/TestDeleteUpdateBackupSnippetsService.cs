@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Autofac;
+using ByteSync.Business.Updates;
 using ByteSync.Client.IntegrationTests.TestHelpers;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Updates;
@@ -31,10 +32,10 @@ public class TestDeleteUpdateBackupSnippetsService : IntegrationTest
         testDirectoryService.CreateSubTestFile("file2.txt", "file2Content");
         testDirectoryService.CreateSubTestFile("file3.txt", "file3Content");
         
-        testDirectoryService.CreateSubTestFile($"file4.txt.{UpdateReplacer.BAK_EXTENSION}0", "file4Content");
-        testDirectoryService.CreateSubTestFile($"file5.txt.{UpdateReplacer.BAK_EXTENSION}1", "file5Content");
-        testDirectoryService.CreateSubTestFile($"file6.txt.{UpdateReplacer.BAK_EXTENSION}15", "file6Content");
-        testDirectoryService.CreateSubTestFile($"file7.txt.{UpdateReplacer.BAK_EXTENSION}15.ext", "file7Content");
+        testDirectoryService.CreateSubTestFile($"file4.txt.{UpdateConstants.BAK_EXTENSION}0", "file4Content");
+        testDirectoryService.CreateSubTestFile($"file5.txt.{UpdateConstants.BAK_EXTENSION}1", "file5Content");
+        testDirectoryService.CreateSubTestFile($"file6.txt.{UpdateConstants.BAK_EXTENSION}15", "file6Content");
+        testDirectoryService.CreateSubTestFile($"file7.txt.{UpdateConstants.BAK_EXTENSION}15.ext", "file7Content");
 
         // Act
         await deleteUpdateBackupSnippetsService.DeleteBackupSnippetsAsync();
@@ -76,10 +77,10 @@ public class TestDeleteUpdateBackupSnippetsService : IntegrationTest
         testDirectoryService.CreateSubTestFile("file2.txt", "file2Content");
         testDirectoryService.CreateSubTestFile("file3.txt", "file3Content");
         
-        testDirectoryService.CreateSubTestFile($"file4.txt.{UpdateReplacer.BAK_EXTENSION}0", "file4Content");
-        testDirectoryService.CreateSubTestFile($"file5.txt.{UpdateReplacer.BAK_EXTENSION}1", "file5Content");
-        testDirectoryService.CreateSubTestFile($"file6.txt.{UpdateReplacer.BAK_EXTENSION}15", "file6Content");
-        testDirectoryService.CreateSubTestFile($"file7.txt.{UpdateReplacer.BAK_EXTENSION}15.ext", "file7Content");
+        testDirectoryService.CreateSubTestFile($"file4.txt.{UpdateConstants.BAK_EXTENSION}0", "file4Content");
+        testDirectoryService.CreateSubTestFile($"file5.txt.{UpdateConstants.BAK_EXTENSION}1", "file5Content");
+        testDirectoryService.CreateSubTestFile($"file6.txt.{UpdateConstants.BAK_EXTENSION}15", "file6Content");
+        testDirectoryService.CreateSubTestFile($"file7.txt.{UpdateConstants.BAK_EXTENSION}15.ext", "file7Content");
 
         // Act
         await deleteUpdateBackupSnippetsService.DeleteBackupSnippetsAsync();

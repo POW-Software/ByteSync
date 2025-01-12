@@ -2567,6 +2567,11 @@ namespace ByteSync.Assets.Resources {
                 return ResourceManager.GetString("UpdateDetails_BackingUpExistingFiles", resourceCulture);
             }
         }
+        public static string UpdateDetails_MovingNewFiles {
+            get {
+                return ResourceManager.GetString("UpdateDetails_MovingNewFiles", resourceCulture);
+            }
+        }
         
         public static string ErrorView_ErrorMessage {
             get {

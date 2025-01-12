@@ -198,6 +198,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
             UpdateProgressStatus.RestartingApplication => _localizationService[nameof(Resources.UpdateDetails_RestartingApplication)].UppercaseFirst(),
             UpdateProgressStatus.UpdatingFiles => _localizationService[nameof(Resources.UpdateDetails_UpdatingFiles)].UppercaseFirst(),
             UpdateProgressStatus.BackingUpExistingFiles => _localizationService[nameof(Resources.UpdateDetails_BackingUpExistingFiles)].UppercaseFirst(),
+            UpdateProgressStatus.MovingNewFiles => _localizationService[nameof(Resources.UpdateDetails_MovingNewFiles)].UppercaseFirst(),
             _ => throw new ArgumentOutOfRangeException(nameof(e.Status), e.Status, null)
         };
 
