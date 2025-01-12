@@ -50,8 +50,10 @@ public class UpdateExtractor : IUpdateExtractor
         {
             try
             {
-                _logger.LogInformation("Extracting {DownloadLocation} to {UnzipLocation} for Windows", downloadLocation, unzipLocation);
+                _logger.LogInformation("UpdateExtractor: Extracting {DownloadLocation} to {UnzipLocation} for Windows", downloadLocation, unzipLocation);
+                
                 await Task.Run(() => ZipFile.ExtractToDirectory(downloadLocation, unzipLocation, overwriteFiles: true));
+                
                 return true;
             }
             catch (Exception ex)
@@ -65,7 +67,7 @@ public class UpdateExtractor : IUpdateExtractor
         {
             try
             {
-                _logger.LogInformation("Extracting {DownloadLocation} to {UnzipLocation} for macOS", downloadLocation, unzipLocation);
+                _logger.LogInformation("UpdateExtractor: Extracting {DownloadLocation} to {UnzipLocation} for macOS", downloadLocation, unzipLocation);
 
                 if (UnixHelper.CommandExists("unzip"))
                 {
@@ -76,8 +78,7 @@ public class UpdateExtractor : IUpdateExtractor
                     await Task.Run(() => ZipFile.ExtractToDirectory(downloadLocation, unzipLocation, overwriteFiles: true));
                     ApplyPermission(unzipLocation);
                 }
-
-                // Move specific macOS directories
+                
                 var byteSyncAppPath = Path.Combine(unzipLocation, "ByteSync.app");
                 var contentsPath = Path.Combine(byteSyncAppPath, "Contents");
                 var destinationPath = Path.Combine(unzipLocation, "Contents");
@@ -101,7 +102,7 @@ public class UpdateExtractor : IUpdateExtractor
         {
             try
             {
-                _logger.LogInformation("Extracting {DownloadLocation} to {UnzipLocation} for Linux", downloadLocation, unzipLocation);
+                _logger.LogInformation("UpdateExtractor: Extracting {DownloadLocation} to {UnzipLocation} for Linux", downloadLocation, unzipLocation);
                 
                 using var fileStream = new FileStream(downloadLocation, FileMode.Open, FileAccess.Read);
                 using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
@@ -146,7 +147,7 @@ public class UpdateExtractor : IUpdateExtractor
                                              .FirstOrDefault();
                 if (byteSyncFile != null)
                 {
-                    _logger.LogInformation("Applying execute permissions to {Path}", byteSyncFile);
+                    _logger.LogInformation("UpdateExtractor: Applying execute permissions to {Path}", byteSyncFile);
                     GetCommandRunner().RunCommand("chmod", $"+x \"{byteSyncFile}\"");
                 }
                 else

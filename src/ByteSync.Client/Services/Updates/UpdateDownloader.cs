@@ -92,6 +92,8 @@ public class UpdateDownloader : IUpdateDownloader
             {
                 _updateRepository.ReportProgress(new UpdateProgress(UpdateProgressStatus.Downloading, 100));
             }
+            
+            _logger.LogInformation("UpdateDownloader: Downloaded file to {destinationPath}", destinationPath);
         }
         catch (HttpRequestException httpEx)
         {
@@ -135,7 +137,7 @@ public class UpdateDownloader : IUpdateDownloader
 
         if (isValid)
         {
-            _logger.LogInformation("Downloaded file checksum is valid");
+            _logger.LogInformation("UpdateDownloader: Downloaded file checksum is valid");
         }
         else
         {
