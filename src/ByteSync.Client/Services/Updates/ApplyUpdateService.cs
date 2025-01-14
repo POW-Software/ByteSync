@@ -92,11 +92,18 @@ public class ApplyUpdateService : IApplyUpdateService
             return false;
         }
 
-        ReportProgress(new UpdateProgress(UpdateProgressStatus.BackingUpExistingFiles));
-        await _updateExistingFilesBackuper.BackupExistingFilesAsync(cancellationToken);
-        if (cancellationToken.IsCancellationRequested)
+        try
         {
-            return false;
+            ReportProgress(new UpdateProgress(UpdateProgressStatus.BackingUpExistingFiles));
+            await _updateExistingFilesBackuper.BackupExistingFilesAsync(cancellationToken);
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "UpdateApplier: Error while backing up existing files");
         }
         
         ReportProgress(new UpdateProgress(UpdateProgressStatus.MovingNewFiles));
