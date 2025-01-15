@@ -9,6 +9,8 @@ public static class RegularArguments
     internal const string SET_MACHINE_NAME = "-set-machine-name";
         
     internal const string UPDATE = "-update";
+    
+    internal const string VERSION = "-version";
         
     internal const string JOIN = "-join";
         
