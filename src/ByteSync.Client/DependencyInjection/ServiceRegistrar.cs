@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using ByteSync.Business.Arguments;
 using ByteSync.Common.Interfaces;
 using ByteSync.DependencyInjection.Modules;
 using ByteSync.Interfaces;
@@ -37,6 +38,15 @@ public static class ServiceRegistrar
 
         var container = builder.Build();
         ContainerProvider.Container = container;
+
+        using (var scope = container.BeginLifetimeScope())
+        {
+            var environmentService = scope.Resolve<IEnvironmentService>();
+            if (environmentService.Arguments.Contains(RegularArguments.VERSION))
+            {
+                return container;
+            }
+        }
 
         LogBootstrapHeader(container);
         

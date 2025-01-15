@@ -99,7 +99,7 @@ public class EnvironmentService : IEnvironmentService
         {
             bool operateCommandLine = false;
             
-            if (Arguments.Contains(RegularArguments.UPDATE))
+            if (Arguments.Contains(RegularArguments.UPDATE) || Arguments.Contains(RegularArguments.VERSION))
             {
                 operateCommandLine = true;
             }
