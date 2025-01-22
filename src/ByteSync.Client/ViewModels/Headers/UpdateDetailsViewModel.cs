@@ -70,7 +70,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         RunUpdateCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(RunUpdate);
 
         _availableUpdateRepository.ObservableCache
-            .Connect() // make the source an observable change set
+            .Connect()
             .Transform(sw => _softwareVersionProxyFactory.CreateSoftwareVersionProxy(sw))
             .Sort(SortExpressionComparer<SoftwareVersionProxy>.Descending(proxy => proxy.Version))
             .ObserveOn(RxApp.MainThreadScheduler)
@@ -84,10 +84,6 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
                 .Subscribe(_ => SetAvailableUpdate())
                 .DisposeWith(disposables);
             
-            // _updateService.NextAvailableVersionsObservable
-            //     .Subscribe(FillSoftwareVersions)
-            //     .DisposeWith(disposables);
-
             _updateRepository.Progress.ProgressChanged += UpdateManager_ProgressReported;
         });
     }
@@ -141,30 +137,6 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
                                        _localizationService[nameof(Resources.UpdateDetails_AutoUpdateNotSupported)];
         }
     }
-    
-    // private void FillSoftwareVersions(List<SoftwareVersion>? softwareVersions)
-    // {
-    //     SoftwareVersions.Clear();
-    //
-    //     if (softwareVersions == null)
-    //     {
-    //         return;
-    //     }
-    //     
-    //     foreach (var softwareVersion in softwareVersions)
-    //     {
-    //         if (!SoftwareVersions.Any(sv => sv.SoftwareVersion.Version.Equals(softwareVersion.Version)))
-    //         {
-    //             SoftwareVersionViewModel softwareVersionViewModel = new SoftwareVersionViewModel(softwareVersion);
-    //             SoftwareVersions.Add(softwareVersionViewModel);
-    //         }
-    //     }
-    // }
-        
-    // private void UpdateServiceNextVersionChanged(object? sender, SoftwareVersionEventArgs e)
-    // {
-    //     FillSoftwareVersions(e.SoftwareVersions);
-    // }
     
     private async Task ShowReleaseNotes(SoftwareVersionProxy softwareVersionProxy)
     {
@@ -220,8 +192,6 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
             UpdateProgressStatus.MovingNewFiles => _localizationService[nameof(Resources.UpdateDetails_MovingNewFiles)].UppercaseFirst(),
             _ => throw new ArgumentOutOfRangeException(nameof(e.Status), e.Status, null)
         };
-
-        // string progress = e.Status.ToString();
 
         if (e.Percentage != null)
         {
