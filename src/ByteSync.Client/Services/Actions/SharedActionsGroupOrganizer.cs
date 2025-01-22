@@ -22,9 +22,8 @@ public class SharedActionsGroupOrganizer : ISharedActionsGroupOrganizer
     {
         return Task.Run(() =>
         {
-            // On met en premier les actions de synchro de contenu dont je suis la source
-            // En les groupant par targets
-            // Puis on met les autres actions
+            // We first put the content sync actions of which the client is the source
+            // By grouping them by targets, then we put the other actions
             List<SharedActionsGroup> sourceCopyActions = new List<SharedActionsGroup>();
             List<SharedActionsGroup> otherActions = new List<SharedActionsGroup>();
             foreach (SharedActionsGroup sharedActionsGroup in _sharedActionsGroupRepository.Elements)
@@ -40,8 +39,8 @@ public class SharedActionsGroupOrganizer : ISharedActionsGroupOrganizer
                     otherActions.Add(sharedActionsGroup);
                 }
             }
-
-            // On groupe par targets, comme ça, lors des uploads, on pourra zipper les fichiers par cibles
+            
+            // We group by targets, so that during uploads, we can zip the files by targets
             Dictionary<string, List<SharedActionsGroup>> sourceCopyActionsDictionary = new Dictionary<string, List<SharedActionsGroup>>();
             foreach (var sharedActionsGroup in sourceCopyActions)
             {
@@ -59,8 +58,8 @@ public class SharedActionsGroupOrganizer : ISharedActionsGroupOrganizer
             List<SharedActionsGroup> sortedSharedActionGroups = new List<SharedActionsGroup>();
             foreach (var sourceCopySharedActionsGroups in sourceCopyActionsDictionary.Values)
             {
-                // On trie par taille croissante pour obtenir un meilleur rendement de la compression
-                // On trie aussi par type de synchronisation. Ce n'est pas forcément utile
+                // We sort by ascending size to get a better compression performance
+                // We also sort by synchronization type. This is not necessarily useful
                 var list = sourceCopySharedActionsGroups
                     .OrderBy(sag => sag.SynchronizationType)
                     .ThenBy(sag => sag.Size);

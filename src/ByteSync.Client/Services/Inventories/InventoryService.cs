@@ -39,10 +39,6 @@ public class InventoryService : IInventoryService
 
         InventoryProcessData = new InventoryProcessData();
         
-        // GlobalInventoriesCache = new SourceCache<GlobalInventoryStatus, ByteSyncEndpoint>(globalInventoryStatus => globalInventoryStatus.Endpoint);
-        //
-        // GlobalInventories = GlobalInventoriesCache.Connect().Publish().AsObservableCache();
-        
         _sessionService.SessionStatusObservable
             .Where(x => x == SessionStatus.Preparation)
             .Subscribe(_ =>
@@ -50,22 +46,7 @@ public class InventoryService : IInventoryService
                 InventoryProcessData.Reset();
             });
         
-        // SampledMonitorData
-        //     //.ObserveOn(RxApp.MainThreadScheduler)    
-        //     .Subscribe(x =>
-        //     {
-        //         _remainingTimeComputer.SetDataToHandle(x.Item1.IdentifiedSize);
-        //         _remainingTimeComputer.SetDataHandled(x.Item1.ProcessedSize);
-        //     });
-
-        // InventoryProcessData.MainStatus.DistinctUntilChanged()
-        //     .Where(status => status == LocalInventoryPartStatus.Running)
-        //     .Subscribe(_ => _remainingTimeComputer.Start(InventoryProcessData.InventoryStart, RemainingTimeData));
         
-        // InventoryProcessData.MainStatus.DistinctUntilChanged()
-        //     .Where(status => status != LocalInventoryPartStatus.Running)
-        //     .Subscribe(_ => _remainingTimeComputer.Stop());
-        //
         // _sessionService.SessionStatusObservable.DistinctUntilChanged()
         //     .Where(ss => ss.In(SessionStatus.Preparation))
         //     .Subscribe(_ => _remainingTimeComputer.Stop());
@@ -73,20 +54,6 @@ public class InventoryService : IInventoryService
     }
 
     public InventoryProcessData InventoryProcessData { get; }
-
-    // public SourceCache<GlobalInventoryStatus, ByteSyncEndpoint> GlobalInventoriesCache { get; set; }
-    //
-    // public IObservableCache<GlobalInventoryStatus, ByteSyncEndpoint> GlobalInventories { get; set; }
-    
-    // public HashSet<LocalSharedFile> OtherMembersInventories { get; }
-    //
-    // public List<LocalSharedFile>? LocalBaseInventories { get; set; }
-    //
-    // public List<LocalSharedFile>? LocalFullInventories { get; set; }
-    
-    // public SessionMemberGeneralStatus SessionMemberGeneralStatus { get; set; }
-
-
     
     public async Task SetLocalInventory(ICollection<InventoryFile> inventoriesFiles, LocalInventoryModes localInventoryMode)
     {
@@ -146,60 +113,6 @@ public class InventoryService : IInventoryService
             InventoryProcessData.AreFullInventoriesComplete.OnNext(areFullInventoriesComplete);
         });
     }
-    
-    // public async Task SetLocalInventoryGlobalStatus(string sessionId, SessionMemberGeneralStatus sessionMemberGeneralStatus)
-    // {
-    //     var raiseEvents = false;
-    //     SessionMemberGeneralStatus? previousStatus;
-    //
-    //     previousStatus = SessionMemberGeneralStatus;
-    //     SessionMemberGeneralStatus = sessionMemberGeneralStatus;
-    //
-    //     if (raiseEvents)
-    //     {
-    //         var endpoint = _connectionService.CurrentEndPoint;
-    //         if (endpoint != null)
-    //         {
-    //             GlobalInventoriesCache.AddOrUpdate(new GlobalInventoryStatus(endpoint, true, sessionMemberGeneralStatus, previousStatus));
-    //         }
-    //
-    //         if (_sessionService.CurrentSession is CloudSession cloudSession)
-    //         {
-    //             var localInventoryStatusParameters = new UpdateSessionMemberGeneralStatusParameters(cloudSession.SessionId, 
-    //                 _connectionService.ClientInstanceId!, sessionMemberGeneralStatus, DateTimeOffset.Now);
-    //             
-    //             await _inventoryApiClient.AssertLocalInventoryStatusChanged(localInventoryStatusParameters)
-    //                 .ConfigureAwait(false);
-    //         }
-    //     }
-    // }
-    
-    // public bool HandleLocalInventoryGlobalStatusChanged(UpdateSessionMemberGeneralStatusParameters parameters)
-    // {
-    //     // todo 040423 : écriture et propriétés obsolètes
-    //     // todo (sessionMember.LocalInventoryGlobalStatus, sessionMember.LastLocalInventoryGlobalStatusUpdate) ?
-    //     var sessionMember = _sessionMemberRepository.GetElement(parameters.ClientInstanceId);
-    //
-    //     if (sessionMember != null)
-    //     {
-    //         if (sessionMember.LastLocalInventoryGlobalStatusUpdate == null || 
-    //             parameters.UtcChangeDate > sessionMember.LastLocalInventoryGlobalStatusUpdate)
-    //         {
-    //             sessionMember.SessionMemberGeneralStatus = parameters.SessionMemberGeneralStatus;
-    //             sessionMember.LastLocalInventoryGlobalStatusUpdate = parameters.UtcChangeDate;
-    //
-    //             if (sessionMember.SessionMemberGeneralStatus.In(SessionMemberGeneralStatus.InventoryCancelled, SessionMemberGeneralStatus.InventoryError))
-    //             {
-    //                 _logger.LogWarning("Local Inventory is cancelled due to a premature end to another Session Member");
-    //                 InventoryProcessData.RequestInventoryAbort();
-    //             }
-    //
-    //             return true;
-    //         }
-    //     }
-    //
-    //     return false;
-    // }
 
     public Task SetSessionOnFatalError(CloudSessionFatalError cloudSessionFatalError)
     {

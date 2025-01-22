@@ -23,7 +23,6 @@ public class FilesIdentifier
 
     public HashSet<IndexedItem> Identify(ComparisonResult comparisonResult)
     {
-        // On récupère tous les ComparisonItems qui sont en lien avec l'inventaire
         var comparisonItems = comparisonResult.ComparisonItems
             .Where(item => item.ContentIdentities
                 .Any(ident => ident.InventoryPartsByLastWriteTimes.Any(
@@ -31,11 +30,9 @@ public class FilesIdentifier
                         ip => ip.Inventory.Equals(Inventory)))));
 
         HashSet<ComparisonItem> comparisonItemsToAnalyse = new HashSet<ComparisonItem>();
-
-        // On doit trouver tous les comparisonItems pour lesquels il y a plusieurs valeurs de date et/ou de taille
+        
         foreach (var comparisonItem in comparisonItems)
         {
-            // Ceci est commun au mode "standard" et au mode "checksum"
             ContentIdentity? contentIdentity = null;
             if (comparisonItem.ContentIdentities.Count > 1)
             {
@@ -52,8 +49,6 @@ public class FilesIdentifier
 
             if (SessionSettings.AnalysisMode == AnalysisModes.Checksum)
             {
-                // Spécifique au mode CheckSum
-                
                 if (contentIdentity != null)
                 {
                     var sum = 0;
@@ -71,7 +66,6 @@ public class FilesIdentifier
         }
 
         var result = new HashSet<IndexedItem>();
-        // On dispose désormais des comparisonsItems
         foreach (var comparisonItem in comparisonItemsToAnalyse)
         {
             var items = InventoryIndexer.GetItemsBy(comparisonItem.PathIdentity)!;

@@ -115,11 +115,6 @@ public class DataInventoryRunner : IDataInventoryRunner
             .GetTimeTrackingComputer(_sessionService.SessionId!, TimeTrackingComputerType.Inventory);
         timeTrackingComputer.Start(InventoryProcessData.InventoryStart);
 
-        // var inventories = InventoryBuilders.Select(ib => ib.Inventory!).ToList();
-
-        // S'occupe de réaliser l'inventaire initial et de gérer le traitement post-inventaire dont upload
-        // AllInventoriesReadyEvent.Reset();
-
         isOK = await RunBaseInventory();
         
         var baseInventoryResult = await Observable.CombineLatest(InventoryProcessData.AreBaseInventoriesComplete, 
@@ -130,19 +125,6 @@ public class DataInventoryRunner : IDataInventoryRunner
             .Select(list => (IsOK: list[0], IsCancellationRequested: list[1], IsInventoryError: list[2] || list[3],
                 Details: list));
         
-        // InventoryProcessData.AreBaseInventoriesComplete.CombineLatest(InventoryProcessData.InventoryAbortionRequested)
-
-        // Attendre que tous les autres inventaires soit downloadés
-        // mre.WaitOne();
-        // int result = WaitHandle.WaitAny(new WaitHandle[] {InventoryProcessData.AllBaseInventoriesCompleteEvent, InventoryProcessData.InventoryAbortionRequested, 
-        //     InventoryProcessData.ErrorEvent, 
-        //     _sessionDataHolder.GetInventoryTransferErrorEvent(), _sessionDataHolder.GetSessionEndedEvent()});
-        //
-        // if (result == 3)
-        // {
-        //     isOK = false;
-        // }
-
         if (baseInventoryResult.IsOK)
         {
             // InventoryProcessData.IdentificationStatus.OnNext(LocalInventoryPartStatus.Success);
@@ -218,22 +200,6 @@ public class DataInventoryRunner : IDataInventoryRunner
 
                 await builder.BuildBaseInventoryAsync(baseInventoryFullName, token);
             });
-            
-            // InventoryProcessData.IsIdentificationRunning = false;
-            
-            
-            
-            // foreach (var inventoryBuilder in InventoryProcessData.InventoryBuilders)
-            // {
-            //     string baseInventoryFullName = _cloudSessionLocalDataManager
-            //         .GetCurrentMachineInventoryPath(inventoryBuilder.InventoryLetter!, LocalInventoryModes.Base);
-            //
-            //     await inventoryBuilder.BuildBaseInventoryAsync(baseInventoryFullName);
-            //     if (InventoryProcessData.CancellationTokenSource!.Token.IsCancellationRequested)
-            //     {
-            //         break;
-            //     }
-            // }
 
             if (!InventoryProcessData.CancellationTokenSource.Token.IsCancellationRequested)
             {
@@ -375,56 +341,6 @@ public class DataInventoryRunner : IDataInventoryRunner
         return isOK;
     }
 
-    // private void OnInventoryCancelOrErrorDuringAnalysis()
-    // {
-    //     if (InventoryProcessData.CancellationTokenSource.IsCancellationRequested)
-    //     {
-    //         InventoryProcessData.MainStatus.OnNext(InventoryProcessStatuses.Cancelled);
-    //         InventoryProcessData.AnalysisStatus.OnNext(InventoryProcessStatuses.Cancelled);
-    //     }
-    //     else 
-    //     {
-    //         InventoryProcessData.MainStatus.OnNext(InventoryProcessStatuses.Error);
-    //         InventoryProcessData.AnalysisStatus.OnNext(InventoryProcessStatuses.Error);
-    //     }
-    //         
-    //     if (InventoryProcessData.CancellationTokenSource.IsCancellationRequested)
-    //     {
-    //         _sessionDataHolder.SetLocalInventoryMainStatus(SessionId, LocalInventoryStatuses.InventoryCancelled);
-    //     }
-    //     else
-    //     {
-    //         _sessionDataHolder.SetLocalInventoryMainStatus(SessionId, LocalInventoryStatuses.InventoryError);
-    //     }
-    // }
-
-    // private async Task OnInventoryCancelOrErrorDuringIdentification(bool isError)
-    // {
-    //     if (InventoryProcessData.CancellationTokenSource.Token.IsCancellationRequested)
-    //     {
-    //         InventoryProcessData.MainStatus.OnNext(InventoryProcessStatuses.Cancelled);
-    //         InventoryProcessData.IdentificationStatus.OnNext(InventoryProcessStatuses.Cancelled); 
-    //         InventoryProcessData.AnalysisStatus.OnNext(InventoryProcessStatuses.NotLaunched);
-    //     }
-    //     else
-    //     {
-    //         InventoryProcessData.MainStatus.OnNext(InventoryProcessStatuses.Error);
-    //         InventoryProcessData.IdentificationStatus.OnNext(InventoryProcessStatuses.Error);
-    //         InventoryProcessData.AnalysisStatus.OnNext(InventoryProcessStatuses.NotLaunched);
-    //     }
-    //
-    //     if (isError)
-    //     {
-    //         await _sessionDataHolder.SetLocalInventoryMainStatus(SessionId, LocalInventoryStatuses.InventoryError);
-    //     }
-    //     else
-    //     {
-    //         await _sessionDataHolder.SetLocalInventoryMainStatus(SessionId, LocalInventoryStatuses.InventoryCancelled);
-    //     }
-    //
-    //     OnInventoryEnd();
-    // }
-
     private async Task<bool> StartDataInventoryInitialization()
     {
         await _sessionMemberService.UpdateCurrentMemberGeneralStatus(SessionMemberGeneralStatus.InventoryRunningIdentification);
@@ -446,12 +362,6 @@ public class DataInventoryRunner : IDataInventoryRunner
             {
                 throw new Exception("Current endpoint is null!");
             }
-
-            // InventoryProcessData.HasInventoryStarted = true;
-            // InventoryProcessData.IsInventoryRunning = true;
-            // InventoryProcessData.IsIdentificationRunning = true;
-            // InventoryProcessData.IsAnalysisRunning = false;
-            // InventoryProcessData.HasAnalysisStarted = false;
             
             List<InventoryBuilder> inventoryBuilders = new List<InventoryBuilder>();
             var myPathItems = _pathItemRepository.CurrentMemberPathItems.Items.ToList();
@@ -467,20 +377,6 @@ public class DataInventoryRunner : IDataInventoryRunner
                     myPathItems.ToList());
                 inventoryBuilders.Add(inventoryBuilder);
             }
-            // else
-            // {
-            //     _logger.LogInformation("Inventory parts:");
-            //     var letter = 'A';
-            //     foreach (var pathItem in myPathItems)
-            //     {
-            //         _logger.LogInformation(" - {@letter:l}: {@path} ({type})", pathItem.Code, pathItem.Path, pathItem.Type);
-            //
-            //         var inventoryBuilder = BuildInventoryBuilder(letter.ToString(), endpoint, new List<PathItem> { pathItem });
-            //         inventoryBuilders.Add(inventoryBuilder);
-            //
-            //         letter = (char)(letter + 1);
-            //     }
-            // }
             
             InventoryProcessData.InventoryBuilders = inventoryBuilders;
 
@@ -511,12 +407,4 @@ public class DataInventoryRunner : IDataInventoryRunner
 
         return inventoryBuilder;
     }
-    
-    // private void OnInventoryEnd()
-    // {
-    //     //
-    //     // InventoryProcessData.IsIdentificationRunning = false;
-    //     // InventoryProcessData.IsAnalysisRunning = false;
-    //     // InventoryProcessData.IsInventoryRunning = false;
-    // }
 }

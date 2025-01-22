@@ -138,9 +138,6 @@ public class InventoryBuilder
 
         try
         {
-            // IdentifiedSize = 0;
-            // AnalyzedFilesCount = 0;
-            // AnalyzeErrorsCount = 0;
             InventoryFileAnalyzer.Start();
             InventorySaver.Start(inventoryFullName);
 
@@ -172,12 +169,7 @@ public class InventoryBuilder
                 Log.Information("InventoryBuilder {Letter:l}: Local Inventory - Files Identification completed on {Code:l} {Path}", 
                     InventoryLetter, inventoryPart.Code, inventoryPart.RootPath);
             }
-
-            // InventoryFileAnalyzer.IsAllIdentified = true;
-            // IdentificationFinished?.AsyncSafeInvoke(this, EventArgs.Empty);
-            // IsIdentificationFinished = true;
-
-            // InventoryFileAnalyzer.HasFinished.WaitOne();
+            
             Inventory.EndDateTime = DateTimeOffset.Now;
 
             InventorySaver.WriteInventory();

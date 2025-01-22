@@ -37,40 +37,6 @@ public class PathItemsService : IPathItemsService
         _pathItemRepository = pathItemRepository;
         _sessionMemberRepository = sessionMemberRepository;
 
-        // PathItemsCache = new SourceCache<PathItem, string>(pathItem => pathItem.Key);
-        //
-        // AllPathItems = PathItemsCache
-        //     .Connect()
-        //     .AsObservableCache();
-        
-        // CurrentMemberPathItems = PathItemsCache
-        //     .Connect()
-        //     .Filter(pathItem => Equals(pathItem.ClientInstanceId, _connectionService.ClientInstanceId!))
-        //     .AsObservableCache();
-        
-        // _hubPushHandler2.PathItemAdded
-        //     .Where(dto => _sessionService.CheckSession(dto.SessionId))
-        //     .Subscribe(dto =>
-        //     {
-        //         var pathItem = _dataEncrypter.DecryptPathItem(dto.EncryptedPathItem);
-        //         PathItemsCache.AddOrUpdate(pathItem);
-        //     });
-        //
-        // _hubPushHandler2.PathItemRemoved
-        //     .Where(dto => _sessionService.CheckSession(dto.SessionId))
-        //     .Subscribe(dto =>
-        //     {
-        //         var pathItem = _dataEncrypter.DecryptPathItem(dto.EncryptedPathItem);
-        //         PathItemsCache.Remove(pathItem);
-        //     });
-        
-        // _sessionService.SessionObservable            
-        //     .Where(session => session == null)
-        //     .Subscribe(_ =>
-        //     {
-        //         PathItemsCache.Clear();
-        //     });
-
         _sessionMemberRepository.SortedSessionMembersObservable
             .OnItemRemoved(_ =>
             {
@@ -78,10 +44,6 @@ public class PathItemsService : IPathItemsService
             })
             .Subscribe();
 
-        // _sessionMembersService.GetAllSessionMembers()
-        //     .OnItemAdded(async sessionMemberInfo => await NewMethod(sessionMemberInfo)) // Task.Run(() => NewMethod(sessionMemberInfo)))
-        //     .Subscribe();
-        
         _sessionMemberRepository.SortedSessionMembersObservable
             .OnItemAdded(sessionMemberInfo => Observable.FromAsync(() => GetSessionMemberPathItems(sessionMemberInfo))) // Task.Run(() => NewMethod(sessionMemberInfo)))
             .Subscribe();
@@ -103,12 +65,6 @@ public class PathItemsService : IPathItemsService
             }
         }
     }
-
-    // private SourceCache<PathItem, string> PathItemsCache { get; }
-    
-    // public IObservableCache<PathItem, string> AllPathItems { get; }
-    
-    // public IObservableCache<PathItem, string> CurrentMemberPathItems { get; }
 
     public async Task AddPathItem(PathItem pathItem)
     {
