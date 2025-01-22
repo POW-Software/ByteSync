@@ -1020,57 +1020,63 @@ namespace ByteSync.Assets.Resources {
         /// <summary>
         ///   Recherche une chaîne localisée semblable à A mandatory update is available ({0})..
         /// </summary>
-        internal static string Login_AvailableUpdate_Mandatory {
+        internal static string UpdateDetails_AvailableUpdate_Mandatory {
             get {
-                return ResourceManager.GetString("Login_AvailableUpdate_Mandatory", resourceCulture);
+                return ResourceManager.GetString("UpdateDetails_AvailableUpdate_Mandatory", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à An optional update is available ({0})..
         /// </summary>
-        internal static string Login_AvailableUpdate_Optional {
+        internal static string UpdateDetails_AvailableUpdate_Optional {
             get {
-                return ResourceManager.GetString("Login_AvailableUpdate_Optional", resourceCulture);
+                return ResourceManager.GetString("UpdateDetails_AvailableUpdate_Optional", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à A recommended update is available ({0})..
         /// </summary>
-        internal static string Login_AvailableUpdate_Recommended {
+        internal static string UpdateDetails_AvailableUpdate_Recommended {
             get {
-                return ResourceManager.GetString("Login_AvailableUpdate_Recommended", resourceCulture);
+                return ResourceManager.GetString("UpdateDetails_AvailableUpdate_Recommended", resourceCulture);
             }
         }
         
-        internal static string Login_AvailableUpdates {
+        internal static string UpdateDetails_AvailableUpdates {
             get {
-                return ResourceManager.GetString("Login_AvailableUpdates", resourceCulture);
+                return ResourceManager.GetString("UpdateDetails_AvailableUpdates", resourceCulture);
             }
         }
         
-        internal static string Login_AvailableUpdate {
+        internal static string UpdateDetails_AvailableUpdate {
             get {
-                return ResourceManager.GetString("Login_AvailableUpdate", resourceCulture);
+                return ResourceManager.GetString("UpdateDetails_AvailableUpdate", resourceCulture);
+            }
+        }
+        
+        internal static string UpdateDetails_AutoUpdateNotSupported {
+            get {
+                return ResourceManager.GetString("UpdateDetails_AutoUpdateNotSupported", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Release notes.
         /// </summary>
-        internal static string Login_AvailableUpdate_ReleaseNotes {
+        internal static string UpdateDetails_AvailableUpdate_ReleaseNotes {
             get {
-                return ResourceManager.GetString("Login_AvailableUpdate_ReleaseNotes", resourceCulture);
+                return ResourceManager.GetString("UpdateDetails_AvailableUpdate_ReleaseNotes", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Update now.
         /// </summary>
-        internal static string Login_AvailableUpdate_UpdateNow {
+        internal static string UpdateDetails_AvailableUpdate_UpdateNow {
             get {
-                return ResourceManager.GetString("Login_AvailableUpdate_UpdateNow", resourceCulture);
+                return ResourceManager.GetString("UpdateDetails_AvailableUpdate_UpdateNow", resourceCulture);
             }
         }
         

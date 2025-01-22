@@ -2,12 +2,14 @@
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Updates;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Factories.Proxies;
 using ByteSync.Interfaces.Repositories;
@@ -29,9 +31,11 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
     private readonly IWebAccessor _webAccessor;
     private readonly IUpdateRepository _updateRepository;
     private readonly ISoftwareVersionProxyFactory _softwareVersionProxyFactory;
+    private readonly IEnvironmentService _environmentService;
     private readonly ILogger<UpdateDetailsViewModel> _logger;
     
     private ReadOnlyObservableCollection<SoftwareVersionProxy> _bindingData;
+
 
     public UpdateDetailsViewModel()
     {
@@ -40,7 +44,8 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
 
     public UpdateDetailsViewModel(IUpdateService updateService, IAvailableUpdateRepository availableAvailableUpdateRepository, 
         ILocalizationService localizationService, IWebAccessor webAccessor, IUpdateRepository updateRepository,
-        ISoftwareVersionProxyFactory softwareVersionProxyFactory, ILogger<UpdateDetailsViewModel> logger)
+        ISoftwareVersionProxyFactory softwareVersionProxyFactory, IEnvironmentService environmentService, 
+        ILogger<UpdateDetailsViewModel> logger)
     {
         AvailableUpdatesMessage = "";
         Progress = "";
@@ -53,6 +58,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         _webAccessor = webAccessor;
         _updateRepository = updateRepository;
         _softwareVersionProxyFactory = softwareVersionProxyFactory;
+        _environmentService = environmentService;
         _logger = logger;
 
         Error = new ErrorViewModel();
@@ -107,16 +113,31 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
 
     [Reactive]
     public ErrorViewModel Error { get; set; }
-        
+
+    public bool CanAutoUpdate
+    {
+        get
+        {
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
+                   (_environmentService.IsPortableApplication && RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
+        }
+    }
+
     private void SetAvailableUpdate()
     {
         if (SoftwareVersions.Count == 1)
         {
-            AvailableUpdatesMessage = _localizationService[nameof(Resources.Login_AvailableUpdate)];
+            AvailableUpdatesMessage = _localizationService[nameof(Resources.UpdateDetails_AvailableUpdate)];
         }
         else
         {
-            AvailableUpdatesMessage = String.Format(_localizationService[nameof(Resources.Login_AvailableUpdates)], SoftwareVersions.Count);
+            AvailableUpdatesMessage = String.Format(_localizationService[nameof(Resources.UpdateDetails_AvailableUpdates)], SoftwareVersions.Count);
+        }
+
+        if (!CanAutoUpdate)
+        {
+            AvailableUpdatesMessage += Environment.NewLine + 
+                                       _localizationService[nameof(Resources.UpdateDetails_AutoUpdateNotSupported)];
         }
     }
     

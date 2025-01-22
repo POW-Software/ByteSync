@@ -14,7 +14,8 @@
     
     <Grid>
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" MinWidth="400" Margin="12 6 12 6">
-            <TextBlock Text="{Binding AvailableUpdatesMessage}" Margin="6" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+            <Label Content="{Binding AvailableUpdatesMessage}" Margin="6" 
+                       HorizontalAlignment="Center" HorizontalContentAlignment="Center" VerticalAlignment="Center"/>
             
             <ItemsControl Items="{Binding SoftwareVersions}">
                 <ItemsControl.ItemsPanel>
@@ -37,12 +38,13 @@
                                     Command="{Binding Path=DataContext.ShowReleaseNotesCommand,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
                                     CommandParameter="{Binding}"
                                     VerticalAlignment="Center" Margin="12 0">
-                                <TextBlock Text="{localizations:Loc Login_AvailableUpdate_ReleaseNotes}" TextDecorations="Underline" />
+                                <TextBlock Text="{localizations:Loc UpdateDetails_AvailableUpdate_ReleaseNotes}" TextDecorations="Underline" />
                             </Button>
                             
                             <Button Classes="GenericButton"
                                     Command="{Binding Path=DataContext.RunUpdateCommand,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
                                     CommandParameter="{Binding}"
+                                    IsVisible="{Binding Path=DataContext.CanAutoUpdate,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
                                     Content="{localizations:Loc UpdateDetails_Update}" VerticalAlignment="Center" Margin="12 0 6 0"/>
                             
                         </StackPanel>
@@ -74,7 +76,7 @@
                             Command="{Binding Path=ShowReleaseNotesCommand}" 
                             CommandParameter="{Binding SelectedVersion}"
                             VerticalAlignment="Center" Margin="6 0">
-                        <TextBlock Text="{localizations:Loc Login_AvailableUpdate_ReleaseNotes}" />
+                        <TextBlock Text="{localizations:Loc UpdateDetails_AvailableUpdate_ReleaseNotes}" />
                     </Button> 
                 </StackPanel>
                 

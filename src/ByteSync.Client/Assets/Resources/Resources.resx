@@ -624,13 +624,13 @@ Would you like to continue ?</value>
   <data name="Login_Version" xml:space="preserve">
     <value>Version {0}</value>
   </data>
-  <data name="Login_AvailableUpdate_Mandatory" xml:space="preserve">
+  <data name="UpdateDetails_AvailableUpdate_Mandatory" xml:space="preserve">
     <value>A mandatory update is available ({0}).</value>
   </data>
-  <data name="Login_AvailableUpdate_Recommended" xml:space="preserve">
+  <data name="UpdateDetails_AvailableUpdate_Recommended" xml:space="preserve">
     <value>A recommended update is available ({0}).</value>
   </data>
-  <data name="Login_AvailableUpdate_Optional" xml:space="preserve">
+  <data name="UpdateDetails_AvailableUpdate_Optional" xml:space="preserve">
     <value>An optional update is available ({0}).</value>
   </data>
   <data name="Login_UpdateDialog_Update" xml:space="preserve">
@@ -645,10 +645,10 @@ Would you like to continue ?</value>
   <data name="Login_UpdateDialog_Message" xml:space="preserve">
     <value>Do you want to update the application to version {0}?</value>
   </data>
-  <data name="Login_AvailableUpdate_UpdateNow" xml:space="preserve">
+  <data name="UpdateDetails_AvailableUpdate_UpdateNow" xml:space="preserve">
     <value>Update now</value>
   </data>
-  <data name="Login_AvailableUpdate_ReleaseNotes" xml:space="preserve">
+  <data name="UpdateDetails_AvailableUpdate_ReleaseNotes" xml:space="preserve">
     <value>Release notes</value>
   </data>
   <data name="Login_SigninError_UnknownError" xml:space="preserve">
@@ -1101,10 +1101,10 @@ Please stop the inventory or synchronization first.</value>
   <data name="General_or" xml:space="preserve">
     <value>or</value>
   </data>
-  <data name="Login_AvailableUpdates" xml:space="preserve">
+  <data name="UpdateDetails_AvailableUpdates" xml:space="preserve">
     <value>{0} updates are available.</value>
   </data>
-  <data name="Login_AvailableUpdate" xml:space="preserve">
+  <data name="UpdateDetails_AvailableUpdate" xml:space="preserve">
     <value>1 update is available.</value>
   </data>
   <data name="SoftwareVersionViewModel_Mandatory" xml:space="preserve">
@@ -1672,5 +1672,8 @@ Do you want to save this new Session Profile with this name?</value>
   </data>
   <data name="DeploymentMode_Installation" xml:space="preserve">
     <value>Installation</value>
+  </data>
+  <data name="UpdateDetails_AutoUpdateNotSupported" xml:space="preserve">
+    <value>Please use the original deployment system to update the software.</value>
   </data>
 </root>
