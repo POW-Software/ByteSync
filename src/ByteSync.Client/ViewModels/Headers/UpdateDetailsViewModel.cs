@@ -2,12 +2,14 @@
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Updates;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Factories.Proxies;
 using ByteSync.Interfaces.Repositories;
@@ -29,9 +31,11 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
     private readonly IWebAccessor _webAccessor;
     private readonly IUpdateRepository _updateRepository;
     private readonly ISoftwareVersionProxyFactory _softwareVersionProxyFactory;
+    private readonly IEnvironmentService _environmentService;
     private readonly ILogger<UpdateDetailsViewModel> _logger;
     
     private ReadOnlyObservableCollection<SoftwareVersionProxy> _bindingData;
+
 
     public UpdateDetailsViewModel()
     {
@@ -40,7 +44,8 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
 
     public UpdateDetailsViewModel(IUpdateService updateService, IAvailableUpdateRepository availableAvailableUpdateRepository, 
         ILocalizationService localizationService, IWebAccessor webAccessor, IUpdateRepository updateRepository,
-        ISoftwareVersionProxyFactory softwareVersionProxyFactory, ILogger<UpdateDetailsViewModel> logger)
+        ISoftwareVersionProxyFactory softwareVersionProxyFactory, IEnvironmentService environmentService, 
+        ErrorViewModel errorViewModel, ILogger<UpdateDetailsViewModel> logger)
     {
         AvailableUpdatesMessage = "";
         Progress = "";
@@ -53,18 +58,19 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         _webAccessor = webAccessor;
         _updateRepository = updateRepository;
         _softwareVersionProxyFactory = softwareVersionProxyFactory;
+        _environmentService = environmentService;
         _logger = logger;
 
-        Error = new ErrorViewModel();
+        Error = errorViewModel;
         
         SelectedVersion = null;
+        IsAutoUpdating = false;
         
         ShowReleaseNotesCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(ShowReleaseNotes);
         RunUpdateCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(RunUpdate);
-        DownloadUpdateCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(DownloadUpdate);
 
         _availableUpdateRepository.ObservableCache
-            .Connect() // make the source an observable change set
+            .Connect()
             .Transform(sw => _softwareVersionProxyFactory.CreateSoftwareVersionProxy(sw))
             .Sort(SortExpressionComparer<SoftwareVersionProxy>.Descending(proxy => proxy.Version))
             .ObserveOn(RxApp.MainThreadScheduler)
@@ -78,10 +84,6 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
                 .Subscribe(_ => SetAvailableUpdate())
                 .DisposeWith(disposables);
             
-            // _updateService.NextAvailableVersionsObservable
-            //     .Subscribe(FillSoftwareVersions)
-            //     .DisposeWith(disposables);
-
             _updateRepository.Progress.ProgressChanged += UpdateManager_ProgressReported;
         });
     }
@@ -91,8 +93,6 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
     public ReactiveCommand<SoftwareVersionProxy, Unit> ShowReleaseNotesCommand { get; }
     
     public ReactiveCommand<SoftwareVersionProxy, Unit> RunUpdateCommand { get; }
-    
-    public ReactiveCommand<SoftwareVersionProxy, Unit> DownloadUpdateCommand { get; }
     
     public ReadOnlyObservableCollection<SoftwareVersionProxy> SoftwareVersions => _bindingData;
         
@@ -107,42 +107,36 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
 
     [Reactive]
     public ErrorViewModel Error { get; set; }
-        
+    
+    [Reactive]
+    public bool IsAutoUpdating { get; set; }
+
+    public bool CanAutoUpdate
+    {
+        get
+        {
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
+                   (_environmentService.IsPortableApplication && RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
+        }
+    }
+
     private void SetAvailableUpdate()
     {
         if (SoftwareVersions.Count == 1)
         {
-            AvailableUpdatesMessage = _localizationService[nameof(Resources.Login_AvailableUpdate)];
+            AvailableUpdatesMessage = _localizationService[nameof(Resources.UpdateDetails_AvailableUpdate)];
         }
         else
         {
-            AvailableUpdatesMessage = String.Format(_localizationService[nameof(Resources.Login_AvailableUpdates)], SoftwareVersions.Count);
+            AvailableUpdatesMessage = String.Format(_localizationService[nameof(Resources.UpdateDetails_AvailableUpdates)], SoftwareVersions.Count);
+        }
+
+        if (!CanAutoUpdate)
+        {
+            AvailableUpdatesMessage += Environment.NewLine + 
+                                       _localizationService[nameof(Resources.UpdateDetails_AutoUpdateNotSupported)];
         }
     }
-    
-    // private void FillSoftwareVersions(List<SoftwareVersion>? softwareVersions)
-    // {
-    //     SoftwareVersions.Clear();
-    //
-    //     if (softwareVersions == null)
-    //     {
-    //         return;
-    //     }
-    //     
-    //     foreach (var softwareVersion in softwareVersions)
-    //     {
-    //         if (!SoftwareVersions.Any(sv => sv.SoftwareVersion.Version.Equals(softwareVersion.Version)))
-    //         {
-    //             SoftwareVersionViewModel softwareVersionViewModel = new SoftwareVersionViewModel(softwareVersion);
-    //             SoftwareVersions.Add(softwareVersionViewModel);
-    //         }
-    //     }
-    // }
-        
-    // private void UpdateServiceNextVersionChanged(object? sender, SoftwareVersionEventArgs e)
-    // {
-    //     FillSoftwareVersions(e.SoftwareVersions);
-    // }
     
     private async Task ShowReleaseNotes(SoftwareVersionProxy softwareVersionProxy)
     {
@@ -161,6 +155,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         
     private async Task RunUpdate(SoftwareVersionProxy? softwareVersionViewModel)
     {
+        IsAutoUpdating = true;
         Container.CanCloseCurrentFlyout = false;
         
         SelectedVersion = softwareVersionViewModel;
@@ -180,13 +175,9 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         }
         finally
         {
+            IsAutoUpdating = false;
             Container.CanCloseCurrentFlyout = true;
         }
-    }
-    
-    private async Task DownloadUpdate(SoftwareVersionProxy? softwareVersionViewModel)
-    {
-        await _webAccessor.OpenByteSyncWebSite();
     }
         
     private void UpdateManager_ProgressReported(object? sender, UpdateProgress e)
@@ -201,8 +192,6 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
             UpdateProgressStatus.MovingNewFiles => _localizationService[nameof(Resources.UpdateDetails_MovingNewFiles)].UppercaseFirst(),
             _ => throw new ArgumentOutOfRangeException(nameof(e.Status), e.Status, null)
         };
-
-        // string progress = e.Status.ToString();
 
         if (e.Percentage != null)
         {

@@ -516,13 +516,13 @@ Voulez-vous continuer ?</value>
   <data name="Login_Version" xml:space="preserve">
 	  <value>Version {0}</value>
   </data>
-  <data name="Login_AvailableUpdate_Mandatory" xml:space="preserve">
+  <data name="UpdateDetails_AvailableUpdate_Mandatory" xml:space="preserve">
 	  <value>Une mise à jour obligatoire est disponible ({0}).</value>
   </data>
-  <data name="Login_AvailableUpdate_Recommended" xml:space="preserve">
+  <data name="UpdateDetails_AvailableUpdate_Recommended" xml:space="preserve">
 	  <value>Une mise à jour recommandée est disponible ({0}).</value>
   </data>
-  <data name="Login_AvailableUpdate_Optional" xml:space="preserve">
+  <data name="UpdateDetails_AvailableUpdate_Optional" xml:space="preserve">
 	  <value>Une mise à jour optionnelle est disponible ({0}).</value>
   </data>
   <data name="Login_UpdateDialog_Cancel" xml:space="preserve">
@@ -537,10 +537,10 @@ Voulez-vous continuer ?</value>
   <data name="Login_UpdateDialog_Message" xml:space="preserve">
 	  <value>Voulez-vous mettre à jour l'application à la version {0} ?</value>
   </data>
-  <data name="Login_AvailableUpdate_ReleaseNotes" xml:space="preserve">
+  <data name="UpdateDetails_AvailableUpdate_ReleaseNotes" xml:space="preserve">
 	  <value>Notes de version</value>
   </data>
-  <data name="Login_AvailableUpdate_UpdateNow" xml:space="preserve">
+  <data name="UpdateDetails_AvailableUpdate_UpdateNow" xml:space="preserve">
 	  <value>Mettre à jour maintenant</value>
   </data>
   <data name="Login_SigninError_UnknownError" xml:space="preserve">
@@ -984,10 +984,10 @@ Veuillez interrompre l'inventaire ou la synchronisation au préalable.</value>
 	<data name="General_or" xml:space="preserve">
 		<value>ou</value>
 	</data>
-	<data name="Login_AvailableUpdates" xml:space="preserve">
+	<data name="UpdateDetails_AvailableUpdates" xml:space="preserve">
 		<value>{0} mises à jour sont disponibles.</value>
 	</data>
-	<data name="Login_AvailableUpdate" xml:space="preserve">
+	<data name="UpdateDetails_AvailableUpdate" xml:space="preserve">
 		<value>1 mise à jour est disponible.</value>
 	</data>
 	<data name="SoftwareVersionViewModel_Mandatory" xml:space="preserve">
@@ -1534,5 +1534,8 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	</data>
 	<data name="AboutApplication_ClientInstanceId" xml:space="preserve">
 		<value>ID d'instance de client :</value>
+	</data>
+	<data name="UpdateDetails_AutoUpdateNotSupported" xml:space="preserve">
+		<value>Veuillez utiliser le système de déploiement d'origine pour mettre à jour le logiciel.</value>
 	</data>
 </root>

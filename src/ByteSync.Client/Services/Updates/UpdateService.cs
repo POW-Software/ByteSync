@@ -32,10 +32,10 @@ class UpdateService : IUpdateService
         {
             var updates = await _availableUpdatesLister.GetAvailableUpdates();
                 
-            List<SoftwareVersion> applicableUpdates = new List<SoftwareVersion>();
+            var applicableUpdates = new List<SoftwareVersion>();
             foreach (var softwareUpdate in updates)
             {
-                Version updateVersion = new Version(softwareUpdate.Version);
+                var updateVersion = new Version(softwareUpdate.Version);
 
                 if (updateVersion > _environmentService.ApplicationVersion)
                 {
@@ -79,9 +79,9 @@ class UpdateService : IUpdateService
 
     private SoftwareVersionFile GuessSoftwareFileVersion(SoftwareVersion softwareVersion)
     {
-        bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-        bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
-        bool isOsx = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+        var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        var isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+        var isOsx = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 
         SoftwareVersionFile softwareFileVersion;
         if (isWindows)

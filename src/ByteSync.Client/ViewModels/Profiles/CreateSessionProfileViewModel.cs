@@ -37,7 +37,7 @@ public class CreateSessionProfileViewModel : FlyoutElementViewModel
     
     public CreateSessionProfileViewModel(ProfileTypes profileType, ISessionService sessionService, 
         ISessionProfileManager sessionProfileManager, IDialogService dialogService,
-        ISessionProfileLocalDataManager sessionProfileLocalDataManager)
+        ISessionProfileLocalDataManager sessionProfileLocalDataManager, ErrorViewModel errorViewModel)
     {
         _sessionService = sessionService;
         _sessionProfileManager = sessionProfileManager;
@@ -65,7 +65,7 @@ public class CreateSessionProfileViewModel : FlyoutElementViewModel
 
         SuggestedItems = new ObservableCollection<string>();
 
-        Error = new ErrorViewModel();
+        Error = errorViewModel;
         
         this.WhenActivated(HandleActivation);
     }

@@ -29,8 +29,6 @@ public class ErrorViewModel : ActivatableViewModelBase
 
         this.WhenActivated(disposables =>
         {
-            // Observable.FromEventPattern<EventArgs>(_localizationService, nameof(_localizationService.PropertyChanged))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
             _localizationService.CurrentCultureObservable
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => UpdateErrorMessage())
