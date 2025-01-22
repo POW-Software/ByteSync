@@ -39,7 +39,7 @@ public class EnvironmentService : IEnvironmentService
     {
         var applicationLauncherFullName = Arguments[0].ToLower();
 
-        var programsDirectoriresCandidates = BuildProgramsDirectoriesCandidates(
+        var programsDirectoriesCandidates = BuildProgramsDirectoriesCandidates(
             Environment.SpecialFolder.CommonProgramFiles,
             Environment.SpecialFolder.CommonProgramFilesX86,
             Environment.SpecialFolder.ProgramFiles,
@@ -50,24 +50,32 @@ public class EnvironmentService : IEnvironmentService
 
         if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
         {
-            programsDirectoriresCandidates.Add("/usr/bin");
-            programsDirectoriresCandidates.Add("/bin");
-            programsDirectoriresCandidates.Add("/usr/local/bin");
-            programsDirectoriresCandidates.Add("/usr/share/");
+            programsDirectoriesCandidates.Add("/usr/bin");
+            programsDirectoriesCandidates.Add("/bin");
+            programsDirectoriesCandidates.Add("/usr/local/bin");
+            programsDirectoriesCandidates.Add("/usr/share/");
         }
 
         if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
         {
-            programsDirectoriresCandidates.Add("/Applications");
+            programsDirectoriesCandidates.Add("/Applications");
+            
+            var homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            programsDirectoriesCandidates.Add($"{homeDirectory}/Applications");
         }
 
         bool isPortableApplication = true;
-        foreach (var candidate in programsDirectoriresCandidates)
+        foreach (var candidate in programsDirectoriesCandidates)
         {
             if (IOUtils.IsSubPathOf(applicationLauncherFullName, candidate))
             {
                 isPortableApplication = false;
             }
+        }
+        
+        if (applicationLauncherFullName.Contains("/homebrew/") || applicationLauncherFullName.Contains("/linuxbrew/"))
+        {
+            isPortableApplication = false;
         }
             
         IsPortableApplication = isPortableApplication;
