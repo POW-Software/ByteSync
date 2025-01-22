@@ -63,17 +63,16 @@ public class DataEncrypter : IDataEncrypter
         aes.Key = _cloudSessionConnectionRepository.GetAesEncryptionKey()!;
         aes.GenerateIV();
         
-        string json = JsonHelper.Serialize(data);
+        var json = JsonHelper.Serialize(data);
         
-        using MemoryStream ms = new MemoryStream();
+        using var ms = new MemoryStream();
         using var encryptor = aes.CreateEncryptor();
-        using CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write);
-        using (StreamWriter sw = new StreamWriter(cs))
+        using var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write);
+        using (var sw = new StreamWriter(cs))
         {
             sw.Write(json);
         }
-
-        // Création du IEncryptedSessionData
+        
         var encryptedData = new T();
         encryptedData.IV = aes.IV;
         encryptedData.Data = ms.ToArray();
@@ -88,15 +87,15 @@ public class DataEncrypter : IDataEncrypter
         aes.IV = encryptedSessionData.IV;
         
         string json;
-        using MemoryStream ms = new MemoryStream(encryptedSessionData.Data);
+        using var ms = new MemoryStream(encryptedSessionData.Data);
         using var decryptor = aes.CreateDecryptor();
-        using CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read);
-        using (StreamReader streamReader = new StreamReader(cs))
+        using var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read);
+        using (var streamReader = new StreamReader(cs))
         {
             json = streamReader.ReadToEnd();
         }
         
-        T decryptedData = JsonHelper.Deserialize<T>(json);
+        var decryptedData = JsonHelper.Deserialize<T>(json);
 
         return decryptedData;
     }

@@ -21,25 +21,10 @@ public class PathItemChecker : IPathItemChecker
     {
         if (pathItem.Type == FileSystemTypes.File)
         {
-            // Pas de contrôle particulier sur les fichiers
             return true;
         }
 
-        // var pathItems = _pathItemsService.CurrentMemberPathItems.Items.ToList();
-
-        // if (pathItems == null)
-        // {
-        //     Log.Information("CheckPathItem: PathItems is null");
-        //     
-        //     MessageBoxViewModel messageBoxViewModel = new MessageBoxViewModel(
-        //         nameof(Resources.General_MessageBox_UnknownError_Title), nameof(Resources.General_MessageBox_UnknownError_Message));
-        //     messageBoxViewModel.ShowOK = true;
-        //     await _dialogService.ShowMessageBoxAsync(messageBoxViewModel);
-        //     
-        //     return false;
-        // }
-
-        // On ne peut ni être égal, ni un être, ni être un parent d'un chemin déjà sélectionné
+        // We can neither be equal, nor be, nor be a parent of an already selected path
         if (existingPathItems.Any(pi => pi.Path.Equals(pathItem.Path, StringComparison.InvariantCultureIgnoreCase) || 
                                 IOUtils.IsSubPathOf(pi.Path, pathItem.Path) || 
                                 IOUtils.IsSubPathOf(pathItem.Path, pi.Path)))

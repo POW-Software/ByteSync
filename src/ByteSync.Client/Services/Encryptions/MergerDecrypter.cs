@@ -7,79 +7,78 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Controls.Sessions;
 
-namespace ByteSync.Services.Encryptions
+namespace ByteSync.Services.Encryptions;
+
+public class MergerDecrypter : IMergerDecrypter
 {
-    public class MergerDecrypter : IMergerDecrypter
+    private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
+    private readonly ILogger<MergerDecrypter> _logger;
+
+    public MergerDecrypter(string localPath, DownloadTarget downloadTarget, CancellationTokenSource cancellationTokenSource, 
+        ICloudSessionConnectionRepository cloudSessionConnectionRepository, ILogger<MergerDecrypter> logger)
     {
-        private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
-        private readonly ILogger<MergerDecrypter> _logger;
+        _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
+        _logger = logger;
+            
+        TotalReadFiles = 0;
 
-        public MergerDecrypter(string localPath, DownloadTarget downloadTarget, CancellationTokenSource cancellationTokenSource, 
-            ICloudSessionConnectionRepository cloudSessionConnectionRepository, ILogger<MergerDecrypter> logger)
+        Initialize(localPath, downloadTarget, cancellationTokenSource);
+    }
+        
+    private int TotalReadFiles { get; set; }
+
+    public string FinalFile { get; private set; } = null!;
+
+    public SharedFileDefinition SharedFileDefinition { get; private set; } = null!;
+
+    private Aes Aes { get; set; } = null!;
+        
+    private DownloadTarget DownloadTarget { get; set; } = null!;
+        
+    private CancellationTokenSource CancellationTokenSource { get; set; } 
+        
+    private void Initialize(string finalFile, DownloadTarget downloadTarget, CancellationTokenSource cancellationTokenSource)
+    {
+        FinalFile = finalFile;
+
+        DownloadTarget = downloadTarget;
+        SharedFileDefinition = downloadTarget.SharedFileDefinition;
+            
+        Aes = Aes.Create();
+        Aes.Key = _cloudSessionConnectionRepository.GetAesEncryptionKey()!;
+        Aes.IV = SharedFileDefinition.IV;
+
+        CancellationTokenSource = cancellationTokenSource;
+
+        var fileInfo = new FileInfo(FinalFile);
+        if (fileInfo.Directory != null)
         {
-            _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
-            _logger = logger;
-            
-            TotalReadFiles = 0;
-
-            Initialize(localPath, downloadTarget, cancellationTokenSource);
+            fileInfo.Directory.Create();
         }
-        
-        private int TotalReadFiles { get; set; }
-
-        public string FinalFile { get; private set; } = null!;
-
-        public SharedFileDefinition SharedFileDefinition { get; private set; } = null!;
-
-        private Aes Aes { get; set; } = null!;
-        
-        private DownloadTarget DownloadTarget { get; set; } = null!;
-        
-        private CancellationTokenSource CancellationTokenSource { get; set; } 
-        
-        private void Initialize(string finalFile, DownloadTarget downloadTarget, CancellationTokenSource cancellationTokenSource)
+        using (var _ = new FileStream(FinalFile, FileMode.Append))
         {
-            FinalFile = finalFile;
-
-            DownloadTarget = downloadTarget;
-            SharedFileDefinition = downloadTarget.SharedFileDefinition;
-            
-            Aes = Aes.Create();
-            Aes.Key = _cloudSessionConnectionRepository.GetAesEncryptionKey()!;
-            Aes.IV = SharedFileDefinition.IV;
-
-            CancellationTokenSource = cancellationTokenSource;
-
-            FileInfo fileInfo = new FileInfo(FinalFile);
-            if (fileInfo.Directory != null)
-            {
-                fileInfo.Directory.Create();
-            }
-            using (var _ = new FileStream(FinalFile, FileMode.Append))
-            {
-                // Pour créer au moins un fichier vide
-            }
+            // Pour créer au moins un fichier vide
         }
+    }
 
-        public async Task MergeAndDecrypt()
+    public async Task MergeAndDecrypt()
+    {
+        if (CancellationTokenSource.IsCancellationRequested)
         {
-            if (CancellationTokenSource.IsCancellationRequested)
-            {
-                return;
-            }
-            
-            await using var outStream = new FileStream(FinalFile, FileMode.Append);
-            
-            ICryptoTransform decryptor = Aes.CreateDecryptor(Aes.Key, Aes.IV);
-            await using CryptoStream cryptoStream = new CryptoStream(outStream, decryptor, CryptoStreamMode.Write);
-            
-            TotalReadFiles += 1;
-            _logger.LogDebug("MergeAndDecrypt memoryStream {Number}", TotalReadFiles);
-
-            var memoryStream = DownloadTarget.GetMemoryStream(TotalReadFiles);
-
-            memoryStream.Position = 0;
-            await memoryStream.CopyToAsync(cryptoStream, CancellationTokenSource.Token);
+            return;
         }
+            
+        await using var outStream = new FileStream(FinalFile, FileMode.Append);
+            
+        var cryptoTransform = Aes.CreateDecryptor(Aes.Key, Aes.IV);
+        await using var cryptoStream = new CryptoStream(outStream, cryptoTransform, CryptoStreamMode.Write);
+            
+        TotalReadFiles += 1;
+        _logger.LogDebug("MergeAndDecrypt memoryStream {Number}", TotalReadFiles);
+
+        var memoryStream = DownloadTarget.GetMemoryStream(TotalReadFiles);
+
+        memoryStream.Position = 0;
+        await memoryStream.CopyToAsync(cryptoStream, CancellationTokenSource.Token);
     }
 }

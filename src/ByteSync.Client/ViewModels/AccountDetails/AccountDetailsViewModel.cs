@@ -39,23 +39,7 @@ public class AccountDetailsViewModel : FlyoutElementViewModel
         Subscription = _applicationSettingsRepository.ProductSerialDescription?.Subscription ?? "";
         AllowedCloudSynchronizationVolumeInBytes = _applicationSettingsRepository.ProductSerialDescription?.AllowedCloudSynchronizationVolumeInBytes ?? 0;
         
-    #if DEBUG
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.SHOW_DEMO_DATA))
-        {
-            AccountEmail = "email@example.com";
-            SerialNumber = "12345-ABCDE-67890***";
-
-            ProductName = "ByteSync";
-            Subscription = "Enterprise - Yearly";
-        }
-    #endif
-        
         this.WhenActivated(HandleActivation);
-        /*
-        this.WhenAnyValue(x => x.LobbyMember.LobbyMemberInfo)
-            .Select(x => x != null && x.ClientInstanceId.Equals(_connectionManager.ClientInstanceId))
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .ToPropertyEx(this, x => x.IsLobbyLocalMember);*/
     }
 
     private void HandleActivation(Action<IDisposable> disposables)

@@ -237,19 +237,9 @@ class ApplicationSettingsRepository : IApplicationSettingsRepository
     {
         var applicationSettings = new ApplicationSettings();
         applicationSettings.SetEncryptionPassword(EncryptionPassword);
-
-        // ReSharper disable RedundantAssignment
-        var email = "";
-        var serial = "";
-        // ReSharper restore RedundantAssignment
-            
-    #if DEBUG
-        email = "paul.fresquet@pow-software.com";
-        serial = "BS-ADM-DEBUG";
-    #endif
-
-        applicationSettings.DecodedEmail = email;
-        applicationSettings.DecodedSerial = serial;
+        
+        applicationSettings.DecodedEmail = "";
+        applicationSettings.DecodedSerial = "";
             
         InitializeInstallationId(applicationSettings);
         

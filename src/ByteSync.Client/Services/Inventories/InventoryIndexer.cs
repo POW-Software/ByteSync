@@ -50,24 +50,6 @@ public class InventoryIndexer
             IndexedItemsByPathIdentity[pathIdentityIndex].Add(indexedItem);
         }
     }
-    
-    // internal void Register(DirectoryDescription directoryDescription, PathIdentity pathIdentity)
-    // {
-    //     string index = BuildFileDescriptionIndex(directoryDescription);
-    //
-    //     if (IndexedItemsByFileDescription.ContainsKey(index))
-    //     {
-    //         var indexedItem = IndexedItemsByFileDescription[index];
-    //
-    //         string pathIdentityIndex = BuildPathIdentityIndex(pathIdentity);
-    //
-    //         if (!IndexedItemsByPathIdentity.ContainsKey(pathIdentityIndex))
-    //         {
-    //             IndexedItemsByPathIdentity.Add(pathIdentityIndex, new HashSet<IndexedItem>());
-    //         }
-    //         IndexedItemsByPathIdentity[pathIdentityIndex].Add(indexedItem);
-    //     }
-    // }
 
     private string BuildFileDescriptionIndex(FileSystemDescription fileSystemDescription)
     {
