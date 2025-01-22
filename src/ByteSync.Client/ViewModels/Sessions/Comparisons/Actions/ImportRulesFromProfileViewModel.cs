@@ -29,7 +29,8 @@ public class ImportRulesFromProfileViewModel : ActivatableViewModelBase
     }
 
     internal ImportRulesFromProfileViewModel(ISessionService sessionService, ISessionProfileLocalDataManager sessionProfileLocalDataManager, 
-        ISynchronizationRulesConverter synchronizationRulesConverter, ILobbySynchronizationRuleViewModelFactory lobbySynchronizationRuleViewModelFactory)
+        ISynchronizationRulesConverter synchronizationRulesConverter, ILobbySynchronizationRuleViewModelFactory lobbySynchronizationRuleViewModelFactory,
+        ErrorViewModel errorViewModel)
     {
         _sessionService = sessionService;
         _sessionProfileLocalDataManager = sessionProfileLocalDataManager;
@@ -39,7 +40,7 @@ public class ImportRulesFromProfileViewModel : ActivatableViewModelBase
         AvailableSessionProfiles = new ObservableCollection<AbstractSessionProfile>();
         CloudSessionProfileSynchronizationRules = new ObservableCollection<LobbySynchronizationRuleViewModel>();
 
-        Error = new ErrorViewModel();
+        Error = errorViewModel;
         
         this.WhenAnyValue(x => x.SelectedSessionProfile)
             .Where(x => x != null)

@@ -45,7 +45,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
     public UpdateDetailsViewModel(IUpdateService updateService, IAvailableUpdateRepository availableAvailableUpdateRepository, 
         ILocalizationService localizationService, IWebAccessor webAccessor, IUpdateRepository updateRepository,
         ISoftwareVersionProxyFactory softwareVersionProxyFactory, IEnvironmentService environmentService, 
-        ILogger<UpdateDetailsViewModel> logger)
+        ErrorViewModel errorViewModel, ILogger<UpdateDetailsViewModel> logger)
     {
         AvailableUpdatesMessage = "";
         Progress = "";
@@ -61,13 +61,13 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         _environmentService = environmentService;
         _logger = logger;
 
-        Error = new ErrorViewModel();
+        Error = errorViewModel;
         
         SelectedVersion = null;
+        IsAutoUpdating = false;
         
         ShowReleaseNotesCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(ShowReleaseNotes);
         RunUpdateCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(RunUpdate);
-        DownloadUpdateCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(DownloadUpdate);
 
         _availableUpdateRepository.ObservableCache
             .Connect() // make the source an observable change set
@@ -98,8 +98,6 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
     
     public ReactiveCommand<SoftwareVersionProxy, Unit> RunUpdateCommand { get; }
     
-    public ReactiveCommand<SoftwareVersionProxy, Unit> DownloadUpdateCommand { get; }
-    
     public ReadOnlyObservableCollection<SoftwareVersionProxy> SoftwareVersions => _bindingData;
         
     [Reactive]
@@ -113,6 +111,9 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
 
     [Reactive]
     public ErrorViewModel Error { get; set; }
+    
+    [Reactive]
+    public bool IsAutoUpdating { get; set; }
 
     public bool CanAutoUpdate
     {
@@ -182,6 +183,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         
     private async Task RunUpdate(SoftwareVersionProxy? softwareVersionViewModel)
     {
+        IsAutoUpdating = true;
         Container.CanCloseCurrentFlyout = false;
         
         SelectedVersion = softwareVersionViewModel;
@@ -201,13 +203,9 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         }
         finally
         {
+            IsAutoUpdating = false;
             Container.CanCloseCurrentFlyout = true;
         }
-    }
-    
-    private async Task DownloadUpdate(SoftwareVersionProxy? softwareVersionViewModel)
-    {
-        await _webAccessor.OpenByteSyncWebSite();
     }
         
     private void UpdateManager_ProgressReported(object? sender, UpdateProgress e)

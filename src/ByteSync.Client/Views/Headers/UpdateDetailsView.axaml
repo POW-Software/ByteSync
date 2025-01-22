@@ -26,8 +26,7 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal" Margin="0 15" 
-                                    IsEnabled="{Binding Path=DataContext.SelectedVersion,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, 
-                                        Converter={x:Static ObjectConverters.IsNull}}">
+                                    IsEnabled="{Binding Path=!DataContext.IsAutoUpdating,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}">
                             <TextBlock Text="{Binding Level}" Width="100" 
                                        VerticalAlignment="Center" Margin="6 0"/>
                             
