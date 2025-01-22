@@ -36,7 +36,7 @@ public class UpdateNewFilesMover : IUpdateNewFilesMover
             var destinationFile = Path.Combine(_updateRepository.UpdateData.ApplicationBaseDirectory, fileName);
             _logger.LogInformation("UpdateNewFilesMover: Moving {UpdateFile} to {DestinationFile}", updateFile, destinationFile);
             
-            File.Move(updateFile, destinationFile, true);
+            File.Move(updateFile, destinationFile);
         }
         
         return Task.CompletedTask;
