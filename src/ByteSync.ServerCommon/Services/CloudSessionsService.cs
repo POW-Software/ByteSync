@@ -55,13 +55,8 @@ public class CloudSessionsService : ICloudSessionsService
         cloudSessionData.SessionMembers.Add(creatorData);
 
         cloudSessionData = await _cloudSessionsRepository.AddCloudSession(cloudSessionData, GenerateRandomSessionId);
-        
-        
-        //var client = await _clientsRepository2.GetClient(creator).ConfigureAwait(false);
 
         await _byteSyncClientCaller.AddToSessionGroup(client, cloudSessionData.SessionId);
-        
-        // await _hubContext.Groups.AddToGroupAsync(client!.ConnectionIds.Last(), cloudSession.SessionId).ConfigureAwait(false);
 
         _logger.LogInformation("CreateCloudSession: {@cloudSession} by {@creator}", cloudSessionData.SessionId, creatorData.BuildLog());
 
@@ -142,11 +137,9 @@ public class CloudSessionsService : ICloudSessionsService
         var member = cloudSession.SessionMembers.FirstOrDefault();
         if (member != null)
         {
-            // Il y a un "premier membre", on enregistre la demande actuelle sous la forme d'une prédemande
             await PreJoinCloudSession(client, parameters.PublicKeyInfo, 
                 parameters.ProfileClientId, parameters.SessionId, member.ClientInstanceId).ConfigureAwait(false);
-
-            // On demande au premier membre de nous fournir sa clé publique qui sera utilisée pour l'échange
+            
             _logger.LogInformation("AskCloudSessionPasswordExchangeKey: Asking PasswordExchangeKey to {member} for session {sessionId} " +
                                 "and requester {requester}", member.BuildLog(), parameters.SessionId, client.ClientInstanceId);
 
@@ -224,24 +217,9 @@ public class CloudSessionsService : ICloudSessionsService
 
                     joiner.FinalizationPassword = finaliationPassword;
                     parameters.FinalizationPassword = finaliationPassword;
-                    
-                    // cloudSessionData.PreSessionMembers.Remove(joiner);
-                    // cloudSessionData.SessionMembers.Add(joiner);
                 }
 
                 return true;
-
-
-                // joiner = new SessionMemberData(byteSyncEndpoint, publicKeyInfo, profileClientId, innerCloudSessionData,
-                //     innerCloudSessionData.SessionMembers.Count);
-                // innerCloudSessionData.SessionMembers.Add(joiner);
-
-                // if (joiner != null)
-                // {
-                //     CloudSessionDatasHolder.ValidateMember(joiner);
-                // }
-
-                //joiner = CloudSessionDatasHolder.AddMember(cloudSessionData, powCloudSynchronizerEndpoint, connectionId);
             }
             else
             {
@@ -249,14 +227,8 @@ public class CloudSessionsService : ICloudSessionsService
             }
         });
         
-        // var cloudSessionData = await _cloudSessionsRepository.GetCloudSession(parameters.SessionId);
-
-        
-
         if (updateResult.IsSaved)
         {
-            // await _inventoryMemberRepository.AddInventoryMember(joiner!);
-            
             _logger.LogInformation("ValidateJoinCloudSession: {@cloudSession} by {@joiner}", updateResult.Element.BuildLog(), joiner!.BuildLog());
 
             var cloudSessionResult = await BuildCloudSessionResult(updateResult.Element, joiner!);
