@@ -165,9 +165,6 @@ class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivatableView
     public extern bool IsComparisonVisible { [ObservableAsProperty] get; }
     
     public extern bool IsSynchronizationVisible { [ObservableAsProperty] get; }
-        
-    [Reactive]
-    public ViewModelBase? LocalSessionParts { get; set; }
     
     [Reactive]
     public ViewModelBase InventoryProcess { get; set; }
