@@ -167,13 +167,20 @@ public class InventoryService : IInventoryService
         return updateEntityResult.IsSaved;
     }
 
-    public async Task<List<EncryptedPathItem>?> GetPathItems(string sessionId, string clientInstanceId)
+    public async Task<List<EncryptedPathItem>> GetPathItems(string sessionId, string clientInstanceId)
     {
         var inventoryData = await _inventoryRepository.Get(sessionId);
         
         var inventoryMember = inventoryData?.InventoryMembers.SingleOrDefault(m => m.ClientInstanceId == clientInstanceId);
-
-        return inventoryMember?.SharedPathItems;
+        
+        if (inventoryMember == null)
+        {
+            return new List<EncryptedPathItem>();
+        }
+        else
+        {
+            return inventoryMember!.SharedPathItems;
+        }
     }
     
     public async Task<bool> SetLocalInventoryStatus(Client client, UpdateSessionMemberGeneralStatusParameters parameters)
