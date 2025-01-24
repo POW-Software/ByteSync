@@ -564,7 +564,7 @@ public class InventoryServiceTests
         var pathItems = await service.GetPathItems(sessionId, client.ClientInstanceId);
 
         // Assert
-        pathItems.Should().BeNull();
+        pathItems.Should().BeEmpty();
         A.CallTo(() => mockInventoryRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
     }
     
