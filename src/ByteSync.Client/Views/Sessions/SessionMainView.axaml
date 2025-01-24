@@ -43,9 +43,6 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                     
-                    <ContentControl Content="{Binding LocalSessionParts}" Background="{DynamicResource BlockBackColor}"
-                                    IsVisible="{Binding !IsCloudSession}" Margin="6" />
-                    
                     <ContentControl Content="{Binding InventoryProcess}" Background="{DynamicResource BlockBackColor}"
                                     IsVisible="{Binding IsInventoryVisible}" MinHeight="320" Margin="6" />
                     

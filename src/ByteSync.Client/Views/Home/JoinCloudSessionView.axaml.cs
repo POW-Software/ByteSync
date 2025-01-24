@@ -1,10 +1,10 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
+﻿using Avalonia.Markup.Xaml;
+using Avalonia.ReactiveUI;
+using ByteSync.ViewModels.Home;
 
 namespace ByteSync.Views.Home;
 
-public partial class JoinCloudSessionView : UserControl
+public class JoinCloudSessionView : ReactiveUserControl<JoinCloudSessionViewModel>
 {
     public JoinCloudSessionView()
     {
