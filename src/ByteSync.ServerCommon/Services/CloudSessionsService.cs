@@ -23,12 +23,13 @@ public class CloudSessionsService : ICloudSessionsService
     private readonly ISynchronizationRepository _synchronizationRepository;
     private readonly ISynchronizationService _synchronizationService;
     private readonly IInventoryRepository _inventoryRepository;
+    private readonly IInventoryService _inventoryService;
     private readonly ISessionMemberMapper _sessionMemberConverter;
     private readonly ICacheService _cacheService;
 
     public CloudSessionsService(ILogger<CloudSessionsService> logger, ISharedFilesService sharedFilesService, IByteSyncClientCaller byteSyncClientCaller, 
-        ICloudSessionsRepository cloudSessionsRepository, ISynchronizationRepository synchronizationRepository, 
-        IInventoryRepository inventoryRepository, ISynchronizationService synchronizationService, 
+        ICloudSessionsRepository cloudSessionsRepository, ISynchronizationRepository synchronizationRepository, ISynchronizationService synchronizationService,
+        IInventoryRepository inventoryRepository,  IInventoryService inventoryService,
         ISessionMemberMapper sessionMemberConverter, ICacheService cacheService)
     {
         _logger = logger;
@@ -38,6 +39,7 @@ public class CloudSessionsService : ICloudSessionsService
         _synchronizationRepository = synchronizationRepository;
         _synchronizationService = synchronizationService;
         _inventoryRepository = inventoryRepository;
+        _inventoryService = inventoryService;
         _sessionMemberConverter = sessionMemberConverter;
         _cacheService = cacheService;
     }
@@ -456,14 +458,18 @@ public class CloudSessionsService : ICloudSessionsService
         {
             cloudSessionData.ResetSession();
             
-            _logger.LogInformation("ResetSession: session {@cloudSession} - OK", cloudSessionData.BuildLog());
+            
 
             return true;
         });
         
-        await _sharedFilesService.ClearSession(sessionId);
+        await _inventoryService.ResetSession(sessionId);
 
         await _synchronizationService.ResetSession(sessionId);
+        
+        await _sharedFilesService.ClearSession(sessionId);
+        
+        _logger.LogInformation("ResetSession: session {sessionId} reset by {clientInstanceId}", sessionId, client.ClientInstanceId);
         
         await _byteSyncClientCaller.SessionGroupExcept(sessionId, client)
             .SessionResetted(new BaseSessionDto(sessionId, client.ClientInstanceId));

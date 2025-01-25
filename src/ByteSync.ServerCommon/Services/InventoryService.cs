@@ -208,7 +208,17 @@ public class InventoryService : IInventoryService
 
         return updateResult.IsSaved;
     }
-    
+
+    public async Task ResetSession(string sessionId)
+    {
+        await _inventoryRepository.UpdateIfExists(sessionId, inventoryData =>
+        {
+            inventoryData.IsInventoryStarted = false;
+
+            return true;
+        });
+    }
+
     private static InventoryMemberData GetOrCreateInventoryMember(InventoryData inventoryData, string sessionId, Client client)
     {
         var inventoryMember = inventoryData.InventoryMembers.SingleOrDefault(imd => imd.ClientInstanceId == client.ClientInstanceId);
