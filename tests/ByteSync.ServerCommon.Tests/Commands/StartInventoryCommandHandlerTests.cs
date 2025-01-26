@@ -165,8 +165,8 @@ public class StartInventoryCommandHandlerTests
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null, cloudSessionData));
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client2", "client2", new PublicKeyInfo(), null, cloudSessionData));
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = "client1", SharedPathItems = new List<EncryptedPathItem> { encryptedPathItem } });
-        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = "client2", SharedPathItems = new List<EncryptedPathItem>() });
+            { ClientInstanceId = "client1", SharedPathItems = [encryptedPathItem] });
+        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = "client2", SharedPathItems = [] });
         
         A.CallTo(() => _mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
@@ -198,9 +198,9 @@ public class StartInventoryCommandHandlerTests
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null, cloudSessionData));
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client2", "client2", new PublicKeyInfo(), null, cloudSessionData));
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = "client1", SharedPathItems = new List<EncryptedPathItem> { new() { Code = "pathItem1" } } });
+            { ClientInstanceId = "client1", SharedPathItems = [new() { Code = "pathItem1" }] });
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = "client2", SharedPathItems = new List<EncryptedPathItem> { new() { Code = "pathItem2" } } });
+            { ClientInstanceId = "client2", SharedPathItems = [new() { Code = "pathItem2" }] });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSessionData);

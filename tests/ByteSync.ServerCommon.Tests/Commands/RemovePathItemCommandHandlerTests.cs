@@ -1,6 +1,5 @@
 ﻿using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions;
-using ByteSync.Common.Interfaces.Hub;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
@@ -9,7 +8,6 @@ using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using FakeItEasy;
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Tests.Commands;
@@ -22,7 +20,6 @@ public class RemovePathItemCommandHandlerTests
     private readonly IInventoryRepository _mockInventoryRepository;
     private readonly IByteSyncClientCaller _mockByteSyncClientCaller;
     private readonly ILogger<RemovePathItemCommandHandler> _mockLogger;
-    private readonly IHubByteSyncPush _mockByteSyncPush = A.Fake<IHubByteSyncPush>(x => x.Strict());
     
     private readonly RemovePathItemCommandHandler _removePathItemCommandHandler;
 
@@ -63,7 +60,6 @@ public class RemovePathItemCommandHandlerTests
         await _removePathItemCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        // inventoryData.InventoryMembers.Any(imd => imd.ClientInstanceId == client.ClientInstanceId && imd.SharedPathItems.Count == 0).Should().BeTrue();
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client)).MustHaveHappenedOnceExactly();
     }
@@ -95,7 +91,6 @@ public class RemovePathItemCommandHandlerTests
         await _removePathItemCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        // inventoryData.InventoryMembers.Any(imd => imd.ClientInstanceId == client.ClientInstanceId && imd.SharedPathItems.Count == 0).Should().BeTrue();
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client)).MustHaveHappenedOnceExactly();
     }

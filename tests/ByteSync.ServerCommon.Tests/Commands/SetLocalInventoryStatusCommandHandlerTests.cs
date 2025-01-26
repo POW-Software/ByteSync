@@ -1,13 +1,11 @@
 ﻿using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
-using ByteSync.Common.Interfaces.Hub;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Commands.Inventories;
 using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
-using ByteSync.ServerCommon.Interfaces.Services;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -18,23 +16,16 @@ namespace ByteSync.ServerCommon.Tests.Commands;
 
 public class SetLocalInventoryStatusCommandHandlerTests
 {
-    private readonly IInventoryMemberService _mockInventoryMemberService;
-    private readonly ICloudSessionsRepository _mockCloudSessionsRepository;
     private readonly IInventoryRepository _mockInventoryRepository;
     private readonly IByteSyncClientCaller _mockByteSyncCaller;
-    private readonly IByteSyncClientCaller _mockByteSyncClientCaller;
     private readonly ILogger<SetLocalInventoryStatusCommandHandler> _mockLogger;
-    private readonly IHubByteSyncPush _mockByteSyncPush = A.Fake<IHubByteSyncPush>(x => x.Strict());
     
     private readonly SetLocalInventoryStatusCommandHandler _setLocalInventoryStatusCommandHandler;
 
     public SetLocalInventoryStatusCommandHandlerTests()
     {
-        _mockInventoryMemberService = A.Fake<IInventoryMemberService>();
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
         _mockByteSyncCaller = A.Fake<IByteSyncClientCaller>();
-        _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
-        _mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
         _mockLogger = A.Fake<ILogger<SetLocalInventoryStatusCommandHandler>>();
         
         _setLocalInventoryStatusCommandHandler = new SetLocalInventoryStatusCommandHandler(_mockInventoryRepository, _mockByteSyncCaller, _mockLogger);
