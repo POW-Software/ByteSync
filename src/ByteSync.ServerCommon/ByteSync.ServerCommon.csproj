@@ -10,6 +10,7 @@
     <ItemGroup>
       <PackageReference Include="Azure.Identity" Version="1.12.0" />
       <PackageReference Include="Azure.Storage.Blobs" Version="12.22.0" />
+      <PackageReference Include="MediatR" Version="12.4.1" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
       <PackageReference Include="Microsoft.Azure.SignalR" Version="1.27.0" />
       <PackageReference Include="Microsoft.Azure.SignalR.Management" Version="1.25.2" />
@@ -23,6 +24,10 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ByteSync.Common\ByteSync.Common.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Commands\" />
     </ItemGroup>
 
 </Project>

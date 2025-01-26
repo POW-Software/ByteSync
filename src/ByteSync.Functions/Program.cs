@@ -168,6 +168,8 @@ var host = new HostBuilder()
         services.AddJwtAuthentication(appSettings!.Secret);
 
         services.AddDbContext<ByteSyncDbContext>();
+
+        services.AddMediatR(new MediatRServiceConfiguration());
     })
     .Build();
 

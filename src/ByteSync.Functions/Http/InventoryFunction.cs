@@ -6,18 +6,22 @@ using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Functions.Constants;
 using ByteSync.Functions.Helpers;
+using ByteSync.ServerCommon.Commands.Inventories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using MediatR;
 
 namespace ByteSync.Functions.Http;
 
 public class InventoryFunction
 {
     private readonly IInventoryService _inventoryService;
+    private readonly IMediator _mediator;
     private readonly ILogger<InventoryFunction> _logger;
 
-    public InventoryFunction(IInventoryService inventoryService, ILoggerFactory loggerFactory)
+    public InventoryFunction(IInventoryService inventoryService, IMediator mediator, ILoggerFactory loggerFactory)
     {
         _inventoryService = inventoryService;
+        _mediator = mediator;
         _logger = loggerFactory.CreateLogger<InventoryFunction>();
     }
     
@@ -33,7 +37,8 @@ public class InventoryFunction
         {
             var client = FunctionHelper.GetClientFromContext(executionContext);
             
-            var result = await _inventoryService.StartInventory(sessionId, client);
+            var request = new StartInventoryRequest(sessionId, client);
+            var result = await _mediator.Send(request);
 
             await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
