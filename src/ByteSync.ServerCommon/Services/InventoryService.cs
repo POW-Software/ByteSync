@@ -63,14 +63,6 @@ public class InventoryService : IInventoryService
             }
         }, transaction, sessionRedisLock);
         
-        // var cloudSessionData = await _cloudSessionsRepository.Get(sessionId);
-        //
-        // if (cloudSessionData == null)
-        // {
-        //     _logger.LogInformation("StartInventory: session {@sessionId}: not found", sessionId);
-        //     return StartInventoryResult.BuildFrom(StartInventoryStatuses.SessionNotFound);
-        // }
-        
         if (cloudSessionData == null)
         {
             _logger.LogInformation("StartInventory: session {@sessionId}: not found", sessionId);
@@ -111,26 +103,6 @@ public class InventoryService : IInventoryService
                 return startInventoryResult.IsOK;
             }, transaction, inventoryRedisLock);
         }
-        
-        
-        // if (updateResult.IsWaitingForTransaction)
-        // {
-        //     await _cloudSessionsRepository.UpdateIfExists(sessionId, sessionData =>
-        //     {
-        //         if (!sessionData.IsSessionActivated)
-        //         {
-        //             sessionData.IsSessionActivated = true;
-        //             return true;
-        //         }
-        //         else
-        //         {
-        //             _logger.LogWarning("Session {sessionId} is already activated", sessionId);
-        //             
-        //             startInventoryResult!.Status = StartInventoryStatuses.UnknownError;
-        //             return false;
-        //         }
-        //     }, transaction, sessionRedisLock);
-        // }
 
         if (sessionUpdateResult.IsWaitingForTransaction 
             && inventoryUpdateResult != null && inventoryUpdateResult.IsWaitingForTransaction 
