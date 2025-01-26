@@ -131,31 +131,31 @@ public class InventoryService : IInventoryService
     //     }
     // }
     
-    public async Task<bool> SetLocalInventoryStatus(Client client, UpdateSessionMemberGeneralStatusParameters parameters)
-    {
-        var updateResult = await _inventoryRepository.Update(parameters.SessionId, inventoryData =>
-        {
-            var inventoryMember = inventoryData.InventoryMembers.Single(m => m.ClientInstanceId == client.ClientInstanceId);
-            
-            if (inventoryMember.LastLocalInventoryStatusUpdate == null || 
-                parameters.UtcChangeDate > inventoryMember.LastLocalInventoryStatusUpdate)
-            {
-                inventoryMember.SessionMemberGeneralStatus = parameters.SessionMemberGeneralStatus;
-
-                inventoryMember.LastLocalInventoryStatusUpdate = parameters.UtcChangeDate;
-                
-                _byteSyncClientCaller.SessionGroupExcept(parameters.SessionId, client).SessionMemberGeneralStatusUpdated(parameters);
-
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        });
-
-        return updateResult.IsSaved;
-    }
+    // public async Task<bool> SetLocalInventoryStatus(Client client, UpdateSessionMemberGeneralStatusParameters parameters)
+    // {
+    //     var updateResult = await _inventoryRepository.Update(parameters.SessionId, inventoryData =>
+    //     {
+    //         var inventoryMember = inventoryData.InventoryMembers.Single(m => m.ClientInstanceId == client.ClientInstanceId);
+    //         
+    //         if (inventoryMember.LastLocalInventoryStatusUpdate == null || 
+    //             parameters.UtcChangeDate > inventoryMember.LastLocalInventoryStatusUpdate)
+    //         {
+    //             inventoryMember.SessionMemberGeneralStatus = parameters.SessionMemberGeneralStatus;
+    //
+    //             inventoryMember.LastLocalInventoryStatusUpdate = parameters.UtcChangeDate;
+    //             
+    //             _byteSyncClientCaller.SessionGroupExcept(parameters.SessionId, client).SessionMemberGeneralStatusUpdated(parameters);
+    //
+    //             return true;
+    //         }
+    //         else
+    //         {
+    //             return false;
+    //         }
+    //     });
+    //
+    //     return updateResult.IsSaved;
+    // }
 
     public async Task ResetSession(string sessionId)
     {
@@ -167,22 +167,22 @@ public class InventoryService : IInventoryService
         });
     }
 
-    private static InventoryMemberData GetOrCreateInventoryMember(InventoryData inventoryData, string sessionId, Client client)
-    {
-        var inventoryMember = inventoryData.InventoryMembers.SingleOrDefault(imd => imd.ClientInstanceId == client.ClientInstanceId);
-
-        if (inventoryMember == null)
-        {
-            inventoryMember = new InventoryMemberData
-            {
-                SessionId = sessionId,
-                ClientInstanceId = client.ClientInstanceId,
-                SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryWaitingForStart,
-            };
-
-            inventoryData.InventoryMembers.Add(inventoryMember);
-        }
-        
-        return inventoryMember;
-    }
+    // private static InventoryMemberData GetOrCreateInventoryMember(InventoryData inventoryData, string sessionId, Client client)
+    // {
+    //     var inventoryMember = inventoryData.InventoryMembers.SingleOrDefault(imd => imd.ClientInstanceId == client.ClientInstanceId);
+    //
+    //     if (inventoryMember == null)
+    //     {
+    //         inventoryMember = new InventoryMemberData
+    //         {
+    //             SessionId = sessionId,
+    //             ClientInstanceId = client.ClientInstanceId,
+    //             SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryWaitingForStart,
+    //         };
+    //
+    //         inventoryData.InventoryMembers.Add(inventoryMember);
+    //     }
+    //     
+    //     return inventoryMember;
+    // }
 }

@@ -8,7 +8,6 @@ using ByteSync.ServerCommon.Commands.Inventories;
 using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
-using ByteSync.ServerCommon.Services;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -45,13 +44,6 @@ public class StartInventoryCommandHandlerTests
     public async Task StartInventory_SessionNotFound_ReturnsSessionNotFoundResult()
     {
         // Arrange
-        // var mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
-        // var mockInventoryRepository = A.Fake<IInventoryRepository>();
-        // var mockSharedFilesService = A.Fake<ISharedFilesService>();
-        // var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
-        // var mockCacheService = A.Fake<ICacheService>();
-        // var mockLogger = A.Fake<ILogger<InventoryService>>();
-
         var sessionId = "testSession";
 
         A.CallTo(() => _mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
@@ -67,38 +59,6 @@ public class StartInventoryCommandHandlerTests
         // Assert
         result.Status.Should().Be(StartInventoryStatuses.SessionNotFound);
     }
-    
-    // [Test]
-    // public async Task StartInventory_SessionNotFound_ReturnsSessionNotFoundResult()
-    // {
-    //     // // Arrange
-    //     // var mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
-    //     // var mockInventoryRepository = A.Fake<IInventoryRepository>();
-    //     // var mockSharedFilesService = A.Fake<ISharedFilesService>();
-    //     // var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
-    //     // var mockCacheService = A.Fake<ICacheService>();
-    //     // var mockLogger = A.Fake<ILogger<InventoryService>>();
-    //
-    //     var sessionId = "testSession";
-    //
-    //     A.CallTo(() => _mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
-    //         .Returns(new UpdateEntityResult<CloudSessionData>(null!, UpdateEntityStatus.NotFound));
-    //
-    //     // var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService,
-    //     //     mockByteSyncClientCaller, mockCacheService, mockLogger);
-    //
-    //     
-    //     
-    //     var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-    //     
-    //     var request = new StartInventoryRequest(sessionId, client);
-    //
-    //     // Act
-    //     var result = await _startInventoryCommandHandler.Handle(request, CancellationToken.None);
-    //
-    //     // Assert
-    //     result.Status.Should().Be(StartInventoryStatuses.SessionNotFound);
-    // }
     
     [Test]
     public async Task StartInventory_LessThan2Members_ReturnsLessThan2MembersResult()

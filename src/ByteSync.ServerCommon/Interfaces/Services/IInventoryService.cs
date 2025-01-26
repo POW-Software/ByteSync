@@ -12,7 +12,7 @@ public interface IInventoryService
     //
     // Task<List<EncryptedPathItem>> GetPathItems(string sessionId, string clientInstanceId);
     
-    Task<bool> SetLocalInventoryStatus(Client byteSyncEndpoint, UpdateSessionMemberGeneralStatusParameters parameters);
+    // Task<bool> SetLocalInventoryStatus(Client byteSyncEndpoint, UpdateSessionMemberGeneralStatusParameters parameters);
     
     Task ResetSession(string sessionId);
 }
