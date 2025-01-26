@@ -1,4 +1,5 @@
 ﻿using ByteSync.ServerCommon.Business.Repositories;
+using RedLockNet;
 using StackExchange.Redis;
 
 namespace ByteSync.ServerCommon.Interfaces.Repositories;
@@ -17,11 +18,9 @@ public interface IRepository<T>
     
     Task<UpdateEntityResult<T>> AddOrUpdate(string key, Func<T?, T?> handler, ITransaction? transaction);
     
-    Task<UpdateEntityResult<T>> Update(string key, Func<T, bool> updateHandler);
+    Task<UpdateEntityResult<T>> Update(string key, Func<T, bool> updateHandler, ITransaction? transaction = null, IRedLock? redisLock = null);
     
-    Task<UpdateEntityResult<T>> Update(string key, Func<T, bool> updateHandler, ITransaction transaction);
-    
-    Task<UpdateEntityResult<T>> UpdateIfExists(string key, Func<T, bool> updateHandler, ITransaction? transaction = null);
+    Task<UpdateEntityResult<T>> UpdateIfExists(string key, Func<T, bool> updateHandler, ITransaction? transaction = null, IRedLock? redisLock = null);
     
     Task<UpdateEntityResult<T>> Save(string key, T element, ITransaction? transaction = null);
 

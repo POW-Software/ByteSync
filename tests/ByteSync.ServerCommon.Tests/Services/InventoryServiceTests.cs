@@ -13,6 +13,8 @@ using ByteSync.ServerCommon.Services;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using RedLockNet;
+using StackExchange.Redis;
 using Assert = NUnit.Framework.Legacy.ClassicAssert;
 
 namespace ByteSync.ServerCommon.Tests.Services;
@@ -27,6 +29,7 @@ public class InventoryServiceTests
         var mockInventoryRepository = A.Fake<IInventoryRepository>();
         var mockSharedFilesService = A.Fake<ISharedFilesService>();
         var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        var mockCacheService = A.Fake<ICacheService>();
         var mockLogger = A.Fake<ILogger<InventoryService>>();
 
         var sessionId = "testSession";
@@ -35,7 +38,7 @@ public class InventoryServiceTests
             .Returns((CloudSessionData?)null);
 
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService,
-            mockByteSyncClientCaller, mockLogger);
+            mockByteSyncClientCaller, mockCacheService, mockLogger);
 
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
 
@@ -55,6 +58,7 @@ public class InventoryServiceTests
         var mockInventoryRepository = A.Fake<IInventoryRepository>();
         var mockSharedFilesService = A.Fake<ISharedFilesService>();
         var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        var mockCacheService = A.Fake<ICacheService>();
         var mockLogger = A.Fake<ILogger<InventoryService>>();
 
         var sessionId = "testSession";
@@ -66,12 +70,12 @@ public class InventoryServiceTests
         A.CallTo(() => mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSessionData);
 
-        A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored))
-            .Invokes((string _, Func<InventoryData, bool> func) => func(inventoryData))
-            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.Saved));
+        A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<InventoryData, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
+            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
 
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService, mockByteSyncClientCaller,
-            mockLogger);
+            mockCacheService, mockLogger);
 
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
 
@@ -91,6 +95,7 @@ public class InventoryServiceTests
         var mockInventoryRepository = A.Fake<IInventoryRepository>();
         var mockSharedFilesService = A.Fake<ISharedFilesService>();
         var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        var mockCacheService = A.Fake<ICacheService>();
         var mockLogger = A.Fake<ILogger<InventoryService>>();
 
         var sessionId = "testSession";
@@ -107,12 +112,12 @@ public class InventoryServiceTests
         A.CallTo(() => mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSessionData);
 
-        A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored))
-            .Invokes((string _, Func<InventoryData, bool> func) => func(inventoryData))
-            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.Saved));
+        A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<InventoryData, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
+            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
 
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService, mockByteSyncClientCaller,
-            mockLogger);
+            mockCacheService, mockLogger);
 
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
 
@@ -132,6 +137,7 @@ public class InventoryServiceTests
         var mockInventoryRepository = A.Fake<IInventoryRepository>();
         var mockSharedFilesService = A.Fake<ISharedFilesService>();
         var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        var mockCacheService = A.Fake<ICacheService>();
         var mockLogger = A.Fake<ILogger<InventoryService>>();
 
         var sessionId = "testSession";
@@ -144,12 +150,12 @@ public class InventoryServiceTests
         A.CallTo(() => mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSessionData);
 
-        A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored))
-            .Invokes((string _, Func<InventoryData, bool> func) => func(inventoryData))
-            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.Saved));
+        A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<InventoryData, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
+            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
 
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService, mockByteSyncClientCaller,
-            mockLogger);
+            mockCacheService, mockLogger);
 
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
 
@@ -169,6 +175,7 @@ public class InventoryServiceTests
         var mockInventoryRepository = A.Fake<IInventoryRepository>();
         var mockSharedFilesService = A.Fake<ISharedFilesService>();
         var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        var mockCacheService = A.Fake<ICacheService>();
         var mockLogger = A.Fake<ILogger<InventoryService>>();
 
         var sessionId = "testSession";
@@ -185,12 +192,12 @@ public class InventoryServiceTests
         A.CallTo(() => mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSessionData);
 
-        A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored))
-            .Invokes((string _, Func<InventoryData, bool> func) => func(inventoryData))
-            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.Saved));
+        A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<InventoryData, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
+            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
 
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService, mockByteSyncClientCaller,
-            mockLogger);
+            mockCacheService, mockLogger);
 
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
 
@@ -210,6 +217,7 @@ public class InventoryServiceTests
         var mockInventoryRepository = A.Fake<IInventoryRepository>();
         var mockSharedFilesService = A.Fake<ISharedFilesService>();
         var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        var mockCacheService = A.Fake<ICacheService>();
         var mockLogger = A.Fake<ILogger<InventoryService>>();
 
         var sessionId = "testSession";
@@ -226,12 +234,12 @@ public class InventoryServiceTests
         A.CallTo(() => mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSessionData);
 
-        A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored))
-            .Invokes((string _, Func<InventoryData, bool> func) => func(inventoryData))
-            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.Saved));
+        A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<InventoryData, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
+            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
 
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService, mockByteSyncClientCaller,
-            mockLogger);
+            mockCacheService, mockLogger);
 
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
 
@@ -253,6 +261,7 @@ public class InventoryServiceTests
         var mockSharedFilesService = A.Fake<ISharedFilesService>(x => x.Strict());
         var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>(x => x.Strict());
         var mockByteSyncPush = A.Fake<IHubByteSyncPush>(x => x.Strict());
+        var mockCacheService = A.Fake<ICacheService>();
         var mockLogger = A.Fake<ILogger<InventoryService>>();
 
         var sessionId = "testSession";
@@ -272,7 +281,7 @@ public class InventoryServiceTests
         A.CallTo(() => mockByteSyncPush.PathItemAdded(A<PathItemDTO>.Ignored)).Returns(Task.CompletedTask);
 
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService, mockByteSyncClientCaller,
-            mockLogger);
+            mockCacheService, mockLogger);
 
         // Act
         await service.AddPathItem(sessionId, client, encryptedPathItem);
@@ -296,6 +305,7 @@ public class InventoryServiceTests
         var mockSharedFilesService = A.Fake<ISharedFilesService>(x => x.Strict());
         var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>(x => x.Strict());
         var mockByteSyncPush = A.Fake<IHubByteSyncPush>(x => x.Strict());
+        var mockCacheService = A.Fake<ICacheService>();
         var mockLogger = A.Fake<ILogger<InventoryService>>();
 
         var sessionId = "testSession";
@@ -315,7 +325,7 @@ public class InventoryServiceTests
         A.CallTo(() => mockByteSyncPush.PathItemAdded(A<PathItemDTO>.Ignored)).Returns(Task.CompletedTask);
 
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService, mockByteSyncClientCaller,
-            mockLogger);
+            mockCacheService, mockLogger);
 
         // Act
         await service.AddPathItem(sessionId, client, encryptedPathItem);
@@ -333,6 +343,7 @@ public class InventoryServiceTests
         var mockInventoryRepository = A.Fake<IInventoryRepository>();
         var mockSharedFilesService = A.Fake<ISharedFilesService>();
         var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        var mockCacheService = A.Fake<ICacheService>();
         var mockLogger = A.Fake<ILogger<InventoryService>>();
 
         var sessionId = "testSession";
@@ -349,7 +360,7 @@ public class InventoryServiceTests
             .Invokes((string _, Func<InventoryData, InventoryData> func) => func(inventoryData));
 
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService, mockByteSyncClientCaller,
-            mockLogger);
+            mockCacheService, mockLogger);
 
         // Act
         await service.AddPathItem(sessionId, client, encryptedPathItem);
@@ -368,6 +379,7 @@ public class InventoryServiceTests
         var mockInventoryRepository = A.Fake<IInventoryRepository>();
         var mockSharedFilesService = A.Fake<ISharedFilesService>();
         var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        var mockCacheService = A.Fake<ICacheService>();
         var mockLogger = A.Fake<ILogger<InventoryService>>();
 
         var sessionId = "testSession";
@@ -385,7 +397,7 @@ public class InventoryServiceTests
             .Invokes((string _, Func<InventoryData, InventoryData> func) => func(inventoryData));
 
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService, mockByteSyncClientCaller,
-            mockLogger);
+            mockCacheService, mockLogger);
 
         // Act
         await service.AddPathItem(sessionId, client1, encryptedPathItem1);
@@ -407,6 +419,7 @@ public class InventoryServiceTests
         var mockInventoryRepository = A.Fake<IInventoryRepository>();
         var mockSharedFilesService = A.Fake<ISharedFilesService>();
         var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        var mockCacheService = A.Fake<ICacheService>();
         var mockLogger = A.Fake<ILogger<InventoryService>>();
 
         var sessionId = "testSession";
@@ -419,10 +432,10 @@ public class InventoryServiceTests
 
         A.CallTo(() => mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
             .Invokes((string _, Func<InventoryData, InventoryData> func) => func(inventoryData))
-            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.Saved));
+            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
 
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService, mockByteSyncClientCaller,
-            mockLogger);
+            mockCacheService, mockLogger);
 
         // Act
         await service.RemovePathItem(sessionId, client, encryptedPathItem);
@@ -440,6 +453,7 @@ public class InventoryServiceTests
         var mockInventoryRepository = A.Fake<IInventoryRepository>();
         var mockSharedFilesService = A.Fake<ISharedFilesService>();
         var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        var mockCacheService = A.Fake<ICacheService>();
         var mockLogger = A.Fake<ILogger<InventoryService>>();
 
         var sessionId = "testSession";
@@ -454,10 +468,10 @@ public class InventoryServiceTests
 
         A.CallTo(() => mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
             .Invokes((string _, Func<InventoryData, InventoryData> func) => func(inventoryData))
-            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.Saved));
+            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
 
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService, mockByteSyncClientCaller,
-            mockLogger);
+            mockCacheService, mockLogger);
 
         // Act
         await service.RemovePathItem(sessionId, client, encryptedPathItem);
@@ -475,6 +489,7 @@ public class InventoryServiceTests
         var mockInventoryRepository = A.Fake<IInventoryRepository>();
         var mockSharedFilesService = A.Fake<ISharedFilesService>();
         var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        var mockCacheService = A.Fake<ICacheService>();
         var mockLogger = A.Fake<ILogger<InventoryService>>();
 
         var sessionId = "testSession";
@@ -491,7 +506,7 @@ public class InventoryServiceTests
             .Returns(inventoryData);
 
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService, mockByteSyncClientCaller,
-            mockLogger);
+            mockCacheService, mockLogger);
 
         // Act
         var pathItems = await service.GetPathItems(sessionId, client.ClientInstanceId);
@@ -509,6 +524,7 @@ public class InventoryServiceTests
         var mockInventoryRepository = A.Fake<IInventoryRepository>();
         var mockSharedFilesService = A.Fake<ISharedFilesService>();
         var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        var mockCacheService = A.Fake<ICacheService>();
         var mockLogger = A.Fake<ILogger<InventoryService>>();
 
         var sessionId = "testSession";
@@ -523,12 +539,12 @@ public class InventoryServiceTests
         var inventoryData = new InventoryData(sessionId);
         inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId });
 
-        A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored))
-            .Invokes((string _, Func<InventoryData, bool> func) => func(inventoryData))
+        A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<InventoryData, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
             .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.Saved));
 
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService, mockByteSyncClientCaller,
-            mockLogger);
+            mockCacheService, mockLogger);
 
         // Act
         var result = await service.SetLocalInventoryStatus(client, parameters);
@@ -537,7 +553,8 @@ public class InventoryServiceTests
         result.Should().Be(true);
         inventoryData.InventoryMembers.Single().SessionMemberGeneralStatus.Should().Be(parameters.SessionMemberGeneralStatus);
         inventoryData.InventoryMembers.Single().LastLocalInventoryStatusUpdate.Should().Be(parameters.UtcChangeDate);
-        A.CallTo(() => mockInventoryRepository.Update(sessionId, A<Func<InventoryData, bool>>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => mockInventoryRepository.Update(sessionId, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .MustHaveHappenedOnceExactly();
     }
 
     [Test]
@@ -548,6 +565,7 @@ public class InventoryServiceTests
         var mockInventoryRepository = A.Fake<IInventoryRepository>();
         var mockSharedFilesService = A.Fake<ISharedFilesService>();
         var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        var mockCacheService = A.Fake<ICacheService>();
         var mockLogger = A.Fake<ILogger<InventoryService>>();
 
         var sessionId = "testSession";
@@ -558,7 +576,7 @@ public class InventoryServiceTests
             .Returns(inventoryData);
 
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService, mockByteSyncClientCaller,
-            mockLogger);
+            mockCacheService, mockLogger);
 
         // Act
         var pathItems = await service.GetPathItems(sessionId, client.ClientInstanceId);
@@ -576,6 +594,7 @@ public class InventoryServiceTests
         var mockInventoryRepository = A.Fake<IInventoryRepository>();
         var mockSharedFilesService = A.Fake<ISharedFilesService>();
         var mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        var mockCacheService = A.Fake<ICacheService>();
         var mockLogger = A.Fake<ILogger<InventoryService>>();
 
         var sessionId = "testSession";
@@ -588,7 +607,7 @@ public class InventoryServiceTests
             .Returns(inventoryData);
         
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService, mockByteSyncClientCaller,
-            mockLogger);
+            mockCacheService, mockLogger);
 
         // Act
         var pathItems = await service.GetPathItems(sessionId, client.ClientInstanceId);

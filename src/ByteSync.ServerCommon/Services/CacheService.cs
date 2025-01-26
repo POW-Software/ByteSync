@@ -2,6 +2,7 @@
 using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using RedLockNet;
 using RedLockNet.SERedis;
 using RedLockNet.SERedis.Configuration;
 using StackExchange.Redis;
@@ -56,13 +57,13 @@ public class CacheService : ICacheService
         return database;
     }
 
-    public async Task<IAsyncDisposable> AcquireLockAsync(string key)
+    public async Task<IRedLock> AcquireLockAsync(string key)
     {
-        var sessionSharedFilesLock = await _redLockFactory.CreateLockAsync(key, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(1));
+        var redisLock = await _redLockFactory.CreateLockAsync(key, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(1));
 
-        if (sessionSharedFilesLock.IsAcquired)
+        if (redisLock.IsAcquired)
         {
-            return sessionSharedFilesLock;
+            return redisLock;
         }
         else
         {

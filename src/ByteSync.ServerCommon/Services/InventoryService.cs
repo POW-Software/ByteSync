@@ -18,20 +18,26 @@ public class InventoryService : IInventoryService
     private readonly ISharedFilesService _sharedFilesService;
     private readonly IInventoryRepository _inventoryRepository;
     private readonly IByteSyncClientCaller _byteSyncClientCaller;
+    private readonly ICacheService _cacheService;
     private readonly ILogger<InventoryService> _logger;
-    
+
     public InventoryService(ICloudSessionsRepository cloudSessionsRepository, IInventoryRepository inventoryRepository, 
-        ISharedFilesService sharedFilesService, IByteSyncClientCaller byteSyncClientCaller, ILogger<InventoryService> logger)
+        ISharedFilesService sharedFilesService, IByteSyncClientCaller byteSyncClientCaller, ICacheService cacheService, 
+        ILogger<InventoryService> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _inventoryRepository = inventoryRepository;
         _sharedFilesService = sharedFilesService;
         _byteSyncClientCaller = byteSyncClientCaller;
+        _cacheService = cacheService;
         _logger = logger;
     }
     
     public async Task<StartInventoryResult> StartInventory(string sessionId, Client client)
     {
+        await using var sessionRedisLock = await _cacheService.AcquireLockAsync(_cloudSessionsRepository.ComputeCacheKey(_cloudSessionsRepository.ElementName, 
+            sessionId));
+        
         var cloudSessionData = await _cloudSessionsRepository.Get(sessionId);
 
         if (cloudSessionData == null)
@@ -40,9 +46,11 @@ public class InventoryService : IInventoryService
             return StartInventoryResult.BuildFrom(StartInventoryStatuses.SessionNotFound);
         }
 
+        var transaction = _cacheService.OpenTransaction();
+        
         StartInventoryResult? startInventoryResult = null;
         
-        await _inventoryRepository.Update(sessionId, inventoryData =>
+        var updateResult = await _inventoryRepository.Update(sessionId, inventoryData =>
         {
             if (cloudSessionData.SessionMembers.Count < 2)
             {
@@ -72,18 +80,40 @@ public class InventoryService : IInventoryService
             }
             
             return startInventoryResult.IsOK;
-        });
-
-        if (startInventoryResult!.IsOK)
+        }, transaction);
+        
+        if (updateResult.IsWaitingForTransaction)
         {
+            await _cloudSessionsRepository.UpdateIfExists(sessionId, sessionData =>
+            {
+                if (!sessionData.IsSessionActivated)
+                {
+                    sessionData.IsSessionActivated = true;
+                    return true;
+                }
+                else
+                {
+                    _logger.LogWarning("Session {sessionId} is already activated", sessionId);
+                    
+                    startInventoryResult!.Status = StartInventoryStatuses.UnknownError;
+                    return false;
+                }
+            }, transaction, sessionRedisLock);
+        }
+
+        if (updateResult.IsWaitingForTransaction && startInventoryResult!.IsOK)
+        {
+            await transaction.ExecuteAsync();
+            
             await _sharedFilesService.ClearSession(sessionId);
             
             var dto = new InventoryStartedDTO(sessionId, client.ClientInstanceId, cloudSessionData.SessionSettings);
             await _byteSyncClientCaller.SessionGroupExcept(sessionId, client).InventoryStarted(dto);
+            
+            _logger.LogInformation("StartInventory: session {@cloudSession} - OK", sessionId);
         }
-        
-        _logger.LogInformation("StartInventory: session {@cloudSession} - OK", sessionId);
-        return startInventoryResult;
+
+        return startInventoryResult!;
     }
     
     public async Task<bool> AddPathItem(string sessionId, Client client, EncryptedPathItem encryptedPathItem)
