@@ -92,7 +92,8 @@ public class InventoryFunction
             var client = FunctionHelper.GetClientFromContext(executionContext);
             var encryptedPathItem = await FunctionHelper.DeserializeRequestBody<EncryptedPathItem>(req);
             
-            var result = await _inventoryService.AddPathItem(sessionId, client, encryptedPathItem);
+            var request = new AddPathItemRequest(sessionId, client, encryptedPathItem);
+            var result = _mediator.Send(request);
 
             await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
@@ -119,7 +120,8 @@ public class InventoryFunction
             var client = FunctionHelper.GetClientFromContext(executionContext);
             var encryptedPathItem = await FunctionHelper.DeserializeRequestBody<EncryptedPathItem>(req);
 
-            var result = await _inventoryService.RemovePathItem(sessionId, client, encryptedPathItem);
+            var request = new RemovePathItemRequest(sessionId, client, encryptedPathItem);
+            var result = _mediator.Send(request);
 
             await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }

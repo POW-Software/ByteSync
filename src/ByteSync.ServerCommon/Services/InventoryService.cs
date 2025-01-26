@@ -34,46 +34,46 @@ public class InventoryService : IInventoryService
         _logger = logger;
     }
 
-    public async Task<bool> AddPathItem(string sessionId, Client client, EncryptedPathItem encryptedPathItem)
-    {
-        var cloudSessionData = await _cloudSessionsRepository.Get(sessionId);
-        if (cloudSessionData == null)
-        {
-            _logger.LogInformation("AddPathItem: session {@sessionId}: not found", sessionId);
-            return false;
-        }
-        
-        var updateEntityResult = await _inventoryRepository.AddOrUpdate(sessionId, inventoryData =>
-        {
-            inventoryData ??= new InventoryData(sessionId);
-
-            if (!inventoryData.IsInventoryStarted)
-            {
-                var inventoryMember = GetOrCreateInventoryMember(inventoryData, sessionId, client);
-
-                inventoryMember.SharedPathItems.RemoveAll(p => p.Code == encryptedPathItem.Code);
-                inventoryMember.SharedPathItems.Add(encryptedPathItem);
-
-                inventoryData.RecodePathItems(cloudSessionData);
-                
-                return inventoryData;
-            }
-            else
-            {
-                _logger.LogWarning("AddPathItem: session {session} is already activated", sessionId);
-                return null;
-            }
-        });
-
-        if (updateEntityResult.IsSaved)
-        {
-            var pathItemDto = new PathItemDTO(sessionId, client.ClientInstanceId, encryptedPathItem);
-            
-            await _byteSyncClientCaller.SessionGroupExcept(sessionId, client).PathItemAdded(pathItemDto);
-        }
-
-        return updateEntityResult.IsSaved;
-    }
+    // public async Task<bool> AddPathItem(string sessionId, Client client, EncryptedPathItem encryptedPathItem)
+    // {
+    //     var cloudSessionData = await _cloudSessionsRepository.Get(sessionId);
+    //     if (cloudSessionData == null)
+    //     {
+    //         _logger.LogInformation("AddPathItem: session {@sessionId}: not found", sessionId);
+    //         return false;
+    //     }
+    //     
+    //     var updateEntityResult = await _inventoryRepository.AddOrUpdate(sessionId, inventoryData =>
+    //     {
+    //         inventoryData ??= new InventoryData(sessionId);
+    //
+    //         if (!inventoryData.IsInventoryStarted)
+    //         {
+    //             var inventoryMember = GetOrCreateInventoryMember(inventoryData, sessionId, client);
+    //
+    //             inventoryMember.SharedPathItems.RemoveAll(p => p.Code == encryptedPathItem.Code);
+    //             inventoryMember.SharedPathItems.Add(encryptedPathItem);
+    //
+    //             inventoryData.RecodePathItems(cloudSessionData);
+    //             
+    //             return inventoryData;
+    //         }
+    //         else
+    //         {
+    //             _logger.LogWarning("AddPathItem: session {session} is already activated", sessionId);
+    //             return null;
+    //         }
+    //     });
+    //
+    //     if (updateEntityResult.IsSaved)
+    //     {
+    //         var pathItemDto = new PathItemDTO(sessionId, client.ClientInstanceId, encryptedPathItem);
+    //         
+    //         await _byteSyncClientCaller.SessionGroupExcept(sessionId, client).PathItemAdded(pathItemDto);
+    //     }
+    //
+    //     return updateEntityResult.IsSaved;
+    // }
 
     public async Task<bool> RemovePathItem(string sessionId, Client client, EncryptedPathItem encryptedPathItem)
     {
