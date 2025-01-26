@@ -7,6 +7,7 @@ using ByteSync.Common.Controls.Json;
 using ByteSync.Common.Interfaces.Hub;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Business.Settings;
+using ByteSync.ServerCommon.Commands.Inventories;
 using ByteSync.ServerCommon.Helpers;
 using ByteSync.ServerCommon.Hubs;
 using ByteSync.ServerCommon.Interfaces.Factories;
@@ -168,6 +169,8 @@ var host = new HostBuilder()
         services.AddJwtAuthentication(appSettings!.Secret);
 
         services.AddDbContext<ByteSyncDbContext>();
+        
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(AddPathItemRequest).Assembly));
     })
     .Build();
 
