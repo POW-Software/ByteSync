@@ -14,13 +14,11 @@ namespace ByteSync.Functions.Http;
 
 public class InventoryFunction
 {
-    private readonly IInventoryService _inventoryService;
     private readonly IMediator _mediator;
     private readonly ILogger<InventoryFunction> _logger;
 
-    public InventoryFunction(IInventoryService inventoryService, IMediator mediator, ILoggerFactory loggerFactory)
+    public InventoryFunction( IMediator mediator, ILoggerFactory loggerFactory)
     {
-        _inventoryService = inventoryService;
         _mediator = mediator;
         _logger = loggerFactory.CreateLogger<InventoryFunction>();
     }

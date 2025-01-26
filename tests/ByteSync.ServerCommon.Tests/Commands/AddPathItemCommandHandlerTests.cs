@@ -11,7 +11,6 @@ using ByteSync.ServerCommon.Interfaces.Services;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using NUnit.Framework.Legacy;
 
 namespace ByteSync.ServerCommon.Tests.Commands;
 
@@ -68,9 +67,6 @@ public class AddPathItemCommandHandlerTests
         await _addPathItemCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        // ClassicAssert.IsTrue(inventoryData.InventoryMembers.Any(imd =>
-        //     imd.ClientInstanceId == client.ClientInstanceId && imd.SharedPathItems.Contains(encryptedPathItem)));
-
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockByteSyncClientCaller.SessionGroupExcept(A<string>.Ignored, A<Client>.Ignored)).MustHaveHappenedOnceExactly();
@@ -136,41 +132,4 @@ public class AddPathItemCommandHandlerTests
         inventoryData.InventoryMembers[0].SharedPathItems.Count.Should().Be(1);
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
     }
-
-    // [Test]
-    // public async Task AddPathItem_InventoryNotStartedAndPathItemAlreadyExistsForAnotherClient_AddsPathItemCorrectly()
-    // {
-    //     // Arrange
-    //     var sessionId = "testSession";
-    //     var client1 = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-    //     var encryptedPathItem1 = new EncryptedPathItem { Code = "pathItem1" };
-    //     var encryptedPathItem2 = new EncryptedPathItem { Code = "pathItem2" };
-    //     var inventoryData = new InventoryData(sessionId);
-    //     inventoryData.InventoryMembers.Add(new InventoryMemberData
-    //         { ClientInstanceId = "client2_CID2", SharedPathItems = new List<EncryptedPathItem> { encryptedPathItem2 } });
-    //
-    //     A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
-    //         .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client1));
-    //
-    //     A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
-    //         .Invokes((string _, Func<InventoryData, InventoryData> func) => func(inventoryData));
-    //     
-    //     A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client1))
-    //         .Returns(new InventoryMemberData { ClientInstanceId = client1.ClientInstanceId });
-    //
-    //
-    //     var request = new AddPathItemRequest(sessionId, client1, encryptedPathItem1);
-    //     
-    //     // Act
-    //     await _addPathItemCommandHandler.Handle(request, CancellationToken.None);
-    //
-    //     // Assert
-    //     // // inventoryData.InventoryMembers.Count.Should().Be(2);
-    //     // inventoryData.InventoryMembers[0].SharedPathItems.Count.Should().Be(1);
-    //     // inventoryData.InventoryMembers[0].SharedPathItems[0].Code.Should().Be(encryptedPathItem2.Code);
-    //     // inventoryData.InventoryMembers[1].SharedPathItems.Count.Should().Be(1);
-    //     // inventoryData.InventoryMembers[1].SharedPathItems[0].Code.Should().Be(encryptedPathItem1.Code);
-    //     A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client1)).MustHaveHappenedOnceExactly();
-    //     // A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
-    // }
 }

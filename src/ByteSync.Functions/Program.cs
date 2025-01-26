@@ -14,7 +14,6 @@ using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Misc;
 using ByteSync.ServerCommon.Storage;
-using MediatR;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.SignalR.Management;
 using Microsoft.Extensions.Configuration;
@@ -116,10 +115,6 @@ var host = new HostBuilder()
         builder.RegisterType<BlobContainerProvider>()
             .InstancePerLifetimeScope()
             .AsImplementedInterfaces();
-        
-        // builder.RegisterAssemblyTypes(typeof(AddPathItemRequest).Assembly)
-        //     .AsClosedTypesOf(typeof(IRequestHandler<,>))
-        //     .AsImplementedInterfaces();
         
         builder.Register(c => {
             var factory = c.Resolve<IHubContextFactory>();
