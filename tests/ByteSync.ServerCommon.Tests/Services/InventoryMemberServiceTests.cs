@@ -21,7 +21,7 @@ public class InventoryMemberServiceTests
         _inventoryMemberService = new InventoryMemberService();
         _inventoryData = new InventoryData
         {
-            InventoryMembers = new System.Collections.Generic.List<InventoryMemberData>()
+            InventoryMembers = new List<InventoryMemberData>()
         };
         _client = new Client();
         _client.ClientInstanceId = "client123";
