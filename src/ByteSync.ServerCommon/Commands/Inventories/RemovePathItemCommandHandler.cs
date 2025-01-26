@@ -8,20 +8,20 @@ using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
-public class RemovePathItemRequestHandler : IRequestHandler<RemovePathItemRequest, bool>
+public class RemovePathItemCommandHandler : IRequestHandler<RemovePathItemRequest, bool>
 {
     private readonly IInventoryMemberService _inventoryMemberService;
     private readonly IInventoryRepository _inventoryRepository;
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly IByteSyncClientCaller _byteSyncClientCaller;
-    private readonly ILogger<RemovePathItemRequestHandler> _logger;
+    private readonly ILogger<RemovePathItemCommandHandler> _logger;
     
-    public RemovePathItemRequestHandler(
+    public RemovePathItemCommandHandler(
         IInventoryMemberService inventoryMemberService,
         IInventoryRepository inventoryRepository,
         ICloudSessionsRepository cloudSessionsRepository,
         IByteSyncClientCaller byteSyncClientCaller,
-        ILogger<RemovePathItemRequestHandler> logger)
+        ILogger<RemovePathItemCommandHandler> logger)
     {
         _inventoryMemberService = inventoryMemberService;
         _inventoryRepository = inventoryRepository;
@@ -68,23 +68,4 @@ public class RemovePathItemRequestHandler : IRequestHandler<RemovePathItemReques
 
         return updateEntityResult.IsSaved;
     }
-
-    // private static InventoryMemberData GetOrCreateInventoryMember(InventoryData inventoryData, string sessionId, Client client)
-    // {
-    //     var inventoryMember = inventoryData.InventoryMembers.SingleOrDefault(imd => imd.ClientInstanceId == client.ClientInstanceId);
-    //
-    //     if (inventoryMember == null)
-    //     {
-    //         inventoryMember = new InventoryMemberData
-    //         {
-    //             SessionId = sessionId,
-    //             ClientInstanceId = client.ClientInstanceId,
-    //             SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryWaitingForStart,
-    //         };
-    //
-    //         inventoryData.InventoryMembers.Add(inventoryMember);
-    //     }
-    //
-    //     return inventoryMember;
-    // }
 }

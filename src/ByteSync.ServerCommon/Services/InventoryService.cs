@@ -75,61 +75,61 @@ public class InventoryService : IInventoryService
     //     return updateEntityResult.IsSaved;
     // }
 
-    public async Task<bool> RemovePathItem(string sessionId, Client client, EncryptedPathItem encryptedPathItem)
-    {
-        var cloudSessionData = await _cloudSessionsRepository.Get(sessionId);
-        if (cloudSessionData == null)
-        {
-            _logger.LogInformation("RemovePathItem: session {@sessionId}: not found", sessionId);
-            return false;
-        }
-        
-        var updateEntityResult = await _inventoryRepository.AddOrUpdate(sessionId, inventoryData =>
-        {
-            inventoryData ??= new InventoryData(sessionId);
-
-            if (!inventoryData.IsInventoryStarted)
-            {
-                var inventoryMember = GetOrCreateInventoryMember(inventoryData, sessionId, client);
-                
-                inventoryMember.SharedPathItems.RemoveAll(p => p.Code == encryptedPathItem.Code);
-                
-                inventoryData.RecodePathItems(cloudSessionData);
-                
-                return inventoryData;
-            }
-            else
-            {
-                _logger.LogWarning("RemovePathItem: session {session} is already activated", sessionId);
-                return null;
-            }
-        });
-        
-        if (updateEntityResult.IsSaved)
-        {
-            var pathItemDto = new PathItemDTO(sessionId, client.ClientInstanceId, encryptedPathItem);
-            
-            await _byteSyncClientCaller.SessionGroupExcept(sessionId, client).PathItemRemoved(pathItemDto);
-        }
-        
-        return updateEntityResult.IsSaved;
-    }
-
-    public async Task<List<EncryptedPathItem>> GetPathItems(string sessionId, string clientInstanceId)
-    {
-        var inventoryData = await _inventoryRepository.Get(sessionId);
-        
-        var inventoryMember = inventoryData?.InventoryMembers.SingleOrDefault(m => m.ClientInstanceId == clientInstanceId);
-        
-        if (inventoryMember == null)
-        {
-            return new List<EncryptedPathItem>();
-        }
-        else
-        {
-            return inventoryMember!.SharedPathItems;
-        }
-    }
+    // public async Task<bool> RemovePathItem(string sessionId, Client client, EncryptedPathItem encryptedPathItem)
+    // {
+    //     var cloudSessionData = await _cloudSessionsRepository.Get(sessionId);
+    //     if (cloudSessionData == null)
+    //     {
+    //         _logger.LogInformation("RemovePathItem: session {@sessionId}: not found", sessionId);
+    //         return false;
+    //     }
+    //     
+    //     var updateEntityResult = await _inventoryRepository.AddOrUpdate(sessionId, inventoryData =>
+    //     {
+    //         inventoryData ??= new InventoryData(sessionId);
+    //
+    //         if (!inventoryData.IsInventoryStarted)
+    //         {
+    //             var inventoryMember = GetOrCreateInventoryMember(inventoryData, sessionId, client);
+    //             
+    //             inventoryMember.SharedPathItems.RemoveAll(p => p.Code == encryptedPathItem.Code);
+    //             
+    //             inventoryData.RecodePathItems(cloudSessionData);
+    //             
+    //             return inventoryData;
+    //         }
+    //         else
+    //         {
+    //             _logger.LogWarning("RemovePathItem: session {session} is already activated", sessionId);
+    //             return null;
+    //         }
+    //     });
+    //     
+    //     if (updateEntityResult.IsSaved)
+    //     {
+    //         var pathItemDto = new PathItemDTO(sessionId, client.ClientInstanceId, encryptedPathItem);
+    //         
+    //         await _byteSyncClientCaller.SessionGroupExcept(sessionId, client).PathItemRemoved(pathItemDto);
+    //     }
+    //     
+    //     return updateEntityResult.IsSaved;
+    // }
+    //
+    // public async Task<List<EncryptedPathItem>> GetPathItems(string sessionId, string clientInstanceId)
+    // {
+    //     var inventoryData = await _inventoryRepository.Get(sessionId);
+    //     
+    //     var inventoryMember = inventoryData?.InventoryMembers.SingleOrDefault(m => m.ClientInstanceId == clientInstanceId);
+    //     
+    //     if (inventoryMember == null)
+    //     {
+    //         return new List<EncryptedPathItem>();
+    //     }
+    //     else
+    //     {
+    //         return inventoryMember!.SharedPathItems;
+    //     }
+    // }
     
     public async Task<bool> SetLocalInventoryStatus(Client client, UpdateSessionMemberGeneralStatusParameters parameters)
     {

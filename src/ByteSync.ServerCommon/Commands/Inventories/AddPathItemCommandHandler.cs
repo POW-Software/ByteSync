@@ -74,23 +74,4 @@ public class AddPathItemCommandHandler : IRequestHandler<AddPathItemRequest, boo
 
         return updateEntityResult.IsSaved;
     }
-    
-    // private static InventoryMemberData GetOrCreateInventoryMember(InventoryData inventoryData, string sessionId, Client client)
-    // {
-    //     var inventoryMember = inventoryData.InventoryMembers.SingleOrDefault(imd => imd.ClientInstanceId == client.ClientInstanceId);
-    //
-    //     if (inventoryMember == null)
-    //     {
-    //         inventoryMember = new InventoryMemberData
-    //         {
-    //             SessionId = sessionId,
-    //             ClientInstanceId = client.ClientInstanceId,
-    //             SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryWaitingForStart,
-    //         };
-    //
-    //         inventoryData.InventoryMembers.Add(inventoryMember);
-    //     }
-    //     
-    //     return inventoryMember;
-    // }
 }

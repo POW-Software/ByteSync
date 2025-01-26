@@ -65,7 +65,8 @@ public class InventoryFunction
             var client = FunctionHelper.GetClientFromContext(executionContext);
             var localInventoryStatusParameters = await FunctionHelper.DeserializeRequestBody<UpdateSessionMemberGeneralStatusParameters>(req);
             
-            var result = await _inventoryService.SetLocalInventoryStatus(client, localInventoryStatusParameters);
+            var request = new SetLocalInventoryStatusRequest(client, localInventoryStatusParameters);
+            var result = await _mediator.Send(request);
 
             await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
@@ -146,7 +147,8 @@ public class InventoryFunction
         var response = req.CreateResponse();
         try
         {
-            var result = await _inventoryService.GetPathItems(sessionId, clientInstanceId);
+            var request = new GetPathItemsRequest(sessionId, clientInstanceId);
+            var result = _mediator.Send(request);
             
             await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         }
