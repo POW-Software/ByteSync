@@ -34,8 +34,8 @@ public class InventoryServiceTests
 
         var sessionId = "testSession";
 
-        A.CallTo(() => mockCloudSessionsRepository.Get(sessionId))
-            .Returns((CloudSessionData?)null);
+        A.CallTo(() => mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Returns(new UpdateEntityResult<CloudSessionData>(null!, UpdateEntityStatus.NotFound));
 
         var service = new InventoryService(mockCloudSessionsRepository, mockInventoryRepository, mockSharedFilesService,
             mockByteSyncClientCaller, mockCacheService, mockLogger);
@@ -47,7 +47,6 @@ public class InventoryServiceTests
 
         // Assert
         result.Status.Should().Be(StartInventoryStatuses.SessionNotFound);
-        A.CallTo(() => mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
     }
 
     [Test]
@@ -66,10 +65,11 @@ public class InventoryServiceTests
         var cloudSessionData = new CloudSessionData(null, new EncryptedSessionSettings(),
             new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" });
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null, cloudSessionData));
-
-        A.CallTo(() => mockCloudSessionsRepository.Get(sessionId))
-            .Returns(cloudSessionData);
-
+        
+        A.CallTo(() => mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
+            .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.WaitingForTransaction));
+        
         A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<InventoryData, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
             .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
@@ -84,7 +84,6 @@ public class InventoryServiceTests
 
         // Assert
         result.Status.Should().Be(StartInventoryStatuses.LessThan2Members);
-        A.CallTo(() => mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
     }
 
     [Test]
@@ -108,9 +107,10 @@ public class InventoryServiceTests
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client4", "client4", new PublicKeyInfo(), null, cloudSessionData));
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client5", "client5", new PublicKeyInfo(), null, cloudSessionData));
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client6", "client6", new PublicKeyInfo(), null, cloudSessionData));
-
-        A.CallTo(() => mockCloudSessionsRepository.Get(sessionId))
-            .Returns(cloudSessionData);
+        
+        A.CallTo(() => mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
+            .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.WaitingForTransaction));
 
         A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<InventoryData, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
@@ -126,7 +126,6 @@ public class InventoryServiceTests
 
         // Assert
         result.Status.Should().Be(StartInventoryStatuses.MoreThan5Members);
-        A.CallTo(() => mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
     }
 
     [Test]
@@ -150,6 +149,10 @@ public class InventoryServiceTests
         A.CallTo(() => mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSessionData);
 
+        A.CallTo(() => mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
+            .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.WaitingForTransaction));
+        
         A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<InventoryData, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
             .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
@@ -164,7 +167,6 @@ public class InventoryServiceTests
 
         // Assert
         result.Status.Should().Be(StartInventoryStatuses.UnknownError);
-        A.CallTo(() => mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
     }
 
     [Test]
@@ -188,10 +190,11 @@ public class InventoryServiceTests
         inventoryData.InventoryMembers.Add(new InventoryMemberData
             { ClientInstanceId = "client1", SharedPathItems = new List<EncryptedPathItem> { encryptedPathItem } });
         inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = "client2", SharedPathItems = new List<EncryptedPathItem>() });
-
-        A.CallTo(() => mockCloudSessionsRepository.Get(sessionId))
-            .Returns(cloudSessionData);
-
+        
+        A.CallTo(() => mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
+            .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.WaitingForTransaction));
+        
         A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<InventoryData, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
             .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
@@ -206,7 +209,6 @@ public class InventoryServiceTests
 
         // Assert
         result.Status.Should().Be(StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
-        A.CallTo(() => mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
     }
 
     [Test]
@@ -234,6 +236,10 @@ public class InventoryServiceTests
         A.CallTo(() => mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSessionData);
 
+        A.CallTo(() => mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
+            .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.WaitingForTransaction));
+        
         A.CallTo(() => mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<InventoryData, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
             .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
@@ -248,7 +254,6 @@ public class InventoryServiceTests
 
         // Assert
         result.Status.Should().Be(StartInventoryStatuses.InventoryStartedSucessfully);
-        A.CallTo(() => mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
         A.CallTo(() => mockSharedFilesService.ClearSession(sessionId)).MustHaveHappenedOnceExactly();
     }
 
