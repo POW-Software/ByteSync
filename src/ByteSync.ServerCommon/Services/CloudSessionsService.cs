@@ -284,12 +284,8 @@ public class CloudSessionsService : ICloudSessionsService
 
             if (joiner != null && finalizeJoinSessionStatus == null)
             {
-                // Il se peut que suite à des problèmes d'IHM ou réseau, le client fasse plusieurs tentatives de connexion
-                // On vérifie que le client n'est pas déjà considéré comme membre de la session
                 if (!innerCloudSessionData!.SessionMembers.Any(smd => smd.ClientInstanceId.Equals(joiner.ClientInstanceId)))
                 {
-                    //joiner.PositionInList = innerCloudSessionData.SessionMembers.Count;
-
                     joiner.EncryptedPrivateData = parameters.EncryptedSessionMemberPrivateData;
                     
                     innerCloudSessionData.SessionMembers.Add(joiner);
@@ -458,8 +454,6 @@ public class CloudSessionsService : ICloudSessionsService
         {
             cloudSessionData.ResetSession();
             
-            
-
             return true;
         });
         

@@ -1,4 +1,5 @@
-﻿using RedLockNet.SERedis;
+﻿using RedLockNet;
+using RedLockNet.SERedis;
 using StackExchange.Redis;
 
 namespace ByteSync.ServerCommon.Interfaces.Services;
@@ -15,5 +16,5 @@ public interface ICacheService
     
     IDatabaseAsync GetDatabase(ITransaction? transaction);
     
-    Task<IAsyncDisposable> AcquireLockAsync(string key);
+    Task<IRedLock> AcquireLockAsync(string key);
 }

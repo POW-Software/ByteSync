@@ -26,12 +26,10 @@ public class CloudSessionData
     public string SessionId { get; set; } = null!;
 
     public string? LobbyId { get; set; }
-
-    // public CloudSession CloudSession { get; }
         
     public EncryptedSessionSettings SessionSettings { get; set; } = null!;
 
-    public CloudSessionFatalError CloudSessionFatalError { get;  private set; } = null!;
+    public CloudSessionFatalError? CloudSessionFatalError { get;  private set; }
 
     public bool IsSessionActivated { get; set; }
 

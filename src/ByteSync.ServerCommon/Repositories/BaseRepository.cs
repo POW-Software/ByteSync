@@ -4,6 +4,7 @@ using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using RedLockNet;
 using StackExchange.Redis;
 
 namespace ByteSync.ServerCommon.Repositories;
@@ -72,63 +73,76 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
         }
     }
 
-    public async Task<UpdateEntityResult<T>> Update(string key, Func<T, bool> updateHandler)
+    public async Task<UpdateEntityResult<T>> Update(string key, Func<T, bool> updateHandler, ITransaction? transaction = null,
+        IRedLock? redisLock = null)
     {
-        var updateEntityResult = await DoUpdate(key, updateHandler, true, null);
-
-        return updateEntityResult;
-    }
-
-    public async Task<UpdateEntityResult<T>> Update(string key, Func<T, bool> updateHandler, ITransaction transaction)
-    {
-        var updateEntityResult = await DoUpdate(key, updateHandler, true, transaction);
+        var updateEntityResult = await DoUpdate(key, updateHandler, true, transaction, redisLock);
 
         return updateEntityResult;
     }
     
-    public async Task<UpdateEntityResult<T>> UpdateIfExists(string key, Func<T, bool> updateHandler, ITransaction? transaction = null)
+    public async Task<UpdateEntityResult<T>> UpdateIfExists(string key, Func<T, bool> updateHandler, ITransaction? transaction = null,
+        IRedLock? redisLock = null)
     {
-        var updateEntityResult = await DoUpdate(key, updateHandler, false, transaction);
+        var updateEntityResult = await DoUpdate(key, updateHandler, false, transaction, redisLock);
 
         return updateEntityResult;
     }
 
-    private async Task<UpdateEntityResult<T>> DoUpdate(string key, Func<T, bool> updateHandler, bool throwIfNotExists, ITransaction? transaction)
+    private async Task<UpdateEntityResult<T>> DoUpdate(string key, Func<T, bool> updateHandler, bool throwIfNotExists, ITransaction? transaction,
+        IRedLock? redisLockParam)
     {
         var cacheKey = ComputeCacheKey(ElementName, key);
         IDatabaseAsync database = _cacheService.GetDatabase(transaction);
         
-        await using var redisLock = await _cacheService.RedLockFactory.CreateLockAsync(cacheKey, TimeSpan.FromSeconds(30));
+        IRedLock? redisLock = redisLockParam;
+        bool shouldDispose = false;
         
-        if (redisLock.IsAcquired)
+        if (redisLock == null)
         {
-            var cachedElement = await GetCachedElement(cacheKey);
-    
-            if (cachedElement == null)
+            redisLock = await _cacheService.RedLockFactory.CreateLockAsync(cacheKey, TimeSpan.FromSeconds(30));
+            shouldDispose = true;
+        }
+
+        try
+        {
+            if (redisLock.IsAcquired)
             {
-                if (throwIfNotExists)
+                var cachedElement = await GetCachedElement(cacheKey);
+
+                if (cachedElement == null)
                 {
-                    throw new Exception("Could not find element to update");
+                    if (throwIfNotExists)
+                    {
+                        throw new Exception("Could not find element to update");
+                    }
+                    else
+                    {
+                        return new UpdateEntityResult<T>(cachedElement, UpdateEntityStatus.NotFound);
+                    }
+                }
+
+                bool isUpdateDone = updateHandler.Invoke(cachedElement);
+                if (!isUpdateDone)
+                {
+                    return new UpdateEntityResult<T>(cachedElement, UpdateEntityStatus.NoOperation);
                 }
                 else
                 {
-                    return new UpdateEntityResult<T>(cachedElement, UpdateEntityStatus.NotFound);
+                    return await SetElement(cacheKey, cachedElement, database);
                 }
-            }
-    
-            bool isUpdateDone = updateHandler.Invoke(cachedElement);
-            if (!isUpdateDone)
-            {
-                return new UpdateEntityResult<T>(cachedElement, UpdateEntityStatus.NoOperation);
             }
             else
             {
-                return await SetElement(cacheKey, cachedElement, database);
+                throw new Exception("Could not acquire redis lock");
             }
         }
-        else
+        finally
         {
-            throw new Exception("Could not acquire redis lock");
+            if (shouldDispose && redisLock != null)
+            {
+                await redisLock.DisposeAsync();
+            }
         }
     }
     
