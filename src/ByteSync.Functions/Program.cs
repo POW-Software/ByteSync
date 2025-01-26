@@ -7,12 +7,14 @@ using ByteSync.Common.Controls.Json;
 using ByteSync.Common.Interfaces.Hub;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Business.Settings;
+using ByteSync.ServerCommon.Commands.Inventories;
 using ByteSync.ServerCommon.Helpers;
 using ByteSync.ServerCommon.Hubs;
 using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Misc;
 using ByteSync.ServerCommon.Storage;
+using MediatR;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.SignalR.Management;
 using Microsoft.Extensions.Configuration;
@@ -115,6 +117,10 @@ var host = new HostBuilder()
             .InstancePerLifetimeScope()
             .AsImplementedInterfaces();
         
+        // builder.RegisterAssemblyTypes(typeof(AddPathItemRequest).Assembly)
+        //     .AsClosedTypesOf(typeof(IRequestHandler<,>))
+        //     .AsImplementedInterfaces();
+        
         builder.Register(c => {
             var factory = c.Resolve<IHubContextFactory>();
             return factory.CreateHubContext();
@@ -168,8 +174,8 @@ var host = new HostBuilder()
         services.AddJwtAuthentication(appSettings!.Secret);
 
         services.AddDbContext<ByteSyncDbContext>();
-
-        services.AddMediatR(new MediatRServiceConfiguration());
+        
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(AddPathItemRequest).Assembly));
     })
     .Build();
 
