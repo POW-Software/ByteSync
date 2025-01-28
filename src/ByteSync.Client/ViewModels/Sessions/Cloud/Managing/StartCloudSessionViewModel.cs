@@ -41,7 +41,7 @@ public class StartCloudSessionViewModel : ViewModelBase
     {
         try
         {
-            await _cloudSessionConnector.CreateSession(null);
+             // await _cloudSessionConnector.CreateSession(null);
         }
         catch (Exception ex)
         {

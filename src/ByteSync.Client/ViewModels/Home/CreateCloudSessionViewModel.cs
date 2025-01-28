@@ -1,10 +1,11 @@
-﻿using System.Reactive;
-using System.Threading.Tasks;
-using ByteSync.Business.Navigations;
+﻿using System.Threading.Tasks;
+using ByteSync.Commands.Sessions;
 using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Sessions;
+using MediatR;
 using ReactiveUI;
 using Serilog;
+using Unit = System.Reactive.Unit;
 
 namespace ByteSync.ViewModels.Home;
 
@@ -12,16 +13,18 @@ public class CreateCloudSessionViewModel : ViewModelBase
 {
     private readonly INavigationService _navigationService;
     private readonly ICloudSessionConnector _cloudSessionConnector;
+    private readonly IMediator _mediator;
 
     public CreateCloudSessionViewModel()
     {
     }
 
     public CreateCloudSessionViewModel(INavigationService navigationService, 
-        ICloudSessionConnector cloudSessionConnector)
+        ICloudSessionConnector cloudSessionConnector, IMediator mediator)
     {
         _navigationService = navigationService;
         _cloudSessionConnector = cloudSessionConnector;
+        _mediator = mediator;
         
         StartComparisonCommand = ReactiveCommand.CreateFromTask(CreateSession);
         
@@ -37,7 +40,7 @@ public class CreateCloudSessionViewModel : ViewModelBase
         
         try
         {
-            await _cloudSessionConnector.CreateSession(null);
+            await _mediator.Send(new CreateSessionRequest(null));
         }
         catch (Exception ex)
         {

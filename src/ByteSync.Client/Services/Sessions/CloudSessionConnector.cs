@@ -76,126 +76,126 @@ class CloudSessionConnector : ICloudSessionConnector
         _sessionMemberService = sessionMemberService;
         _environmentService = environmentService;
 
-        _connectionManager.HubPushHandler2.YouJoinedSession
-            .Subscribe(OnYouJoinedSession);
+        // _connectionManager.HubPushHandler2.YouJoinedSession
+        //     .Subscribe(OnYouJoinedSession);
         
-        _connectionManager.HubPushHandler2.YouGaveAWrongPassword
-            .Subscribe(OnYouGaveAWrongPassword);
-        
-        _connectionManager.HubPushHandler2.AskCloudSessionPasswordExchangeKey
-            .Subscribe(OnCloudSessionPasswordExchangeKeyAsked);
-        
-        _connectionManager.HubPushHandler2.GiveCloudSessionPasswordExchangeKey
-            .Subscribe(OnCloudSessionPasswordExchangeKeyGiven);
+        // _connectionManager.HubPushHandler2.YouGaveAWrongPassword
+        //     .Subscribe(OnYouGaveAWrongPassword);
+        //
+        // _connectionManager.HubPushHandler2.AskCloudSessionPasswordExchangeKey
+        //     .Subscribe(OnCloudSessionPasswordExchangeKeyAsked);
+        //
+        // _connectionManager.HubPushHandler2.GiveCloudSessionPasswordExchangeKey
+        //     .Subscribe(OnCloudSessionPasswordExchangeKeyGiven);
         
         _connectionManager.HubPushHandler2.CheckCloudSessionPasswordExchangeKey
             .Subscribe(OnCheckCloudSessionPasswordExchangeKey);
         
-        _connectionManager.HubPushHandler2.OnReconnected
-            .Subscribe(OnReconnected);
+        // _connectionManager.HubPushHandler2.OnReconnected
+        //     .Subscribe(OnReconnected);
     }
 
-    public async Task<CloudSessionResult?> CreateSession(RunCloudSessionProfileInfo? lobbySessionDetails)
-    {
-        try
-        {
-            await ClearConnectionData();
-            _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.CreatingSession);
-            
-            using var aes = Aes.Create();
-            aes.GenerateKey();
-            _cloudSessionConnectionRepository.SetAesEncryptionKey(aes.Key);
-            
-            SessionSettings sessionSettings;
-            if (lobbySessionDetails == null)
-            {
-                sessionSettings = SessionSettings.BuildDefault();
-            }
-            else
-            {
-                sessionSettings = lobbySessionDetails.ProfileDetails.Options.Settings;
-            }
-            
-            var encryptedSessionSettings = _dataEncrypter.EncryptSessionSettings(sessionSettings);
+    // public async Task<CloudSessionResult?> CreateSession(RunCloudSessionProfileInfo? lobbySessionDetails)
+    // {
+    //     try
+    //     {
+    //         await ClearConnectionData();
+    //         _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.CreatingSession);
+    //         
+    //         using var aes = Aes.Create();
+    //         aes.GenerateKey();
+    //         _cloudSessionConnectionRepository.SetAesEncryptionKey(aes.Key);
+    //         
+    //         SessionSettings sessionSettings;
+    //         if (lobbySessionDetails == null)
+    //         {
+    //             sessionSettings = SessionSettings.BuildDefault();
+    //         }
+    //         else
+    //         {
+    //             sessionSettings = lobbySessionDetails.ProfileDetails.Options.Settings;
+    //         }
+    //         
+    //         var encryptedSessionSettings = _dataEncrypter.EncryptSessionSettings(sessionSettings);
+    //
+    //         var sessionMemberPrivateData = new SessionMemberPrivateData
+    //         {
+    //             MachineName = _environmentService.MachineName
+    //         };
+    //         var encryptedSessionMemberPrivateData = _dataEncrypter.EncryptSessionMemberPrivateData(sessionMemberPrivateData);
+    //         
+    //         var parameters = new CreateCloudSessionParameters
+    //         {
+    //             LobbyId = lobbySessionDetails?.LobbyId,
+    //             CreatorProfileClientId = lobbySessionDetails?.LocalProfileClientId,
+    //             SessionSettings = encryptedSessionSettings,
+    //             CreatorPublicKeyInfo = _publicKeysManager.GetMyPublicKeyInfo(),
+    //             CreatorPrivateData = encryptedSessionMemberPrivateData
+    //         };
+    //         var cloudSessionResult = await _cloudSessionApiClient.CreateCloudSession(parameters);
+    //         
+    //         await _trustProcessPublicKeysRepository.Start(cloudSessionResult.SessionId);
+    //         await _digitalSignaturesRepository.Start(cloudSessionResult.SessionId);
+    //
+    //         await AfterSessionCreatedOrJoined(cloudSessionResult, lobbySessionDetails, true);
+    //
+    //         Log.Information("Created Cloud Session {CloudSession}", cloudSessionResult.SessionId);
+    //
+    //         return cloudSessionResult;
+    //     }
+    //     catch (Exception)
+    //     {
+    //         _sessionService.ClearCloudSession();
+    //
+    //         throw;
+    //     }
+    //     finally
+    //     {
+    //         _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.None);
+    //     }
+    // }
 
-            var sessionMemberPrivateData = new SessionMemberPrivateData
-            {
-                MachineName = _environmentService.MachineName
-            };
-            var encryptedSessionMemberPrivateData = _dataEncrypter.EncryptSessionMemberPrivateData(sessionMemberPrivateData);
-            
-            var parameters = new CreateCloudSessionParameters
-            {
-                LobbyId = lobbySessionDetails?.LobbyId,
-                CreatorProfileClientId = lobbySessionDetails?.LocalProfileClientId,
-                SessionSettings = encryptedSessionSettings,
-                CreatorPublicKeyInfo = _publicKeysManager.GetMyPublicKeyInfo(),
-                CreatorPrivateData = encryptedSessionMemberPrivateData
-            };
-            var cloudSessionResult = await _cloudSessionApiClient.CreateCloudSession(parameters);
-            
-            await _trustProcessPublicKeysRepository.Start(cloudSessionResult.SessionId);
-            await _digitalSignaturesRepository.Start(cloudSessionResult.SessionId);
-    
-            await AfterSessionCreatedOrJoined(cloudSessionResult, lobbySessionDetails, true);
+    // public async Task QuitSession()
+    // {
+    //     var session = _sessionService.CurrentSession;
+    //
+    //     if (session == null)
+    //     {
+    //         Log.Information("Can not quit Session: unknown Session");
+    //         return;
+    //     }
+    //
+    //     if (session is CloudSession)
+    //     {
+    //         try
+    //         {
+    //             // Ici, le but est d'essayer de quitter la session, sans bloquer l'utilisateur pour autant si cela échoue
+    //             await _cloudSessionApiClient.QuitCloudSession(session.SessionId);
+    //         }
+    //         catch (Exception ex)
+    //         {
+    //             Log.Here().Error(ex, "Error durant calling Hub... continuing exit of the session");
+    //         }
+    //     }
+    //     
+    //     await ClearConnectionData();
+    //     _sessionService.ClearCloudSession();
+    //
+    //     if (session is CloudSession)
+    //     {
+    //         Log.Information("Quitted Cloud Session {CloudSession}", session.SessionId);
+    //     }
+    //     else
+    //     {
+    //         Log.Information("Quitted Local Session {CloudSession}", session.SessionId);
+    //     }
+    //
+    //     
+    //     _navigationService.NavigateTo(NavigationPanel.Home);
+    //     // _cloudSessionEventsHub.RaiseCloudSessionQuitted();
+    // }
 
-            Log.Information("Created Cloud Session {CloudSession}", cloudSessionResult.SessionId);
-
-            return cloudSessionResult;
-        }
-        catch (Exception)
-        {
-            _sessionService.ClearCloudSession();
-
-            throw;
-        }
-        finally
-        {
-            _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.None);
-        }
-    }
-
-    public async Task QuitSession()
-    {
-        var session = _sessionService.CurrentSession;
-
-        if (session == null)
-        {
-            Log.Information("Can not quit Session: unknown Session");
-            return;
-        }
-
-        if (session is CloudSession)
-        {
-            try
-            {
-                // Ici, le but est d'essayer de quitter la session, sans bloquer l'utilisateur pour autant si cela échoue
-                await _cloudSessionApiClient.QuitCloudSession(session.SessionId);
-            }
-            catch (Exception ex)
-            {
-                Log.Here().Error(ex, "Error durant calling Hub... continuing exit of the session");
-            }
-        }
-        
-        await ClearConnectionData();
-        _sessionService.ClearCloudSession();
-
-        if (session is CloudSession)
-        {
-            Log.Information("Quitted Cloud Session {CloudSession}", session.SessionId);
-        }
-        else
-        {
-            Log.Information("Quitted Local Session {CloudSession}", session.SessionId);
-        }
-
-        
-        _navigationService.NavigateTo(NavigationPanel.Home);
-        // _cloudSessionEventsHub.RaiseCloudSessionQuitted();
-    }
-
-    private async Task ClearConnectionData()
+    public async Task ClearConnectionData()
     {
         await Task.WhenAll(
             _cloudSessionConnectionRepository.ClearAsync(), 
@@ -223,97 +223,97 @@ class CloudSessionConnector : ICloudSessionConnector
         }
     }
 
-    /// <summary>
-    /// Après que l'on ait créé ou rejoint une session
-    /// </summary>
-    /// <param name="cloudSessionResult"></param>
-    /// <param name="runCloudSessionProfileInfo"></param>
-    /// <param name="isCreator"></param>
-    private async Task AfterSessionCreatedOrJoined(CloudSessionResult cloudSessionResult, RunCloudSessionProfileInfo? runCloudSessionProfileInfo, 
-        bool isCreator)
-    {
-        var sessionMemberInfoDtos = await _cloudSessionApiClient.GetMembers(cloudSessionResult.SessionId);
-        
-        // On contrôle que chacun des autres membres est Auth-Checked
-        var areAllMemberAuthOK = true;
-        foreach (var sessionMemberInfo in sessionMemberInfoDtos)
-        {
-            if (!sessionMemberInfo.HasClientInstanceId(_connectionManager.ClientInstanceId))
-            {
-                if (! await _digitalSignaturesRepository.IsAuthChecked(cloudSessionResult.SessionId, sessionMemberInfo))
-                {
-                    Log.Warning("Digital Signature not checked for Client {ClientInstanceId}", sessionMemberInfo.ClientInstanceId);
-                    areAllMemberAuthOK = false;
-                }
-            }
-        }
-
-        if (!areAllMemberAuthOK)
-        {
-            Log.Here().Warning("Auth check failed, quitting session");
-            
-            await ClearConnectionData();
-            await QuitSession();
-
-            throw new Exception("Auth check failed, quitting session");
-        }
-        
-        var sessionSettings = _dataEncrypter.DecryptSessionSettings(cloudSessionResult.SessionSettings);
-
-        await _sessionService.SetCloudSession(cloudSessionResult.CloudSession, runCloudSessionProfileInfo, sessionSettings);
-        string password;
-        if (isCreator)
-        {
-            password = GeneratePassword();
-        }
-        else
-        {
-            password = (await _cloudSessionConnectionRepository.GetTempSessionPassword(cloudSessionResult.SessionId))!;
-        }
-        _sessionService.SetPassword(password.ToUpper());
-
-        
-        
-        _sessionMemberService.AddOrUpdate(sessionMemberInfoDtos);
-        
-        if (runCloudSessionProfileInfo != null)
-        {
-            var myPathItems = runCloudSessionProfileInfo.GetMyPathItems();
-
-            // var pathItemsViewModels = _pathItemsService.GetMyPathItems()!;
-            foreach (var pathItem in myPathItems)
-            {
-                await _pathItemsService.CreateAndAddPathItem(pathItem.Path, pathItem.Type);
-                
-                // pathItemsViewModels.Add(new PathItemViewModel(pathItem));
-                
-                // var encryptedPathItem = dataEncrypter.EncryptPathItem(pathItem); 
-                //
-                // // PathItemEncrypter pathItemEncrypter = _sessionObjectsFactory.BuildPathItemEncrypter();
-                // // var sharedPathItem = pathItemEncrypter.Encrypt(pathItem);
-                // await _connectionManager.HubWrapper.SetPathItemAdded(cloudSessionResult.SessionId, encryptedPathItem);
-            }
-            
-            // await _connectionManager.
-        }
-
-        foreach (var sessionMemberInfo in sessionMemberInfoDtos)
-        {
-            if (!sessionMemberInfo.HasClientInstanceId(_connectionManager.ClientInstanceId))
-            {
-                var encryptedPathItems = await _inventoryApiClient.GetPathItems(cloudSessionResult.SessionId, sessionMemberInfo.ClientInstanceId);
-
-                if (encryptedPathItems != null)
-                {
-                    foreach (var encryptedPathItem in encryptedPathItems)
-                    {
-                        var pathItem = _dataEncrypter.DecryptPathItem(encryptedPathItem);
-                        await _pathItemsService.AddPathItem(pathItem);
-                    }
-                }
-            }
-        }
-    }
+    // /// <summary>
+    // /// Après que l'on ait créé ou rejoint une session
+    // /// </summary>
+    // /// <param name="cloudSessionResult"></param>
+    // /// <param name="runCloudSessionProfileInfo"></param>
+    // /// <param name="isCreator"></param>
+    // private async Task AfterSessionCreatedOrJoined(CloudSessionResult cloudSessionResult, RunCloudSessionProfileInfo? runCloudSessionProfileInfo, 
+    //     bool isCreator)
+    // {
+    //     var sessionMemberInfoDtos = await _cloudSessionApiClient.GetMembers(cloudSessionResult.SessionId);
+    //     
+    //     // On contrôle que chacun des autres membres est Auth-Checked
+    //     var areAllMemberAuthOK = true;
+    //     foreach (var sessionMemberInfo in sessionMemberInfoDtos)
+    //     {
+    //         if (!sessionMemberInfo.HasClientInstanceId(_connectionManager.ClientInstanceId))
+    //         {
+    //             if (! await _digitalSignaturesRepository.IsAuthChecked(cloudSessionResult.SessionId, sessionMemberInfo))
+    //             {
+    //                 Log.Warning("Digital Signature not checked for Client {ClientInstanceId}", sessionMemberInfo.ClientInstanceId);
+    //                 areAllMemberAuthOK = false;
+    //             }
+    //         }
+    //     }
+    //
+    //     if (!areAllMemberAuthOK)
+    //     {
+    //         Log.Here().Warning("Auth check failed, quitting session");
+    //         
+    //         await ClearConnectionData();
+    //         await QuitSession();
+    //
+    //         throw new Exception("Auth check failed, quitting session");
+    //     }
+    //     
+    //     var sessionSettings = _dataEncrypter.DecryptSessionSettings(cloudSessionResult.SessionSettings);
+    //
+    //     await _sessionService.SetCloudSession(cloudSessionResult.CloudSession, runCloudSessionProfileInfo, sessionSettings);
+    //     string password;
+    //     if (isCreator)
+    //     {
+    //         password = GeneratePassword();
+    //     }
+    //     else
+    //     {
+    //         password = (await _cloudSessionConnectionRepository.GetTempSessionPassword(cloudSessionResult.SessionId))!;
+    //     }
+    //     _sessionService.SetPassword(password.ToUpper());
+    //
+    //     
+    //     
+    //     _sessionMemberService.AddOrUpdate(sessionMemberInfoDtos);
+    //     
+    //     if (runCloudSessionProfileInfo != null)
+    //     {
+    //         var myPathItems = runCloudSessionProfileInfo.GetMyPathItems();
+    //
+    //         // var pathItemsViewModels = _pathItemsService.GetMyPathItems()!;
+    //         foreach (var pathItem in myPathItems)
+    //         {
+    //             await _pathItemsService.CreateAndAddPathItem(pathItem.Path, pathItem.Type);
+    //             
+    //             // pathItemsViewModels.Add(new PathItemViewModel(pathItem));
+    //             
+    //             // var encryptedPathItem = dataEncrypter.EncryptPathItem(pathItem); 
+    //             //
+    //             // // PathItemEncrypter pathItemEncrypter = _sessionObjectsFactory.BuildPathItemEncrypter();
+    //             // // var sharedPathItem = pathItemEncrypter.Encrypt(pathItem);
+    //             // await _connectionManager.HubWrapper.SetPathItemAdded(cloudSessionResult.SessionId, encryptedPathItem);
+    //         }
+    //         
+    //         // await _connectionManager.
+    //     }
+    //
+    //     foreach (var sessionMemberInfo in sessionMemberInfoDtos)
+    //     {
+    //         if (!sessionMemberInfo.HasClientInstanceId(_connectionManager.ClientInstanceId))
+    //         {
+    //             var encryptedPathItems = await _inventoryApiClient.GetPathItems(cloudSessionResult.SessionId, sessionMemberInfo.ClientInstanceId);
+    //
+    //             if (encryptedPathItems != null)
+    //             {
+    //                 foreach (var encryptedPathItem in encryptedPathItems)
+    //                 {
+    //                     var pathItem = _dataEncrypter.DecryptPathItem(encryptedPathItem);
+    //                     await _pathItemsService.AddPathItem(pathItem);
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
     private string GeneratePassword()
     {
@@ -388,7 +388,7 @@ class CloudSessionConnector : ICloudSessionConnector
         }
     }
 
-    private async Task OnJoinSessionError(JoinSessionResult joinSessionResult)
+    public async Task OnJoinSessionError(JoinSessionResult joinSessionResult)
     {
         _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.None);
         await ClearConnectionData();
@@ -397,217 +397,217 @@ class CloudSessionConnector : ICloudSessionConnector
         await _cloudSessionEventsHub.RaiseJoinCloudSessionFailed(joinSessionResult);
     }
 
-    private async void OnYouJoinedSession((CloudSessionResult cloudSessionResult, ValidateJoinCloudSessionParameters parameters) tuple)
-    {
-        try
-        {
-            if (!await _cloudSessionConnectionRepository.CheckConnectingCloudSession(tuple.cloudSessionResult.CloudSession.SessionId))
-            {
-                Log.Here().Error(UNKNOWN_RECEIVED_SESSION_ID, tuple.cloudSessionResult.CloudSession.SessionId);
-                return;
-            }
+    // private async void OnYouJoinedSession((CloudSessionResult cloudSessionResult, ValidateJoinCloudSessionParameters parameters) tuple)
+    // {
+    //     try
+    //     {
+    //         if (!await _cloudSessionConnectionRepository.CheckConnectingCloudSession(tuple.cloudSessionResult.CloudSession.SessionId))
+    //         {
+    //             Log.Here().Error(UNKNOWN_RECEIVED_SESSION_ID, tuple.cloudSessionResult.CloudSession.SessionId);
+    //             return;
+    //         }
+    //
+    //         if (!_connectionManager.ClientInstanceId.Equals(tuple.parameters.JoinerClientInstanceId))
+    //         {
+    //             Log.Here().Warning("unexpected session event received with JoinerId {joinerId}", tuple.parameters.JoinerClientInstanceId);
+    //             return;
+    //         }
+    //
+    //         if (_cloudSessionConnectionRepository.CurrentConnectionStatus != ConnectionStatuses.JoiningSession)
+    //         {
+    //             Log.Here().Warning("no longer trying to join session");
+    //             return;
+    //         }
+    //         
+    //         var isAuthOK = false;
+    //         var cpt = 0;
+    //         while (! isAuthOK)
+    //         {
+    //             cpt += 1;
+    //             if (cpt == 5)
+    //             {
+    //                 Log.Here().Warning($"can not check auth. Too many tries");
+    //                 return;
+    //             }
+    //             
+    //             var sessionMembersClientInstanceIds = await _publicKeysTruster.TrustMissingMembersPublicKeys(tuple.cloudSessionResult.CloudSession.SessionId);
+    //             if (sessionMembersClientInstanceIds == null)
+    //             {
+    //                 Log.Here().Warning($"can not check trust");
+    //                 return;
+    //             }
+    //             
+    //             isAuthOK = await _digitalSignaturesChecker.CheckExistingMembersDigitalSignatures(tuple.cloudSessionResult.CloudSession.SessionId, 
+    //                 sessionMembersClientInstanceIds);
+    //             if (!isAuthOK)
+    //             {
+    //                 Log.Here().Warning($"can not check auth");
+    //                 return;
+    //             }
+    //
+    //             var sessionMemberPrivateData = new SessionMemberPrivateData
+    //             {
+    //                 MachineName = _environmentService.MachineName
+    //             };
+    //             
+    //             var aesEncryptionKey = _publicKeysManager.DecryptBytes(tuple.parameters.EncryptedAesKey);
+    //             _cloudSessionConnectionRepository.SetAesEncryptionKey(aesEncryptionKey);
+    //             
+    //             var encryptedSessionMemberPrivateData = _dataEncrypter.EncryptSessionMemberPrivateData(sessionMemberPrivateData);
+    //             var finalizeParameters = new FinalizeJoinCloudSessionParameters(tuple.parameters, encryptedSessionMemberPrivateData);
+    //
+    //             var finalizeJoinSessionResult = await _cloudSessionApiClient.FinalizeJoinCloudSession(finalizeParameters);
+    //
+    //             if (finalizeJoinSessionResult.Status == FinalizeJoinSessionStatuses.AuthIsNotChecked)
+    //             {
+    //                 isAuthOK = false;
+    //                 await Task.Delay(TimeSpan.FromSeconds(1));
+    //             }
+    //             else if (!finalizeJoinSessionResult.IsOK)
+    //             {
+    //                 Log.Here().Warning($"error during join session finalization");
+    //                 return;
+    //             }
+    //         }
+    //
+    //         try
+    //         {
+    //             var aesEncryptionKey = _publicKeysManager.DecryptBytes(tuple.parameters.EncryptedAesKey);
+    //             _cloudSessionConnectionRepository.SetAesEncryptionKey(aesEncryptionKey);
+    //
+    //             Log.Here().Debug("...EncryptionKey received successfully");
+    //         }
+    //         catch (Exception ex)
+    //         {
+    //             Log.Here().Error(ex, "...Error during EncryptionKey reception");
+    //             throw;
+    //         }
+    //
+    //         var lobbySessionDetails = await _cloudSessionConnectionRepository
+    //             .GetTempLobbySessionDetails(tuple.cloudSessionResult.CloudSession.SessionId);
+    //         
+    //         await AfterSessionCreatedOrJoined(tuple.cloudSessionResult, lobbySessionDetails, false);
+    //         
+    //         await _cloudSessionConnectionRepository.SetJoinSessionResultReceived(tuple.cloudSessionResult.CloudSession.SessionId);
+    //
+    //         // ReSharper disable once PossibleNullReferenceException
+    //         Log.Information("JoinSession: {CloudSession}", tuple.cloudSessionResult.SessionId);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Log.Error(ex, "OnYouJoinedSession");
+    //         
+    //         _sessionService.ClearCloudSession();
+    //     }
+    //     finally
+    //     {
+    //         _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.None);
+    //     }
+    // }
 
-            if (!_connectionManager.ClientInstanceId.Equals(tuple.parameters.JoinerClientInstanceId))
-            {
-                Log.Here().Warning("unexpected session event received with JoinerId {joinerId}", tuple.parameters.JoinerClientInstanceId);
-                return;
-            }
+    // private async void OnYouGaveAWrongPassword(string sessionId)
+    // {
+    //     try
+    //     {
+    //         if (!await _cloudSessionConnectionRepository.CheckConnectingCloudSession(sessionId))
+    //         {
+    //             Log.Here().Error(UNKNOWN_RECEIVED_SESSION_ID, sessionId);
+    //         }
+    //
+    //         _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.None);
+    //         
+    //         await _cloudSessionEventsHub.RaiseJoinCloudSessionFailed(JoinSessionResult.BuildFrom(JoinSessionStatuses.WrondPassword));
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Log.Error(ex, "OnYouGaveAWrongPassword");
+    //     }
+    // }
 
-            if (_cloudSessionConnectionRepository.CurrentConnectionStatus != ConnectionStatuses.JoiningSession)
-            {
-                Log.Here().Warning("no longer trying to join session");
-                return;
-            }
-            
-            var isAuthOK = false;
-            var cpt = 0;
-            while (! isAuthOK)
-            {
-                cpt += 1;
-                if (cpt == 5)
-                {
-                    Log.Here().Warning($"can not check auth. Too many tries");
-                    return;
-                }
-                
-                var sessionMembersClientInstanceIds = await _publicKeysTruster.TrustMissingMembersPublicKeys(tuple.cloudSessionResult.CloudSession.SessionId);
-                if (sessionMembersClientInstanceIds == null)
-                {
-                    Log.Here().Warning($"can not check trust");
-                    return;
-                }
-                
-                isAuthOK = await _digitalSignaturesChecker.CheckExistingMembersDigitalSignatures(tuple.cloudSessionResult.CloudSession.SessionId, 
-                    sessionMembersClientInstanceIds);
-                if (!isAuthOK)
-                {
-                    Log.Here().Warning($"can not check auth");
-                    return;
-                }
+    // private async void OnCloudSessionPasswordExchangeKeyAsked(AskCloudSessionPasswordExchangeKeyPush askCloudSessionPasswordExchangeKeyPush)
+    // {
+    //     try
+    //     {
+    //         await OnCloudSessionPasswordExchangeKeyAskedAsync(askCloudSessionPasswordExchangeKeyPush);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Log.Error(ex, "OnCloudSessionPasswordExchangeKeyAsked");
+    //     }
+    // }
 
-                var sessionMemberPrivateData = new SessionMemberPrivateData
-                {
-                    MachineName = _environmentService.MachineName
-                };
-                
-                var aesEncryptionKey = _publicKeysManager.DecryptBytes(tuple.parameters.EncryptedAesKey);
-                _cloudSessionConnectionRepository.SetAesEncryptionKey(aesEncryptionKey);
-                
-                var encryptedSessionMemberPrivateData = _dataEncrypter.EncryptSessionMemberPrivateData(sessionMemberPrivateData);
-                var finalizeParameters = new FinalizeJoinCloudSessionParameters(tuple.parameters, encryptedSessionMemberPrivateData);
+    // private async Task OnCloudSessionPasswordExchangeKeyAskedAsync(AskCloudSessionPasswordExchangeKeyPush pushData)
+    // {
+    //     var isTrusted = _publicKeysManager.IsTrusted(pushData.PublicKeyInfo);
+    //     if (!isTrusted)
+    //     {
+    //         throw new Exception(PUBLIC_KEY_IS_NOT_TRUSTED);
+    //     }
+    //             
+    //     var parameters = new GiveCloudSessionPasswordExchangeKeyParameters(pushData.SessionId, 
+    //         pushData.RequesterInstanceId, _connectionManager.ClientInstanceId, 
+    //         _publicKeysManager.GetMyPublicKeyInfo());
+    //     await _cloudSessionApiClient.GiveCloudSessionPasswordExchangeKey(parameters);
+    // }
 
-                var finalizeJoinSessionResult = await _cloudSessionApiClient.FinalizeJoinCloudSession(finalizeParameters);
+    // private async void OnCloudSessionPasswordExchangeKeyGiven(GiveCloudSessionPasswordExchangeKeyParameters parameters)
+    // {
+    //     try
+    //     {
+    //         await OnCloudSessionPasswordExchangeKeyGivenAsync(parameters);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Log.Error(ex, "OnCloudSessionPasswordExchangeKeyGiven");
+    //     }
+    // }
 
-                if (finalizeJoinSessionResult.Status == FinalizeJoinSessionStatuses.AuthIsNotChecked)
-                {
-                    isAuthOK = false;
-                    await Task.Delay(TimeSpan.FromSeconds(1));
-                }
-                else if (!finalizeJoinSessionResult.IsOK)
-                {
-                    Log.Here().Warning($"error during join session finalization");
-                    return;
-                }
-            }
-
-            try
-            {
-                var aesEncryptionKey = _publicKeysManager.DecryptBytes(tuple.parameters.EncryptedAesKey);
-                _cloudSessionConnectionRepository.SetAesEncryptionKey(aesEncryptionKey);
-
-                Log.Here().Debug("...EncryptionKey received successfully");
-            }
-            catch (Exception ex)
-            {
-                Log.Here().Error(ex, "...Error during EncryptionKey reception");
-                throw;
-            }
-
-            var lobbySessionDetails = await _cloudSessionConnectionRepository
-                .GetTempLobbySessionDetails(tuple.cloudSessionResult.CloudSession.SessionId);
-            
-            await AfterSessionCreatedOrJoined(tuple.cloudSessionResult, lobbySessionDetails, false);
-            
-            await _cloudSessionConnectionRepository.SetJoinSessionResultReceived(tuple.cloudSessionResult.CloudSession.SessionId);
-
-            // ReSharper disable once PossibleNullReferenceException
-            Log.Information("JoinSession: {CloudSession}", tuple.cloudSessionResult.SessionId);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "OnYouJoinedSession");
-            
-            _sessionService.ClearCloudSession();
-        }
-        finally
-        {
-            _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.None);
-        }
-    }
-
-    private async void OnYouGaveAWrongPassword(string sessionId)
-    {
-        try
-        {
-            if (!await _cloudSessionConnectionRepository.CheckConnectingCloudSession(sessionId))
-            {
-                Log.Here().Error(UNKNOWN_RECEIVED_SESSION_ID, sessionId);
-            }
-
-            _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.None);
-            
-            await _cloudSessionEventsHub.RaiseJoinCloudSessionFailed(JoinSessionResult.BuildFrom(JoinSessionStatuses.WrondPassword));
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "OnYouGaveAWrongPassword");
-        }
-    }
-
-    private async void OnCloudSessionPasswordExchangeKeyAsked(AskCloudSessionPasswordExchangeKeyPush askCloudSessionPasswordExchangeKeyPush)
-    {
-        try
-        {
-            await OnCloudSessionPasswordExchangeKeyAskedAsync(askCloudSessionPasswordExchangeKeyPush);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "OnCloudSessionPasswordExchangeKeyAsked");
-        }
-    }
-
-    private async Task OnCloudSessionPasswordExchangeKeyAskedAsync(AskCloudSessionPasswordExchangeKeyPush pushData)
-    {
-        var isTrusted = _publicKeysManager.IsTrusted(pushData.PublicKeyInfo);
-        if (!isTrusted)
-        {
-            throw new Exception(PUBLIC_KEY_IS_NOT_TRUSTED);
-        }
-                
-        var parameters = new GiveCloudSessionPasswordExchangeKeyParameters(pushData.SessionId, 
-            pushData.RequesterInstanceId, _connectionManager.ClientInstanceId, 
-            _publicKeysManager.GetMyPublicKeyInfo());
-        await _cloudSessionApiClient.GiveCloudSessionPasswordExchangeKey(parameters);
-    }
-
-    private async void OnCloudSessionPasswordExchangeKeyGiven(GiveCloudSessionPasswordExchangeKeyParameters parameters)
-    {
-        try
-        {
-            await OnCloudSessionPasswordExchangeKeyGivenAsync(parameters);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "OnCloudSessionPasswordExchangeKeyGiven");
-        }
-    }
-
-    /// <summary>
-    /// Appelé lorsqu'on reçoit les paramètres d'échange de clé
-    /// </summary>
-    /// <param name="parameters"></param>
-    private async Task OnCloudSessionPasswordExchangeKeyGivenAsync(GiveCloudSessionPasswordExchangeKeyParameters parameters)
-    {
-        if (!await _cloudSessionConnectionRepository.CheckConnectingCloudSession(parameters.SessionId))
-        {
-            Log.Here().Error(UNKNOWN_RECEIVED_SESSION_ID, parameters.SessionId);
-            return;
-        }
-        if (!_connectionManager.ClientInstanceId.Equals(parameters.JoinerInstanceId))
-        {
-            Log.Here().Warning("Unexpected password provide request received with JoinerId {joinerId}", parameters.JoinerInstanceId);
-            return;
-        }
-            
-        await _cloudSessionConnectionRepository.SetPasswordExchangeKeyReceived(parameters.SessionId);
-        
-        var isTrusted = _publicKeysManager.IsTrusted(parameters.PublicKeyInfo);
-        if (isTrusted)
-        {
-            var password = await _cloudSessionConnectionRepository.GetTempSessionPassword(parameters.SessionId);
-            ExchangePassword exchangePassword = new(parameters.SessionId, _connectionManager.ClientInstanceId, password!);
-
-            var encryptedPassword = _publicKeysManager.EncryptString(parameters.PublicKeyInfo, exchangePassword.Data);
-            AskJoinCloudSessionParameters outParameters = new (parameters, encryptedPassword);
-
-            Log.Information("...Providing encrypted password to the validator");
-            var joinSessionResult = await _cloudSessionApiClient.AskJoinCloudSession(outParameters);
-
-            if (!joinSessionResult.IsOK)
-            {
-                await OnJoinSessionError(joinSessionResult);
-            }
-            else
-            {
-                await _cloudSessionConnectionRepository.WaitOrThrowAsync(parameters.SessionId, 
-                    data => data.WaitForJoinSessionEvent, data => data.WaitTimeSpan, "Join session failed");
-            }
-        }
-        else
-        {
-            throw new Exception(PUBLIC_KEY_IS_NOT_TRUSTED);
-        }
-    }
+    // /// <summary>
+    // /// Appelé lorsqu'on reçoit les paramètres d'échange de clé
+    // /// </summary>
+    // /// <param name="parameters"></param>
+    // private async Task OnCloudSessionPasswordExchangeKeyGivenAsync(GiveCloudSessionPasswordExchangeKeyParameters parameters)
+    // {
+    //     if (!await _cloudSessionConnectionRepository.CheckConnectingCloudSession(parameters.SessionId))
+    //     {
+    //         Log.Here().Error(UNKNOWN_RECEIVED_SESSION_ID, parameters.SessionId);
+    //         return;
+    //     }
+    //     if (!_connectionManager.ClientInstanceId.Equals(parameters.JoinerInstanceId))
+    //     {
+    //         Log.Here().Warning("Unexpected password provide request received with JoinerId {joinerId}", parameters.JoinerInstanceId);
+    //         return;
+    //     }
+    //         
+    //     await _cloudSessionConnectionRepository.SetPasswordExchangeKeyReceived(parameters.SessionId);
+    //     
+    //     var isTrusted = _publicKeysManager.IsTrusted(parameters.PublicKeyInfo);
+    //     if (isTrusted)
+    //     {
+    //         var password = await _cloudSessionConnectionRepository.GetTempSessionPassword(parameters.SessionId);
+    //         ExchangePassword exchangePassword = new(parameters.SessionId, _connectionManager.ClientInstanceId, password!);
+    //
+    //         var encryptedPassword = _publicKeysManager.EncryptString(parameters.PublicKeyInfo, exchangePassword.Data);
+    //         AskJoinCloudSessionParameters outParameters = new (parameters, encryptedPassword);
+    //
+    //         Log.Information("...Providing encrypted password to the validator");
+    //         var joinSessionResult = await _cloudSessionApiClient.AskJoinCloudSession(outParameters);
+    //
+    //         if (!joinSessionResult.IsOK)
+    //         {
+    //             await OnJoinSessionError(joinSessionResult);
+    //         }
+    //         else
+    //         {
+    //             await _cloudSessionConnectionRepository.WaitOrThrowAsync(parameters.SessionId, 
+    //                 data => data.WaitForJoinSessionEvent, data => data.WaitTimeSpan, "Join session failed");
+    //         }
+    //     }
+    //     else
+    //     {
+    //         throw new Exception(PUBLIC_KEY_IS_NOT_TRUSTED);
+    //     }
+    // }
 
     private async void OnCheckCloudSessionPasswordExchangeKey(AskJoinCloudSessionParameters parameters)
     {
@@ -621,10 +621,10 @@ class CloudSessionConnector : ICloudSessionConnector
         }
     }
         
-    private async void OnReconnected(string sessionId)
-    {
-        
-    }
+    // private async void OnReconnected(string sessionId)
+    // {
+    //     
+    // }
 
     private async void HandleOnCheckCloudSessionPasswordExchangeKey(AskJoinCloudSessionParameters parameters)
     {

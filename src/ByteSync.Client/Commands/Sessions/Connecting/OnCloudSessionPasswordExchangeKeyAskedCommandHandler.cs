@@ -1,0 +1,50 @@
+﻿using System.Threading;
+using System.Threading.Tasks;
+using ByteSync.Common.Business.Sessions.Cloud.Connections;
+using ByteSync.Interfaces.Controls.Applications;
+using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Controls.Communications.Http;
+using MediatR;
+using Serilog;
+
+namespace ByteSync.Commands.Sessions.Connecting;
+
+public class OnCloudSessionPasswordExchangeKeyAskedCommandHandler : IRequestHandler<OnCloudSessionPasswordExchangeKeyAskedRequest>
+{
+    private readonly ICloudSessionApiClient _cloudSessionApiClient;
+    private readonly IPublicKeysManager _publicKeysManager;
+    private readonly IEnvironmentService _environmentService;
+    
+    private const string PUBLIC_KEY_IS_NOT_TRUSTED = "Public key is not trusted";
+
+    public OnCloudSessionPasswordExchangeKeyAskedCommandHandler(
+        ICloudSessionApiClient cloudSessionApiClient,
+        IPublicKeysManager publicKeysManager,
+        IEnvironmentService environmentService)
+    {
+        _cloudSessionApiClient = cloudSessionApiClient;
+        _publicKeysManager = publicKeysManager;
+        _environmentService = environmentService;
+    }
+    
+    public async Task Handle(OnCloudSessionPasswordExchangeKeyAskedRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var isTrusted = _publicKeysManager.IsTrusted(request.PublicKeyInfo);
+            if (!isTrusted)
+            {
+                throw new Exception(PUBLIC_KEY_IS_NOT_TRUSTED);
+            }
+                
+            var parameters = new GiveCloudSessionPasswordExchangeKeyParameters(request.SessionId, 
+                request.RequesterInstanceId, _environmentService.ClientInstanceId, 
+                _publicKeysManager.GetMyPublicKeyInfo());
+            await _cloudSessionApiClient.GiveCloudSessionPasswordExchangeKey(parameters);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "OnCloudSessionPasswordExchangeKeyAsked");
+        }
+    }
+}
