@@ -22,6 +22,7 @@ namespace ByteSync.Views
         {
             InitializeComponent();
             
+            // Voir ce qui a été fait pour l'enregistrement du FlyoutPanel
             Locator.CurrentMutable.RegisterConstant<IFileDialogService>(this);
             
             _zoomService = Locator.Current.GetService<IZoomService>()!;

@@ -38,7 +38,6 @@ class CloudSessionConnector : ICloudSessionConnector
     private readonly ISessionService _sessionService;
     private readonly ISynchronizationService _synchronizationService;
     private readonly IPathItemsService _pathItemsService;
-    private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
     private readonly INavigationService _navigationService;
     private readonly IDataEncrypter _dataEncrypter;
     private readonly ICloudSessionApiClient _cloudSessionApiClient;
@@ -54,7 +53,7 @@ class CloudSessionConnector : ICloudSessionConnector
     public CloudSessionConnector(ICloudProxy connectionManager, ICloudSessionConnectionRepository cloudSessionConnectionRepository, 
         IPublicKeysManager publicKeysManager, ICloudSessionEventsHub cloudSessionEventsHub, IDigitalSignaturesRepository digitalSignaturesRepository, 
         ITrustProcessPublicKeysRepository trustPublicKeysRepository, ISessionService sessionService, ISynchronizationService synchronizationService, 
-        IPathItemsService pathItemsService, ICloudSessionConnectionService cloudSessionConnectionService, INavigationService navigationService, 
+        IPathItemsService pathItemsService, INavigationService navigationService, 
         IDataEncrypter dataEncrypter, ICloudSessionApiClient cloudSessionApiClient, IPublicKeysTruster publicKeysTruster,
         IDigitalSignaturesChecker digitalSignaturesChecker, IInventoryApiClient inventoryApiClient, ISessionMemberService sessionMemberService,
         IEnvironmentService environmentService)
@@ -68,7 +67,6 @@ class CloudSessionConnector : ICloudSessionConnector
         _sessionService = sessionService;
         _synchronizationService = synchronizationService;
         _pathItemsService = pathItemsService;
-        _cloudSessionConnectionService = cloudSessionConnectionService;
         _navigationService = navigationService;
         _dataEncrypter = dataEncrypter;
         _cloudSessionApiClient = cloudSessionApiClient;
@@ -102,7 +100,7 @@ class CloudSessionConnector : ICloudSessionConnector
         try
         {
             await ClearConnectionData();
-            _cloudSessionConnectionService.SetConnectionStatus(ConnectionStatuses.CreatingSession);
+            _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.CreatingSession);
             
             using var aes = Aes.Create();
             aes.GenerateKey();
@@ -153,7 +151,7 @@ class CloudSessionConnector : ICloudSessionConnector
         }
         finally
         {
-            _cloudSessionConnectionService.SetConnectionStatus(ConnectionStatuses.None);
+            _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.None);
         }
     }
 
@@ -209,7 +207,7 @@ class CloudSessionConnector : ICloudSessionConnector
     {
         get
         {
-            return Observable.CombineLatest(_cloudSessionConnectionService.ConnectionStatusObservable,
+            return Observable.CombineLatest(_cloudSessionConnectionRepository.ConnectionStatusObservable,
                 _sessionService.SessionObservable, _synchronizationService.SynchronizationProcessData.SynchronizationEnd, 
                 _sessionService.SessionStatusObservable,
                 (connectionStatus, session, synchronizationEnd, sessionStatus) =>
@@ -350,7 +348,7 @@ class CloudSessionConnector : ICloudSessionConnector
             return;
         }
 
-        _cloudSessionConnectionService.SetConnectionStatus(ConnectionStatuses.JoiningSession);
+        _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.JoiningSession);
         await ClearConnectionData();
 
         await _trustProcessPublicKeysRepository.Start(sessionId);
@@ -392,7 +390,7 @@ class CloudSessionConnector : ICloudSessionConnector
 
     private async Task OnJoinSessionError(JoinSessionResult joinSessionResult)
     {
-        _cloudSessionConnectionService.SetConnectionStatus(ConnectionStatuses.None);
+        _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.None);
         await ClearConnectionData();
             
         Log.Error("Can not join the Cloud Session. Reason: {Reason}", joinSessionResult.Status);
@@ -415,7 +413,7 @@ class CloudSessionConnector : ICloudSessionConnector
                 return;
             }
 
-            if (_cloudSessionConnectionService.CurrentConnectionStatus != ConnectionStatuses.JoiningSession)
+            if (_cloudSessionConnectionRepository.CurrentConnectionStatus != ConnectionStatuses.JoiningSession)
             {
                 Log.Here().Warning("no longer trying to join session");
                 return;
@@ -503,7 +501,7 @@ class CloudSessionConnector : ICloudSessionConnector
         }
         finally
         {
-            _cloudSessionConnectionService.SetConnectionStatus(ConnectionStatuses.None);
+            _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.None);
         }
     }
 
@@ -516,7 +514,7 @@ class CloudSessionConnector : ICloudSessionConnector
                 Log.Here().Error(UNKNOWN_RECEIVED_SESSION_ID, sessionId);
             }
 
-            _cloudSessionConnectionService.SetConnectionStatus(ConnectionStatuses.None);
+            _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.None);
             
             await _cloudSessionEventsHub.RaiseJoinCloudSessionFailed(JoinSessionResult.BuildFrom(JoinSessionStatuses.WrondPassword));
         }

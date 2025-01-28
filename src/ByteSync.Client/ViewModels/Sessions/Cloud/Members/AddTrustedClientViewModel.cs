@@ -11,14 +11,12 @@ using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Dialogs;
-using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Services.Communications;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.TrustedNetworks;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
-using Splat;
 
 namespace ByteSync.ViewModels.Sessions.Cloud.Members;
 

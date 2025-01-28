@@ -22,5 +22,14 @@ namespace ByteSync.Interfaces.Controls.Sessions
         Task SetJoinSessionResultReceived(string sessionId);
         
         Task<bool> CheckConnectingCloudSession(string? sessionId);
+        
+        // StatusObservable ici : IsCreatingSession, IsJoiningSession, IsConnectedSession
+        // Déjà implémenté dans CloudSessionConnectionService
+        
+        public IObservable<ConnectionStatuses> ConnectionStatusObservable { get; }
+    
+        public ConnectionStatuses CurrentConnectionStatus { get; }
+    
+        void SetConnectionStatus(ConnectionStatuses connectionStatus);
     }
 }

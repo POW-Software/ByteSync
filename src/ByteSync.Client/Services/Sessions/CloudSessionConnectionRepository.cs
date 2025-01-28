@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.RunSessionInfos;
@@ -10,9 +12,11 @@ namespace ByteSync.Services.Sessions;
 
 public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConnectionData>, ICloudSessionConnectionRepository
 {
+    private readonly BehaviorSubject<ConnectionStatuses> _connectionStatus;
+    
     public CloudSessionConnectionRepository()
     {
-
+        _connectionStatus = new BehaviorSubject<ConnectionStatuses>(ConnectionStatuses.None);
     }
 
     public byte[]? AesEncryptionKey { get; set; }
@@ -89,5 +93,14 @@ public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConne
         {
             return AesEncryptionKey;
         }
+    }
+    
+    public IObservable<ConnectionStatuses> ConnectionStatusObservable => _connectionStatus.AsObservable();
+    
+    public ConnectionStatuses CurrentConnectionStatus => _connectionStatus.Value;
+    
+    public void SetConnectionStatus(ConnectionStatuses connectionStatus)
+    {
+        _connectionStatus.OnNext(connectionStatus);
     }
 }

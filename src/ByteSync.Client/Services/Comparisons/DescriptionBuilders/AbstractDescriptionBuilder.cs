@@ -3,15 +3,14 @@ using ByteSync.Assets.Resources;
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
-using Splat;
 
 namespace ByteSync.Services.Comparisons.DescriptionBuilders;
 
 public abstract class AbstractDescriptionBuilder<T>
 {
-    protected AbstractDescriptionBuilder(ILocalizationService? localizationService)
+    protected AbstractDescriptionBuilder(ILocalizationService localizationService)
     {
-        TranslationSource = localizationService ?? Locator.Current.GetService<ILocalizationService>()!;
+        TranslationSource = localizationService;
     }
 
     protected ILocalizationService TranslationSource { get; }
@@ -19,7 +18,7 @@ public abstract class AbstractDescriptionBuilder<T>
     public string GetDescription(T element)
     {
         var stringBuilder = new StringBuilder();
-            
+        
         AppendDescription(stringBuilder, element);
         var description = stringBuilder.ToString();
             
