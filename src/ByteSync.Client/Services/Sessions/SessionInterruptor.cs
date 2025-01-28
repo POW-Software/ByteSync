@@ -2,12 +2,14 @@
 using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Business.Sessions;
+using ByteSync.Commands.Sessions;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.ViewModels.Misc;
+using MediatR;
 
 namespace ByteSync.Services.Sessions;
 
@@ -19,11 +21,11 @@ public class SessionInterruptor : ISessionInterruptor
     private readonly ISynchronizationService _synchronizationService;
     private readonly ISessionResetter _sessionResetter;
     private readonly ISessionMemberRepository _sessionMemberRepository;
-
+    private readonly IMediator _mediator;
 
     public SessionInterruptor(ICloudSessionConnector cloudSessionConnector, ISessionService sessionService, 
         IDialogService dialogService, ISynchronizationService synchronizationService,
-        ISessionMemberRepository sessionMemberRepository, ISessionResetter sessionResetter)
+        ISessionMemberRepository sessionMemberRepository, ISessionResetter sessionResetter, IMediator mediator)
     {
         _cloudSessionConnector = cloudSessionConnector;
         _sessionService = sessionService;
@@ -31,6 +33,7 @@ public class SessionInterruptor : ISessionInterruptor
         _synchronizationService = synchronizationService;
         _sessionMemberRepository = sessionMemberRepository;
         _sessionResetter = sessionResetter;
+        _mediator = mediator;
     }
 
     public async Task RequestQuitSession()
@@ -54,7 +57,7 @@ public class SessionInterruptor : ISessionInterruptor
         {
             if (_sessionService.CurrentSession != null)
             {
-                await _cloudSessionConnector.QuitSession();
+                await _mediator.Send(new QuitSessionRequest());
             }
         }
         else
@@ -85,7 +88,7 @@ public class SessionInterruptor : ISessionInterruptor
 
             if (result == MessageBoxResult.Yes)
             {
-                await _cloudSessionConnector.QuitSession();
+                await _mediator.Send(new QuitSessionRequest());
             }
         }
     }

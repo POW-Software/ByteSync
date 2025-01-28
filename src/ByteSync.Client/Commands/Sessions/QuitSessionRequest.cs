@@ -2,7 +2,7 @@
 
 namespace ByteSync.Commands.Sessions;
 
-public class QuiSessionRequest : IRequest
+public class QuitSessionRequest : IRequest
 { 
     
 }

@@ -5,12 +5,14 @@ using Avalonia.Animation;
 using Avalonia.Controls.Mixins;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Navigations;
+using ByteSync.Commands.Sessions;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.ViewModels.Headers;
 using ByteSync.ViewModels.Misc;
+using MediatR;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
@@ -25,6 +27,7 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
     private readonly IZoomService _zoomService;
     private readonly IIndex<NavigationPanel, IRoutableViewModel> _navigationPanelViewModels;
     private readonly IMessageBoxViewModelFactory _messageBoxViewModelFactory;
+    private readonly IMediator _mediator;
 
     public RoutingState Router { get; } = new RoutingState();
 
@@ -35,7 +38,8 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
 
     public MainWindowViewModel(ISessionService sessionService, ICloudSessionConnector cloudSessionConnector, INavigationService navigationService, 
         IZoomService zoomService, FlyoutContainerViewModel? flyoutContainerViewModel, HeaderViewModel headerViewModel, 
-        IIndex<NavigationPanel, IRoutableViewModel> navigationPanelViewModels, IMessageBoxViewModelFactory messageBoxViewModelFactory)
+        IIndex<NavigationPanel, IRoutableViewModel> navigationPanelViewModels, IMessageBoxViewModelFactory messageBoxViewModelFactory,
+        IMediator mediator)
     {
         PageTransition = null;
 
@@ -45,6 +49,7 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
         _zoomService = zoomService;
         _navigationPanelViewModels = navigationPanelViewModels;
         _messageBoxViewModelFactory = messageBoxViewModelFactory;
+        _mediator = mediator;
         
         FlyoutContainer = flyoutContainerViewModel!;
         Header = headerViewModel!;
@@ -124,7 +129,7 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
             {
                 if (_sessionService.CurrentSession != null)
                 {
-                    await _cloudSessionConnector.QuitSession();
+                    await _mediator.Send(new QuitSessionRequest());
                 }
             }
             catch (Exception ex)

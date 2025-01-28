@@ -27,7 +27,8 @@ public class SessionConnectionPushReceiver : IPushReceiver
                 p.ValidatorInstanceId, p.PublicKeyInfo)));
         
         _hubPushHandler2.CheckCloudSessionPasswordExchangeKey
-            .Subscribe(p => OnCheckCloudSessionPasswordExchangeKey);
+            .Subscribe(p => mediator.Send(new OnCheckCloudSessionPasswordExchangeKeyRequest(p.SessionId, p.JoinerClientInstanceId, 
+                p.ValidatorInstanceId, p.EncryptedPassword)));
         
         // _hubPushHandler2.HubPushHandler2.OnReconnected
         //     .Subscribe(OnReconnected);

@@ -9,7 +9,7 @@ using MediatR;
 
 namespace ByteSync.Commands.Sessions;
 
-public class QuitSessionCommandHandler : IRequestHandler<QuiSessionRequest>
+public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
 {
     private readonly ISessionService _sessionService;
     private readonly INavigationService _navigationService;
@@ -27,7 +27,7 @@ public class QuitSessionCommandHandler : IRequestHandler<QuiSessionRequest>
         _logger = logger;
     }
     
-    public async Task Handle(QuiSessionRequest request, CancellationToken cancellationToken)
+    public async Task Handle(QuitSessionRequest request, CancellationToken cancellationToken)
     {
         var session = _sessionService.CurrentSession;
 

@@ -88,8 +88,8 @@ class CloudSessionConnector : ICloudSessionConnector
         // _connectionManager.HubPushHandler2.GiveCloudSessionPasswordExchangeKey
         //     .Subscribe(OnCloudSessionPasswordExchangeKeyGiven);
         
-        _connectionManager.HubPushHandler2.CheckCloudSessionPasswordExchangeKey
-            .Subscribe(OnCheckCloudSessionPasswordExchangeKey);
+        // _connectionManager.HubPushHandler2.CheckCloudSessionPasswordExchangeKey
+        //     .Subscribe(OnCheckCloudSessionPasswordExchangeKey);
         
         // _connectionManager.HubPushHandler2.OnReconnected
         //     .Subscribe(OnReconnected);
@@ -315,16 +315,16 @@ class CloudSessionConnector : ICloudSessionConnector
     //     }
     // }
 
-    private string GeneratePassword()
-    {
-        var sb = new StringBuilder();
-        for (var i = 0; i < 5; i++)
-        {
-            sb.Append(RandomUtils.GetRandomLetter(true));
-        }
-        
-        return sb.ToString();
-    }
+    // private string GeneratePassword()
+    // {
+    //     var sb = new StringBuilder();
+    //     for (var i = 0; i < 5; i++)
+    //     {
+    //         sb.Append(RandomUtils.GetRandomLetter(true));
+    //     }
+    //     
+    //     return sb.ToString();
+    // }
 
     public async Task JoinSession(string sessionId, string sessionPassword, RunCloudSessionProfileInfo? lobbySessionDetails)
     {
@@ -609,73 +609,73 @@ class CloudSessionConnector : ICloudSessionConnector
     //     }
     // }
 
-    private async void OnCheckCloudSessionPasswordExchangeKey(AskJoinCloudSessionParameters parameters)
-    {
-        try
-        {
-            await Task.Run(() => HandleOnCheckCloudSessionPasswordExchangeKey(parameters));
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "OnCheckCloudSessionPasswordExchangeKey");
-        }
-    }
+    // private async void OnCheckCloudSessionPasswordExchangeKey(AskJoinCloudSessionParameters parameters)
+    // {
+    //     try
+    //     {
+    //         await Task.Run(() => HandleOnCheckCloudSessionPasswordExchangeKey(parameters));
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Log.Error(ex, "OnCheckCloudSessionPasswordExchangeKey");
+    //     }
+    // }
         
     // private async void OnReconnected(string sessionId)
     // {
     //     
     // }
 
-    private async void HandleOnCheckCloudSessionPasswordExchangeKey(AskJoinCloudSessionParameters parameters)
-    {
-        if (!_connectionManager.ClientInstanceId.Equals(parameters.ValidatorInstanceId))
-        {
-            Log.Here().Warning("unexpected password check request received with ValidatorId {validatorId}", parameters.ValidatorInstanceId);
-            return;
-        }
-
-        var keyCheckData = await _trustProcessPublicKeysRepository.GetLocalPublicKeyCheckData(parameters.SessionId, parameters.JoinerClientInstanceId);
-        var publicKeyInfo = keyCheckData?.OtherPartyPublicKeyInfo;
-        if (publicKeyInfo != null)
-        {
-            var isTrusted = _publicKeysManager.IsTrusted(publicKeyInfo);
-            if (!isTrusted)
-            {
-                throw new Exception(PUBLIC_KEY_IS_NOT_TRUSTED);
-            }
-            
-            try
-            {
-                var rawPassword = _publicKeysManager.DecryptString(parameters.EncryptedPassword);
-                ExchangePassword exchangePassword = new(rawPassword);
-                if (exchangePassword.IsMatch(parameters.SessionId, parameters.JoinerClientInstanceId, _sessionService.CloudSessionPassword!))
-                {
-                    var encryptedAesKey = _publicKeysManager.EncryptBytes(publicKeyInfo, 
-                        _cloudSessionConnectionRepository.GetAesEncryptionKey()!);
-
-                    ValidateJoinCloudSessionParameters outParameters = new (parameters, encryptedAesKey);
-                        
-                    Log.Information("...Password successfully checked for client {clientId}", parameters.JoinerClientInstanceId);
-                        
-                    // On informe le serveur que c'est OK
-                    await _cloudSessionApiClient.ValidateJoinCloudSession(outParameters);
-                }
-                else
-                {
-                    // On informe le serveur que le mot de passe est erroné
-                    await _cloudSessionApiClient.InformPasswordIsWrong(parameters.SessionId, parameters.JoinerClientInstanceId);
-
-                    Log.Information("...Password checked failed for client {clientId}", parameters.JoinerClientInstanceId);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Warning(ex, "...Password checked failed with error for client {clientId}", parameters.JoinerClientInstanceId);
-            }
-        }
-        else
-        {
-            Log.Warning("...Can not find encryption key for client {clientId}", parameters.JoinerClientInstanceId);
-        }
-    }
+    // private async void HandleOnCheckCloudSessionPasswordExchangeKey(AskJoinCloudSessionParameters parameters)
+    // {
+    //     if (!_connectionManager.ClientInstanceId.Equals(parameters.ValidatorInstanceId))
+    //     {
+    //         Log.Here().Warning("unexpected password check request received with ValidatorId {validatorId}", parameters.ValidatorInstanceId);
+    //         return;
+    //     }
+    //
+    //     var keyCheckData = await _trustProcessPublicKeysRepository.GetLocalPublicKeyCheckData(parameters.SessionId, parameters.JoinerClientInstanceId);
+    //     var publicKeyInfo = keyCheckData?.OtherPartyPublicKeyInfo;
+    //     if (publicKeyInfo != null)
+    //     {
+    //         var isTrusted = _publicKeysManager.IsTrusted(publicKeyInfo);
+    //         if (!isTrusted)
+    //         {
+    //             throw new Exception(PUBLIC_KEY_IS_NOT_TRUSTED);
+    //         }
+    //         
+    //         try
+    //         {
+    //             var rawPassword = _publicKeysManager.DecryptString(parameters.EncryptedPassword);
+    //             ExchangePassword exchangePassword = new(rawPassword);
+    //             if (exchangePassword.IsMatch(parameters.SessionId, parameters.JoinerClientInstanceId, _sessionService.CloudSessionPassword!))
+    //             {
+    //                 var encryptedAesKey = _publicKeysManager.EncryptBytes(publicKeyInfo, 
+    //                     _cloudSessionConnectionRepository.GetAesEncryptionKey()!);
+    //
+    //                 ValidateJoinCloudSessionParameters outParameters = new (parameters, encryptedAesKey);
+    //                     
+    //                 Log.Information("...Password successfully checked for client {clientId}", parameters.JoinerClientInstanceId);
+    //                     
+    //                 // On informe le serveur que c'est OK
+    //                 await _cloudSessionApiClient.ValidateJoinCloudSession(outParameters);
+    //             }
+    //             else
+    //             {
+    //                 // On informe le serveur que le mot de passe est erroné
+    //                 await _cloudSessionApiClient.InformPasswordIsWrong(parameters.SessionId, parameters.JoinerClientInstanceId);
+    //
+    //                 Log.Information("...Password checked failed for client {clientId}", parameters.JoinerClientInstanceId);
+    //             }
+    //         }
+    //         catch (Exception ex)
+    //         {
+    //             Log.Warning(ex, "...Password checked failed with error for client {clientId}", parameters.JoinerClientInstanceId);
+    //         }
+    //     }
+    //     else
+    //     {
+    //         Log.Warning("...Can not find encryption key for client {clientId}", parameters.JoinerClientInstanceId);
+    //     }
+    // }
 }

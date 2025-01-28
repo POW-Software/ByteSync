@@ -166,7 +166,7 @@ public class ProfileAutoRunner : IProfileAutoRunner
         // }
         
         // On quitte la session systématiquement, qu'elle soit locale ou cloud
-        await _cloudSessionConnector.QuitSession();
+        // await _cloudSessionConnector.QuitSession();
 
         return RESULT_SUCCESS;
     }

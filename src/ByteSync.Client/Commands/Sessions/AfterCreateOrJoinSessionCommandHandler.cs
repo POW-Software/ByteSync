@@ -79,7 +79,7 @@ public class AfterCreateOrJoinSessionCommandHandler : IRequestHandler<AfterCreat
             
             await _cloudSessionConnector.ClearConnectionData();
             
-            await _mediator.Send(new QuiSessionRequest(), cancellationToken);
+            await _mediator.Send(new QuitSessionRequest(), cancellationToken);
             
             throw new Exception("Auth check failed, quitting session");
         }
