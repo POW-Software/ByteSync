@@ -8,7 +8,7 @@ public interface ICloudSessionConnector
 {
     // Task<CloudSessionResult?> CreateSession(RunCloudSessionProfileInfo? lobbySessionDetails);
 
-    Task JoinSession(string sessionId, string sessionPassword, RunCloudSessionProfileInfo? lobbySessionDetails);
+    // Task JoinSession(string sessionId, string sessionPassword, RunCloudSessionProfileInfo? lobbySessionDetails);
 
     // Task QuitSession();
 

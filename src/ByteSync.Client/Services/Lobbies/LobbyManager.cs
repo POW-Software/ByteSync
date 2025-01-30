@@ -19,7 +19,6 @@ using ByteSync.Interfaces.Profiles;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
 using Serilog;
-using Splat;
 
 namespace ByteSync.Services.Lobbies;
 
@@ -35,12 +34,15 @@ public class LobbyManager : ILobbyManager
     private readonly ISessionService _sessionService;
     private readonly ILobbyApiClient _lobbyApiClient;
     private readonly ICreateSessionService _createSessionService;
+    private readonly IDigitalSignaturesChecker _digitalSignaturesChecker;
+    private readonly IJoinSessionService _joinSessionService;
 
     public LobbyManager(IEnvironmentService environmentService, ISessionProfileLocalDataManager sessionProfileLocalDataManager,
         ILobbyRepository lobbyRepository,
         IPublicKeysManager publicKeysManager, IApplicationSettingsRepository applicationSettingsManager,
         IDigitalSignaturesRepository digitalSignaturesRepository, INavigationService navigationService,
-        ISessionService sessionService, ILobbyApiClient lobbyApiClient, ICreateSessionService createSessionService)   
+        ISessionService sessionService, ILobbyApiClient lobbyApiClient, ICreateSessionService createSessionService,
+        IDigitalSignaturesChecker digitalSignaturesChecker, IJoinSessionService joinSessionService)   
     {
         _environmentService = environmentService;
         _sessionProfileLocalDataManager = sessionProfileLocalDataManager;
@@ -52,6 +54,8 @@ public class LobbyManager : ILobbyManager
         _sessionService = sessionService;
         _lobbyApiClient = lobbyApiClient;
         _createSessionService = createSessionService;
+        _digitalSignaturesChecker = digitalSignaturesChecker;
+        _joinSessionService = joinSessionService;
     }
 
     public TimeSpan GeneralWaitTimeSpan
@@ -310,9 +314,6 @@ public class LobbyManager : ILobbyManager
 
     private async Task<bool> StartSessionCreationAndConnectionProcess(string lobbyId, List<LobbyMember> otherLobbyMembers)
     {
-        var cloudSessionConnector = Locator.Current.GetService<ICloudSessionConnector>()!;
-        var sessionDataHolder = Locator.Current.GetService<ISessionService>()!;
-
         var lobbySessionDetails = await _lobbyRepository.BuildCloudProfileSessionDetails(lobbyId);
         var cloudSessionResult = await _createSessionService.Process(new CreateSessionRequest(lobbySessionDetails));
 
@@ -322,7 +323,7 @@ public class LobbyManager : ILobbyManager
 
             await Task.Delay(GeneralWaitTimeSpan);
 
-            var lobbyCloudSessionInfoJson = BuildLobbyCloudSessionInfoJson(cloudSessionResult, sessionDataHolder, lobbyId);
+            var lobbyCloudSessionInfoJson = BuildLobbyCloudSessionInfoJson(cloudSessionResult, lobbyId);
             foreach (var lobbyMember in otherLobbyMembers)
             {
                 var lobbyMemberInfo = lobbyMember.LobbyMemberInfo;
@@ -386,9 +387,7 @@ public class LobbyManager : ILobbyManager
         }
         else
         {
-            var digitalSignaturesChecker = Locator.Current.GetService<IDigitalSignaturesChecker>()!;
-
-            var isAuthOK = await digitalSignaturesChecker.CheckExistingMembersDigitalSignatures(lobbyId, 
+            var isAuthOK = await _digitalSignaturesChecker.CheckExistingMembersDigitalSignatures(lobbyId, 
                 otherLobbyMembers.Select(lm => lm.LobbyMemberInfo!.ClientInstanceId).ToList());
             if (!isAuthOK)
             {
@@ -435,11 +434,11 @@ public class LobbyManager : ILobbyManager
         return credentials;
     }
 
-    private static string BuildLobbyCloudSessionInfoJson(CloudSessionResult cloudSessionResult, ISessionService sessionService, string lobbyId)
+    private string BuildLobbyCloudSessionInfoJson(CloudSessionResult cloudSessionResult, string lobbyId)
     {
         var lobbyCloudSessionInfo = new LobbyCloudSessionInfo();
         lobbyCloudSessionInfo.SessionId = cloudSessionResult.SessionId;
-        lobbyCloudSessionInfo.SessionPassword = sessionService.CloudSessionPassword!;
+        lobbyCloudSessionInfo.SessionPassword = _sessionService.CloudSessionPassword!;
         lobbyCloudSessionInfo.LobbyId = lobbyId;
         var lobbyCloudSessionInfoJson = JsonHelper.Serialize(lobbyCloudSessionInfo);
         return lobbyCloudSessionInfoJson;
@@ -454,9 +453,8 @@ public class LobbyManager : ILobbyManager
             var lobbyCloudSessionInfo = JsonHelper.Deserialize<LobbyCloudSessionInfo>(json);
 
             var lobbySessionDetails = await _lobbyRepository.BuildCloudProfileSessionDetails(lobbyCloudSessionInfo.LobbyId);
-
-            var cloudSessionConnector = Locator.Current.GetService<ICloudSessionConnector>()!;
-            await cloudSessionConnector.JoinSession(lobbyCloudSessionInfo.SessionId, lobbyCloudSessionInfo.SessionPassword,
+            
+            await _joinSessionService.JoinSession(lobbyCloudSessionInfo.SessionId, lobbyCloudSessionInfo.SessionPassword,
                 lobbySessionDetails);
 
             _navigationService.NavigateTo(NavigationPanel.CloudSynchronization);

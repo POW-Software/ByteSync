@@ -21,7 +21,7 @@ namespace ByteSync.ViewModels.Sessions.Cloud.Managing;
 
 public class JoinCloudSessionViewModel : ActivatableViewModelBase
 {
-    private readonly ICloudSessionConnector _cloudSessionConnector;
+    private readonly IJoinSessionService _joinSessionService;
     private readonly ICloudSessionEventsHub _cloudSessionEventsHub;
     private readonly ILocalizationService _localizationService;
     private readonly INavigationService _navigationService;
@@ -31,10 +31,10 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         
     }
     
-    public JoinCloudSessionViewModel(ICloudSessionConnector cloudSessionConnector, ICloudSessionEventsHub cloudSessionEventsHub, 
+    public JoinCloudSessionViewModel(IJoinSessionService joinSessionService, ICloudSessionEventsHub cloudSessionEventsHub, 
         INavigationService navigationService, ILocalizationService localizationService)
     {
-        _cloudSessionConnector = cloudSessionConnector;
+        _joinSessionService = joinSessionService;
         _cloudSessionEventsHub = cloudSessionEventsHub;
         _navigationService = navigationService;
         _localizationService = localizationService;
@@ -119,7 +119,7 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
 
             AreControlsEnabled = false;
 
-            await _cloudSessionConnector.JoinSession(SessionId, SessionPassword, null);
+            await _joinSessionService.JoinSession(SessionId, SessionPassword, null);
         }
         catch (Exception ex)
         {
