@@ -46,16 +46,16 @@ public class AtomicConditionDescriptionBuilder : AbstractDescriptionBuilder<IAto
         switch (atomicCondition.ComparisonElement)
         {
             case ComparisonElement.Content:
-                result = TranslationSource[nameof(Resources.AtomicConditionDescription_ComparisonElement_Content)];
+                result = LocalizationService[nameof(Resources.AtomicConditionDescription_ComparisonElement_Content)];
                 break;
             case ComparisonElement.Date:
-                result = TranslationSource[nameof(Resources.AtomicConditionDescription_ComparisonElement_Date)];
+                result = LocalizationService[nameof(Resources.AtomicConditionDescription_ComparisonElement_Date)];
                 break;
             case ComparisonElement.Size:
-                result = TranslationSource[nameof(Resources.AtomicConditionDescription_ComparisonElement_Size)];
+                result = LocalizationService[nameof(Resources.AtomicConditionDescription_ComparisonElement_Size)];
                 break;
             case ComparisonElement.Presence:
-                result = TranslationSource[nameof(Resources.AtomicConditionDescription_ComparisonElement_Presence)];
+                result = LocalizationService[nameof(Resources.AtomicConditionDescription_ComparisonElement_Presence)];
                 break;
         }
             
@@ -75,28 +75,28 @@ public class AtomicConditionDescriptionBuilder : AbstractDescriptionBuilder<IAto
         switch (atomicCondition.ConditionOperator)
         {
             case ConditionOperatorTypes.Equals:
-                result = TranslationSource[nameof(Resources.AtomicConditionDescription_ConditionOperator_Equals)];
+                result = LocalizationService[nameof(Resources.AtomicConditionDescription_ConditionOperator_Equals)];
                 break;
             case ConditionOperatorTypes.NotEquals:
-                result = TranslationSource[nameof(Resources.AtomicConditionDescription_ConditionOperator_NotEquals)];
+                result = LocalizationService[nameof(Resources.AtomicConditionDescription_ConditionOperator_NotEquals)];
                 break;
             case ConditionOperatorTypes.ExistsOn:
-                result = TranslationSource[nameof(Resources.AtomicConditionDescription_ConditionOperator_ExistsOn)];
+                result = LocalizationService[nameof(Resources.AtomicConditionDescription_ConditionOperator_ExistsOn)];
                 break;
             case ConditionOperatorTypes.NotExistsOn:
-                result = TranslationSource[nameof(Resources.AtomicConditionDescription_ConditionOperator_NotExistsOn)];
+                result = LocalizationService[nameof(Resources.AtomicConditionDescription_ConditionOperator_NotExistsOn)];
                 break;
             case ConditionOperatorTypes.IsBiggerThan:
-                result = TranslationSource[nameof(Resources.AtomicConditionDescription_ConditionOperator_IsSizeGreaterThan)];
+                result = LocalizationService[nameof(Resources.AtomicConditionDescription_ConditionOperator_IsSizeGreaterThan)];
                 break;
             case ConditionOperatorTypes.IsSmallerThan:
-                result = TranslationSource[nameof(Resources.AtomicConditionDescription_ConditionOperatort_IsSizeLessThan)];
+                result = LocalizationService[nameof(Resources.AtomicConditionDescription_ConditionOperatort_IsSizeLessThan)];
                 break;
             case ConditionOperatorTypes.IsOlderThan:
-                result = TranslationSource[nameof(Resources.AtomicConditionDescription_ConditionOperator_IsDateBefore)];
+                result = LocalizationService[nameof(Resources.AtomicConditionDescription_ConditionOperator_IsDateBefore)];
                 break;
             case ConditionOperatorTypes.IsNewerThan:
-                result = TranslationSource[nameof(Resources.AtomicConditionDescription_ConditionOperator_IsDateAfter)];
+                result = LocalizationService[nameof(Resources.AtomicConditionDescription_ConditionOperator_IsDateAfter)];
                 break;
         }
             

@@ -10,10 +10,10 @@ public abstract class AbstractDescriptionBuilder<T>
 {
     protected AbstractDescriptionBuilder(ILocalizationService localizationService)
     {
-        TranslationSource = localizationService;
+        LocalizationService = localizationService;
     }
 
-    protected ILocalizationService TranslationSource { get; }
+    protected ILocalizationService LocalizationService { get; }
 
     public string GetDescription(T element)
     {
@@ -39,22 +39,22 @@ public abstract class AbstractDescriptionBuilder<T>
         switch (operatorType)
         {
             case ActionOperatorTypes.SynchronizeContentOnly:
-                result = TranslationSource[nameof(Resources.SynchronizationActionDescription_Action_SynchronizeContent)];
+                result = LocalizationService[nameof(Resources.SynchronizationActionDescription_Action_SynchronizeContent)];
                 break;
             case ActionOperatorTypes.SynchronizeContentAndDate:
-                result = TranslationSource[nameof(Resources.SynchronizationActionDescription_Action_SynchronizeContentAndDate)];
+                result = LocalizationService[nameof(Resources.SynchronizationActionDescription_Action_SynchronizeContentAndDate)];
                 break;
             case ActionOperatorTypes.SynchronizeDate:
-                result = TranslationSource[nameof(Resources.SynchronizationActionDescription_Action_SynchronizeDate)];
+                result = LocalizationService[nameof(Resources.SynchronizationActionDescription_Action_SynchronizeDate)];
                 break;
             case ActionOperatorTypes.Create:
-                result = TranslationSource[nameof(Resources.SynchronizationActionDescription_Action_Create)];
+                result = LocalizationService[nameof(Resources.SynchronizationActionDescription_Action_Create)];
                 break;
             case ActionOperatorTypes.Delete:
-                result = TranslationSource[nameof(Resources.SynchronizationActionDescription_Action_Delete)];
+                result = LocalizationService[nameof(Resources.SynchronizationActionDescription_Action_Delete)];
                 break;
             case ActionOperatorTypes.DoNothing:
-                result = TranslationSource[nameof(Resources.SynchronizationActionDescription_Action_DoNothing)];
+                result = LocalizationService[nameof(Resources.SynchronizationActionDescription_Action_DoNothing)];
                 break;
         }
 
@@ -68,16 +68,16 @@ public abstract class AbstractDescriptionBuilder<T>
     
     protected string GetFrom()
     {
-        return TranslationSource[nameof(Resources.SynchronizationActionDescription_From)];
+        return LocalizationService[nameof(Resources.SynchronizationActionDescription_From)];
     }
     
     protected string GetTo()
     {
-        return TranslationSource[nameof(Resources.SynchronizationActionDescription_To)];
+        return LocalizationService[nameof(Resources.SynchronizationActionDescription_To)];
     }
     
     protected string GetOn()
     {
-        return TranslationSource[nameof(Resources.SynchronizationActionDescription_On)];
+        return LocalizationService[nameof(Resources.SynchronizationActionDescription_On)];
     }
 }
