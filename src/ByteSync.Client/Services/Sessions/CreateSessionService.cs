@@ -1,21 +1,21 @@
-﻿using System.Threading;
+﻿using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Security.Cryptography;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
+using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ByteSync.Repositories;
 using ByteSync.Services.Applications;
 using ByteSync.Services.Communications;
 using ByteSync.Services.Communications.Api;
 using ByteSync.Services.Encryptions;
-using ByteSync.Services.Sessions;
-using MediatR;
 
-namespace ByteSync.Commands.Sessions;
+namespace ByteSync.Services.Sessions;
 
-public class CreateSessionCommandHandler : IRequestHandler<CreateSessionRequest, CloudSessionResult?>
+public class CreateSessionService : ICreateSessionService
 {
     private readonly CloudSessionConnectionRepository _cloudSessionConnectionRepository;
     private readonly DataEncrypter _dataEncrypter;
@@ -25,10 +25,10 @@ public class CreateSessionCommandHandler : IRequestHandler<CreateSessionRequest,
     private readonly TrustProcessPublicKeysRepository _trustProcessPublicKeysRepository;
     private readonly DigitalSignaturesRepository _digitalSignaturesRepository;
     private readonly SessionService _sessionService;
-    private readonly IMediator _mediator;
-    private readonly ILogger<CreateSessionCommandHandler> _logger;
+    private readonly IAfterJoinSessionService _afterJoinSessionService;
+    private readonly ILogger<CreateSessionService> _logger;
 
-    public CreateSessionCommandHandler(CloudSessionConnectionRepository cloudSessionConnectionRepository, 
+    public CreateSessionService(CloudSessionConnectionRepository cloudSessionConnectionRepository, 
         DataEncrypter dataEncrypter, 
         EnvironmentService environmentService, 
         CloudSessionApiClient cloudSessionApiClient, 
@@ -36,8 +36,8 @@ public class CreateSessionCommandHandler : IRequestHandler<CreateSessionRequest,
         TrustProcessPublicKeysRepository trustProcessPublicKeysRepository, 
         DigitalSignaturesRepository digitalSignaturesRepository, 
         SessionService sessionService,
-        IMediator mediator,
-        ILogger<CreateSessionCommandHandler> logger)
+        IAfterJoinSessionService afterJoinSessionService,
+        ILogger<CreateSessionService> logger)
     {
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         _dataEncrypter = dataEncrypter;
@@ -47,11 +47,11 @@ public class CreateSessionCommandHandler : IRequestHandler<CreateSessionRequest,
         _trustProcessPublicKeysRepository = trustProcessPublicKeysRepository;
         _digitalSignaturesRepository = digitalSignaturesRepository;
         _sessionService = sessionService;
-        _mediator = mediator;
+        _afterJoinSessionService = afterJoinSessionService;
         _logger = logger;
     }
     
-    public async Task<CloudSessionResult?> Handle(CreateSessionRequest request, CancellationToken cancellationToken)
+    public async Task<CloudSessionResult?> Process(CreateSessionRequest request)
     {
         try
         {
@@ -93,8 +93,8 @@ public class CreateSessionCommandHandler : IRequestHandler<CreateSessionRequest,
             await _trustProcessPublicKeysRepository.Start(cloudSessionResult.SessionId);
             await _digitalSignaturesRepository.Start(cloudSessionResult.SessionId);
     
-            await _mediator.Send(new AfterJoinSessionRequest(cloudSessionResult, request.RunCloudSessionProfileInfo, true), cancellationToken);
-
+            await _afterJoinSessionService.Process(new AfterJoinSessionRequest(cloudSessionResult, request.RunCloudSessionProfileInfo, true));
+            
             _logger.LogInformation("Created Cloud Session {CloudSession}", cloudSessionResult.SessionId);
 
             return cloudSessionResult;

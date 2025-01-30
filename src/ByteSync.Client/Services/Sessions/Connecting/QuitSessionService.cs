@@ -1,25 +1,23 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using ByteSync.Business.Navigations;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
-using MediatR;
 
-namespace ByteSync.Commands.Sessions;
+namespace ByteSync.Services.Sessions.Connecting;
 
-public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
+public class QuitSessionService : IQuitSessionService
 {
     private readonly ISessionService _sessionService;
     private readonly INavigationService _navigationService;
     private readonly ICloudSessionApiClient _cloudSessionApiClient;
     private readonly ICloudSessionConnector _cloudSessionConnector;
-    private readonly ILogger<QuitSessionCommandHandler> _logger;
+    private readonly ILogger<QuitSessionService> _logger;
 
-    public QuitSessionCommandHandler(ISessionService sessionService, INavigationService navigationService, ICloudSessionApiClient cloudSessionApiClient,
-        ICloudSessionConnector cloudSessionConnector, ILogger<QuitSessionCommandHandler> logger)
+    public QuitSessionService(ISessionService sessionService, INavigationService navigationService, ICloudSessionApiClient cloudSessionApiClient,
+        ICloudSessionConnector cloudSessionConnector, ILogger<QuitSessionService> logger)
     {
         _sessionService = sessionService;
         _navigationService = navigationService;
@@ -28,7 +26,7 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
         _logger = logger;
     }
     
-    public async Task Handle(QuitSessionRequest request, CancellationToken cancellationToken)
+    public async Task Process()
     {
         var session = _sessionService.CurrentSession;
 

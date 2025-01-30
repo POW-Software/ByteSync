@@ -1,12 +1,8 @@
 ﻿using ByteSync.Business.Sessions.RunSessionInfos;
-using ByteSync.Common.Business.Inventories;
-using ByteSync.Common.Business.Sessions.Cloud.Connections;
-using ByteSync.Interfaces.Commands.Sessions;
-using MediatR;
 
-namespace ByteSync.Commands.Sessions;
+namespace ByteSync.Business.Sessions;
 
-public class CreateSessionRequest : IRequest<CloudSessionResult?>
+public class CreateSessionRequest
 {
     public CreateSessionRequest(RunCloudSessionProfileInfo? runCloudSessionProfileInfo)
     {

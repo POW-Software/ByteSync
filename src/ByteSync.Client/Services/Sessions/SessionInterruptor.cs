@@ -2,7 +2,6 @@
 using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Business.Sessions;
-using ByteSync.Commands.Sessions;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
@@ -10,7 +9,6 @@ using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ByteSync.ViewModels.Misc;
-using MediatR;
 
 namespace ByteSync.Services.Sessions;
 
@@ -22,11 +20,11 @@ public class SessionInterruptor : ISessionInterruptor
     private readonly ISynchronizationService _synchronizationService;
     private readonly IResetSessionService _sessionResetter;
     private readonly ISessionMemberRepository _sessionMemberRepository;
-    private readonly IMediator _mediator;
+    private readonly IQuitSessionService _quitSessionService;
 
     public SessionInterruptor(ICloudSessionConnector cloudSessionConnector, ISessionService sessionService, 
         IDialogService dialogService, ISynchronizationService synchronizationService,
-        ISessionMemberRepository sessionMemberRepository, IResetSessionService sessionResetter, IMediator mediator)
+        ISessionMemberRepository sessionMemberRepository, IResetSessionService sessionResetter, IQuitSessionService quitSessionService)
     {
         _cloudSessionConnector = cloudSessionConnector;
         _sessionService = sessionService;
@@ -34,7 +32,7 @@ public class SessionInterruptor : ISessionInterruptor
         _synchronizationService = synchronizationService;
         _sessionMemberRepository = sessionMemberRepository;
         _sessionResetter = sessionResetter;
-        _mediator = mediator;
+        _quitSessionService = quitSessionService;
     }
 
     public async Task RequestQuitSession()
@@ -58,7 +56,7 @@ public class SessionInterruptor : ISessionInterruptor
         {
             if (_sessionService.CurrentSession != null)
             {
-                await _mediator.Send(new QuitSessionRequest());
+                await _quitSessionService.Process();
             }
         }
         else
@@ -89,7 +87,7 @@ public class SessionInterruptor : ISessionInterruptor
 
             if (result == MessageBoxResult.Yes)
             {
-                await _mediator.Send(new QuitSessionRequest());
+                await _quitSessionService.Process();
             }
         }
     }

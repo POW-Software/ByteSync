@@ -4,7 +4,6 @@ using ByteSync.Business.Navigations;
 using ByteSync.Business.Profiles;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.RunSessionInfos;
-using ByteSync.Commands.Sessions;
 using ByteSync.Common.Business.Lobbies;
 using ByteSync.Common.Business.Lobbies.Connections;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
@@ -17,9 +16,8 @@ using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Lobbies;
 using ByteSync.Interfaces.Profiles;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
-using ByteSync.Services.Misc;
-using MediatR;
 using Serilog;
 using Splat;
 
@@ -36,13 +34,13 @@ public class LobbyManager : ILobbyManager
     private readonly INavigationService _navigationService;
     private readonly ISessionService _sessionService;
     private readonly ILobbyApiClient _lobbyApiClient;
-    private readonly IMediator _mediator;
+    private readonly ICreateSessionService _createSessionService;
 
     public LobbyManager(IEnvironmentService environmentService, ISessionProfileLocalDataManager sessionProfileLocalDataManager,
         ILobbyRepository lobbyRepository,
         IPublicKeysManager publicKeysManager, IApplicationSettingsRepository applicationSettingsManager,
         IDigitalSignaturesRepository digitalSignaturesRepository, INavigationService navigationService,
-        ISessionService sessionService, ILobbyApiClient lobbyApiClient, IMediator mediator)   
+        ISessionService sessionService, ILobbyApiClient lobbyApiClient, ICreateSessionService createSessionService)   
     {
         _environmentService = environmentService;
         _sessionProfileLocalDataManager = sessionProfileLocalDataManager;
@@ -53,7 +51,7 @@ public class LobbyManager : ILobbyManager
         _navigationService = navigationService;
         _sessionService = sessionService;
         _lobbyApiClient = lobbyApiClient;
-        _mediator = mediator;
+        _createSessionService = createSessionService;
     }
 
     public TimeSpan GeneralWaitTimeSpan
@@ -316,7 +314,7 @@ public class LobbyManager : ILobbyManager
         var sessionDataHolder = Locator.Current.GetService<ISessionService>()!;
 
         var lobbySessionDetails = await _lobbyRepository.BuildCloudProfileSessionDetails(lobbyId);
-        var cloudSessionResult = await _mediator.Send(new CreateSessionRequest(lobbySessionDetails));
+        var cloudSessionResult = await _createSessionService.Process(new CreateSessionRequest(lobbySessionDetails));
 
         if (cloudSessionResult != null)
         {

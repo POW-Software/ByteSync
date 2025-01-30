@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Common.Helpers;
@@ -11,9 +10,8 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
-using MediatR;
 
-namespace ByteSync.Commands.Sessions;
+namespace ByteSync.Services.Sessions.Connecting;
 
 public class AfterJoinSessionService : IAfterJoinSessionService
 {
@@ -27,9 +25,9 @@ public class AfterJoinSessionService : IAfterJoinSessionService
     private readonly IDigitalSignaturesRepository _digitalSignaturesRepository;
     private readonly IEnvironmentService _environmentService;
     private readonly ICloudSessionConnector _cloudSessionConnector;
-    private readonly IMediator _mediator;
     private readonly ILogger<AfterJoinSessionService> _logger;
-    
+    private readonly IQuitSessionService _quitSessionService;
+
     public AfterJoinSessionService(
         ICloudSessionApiClient cloudSessionApiClient,
         ISessionService sessionService,
@@ -40,8 +38,8 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         IInventoryApiClient inventoryApiClient,
         IDigitalSignaturesRepository digitalSignaturesRepository,
         IEnvironmentService environmentService,
-        IMediator mediator,
         ICloudSessionConnector cloudSessionConnector,
+        IQuitSessionService quitSessionService,
         ILogger<AfterJoinSessionService> logger)
     {
         _cloudSessionApiClient = cloudSessionApiClient;
@@ -54,7 +52,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         _digitalSignaturesRepository = digitalSignaturesRepository;
         _environmentService = environmentService;
         _cloudSessionConnector = cloudSessionConnector;
-        _mediator = mediator;
+        _quitSessionService = quitSessionService;
         _logger = logger;
     }
     
@@ -82,7 +80,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
             
             await _cloudSessionConnector.ClearConnectionData();
             
-            await _mediator.Send(new QuitSessionRequest());
+            await _quitSessionService.Process();
             
             throw new Exception("Auth check failed, quitting session");
         }

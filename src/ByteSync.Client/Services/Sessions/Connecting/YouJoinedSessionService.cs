@@ -1,6 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using ByteSync.Business.Communications;
+﻿using System.Threading.Tasks;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
@@ -11,7 +9,6 @@ using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
-using MediatR;
 using Serilog;
 using ConnectionStatuses = ByteSync.Business.Sessions.ConnectionStatuses;
 

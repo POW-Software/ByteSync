@@ -1,12 +1,9 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
-using MediatR;
 using Serilog;
 
 namespace ByteSync.Commands.Sessions.Connecting;
