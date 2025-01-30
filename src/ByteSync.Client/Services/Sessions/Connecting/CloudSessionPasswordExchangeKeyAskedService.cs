@@ -4,12 +4,12 @@ using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
-using MediatR;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using Serilog;
 
-namespace ByteSync.Commands.Sessions.Connecting;
+namespace ByteSync.Services.Sessions.Connecting;
 
-public class OnCloudSessionPasswordExchangeKeyAskedCommandHandler : IRequestHandler<OnCloudSessionPasswordExchangeKeyAskedRequest>
+public class CloudSessionPasswordExchangeKeyAskedService : ICloudSessionPasswordExchangeKeyAskedService
 {
     private readonly ICloudSessionApiClient _cloudSessionApiClient;
     private readonly IPublicKeysManager _publicKeysManager;
@@ -17,7 +17,7 @@ public class OnCloudSessionPasswordExchangeKeyAskedCommandHandler : IRequestHand
     
     private const string PUBLIC_KEY_IS_NOT_TRUSTED = "Public key is not trusted";
 
-    public OnCloudSessionPasswordExchangeKeyAskedCommandHandler(
+    public CloudSessionPasswordExchangeKeyAskedService(
         ICloudSessionApiClient cloudSessionApiClient,
         IPublicKeysManager publicKeysManager,
         IEnvironmentService environmentService)
@@ -27,7 +27,7 @@ public class OnCloudSessionPasswordExchangeKeyAskedCommandHandler : IRequestHand
         _environmentService = environmentService;
     }
     
-    public async Task Handle(OnCloudSessionPasswordExchangeKeyAskedRequest request, CancellationToken cancellationToken)
+    public async Task Process(AskCloudSessionPasswordExchangeKeyPush request)
     {
         try
         {

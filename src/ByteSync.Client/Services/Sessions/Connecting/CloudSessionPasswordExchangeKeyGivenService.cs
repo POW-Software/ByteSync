@@ -6,30 +6,32 @@ using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using MediatR;
 using Serilog;
 
 namespace ByteSync.Commands.Sessions.Connecting;
 
-public class OnCloudSessionPasswordExchangeKeyGivenCommandHandler : IRequestHandler<OnCloudSessionPasswordExchangeKeyGivenRequest>
+public class CloudSessionPasswordExchangeKeyGivenService : ICloudSessionPasswordExchangeKeyGivenService
 {
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
     private readonly IEnvironmentService _environmentService;
     private readonly IPublicKeysManager _publicKeysManager;
     private readonly ICloudSessionApiClient _cloudSessionApiClient;
     private readonly ICloudSessionConnector _cloudSessionConnector;
-    private readonly ILogger<OnCloudSessionPasswordExchangeKeyGivenCommandHandler> _logger;
+    private readonly ILogger<CloudSessionPasswordExchangeKeyGivenService> _logger;
     
     private const string UNKNOWN_RECEIVED_SESSION_ID = "unknown received sessionId {sessionId}";
     private const string PUBLIC_KEY_IS_NOT_TRUSTED = "Public key is not trusted";
 
-    public OnCloudSessionPasswordExchangeKeyGivenCommandHandler(
+    public CloudSessionPasswordExchangeKeyGivenService(
         ICloudSessionConnectionRepository cloudSessionConnectionRepository,
         IEnvironmentService environmentService,
         IPublicKeysManager publicKeysManager,
         ICloudSessionApiClient cloudSessionApiClient,
         ICloudSessionConnector cloudSessionConnector,
-        ILogger<OnCloudSessionPasswordExchangeKeyGivenCommandHandler> logger)
+        ILogger<CloudSessionPasswordExchangeKeyGivenService> logger)
     {
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         _environmentService = environmentService;
@@ -39,7 +41,7 @@ public class OnCloudSessionPasswordExchangeKeyGivenCommandHandler : IRequestHand
         _logger = logger;
     }
     
-    public async Task Handle(OnCloudSessionPasswordExchangeKeyGivenRequest request, CancellationToken cancellationToken)
+    public async Task Process(GiveCloudSessionPasswordExchangeKeyParameters request)
     {
         try
         {
@@ -63,7 +65,7 @@ public class OnCloudSessionPasswordExchangeKeyGivenCommandHandler : IRequestHand
                 ExchangePassword exchangePassword = new(request.SessionId, _environmentService.ClientInstanceId, password!);
 
                 var encryptedPassword = _publicKeysManager.EncryptString(request.PublicKeyInfo, exchangePassword.Data);
-                AskJoinCloudSessionParameters outParameters = new (request.ToGiveCloudSessionPasswordExchangeKeyParameters(), encryptedPassword);
+                AskJoinCloudSessionParameters outParameters = new (request, encryptedPassword);
 
                 Log.Information("...Providing encrypted password to the validator");
                 var joinSessionResult = await _cloudSessionApiClient.AskJoinCloudSession(outParameters);

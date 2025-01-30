@@ -12,6 +12,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.EventsHubs;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;

@@ -10,6 +10,7 @@ using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Dialogs;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ByteSync.ViewModels.Headers;
 using ByteSync.ViewModels.Misc;
 using MediatR;

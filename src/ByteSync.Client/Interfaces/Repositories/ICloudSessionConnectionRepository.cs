@@ -3,7 +3,7 @@ using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Common.Interfaces;
 
-namespace ByteSync.Interfaces.Controls.Sessions
+namespace ByteSync.Interfaces.Repositories
 {
     public interface ICloudSessionConnectionRepository : IRepository<CloudSessionConnectionData>
     {

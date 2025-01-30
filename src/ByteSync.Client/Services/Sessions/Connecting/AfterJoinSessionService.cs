@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
@@ -8,11 +9,13 @@ using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using MediatR;
 
 namespace ByteSync.Commands.Sessions;
 
-public class AfterCreateOrJoinSessionCommandHandler : IRequestHandler<AfterCreateOrJoinSessionRequest>
+public class AfterJoinSessionService : IAfterJoinSessionService
 {
     private readonly ICloudSessionApiClient _cloudSessionApiClient;
     private readonly ISessionService _sessionService;
@@ -25,9 +28,9 @@ public class AfterCreateOrJoinSessionCommandHandler : IRequestHandler<AfterCreat
     private readonly IEnvironmentService _environmentService;
     private readonly ICloudSessionConnector _cloudSessionConnector;
     private readonly IMediator _mediator;
-    private readonly ILogger<AfterCreateOrJoinSessionCommandHandler> _logger;
+    private readonly ILogger<AfterJoinSessionService> _logger;
     
-    public AfterCreateOrJoinSessionCommandHandler(
+    public AfterJoinSessionService(
         ICloudSessionApiClient cloudSessionApiClient,
         ISessionService sessionService,
         ISessionMemberService sessionMemberService,
@@ -39,7 +42,7 @@ public class AfterCreateOrJoinSessionCommandHandler : IRequestHandler<AfterCreat
         IEnvironmentService environmentService,
         IMediator mediator,
         ICloudSessionConnector cloudSessionConnector,
-        ILogger<AfterCreateOrJoinSessionCommandHandler> logger)
+        ILogger<AfterJoinSessionService> logger)
     {
         _cloudSessionApiClient = cloudSessionApiClient;
         _sessionService = sessionService;
@@ -55,7 +58,7 @@ public class AfterCreateOrJoinSessionCommandHandler : IRequestHandler<AfterCreat
         _logger = logger;
     }
     
-    public async Task Handle(AfterCreateOrJoinSessionRequest request, CancellationToken cancellationToken)
+    public async Task Process(AfterJoinSessionRequest request)
     {
         var sessionMemberInfoDtos = await _cloudSessionApiClient.GetMembers(request.CloudSessionResult.SessionId);
         
@@ -79,7 +82,7 @@ public class AfterCreateOrJoinSessionCommandHandler : IRequestHandler<AfterCreat
             
             await _cloudSessionConnector.ClearConnectionData();
             
-            await _mediator.Send(new QuitSessionRequest(), cancellationToken);
+            await _mediator.Send(new QuitSessionRequest());
             
             throw new Exception("Auth check failed, quitting session");
         }

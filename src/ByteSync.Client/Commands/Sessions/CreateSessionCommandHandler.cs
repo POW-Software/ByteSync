@@ -3,7 +3,9 @@ using System.Threading.Tasks;
 using System.Security.Cryptography;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
+using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
+using ByteSync.Repositories;
 using ByteSync.Services.Applications;
 using ByteSync.Services.Communications;
 using ByteSync.Services.Communications.Api;
@@ -91,7 +93,7 @@ public class CreateSessionCommandHandler : IRequestHandler<CreateSessionRequest,
             await _trustProcessPublicKeysRepository.Start(cloudSessionResult.SessionId);
             await _digitalSignaturesRepository.Start(cloudSessionResult.SessionId);
     
-            await _mediator.Send(new AfterCreateOrJoinSessionRequest(cloudSessionResult, request.RunCloudSessionProfileInfo, true), cancellationToken);
+            await _mediator.Send(new AfterJoinSessionRequest(cloudSessionResult, request.RunCloudSessionProfileInfo, true), cancellationToken);
 
             _logger.LogInformation("Created Cloud Session {CloudSession}", cloudSessionResult.SessionId);
 

@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using ByteSync.Business.Arguments;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ByteSync.ViewModels.Misc;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;

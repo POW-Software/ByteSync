@@ -1,12 +1,11 @@
 ﻿using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
-using MediatR;
 
-namespace ByteSync.Commands.Sessions;
+namespace ByteSync.Business.Sessions.Connecting;
 
-public class AfterCreateOrJoinSessionRequest : IRequest
+public class AfterJoinSessionRequest
 {
-    public AfterCreateOrJoinSessionRequest(CloudSessionResult cloudSessionResult, RunCloudSessionProfileInfo? runCloudSessionProfileInfo, 
+    public AfterJoinSessionRequest(CloudSessionResult cloudSessionResult, RunCloudSessionProfileInfo? runCloudSessionProfileInfo, 
         bool isCreator)
     {
         CloudSessionResult = cloudSessionResult;

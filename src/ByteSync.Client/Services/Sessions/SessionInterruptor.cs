@@ -8,6 +8,7 @@ using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ByteSync.ViewModels.Misc;
 using MediatR;
 
@@ -19,13 +20,13 @@ public class SessionInterruptor : ISessionInterruptor
     private readonly ISessionService _sessionService;
     private readonly IDialogService _dialogService;
     private readonly ISynchronizationService _synchronizationService;
-    private readonly ISessionResetter _sessionResetter;
+    private readonly IResetSessionService _sessionResetter;
     private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly IMediator _mediator;
 
     public SessionInterruptor(ICloudSessionConnector cloudSessionConnector, ISessionService sessionService, 
         IDialogService dialogService, ISynchronizationService synchronizationService,
-        ISessionMemberRepository sessionMemberRepository, ISessionResetter sessionResetter, IMediator mediator)
+        ISessionMemberRepository sessionMemberRepository, IResetSessionService sessionResetter, IMediator mediator)
     {
         _cloudSessionConnector = cloudSessionConnector;
         _sessionService = sessionService;

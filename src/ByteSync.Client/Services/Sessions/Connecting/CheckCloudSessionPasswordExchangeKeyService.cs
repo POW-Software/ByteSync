@@ -6,11 +6,12 @@ using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Sessions;
-using MediatR;
+using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 
-namespace ByteSync.Commands.Sessions.Connecting;
+namespace ByteSync.Services.Sessions.Connecting;
 
-public class OnCheckCloudSessionPasswordExchangeKeyCommandHandler : IRequestHandler<OnCheckCloudSessionPasswordExchangeKeyRequest>
+public class CheckCloudSessionPasswordExchangeKeyService : ICheckCloudSessionPasswordExchangeKeyService
 {
     private readonly IEnvironmentService _environmentService;
     private readonly ITrustProcessPublicKeysRepository _trustProcessPublicKeysRepository;
@@ -18,19 +19,19 @@ public class OnCheckCloudSessionPasswordExchangeKeyCommandHandler : IRequestHand
     private readonly ISessionService _sessionService;
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
     private readonly ICloudSessionApiClient _cloudSessionApiClient;
-    private readonly ILogger<OnCheckCloudSessionPasswordExchangeKeyCommandHandler> _logger;
+    private readonly ILogger<CheckCloudSessionPasswordExchangeKeyService> _logger;
     
     private const string UNKNOWN_RECEIVED_SESSION_ID = "unknown received sessionId {sessionId}";
     private const string PUBLIC_KEY_IS_NOT_TRUSTED = "Public key is not trusted";
     
-    public OnCheckCloudSessionPasswordExchangeKeyCommandHandler(
+    public CheckCloudSessionPasswordExchangeKeyService(
         IEnvironmentService environmentService,
         ITrustProcessPublicKeysRepository trustProcessPublicKeysRepository,
         IPublicKeysManager publicKeysManager,
         ISessionService sessionService,
         ICloudSessionConnectionRepository cloudSessionConnectionRepository,
         ICloudSessionApiClient cloudSessionApiClient,
-        ILogger<OnCheckCloudSessionPasswordExchangeKeyCommandHandler> logger)
+        ILogger<CheckCloudSessionPasswordExchangeKeyService> logger)
     {
         _environmentService = environmentService;
         _trustProcessPublicKeysRepository = trustProcessPublicKeysRepository;
@@ -41,7 +42,7 @@ public class OnCheckCloudSessionPasswordExchangeKeyCommandHandler : IRequestHand
         _logger = logger;
     }
     
-    public async Task Handle(OnCheckCloudSessionPasswordExchangeKeyRequest request, CancellationToken cancellationToken)
+    public async Task Process(AskJoinCloudSessionParameters request)
     {
         try
         {
@@ -70,7 +71,7 @@ public class OnCheckCloudSessionPasswordExchangeKeyCommandHandler : IRequestHand
                         var encryptedAesKey = _publicKeysManager.EncryptBytes(publicKeyInfo,
                             _cloudSessionConnectionRepository.GetAesEncryptionKey()!);
 
-                        ValidateJoinCloudSessionParameters outParameters = new(request.ToAskJoinCloudSessionParameters(), encryptedAesKey);
+                        ValidateJoinCloudSessionParameters outParameters = new(request, encryptedAesKey);
 
                         _logger.LogInformation("...Password successfully checked for client {clientId}", request.JoinerClientInstanceId);
                         

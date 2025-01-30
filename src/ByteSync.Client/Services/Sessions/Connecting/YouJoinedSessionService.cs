@@ -2,19 +2,22 @@
 using System.Threading.Tasks;
 using ByteSync.Business.Communications;
 using ByteSync.Business.SessionMembers;
+using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using MediatR;
 using Serilog;
 using ConnectionStatuses = ByteSync.Business.Sessions.ConnectionStatuses;
 
 namespace ByteSync.Commands.Sessions.Connecting;
 
-public class OnYouJoinedSessionCommandHandler : IRequestHandler<OnYouJoinedSessionRequest>
+public class YouJoinedSessionService : IYouJoinedSessionService
 {
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
     private readonly IEnvironmentService _environmentService;
@@ -25,15 +28,16 @@ public class OnYouJoinedSessionCommandHandler : IRequestHandler<OnYouJoinedSessi
     private readonly IPublicKeysManager _publicKeysManager;
     private readonly ISessionService _sessionService;
     private readonly ICloudSessionConnector _cloudSessionConnector;
-    private readonly ILogger<OnYouJoinedSessionCommandHandler> _logger;
+    private readonly IAfterJoinSessionService _afterJoinSessionService;
+    private readonly ILogger<YouJoinedSessionService> _logger;
     
     private const string UNKNOWN_RECEIVED_SESSION_ID = "unknown received sessionId {sessionId}";
     private const string PUBLIC_KEY_IS_NOT_TRUSTED = "Public key is not trusted";
 
-    public OnYouJoinedSessionCommandHandler(ICloudSessionConnectionRepository cloudSessionConnectionRepository,
+    public YouJoinedSessionService(ICloudSessionConnectionRepository cloudSessionConnectionRepository,
         IEnvironmentService environmentService, IPublicKeysTruster publicKeysTruster, IDigitalSignaturesChecker digitalSignaturesChecker,
         IDataEncrypter dataEncrypter, ICloudSessionApiClient cloudSessionApiClient, IPublicKeysManager publicKeysManager, ISessionService sessionService,
-        ICloudSessionConnector cloudSessionConnector, ILogger<OnYouJoinedSessionCommandHandler> logger)
+        ICloudSessionConnector cloudSessionConnector, IAfterJoinSessionService afterJoinSessionService, ILogger<YouJoinedSessionService> logger)
     {
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         _environmentService = environmentService;
@@ -44,22 +48,23 @@ public class OnYouJoinedSessionCommandHandler : IRequestHandler<OnYouJoinedSessi
         _publicKeysManager = publicKeysManager;
         _sessionService = sessionService;
         _cloudSessionConnector = cloudSessionConnector;
+        _afterJoinSessionService = afterJoinSessionService;
         _logger = logger;
     }
     
-    public async Task Handle(OnYouJoinedSessionRequest request, CancellationToken cancellationToken)
+    public async Task Process(CloudSessionResult cloudSessionResult, ValidateJoinCloudSessionParameters parameters)
     {
         try
         {
-            if (!await _cloudSessionConnectionRepository.CheckConnectingCloudSession(request.CloudSessionResult.CloudSession.SessionId))
+            if (!await _cloudSessionConnectionRepository.CheckConnectingCloudSession(cloudSessionResult.CloudSession.SessionId))
             {
-                _logger.LogError(UNKNOWN_RECEIVED_SESSION_ID, request.CloudSessionResult.CloudSession.SessionId);
+                _logger.LogError(UNKNOWN_RECEIVED_SESSION_ID, cloudSessionResult.CloudSession.SessionId);
                 return;
             }
 
-            if (!_environmentService.ClientInstanceId.Equals(request.Parameters.JoinerClientInstanceId))
+            if (!_environmentService.ClientInstanceId.Equals(parameters.JoinerClientInstanceId))
             {
-                _logger.LogWarning("unexpected session event received with JoinerId {joinerId}", request.Parameters.JoinerClientInstanceId);
+                _logger.LogWarning("unexpected session event received with JoinerId {joinerId}", parameters.JoinerClientInstanceId);
                 return;
             }
 
@@ -80,14 +85,14 @@ public class OnYouJoinedSessionCommandHandler : IRequestHandler<OnYouJoinedSessi
                     return;
                 }
                 
-                var sessionMembersClientInstanceIds = await _publicKeysTruster.TrustMissingMembersPublicKeys(request.CloudSessionResult.CloudSession.SessionId);
+                var sessionMembersClientInstanceIds = await _publicKeysTruster.TrustMissingMembersPublicKeys(cloudSessionResult.CloudSession.SessionId);
                 if (sessionMembersClientInstanceIds == null)
                 {
                     _logger.LogWarning($"can not check trust");
                     return;
                 }
                 
-                isAuthOK = await _digitalSignaturesChecker.CheckExistingMembersDigitalSignatures(request.CloudSessionResult.CloudSession.SessionId, 
+                isAuthOK = await _digitalSignaturesChecker.CheckExistingMembersDigitalSignatures(cloudSessionResult.CloudSession.SessionId, 
                     sessionMembersClientInstanceIds);
                 if (!isAuthOK)
                 {
@@ -100,11 +105,11 @@ public class OnYouJoinedSessionCommandHandler : IRequestHandler<OnYouJoinedSessi
                     MachineName = _environmentService.MachineName
                 };
                 
-                var aesEncryptionKey = _publicKeysManager.DecryptBytes(request.Parameters.EncryptedAesKey);
+                var aesEncryptionKey = _publicKeysManager.DecryptBytes(parameters.EncryptedAesKey);
                 _cloudSessionConnectionRepository.SetAesEncryptionKey(aesEncryptionKey);
                 
                 var encryptedSessionMemberPrivateData = _dataEncrypter.EncryptSessionMemberPrivateData(sessionMemberPrivateData);
-                var finalizeParameters = new FinalizeJoinCloudSessionParameters(request.Parameters, encryptedSessionMemberPrivateData);
+                var finalizeParameters = new FinalizeJoinCloudSessionParameters(parameters, encryptedSessionMemberPrivateData);
 
                 var finalizeJoinSessionResult = await _cloudSessionApiClient.FinalizeJoinCloudSession(finalizeParameters);
 
@@ -122,7 +127,7 @@ public class OnYouJoinedSessionCommandHandler : IRequestHandler<OnYouJoinedSessi
 
             try
             {
-                var aesEncryptionKey = _publicKeysManager.DecryptBytes(request.Parameters.EncryptedAesKey);
+                var aesEncryptionKey = _publicKeysManager.DecryptBytes(parameters.EncryptedAesKey);
                 _cloudSessionConnectionRepository.SetAesEncryptionKey(aesEncryptionKey);
 
                 _logger.LogDebug("...EncryptionKey received successfully");
@@ -134,14 +139,16 @@ public class OnYouJoinedSessionCommandHandler : IRequestHandler<OnYouJoinedSessi
             }
 
             var lobbySessionDetails = await _cloudSessionConnectionRepository
-                .GetTempLobbySessionDetails(request.CloudSessionResult.CloudSession.SessionId);
+                .GetTempLobbySessionDetails(cloudSessionResult.CloudSession.SessionId);
             
-            await AfterSessionCreatedOrJoined(request.CloudSessionResult, lobbySessionDetails, false);
+            await _afterJoinSessionService.Process(
+                new AfterJoinSessionRequest(cloudSessionResult, lobbySessionDetails, false));
             
-            await _cloudSessionConnectionRepository.SetJoinSessionResultReceived(request.CloudSessionResult.CloudSession.SessionId);
+            
+            await _cloudSessionConnectionRepository.SetJoinSessionResultReceived(cloudSessionResult.CloudSession.SessionId);
 
             // ReSharper disable once PossibleNullReferenceException
-            Log.Information("JoinSession: {CloudSession}", request.CloudSessionResult.SessionId);
+            Log.Information("JoinSession: {CloudSession}", cloudSessionResult.SessionId);
         }
         catch (Exception ex)
         {

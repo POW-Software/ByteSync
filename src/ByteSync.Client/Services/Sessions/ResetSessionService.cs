@@ -8,18 +8,18 @@ using ByteSync.Interfaces.Controls.Sessions;
 
 namespace ByteSync.Services.Sessions;
 
-public class SessionResetter : ISessionResetter
+public class ResetSessionService : IResetSessionService
 {
     private readonly ISessionService _sessionService;
     private readonly ISessionMemberService _sessionMemberService;
     private readonly ICloudProxy _connectionManager;
     private readonly ICloudSessionLocalDataManager _cloudSessionLocalDataManager;
     private readonly ICloudSessionApiClient _cloudSessionApiClient;
-    private readonly ILogger<SessionResetter> _logger;
+    private readonly ILogger<ResetSessionService> _logger;
 
-    public SessionResetter(ISessionService sessionService, ISessionMemberService sessionMemberService, ICloudProxy connectionManager, 
+    public ResetSessionService(ISessionService sessionService, ISessionMemberService sessionMemberService, ICloudProxy connectionManager, 
         ICloudSessionLocalDataManager cloudSessionLocalDataManager, ICloudSessionApiClient cloudSessionApiClient, 
-        ILogger<SessionResetter> logger)
+        ILogger<ResetSessionService> logger)
     {
         _sessionService = sessionService;
         _sessionMemberService = sessionMemberService;

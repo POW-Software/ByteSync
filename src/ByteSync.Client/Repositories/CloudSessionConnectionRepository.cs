@@ -7,8 +7,9 @@ using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Common.Controls;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Repositories;
 
-namespace ByteSync.Services.Sessions;
+namespace ByteSync.Repositories;
 
 public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConnectionData>, ICloudSessionConnectionRepository
 {

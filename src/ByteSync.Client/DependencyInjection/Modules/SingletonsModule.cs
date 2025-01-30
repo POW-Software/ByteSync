@@ -8,6 +8,7 @@ using ByteSync.Services.Communications.Transfers;
 using ByteSync.Services.Inventories;
 using ByteSync.Services.Navigations;
 using ByteSync.Services.Sessions;
+using ByteSync.Services.Sessions.Connecting;
 using ByteSync.Services.Synchronizations;
 
 namespace ByteSync.DependencyInjection.Modules;

@@ -1,36 +1,30 @@
-﻿using ByteSync.Commands.Sessions.Connecting;
-using ByteSync.Interfaces.Communications;
+﻿using ByteSync.Interfaces.Communications;
 using ByteSync.Interfaces.Controls.Communications.SignalR;
-using MediatR;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 
 namespace ByteSync.Services.Communications.PushReceivers;
 
 public class SessionConnectionPushReceiver : IPushReceiver
 {
-    private readonly IHubPushHandler2 _hubPushHandler2;
-
-    public SessionConnectionPushReceiver(IHubPushHandler2 hubPushHandler2, IMediator mediator)
+    public SessionConnectionPushReceiver(IHubPushHandler2 hubPushHandler2,
+        IYouJoinedSessionService youJoinedSessionService, IYouGaveAWrongPasswordService youGaveAWrongPasswordService,
+        ICloudSessionPasswordExchangeKeyAskedService cloudSessionPasswordExchangeKeyAskedService,
+        ICloudSessionPasswordExchangeKeyGivenService cloudSessionPasswordExchangeKeyGivenService,
+        ICheckCloudSessionPasswordExchangeKeyService checkCloudSessionPasswordExchangeKeyService)
     {
-        _hubPushHandler2 = hubPushHandler2;
+        hubPushHandler2.YouJoinedSession
+            .Subscribe(p => youJoinedSessionService.Process(p.Item1, p.Item2));
+        
+        hubPushHandler2.YouGaveAWrongPassword
+            .Subscribe(s => youGaveAWrongPasswordService.Process(s));
 
-        _hubPushHandler2.YouJoinedSession
-            .Subscribe(p => mediator.Send(new OnYouJoinedSessionRequest(p.Item1, p.Item2)));
+        hubPushHandler2.AskCloudSessionPasswordExchangeKey
+            .Subscribe(p => cloudSessionPasswordExchangeKeyAskedService.Process(p));
         
-        _hubPushHandler2.YouGaveAWrongPassword
-            .Subscribe(s => mediator.Send(new OnYouGaveAWrongPasswordRequest(s)));
-
-        _hubPushHandler2.AskCloudSessionPasswordExchangeKey
-            .Subscribe(p => mediator.Send(new OnCloudSessionPasswordExchangeKeyAskedRequest(p.SessionId, p.PublicKeyInfo, p.RequesterInstanceId)));
+        hubPushHandler2.GiveCloudSessionPasswordExchangeKey
+            .Subscribe(p => cloudSessionPasswordExchangeKeyGivenService.Process(p));
         
-        _hubPushHandler2.GiveCloudSessionPasswordExchangeKey
-            .Subscribe(p => mediator.Send(new OnCloudSessionPasswordExchangeKeyGivenRequest(p.SessionId, p.JoinerInstanceId, 
-                p.ValidatorInstanceId, p.PublicKeyInfo)));
-        
-        _hubPushHandler2.CheckCloudSessionPasswordExchangeKey
-            .Subscribe(p => mediator.Send(new OnCheckCloudSessionPasswordExchangeKeyRequest(p.SessionId, p.JoinerClientInstanceId, 
-                p.ValidatorInstanceId, p.EncryptedPassword)));
-        
-        // _hubPushHandler2.HubPushHandler2.OnReconnected
-        //     .Subscribe(OnReconnected);
+        hubPushHandler2.CheckCloudSessionPasswordExchangeKey
+            .Subscribe(p => checkCloudSessionPasswordExchangeKeyService.Process(p));
     }
 }

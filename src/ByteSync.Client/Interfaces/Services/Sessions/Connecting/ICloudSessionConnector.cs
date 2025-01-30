@@ -2,7 +2,7 @@
 using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 
-namespace ByteSync.Interfaces.Controls.Sessions;
+namespace ByteSync.Interfaces.Services.Sessions.Connecting;
 
 public interface ICloudSessionConnector
 {

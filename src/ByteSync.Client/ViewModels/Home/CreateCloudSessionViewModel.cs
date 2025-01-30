@@ -2,6 +2,7 @@
 using ByteSync.Commands.Sessions;
 using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using MediatR;
 using ReactiveUI;
 using Serilog;

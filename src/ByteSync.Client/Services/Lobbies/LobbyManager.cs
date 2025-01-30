@@ -17,6 +17,7 @@ using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Lobbies;
 using ByteSync.Interfaces.Profiles;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ByteSync.Services.Misc;
 using MediatR;
 using Serilog;

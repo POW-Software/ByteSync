@@ -5,6 +5,7 @@ using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using MediatR;
 
 namespace ByteSync.Commands.Sessions;

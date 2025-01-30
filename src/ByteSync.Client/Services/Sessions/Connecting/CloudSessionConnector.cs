@@ -1,15 +1,8 @@
 ﻿using System.Reactive.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
-using ByteSync.Business.Communications;
-using ByteSync.Business.Navigations;
-using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.RunSessionInfos;
-using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
-using ByteSync.Common.Controls.Serilog;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
@@ -20,9 +13,11 @@ using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.EventsHubs;
+using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ConnectionStatuses = ByteSync.Business.Sessions.ConnectionStatuses;
 
-namespace ByteSync.Services.Sessions;
+namespace ByteSync.Services.Sessions.Connecting;
 
 class CloudSessionConnector : ICloudSessionConnector
 {

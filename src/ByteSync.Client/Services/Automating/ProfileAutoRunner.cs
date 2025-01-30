@@ -12,6 +12,7 @@ using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Lobbies;
 using ByteSync.Interfaces.Profiles;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 
 namespace ByteSync.Services.Automating;
 
