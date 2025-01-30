@@ -31,6 +31,7 @@ public class ProfileAutoRunner : IProfileAutoRunner
     private readonly IComparisonItemsService _comparisonItemsService;
     private readonly ISessionService _sessionService;
     private readonly ISynchronizationStarter _synchronizationStarter;
+    private readonly IQuitSessionService _quitSessionService;
 
     public const int RESULT_SUCCESS = 0;
     public const int RESULT_INVENTORY_ERROR = 1;
@@ -45,7 +46,7 @@ public class ProfileAutoRunner : IProfileAutoRunner
         IDataInventoryStarter dataInventoryStarter, ILobbyRepository lobbyRepository,
         ICloudSessionConnector cloudSessionConnector, IInventoryService inventoriesService,
         ISynchronizationService synchronizationService, IComparisonItemsService comparisonItemsService,
-        ISessionService sessionService, ISynchronizationStarter synchronizationStarter)
+        ISessionService sessionService, ISynchronizationStarter synchronizationStarter, IQuitSessionService quitSessionService)
     {
         _applicationSettingsRepository = applicationSettingsManager;
         _sessionProfileLocalDataManager = sessionProfileLocalDataManager;
@@ -58,6 +59,7 @@ public class ProfileAutoRunner : IProfileAutoRunner
         _comparisonItemsService = comparisonItemsService;
         _sessionService = sessionService;
         _synchronizationStarter = synchronizationStarter;
+        _quitSessionService = quitSessionService;
     }
     
     public async Task<int> OperateRunProfile(string? profileName, JoinLobbyModes? joinLobbyMode)
@@ -167,7 +169,7 @@ public class ProfileAutoRunner : IProfileAutoRunner
         // }
         
         // On quitte la session systématiquement, qu'elle soit locale ou cloud
-        // await _cloudSessionConnector.QuitSession();
+        await _quitSessionService.Process();
 
         return RESULT_SUCCESS;
     }
