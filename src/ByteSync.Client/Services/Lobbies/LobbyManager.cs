@@ -315,7 +315,7 @@ public class LobbyManager : ILobbyManager
     private async Task<bool> StartSessionCreationAndConnectionProcess(string lobbyId, List<LobbyMember> otherLobbyMembers)
     {
         var lobbySessionDetails = await _lobbyRepository.BuildCloudProfileSessionDetails(lobbyId);
-        var cloudSessionResult = await _createSessionService.Process(new CreateSessionRequest(lobbySessionDetails));
+        var cloudSessionResult = await _createSessionService.CreateCloudSession(new CreateCloudSessionRequest(lobbySessionDetails));
 
         if (cloudSessionResult != null)
         {

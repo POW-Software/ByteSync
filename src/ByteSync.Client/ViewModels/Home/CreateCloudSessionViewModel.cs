@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Reactive.Linq;
+using System.Threading.Tasks;
 using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Repositories;
@@ -36,6 +37,10 @@ public class CreateCloudSessionViewModel : ViewModelBase
         CreateCloudSessionCommand = ReactiveCommand.CreateFromTask(CreateSession);
         CancelCloudSessionCreationCommand = ReactiveCommand.CreateFromTask(CancelCloudSessionCreation);
         
+        _cloudSessionConnectionRepository.ConnectionStatusObservable
+            .Select(x => x == SessionConnectionStatus.CreatingSession)
+            .ToPropertyEx(this, x => x.IsCreatingCloudSession);
+        
         // CancelCommand = ReactiveCommand.Create(() => _navigationService.NavigateTo(NavigationPanel.Home));
     }
 
@@ -52,7 +57,7 @@ public class CreateCloudSessionViewModel : ViewModelBase
         
         try
         {
-            await _createSessionService.Process(new CreateSessionRequest(null));
+            await _createSessionService.CreateCloudSession(new CreateCloudSessionRequest(null));
         }
         catch (Exception ex)
         {
@@ -62,8 +67,17 @@ public class CreateCloudSessionViewModel : ViewModelBase
         }
     }
     
-    private Task CancelCloudSessionCreation()
+    private async Task CancelCloudSessionCreation()
     {
-        return Task.CompletedTask;
+        try
+        {
+            await _createSessionService.CancelCloudSessionCreation();
+        }
+        catch (Exception ex)
+        {
+            // IsProgressActive = false;
+            // IsError = true;
+            _logger.LogError(ex, "CreateSession");
+        }
     }
 }

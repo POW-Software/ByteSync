@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Common.Interfaces;
@@ -26,10 +27,14 @@ namespace ByteSync.Interfaces.Repositories
         // StatusObservable ici : IsCreatingSession, IsJoiningSession, IsConnectedSession
         // Déjà implémenté dans CloudSessionConnectionService
         
-        public IObservable<SessionConnectionStatus> ConnectionStatusObservable { get; }
+        IObservable<SessionConnectionStatus> ConnectionStatusObservable { get; }
     
-        public SessionConnectionStatus CurrentConnectionStatus { get; }
-    
+        SessionConnectionStatus CurrentConnectionStatus { get; }
+        
+        CancellationTokenSource CancellationTokenSource { get; set; }
+        
+        CancellationToken CancellationToken { get; }
+
         void SetConnectionStatus(SessionConnectionStatus connectionStatus);
     }
 }

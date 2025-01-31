@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
@@ -17,7 +18,7 @@ public class CloudSessionApiClient : ICloudSessionApiClient
         _apiInvoker = apiInvoker!;
     }
     
-    public async Task<CloudSessionResult> CreateCloudSession(CreateCloudSessionParameters parameters)
+    public async Task<CloudSessionResult> CreateCloudSession(CreateCloudSessionParameters parameters, CancellationToken cancellationToken = default)
     {
         try
         {

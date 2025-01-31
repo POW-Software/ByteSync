@@ -7,5 +7,7 @@ namespace ByteSync.Interfaces.Services.Sessions;
 
 public interface ICreateSessionService
 {
-    Task<CloudSessionResult?> Process(CreateSessionRequest request);
+    Task<CloudSessionResult?> CreateCloudSession(CreateCloudSessionRequest request);
+    
+    Task CancelCloudSessionCreation();
 }

@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.Connecting;
@@ -8,7 +7,6 @@ using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
@@ -24,7 +22,6 @@ public class CreateSessionService : ICreateSessionService
     private readonly IPublicKeysManager _publicKeysManager;
     private readonly ITrustProcessPublicKeysRepository _trustProcessPublicKeysRepository;
     private readonly IDigitalSignaturesRepository _digitalSignaturesRepository;
-    private readonly ISessionService _sessionService;
     private readonly IAfterJoinSessionService _afterJoinSessionService;
     private readonly ICloudSessionConnector _cloudSessionConnector;
     private readonly ILogger<CreateSessionService> _logger;
@@ -35,8 +32,7 @@ public class CreateSessionService : ICreateSessionService
         ICloudSessionApiClient cloudSessionApiClient, 
         IPublicKeysManager publicKeysManager, 
         ITrustProcessPublicKeysRepository trustProcessPublicKeysRepository, 
-        IDigitalSignaturesRepository digitalSignaturesRepository, 
-        ISessionService sessionService,
+        IDigitalSignaturesRepository digitalSignaturesRepository,
         IAfterJoinSessionService afterJoinSessionService,
         ICloudSessionConnector cloudSessionConnector,
         ILogger<CreateSessionService> logger)
@@ -48,50 +44,27 @@ public class CreateSessionService : ICreateSessionService
         _publicKeysManager = publicKeysManager;
         _trustProcessPublicKeysRepository = trustProcessPublicKeysRepository;
         _digitalSignaturesRepository = digitalSignaturesRepository;
-        _sessionService = sessionService;
         _afterJoinSessionService = afterJoinSessionService;
         _cloudSessionConnector = cloudSessionConnector;
         _logger = logger;
     }
     
-    public async Task<CloudSessionResult?> Process(CreateSessionRequest request)
+    public async Task<CloudSessionResult?> CreateCloudSession(CreateCloudSessionRequest request)
     {
         try
         {
-            await _cloudSessionConnector.ClearConnectionData();
-            _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.CreatingSession);
+            await _cloudSessionConnector.InitializeConnection(SessionConnectionStatus.CreatingSession);
             
-            using var aes = Aes.Create();
-            aes.GenerateKey();
-            _cloudSessionConnectionRepository.SetAesEncryptionKey(aes.Key);
+            await Task.Delay(5000, _cloudSessionConnectionRepository.CancellationToken);
             
-            SessionSettings sessionSettings;
-            if (request.RunCloudSessionProfileInfo == null)
-            {
-                sessionSettings = SessionSettings.BuildDefault();
-            }
-            else
-            {
-                sessionSettings = request.RunCloudSessionProfileInfo.ProfileDetails.Options.Settings;
-            }
-            
-            var encryptedSessionSettings = _dataEncrypter.EncryptSessionSettings(sessionSettings);
+            var createCloudSessionParameters = BuildCreateCloudSessionParameters(request);
+            var cloudSessionResult = await _cloudSessionApiClient.CreateCloudSession(createCloudSessionParameters, 
+                _cloudSessionConnectionRepository.CancellationToken);
 
-            var sessionMemberPrivateData = new SessionMemberPrivateData
+            if (_cloudSessionConnectionRepository.CancellationToken.IsCancellationRequested)
             {
-                MachineName = _environmentService.MachineName
-            };
-            var encryptedSessionMemberPrivateData = _dataEncrypter.EncryptSessionMemberPrivateData(sessionMemberPrivateData);
-            
-            var parameters = new CreateCloudSessionParameters
-            {
-                LobbyId = request.RunCloudSessionProfileInfo?.LobbyId,
-                CreatorProfileClientId = request.RunCloudSessionProfileInfo?.LocalProfileClientId,
-                SessionSettings = encryptedSessionSettings,
-                CreatorPublicKeyInfo = _publicKeysManager.GetMyPublicKeyInfo(),
-                CreatorPrivateData = encryptedSessionMemberPrivateData
-            };
-            var cloudSessionResult = await _cloudSessionApiClient.CreateCloudSession(parameters);
+                throw new TaskCanceledException();
+            }
             
             await _trustProcessPublicKeysRepository.Start(cloudSessionResult.SessionId);
             await _digitalSignaturesRepository.Start(cloudSessionResult.SessionId);
@@ -106,14 +79,51 @@ public class CreateSessionService : ICreateSessionService
         }
         catch (Exception)
         {
-            _sessionService.ClearCloudSession();
-            
-            _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.None);
+            await _cloudSessionConnector.InitializeConnection(SessionConnectionStatus.None);
 
             throw;
         }
     }
-    
+
+    public Task CancelCloudSessionCreation()
+    {
+        _logger.LogInformation("User requested to cancel Cloud Session creation");
+        _cloudSessionConnectionRepository.CancellationTokenSource.Cancel();
+        
+        return Task.CompletedTask;
+    }
+
+    private CreateCloudSessionParameters BuildCreateCloudSessionParameters(CreateCloudSessionRequest request)
+    {
+        SessionSettings sessionSettings;
+        if (request.RunCloudSessionProfileInfo == null)
+        {
+            sessionSettings = SessionSettings.BuildDefault();
+        }
+        else
+        {
+            sessionSettings = request.RunCloudSessionProfileInfo.ProfileDetails.Options.Settings;
+        }
+            
+        var encryptedSessionSettings = _dataEncrypter.EncryptSessionSettings(sessionSettings);
+
+        var sessionMemberPrivateData = new SessionMemberPrivateData
+        {
+            MachineName = _environmentService.MachineName
+        };
+        var encryptedSessionMemberPrivateData = _dataEncrypter.EncryptSessionMemberPrivateData(sessionMemberPrivateData);
+            
+        var parameters = new CreateCloudSessionParameters
+        {
+            LobbyId = request.RunCloudSessionProfileInfo?.LobbyId,
+            CreatorProfileClientId = request.RunCloudSessionProfileInfo?.LocalProfileClientId,
+            SessionSettings = encryptedSessionSettings,
+            CreatorPublicKeyInfo = _publicKeysManager.GetMyPublicKeyInfo(),
+            CreatorPrivateData = encryptedSessionMemberPrivateData
+        };
+        return parameters;
+    }
+
     // private async Task ClearConnectionData()
     // {
     //     await Task.WhenAll(

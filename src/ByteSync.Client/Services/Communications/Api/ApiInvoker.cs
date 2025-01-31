@@ -1,6 +1,7 @@
 ﻿using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Common.Controls.Json;
 using ByteSync.Common.Helpers;
@@ -26,45 +27,46 @@ public class ApiInvoker : IApiInvoker
         _logger = logger;
     }
 
-    public Task<T> GetAsync<T>(string resource)
+    public Task<T> GetAsync<T>(string resource, CancellationToken cancellationToken = default)
     {
-        return InvokeRestAsync<T>(HttpMethod.Get, resource, null, null);
+        return InvokeRestAsync<T>(HttpMethod.Get, resource, null, null, cancellationToken);
     }
 
-    public Task<T> PostAsync<T>(string resource, object? postObject)
+    public Task<T> PostAsync<T>(string resource, object? postObject, CancellationToken cancellationToken = default)
     {
-        return InvokeRestAsync<T>(HttpMethod.Post, resource, null, postObject);
+        return InvokeRestAsync<T>(HttpMethod.Post, resource, null, postObject, cancellationToken);
     }
 
-    public Task<T> DeleteAsync<T>(string resource, object objectToDelete)
+    public Task<T> DeleteAsync<T>(string resource, object objectToDelete, CancellationToken cancellationToken = default)
     {
-        return InvokeRestAsync<T>(HttpMethod.Delete, resource, null, objectToDelete);
+        return InvokeRestAsync<T>(HttpMethod.Delete, resource, null, objectToDelete, cancellationToken);
     }
 
-    public Task PostAsync(string resource, object? postObject)
+    public Task PostAsync(string resource, object? postObject, CancellationToken cancellationToken = default)
     {
-        return DoInvokeRestAsync<object>(HttpMethod.Post, resource, null, postObject, false);
+        return DoInvokeRestAsync<object>(HttpMethod.Post, resource, null, postObject, false, cancellationToken);
     }
 
-    private async Task<T> InvokeRestAsync<T>(HttpMethod httpVerb, string resource, Dictionary<string, string>? additionalHeaders, object? requestObject)
+    private async Task<T> InvokeRestAsync<T>(HttpMethod httpVerb, string resource, Dictionary<string, string>? additionalHeaders, object? requestObject,
+        CancellationToken cancellationToken)
     {
-        return await DoInvokeRestAsync<T>(httpVerb, resource, additionalHeaders, requestObject, true);
+        return await DoInvokeRestAsync<T>(httpVerb, resource, additionalHeaders, requestObject, true, cancellationToken);
     }
 
     private async Task<T> DoInvokeRestAsync<T>(HttpMethod httpMethod, string resource, Dictionary<string, string>? additionalHeaders, 
-        object? requestObject, bool handleResult)
+        object? requestObject, bool handleResult, CancellationToken cancellationToken)
     {
         using var request = await BuildRequest(httpMethod, resource, additionalHeaders, requestObject);
 
         try
         {
-            var response = await _httpClient.SendAsync(request);
+            var response = await _httpClient.SendAsync(request, cancellationToken);
             return await HandleResponse<T>(handleResult, response);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception occurred while invoking API: {Resource}", resource);
-            throw new ApiException("An error occurred while invoking the API.", ex);
+            throw new ApiException($"An error occurred while invoking the API on resource {resource}", ex);
         }
     }
 

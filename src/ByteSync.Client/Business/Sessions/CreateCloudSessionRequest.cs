@@ -2,9 +2,9 @@
 
 namespace ByteSync.Business.Sessions;
 
-public class CreateSessionRequest
+public class CreateCloudSessionRequest
 {
-    public CreateSessionRequest(RunCloudSessionProfileInfo? runCloudSessionProfileInfo)
+    public CreateCloudSessionRequest(RunCloudSessionProfileInfo? runCloudSessionProfileInfo)
     {
         RunCloudSessionProfileInfo = runCloudSessionProfileInfo;
     }

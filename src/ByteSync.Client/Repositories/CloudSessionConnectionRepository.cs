@@ -100,6 +100,10 @@ public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConne
     
     public SessionConnectionStatus CurrentConnectionStatus => _connectionStatus.Value;
     
+    public CancellationTokenSource CancellationTokenSource { get; set; }
+    
+    public CancellationToken CancellationToken => CancellationTokenSource.Token;
+
     public void SetConnectionStatus(SessionConnectionStatus connectionStatus)
     {
         _connectionStatus.OnNext(connectionStatus);

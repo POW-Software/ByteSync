@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 
@@ -11,4 +12,6 @@ public interface ICloudSessionConnector
     public Task OnJoinSessionError(JoinSessionResult joinSessionResult);
     
     IObservable<bool> CanLogOutOrShutdown { get; }
+    
+    Task InitializeConnection(SessionConnectionStatus creatingSession);
 }

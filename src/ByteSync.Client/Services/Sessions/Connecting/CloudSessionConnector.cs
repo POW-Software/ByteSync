@@ -1,4 +1,6 @@
 ﻿using System.Reactive.Linq;
+using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.RunSessionInfos;
@@ -214,6 +216,26 @@ class CloudSessionConnector : ICloudSessionConnector
             //               (_sessionDataHolder.Session == null || _sessionDataHolder.IsSynchronizationEnded);
             //
             // return result;
+        }
+    }
+
+    public async Task InitializeConnection(SessionConnectionStatus sessionConnectionStatus)
+    {
+        await ClearConnectionData();
+        _cloudSessionConnectionRepository.SetConnectionStatus(sessionConnectionStatus);
+
+        _cloudSessionConnectionRepository.CancellationTokenSource = new CancellationTokenSource();
+
+        if (sessionConnectionStatus == SessionConnectionStatus.CreatingSession)
+        {
+            using var aes = Aes.Create();
+            aes.GenerateKey();
+            _cloudSessionConnectionRepository.SetAesEncryptionKey(aes.Key);
+        }
+
+        if (sessionConnectionStatus != SessionConnectionStatus.InSession)
+        {
+            _sessionService.ClearCloudSession();
         }
     }
 
