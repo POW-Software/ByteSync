@@ -1,15 +1,11 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Business.Sessions;
+﻿using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Sessions;
-using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
-using Serilog;
 
 namespace ByteSync.Services.Sessions.Connecting;
 
@@ -22,20 +18,13 @@ public class JoinSessionService : IJoinSessionService
     private readonly IPublicKeysTruster _publicKeysTruster;
     private readonly IPublicKeysManager _publicKeysManager;
     private readonly ICloudSessionApiClient _cloudSessionApiClient;
-    private readonly ICloudSessionEventsHub _cloudSessionEventsHub;
     private readonly ICloudSessionConnector _cloudSessionConnector;
+    private readonly ILogger<JoinSessionService> _logger;
 
-
-    public JoinSessionService(
-        ISessionService sessionService,
-        ICloudSessionConnectionRepository cloudSessionConnectionRepository,
-        ITrustProcessPublicKeysRepository trustProcessPublicKeysRepository,
-        IDigitalSignaturesRepository digitalSignaturesRepository,
-        IPublicKeysTruster publicKeysTruster,
-        IPublicKeysManager publicKeysManager,
-        ICloudSessionApiClient cloudSessionApiClient,
-        ICloudSessionEventsHub cloudSessionEventsHub,
-        ICloudSessionConnector cloudSessionConnector)
+    public JoinSessionService(ISessionService sessionService, ICloudSessionConnectionRepository cloudSessionConnectionRepository,
+        ITrustProcessPublicKeysRepository trustProcessPublicKeysRepository, IDigitalSignaturesRepository digitalSignaturesRepository,
+        IPublicKeysTruster publicKeysTruster, IPublicKeysManager publicKeysManager, ICloudSessionApiClient cloudSessionApiClient,
+        ICloudSessionConnector cloudSessionConnector, ILogger<JoinSessionService> logger)
     {
         _sessionService = sessionService;
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
@@ -44,8 +33,8 @@ public class JoinSessionService : IJoinSessionService
         _publicKeysTruster = publicKeysTruster;
         _publicKeysManager = publicKeysManager;
         _cloudSessionApiClient = cloudSessionApiClient;
-        _cloudSessionEventsHub = cloudSessionEventsHub;
         _cloudSessionConnector = cloudSessionConnector;
+        _logger = logger;
     }
     
     public async Task JoinSession(string sessionId, string sessionPassword, RunCloudSessionProfileInfo? lobbySessionDetails)
@@ -54,7 +43,7 @@ public class JoinSessionService : IJoinSessionService
         {
             await DoStartJoinSession(sessionId, sessionPassword, lobbySessionDetails);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             var joinSessionResult = JoinSessionResult.BuildFrom(JoinSessionStatuses.UnexpectedError);
             await _cloudSessionConnector.OnJoinSessionError(joinSessionResult);
@@ -76,23 +65,16 @@ public class JoinSessionService : IJoinSessionService
         await _trustProcessPublicKeysRepository.Start(sessionId);
         await _digitalSignaturesRepository.Start(sessionId);
 
-        Log.Information("Start joining the Cloud Session {sessionId}: getting password exchange encryption key", sessionId);
+        _logger.LogInformation("Start joining the Cloud Session {sessionId}: getting password exchange encryption key", sessionId);
 
         await _cloudSessionConnectionRepository.SetCloudSessionConnectionData(sessionId, sessionPassword, lobbySessionDetails);
 
-        JoinSessionResult joinSessionResult;
-        // On Fait un processus de Trust pour les clés qui ne sont pas trustées
-
-        joinSessionResult = await _publicKeysTruster.TrustAllMembersPublicKeys(sessionId);
+        var joinSessionResult = await _publicKeysTruster.TrustAllMembersPublicKeys(sessionId);
         if (!joinSessionResult.IsOK)
         {
             await _cloudSessionConnector.OnJoinSessionError(joinSessionResult);
             return;
         }
-
-        // Quand tout est trusté, on peut contrôler les clés
-        // Contruction digital signature : sessionId, monClientInstanceId, 
-        // Protection: mix clientInstanceId / InstallationId / SessionId en SHA 256
 
         var parameters = new AskCloudSessionPasswordExchangeKeyParameters(sessionId, _publicKeysManager.GetMyPublicKeyInfo());
         parameters.LobbyId = lobbySessionDetails?.LobbyId;
@@ -109,13 +91,4 @@ public class JoinSessionService : IJoinSessionService
                 data => data.WaitForPasswordExchangeKeyEvent, data => data.WaitTimeSpan, "Keys exchange failed: no key received");
         }
     }
-    
-    // public async Task OnJoinSessionError(JoinSessionResult joinSessionResult)
-    // {
-    //     _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.None);
-    //     await _cloudSessionConnector.ClearConnectionData();
-    //         
-    //     Log.Error("Can not join the Cloud Session. Reason: {Reason}", joinSessionResult.Status);
-    //     await _cloudSessionEventsHub.RaiseJoinCloudSessionFailed(joinSessionResult);
-    // }
 }

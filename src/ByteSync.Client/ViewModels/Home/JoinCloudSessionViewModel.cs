@@ -24,8 +24,7 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
     private readonly ILocalizationService _localizationService;
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
     private readonly ILogger<JoinCloudSessionViewModel> _logger;
-
-
+    
     public JoinCloudSessionViewModel()
     {
         
@@ -109,18 +108,12 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
                 return;
             }
 
-            // AreControlsEnabled = false;
-
             await _joinSessionService.JoinSession(SessionId, SessionPassword, null);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Can not join session");
             UpdateErrorMessage(nameof(Resources.JoinSession_ErrorMessage));
-        }
-        finally
-        {
-            // AreControlsEnabled = true;
         }
     }
     
