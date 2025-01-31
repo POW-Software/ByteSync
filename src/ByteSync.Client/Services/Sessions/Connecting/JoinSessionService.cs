@@ -70,7 +70,7 @@ public class JoinSessionService : IJoinSessionService
             return;
         }
 
-        _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.JoiningSession);
+        _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.JoiningSession);
         await _cloudSessionConnector.ClearConnectionData();
 
         await _trustProcessPublicKeysRepository.Start(sessionId);

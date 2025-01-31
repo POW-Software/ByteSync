@@ -1,8 +1,9 @@
 ﻿namespace ByteSync.Business.Sessions;
 
-public enum ConnectionStatuses
+public enum SessionConnectionStatus
 { 
     None = 0,
     JoiningSession = 1, 
-    CreatingSession = 2 
+    CreatingSession = 2,
+    InSession = 3,
 }

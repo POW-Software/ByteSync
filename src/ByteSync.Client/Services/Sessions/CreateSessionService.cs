@@ -26,6 +26,7 @@ public class CreateSessionService : ICreateSessionService
     private readonly IDigitalSignaturesRepository _digitalSignaturesRepository;
     private readonly ISessionService _sessionService;
     private readonly IAfterJoinSessionService _afterJoinSessionService;
+    private readonly ICloudSessionConnector _cloudSessionConnector;
     private readonly ILogger<CreateSessionService> _logger;
 
     public CreateSessionService(ICloudSessionConnectionRepository cloudSessionConnectionRepository, 
@@ -37,6 +38,7 @@ public class CreateSessionService : ICreateSessionService
         IDigitalSignaturesRepository digitalSignaturesRepository, 
         ISessionService sessionService,
         IAfterJoinSessionService afterJoinSessionService,
+        ICloudSessionConnector cloudSessionConnector,
         ILogger<CreateSessionService> logger)
     {
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
@@ -48,6 +50,7 @@ public class CreateSessionService : ICreateSessionService
         _digitalSignaturesRepository = digitalSignaturesRepository;
         _sessionService = sessionService;
         _afterJoinSessionService = afterJoinSessionService;
+        _cloudSessionConnector = cloudSessionConnector;
         _logger = logger;
     }
     
@@ -55,8 +58,8 @@ public class CreateSessionService : ICreateSessionService
     {
         try
         {
-            await ClearConnectionData();
-            _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.CreatingSession);
+            await _cloudSessionConnector.ClearConnectionData();
+            _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.CreatingSession);
             
             using var aes = Aes.Create();
             aes.GenerateKey();
@@ -95,6 +98,8 @@ public class CreateSessionService : ICreateSessionService
     
             await _afterJoinSessionService.Process(new AfterJoinSessionRequest(cloudSessionResult, request.RunCloudSessionProfileInfo, true));
             
+            _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.InSession);
+            
             _logger.LogInformation("Created Cloud Session {CloudSession}", cloudSessionResult.SessionId);
 
             return cloudSessionResult;
@@ -102,22 +107,20 @@ public class CreateSessionService : ICreateSessionService
         catch (Exception)
         {
             _sessionService.ClearCloudSession();
+            
+            _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.None);
 
             throw;
         }
-        finally
-        {
-            _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.None);
-        }
     }
     
-    private async Task ClearConnectionData()
-    {
-        await Task.WhenAll(
-            _cloudSessionConnectionRepository.ClearAsync(), 
-            _trustProcessPublicKeysRepository.ClearAsync(), 
-            _digitalSignaturesRepository.ClearAsync());
-    }
+    // private async Task ClearConnectionData()
+    // {
+    //     await Task.WhenAll(
+    //         _cloudSessionConnectionRepository.ClearAsync(), 
+    //         _trustProcessPublicKeysRepository.ClearAsync(), 
+    //         _digitalSignaturesRepository.ClearAsync());
+    // }
     
     // /// <summary>
     // /// Après que l'on ait créé ou rejoint une session

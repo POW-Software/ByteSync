@@ -15,7 +15,6 @@ using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
-using ConnectionStatuses = ByteSync.Business.Sessions.ConnectionStatuses;
 
 namespace ByteSync.Services.Sessions.Connecting;
 
@@ -206,7 +205,7 @@ class CloudSessionConnector : ICloudSessionConnector
                 _sessionService.SessionObservable, _synchronizationService.SynchronizationProcessData.SynchronizationEnd, 
                 _sessionService.SessionStatusObservable,
                 (connectionStatus, session, synchronizationEnd, sessionStatus) =>
-                    !connectionStatus.In(ConnectionStatuses.CreatingSession, ConnectionStatuses.JoiningSession) &&
+                    !connectionStatus.In(SessionConnectionStatus.CreatingSession, SessionConnectionStatus.JoiningSession) &&
                     (session == null || synchronizationEnd != null)
                     && sessionStatus.In(SessionStatus.FatalError, SessionStatus.None, SessionStatus.RegularEnd));
             
@@ -385,7 +384,7 @@ class CloudSessionConnector : ICloudSessionConnector
     //
     public async Task OnJoinSessionError(JoinSessionResult joinSessionResult)
     {
-        _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.None);
+        _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.None);
         await ClearConnectionData();
             
         Log.Error("Can not join the Cloud Session. Reason: {Reason}", joinSessionResult.Status);

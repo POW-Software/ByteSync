@@ -6,12 +6,6 @@ namespace ByteSync.Interfaces.Services.Sessions.Connecting;
 
 public interface ICloudSessionConnector
 {
-    // Task<CloudSessionResult?> CreateSession(RunCloudSessionProfileInfo? lobbySessionDetails);
-
-    // Task JoinSession(string sessionId, string sessionPassword, RunCloudSessionProfileInfo? lobbySessionDetails);
-
-    // Task QuitSession();
-
     public Task ClearConnectionData();
 
     public Task OnJoinSessionError(JoinSessionResult joinSessionResult);

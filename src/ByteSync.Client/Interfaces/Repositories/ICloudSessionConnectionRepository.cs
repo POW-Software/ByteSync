@@ -26,10 +26,10 @@ namespace ByteSync.Interfaces.Repositories
         // StatusObservable ici : IsCreatingSession, IsJoiningSession, IsConnectedSession
         // Déjà implémenté dans CloudSessionConnectionService
         
-        public IObservable<ConnectionStatuses> ConnectionStatusObservable { get; }
+        public IObservable<SessionConnectionStatus> ConnectionStatusObservable { get; }
     
-        public ConnectionStatuses CurrentConnectionStatus { get; }
+        public SessionConnectionStatus CurrentConnectionStatus { get; }
     
-        void SetConnectionStatus(ConnectionStatuses connectionStatus);
+        void SetConnectionStatus(SessionConnectionStatus connectionStatus);
     }
 }

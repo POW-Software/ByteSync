@@ -5,7 +5,6 @@ using Avalonia.Animation;
 using Avalonia.Controls.Mixins;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Navigations;
-using ByteSync.Commands.Sessions;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Sessions;

@@ -13,11 +13,11 @@ namespace ByteSync.Repositories;
 
 public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConnectionData>, ICloudSessionConnectionRepository
 {
-    private readonly BehaviorSubject<ConnectionStatuses> _connectionStatus;
+    private readonly BehaviorSubject<SessionConnectionStatus> _connectionStatus;
     
     public CloudSessionConnectionRepository()
     {
-        _connectionStatus = new BehaviorSubject<ConnectionStatuses>(ConnectionStatuses.None);
+        _connectionStatus = new BehaviorSubject<SessionConnectionStatus>(SessionConnectionStatus.None);
     }
 
     public byte[]? AesEncryptionKey { get; set; }
@@ -96,11 +96,11 @@ public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConne
         }
     }
     
-    public IObservable<ConnectionStatuses> ConnectionStatusObservable => _connectionStatus.AsObservable();
+    public IObservable<SessionConnectionStatus> ConnectionStatusObservable => _connectionStatus.AsObservable();
     
-    public ConnectionStatuses CurrentConnectionStatus => _connectionStatus.Value;
+    public SessionConnectionStatus CurrentConnectionStatus => _connectionStatus.Value;
     
-    public void SetConnectionStatus(ConnectionStatuses connectionStatus)
+    public void SetConnectionStatus(SessionConnectionStatus connectionStatus)
     {
         _connectionStatus.OnNext(connectionStatus);
     }

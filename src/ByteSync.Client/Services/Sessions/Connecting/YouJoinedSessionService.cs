@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using ByteSync.Business.SessionMembers;
+using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces.Controls.Applications;
@@ -10,7 +11,6 @@ using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
 using Serilog;
-using ConnectionStatuses = ByteSync.Business.Sessions.ConnectionStatuses;
 
 namespace ByteSync.Services.Sessions.Connecting;
 
@@ -65,7 +65,7 @@ public class YouJoinedSessionService : IYouJoinedSessionService
                 return;
             }
 
-            if (_cloudSessionConnectionRepository.CurrentConnectionStatus != ConnectionStatuses.JoiningSession)
+            if (_cloudSessionConnectionRepository.CurrentConnectionStatus != SessionConnectionStatus.JoiningSession)
             {
                 _logger.LogWarning("no longer trying to join session");
                 return;
@@ -155,7 +155,7 @@ public class YouJoinedSessionService : IYouJoinedSessionService
         }
         finally
         {
-            _cloudSessionConnectionRepository.SetConnectionStatus(ConnectionStatuses.None);
+            _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.None);
         }
     }
 }
