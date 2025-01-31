@@ -1538,4 +1538,10 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	<data name="UpdateDetails_AutoUpdateNotSupported" xml:space="preserve">
 		<value>Veuillez utiliser le système de déploiement d'origine pour mettre à jour le logiciel.</value>
 	</data>
+	<data name="CreateCloudSession_Create" xml:space="preserve">
+		<value>DÉMARRER UNE SESSION CLOUD</value>
+	</data>
+	<data name="CreateCloudSession_Cancel" xml:space="preserve">
+		<value>ANNULER</value>
+	</data>
 </root>

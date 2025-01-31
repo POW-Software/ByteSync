@@ -14,14 +14,28 @@
     
     <Border BorderBrush="Black" BorderThickness="2" Width="400" Height="400" HorizontalAlignment="Center" VerticalAlignment="Center">
         <Grid>
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Vertical">
+                <misc:LinearProgress Width="120" Height="100"
+                                     IsActive="{Binding IsCreatingCloudSession}"
+                                     IsVisible="{Binding IsCreatingCloudSession}" />
+                
+                <!-- TODO Delete OnlineActions_JoinCloudSession, OnlineActions_StartCloudSession & OnlineActions_Title-->
+                
                 <Button Classes="GenericButton" Margin="3"
                         HorizontalAlignment="Left" MaxHeight="30"
-                        Command="{Binding Path=StartComparisonCommand}">
-
+                        Command="{Binding Path=CreateCloudSessionCommand}" IsVisible="{Binding !IsCreatingCloudSession}">
                     <StackPanel Orientation="Horizontal">
                         <misc:Icon FontSize="16" Value="RegularAnalyse" Margin="0" />
-                        <TextBlock Text="{localizations:Loc OnlineActions_StartCloudSession}" />
+                        <TextBlock Text="{localizations:Loc CreateCloudSession_Create}" />
+                    </StackPanel>
+                </Button>
+                
+                <Button Classes="GenericButton" Margin="3"
+                        HorizontalAlignment="Left" MaxHeight="30"
+                        Command="{Binding Path=CancelCloudSessionCreationCommand}" IsVisible="{Binding IsCreatingCloudSession}">
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon FontSize="16" Value="RegularX" Margin="0" />
+                        <TextBlock Text="{localizations:Loc CreateCloudSession_Cancel}" />
                     </StackPanel>
                 </Button>
 

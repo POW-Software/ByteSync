@@ -1676,4 +1676,10 @@ Do you want to save this new Session Profile with this name?</value>
   <data name="UpdateDetails_AutoUpdateNotSupported" xml:space="preserve">
     <value>Please use the original deployment system to update the software.</value>
   </data>
+  <data name="CreateCloudSession_Create" xml:space="preserve">
+    <value>START CLOUD SESSION</value>
+  </data>
+  <data name="CreateCloudSession_Cancel" xml:space="preserve">
+    <value>CANCEL</value>
+  </data>
 </root>

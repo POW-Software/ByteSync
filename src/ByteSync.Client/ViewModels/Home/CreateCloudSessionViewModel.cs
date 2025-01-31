@@ -26,12 +26,15 @@ public class CreateCloudSessionViewModel : ViewModelBase
         _cloudSessionConnector = cloudSessionConnector;
         _createSessionService = createSessionService;
         
-        StartComparisonCommand = ReactiveCommand.CreateFromTask(CreateSession);
+        CreateCloudSessionCommand = ReactiveCommand.CreateFromTask(CreateSession);
+        CancelCloudSessionCreationCommand = ReactiveCommand.CreateFromTask(CancelCloudSessionCreation);
         
         // CancelCommand = ReactiveCommand.Create(() => _navigationService.NavigateTo(NavigationPanel.Home));
     }
 
-    public ReactiveCommand<Unit, Unit>? StartComparisonCommand { get; set; }
+    public ReactiveCommand<Unit, Unit>? CreateCloudSessionCommand { get; set; }
+    
+    public ReactiveCommand<Unit, Unit>? CancelCloudSessionCreationCommand { get; set; }
     
     private async Task CreateSession()
     {
@@ -48,5 +51,10 @@ public class CreateCloudSessionViewModel : ViewModelBase
             // IsError = true;
             Log.Error(ex, "CreateSession");
         }
+    }
+    
+    private Task CancelCloudSessionCreation()
+    {
+        return Task.CompletedTask;
     }
 }

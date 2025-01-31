@@ -12,7 +12,7 @@ using ByteSync.Interfaces.Services.Sessions.Connecting;
 using Serilog;
 using ConnectionStatuses = ByteSync.Business.Sessions.ConnectionStatuses;
 
-namespace ByteSync.Commands.Sessions.Connecting;
+namespace ByteSync.Services.Sessions.Connecting;
 
 public class YouJoinedSessionService : IYouJoinedSessionService
 {

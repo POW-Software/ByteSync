@@ -1,4 +1,4 @@
-﻿using ByteSync.Interfaces;
+﻿using ByteSync.Interfaces.Communications;
 
 namespace ByteSync.Services.Communications.Functions;
 

@@ -1,41 +1,41 @@
 ﻿using System.Security.Cryptography;
-using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
+using ByteSync.Interfaces.Controls.Applications;
+using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Controls.Communications.Http;
+using ByteSync.Interfaces.Controls.Encryptions;
+using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
-using ByteSync.Repositories;
-using ByteSync.Services.Applications;
-using ByteSync.Services.Communications;
-using ByteSync.Services.Communications.Api;
-using ByteSync.Services.Encryptions;
 
 namespace ByteSync.Services.Sessions;
 
 public class CreateSessionService : ICreateSessionService
 {
-    private readonly CloudSessionConnectionRepository _cloudSessionConnectionRepository;
-    private readonly DataEncrypter _dataEncrypter;
-    private readonly EnvironmentService _environmentService;
-    private readonly CloudSessionApiClient _cloudSessionApiClient;
-    private readonly PublicKeysManager _publicKeysManager;
-    private readonly TrustProcessPublicKeysRepository _trustProcessPublicKeysRepository;
-    private readonly DigitalSignaturesRepository _digitalSignaturesRepository;
-    private readonly SessionService _sessionService;
+    private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
+    private readonly IDataEncrypter _dataEncrypter;
+    private readonly IEnvironmentService _environmentService;
+    private readonly ICloudSessionApiClient _cloudSessionApiClient;
+    private readonly IPublicKeysManager _publicKeysManager;
+    private readonly ITrustProcessPublicKeysRepository _trustProcessPublicKeysRepository;
+    private readonly IDigitalSignaturesRepository _digitalSignaturesRepository;
+    private readonly ISessionService _sessionService;
     private readonly IAfterJoinSessionService _afterJoinSessionService;
     private readonly ILogger<CreateSessionService> _logger;
 
-    public CreateSessionService(CloudSessionConnectionRepository cloudSessionConnectionRepository, 
-        DataEncrypter dataEncrypter, 
-        EnvironmentService environmentService, 
-        CloudSessionApiClient cloudSessionApiClient, 
-        PublicKeysManager publicKeysManager, 
-        TrustProcessPublicKeysRepository trustProcessPublicKeysRepository, 
-        DigitalSignaturesRepository digitalSignaturesRepository, 
-        SessionService sessionService,
+    public CreateSessionService(ICloudSessionConnectionRepository cloudSessionConnectionRepository, 
+        IDataEncrypter dataEncrypter, 
+        IEnvironmentService environmentService, 
+        ICloudSessionApiClient cloudSessionApiClient, 
+        IPublicKeysManager publicKeysManager, 
+        ITrustProcessPublicKeysRepository trustProcessPublicKeysRepository, 
+        IDigitalSignaturesRepository digitalSignaturesRepository, 
+        ISessionService sessionService,
         IAfterJoinSessionService afterJoinSessionService,
         ILogger<CreateSessionService> logger)
     {

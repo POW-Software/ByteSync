@@ -8,7 +8,7 @@ using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
 using Serilog;
 
-namespace ByteSync.Commands.Sessions.Connecting;
+namespace ByteSync.Services.Sessions.Connecting;
 
 public class CloudSessionPasswordExchangeKeyGivenService : ICloudSessionPasswordExchangeKeyGivenService
 {
