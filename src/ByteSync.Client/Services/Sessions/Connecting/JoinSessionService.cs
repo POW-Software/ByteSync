@@ -52,6 +52,14 @@ public class JoinSessionService : IJoinSessionService
         }
     }
 
+    public Task CancelJoinCloudSession()
+    {
+        _logger.LogInformation("User requested to cancel joining the Cloud Session");
+        _cloudSessionConnectionRepository.CancellationTokenSource.Cancel();
+        
+        return Task.CompletedTask;
+    }
+
     private async Task DoStartJoinSession(string sessionId, string sessionPassword, RunCloudSessionProfileInfo? lobbySessionDetails)
     {
         if (sessionId.IsNotEmpty(true) && sessionId.Equals(_sessionService.SessionId))
@@ -59,8 +67,9 @@ public class JoinSessionService : IJoinSessionService
             return;
         }
 
-        _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.JoiningSession);
-        await _cloudSessionConnector.ClearConnectionData();
+        await _cloudSessionConnector.InitializeConnection(SessionConnectionStatus.JoiningSession);
+        
+        await Task.Delay(5000, _cloudSessionConnectionRepository.CancellationToken);
 
         await _trustProcessPublicKeysRepository.Start(sessionId);
         await _digitalSignaturesRepository.Start(sessionId);

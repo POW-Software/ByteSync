@@ -43,14 +43,9 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
 
         SessionId = "";
         SessionPassword = "";
-
-        // AreControlsEnabled = true;
-
-        // var canJoin = this.WhenAnyValue(x => x.AreControlsEnabled, (bool areControlsEnabled) => areControlsEnabled) ;
+        
         JoinCommand = ReactiveCommand.CreateFromTask(JoinCloudSession);
-        CancelCommand = ReactiveCommand.Create(() => { _navigationService.NavigateTo(NavigationPanel.Home); });
-        
-        
+        CancelCommand =  ReactiveCommand.CreateFromTask(CancelJoinCloudSession);
         
         this.WhenActivated(disposables =>
         {
@@ -71,7 +66,7 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
             
         });
     }
-    
+
     public ReactiveCommand<Unit, Unit> JoinCommand { get; set; }
         
     public ReactiveCommand<Unit, Unit> CancelCommand { get; set; }
@@ -114,6 +109,18 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         {
             _logger.LogError(ex, "Can not join session");
             UpdateErrorMessage(nameof(Resources.JoinSession_ErrorMessage));
+        }
+    }
+    
+    private async Task CancelJoinCloudSession()
+    {
+        try
+        {
+            await _joinSessionService.CancelJoinCloudSession();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "CancelJoinCloudSession");
         }
     }
     

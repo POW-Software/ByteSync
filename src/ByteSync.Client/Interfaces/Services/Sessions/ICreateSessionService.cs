@@ -9,5 +9,5 @@ public interface ICreateSessionService
 {
     Task<CloudSessionResult?> CreateCloudSession(CreateCloudSessionRequest request);
     
-    Task CancelCloudSessionCreation();
+    Task CancelCreateCloudSession();
 }

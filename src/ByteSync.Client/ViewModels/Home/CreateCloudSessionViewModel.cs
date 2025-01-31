@@ -35,7 +35,7 @@ public class CreateCloudSessionViewModel : ViewModelBase
         _logger = logger;
         
         CreateCloudSessionCommand = ReactiveCommand.CreateFromTask(CreateCloudSession);
-        CancelCloudSessionCreationCommand = ReactiveCommand.CreateFromTask(CancelCloudSessionCreation);
+        CancelCloudSessionCreationCommand = ReactiveCommand.CreateFromTask(CancelCreateCloudSession);
         
         _cloudSessionConnectionRepository.ConnectionStatusObservable
             .Select(x => x == SessionConnectionStatus.CreatingSession)
@@ -67,17 +67,15 @@ public class CreateCloudSessionViewModel : ViewModelBase
         }
     }
     
-    private async Task CancelCloudSessionCreation()
+    private async Task CancelCreateCloudSession()
     {
         try
         {
-            await _createSessionService.CancelCloudSessionCreation();
+            await _createSessionService.CancelCreateCloudSession();
         }
         catch (Exception ex)
         {
-            // IsProgressActive = false;
-            // IsError = true;
-            _logger.LogError(ex, "CreateSession");
+            _logger.LogError(ex, "CancelCreateCloudSession");
         }
     }
 }

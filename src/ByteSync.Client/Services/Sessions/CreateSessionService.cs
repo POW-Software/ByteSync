@@ -85,7 +85,7 @@ public class CreateSessionService : ICreateSessionService
         }
     }
 
-    public Task CancelCloudSessionCreation()
+    public Task CancelCreateCloudSession()
     {
         _logger.LogInformation("User requested to cancel Cloud Session creation");
         _cloudSessionConnectionRepository.CancellationTokenSource.Cancel();
