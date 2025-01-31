@@ -3,11 +3,9 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Events;
-using ByteSync.Business.Navigations;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces;
-using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
@@ -20,7 +18,6 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
 {
     private readonly IJoinSessionService _joinSessionService;
     private readonly ICloudSessionEventsHub _cloudSessionEventsHub;
-    private readonly INavigationService _navigationService;
     private readonly ILocalizationService _localizationService;
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
     private readonly ILogger<JoinCloudSessionViewModel> _logger;
@@ -31,12 +28,11 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
     }
     
     public JoinCloudSessionViewModel(IJoinSessionService joinSessionService, ICloudSessionEventsHub cloudSessionEventsHub, 
-        INavigationService navigationService, ILocalizationService localizationService, ICloudSessionConnectionRepository cloudSessionConnectionRepository, 
+        ILocalizationService localizationService, ICloudSessionConnectionRepository cloudSessionConnectionRepository, 
         ILogger<JoinCloudSessionViewModel> logger)
     {
         _joinSessionService = joinSessionService;
         _cloudSessionEventsHub = cloudSessionEventsHub;
-        _navigationService = navigationService;
         _localizationService = localizationService;
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         _logger = logger;
@@ -49,6 +45,7 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         
         this.WhenActivated(disposables =>
         {
+            // Todo improve error handling
             Observable.FromEventPattern<GenericEventArgs<JoinSessionResult>>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.JoinCloudSessionFailed))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(evt => OnCloudSessionJoinError(evt.EventArgs.Value))
@@ -107,7 +104,7 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Can not join session");
+            _logger.LogError(ex, "Cannot join Cloud Session");
             UpdateErrorMessage(nameof(Resources.JoinSession_ErrorMessage));
         }
     }

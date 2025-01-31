@@ -55,7 +55,7 @@ public class CreateSessionService : ICreateSessionService
         {
             await _cloudSessionConnector.InitializeConnection(SessionConnectionStatus.CreatingSession);
             
-            await Task.Delay(5000, _cloudSessionConnectionRepository.CancellationToken);
+            // await Task.Delay(5000, _cloudSessionConnectionRepository.CancellationToken);
             
             var createCloudSessionParameters = BuildCreateCloudSessionParameters(request);
             var cloudSessionResult = await _cloudSessionApiClient.CreateCloudSession(createCloudSessionParameters, 

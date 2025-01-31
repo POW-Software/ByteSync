@@ -69,7 +69,7 @@ public class JoinSessionService : IJoinSessionService
 
         await _cloudSessionConnector.InitializeConnection(SessionConnectionStatus.JoiningSession);
         
-        await Task.Delay(5000, _cloudSessionConnectionRepository.CancellationToken);
+        // await Task.Delay(5000, _cloudSessionConnectionRepository.CancellationToken);
 
         await _trustProcessPublicKeysRepository.Start(sessionId);
         await _digitalSignaturesRepository.Start(sessionId);
