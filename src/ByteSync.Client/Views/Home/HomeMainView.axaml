@@ -15,7 +15,7 @@
     
     <Grid Background="{DynamicResource BlockBackColor}"> 
         
-        <StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
             <ContentControl Content="{Binding CreateCloudSession}" Background="{DynamicResource BlockBackColor}"
                             Margin="6" />
             
