@@ -133,8 +133,8 @@ public class GraphicalUserInterfaceBootstrapper : BaseBootstrapper
         Locator.CurrentMutable.Register(() => new HomeMainView(), typeof(IViewFor<HomeMainViewModel>));
         Locator.CurrentMutable.Register(() => new SessionMainView(), typeof(IViewFor<SessionMainViewModel>));
         Locator.CurrentMutable.Register(() => new LobbyMainView(), typeof(IViewFor<LobbyMainViewModel>));
-        
-        Locator.CurrentMutable.UseSerilogFullLogger();
+        //
+        // Locator.CurrentMutable.UseSerilogFullLogger();
             
         return AppBuilder.Configure<App>()
             .UsePlatformDetect()

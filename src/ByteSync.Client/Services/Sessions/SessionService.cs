@@ -56,6 +56,8 @@ public class SessionService : ISessionService
                 var sessionSettings = _dataEncrypter.DecryptSessionSettings(dto.EncryptedSessionSettings);
                 _sessionSettings.OnNext(sessionSettings);
             });
+
+        InitiateCloudSessionMode();
     }
     
     public IObservable<AbstractSession?> SessionObservable => _session.AsObservable();
@@ -131,7 +133,7 @@ public class SessionService : ISessionService
     {
         _sessionMode.OnNext(SessionModes.Cloud);
         
-        _navigationService.NavigateTo(NavigationPanel.CloudSynchronization);
+        // _navigationService.NavigateTo(NavigationPanel.CloudSynchronization);
         
         return Task.CompletedTask;
     }

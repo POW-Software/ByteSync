@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
+using Autofac;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -8,6 +9,7 @@ using Avalonia.ReactiveUI;
 using Avalonia.Threading;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
+using ByteSync.Services;
 using ByteSync.ViewModels;
 using Serilog;
 using Splat;
@@ -20,12 +22,20 @@ namespace ByteSync.Views
 
         public MainWindow()
         {
+            
+        }
+        
+        public MainWindow(IZoomService zoomService, MainWindowViewModel mainWindowViewModel)
+        {
             InitializeComponent();
+
+            _zoomService = zoomService;
+            DataContext = mainWindowViewModel;
             
             // Voir ce qui a été fait pour l'enregistrement du FlyoutPanel
-            Locator.CurrentMutable.RegisterConstant<IFileDialogService>(this);
+            // Locator.CurrentMutable.RegisterConstant<IFileDialogService>(this);
             
-            _zoomService = Locator.Current.GetService<IZoomService>()!;
+            // _zoomService = ContainerProvider.Container.Resolve<IZoomService>();
             
 #if DEBUG
             this.AttachDevTools();
@@ -46,15 +56,15 @@ namespace ByteSync.Views
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            // CanCloseApplication indique si l'utilisateur a déjà autorisé la fin de l'application
+            // CanCloseApplication indicates if the user has already authorized the end of the application
             if (!CanCloseApplication)
             {
                 e.Cancel = true;
-
-                // La gestion de la fermeture (messages et traitements) doit se faire en asynchrone
-                // Cela n'est pas compatible avec OnClosing (OnClosing n'attend pas la fin des traitements asynchrones)
-                // On lance la méthode ci-dessous qui est taskée
-                // A la fin de cette méthode, CanCloseApplication peut être settée à True et Close rappelé
+                
+                // The closing management (messages and treatments) must be done asynchronously
+                // This is not compatible with OnClosing (OnClosing does not wait for the end of asynchronous treatments)
+                // We launch the method below which is task
+                // At the end of this method, CanCloseApplication can be set to True and Close recalled
                 TryCloseApplication(ViewModel);
             }
 
@@ -67,7 +77,7 @@ namespace ByteSync.Views
             {
                 try
                 {
-                    // 08/06/2022: pour débugguer memory leaks
+                    // ReSharper disable once UnusedVariable C- can be used to debug memory leaks
                     var t = this;
 
                     bool canCloseApplication;

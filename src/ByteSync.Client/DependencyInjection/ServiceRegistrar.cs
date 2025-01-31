@@ -29,6 +29,7 @@ public static class ServiceRegistrar
         builder.RegisterModule<KeyedTypesModule>();
         builder.RegisterModule<SingletonsModule>();
         builder.RegisterModule<ViewModelsModule>();
+        builder.RegisterModule<ViewsModule>();
         builder.RegisterModule<ExternalAssembliesModule>();
 
         var autofacResolver = builder.UseAutofacDependencyResolver();

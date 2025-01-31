@@ -46,22 +46,16 @@ namespace ByteSync
         public override void OnFrameworkInitializationCompleted()
         {
             var container = ContainerProvider.Container;
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-            if (container != null)
-            {
-                var bootstrapperFactory = ContainerProvider.Container.Resolve<IBootstrapperFactory>();
-                var bootStrapper = bootstrapperFactory.CreateBootstrapper();
-                bootStrapper.AfterFrameworkInitializationCompleted();
-            }
-
+            
+            var bootstrapperFactory = container.Resolve<IBootstrapperFactory>();
+            var bootStrapper = bootstrapperFactory.CreateBootstrapper();
+            bootStrapper.AfterFrameworkInitializationCompleted();
+                
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new MainWindow
-                {
-                    DataContext = ContainerProvider.Container.Resolve<MainWindowViewModel>(),
-                };
+                desktop.MainWindow = container.Resolve<MainWindow>();
             }
-
+            
             base.OnFrameworkInitializationCompleted();
         }
     }
