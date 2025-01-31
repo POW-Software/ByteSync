@@ -34,7 +34,7 @@ public class CreateCloudSessionViewModel : ViewModelBase
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         _logger = logger;
         
-        CreateCloudSessionCommand = ReactiveCommand.CreateFromTask(CreateSession);
+        CreateCloudSessionCommand = ReactiveCommand.CreateFromTask(CreateCloudSession);
         CancelCloudSessionCreationCommand = ReactiveCommand.CreateFromTask(CancelCloudSessionCreation);
         
         _cloudSessionConnectionRepository.ConnectionStatusObservable
@@ -50,7 +50,7 @@ public class CreateCloudSessionViewModel : ViewModelBase
     
     public extern bool IsCreatingCloudSession { [ObservableAsProperty] get; }
     
-    private async Task CreateSession()
+    private async Task CreateCloudSession()
     {
         // CloudSessionManagement = StartCloudSessionViewModel;
         // await StartCloudSessionViewModel!.CreateSession();

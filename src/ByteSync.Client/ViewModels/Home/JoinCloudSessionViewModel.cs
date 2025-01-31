@@ -4,10 +4,12 @@ using System.Reactive.Linq;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Events;
 using ByteSync.Business.Navigations;
+using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.EventsHubs;
+using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -20,7 +22,9 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
     private readonly ICloudSessionEventsHub _cloudSessionEventsHub;
     private readonly INavigationService _navigationService;
     private readonly ILocalizationService _localizationService;
+    private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
     private readonly ILogger<JoinCloudSessionViewModel> _logger;
+
 
     public JoinCloudSessionViewModel()
     {
@@ -28,22 +32,26 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
     }
     
     public JoinCloudSessionViewModel(IJoinSessionService joinSessionService, ICloudSessionEventsHub cloudSessionEventsHub, 
-        INavigationService navigationService, ILocalizationService localizationService, ILogger<JoinCloudSessionViewModel> logger)
+        INavigationService navigationService, ILocalizationService localizationService, ICloudSessionConnectionRepository cloudSessionConnectionRepository, 
+        ILogger<JoinCloudSessionViewModel> logger)
     {
         _joinSessionService = joinSessionService;
         _cloudSessionEventsHub = cloudSessionEventsHub;
         _navigationService = navigationService;
         _localizationService = localizationService;
+        _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         _logger = logger;
 
         SessionId = "";
         SessionPassword = "";
 
-        AreControlsEnabled = true;
+        // AreControlsEnabled = true;
 
-        var canJoin = this.WhenAnyValue(x => x.AreControlsEnabled, (bool areControlsEnabled) => areControlsEnabled) ;
-        JoinCommand = ReactiveCommand.CreateFromTask(Join, canJoin);
+        // var canJoin = this.WhenAnyValue(x => x.AreControlsEnabled, (bool areControlsEnabled) => areControlsEnabled) ;
+        JoinCommand = ReactiveCommand.CreateFromTask(JoinCloudSession);
         CancelCommand = ReactiveCommand.Create(() => { _navigationService.NavigateTo(NavigationPanel.Home); });
+        
+        
         
         this.WhenActivated(disposables =>
         {
@@ -56,6 +64,12 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => OnLocaleChanged())
                 .DisposeWith(disposables);
+            
+            _cloudSessionConnectionRepository.ConnectionStatusObservable
+                .Select(x => x == SessionConnectionStatus.JoiningSession)
+                .ToPropertyEx(this, x => x.IsJoiningCloudSession)
+                .DisposeWith(disposables);
+            
         });
     }
     
@@ -75,10 +89,9 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
     [Reactive]
     public string? ErrorMessageSource { get; set; }
     
-    [Reactive]
-    public bool AreControlsEnabled { get; set; }
+    public extern bool IsJoiningCloudSession { [ObservableAsProperty] get; }
     
-    private async Task Join()
+    private async Task JoinCloudSession()
     {
         try
         {
@@ -96,7 +109,7 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
                 return;
             }
 
-            AreControlsEnabled = false;
+            // AreControlsEnabled = false;
 
             await _joinSessionService.JoinSession(SessionId, SessionPassword, null);
         }
@@ -107,7 +120,7 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         }
         finally
         {
-            AreControlsEnabled = true;
+            // AreControlsEnabled = true;
         }
     }
     
