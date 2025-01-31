@@ -1,11 +1,8 @@
 ﻿using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using ByteSync.Business.Sessions;
-using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
-using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Unit = System.Reactive.Unit;
@@ -14,8 +11,6 @@ namespace ByteSync.ViewModels.Home;
 
 public class CreateCloudSessionViewModel : ActivatableViewModelBase
 {
-    private readonly INavigationService _navigationService;
-    private readonly ICloudSessionConnector _cloudSessionConnector;
     private readonly ICreateSessionService _createSessionService;
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
     private readonly ILogger<CreateCloudSessionViewModel> _logger;
@@ -25,12 +20,9 @@ public class CreateCloudSessionViewModel : ActivatableViewModelBase
     {
     }
 
-    public CreateCloudSessionViewModel(INavigationService navigationService, ICloudSessionConnector cloudSessionConnector, 
-        ICreateSessionService createSessionService, ICloudSessionConnectionRepository cloudSessionConnectionRepository, 
+    public CreateCloudSessionViewModel(ICreateSessionService createSessionService, ICloudSessionConnectionRepository cloudSessionConnectionRepository, 
         ILogger<CreateCloudSessionViewModel> logger)
     {
-        _navigationService = navigationService;
-        _cloudSessionConnector = cloudSessionConnector;
         _createSessionService = createSessionService;
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         _logger = logger;
