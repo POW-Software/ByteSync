@@ -186,9 +186,6 @@
   <data name="OperationSelection_Documentation" xml:space="preserve">
     <value>Documentation</value>
   </data>
-  <data name="OnlineActions_Title" xml:space="preserve">
-    <value>Cloud Synchronization</value>
-  </data>
   <data name="StartComparison_SessionId" xml:space="preserve">
     <value>Session ID:</value>
   </data>
@@ -428,12 +425,6 @@
   </data>
   <data name="SessionMachine_NoDataSelected" xml:space="preserve">
     <value>Please select data</value>
-  </data>
-  <data name="OnlineActions_StartCloudSession" xml:space="preserve">
-    <value>START CLOUD SESSION</value>
-  </data>
-  <data name="OnlineActions_JoinCloudSession" xml:space="preserve">
-    <value>JOIN CLOUD SESSION</value>
   </data>
   <data name="SessionMachine_Status_WaitingForStart" xml:space="preserve">
     <value>Waiting for inventory start</value>

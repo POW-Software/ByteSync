@@ -1441,33 +1441,6 @@ namespace ByteSync.Assets.Resources {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à JOIN CLOUD SESSION.
-        /// </summary>
-        internal static string OnlineActions_JoinCloudSession {
-            get {
-                return ResourceManager.GetString("OnlineActions_JoinCloudSession", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à START CLOUD SESSION.
-        /// </summary>
-        internal static string OnlineActions_StartCloudSession {
-            get {
-                return ResourceManager.GetString("OnlineActions_StartCloudSession", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Cloud Synchronization.
-        /// </summary>
-        internal static string OnlineActions_Title {
-            get {
-                return ResourceManager.GetString("OnlineActions_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Recherche une chaîne localisée semblable à Documentation.
         /// </summary>
         internal static string OperationSelection_Documentation {
