@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using Autofac;
+using Avalonia;
 using Avalonia.ReactiveUI;
 using ByteSync.Business.Misc;
 using ByteSync.Business.Navigations;
@@ -17,6 +18,7 @@ using ByteSync.Views.Lobbies;
 using ByteSync.Views.Sessions;
 using ReactiveUI;
 using Splat;
+using Splat.Autofac;
 using Splat.Serilog;
 
 namespace ByteSync.Services.Bootstrappers;
@@ -130,15 +132,23 @@ public class GraphicalUserInterfaceBootstrapper : BaseBootstrapper
         // https://www.reactiveui.net/docs/handbook/view-location/
         // Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetExecutingAssembly());
         
-        Locator.CurrentMutable.Register(() => new HomeMainView(), typeof(IViewFor<HomeMainViewModel>));
-        Locator.CurrentMutable.Register(() => new SessionMainView(), typeof(IViewFor<SessionMainViewModel>));
-        Locator.CurrentMutable.Register(() => new LobbyMainView(), typeof(IViewFor<LobbyMainViewModel>));
+        // Locator.CurrentMutable.Register(() => new HomeMainView(), typeof(IViewFor<HomeMainViewModel>));
+        // Locator.CurrentMutable.Register(() => new SessionMainView(), typeof(IViewFor<SessionMainViewModel>));
+        // Locator.CurrentMutable.Register(() => new LobbyMainView(), typeof(IViewFor<LobbyMainViewModel>));
+        // //
+        // // Locator.CurrentMutable.UseSerilogFullLogger();
         //
-        // Locator.CurrentMutable.UseSerilogFullLogger();
-            
+        // Locator.SetLocator(new AutofacLocatorProvider(container));.SetLocatorProvider(() => new AutofacLocatorProvider(container));
+
+        var autofacResolver = ContainerProvider.Container.Resolve<AutofacDependencyResolver>();
+
+        // Set a lifetime scope (either the root or any of the child ones) to Autofac resolver
+        // This is needed, because the previous steps did not Update the ContainerBuilder since they became immutable in Autofac 5+
+        // https://github.com/autofac/Autofac/issues/811
+        autofacResolver.SetLifetimeScope(ContainerProvider.Container);
+
         return AppBuilder.Configure<App>()
             .UsePlatformDetect()
-            .LogToTrace()
-            .UseReactiveUI();
+            .LogToTrace();
     }
 }

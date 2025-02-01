@@ -1,6 +1,14 @@
 ﻿using Autofac;
+using Avalonia.ReactiveUI;
 using ByteSync.Interfaces;
+using ByteSync.ViewModels.Home;
+using ByteSync.ViewModels.Lobbies;
+using ByteSync.ViewModels.Sessions;
 using ByteSync.Views;
+using ByteSync.Views.Home;
+using ByteSync.Views.Lobbies;
+using ByteSync.Views.Sessions;
+using ReactiveUI;
 using Module = Autofac.Module;
 
 namespace ByteSync.DependencyInjection.Modules;
@@ -14,5 +22,34 @@ public class ViewsModule : Module
             .AsSelf()
             .As<IFileDialogService>()
             .AsImplementedInterfaces();
+        
+        // builder.RegisterType<HomeMainView>()
+        //     .As<IViewFor<HomeMainViewModel>>()
+        //     .InstancePerDependency();
+        //
+        // builder.RegisterType<SessionMainView>()
+        //     .As<IViewFor<SessionMainViewModel>>()
+        //     .InstancePerDependency();
+        //
+        // builder.RegisterType<LobbyMainView>()
+        //     .As<IViewFor<LobbyMainViewModel>>()
+        //     .InstancePerDependency();
+        
+        builder.RegisterType<HomeMainView>().As<IViewFor<HomeMainViewModel>>();
+        builder.RegisterType<SessionMainView>().As<IViewFor<SessionMainViewModel>>();
+        builder.RegisterType<LobbyMainView>().As<IViewFor<LobbyMainViewModel>>();
+        
+        builder.RegisterInstance(new AvaloniaActivationForViewFetcher())
+            .As<IActivationForViewFetcher>()
+            .SingleInstance();
+
+        builder.RegisterInstance(new AutoDataTemplateBindingHook())
+            .As<IPropertyBindingHook>()
+            .SingleInstance();
+        
+        // builder.RegisterConstant(new AvaloniaActivationForViewFetcher(), typeof(IActivationForViewFetcher));
+        // builder.RegisterConstant(new AutoDataTemplateBindingHook(), typeof(IPropertyBindingHook));
     }
+    
+    
 }

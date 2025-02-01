@@ -1,4 +1,6 @@
 ﻿using Autofac;
+using Avalonia.ReactiveUI;
+using Avalonia.Threading;
 using ByteSync.Business.Arguments;
 using ByteSync.Common.Interfaces;
 using ByteSync.DependencyInjection.Modules;
@@ -9,6 +11,7 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Services;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
+using Splat;
 using Splat.Autofac;
 
 namespace ByteSync.DependencyInjection;
@@ -35,10 +38,18 @@ public static class ServiceRegistrar
         var autofacResolver = builder.UseAutofacDependencyResolver();
         builder.RegisterInstance(autofacResolver);
         
+        autofacResolver.InitializeSplat();
         autofacResolver.InitializeReactiveUI();
+        
+        RxApp.MainThreadScheduler = AvaloniaScheduler.Instance;
+        // Locator.CurrentMutable.RegisterConstant(new AvaloniaActivationForViewFetcher(), typeof(IActivationForViewFetcher));
+        // Locator.CurrentMutable.RegisterConstant(new AutoDataTemplateBindingHook(), typeof(IPropertyBindingHook));
 
         var container = builder.Build();
         ContainerProvider.Container = container;
+        
+        // autofacResolver = container.Resolve<AutofacDependencyResolver>();
+        // autofacResolver.SetLifetimeScope(container);
 
         using (var scope = container.BeginLifetimeScope())
         {
