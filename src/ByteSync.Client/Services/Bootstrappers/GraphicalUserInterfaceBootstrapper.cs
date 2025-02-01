@@ -129,17 +129,6 @@ public class GraphicalUserInterfaceBootstrapper : BaseBootstrapper
 
     private AppBuilder BuildAvaloniaApp()
     {
-        // https://www.reactiveui.net/docs/handbook/view-location/
-        // Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetExecutingAssembly());
-        
-        // Locator.CurrentMutable.Register(() => new HomeMainView(), typeof(IViewFor<HomeMainViewModel>));
-        // Locator.CurrentMutable.Register(() => new SessionMainView(), typeof(IViewFor<SessionMainViewModel>));
-        // Locator.CurrentMutable.Register(() => new LobbyMainView(), typeof(IViewFor<LobbyMainViewModel>));
-        // //
-        // // Locator.CurrentMutable.UseSerilogFullLogger();
-        //
-        // Locator.SetLocator(new AutofacLocatorProvider(container));.SetLocatorProvider(() => new AutofacLocatorProvider(container));
-
         var autofacResolver = ContainerProvider.Container.Resolve<AutofacDependencyResolver>();
 
         // Set a lifetime scope (either the root or any of the child ones) to Autofac resolver

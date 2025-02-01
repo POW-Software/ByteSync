@@ -22,7 +22,7 @@ public class CloudSessionApiClient : ICloudSessionApiClient
     {
         try
         {
-            var result = await _apiInvoker.PostAsync<CloudSessionResult>($"session", parameters);
+            var result = await _apiInvoker.PostAsync<CloudSessionResult>($"session", parameters, cancellationToken);
 
             return result;
         }
