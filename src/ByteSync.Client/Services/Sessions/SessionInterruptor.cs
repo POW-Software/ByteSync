@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Assets.Resources;
+﻿using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions;

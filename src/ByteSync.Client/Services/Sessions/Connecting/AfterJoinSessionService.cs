@@ -1,7 +1,5 @@
 ﻿using System.Text;
-using System.Threading.Tasks;
 using ByteSync.Business.Sessions.Connecting;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;

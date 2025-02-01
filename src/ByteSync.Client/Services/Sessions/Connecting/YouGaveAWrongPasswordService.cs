@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Business.Sessions;
+﻿using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Repositories;
