@@ -31,8 +31,8 @@
             <StackPanel Grid.Row="3" Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Center">
                 
                 <!-- Create Button -->
-                <Button Classes="GenericButton" Margin="3"
-                        HorizontalAlignment="Left" MaxHeight="30"
+                <Button Classes="GenericButton" Margin="9" Height="32"
+                        HorizontalAlignment="Center" 
                         Command="{Binding Path=CreateCloudSessionCommand}" IsVisible="{Binding !IsCreatingCloudSession}">
                     <StackPanel Orientation="Horizontal">
                         <misc:Icon FontSize="16" Value="RegularAnalyse" Margin="0" />
@@ -41,13 +41,13 @@
                 </Button>
                 
                 <!-- Progress Bar -->
-                <misc:LinearProgress Width="120" Height="100"
+                <misc:LinearProgress Width="120" Margin="9" Height="32"
                                      IsActive="{Binding IsCreatingCloudSession}"
                                      IsVisible="{Binding IsCreatingCloudSession}" />
                 
                 <!-- Cancel Button -->
-                <Button Classes="GenericButton" Margin="3"
-                        HorizontalAlignment="Left" MaxHeight="30"
+                <Button Classes="GenericButton" Margin="9" Height="32"
+                        HorizontalAlignment="Center"
                         Command="{Binding Path=CancelCloudSessionCreationCommand}" IsVisible="{Binding IsCreatingCloudSession}">
                     <StackPanel Orientation="Horizontal">
                         <misc:Icon FontSize="16" Value="RegularX" Margin="0" />
