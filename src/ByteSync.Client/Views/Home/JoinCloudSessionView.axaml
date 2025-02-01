@@ -12,9 +12,9 @@
         <home:JoinCloudSessionViewModel />
     </Design.DataContext>
     
-    <Border BorderBrush="{DynamicResource HomeCloudSynchronizationBackGround}" CornerRadius="4" BorderThickness="5" 
+    <Border BorderBrush="{DynamicResource OtherMemberBackGround}" CornerRadius="4" BorderThickness="5" 
             Width="400" Height="400" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Grid Background="{DynamicResource HomeCloudSynchronizationBackGround}">
+        <Grid Background="{DynamicResource OtherMemberBackGround}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
