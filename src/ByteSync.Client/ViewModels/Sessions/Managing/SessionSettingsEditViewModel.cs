@@ -2,17 +2,15 @@
 using System.Reactive.Linq;
 using Avalonia.Controls.Mixins;
 using ByteSync.Business.Sessions;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Factories.ViewModels;
-using ByteSync.ViewModels.Sessions.Cloud.Managing;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
 
-namespace ByteSync.ViewModels.Sessions.Settings;
+namespace ByteSync.ViewModels.Sessions.Managing;
 
 public class SessionSettingsEditViewModel : ActivatableViewModelBase
 {

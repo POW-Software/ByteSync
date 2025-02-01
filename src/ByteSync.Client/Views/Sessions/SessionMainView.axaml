@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:sessions="clr-namespace:ByteSync.ViewModels.Sessions"
-             xmlns:members="clr-namespace:ByteSync.Views.Sessions.Cloud.Members"
+             xmlns:members="clr-namespace:ByteSync.Views.Sessions.Members"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ByteSync.Views.Sessions.SessionMainView">
     

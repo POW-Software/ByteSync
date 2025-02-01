@@ -211,9 +211,13 @@
       <DependentUpon>UsageStatisticsView.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Sessions\Managing\SessionSettingsEditView.axaml.cs">
+      <DependentUpon>SessionSettingsEditView.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ViewModels\Sessions\Cloud" />
-    <Folder Include="Views\Sessions\Cloud" />
+    <Folder Include="ViewModels\Sessions\Settings\" />
   </ItemGroup>
 </Project>

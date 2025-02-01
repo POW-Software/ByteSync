@@ -6,7 +6,7 @@ using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Factories.ViewModels;
-using ByteSync.ViewModels.Sessions.Settings;
+using ByteSync.ViewModels.Sessions.Managing;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;

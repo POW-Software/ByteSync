@@ -2,13 +2,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:settings="clr-namespace:ByteSync.ViewModels.Sessions.Settings"
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             xmlns:managing="clr-namespace:ByteSync.ViewModels.Sessions.Managing"
              mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="500"
-             x:Class="ByteSync.Views.Sessions.Settings.SessionSettingsEditView">
+             x:Class="ByteSync.Views.Sessions.Managing.SessionSettingsEditView">
    
     <Design.DataContext>
-        <settings:SessionSettingsEditViewModel />
+        <managing:SessionSettingsEditViewModel />
     </Design.DataContext>
     
     <WrapPanel Orientation="Horizontal" IsEnabled="{Binding CanEditSettings}"> 

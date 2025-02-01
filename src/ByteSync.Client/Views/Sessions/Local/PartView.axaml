@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:ByteSync.ViewModels.Sessions.Local"
              xmlns:misc="clr-namespace:ByteSync.Views.Misc"
-             xmlns:members="clr-namespace:ByteSync.ViewModels.Sessions.Cloud.Members"
              xmlns:local1="clr-namespace:ByteSync.Views.Sessions.Local"
              xmlns:inventories="clr-namespace:ByteSync.ViewModels.Sessions.Inventories"
              xmlns:pathItems="clr-namespace:ByteSync.Business.PathItems"

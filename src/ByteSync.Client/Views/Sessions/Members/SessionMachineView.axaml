@@ -3,10 +3,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:misc="clr-namespace:ByteSync.Views.Misc"
-             xmlns:members="clr-namespace:ByteSync.ViewModels.Sessions.Cloud.Members"
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             xmlns:members="clr-namespace:ByteSync.ViewModels.Sessions.Members"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="ByteSync.Views.Sessions.Cloud.Members.SessionMachineView">
+             x:Class="ByteSync.Views.Sessions.Members.SessionMachineView">
     
     <Design.DataContext>
         <members:SessionMachineViewModel />

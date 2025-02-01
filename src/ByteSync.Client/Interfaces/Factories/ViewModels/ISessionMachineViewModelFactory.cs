@@ -1,5 +1,5 @@
 ﻿using ByteSync.Business.SessionMembers;
-using ByteSync.ViewModels.Sessions.Cloud.Members;
+using ByteSync.ViewModels.Sessions.Members;
 
 namespace ByteSync.Interfaces.Factories.ViewModels;
 

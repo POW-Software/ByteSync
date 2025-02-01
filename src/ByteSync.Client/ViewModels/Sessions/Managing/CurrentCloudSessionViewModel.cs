@@ -1,23 +1,20 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.Mixins;
 using ByteSync.Business.Arguments;
 using ByteSync.Business.Events;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Factories.ViewModels;
-using ByteSync.ViewModels.Sessions.Settings;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
 
-namespace ByteSync.ViewModels.Sessions.Cloud.Managing;
+namespace ByteSync.ViewModels.Sessions.Managing;
 
 public class CurrentCloudSessionViewModel : ActivatableViewModelBase
 {
