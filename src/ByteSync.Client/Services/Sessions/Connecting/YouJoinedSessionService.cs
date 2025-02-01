@@ -23,7 +23,6 @@ public class YouJoinedSessionService : IYouJoinedSessionService
     private readonly ICloudSessionApiClient _cloudSessionApiClient;
     private readonly IPublicKeysManager _publicKeysManager;
     private readonly ISessionService _sessionService;
-    private readonly ICloudSessionConnector _cloudSessionConnector;
     private readonly IAfterJoinSessionService _afterJoinSessionService;
     private readonly ILogger<YouJoinedSessionService> _logger;
     
@@ -33,7 +32,7 @@ public class YouJoinedSessionService : IYouJoinedSessionService
     public YouJoinedSessionService(ICloudSessionConnectionRepository cloudSessionConnectionRepository,
         IEnvironmentService environmentService, IPublicKeysTruster publicKeysTruster, IDigitalSignaturesChecker digitalSignaturesChecker,
         IDataEncrypter dataEncrypter, ICloudSessionApiClient cloudSessionApiClient, IPublicKeysManager publicKeysManager, ISessionService sessionService,
-        ICloudSessionConnector cloudSessionConnector, IAfterJoinSessionService afterJoinSessionService, ILogger<YouJoinedSessionService> logger)
+        IAfterJoinSessionService afterJoinSessionService, ILogger<YouJoinedSessionService> logger)
     {
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         _environmentService = environmentService;
@@ -43,7 +42,6 @@ public class YouJoinedSessionService : IYouJoinedSessionService
         _cloudSessionApiClient = cloudSessionApiClient;
         _publicKeysManager = publicKeysManager;
         _sessionService = sessionService;
-        _cloudSessionConnector = cloudSessionConnector;
         _afterJoinSessionService = afterJoinSessionService;
         _logger = logger;
     }
