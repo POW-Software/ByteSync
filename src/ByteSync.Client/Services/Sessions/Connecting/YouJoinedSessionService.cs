@@ -143,6 +143,8 @@ public class YouJoinedSessionService : IYouJoinedSessionService
             
             
             await _cloudSessionConnectionRepository.SetJoinSessionResultReceived(cloudSessionResult.CloudSession.SessionId);
+            
+            _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.InSession);
 
             // ReSharper disable once PossibleNullReferenceException
             Log.Information("JoinSession: {CloudSession}", cloudSessionResult.SessionId);
@@ -152,9 +154,7 @@ public class YouJoinedSessionService : IYouJoinedSessionService
             Log.Error(ex, "OnYouJoinedSession");
             
             _sessionService.ClearCloudSession();
-        }
-        finally
-        {
+            
             _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.None);
         }
     }

@@ -76,6 +76,7 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
             
             _cloudSessionConnectionRepository.ConnectionStatusObservable
                 .Where(x => x == SessionConnectionStatus.InSession)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(x => _navigationService.NavigateTo(NavigationPanel.CloudSynchronization))
                 .DisposeWith(disposables);
             
