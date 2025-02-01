@@ -1,4 +1,5 @@
 ﻿using ByteSync.Business.Navigations;
+using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Navigations;
@@ -39,17 +40,15 @@ public class QuitSessionService : IQuitSessionService
         {
             try
             {
-                // Ici, le but est d'essayer de quitter la session, sans bloquer l'utilisateur pour autant si cela échoue
                 await _cloudSessionApiClient.QuitCloudSession(session.SessionId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error durant calling Hub... continuing exit of the session");
+                _logger.LogError(ex, "Error while exiting the session");
             }
         }
         
-        await _cloudSessionConnector.ClearConnectionData();
-        _sessionService.ClearCloudSession();
+        await _cloudSessionConnector.InitializeConnection(SessionConnectionStatus.NoSession);
 
         if (session is CloudSession)
         {
@@ -60,8 +59,8 @@ public class QuitSessionService : IQuitSessionService
             _logger.LogInformation("Quitted Local Session {CloudSession}", session.SessionId);
         }
 
-        
-        _navigationService.NavigateTo(NavigationPanel.Home);
-        // _cloudSessionEventsHub.RaiseCloudSessionQuitted();
+        //
+        // _navigationService.NavigateTo(NavigationPanel.Home);
+        // // _cloudSessionEventsHub.RaiseCloudSessionQuitted();
     }
 }

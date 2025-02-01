@@ -58,8 +58,6 @@ class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivatableView
             .Bind(out _data)
             .DisposeMany()
             .Subscribe();
-            
-        // CloudSessionManagement = CurrentCloudSessionViewModel;
 
         this.WhenActivated(disposables =>
         {
@@ -77,12 +75,6 @@ class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivatableView
                 .ToPropertyEx(this, x => x.IsCloudSession)
                 .DisposeWith(disposables);
             
-            // _sessionMemberRepository.SortedSessionMembersObservable
-            //     .Select(m => m.Count > 0)
-            //     .DistinctUntilChanged()
-            //     .Subscribe(_ => OnCloudSessionJoined())
-            //     .DisposeWith(disposables);
-            //
             _sessionService.SessionStatusObservable.CombineLatest(_sessionMemberRepository.SortedSessionMembersObservable)
                 .Select(s => (s.First == SessionStatus.Preparation && s.Second.Count > 0)
                                 || (s.First == SessionStatus.Inventory 
@@ -104,17 +96,8 @@ class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivatableView
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .ToPropertyEx(this, x => x.IsSynchronizationVisible)
                 .DisposeWith(disposables);
-
-            // if (_sessionService.IsCloudSession)
-            // {
-            //     OnCloudSessionJoined();
-            // }
         });
     }
-        
-    // public StartCloudSessionViewModel? StartCloudSessionViewModel { get; private set; }
-        
-    // public CurrentCloudSessionViewModel? CurrentCloudSessionViewModel { get; private set; }
     
     public ReadOnlyObservableCollection<SessionMachineViewModel> Machines => _data;
 
@@ -142,9 +125,4 @@ class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivatableView
         
     [Reactive]
     public ViewModelBase SynchronizationProcess { get; set; }
-
-    // private void OnCloudSessionJoined()
-    // {
-    //     CloudSessionManagement = CurrentCloudSessionViewModel;
-    // }
 }

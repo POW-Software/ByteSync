@@ -80,6 +80,12 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
                 .Subscribe(x => _navigationService.NavigateTo(NavigationPanel.CloudSynchronization))
                 .DisposeWith(disposables);
             
+            _cloudSessionConnectionRepository.ConnectionStatusObservable
+                .Where(x => x == SessionConnectionStatus.NoSession)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(x => _navigationService.NavigateTo(NavigationPanel.Home))
+                .DisposeWith(disposables);
+            
         });
     }
 
