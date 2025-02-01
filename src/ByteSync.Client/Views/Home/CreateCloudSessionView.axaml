@@ -19,6 +19,7 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="120"></RowDefinition>
             </Grid.RowDefinitions>
             
             <TextBlock Grid.Row="0" Name="MachineDescriptionTextBlock" FontWeight="Bold" Text="Create a new Cloud Session" Margin="3"/>
@@ -26,12 +27,11 @@
             <Rectangle Grid.Row="1" Height="1" Fill="{DynamicResource SystemBaseLowColor}" Margin="3,6"/>
             
             <StackPanel Grid.Row="2" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
-                <misc:LinearProgress Width="120" Height="100"
-                                     IsActive="{Binding IsCreatingCloudSession}"
-                                     IsVisible="{Binding IsCreatingCloudSession}" />
+            </StackPanel>
+            
+            <StackPanel Grid.Row="3" Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Center">
                 
-                <!-- TODO Delete OnlineActions_JoinCloudSession, OnlineActions_StartCloudSession & OnlineActions_Title-->
-                
+                <!-- Create Button -->
                 <Button Classes="GenericButton" Margin="3"
                         HorizontalAlignment="Left" MaxHeight="30"
                         Command="{Binding Path=CreateCloudSessionCommand}" IsVisible="{Binding !IsCreatingCloudSession}">
@@ -41,6 +41,12 @@
                     </StackPanel>
                 </Button>
                 
+                <!-- Progress Bar -->
+                <misc:LinearProgress Width="120" Height="100"
+                                     IsActive="{Binding IsCreatingCloudSession}"
+                                     IsVisible="{Binding IsCreatingCloudSession}" />
+                
+                <!-- Cancel Button -->
                 <Button Classes="GenericButton" Margin="3"
                         HorizontalAlignment="Left" MaxHeight="30"
                         Command="{Binding Path=CancelCloudSessionCreationCommand}" IsVisible="{Binding IsCreatingCloudSession}">

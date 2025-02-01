@@ -19,13 +19,14 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="120"></RowDefinition>
             </Grid.RowDefinitions>
             
             <TextBlock Grid.Row="0" Name="MachineDescriptionTextBlock" FontWeight="Bold" Text="Join an existing Cloud Session" Margin="3"/>
             
             <Rectangle Grid.Row="1" Height="1" Fill="{DynamicResource SystemBaseLowColor}" Margin="3,6"/>
             
-            <StackPanel Grid.Row="2" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <StackPanel Grid.Row="2" Margin="0 0 0 24" Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Center">
                 
                 <!-- SessionId -->
                 <StackPanel Orientation="Vertical" Margin="3" HorizontalAlignment="Left">
@@ -35,15 +36,18 @@
                 </StackPanel>
 
                 <!-- Password -->
-                <StackPanel Orientation="Vertical" Margin="20,3,3,3" HorizontalAlignment="Left">
+                <StackPanel Orientation="Vertical" Margin="3" HorizontalAlignment="Left">
                     <Label Content="{localizations:Loc StartComparison_SessionPassword}" />
                     <TextBox Text="{Binding SessionPassword}" Name="TextBoxSessionPassword" 
                              IsEnabled="{Binding !IsJoiningCloudSession}" MinWidth="200" HorizontalAlignment="Left"/>
                 </StackPanel>
+            </StackPanel>
+            
+            <StackPanel Grid.Row="3" Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Center">
 
                 <!-- Join Button -->
                 <Button Classes="GenericButton" Name="ButtonJoin" Height="32" HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                        Command="{Binding Path=JoinCommand}" IsVisible="{Binding !IsJoiningCloudSession}" Margin="20,3,3,3">
+                        Command="{Binding Path=JoinCommand}" IsVisible="{Binding !IsJoiningCloudSession}" Margin="3">
                     <StackPanel Orientation="Horizontal">
                         <misc:Icon FontSize="16" Value="RegularLogInCircle" Margin="0" />
                         <TextBlock Text="{localizations:Loc JoinCloudSession_JoinCloudSession}" />
@@ -60,6 +64,7 @@
                     </StackPanel>
                 </Button>
                 
+                <!-- Progress Bar -->
                 <misc:LinearProgress Width="48" Height="32" 
                                      Margin="20,0,0,3"  HorizontalAlignment="Center" VerticalAlignment="Bottom"
                                      IsActive="{Binding IsJoiningCloudSession}" IsVisible="{Binding IsJoiningCloudSession}"
