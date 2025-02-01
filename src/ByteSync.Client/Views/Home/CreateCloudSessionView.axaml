@@ -12,9 +12,8 @@
         <home:CreateCloudSessionViewModel />
     </Design.DataContext>
     
-    <Border BorderBrush="{DynamicResource OtherMemberBackGround}" CornerRadius="4" BorderThickness="5" 
-            Width="400" Height="400" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Grid Background="{DynamicResource OtherMemberBackGround}">
+    <Border Width="380" Height="320">
+        <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>

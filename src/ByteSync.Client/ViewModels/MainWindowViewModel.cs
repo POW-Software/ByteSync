@@ -76,12 +76,14 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
             
             _cloudSessionConnectionRepository.ConnectionStatusObservable
                 .Where(x => x == SessionConnectionStatus.InSession)
+                .DistinctUntilChanged()
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(x => _navigationService.NavigateTo(NavigationPanel.CloudSynchronization))
                 .DisposeWith(disposables);
             
             _cloudSessionConnectionRepository.ConnectionStatusObservable
                 .Where(x => x == SessionConnectionStatus.NoSession)
+                .DistinctUntilChanged()
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(x => _navigationService.NavigateTo(NavigationPanel.Home))
                 .DisposeWith(disposables);

@@ -12,11 +12,17 @@
     
     <Grid Background="{DynamicResource BlockBackColor}"> 
         
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <ContentControl Content="{Binding CreateCloudSession}" Margin="9" />
-            
-            <ContentControl Content="{Binding JoinCloudSession}" Margin="9" />
-        </StackPanel>
+        <Border BorderBrush="{DynamicResource OtherMemberBackGround}" CornerRadius="4" BorderThickness="5" 
+                HorizontalAlignment="Center" VerticalAlignment="Center" Background="{DynamicResource OtherMemberBackGround}">
+            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        >
+                <ContentControl Content="{Binding CreateCloudSession}" Margin="24 12" 
+                                HorizontalAlignment="Center" VerticalAlignment="Center" />
+                
+                <ContentControl Content="{Binding JoinCloudSession}" Margin="24 12" 
+                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </WrapPanel>
+        </Border>
         
         <!-- <Grid.Styles> -->
         <!--     <Style Selector="Button.CloudSynchronization"> -->
