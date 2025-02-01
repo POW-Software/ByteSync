@@ -107,13 +107,13 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         #endif
             if (SessionId.IsNullOrEmpty())
             {
-                UpdateErrorMessage(nameof(Resources.JoinSession_LoginMissing));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_LoginMissing));
                 return;
             }
 
             if (SessionPassword.IsNullOrEmpty())
             {
-                UpdateErrorMessage(nameof(Resources.JoinSession_PasswordMissing));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_PasswordMissing));
                 return;
             }
 
@@ -124,7 +124,7 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         catch (Exception ex)
         {
             Log.Error(ex, "Can not join session");
-            UpdateErrorMessage(nameof(Resources.JoinSession_ErrorMessage));
+            UpdateErrorMessage(nameof(Resources.JoinCloudSession_ErrorMessage));
         }
         finally
         {
@@ -158,31 +158,31 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         switch (joinSessionResult.Status)
         {
             case JoinSessionStatuses.SessionNotFound:
-                UpdateErrorMessage(nameof(Resources.JoinSession_SessionNotFound));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_SessionNotFound));
                 break;
             
             case JoinSessionStatuses.ServerError:
-                UpdateErrorMessage(nameof(Resources.JoinSession_ServerError));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_ServerError));
                 break;
             
             case JoinSessionStatuses.TransientError:
-                UpdateErrorMessage(nameof(Resources.JoinSession_TransientError));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_TransientError));
                 break;
             
             case JoinSessionStatuses.TooManyMembers:
-                UpdateErrorMessage(nameof(Resources.JoinSession_TooManyMembers));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_TooManyMembers));
                 break;
             
             case JoinSessionStatuses.SessionAlreadyActivated:
-                UpdateErrorMessage(nameof(Resources.JoinSession_SessionAlreadyActivated));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_SessionAlreadyActivated));
                 break;
             
             case JoinSessionStatuses.TrustCheckFailed:
-                UpdateErrorMessage(nameof(Resources.JoinSession_TrustCheckFailed));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_TrustCheckFailed));
                 break;
             
             default:
-                UpdateErrorMessage(nameof(Resources.JoinSession_UnkownError));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_UnkownError));
                 break;
         }
     }

@@ -2,7 +2,7 @@
 
 public enum SessionConnectionStatus
 { 
-    None = 0,
+    NoSession = 0,
     JoiningSession = 1, 
     CreatingSession = 2,
     InSession = 3,

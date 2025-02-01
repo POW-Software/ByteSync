@@ -33,7 +33,7 @@ public class YouGaveAWrongPasswordService : IYouGaveAWrongPasswordService
                 _logger.LogError(UNKNOWN_RECEIVED_SESSION_ID, sessionId);
             }
 
-            _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.None);
+            _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.NoSession);
             
             await _cloudSessionEventsHub.RaiseJoinCloudSessionFailed(JoinSessionResult.BuildFrom(JoinSessionStatuses.WrondPassword));
         }

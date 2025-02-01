@@ -79,7 +79,7 @@ public class CreateSessionService : ICreateSessionService
         }
         catch (Exception)
         {
-            await _cloudSessionConnector.InitializeConnection(SessionConnectionStatus.None);
+            await _cloudSessionConnector.InitializeConnection(SessionConnectionStatus.NoSession);
 
             throw;
         }

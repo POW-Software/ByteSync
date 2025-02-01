@@ -35,21 +35,10 @@ public static class ServiceRegistrar
         builder.RegisterModule<ViewsModule>();
         builder.RegisterModule<ExternalAssembliesModule>();
 
-        var autofacResolver = builder.UseAutofacDependencyResolver();
-        builder.RegisterInstance(autofacResolver);
-        
-        autofacResolver.InitializeSplat();
-        autofacResolver.InitializeReactiveUI();
-        
-        RxApp.MainThreadScheduler = AvaloniaScheduler.Instance;
-        // Locator.CurrentMutable.RegisterConstant(new AvaloniaActivationForViewFetcher(), typeof(IActivationForViewFetcher));
-        // Locator.CurrentMutable.RegisterConstant(new AutoDataTemplateBindingHook(), typeof(IPropertyBindingHook));
+        builder.InitializeAvalonia();
 
         var container = builder.Build();
         ContainerProvider.Container = container;
-        
-        // autofacResolver = container.Resolve<AutofacDependencyResolver>();
-        // autofacResolver.SetLifetimeScope(container);
 
         using (var scope = container.BeginLifetimeScope())
         {
@@ -60,16 +49,24 @@ public static class ServiceRegistrar
             }
         }
 
-        LogBootstrapHeader(container);
-        
-        FeedClientId(container);
-
-        LogBootstrap(container);
+        container.LogBootstrapHeader();
+        container.FeedClientId();
+        container.LogBootstrap();
 
         return container;
     }
 
-    private static void FeedClientId(IContainer container)
+    private static void InitializeAvalonia(this ContainerBuilder builder)
+    {
+        var autofacResolver = builder.UseAutofacDependencyResolver();
+        builder.RegisterInstance(autofacResolver);
+        
+        autofacResolver.InitializeSplat();
+        autofacResolver.InitializeReactiveUI();
+        RxApp.MainThreadScheduler = AvaloniaScheduler.Instance;
+    }
+
+    private static void FeedClientId(this IContainer container)
     {
         using var scope = container.BeginLifetimeScope();
         
@@ -80,7 +77,7 @@ public static class ServiceRegistrar
         environmentService.SetClientId(applicationSettings.ClientId);
     }
     
-    private static void LogBootstrapHeader(IContainer container)
+    private static void LogBootstrapHeader(this IContainer container)
     {
         using var scope = container.BeginLifetimeScope();
         
@@ -88,7 +85,7 @@ public static class ServiceRegistrar
         logger.LogBootstrapHeader();
     }
     
-    private static void LogBootstrap(IContainer container)
+    private static void LogBootstrap(this IContainer container)
     {
         using var scope = container.BeginLifetimeScope();
         

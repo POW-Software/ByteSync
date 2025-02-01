@@ -435,10 +435,10 @@ Voulez-vous continuer ?</value>
   <data name="CloudSession_QuitSession" xml:space="preserve">
 	  <value>QUITTER LA SESSION</value>
   </data>
-  <data name="JoinSession_JoinCloudSession" xml:space="preserve">
+  <data name="JoinCloudSession_JoinCloudSession" xml:space="preserve">
 	  <value>REJOINDRE LA SESSION CLOUD</value>
   </data>
-  <data name="JoinSession_Cancel" xml:space="preserve">
+  <data name="JoinCloudSession_Cancel" xml:space="preserve">
 	  <value>ANNULER</value>
   </data>
   <data name="SynchronizationMain_CurrentAction" xml:space="preserve">
@@ -579,10 +579,10 @@ Voulez-vous continuer ?</value>
   <data name="AccountDetails_Subscription" xml:space="preserve">
 	  <value>Abonnement :</value>
   </data>
-  <data name="JoinSession_ErrorMessage" xml:space="preserve">
+  <data name="JoinCloudSession_ErrorMessage" xml:space="preserve">
 	  <value>Une erreur est survenue. Veuillez consulter le journal.</value>
   </data>
-	<data name="JoinSession_WrongPassword" xml:space="preserve">
+	<data name="JoinCloudSession_WrongPassword" xml:space="preserve">
 		<value>Le mot de passe fourni est incorrect. Veuillez réessayer.</value>
 	</data>
 	<data name="Header_Update" xml:space="preserve">
@@ -686,22 +686,22 @@ POW Software, l'éditeur, ne donne aucune garantie, qu'elle soit expresse ou imp
 	<data name="LoginForm_BetaWarningCheckbox" xml:space="preserve">
 		<value>Je comprends et j'accepte d'utiliser cette version Bêta du logiciel</value>
 	</data>
-	<data name="JoinSession_SessionNotFound" xml:space="preserve">
+	<data name="JoinCloudSession_SessionNotFound" xml:space="preserve">
 		<value>La session n'a pas été trouvée. Veuillez vérifier l'identifiant de session fourni.</value>
 	</data>
-	<data name="JoinSession_ServerError" xml:space="preserve">
+	<data name="JoinCloudSession_ServerError" xml:space="preserve">
 		<value>Une erreur est survenue sur le serveur. Si cette persiste, veuillez contacter le support technique.</value>
 	</data>
-	<data name="JoinSession_TransientError" xml:space="preserve">
+	<data name="JoinCloudSession_TransientError" xml:space="preserve">
 		<value>Une erreur passagère est survenue. Si cette erreur persiste, veuillez contacter le support technique.</value>
 	</data>
-	<data name="JoinSession_UnkownError" xml:space="preserve">
+	<data name="JoinCloudSession_UnkownError" xml:space="preserve">
 		<value>Une erreur inconnue est survenue. Veuillez consulter le journal. Si cette erreur persiste, veuillez contacter le support technique.</value>
 	</data>
-	<data name="JoinSession_LoginMissing" xml:space="preserve">
+	<data name="JoinCloudSession_LoginMissing" xml:space="preserve">
 		<value>Veuillez indiquer l'Identifiant de session (Session ID).</value>
 	</data>
-	<data name="JoinSession_PasswordMissing" xml:space="preserve">
+	<data name="JoinCloudSession_PasswordMissing" xml:space="preserve">
 		<value>Veuillez indiquer le mot de passe de session.</value>
 	</data>
 	<data name="General_Cancel_Uppercase" xml:space="preserve">
@@ -740,10 +740,10 @@ POW Software, l'éditeur, ne donne aucune garantie, qu'elle soit expresse ou imp
 	<data name="Status_Error" xml:space="preserve">
 		<value>Erreur</value>
 	</data>
-	<data name="JoinSession_TooManyMembers" xml:space="preserve">
+	<data name="JoinCloudSession_TooManyMembers" xml:space="preserve">
 		<value>Le nombre maximals de participant à la session est atteint.</value>
 	</data>
-	<data name="JoinSession_SessionAlreadyActivated" xml:space="preserve">
+	<data name="JoinCloudSession_SessionAlreadyActivated" xml:space="preserve">
 		<value>La session est déjà activée. Il n'est plus possible de la rejoindre.</value>
 	</data>
 	<data name="SynchronizationActionDescription_On" xml:space="preserve">
@@ -1313,7 +1313,7 @@ Acceptez-vous d'enregistrer ce Profil de Session Cloud sur votre machine ?</valu
 	<data name="StartComparison_SessionProfile" xml:space="preserve">
 		<value>Profil de Session :</value>
 	</data>
-	<data name="JoinSession_TrustCheckFailed" xml:space="preserve">
+	<data name="JoinCloudSession_TrustCheckFailed" xml:space="preserve">
 		<value>Le contrôle des Clients de Confiance a échoué.</value>
 	</data>
 	<data name="AddTrustedClient_ClientToAdd" xml:space="preserve">

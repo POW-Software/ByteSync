@@ -23,18 +23,6 @@ public class ViewsModule : Module
             .As<IFileDialogService>()
             .AsImplementedInterfaces();
         
-        // builder.RegisterType<HomeMainView>()
-        //     .As<IViewFor<HomeMainViewModel>>()
-        //     .InstancePerDependency();
-        //
-        // builder.RegisterType<SessionMainView>()
-        //     .As<IViewFor<SessionMainViewModel>>()
-        //     .InstancePerDependency();
-        //
-        // builder.RegisterType<LobbyMainView>()
-        //     .As<IViewFor<LobbyMainViewModel>>()
-        //     .InstancePerDependency();
-        
         builder.RegisterType<HomeMainView>().As<IViewFor<HomeMainViewModel>>();
         builder.RegisterType<SessionMainView>().As<IViewFor<SessionMainViewModel>>();
         builder.RegisterType<LobbyMainView>().As<IViewFor<LobbyMainViewModel>>();
@@ -46,10 +34,5 @@ public class ViewsModule : Module
         builder.RegisterInstance(new AutoDataTemplateBindingHook())
             .As<IPropertyBindingHook>()
             .SingleInstance();
-        
-        // builder.RegisterConstant(new AvaloniaActivationForViewFetcher(), typeof(IActivationForViewFetcher));
-        // builder.RegisterConstant(new AutoDataTemplateBindingHook(), typeof(IPropertyBindingHook));
     }
-    
-    
 }

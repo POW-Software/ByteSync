@@ -184,7 +184,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Home\HomeMainView.axaml.cs">
-      <DependentUpon>OperationSelectionView.axaml</DependentUpon>
+      <DependentUpon>HomeMainView.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Misc\SelectLocaleView.axaml.cs">

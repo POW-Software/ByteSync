@@ -155,7 +155,7 @@ public class YouJoinedSessionService : IYouJoinedSessionService
             
             _sessionService.ClearCloudSession();
             
-            _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.None);
+            _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.NoSession);
         }
     }
 }

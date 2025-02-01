@@ -35,7 +35,7 @@
                         Command="{Binding Path=JoinCommand}" IsVisible="{Binding !IsJoiningCloudSession}" Margin="20,3,3,3">
                     <StackPanel Orientation="Horizontal">
                         <misc:Icon FontSize="16" Value="RegularLogInCircle" Margin="0" />
-                        <TextBlock Text="{localizations:Loc JoinSession_JoinCloudSession}" />
+                        <TextBlock Text="{localizations:Loc JoinCloudSession_JoinCloudSession}" />
                     </StackPanel>
                 </Button>
 
@@ -45,7 +45,7 @@
                         Command="{Binding Path=CancelCommand}" Margin="3" >
                     <StackPanel Orientation="Horizontal">
                         <misc:Icon FontSize="16"  Value="RegularX" />
-                        <TextBlock Text="{localizations:Loc JoinSession_Cancel}" />
+                        <TextBlock Text="{localizations:Loc JoinCloudSession_Cancel}" />
                     </StackPanel>
                 </Button>
                 

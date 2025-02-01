@@ -34,7 +34,7 @@
                     
                 <misc:Icon FontSize="24" Value="RegularErrorCircle" Foreground="{DynamicResource HomeCloudSynchronizationBackGround}"
                            VerticalAlignment="Center" Margin="6 0" />
-                <TextBlock Text="{localizations:Loc JoinSession_ErrorMessage}" VerticalAlignment="Center" Margin="0"/>
+                <TextBlock Text="{localizations:Loc JoinCloudSession_ErrorMessage}" VerticalAlignment="Center" Margin="0"/>
             </StackPanel>
             
             <!--Bouton Cancel-->
@@ -43,7 +43,7 @@
                     Command="{Binding Path=CancelCommand}" Margin="3" > <!--MaxHeight="30"-->
                 <StackPanel Orientation="Horizontal">
                     <misc:Icon FontSize="16"  Value="RegularX" />
-                    <TextBlock Text="{localizations:Loc JoinSession_Cancel}" />
+                    <TextBlock Text="{localizations:Loc JoinCloudSession_Cancel}" />
                 </StackPanel>
             </Button>
             

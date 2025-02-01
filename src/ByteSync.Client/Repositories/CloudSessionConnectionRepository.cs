@@ -17,7 +17,7 @@ public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConne
     
     public CloudSessionConnectionRepository()
     {
-        _connectionStatus = new BehaviorSubject<SessionConnectionStatus>(SessionConnectionStatus.None);
+        _connectionStatus = new BehaviorSubject<SessionConnectionStatus>(SessionConnectionStatus.NoSession);
     }
 
     public byte[]? AesEncryptionKey { get; set; }

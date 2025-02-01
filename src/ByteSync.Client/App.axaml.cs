@@ -48,6 +48,7 @@ namespace ByteSync
             var container = ContainerProvider.Container;
             
             var bootstrapperFactory = container.Resolve<IBootstrapperFactory>();
+            
             var bootStrapper = bootstrapperFactory.CreateBootstrapper();
             bootStrapper.AfterFrameworkInitializationCompleted();
                 

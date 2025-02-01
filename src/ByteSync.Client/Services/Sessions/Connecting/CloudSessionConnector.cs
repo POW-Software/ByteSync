@@ -406,7 +406,7 @@ class CloudSessionConnector : ICloudSessionConnector
     //
     public async Task OnJoinSessionError(JoinSessionResult joinSessionResult)
     {
-        _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.None);
+        _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.NoSession);
         await ClearConnectionData();
             
         Log.Error("Can not join the Cloud Session. Reason: {Reason}", joinSessionResult.Status);
