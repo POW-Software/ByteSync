@@ -2,7 +2,7 @@
 
 namespace ByteSync.Interfaces.Controls.Sessions;
 
-public interface ISessionResetter
+public interface IResetSessionService
 {
     public Task ResetSession();
 }

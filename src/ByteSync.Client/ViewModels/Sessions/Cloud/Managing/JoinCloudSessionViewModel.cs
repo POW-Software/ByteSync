@@ -12,6 +12,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.EventsHubs;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
@@ -20,7 +21,7 @@ namespace ByteSync.ViewModels.Sessions.Cloud.Managing;
 
 public class JoinCloudSessionViewModel : ActivatableViewModelBase
 {
-    private readonly ICloudSessionConnector _cloudSessionConnector;
+    private readonly IJoinSessionService _joinSessionService;
     private readonly ICloudSessionEventsHub _cloudSessionEventsHub;
     private readonly ILocalizationService _localizationService;
     private readonly INavigationService _navigationService;
@@ -30,10 +31,10 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         
     }
     
-    public JoinCloudSessionViewModel(ICloudSessionConnector cloudSessionConnector, ICloudSessionEventsHub cloudSessionEventsHub, 
+    public JoinCloudSessionViewModel(IJoinSessionService joinSessionService, ICloudSessionEventsHub cloudSessionEventsHub, 
         INavigationService navigationService, ILocalizationService localizationService)
     {
-        _cloudSessionConnector = cloudSessionConnector;
+        _joinSessionService = joinSessionService;
         _cloudSessionEventsHub = cloudSessionEventsHub;
         _navigationService = navigationService;
         _localizationService = localizationService;
@@ -106,24 +107,24 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         #endif
             if (SessionId.IsNullOrEmpty())
             {
-                UpdateErrorMessage(nameof(Resources.JoinSession_LoginMissing));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_LoginMissing));
                 return;
             }
 
             if (SessionPassword.IsNullOrEmpty())
             {
-                UpdateErrorMessage(nameof(Resources.JoinSession_PasswordMissing));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_PasswordMissing));
                 return;
             }
 
             AreControlsEnabled = false;
 
-            await _cloudSessionConnector.JoinSession(SessionId, SessionPassword, null);
+            await _joinSessionService.JoinSession(SessionId, SessionPassword, null);
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Can not join session");
-            UpdateErrorMessage(nameof(Resources.JoinSession_ErrorMessage));
+            UpdateErrorMessage(nameof(Resources.JoinCloudSession_ErrorMessage));
         }
         finally
         {
@@ -157,31 +158,31 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         switch (joinSessionResult.Status)
         {
             case JoinSessionStatuses.SessionNotFound:
-                UpdateErrorMessage(nameof(Resources.JoinSession_SessionNotFound));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_SessionNotFound));
                 break;
             
             case JoinSessionStatuses.ServerError:
-                UpdateErrorMessage(nameof(Resources.JoinSession_ServerError));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_ServerError));
                 break;
             
             case JoinSessionStatuses.TransientError:
-                UpdateErrorMessage(nameof(Resources.JoinSession_TransientError));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_TransientError));
                 break;
             
             case JoinSessionStatuses.TooManyMembers:
-                UpdateErrorMessage(nameof(Resources.JoinSession_TooManyMembers));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_TooManyMembers));
                 break;
             
             case JoinSessionStatuses.SessionAlreadyActivated:
-                UpdateErrorMessage(nameof(Resources.JoinSession_SessionAlreadyActivated));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_SessionAlreadyActivated));
                 break;
             
             case JoinSessionStatuses.TrustCheckFailed:
-                UpdateErrorMessage(nameof(Resources.JoinSession_TrustCheckFailed));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_TrustCheckFailed));
                 break;
             
             default:
-                UpdateErrorMessage(nameof(Resources.JoinSession_UnkownError));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_UnkownError));
                 break;
         }
     }

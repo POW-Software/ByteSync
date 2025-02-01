@@ -64,8 +64,4 @@ public interface ISessionService
     bool CheckSession(string? sessionId);
     
     Task StartLocalSession(RunLocalSessionProfileInfo? runLocalSessionProfileInfo);
-    
-    Task InitiateCloudSessionMode();
-    
-    Task InitiateLocalSessionMode();
 }

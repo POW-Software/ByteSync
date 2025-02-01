@@ -1,6 +1,5 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading.Tasks;
 using ByteSync.Business;
 using ByteSync.Business.Navigations;
 using ByteSync.Business.Sessions;
@@ -8,7 +7,6 @@ using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Sessions.Local;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
@@ -47,7 +45,7 @@ public class SessionService : ISessionService
         _runSessionProfileInfo = new BehaviorSubject<AbstractRunSessionProfileInfo?>(null);
         _sessionStatus = new BehaviorSubject<SessionStatus>(SessionStatus.None);
         _hasSessionBeenReset = new BehaviorSubject<bool>(false);
-        _sessionMode = new BehaviorSubject<SessionModes?>(null);
+        _sessionMode = new BehaviorSubject<SessionModes?>(SessionModes.Cloud);
 
         _connectionManager.HubPushHandler2.SessionSettingsUpdated
             .Where(dto => CheckSession(dto.SessionId))
@@ -110,37 +108,16 @@ public class SessionService : ISessionService
 
     public async Task StartLocalSession(RunLocalSessionProfileInfo? runLocalSessionProfileInfo)
     {
-        var currentMachineEndpoint = _connectionManager.CurrentEndPoint;
+        var sessionId = $"LSID_{Guid.NewGuid()}";
+        var localSession = new LocalSession(sessionId, _connectionManager.CurrentEndPoint.ClientInstanceId);
 
-        if (currentMachineEndpoint != null)
-        {
-            var sessionId = $"LSID_{Guid.NewGuid()}";
-            var localSession = new LocalSession(sessionId, currentMachineEndpoint.ClientInstanceId);
-
-            var cloudSessionSettings = SessionSettings.BuildDefault();
+        var cloudSessionSettings = SessionSettings.BuildDefault();
                 
-            await SetLocalSession(localSession, runLocalSessionProfileInfo, cloudSessionSettings);
+        await SetLocalSession(localSession, runLocalSessionProfileInfo, cloudSessionSettings);
                 
-            _logger.LogInformation("Starting Local Session {SessionId}", sessionId);
+        _logger.LogInformation("Starting Local Session {SessionId}", sessionId);
                 
-            _navigationService.NavigateTo(NavigationPanel.LocalSynchronization);
-        }
-    }
-
-    public Task InitiateCloudSessionMode()
-    {
-        _sessionMode.OnNext(SessionModes.Cloud);
-        
-        _navigationService.NavigateTo(NavigationPanel.CloudSynchronization);
-        
-        return Task.CompletedTask;
-    }
-
-    public async Task InitiateLocalSessionMode()
-    {
-        _sessionMode.OnNext(SessionModes.Local);
-
-        await StartLocalSession(null);
+        _navigationService.NavigateTo(NavigationPanel.LocalSynchronization);
     }
 
     public void ClearCloudSession()

@@ -49,7 +49,7 @@ static class Program
     #endif
     }
 
-    //  Avalonia configuration, don't remove; also used by visual designer.
+    //  Avalonia configuration, don't remove; used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
     {
         return AppBuilder.Configure<App>()

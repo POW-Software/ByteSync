@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using ByteSync.Business.Navigations;
 using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
@@ -41,7 +42,7 @@ public class StartCloudSessionViewModel : ViewModelBase
     {
         try
         {
-            await _cloudSessionConnector.CreateSession(null);
+             // await _cloudSessionConnector.CreateSession(null);
         }
         catch (Exception ex)
         {

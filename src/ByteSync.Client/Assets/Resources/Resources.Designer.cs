@@ -978,42 +978,42 @@ namespace ByteSync.Assets.Resources {
         /// <summary>
         ///   Recherche une chaîne localisée semblable à CANCEL.
         /// </summary>
-        internal static string JoinSession_Cancel {
+        internal static string JoinCloudSession_Cancel {
             get {
-                return ResourceManager.GetString("JoinSession_Cancel", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_Cancel", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à An error occured. Please read log for more details..
         /// </summary>
-        internal static string JoinSession_ErrorMessage {
+        internal static string JoinCloudSession_ErrorMessage {
             get {
-                return ResourceManager.GetString("JoinSession_ErrorMessage", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_ErrorMessage", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à JOIN CLOUD SESSION.
         /// </summary>
-        internal static string JoinSession_JoinCloudSession {
+        internal static string JoinCloudSession_JoinCloudSession {
             get {
-                return ResourceManager.GetString("JoinSession_JoinCloudSession", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_JoinCloudSession", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Wrong password. Please try again..
         /// </summary>
-        internal static string JoinSession_WrongPassword {
+        internal static string JoinCloudSession_WrongPassword {
             get {
-                return ResourceManager.GetString("JoinSession_WrongPassword", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_WrongPassword", resourceCulture);
             }
         }
         
-        internal static string JoinSession_TrustCheckFailed {
+        internal static string JoinCloudSession_TrustCheckFailed {
             get {
-                return ResourceManager.GetString("JoinSession_TrustCheckFailed", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_TrustCheckFailed", resourceCulture);
             }
         }
         
@@ -2118,51 +2118,51 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
-        public static string JoinSession_SessionNotFound {
+        public static string JoinCloudSession_SessionNotFound {
             get {
-                return ResourceManager.GetString("JoinSession_SessionNotFound", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_SessionNotFound", resourceCulture);
             }
         }
         
-        public static string JoinSession_ServerError {
+        public static string JoinCloudSession_ServerError {
             get {
-                return ResourceManager.GetString("JoinSession_ServerError", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_ServerError", resourceCulture);
             }
         }
         
-        public static string JoinSession_TransientError { 
+        public static string JoinCloudSession_TransientError { 
             get {
-                return ResourceManager.GetString("JoinSession_TransientError", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_TransientError", resourceCulture);
             }
         }
         
-        public static string JoinSession_UnkownError {
+        public static string JoinCloudSession_UnkownError {
             get {
-                return ResourceManager.GetString("JoinSession_UnkownError", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_UnkownError", resourceCulture);
             }
         }
         
-        public static string JoinSession_LoginMissing {
+        public static string JoinCloudSession_LoginMissing {
             get {
-                return ResourceManager.GetString("JoinSession_LoginMissing", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_LoginMissing", resourceCulture);
             }
         }
         
-        public static string JoinSession_PasswordMissing {
+        public static string JoinCloudSession_PasswordMissing {
             get {
-                return ResourceManager.GetString("JoinSession_PasswordMissing", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_PasswordMissing", resourceCulture);
             }
         }
         
-        public static string JoinSession_TooManyMembers { 
+        public static string JoinCloudSession_TooManyMembers { 
             get {
-                return ResourceManager.GetString("JoinSession_TooManyMembers", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_TooManyMembers", resourceCulture);
             }
         }
         
-        public static string JoinSession_SessionAlreadyActivated { 
+        public static string JoinCloudSession_SessionAlreadyActivated { 
             get {
-                return ResourceManager.GetString("JoinSession_SessionAlreadyActivated", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_SessionAlreadyActivated", resourceCulture);
             }
         }
         

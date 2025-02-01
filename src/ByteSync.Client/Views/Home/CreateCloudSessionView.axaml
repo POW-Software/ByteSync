@@ -1,0 +1,45 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:home="clr-namespace:ByteSync.ViewModels.Home"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Home.CreateCloudSessionView">
+
+    <Design.DataContext>
+        <home:CreateCloudSessionViewModel />
+    </Design.DataContext>
+    
+    <Border BorderBrush="Black" BorderThickness="2" Width="400" Height="400" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Grid>
+            <StackPanel Orientation="Vertical">
+                <misc:LinearProgress Width="120" Height="100"
+                                     IsActive="{Binding IsCreatingCloudSession}"
+                                     IsVisible="{Binding IsCreatingCloudSession}" />
+                
+                <!-- TODO Delete OnlineActions_JoinCloudSession, OnlineActions_StartCloudSession & OnlineActions_Title-->
+                
+                <Button Classes="GenericButton" Margin="3"
+                        HorizontalAlignment="Left" MaxHeight="30"
+                        Command="{Binding Path=CreateCloudSessionCommand}" IsVisible="{Binding !IsCreatingCloudSession}">
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon FontSize="16" Value="RegularAnalyse" Margin="0" />
+                        <TextBlock Text="{localizations:Loc CreateCloudSession_Create}" />
+                    </StackPanel>
+                </Button>
+                
+                <Button Classes="GenericButton" Margin="3"
+                        HorizontalAlignment="Left" MaxHeight="30"
+                        Command="{Binding Path=CancelCloudSessionCreationCommand}" IsVisible="{Binding IsCreatingCloudSession}">
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon FontSize="16" Value="RegularX" Margin="0" />
+                        <TextBlock Text="{localizations:Loc CreateCloudSession_Cancel}" />
+                    </StackPanel>
+                </Button>
+
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

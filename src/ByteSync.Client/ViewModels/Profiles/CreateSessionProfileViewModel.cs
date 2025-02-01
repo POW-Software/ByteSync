@@ -8,13 +8,11 @@ using ByteSync.Business.Profiles;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Dialogs;
-using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Profiles;
 using ByteSync.ViewModels.Misc;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
-using Splat;
 
 namespace ByteSync.ViewModels.Profiles;
 

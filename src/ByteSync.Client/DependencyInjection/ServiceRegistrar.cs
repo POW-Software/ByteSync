@@ -1,4 +1,6 @@
 ﻿using Autofac;
+using Avalonia.ReactiveUI;
+using Avalonia.Threading;
 using ByteSync.Business.Arguments;
 using ByteSync.Common.Interfaces;
 using ByteSync.DependencyInjection.Modules;
@@ -9,6 +11,7 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Services;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
+using Splat;
 using Splat.Autofac;
 
 namespace ByteSync.DependencyInjection;
@@ -29,12 +32,10 @@ public static class ServiceRegistrar
         builder.RegisterModule<KeyedTypesModule>();
         builder.RegisterModule<SingletonsModule>();
         builder.RegisterModule<ViewModelsModule>();
+        builder.RegisterModule<ViewsModule>();
         builder.RegisterModule<ExternalAssembliesModule>();
 
-        var autofacResolver = builder.UseAutofacDependencyResolver();
-        builder.RegisterInstance(autofacResolver);
-        
-        autofacResolver.InitializeReactiveUI();
+        builder.InitializeAvalonia();
 
         var container = builder.Build();
         ContainerProvider.Container = container;
@@ -48,16 +49,24 @@ public static class ServiceRegistrar
             }
         }
 
-        LogBootstrapHeader(container);
-        
-        FeedClientId(container);
-
-        LogBootstrap(container);
+        container.LogBootstrapHeader();
+        container.FeedClientId();
+        container.LogBootstrap();
 
         return container;
     }
 
-    private static void FeedClientId(IContainer container)
+    private static void InitializeAvalonia(this ContainerBuilder builder)
+    {
+        var autofacResolver = builder.UseAutofacDependencyResolver();
+        builder.RegisterInstance(autofacResolver);
+        
+        autofacResolver.InitializeSplat();
+        autofacResolver.InitializeReactiveUI();
+        RxApp.MainThreadScheduler = AvaloniaScheduler.Instance;
+    }
+
+    private static void FeedClientId(this IContainer container)
     {
         using var scope = container.BeginLifetimeScope();
         
@@ -68,7 +77,7 @@ public static class ServiceRegistrar
         environmentService.SetClientId(applicationSettings.ClientId);
     }
     
-    private static void LogBootstrapHeader(IContainer container)
+    private static void LogBootstrapHeader(this IContainer container)
     {
         using var scope = container.BeginLifetimeScope();
         
@@ -76,7 +85,7 @@ public static class ServiceRegistrar
         logger.LogBootstrapHeader();
     }
     
-    private static void LogBootstrap(IContainer container)
+    private static void LogBootstrap(this IContainer container)
     {
         using var scope = container.BeginLifetimeScope();
         

@@ -1,6 +1,5 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading.Tasks;
 using ByteSync.Business;
 using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Inventories;

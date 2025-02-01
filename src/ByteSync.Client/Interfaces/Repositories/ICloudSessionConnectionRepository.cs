@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Common.Interfaces;
 
-namespace ByteSync.Interfaces.Controls.Sessions
+namespace ByteSync.Interfaces.Repositories
 {
     public interface ICloudSessionConnectionRepository : IRepository<CloudSessionConnectionData>
     {
@@ -22,5 +23,15 @@ namespace ByteSync.Interfaces.Controls.Sessions
         Task SetJoinSessionResultReceived(string sessionId);
         
         Task<bool> CheckConnectingCloudSession(string? sessionId);
+        
+        IObservable<SessionConnectionStatus> ConnectionStatusObservable { get; }
+    
+        SessionConnectionStatus CurrentConnectionStatus { get; }
+        
+        CancellationTokenSource CancellationTokenSource { get; set; }
+        
+        CancellationToken CancellationToken { get; }
+
+        void SetConnectionStatus(SessionConnectionStatus connectionStatus);
     }
 }

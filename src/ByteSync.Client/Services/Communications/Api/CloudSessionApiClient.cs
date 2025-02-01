@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
@@ -17,11 +18,11 @@ public class CloudSessionApiClient : ICloudSessionApiClient
         _apiInvoker = apiInvoker!;
     }
     
-    public async Task<CloudSessionResult> CreateCloudSession(CreateCloudSessionParameters parameters)
+    public async Task<CloudSessionResult> CreateCloudSession(CreateCloudSessionParameters parameters, CancellationToken cancellationToken = default)
     {
         try
         {
-            var result = await _apiInvoker.PostAsync<CloudSessionResult>($"session", parameters);
+            var result = await _apiInvoker.PostAsync<CloudSessionResult>($"session", parameters, cancellationToken);
 
             return result;
         }

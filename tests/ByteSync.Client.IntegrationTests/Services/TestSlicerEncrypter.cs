@@ -8,6 +8,7 @@ using ByteSync.Common.Helpers;
 using ByteSync.Factories;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Repositories;
 using ByteSync.Services.Encryptions;
 using ByteSync.TestsCommon;
 using FluentAssertions;

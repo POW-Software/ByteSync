@@ -9,6 +9,7 @@ using ByteSync.Common.Controls.Json;
 using ByteSync.Common.Interfaces.Business;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Repositories;
 
 namespace ByteSync.Services.Encryptions;
 

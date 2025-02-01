@@ -1,4 +1,4 @@
-﻿namespace ByteSync.Interfaces;
+﻿namespace ByteSync.Interfaces.Communications;
 
 public class IFunctionsByteSyncInvoke
 {

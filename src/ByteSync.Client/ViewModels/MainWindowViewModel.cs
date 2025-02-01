@@ -5,10 +5,13 @@ using Avalonia.Animation;
 using Avalonia.Controls.Mixins;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Navigations;
+using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Dialogs;
+using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ByteSync.ViewModels.Headers;
 using ByteSync.ViewModels.Misc;
 using ReactiveUI;
@@ -25,6 +28,8 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
     private readonly IZoomService _zoomService;
     private readonly IIndex<NavigationPanel, IRoutableViewModel> _navigationPanelViewModels;
     private readonly IMessageBoxViewModelFactory _messageBoxViewModelFactory;
+    private readonly IQuitSessionService _quitSessionService;
+    private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
 
     public RoutingState Router { get; } = new RoutingState();
 
@@ -35,7 +40,8 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
 
     public MainWindowViewModel(ISessionService sessionService, ICloudSessionConnector cloudSessionConnector, INavigationService navigationService, 
         IZoomService zoomService, FlyoutContainerViewModel? flyoutContainerViewModel, HeaderViewModel headerViewModel, 
-        IIndex<NavigationPanel, IRoutableViewModel> navigationPanelViewModels, IMessageBoxViewModelFactory messageBoxViewModelFactory)
+        IIndex<NavigationPanel, IRoutableViewModel> navigationPanelViewModels, IMessageBoxViewModelFactory messageBoxViewModelFactory,
+        IQuitSessionService quitSessionService, ICloudSessionConnectionRepository cloudSessionConnectionRepository)
     {
         PageTransition = null;
 
@@ -45,6 +51,8 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
         _zoomService = zoomService;
         _navigationPanelViewModels = navigationPanelViewModels;
         _messageBoxViewModelFactory = messageBoxViewModelFactory;
+        _quitSessionService = quitSessionService;
+        _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         
         FlyoutContainer = flyoutContainerViewModel!;
         Header = headerViewModel!;
@@ -65,6 +73,19 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
                     InitPageTransition();
                 })
                 .DisposeWith(disposables);
+            
+            _cloudSessionConnectionRepository.ConnectionStatusObservable
+                .Where(x => x == SessionConnectionStatus.InSession)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(x => _navigationService.NavigateTo(NavigationPanel.CloudSynchronization))
+                .DisposeWith(disposables);
+            
+            _cloudSessionConnectionRepository.ConnectionStatusObservable
+                .Where(x => x == SessionConnectionStatus.NoSession)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(x => _navigationService.NavigateTo(NavigationPanel.Home))
+                .DisposeWith(disposables);
+            
         });
     }
 
@@ -124,7 +145,7 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
             {
                 if (_sessionService.CurrentSession != null)
                 {
-                    await _cloudSessionConnector.QuitSession();
+                    await _quitSessionService.Process();
                 }
             }
             catch (Exception ex)

@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Business.SessionMembers;
+﻿using ByteSync.Business.SessionMembers;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Communications.Http;

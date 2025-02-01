@@ -1,10 +1,8 @@
 ﻿using System.IO;
-using System.Threading.Tasks;
 using ByteSync.Business;
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.SharedFiles;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Sessions;

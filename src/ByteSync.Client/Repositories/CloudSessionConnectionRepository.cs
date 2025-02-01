@@ -1,18 +1,23 @@
-﻿using System.Threading;
+﻿using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Common.Controls;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Repositories;
 
-namespace ByteSync.Services.Sessions;
+namespace ByteSync.Repositories;
 
 public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConnectionData>, ICloudSessionConnectionRepository
 {
+    private readonly BehaviorSubject<SessionConnectionStatus> _connectionStatus;
+    
     public CloudSessionConnectionRepository()
     {
-
+        _connectionStatus = new BehaviorSubject<SessionConnectionStatus>(SessionConnectionStatus.NoSession);
     }
 
     public byte[]? AesEncryptionKey { get; set; }
@@ -89,5 +94,18 @@ public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConne
         {
             return AesEncryptionKey;
         }
+    }
+    
+    public IObservable<SessionConnectionStatus> ConnectionStatusObservable => _connectionStatus.AsObservable();
+    
+    public SessionConnectionStatus CurrentConnectionStatus => _connectionStatus.Value;
+    
+    public CancellationTokenSource CancellationTokenSource { get; set; }
+    
+    public CancellationToken CancellationToken => CancellationTokenSource.Token;
+
+    public void SetConnectionStatus(SessionConnectionStatus connectionStatus)
+    {
+        _connectionStatus.OnNext(connectionStatus);
     }
 }

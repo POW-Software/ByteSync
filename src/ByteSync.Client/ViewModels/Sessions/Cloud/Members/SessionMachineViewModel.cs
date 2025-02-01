@@ -5,32 +5,24 @@ using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading.Tasks;
 using Avalonia.Controls.Mixins;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Arguments;
-using ByteSync.Business.Events;
 using ByteSync.Business.PathItems;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions;
-using ByteSync.Common.Business.Sessions.Cloud;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Sessions;
-using ByteSync.Interfaces.EventsHubs;
-using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Factories.Proxies;
 using ByteSync.Interfaces.Repositories;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Serilog;
-using Splat;
 
 namespace ByteSync.ViewModels.Sessions.Cloud.Members;
 
@@ -42,9 +34,11 @@ public class SessionMachineViewModel : ActivatableViewModelBase
     private readonly IPathItemProxyFactory _pathItemProxyFactory;
     private readonly IPathItemRepository _pathItemRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
+    private readonly IFileDialogService _fileDialogService;
+    private readonly ILogger<SessionMachineViewModel> _logger;
     
     private ReadOnlyObservableCollection<PathItemProxy> _data;
-    
+
     public SessionMachineViewModel()
     {
 
@@ -52,7 +46,8 @@ public class SessionMachineViewModel : ActivatableViewModelBase
 
     public SessionMachineViewModel(SessionMemberInfo sessionMemberInfo, ISessionService sessionService, IPathItemsService pathItemsService, 
         ILocalizationService localizationService, IEnvironmentService environmentService, IPathItemProxyFactory pathItemProxyFactory,
-        IPathItemRepository pathItemRepository, ISessionMemberRepository sessionMemberRepository)
+        IPathItemRepository pathItemRepository, ISessionMemberRepository sessionMemberRepository, IFileDialogService fileDialogService,
+        ILogger<SessionMachineViewModel> logger)
     {
         _sessionService = sessionService;
         _pathItemsService = pathItemsService;
@@ -60,6 +55,8 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         _pathItemProxyFactory = pathItemProxyFactory;
         _pathItemRepository = pathItemRepository;
         _sessionMemberRepository = sessionMemberRepository;
+        _fileDialogService = fileDialogService;
+        _logger = logger;
 
         SessionMemberInfo = sessionMemberInfo;
 
@@ -270,9 +267,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
     {
         try
         {
-            var fileDialogService = Locator.Current.GetService<IFileDialogService>()!;
-
-            var result = await fileDialogService.ShowOpenFolderDialogAsync(Resources.SessionMachineView_SelectDirectory);
+            var result = await _fileDialogService.ShowOpenFolderDialogAsync(Resources.SessionMachineView_SelectDirectory);
 
             if (result != null && Directory.Exists(result))
             {
@@ -281,15 +276,13 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "SessionMachineViewModel.AddDirectory");
+            _logger.LogError(ex, "SessionMachineViewModel.AddDirectory");
         }
     }
 
     private async Task AddFiles()
     {
-        var fileDialogService = Locator.Current.GetService<IFileDialogService>()!;
-
-        var result = await fileDialogService.ShowOpenFileDialogAsync(Resources.SessionMachineView_SelectFiles, true);
+        var result = await _fileDialogService.ShowOpenFileDialogAsync(Resources.SessionMachineView_SelectFiles, true);
 
         if (result != null)
         {
