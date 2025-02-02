@@ -28,7 +28,8 @@
             <StackPanel Grid.Row="2" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
             </StackPanel>
             
-            <StackPanel Grid.Row="3" Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Center">
+            <StackPanel Grid.Row="3" Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Center"
+                        IsEnabled="{Binding !IsJoiningCloudSession}">
                 
                 <!-- Create Button -->
                 <Button Classes="GenericButton" Margin="9" Height="32"

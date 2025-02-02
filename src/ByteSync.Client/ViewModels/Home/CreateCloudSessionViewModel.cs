@@ -47,6 +47,11 @@ public class CreateCloudSessionViewModel : ActivatableViewModelBase
                 .Select(x => x == SessionConnectionStatus.CreatingSession)
                 .ToPropertyEx(this, x => x.IsCreatingCloudSession)
                 .DisposeWith(disposables);
+            
+            _cloudSessionConnectionRepository.ConnectionStatusObservable
+                .Select(x => x == SessionConnectionStatus.JoiningSession)
+                .ToPropertyEx(this, x => x.IsJoiningCloudSession)
+                .DisposeWith(disposables);
         });
     }
 
@@ -55,6 +60,8 @@ public class CreateCloudSessionViewModel : ActivatableViewModelBase
     public ReactiveCommand<Unit, Unit>? CancelCloudSessionCreationCommand { get; set; }
     
     public extern bool IsCreatingCloudSession { [ObservableAsProperty] get; }
+    
+    public extern bool IsJoiningCloudSession { [ObservableAsProperty] get; }
     
     [Reactive]
     public string? ErrorMessage { get; set; }

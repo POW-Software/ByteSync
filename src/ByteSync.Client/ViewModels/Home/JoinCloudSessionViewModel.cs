@@ -61,6 +61,11 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
                 .ToPropertyEx(this, x => x.IsJoiningCloudSession)
                 .DisposeWith(disposables);
             
+            _cloudSessionConnectionRepository.ConnectionStatusObservable
+                .Select(x => x == SessionConnectionStatus.CreatingSession)
+                .ToPropertyEx(this, x => x.IsCreatingCloudSession)
+                .DisposeWith(disposables);
+            
         });
     }
 
@@ -81,6 +86,8 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
     public string? ErrorMessageSource { get; set; }
     
     public extern bool IsJoiningCloudSession { [ObservableAsProperty] get; }
+        
+    public extern bool IsCreatingCloudSession { [ObservableAsProperty] get; }
     
     private async Task JoinCloudSession()
     {

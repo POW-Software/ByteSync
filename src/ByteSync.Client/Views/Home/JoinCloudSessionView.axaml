@@ -25,7 +25,8 @@
             
             <Rectangle Grid.Row="1" Height="1" Fill="{DynamicResource SystemBaseLowColor}" Margin="3,6"/>
             
-            <StackPanel Grid.Row="2" Margin="0 0 0 12" Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Center">
+            <StackPanel Grid.Row="2" Margin="0 0 0 12" Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                        IsEnabled="{Binding !IsCreatingCloudSession}">
                 
                 <!-- SessionId -->
                 <StackPanel Orientation="Vertical" Margin="3" HorizontalAlignment="Left">
@@ -42,7 +43,8 @@
                 </StackPanel>
             </StackPanel>
             
-            <StackPanel Grid.Row="3" Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Stretch">
+            <StackPanel Grid.Row="3" Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Stretch"
+                        IsEnabled="{Binding !IsCreatingCloudSession}">
 
                 <!-- Join Button -->
                 <Button Classes="GenericButton" Name="ButtonJoin" Margin="9" Height="32" HorizontalAlignment="Center" VerticalAlignment="Bottom"
