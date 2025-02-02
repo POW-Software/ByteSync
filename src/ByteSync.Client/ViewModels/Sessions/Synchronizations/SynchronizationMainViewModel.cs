@@ -61,9 +61,8 @@ public class SynchronizationMainViewModel : ViewModelBase, IActivatableViewModel
         EstimatedEndDateTimeLabel = Resources.SynchronizationMain_EstimatedEnd;
     }
 
-    public SynchronizationMainViewModel(ICloudSessionEventsHub cloudSessionEventsHub, 
-        ISessionService sessionService, ILocalizationService localizationService, ISynchronizationService synchronizationService,
-        IDialogService dialogService, IAtomicActionRepository atomicActionRepository,
+    public SynchronizationMainViewModel(ISessionService sessionService, ILocalizationService localizationService, 
+        ISynchronizationService synchronizationService, IDialogService dialogService, IAtomicActionRepository atomicActionRepository,
         ISessionMemberRepository sessionMemberRepository, ErrorViewModel errorViewModel, ISynchronizationStarter synchronizationStarter,
         ISharedActionsGroupRepository sharedActionsGroupRepository, ITimeTrackingCache timeTrackingCache, ILogger<SynchronizationMainViewModel> logger) 
         : this()

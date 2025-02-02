@@ -19,7 +19,6 @@ namespace ByteSync.ViewModels.Sessions.Managing;
 public class CurrentCloudSessionViewModel : ActivatableViewModelBase
 {
     private readonly ISessionService _sessionService;
-    private readonly ICloudSessionEventsHub _cloudSessionEventsHub;
     private readonly ISessionInterruptor _sessionInterruptor;
     private readonly INavigationEventsHub _navigationEventsHub;
     private readonly IDataInventoryStarter _dataInventoryStarter;
@@ -28,12 +27,10 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
     {
     }
 
-    public CurrentCloudSessionViewModel(ISessionService sessionService, ICloudSessionEventsHub cloudSessionEventsHub,
-        ISessionInterruptor sessionInterruptor, INavigationEventsHub navigationEventsHub,
+    public CurrentCloudSessionViewModel(ISessionService sessionService, ISessionInterruptor sessionInterruptor, INavigationEventsHub navigationEventsHub,
         IDataInventoryStarter dataInventoryStarter, ISessionSettingsEditViewModelFactory sessionSettingsEditViewModel)
     {
         _sessionService = sessionService;
-        _cloudSessionEventsHub = cloudSessionEventsHub;
         _sessionInterruptor = sessionInterruptor;
         _navigationEventsHub = navigationEventsHub;
         _dataInventoryStarter = dataInventoryStarter;
@@ -60,11 +57,6 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
             _dataInventoryStarter.CanCurrentUserStartInventory()
                 .ToPropertyEx(this, x => x.ShowRestartSessionAndSaveProfile)
                 .DisposeWith(disposables);
-
-            // Observable.FromEventPattern<GenericEventArgs<CloudSessionFatalError>>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.CloudSessionOnFatalError))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(evt => OnCloudSessionOnFatalError(evt.EventArgs.Value))
-            //     .DisposeWith(disposables);
             
             this.HandleActivation(disposables);
         });
