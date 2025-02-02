@@ -8,13 +8,13 @@ namespace ByteSync.Interfaces.Services.Sessions.Connecting;
 
 public interface ICloudSessionConnector
 {
-    public Task ClearConnectionData();
+    Task ClearConnectionData();
     
     IObservable<bool> CanLogOutOrShutdown { get; }
     
     Task InitializeConnection(SessionConnectionStatus creatingSession);
     
-    public Task OnJoinSessionError(JoinSessionResult joinSessionResult);
+    Task OnJoinSessionError(JoinSessionResult joinSessionResult);
     
     Task OnCreateSessionError(CreateSessionError createSessionError);
 }
