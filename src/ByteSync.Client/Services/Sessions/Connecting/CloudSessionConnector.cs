@@ -85,11 +85,6 @@ class CloudSessionConnector : ICloudSessionConnector
         _cloudSessionConnectionRepository.SetJoinSessionError(joinSessionResult);
         
         await InitializeConnection(SessionConnectionStatus.NoSession);
-        
-        // _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.NoSession);
-        // await ClearConnectionData();
-        
-        // await _cloudSessionEventsHub.RaiseJoinCloudSessionFailed(joinSessionResult);
     }
 
     public async Task OnCreateSessionError(CreateSessionError createSessionError)
@@ -98,8 +93,5 @@ class CloudSessionConnector : ICloudSessionConnector
         _cloudSessionConnectionRepository.SetCreateSessionError(createSessionError);
 
         await InitializeConnection(SessionConnectionStatus.NoSession);
-        
-        // _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.NoSession);
-        // await ClearConnectionData();
     }
 }
