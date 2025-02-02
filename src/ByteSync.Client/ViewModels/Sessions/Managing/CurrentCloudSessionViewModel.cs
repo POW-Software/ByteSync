@@ -1,28 +1,24 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.Mixins;
 using ByteSync.Business.Arguments;
 using ByteSync.Business.Events;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Factories.ViewModels;
-using ByteSync.ViewModels.Sessions.Settings;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
 
-namespace ByteSync.ViewModels.Sessions.Cloud.Managing;
+namespace ByteSync.ViewModels.Sessions.Managing;
 
 public class CurrentCloudSessionViewModel : ActivatableViewModelBase
 {
     private readonly ISessionService _sessionService;
-    private readonly ICloudSessionEventsHub _cloudSessionEventsHub;
     private readonly ISessionInterruptor _sessionInterruptor;
     private readonly INavigationEventsHub _navigationEventsHub;
     private readonly IDataInventoryStarter _dataInventoryStarter;
@@ -31,12 +27,10 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
     {
     }
 
-    public CurrentCloudSessionViewModel(ISessionService sessionService, ICloudSessionEventsHub cloudSessionEventsHub,
-        ISessionInterruptor sessionInterruptor, INavigationEventsHub navigationEventsHub,
+    public CurrentCloudSessionViewModel(ISessionService sessionService, ISessionInterruptor sessionInterruptor, INavigationEventsHub navigationEventsHub,
         IDataInventoryStarter dataInventoryStarter, ISessionSettingsEditViewModelFactory sessionSettingsEditViewModel)
     {
         _sessionService = sessionService;
-        _cloudSessionEventsHub = cloudSessionEventsHub;
         _sessionInterruptor = sessionInterruptor;
         _navigationEventsHub = navigationEventsHub;
         _dataInventoryStarter = dataInventoryStarter;
@@ -62,11 +56,6 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
         {
             _dataInventoryStarter.CanCurrentUserStartInventory()
                 .ToPropertyEx(this, x => x.ShowRestartSessionAndSaveProfile)
-                .DisposeWith(disposables);
-
-            Observable.FromEventPattern<GenericEventArgs<CloudSessionFatalError>>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.CloudSessionOnFatalError))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(evt => OnCloudSessionOnFatalError(evt.EventArgs.Value))
                 .DisposeWith(disposables);
             
             this.HandleActivation(disposables);

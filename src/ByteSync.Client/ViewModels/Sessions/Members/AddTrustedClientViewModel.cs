@@ -1,13 +1,11 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using ByteSync.Business;
 using ByteSync.Business.Communications;
 using ByteSync.Common.Business.EndPoints;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Dialogs;
@@ -18,7 +16,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
 
-namespace ByteSync.ViewModels.Sessions.Cloud.Members;
+namespace ByteSync.ViewModels.Sessions.Members;
 
 public class AddTrustedClientViewModel : FlyoutElementViewModel
 {

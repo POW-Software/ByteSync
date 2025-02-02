@@ -2,10 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
              xmlns:home="clr-namespace:ByteSync.ViewModels.Home"
-             xmlns:home1="clr-namespace:ByteSync.Views.Home"
-             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="950"
              x:Class="ByteSync.Views.Home.HomeMainView">
     
@@ -15,65 +12,16 @@
     
     <Grid Background="{DynamicResource BlockBackColor}"> 
         
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <ContentControl Content="{Binding CreateCloudSession}" Background="{DynamicResource BlockBackColor}"
-                            Margin="6" />
-            
-            <ContentControl Content="{Binding JoinCloudSession}" Background="{DynamicResource BlockBackColor}"
-                            Margin="6" />
-        </StackPanel>
-        
-        <!-- <Grid.Styles> -->
-        <!--     <Style Selector="Button.CloudSynchronization"> -->
-        <!--         <Setter Property="Background" Value="{DynamicResource HomeCloudSynchronizationBackGround}"/> -->
-        <!--     </Style> -->
-        <!--      -->
-        <!--     <Style Selector="Button.CloudSynchronization:pointerover /template/ ContentPresenter#PART_ContentPresenter"> -->
-        <!--         <Setter Property="Background" Value="{DynamicResource HomeCloudSynchronizationPointerOverBackGround}" /> -->
-        <!--     </Style> -->
-        <!--      -->
-        <!--     <Style Selector="Button.LocalSynchronization"> -->
-        <!--         <Setter Property="Background" Value="{DynamicResource HomeLocalSynchronizationBackGround}"/> -->
-        <!--     </Style> -->
-        <!--      -->
-        <!--     <Style Selector="Button.LocalSynchronization:pointerover /template/ ContentPresenter#PART_ContentPresenter"> -->
-        <!--         <Setter Property="Background" Value="{DynamicResource HomeLocalSynchronizationPointerOverBackGround}" /> -->
-        <!--     </Style> -->
-        <!-- -->
-        <!-- </Grid.Styles> -->
-        <!-- -->
-        <!-- <Grid HorizontalAlignment="Stretch" VerticalAlignment="Center"> -->
-        <!--      -->
-        <!--     <StackPanel Orientation="Vertical"> -->
-        <!--         <WrapPanel MinHeight="200" MaxWidth="850" HorizontalAlignment="Center"> -->
-        <!--              -->
-        <!--             <Button Width="400" BorderThickness="0" Margin="6" Padding="0" Classes="CloudSynchronization" -->
-        <!--                     Command="{Binding CloudSynchronizationCommand}"> -->
-        <!--                 <Grid Margin="0" Height="140"> -->
-        <!--                      -->
-        <!--                     <misc:Icon FontSize="48" Value="RegularAnalyse" Foreground="{DynamicResource BlockBackColor}" -->
-        <!--                                Margin="2" VerticalAlignment="Center"/> -->
-        <!--                      -->
-        <!--                     <TextBlock Text="{localizations:Loc OperationSelection_CloudSynchronization}" -->
-        <!--                                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="6"  -->
-        <!--                                FontSize="18" FontWeight="Bold" Foreground="{DynamicResource BlockBackColor}"/> -->
-        <!--                 </Grid> -->
-        <!--                  -->
-        <!--                 <ToolTip.Tip> -->
-        <!--                     <StackPanel Classes="ByteSyncToolTip"> -->
-        <!--                         <TextBlock Text="{localizations:Loc HomeView_CloudSynchronization_ToolTip_Header}"/> -->
-        <!--                         <TextBlock Text="{localizations:Loc HomeView_CloudSynchronization_ToolTip_Content}"/> -->
-        <!--                     </StackPanel> -->
-        <!--                 </ToolTip.Tip> -->
-        <!--                 <ToolTip.Placement>Bottom</ToolTip.Placement> -->
-        <!--                 <ToolTip.VerticalOffset>10</ToolTip.VerticalOffset> -->
-        <!--                 <ToolTip.ShowDelay>1000</ToolTip.ShowDelay> -->
-        <!--             </Button> -->
-        <!--              -->
-        <!--         </WrapPanel> -->
-        <!--          -->
-        <!--     </StackPanel> -->
-        <!--      -->
-        <!-- </Grid> -->
+        <Border BorderBrush="{DynamicResource OtherMemberBackGround}" CornerRadius="4" BorderThickness="5" 
+                HorizontalAlignment="Center" VerticalAlignment="Center" Background="{DynamicResource OtherMemberBackGround}">
+            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        >
+                <ContentControl Content="{Binding CreateCloudSession}" Margin="24 12" 
+                                HorizontalAlignment="Center" VerticalAlignment="Center" />
+                
+                <ContentControl Content="{Binding JoinCloudSession}" Margin="24 12" 
+                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </WrapPanel>
+        </Border>
     </Grid>
 </UserControl>

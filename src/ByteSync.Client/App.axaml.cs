@@ -1,5 +1,6 @@
 using Autofac;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using ByteSync.Interfaces.Factories;
@@ -45,19 +46,34 @@ namespace ByteSync
 
         public override void OnFrameworkInitializationCompleted()
         {
-            var container = ContainerProvider.Container;
-            
-            var bootstrapperFactory = container.Resolve<IBootstrapperFactory>();
-            
-            var bootStrapper = bootstrapperFactory.CreateBootstrapper();
-            bootStrapper.AfterFrameworkInitializationCompleted();
-                
-            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            if (Design.IsDesignMode)
             {
-                desktop.MainWindow = container.Resolve<MainWindow>();
-            }
+                if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                {
+                    desktop.MainWindow = new MainWindow
+                    {
+                        DataContext = new MainWindowViewModel()
+                    };
+                }
             
-            base.OnFrameworkInitializationCompleted();
+                base.OnFrameworkInitializationCompleted();
+            }
+            else
+            {
+                var container = ContainerProvider.Container;
+            
+                var bootstrapperFactory = container.Resolve<IBootstrapperFactory>();
+            
+                var bootStrapper = bootstrapperFactory.CreateBootstrapper();
+                bootStrapper.AfterFrameworkInitializationCompleted();
+                
+                if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                {
+                    desktop.MainWindow = container.Resolve<MainWindow>();
+                }
+            
+                base.OnFrameworkInitializationCompleted();
+            }
         }
     }
 }

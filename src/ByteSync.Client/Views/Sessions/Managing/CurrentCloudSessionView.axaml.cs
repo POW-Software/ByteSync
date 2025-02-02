@@ -1,11 +1,11 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using ByteSync.ViewModels.Sessions.Cloud.Managing;
+using ByteSync.ViewModels.Sessions.Managing;
 using ByteSync.Views.Misc;
 using ReactiveUI;
 
-namespace ByteSync.Views.Sessions.Cloud.Managing
+namespace ByteSync.Views.Sessions.Managing
 {
     public class CurrentCloudSessionView : ReactiveUserControl<CurrentCloudSessionViewModel>
     {

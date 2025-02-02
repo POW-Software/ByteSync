@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
+using System.Threading;
 using ByteSync.Business;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Business.Trust.Connections;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
@@ -35,31 +34,14 @@ public class PublicKeysTruster : IPublicKeysTruster
         _logger = logger;
     }
     
-    public async Task<JoinSessionResult> TrustAllMembersPublicKeys(string sessionId)
+    public async Task<JoinSessionResult> TrustAllMembersPublicKeys(string sessionId, CancellationToken cancellationToken = default)
     {
-        return await DoTrustMembersPublicKeys(sessionId);
+        return await DoTrustMembersPublicKeys(sessionId, null, cancellationToken);
     }
     
-    public async Task<List<string>?> TrustMissingMembersPublicKeys(string sessionId)
+    public async Task<List<string>?> TrustMissingMembersPublicKeys(string sessionId, CancellationToken cancellationToken = default)
     {
-        // var parameters = new GetCloudSessionMembersParameters(sessionId,
-        //     _publicKeysManager.GetMyPublicKeyInfo(), StartTrustCheckModes.None);
-        
-        var membersClientInstanceIds = await _cloudSessionApiClient.GetMembersClientInstanceIds(sessionId);
-
-        // sessionMemberFullIds.RemoveAll(i => i.Equals(_connectionManager.FullId));
-        
-        // var parameters = new TrustCheckParameters 
-        // { 
-        //     SessionId = sessionId, 
-        //     PublicKeyInfo = _publicKeysManager.GetMyPublicKeyInfo(),
-        //     MembersFullIdsToCheck = sessionMemberFullIds
-        // };
-        //
-        // await _trustApiClient.StartTrustCheck(parameters);
-        //
-        // var sessionMembersClientInstanceIds = await
-        //     _connectionManager.HubWrapper.GetCloudSessionMembersAndStartTrustCheck(parameters);
+        var membersClientInstanceIds = await _cloudSessionApiClient.GetMembersClientInstanceIds(sessionId, cancellationToken);
 
         var nonFullyTrustedMembersIds = new List<string>();
         foreach (var memberInstanceId in membersClientInstanceIds)
@@ -73,7 +55,7 @@ public class PublicKeysTruster : IPublicKeysTruster
         // Pour tous les membres non trustés, on demande un trust
         if (nonFullyTrustedMembersIds.Count > 0)
         {
-            var joinSessionResult = await DoTrustMembersPublicKeys(sessionId, nonFullyTrustedMembersIds);
+            var joinSessionResult = await DoTrustMembersPublicKeys(sessionId, nonFullyTrustedMembersIds, cancellationToken);
             if (!joinSessionResult.IsOK)
             {
                 return null;
@@ -83,7 +65,7 @@ public class PublicKeysTruster : IPublicKeysTruster
         return membersClientInstanceIds;
     }
 
-    // Appelé lors du StartTrustCheck sur les membres de la session pour qu'ils fournissent leur PublicKeyCheckData au joiner
+    // Called during StartTrustCheck on the session members so that they provide their PublicKeyCheckData to the joiner
     public async Task OnPublicKeyCheckDataAskedAsync((string sessionId, string clientInstanceId, PublicKeyInfo publicKeyInfo) tuple)
     {
         var isTrusted = _publicKeysManager.IsTrusted(tuple.publicKeyInfo);
@@ -104,7 +86,7 @@ public class PublicKeysTruster : IPublicKeysTruster
 
     public async Task OnTrustPublicKeyRequestedAsync(RequestTrustProcessParameters requestTrustProcessParameters)
     {
-        // On contrôle le salt
+        // Check if the key is already stored
         var myPublicKeyCheckData = await _trustProcessPublicKeysRepository.GetLocalPublicKeyCheckData(requestTrustProcessParameters.SessionId,
             requestTrustProcessParameters.JoinerClientInstanceId);
 
@@ -113,14 +95,14 @@ public class PublicKeysTruster : IPublicKeysTruster
             throw new Exception("key is null");
         }
 
-        // joinerPublicKeyCheckData et givenPublicKeyCheckData sont différents, mais ils doivent avoir le même salt
+        // joinerPublicKeyCheckData and givenPublicKeyCheckData are different, but they must have the same salt
         if (myPublicKeyCheckData.Salt.IsNullOrEmpty() 
             || !myPublicKeyCheckData.Salt.Equals(requestTrustProcessParameters.JoinerPublicKeyCheckData.Salt))
         {
             throw new ArgumentException("Salt is not the same, unable to proceed");
         }
 
-        // On informe en local qu'il faut un trust
+        // Reset the peer trust process data
         var peerTrustProcessData = await _trustProcessPublicKeysRepository.ResetPeerTrustProcessData(
             requestTrustProcessParameters.SessionId, myPublicKeyCheckData.OtherPartyPublicKeyInfo!.ClientId);
         
@@ -149,30 +131,27 @@ public class PublicKeysTruster : IPublicKeysTruster
 
         trustDataParameters.PeerTrustProcessData.SetMyPartyChecked(parameters.IsValidated);
         
-        // await _trustProcessPublicKeysHolder.SetMyPartyChecked(parameters.SessionId, parameters.IsValidated);
-        
         await _trustApiClient.InformPublicKeyValidationIsFinished(parameters);
     }
     
     public Task OnPublicKeyValidationCanceled(PublicKeyCheckData publicKeyCheckData, TrustDataParameters trustDataParameters)
     {
         trustDataParameters.PeerTrustProcessData.SetMyPartyCancelled();
-        //
-        // await _trustProcessPublicKeysHolder.SetMyPartyCanceled(trustDataParameters.SessionId);
 
         return Task.CompletedTask;
     }
 
-    private async Task<JoinSessionResult> DoTrustMembersPublicKeys(string sessionId, List<string>? memberIdsToCheck = null)
+    private async Task<JoinSessionResult> DoTrustMembersPublicKeys(string sessionId, List<string>? memberIdsToCheck = null, 
+        CancellationToken cancellationToken = default)
     {
-        // On demande que les membres de la session nous fournissent leurs PublicKeyCheckData
-        var joinSessionResult = await InitiateAndWaitForTrustCheck(sessionId, memberIdsToCheck);
+        // We ask the members of the session to provide us with their PublicKeyCheckData
+        var joinSessionResult = await InitiateAndWaitForTrustCheck(sessionId, memberIdsToCheck, cancellationToken);
         if (!joinSessionResult.IsOK)
         {
             return joinSessionResult;
         }
         
-        // On détermine les clés à truster
+        // We determine the keys to trust
         var keysToTrust = new List<PublicKeyCheckData>();
         foreach (var publicKeyCheckData in await _trustProcessPublicKeysRepository.GetReceivedPublicKeyCheckData(sessionId))
         {
@@ -203,7 +182,7 @@ public class PublicKeysTruster : IPublicKeysTruster
 
             var requestTrustProcessParameters = new RequestTrustProcessParameters(sessionId, myPublicKeyCheckData,
                 publicKeyCheckData.IssuerClientInstanceId);
-            await _trustApiClient.RequestTrustPublicKey(requestTrustProcessParameters);
+            await _trustApiClient.RequestTrustPublicKey(requestTrustProcessParameters, cancellationToken);
 
             var isTrustSuccess = await peerTrustProcessData.WaitForPeerTrustProcessFinished();
 
@@ -211,7 +190,7 @@ public class PublicKeysTruster : IPublicKeysTruster
             {
                 LogProblem("Can not join the session because at least one the Session Member is not trusted");
 
-                return JoinSessionResult.BuildFrom(JoinSessionStatuses.TrustCheckFailed);
+                return JoinSessionResult.BuildFrom(JoinSessionStatus.TrustCheckFailed);
             }
             else
             {
@@ -222,11 +201,12 @@ public class PublicKeysTruster : IPublicKeysTruster
         return JoinSessionResult.BuildProcessingNormally();  
     }
     
-    private async Task<JoinSessionResult> InitiateAndWaitForTrustCheck(string sessionId, List<string>? memberIdsToCheck = null)
+    private async Task<JoinSessionResult> InitiateAndWaitForTrustCheck(string sessionId, List<string>? memberIdsToCheck, 
+        CancellationToken cancellationToken)
     {
         if (memberIdsToCheck == null)
         {
-            var sessionMemberInstanceIds = await _cloudSessionApiClient.GetMembersClientInstanceIds(sessionId);
+            var sessionMemberInstanceIds = await _cloudSessionApiClient.GetMembersClientInstanceIds(sessionId, cancellationToken);
             
             memberIdsToCheck = new List<string>(sessionMemberInstanceIds);
         }
@@ -234,12 +214,9 @@ public class PublicKeysTruster : IPublicKeysTruster
         if (memberIdsToCheck.Count == 0)
         {
             LogProblem("Members list is empty");
-            return JoinSessionResult.BuildFrom(JoinSessionStatuses.SessionNotFound);
+            return JoinSessionResult.BuildFrom(JoinSessionStatus.SessionNotFound);
         }
-        
-        // var parameters = new GetCloudSessionMembersParameters(sessionId, _publicKeysManager.GetMyPublicKeyInfo(), startTrustCheckMode);
-        // parameters.MembersToCheck = memberIdsToCheck;
-        
+   
         var parameters = new TrustCheckParameters 
         { 
             SessionId = sessionId, 
@@ -248,25 +225,12 @@ public class PublicKeysTruster : IPublicKeysTruster
         };
 
         await _trustProcessPublicKeysRepository.ResetJoinerTrustProcessData(sessionId);
-        var result = await _trustApiClient.StartTrustCheck(parameters);
-
-        // if (memberIdsToCheck != null)
-        // {
-        //     // On retire tous les membres qui ne seraient plus membres de la session
-        //     memberIdsToCheck.RemoveAll(m => !sessionMemberFullIds.Contains(m));
-        //     
-        //     // Il est possible (bien que peu probable) que la liste soit vide, auquel cas, il n'y aurait pas de check à faire
-        //     if (memberIdsToCheck.Count == 0)
-        //     {
-        //         // On considère alors que tout est checké
-        //         return JoinSessionResult.BuildProcessingNormally();
-        //     }
-        // }
+        var result = await _trustApiClient.StartTrustCheck(parameters, cancellationToken);
 
         if (result == null || !result.IsOK)
         {
             _logger.LogError("Can not start trust check");
-            return JoinSessionResult.BuildFrom(JoinSessionStatuses.UnexpectedError);
+            return JoinSessionResult.BuildFrom(JoinSessionStatus.UnexpectedError);
         }
         
         await _trustProcessPublicKeysRepository.SetExpectedPublicKeyCheckDataCount(sessionId, result.MembersInstanceIds);
@@ -282,7 +246,7 @@ public class PublicKeysTruster : IPublicKeysTruster
         else
         {
             _logger.LogWarning("Timeout during trust check process");
-            return JoinSessionResult.BuildFrom(JoinSessionStatuses.TrustCheckFailed);
+            return JoinSessionResult.BuildFrom(JoinSessionStatus.TrustCheckFailed);
         }
     }
     
@@ -301,20 +265,4 @@ public class PublicKeysTruster : IPublicKeysTruster
         // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
         _logger.LogWarning($"CloudSessionConnector.{caller}: {problemDescription}");
     }
-    
-    // private async Task WaitForEvent(Func<bool> waitFunction, string waitFailMessage)
-    // {
-    //     await Task.Run(() =>
-    //     {
-    //         bool isWaitOk = waitFunction.Invoke();
-    //
-    //         if (!isWaitOk)
-    //         {
-    //             _cloudSessionConnectionDataHolder.SetStatus(ConnectionStatuses.None);
-    //             ClearConnectionData();
-    //             
-    //             throw new Exception(waitFailMessage);
-    //         }
-    //     });
-    // }
 }

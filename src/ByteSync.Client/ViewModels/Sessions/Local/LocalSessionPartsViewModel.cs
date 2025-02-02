@@ -33,7 +33,6 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
 {
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;
-    private readonly ICloudSessionEventsHub _cloudSessionEventsHub;
     private readonly IInventoryService _inventoryService;
     private readonly IPathItemsService _pathItemsService;
     private readonly IPathItemProxyFactory _pathItemProxyFactory;
@@ -48,13 +47,11 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
     }
     
     public LocalSessionPartsViewModel(ISessionService sessionService,
-        ILocalizationService localizationService, ICloudSessionEventsHub cloudSessionEventsHub,
-        IInventoryService inventoriesService, IPathItemsService pathItemsService,
+        ILocalizationService localizationService, IInventoryService inventoriesService, IPathItemsService pathItemsService,
         IPathItemProxyFactory pathItemProxyFactory, IPathItemRepository pathItemRepository, ILogger<LocalSessionPartsViewModel> logger)
     {
         _sessionService = sessionService;
         _localizationService = localizationService;
-        _cloudSessionEventsHub = cloudSessionEventsHub;
         _inventoryService = inventoriesService;
         _pathItemsService = pathItemsService;
         _pathItemProxyFactory = pathItemProxyFactory;

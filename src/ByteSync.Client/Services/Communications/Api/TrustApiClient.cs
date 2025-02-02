@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Business.Trust.Connections;
@@ -17,11 +18,11 @@ public class TrustApiClient : ITrustApiClient
         _logger = logger;
     }
     
-    public async Task<StartTrustCheckResult?> StartTrustCheck(TrustCheckParameters parameters)
+    public async Task<StartTrustCheckResult?> StartTrustCheck(TrustCheckParameters parameters, CancellationToken cancellationToken = default)
     {
         try
         {
-            return await _apiInvoker.PostAsync<StartTrustCheckResult?>($"trust/startTrustCheck", parameters);
+            return await _apiInvoker.PostAsync<StartTrustCheckResult?>($"trust/startTrustCheck", parameters, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -31,11 +32,11 @@ public class TrustApiClient : ITrustApiClient
         }
     }
 
-    public async Task GiveMemberPublicKeyCheckData(GiveMemberPublicKeyCheckDataParameters parameters)
+    public async Task GiveMemberPublicKeyCheckData(GiveMemberPublicKeyCheckDataParameters parameters, CancellationToken cancellationToken = default)
     {
         try
         {
-            await _apiInvoker.PostAsync($"trust/giveMemberPublicKeyCheckData", parameters);
+            await _apiInvoker.PostAsync($"trust/giveMemberPublicKeyCheckData", parameters, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -45,11 +46,11 @@ public class TrustApiClient : ITrustApiClient
         }
     }
 
-    public async Task InformPublicKeyValidationIsFinished(PublicKeyValidationParameters parameters)
+    public async Task InformPublicKeyValidationIsFinished(PublicKeyValidationParameters parameters, CancellationToken cancellationToken = default)
     {
         try
         {
-            await _apiInvoker.PostAsync($"trust/informPublicKeyValidationIsFinished", parameters);
+            await _apiInvoker.PostAsync($"trust/informPublicKeyValidationIsFinished", parameters, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -59,11 +60,11 @@ public class TrustApiClient : ITrustApiClient
         }
     }
 
-    public async Task RequestTrustPublicKey(RequestTrustProcessParameters parameters)
+    public async Task RequestTrustPublicKey(RequestTrustProcessParameters parameters, CancellationToken cancellationToken = default)
     {
         try
         {
-            await _apiInvoker.PostAsync($"trust/requestTrustPublicKey", parameters);
+            await _apiInvoker.PostAsync($"trust/requestTrustPublicKey", parameters, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -73,11 +74,11 @@ public class TrustApiClient : ITrustApiClient
         }
     }
 
-    public async Task SendDigitalSignatures(SendDigitalSignaturesParameters parameters)
+    public async Task SendDigitalSignatures(SendDigitalSignaturesParameters parameters, CancellationToken cancellationToken = default)
     {
         try
         {
-            await _apiInvoker.PostAsync($"trust/sendDigitalSignatures", parameters);
+            await _apiInvoker.PostAsync($"trust/sendDigitalSignatures", parameters, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -87,11 +88,11 @@ public class TrustApiClient : ITrustApiClient
         }
     }
 
-    public async Task SetAuthChecked(SetAuthCheckedParameters parameters)
+    public async Task SetAuthChecked(SetAuthCheckedParameters parameters, CancellationToken cancellationToken = default)
     {
         try
         {
-            await _apiInvoker.PostAsync($"trust/setAuthChecked", parameters);
+            await _apiInvoker.PostAsync($"trust/setAuthChecked", parameters, cancellationToken);
         }
         catch (Exception ex)
         {

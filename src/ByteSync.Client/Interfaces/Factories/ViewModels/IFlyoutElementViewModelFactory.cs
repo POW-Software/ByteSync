@@ -7,8 +7,8 @@ using ByteSync.ViewModels.AccountDetails;
 using ByteSync.ViewModels.Headers;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Profiles;
-using ByteSync.ViewModels.Sessions.Cloud.Members;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions;
+using ByteSync.ViewModels.Sessions.Members;
 using ByteSync.ViewModels.TrustedNetworks;
 
 namespace ByteSync.Interfaces.Factories.ViewModels;

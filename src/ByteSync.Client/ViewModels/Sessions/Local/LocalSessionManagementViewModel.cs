@@ -1,16 +1,13 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using ByteSync.Business.Sessions;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Factories.ViewModels;
-using ByteSync.ViewModels.Sessions.Settings;
+using ByteSync.ViewModels.Sessions.Managing;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
-using Splat;
 
 namespace ByteSync.ViewModels.Sessions.Local;
 
@@ -18,22 +15,19 @@ public class LocalSessionManagementViewModel : ActivatableViewModelBase
 {
     private readonly ISessionInterruptor _sessionInterruptor;
     private readonly INavigationEventsHub _navigationEventsHub;
-    private readonly ICloudSessionEventsHub _cloudSessionEventsHub;
     private readonly ISessionService _sessionService;
 
-    public LocalSessionManagementViewModel() : this (null)
+    public LocalSessionManagementViewModel()
     {
         
     }
     
-    internal LocalSessionManagementViewModel(ISessionInterruptor? sessionQuitChecker = null, INavigationEventsHub? navigationEventsHub = null,
-        ICloudSessionEventsHub? cloudSessionEventsHub = null, ISessionService? sessionDataHolder = null, 
-        ISessionSettingsEditViewModelFactory? sessionSettingsEditViewModelFactory = null)
+    internal LocalSessionManagementViewModel(ISessionInterruptor sessionQuitChecker, INavigationEventsHub navigationEventsHub,
+        ISessionService sessionDataHolder, ISessionSettingsEditViewModelFactory sessionSettingsEditViewModelFactory)
     {
-        _sessionInterruptor = sessionQuitChecker ?? Locator.Current.GetService<ISessionInterruptor>()!;
-        _navigationEventsHub = navigationEventsHub ?? Locator.Current.GetService<INavigationEventsHub>()!;
-        _cloudSessionEventsHub = cloudSessionEventsHub ?? Locator.Current.GetService<ICloudSessionEventsHub>()!;
-        _sessionService = sessionDataHolder ?? Locator.Current.GetService<ISessionService>()!;
+        _sessionInterruptor = sessionQuitChecker;
+        _navigationEventsHub = navigationEventsHub;
+        _sessionService = sessionDataHolder;
 
         SessionSettingsEditViewModel = sessionSettingsEditViewModelFactory.CreateSessionSettingsEditViewModel(null);
         

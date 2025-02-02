@@ -12,7 +12,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Lobbies;
 using ByteSync.Services.Lobbies;
-using ByteSync.ViewModels.Sessions.Settings;
+using ByteSync.ViewModels.Sessions.Managing;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;

@@ -1,9 +1,9 @@
 ﻿using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using ByteSync.ViewModels.Sessions.Settings;
+using ByteSync.ViewModels.Sessions.Managing;
 using ReactiveUI;
 
-namespace ByteSync.Views.Sessions.Settings;
+namespace ByteSync.Views.Sessions.Managing;
 
 public class SessionSettingsEditView : ReactiveUserControl<SessionSettingsEditViewModel>
 {

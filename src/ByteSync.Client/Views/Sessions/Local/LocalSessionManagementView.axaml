@@ -4,8 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:ByteSync.ViewModels.Sessions.Local"
              xmlns:misc="clr-namespace:ByteSync.Views.Misc"
-             xmlns:settings="clr-namespace:ByteSync.Views.Sessions.Settings"
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             xmlns:managing="clr-namespace:ByteSync.Views.Sessions.Managing"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ByteSync.Views.Sessions.Local.LocalSessionManagementView">
     
@@ -55,7 +55,7 @@
                    StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
         
         <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 9 0 3">
-            <settings:SessionSettingsEditView DataContext="{Binding SessionSettingsEditViewModel}" HorizontalContentAlignment="Right"
+            <managing:SessionSettingsEditView DataContext="{Binding SessionSettingsEditViewModel}" HorizontalContentAlignment="Right"
                                               Margin="24 0"/>
         
         </WrapPanel>

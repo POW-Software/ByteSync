@@ -1,25 +1,23 @@
-﻿using ByteSync.Business.Sessions;
-using ByteSync.Common.Business.Sessions.Cloud.Connections;
+﻿using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
-using Serilog;
 
 namespace ByteSync.Services.Sessions.Connecting;
 
 public class YouGaveAWrongPasswordService : IYouGaveAWrongPasswordService
 {
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
-    private readonly ICloudSessionEventsHub _cloudSessionEventsHub;
+    private readonly ICloudSessionConnector _cloudSessionConnector;
     private readonly ILogger<YouGaveAWrongPasswordService> _logger;
     
     private const string UNKNOWN_RECEIVED_SESSION_ID = "unknown received sessionId {sessionId}";
 
     public YouGaveAWrongPasswordService(ICloudSessionConnectionRepository cloudSessionConnectionRepository, 
-        ICloudSessionEventsHub cloudSessionEventsHub, ILogger<YouGaveAWrongPasswordService> logger)
+        ICloudSessionConnector cloudSessionConnector, ILogger<YouGaveAWrongPasswordService> logger)
     {
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
-        _cloudSessionEventsHub = cloudSessionEventsHub;
+        _cloudSessionConnector = cloudSessionConnector;
         _logger = logger;
     }
     
@@ -32,13 +30,15 @@ public class YouGaveAWrongPasswordService : IYouGaveAWrongPasswordService
                 _logger.LogError(UNKNOWN_RECEIVED_SESSION_ID, sessionId);
             }
 
-            _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.NoSession);
-            
-            await _cloudSessionEventsHub.RaiseJoinCloudSessionFailed(JoinSessionResult.BuildFrom(JoinSessionStatuses.WrondPassword));
+            var joinSessionResult = JoinSessionResult.BuildFrom(JoinSessionStatus.WrondPassword);
+            await _cloudSessionConnector.OnJoinSessionError(joinSessionResult);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "OnYouGaveAWrongPassword");
+            _logger.LogError(ex, "OnYouGaveAWrongPassword");
+            
+            var joinSessionResult = JoinSessionResult.BuildFrom(JoinSessionStatus.UnexpectedError);
+            await _cloudSessionConnector.OnJoinSessionError(joinSessionResult);
         }
     }
 }

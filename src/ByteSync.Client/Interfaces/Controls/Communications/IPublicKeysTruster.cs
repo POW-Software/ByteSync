@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using ByteSync.Business;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
@@ -7,9 +8,9 @@ namespace ByteSync.Interfaces.Controls.Communications;
 
 public interface IPublicKeysTruster
 {
-    Task<JoinSessionResult> TrustAllMembersPublicKeys(string sessionId);
+    Task<JoinSessionResult> TrustAllMembersPublicKeys(string sessionId, CancellationToken cancellationToken = default);
     
-    Task<List<string>?> TrustMissingMembersPublicKeys(string cloudSessionSessionId);
+    Task<List<string>?> TrustMissingMembersPublicKeys(string cloudSessionSessionId, CancellationToken cancellationToken = default);
     
     Task OnPublicKeyCheckDataAskedAsync((string sessionId, string clientInstanceId, PublicKeyInfo publicKeyInfo) tuple);
     

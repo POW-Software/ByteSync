@@ -24,7 +24,6 @@ public class TestInventoryProcessViewModel : AbstractTester
     private Mock<InventoryBeforeStartViewModel> _mockInventoryBeforeStartViewModel;
     private Mock<ISessionService> _mockSessionService;
     private Mock<IInventoryService> _mockInventoryService;
-    private Mock<ICloudSessionEventsHub> _mockCloudSessionEventsHub;
     private Mock<IDialogService> _mockDialogService;
     private InventoryProcessViewModel _inventoryProcessViewModel;
     
@@ -37,7 +36,6 @@ public class TestInventoryProcessViewModel : AbstractTester
         _mockInventoryBeforeStartViewModel = new Mock<InventoryBeforeStartViewModel>();
         _mockSessionService = new Mock<ISessionService>();
         _mockInventoryService = new Mock<IInventoryService>();
-        _mockCloudSessionEventsHub = new Mock<ICloudSessionEventsHub>();
         _mockDialogService = new Mock<IDialogService>();
 
         _inventoryProcessViewModel = new InventoryProcessViewModel(

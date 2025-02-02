@@ -1441,33 +1441,6 @@ namespace ByteSync.Assets.Resources {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à JOIN CLOUD SESSION.
-        /// </summary>
-        internal static string OnlineActions_JoinCloudSession {
-            get {
-                return ResourceManager.GetString("OnlineActions_JoinCloudSession", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à START CLOUD SESSION.
-        /// </summary>
-        internal static string OnlineActions_StartCloudSession {
-            get {
-                return ResourceManager.GetString("OnlineActions_StartCloudSession", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Cloud Synchronization.
-        /// </summary>
-        internal static string OnlineActions_Title {
-            get {
-                return ResourceManager.GetString("OnlineActions_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Recherche une chaîne localisée semblable à Documentation.
         /// </summary>
         internal static string OperationSelection_Documentation {
@@ -1753,38 +1726,20 @@ namespace ByteSync.Assets.Resources {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à Creating session....
-        /// </summary>
-        internal static string StartComparison_CreatingSession {
-            get {
-                return ResourceManager.GetString("StartComparison_CreatingSession", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Recherche une chaîne localisée semblable à Session ID:.
         /// </summary>
-        internal static string StartComparison_SessionId {
+        internal static string JoinCloudSession_SessionId {
             get {
-                return ResourceManager.GetString("StartComparison_SessionId", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_SessionId", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Session Password:.
         /// </summary>
-        internal static string StartComparison_SessionPassword {
+        internal static string JoinCloudSession_SessionPassword {
             get {
-                return ResourceManager.GetString("StartComparison_SessionPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Please share credentials with your partners.
-        /// </summary>
-        internal static string StartComparison_ShareCredentials {
-            get {
-                return ResourceManager.GetString("StartComparison_ShareCredentials", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_SessionPassword", resourceCulture);
             }
         }
         
@@ -2163,6 +2118,12 @@ namespace ByteSync.Assets.Resources {
         public static string JoinCloudSession_SessionAlreadyActivated { 
             get {
                 return ResourceManager.GetString("JoinCloudSession_SessionAlreadyActivated", resourceCulture);
+            }
+        }
+        
+        public static string CreateCloudSession_UnknownError {
+            get {
+                return ResourceManager.GetString("CreateCloudSession_UnknownError", resourceCulture);
             }
         }
         

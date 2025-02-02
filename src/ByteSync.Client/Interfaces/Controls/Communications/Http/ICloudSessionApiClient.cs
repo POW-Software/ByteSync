@@ -14,15 +14,19 @@ public interface ICloudSessionApiClient
 
     Task ResetCloudSession(string sessionId);
     
-    Task<List<string>> GetMembersClientInstanceIds(string sessionId);
+    Task<List<string>> GetMembersClientInstanceIds(string sessionId, CancellationToken cancellationToken = default);
     
-    Task<JoinSessionResult> AskPasswordExchangeKey(AskCloudSessionPasswordExchangeKeyParameters parameters);
+    Task<JoinSessionResult> AskPasswordExchangeKey(AskCloudSessionPasswordExchangeKeyParameters parameters, 
+        CancellationToken cancellationToken = default);
     
-    Task<FinalizeJoinSessionResult> FinalizeJoinCloudSession(FinalizeJoinCloudSessionParameters parameters);
+    Task<FinalizeJoinSessionResult> FinalizeJoinCloudSession(FinalizeJoinCloudSessionParameters parameters,
+        CancellationToken cancellationToken = default);
     
-    Task GiveCloudSessionPasswordExchangeKey(GiveCloudSessionPasswordExchangeKeyParameters parameters);
+    Task GiveCloudSessionPasswordExchangeKey(GiveCloudSessionPasswordExchangeKeyParameters parameters,
+        CancellationToken cancellationToken = default);
     
-    Task<JoinSessionResult> AskJoinCloudSession(AskJoinCloudSessionParameters parameters);
+    Task<JoinSessionResult> AskJoinCloudSession(AskJoinCloudSessionParameters parameters,
+        CancellationToken cancellationToken = default);
     
     Task ValidateJoinCloudSession(ValidateJoinCloudSessionParameters parameters);
     

@@ -186,20 +186,11 @@
   <data name="OperationSelection_Documentation" xml:space="preserve">
     <value>Documentation</value>
   </data>
-  <data name="OnlineActions_Title" xml:space="preserve">
-    <value>Cloud Synchronization</value>
-  </data>
-  <data name="StartComparison_SessionId" xml:space="preserve">
+  <data name="JoinCloudSession_SessionId" xml:space="preserve">
     <value>Session ID:</value>
   </data>
-  <data name="StartComparison_SessionPassword" xml:space="preserve">
+  <data name="JoinCloudSession_SessionPassword" xml:space="preserve">
     <value>Session Password:</value>
-  </data>
-  <data name="StartComparison_ShareCredentials" xml:space="preserve">
-    <value>Please share credentials with your partners</value>
-  </data>
-  <data name="StartComparison_CreatingSession" xml:space="preserve">
-    <value>Creating session...</value>
   </data>
   <data name="Shell_Home" xml:space="preserve">
     <value>Home</value>
@@ -428,12 +419,6 @@
   </data>
   <data name="SessionMachine_NoDataSelected" xml:space="preserve">
     <value>Please select data</value>
-  </data>
-  <data name="OnlineActions_StartCloudSession" xml:space="preserve">
-    <value>START CLOUD SESSION</value>
-  </data>
-  <data name="OnlineActions_JoinCloudSession" xml:space="preserve">
-    <value>JOIN CLOUD SESSION</value>
   </data>
   <data name="SessionMachine_Status_WaitingForStart" xml:space="preserve">
     <value>Waiting for inventory start</value>
@@ -804,13 +789,13 @@ POW Software, the publisher, makes no warranty, either express or implied, as to
     <value>The session was not found. Please check the session ID provided.</value>
   </data>
   <data name="JoinCloudSession_ServerError" xml:space="preserve">
-    <value>An error has occurred on the server. If this error persists, please contact technical support.</value>
+    <value>An error has occurred on the server.</value>
   </data>
   <data name="JoinCloudSession_TransientError" xml:space="preserve">
-    <value>A transient error has occurred. If this error persists, please contact technical support.</value>
+    <value>A transient error has occurred.</value>
   </data>
   <data name="JoinCloudSession_UnkownError" xml:space="preserve">
-    <value>An unknown error has occurred. Please check the log. If this error persists, please contact technical support.</value>
+    <value>An unknown error has occurred. Please check the log.</value>
   </data>
   <data name="JoinCloudSession_PasswordMissing" xml:space="preserve">
     <value>Please enter the session password.</value>
@@ -952,7 +937,7 @@ The Session must have a maximum of 5 members.</value>
   </data>
   <data name="InventoryProcess_UnknownError" xml:space="preserve">
     <value>Unable to start the Data Inventory:
-An unknown error has occurred. Please check the log. If this error persists, please contact technical support.</value>
+An unknown error has occurred. Please check the log.</value>
   </data>
   <data name="InventoryProcess_AtLeastOneMemberWithNoDataToSynchronize" xml:space="preserve">
     <value>Unable to start the Data Inventory:
@@ -1681,5 +1666,14 @@ Do you want to save this new Session Profile with this name?</value>
   </data>
   <data name="CreateCloudSession_Cancel" xml:space="preserve">
     <value>CANCEL</value>
+  </data>
+  <data name="CreateCloudSession_UnknownError" xml:space="preserve">
+    <value>An unknown error has occurred. Please check the log.</value>
+  </data>
+  <data name="CreateCloudSession_Header" xml:space="preserve">
+    <value>Create a new Cloud Session</value>
+  </data>
+  <data name="JoinCloudSession_Header" xml:space="preserve">
+    <value>Join an existing Cloud Session</value>
   </data>
 </root>

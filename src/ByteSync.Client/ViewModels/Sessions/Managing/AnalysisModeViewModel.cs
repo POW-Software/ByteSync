@@ -2,7 +2,7 @@
 using ByteSync.Interfaces;
 using ReactiveUI.Fody.Helpers;
 
-namespace ByteSync.ViewModels.Sessions.Cloud.Managing;
+namespace ByteSync.ViewModels.Sessions.Managing;
 
 public class AnalysisModeViewModel
 {

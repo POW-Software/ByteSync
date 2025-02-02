@@ -78,20 +78,11 @@
   <data name="OperationSelection_Documentation" xml:space="preserve">
 	  <value>Documentation</value>
   </data>
-  <data name="OnlineActions_Title" xml:space="preserve">
-	  <value>Synchronisation Cloud</value>
-  </data>
-  <data name="StartComparison_SessionId" xml:space="preserve">
+  <data name="JoinCloudSession_SessionId" xml:space="preserve">
 	  <value>Identifiant de session (Session ID) :</value>
   </data>
-  <data name="StartComparison_SessionPassword" xml:space="preserve">
+  <data name="JoinCloudSession_SessionPassword" xml:space="preserve">
 	  <value>Mot de passe de session :</value>
-  </data>
-  <data name="StartComparison_ShareCredentials" xml:space="preserve">
-	  <value>Veuillez partager les identifiants avec vos partenaires</value>
-  </data>
-  <data name="StartComparison_CreatingSession" xml:space="preserve">
-	  <value>Création de la session...</value>
   </data>
   <data name="Shell_Home" xml:space="preserve">
 	  <value>Accueil</value>
@@ -320,12 +311,6 @@
   </data>
   <data name="SessionMachine_NoDataSelected" xml:space="preserve">
 	  <value>Veuillez sélectionner des données</value>
-  </data>
-  <data name="OnlineActions_StartCloudSession" xml:space="preserve">
-	  <value>DÉMARRER UNE SESSION CLOUD</value>
-  </data>
-  <data name="OnlineActions_JoinCloudSession" xml:space="preserve">
-	  <value>REJOINDRE UNE SESSION CLOUD</value>
   </data>
   <data name="SessionMachine_Status_WaitingForStart" xml:space="preserve">
 	  <value>En attente du démarrage de l'inventaire</value>
@@ -690,13 +675,13 @@ POW Software, l'éditeur, ne donne aucune garantie, qu'elle soit expresse ou imp
 		<value>La session n'a pas été trouvée. Veuillez vérifier l'identifiant de session fourni.</value>
 	</data>
 	<data name="JoinCloudSession_ServerError" xml:space="preserve">
-		<value>Une erreur est survenue sur le serveur. Si cette persiste, veuillez contacter le support technique.</value>
+		<value>Une erreur est survenue sur le serveur.</value>
 	</data>
 	<data name="JoinCloudSession_TransientError" xml:space="preserve">
-		<value>Une erreur passagère est survenue. Si cette erreur persiste, veuillez contacter le support technique.</value>
+		<value>Une erreur passagère est survenue.</value>
 	</data>
 	<data name="JoinCloudSession_UnkownError" xml:space="preserve">
-		<value>Une erreur inconnue est survenue. Veuillez consulter le journal. Si cette erreur persiste, veuillez contacter le support technique.</value>
+		<value>Une erreur inconnue est survenue. Veuillez consulter le journal.</value>
 	</data>
 	<data name="JoinCloudSession_LoginMissing" xml:space="preserve">
 		<value>Veuillez indiquer l'Identifiant de session (Session ID).</value>
@@ -835,7 +820,7 @@ Les paramètres de la Session ne sont pas définis.</value>
 	</data>
 	<data name="InventoryProcess_UnknownError" xml:space="preserve">
 		<value>Impossible de démarrer l'Inventaire des Données :
-Une erreur inconnue est survenue. Veuillez consulter le journal. Si cette erreur persiste, veuillez contacter le support technique.</value>
+Une erreur inconnue est survenue. Veuillez consulter le journal.</value>
 	</data>
 	<data name="InventoryProcess_AtLeastOneMemberWithNoDataToSynchronize" xml:space="preserve">
 		<value>Impossible de démarrer l'Inventaire des Données :
@@ -1543,5 +1528,14 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	</data>
 	<data name="CreateCloudSession_Cancel" xml:space="preserve">
 		<value>ANNULER</value>
+	</data>
+	<data name="CreateCloudSession_UnknownError" xml:space="preserve">
+		<value>Une erreur inconnue est survenue. Veuillez consulter le journal.</value>
+	</data>
+	<data name="CreateCloudSession_Header" xml:space="preserve">
+		<value>Créer une nouvelle Session Cloud</value>
+	</data>
+	<data name="JoinCloudSession_Header" xml:space="preserve">
+		<value>Rejoindre une Session Cloud existante</value>
 	</data>
 </root>

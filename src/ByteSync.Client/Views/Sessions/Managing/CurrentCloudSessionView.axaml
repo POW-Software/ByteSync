@@ -3,11 +3,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:misc="clr-namespace:ByteSync.Views.Misc"
-             xmlns:managing="clr-namespace:ByteSync.ViewModels.Sessions.Cloud.Managing"
-             xmlns:settings="clr-namespace:ByteSync.Views.Sessions.Settings"
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             xmlns:managing="clr-namespace:ByteSync.ViewModels.Sessions.Managing"
+             xmlns:managing1="clr-namespace:ByteSync.Views.Sessions.Managing"
              mc:Ignorable="d" d:DesignWidth="1500" d:DesignHeight="450"
-             x:Class="ByteSync.Views.Sessions.Cloud.Managing.CurrentCloudSessionView">
+             x:Class="ByteSync.Views.Sessions.Managing.CurrentCloudSessionView">
     
     <Design.DataContext>
         <managing:CurrentCloudSessionViewModel />
@@ -19,7 +19,7 @@
             <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 3 0 9">
 
                 <StackPanel Orientation="Vertical" Margin="3">
-                    <Label Content="{localizations:Loc StartComparison_SessionId}"></Label>
+                    <Label Content="{localizations:Loc JoinCloudSession_SessionId}"></Label>
                     <StackPanel Orientation="Horizontal">
                         <TextBox Text="{Binding SessionId}" MinWidth="180" IsReadOnly="True" CaretBrush="Transparent"/>
                         
@@ -33,7 +33,7 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Vertical" Margin="18,3,3,3">
-                    <Label Content="{localizations:Loc StartComparison_SessionPassword}" ></Label>
+                    <Label Content="{localizations:Loc JoinCloudSession_SessionPassword}" ></Label>
                     <StackPanel Orientation="Horizontal">
                         <TextBox Text="{Binding SessionPassword}" MinWidth="180" IsReadOnly="True" CaretBrush="Transparent"/>
                         
@@ -97,7 +97,7 @@
                        StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
             
             <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 9 0 3">
-                <settings:SessionSettingsEditView DockPanel.Dock="Right" DataContext="{Binding SessionSettingsEditViewModel}" HorizontalContentAlignment="Right"
+                <managing1:SessionSettingsEditView DockPanel.Dock="Right" DataContext="{Binding SessionSettingsEditViewModel}" HorizontalContentAlignment="Right"
                                                   Margin="24 0"/>
             </WrapPanel>
         </StackPanel>

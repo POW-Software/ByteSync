@@ -6,7 +6,6 @@ using ByteSync.Business.Events;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces;
-using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ReactiveUI;
@@ -17,7 +16,6 @@ namespace ByteSync.ViewModels.Home;
 public class JoinCloudSessionViewModel : ActivatableViewModelBase
 {
     private readonly IJoinSessionService _joinSessionService;
-    private readonly ICloudSessionEventsHub _cloudSessionEventsHub;
     private readonly ILocalizationService _localizationService;
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
     private readonly ILogger<JoinCloudSessionViewModel> _logger;
@@ -27,12 +25,11 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         
     }
     
-    public JoinCloudSessionViewModel(IJoinSessionService joinSessionService, ICloudSessionEventsHub cloudSessionEventsHub, 
+    public JoinCloudSessionViewModel(IJoinSessionService joinSessionService, 
         ILocalizationService localizationService, ICloudSessionConnectionRepository cloudSessionConnectionRepository, 
         ILogger<JoinCloudSessionViewModel> logger)
     {
         _joinSessionService = joinSessionService;
-        _cloudSessionEventsHub = cloudSessionEventsHub;
         _localizationService = localizationService;
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         _logger = logger;
@@ -45,11 +42,11 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         
         this.WhenActivated(disposables =>
         {
-            // Todo improve error handling
-            Observable.FromEventPattern<GenericEventArgs<JoinSessionResult>>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.JoinCloudSessionFailed))
+            _cloudSessionConnectionRepository.JoinSessionErrorObservable
+                .DistinctUntilChanged()
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(evt => OnCloudSessionJoinError(evt.EventArgs.Value))
-                .DisposeWith(disposables);
+                .Subscribe(OnCloudSessionJoinError)
+                .DisposeWith(disposables);           
             
             _localizationService.CurrentCultureObservable
                 .ObserveOn(RxApp.MainThreadScheduler)
@@ -59,6 +56,11 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
             _cloudSessionConnectionRepository.ConnectionStatusObservable
                 .Select(x => x == SessionConnectionStatus.JoiningSession)
                 .ToPropertyEx(this, x => x.IsJoiningCloudSession)
+                .DisposeWith(disposables);
+            
+            _cloudSessionConnectionRepository.ConnectionStatusObservable
+                .Select(x => x == SessionConnectionStatus.CreatingSession)
+                .ToPropertyEx(this, x => x.IsCreatingCloudSession)
                 .DisposeWith(disposables);
             
         });
@@ -81,6 +83,8 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
     public string? ErrorMessageSource { get; set; }
     
     public extern bool IsJoiningCloudSession { [ObservableAsProperty] get; }
+        
+    public extern bool IsCreatingCloudSession { [ObservableAsProperty] get; }
     
     private async Task JoinCloudSession()
     {
@@ -142,31 +146,37 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         }
     }
 
-    private void OnCloudSessionJoinError(JoinSessionResult joinSessionResult)
+    private void OnCloudSessionJoinError(JoinSessionResult? joinSessionResult)
     {
+        if (joinSessionResult == null)
+        {
+            UpdateErrorMessage(null);
+            return;
+        }
+        
         switch (joinSessionResult.Status)
         {
-            case JoinSessionStatuses.SessionNotFound:
+            case JoinSessionStatus.SessionNotFound:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_SessionNotFound));
                 break;
 
-            case JoinSessionStatuses.ServerError:
+            case JoinSessionStatus.ServerError:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_ServerError));
                 break;
 
-            case JoinSessionStatuses.TransientError:
+            case JoinSessionStatus.TransientError:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_TransientError));
                 break;
 
-            case JoinSessionStatuses.TooManyMembers:
+            case JoinSessionStatus.TooManyMembers:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_TooManyMembers));
                 break;
 
-            case JoinSessionStatuses.SessionAlreadyActivated:
+            case JoinSessionStatus.SessionAlreadyActivated:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_SessionAlreadyActivated));
                 break;
 
-            case JoinSessionStatuses.TrustCheckFailed:
+            case JoinSessionStatus.TrustCheckFailed:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_TrustCheckFailed));
                 break;
 

@@ -1,8 +1,8 @@
 ﻿using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using ByteSync.ViewModels.Sessions.Cloud.Members;
+using ByteSync.ViewModels.Sessions.Members;
 
-namespace ByteSync.Views.Sessions.Cloud.Members
+namespace ByteSync.Views.Sessions.Members
 {
     class SessionMachineView : ReactiveUserControl<SessionMachineViewModel>
     {

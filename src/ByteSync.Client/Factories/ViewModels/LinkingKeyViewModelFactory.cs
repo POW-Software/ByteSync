@@ -1,7 +1,7 @@
 ﻿using Autofac;
 using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Factories.ViewModels;
-using ByteSync.ViewModels.Sessions.Cloud.Managing;
+using ByteSync.ViewModels.Sessions.Managing;
 
 namespace ByteSync.Factories.ViewModels;
 

@@ -24,7 +24,7 @@ using DynamicData.Binding;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-namespace ByteSync.ViewModels.Sessions.Cloud.Members;
+namespace ByteSync.ViewModels.Sessions.Members;
 
 public class SessionMachineViewModel : ActivatableViewModelBase
 {
