@@ -15,7 +15,7 @@
     
     <Grid>
         <StackPanel MinWidth="300" MaxWidth="450" Margin="12"
-                    IsVisible="{Binding CanCurrentUserStartInventory}"
+                    IsVisible="{Binding IsCurrentUserAllowedToStartInventory}"
                     HorizontalAlignment="Center" Orientation="Vertical">
             <Button Classes="AccentButton"
                     Command="{Binding Path=StartInventoryCommand}" HorizontalAlignment="Center"
@@ -34,10 +34,9 @@
                        IsVisible="{Binding StartInventoryErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
                        HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
         </StackPanel>
-
-        <!-- IsVisible="{Binding ShowWaitingForInventoriesStart}" -->
+        
         <StackPanel MinWidth="300" Margin="12"
-                    IsVisible="{Binding !CanCurrentUserStartInventory}"
+                    IsVisible="{Binding !IsCurrentUserAllowedToStartInventory}"
                     HorizontalAlignment="Center">
 
             <TextBlock FontWeight="Bold" Text="{Binding WaitingForInventoryStartMessage}" MaxWidth="500"

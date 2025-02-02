@@ -1,15 +1,11 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using Avalonia.Controls.Mixins;
 using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Business.Inventories;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Inventories;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Dialogs;
-using ByteSync.Interfaces.EventsHubs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
@@ -37,57 +33,19 @@ public class InventoryProcessViewModel : ActivatableViewModelBase
         InventoryAnalysisViewModel = inventoryAnalysisViewModel;
         InventoryBeforeStartViewModel = inventoryBeforeStartViewModel;
         
-        // RemainingTimeData = new RemainingTimeData();
-        // RemainingTimeComputer = new RemainingTimeComputer(RemainingTimeData);
-        
         AbortIventoryCommand = ReactiveCommand.CreateFromTask(AbortInventory);
 
         InventoryProcessData = _inventoryService.InventoryProcessData;
-
-        // SampledMonitorData
-        //     .ObserveOn(RxApp.MainThreadScheduler)    
-        //     .Subscribe(x =>
-        //     {
-        //         MonitorData = x.Item1;
-        //
-        //         RemainingTimeComputer.SetDataToHandle(MonitorData.IdentifiedSize);
-        //         RemainingTimeComputer.SetDataHandled(MonitorData.ProcessedSize);
-        //     });
 
         this.WhenActivated(HandleActivation);
     }
     
     private void HandleActivation(System.Reactive.Disposables.CompositeDisposable disposables)
     {
-        // _inventoryService.InventoryProcessData.MainStatus.DistinctUntilChanged()
-        //     .Where(status => status == LocalInventoryPartStatus.Running)
-        //     .Subscribe(_ => RemainingTimeComputer.Start(InventoryProcessData.InventoryStart))
-        //     .DisposeWith(disposables);
-
         _inventoryService.InventoryProcessData.MainStatus.DistinctUntilChanged()
             .Select(status => status is not LocalInventoryPartStatus.Pending)
             .ToPropertyEx(this, x => x.HasLocalInventoryStarted)
             .DisposeWith(disposables);
-
-        // _sessionService.SessionStatusObservable.DistinctUntilChanged()
-        //     .Where(ss => ss.In(SessionStatus.Preparation))
-        //     .Subscribe(_ => RemainingTimeComputer.Stop())
-        //     .DisposeWith(disposables);
-        
-        // Observable.FromEventPattern<InventoryStatusChangedEventArgs>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.InventoryStatusChanged))
-        //     .ObserveOn(RxApp.MainThreadScheduler)
-        //     .Subscribe( evt=> OnInventoryStatusChanged(evt.EventArgs))
-        //     .DisposeWith(disposables);
-        
-        // Observable.FromEventPattern<EventArgs>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.SessionResetted))
-        //     .ObserveOn(RxApp.MainThreadScheduler)
-        //     .Subscribe(_ => OnSessionResetted())
-        //     .DisposeWith(disposables);
-
-        // Observable.FromEventPattern<EventArgs>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.MemberQuittedSession))
-        //     .ObserveOn(RxApp.MainThreadScheduler)
-        //     .Subscribe(_ => OnMemberQuittedSession())
-        //     .DisposeWith(disposables);
     }
     
     private IObservable<(InventoryMonitorData, LocalInventoryPartStatus)> SampledMonitorData
@@ -132,11 +90,6 @@ public class InventoryProcessViewModel : ActivatableViewModelBase
 
     [Reactive]
     public InventoryProcessData InventoryProcessData { get; set; }
-    
-    // [Reactive]
-    // private RemainingTimeData RemainingTimeData { get; set; }
-
-    // private RemainingTimeComputer RemainingTimeComputer { get; set; }
         
     public ReactiveCommand<Unit, Unit> AbortIventoryCommand { get; set; }
 
@@ -164,18 +117,4 @@ public class InventoryProcessViewModel : ActivatableViewModelBase
             await _inventoryService.AbortInventory();
         }
     }
-
-    // private void OnSessionResetted()
-    // {
-    //     RemainingTimeComputer.Stop();
-    // }
-
-    // private void OnInventoryStatusChanged(InventoryStatusChangedEventArgs eventArgs)
-    // {
-    //     if (eventArgs.IsLocal && eventArgs.NewStatus.In(LocalInventoryGlobalStatus.Finished, 
-    //             LocalInventoryGlobalStatus.InventoryCancelled, LocalInventoryGlobalStatus.InventoryError))
-    //     {
-    //         RemainingTimeComputer.Stop();
-    //     }
-    // }
 }
