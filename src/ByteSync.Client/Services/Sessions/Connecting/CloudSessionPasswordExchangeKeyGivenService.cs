@@ -64,7 +64,8 @@ public class CloudSessionPasswordExchangeKeyGivenService : ICloudSessionPassword
                 AskJoinCloudSessionParameters outParameters = new (request, encryptedPassword);
 
                 Log.Information("...Providing encrypted password to the validator");
-                var joinSessionResult = await _cloudSessionApiClient.AskJoinCloudSession(outParameters);
+                var joinSessionResult = await _cloudSessionApiClient.AskJoinCloudSession(outParameters,
+                    _cloudSessionConnectionRepository.CancellationToken);
 
                 if (!joinSessionResult.IsOK)
                 {

@@ -78,7 +78,7 @@ public class JoinSessionService : IJoinSessionService
 
         await _cloudSessionConnectionRepository.SetCloudSessionConnectionData(sessionId, sessionPassword, lobbySessionDetails);
 
-        var joinSessionResult = await _publicKeysTruster.TrustAllMembersPublicKeys(sessionId);
+        var joinSessionResult = await _publicKeysTruster.TrustAllMembersPublicKeys(sessionId, _cloudSessionConnectionRepository.CancellationToken);
         if (!joinSessionResult.IsOK)
         {
             await _cloudSessionConnector.OnJoinSessionError(joinSessionResult);
@@ -88,7 +88,8 @@ public class JoinSessionService : IJoinSessionService
         var parameters = new AskCloudSessionPasswordExchangeKeyParameters(sessionId, _publicKeysManager.GetMyPublicKeyInfo());
         parameters.LobbyId = lobbySessionDetails?.LobbyId;
         parameters.ProfileClientId = lobbySessionDetails?.LocalProfileClientId;
-        joinSessionResult = await _cloudSessionApiClient.AskPasswordExchangeKey(parameters);
+        joinSessionResult = await _cloudSessionApiClient.AskPasswordExchangeKey(parameters,
+            _cloudSessionConnectionRepository.CancellationToken);
 
         if (!joinSessionResult.IsOK)
         {

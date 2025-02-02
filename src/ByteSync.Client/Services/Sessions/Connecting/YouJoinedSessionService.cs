@@ -79,7 +79,8 @@ public class YouJoinedSessionService : IYouJoinedSessionService
                     return;
                 }
                 
-                var sessionMembersClientInstanceIds = await _publicKeysTruster.TrustMissingMembersPublicKeys(cloudSessionResult.CloudSession.SessionId);
+                var sessionMembersClientInstanceIds = await _publicKeysTruster.TrustMissingMembersPublicKeys(cloudSessionResult.CloudSession.SessionId,
+                    _cloudSessionConnectionRepository.CancellationToken);
                 if (sessionMembersClientInstanceIds == null)
                 {
                     _logger.LogWarning($"can not check trust");
