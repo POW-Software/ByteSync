@@ -18,7 +18,7 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
-                <RowDefinition Height="120"></RowDefinition>
+                <RowDefinition Height="Auto" MinHeight="120"></RowDefinition>
             </Grid.RowDefinitions>
             
             <TextBlock Grid.Row="0" Name="MachineDescriptionTextBlock" FontWeight="Bold" Text="Create a new Cloud Session" Margin="3"/>
@@ -61,7 +61,8 @@
                     
                     <misc:Icon FontSize="24" Value="RegularErrorCircle" Foreground="{DynamicResource HomeCloudSynchronizationBackGround}"
                                VerticalAlignment="Center" Margin="6 0" />
-                    <TextBlock Text="{Binding Path=ErrorMessage}" VerticalAlignment="Center" Margin="0"/>
+                    <TextBlock Text="{Binding Path=ErrorMessage}" TextWrapping="Wrap" MaxWidth="300"
+                               VerticalAlignment="Center" Margin="0"/>
                 </StackPanel>
 
             </StackPanel>

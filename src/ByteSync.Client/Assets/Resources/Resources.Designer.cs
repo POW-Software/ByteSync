@@ -2139,9 +2139,9 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
-        public static string CreateCloudSession_UnexpectedError {
+        public static string CreateCloudSession_UnknownError {
             get {
-                return ResourceManager.GetString("CreateCloudSession_UnexpectedError", resourceCulture);
+                return ResourceManager.GetString("CreateCloudSession_UnknownError", resourceCulture);
             }
         }
         
