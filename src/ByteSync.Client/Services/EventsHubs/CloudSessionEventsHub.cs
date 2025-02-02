@@ -120,10 +120,10 @@ internal class CloudSessionEventsHub : ICloudSessionEventsHub
     //     Task.Run(() => SynchronizationProgressChanged?.Invoke(this, new GenericEventArgs<SynchronizationProgressInfo>(synchronizationProgressData)));
     // }
 
-    public void RaiseSessionOnFatalError(CloudSessionFatalError cloudSessionFatalError)
-    {
-        Task.Run(() => CloudSessionOnFatalError?.Invoke(this, new GenericEventArgs<CloudSessionFatalError>(cloudSessionFatalError)));
-    }
+    // public void RaiseSessionOnFatalError(CloudSessionFatalError cloudSessionFatalError)
+    // {
+    //     Task.Run(() => CloudSessionOnFatalError?.Invoke(this, new GenericEventArgs<CloudSessionFatalError>(cloudSessionFatalError)));
+    // }
 
     // public void RaiseSynchronizationRuleRemoved(SynchronizationRuleSummaryViewModel synchronizationRuleSummaryViewModel)
     // {

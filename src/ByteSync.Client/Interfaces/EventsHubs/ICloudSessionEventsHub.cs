@@ -34,7 +34,7 @@ public interface ICloudSessionEventsHub
     
     // public event EventHandler<GenericEventArgs<SynchronizationProgressInfo>>? SynchronizationProgressChanged;
     
-    public event EventHandler<GenericEventArgs<CloudSessionFatalError>>? CloudSessionOnFatalError;
+    // public event EventHandler<GenericEventArgs<CloudSessionFatalError>>? CloudSessionOnFatalError;
     
     // public event EventHandler<GenericEventArgs<SynchronizationRuleSummaryViewModel>>? SynchronizationRuleRemoved;
     
@@ -76,7 +76,7 @@ public interface ICloudSessionEventsHub
     
     // void RaiseSynchronizationProgressChanged(SynchronizationProgressInfo synchronizationProgressData);
     
-    void RaiseSessionOnFatalError(CloudSessionFatalError cloudSessionFatalError);
+    // void RaiseSessionOnFatalError(CloudSessionFatalError cloudSessionFatalError);
     
     // void RaiseSynchronizationRuleRemoved(SynchronizationRuleSummaryViewModel synchronizationRuleSummaryViewModel);
     

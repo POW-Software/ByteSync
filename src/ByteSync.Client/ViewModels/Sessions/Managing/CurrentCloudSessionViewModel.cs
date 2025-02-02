@@ -61,10 +61,10 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
                 .ToPropertyEx(this, x => x.ShowRestartSessionAndSaveProfile)
                 .DisposeWith(disposables);
 
-            Observable.FromEventPattern<GenericEventArgs<CloudSessionFatalError>>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.CloudSessionOnFatalError))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(evt => OnCloudSessionOnFatalError(evt.EventArgs.Value))
-                .DisposeWith(disposables);
+            // Observable.FromEventPattern<GenericEventArgs<CloudSessionFatalError>>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.CloudSessionOnFatalError))
+            //     .ObserveOn(RxApp.MainThreadScheduler)
+            //     .Subscribe(evt => OnCloudSessionOnFatalError(evt.EventArgs.Value))
+            //     .DisposeWith(disposables);
             
             this.HandleActivation(disposables);
         });
