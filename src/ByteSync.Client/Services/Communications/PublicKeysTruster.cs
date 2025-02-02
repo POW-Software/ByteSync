@@ -211,7 +211,7 @@ public class PublicKeysTruster : IPublicKeysTruster
             {
                 LogProblem("Can not join the session because at least one the Session Member is not trusted");
 
-                return JoinSessionResult.BuildFrom(JoinSessionStatuses.TrustCheckFailed);
+                return JoinSessionResult.BuildFrom(JoinSessionStatus.TrustCheckFailed);
             }
             else
             {
@@ -235,7 +235,7 @@ public class PublicKeysTruster : IPublicKeysTruster
         if (memberIdsToCheck.Count == 0)
         {
             LogProblem("Members list is empty");
-            return JoinSessionResult.BuildFrom(JoinSessionStatuses.SessionNotFound);
+            return JoinSessionResult.BuildFrom(JoinSessionStatus.SessionNotFound);
         }
    
         var parameters = new TrustCheckParameters 
@@ -251,7 +251,7 @@ public class PublicKeysTruster : IPublicKeysTruster
         if (result == null || !result.IsOK)
         {
             _logger.LogError("Can not start trust check");
-            return JoinSessionResult.BuildFrom(JoinSessionStatuses.UnexpectedError);
+            return JoinSessionResult.BuildFrom(JoinSessionStatus.UnexpectedError);
         }
         
         await _trustProcessPublicKeysRepository.SetExpectedPublicKeyCheckDataCount(sessionId, result.MembersInstanceIds);
@@ -267,7 +267,7 @@ public class PublicKeysTruster : IPublicKeysTruster
         else
         {
             _logger.LogWarning("Timeout during trust check process");
-            return JoinSessionResult.BuildFrom(JoinSessionStatuses.TrustCheckFailed);
+            return JoinSessionResult.BuildFrom(JoinSessionStatus.TrustCheckFailed);
         }
     }
     

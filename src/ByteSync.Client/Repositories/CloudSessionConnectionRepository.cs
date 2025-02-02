@@ -3,7 +3,9 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Business.Sessions;
+using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Business.Sessions.RunSessionInfos;
+using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Controls;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Sessions;
@@ -14,10 +16,16 @@ namespace ByteSync.Repositories;
 public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConnectionData>, ICloudSessionConnectionRepository
 {
     private readonly BehaviorSubject<SessionConnectionStatus> _connectionStatus;
-    
+    private readonly BehaviorSubject<CreateSessionError?> _createSessionError;
+    private readonly BehaviorSubject<JoinSessionResult?> _joinSessionError;
+
     public CloudSessionConnectionRepository()
     {
         _connectionStatus = new BehaviorSubject<SessionConnectionStatus>(SessionConnectionStatus.NoSession);
+        _createSessionError = new BehaviorSubject<CreateSessionError?>(null);
+        _joinSessionError = new BehaviorSubject<JoinSessionResult?>(null);
+        
+        CancellationTokenSource = new CancellationTokenSource();
     }
 
     public byte[]? AesEncryptionKey { get; set; }
@@ -98,6 +106,10 @@ public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConne
     
     public IObservable<SessionConnectionStatus> ConnectionStatusObservable => _connectionStatus.AsObservable();
     
+    public IObservable<CreateSessionError?> CreateSessionErrorObservable => _createSessionError.AsObservable();
+    
+    public IObservable<JoinSessionResult?> JoinSessionErrorObservable => _joinSessionError.AsObservable();
+    
     public SessionConnectionStatus CurrentConnectionStatus => _connectionStatus.Value;
     
     public CancellationTokenSource CancellationTokenSource { get; set; }
@@ -107,5 +119,21 @@ public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConne
     public void SetConnectionStatus(SessionConnectionStatus connectionStatus)
     {
         _connectionStatus.OnNext(connectionStatus);
+    }
+    
+    public void SetCreateSessionError(CreateSessionError createSessionError)
+    {
+        _createSessionError.OnNext(createSessionError);
+    }
+    
+    public void SetJoinSessionError(JoinSessionResult joinSessionResult)
+    {
+        _joinSessionError.OnNext(joinSessionResult);
+    }
+
+    public void ClearErrors()
+    {
+        _createSessionError.OnNext(null);
+        _joinSessionError.OnNext(null);
     }
 }

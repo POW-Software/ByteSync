@@ -45,7 +45,7 @@ public class JoinSessionService : IJoinSessionService
         }
         catch (Exception)
         {
-            var joinSessionResult = JoinSessionResult.BuildFrom(JoinSessionStatuses.UnexpectedError);
+            var joinSessionResult = JoinSessionResult.BuildFrom(JoinSessionStatus.UnexpectedError);
             await _cloudSessionConnector.OnJoinSessionError(joinSessionResult);
 
             throw;

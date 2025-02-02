@@ -1,7 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Business.Sessions;
+using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Business.Sessions.RunSessionInfos;
+using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Interfaces;
 
 namespace ByteSync.Interfaces.Repositories
@@ -25,6 +27,10 @@ namespace ByteSync.Interfaces.Repositories
         Task<bool> CheckConnectingCloudSession(string? sessionId);
         
         IObservable<SessionConnectionStatus> ConnectionStatusObservable { get; }
+        
+        IObservable<CreateSessionError?> CreateSessionErrorObservable { get; }
+        
+        IObservable<JoinSessionResult?> JoinSessionErrorObservable { get; }
     
         SessionConnectionStatus CurrentConnectionStatus { get; }
         
@@ -33,5 +39,11 @@ namespace ByteSync.Interfaces.Repositories
         CancellationToken CancellationToken { get; }
 
         void SetConnectionStatus(SessionConnectionStatus connectionStatus);
+        
+        void SetCreateSessionError(CreateSessionError createSessionError);
+        
+        void SetJoinSessionError(JoinSessionResult joinSessionResult);
+        
+        void ClearErrors();
     }
 }

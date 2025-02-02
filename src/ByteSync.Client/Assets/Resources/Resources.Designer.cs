@@ -2139,6 +2139,12 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
+        public static string CreateCloudSession_UnexpectedError {
+            get {
+                return ResourceManager.GetString("CreateCloudSession_UnexpectedError", resourceCulture);
+            }
+        }
+        
         public static string General_Cancel_Uppercase {   
             get {
                 return ResourceManager.GetString("General_Cancel_Uppercase", resourceCulture);

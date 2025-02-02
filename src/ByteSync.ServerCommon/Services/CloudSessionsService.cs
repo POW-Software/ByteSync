@@ -127,7 +127,7 @@ public class CloudSessionsService : ICloudSessionsService
             _logger.LogInformation("AskCloudSessionPasswordExchangeKey: session not found for sessionId '{sessionId}'. Can not proceed",
                 parameters.SessionId);
 
-            return JoinSessionResult.BuildFrom(JoinSessionStatuses.SessionNotFound);
+            return JoinSessionResult.BuildFrom(JoinSessionStatus.SessionNotFound);
         }
         
         JoinSessionResult? result = await PrecheckJoinSession(client, cloudSession);
@@ -160,7 +160,7 @@ public class CloudSessionsService : ICloudSessionsService
             _logger.LogInformation("AskCloudSessionPasswordExchangeKey: no member found for sessionId '{sessionId}'. Can not proceed",
                 parameters.SessionId);
 
-            return JoinSessionResult.BuildFrom(JoinSessionStatuses.TransientError);
+            return JoinSessionResult.BuildFrom(JoinSessionStatus.TransientError);
         }
     }
     
@@ -174,7 +174,7 @@ public class CloudSessionsService : ICloudSessionsService
             _logger.LogInformation("AskCloudSessionPasswordExchangeKey: already too many members ({members}) for sessionId '{sessionId}'. Can not proceed",
                 allMembers.Count, cloudSession.SessionId);
 
-            return JoinSessionResult.BuildFrom(JoinSessionStatuses.TooManyMembers);
+            return JoinSessionResult.BuildFrom(JoinSessionStatus.TooManyMembers);
         }
             
         if (cloudSession.IsSessionActivated)
@@ -182,7 +182,7 @@ public class CloudSessionsService : ICloudSessionsService
             _logger.LogInformation("AskCloudSessionPasswordExchangeKey: session '{sessionId}' is already activated. Can not proceed",
                 cloudSession.SessionId);
 
-            return JoinSessionResult.BuildFrom(JoinSessionStatuses.SessionAlreadyActivated);
+            return JoinSessionResult.BuildFrom(JoinSessionStatus.SessionAlreadyActivated);
         }
 
         return null;
@@ -477,7 +477,7 @@ public class CloudSessionsService : ICloudSessionsService
         {
             _logger.LogWarning("AskJoinCloudSession: ClientInstanceIds not matching. client.ClientInstanceId:{id1}" +
                         "parameters.JoinerId:{id2}", client.ClientInstanceId, parameters.JoinerClientInstanceId);
-            return JoinSessionResult.BuildFrom(JoinSessionStatuses.TransientError);
+            return JoinSessionResult.BuildFrom(JoinSessionStatus.TransientError);
         }
 
         var cloudSessionData = await _cloudSessionsRepository.Get(parameters.SessionId);
@@ -492,7 +492,7 @@ public class CloudSessionsService : ICloudSessionsService
                 _logger.LogInformation(
                     "AskJoinCloudSession: already too many members ({members}) for sessionId '{sessionId}'. Can not proceed",
                     members.Count, parameters.SessionId);
-                return JoinSessionResult.BuildFrom(JoinSessionStatuses.TooManyMembers);
+                return JoinSessionResult.BuildFrom(JoinSessionStatus.TooManyMembers);
             }
 
             if (cloudSessionData.IsSessionActivated)
@@ -500,7 +500,7 @@ public class CloudSessionsService : ICloudSessionsService
                 _logger.LogInformation(
                     "AskJoinCloudSession: session '{sessionId}' is already activated. Can not proceed",
                     parameters.SessionId);
-                return JoinSessionResult.BuildFrom(JoinSessionStatuses.SessionAlreadyActivated);
+                return JoinSessionResult.BuildFrom(JoinSessionStatus.SessionAlreadyActivated);
             }
 
             var member = members.FirstOrDefault(m => m.ClientInstanceId.Equals(parameters.ValidatorInstanceId));
@@ -517,7 +517,7 @@ public class CloudSessionsService : ICloudSessionsService
                     "AskJoinCloudSession: not member found for sessionId '{sessionId}' and clientInstanceId:{cid}. Can not proceed",
                     parameters.SessionId, parameters.ValidatorInstanceId);
 
-                return JoinSessionResult.BuildFrom(JoinSessionStatuses.TransientError);
+                return JoinSessionResult.BuildFrom(JoinSessionStatus.TransientError);
             }
         }
         else
@@ -526,7 +526,7 @@ public class CloudSessionsService : ICloudSessionsService
                 "AskJoinCloudSession: session not found for sessionId '{sessionId}'. Can not proceed",
                 parameters.SessionId);
 
-            return JoinSessionResult.BuildFrom(JoinSessionStatuses.SessionNotFound);
+            return JoinSessionResult.BuildFrom(JoinSessionStatus.SessionNotFound);
         }
     }
     

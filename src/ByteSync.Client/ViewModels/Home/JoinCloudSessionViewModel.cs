@@ -45,11 +45,11 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         
         this.WhenActivated(disposables =>
         {
-            // Todo improve error handling
-            Observable.FromEventPattern<GenericEventArgs<JoinSessionResult>>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.JoinCloudSessionFailed))
+            _cloudSessionConnectionRepository.JoinSessionErrorObservable
+                .DistinctUntilChanged()
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(evt => OnCloudSessionJoinError(evt.EventArgs.Value))
-                .DisposeWith(disposables);
+                .Subscribe(OnCloudSessionJoinError)
+                .DisposeWith(disposables);           
             
             _localizationService.CurrentCultureObservable
                 .ObserveOn(RxApp.MainThreadScheduler)
@@ -142,31 +142,37 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         }
     }
 
-    private void OnCloudSessionJoinError(JoinSessionResult joinSessionResult)
+    private void OnCloudSessionJoinError(JoinSessionResult? joinSessionResult)
     {
+        if (joinSessionResult == null)
+        {
+            UpdateErrorMessage(null);
+            return;
+        }
+        
         switch (joinSessionResult.Status)
         {
-            case JoinSessionStatuses.SessionNotFound:
+            case JoinSessionStatus.SessionNotFound:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_SessionNotFound));
                 break;
 
-            case JoinSessionStatuses.ServerError:
+            case JoinSessionStatus.ServerError:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_ServerError));
                 break;
 
-            case JoinSessionStatuses.TransientError:
+            case JoinSessionStatus.TransientError:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_TransientError));
                 break;
 
-            case JoinSessionStatuses.TooManyMembers:
+            case JoinSessionStatus.TooManyMembers:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_TooManyMembers));
                 break;
 
-            case JoinSessionStatuses.SessionAlreadyActivated:
+            case JoinSessionStatus.SessionAlreadyActivated:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_SessionAlreadyActivated));
                 break;
 
-            case JoinSessionStatuses.TrustCheckFailed:
+            case JoinSessionStatus.TrustCheckFailed:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_TrustCheckFailed));
                 break;
 

@@ -42,7 +42,7 @@ public interface ICloudSessionEventsHub
 
     // public event EventHandler? SessionResetted;
     
-    public event EventHandler<GenericEventArgs<JoinSessionResult>>? JoinCloudSessionFailed;
+    // public event EventHandler<GenericEventArgs<JoinSessionResult>>? JoinCloudSessionFailed;
     
     // public event EventHandler? SynchronizationRulesApplied;
     
@@ -84,7 +84,7 @@ public interface ICloudSessionEventsHub
     
     // void RaiseSessionResetted();
     
-    Task RaiseJoinCloudSessionFailed(JoinSessionResult joinSessionResult);
+    // Task RaiseJoinCloudSessionFailed(JoinSessionResult joinSessionResult);
     
     // Task RaiseSynchronizationRulesApplied();
 }

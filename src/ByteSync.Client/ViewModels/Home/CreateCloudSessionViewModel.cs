@@ -1,6 +1,10 @@
 ﻿using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using ByteSync.Assets.Resources;
 using ByteSync.Business.Sessions;
+using ByteSync.Business.Sessions.Connecting;
+using ByteSync.Common.Business.Sessions.Cloud.Connections;
+using ByteSync.Interfaces;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 using ReactiveUI;
@@ -13,18 +17,19 @@ public class CreateCloudSessionViewModel : ActivatableViewModelBase
 {
     private readonly ICreateSessionService _createSessionService;
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
+    private readonly ILocalizationService _localizationService;
     private readonly ILogger<CreateCloudSessionViewModel> _logger;
-
-
+    
     public CreateCloudSessionViewModel()
     {
     }
 
     public CreateCloudSessionViewModel(ICreateSessionService createSessionService, ICloudSessionConnectionRepository cloudSessionConnectionRepository, 
-        ILogger<CreateCloudSessionViewModel> logger)
+        ILocalizationService localizationService, ILogger<CreateCloudSessionViewModel> logger)
     {
         _createSessionService = createSessionService;
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
+        _localizationService = localizationService;
         _logger = logger;
         
         CreateCloudSessionCommand = ReactiveCommand.CreateFromTask(CreateCloudSession);
@@ -32,6 +37,12 @@ public class CreateCloudSessionViewModel : ActivatableViewModelBase
         
         this.WhenActivated(disposables =>
         {
+            _cloudSessionConnectionRepository.CreateSessionErrorObservable
+                .DistinctUntilChanged()
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(OnCreateSessionError)
+                .DisposeWith(disposables);
+            
             _cloudSessionConnectionRepository.ConnectionStatusObservable
                 .Select(x => x == SessionConnectionStatus.CreatingSession)
                 .ToPropertyEx(this, x => x.IsCreatingCloudSession)
@@ -44,6 +55,12 @@ public class CreateCloudSessionViewModel : ActivatableViewModelBase
     public ReactiveCommand<Unit, Unit>? CancelCloudSessionCreationCommand { get; set; }
     
     public extern bool IsCreatingCloudSession { [ObservableAsProperty] get; }
+    
+    [Reactive]
+    public string? ErrorMessage { get; set; }
+
+    [Reactive]
+    public string? ErrorMessageSource { get; set; }
     
     private async Task CreateCloudSession()
     {
@@ -66,6 +83,41 @@ public class CreateCloudSessionViewModel : ActivatableViewModelBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "CancelCreateCloudSession");
+        }
+    }
+
+    private void OnCreateSessionError(CreateSessionError? createSessionError)
+    {
+        if (createSessionError == null)
+        {
+            UpdateErrorMessage(null);
+            return;
+        }
+        
+        switch (createSessionError.Status)
+        {
+            case CreateSessionStatus.Error:
+                UpdateErrorMessage(nameof(Resources.CreateCloudSession_UnexpectedError), createSessionError.Exception);
+                break;
+        }
+    }
+    
+    private void UpdateErrorMessage(string? errorMessageSource, Exception? exception = null)
+    {
+        ErrorMessageSource = errorMessageSource;
+        if (ErrorMessageSource.IsNotEmpty())
+        {
+            string errorMessage = _localizationService[ErrorMessageSource!];
+            if (exception != null)
+            {
+                errorMessage += $" ({exception.Message})";
+            }
+
+            ErrorMessage = errorMessage;
+        }
+        else
+        {
+            ErrorMessage = "";
         }
     }
 }

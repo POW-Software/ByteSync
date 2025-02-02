@@ -35,7 +35,7 @@ internal class CloudSessionEventsHub : ICloudSessionEventsHub
     
     // public event EventHandler<GenericEventArgs<SynchronizationProgressInfo>>? SynchronizationProgressChanged;
     
-    public event EventHandler<GenericEventArgs<CloudSessionFatalError>>? CloudSessionOnFatalError;
+    // public event EventHandler<GenericEventArgs<CloudSessionFatalError>>? CloudSessionOnFatalError;
     
     // public event EventHandler<GenericEventArgs<SynchronizationRuleSummaryViewModel>>? SynchronizationRuleRemoved;
     
@@ -43,7 +43,7 @@ internal class CloudSessionEventsHub : ICloudSessionEventsHub
     
     // public event EventHandler? SessionResetted;
     
-    public event EventHandler<GenericEventArgs<JoinSessionResult>>? JoinCloudSessionFailed;
+    // public event EventHandler<GenericEventArgs<JoinSessionResult>>? JoinCloudSessionFailed;
     
     // public event EventHandler? SynchronizationRulesApplied;
 
@@ -140,10 +140,10 @@ internal class CloudSessionEventsHub : ICloudSessionEventsHub
     //     Task.Run(() => SessionResetted?.Invoke(this, EventArgs.Empty));
     // }
     
-    public async Task RaiseJoinCloudSessionFailed(JoinSessionResult joinSessionResult)
-    {
-        await Task.Run(() => JoinCloudSessionFailed?.Invoke(this, new GenericEventArgs<JoinSessionResult>(joinSessionResult)));
-    }
+    // public async Task RaiseJoinCloudSessionFailed(JoinSessionResult joinSessionResult)
+    // {
+    //     await Task.Run(() => JoinCloudSessionFailed?.Invoke(this, new GenericEventArgs<JoinSessionResult>(joinSessionResult)));
+    // }
 
     // public async Task RaiseSynchronizationRulesApplied()
     // {

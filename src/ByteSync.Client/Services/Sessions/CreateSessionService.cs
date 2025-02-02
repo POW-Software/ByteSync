@@ -74,9 +74,15 @@ public class CreateSessionService : ICreateSessionService
 
             return cloudSessionResult;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            await _cloudSessionConnector.InitializeConnection(SessionConnectionStatus.NoSession);
+            var createSessionError = new CreateSessionError
+            {
+                Exception = ex,
+                Status = CreateSessionStatus.Error
+            };
+            
+            await _cloudSessionConnector.OnCreateSessionError(createSessionError);
 
             throw;
         }

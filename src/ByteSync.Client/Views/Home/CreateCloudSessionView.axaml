@@ -54,6 +54,15 @@
                         <TextBlock Text="{localizations:Loc CreateCloudSession_Cancel}" />
                     </StackPanel>
                 </Button>
+                
+                <!-- Error Message -->
+                <StackPanel Orientation="Horizontal" MinHeight="32" Margin="9" VerticalAlignment="Bottom"
+                            IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"> 
+                    
+                    <misc:Icon FontSize="24" Value="RegularErrorCircle" Foreground="{DynamicResource HomeCloudSynchronizationBackGround}"
+                               VerticalAlignment="Center" Margin="6 0" />
+                    <TextBlock Text="{Binding Path=ErrorMessage}" VerticalAlignment="Center" Margin="0"/>
+                </StackPanel>
 
             </StackPanel>
         </Grid>

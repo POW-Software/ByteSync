@@ -1673,4 +1673,7 @@ Do you want to save this new Session Profile with this name?</value>
   <data name="CreateCloudSession_Cancel" xml:space="preserve">
     <value>CANCEL</value>
   </data>
+  <data name="CreateCloudSession_UnknownError" xml:space="preserve">
+    <value>An unknown error has occurred. Please check the log. If this error persists, please contact technical support.</value>
+  </data>
 </root>
