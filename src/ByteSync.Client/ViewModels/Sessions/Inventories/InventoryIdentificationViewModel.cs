@@ -57,8 +57,4 @@ public class InventoryIdentificationViewModel : ActivatableViewModelBase
     
     [Reactive]
     public long IdentifiedSize { get; set; }
-    
-    // public extern int IdentifiedFiles { [ObservableAsProperty] get; }
-    //
-    // public extern int IdentifiedDirectories { [ObservableAsProperty] get; }
 }

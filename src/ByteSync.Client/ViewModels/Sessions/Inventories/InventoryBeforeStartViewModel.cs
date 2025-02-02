@@ -1,7 +1,6 @@
 ﻿using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Arguments;
 using ByteSync.Common.Business.Inventories;
@@ -45,7 +44,7 @@ public class InventoryBeforeStartViewModel : ActivatableViewModelBase
         UpdateWaitingForInventoryStartMessage();
 
         _dataInventoryStarter.CanCurrentUserStartInventory()
-            .ToPropertyEx(this, x => x.CanCurrentUserStartInventory)
+            .ToPropertyEx(this, x => x.IsCurrentUserAllowedToStartInventory)
             .DisposeWith(disposables);
 
         _localizationService.CurrentCultureObservable
@@ -54,9 +53,7 @@ public class InventoryBeforeStartViewModel : ActivatableViewModelBase
             .DisposeWith(disposables);
     }
     
-    public InventoryProcessViewModel InventoryProcess { get; set; }
-    
-    public extern bool CanCurrentUserStartInventory { [ObservableAsProperty] get; }
+    public extern bool IsCurrentUserAllowedToStartInventory { [ObservableAsProperty] get; }
 
     private StartInventoryStatuses? LastStartInventoryStatus { get; set; }
     
@@ -168,9 +165,5 @@ public class InventoryBeforeStartViewModel : ActivatableViewModelBase
             LastStartInventoryStatus = StartInventoryStatuses.UnknownError;
             Log.Error(ex, "InventoryProcessViewModel.StartDataInventory");
         }
-        // finally
-        // {
-        //     RemainingTimeComputer.Stop();
-        // }
     }
 }

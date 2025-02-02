@@ -1,5 +1,4 @@
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using Autofac.Features.Indexed;
 using Avalonia.Animation;
 using Avalonia.Controls.Mixins;
@@ -16,7 +15,6 @@ using ByteSync.ViewModels.Headers;
 using ByteSync.ViewModels.Misc;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Serilog;
 
 namespace ByteSync.ViewModels;
 
@@ -30,6 +28,7 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
     private readonly IMessageBoxViewModelFactory _messageBoxViewModelFactory;
     private readonly IQuitSessionService _quitSessionService;
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
+    private readonly ILogger<MainWindowViewModel> _logger;
 
     public RoutingState Router { get; } = new RoutingState();
 
@@ -41,7 +40,8 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
     public MainWindowViewModel(ISessionService sessionService, ICloudSessionConnector cloudSessionConnector, INavigationService navigationService, 
         IZoomService zoomService, FlyoutContainerViewModel? flyoutContainerViewModel, HeaderViewModel headerViewModel, 
         IIndex<NavigationPanel, IRoutableViewModel> navigationPanelViewModels, IMessageBoxViewModelFactory messageBoxViewModelFactory,
-        IQuitSessionService quitSessionService, ICloudSessionConnectionRepository cloudSessionConnectionRepository)
+        IQuitSessionService quitSessionService, ICloudSessionConnectionRepository cloudSessionConnectionRepository,
+        ILogger<MainWindowViewModel> logger)
     {
         PageTransition = null;
 
@@ -53,6 +53,7 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
         _messageBoxViewModelFactory = messageBoxViewModelFactory;
         _quitSessionService = quitSessionService;
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
+        _logger = logger;
         
         FlyoutContainer = flyoutContainerViewModel!;
         Header = headerViewModel!;
@@ -75,19 +76,20 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
                 .DisposeWith(disposables);
             
             _cloudSessionConnectionRepository.ConnectionStatusObservable
-                .Where(x => x == SessionConnectionStatus.InSession)
                 .DistinctUntilChanged()
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(x => _navigationService.NavigateTo(NavigationPanel.CloudSynchronization))
+                .Subscribe(sessionConnectionStatus =>
+                {
+                    if (sessionConnectionStatus == SessionConnectionStatus.NoSession)
+                    {
+                        _navigationService.NavigateTo(NavigationPanel.Home);
+                    }
+                    else if (sessionConnectionStatus == SessionConnectionStatus.InSession)
+                    {
+                        _navigationService.NavigateTo(NavigationPanel.CloudSynchronization);
+                    }
+                })
                 .DisposeWith(disposables);
-            
-            _cloudSessionConnectionRepository.ConnectionStatusObservable
-                .Where(x => x == SessionConnectionStatus.NoSession)
-                .DistinctUntilChanged()
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(x => _navigationService.NavigateTo(NavigationPanel.Home))
-                .DisposeWith(disposables);
-            
         });
     }
 
@@ -140,7 +142,7 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
         {
             if (!canLogOutOrShutdown && isCtrlDown)
             {
-                Log.Warning("Forced closing of the application because the Ctrl key is pressed...");
+                _logger.LogWarning("Forced closing of the application because the Ctrl key is pressed...");
             }
             
             try
@@ -152,11 +154,10 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "OnCloseWindowRequested.QuitSession");
+                _logger.LogError(ex, "OnCloseWindowRequested.QuitSession");
             }
             
-            Log.Information("Shutting down the application...");
-            await Log.CloseAndFlushAsync();
+            _logger.LogInformation("Shutting down the application...");
 
             return true;
         }

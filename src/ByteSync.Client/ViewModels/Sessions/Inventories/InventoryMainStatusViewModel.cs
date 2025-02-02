@@ -1,7 +1,6 @@
 ﻿using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Business.Inventories;
@@ -36,10 +35,6 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
         _timeTrackingCache = timeTrackingCache;
         _dialogService = dialogService;
         _logger = logger;
-
-        // InventoryProcess = inventoryProcessViewModel;
-        
-        // InventoryProcessData = _inventoryService.InventoryProcessData;
         
         AbortIventoryCommand = ReactiveCommand.CreateFromTask(AbortInventory);
         
@@ -75,10 +70,6 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
     
     public ReactiveCommand<Unit, Unit> AbortIventoryCommand { get; set; }
     
-    // public InventoryProcessData InventoryProcessData => _inventoryService.InventoryProcessData;
-    
-    // public InventoryProcessViewModel InventoryProcess { get; set; }
-    
     public extern LocalInventoryPartStatus MainStatus { [ObservableAsProperty] get; }
     
     public extern bool IsInventoryRunning { [ObservableAsProperty] get; }
@@ -108,8 +99,6 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
         if (result == MessageBoxResult.Yes)
         {
             _logger.LogInformation("inventory aborted on user request");
-
-            // _inventoryService.InventoryProcessData?.RequestInventoryAbort();
             
             await _inventoryService.AbortInventory();
         }
