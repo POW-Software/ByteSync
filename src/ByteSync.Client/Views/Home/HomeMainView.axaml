@@ -23,58 +23,5 @@
                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </WrapPanel>
         </Border>
-        
-        <!-- <Grid.Styles> -->
-        <!--     <Style Selector="Button.CloudSynchronization"> -->
-        <!--         <Setter Property="Background" Value="{DynamicResource HomeCloudSynchronizationBackGround}"/> -->
-        <!--     </Style> -->
-        <!--      -->
-        <!--     <Style Selector="Button.CloudSynchronization:pointerover /template/ ContentPresenter#PART_ContentPresenter"> -->
-        <!--         <Setter Property="Background" Value="{DynamicResource HomeCloudSynchronizationPointerOverBackGround}" /> -->
-        <!--     </Style> -->
-        <!--      -->
-        <!--     <Style Selector="Button.LocalSynchronization"> -->
-        <!--         <Setter Property="Background" Value="{DynamicResource HomeLocalSynchronizationBackGround}"/> -->
-        <!--     </Style> -->
-        <!--      -->
-        <!--     <Style Selector="Button.LocalSynchronization:pointerover /template/ ContentPresenter#PART_ContentPresenter"> -->
-        <!--         <Setter Property="Background" Value="{DynamicResource HomeLocalSynchronizationPointerOverBackGround}" /> -->
-        <!--     </Style> -->
-        <!-- -->
-        <!-- </Grid.Styles> -->
-        <!-- -->
-        <!-- <Grid HorizontalAlignment="Stretch" VerticalAlignment="Center"> -->
-        <!--      -->
-        <!--     <StackPanel Orientation="Vertical"> -->
-        <!--         <WrapPanel MinHeight="200" MaxWidth="850" HorizontalAlignment="Center"> -->
-        <!--              -->
-        <!--             <Button Width="400" BorderThickness="0" Margin="6" Padding="0" Classes="CloudSynchronization" -->
-        <!--                     Command="{Binding CloudSynchronizationCommand}"> -->
-        <!--                 <Grid Margin="0" Height="140"> -->
-        <!--                      -->
-        <!--                     <misc:Icon FontSize="48" Value="RegularAnalyse" Foreground="{DynamicResource BlockBackColor}" -->
-        <!--                                Margin="2" VerticalAlignment="Center"/> -->
-        <!--                      -->
-        <!--                     <TextBlock Text="{localizations:Loc OperationSelection_CloudSynchronization}" -->
-        <!--                                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="6"  -->
-        <!--                                FontSize="18" FontWeight="Bold" Foreground="{DynamicResource BlockBackColor}"/> -->
-        <!--                 </Grid> -->
-        <!--                  -->
-        <!--                 <ToolTip.Tip> -->
-        <!--                     <StackPanel Classes="ByteSyncToolTip"> -->
-        <!--                         <TextBlock Text="{localizations:Loc HomeView_CloudSynchronization_ToolTip_Header}"/> -->
-        <!--                         <TextBlock Text="{localizations:Loc HomeView_CloudSynchronization_ToolTip_Content}"/> -->
-        <!--                     </StackPanel> -->
-        <!--                 </ToolTip.Tip> -->
-        <!--                 <ToolTip.Placement>Bottom</ToolTip.Placement> -->
-        <!--                 <ToolTip.VerticalOffset>10</ToolTip.VerticalOffset> -->
-        <!--                 <ToolTip.ShowDelay>1000</ToolTip.ShowDelay> -->
-        <!--             </Button> -->
-        <!--              -->
-        <!--         </WrapPanel> -->
-        <!--          -->
-        <!--     </StackPanel> -->
-        <!--      -->
-        <!-- </Grid> -->
     </Grid>
 </UserControl>

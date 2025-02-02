@@ -1726,38 +1726,20 @@ namespace ByteSync.Assets.Resources {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à Creating session....
-        /// </summary>
-        internal static string StartComparison_CreatingSession {
-            get {
-                return ResourceManager.GetString("StartComparison_CreatingSession", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Recherche une chaîne localisée semblable à Session ID:.
         /// </summary>
-        internal static string StartComparison_SessionId {
+        internal static string JoinCloudSession_SessionId {
             get {
-                return ResourceManager.GetString("StartComparison_SessionId", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_SessionId", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Session Password:.
         /// </summary>
-        internal static string StartComparison_SessionPassword {
+        internal static string JoinCloudSession_SessionPassword {
             get {
-                return ResourceManager.GetString("StartComparison_SessionPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Please share credentials with your partners.
-        /// </summary>
-        internal static string StartComparison_ShareCredentials {
-            get {
-                return ResourceManager.GetString("StartComparison_ShareCredentials", resourceCulture);
+                return ResourceManager.GetString("JoinCloudSession_SessionPassword", resourceCulture);
             }
         }
         

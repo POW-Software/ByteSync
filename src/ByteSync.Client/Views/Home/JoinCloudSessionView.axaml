@@ -21,7 +21,7 @@
                 <RowDefinition Height="Auto" MinHeight="120"></RowDefinition>
             </Grid.RowDefinitions>
             
-            <TextBlock Grid.Row="0" Name="MachineDescriptionTextBlock" FontWeight="Bold" Text="Join an existing Cloud Session" Margin="3"/>
+            <TextBlock Grid.Row="0" Name="MachineDescriptionTextBlock" FontWeight="Bold" Text="{localizations:Loc JoinCloudSession_Header}" Margin="3"/>
             
             <Rectangle Grid.Row="1" Height="1" Fill="{DynamicResource SystemBaseLowColor}" Margin="3,6"/>
             
@@ -29,14 +29,14 @@
                 
                 <!-- SessionId -->
                 <StackPanel Orientation="Vertical" Margin="3" HorizontalAlignment="Left">
-                    <Label Content="{localizations:Loc StartComparison_SessionId}" />
+                    <Label Content="{localizations:Loc JoinCloudSession_SessionId}" />
                     <TextBox Text="{Binding SessionId}" Name="TextBoxSessionId" 
                              IsEnabled="{Binding !IsJoiningCloudSession}" MinWidth="200" HorizontalAlignment="Left"/>
                 </StackPanel>
 
                 <!-- Password -->
                 <StackPanel Orientation="Vertical" Margin="3" HorizontalAlignment="Left">
-                    <Label Content="{localizations:Loc StartComparison_SessionPassword}" />
+                    <Label Content="{localizations:Loc JoinCloudSession_SessionPassword}" />
                     <TextBox Text="{Binding SessionPassword}" Name="TextBoxSessionPassword" 
                              IsEnabled="{Binding !IsJoiningCloudSession}" MinWidth="200" HorizontalAlignment="Left"/>
                 </StackPanel>

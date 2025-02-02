@@ -19,7 +19,7 @@
             <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 3 0 9">
 
                 <StackPanel Orientation="Vertical" Margin="3">
-                    <Label Content="{localizations:Loc StartComparison_SessionId}"></Label>
+                    <Label Content="{localizations:Loc JoinCloudSession_SessionId}"></Label>
                     <StackPanel Orientation="Horizontal">
                         <TextBox Text="{Binding SessionId}" MinWidth="180" IsReadOnly="True" CaretBrush="Transparent"/>
                         
@@ -33,7 +33,7 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Vertical" Margin="18,3,3,3">
-                    <Label Content="{localizations:Loc StartComparison_SessionPassword}" ></Label>
+                    <Label Content="{localizations:Loc JoinCloudSession_SessionPassword}" ></Label>
                     <StackPanel Orientation="Horizontal">
                         <TextBox Text="{Binding SessionPassword}" MinWidth="180" IsReadOnly="True" CaretBrush="Transparent"/>
                         
