@@ -7,34 +7,41 @@ This guide provides instructions for deploying the **ByteSync Server** component
 ## Components to Deploy
 
 1. **Azure Function**
+
    - **Windows-only** deployment (currently not tested on Linux).
    - This is the main entry point for ByteSync’s server-side functionality, handling requests and orchestrating other services.
    - Deployed from the `ByteSync.Functions` project.
    - You can deploy via the Azure Portal or from your local machine (Visual Studio / CLI). Make sure to configure your connection strings and secrets.
 
 2. **Azure Cosmos DB**
+
    - A globally distributed, multi-model database.
    - Stores persistent data for ByteSync (such as metadata, user data, or other domain-related information).
    - The necessary containers may be auto-created on startup if configured properly.
 
 3. **Redis**
+
    - An in-memory data store used for caching and rapid data retrieval.
    - Useful for session management, real-time messaging, or other scenarios where speed is critical.
    - You can specify a prefix (`Prefix`) in configuration to logically group or namespace your cache keys.
 
-Azure App Configuration can be used for storing application settings. Alternatively, you can configure settings via:
 
-- `local.settings.json` (for local development)
-- .NET User Secrets
-- Azure App Configuration
 
 ---
 
 ## Projects Requiring Configuration
 
+The following projects require configuration to function properly:
+
 - **ByteSync.Functions**
 - **ByteSync.Functions.IntegrationTests**
 - **ByteSync.ServerCommon.Tests**
+
+You can store and manage application settings for these projects in several ways:
+
+- **Azure App Configuration:** A dedicated service for hosting and managing settings in Azure. Only for the **ByteSync.Functions** project.
+- **local.settings.json (for local development):** Typically used for local debugging and testing.
+- **.NET User Secrets:** A secure way to store local secrets without committing them to source control.
 
 ---
 
@@ -99,7 +106,7 @@ Below is the JSON structure indicating which properties must be set. In particul
 
 ### 2. Using .NET User Secrets
 
-For secure storage of secrets during local development, you can use [**.NET Secret Manager**](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets).
+For secure storage of secrets during local development, you can use **[.NET Secret Manager](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets)**.
 
 Below is an example of how to set these secrets for **ByteSync.Functions**:
 
@@ -158,4 +165,3 @@ Repeat these steps for **ByteSync.Functions.IntegrationTests** and **ByteSync.Se
 - **Monitoring:** Enable Azure monitoring for real-time logs and alerts.
 
 For issues or questions, please open an issue on the [ByteSync GitHub repository](https://github.com/POW-Software/ByteSync).
-
