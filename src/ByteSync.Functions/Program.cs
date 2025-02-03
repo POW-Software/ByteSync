@@ -3,18 +3,12 @@ using System.Text.Json;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using ByteSync.Common.Controls.Json;
-using ByteSync.Common.Interfaces.Hub;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Commands.Inventories;
 using ByteSync.ServerCommon.Helpers;
-using ByteSync.ServerCommon.Hubs;
-using ByteSync.ServerCommon.Interfaces.Factories;
-using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Misc;
-using ByteSync.ServerCommon.Storage;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.SignalR.Management;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -28,36 +22,10 @@ var host = new HostBuilder()
         builder.AddEnvironmentVariables();
         
         IConfiguration configuration = builder.Build();
-        // var azureAppConfigurationUrl = settings.GetValue<string>("AzureAppConfigurationUrl");
 
         Console.WriteLine($"Current Environment: {hostingContext.HostingEnvironment.EnvironmentName}");
         
         builder.AddAzureAppConfiguration(hostingContext, configuration);
-        
-        // builder.AddAzureAppConfiguration(options =>
-        // {
-        //     var credentials = new DefaultAzureCredential(new DefaultAzureCredentialOptions
-        //     {
-        //         ExcludeAzureDeveloperCliCredential = true,
-        //         ExcludeEnvironmentCredential = true,
-        //         ExcludeAzurePowerShellCredential = true,
-        //         ExcludeInteractiveBrowserCredential = true,
-        //         ExcludeSharedTokenCacheCredential = true,
-        //     });
-        //     
-        //     options.Connect(new Uri(azureAppConfigurationUrl!), credentials)
-        //         .ConfigureStartupOptions(startupOptions =>
-        //         {
-        //             startupOptions.Timeout = TimeSpan.FromSeconds(240);
-        //         })
-        //         // Load configuration values with no label
-        //         .Select(KeyFilter.Any, LabelFilter.Null)
-        //         // Override with any configuration values specific to current hosting env
-        //         .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName);
-        //
-        //         options.ConfigureKeyVault(kv => kv.SetCredential(credentials));
-        // });
-        
         builder.AddJsonFile("local.settings.json", optional: true);
         builder.AddUserSecrets<Program>(optional: true, reloadOnChange: false);
         
@@ -76,7 +44,7 @@ var host = new HostBuilder()
     {
         builder.LoadDependencyInjection();
     })
-    .ConfigureServices((hostContext, services) =>
+    .ConfigureServices((_, services) =>
     {
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
@@ -111,12 +79,12 @@ var host = new HostBuilder()
         
         var serviceProvider = services.BuildServiceProvider();
         
-        var config = serviceProvider.GetService<IConfiguration>()!;
-        var appSettingsSection = config.GetSection("AppSettings");
-        services.Configure<RedisSettings>(config.GetSection("Redis"));
-        services.Configure<BlobStorageSettings>(config.GetSection("BlobStorage"));
-        services.Configure<SignalRSettings>(config.GetSection("SignalR"));
-        services.Configure<CosmosDbSettings>(config.GetSection("CosmosDb"));
+        var configuration = serviceProvider.GetService<IConfiguration>()!;
+        var appSettingsSection = configuration.GetSection("AppSettings");
+        services.Configure<RedisSettings>(configuration.GetSection("Redis"));
+        services.Configure<BlobStorageSettings>(configuration.GetSection("BlobStorage"));
+        services.Configure<SignalRSettings>(configuration.GetSection("SignalR"));
+        services.Configure<CosmosDbSettings>(configuration.GetSection("CosmosDb"));
         services.Configure<AppSettings>(appSettingsSection);
         var appSettings = appSettingsSection.Get<AppSettings>();
         
