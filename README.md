@@ -28,17 +28,15 @@
 
 ## Installation
 
-### Download
-1. Visit our [official website](https://www.bytesyncapp.com).
+### Download the Precompiled Client 
+1. Visit our [official website](https://www.bytesyncapp.com#download).
 2. Download the right version for your operating system.
 
-### Build from Source (Optional)
-To build ByteSync from source:
-```bash
-git clone https://github.com/POW-Software/ByteSync.git
-cd ByteSync
-dotnet build
-```
+### Building from Source
+If you prefer to build ByteSync from source or want to deploy specific components:
+
+- For **client-side deployment** steps, refer to [docs/client-deployment.md](docs/client-deployment.md).
+- For **server-side deployment** steps, refer to [docs/server-deployment.md](docs/server-deployment.md).
 
 ---
 
