@@ -2,7 +2,6 @@
 using System.Text.Json;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Azure.Identity;
 using ByteSync.Common.Controls.Json;
 using ByteSync.Common.Interfaces.Hub;
 using ByteSync.Functions.Helpers;
@@ -17,7 +16,6 @@ using ByteSync.ServerCommon.Storage;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.SignalR.Management;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -29,38 +27,41 @@ var host = new HostBuilder()
         builder.AddUserSecrets<Program>(optional: true, reloadOnChange: false);
         builder.AddEnvironmentVariables();
         
-        IConfiguration settings = builder.Build();
-        var azureAppConfigurationUrl = settings.GetValue<string>("AzureAppConfigurationUrl");
+        IConfiguration configuration = builder.Build();
+        // var azureAppConfigurationUrl = settings.GetValue<string>("AzureAppConfigurationUrl");
 
         Console.WriteLine($"Current Environment: {hostingContext.HostingEnvironment.EnvironmentName}");
         
-        builder.AddAzureAppConfiguration(options =>
-        {
-            var credentials = new DefaultAzureCredential(new DefaultAzureCredentialOptions
-            {
-                ExcludeAzureDeveloperCliCredential = true,
-                ExcludeEnvironmentCredential = true,
-                ExcludeAzurePowerShellCredential = true,
-                ExcludeInteractiveBrowserCredential = true,
-                ExcludeSharedTokenCacheCredential = true,
-            });
-            
-            options.Connect(new Uri(azureAppConfigurationUrl!), credentials)
-                .ConfigureStartupOptions(startupOptions =>
-                {
-                    startupOptions.Timeout = TimeSpan.FromSeconds(240);
-                })
-                // Load configuration values with no label
-                .Select(KeyFilter.Any, LabelFilter.Null)
-                // Override with any configuration values specific to current hosting env
-                .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName);
-
-                options.ConfigureKeyVault(kv => kv.SetCredential(credentials));
-        });
+        builder.AddAzureAppConfiguration(hostingContext, configuration);
         
+        // builder.AddAzureAppConfiguration(options =>
+        // {
+        //     var credentials = new DefaultAzureCredential(new DefaultAzureCredentialOptions
+        //     {
+        //         ExcludeAzureDeveloperCliCredential = true,
+        //         ExcludeEnvironmentCredential = true,
+        //         ExcludeAzurePowerShellCredential = true,
+        //         ExcludeInteractiveBrowserCredential = true,
+        //         ExcludeSharedTokenCacheCredential = true,
+        //     });
+        //     
+        //     options.Connect(new Uri(azureAppConfigurationUrl!), credentials)
+        //         .ConfigureStartupOptions(startupOptions =>
+        //         {
+        //             startupOptions.Timeout = TimeSpan.FromSeconds(240);
+        //         })
+        //         // Load configuration values with no label
+        //         .Select(KeyFilter.Any, LabelFilter.Null)
+        //         // Override with any configuration values specific to current hosting env
+        //         .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName);
+        //
+        //         options.ConfigureKeyVault(kv => kv.SetCredential(credentials));
+        // });
+        
+        builder.AddJsonFile("local.settings.json", optional: true);
         builder.AddUserSecrets<Program>(optional: true, reloadOnChange: false);
         
-        settings = builder.Build();
+        builder.Build();
     })
     .ConfigureFunctionsWorkerDefaults(builder =>
     {
@@ -73,53 +74,7 @@ var host = new HostBuilder()
     })
     .ConfigureContainer<ContainerBuilder>(builder =>
     {
-        var executingAssembly = Assembly.GetExecutingAssembly();
-        
-        builder.RegisterAssemblyTypes(executingAssembly)
-            .Where(t => t.Name.EndsWith("Service"))
-            .InstancePerLifetimeScope()
-            .AsImplementedInterfaces();
-
-        // ByteSync.ServerCommon
-        executingAssembly = typeof(IClientsRepository).Assembly;
-        
-        builder.RegisterAssemblyTypes(executingAssembly)
-            .Where(t => t.Name.EndsWith("Repository"))
-            .InstancePerLifetimeScope()
-            .AsImplementedInterfaces();
-        
-        builder.RegisterAssemblyTypes(executingAssembly)
-            .Where(t => t.Name.EndsWith("Service"))
-            .InstancePerLifetimeScope()
-            .AsImplementedInterfaces();
-        
-        builder.RegisterAssemblyTypes(executingAssembly)
-            .Where(t => t.Name.EndsWith("Factory"))
-            .InstancePerLifetimeScope()
-            .AsImplementedInterfaces();
-        
-        builder.RegisterAssemblyTypes(executingAssembly)
-            .Where(t => t.Name.EndsWith("Loader"))
-            .InstancePerLifetimeScope()
-            .AsImplementedInterfaces();
-        
-        builder.RegisterAssemblyTypes(executingAssembly)
-            .Where(t => t.Name.EndsWith("Mapper"))
-            .InstancePerLifetimeScope()
-            .AsImplementedInterfaces();
-        
-        builder.RegisterType<ByteSyncClientCaller>()
-            .InstancePerLifetimeScope()
-            .AsImplementedInterfaces();
-        
-        builder.RegisterType<BlobContainerProvider>()
-            .InstancePerLifetimeScope()
-            .AsImplementedInterfaces();
-        
-        builder.Register(c => {
-            var factory = c.Resolve<IHubContextFactory>();
-            return factory.CreateHubContext();
-        }).As<ServiceHubContext<IHubByteSyncPush>>().SingleInstance().AsImplementedInterfaces();
+        builder.LoadDependencyInjection();
     })
     .ConfigureServices((hostContext, services) =>
     {
