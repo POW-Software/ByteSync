@@ -4,6 +4,10 @@ This guide provides instructions for deploying the **ByteSync Server** component
 
 ---
 
+## Technology and Requirements
+
+These projects are written in **C#** and target a specific version of **.NET**. You can find the exact .NET version required by checking the corresponding `.csproj` files. You must have the appropriate .NET SDK installed to build and deploy the solution.
+
 ## Components to Deploy
 
 1. **Azure Function**
@@ -24,8 +28,6 @@ This guide provides instructions for deploying the **ByteSync Server** component
    - An in-memory data store used for caching and rapid data retrieval.
    - Useful for session management, real-time messaging, or other scenarios where speed is critical.
    - You can specify a prefix (`Prefix`) in configuration to logically group or namespace your cache keys.
-
-
 
 ---
 
