@@ -5,8 +5,6 @@ public class AppSettings
     public string Secret { get; set; } = "";
     
     public int JwtDurationInSeconds { get; set; } = 3600;
-
-    public int SaveStorageDelayInSeconds { get; set; } = 3600;
     
     public bool SkipClientsVersionCheck { get; set; } = false;
     
