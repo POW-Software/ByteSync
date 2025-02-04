@@ -30,7 +30,7 @@ public class YouGaveAWrongPasswordService : IYouGaveAWrongPasswordService
                 _logger.LogError(UNKNOWN_RECEIVED_SESSION_ID, sessionId);
             }
 
-            var joinSessionResult = JoinSessionResult.BuildFrom(JoinSessionStatus.WrondPassword);
+            var joinSessionResult = JoinSessionResult.BuildFrom(JoinSessionStatus.WrongPassword);
             await _cloudSessionConnector.OnJoinSessionError(joinSessionResult);
         }
         catch (Exception ex)
