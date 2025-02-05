@@ -3,6 +3,8 @@ using ByteSync.Common.Business.Auth;
 using ByteSync.Functions.Constants;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Interfaces.Services;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -14,11 +16,13 @@ public class AuthFunction
 {
     private readonly IAuthService _authService;
     private readonly ILogger<AuthFunction> _logger;
+    private readonly TelemetryClient _telemetryClient;
 
-    public AuthFunction(IAuthService authService, ILoggerFactory loggerFactory)
+    public AuthFunction(IAuthService authService, ILoggerFactory loggerFactory, TelemetryClient telemetryClient)
     {
         _authService = authService;
         _logger = loggerFactory.CreateLogger<AuthFunction>();
+        _telemetryClient = telemetryClient;
     }
 
     [AllowAnonymous]
@@ -26,31 +30,37 @@ public class AuthFunction
     public async Task<HttpResponseData> Login([HttpTrigger(AuthorizationLevel.Anonymous, "post", "get", Route = "auth/login")] HttpRequestData req, 
         FunctionContext executionContext)
     {
-        using (_logger.BeginScope("Login"))
+        using (var operation = _telemetryClient.StartOperation<RequestTelemetry>("Login"))
         {
-            var response = req.CreateResponse();
-            try
+            using (_logger.BeginScope(new Dictionary<string, object>
             {
-                var loginData = await FunctionHelper.DeserializeRequestBody<LoginData>(req);
-                
-                var authResult  = await _authService.Authenticate(loginData, GetIpAddress(req));
+                ["OperationId"] = operation.Telemetry.Context.Operation.Id
+            }))
+            {
+                var response = req.CreateResponse();
+                try
+                {
+                    var loginData = await FunctionHelper.DeserializeRequestBody<LoginData>(req);
 
-                if (authResult.IsSuccess)
-                {
-                    await response.WriteAsJsonAsync(authResult, HttpStatusCode.OK);
+                    var authResult = await _authService.Authenticate(loginData, GetIpAddress(req));
+
+                    if (authResult.IsSuccess)
+                    {
+                        await response.WriteAsJsonAsync(authResult, HttpStatusCode.OK);
+                    }
+                    else
+                    {
+                        await response.WriteAsJsonAsync(authResult, HttpStatusCode.Unauthorized);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    await response.WriteAsJsonAsync(authResult, HttpStatusCode.Unauthorized);
+                    _logger.LogError(ex, "Error while logging in");
+                    await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
                 }
+
+                return response;
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error while logging in");
-                await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-            }
-        
-            return response;
         }
     }
     

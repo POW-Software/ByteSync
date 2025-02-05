@@ -4,6 +4,8 @@ using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Functions.Constants;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Interfaces.Services;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -14,37 +16,46 @@ public class CloudSessionFunction
 {
     private readonly ICloudSessionsService _cloudSessionsService;
     private readonly ILogger<CloudSessionFunction> _logger;
+    private readonly TelemetryClient _telemetryClient;
 
-    public CloudSessionFunction(ICloudSessionsService cloudSessionsService, ILoggerFactory loggerFactory)
+    public CloudSessionFunction(ICloudSessionsService cloudSessionsService, ILoggerFactory loggerFactory,
+        TelemetryClient telemetryClient)
     {
         _cloudSessionsService = cloudSessionsService;
         _logger = loggerFactory.CreateLogger<CloudSessionFunction>();
+        _telemetryClient = telemetryClient;
     }
         
     [Function("CreateCloudSessionFunction")]
     public async Task<HttpResponseData> Create([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session")] HttpRequestData req,
         FunctionContext executionContext)
     {
-        using (_logger.BeginScope("CreateCloudSession"))
+        using (var operation = _telemetryClient.StartOperation<RequestTelemetry>("CreateCloudSession"))
         {
-            var response = req.CreateResponse();
-            try
+            using (_logger.BeginScope(new Dictionary<string, object>
+                   {
+                       ["OperationId"] = operation.Telemetry.Context.Operation.Id
+                   }))
             {
-                var client = FunctionHelper.GetClientFromContext(executionContext);
-                var createCloudSessionParameters = await FunctionHelper.DeserializeRequestBody<CreateCloudSessionParameters>(req);
-            
-                var cloudSessionResult = await _cloudSessionsService.CreateCloudSession(createCloudSessionParameters, client);
-            
-                await response.WriteAsJsonAsync(cloudSessionResult, HttpStatusCode.OK);
+                var response = req.CreateResponse();
+                try
+                {
+                    var client = FunctionHelper.GetClientFromContext(executionContext);
+                    var createCloudSessionParameters = await FunctionHelper.DeserializeRequestBody<CreateCloudSessionParameters>(req);
+
+                    var cloudSessionResult = await _cloudSessionsService.CreateCloudSession(createCloudSessionParameters, client);
+
+                    await response.WriteAsJsonAsync(cloudSessionResult, HttpStatusCode.OK);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error while creating session");
+
+                    await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
+                }
+
+                return response;
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error while creating session");
-            
-                await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-            }
-        
-            return response;
         }
     }
     
