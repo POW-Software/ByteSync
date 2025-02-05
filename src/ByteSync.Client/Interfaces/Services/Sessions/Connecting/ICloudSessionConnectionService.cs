@@ -1,16 +1,14 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Business.Sessions;
+﻿using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.Connecting;
-using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 
 namespace ByteSync.Interfaces.Services.Sessions.Connecting;
 
-public interface ICloudSessionConnector
+public interface ICloudSessionConnectionService
 {
-    Task ClearConnectionData();
-    
     IObservable<bool> CanLogOutOrShutdown { get; }
+    
+    Task ClearConnectionData();
     
     Task InitializeConnection(SessionConnectionStatus creatingSession);
     

@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Threading.Tasks;
 using ByteSync.Business;
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Interfaces.Controls.Sessions;

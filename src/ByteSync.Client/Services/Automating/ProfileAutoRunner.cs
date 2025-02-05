@@ -25,7 +25,7 @@ public class ProfileAutoRunner : IProfileAutoRunner
     // private ISessionDataHolder _sessionDataHolder;
     // private ISynchronizationManager _synchronizationManager;
     private readonly ILobbyRepository _lobbyRepository;
-    private readonly ICloudSessionConnector _cloudSessionConnector;
+    private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
     private readonly IInventoryService _inventoryService;
     private readonly ISynchronizationService _synchronizationService;
     private readonly IComparisonItemsService _comparisonItemsService;
@@ -44,7 +44,7 @@ public class ProfileAutoRunner : IProfileAutoRunner
     public ProfileAutoRunner(IApplicationSettingsRepository applicationSettingsManager,
         ISessionProfileLocalDataManager sessionProfileLocalDataManager, ILobbyManager lobbyManager,
         IDataInventoryStarter dataInventoryStarter, ILobbyRepository lobbyRepository,
-        ICloudSessionConnector cloudSessionConnector, IInventoryService inventoriesService,
+        ICloudSessionConnectionService cloudSessionConnectionService, IInventoryService inventoriesService,
         ISynchronizationService synchronizationService, IComparisonItemsService comparisonItemsService,
         ISessionService sessionService, ISynchronizationStarter synchronizationStarter, IQuitSessionService quitSessionService)
     {
@@ -53,7 +53,7 @@ public class ProfileAutoRunner : IProfileAutoRunner
         _lobbyManager = lobbyManager;
         _dataInventoryStarter = dataInventoryStarter;
         _lobbyRepository = lobbyRepository;
-        _cloudSessionConnector = cloudSessionConnector;
+        _cloudSessionConnectionService = cloudSessionConnectionService;
         _inventoryService = inventoriesService;
         _synchronizationService = synchronizationService;
         _comparisonItemsService = comparisonItemsService;

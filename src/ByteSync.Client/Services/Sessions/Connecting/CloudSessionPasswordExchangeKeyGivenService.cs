@@ -15,7 +15,7 @@ public class CloudSessionPasswordExchangeKeyGivenService : ICloudSessionPassword
     private readonly IEnvironmentService _environmentService;
     private readonly IPublicKeysManager _publicKeysManager;
     private readonly ICloudSessionApiClient _cloudSessionApiClient;
-    private readonly ICloudSessionConnector _cloudSessionConnector;
+    private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
     private readonly ILogger<CloudSessionPasswordExchangeKeyGivenService> _logger;
     
     private const string UNKNOWN_RECEIVED_SESSION_ID = "unknown received sessionId {sessionId}";
@@ -26,14 +26,14 @@ public class CloudSessionPasswordExchangeKeyGivenService : ICloudSessionPassword
         IEnvironmentService environmentService,
         IPublicKeysManager publicKeysManager,
         ICloudSessionApiClient cloudSessionApiClient,
-        ICloudSessionConnector cloudSessionConnector,
+        ICloudSessionConnectionService cloudSessionConnectionService,
         ILogger<CloudSessionPasswordExchangeKeyGivenService> logger)
     {
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         _environmentService = environmentService;
         _publicKeysManager = publicKeysManager;
         _cloudSessionApiClient = cloudSessionApiClient;
-        _cloudSessionConnector = cloudSessionConnector;
+        _cloudSessionConnectionService = cloudSessionConnectionService;
         _logger = logger;
     }
     
@@ -69,7 +69,7 @@ public class CloudSessionPasswordExchangeKeyGivenService : ICloudSessionPassword
 
                 if (!joinSessionResult.IsOK)
                 {
-                    await _cloudSessionConnector.OnJoinSessionError(joinSessionResult);
+                    await _cloudSessionConnectionService.OnJoinSessionError(joinSessionResult);
                 }
                 else
                 {

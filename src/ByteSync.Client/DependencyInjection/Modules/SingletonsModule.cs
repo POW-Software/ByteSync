@@ -28,7 +28,7 @@ public class SingletonsModule : Module
         builder.RegisterType<PushReceiversStarter>().SingleInstance().AsImplementedInterfaces();
         
         builder.RegisterType<DataInventoryStarter>().SingleInstance().AsImplementedInterfaces();
-        builder.RegisterType<CloudSessionConnector>().SingleInstance().AsImplementedInterfaces();
+        builder.RegisterType<CloudSessionConnectionService>().SingleInstance().AsImplementedInterfaces();
         builder.RegisterType<FileDownloaderCache>().SingleInstance().AsImplementedInterfaces();
         builder.RegisterType<CommandLineModeHandler>().SingleInstance().AsImplementedInterfaces();
         builder.RegisterType<SynchronizationStarter>().SingleInstance().AsImplementedInterfaces();

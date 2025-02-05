@@ -13,7 +13,7 @@ namespace ByteSync.Services.Sessions;
 
 public class SessionInterruptor : ISessionInterruptor
 {
-    private readonly ICloudSessionConnector _cloudSessionConnector;
+    private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
     private readonly ISessionService _sessionService;
     private readonly IDialogService _dialogService;
     private readonly ISynchronizationService _synchronizationService;
@@ -21,11 +21,11 @@ public class SessionInterruptor : ISessionInterruptor
     private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly IQuitSessionService _quitSessionService;
 
-    public SessionInterruptor(ICloudSessionConnector cloudSessionConnector, ISessionService sessionService, 
+    public SessionInterruptor(ICloudSessionConnectionService cloudSessionConnectionService, ISessionService sessionService, 
         IDialogService dialogService, ISynchronizationService synchronizationService,
         ISessionMemberRepository sessionMemberRepository, IResetSessionService sessionResetter, IQuitSessionService quitSessionService)
     {
-        _cloudSessionConnector = cloudSessionConnector;
+        _cloudSessionConnectionService = cloudSessionConnectionService;
         _sessionService = sessionService;
         _dialogService = dialogService;
         _synchronizationService = synchronizationService;

@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Business.Sessions.RunSessionInfos;
+﻿using ByteSync.Business.Sessions.RunSessionInfos;
 
 namespace ByteSync.Interfaces.Services.Sessions.Connecting;
 

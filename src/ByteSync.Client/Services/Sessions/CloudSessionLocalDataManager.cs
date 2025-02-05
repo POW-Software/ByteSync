@@ -197,33 +197,33 @@ public class CloudSessionLocalDataManager : ICloudSessionLocalDataManager
     }
 
     /// <summary>
-    /// Le but de cette méthode est de déplacer les fichiers et répertoires de la session dans un sous répertoire "previous_TICKS"
-    /// Ceci est utilisé lors du reset, pour déplacer sans supprimer les fichiers existants
-    /// Seuls les autres dossiers "previous_TICKS" sont conservés
-    /// Pour le premier backup, TICKS correspond à la date de création du répertoire "sessionLocalPath"
-    /// Pour les backups suivants, TICKS correspond à la date de création du dernier répertoire "previous_TICKS" (avec gestion de l'unicité)
+    /// The purpose of this method is to move files and directories from the session to a subdirectory called “previous_TICKS”.
+    /// This is used at reset time, to move without deleting existing files
+    /// Only other “previous_TICKS” folders are retained
+    /// For the first backup, TICKS corresponds to the creation date of the “sessionLocalPath” directory
+    /// For subsequent backups, TICKS corresponds to the creation date of the last “previous_TICKS” directory (with uniqueness management)
     /// </summary>
     private void DoBackupCurrentSessionFiles()
     {
-        // On travaille dans le répertoire de la session
+        // We work in the session directory
         var sessionDirectory = new DirectoryInfo(GetSessionLocalPath());
 
-        // previousDateTime stockera la date qui servira à générer "TICKS"
+        // previousDateTime will store the date used to generate “TICKS”
         DateTime previousDateTime;
         var existingPreviousDirectories = sessionDirectory.GetDirectories().Where(d => d.Name.StartsWith("previous_")).ToList();
         if (existingPreviousDirectories.Count > 0)
         {
-            // S'il y a des répertoires "previous_TICKS", on prend le plus récent
+            // If there are “previous_TICKS” directories, we take the most recent one
             var lastPrevious = existingPreviousDirectories.OrderBy(d => d.CreationTime).Last();
             previousDateTime = lastPrevious.CreationTime;
         }
         else
         {
-            // Pas de répertoire "previous_TICKS"
+            // No “previous_TICKS” directory
             previousDateTime = sessionDirectory.CreationTime;
         }
 
-        // On génère le nom de "previous_TICKS", avec gestion de l'unicité
+        // We generate the name “previous_TICKS”, with unicit management
         var previousDirectoryName = "previous_" + previousDateTime.Ticks;
         var previousDirectoryFullName = sessionDirectory.Combine(previousDirectoryName);
         var cpt = 0;
@@ -233,12 +233,12 @@ public class CloudSessionLocalDataManager : ICloudSessionLocalDataManager
             previousDirectoryFullName = sessionDirectory.Combine(previousDirectoryName) + "_" + cpt;
         }
 
-        // On crée le réperoire "previous_TICKS" dans lequel sera déplacé le contenu actuel
+        // We create the “previous_TICKS” directory, to which the current contents will be moved.
         var previousDirectory = new DirectoryInfo(previousDirectoryFullName);
         _logger.LogInformation("Creating backup directory {previousDirectory}", previousDirectory.FullName);
         previousDirectory.Create();
 
-        // On déplace tous les répertoires sauf les autres "previous_TICKS"
+        // We move all directories except “previous_TICKS”
         foreach (var subDirectory in sessionDirectory.GetDirectories())
         {
             if (!subDirectory.Name.StartsWith("previous_"))
@@ -255,7 +255,7 @@ public class CloudSessionLocalDataManager : ICloudSessionLocalDataManager
             }
         }
         
-        // On déplace tous les fichiers
+        // Move all files
         foreach (var subFile in sessionDirectory.GetFiles())
         {
             try

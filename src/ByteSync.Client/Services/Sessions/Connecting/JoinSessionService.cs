@@ -18,13 +18,13 @@ public class JoinSessionService : IJoinSessionService
     private readonly IPublicKeysTruster _publicKeysTruster;
     private readonly IPublicKeysManager _publicKeysManager;
     private readonly ICloudSessionApiClient _cloudSessionApiClient;
-    private readonly ICloudSessionConnector _cloudSessionConnector;
+    private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
     private readonly ILogger<JoinSessionService> _logger;
 
     public JoinSessionService(ISessionService sessionService, ICloudSessionConnectionRepository cloudSessionConnectionRepository,
         ITrustProcessPublicKeysRepository trustProcessPublicKeysRepository, IDigitalSignaturesRepository digitalSignaturesRepository,
         IPublicKeysTruster publicKeysTruster, IPublicKeysManager publicKeysManager, ICloudSessionApiClient cloudSessionApiClient,
-        ICloudSessionConnector cloudSessionConnector, ILogger<JoinSessionService> logger)
+        ICloudSessionConnectionService cloudSessionConnectionService, ILogger<JoinSessionService> logger)
     {
         _sessionService = sessionService;
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
@@ -33,7 +33,7 @@ public class JoinSessionService : IJoinSessionService
         _publicKeysTruster = publicKeysTruster;
         _publicKeysManager = publicKeysManager;
         _cloudSessionApiClient = cloudSessionApiClient;
-        _cloudSessionConnector = cloudSessionConnector;
+        _cloudSessionConnectionService = cloudSessionConnectionService;
         _logger = logger;
     }
     
@@ -46,7 +46,7 @@ public class JoinSessionService : IJoinSessionService
         catch (Exception)
         {
             var joinSessionResult = JoinSessionResult.BuildFrom(JoinSessionStatus.UnexpectedError);
-            await _cloudSessionConnector.OnJoinSessionError(joinSessionResult);
+            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionResult);
 
             throw;
         }
@@ -67,7 +67,7 @@ public class JoinSessionService : IJoinSessionService
             return;
         }
 
-        await _cloudSessionConnector.InitializeConnection(SessionConnectionStatus.JoiningSession);
+        await _cloudSessionConnectionService.InitializeConnection(SessionConnectionStatus.JoiningSession);
         
         // await Task.Delay(5000, _cloudSessionConnectionRepository.CancellationToken);
 
@@ -81,7 +81,7 @@ public class JoinSessionService : IJoinSessionService
         var joinSessionResult = await _publicKeysTruster.TrustAllMembersPublicKeys(sessionId, _cloudSessionConnectionRepository.CancellationToken);
         if (!joinSessionResult.IsOK)
         {
-            await _cloudSessionConnector.OnJoinSessionError(joinSessionResult);
+            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionResult);
             return;
         }
 
@@ -93,7 +93,7 @@ public class JoinSessionService : IJoinSessionService
 
         if (!joinSessionResult.IsOK)
         {
-            await _cloudSessionConnector.OnJoinSessionError(joinSessionResult);
+            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionResult);
         }
         else
         {

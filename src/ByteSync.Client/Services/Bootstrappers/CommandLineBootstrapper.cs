@@ -1,5 +1,4 @@
-﻿using Avalonia.Controls.ApplicationLifetimes;
-using ByteSync.Business.Arguments;
+﻿using ByteSync.Business.Arguments;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 

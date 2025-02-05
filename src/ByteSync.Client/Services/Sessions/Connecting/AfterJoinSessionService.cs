@@ -22,7 +22,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
     private readonly IInventoryApiClient _inventoryApiClient;
     private readonly IDigitalSignaturesRepository _digitalSignaturesRepository;
     private readonly IEnvironmentService _environmentService;
-    private readonly ICloudSessionConnector _cloudSessionConnector;
+    private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
     private readonly ILogger<AfterJoinSessionService> _logger;
     private readonly IQuitSessionService _quitSessionService;
 
@@ -36,7 +36,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         IInventoryApiClient inventoryApiClient,
         IDigitalSignaturesRepository digitalSignaturesRepository,
         IEnvironmentService environmentService,
-        ICloudSessionConnector cloudSessionConnector,
+        ICloudSessionConnectionService cloudSessionConnectionService,
         IQuitSessionService quitSessionService,
         ILogger<AfterJoinSessionService> logger)
     {
@@ -49,7 +49,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         _inventoryApiClient = inventoryApiClient;
         _digitalSignaturesRepository = digitalSignaturesRepository;
         _environmentService = environmentService;
-        _cloudSessionConnector = cloudSessionConnector;
+        _cloudSessionConnectionService = cloudSessionConnectionService;
         _quitSessionService = quitSessionService;
         _logger = logger;
     }
@@ -76,7 +76,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         {
             _logger.LogWarning("Auth check failed, quitting session");
             
-            await _cloudSessionConnector.ClearConnectionData();
+            await _cloudSessionConnectionService.ClearConnectionData();
             
             await _quitSessionService.Process();
             

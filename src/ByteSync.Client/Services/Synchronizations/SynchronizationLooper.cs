@@ -1,9 +1,7 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Business.Arguments;
+﻿using ByteSync.Business.Arguments;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Sessions.Local;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;

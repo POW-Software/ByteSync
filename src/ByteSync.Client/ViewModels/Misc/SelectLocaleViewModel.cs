@@ -5,8 +5,6 @@ using ByteSync.Business;
 using ByteSync.Interfaces;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Serilog;
-using Splat;
 
 namespace ByteSync.ViewModels.Misc;
 
@@ -14,15 +12,15 @@ class SelectLocaleViewModel : ViewModelBase, IActivatableViewModel
 {
     private readonly ILocalizationService _localizationService;
 
-    public SelectLocaleViewModel() : this (null)
+    public SelectLocaleViewModel()
     {
     }
 
-    public SelectLocaleViewModel(ILocalizationService? localizationService = null)
+    public SelectLocaleViewModel(ILocalizationService localizationService, ILogger<SelectLocaleViewModel> logger)
     {
         Activator = new ViewModelActivator();
-        
-        _localizationService = localizationService ?? Locator.Current.GetService<ILocalizationService>()!;
+
+        _localizationService = localizationService;
 
         CultureDefinitions = new ObservableCollection<CultureDefinition>(_localizationService.GetAvailableCultures());
         SelectedCulture = _localizationService.CurrentCultureDefinition;
@@ -33,7 +31,7 @@ class SelectLocaleViewModel : ViewModelBase, IActivatableViewModel
             {
                 if (culture != null)
                 {
-                    Log.Information("SelectLocaleViewModel: user is changing the culture to {CultureCode}", culture.Code);
+                    logger.LogInformation("SelectLocaleViewModel: user is changing the culture to {CultureCode}", culture.Code);
                     _localizationService.SetCurrentCulture(culture);
                 }
             });

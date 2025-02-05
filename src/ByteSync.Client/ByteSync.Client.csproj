@@ -216,8 +216,4 @@
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ViewModels\Sessions\Cloud" />
-    <Folder Include="ViewModels\Sessions\Settings\" />
-  </ItemGroup>
 </Project>

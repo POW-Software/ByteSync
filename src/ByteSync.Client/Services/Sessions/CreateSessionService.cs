@@ -22,7 +22,7 @@ public class CreateSessionService : ICreateSessionService
     private readonly ITrustProcessPublicKeysRepository _trustProcessPublicKeysRepository;
     private readonly IDigitalSignaturesRepository _digitalSignaturesRepository;
     private readonly IAfterJoinSessionService _afterJoinSessionService;
-    private readonly ICloudSessionConnector _cloudSessionConnector;
+    private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
     private readonly ILogger<CreateSessionService> _logger;
 
     public CreateSessionService(ICloudSessionConnectionRepository cloudSessionConnectionRepository, 
@@ -33,7 +33,7 @@ public class CreateSessionService : ICreateSessionService
         ITrustProcessPublicKeysRepository trustProcessPublicKeysRepository, 
         IDigitalSignaturesRepository digitalSignaturesRepository,
         IAfterJoinSessionService afterJoinSessionService,
-        ICloudSessionConnector cloudSessionConnector,
+        ICloudSessionConnectionService cloudSessionConnectionService,
         ILogger<CreateSessionService> logger)
     {
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
@@ -44,7 +44,7 @@ public class CreateSessionService : ICreateSessionService
         _trustProcessPublicKeysRepository = trustProcessPublicKeysRepository;
         _digitalSignaturesRepository = digitalSignaturesRepository;
         _afterJoinSessionService = afterJoinSessionService;
-        _cloudSessionConnector = cloudSessionConnector;
+        _cloudSessionConnectionService = cloudSessionConnectionService;
         _logger = logger;
     }
     
@@ -52,7 +52,7 @@ public class CreateSessionService : ICreateSessionService
     {
         try
         {
-            await _cloudSessionConnector.InitializeConnection(SessionConnectionStatus.CreatingSession);
+            await _cloudSessionConnectionService.InitializeConnection(SessionConnectionStatus.CreatingSession);
             
             var createCloudSessionParameters = BuildCreateCloudSessionParameters(request);
             var cloudSessionResult = await _cloudSessionApiClient.CreateCloudSession(createCloudSessionParameters, 
@@ -82,7 +82,7 @@ public class CreateSessionService : ICreateSessionService
                 Status = CreateSessionStatus.Error
             };
             
-            await _cloudSessionConnector.OnCreateSessionError(createSessionError);
+            await _cloudSessionConnectionService.OnCreateSessionError(createSessionError);
 
             throw;
         }

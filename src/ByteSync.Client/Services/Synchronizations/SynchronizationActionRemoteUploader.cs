@@ -1,13 +1,11 @@
 ﻿using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Synchronizations;
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Business.SharedFiles;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;

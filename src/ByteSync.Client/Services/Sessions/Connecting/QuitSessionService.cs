@@ -10,15 +10,15 @@ public class QuitSessionService : IQuitSessionService
 {
     private readonly ISessionService _sessionService;
     private readonly ICloudSessionApiClient _cloudSessionApiClient;
-    private readonly ICloudSessionConnector _cloudSessionConnector;
+    private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
     private readonly ILogger<QuitSessionService> _logger;
 
     public QuitSessionService(ISessionService sessionService, ICloudSessionApiClient cloudSessionApiClient,
-        ICloudSessionConnector cloudSessionConnector, ILogger<QuitSessionService> logger)
+        ICloudSessionConnectionService cloudSessionConnectionService, ILogger<QuitSessionService> logger)
     {
         _sessionService = sessionService;
         _cloudSessionApiClient = cloudSessionApiClient;
-        _cloudSessionConnector = cloudSessionConnector;
+        _cloudSessionConnectionService = cloudSessionConnectionService;
         _logger = logger;
     }
     
@@ -44,7 +44,7 @@ public class QuitSessionService : IQuitSessionService
             }
         }
         
-        await _cloudSessionConnector.InitializeConnection(SessionConnectionStatus.NoSession);
+        await _cloudSessionConnectionService.InitializeConnection(SessionConnectionStatus.NoSession);
 
         if (session is CloudSession)
         {

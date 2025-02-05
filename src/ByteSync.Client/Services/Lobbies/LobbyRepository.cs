@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Business.Events;
 using ByteSync.Business.Lobbies;
 using ByteSync.Business.Profiles;
@@ -8,8 +7,6 @@ using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Common.Business.Lobbies;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Controls;
-using ByteSync.Common.Helpers;
-using ByteSync.Factories.ViewModels;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;

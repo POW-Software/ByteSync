@@ -12,18 +12,18 @@ using ByteSync.Interfaces.Services.Sessions.Connecting;
 
 namespace ByteSync.Services.Sessions.Connecting;
 
-class CloudSessionConnector : ICloudSessionConnector
+class CloudSessionConnectionService : ICloudSessionConnectionService
 {
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
     private readonly IDigitalSignaturesRepository _digitalSignaturesRepository;
     private readonly ITrustProcessPublicKeysRepository _trustProcessPublicKeysRepository;
     private readonly ISessionService _sessionService;
     private readonly ISynchronizationService _synchronizationService;
-    private readonly ILogger<CloudSessionConnector> _logger;
+    private readonly ILogger<CloudSessionConnectionService> _logger;
 
-    public CloudSessionConnector(ICloudSessionConnectionRepository cloudSessionConnectionRepository, 
+    public CloudSessionConnectionService(ICloudSessionConnectionRepository cloudSessionConnectionRepository, 
         IDigitalSignaturesRepository digitalSignaturesRepository, ITrustProcessPublicKeysRepository trustPublicKeysRepository, 
-        ISessionService sessionService, ISynchronizationService synchronizationService, ILogger<CloudSessionConnector> logger)
+        ISessionService sessionService, ISynchronizationService synchronizationService, ILogger<CloudSessionConnectionService> logger)
     {
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         _digitalSignaturesRepository = digitalSignaturesRepository;
@@ -33,14 +33,6 @@ class CloudSessionConnector : ICloudSessionConnector
         _logger = logger;
     }
     
-    public async Task ClearConnectionData()
-    {
-        await Task.WhenAll(
-            _cloudSessionConnectionRepository.ClearAsync(), 
-            _trustProcessPublicKeysRepository.ClearAsync(), 
-            _digitalSignaturesRepository.ClearAsync());
-    }
-
     public IObservable<bool> CanLogOutOrShutdown 
     {
         get
@@ -53,6 +45,14 @@ class CloudSessionConnector : ICloudSessionConnector
                     (session == null || synchronizationEnd != null)
                     && sessionStatus.In(SessionStatus.FatalError, SessionStatus.None, SessionStatus.RegularEnd));
         }
+    }
+    
+    public async Task ClearConnectionData()
+    {
+        await Task.WhenAll(
+            _cloudSessionConnectionRepository.ClearAsync(), 
+            _trustProcessPublicKeysRepository.ClearAsync(), 
+            _digitalSignaturesRepository.ClearAsync());
     }
 
     public async Task InitializeConnection(SessionConnectionStatus sessionConnectionStatus)
