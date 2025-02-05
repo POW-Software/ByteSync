@@ -1,6 +1,5 @@
 ﻿using ByteSync.Business.Lobbies;
 using ByteSync.Business.Profiles;
-using ByteSync.Common.Helpers;
 
 namespace ByteSync.Services.Lobbies;
 

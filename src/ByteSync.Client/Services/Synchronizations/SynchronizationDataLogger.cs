@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Business.Actions.Shared;
+﻿using ByteSync.Business.Actions.Shared;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Converters;
 using ByteSync.Interfaces.Factories;

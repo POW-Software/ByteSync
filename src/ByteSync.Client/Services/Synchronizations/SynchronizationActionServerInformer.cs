@@ -1,7 +1,5 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Business.Actions.Shared;
+﻿using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Synchronizations;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;

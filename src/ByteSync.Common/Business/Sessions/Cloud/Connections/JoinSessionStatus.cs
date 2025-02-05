@@ -10,7 +10,7 @@ public enum JoinSessionStatus
     TooManyMembers = 6,
     SessionAlreadyActivated = 7,
     TrustCheckFailed = 8,
-    WrondPassword = 9,
+    WrongPassword = 9,
     UnexpectedError = 10,
     Unknown_11 = 11,
     Unknown_12 = 12,

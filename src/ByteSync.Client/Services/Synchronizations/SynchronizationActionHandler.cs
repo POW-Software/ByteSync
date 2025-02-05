@@ -1,12 +1,10 @@
 ﻿using System.IO;
-using System.Threading.Tasks;
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions.Cloud;
-using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;

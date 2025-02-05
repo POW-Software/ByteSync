@@ -42,14 +42,6 @@ public class LocExtension : MarkupExtension
             return keyToUse;
         }
 
-        //var c = ContainerProvider.Container;
-        //if (c == null)
-        //{
-        //    return "Container is null";
-        //}
-
-        //return keyToUse;
-
         IValueConverter? converter = null;
         if (UpperCase != null)
         {

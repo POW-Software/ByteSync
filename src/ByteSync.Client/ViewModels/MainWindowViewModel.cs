@@ -21,7 +21,7 @@ namespace ByteSync.ViewModels;
 public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
 {
     private readonly ISessionService _sessionService;
-    private readonly ICloudSessionConnector _cloudSessionConnector;
+    private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
     private readonly INavigationService _navigationService;
     private readonly IZoomService _zoomService;
     private readonly IIndex<NavigationPanel, IRoutableViewModel> _navigationPanelViewModels;
@@ -37,7 +37,7 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
 
     }
 
-    public MainWindowViewModel(ISessionService sessionService, ICloudSessionConnector cloudSessionConnector, INavigationService navigationService, 
+    public MainWindowViewModel(ISessionService sessionService, ICloudSessionConnectionService cloudSessionConnectionService, INavigationService navigationService, 
         IZoomService zoomService, FlyoutContainerViewModel? flyoutContainerViewModel, HeaderViewModel headerViewModel, 
         IIndex<NavigationPanel, IRoutableViewModel> navigationPanelViewModels, IMessageBoxViewModelFactory messageBoxViewModelFactory,
         IQuitSessionService quitSessionService, ICloudSessionConnectionRepository cloudSessionConnectionRepository,
@@ -46,7 +46,7 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
         PageTransition = null;
 
         _sessionService = sessionService;
-        _cloudSessionConnector = cloudSessionConnector;
+        _cloudSessionConnectionService = cloudSessionConnectionService;
         _navigationService = navigationService;
         _zoomService = zoomService;
         _navigationPanelViewModels = navigationPanelViewModels;
@@ -124,7 +124,7 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
             return false;
         }
         
-        var canLogOutOrShutdown = await _cloudSessionConnector.CanLogOutOrShutdown.FirstOrDefaultAsync();
+        var canLogOutOrShutdown = await _cloudSessionConnectionService.CanLogOutOrShutdown.FirstOrDefaultAsync();
 
         var canQuit = isCtrlDown || canLogOutOrShutdown;
         

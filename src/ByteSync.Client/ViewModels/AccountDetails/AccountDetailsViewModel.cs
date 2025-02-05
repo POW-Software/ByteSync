@@ -13,7 +13,7 @@ namespace ByteSync.ViewModels.AccountDetails;
 public class AccountDetailsViewModel : FlyoutElementViewModel
 {
     private readonly IApplicationSettingsRepository _applicationSettingsRepository;
-    private readonly ICloudSessionConnector _cloudSessionConnector;
+    private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
 
     public AccountDetailsViewModel() 
     {
@@ -21,14 +21,14 @@ public class AccountDetailsViewModel : FlyoutElementViewModel
     }
 
     public AccountDetailsViewModel(IApplicationSettingsRepository userSettingsManager,
-        ICloudSessionConnector cloudSessionConnector, UsageStatisticsViewModel usageStatisticsViewModel)
+        ICloudSessionConnectionService cloudSessionConnectionService, UsageStatisticsViewModel usageStatisticsViewModel)
     {
         _applicationSettingsRepository = userSettingsManager;
-        _cloudSessionConnector = cloudSessionConnector;
+        _cloudSessionConnectionService = cloudSessionConnectionService;
         
         UsageStatistics = usageStatisticsViewModel;
         
-        LogOutCommand = ReactiveCommand.Create(LogOut, _cloudSessionConnector.CanLogOutOrShutdown);
+        LogOutCommand = ReactiveCommand.Create(LogOut, _cloudSessionConnectionService.CanLogOutOrShutdown);
 
         ShowCanNotLogOutMessage = false;
 
@@ -45,7 +45,7 @@ public class AccountDetailsViewModel : FlyoutElementViewModel
 
     private void HandleActivation(Action<IDisposable> disposables)
     {
-        _cloudSessionConnector.CanLogOutOrShutdown
+        _cloudSessionConnectionService.CanLogOutOrShutdown
             .ObserveOn(RxApp.MainThreadScheduler)
             .ToPropertyEx(this, x => x.CanLogOutOrShutdown);
     }
@@ -56,17 +56,7 @@ public class AccountDetailsViewModel : FlyoutElementViewModel
 
     private void LogOut()
     {
-        // if (!_cloudSessionConnector.CanLogOutOrShutdown())
-        // {
-        //     ShowCanNotLogOutMessage = true;
-        // }
-        // else
-        // {
-        //     _navigationEventsHub.RaiseLogOutRequested();
-        // }
-     
-        // todo 220523
-        // _navigationEventsHub.RaiseLogOutRequested();
+
     }
 
     [Reactive]

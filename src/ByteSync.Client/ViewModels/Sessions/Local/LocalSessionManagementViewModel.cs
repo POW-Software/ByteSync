@@ -32,9 +32,6 @@ public class LocalSessionManagementViewModel : ActivatableViewModelBase
         SessionSettingsEditViewModel = sessionSettingsEditViewModelFactory.CreateSessionSettingsEditViewModel(null);
         
         QuitSessionCommand = ReactiveCommand.CreateFromTask(QuitSession);
-        
-        // var canRestartSession = this.WhenAnyValue(x => x.IsSessionActivated, (bool isSessionActivated) => isSessionActivated) ;
-        // RestartSessionCommand = ReactiveCommand.CreateFromTask(RestartSession, canRestartSession);
 
         CreateLocalSessionProfileCommand = ReactiveCommand.CreateFromTask(CreateLocalSessionProfile);
         
@@ -44,16 +41,6 @@ public class LocalSessionManagementViewModel : ActivatableViewModelBase
                 _sessionService.SessionStatusObservable
                     .Select(ss => ss.In(SessionStatus.Preparation, SessionStatus.Synchronization, SessionStatus.RegularEnd))
                     .ObserveOn(RxApp.MainThreadScheduler));
-            
-            // Observable.FromEventPattern<EventArgs>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.SessionActivated))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnSessionActivated())
-            //     .DisposeWith(disposables);
-            //
-            // Observable.FromEventPattern<EventArgs>(_cloudSessionEventsHub, nameof(_cloudSessionEventsHub.SessionResetted))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnSessionResetted())
-            //     .DisposeWith(disposables);
             
             this.HandleActivation(disposables);
         });

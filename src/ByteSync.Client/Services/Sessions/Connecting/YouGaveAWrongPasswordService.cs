@@ -8,16 +8,16 @@ namespace ByteSync.Services.Sessions.Connecting;
 public class YouGaveAWrongPasswordService : IYouGaveAWrongPasswordService
 {
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
-    private readonly ICloudSessionConnector _cloudSessionConnector;
+    private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
     private readonly ILogger<YouGaveAWrongPasswordService> _logger;
     
     private const string UNKNOWN_RECEIVED_SESSION_ID = "unknown received sessionId {sessionId}";
 
     public YouGaveAWrongPasswordService(ICloudSessionConnectionRepository cloudSessionConnectionRepository, 
-        ICloudSessionConnector cloudSessionConnector, ILogger<YouGaveAWrongPasswordService> logger)
+        ICloudSessionConnectionService cloudSessionConnectionService, ILogger<YouGaveAWrongPasswordService> logger)
     {
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
-        _cloudSessionConnector = cloudSessionConnector;
+        _cloudSessionConnectionService = cloudSessionConnectionService;
         _logger = logger;
     }
     
@@ -30,15 +30,15 @@ public class YouGaveAWrongPasswordService : IYouGaveAWrongPasswordService
                 _logger.LogError(UNKNOWN_RECEIVED_SESSION_ID, sessionId);
             }
 
-            var joinSessionResult = JoinSessionResult.BuildFrom(JoinSessionStatus.WrondPassword);
-            await _cloudSessionConnector.OnJoinSessionError(joinSessionResult);
+            var joinSessionResult = JoinSessionResult.BuildFrom(JoinSessionStatus.WrongPassword);
+            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionResult);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "OnYouGaveAWrongPassword");
             
             var joinSessionResult = JoinSessionResult.BuildFrom(JoinSessionStatus.UnexpectedError);
-            await _cloudSessionConnector.OnJoinSessionError(joinSessionResult);
+            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionResult);
         }
     }
 }

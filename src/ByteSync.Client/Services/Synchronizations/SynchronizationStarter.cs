@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Business.Actions.Shared;
+﻿using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Communications;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Sessions.Local;
@@ -12,7 +11,6 @@ using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Services.Actions;
-using Serilog;
 
 namespace ByteSync.Services.Synchronizations;
 
@@ -27,12 +25,13 @@ public class SynchronizationStarter : ISynchronizationStarter
     private readonly ISynchronizationService _synchronizationService;
     private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository;
     private readonly ISynchronizationDataLogger _synchronizationDataLogger;
+    private readonly ILogger<SynchronizationStarter> _logger;
 
     public SynchronizationStarter(ISessionService sessionService, ISynchronizationStartFactory synchronizationStartFactory, 
         ICloudSessionLocalDataManager cloudSessionLocalDataManager, ISynchronizationApiClient synchronizationApiClient, 
         IFileUploaderFactory fileUploaderFactory, IConnectionService connectionService,
         ISynchronizationService synchronizationService, ISharedActionsGroupRepository sharedActionsGroupRepository,
-        ISynchronizationDataLogger synchronizationDataLogger)
+        ISynchronizationDataLogger synchronizationDataLogger, ILogger<SynchronizationStarter> logger)
     {
         _sessionService = sessionService;
         _synchronizationStartFactory = synchronizationStartFactory;
@@ -43,6 +42,7 @@ public class SynchronizationStarter : ISynchronizationStarter
         _synchronizationService = synchronizationService;
         _sharedActionsGroupRepository = sharedActionsGroupRepository;
         _synchronizationDataLogger = synchronizationDataLogger;
+        _logger = logger;
     }
     
     public async Task StartSynchronization(bool isLaunchedByUser)
@@ -53,16 +53,16 @@ public class SynchronizationStarter : ISynchronizationStarter
         {
             if (isLaunchedByUser)
             {
-                Log.Information("The current user has requested to start the Data Synchronization");
+                _logger.LogInformation("The current user has requested to start the Data Synchronization");
             }
             else
             {
-                Log.Information("The Data Synchronization has been automatically started");
+                _logger.LogInformation("The Data Synchronization has been automatically started");
             }
         }
         else
         {
-            Log.Information("The Data Synchronization has started");
+            _logger.LogInformation("The Data Synchronization has started");
         }
 
         if (session is CloudSession cloudSession)
@@ -100,7 +100,7 @@ public class SynchronizationStarter : ISynchronizationStarter
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error during synchronization loop");
+            _logger.LogError(ex, "Error during synchronization loop");
         }
     }
 

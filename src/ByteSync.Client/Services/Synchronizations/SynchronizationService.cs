@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Linq;
-using System.Threading.Tasks;
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Misc;
 using ByteSync.Business.Sessions;

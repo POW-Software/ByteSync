@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using Avalonia;
-using Avalonia.ReactiveUI;
 using ByteSync.Business.Misc;
 using ByteSync.Business.Navigations;
 using ByteSync.Interfaces;
@@ -10,16 +9,7 @@ using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Updates;
-using ByteSync.ViewModels.Home;
-using ByteSync.ViewModels.Lobbies;
-using ByteSync.ViewModels.Sessions;
-using ByteSync.Views.Home;
-using ByteSync.Views.Lobbies;
-using ByteSync.Views.Sessions;
-using ReactiveUI;
-using Splat;
 using Splat.Autofac;
-using Splat.Serilog;
 
 namespace ByteSync.Services.Bootstrappers;
 

@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Business.Lobbies;
+﻿using ByteSync.Business.Lobbies;
 using ByteSync.Business.Navigations;
 using ByteSync.Business.Profiles;
 using ByteSync.Business.Sessions;
