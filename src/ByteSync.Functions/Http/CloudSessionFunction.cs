@@ -25,24 +25,27 @@ public class CloudSessionFunction
     public async Task<HttpResponseData> Create([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session")] HttpRequestData req,
         FunctionContext executionContext)
     {
-        var response = req.CreateResponse();
-        try
+        using (_logger.BeginScope("CreateCloudSession"))
         {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var createCloudSessionParameters = await FunctionHelper.DeserializeRequestBody<CreateCloudSessionParameters>(req);
+            var response = req.CreateResponse();
+            try
+            {
+                var client = FunctionHelper.GetClientFromContext(executionContext);
+                var createCloudSessionParameters = await FunctionHelper.DeserializeRequestBody<CreateCloudSessionParameters>(req);
             
-            var cloudSessionResult = await _cloudSessionsService.CreateCloudSession(createCloudSessionParameters, client);
+                var cloudSessionResult = await _cloudSessionsService.CreateCloudSession(createCloudSessionParameters, client);
             
-            await response.WriteAsJsonAsync(cloudSessionResult, HttpStatusCode.OK);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while creating session");
+                await response.WriteAsJsonAsync(cloudSessionResult, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while creating session");
             
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+                await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
+            }
         
-        return response;
+            return response;
+        }
     }
     
     [Function("AskPasswordExchangeKeyFunction")]

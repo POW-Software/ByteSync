@@ -26,58 +26,64 @@ public class AuthFunction
     public async Task<HttpResponseData> Login([HttpTrigger(AuthorizationLevel.Anonymous, "post", "get", Route = "auth/login")] HttpRequestData req, 
         FunctionContext executionContext)
     {
-        var response = req.CreateResponse();
-        try
+        using (_logger.BeginScope("Login"))
         {
-            var loginData = await FunctionHelper.DeserializeRequestBody<LoginData>(req);
+            var response = req.CreateResponse();
+            try
+            {
+                var loginData = await FunctionHelper.DeserializeRequestBody<LoginData>(req);
                 
-            var authResult  = await _authService.Authenticate(loginData, GetIpAddress(req));
+                var authResult  = await _authService.Authenticate(loginData, GetIpAddress(req));
 
-            if (authResult.IsSuccess)
-            {
-                await response.WriteAsJsonAsync(authResult, HttpStatusCode.OK);
+                if (authResult.IsSuccess)
+                {
+                    await response.WriteAsJsonAsync(authResult, HttpStatusCode.OK);
+                }
+                else
+                {
+                    await response.WriteAsJsonAsync(authResult, HttpStatusCode.Unauthorized);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await response.WriteAsJsonAsync(authResult, HttpStatusCode.Unauthorized);
+                _logger.LogError(ex, "Error while logging in");
+                await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while logging in");
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
         
-        return response;
+            return response;
+        }
     }
     
     [Function("RefreshTokens")]
     public async Task<HttpResponseData> RefreshTokens([HttpTrigger(AuthorizationLevel.Anonymous, "post", "get", Route = "auth/refreshTokens")] HttpRequestData req, 
         FunctionContext executionContext)
     {
-        var response = req.CreateResponse();
-        try
+        using (_logger.BeginScope("RefreshTokens"))
         {
-            var refreshTokensData = await FunctionHelper.DeserializeRequestBody<RefreshTokensData>(req);
+            var response = req.CreateResponse();
+            try
+            {
+                var refreshTokensData = await FunctionHelper.DeserializeRequestBody<RefreshTokensData>(req);
                 
-            var authResult = await _authService.RefreshTokens(refreshTokensData, GetIpAddress(req));
+                var authResult = await _authService.RefreshTokens(refreshTokensData, GetIpAddress(req));
 
-            if (authResult.IsSuccess)
-            {
-                await response.WriteAsJsonAsync(authResult, HttpStatusCode.OK);
+                if (authResult.IsSuccess)
+                {
+                    await response.WriteAsJsonAsync(authResult, HttpStatusCode.OK);
+                }
+                else
+                {
+                    await response.WriteAsJsonAsync(authResult, HttpStatusCode.Unauthorized);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await response.WriteAsJsonAsync(authResult, HttpStatusCode.Unauthorized);
+                _logger.LogError(ex, "Error while refreshing tokens");
+                await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while refreshing tokens");
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
         
-        return response;
+            return response;
+        }
     }
 
     private string GetIpAddress(HttpRequestData req)
