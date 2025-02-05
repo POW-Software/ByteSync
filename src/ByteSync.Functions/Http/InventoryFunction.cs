@@ -85,25 +85,32 @@ public class InventoryFunction
         FunctionContext executionContext,
         string sessionId)
     {
-        var response = req.CreateResponse();
-        try
+        using (_logger.BeginScope(new Dictionary<string, object>
+               {
+                   ["MyMethod"] = "AddPathItem",
+                   ["SessionId"] = sessionId,
+               }))
         {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var encryptedPathItem = await FunctionHelper.DeserializeRequestBody<EncryptedPathItem>(req);
-            
-            var request = new AddPathItemRequest(sessionId, client, encryptedPathItem);
-            var result = await _mediator.Send(request);
+            var response = req.CreateResponse();
+            try
+            {
+                var client = FunctionHelper.GetClientFromContext(executionContext);
+                var encryptedPathItem = await FunctionHelper.DeserializeRequestBody<EncryptedPathItem>(req);
 
-            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+                var request = new AddPathItemRequest(sessionId, client, encryptedPathItem);
+                var result = await _mediator.Send(request);
+
+                await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while adding pathItem to an inventory with sessionId: {sessionId}", sessionId);
+
+                await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
+            }
+
+            return response;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while adding pathItem to an inventory with sessionId: {sessionId}", sessionId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
-        
-        return response;
     }
     
     [Function("InventoryRemovePathItemFunction")]

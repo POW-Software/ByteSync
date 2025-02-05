@@ -25,7 +25,10 @@ public class CloudSessionFunction
     public async Task<HttpResponseData> Create([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session")] HttpRequestData req,
         FunctionContext executionContext)
     {
-        using (_logger.BeginScope("CreateCloudSession"))
+        using (_logger.BeginScope(new Dictionary<string, object>
+               {
+                   ["MyMethod"] = "MyCreate"
+               }))
         {
             var response = req.CreateResponse();
             try
@@ -53,24 +56,32 @@ public class CloudSessionFunction
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/askPasswordExchangeKey")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
-        var response = req.CreateResponse();
-        try
+        using (_logger.BeginScope(new Dictionary<string, object>
+               {
+                   ["MyMethod"] = "AskPasswordExchangeKey",
+                   ["SessionId"] = sessionId,
+               }))
         {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var parameters = await FunctionHelper.DeserializeRequestBody<AskCloudSessionPasswordExchangeKeyParameters>(req);
-            
-            var result = await _cloudSessionsService.AskCloudSessionPasswordExchangeKey(client, parameters);
-            
-            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+
+            var response = req.CreateResponse();
+            try
+            {
+                var client = FunctionHelper.GetClientFromContext(executionContext);
+                var parameters = await FunctionHelper.DeserializeRequestBody<AskCloudSessionPasswordExchangeKeyParameters>(req);
+
+                var result = await _cloudSessionsService.AskCloudSessionPasswordExchangeKey(client, parameters);
+
+                await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while asking PasswordExchangeKey for session {sessionId}", sessionId);
+
+                await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
+            }
+
+            return response;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while asking PasswordExchangeKey for session {sessionId}", sessionId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
-        
-        return response;
     }
     
     [Function("GetMembersInstanceIdsFunction")]
@@ -78,21 +89,28 @@ public class CloudSessionFunction
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/membersInstanceIds")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
-        var response = req.CreateResponse();
-        try
+        using (_logger.BeginScope(new Dictionary<string, object>
+               {
+                   ["MyMethod"] = "GetMembersInstanceIds",
+                   ["SessionId"] = sessionId,
+               }))
         {
-            var membersInstanceIds = await _cloudSessionsService.GetMembersInstanceIds(sessionId);
-            
-            await response.WriteAsJsonAsync(membersInstanceIds, HttpStatusCode.OK);
+            var response = req.CreateResponse();
+            try
+            {
+                var membersInstanceIds = await _cloudSessionsService.GetMembersInstanceIds(sessionId);
+
+                await response.WriteAsJsonAsync(membersInstanceIds, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while getting members ids for session {sessionId}", sessionId);
+
+                await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
+            }
+
+            return response;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while getting members ids for session {sessionId}", sessionId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
-        
-        return response;
     }
     
     [Function("GetMembersFunction")]
