@@ -30,16 +30,16 @@ public class ErrorHandlingMiddleware : IFunctionsWorkerMiddleware
             _telemetryClient.TrackException(ex);
             _logger.LogError(ex, "An error occurred in function {FunctionName}", context.FunctionDefinition.Name);
             
-            if (context.BindingContext.BindingData.TryGetValue("req", out var reqObj) && reqObj is HttpRequestData req)
+            var httpRequest = await context.GetHttpRequestDataAsync();
+            if (httpRequest != null)
             {
-                var response = req.CreateResponse();
+                var response = httpRequest.CreateResponse();
                 response.StatusCode = HttpStatusCode.InternalServerError;
                 await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
 
                 context.GetInvocationResult().Value = response;
                 return;
             }
-
             throw;
         }
     }

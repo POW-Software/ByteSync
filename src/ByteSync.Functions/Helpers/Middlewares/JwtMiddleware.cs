@@ -55,6 +55,7 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_secret);
 
+            bool isTokenChecked = false;
             try
             {
                 var claims = tokenHandler.ValidateToken(token, new TokenValidationParameters
@@ -90,13 +91,18 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
                     context.Items.Add(AuthConstants.FUNCTION_CONTEXT_CLIENT, client);
                 }
                 
-                await next(context);
+                isTokenChecked = true;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error validating token");
                 
                 await HandleTokenError(context, "Invalid token");
+            }
+
+            if (isTokenChecked)
+            {
+                await next(context);
             }
         }
         else
