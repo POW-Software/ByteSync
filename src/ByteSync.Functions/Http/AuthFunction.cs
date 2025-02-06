@@ -13,12 +13,10 @@ namespace ByteSync.Functions.Http;
 public class AuthFunction
 {
     private readonly IAuthService _authService;
-    private readonly ILogger<AuthFunction> _logger;
 
-    public AuthFunction(IAuthService authService, ILoggerFactory loggerFactory)
+    public AuthFunction(IAuthService authService)
     {
         _authService = authService;
-        _logger = loggerFactory.CreateLogger<AuthFunction>();
     }
 
     [AllowAnonymous]
@@ -26,76 +24,52 @@ public class AuthFunction
     public async Task<HttpResponseData> Login([HttpTrigger(AuthorizationLevel.Anonymous, "post", "get", Route = "auth/login")] HttpRequestData req, 
         FunctionContext executionContext)
     {
-        using (_logger.BeginScope("Login"))
-        {
-            var response = req.CreateResponse();
-            try
-            {
-                var loginData = await FunctionHelper.DeserializeRequestBody<LoginData>(req);
+        var loginData = await FunctionHelper.DeserializeRequestBody<LoginData>(req);
                 
-                var authResult  = await _authService.Authenticate(loginData, GetIpAddress(req));
+        var authResult  = await _authService.Authenticate(loginData, ExtractIpAddress(req));
 
-                if (authResult.IsSuccess)
-                {
-                    await response.WriteAsJsonAsync(authResult, HttpStatusCode.OK);
-                }
-                else
-                {
-                    await response.WriteAsJsonAsync(authResult, HttpStatusCode.Unauthorized);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error while logging in");
-                await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-            }
-        
-            return response;
+        var response = req.CreateResponse();
+        if (authResult.IsSuccess)
+        {
+            await response.WriteAsJsonAsync(authResult, HttpStatusCode.OK);
         }
+        else
+        {
+            await response.WriteAsJsonAsync(authResult, HttpStatusCode.Unauthorized);
+        }
+        
+        return response;
     }
     
     [Function("RefreshTokens")]
     public async Task<HttpResponseData> RefreshTokens([HttpTrigger(AuthorizationLevel.Anonymous, "post", "get", Route = "auth/refreshTokens")] HttpRequestData req, 
         FunctionContext executionContext)
     {
-        using (_logger.BeginScope("RefreshTokens"))
-        {
-            var response = req.CreateResponse();
-            try
-            {
-                var refreshTokensData = await FunctionHelper.DeserializeRequestBody<RefreshTokensData>(req);
+        var refreshTokensData = await FunctionHelper.DeserializeRequestBody<RefreshTokensData>(req);
                 
-                var authResult = await _authService.RefreshTokens(refreshTokensData, GetIpAddress(req));
+        var authResult = await _authService.RefreshTokens(refreshTokensData, ExtractIpAddress(req));
 
-                if (authResult.IsSuccess)
-                {
-                    await response.WriteAsJsonAsync(authResult, HttpStatusCode.OK);
-                }
-                else
-                {
-                    await response.WriteAsJsonAsync(authResult, HttpStatusCode.Unauthorized);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error while refreshing tokens");
-                await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-            }
-        
-            return response;
+        var response = req.CreateResponse();
+        if (authResult.IsSuccess)
+        {
+            await response.WriteAsJsonAsync(authResult, HttpStatusCode.OK);
         }
+        else
+        {
+            await response.WriteAsJsonAsync(authResult, HttpStatusCode.Unauthorized);
+        }
+        
+        return response;
     }
 
-    private string GetIpAddress(HttpRequestData req)
+    private string ExtractIpAddress(HttpRequestData req)
     {
         var headerDictionary = req.Headers.ToDictionary(x => x.Key.ToLower(), x => x.Value, StringComparer.Ordinal);
         var key = "x-forwarded-for";
-        if (headerDictionary.ContainsKey(key))
+        if (headerDictionary.TryGetValue(key, out var headerValues))
         {
-            IPAddress? ipAddress = null;
-            var headerValues = headerDictionary[key];
-            var ipn = headerValues?.FirstOrDefault()?.Split(new char[] { ',' }).FirstOrDefault()?.Split(new char[] { ':' }).FirstOrDefault();
-            if (IPAddress.TryParse(ipn, out ipAddress))
+            var ipn = headerValues.FirstOrDefault()?.Split([',']).FirstOrDefault()?.Split([':']).FirstOrDefault();
+            if (IPAddress.TryParse(ipn, out var ipAddress))
             {
                 var ipAddressString = ipAddress.ToString();
                 return ipAddressString;

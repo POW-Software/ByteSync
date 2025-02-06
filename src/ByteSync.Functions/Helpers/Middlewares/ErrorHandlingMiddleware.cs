@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using ByteSync.Functions.Constants;
 using Microsoft.ApplicationInsights;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -33,7 +34,7 @@ public class ErrorHandlingMiddleware : IFunctionsWorkerMiddleware
             {
                 var response = req.CreateResponse();
                 response.StatusCode = HttpStatusCode.InternalServerError;
-                await response.WriteStringAsync("{ \"error\": \"Internal Server Error\" }");
+                await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
 
                 context.GetInvocationResult().Value = response;
                 return;

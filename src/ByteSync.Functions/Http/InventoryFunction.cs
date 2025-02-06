@@ -1,13 +1,10 @@
 ﻿using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Logging;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions.Cloud;
-using ByteSync.Functions.Constants;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Commands.Inventories;
-using ByteSync.ServerCommon.Interfaces.Services;
 using MediatR;
 
 namespace ByteSync.Functions.Http;
@@ -15,12 +12,10 @@ namespace ByteSync.Functions.Http;
 public class InventoryFunction
 {
     private readonly IMediator _mediator;
-    private readonly ILogger<InventoryFunction> _logger;
 
-    public InventoryFunction( IMediator mediator, ILoggerFactory loggerFactory)
+    public InventoryFunction( IMediator mediator)
     {
         _mediator = mediator;
-        _logger = loggerFactory.CreateLogger<InventoryFunction>();
     }
     
     [Function("InventoryStartFunction")]
@@ -30,22 +25,13 @@ public class InventoryFunction
         FunctionContext executionContext,
         string sessionId)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
             
-            var request = new StartInventoryRequest(sessionId, client);
-            var result = await _mediator.Send(request);
+        var request = new StartInventoryRequest(sessionId, client);
+        var result = await _mediator.Send(request);
 
-            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while starting inventory with sessionId: {sessionId}", sessionId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         
         return response;
     }
@@ -57,23 +43,14 @@ public class InventoryFunction
         FunctionContext executionContext,
         string sessionId)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var localInventoryStatusParameters = await FunctionHelper.DeserializeRequestBody<UpdateSessionMemberGeneralStatusParameters>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var localInventoryStatusParameters = await FunctionHelper.DeserializeRequestBody<UpdateSessionMemberGeneralStatusParameters>(req);
             
-            var request = new SetLocalInventoryStatusRequest(client, localInventoryStatusParameters);
-            var result = await _mediator.Send(request);
+        var request = new SetLocalInventoryStatusRequest(client, localInventoryStatusParameters);
+        var result = await _mediator.Send(request);
 
-            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while setting local inventory status: {sessionId}", sessionId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         
         return response;
     }
@@ -85,32 +62,16 @@ public class InventoryFunction
         FunctionContext executionContext,
         string sessionId)
     {
-        using (_logger.BeginScope(new Dictionary<string, object>
-               {
-                   ["MyMethod"] = "AddPathItem",
-                   ["SessionId"] = sessionId,
-               }))
-        {
-            var response = req.CreateResponse();
-            try
-            {
-                var client = FunctionHelper.GetClientFromContext(executionContext);
-                var encryptedPathItem = await FunctionHelper.DeserializeRequestBody<EncryptedPathItem>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var encryptedPathItem = await FunctionHelper.DeserializeRequestBody<EncryptedPathItem>(req);
 
-                var request = new AddPathItemRequest(sessionId, client, encryptedPathItem);
-                var result = await _mediator.Send(request);
+        var request = new AddPathItemRequest(sessionId, client, encryptedPathItem);
+        var result = await _mediator.Send(request);
 
-                await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error while adding pathItem to an inventory with sessionId: {sessionId}", sessionId);
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
 
-                await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-            }
-
-            return response;
-        }
+        return response;
     }
     
     [Function("InventoryRemovePathItemFunction")]
@@ -120,23 +81,14 @@ public class InventoryFunction
         FunctionContext executionContext,
         string sessionId)
     {
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var encryptedPathItem = await FunctionHelper.DeserializeRequestBody<EncryptedPathItem>(req);
+
+        var request = new RemovePathItemRequest(sessionId, client, encryptedPathItem);
+        var result = await _mediator.Send(request);
+        
         var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var encryptedPathItem = await FunctionHelper.DeserializeRequestBody<EncryptedPathItem>(req);
-
-            var request = new RemovePathItemRequest(sessionId, client, encryptedPathItem);
-            var result = await _mediator.Send(request);
-
-            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while removing pathItem from an inventory with sessionId: {sessionId}", sessionId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         
         return response;
     }
@@ -149,20 +101,11 @@ public class InventoryFunction
         string sessionId,
         string clientInstanceId)
     {
+        var request = new GetPathItemsRequest(sessionId, clientInstanceId);
+        var result = await _mediator.Send(request);
+          
         var response = req.CreateResponse();
-        try
-        {
-            var request = new GetPathItemsRequest(sessionId, clientInstanceId);
-            var result = await _mediator.Send(request);
-            
-            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while getting pathItems from an inventory with sessionId: {sessionId}", sessionId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         
         return response;
     }
