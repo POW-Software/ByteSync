@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ByteSync.Functions.Helpers;
+namespace ByteSync.Functions.Helpers.Middlewares;
 
 public class JwtMiddleware : IFunctionsWorkerMiddleware
 {

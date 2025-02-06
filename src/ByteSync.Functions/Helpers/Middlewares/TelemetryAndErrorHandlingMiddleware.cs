@@ -6,7 +6,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.Functions.Helpers;
+namespace ByteSync.Functions.Helpers.Middlewares;
 
 public class TelemetryAndErrorHandlingMiddleware : IFunctionsWorkerMiddleware
 {

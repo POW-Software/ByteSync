@@ -4,6 +4,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using ByteSync.Common.Controls.Json;
 using ByteSync.Functions.Helpers;
+using ByteSync.Functions.Helpers.Middlewares;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Commands.Inventories;
 using ByteSync.ServerCommon.Helpers;
@@ -33,9 +34,12 @@ var host = new HostBuilder()
     })
     .ConfigureFunctionsWorkerDefaults(builder =>
     {
+        builder.UseMiddleware<TelemetryAndLoggingMiddleware>();
+        
+        builder.UseMiddleware<ErrorHandlingMiddleware>();
+        
         builder.UseWhen<JwtMiddleware>((context) =>
         {
-            // We want to use this middleware only for http trigger invocations.
             return context.FunctionDefinition.InputBindings.Values
                 .First(a => a.Type.EndsWith("Trigger")).Type == "httpTrigger";
         });
