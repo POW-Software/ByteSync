@@ -28,22 +28,13 @@ public class SynchronizationFunction
         FunctionContext executionContext, 
         string sessionId)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var synchronizationStartRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationStartRequest>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var synchronizationStartRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationStartRequest>(req);
             
-            var result = await _synchronizationService.StartSynchronization(sessionId, client, synchronizationStartRequest.ActionsGroupDefinitions);
+        var result = await _synchronizationService.StartSynchronization(sessionId, client, synchronizationStartRequest.ActionsGroupDefinitions);
 
-            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while starting synchronization with sessionId: {sessionId}", sessionId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         
         return response;
     }
@@ -55,22 +46,13 @@ public class SynchronizationFunction
         FunctionContext executionContext, 
         string sessionId)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            List<string> actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        List<string> actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
 
-            await _synchronizationService.OnLocalCopyIsDoneAsync(sessionId, actionsGroupIds, client);
+        await _synchronizationService.OnLocalCopyIsDoneAsync(sessionId, actionsGroupIds, client);
             
-            response.StatusCode = HttpStatusCode.OK;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while handling information that local copy is done with sessionId: {sessionId}", sessionId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        var response = req.CreateResponse();
+        response.StatusCode = HttpStatusCode.OK;
 
         return response;
     }
@@ -82,22 +64,13 @@ public class SynchronizationFunction
         FunctionContext executionContext, 
         string sessionId)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            List<string> actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        List<string> actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
 
-            await _synchronizationService.OnDateIsCopied(sessionId, actionsGroupIds, client);
-            
-            response.StatusCode = HttpStatusCode.OK;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while handling information that date is copied with sessionId: {sessionId}", sessionId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        await _synchronizationService.OnDateIsCopied(sessionId, actionsGroupIds, client);
+        
+        var response = req.CreateResponse();
+        response.StatusCode = HttpStatusCode.OK;
 
         return response;
     }
@@ -109,22 +82,13 @@ public class SynchronizationFunction
         FunctionContext executionContext, 
         string sessionId)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            List<string> actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        List<string> actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
 
-            await _synchronizationService.OnFileOrDirectoryIsDeletedAsync(sessionId, actionsGroupIds, client);
+        await _synchronizationService.OnFileOrDirectoryIsDeletedAsync(sessionId, actionsGroupIds, client);
             
-            response.StatusCode = HttpStatusCode.OK;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while handling information that file or directory is deleted with sessionId: {sessionId}", sessionId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        var response = req.CreateResponse();
+        response.StatusCode = HttpStatusCode.OK;
 
         return response;
     }
@@ -136,23 +100,14 @@ public class SynchronizationFunction
         FunctionContext executionContext, 
         string sessionId)
     {
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        List<string> actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+
+        await _synchronizationService.OnDirectoryIsCreatedAsync(sessionId, actionsGroupIds, client);
+            
         var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            List<string> actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
-
-            await _synchronizationService.OnDirectoryIsCreatedAsync(sessionId, actionsGroupIds, client);
-            
-            response.StatusCode = HttpStatusCode.OK;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while handling information that directory is created with sessionId: {sessionId}", sessionId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
-
+        response.StatusCode = HttpStatusCode.OK;
+        
         return response;
     }
     
@@ -163,21 +118,12 @@ public class SynchronizationFunction
         FunctionContext executionContext, 
         string sessionId)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
 
-            await _synchronizationService.OnMemberHasFinished(sessionId, client);
+        await _synchronizationService.OnMemberHasFinished(sessionId, client);
             
-            response.StatusCode = HttpStatusCode.OK;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while handling information that member has finished synchronization with sessionId: {sessionId}", sessionId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        var response = req.CreateResponse();
+        response.StatusCode = HttpStatusCode.OK;
 
         return response;
     }
@@ -189,21 +135,12 @@ public class SynchronizationFunction
         FunctionContext executionContext, 
         string sessionId)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
 
-            await _synchronizationService.RequestAbortSynchronization(sessionId, client);
-            
-            response.StatusCode = HttpStatusCode.OK;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while handling request to abort synchronization with sessionId: {sessionId}", sessionId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        await _synchronizationService.RequestAbortSynchronization(sessionId, client);
+      
+        var response = req.CreateResponse();
+        response.StatusCode = HttpStatusCode.OK;
 
         return response;
     }
@@ -215,22 +152,13 @@ public class SynchronizationFunction
         FunctionContext executionContext, 
         string sessionId)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var sharedFileDefinition = await FunctionHelper.DeserializeRequestBody<SharedFileDefinition>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var sharedFileDefinition = await FunctionHelper.DeserializeRequestBody<SharedFileDefinition>(req);
 
-            await _synchronizationService.AssertSynchronizationActionErrors(sessionId, sharedFileDefinition.ActionsGroupIds!, client);
+        await _synchronizationService.AssertSynchronizationActionErrors(sessionId, sharedFileDefinition.ActionsGroupIds!, client);
             
-            response.StatusCode = HttpStatusCode.OK;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while handling synchronization error with sessionId: {sessionId}", sessionId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        var response = req.CreateResponse();
+        response.StatusCode = HttpStatusCode.OK;
 
         return response;
     }
@@ -242,23 +170,13 @@ public class SynchronizationFunction
         FunctionContext executionContext, 
         string sessionId)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
 
-            await _synchronizationService.AssertSynchronizationActionErrors(sessionId, actionsGroupIds, client);
+        await _synchronizationService.AssertSynchronizationActionErrors(sessionId, actionsGroupIds, client);
             
-            response.StatusCode = HttpStatusCode.OK;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while handling synchronization errors with sessionId: {sessionId}", sessionId);
-            
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        var response = req.CreateResponse();
+        response.StatusCode = HttpStatusCode.OK;
 
         return response;
     }

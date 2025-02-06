@@ -56,6 +56,7 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
             var key = Encoding.ASCII.GetBytes(_secret);
 
             bool isTokenChecked = false;
+            string? clientInstanceId = null;
             try
             {
                 var claims = tokenHandler.ValidateToken(token, new TokenValidationParameters
@@ -76,7 +77,7 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
 
                 if (claims != null)
                 {
-                    var clientInstanceId = claims.Claims.FirstOrDefault(c => c.Type.Equals(AuthConstants.CLAIM_CLIENT_INSTANCE_ID))?.Value;
+                    clientInstanceId = claims.Claims.FirstOrDefault(c => c.Type.Equals(AuthConstants.CLAIM_CLIENT_INSTANCE_ID))?.Value;
                     if (clientInstanceId == null)
                     {
                         throw new SecurityTokenExpiredException("clientInstanceId is null");
@@ -102,7 +103,15 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
 
             if (isTokenChecked)
             {
-                await next(context);
+                var scopeProperties = new Dictionary<string, object>
+                {
+                    ["ClientInstanceId"] = clientInstanceId!
+                };
+
+                using (_logger.BeginScope(scopeProperties))
+                {
+                    await next(context);
+                }
             }
         }
         else

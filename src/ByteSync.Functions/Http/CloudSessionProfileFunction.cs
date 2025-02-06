@@ -27,22 +27,13 @@ public class CloudSessionProfileFunction
         HttpRequestData req,
         FunctionContext executionContext)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var sessionId = await FunctionHelper.DeserializeRequestBody<string>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var sessionId = await FunctionHelper.DeserializeRequestBody<string>(req);
 
-            var result = await _cloudSessionProfileService.CreateCloudSessionProfile(sessionId, client);
+        var result = await _cloudSessionProfileService.CreateCloudSessionProfile(sessionId, client);
             
-            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while creating cloud session profile");
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
 
         return response;
     }
@@ -54,24 +45,13 @@ public class CloudSessionProfileFunction
         FunctionContext executionContext,
         string cloudSessionProfileId)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var parameters = await FunctionHelper.DeserializeRequestBody<GetCloudSessionProfileDataParameters>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var parameters = await FunctionHelper.DeserializeRequestBody<GetCloudSessionProfileDataParameters>(req);
 
-            var result = await _cloudSessionProfileService.GetCloudSessionProfileData(parameters, client);
+        var result = await _cloudSessionProfileService.GetCloudSessionProfileData(parameters, client);
             
-            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, 
-                "Error while getting cloud session profile data for cloudSessionProfileId: {cloudSessionProfileId}",
-                cloudSessionProfileId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
 
         return response;
     }
@@ -81,24 +61,13 @@ public class CloudSessionProfileFunction
             AuthorizationLevel.Anonymous, "post", Route = "cloudSessionProfile/{cloudSessionProfileId}/getProfileDetailsPassword")] HttpRequestData req,
         FunctionContext executionContext, string cloudSessionProfileId)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var parameters = await FunctionHelper.DeserializeRequestBody<GetProfileDetailsPasswordParameters>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var parameters = await FunctionHelper.DeserializeRequestBody<GetProfileDetailsPasswordParameters>(req);
 
-            var result = await _cloudSessionProfileService.GetProfileDetailsPassword(parameters, client);
+        var result = await _cloudSessionProfileService.GetProfileDetailsPassword(parameters, client);
             
-            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, 
-                "Error while getting profile details password for cloudSessionProfileId: {cloudSessionProfileId}",
-                cloudSessionProfileId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
 
         return response;
     }
@@ -108,24 +77,13 @@ public class CloudSessionProfileFunction
             AuthorizationLevel.Anonymous, "post", Route = "cloudSessionProfile/{cloudSessionProfileId}/delete")] HttpRequestData req,
         FunctionContext executionContext, string cloudSessionProfileId)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var parameters = await FunctionHelper.DeserializeRequestBody<DeleteCloudSessionProfileParameters>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var parameters = await FunctionHelper.DeserializeRequestBody<DeleteCloudSessionProfileParameters>(req);
 
-            var result = await _cloudSessionProfileService.DeleteCloudSessionProfile(parameters, client);
+        var result = await _cloudSessionProfileService.DeleteCloudSessionProfile(parameters, client);
             
-            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, 
-                "Error while deleting cloud session profile with cloudSessionProfileId: {cloudSessionProfileId}",
-                cloudSessionProfileId);
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
 
         return response;
     }

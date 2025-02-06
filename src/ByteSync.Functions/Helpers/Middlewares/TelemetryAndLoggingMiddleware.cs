@@ -29,7 +29,12 @@ public class TelemetryAndLoggingMiddleware : IFunctionsWorkerMiddleware
         
         if (context.BindingContext.BindingData.TryGetValue("sessionId", out var sessionId))
         {
-            scopeProperties["SessionId"] = sessionId;
+            scopeProperties["SessionId"] = sessionId!;
+        }
+        
+        if (context.BindingContext.BindingData.TryGetValue("cloudSessionProfileId", out var cloudSessionProfileId))
+        {
+            scopeProperties["CloudSessionProfileId"] = cloudSessionProfileId!;
         }
 
         using (_logger.BeginScope(scopeProperties))
