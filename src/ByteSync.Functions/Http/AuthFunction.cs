@@ -1,12 +1,10 @@
 ﻿using System.Net;
 using ByteSync.Common.Business.Auth;
-using ByteSync.Functions.Constants;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Logging;
 
 namespace ByteSync.Functions.Http;
 

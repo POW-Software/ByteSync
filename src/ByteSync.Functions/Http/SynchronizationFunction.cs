@@ -1,10 +1,8 @@
 ﻿using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Logging;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Common.Business.Synchronizations;
-using ByteSync.Functions.Constants;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Interfaces.Services;
 
@@ -13,12 +11,10 @@ namespace ByteSync.Functions.Http;
 public class SynchronizationFunction
 {
     private readonly ISynchronizationService _synchronizationService;
-    private readonly ILogger<SynchronizationFunction> _logger;
 
-    public SynchronizationFunction(ISynchronizationService synchronizationService, ILoggerFactory loggerFactory)
+    public SynchronizationFunction(ISynchronizationService synchronizationService)
     {
         _synchronizationService = synchronizationService;
-        _logger = loggerFactory.CreateLogger<SynchronizationFunction>();
     }
     
     [Function("StartSynchronizationFunction")]

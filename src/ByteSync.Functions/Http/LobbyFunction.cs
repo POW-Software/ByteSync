@@ -1,10 +1,8 @@
 ﻿using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Logging;
 using ByteSync.Common.Business.Lobbies;
 using ByteSync.Common.Business.Lobbies.Connections;
-using ByteSync.Functions.Constants;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Interfaces.Services;
 
@@ -13,12 +11,10 @@ namespace ByteSync.Functions.Http;
 public class LobbyFunction
 {
     private readonly ILobbyService _lobbyService;
-    private readonly ILogger<LobbyFunction> _logger;
 
-    public LobbyFunction(ILobbyService lobbyService, ILoggerFactory loggerFactory)
+    public LobbyFunction(ILobbyService lobbyService)
     {
         _lobbyService = lobbyService;
-        _logger = loggerFactory.CreateLogger<LobbyFunction>();
     }
     
     [Function("JoinLobbyFunction")]

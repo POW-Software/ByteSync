@@ -1,24 +1,20 @@
 ﻿using System.Net;
 using ByteSync.Common.Business.Lobbies.Connections;
 using ByteSync.Common.Business.Profiles;
-using ByteSync.Functions.Constants;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Logging;
 
 namespace ByteSync.Functions.Http;
 
 public class CloudSessionProfileFunction
 {
     private readonly ICloudSessionProfileService _cloudSessionProfileService;
-    private readonly ILogger<CloudSessionProfileFunction> _logger;
 
-    public CloudSessionProfileFunction(ICloudSessionProfileService cloudSessionProfileService, ILoggerFactory loggerFactory)
+    public CloudSessionProfileFunction(ICloudSessionProfileService cloudSessionProfileService)
     {
         _cloudSessionProfileService = cloudSessionProfileService;
-        _logger = loggerFactory.CreateLogger<CloudSessionProfileFunction>();
     }
     
     [Function("CreateCloudSessionProfileFunction")]

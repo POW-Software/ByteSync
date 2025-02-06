@@ -1,10 +1,8 @@
 ﻿using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Logging;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Business.Trust.Connections;
-using ByteSync.Functions.Constants;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Interfaces.Services;
 
@@ -13,12 +11,10 @@ namespace ByteSync.Functions.Http;
 public class TrustFunction
 {
     private readonly ITrustService _trustService;
-    private readonly ILogger<TrustFunction> _logger;
 
-    public TrustFunction(ITrustService trustService, ILoggerFactory loggerFactory)
+    public TrustFunction(ITrustService trustService)
     {
         _trustService = trustService;
-        _logger = loggerFactory.CreateLogger<TrustFunction>();
     }
     
     [Function("StartTrustCheckFunction")]

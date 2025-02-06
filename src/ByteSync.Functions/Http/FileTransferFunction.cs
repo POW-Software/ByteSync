@@ -1,9 +1,7 @@
 ﻿using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Logging;
 using ByteSync.Common.Business.SharedFiles;
-using ByteSync.Functions.Constants;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Interfaces.Services;
 
@@ -12,14 +10,10 @@ namespace ByteSync.Functions.Http;
 public class FileTransferFunction
 {
     private readonly ITransferLocationService _transferLocationService;
-    private readonly ILogger<FileTransferFunction> _logger;
 
-    public FileTransferFunction(
-        ITransferLocationService transferLocationService, 
-        ILoggerFactory loggerFactory)
+    public FileTransferFunction(ITransferLocationService transferLocationService)
     {
         _transferLocationService = transferLocationService;
-        _logger = loggerFactory.CreateLogger<FileTransferFunction>();
     }
     
     [Function("GetUploadFileUrlFunction")]
