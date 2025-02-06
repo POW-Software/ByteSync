@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ByteSync.Functions.Helpers;
+namespace ByteSync.Functions.Helpers.Middlewares;
 
 public class JwtMiddleware : IFunctionsWorkerMiddleware
 {
@@ -55,6 +55,8 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_secret);
 
+            bool isTokenChecked = false;
+            string? clientInstanceId = null;
             try
             {
                 var claims = tokenHandler.ValidateToken(token, new TokenValidationParameters
@@ -75,7 +77,7 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
 
                 if (claims != null)
                 {
-                    var clientInstanceId = claims.Claims.FirstOrDefault(c => c.Type.Equals(AuthConstants.CLAIM_CLIENT_INSTANCE_ID))?.Value;
+                    clientInstanceId = claims.Claims.FirstOrDefault(c => c.Type.Equals(AuthConstants.CLAIM_CLIENT_INSTANCE_ID))?.Value;
                     if (clientInstanceId == null)
                     {
                         throw new SecurityTokenExpiredException("clientInstanceId is null");
@@ -90,13 +92,26 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
                     context.Items.Add(AuthConstants.FUNCTION_CONTEXT_CLIENT, client);
                 }
                 
-                await next(context);
+                isTokenChecked = true;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error validating token");
                 
                 await HandleTokenError(context, "Invalid token");
+            }
+
+            if (isTokenChecked)
+            {
+                var scopeProperties = new Dictionary<string, object>
+                {
+                    ["ClientInstanceId"] = clientInstanceId!
+                };
+
+                using (_logger.BeginScope(scopeProperties))
+                {
+                    await next(context);
+                }
             }
         }
         else

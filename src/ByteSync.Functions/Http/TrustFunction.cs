@@ -1,10 +1,8 @@
 ﻿using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Logging;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Business.Trust.Connections;
-using ByteSync.Functions.Constants;
 using ByteSync.Functions.Helpers;
 using ByteSync.ServerCommon.Interfaces.Services;
 
@@ -13,12 +11,10 @@ namespace ByteSync.Functions.Http;
 public class TrustFunction
 {
     private readonly ITrustService _trustService;
-    private readonly ILogger<TrustFunction> _logger;
 
-    public TrustFunction(ITrustService trustService, ILoggerFactory loggerFactory)
+    public TrustFunction(ITrustService trustService)
     {
         _trustService = trustService;
-        _logger = loggerFactory.CreateLogger<TrustFunction>();
     }
     
     [Function("StartTrustCheckFunction")]
@@ -27,22 +23,13 @@ public class TrustFunction
         HttpRequestData req, 
         FunctionContext executionContext)
     {
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var parameters = await FunctionHelper.DeserializeRequestBody<TrustCheckParameters>(req);
+
+        var result = await _trustService.StartTrustCheck(client, parameters);
+        
         var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var parameters = await FunctionHelper.DeserializeRequestBody<TrustCheckParameters>(req);
-
-            var result = await _trustService.StartTrustCheck(client, parameters);
-
-            await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while starting trust check");
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         
         return response;
     }
@@ -53,22 +40,13 @@ public class TrustFunction
         HttpRequestData req, 
         FunctionContext executionContext)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var parameters = await FunctionHelper.DeserializeRequestBody<GiveMemberPublicKeyCheckDataParameters>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var parameters = await FunctionHelper.DeserializeRequestBody<GiveMemberPublicKeyCheckDataParameters>(req);
 
-            await _trustService.GiveMemberPublicKeyCheckData(client, parameters);
-            
-            response.StatusCode = HttpStatusCode.OK;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while giving member public key check data");
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        await _trustService.GiveMemberPublicKeyCheckData(client, parameters);
+        var response = req.CreateResponse();
+        
+        response.StatusCode = HttpStatusCode.OK;
         
         return response;
     }
@@ -79,22 +57,13 @@ public class TrustFunction
         HttpRequestData req, 
         FunctionContext executionContext)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var parameters = await FunctionHelper.DeserializeRequestBody<SendDigitalSignaturesParameters>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var parameters = await FunctionHelper.DeserializeRequestBody<SendDigitalSignaturesParameters>(req);
 
-            await _trustService.SendDigitalSignatures(client, parameters);
-            
-            response.StatusCode = HttpStatusCode.OK;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while sending digital signatures");
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        await _trustService.SendDigitalSignatures(client, parameters);
+           
+        var response = req.CreateResponse();
+        response.StatusCode = HttpStatusCode.OK;
         
         return response;
     }
@@ -105,22 +74,13 @@ public class TrustFunction
         HttpRequestData req, 
         FunctionContext executionContext)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var parameters = await FunctionHelper.DeserializeRequestBody<SetAuthCheckedParameters>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var parameters = await FunctionHelper.DeserializeRequestBody<SetAuthCheckedParameters>(req);
 
-            await _trustService.SetAuthChecked(client, parameters);
-            
-            response.StatusCode = HttpStatusCode.OK;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while setting auth checked");
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        await _trustService.SetAuthChecked(client, parameters);
+           
+        var response = req.CreateResponse();
+        response.StatusCode = HttpStatusCode.OK;
         
         return response;
     }
@@ -131,22 +91,13 @@ public class TrustFunction
         HttpRequestData req, 
         FunctionContext executionContext)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var parameters = await FunctionHelper.DeserializeRequestBody<RequestTrustProcessParameters>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var parameters = await FunctionHelper.DeserializeRequestBody<RequestTrustProcessParameters>(req);
 
-            await _trustService.RequestTrustPublicKey(client, parameters);
-            
-            response.StatusCode = HttpStatusCode.OK;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while requesting trust public key");
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        await _trustService.RequestTrustPublicKey(client, parameters);
+          
+        var response = req.CreateResponse();
+        response.StatusCode = HttpStatusCode.OK;
         
         return response;
     }
@@ -157,22 +108,13 @@ public class TrustFunction
         HttpRequestData req, 
         FunctionContext executionContext)
     {
-        var response = req.CreateResponse();
-        try
-        {
-            var client = FunctionHelper.GetClientFromContext(executionContext);
-            var parameters = await FunctionHelper.DeserializeRequestBody<PublicKeyValidationParameters>(req);
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var parameters = await FunctionHelper.DeserializeRequestBody<PublicKeyValidationParameters>(req);
 
-            await _trustService.InformPublicKeyValidationIsFinished(client, parameters);
+        await _trustService.InformPublicKeyValidationIsFinished(client, parameters);
             
-            response.StatusCode = HttpStatusCode.OK;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while informing public key validation is finished");
-            
-            await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
-        }
+        var response = req.CreateResponse();
+        response.StatusCode = HttpStatusCode.OK;
         
         return response;
     }
