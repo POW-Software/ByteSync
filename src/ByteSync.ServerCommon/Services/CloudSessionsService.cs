@@ -46,7 +46,6 @@ public class CloudSessionsService : ICloudSessionsService
     
     public async Task<CloudSessionResult> CreateCloudSession(CreateCloudSessionParameters createCloudSessionParameters, Client client)
     {
-        CloudSession cloudSession;
         CloudSessionData cloudSessionData;
         SessionMemberData creatorData;
         
@@ -60,7 +59,7 @@ public class CloudSessionsService : ICloudSessionsService
 
         await _byteSyncClientCaller.AddToSessionGroup(client, cloudSessionData.SessionId);
 
-        _logger.LogInformation("CreateCloudSession: {@cloudSession} by {@creator}", cloudSessionData.SessionId, creatorData.BuildLog());
+        _logger.LogInformation("Cloud Session {SessionId} created", cloudSessionData.SessionId);
 
         var cloudSessionResult = await BuildCloudSessionResult(cloudSessionData, creatorData);
 

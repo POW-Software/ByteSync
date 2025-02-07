@@ -1,8 +1,6 @@
 ﻿using System.Net;
-using ByteSync.Functions.Constants;
 using Microsoft.ApplicationInsights;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.Logging;
 
@@ -35,9 +33,9 @@ public class ErrorHandlingMiddleware : IFunctionsWorkerMiddleware
             {
                 var response = httpRequest.CreateResponse();
                 response.StatusCode = HttpStatusCode.InternalServerError;
-                await response.WriteAsJsonAsync(new { error = ErrorConstants.INTERNAL_SERVER_ERROR }, HttpStatusCode.InternalServerError);
 
                 context.GetInvocationResult().Value = response;
+                
                 return;
             }
             throw;
