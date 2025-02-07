@@ -79,10 +79,10 @@ class CloudSessionConnectionService : ICloudSessionConnectionService
         }
     }
     
-    public async Task OnJoinSessionError(JoinSessionResult joinSessionResult)
+    public async Task OnJoinSessionError(JoinSessionError joinSessionError)
     {
-        _logger.LogError("Can not join the Cloud Session. Reason: {Reason}", joinSessionResult.Status);
-        _cloudSessionConnectionRepository.SetJoinSessionError(joinSessionResult);
+        _logger.LogError("Can not join the Cloud Session. Reason: {Reason}", joinSessionError.Status);
+        _cloudSessionConnectionRepository.SetJoinSessionError(joinSessionError);
         
         await InitializeConnection(SessionConnectionStatus.NoSession);
     }

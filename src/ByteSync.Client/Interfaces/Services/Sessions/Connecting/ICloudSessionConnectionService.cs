@@ -12,7 +12,7 @@ public interface ICloudSessionConnectionService
     
     Task InitializeConnection(SessionConnectionStatus creatingSession);
     
-    Task OnJoinSessionError(JoinSessionResult joinSessionResult);
+    Task OnJoinSessionError(JoinSessionError joinSessionError);
     
     Task OnCreateSessionError(CreateSessionError createSessionError);
 }

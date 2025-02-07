@@ -16,13 +16,13 @@ public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConne
 {
     private readonly BehaviorSubject<SessionConnectionStatus> _connectionStatus;
     private readonly BehaviorSubject<CreateSessionError?> _createSessionError;
-    private readonly BehaviorSubject<JoinSessionResult?> _joinSessionError;
+    private readonly BehaviorSubject<JoinSessionError?> _joinSessionError;
 
     public CloudSessionConnectionRepository()
     {
         _connectionStatus = new BehaviorSubject<SessionConnectionStatus>(SessionConnectionStatus.NoSession);
         _createSessionError = new BehaviorSubject<CreateSessionError?>(null);
-        _joinSessionError = new BehaviorSubject<JoinSessionResult?>(null);
+        _joinSessionError = new BehaviorSubject<JoinSessionError?>(null);
         
         CancellationTokenSource = new CancellationTokenSource();
     }
@@ -107,7 +107,7 @@ public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConne
     
     public IObservable<CreateSessionError?> CreateSessionErrorObservable => _createSessionError.AsObservable();
     
-    public IObservable<JoinSessionResult?> JoinSessionErrorObservable => _joinSessionError.AsObservable();
+    public IObservable<JoinSessionError?> JoinSessionErrorObservable => _joinSessionError.AsObservable();
     
     public SessionConnectionStatus CurrentConnectionStatus => _connectionStatus.Value;
     
@@ -125,9 +125,9 @@ public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConne
         _createSessionError.OnNext(createSessionError);
     }
     
-    public void SetJoinSessionError(JoinSessionResult joinSessionResult)
+    public void SetJoinSessionError(JoinSessionError joinSessionError)
     {
-        _joinSessionError.OnNext(joinSessionResult);
+        _joinSessionError.OnNext(joinSessionError);
     }
 
     public void ClearErrors()

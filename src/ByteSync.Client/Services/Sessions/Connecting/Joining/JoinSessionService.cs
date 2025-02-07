@@ -1,4 +1,5 @@
 ﻿using ByteSync.Business.Sessions;
+using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces.Controls.Communications;
@@ -44,10 +45,15 @@ public class JoinSessionService : IJoinSessionService
         {
             await DoStartJoinSession(sessionId, sessionPassword, lobbySessionDetails);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            var joinSessionResult = JoinSessionResult.BuildFrom(JoinSessionStatus.UnexpectedError);
-            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionResult);
+            var joinSessionError = new JoinSessionError
+            {
+                Exception = ex,
+                Status = JoinSessionStatus.UnexpectedError
+            };
+            
+            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionError);
 
             throw;
         }
@@ -82,7 +88,12 @@ public class JoinSessionService : IJoinSessionService
         var joinSessionResult = await _publicKeysTruster.TrustAllMembersPublicKeys(sessionId, _cloudSessionConnectionRepository.CancellationToken);
         if (!joinSessionResult.IsOK)
         {
-            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionResult);
+            var joinSessionError = new JoinSessionError
+            {
+                Status = joinSessionResult.Status
+            };
+            
+            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionError);
             return;
         }
 
@@ -94,7 +105,12 @@ public class JoinSessionService : IJoinSessionService
 
         if (!joinSessionResult.IsOK)
         {
-            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionResult);
+            var joinSessionError = new JoinSessionError
+            {
+                Status = joinSessionResult.Status
+            };
+            
+            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionError);
         }
         else
         {

@@ -1,4 +1,5 @@
 ﻿using ByteSync.Business.Communications;
+using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
@@ -69,7 +70,12 @@ public class CloudSessionPasswordExchangeKeyGivenService : ICloudSessionPassword
 
                 if (!joinSessionResult.IsOK)
                 {
-                    await _cloudSessionConnectionService.OnJoinSessionError(joinSessionResult);
+                    var joinSessionError = new JoinSessionError
+                    {
+                        Status = joinSessionResult.Status
+                    };
+                    
+                    await _cloudSessionConnectionService.OnJoinSessionError(joinSessionError);
                 }
                 else
                 {
