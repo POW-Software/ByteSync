@@ -5,7 +5,6 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
-using Serilog;
 
 namespace ByteSync.Services.Sessions.Connecting;
 
@@ -63,7 +62,7 @@ public class CloudSessionPasswordExchangeKeyGivenService : ICloudSessionPassword
                 var encryptedPassword = _publicKeysManager.EncryptString(request.PublicKeyInfo, exchangePassword.Data);
                 AskJoinCloudSessionParameters outParameters = new (request, encryptedPassword);
 
-                Log.Information("...Providing encrypted password to the validator");
+                _logger.LogInformation("...Providing encrypted password to the validator");
                 var joinSessionResult = await _cloudSessionApiClient.AskJoinCloudSession(outParameters,
                     _cloudSessionConnectionRepository.CancellationToken);
 
@@ -84,7 +83,7 @@ public class CloudSessionPasswordExchangeKeyGivenService : ICloudSessionPassword
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "OnCloudSessionPasswordExchangeKeyGiven");
+            _logger.LogError(ex, "OnCloudSessionPasswordExchangeKeyGiven");
         }
     }
 }
