@@ -1017,6 +1017,12 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
+        internal static string JoinCloudSession_TimeoutError {
+            get {
+                return ResourceManager.GetString("JoinCloudSession_TimeoutError", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Recherche une chaîne localisée semblable à A mandatory update is available ({0})..
         /// </summary>

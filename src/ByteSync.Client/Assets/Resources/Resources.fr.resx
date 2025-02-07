@@ -1538,4 +1538,7 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	<data name="JoinCloudSession_Header" xml:space="preserve">
 		<value>Rejoindre une Session Cloud existante</value>
 	</data>
+	<data name="JoinCloudSession_TimeoutError" xml:space="preserve">
+		<value>Le délai d'attente a expiré.</value>
+	</data>
 </root>

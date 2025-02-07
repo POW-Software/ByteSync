@@ -12,6 +12,6 @@ public enum JoinSessionStatus
     TrustCheckFailed = 8,
     WrongPassword = 9,
     UnexpectedError = 10,
-    Unknown_11 = 11,
+    TimeoutError = 11,
     Unknown_12 = 12,
 }

@@ -47,10 +47,17 @@ public class JoinSessionService : IJoinSessionService
         }
         catch (Exception ex)
         {
+            var status = JoinSessionStatus.UnexpectedError;
+            if (ex is TimeoutException)
+            {
+                status = JoinSessionStatus.TimeoutError;
+            }
+
+            
             var joinSessionError = new JoinSessionError
             {
                 Exception = ex,
-                Status = JoinSessionStatus.UnexpectedError
+                Status = status
             };
             
             await _cloudSessionConnectionService.OnJoinSessionError(joinSessionError);

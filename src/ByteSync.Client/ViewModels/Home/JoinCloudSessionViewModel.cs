@@ -191,6 +191,10 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
             case JoinSessionStatus.TrustCheckFailed:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_TrustCheckFailed), joinSessionError.Exception);
                 break;
+            
+            case JoinSessionStatus.TimeoutError:
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_TimeoutError), joinSessionError.Exception);
+                break;
 
             default:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_UnkownError), joinSessionError.Exception);
