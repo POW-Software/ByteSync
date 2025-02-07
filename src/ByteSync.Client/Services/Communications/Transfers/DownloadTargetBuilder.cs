@@ -3,12 +3,12 @@ using ByteSync.Business.Communications.Downloading;
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Profiles;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
+using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Communications.Transfers;
 

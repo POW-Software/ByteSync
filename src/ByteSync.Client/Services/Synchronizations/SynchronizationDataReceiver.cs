@@ -1,9 +1,9 @@
 ﻿using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Communications;
 using ByteSync.Interfaces.Controls.Actions;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Actions;
 
 namespace ByteSync.Services.Synchronizations;

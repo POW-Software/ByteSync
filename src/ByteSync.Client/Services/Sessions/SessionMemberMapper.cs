@@ -1,7 +1,7 @@
 ﻿using ByteSync.Business.SessionMembers;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Encryptions;
-using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Sessions;
 

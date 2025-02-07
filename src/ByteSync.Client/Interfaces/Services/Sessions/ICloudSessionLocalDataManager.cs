@@ -1,10 +1,8 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Business;
+﻿using ByteSync.Business;
 using ByteSync.Business.Actions.Shared;
-using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.SharedFiles;
 
-namespace ByteSync.Interfaces.Controls.Sessions
+namespace ByteSync.Interfaces.Services.Sessions
 {
     public interface ICloudSessionLocalDataManager
     {

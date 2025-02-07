@@ -3,7 +3,7 @@ using System.Text;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
-using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Inventories;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;

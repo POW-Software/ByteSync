@@ -3,9 +3,9 @@ using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Repositories;
-using ByteSync.Interfaces.Services.Sessions.Connecting;
+using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Interfaces.Services.Sessions.Connecting.Validating;
 
 namespace ByteSync.Services.Sessions.Connecting;
 

@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
-using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Inventories;
 
 namespace ByteSync.Services.Sessions;

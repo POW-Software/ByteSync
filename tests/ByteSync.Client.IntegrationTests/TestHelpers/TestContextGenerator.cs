@@ -4,9 +4,9 @@ using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Applications;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
+using ByteSync.Interfaces.Services.Sessions;
 using Moq;
 
 namespace ByteSync.Client.IntegrationTests.TestHelpers;

@@ -5,7 +5,7 @@ using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Helpers;
-using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Converters;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions.Misc;
 using ReactiveUI;

@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace ByteSync.Interfaces.Controls.Sessions;
+﻿namespace ByteSync.Interfaces.Services.Sessions;
 
 public interface ISessionInterruptor
 {

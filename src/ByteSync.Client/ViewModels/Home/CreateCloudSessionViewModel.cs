@@ -7,6 +7,7 @@ using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Unit = System.Reactive.Unit;

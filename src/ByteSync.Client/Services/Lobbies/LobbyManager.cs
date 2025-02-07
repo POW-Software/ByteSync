@@ -12,11 +12,11 @@ using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Navigations;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Lobbies;
 using ByteSync.Interfaces.Profiles;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
+using ByteSync.Interfaces.Services.Sessions.Connecting.Joining;
 using Serilog;
 
 namespace ByteSync.Services.Lobbies;

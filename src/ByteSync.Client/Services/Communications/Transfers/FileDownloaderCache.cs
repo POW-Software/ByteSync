@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Communications.Transfers;
 

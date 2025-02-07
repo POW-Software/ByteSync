@@ -5,6 +5,7 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
+using ByteSync.Interfaces.Services.Sessions.Connecting.Joining;
 
 namespace ByteSync.Services.Sessions.Connecting;
 

@@ -2,10 +2,10 @@
 using ByteSync.Business;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ByteSync.ViewModels.Misc;
 

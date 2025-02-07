@@ -7,10 +7,10 @@ using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Interfaces.Controls.Communications.Http;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Synchronizations;
 

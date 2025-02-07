@@ -1,7 +1,7 @@
 ﻿using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Communications.Http;
-using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
 
 namespace ByteSync.Services.Sessions.Connecting;

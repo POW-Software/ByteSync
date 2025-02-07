@@ -1,4 +1,4 @@
-﻿namespace ByteSync.Interfaces.Services.Sessions.Connecting;
+﻿namespace ByteSync.Interfaces.Services.Sessions.Connecting.Joining;
 
 public interface IYouGaveAWrongPasswordService
 {

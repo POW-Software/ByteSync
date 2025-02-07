@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Encryptions;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Repositories;
 
 namespace ByteSync.Services.Encryptions;
