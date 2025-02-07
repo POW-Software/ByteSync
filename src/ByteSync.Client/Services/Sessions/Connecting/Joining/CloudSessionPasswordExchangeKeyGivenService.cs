@@ -91,6 +91,14 @@ public class CloudSessionPasswordExchangeKeyGivenService : ICloudSessionPassword
         catch (Exception ex)
         {
             _logger.LogError(ex, "OnCloudSessionPasswordExchangeKeyGiven");
+            
+            var joinSessionError = new JoinSessionError
+            {
+                Exception = ex,
+                Status = JoinSessionStatus.UnexpectedError
+            };
+            
+            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionError);
         }
     }
 }
