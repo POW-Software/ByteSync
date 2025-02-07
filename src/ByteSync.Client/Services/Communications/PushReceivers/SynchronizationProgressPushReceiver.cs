@@ -1,9 +1,9 @@
 ﻿using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Interfaces.Communications;
 using ByteSync.Interfaces.Controls.Communications.SignalR;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Communications.PushReceivers;
 

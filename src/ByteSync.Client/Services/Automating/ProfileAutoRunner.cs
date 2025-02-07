@@ -8,10 +8,10 @@ using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Automating;
 using ByteSync.Interfaces.Controls.Inventories;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Lobbies;
 using ByteSync.Interfaces.Profiles;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
 
 namespace ByteSync.Services.Automating;

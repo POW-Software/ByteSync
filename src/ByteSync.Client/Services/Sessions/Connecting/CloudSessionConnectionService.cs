@@ -5,9 +5,9 @@ using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces.Controls.Communications;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
 
 namespace ByteSync.Services.Sessions.Connecting;
@@ -79,10 +79,10 @@ class CloudSessionConnectionService : ICloudSessionConnectionService
         }
     }
     
-    public async Task OnJoinSessionError(JoinSessionResult joinSessionResult)
+    public async Task OnJoinSessionError(JoinSessionError joinSessionError)
     {
-        _logger.LogError("Can not join the Cloud Session. Reason: {Reason}", joinSessionResult.Status);
-        _cloudSessionConnectionRepository.SetJoinSessionError(joinSessionResult);
+        _logger.LogError("Can not join the Cloud Session. Reason: {Reason}", joinSessionError.Status);
+        _cloudSessionConnectionRepository.SetJoinSessionError(joinSessionError);
         
         await InitializeConnection(SessionConnectionStatus.NoSession);
     }

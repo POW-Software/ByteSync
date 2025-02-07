@@ -1,6 +1,6 @@
 ﻿using ByteSync.Interfaces;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Factories.ViewModels;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Inventories;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
 using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;

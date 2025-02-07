@@ -5,8 +5,8 @@ using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Sessions;
 

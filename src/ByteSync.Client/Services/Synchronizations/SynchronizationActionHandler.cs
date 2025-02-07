@@ -6,9 +6,9 @@ using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Communications.Http;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Services.Communications;
+using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Synchronizations;
 

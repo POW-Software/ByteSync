@@ -4,7 +4,7 @@ using ByteSync.Business.Sessions;
 using ByteSync.Client.IntegrationTests.TestHelpers.Business;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Misc;
-using ByteSync.Interfaces.Controls.Sessions;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Services.Comparisons;
 using ByteSync.Services.Inventories;

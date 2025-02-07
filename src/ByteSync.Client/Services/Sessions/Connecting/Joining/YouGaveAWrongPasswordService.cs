@@ -1,7 +1,8 @@
-﻿using ByteSync.Common.Business.Sessions.Cloud.Connections;
-using ByteSync.Interfaces.EventsHubs;
+﻿using ByteSync.Business.Sessions.Connecting;
+using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
+using ByteSync.Interfaces.Services.Sessions.Connecting.Joining;
 
 namespace ByteSync.Services.Sessions.Connecting;
 
@@ -30,15 +31,24 @@ public class YouGaveAWrongPasswordService : IYouGaveAWrongPasswordService
                 _logger.LogError(UNKNOWN_RECEIVED_SESSION_ID, sessionId);
             }
 
-            var joinSessionResult = JoinSessionResult.BuildFrom(JoinSessionStatus.WrongPassword);
-            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionResult);
+            var joinSessionError = new JoinSessionError
+            {
+                Status = JoinSessionStatus.WrongPassword
+            };
+            
+            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionError);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "OnYouGaveAWrongPassword");
             
-            var joinSessionResult = JoinSessionResult.BuildFrom(JoinSessionStatus.UnexpectedError);
-            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionResult);
+            var joinSessionError = new JoinSessionError
+            {
+                Exception = ex,
+                Status = JoinSessionStatus.UnexpectedError
+            };
+            
+            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionError);
         }
     }
 }

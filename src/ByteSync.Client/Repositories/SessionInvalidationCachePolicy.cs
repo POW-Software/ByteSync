@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Linq;
 using ByteSync.Business.Sessions;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions;
 using DynamicData;
 
 namespace ByteSync.Repositories;

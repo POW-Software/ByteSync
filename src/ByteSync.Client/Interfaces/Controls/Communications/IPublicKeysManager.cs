@@ -7,14 +7,10 @@ namespace ByteSync.Interfaces.Controls.Communications;
 public interface IPublicKeysManager
 {
     PublicKeyInfo GetMyPublicKeyInfo();
-
-    // string GetMyInstallationId();
     
     PublicKeyCheckData BuildJoinerPublicKeyCheckData(PublicKeyCheckData memberPublicKeyCheckData);
     
     PublicKeyCheckData BuildMemberPublicKeyCheckData(PublicKeyInfo joinerPublicKeyInfo, bool isTrustedByMember);
-    
-    // PublicKeyCheckData BuildPublicKeyCheckData(PublicKeyInfo? otherPartyPublicKeyInfo, bool? checkResponse, string? salt);
 
     bool IsTrusted(PublicKeyCheckData publicKeyCheckData);
     

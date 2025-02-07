@@ -3,8 +3,8 @@ using System.Reactive.Subjects;
 using ByteSync.Business;
 using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Inventories;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Services.Comparisons;
 

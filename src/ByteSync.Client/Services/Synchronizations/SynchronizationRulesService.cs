@@ -1,9 +1,9 @@
 ﻿using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Actions.Loose;
 using ByteSync.Interfaces.Controls.Profiles;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Synchronizations;
 

@@ -5,11 +5,11 @@ using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

@@ -3,8 +3,8 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Communications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.SignalR;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Services.Communications;
+using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Communications.PushReceivers;
 

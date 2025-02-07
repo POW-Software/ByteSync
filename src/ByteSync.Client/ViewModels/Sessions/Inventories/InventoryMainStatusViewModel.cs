@@ -6,9 +6,9 @@ using ByteSync.Business;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.Misc;
 using ByteSync.Interfaces.Controls.Inventories;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Interfaces.Dialogs;
+using ByteSync.Interfaces.Services.Sessions;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

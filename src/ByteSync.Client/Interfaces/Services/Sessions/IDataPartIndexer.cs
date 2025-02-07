@@ -3,7 +3,7 @@ using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
 using ByteSync.Models.Inventories;
 
-namespace ByteSync.Interfaces.Controls.Sessions;
+namespace ByteSync.Interfaces.Services.Sessions;
 
 public interface IDataPartIndexer
 {

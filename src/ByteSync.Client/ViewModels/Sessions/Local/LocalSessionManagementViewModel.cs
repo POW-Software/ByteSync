@@ -1,9 +1,9 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
 using ByteSync.Business.Sessions;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Factories.ViewModels;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.ViewModels.Sessions.Managing;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;

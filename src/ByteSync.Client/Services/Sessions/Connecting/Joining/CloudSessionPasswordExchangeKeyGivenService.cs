@@ -1,11 +1,12 @@
 ﻿using ByteSync.Business.Communications;
+using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
-using Serilog;
+using ByteSync.Interfaces.Services.Sessions.Connecting.Joining;
 
 namespace ByteSync.Services.Sessions.Connecting;
 
@@ -63,13 +64,18 @@ public class CloudSessionPasswordExchangeKeyGivenService : ICloudSessionPassword
                 var encryptedPassword = _publicKeysManager.EncryptString(request.PublicKeyInfo, exchangePassword.Data);
                 AskJoinCloudSessionParameters outParameters = new (request, encryptedPassword);
 
-                Log.Information("...Providing encrypted password to the validator");
+                _logger.LogInformation("...Providing encrypted password to the validator");
                 var joinSessionResult = await _cloudSessionApiClient.AskJoinCloudSession(outParameters,
                     _cloudSessionConnectionRepository.CancellationToken);
 
                 if (!joinSessionResult.IsOK)
                 {
-                    await _cloudSessionConnectionService.OnJoinSessionError(joinSessionResult);
+                    var joinSessionError = new JoinSessionError
+                    {
+                        Status = joinSessionResult.Status
+                    };
+                    
+                    await _cloudSessionConnectionService.OnJoinSessionError(joinSessionError);
                 }
                 else
                 {
@@ -84,7 +90,21 @@ public class CloudSessionPasswordExchangeKeyGivenService : ICloudSessionPassword
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "OnCloudSessionPasswordExchangeKeyGiven");
+            _logger.LogError(ex, "OnCloudSessionPasswordExchangeKeyGiven");
+            
+            var status = JoinSessionStatus.UnexpectedError;
+            if (ex is TimeoutException)
+            {
+                status = JoinSessionStatus.TimeoutError;
+            }
+            
+            var joinSessionError = new JoinSessionError
+            {
+                Exception = ex,
+                Status = status
+            };
+            
+            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionError);
         }
     }
 }

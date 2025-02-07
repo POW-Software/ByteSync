@@ -4,10 +4,12 @@ using System.Reactive.Linq;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Events;
 using ByteSync.Business.Sessions;
+using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
+using ByteSync.Interfaces.Services.Sessions.Connecting.Joining;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -109,7 +111,7 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Cannot join Cloud Session");
-            UpdateErrorMessage(nameof(Resources.JoinCloudSession_ErrorMessage));
+            UpdateErrorMessage(nameof(Resources.JoinCloudSession_ErrorMessage), ex);
         }
     }
     
@@ -133,12 +135,18 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         }
     }
 
-    private void UpdateErrorMessage(string? errorMessageSource)
+    private void UpdateErrorMessage(string? errorMessageSource, Exception? exception = null)
     {
         ErrorMessageSource = errorMessageSource;
         if (ErrorMessageSource.IsNotEmpty())
         {
-            ErrorMessage = _localizationService[ErrorMessageSource!];
+            string errorMessage = _localizationService[ErrorMessageSource!];
+            if (exception != null)
+            {
+                errorMessage += $" ({exception.Message})";
+            }
+
+            ErrorMessage = errorMessage;
         }
         else
         {
@@ -146,42 +154,50 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
         }
     }
 
-    private void OnCloudSessionJoinError(JoinSessionResult? joinSessionResult)
+    private void OnCloudSessionJoinError(JoinSessionError? joinSessionError)
     {
-        if (joinSessionResult == null)
+        if (joinSessionError == null)
         {
             UpdateErrorMessage(null);
             return;
         }
         
-        switch (joinSessionResult.Status)
+        switch (joinSessionError.Status)
         {
             case JoinSessionStatus.SessionNotFound:
-                UpdateErrorMessage(nameof(Resources.JoinCloudSession_SessionNotFound));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_SessionNotFound), joinSessionError.Exception);
+                break;
+            
+            case JoinSessionStatus.WrongPassword:
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_WrongPassword), joinSessionError.Exception);
                 break;
 
             case JoinSessionStatus.ServerError:
-                UpdateErrorMessage(nameof(Resources.JoinCloudSession_ServerError));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_ServerError), joinSessionError.Exception);
                 break;
 
             case JoinSessionStatus.TransientError:
-                UpdateErrorMessage(nameof(Resources.JoinCloudSession_TransientError));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_TransientError), joinSessionError.Exception);
                 break;
 
             case JoinSessionStatus.TooManyMembers:
-                UpdateErrorMessage(nameof(Resources.JoinCloudSession_TooManyMembers));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_TooManyMembers), joinSessionError.Exception);
                 break;
 
             case JoinSessionStatus.SessionAlreadyActivated:
-                UpdateErrorMessage(nameof(Resources.JoinCloudSession_SessionAlreadyActivated));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_SessionAlreadyActivated), joinSessionError.Exception);
                 break;
 
             case JoinSessionStatus.TrustCheckFailed:
-                UpdateErrorMessage(nameof(Resources.JoinCloudSession_TrustCheckFailed));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_TrustCheckFailed), joinSessionError.Exception);
+                break;
+            
+            case JoinSessionStatus.TimeoutError:
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_TimeoutError), joinSessionError.Exception);
                 break;
 
             default:
-                UpdateErrorMessage(nameof(Resources.JoinCloudSession_UnkownError));
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_UnkownError), joinSessionError.Exception);
                 break;
         }
     }

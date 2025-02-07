@@ -2,6 +2,6 @@
 
 public class CreateSessionError
 {
-    public Exception? Exception { get; set; }
-    public CreateSessionStatus Status { get; set; }
+    public Exception? Exception { get; init; }
+    public CreateSessionStatus Status { get; init; }
 }

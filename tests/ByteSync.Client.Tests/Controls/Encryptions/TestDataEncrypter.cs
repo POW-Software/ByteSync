@@ -3,7 +3,6 @@ using System.Security.Cryptography;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Helpers;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Services.Encryptions;
 using ByteSync.Tests.TestUtilities.Helpers;

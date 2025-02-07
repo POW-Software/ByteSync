@@ -1,10 +1,7 @@
 ﻿using System.Reactive.Subjects;
-using System.Threading.Tasks;
-using ByteSync.Business.Inventories;
 using ByteSync.Models.Comparisons.Result;
-using DynamicData;
 
-namespace ByteSync.Interfaces.Controls.Sessions;
+namespace ByteSync.Interfaces.Services.Sessions;
 
 public interface IComparisonItemsService
 {

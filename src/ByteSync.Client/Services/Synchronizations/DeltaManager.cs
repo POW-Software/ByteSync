@@ -1,9 +1,9 @@
 ﻿using System.IO;
 using ByteSync.Business;
 using ByteSync.Business.Actions.Shared;
-using ByteSync.Interfaces.Controls.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Inventories;
 using FastRsync.Core;
 using FastRsync.Delta;

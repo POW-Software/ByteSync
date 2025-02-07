@@ -30,7 +30,7 @@ namespace ByteSync.Interfaces.Repositories
         
         IObservable<CreateSessionError?> CreateSessionErrorObservable { get; }
         
-        IObservable<JoinSessionResult?> JoinSessionErrorObservable { get; }
+        IObservable<JoinSessionError?> JoinSessionErrorObservable { get; }
     
         SessionConnectionStatus CurrentConnectionStatus { get; }
         
@@ -42,7 +42,7 @@ namespace ByteSync.Interfaces.Repositories
         
         void SetCreateSessionError(CreateSessionError createSessionError);
         
-        void SetJoinSessionError(JoinSessionResult joinSessionResult);
+        void SetJoinSessionError(JoinSessionError joinSessionError);
         
         void ClearErrors();
     }
