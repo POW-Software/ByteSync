@@ -159,6 +159,10 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
             case JoinSessionStatus.SessionNotFound:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_SessionNotFound));
                 break;
+            
+            case JoinSessionStatus.WrongPassword:
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_WrongPassword));
+                break;
 
             case JoinSessionStatus.ServerError:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_ServerError));

@@ -18,7 +18,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels;
 
-public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
+public class MainWindowViewModel : ActivatableViewModelBase, IScreen
 {
     private readonly ISessionService _sessionService;
     private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
@@ -30,7 +30,7 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
     private readonly ILogger<MainWindowViewModel> _logger;
 
-    public RoutingState Router { get; } = new RoutingState();
+    public RoutingState Router { get; } = new();
 
     public MainWindowViewModel()
     {
@@ -56,7 +56,7 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
         _logger = logger;
         
         FlyoutContainer = flyoutContainerViewModel!;
-        Header = headerViewModel!;
+        Header = headerViewModel;
 
         this.WhenActivated(disposables =>
         {
@@ -76,6 +76,7 @@ public partial class MainWindowViewModel : ActivatableViewModelBase, IScreen
                 .DisposeWith(disposables);
             
             _cloudSessionConnectionRepository.ConnectionStatusObservable
+                .Where(sessionConnectionStatus => sessionConnectionStatus.In(SessionConnectionStatus.NoSession, SessionConnectionStatus.InSession))
                 .DistinctUntilChanged()
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(sessionConnectionStatus =>
