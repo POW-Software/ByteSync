@@ -126,16 +126,9 @@ public class SessionMachineViewModel : ActivatableViewModelBase
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(evt => OnLocaleChanged(evt.EventArgs))
                 .DisposeWith(disposables);
-            
-            // this.WhenAnyValue(x => x.SessionMemberInfo.PositionInList)
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(position => PositionInList = position)
-            //     .DisposeWith(disposables);
         });
 
         UpdateMachineDescription();
-        // UpdateStatus(SessionMemberGeneralStatus.InventoryWaitingForStart);
-        // PositionInList = sessionMemberInfo.PositionInList;
 
     #if DEBUG
         if (IsLocalMachine && _sessionService.CurrentRunSessionProfileInfo == null)
