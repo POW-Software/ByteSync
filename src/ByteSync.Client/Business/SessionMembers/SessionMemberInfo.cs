@@ -11,19 +11,10 @@ public class SessionMemberInfo
     public SessionMemberPrivateData PrivateData { get; set; }
     
     public string SessionId { get; set; }
-        
 
     public DateTimeOffset JoinedSessionOn { get; set; }
     
     public int PositionInList { get; set; }
-
-    public string Letter
-    {
-        get
-        {
-            return ((char) ('A' + PositionInList)).ToString();
-        }
-    }
     
     public DateTimeOffset? LastLocalInventoryGlobalStatusUpdate { get; set; }
 
@@ -32,8 +23,6 @@ public class SessionMemberInfo
     public string? LobbyId { get; set; }
     
     public string? ProfileClientId { get; set; }
-    
-    public string ClientId => Endpoint.ClientId;
     
     public string ClientInstanceId => Endpoint.ClientInstanceId;
     

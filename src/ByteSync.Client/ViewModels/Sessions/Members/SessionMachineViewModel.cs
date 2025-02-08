@@ -19,6 +19,7 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Factories.Proxies;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Services.Sessions;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
@@ -117,6 +118,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
                 .Subscribe(item =>
                 {
                     UpdateStatus(item.Current.SessionMemberGeneralStatus);
+                    PositionInList = item.Current.PositionInList;
                 })
                 .DisposeWith(disposables);
 
@@ -127,9 +129,6 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         });
 
         UpdateMachineDescription();
-        UpdateStatus(SessionMemberGeneralStatus.InventoryWaitingForStart);
-
-        UpdateLetter();
 
     #if DEBUG
         if (IsLocalMachine && _sessionService.CurrentRunSessionProfileInfo == null)
@@ -250,9 +249,9 @@ public class SessionMachineViewModel : ActivatableViewModelBase
 
     [Reactive]
     public string Status { get; set; }
-
+    
     [Reactive]
-    public string MachineLetter { get; set; }
+    public int PositionInList { get; set; }
 
     public ReadOnlyObservableCollection<PathItemProxy> PathItems => _data;
     
@@ -381,10 +380,5 @@ public class SessionMachineViewModel : ActivatableViewModelBase
                 Status = Resources.SessionMachine_Status_UnknownStatus;
                 break;
         }
-    }
-
-    private void UpdateLetter()
-    {
-        MachineLetter = SessionMemberInfo.Letter;
     }
 }

@@ -11,6 +11,7 @@
         <converters:ExecutionModeConverter x:Key="ExecutionModeConverter" />
         <converters:LocalInventoryPartStatusToIconConverter x:Key="InventoryProcessStatusToIconConverter" />
         <converters:LocalInventoryPartStatusToTextConverter x:Key="InventoryProcessStatusToTextConverter" />
+        <converters:IntToLetterConverter x:Key="IntToLetterConverter" />
     </Application.Resources>
     <Application.DataTemplates>
         <byteSync:ViewLocator/>

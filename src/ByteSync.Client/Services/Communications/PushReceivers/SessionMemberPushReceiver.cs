@@ -3,6 +3,7 @@ using ByteSync.Interfaces.Controls.Communications.SignalR;
 using ByteSync.Interfaces.Repositories;
 using System.Reactive.Linq;
 using ByteSync.Business.Inventories;
+using ByteSync.Business.SessionMembers;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Encryptions;
@@ -43,14 +44,18 @@ public class SessionMemberPushReceiver : IPushReceiver
             .Where(csr => _sessionService.CheckSession(csr.SessionId))
             .Subscribe(smi =>
             {
+                var elementsToUpdate = new List<SessionMemberInfo>();
+                
                 foreach (var anySessionMemberInfo in _sessionMemberRepository.Elements)
                 {
                     if (anySessionMemberInfo.JoinedSessionOn > smi.JoinedSessionOn)
                     {
                         anySessionMemberInfo.PositionInList -= 1;
+                        elementsToUpdate.Add(anySessionMemberInfo);
                     }
                 }
                 
+                _sessionMemberRepository.AddOrUpdate(elementsToUpdate);
                 _sessionMemberRepository.Remove(smi);
             });
 
