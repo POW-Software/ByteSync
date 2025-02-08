@@ -1,10 +1,13 @@
-﻿using ByteSync.Common.Business.EndPoints;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
+using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.Business.SessionMembers;
 
-public class SessionMemberInfo
+public class SessionMemberInfo : INotifyPropertyChanged
 {
     public ByteSyncEndpoint Endpoint { get; set; }
     
@@ -15,15 +18,8 @@ public class SessionMemberInfo
 
     public DateTimeOffset JoinedSessionOn { get; set; }
     
+    // [Reactive]
     public int PositionInList { get; set; }
-
-    public string Letter
-    {
-        get
-        {
-            return ((char) ('A' + PositionInList)).ToString();
-        }
-    }
     
     public DateTimeOffset? LastLocalInventoryGlobalStatusUpdate { get; set; }
 
@@ -62,5 +58,20 @@ public class SessionMemberInfo
     public override int GetHashCode()
     {
         return ClientInstanceId.GetHashCode();
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
     }
 }

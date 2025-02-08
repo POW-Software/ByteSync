@@ -25,25 +25,17 @@ public class PathItemProxy
         _logger = logger;
 
         PathItem = pathItem;
-        // Code = PathItem.Code;
         Path = PathItem.Path;
         FileSystemType = PathItem.Type;
 
         UpdateElementType(localizationService);
 
         OpenPathCommand = ReactiveCommand.Create(OpenPath);
-
-        // this.WhenAnyValue(x => x.Code)
-        //     .Skip(1)
-        //     .Subscribe(code => PathItem.Code = code);
     }
     
     public PathItem PathItem { get; } = null!;
     
     public string ElementType { get; set; } = null!;
-
-    // [Reactive]
-    // public string Code { get; set; }
     
     public string Path { get; set; }
     
@@ -88,15 +80,4 @@ public class PathItemProxy
         }
 
     }
-
-    // public static void RecodePathItems(ObservableCollection<PathItemViewModel> pathItemViewModels, string letter)
-    // {
-    //     int cpt = 1;
-    //     foreach (var pathItem in pathItemViewModels)
-    //     {
-    //         pathItem.Code = letter + cpt;
-    //
-    //         cpt += 1;
-    //     }
-    // }
 }

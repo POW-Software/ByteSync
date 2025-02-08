@@ -20,6 +20,7 @@ using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Comparisons;
 using ByteSync.Services.Misc;
+using ByteSync.Services.Sessions;
 
 namespace ByteSync.Services.Inventories;
 
@@ -398,7 +399,7 @@ public class DataInventoryRunner : IDataInventoryRunner
     {
         var cloudSessionSettings = _sessionService.CurrentSessionSettings!;
         
-        var inventoryBuilder = new InventoryBuilder(sessionMemberInfo.Letter, cloudSessionSettings, InventoryProcessData, 
+        var inventoryBuilder = new InventoryBuilder(sessionMemberInfo.GetLetter(), cloudSessionSettings, InventoryProcessData, 
             endpoint, sessionMemberInfo.MachineName, FingerprintModes.Rsync);
         foreach (var pathItem in pathItems)
         {

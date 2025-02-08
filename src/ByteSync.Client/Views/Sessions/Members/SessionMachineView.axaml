@@ -42,7 +42,7 @@
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <Label Grid.Column="0" Content="{Binding MachineLetter}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontWeight="Bold" FontSize="24"
+            <Label Grid.Column="0" Content="{Binding PositionInList}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontWeight="Bold" FontSize="24"
                        Margin="6 6" BorderThickness="1" Width="36">
                 
                 <Interaction.Behaviors>

@@ -11,6 +11,7 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Services.Sessions;
 using DynamicData;
 
 namespace ByteSync.Services.Inventories;
@@ -94,7 +95,7 @@ public class PathItemsService : IPathItemsService
         pathItem.ClientInstanceId = _connectionService.ClientInstanceId!;
 
         var sessionMemberInfo = _sessionMemberRepository.GetCurrentSessionMember();
-        pathItem.Code = sessionMemberInfo.Letter +
+        pathItem.Code = sessionMemberInfo.GetLetter() +
                         (_pathItemRepository.Elements.Count(pi => pi.BelongsTo(sessionMemberInfo)) + 1);
 
         return AddPathItem(pathItem);
@@ -131,7 +132,7 @@ public class PathItemsService : IPathItemsService
         var i = 1;
         foreach (var remainingPathItem in pathItems)
         {
-            remainingPathItem.Code = sessionMemberInfo.Letter + i;
+            remainingPathItem.Code = sessionMemberInfo.GetLetter() + i;
             i += 1;
         }
     }

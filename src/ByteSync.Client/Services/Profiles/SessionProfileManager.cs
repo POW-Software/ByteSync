@@ -20,6 +20,7 @@ using ByteSync.Interfaces.Profiles;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Services.Misc;
+using ByteSync.Services.Sessions;
 using Serilog;
 
 namespace ByteSync.Services.Profiles;
@@ -362,7 +363,7 @@ public class SessionProfileManager : ISessionProfileManager
             var cloudSessionProfileMember = new CloudSessionProfileMember();
 
             cloudSessionProfileMember.MachineName = sessionMemberInfo.MachineName;
-            cloudSessionProfileMember.Letter = sessionMemberInfo.Letter;
+            cloudSessionProfileMember.Letter = sessionMemberInfo.GetLetter();
             cloudSessionProfileMember.IpAddress = sessionMemberInfo.IpAddress;
             cloudSessionProfileMember.ProfileClientId =
                 data.Slots
