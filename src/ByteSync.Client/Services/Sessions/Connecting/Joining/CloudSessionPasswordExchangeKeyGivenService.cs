@@ -90,21 +90,7 @@ public class CloudSessionPasswordExchangeKeyGivenService : ICloudSessionPassword
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "OnCloudSessionPasswordExchangeKeyGiven");
-            
-            var status = JoinSessionStatus.UnexpectedError;
-            if (ex is TimeoutException)
-            {
-                status = JoinSessionStatus.TimeoutError;
-            }
-            
-            var joinSessionError = new JoinSessionError
-            {
-                Exception = ex,
-                Status = status
-            };
-            
-            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionError);
+            await _cloudSessionConnectionService.HandleJoinSessionError(ex);
         }
     }
 }
