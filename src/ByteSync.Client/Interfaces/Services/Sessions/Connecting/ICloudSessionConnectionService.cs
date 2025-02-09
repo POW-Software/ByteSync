@@ -15,4 +15,6 @@ public interface ICloudSessionConnectionService
     Task OnJoinSessionError(JoinSessionError joinSessionError);
     
     Task OnCreateSessionError(CreateSessionError createSessionError);
+    
+    Task HandleJoinSessionError(Exception exception);
 }

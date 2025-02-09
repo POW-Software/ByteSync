@@ -22,13 +22,15 @@ public interface IRepository<T>
     
     T2 Get<T2>(string lobbyId, Func<T, T2> func);
 
-    public Task WaitOrThrowAsync(string dataId, Func<T, EventWaitHandle> func, TimeSpan? timeout, string exceptionMessage);
+    public Task WaitOrThrowAsync(string dataId, Func<T, EventWaitHandle> func, TimeSpan? timeout, string exceptionMessage,
+        CancellationToken cancellationToken = default);
 
-    public Task WaitOrThrowAsync(string dataId, Func<T, EventWaitHandle> func, Func<T, TimeSpan?> getTimeSpan, string exceptionMessage);
+    public Task WaitOrThrowAsync(string dataId, Func<T, EventWaitHandle> func, Func<T, TimeSpan?> getTimeSpan, string exceptionMessage,
+        CancellationToken cancellationToken = default);
     
     public Task<bool> WaitAsync(string dataId, Func<T, EventWaitHandle> func, TimeSpan? timeout);
 
     public Task<bool> WaitAsync(string dataId, Func<T, EventWaitHandle> func, Func<T, TimeSpan?> getTimeSpan);
 
-    public bool Wait(string dataId, Func<T, EventWaitHandle> func, Func<T, TimeSpan?> getTimeSpan);
+    public bool Wait(string dataId, Func<T, EventWaitHandle> func, Func<T, TimeSpan?> getTimeSpan, CancellationToken cancellationToken = default);
 }

@@ -94,4 +94,29 @@ class CloudSessionConnectionService : ICloudSessionConnectionService
 
         await InitializeConnection(SessionConnectionStatus.NoSession);
     }
+
+    public async Task HandleJoinSessionError(Exception exception)
+    {
+        _logger.LogError(exception, "An error occurred while joining the Cloud Session");
+            
+        var status = JoinSessionStatus.UnexpectedError;
+        
+        if ((exception is TaskCanceledException || exception.InnerException is TaskCanceledException)
+            && _cloudSessionConnectionRepository.CancellationToken.IsCancellationRequested)
+        {
+            status = JoinSessionStatus.CanceledByUser;
+        }
+        else if (exception is TimeoutException)
+        {
+            status = JoinSessionStatus.TimeoutError;
+        }
+            
+        var joinSessionError = new JoinSessionError
+        {
+            Exception = exception,
+            Status = status
+        };
+            
+        await OnJoinSessionError(joinSessionError);
+    }
 }

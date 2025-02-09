@@ -1023,6 +1023,12 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
+        internal static string JoinCloudSession_CanceledByUser {
+            get {
+                return ResourceManager.GetString("JoinCloudSession_CanceledByUser", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Recherche une chaîne localisée semblable à A mandatory update is available ({0})..
         /// </summary>
@@ -2130,6 +2136,12 @@ namespace ByteSync.Assets.Resources {
         public static string CreateCloudSession_UnknownError {
             get {
                 return ResourceManager.GetString("CreateCloudSession_UnknownError", resourceCulture);
+            }
+        }
+        
+        public static string CreateCloudSession_CanceledByUser {
+            get {
+                return ResourceManager.GetString("CreateCloudSession_CanceledByUser", resourceCulture);
             }
         }
         

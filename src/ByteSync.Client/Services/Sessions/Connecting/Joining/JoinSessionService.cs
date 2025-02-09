@@ -47,22 +47,7 @@ public class JoinSessionService : IJoinSessionService
         }
         catch (Exception ex)
         {
-            var status = JoinSessionStatus.UnexpectedError;
-            if (ex is TimeoutException)
-            {
-                status = JoinSessionStatus.TimeoutError;
-            }
-
-            
-            var joinSessionError = new JoinSessionError
-            {
-                Exception = ex,
-                Status = status
-            };
-            
-            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionError);
-
-            throw;
+            await _cloudSessionConnectionService.HandleJoinSessionError(ex);
         }
     }
 
@@ -122,7 +107,8 @@ public class JoinSessionService : IJoinSessionService
         else
         {
             await _cloudSessionConnectionRepository.WaitOrThrowAsync(sessionId,
-                data => data.WaitForPasswordExchangeKeyEvent, data => data.WaitTimeSpan, "Keys exchange failed: no key received");
+                data => data.WaitForPasswordExchangeKeyEvent, data => data.WaitTimeSpan, "Keys exchange failed: no key received", 
+                _cloudSessionConnectionRepository.CancellationToken);
         }
     }
 }

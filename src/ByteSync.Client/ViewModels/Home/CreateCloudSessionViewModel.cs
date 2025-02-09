@@ -107,6 +107,10 @@ public class CreateCloudSessionViewModel : ActivatableViewModelBase
             case CreateSessionStatus.Error:
                 UpdateErrorMessage(nameof(Resources.CreateCloudSession_UnknownError), createSessionError.Exception);
                 break;
+            
+            case CreateSessionStatus.CanceledByUser:
+                UpdateErrorMessage(nameof(Resources.CreateCloudSession_CanceledByUser));
+                break;
         }
     }
     

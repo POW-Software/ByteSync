@@ -107,7 +107,8 @@ public class YouJoinedSessionService : IYouJoinedSessionService
                 var encryptedSessionMemberPrivateData = _dataEncrypter.EncryptSessionMemberPrivateData(sessionMemberPrivateData);
                 var finalizeParameters = new FinalizeJoinCloudSessionParameters(parameters, encryptedSessionMemberPrivateData);
 
-                var finalizeJoinSessionResult = await _cloudSessionApiClient.FinalizeJoinCloudSession(finalizeParameters);
+                var finalizeJoinSessionResult = await _cloudSessionApiClient.FinalizeJoinCloudSession(finalizeParameters, 
+                    _cloudSessionConnectionRepository.CancellationToken);
 
                 if (finalizeJoinSessionResult.Status == FinalizeJoinSessionStatuses.AuthIsNotChecked)
                 {
