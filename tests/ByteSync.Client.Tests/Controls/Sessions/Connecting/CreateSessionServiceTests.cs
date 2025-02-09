@@ -234,15 +234,13 @@ public class CreateSessionServiceTests
             .ReturnsAsync(dummyResult);
 
         // Act
-        Func<Task> act = async () => await _service.CreateCloudSession(request);
+        await _service.CreateCloudSession(request);
 
         // Assert
-        await act.Should().ThrowAsync<TaskCanceledException>();
-
         _cloudSessionConnectionServiceMock.Verify(x => x.OnCreateSessionError(
                 It.Is<CreateSessionError>(err =>
                     err.Exception is TaskCanceledException &&
-                    err.Status == CreateSessionStatus.Error)),
+                    err.Status == CreateSessionStatus.CanceledByUser)),
             Times.Once);
     }
 
@@ -261,11 +259,9 @@ public class CreateSessionServiceTests
             .ThrowsAsync(exception);
 
         // Act
-        Func<Task> act = async () => await _service.CreateCloudSession(request);
+        await _service.CreateCloudSession(request);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("Test exception");
-
         _cloudSessionConnectionServiceMock.Verify(x => x.OnCreateSessionError(
                 It.Is<CreateSessionError>(err =>
                     err.Exception == exception &&
