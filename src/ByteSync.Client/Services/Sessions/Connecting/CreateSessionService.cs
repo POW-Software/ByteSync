@@ -76,15 +76,21 @@ public class CreateSessionService : ICreateSessionService
         }
         catch (Exception ex)
         {
+            var status = CreateSessionStatus.Error;
+            if (ex is TaskCanceledException || ex.InnerException is TaskCanceledException)
+            {
+                status = CreateSessionStatus.CanceledByUser;
+            }
+            
             var createSessionError = new CreateSessionError
             {
                 Exception = ex,
-                Status = CreateSessionStatus.Error
+                Status = status
             };
             
             await _cloudSessionConnectionService.OnCreateSessionError(createSessionError);
-
-            throw;
+            
+            return null;
         }
     }
 

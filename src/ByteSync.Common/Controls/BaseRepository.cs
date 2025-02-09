@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Common.Helpers;
+using ByteSync.Common.Interfaces;
 using Serilog;
 
 // ReSharper disable UnusedType.Global
@@ -10,7 +11,7 @@ using Serilog;
 // ReSharper disable MemberCanBeProtected.Global
 namespace ByteSync.Common.Controls;
 
-public abstract class BaseRepository<T>
+public abstract class BaseRepository<T> : IRepository<T>
 {
     protected BaseRepository()
     {
@@ -136,16 +137,18 @@ public abstract class BaseRepository<T>
         return CheckAndRun(dataId, func);
     }
     
-    public async Task WaitOrThrowAsync(string dataId, Func<T, EventWaitHandle> func, TimeSpan? timeout, string exceptionMessage)
+    public async Task WaitOrThrowAsync(string dataId, Func<T, EventWaitHandle> func, TimeSpan? timeout, string exceptionMessage, 
+        CancellationToken cancellationToken = default)
     {
-        await WaitOrThrowAsync(dataId, func, _ => timeout, exceptionMessage);
+        await WaitOrThrowAsync(dataId, func, _ => timeout, exceptionMessage, cancellationToken);
     }
     
-    public async Task WaitOrThrowAsync(string dataId, Func<T, EventWaitHandle> func, Func<T, TimeSpan?> getTimeSpan, string exceptionMessage)
+    public async Task WaitOrThrowAsync(string dataId, Func<T, EventWaitHandle> func, Func<T, TimeSpan?> getTimeSpan, string exceptionMessage,
+        CancellationToken cancellationToken = default)
     {
         await Task.Run(() =>
         {
-            bool isWaitOK = Wait(dataId, func, getTimeSpan);
+            bool isWaitOK = Wait(dataId, func, getTimeSpan, cancellationToken);
             
             if (!isWaitOK)
             {
@@ -167,7 +170,7 @@ public abstract class BaseRepository<T>
         });
     }
 
-    public bool Wait(string dataId, Func<T, EventWaitHandle> func, Func<T, TimeSpan?> getTimeSpan)
+    public bool Wait(string dataId, Func<T, EventWaitHandle> func, Func<T, TimeSpan?> getTimeSpan, CancellationToken cancellationToken = default)
     {
         EventWaitHandle? waitHandle = null;
         TimeSpan? timeout = null;
@@ -182,13 +185,17 @@ public abstract class BaseRepository<T>
         
         CheckAndRun(dataId, myFunc);
         
-        // Le code ci-dessous doit être exécuté en dehors du "lock"
         timeout ??= new TimeSpan(-1);
         List<WaitHandle> waitHandles = new List<WaitHandle> {waitHandle!};
         if (endEvent != null)
         {
             waitHandles.Add(endEvent);
         }
+        if (cancellationToken.CanBeCanceled)
+        {
+            waitHandles.Add(cancellationToken.WaitHandle);
+        }
+        
         int index = WaitHandle.WaitAny(waitHandles.ToArray(), timeout.Value);
 
         if (index == 0)

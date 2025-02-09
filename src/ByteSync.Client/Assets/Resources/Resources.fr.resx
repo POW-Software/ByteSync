@@ -1541,4 +1541,10 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	<data name="JoinCloudSession_TimeoutError" xml:space="preserve">
 		<value>Le délai d'attente a expiré.</value>
 	</data>
+	<data name="JoinCloudSession_CanceledByUser" xml:space="preserve">
+		<value>Opération annulée par l'utilisateur.</value>
+	</data>
+	<data name="CreateCloudSession_CanceledByUser" xml:space="preserve">
+		<value>Opération annulée par l'utilisateur.</value>
+	</data>
 </root>

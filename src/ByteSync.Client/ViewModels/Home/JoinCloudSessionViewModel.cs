@@ -195,6 +195,10 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
             case JoinSessionStatus.TimeoutError:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_TimeoutError), joinSessionError.Exception);
                 break;
+            
+            case JoinSessionStatus.CanceledByUser:
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_CanceledByUser));
+                break;
 
             default:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_UnkownError), joinSessionError.Exception);

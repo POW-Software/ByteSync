@@ -1679,4 +1679,10 @@ Do you want to save this new Session Profile with this name?</value>
   <data name="JoinCloudSession_TimeoutError" xml:space="preserve">
     <value>The waiting period has expired.</value>
   </data>
+  <data name="JoinCloudSession_CanceledByUser" xml:space="preserve">
+    <value>Operation canceled by the user.</value>
+  </data>
+  <data name="CreateCloudSession_CanceledByUser" xml:space="preserve">
+    <value>Operation canceled by the user.</value>
+  </data>
 </root>

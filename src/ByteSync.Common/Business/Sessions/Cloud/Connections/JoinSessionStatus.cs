@@ -13,5 +13,5 @@ public enum JoinSessionStatus
     WrongPassword = 9,
     UnexpectedError = 10,
     TimeoutError = 11,
-    Unknown_12 = 12,
+    CanceledByUser = 12,
 }
