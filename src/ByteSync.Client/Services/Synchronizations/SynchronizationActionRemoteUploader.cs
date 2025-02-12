@@ -212,8 +212,9 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
         var canDisposeInFinallyBlock = true;
         try
         {
-            if (_currentMultiUploadZip == null)
+            if (_currentMultiUploadZip == null || _currentMultiUploadZip.ActionGroupsIds.Count == 0)
             {
+                _currentMultiUploadZip?.CloseZip();
                 return;
             }
 
