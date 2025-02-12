@@ -39,10 +39,10 @@ public class InventoryBuilder
 
         Indexer = new InventoryIndexer();
 
-        Inventory = InstanciateInventory();
+        Inventory = InstantiateInventory();
     }
 
-    private Inventory InstanciateInventory()
+    private Inventory InstantiateInventory()
     {
         var id = $"IID_{Guid.NewGuid()}";
         var inventory = new Inventory();
@@ -312,7 +312,7 @@ public class InventoryBuilder
         //  - Windows: New-Item -ItemType SymbolicLink -Path  C:\Users\paulf\Desktop\testVide\SL -Target C:\Users\paulf\Desktop\testA_
         if (fileInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
         {
-            Log.Warning("File {File} is ignored because it has flag 'ReparsePoint'", fileInfo.FullName);
+            Log.Warning("File {File} is ignored because it has flag 'ReparsePoint'. It might be a symolic link", fileInfo.FullName);
             return;
         }
 
