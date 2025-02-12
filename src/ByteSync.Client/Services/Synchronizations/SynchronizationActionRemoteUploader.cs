@@ -15,27 +15,22 @@ using Serilog;
 
 namespace ByteSync.Services.Synchronizations;
 
-internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteUploader
+public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteUploader
 {
     private readonly ICloudProxy _connectionManager;
     private readonly IDeltaManager _deltaManager;
     private readonly ISessionService _sessionService;
-    private readonly IAtomicActionRepository _atomicActionRepository;
     private readonly ISynchronizationActionServerInformer _synchronizationActionServerInformer;
     private readonly IFileUploaderFactory _fileUploaderFactory;
     
     private MultiUploadZip? _currentMultiUploadZip;
-
-
-
+    
     public SynchronizationActionRemoteUploader(ICloudProxy connectionManager, ISessionService sessionService, 
-        IDeltaManager deltaManager, IAtomicActionRepository sessionDataHolder, 
-        ISynchronizationActionServerInformer synchronizationActionServerInformer, IFileUploaderFactory fileUploaderFactory)
+        IDeltaManager deltaManager, ISynchronizationActionServerInformer synchronizationActionServerInformer, IFileUploaderFactory fileUploaderFactory)
     {
         _connectionManager = connectionManager;
         _sessionService = sessionService;
         _deltaManager = deltaManager;
-        _atomicActionRepository = sessionDataHolder;
         _synchronizationActionServerInformer = synchronizationActionServerInformer;
         _fileUploaderFactory = fileUploaderFactory;
         
@@ -142,20 +137,12 @@ internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemot
         }
         else
         {
-            // on uploade directement
             var sharedFileDefinition = BuildSharedFileDefinition(sharedFileType);
-
-            // await _connectionManager.ApiWrapper.SetActionsGroupsIds(sharedFileDefinition.SessionId,
-            //     sharedFileDefinition, new List<string> { sharedActionsGroup.ActionsGroupId });
-            //
-            // _synchronizationActionsService.SetActionsGroupIds(sharedFileDefinition, new List<string> { sharedActionsGroup.ActionsGroupId });
-
-            sharedFileDefinition.ActionsGroupIds = new List<string> { sharedActionsGroup.ActionsGroupId };
+            
+            sharedFileDefinition.ActionsGroupIds = [sharedActionsGroup.ActionsGroupId];
             
             Log.Information("{Type:l}: uploading {sourceFile} (delta:{isDelta})",
                 $"Synchronization.{sharedActionsGroup.Operator}", localFullName, deltaFullName != null);
-            // var fileUploader = Locator.Current.GetService<IFileUploader>()!;
-            // await fileUploader.Upload(uploadFullName, sharedFileDefinition);
 
             var fileUploader = _fileUploaderFactory.Build(uploadFullName, sharedFileDefinition);
             var uploadTask = RunUploadTask(sharedActionsGroup, fileUploader,
@@ -235,12 +222,6 @@ internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemot
 
             _currentMultiUploadZip.CloseZip();
 
-            // await _connectionManager.ApiWrapper.SetActionsGroupsIds(_currentMultiUploadZip!.SharedFileDefinition.SessionId,
-            //     _currentMultiUploadZip.SharedFileDefinition, _currentMultiUploadZip.ActionGroupsIds);
-            //
-            // _synchronizationActionsService.SetActionsGroupIds(_currentMultiUploadZip!.SharedFileDefinition,
-            //     _currentMultiUploadZip.ActionGroupsIds);
-
             _currentMultiUploadZip!.SharedFileDefinition.ActionsGroupIds = _currentMultiUploadZip.ActionGroupsIds;
 
             canDisposeInFinallyBlock = false;
@@ -275,7 +256,7 @@ internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemot
 
     private async Task RunUploadTask(SharedActionsGroup sharedActionsGroup, IFileUploader fileUploader, Action? postAction = null)
     {
-        await RunUploadTask(new List<string> { sharedActionsGroup.ActionsGroupId }, fileUploader, postAction);
+        await RunUploadTask([sharedActionsGroup.ActionsGroupId], fileUploader, postAction);
     }
 
     private async Task RunUploadTask(List<string> actionsGroupsIds, IFileUploader fileUploader, Action? postAction = null)
@@ -283,15 +264,8 @@ internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemot
         try
         {
             await UploadSemaphore.WaitAsync();
-                
-            // var fileUploader = Locator.Current.GetService<IFileUploader>()!;
-
-            // await action.Invoke(fileUploader);
 
             await fileUploader.Upload();
-
-            // await fileUploader.Upload(previousMultiUploadZip.MemoryStream, previousMultiUploadZip.SharedFileDefinition);
-
         }
         catch (Exception ex)
         {
