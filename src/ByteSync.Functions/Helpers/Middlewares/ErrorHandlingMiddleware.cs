@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using ByteSync.ServerCommon.Exceptions;
 using Microsoft.ApplicationInsights;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Middleware;
@@ -32,8 +33,16 @@ public class ErrorHandlingMiddleware : IFunctionsWorkerMiddleware
             if (httpRequest != null)
             {
                 var response = httpRequest.CreateResponse();
-                response.StatusCode = HttpStatusCode.InternalServerError;
 
+                if (ex is BadRequestException)
+                {
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                }
+                else
+                {
+                    response.StatusCode = HttpStatusCode.InternalServerError;
+                }
+                
                 context.GetInvocationResult().Value = response;
                 
                 return;

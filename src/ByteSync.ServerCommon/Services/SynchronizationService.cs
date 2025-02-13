@@ -4,6 +4,7 @@ using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Entities;
+using ByteSync.ServerCommon.Exceptions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.Extensions.Logging;
@@ -108,6 +109,11 @@ public class SynchronizationService : ISynchronizationService
         if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
         {
             return;
+        }
+        
+        if (sharedFileDefinition.ActionsGroupIds == null || sharedFileDefinition.ActionsGroupIds.Count == 0)
+        {
+            throw new BadRequestException("sharedFileDefinition.ActionsGroupIds is null or empty");
         }
         
         var actionsGroupsId = sharedFileDefinition.ActionsGroupIds!.First();
