@@ -326,7 +326,7 @@ public class InventoryBuilder
             return;
         }
             
-        // Fichiers OneDrive (GoogleDrive ?) non présents
+        // Non-Local OneDrive Files (not GoogleDrive)
         // https://docs.microsoft.com/en-gb/windows/win32/fileio/file-attribute-constants?redirectedfrom=MSDN
         // https://stackoverflow.com/questions/49301958/how-to-detect-onedrive-online-only-files
         // https://stackoverflow.com/questions/54560454/getting-full-file-attributes-for-files-managed-by-microsoft-onedrive
