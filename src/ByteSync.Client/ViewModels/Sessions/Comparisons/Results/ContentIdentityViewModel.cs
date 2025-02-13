@@ -36,7 +36,7 @@ public class ContentIdentityViewModel : ViewModelBase
     }
 
     public ContentIdentityViewModel(ComparisonItemViewModel comparisonItemViewModel, 
-        ContentIdentity contentIdentity, Inventory inventory, ISessionService sessionDataHolder,
+        ContentIdentity contentIdentity, Inventory inventory, ISessionService sessionService,
         IDateAndInventoryPartsViewModelFactory dateAndInventoryPartsViewModelFactory)
     {
         ComparisonItemViewModel = comparisonItemViewModel;
@@ -46,7 +46,7 @@ public class ContentIdentityViewModel : ViewModelBase
         IsFile = ComparisonItemViewModel.FileSystemType == FileSystemTypes.File;
         IsDirectory = !IsFile;
 
-        _sessionService = sessionDataHolder;
+        _sessionService = sessionService;
         _dateAndInventoryPartsViewModelFactory = dateAndInventoryPartsViewModelFactory;
         
         DateAndInventoryParts = new ObservableCollection<DateAndInventoryPartsViewModel>();
