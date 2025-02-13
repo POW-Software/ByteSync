@@ -9,9 +9,7 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Factories;
-using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
-using Serilog;
 
 namespace ByteSync.Services.Synchronizations;
 
@@ -22,17 +20,21 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
     private readonly ISessionService _sessionService;
     private readonly ISynchronizationActionServerInformer _synchronizationActionServerInformer;
     private readonly IFileUploaderFactory _fileUploaderFactory;
+    private readonly ILogger<SynchronizationActionRemoteUploader> _logger;
     
     private MultiUploadZip? _currentMultiUploadZip;
-    
+
+
     public SynchronizationActionRemoteUploader(ICloudProxy connectionManager, ISessionService sessionService, 
-        IDeltaManager deltaManager, ISynchronizationActionServerInformer synchronizationActionServerInformer, IFileUploaderFactory fileUploaderFactory)
+        IDeltaManager deltaManager, ISynchronizationActionServerInformer synchronizationActionServerInformer, IFileUploaderFactory fileUploaderFactory,
+        ILogger<SynchronizationActionRemoteUploader> logger)
     {
         _connectionManager = connectionManager;
         _sessionService = sessionService;
         _deltaManager = deltaManager;
         _synchronizationActionServerInformer = synchronizationActionServerInformer;
         _fileUploaderFactory = fileUploaderFactory;
+        _logger = logger;
         
         _currentMultiUploadZip = null;
         
@@ -81,8 +83,8 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "{Type:l}: an error occurred while starting {logSourceFileName} upload process, " +
-                                "ActionsGroupId:{ActionsGroupId}",
+            _logger.LogError(ex, "{Type:l}: an error occurred while starting {logSourceFileName} upload process, " +
+                             "ActionsGroupId:{ActionsGroupId}",
                 $"Synchronization.{sharedActionsGroup.Operator}", localFullName, sharedActionsGroup.ActionsGroupId);
 
             throw;
@@ -101,7 +103,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "CloseAndUploadCurrentMultiZip");
+                _logger.LogError(ex, "CloseAndUploadCurrentMultiZip");
             }
         }
 
@@ -114,7 +116,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
                 // on crée le currentMultiUploadZip
                 var sharedFileDefinition = BuildSharedFileDefinition(sharedFileType);
 
-                Log.Information("Creating MultiUploadZip with id:{MultiZipId} for grouped upload (delta:{isDelta})",
+                _logger.LogInformation("Creating MultiUploadZip with id:{MultiZipId} for grouped upload (delta:{isDelta})",
                     sharedFileDefinition.Id, deltaFullName != null);
                 _currentMultiUploadZip = new MultiUploadZip(sharedActionsGroup.Key, sharedFileDefinition);
             }
@@ -127,7 +129,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
             {
                 await _synchronizationActionServerInformer.HandleCloudActionError(sharedActionsGroup);
 
-                Log.Error(ex, "Can not add {File} to MultiUploadZip {MultiZipId}", fileInfo.FullName,
+                _logger.LogError(ex, "Can not add {File} to MultiUploadZip {MultiZipId}", fileInfo.FullName,
                     _currentMultiUploadZip.SharedFileDefinition.Id);
             }
             finally
@@ -141,7 +143,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
             
             sharedFileDefinition.ActionsGroupIds = [sharedActionsGroup.ActionsGroupId];
             
-            Log.Information("{Type:l}: uploading {sourceFile} (delta:{isDelta})",
+            _logger.LogInformation("{Type:l}: uploading {sourceFile} (delta:{isDelta})",
                 $"Synchronization.{sharedActionsGroup.Operator}", localFullName, deltaFullName != null);
 
             var fileUploader = _fileUploaderFactory.Build(uploadFullName, sharedFileDefinition);
@@ -152,11 +154,11 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
         }
     }
 
-    private static void DeleteDeltaFile(string? deltaFullName)
+    private void DeleteDeltaFile(string? deltaFullName)
     {
         if (deltaFullName != null)
         {
-            Log.Information("Deleting delta file {delta}", deltaFullName);
+            _logger.LogInformation("Deleting delta file {delta}", deltaFullName);
             File.Delete(deltaFullName);
         }
     }
@@ -174,7 +176,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
         }
         catch (Exception ex)
         {
-            Log.Warning(ex, "Error during Complete");
+            _logger.LogWarning(ex, "Error during Complete");
         }
     }
 
@@ -192,7 +194,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning(ex, "An error occurred while disposing currentMultiUploadZip");
+                    _logger.LogWarning(ex, "An error occurred while disposing currentMultiUploadZip");
                 }
                 finally
                 {
@@ -218,7 +220,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
                 return;
             }
 
-            Log.Information("Closing and uploading MultiUploadZip with id:{MultiZipId}. It contains {FilesFullNames}",
+            _logger.LogInformation("Closing and uploading MultiUploadZip with id:{MultiZipId}. It contains {FilesFullNames}",
                 _currentMultiUploadZip.SharedFileDefinition.Id, _currentMultiUploadZip.FilesFullNames);
 
             _currentMultiUploadZip.CloseZip();
@@ -237,7 +239,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error during CloseAndUploadCurrentMultiZip");
+            _logger.LogError(ex, "Error during CloseAndUploadCurrentMultiZip");
             if (_currentMultiUploadZip != null)
             {
                 await _synchronizationActionServerInformer.HandleCloudActionError(_currentMultiUploadZip.ActionGroupsIds);
@@ -272,7 +274,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
         {
             await _synchronizationActionServerInformer.HandleCloudActionError(actionsGroupsIds);
             
-            Log.Error(ex, "CloseAndUploadCurrentMultiZip.Upload");
+            _logger.LogError(ex, "CloseAndUploadCurrentMultiZip.Upload");
         }
         finally
         {
