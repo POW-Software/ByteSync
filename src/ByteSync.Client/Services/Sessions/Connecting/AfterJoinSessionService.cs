@@ -1,5 +1,8 @@
 ﻿using System.Text;
+using ByteSync.Business.Arguments;
 using ByteSync.Business.Sessions.Connecting;
+using ByteSync.Common.Business.Inventories;
+using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
@@ -23,8 +26,9 @@ public class AfterJoinSessionService : IAfterJoinSessionService
     private readonly IDigitalSignaturesRepository _digitalSignaturesRepository;
     private readonly IEnvironmentService _environmentService;
     private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
-    private readonly ILogger<AfterJoinSessionService> _logger;
     private readonly IQuitSessionService _quitSessionService;
+    private readonly IPathItemRepository _pathItemRepository;
+    private readonly ILogger<AfterJoinSessionService> _logger;
 
     public AfterJoinSessionService(
         ICloudSessionApiClient cloudSessionApiClient,
@@ -38,6 +42,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         IEnvironmentService environmentService,
         ICloudSessionConnectionService cloudSessionConnectionService,
         IQuitSessionService quitSessionService,
+        IPathItemRepository pathItemRepository,
         ILogger<AfterJoinSessionService> logger)
     {
         _cloudSessionApiClient = cloudSessionApiClient;
@@ -51,6 +56,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         _environmentService = environmentService;
         _cloudSessionConnectionService = cloudSessionConnectionService;
         _quitSessionService = quitSessionService;
+        _pathItemRepository = pathItemRepository;
         _logger = logger;
     }
     
@@ -58,7 +64,20 @@ public class AfterJoinSessionService : IAfterJoinSessionService
     {
         var sessionMemberInfoDtos = await _cloudSessionApiClient.GetMembers(request.CloudSessionResult.SessionId);
         
-        // On contrôle que chacun des autres membres est Auth-Checked
+        await CheckOtherMembersAreTrustedAndChecked(request, sessionMemberInfoDtos);
+
+        var sessionSettings = _dataEncrypter.DecryptSessionSettings(request.CloudSessionResult.SessionSettings);
+
+        var password = await GetPassword(request);
+        await _sessionService.SetCloudSession(request.CloudSessionResult.CloudSession, request.RunCloudSessionProfileInfo, sessionSettings, password);
+        
+        _sessionMemberService.AddOrUpdate(sessionMemberInfoDtos);
+        
+        await FillPathItems(request, sessionMemberInfoDtos);
+    }
+
+    private async Task CheckOtherMembersAreTrustedAndChecked(AfterJoinSessionRequest request, List<SessionMemberInfoDTO> sessionMemberInfoDtos)
+    {
         var areAllMemberAuthOK = true;
         foreach (var sessionMemberInfo in sessionMemberInfoDtos)
         {
@@ -82,10 +101,10 @@ public class AfterJoinSessionService : IAfterJoinSessionService
             
             throw new Exception("Auth check failed, quitting session");
         }
-        
-        var sessionSettings = _dataEncrypter.DecryptSessionSettings(request.CloudSessionResult.SessionSettings);
+    }
 
-        await _sessionService.SetCloudSession(request.CloudSessionResult.CloudSession, request.RunCloudSessionProfileInfo, sessionSettings);
+    private async Task<string> GetPassword(AfterJoinSessionRequest request)
+    {
         string password;
         if (request.IsCreator)
         {
@@ -95,31 +114,20 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         {
             password = (await _cloudSessionConnectionRepository.GetTempSessionPassword(request.CloudSessionResult.SessionId))!;
         }
-        _sessionService.SetPassword(password.ToUpper());
 
-        
-        
-        _sessionMemberService.AddOrUpdate(sessionMemberInfoDtos);
-        
+        return password;
+    }
+    
+    private async Task FillPathItems(AfterJoinSessionRequest request, List<SessionMemberInfoDTO> sessionMemberInfoDtos)
+    {
         if (request.RunCloudSessionProfileInfo != null)
         {
             var myPathItems = request.RunCloudSessionProfileInfo.GetMyPathItems();
-
-            // var pathItemsViewModels = _pathItemsService.GetMyPathItems()!;
+            
             foreach (var pathItem in myPathItems)
             {
                 await _pathItemsService.CreateAndAddPathItem(pathItem.Path, pathItem.Type);
-                
-                // pathItemsViewModels.Add(new PathItemViewModel(pathItem));
-                
-                // var encryptedPathItem = dataEncrypter.EncryptPathItem(pathItem); 
-                //
-                // // PathItemEncrypter pathItemEncrypter = _sessionObjectsFactory.BuildPathItemEncrypter();
-                // // var sharedPathItem = pathItemEncrypter.Encrypt(pathItem);
-                // await _connectionManager.HubWrapper.SetPathItemAdded(cloudSessionResult.SessionId, encryptedPathItem);
             }
-            
-            // await _connectionManager.
         }
 
         foreach (var sessionMemberInfo in sessionMemberInfoDtos)
@@ -138,8 +146,93 @@ public class AfterJoinSessionService : IAfterJoinSessionService
                 }
             }
         }
+
+        AddDebugPathItems();
+    }
+
+    private void AddDebugPathItems()
+    {
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTA))
+        {
+            DebugAddDesktopPathItem("testA");
+        }
+
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTA1))
+        {
+            DebugAddDesktopPathItem("testA1");
+        }
+
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTB))
+        {
+            DebugAddDesktopPathItem("testB");
+        }
+
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTB1))
+        {
+            DebugAddDesktopPathItem("testB1");
+        }
+
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTC))
+        {
+            DebugAddDesktopPathItem("testC");
+        }
+
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTC1))
+        {
+            DebugAddDesktopPathItem("testC1");
+        }
+
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTD))
+        {
+            DebugAddDesktopPathItem("testD");
+        }
+
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTD1))
+        {
+            DebugAddDesktopPathItem("testD1");
+        }
+
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTE))
+        {
+            DebugAddDesktopPathItem("testE");
+        }
+
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTE1))
+        {
+            DebugAddDesktopPathItem("testE1");
+        }
+
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTTMP))
+        {
+            DebugAddDesktopPathItem("testTmp");
+        }
+
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_MYDATA))
+        {
+            _pathItemsService.CreateAndAddPathItem(@"D:\MyData", FileSystemTypes.Directory);
+        }
+
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_SAMPLEDATA))
+        {
+            _pathItemsService.CreateAndAddPathItem(@"E:\SampleData", FileSystemTypes.Directory);
+        }
     }
     
+    private void DebugAddDesktopPathItem(string folderName)
+    {
+        var myPathItems = _pathItemRepository.Elements.Where(pi => pi.ClientInstanceId == _environmentService.ClientInstanceId).ToList();
+                
+        if (myPathItems.Any(pi => pi.Path.Equals(IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
+                StringComparison.InvariantCultureIgnoreCase)))
+        {
+            return;
+        }
+
+        _pathItemsService.CreateAndAddPathItem(
+            IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
+            FileSystemTypes.Directory);
+    }
+
     private string GeneratePassword()
     {
         var sb = new StringBuilder();

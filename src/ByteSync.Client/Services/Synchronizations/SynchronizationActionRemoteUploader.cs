@@ -9,35 +9,32 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Factories;
-using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
-using Serilog;
 
 namespace ByteSync.Services.Synchronizations;
 
-internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteUploader
+public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteUploader
 {
     private readonly ICloudProxy _connectionManager;
     private readonly IDeltaManager _deltaManager;
     private readonly ISessionService _sessionService;
-    private readonly IAtomicActionRepository _atomicActionRepository;
     private readonly ISynchronizationActionServerInformer _synchronizationActionServerInformer;
     private readonly IFileUploaderFactory _fileUploaderFactory;
+    private readonly ILogger<SynchronizationActionRemoteUploader> _logger;
     
     private MultiUploadZip? _currentMultiUploadZip;
 
 
-
     public SynchronizationActionRemoteUploader(ICloudProxy connectionManager, ISessionService sessionService, 
-        IDeltaManager deltaManager, IAtomicActionRepository sessionDataHolder, 
-        ISynchronizationActionServerInformer synchronizationActionServerInformer, IFileUploaderFactory fileUploaderFactory)
+        IDeltaManager deltaManager, ISynchronizationActionServerInformer synchronizationActionServerInformer, IFileUploaderFactory fileUploaderFactory,
+        ILogger<SynchronizationActionRemoteUploader> logger)
     {
         _connectionManager = connectionManager;
         _sessionService = sessionService;
         _deltaManager = deltaManager;
-        _atomicActionRepository = sessionDataHolder;
         _synchronizationActionServerInformer = synchronizationActionServerInformer;
         _fileUploaderFactory = fileUploaderFactory;
+        _logger = logger;
         
         _currentMultiUploadZip = null;
         
@@ -86,8 +83,8 @@ internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemot
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "{Type:l}: an error occurred while starting {logSourceFileName} upload process, " +
-                                "ActionsGroupId:{ActionsGroupId}",
+            _logger.LogError(ex, "{Type:l}: an error occurred while starting {logSourceFileName} upload process, " +
+                             "ActionsGroupId:{ActionsGroupId}",
                 $"Synchronization.{sharedActionsGroup.Operator}", localFullName, sharedActionsGroup.ActionsGroupId);
 
             throw;
@@ -106,7 +103,7 @@ internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemot
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "CloseAndUploadCurrentMultiZip");
+                _logger.LogError(ex, "CloseAndUploadCurrentMultiZip");
             }
         }
 
@@ -119,7 +116,7 @@ internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemot
                 // on crée le currentMultiUploadZip
                 var sharedFileDefinition = BuildSharedFileDefinition(sharedFileType);
 
-                Log.Information("Creating MultiUploadZip with id:{MultiZipId} for grouped upload (delta:{isDelta})",
+                _logger.LogInformation("Creating MultiUploadZip with id:{MultiZipId} for grouped upload (delta:{isDelta})",
                     sharedFileDefinition.Id, deltaFullName != null);
                 _currentMultiUploadZip = new MultiUploadZip(sharedActionsGroup.Key, sharedFileDefinition);
             }
@@ -132,7 +129,7 @@ internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemot
             {
                 await _synchronizationActionServerInformer.HandleCloudActionError(sharedActionsGroup);
 
-                Log.Error(ex, "Can not add {File} to MultiUploadZip {MultiZipId}", fileInfo.FullName,
+                _logger.LogError(ex, "Can not add {File} to MultiUploadZip {MultiZipId}", fileInfo.FullName,
                     _currentMultiUploadZip.SharedFileDefinition.Id);
             }
             finally
@@ -142,20 +139,12 @@ internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemot
         }
         else
         {
-            // on uploade directement
             var sharedFileDefinition = BuildSharedFileDefinition(sharedFileType);
-
-            // await _connectionManager.ApiWrapper.SetActionsGroupsIds(sharedFileDefinition.SessionId,
-            //     sharedFileDefinition, new List<string> { sharedActionsGroup.ActionsGroupId });
-            //
-            // _synchronizationActionsService.SetActionsGroupIds(sharedFileDefinition, new List<string> { sharedActionsGroup.ActionsGroupId });
-
-            sharedFileDefinition.ActionsGroupIds = new List<string> { sharedActionsGroup.ActionsGroupId };
             
-            Log.Information("{Type:l}: uploading {sourceFile} (delta:{isDelta})",
+            sharedFileDefinition.ActionsGroupIds = [sharedActionsGroup.ActionsGroupId];
+            
+            _logger.LogInformation("{Type:l}: uploading {sourceFile} (delta:{isDelta})",
                 $"Synchronization.{sharedActionsGroup.Operator}", localFullName, deltaFullName != null);
-            // var fileUploader = Locator.Current.GetService<IFileUploader>()!;
-            // await fileUploader.Upload(uploadFullName, sharedFileDefinition);
 
             var fileUploader = _fileUploaderFactory.Build(uploadFullName, sharedFileDefinition);
             var uploadTask = RunUploadTask(sharedActionsGroup, fileUploader,
@@ -165,11 +154,11 @@ internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemot
         }
     }
 
-    private static void DeleteDeltaFile(string? deltaFullName)
+    private void DeleteDeltaFile(string? deltaFullName)
     {
         if (deltaFullName != null)
         {
-            Log.Information("Deleting delta file {delta}", deltaFullName);
+            _logger.LogInformation("Deleting delta file {delta}", deltaFullName);
             File.Delete(deltaFullName);
         }
     }
@@ -187,7 +176,7 @@ internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemot
         }
         catch (Exception ex)
         {
-            Log.Warning(ex, "Error during Complete");
+            _logger.LogWarning(ex, "Error during Complete");
         }
     }
 
@@ -205,7 +194,7 @@ internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemot
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning(ex, "An error occurred while disposing currentMultiUploadZip");
+                    _logger.LogWarning(ex, "An error occurred while disposing currentMultiUploadZip");
                 }
                 finally
                 {
@@ -225,21 +214,16 @@ internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemot
         var canDisposeInFinallyBlock = true;
         try
         {
-            if (_currentMultiUploadZip == null)
+            if (_currentMultiUploadZip == null || _currentMultiUploadZip.ActionGroupsIds.Count == 0)
             {
+                _currentMultiUploadZip?.CloseZip();
                 return;
             }
 
-            Log.Information("Closing and uploading MultiUploadZip with id:{MultiZipId}. It contains {FilesFullNames}",
+            _logger.LogInformation("Closing and uploading MultiUploadZip with id:{MultiZipId}. It contains {FilesFullNames}",
                 _currentMultiUploadZip.SharedFileDefinition.Id, _currentMultiUploadZip.FilesFullNames);
 
             _currentMultiUploadZip.CloseZip();
-
-            // await _connectionManager.ApiWrapper.SetActionsGroupsIds(_currentMultiUploadZip!.SharedFileDefinition.SessionId,
-            //     _currentMultiUploadZip.SharedFileDefinition, _currentMultiUploadZip.ActionGroupsIds);
-            //
-            // _synchronizationActionsService.SetActionsGroupIds(_currentMultiUploadZip!.SharedFileDefinition,
-            //     _currentMultiUploadZip.ActionGroupsIds);
 
             _currentMultiUploadZip!.SharedFileDefinition.ActionsGroupIds = _currentMultiUploadZip.ActionGroupsIds;
 
@@ -255,7 +239,7 @@ internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemot
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error during CloseAndUploadCurrentMultiZip");
+            _logger.LogError(ex, "Error during CloseAndUploadCurrentMultiZip");
             if (_currentMultiUploadZip != null)
             {
                 await _synchronizationActionServerInformer.HandleCloudActionError(_currentMultiUploadZip.ActionGroupsIds);
@@ -275,7 +259,7 @@ internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemot
 
     private async Task RunUploadTask(SharedActionsGroup sharedActionsGroup, IFileUploader fileUploader, Action? postAction = null)
     {
-        await RunUploadTask(new List<string> { sharedActionsGroup.ActionsGroupId }, fileUploader, postAction);
+        await RunUploadTask([sharedActionsGroup.ActionsGroupId], fileUploader, postAction);
     }
 
     private async Task RunUploadTask(List<string> actionsGroupsIds, IFileUploader fileUploader, Action? postAction = null)
@@ -283,21 +267,14 @@ internal class SynchronizationActionRemoteUploader : ISynchronizationActionRemot
         try
         {
             await UploadSemaphore.WaitAsync();
-                
-            // var fileUploader = Locator.Current.GetService<IFileUploader>()!;
-
-            // await action.Invoke(fileUploader);
 
             await fileUploader.Upload();
-
-            // await fileUploader.Upload(previousMultiUploadZip.MemoryStream, previousMultiUploadZip.SharedFileDefinition);
-
         }
         catch (Exception ex)
         {
             await _synchronizationActionServerInformer.HandleCloudActionError(actionsGroupsIds);
             
-            Log.Error(ex, "CloseAndUploadCurrentMultiZip.Upload");
+            _logger.LogError(ex, "CloseAndUploadCurrentMultiZip.Upload");
         }
         finally
         {

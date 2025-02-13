@@ -16,13 +16,13 @@ public class DateAndInventoryPartsViewModel : ViewModelBase
     private readonly ILocalizationService _localizationService;
 
     public DateAndInventoryPartsViewModel(ContentIdentityViewModel contentIdentityViewModel, DateTime lastWriteTimeUtc, HashSet<InventoryPart> inventoryParts,
-        ISessionService sessionDataHolder, ILocalizationService localizationService)
+        ISessionService sessionService, ILocalizationService localizationService)
     {
         _lastWriteTimeUtc = lastWriteTimeUtc;
 
         _localizationService = localizationService;
 
-        if (sessionDataHolder.CurrentSessionSettings!.LinkingKey == LinkingKeys.Name ||
+        if (sessionService.CurrentSessionSettings!.LinkingKey == LinkingKeys.Name ||
                 contentIdentityViewModel.ContentIdentity.HasManyFileSystemDescriptionOnAnInventoryPart)
         {
             var sb = new StringBuilder();

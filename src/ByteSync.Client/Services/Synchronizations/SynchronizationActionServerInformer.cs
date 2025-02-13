@@ -3,19 +3,21 @@ using ByteSync.Business.Synchronizations;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Services.Sessions;
-using Serilog;
 
 namespace ByteSync.Services.Synchronizations;
 
 public class SynchronizationActionServerInformer : ISynchronizationActionServerInformer
 {
-    private readonly ISessionService _sessionDataHolder;
+    private readonly ISessionService _sessionService;
     private readonly ISynchronizationApiClient _synchronizationApiClient;
+    private readonly ILogger<SynchronizationActionServerInformer> _logger;
 
-    public SynchronizationActionServerInformer(ISessionService sessionDataHolder, ISynchronizationApiClient synchronizationApiClient)
+    public SynchronizationActionServerInformer(ISessionService sessionService, ISynchronizationApiClient synchronizationApiClient,
+        ILogger<SynchronizationActionServerInformer> logger)
     {
-        _sessionDataHolder = sessionDataHolder;
+        _sessionService = sessionService;
         _synchronizationApiClient = synchronizationApiClient;
+        _logger = logger;
 
         ServerInformerOperatorInfos = new Dictionary<ISynchronizationActionServerInformer.CloudActionCaller, ServerInformerOperatorInfo>();
 
@@ -52,7 +54,7 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
 
     public async Task HandlePendingActions()
     {
-        if (_sessionDataHolder.IsCloudSession)
+        if (_sessionService.IsCloudSession)
         {
             List<ServerInformerOperatorInfo> serverInformerOperatorInfosToHandle;
             
@@ -68,7 +70,7 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
 
     public Task ClearPendingActions()
     {
-        if (_sessionDataHolder.IsCloudSession)
+        if (_sessionService.IsCloudSession)
         {
             lock (SyncRoot)
             {
@@ -81,7 +83,7 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
 
     private async Task DoHandleCloudAction(List<string> actionsGroupIds, ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
     {
-        if (_sessionDataHolder.IsCloudSession)
+        if (_sessionService.IsCloudSession)
         {
             var serverInformerOperatorInfosToHandle = new List<ServerInformerOperatorInfo>();
             
@@ -98,7 +100,7 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
 
     private async Task DoHandleCloudAction(SharedActionsGroup sharedActionsGroup, ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
     {
-        if (_sessionDataHolder.IsCloudSession)
+        if (_sessionService.IsCloudSession)
         {
             var serverInformerOperatorInfosToHandle = new List<ServerInformerOperatorInfo>();
             
@@ -124,7 +126,7 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
             }
         }
 
-        // On enlève les éléments que l'on traite
+        // We remove the elements we are processing
         foreach (var serverInformerOperatorInfo in serverInformerOperatorInfosToHandle)
         {
             var isRemoved = ServerInformerOperatorInfos.Remove(serverInformerOperatorInfo.CloudActionCaller);
@@ -167,14 +169,14 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
                 // https://stackoverflow.com/questions/15136542/parallel-foreach-with-asynchronous-lambda
                 var tasks = serverInformerOperatorInfo.ActionsGroupIds.Chunk(200).Select(async chunk =>
                 {
-                    await cloudActionCaller.Invoke(_sessionDataHolder.SessionId!, chunk.ToList());
+                    await cloudActionCaller.Invoke(_sessionService.SessionId!, chunk.ToList());
                 });
 
                 await Task.WhenAll(tasks);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Unable to inform the server of the result of an action");
+                _logger.LogError(ex, "Unable to inform the server of the result of an action");
             }
         }
     }

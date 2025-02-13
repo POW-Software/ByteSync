@@ -19,7 +19,6 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Factories.Proxies;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
-using ByteSync.Services.Sessions;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
@@ -129,91 +128,6 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         });
 
         UpdateMachineDescription();
-
-    #if DEBUG
-        if (IsLocalMachine && _sessionService.CurrentRunSessionProfileInfo == null)
-        {
-            void DebugAddDesktopPathItem(string folderName)
-            {
-                var allPathItems = _pathItemRepository.Elements.Where(pi => pi.BelongsTo(SessionMemberInfo)).ToList();
-                
-                if (allPathItems.Any(pi => pi.Path.Equals(IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
-                        StringComparison.InvariantCultureIgnoreCase)))
-                {
-                    return;
-                }
-
-                _pathItemsService.CreateAndAddPathItem(
-                    IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
-                    FileSystemTypes.Directory);
-            }
-
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTA))
-            {
-                DebugAddDesktopPathItem("testA");
-            }
-            
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTA1))
-            {
-                DebugAddDesktopPathItem("testA1");
-            }
-
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTB))
-            {
-                DebugAddDesktopPathItem("testB");
-            }
-            
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTB1))
-            {
-                DebugAddDesktopPathItem("testB1");
-            }
-            
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTC))
-            {
-                DebugAddDesktopPathItem("testC");
-            }
-            
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTC1))
-            {
-                DebugAddDesktopPathItem("testC1");
-            }
-            
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTD))
-            {
-                DebugAddDesktopPathItem("testD");
-            }
-            
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTD1))
-            {
-                DebugAddDesktopPathItem("testD1");
-            }
-            
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTE))
-            {
-                DebugAddDesktopPathItem("testE");
-            }
-            
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTE1))
-            {
-                DebugAddDesktopPathItem("testE1");
-            }
-            
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTTMP))
-            {
-                DebugAddDesktopPathItem("testTmp");
-            }
-
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_MYDATA))
-            {
-                _pathItemsService.CreateAndAddPathItem(@"D:\MyData", FileSystemTypes.Directory);
-            }
-
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_SAMPLEDATA))
-            {
-                _pathItemsService.CreateAndAddPathItem(@"E:\SampleData", FileSystemTypes.Directory);
-            }
-        }
-#endif
     }
     
     private void OnLocaleChanged(PropertyChangedEventArgs objEventArgs)

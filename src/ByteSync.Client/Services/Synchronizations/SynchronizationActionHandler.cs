@@ -24,12 +24,12 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
     private readonly IFileDatesSetter _fileDatesSetter;
     private readonly ILogger<SynchronizationActionHandler> _logger;
 
-    public SynchronizationActionHandler(ISessionService sessionDataHolder, IConnectionService connectionService, IDeltaManager deltaManager, 
+    public SynchronizationActionHandler(ISessionService sessionService, IConnectionService connectionService, IDeltaManager deltaManager, 
         ISynchronizationActionServerInformer synchronizationActionServerInformer, ISynchronizationActionRemoteUploader synchronizationActionRemoteUploader,
         ISynchronizationService synchronizationService, ISynchronizationApiClient synchronizationApiClient, IFileDatesSetter fileDatesSetter,
         ILogger<SynchronizationActionHandler> logger)
     {
-        _sessionService = sessionDataHolder;
+        _sessionService = sessionService;
         _connectionService = connectionService;
         _deltaManager = deltaManager;
         _synchronizationActionServerInformer = synchronizationActionServerInformer;

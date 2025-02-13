@@ -32,5 +32,6 @@ public class SingletonsModule : Module
         builder.RegisterType<FileDownloaderCache>().SingleInstance().AsImplementedInterfaces();
         builder.RegisterType<CommandLineModeHandler>().SingleInstance().AsImplementedInterfaces();
         builder.RegisterType<SynchronizationStarter>().SingleInstance().AsImplementedInterfaces();
+        builder.RegisterType<SynchronizationActionServerInformer>().SingleInstance().AsImplementedInterfaces();
     }
 }

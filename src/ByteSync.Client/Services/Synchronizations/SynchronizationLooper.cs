@@ -6,7 +6,6 @@ using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
-using Serilog;
 
 namespace ByteSync.Services.Synchronizations;
 
@@ -17,16 +16,19 @@ public class SynchronizationLooper : ISynchronizationLooper
     private readonly ISynchronizationActionHandler _synchronizationActionHandler;
     private readonly ISynchronizationApiClient _synchronizationApiClient;
     private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository;
+    private readonly ILogger<SynchronizationLooper> _logger;
 
     public SynchronizationLooper(ISessionService sessionService, ISessionMemberService sessionMemberService, 
         ISynchronizationActionHandler synchronizationActionHandler, 
-        ISynchronizationApiClient synchronizationApiClient, ISharedActionsGroupRepository sharedActionsGroupRepository)
+        ISynchronizationApiClient synchronizationApiClient, ISharedActionsGroupRepository sharedActionsGroupRepository,
+        ILogger<SynchronizationLooper> logger)
     {
         _sessionService = sessionService;
         _sessionMemberService = sessionMemberService;
         _synchronizationActionHandler = synchronizationActionHandler;
         _synchronizationApiClient = synchronizationApiClient;
         _sharedActionsGroupRepository = sharedActionsGroupRepository;
+        _logger = logger;
 
         Session = null;
         _sessionService.SessionObservable.Subscribe(value => Session = value); 
@@ -83,7 +85,7 @@ public class SynchronizationLooper : ISynchronizationLooper
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Synchronization exception");
+                _logger.LogError(ex, "Synchronization exception");
             }
         }
 
@@ -93,7 +95,7 @@ public class SynchronizationLooper : ISynchronizationLooper
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "SynchronizationManager.StartLocalSessionSynchronization");
+            _logger.LogError(ex, "SynchronizationManager.StartLocalSessionSynchronization");
         }
         
         try
@@ -104,7 +106,7 @@ public class SynchronizationLooper : ISynchronizationLooper
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error while informing server");
+            _logger.LogError(ex, "Error while informing server");
         }
     }
 }

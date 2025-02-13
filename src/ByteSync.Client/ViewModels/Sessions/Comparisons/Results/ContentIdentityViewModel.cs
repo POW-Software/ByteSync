@@ -1,8 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Common.Helpers;
-using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
@@ -36,7 +34,7 @@ public class ContentIdentityViewModel : ViewModelBase
     }
 
     public ContentIdentityViewModel(ComparisonItemViewModel comparisonItemViewModel, 
-        ContentIdentity contentIdentity, Inventory inventory, ISessionService sessionDataHolder,
+        ContentIdentity contentIdentity, Inventory inventory, ISessionService sessionService,
         IDateAndInventoryPartsViewModelFactory dateAndInventoryPartsViewModelFactory)
     {
         ComparisonItemViewModel = comparisonItemViewModel;
@@ -46,7 +44,7 @@ public class ContentIdentityViewModel : ViewModelBase
         IsFile = ComparisonItemViewModel.FileSystemType == FileSystemTypes.File;
         IsDirectory = !IsFile;
 
-        _sessionService = sessionDataHolder;
+        _sessionService = sessionService;
         _dateAndInventoryPartsViewModelFactory = dateAndInventoryPartsViewModelFactory;
         
         DateAndInventoryParts = new ObservableCollection<DateAndInventoryPartsViewModel>();
