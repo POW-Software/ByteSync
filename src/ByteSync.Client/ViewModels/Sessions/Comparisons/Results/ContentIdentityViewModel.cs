@@ -1,8 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Common.Helpers;
-using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;

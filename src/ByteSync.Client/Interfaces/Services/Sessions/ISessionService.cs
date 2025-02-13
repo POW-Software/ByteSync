@@ -48,11 +48,9 @@ public interface ISessionService
     
     void ClearCloudSession();
     
-    Task SetCloudSession(CloudSession cloudSession, RunCloudSessionProfileInfo? runCloudSessionProfileInfo, SessionSettings sessionSettings);
+    Task SetCloudSession(CloudSession cloudSession, RunCloudSessionProfileInfo? runCloudSessionProfileInfo, SessionSettings sessionSettings, string password);
     
     Task SetLocalSession(LocalSession localSession, RunLocalSessionProfileInfo? runLocalSessionProfileInfo, SessionSettings sessionSettings);
-    
-    void SetPassword(string password);
     
     Task SetSessionSettings(SessionSettings sessionSettings);
     

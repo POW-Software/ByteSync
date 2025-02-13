@@ -129,7 +129,7 @@ public class SessionService : ISessionService
     }
 
     public Task SetCloudSession(CloudSession cloudSession, RunCloudSessionProfileInfo? runCloudSessionProfileInfo,
-        SessionSettings sessionSettings)
+        SessionSettings sessionSettings, string password)
     {
         return Task.Run(() =>
         {
@@ -142,6 +142,8 @@ public class SessionService : ISessionService
             _sessionStatus.OnNext(SessionStatus.Preparation);
             
             _hasSessionBeenReset.OnNext(false);
+            
+            CloudSessionPassword = password;
         });
     }
     
@@ -160,11 +162,6 @@ public class SessionService : ISessionService
             
             _hasSessionBeenReset.OnNext(false);
         });
-    }
-
-    public void SetPassword(string password)
-    {
-        CloudSessionPassword = password;
     }
 
     public async Task SetSessionSettings(SessionSettings sessionSettings)
