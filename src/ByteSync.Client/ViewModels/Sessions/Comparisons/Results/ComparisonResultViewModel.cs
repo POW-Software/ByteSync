@@ -7,13 +7,10 @@ using ByteSync.Business.Arguments;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Themes;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Dialogs;
-using ByteSync.Interfaces.EventsHubs;
-using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
@@ -23,7 +20,6 @@ using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Serilog;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Results;
 
@@ -39,6 +35,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly IFlyoutElementViewModelFactory _flyoutElementViewModelFactory;
     private readonly IComparisonItemRepository _comparisonItemRepository;
+    private readonly ILogger<ComparisonResultViewModel> _logger;
 
     private const int PAGE_SIZE = 10;
 
@@ -51,7 +48,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         IDialogService dialogService, IInventoryService inventoriesService, IComparisonItemsService comparisonItemsService, IThemeService themeService, 
         IComparisonItemViewModelFactory comparisonItemViewModelFactory, ISessionMemberRepository sessionMemberRepository, 
         IFlyoutElementViewModelFactory flyoutElementViewModelFactory, ManageSynchronizationRulesViewModel manageSynchronizationRulesViewModel,
-        IComparisonItemRepository comparisonItemRepository)
+        IComparisonItemRepository comparisonItemRepository, ILogger<ComparisonResultViewModel> logger)
     {
         _sessionService = sessionService;
         _localizationService = localizationService;
@@ -63,6 +60,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         _sessionMemberRepository = sessionMemberRepository;
         _flyoutElementViewModelFactory = flyoutElementViewModelFactory;
         _comparisonItemRepository = comparisonItemRepository;
+        _logger = logger;
         
         ManageSynchronizationRules = manageSynchronizationRulesViewModel;
 
@@ -266,7 +264,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         {
             IsResultLoadingError = true;
             
-            Log.Error(ex, "ComparisonResultViewModel.HandleOnInventoriesComparisonDone");
+            _logger.LogError(ex, "ComparisonResultViewModel.HandleOnInventoriesComparisonDone");
         }
     }
 
@@ -344,15 +342,12 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
             return result;
         }
     }
-
-    // Anciennement utilisé : https://stackoverflow.com/questions/9880589/bind-to-selecteditems-from-datagrid-or-listbox-in-mvvm
+    
     private void AddManualAction()
     {
         _dialogService.ShowFlyout(nameof(Resources.Shell_CreateTargetedAction), false,
             _flyoutElementViewModelFactory.BuildTargetedActionGlobalViewModel(
                 SelectedComparisonItemViews.Select(civm => civm.ComparisonItem).ToList()));
-        
-        // _navigationEventsHub.RaiseManualActionCreationRequested(this, SelectedComparisonItemViews);
     }
 
     private void DeleteManualActions()
@@ -365,9 +360,6 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     
     private void OnThemeChanged(Theme? theme)
     {
-        // Si trop lent avec ComparisonItems.SourceCollection, on pourrait faire :
-        //  - Pour ComparisonItems: MAJ en Reactive
-        //  - Pour ComparisonItems.SourceCollection: MAJ en direct sur la sous propriété
         foreach (var comparisonItem in ComparisonItems)
         {
             comparisonItem?.OnThemeChanged();
