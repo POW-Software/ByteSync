@@ -288,9 +288,10 @@ public class TestInventoryBuilder : IntegrationTest
     }
 
     [Test]
+    [Platform(Exclude = "Linux")]
     [TestCase(true, 0)]
     [TestCase(false, 2)]
-    public async Task Test_HiddenFiles(bool excludeHiddenFiles, int expectedHiddenFiles)
+    public async Task Test_HiddenFiles_Windows(bool excludeHiddenFiles, int expectedHiddenFiles)
     {
         InventoryBuilder inventoryBuilder;
         Inventory inventory;
@@ -308,6 +309,54 @@ public class TestInventoryBuilder : IntegrationTest
         fileInfo =new FileInfo(_testDirectoryService.CreateFileInDirectory(dir1.FullName, "fileA1.txt", "file1Content").FullName);
         fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(dir1.FullName, "fileA1_hidden.txt", "file1Content").FullName);
         File.SetAttributes(fileInfo.FullName, FileAttributes.Hidden);
+
+
+        string inventoryAFilePath = IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, $"inventoryA.zip");
+
+        var sessionSettings = SessionSettings.BuildDefault();
+        sessionSettings.ExcludeHiddenFiles = excludeHiddenFiles;
+            
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings);
+        inventoryBuilder.AddInventoryPart(sourceA.FullName);
+        await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
+
+        ClassicAssert.IsTrue(File.Exists(inventoryAFilePath));
+
+        unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
+        unzipDir.Create();
+
+        FastZip fastZip = new FastZip();
+        fastZip.ExtractZip(inventoryAFilePath, unzipDir.FullName, null);
+
+        ClassicAssert.AreEqual(1, unzipDir.GetFiles("*", SearchOption.AllDirectories).Length);
+        ClassicAssert.IsTrue(File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")));
+
+        inventory = inventoryBuilder.Inventory!;
+        ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
+        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
+        ClassicAssert.AreEqual(2 + expectedHiddenFiles, inventory.InventoryParts[0].FileDescriptions.Count);
+    }
+    
+    [Test]
+    [Platform(Exclude = "Win")]
+    [TestCase(true, 0)]
+    [TestCase(false, 2)]
+    public async Task Test_HiddenFiles_Linux(bool excludeHiddenFiles, int expectedHiddenFiles)
+    {
+        InventoryBuilder inventoryBuilder;
+        Inventory inventory;
+
+        DirectoryInfo sourceA,dir1, rootAb, unzipDir;
+        FileInfo fileInfo;
+        
+        sourceA = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "sourceA"));
+        sourceA.Create();
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(sourceA.FullName, "fileA.txt", "file1Content").FullName);
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(sourceA.FullName, ".fileA_hidden.txt", "file1Content").FullName);
+            
+        dir1 = sourceA.CreateSubdirectory("Dir1");
+        fileInfo =new FileInfo(_testDirectoryService.CreateFileInDirectory(dir1.FullName, "fileA1.txt", "file1Content").FullName);
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(dir1.FullName, ".fileA1_hidden.txt", "file1Content").FullName);
 
 
         string inventoryAFilePath = IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, $"inventoryA.zip");
@@ -391,6 +440,7 @@ public class TestInventoryBuilder : IntegrationTest
     }
         
     [Test]
+    [Platform(Exclude = "Linux")]
     [TestCase(true, true, 0)]
     [TestCase(false, true, 4)]
     [TestCase(true, false, 1)]
