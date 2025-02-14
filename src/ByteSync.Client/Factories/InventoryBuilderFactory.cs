@@ -39,9 +39,6 @@ public class InventoryBuilderFactory : IInventoryBuilderFactory
         var sessionMember = sessionMemberRepository.GetCurrentSessionMember();
         var cloudSessionSettings = sessionService.CurrentSessionSettings!;
         var myPathItems = pathItemRepository.CurrentMemberPathItems.Items.ToList();
-        //
-        // var inventoryBuilder = new InventoryBuilder(sessionMember, cloudSessionSettings, inventoryService.InventoryProcessData, 
-        //     environmentService.OSPlatform, FingerprintModes.Rsync);
         
         var inventoryBuilder = _context.Resolve<IInventoryBuilder>(
             new TypedParameter(typeof(SessionMemberInfo), sessionMember),

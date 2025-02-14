@@ -18,35 +18,17 @@ public class InventoryProcessData : ReactiveObject
         IdentificationStatus = new ReplaySubject<LocalInventoryPartStatus>(1);
         AnalysisStatus = new ReplaySubject<LocalInventoryPartStatus>(1);
 
-        // GlobalInventoryStatus = new ReplaySubject<GlobalInventoryStatus>(1);
-
         AreBaseInventoriesComplete = new ReplaySubject<bool>(1);
         AreFullInventoriesComplete = new ReplaySubject<bool>(1);
 
         InventoryMonitorDataSubject = new BehaviorSubject<InventoryMonitorData>(new InventoryMonitorData());
         
-        // AllBaseInventoriesCompleteEvent = new ManualResetEvent(false);
-        // AllFullInventoriesCompleteEvent = new ManualResetEvent(false);
         InventoryAbortionRequested = new ReplaySubject<bool>(1);
         
         ErrorEvent = new ReplaySubject<bool>(1);
         InventoryTransferError = new ReplaySubject<bool>(1);
 
         CancellationTokenSource = new CancellationTokenSource();
-
-        /*
-        Observable.CombineLatest(MainStatus, IdentificationStatus)
-            .Select(l => (Main: l[0], Identification: l[1]))
-            .Where(v => v.Main.In(LocalInventoryPartStatus.Error, LocalInventoryPartStatus.Cancelled)
-                        && v.Identification == LocalInventoryPartStatus.Pending)
-            .Subscribe(_ => IdentificationStatus = MainStatus);
-        
-        Observable.CombineLatest(MainStatus, AnalysisStatus)
-            .Select(l => (Main: l[0], Analysis: l[1]))
-            .Where(v => v.Main.In(LocalInventoryPartStatus.Error, LocalInventoryPartStatus.Cancelled)
-                        && v.Analysis == LocalInventoryPartStatus.Pending)
-            .Subscribe(_ => AnalysisStatus = MainStatus);
-        */
 
         Observable.CombineLatest(MainStatus, IdentificationStatus)
             .Select(l => (Main: l[0], Identification: l[1]))
@@ -79,11 +61,6 @@ public class InventoryProcessData : ReactiveObject
         });
         
         Reset();
-
-        //
-        // ProcessStart = DateTime.Now;
-        //
-        // InventoryBuilderData = new InventoryBuilderData();
     }
 
     public List<IInventoryBuilder>? InventoryBuilders { get; set; }
@@ -96,10 +73,6 @@ public class InventoryProcessData : ReactiveObject
         }
     }
     
-    // public ManualResetEvent AllBaseInventoriesCompleteEvent { get; }
-    //
-    // public ManualResetEvent AllFullInventoriesCompleteEvent { get; }
-    //
     public CancellationTokenSource CancellationTokenSource { get; private set; }
     
     public ISubject<bool> InventoryAbortionRequested { get; }
@@ -107,29 +80,12 @@ public class InventoryProcessData : ReactiveObject
     public ISubject<bool> ErrorEvent { get; }
     
     public ISubject<bool> InventoryTransferError { get; }
-    //
-    // [Reactive]
-    // public bool IsInventoryRunning { get; set; }
-    //
-    // [Reactive]
-    // public bool IsIdentificationRunning { get; set; }
-    //     
-    // [Reactive]
-    // public bool IsAnalysisRunning { get; set; }
-    //     
-    // [Reactive]
-    // public bool HasInventoryStarted { get; set; }
-    //     
-    // [Reactive]
-    // public bool HasAnalysisStarted { get; set; }
     
     public ISubject<LocalInventoryPartStatus> MainStatus { get; set; }
     
     public ISubject<LocalInventoryPartStatus> IdentificationStatus { get; set; }
     
     public ISubject<LocalInventoryPartStatus> AnalysisStatus { get; set; }
-    
-    // public ISubject<GlobalInventoryStatus> GlobalInventoryStatus { get; set; }
     
     public ISubject<bool> AreBaseInventoriesComplete { get; set; }
     
@@ -138,8 +94,6 @@ public class InventoryProcessData : ReactiveObject
     private BehaviorSubject<InventoryMonitorData> InventoryMonitorDataSubject { get; set; }
     
     public IObservable<InventoryMonitorData> InventoryMonitorObservable => InventoryMonitorDataSubject.AsObservable();
-
-    // public InventoryMonitorData InventoryMonitor => InventoryMonitorDataSubject.Value;
 
     [Reactive]
     public DateTimeOffset InventoryStart  { get; set; }
@@ -158,8 +112,6 @@ public class InventoryProcessData : ReactiveObject
         IdentificationStatus.OnNext(LocalInventoryPartStatus.Pending);
         AnalysisStatus.OnNext(LocalInventoryPartStatus.Pending);
         
-        // GlobalInventoryStatus.OnNext(new GlobalInventoryStatus());
-
         AreBaseInventoriesComplete.OnNext(false);
         AreFullInventoriesComplete.OnNext(false);
 
