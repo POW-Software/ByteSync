@@ -1,39 +1,38 @@
 ﻿using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Business;
 using ByteSync.Business.Arguments;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.PathItems;
+using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
-using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Common.Helpers;
+using ByteSync.Common.Business.Misc;
+using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Comparisons;
-using Serilog;
+using ByteSync.Services.Sessions;
 
 namespace ByteSync.Services.Inventories;
 
-public class InventoryBuilder
+public class InventoryBuilder : IInventoryBuilder
 {
+    private readonly ILogger<InventoryBuilder> _logger;
+    
     private const int FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 4194304; 
         
-    public InventoryBuilder(string inventoryLetter, SessionSettings sessionSettings,
-        InventoryProcessData inventoryProcessData, ByteSyncEndpoint byteSyncEndpoint,
-        string machineName, FingerprintModes fingerprintMode = FingerprintModes.Rsync)
+    public InventoryBuilder(SessionMemberInfo sessionMemberInfo, SessionSettings sessionSettings, InventoryProcessData inventoryProcessData, 
+        OSPlatforms osPlatform, FingerprintModes fingerprintMode, ILogger<InventoryBuilder> logger)
     {
-        InventoryLetter = inventoryLetter;
+        _logger = logger;
+        
+        SessionMemberInfo = sessionMemberInfo;
         SessionSettings = sessionSettings;
         InventoryProcessData = inventoryProcessData;
-        Endpoint = byteSyncEndpoint;
         FingerprintMode = fingerprintMode;
-        MachineName = machineName;
-
-        InventoryMonitorData = new InventoryMonitorData();
-
-            
+        OSPlatform = osPlatform;
+        
         InventoryFileAnalyzer = new InventoryFileAnalyzer(this, RaiseFileAnalyzed, RaiseFileAnalyzeError);
         InventorySaver = new InventorySaver(this);
 
@@ -48,38 +47,36 @@ public class InventoryBuilder
         var inventory = new Inventory();
         inventory.InventoryId = id;
                     
-        Log.Debug("InventoryBuilder.AddInventoryPart: Creating inventory {InventoryId}", id);
+        _logger.LogDebug("InventoryBuilder.AddInventoryPart: Creating inventory {InventoryId}", id);
             
-        inventory.Endpoint = Endpoint!;
-        inventory.MachineName = MachineName;
+        inventory.Endpoint = SessionMemberInfo.Endpoint;
+        inventory.MachineName = SessionMemberInfo.MachineName;
         inventory.Letter = InventoryLetter!;
 
         return inventory;
     }
+    
+    private SessionMemberInfo SessionMemberInfo { get; }
 
     public Inventory Inventory { get; }
         
     private InventoryProcessData InventoryProcessData { get; }
-    
-    private InventoryMonitorData InventoryMonitorData { get; }
 
     public FingerprintModes FingerprintMode { get; }
         
     public SessionSettings? SessionSettings { get; }
 
-    public string InventoryLetter { get; }
+    public string InventoryLetter => SessionMemberInfo.GetLetter();
 
     private InventoryFileAnalyzer InventoryFileAnalyzer { get; }
 
     internal InventorySaver InventorySaver { get; }
         
     public InventoryIndexer Indexer { get; }
-        
-    public ByteSyncEndpoint Endpoint { get; }
     
-    public string MachineName { get; set; }
+    private OSPlatforms OSPlatform { get; set; }
 
-    public bool IgnoreHidden
+    private bool IgnoreHidden
     {
         get
         {
@@ -87,7 +84,7 @@ public class InventoryBuilder
         }
     }
         
-    public bool IgnoreSystem
+    private bool IgnoreSystem
     {
         get
         {
@@ -134,7 +131,13 @@ public class InventoryBuilder
 
     private void BuildBaseInventory(string inventoryFullName, CancellationToken cancellationToken)
     {
-        Log.Information("InventoryBuilder {Letter:l}: Local Inventory started", InventoryLetter);
+        _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory started", InventoryLetter);
+        
+        _logger.LogInformation("Local Inventory parts:");
+        foreach (var inventoryPart in Inventory.InventoryParts)
+        {
+            _logger.LogInformation(" - {@letter:l}: {@path} ({type})", inventoryPart.Code, inventoryPart.RootPath, inventoryPart.InventoryPartType);
+        }
 
         try
         {
@@ -147,7 +150,7 @@ public class InventoryBuilder
                 
             foreach (var inventoryPart in inventoryPartsToAnalyze)
             {
-                Log.Information("InventoryBuilder {Letter:l}: Local Inventory - Files Identification started on part {Code:l} {Path}", 
+                _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Identification started on part {Code:l} {Path}", 
                     InventoryLetter, inventoryPart.Code, inventoryPart.RootPath);
                     
                 if (cancellationToken.IsCancellationRequested)
@@ -166,7 +169,7 @@ public class InventoryBuilder
                     DoAnalyze(inventoryPart, fileInfo, cancellationToken);
                 }
                     
-                Log.Information("InventoryBuilder {Letter:l}: Local Inventory - Files Identification completed on {Code:l} {Path}", 
+                _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Identification completed on {Code:l} {Path}", 
                     InventoryLetter, inventoryPart.Code, inventoryPart.RootPath);
             }
             
@@ -174,7 +177,7 @@ public class InventoryBuilder
 
             InventorySaver.WriteInventory();
                 
-            Log.Information("InventoryBuilder {Letter:l}: Local Inventory - Files Identification completed ({ItemsCount} files found)", 
+            _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Identification completed ({ItemsCount} files found)", 
                 InventoryLetter, Inventory.InventoryParts.Sum(ip => ip.FileDescriptions.Count));
         }
         finally
@@ -190,7 +193,7 @@ public class InventoryBuilder
 
     internal void RunAnalysis(string inventoryFullName, HashSet<IndexedItem> items, CancellationToken cancellationToken)
     {
-        Log.Information("InventoryBuilder {Letter:l}: Local Inventory - Files Analysis started", InventoryLetter);
+        _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Analysis started", InventoryLetter);
             
         try
         {
@@ -214,7 +217,7 @@ public class InventoryBuilder
                 
             InventorySaver.WriteInventory();
 
-            Log.Information("InventoryBuilder {Letter:l}: Local Inventory - Files Analysis completed ({ItemsCount} files analyzed)",
+            _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Analysis completed ({ItemsCount} files analyzed)",
                 InventoryLetter, items.Count);
         }
         finally
@@ -236,10 +239,14 @@ public class InventoryBuilder
             return;
         }
 
-        if (directoryInfo.Attributes.HasFlag(FileAttributes.Hidden) && IgnoreHidden)
+        if (IgnoreHidden)
         {
-            Log.Information("Directory {Directory} is ignored because considered as hidden", directoryInfo.FullName);
-            return;
+            if (directoryInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
+                (OSPlatform == OSPlatforms.Linux && directoryInfo.Name.StartsWith(".")))
+            {
+                _logger.LogInformation("Directory {Directory} is ignored because considered as hidden", directoryInfo.FullName);
+                return;
+            }
         }
 
         var directoryDescription = IdentityBuilder.BuildDirectoryDescription(inventoryPart, directoryInfo);
@@ -260,7 +267,7 @@ public class InventoryBuilder
             //  - Windows: New-Item -ItemType SymbolicLink -Path  C:\Users\paulf\Desktop\testVide\SL -Target C:\Users\paulf\Desktop\testA_
             if (subDirectory.Attributes.HasFlag(FileAttributes.ReparsePoint))
             {
-                Log.Warning("Directory {Directory} is ignored because it has flag 'ReparsePoint'", subDirectory.FullName);
+                _logger.LogWarning("Directory {Directory} is ignored because it has flag 'ReparsePoint'", subDirectory.FullName);
                 continue;
             }
                 
@@ -291,18 +298,24 @@ public class InventoryBuilder
         {
             return;
         }
-            
-        if (fileInfo.Attributes.HasFlag(FileAttributes.Hidden) && IgnoreHidden)
+
+        if (IgnoreHidden)
         {
-            Log.Information("File {File} is ignored because considered as hidden", fileInfo.FullName);
-            return;
+            if (fileInfo.Attributes.HasFlag(FileAttributes.Hidden) || 
+                (OSPlatform == OSPlatforms.Linux && fileInfo.Name.StartsWith(".")))
+            {
+                _logger.LogInformation("File {File} is ignored because considered as hidden", fileInfo.FullName);
+                return;
+            }
         }
+
 
         if (IgnoreSystem)
         {
-            if (fileInfo.Name.In("desktop.ini", "thumbs.db", ".DS_Store"))
+            if (fileInfo.Name.In("desktop.ini", "thumbs.db", ".desktop.ini", ".thumbs.db", ".DS_Store")
+                || fileInfo.Attributes.HasFlag(FileAttributes.System))
             {
-                Log.Information("File {File} is ignored because considered as system", fileInfo.FullName);
+                _logger.LogInformation("File {File} is ignored because considered as system", fileInfo.FullName);
                 return;
             }
         }
@@ -312,7 +325,7 @@ public class InventoryBuilder
         //  - Windows: New-Item -ItemType SymbolicLink -Path  C:\Users\paulf\Desktop\testVide\SL -Target C:\Users\paulf\Desktop\testA_
         if (fileInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
         {
-            Log.Warning("File {File} is ignored because it has flag 'ReparsePoint'. It might be a symolic link", fileInfo.FullName);
+            _logger.LogWarning("File {File} is ignored because it has flag 'ReparsePoint'. It might be a symolic link", fileInfo.FullName);
             return;
         }
 
@@ -326,7 +339,7 @@ public class InventoryBuilder
             return;
         }
             
-        // Fichiers OneDrive (GoogleDrive ?) non présents
+        // Non-Local OneDrive Files (not GoogleDrive)
         // https://docs.microsoft.com/en-gb/windows/win32/fileio/file-attribute-constants?redirectedfrom=MSDN
         // https://stackoverflow.com/questions/49301958/how-to-detect-onedrive-online-only-files
         // https://stackoverflow.com/questions/54560454/getting-full-file-attributes-for-files-managed-by-microsoft-onedrive

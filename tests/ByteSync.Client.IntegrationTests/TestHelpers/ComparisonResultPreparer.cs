@@ -1,5 +1,6 @@
 ﻿using ByteSync.Business;
 using ByteSync.Business.Inventories;
+using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Client.IntegrationTests.TestHelpers.Business;
 using ByteSync.Common.Business.EndPoints;
@@ -8,6 +9,8 @@ using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Services.Comparisons;
 using ByteSync.Services.Inventories;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace ByteSync.Client.IntegrationTests.TestHelpers;
 
@@ -75,8 +78,21 @@ public class ComparisonResultPreparer
                 IpAddress = "localhost",
                 OSPlatform = OSPlatforms.Windows
             };
-            InventoryBuilder inventoryBuilder = new InventoryBuilder(inventoryData.Letter, SessionSettings, new InventoryProcessData(), endpoint, 
-                $"Machine{inventoryData.Letter}");
+            
+            var sessionMemberInfo = new SessionMemberInfo
+            {
+                Endpoint = endpoint,
+                PositionInList = inventoryData.Letter[0] - 'A',
+                PrivateData = new()
+                {
+                    MachineName = "Machine" + inventoryData.Letter
+                }
+            };
+            
+            Mock<ILogger<InventoryBuilder>> loggerMock = new Mock<ILogger<InventoryBuilder>>();
+            
+            InventoryBuilder inventoryBuilder = new InventoryBuilder(sessionMemberInfo, SessionSettings, new InventoryProcessData(), 
+                OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object);
             
             foreach (var pathItem in inventoryData.PathItems)
             {

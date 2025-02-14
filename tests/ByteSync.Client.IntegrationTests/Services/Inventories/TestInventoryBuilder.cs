@@ -1,10 +1,13 @@
 ﻿using Autofac;
+using ByteSync.Business;
 using ByteSync.Business.Inventories;
+using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Client.IntegrationTests.TestHelpers;
 using ByteSync.Client.IntegrationTests.TestHelpers.Business;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Inventories;
+using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
@@ -17,6 +20,7 @@ using ByteSync.Services.Sessions;
 using ByteSync.TestsCommon;
 using FluentAssertions;
 using ICSharpCode.SharpZipLib.Zip;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework.Legacy;
 
@@ -255,7 +259,7 @@ public class TestInventoryBuilder : IntegrationTest
 
         var sessionSettings = SessionSettings.BuildDefault();
 
-        inventoryBuilder = BuildInventoryBuilder("A", sessionSettings);
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings);
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
 
         ClassicAssert.ThrowsAsync<TaskCanceledException>(() => inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath, new CancellationToken(true)));
@@ -284,9 +288,10 @@ public class TestInventoryBuilder : IntegrationTest
     }
 
     [Test]
+    [Platform(Exclude = "Linux")]
     [TestCase(true, 0)]
     [TestCase(false, 2)]
-    public async Task Test_HiddenFiles(bool excludeHiddenFiles, int expectedHiddenFiles)
+    public async Task Test_HiddenFiles_Windows(bool excludeHiddenFiles, int expectedHiddenFiles)
     {
         InventoryBuilder inventoryBuilder;
         Inventory inventory;
@@ -311,7 +316,55 @@ public class TestInventoryBuilder : IntegrationTest
         var sessionSettings = SessionSettings.BuildDefault();
         sessionSettings.ExcludeHiddenFiles = excludeHiddenFiles;
             
-        inventoryBuilder = BuildInventoryBuilder("A", sessionSettings);
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings);
+        inventoryBuilder.AddInventoryPart(sourceA.FullName);
+        await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
+
+        ClassicAssert.IsTrue(File.Exists(inventoryAFilePath));
+
+        unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
+        unzipDir.Create();
+
+        FastZip fastZip = new FastZip();
+        fastZip.ExtractZip(inventoryAFilePath, unzipDir.FullName, null);
+
+        ClassicAssert.AreEqual(1, unzipDir.GetFiles("*", SearchOption.AllDirectories).Length);
+        ClassicAssert.IsTrue(File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")));
+
+        inventory = inventoryBuilder.Inventory!;
+        ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
+        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
+        ClassicAssert.AreEqual(2 + expectedHiddenFiles, inventory.InventoryParts[0].FileDescriptions.Count);
+    }
+    
+    [Test]
+    [Platform(Exclude = "Win")]
+    [TestCase(true, 0)]
+    [TestCase(false, 2)]
+    public async Task Test_HiddenFiles_Linux(bool excludeHiddenFiles, int expectedHiddenFiles)
+    {
+        InventoryBuilder inventoryBuilder;
+        Inventory inventory;
+
+        DirectoryInfo sourceA,dir1, rootAb, unzipDir;
+        FileInfo fileInfo;
+        
+        sourceA = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "sourceA"));
+        sourceA.Create();
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(sourceA.FullName, "fileA.txt", "file1Content").FullName);
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(sourceA.FullName, ".fileA_hidden.txt", "file1Content").FullName);
+            
+        dir1 = sourceA.CreateSubdirectory("Dir1");
+        fileInfo =new FileInfo(_testDirectoryService.CreateFileInDirectory(dir1.FullName, "fileA1.txt", "file1Content").FullName);
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(dir1.FullName, ".fileA1_hidden.txt", "file1Content").FullName);
+
+
+        string inventoryAFilePath = IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, $"inventoryA.zip");
+
+        var sessionSettings = SessionSettings.BuildDefault();
+        sessionSettings.ExcludeHiddenFiles = excludeHiddenFiles;
+            
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings);
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
 
@@ -333,9 +386,10 @@ public class TestInventoryBuilder : IntegrationTest
     }
         
     [Test]
-    [TestCase(true, 0)]
-    [TestCase(false, 6)]
-    public async Task Test_SystemFiles(bool excludeSystemFiles, int expectedSystemFiles)
+    [TestCase(true, 2, 0)]
+    [TestCase(false, 8, 2, ExcludePlatform = "Linux")]
+    [TestCase(false, 6, 2, ExcludePlatform = "Win")]
+    public async Task Test_SystemFiles(bool excludeSystemFiles, int expectedSystemFiles, int expectedDesktopIniFiles)
     {
         InventoryBuilder inventoryBuilder;
         Inventory inventory;
@@ -362,7 +416,7 @@ public class TestInventoryBuilder : IntegrationTest
         var sessionSettings = SessionSettings.BuildDefault();
         sessionSettings.ExcludeSystemFiles = excludeSystemFiles;
             
-        inventoryBuilder = BuildInventoryBuilder("A", sessionSettings);
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings);
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
 
@@ -380,18 +434,19 @@ public class TestInventoryBuilder : IntegrationTest
         inventory = inventoryBuilder.Inventory!;
         ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
         ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
-        ClassicAssert.AreEqual(2 + expectedSystemFiles, inventory.InventoryParts[0].FileDescriptions.Count);
+        ClassicAssert.AreEqual(expectedSystemFiles, inventory.InventoryParts[0].FileDescriptions.Count);
             
-        ClassicAssert.AreEqual(expectedSystemFiles / 3, 
+        ClassicAssert.AreEqual(expectedDesktopIniFiles, 
             inventory.InventoryParts[0].FileDescriptions.Count(fd => fd.Name.Equals("desktop.ini")));
     }
         
     [Test]
+    [Platform(Exclude = "Linux")]
     [TestCase(true, true, 0)]
     [TestCase(false, true, 4)]
     [TestCase(true, false, 1)]
     [TestCase(false, false, 7)]
-    public async Task Test_HiddenAndSystemFiles(bool excludeHiddenFiles, bool excludeSystemFiles, int expectedAdditionalFiles)
+    public async Task Test_HiddenAndSystemFiles_Windows(bool excludeHiddenFiles, bool excludeSystemFiles, int expectedAdditionalFiles)
     {
         InventoryBuilder inventoryBuilder;
         Inventory inventory;
@@ -426,7 +481,68 @@ public class TestInventoryBuilder : IntegrationTest
         sessionSettings.ExcludeHiddenFiles = excludeHiddenFiles;
         sessionSettings.ExcludeSystemFiles = excludeSystemFiles;
             
-        inventoryBuilder = BuildInventoryBuilder("A", sessionSettings);
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings, null, null, OSPlatforms.Windows);
+        inventoryBuilder.AddInventoryPart(sourceA.FullName);
+        await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
+
+        ClassicAssert.IsTrue(File.Exists(inventoryAFilePath));
+
+        unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
+        unzipDir.Create();
+
+        FastZip fastZip = new FastZip();
+        fastZip.ExtractZip(inventoryAFilePath, unzipDir.FullName, null);
+
+        ClassicAssert.AreEqual(1, unzipDir.GetFiles("*", SearchOption.AllDirectories).Length);
+        ClassicAssert.IsTrue(File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")));
+
+        inventory = inventoryBuilder.Inventory!;
+        ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
+        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
+        ClassicAssert.AreEqual(2 + expectedAdditionalFiles, inventory.InventoryParts[0].FileDescriptions.Count);
+    }
+    
+    [Test]
+    [TestCase(true, true, 0)]
+    [TestCase(false, true, 4)]
+    [TestCase(true, false, 1)]
+    [TestCase(false, false, 7)]
+    public async Task Test_HiddenAndSystemFiles_Linux(bool excludeHiddenFiles, bool excludeSystemFiles, int expectedAdditionalFiles)
+    {
+        InventoryBuilder inventoryBuilder;
+        Inventory inventory;
+
+        DirectoryInfo sourceA,dir1, rootAb, unzipDir;
+        FileInfo fileInfo;
+        
+        sourceA = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "sourceA"));
+        sourceA.Create();
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(sourceA.FullName, "fileA.txt", "file1Content").FullName);
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(sourceA.FullName, ".fileB.txt", "file1Content").FullName);
+        // File.SetAttributes(fileInfo.FullName, FileAttributes.Hidden);
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(sourceA.FullName, ".fileC.txt", "file1Content").FullName);
+        // File.SetAttributes(fileInfo.FullName, FileAttributes.Hidden);
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(sourceA.FullName, ".fileD.txt", "file1Content").FullName);
+        // File.SetAttributes(fileInfo.FullName, FileAttributes.Hidden);
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(sourceA.FullName, ".fileE.txt", "file1Content").FullName);
+        // File.SetAttributes(fileInfo.FullName, FileAttributes.Hidden);
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(sourceA.FullName, "desktop.ini", "file1Content").FullName);
+
+        dir1 = sourceA.CreateSubdirectory("Dir1");
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(dir1.FullName, "fileA1.txt", "file1Content").FullName);
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(dir1.FullName, ".desktop.ini", "file1Content").FullName);
+        // File.SetAttributes(fileInfo.FullName, FileAttributes.Hidden);
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(dir1.FullName, ".thumbs.db", "file1Content").FullName);
+        // File.SetAttributes(fileInfo.FullName, FileAttributes.Hidden);
+
+
+        string inventoryAFilePath = IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, $"inventoryA.zip");
+
+        var sessionSettings = SessionSettings.BuildDefault();
+        sessionSettings.ExcludeHiddenFiles = excludeHiddenFiles;
+        sessionSettings.ExcludeSystemFiles = excludeSystemFiles;
+            
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings, null, null, OSPlatforms.Linux);
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
 
@@ -447,57 +563,58 @@ public class TestInventoryBuilder : IntegrationTest
         ClassicAssert.AreEqual(2 + expectedAdditionalFiles, inventory.InventoryParts[0].FileDescriptions.Count);
     }
         
-    // [Test]
-    // public async Task Test_ReparsePoint()
-    // {
-    //     InventoryBuilder inventoryBuilder;
-    //     Inventory inventory;
-    //
-    //     DirectoryInfo sourceA,dir1, rootAb, unzipDir;
-    //     FileInfo fileInfo;
-    //
-    //     CreateTestDirectory();
-    //     sourceA = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "sourceA"));
-    //     sourceA.Create();
-    //
-    //     var symLinkDest = _testDirectoryService.CreateSubTestDirectory("symLinkDest");
-    //
-    //     // https://stackoverflow.com/questions/58038683/allow-mklink-for-a-non-admin-user
-    //     // Sur Windows, il faut passer l'ordi en mode développeur pour que CreateSymbolicLink fonctionne
-    //     // Paramètres => Mode développeur
-    //         
-    //     fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(sourceA.FullName, "fileA.txt", "file1Content").FullName);
-    //     File.CreateSymbolicLink(IOUtils.Combine(sourceA.FullName, "fileA_reparsePoint.txt"), symLinkDest.FullName);
-    //
-    //     dir1 = sourceA.CreateSubdirectory("Dir1");
-    //     fileInfo =new FileInfo(_testDirectoryService.CreateFileInDirectory(dir1.FullName, "fileA1.txt", "file1Content").FullName);
-    //     File.CreateSymbolicLink(IOUtils.Combine(dir1.FullName, "fileA_reparsePoint.txt"), symLinkDest.FullName);
-    //
-    //
-    //     string inventoryAFilePath = IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, $"inventoryA.zip");
-    //
-    //     var sessionSettings = SessionSettings.BuildDefault();
-    //
-    //     inventoryBuilder = BuildInventoryBuilder("A", sessionSettings);
-    //     inventoryBuilder.AddInventoryPart(sourceA.FullName);
-    //     await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
-    //
-    //     ClassicAssert.IsTrue(File.Exists(inventoryAFilePath));
-    //
-    //     unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
-    //     unzipDir.Create();
-    //
-    //     FastZip fastZip = new FastZip();
-    //     fastZip.ExtractZip(inventoryAFilePath, unzipDir.FullName, null);
-    //
-    //     ClassicAssert.AreEqual(1, unzipDir.GetFiles("*", SearchOption.AllDirectories).Length);
-    //     ClassicAssert.IsTrue(File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")));
-    //
-    //     inventory = inventoryBuilder.Inventory!;
-    //     ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
-    //     ClassicAssert.AreEqual(3, inventory.InventoryParts[0].FileSystemDescriptions.Count);
-    //     ClassicAssert.AreEqual(2, inventory.InventoryParts[0].FileDescriptions.Count);
-    // }
+    [Test]
+    [Platform(Exclude = "Win")]
+    public async Task Test_ReparsePoint()
+    {
+        InventoryBuilder inventoryBuilder;
+        Inventory inventory;
+    
+        DirectoryInfo sourceA,dir1, rootAb, unzipDir;
+        FileInfo fileInfo;
+    
+        // CreateTestDirectory();
+        sourceA = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "sourceA"));
+        sourceA.Create();
+    
+        var symLinkDest = _testDirectoryService.CreateSubTestDirectory("symLinkDest");
+    
+        // https://stackoverflow.com/questions/58038683/allow-mklink-for-a-non-admin-user
+        // Sur Windows, il faut passer l'ordi en mode développeur pour que CreateSymbolicLink fonctionne
+        // Paramètres => Mode développeur
+            
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(sourceA.FullName, "fileA.txt", "file1Content").FullName);
+        File.CreateSymbolicLink(IOUtils.Combine(sourceA.FullName, "fileA_reparsePoint.txt"), symLinkDest.FullName);
+    
+        dir1 = sourceA.CreateSubdirectory("Dir1");
+        fileInfo =new FileInfo(_testDirectoryService.CreateFileInDirectory(dir1.FullName, "fileA1.txt", "file1Content").FullName);
+        File.CreateSymbolicLink(IOUtils.Combine(dir1.FullName, "fileA_reparsePoint.txt"), symLinkDest.FullName);
+    
+    
+        string inventoryAFilePath = IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, $"inventoryA.zip");
+    
+        var sessionSettings = SessionSettings.BuildDefault();
+    
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings);
+        inventoryBuilder.AddInventoryPart(sourceA.FullName);
+        await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
+    
+        ClassicAssert.IsTrue(File.Exists(inventoryAFilePath));
+    
+        unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
+        unzipDir.Create();
+    
+        FastZip fastZip = new FastZip();
+        fastZip.ExtractZip(inventoryAFilePath, unzipDir.FullName, null);
+    
+        ClassicAssert.AreEqual(1, unzipDir.GetFiles("*", SearchOption.AllDirectories).Length);
+        ClassicAssert.IsTrue(File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")));
+    
+        inventory = inventoryBuilder.Inventory!;
+        ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
+        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
+        ClassicAssert.AreEqual(2, inventory.InventoryParts[0].FileDescriptions.Count);
+    }
         
     [Test]
     public async Task Test_GetBuildingStageData()
@@ -519,7 +636,7 @@ public class TestInventoryBuilder : IntegrationTest
 
         var sessionSettings = SessionSettings.BuildDefault();
 
-        inventoryBuilder = BuildInventoryBuilder("A", sessionSettings);
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings);
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
 
@@ -606,8 +723,8 @@ public class TestInventoryBuilder : IntegrationTest
         blockingStream.Dispose();
     }
     
-    private InventoryBuilder BuildInventoryBuilder(string inventoryLetter = "A", SessionSettings? sessionSettings = null,
-        InventoryProcessData? inventoryProcessData = null, ByteSyncEndpoint? byteSyncEndpoint = null)
+    private InventoryBuilder BuildInventoryBuilder(SessionSettings? sessionSettings = null,
+        InventoryProcessData? inventoryProcessData = null, ByteSyncEndpoint? byteSyncEndpoint = null, OSPlatforms osPlatform = OSPlatforms.Windows)
     {
         if (sessionSettings == null)
         {
@@ -623,7 +740,20 @@ public class TestInventoryBuilder : IntegrationTest
         {
             byteSyncEndpoint = new ByteSyncEndpoint();
         }
+        
+        var sessionMemberInfo = new SessionMemberInfo
+        {
+            Endpoint = byteSyncEndpoint,
+            PositionInList = 0,
+            PrivateData = new()
+            {
+                MachineName = "MachineA"
+            }
+        };
+        
+        Mock<ILogger<InventoryBuilder>> loggerMock = new Mock<ILogger<InventoryBuilder>>();
 
-        return new InventoryBuilder(inventoryLetter, sessionSettings, inventoryProcessData, byteSyncEndpoint, $"Machine{inventoryLetter}");
+        return new InventoryBuilder(sessionMemberInfo, sessionSettings, inventoryProcessData,
+            osPlatform, FingerprintModes.Rsync, loggerMock.Object);
     }
 }
