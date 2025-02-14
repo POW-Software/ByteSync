@@ -312,7 +312,7 @@ public class InventoryBuilder : IInventoryBuilder
 
         if (IgnoreSystem)
         {
-            if (fileInfo.Name.In("desktop.ini", "thumbs.db", ".DS_Store")
+            if (fileInfo.Name.In("desktop.ini", "thumbs.db", ".desktop.ini", ".thumbs.db", ".DS_Store")
                 || fileInfo.Attributes.HasFlag(FileAttributes.System))
             {
                 _logger.LogInformation("File {File} is ignored because considered as system", fileInfo.FullName);
