@@ -2,6 +2,7 @@
 using System.Reactive.Subjects;
 using System.Threading;
 using ByteSync.Common.Helpers;
+using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Inventories;
 using ReactiveUI;
@@ -85,7 +86,7 @@ public class InventoryProcessData : ReactiveObject
         // InventoryBuilderData = new InventoryBuilderData();
     }
 
-    public List<InventoryBuilder>? InventoryBuilders { get; set; }
+    public List<IInventoryBuilder>? InventoryBuilders { get; set; }
 
     public List<Inventory>? Inventories
     {

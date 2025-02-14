@@ -76,7 +76,7 @@ public class ComparisonResultPreparer
                 OSPlatform = OSPlatforms.Windows
             };
             InventoryBuilder inventoryBuilder = new InventoryBuilder(inventoryData.Letter, SessionSettings, new InventoryProcessData(), endpoint, 
-                $"Machine{inventoryData.Letter}");
+                $"Machine{inventoryData.Letter}", OSPlatforms.Windows, FingerprintModes.Rsync);
             
             foreach (var pathItem in inventoryData.PathItems)
             {

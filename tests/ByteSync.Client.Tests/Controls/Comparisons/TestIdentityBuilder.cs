@@ -1,10 +1,12 @@
 ﻿using System.IO;
 using System.Linq;
+using ByteSync.Business;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.PathItems;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Inventories;
+using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Helpers;
 using ByteSync.Services.Comparisons;
 using ByteSync.Services.Inventories;
@@ -116,7 +118,7 @@ public class TestIdentityBuilder : AbstractTester
         };
         InventoryBuilder inventoryBuilder = new InventoryBuilder("A",
             SessionSettingsHelper.BuildDefaultSessionSettings(DataTypes.FilesDirectories, LinkingKeys.RelativePath), new InventoryProcessData(), endpoint,
-            $"MachineA");
+            $"MachineA", OSPlatforms.Windows, FingerprintModes.Rsync);
 
         inventoryBuilder.AddInventoryPart(pathItem);
             

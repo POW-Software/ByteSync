@@ -8,7 +8,9 @@ using ByteSync.Business.PathItems;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Inventories;
+using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Helpers;
+using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Comparisons;
@@ -16,13 +18,12 @@ using Serilog;
 
 namespace ByteSync.Services.Inventories;
 
-public class InventoryBuilder
+public class InventoryBuilder : IInventoryBuilder
 {
     private const int FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 4194304; 
         
-    public InventoryBuilder(string inventoryLetter, SessionSettings sessionSettings,
-        InventoryProcessData inventoryProcessData, ByteSyncEndpoint byteSyncEndpoint,
-        string machineName, FingerprintModes fingerprintMode = FingerprintModes.Rsync)
+    public InventoryBuilder(string inventoryLetter, SessionSettings sessionSettings, InventoryProcessData inventoryProcessData, 
+        ByteSyncEndpoint byteSyncEndpoint, string machineName, OSPlatforms osPlatform, FingerprintModes fingerprintMode)
     {
         InventoryLetter = inventoryLetter;
         SessionSettings = sessionSettings;
@@ -30,6 +31,7 @@ public class InventoryBuilder
         Endpoint = byteSyncEndpoint;
         FingerprintMode = fingerprintMode;
         MachineName = machineName;
+        OSPlatform = osPlatform;
 
         InventoryMonitorData = new InventoryMonitorData();
 
@@ -75,9 +77,11 @@ public class InventoryBuilder
         
     public InventoryIndexer Indexer { get; }
         
-    public ByteSyncEndpoint Endpoint { get; }
+    private ByteSyncEndpoint Endpoint { get; }
     
-    public string MachineName { get; set; }
+    private string MachineName { get; set; }
+    
+    private OSPlatforms OSPlatform { get; set; }
 
     public bool IgnoreHidden
     {
@@ -291,16 +295,22 @@ public class InventoryBuilder
         {
             return;
         }
-            
-        if (fileInfo.Attributes.HasFlag(FileAttributes.Hidden) && IgnoreHidden)
+
+        if (IgnoreHidden)
         {
-            Log.Information("File {File} is ignored because considered as hidden", fileInfo.FullName);
-            return;
+            if (fileInfo.Attributes.HasFlag(FileAttributes.Hidden) || 
+                (OSPlatform == OSPlatforms.Linux && fileInfo.Name.StartsWith(".")))
+            {
+                Log.Information("File {File} is ignored because considered as hidden", fileInfo.FullName);
+                return;
+            }
         }
+
 
         if (IgnoreSystem)
         {
-            if (fileInfo.Name.In("desktop.ini", "thumbs.db", ".DS_Store"))
+            if (fileInfo.Name.In("desktop.ini", "thumbs.db", ".DS_Store")
+                || fileInfo.Attributes.HasFlag(FileAttributes.System))
             {
                 Log.Information("File {File} is ignored because considered as system", fileInfo.FullName);
                 return;

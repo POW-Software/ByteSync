@@ -1,10 +1,12 @@
 ﻿using Autofac;
+using ByteSync.Business;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.Sessions;
 using ByteSync.Client.IntegrationTests.TestHelpers;
 using ByteSync.Client.IntegrationTests.TestHelpers.Business;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Inventories;
+using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
@@ -624,6 +626,7 @@ public class TestInventoryBuilder : IntegrationTest
             byteSyncEndpoint = new ByteSyncEndpoint();
         }
 
-        return new InventoryBuilder(inventoryLetter, sessionSettings, inventoryProcessData, byteSyncEndpoint, $"Machine{inventoryLetter}");
+        return new InventoryBuilder(inventoryLetter, sessionSettings, inventoryProcessData, byteSyncEndpoint, $"Machine{inventoryLetter}",
+            OSPlatforms.Windows, FingerprintModes.Rsync);
     }
 }

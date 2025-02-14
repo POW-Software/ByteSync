@@ -31,28 +31,29 @@ public class DataInventoryRunner : IDataInventoryRunner
     private readonly ICloudProxy _connectionManager;
     private readonly IInventoryService _inventoryService;
     private readonly IInventoryFileRepository _inventoryFileRepository;
-    private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly IFileUploaderFactory _fileUploaderFactory;
     private readonly ITimeTrackingCache _timeTrackingCache;
     private readonly IPathItemRepository _pathItemRepository;
     private readonly ISessionMemberService _sessionMemberService;
+    private readonly IInventoryBuilderFactory _inventoryBuilderFactory;
     private readonly ILogger<DataInventoryRunner> _logger;
 
     public DataInventoryRunner(ISessionService sessionService, ICloudSessionLocalDataManager cloudSessionLocalDataManager,
         ICloudProxy connectionManager, IInventoryService inventoryService, IInventoryFileRepository inventoryFileRepository, 
-        ISessionMemberRepository sessionMemberRepository, IFileUploaderFactory fileUploaderFactory, ITimeTrackingCache timeTrackingCache, 
-        IPathItemRepository pathItemRepository, ISessionMemberService sessionMemberService, ILogger<DataInventoryRunner> logger)
+        IFileUploaderFactory fileUploaderFactory, ITimeTrackingCache timeTrackingCache, 
+        IPathItemRepository pathItemRepository, ISessionMemberService sessionMemberService, 
+        IInventoryBuilderFactory inventoryBuilderFactory, ILogger<DataInventoryRunner> logger)
     {
         _sessionService = sessionService;
         _cloudSessionLocalDataManager = cloudSessionLocalDataManager;
         _connectionManager = connectionManager;
         _inventoryService = inventoryService;
         _inventoryFileRepository = inventoryFileRepository;
-        _sessionMemberRepository = sessionMemberRepository;
         _fileUploaderFactory = fileUploaderFactory;
         _timeTrackingCache = timeTrackingCache;
         _pathItemRepository = pathItemRepository;
         _sessionMemberService = sessionMemberService;
+        _inventoryBuilderFactory = inventoryBuilderFactory;
         _logger = logger;
         
         InventoryProcessData.MainStatus.DistinctUntilChanged()
@@ -296,7 +297,7 @@ public class DataInventoryRunner : IDataInventoryRunner
             // InventoryProcessData.HasAnalysisStarted = true;
             InventoryProcessData.AnalysisStatus.OnNext(LocalInventoryPartStatus.Running);
 
-            var inventoriesBuildersAndItems = new List<Tuple<InventoryBuilder, HashSet<IndexedItem>>>();
+            var inventoriesBuildersAndItems = new List<Tuple<IInventoryBuilder, HashSet<IndexedItem>>>();
             foreach (var inventoryBuilder in InventoryProcessData.InventoryBuilders!)
             {
                 var inventoriesFiles = _inventoryFileRepository.GetAllInventoriesFiles(LocalInventoryModes.Base);
@@ -351,20 +352,8 @@ public class DataInventoryRunner : IDataInventoryRunner
             InventoryProcessData.MainStatus.OnNext(LocalInventoryPartStatus.Running);
             InventoryProcessData.IdentificationStatus.OnNext(LocalInventoryPartStatus.Running);
             InventoryProcessData.AnalysisStatus.OnNext(LocalInventoryPartStatus.Pending);
-
-            SessionMemberInfo? currentSessionMemberInfo = null;
-            if (_sessionService.IsCloudSession)
-            {
-                currentSessionMemberInfo = _sessionMemberRepository.GetCurrentSessionMember();
-            }
-
-            var endpoint = _connectionManager.CurrentEndPoint;
-            if (endpoint == null)
-            {
-                throw new Exception("Current endpoint is null!");
-            }
             
-            List<InventoryBuilder> inventoryBuilders = new List<InventoryBuilder>();
+            var inventoryBuilders = new List<IInventoryBuilder>();
             var myPathItems = _pathItemRepository.CurrentMemberPathItems.Items.ToList();
             if (_sessionService.IsCloudSession)
             {
@@ -374,8 +363,7 @@ public class DataInventoryRunner : IDataInventoryRunner
                     _logger.LogInformation(" - {@letter:l}: {@path} ({type})", pathItem.Code, pathItem.Path, pathItem.Type);
                 }
 
-                var inventoryBuilder = BuildInventoryBuilder(currentSessionMemberInfo, endpoint,
-                    myPathItems.ToList());
+                var inventoryBuilder = _inventoryBuilderFactory.CreateInventoryBuilder(myPathItems);                
                 inventoryBuilders.Add(inventoryBuilder);
             }
             
@@ -393,19 +381,5 @@ public class DataInventoryRunner : IDataInventoryRunner
 
             return false;
         }
-    }
-    
-    private InventoryBuilder BuildInventoryBuilder(SessionMemberInfo sessionMemberInfo, ByteSyncEndpoint endpoint, ICollection<PathItem> pathItems)
-    {
-        var cloudSessionSettings = _sessionService.CurrentSessionSettings!;
-        
-        var inventoryBuilder = new InventoryBuilder(sessionMemberInfo.GetLetter(), cloudSessionSettings, InventoryProcessData, 
-            endpoint, sessionMemberInfo.MachineName, FingerprintModes.Rsync);
-        foreach (var pathItem in pathItems)
-        {
-            inventoryBuilder.AddInventoryPart(pathItem);
-        }
-
-        return inventoryBuilder;
     }
 }
