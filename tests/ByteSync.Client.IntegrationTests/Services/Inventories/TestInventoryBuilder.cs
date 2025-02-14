@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using ByteSync.Business;
 using ByteSync.Business.Inventories;
+using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Client.IntegrationTests.TestHelpers;
 using ByteSync.Client.IntegrationTests.TestHelpers.Business;
@@ -19,6 +20,7 @@ using ByteSync.Services.Sessions;
 using ByteSync.TestsCommon;
 using FluentAssertions;
 using ICSharpCode.SharpZipLib.Zip;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework.Legacy;
 
@@ -257,7 +259,7 @@ public class TestInventoryBuilder : IntegrationTest
 
         var sessionSettings = SessionSettings.BuildDefault();
 
-        inventoryBuilder = BuildInventoryBuilder("A", sessionSettings);
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings);
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
 
         ClassicAssert.ThrowsAsync<TaskCanceledException>(() => inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath, new CancellationToken(true)));
@@ -313,7 +315,7 @@ public class TestInventoryBuilder : IntegrationTest
         var sessionSettings = SessionSettings.BuildDefault();
         sessionSettings.ExcludeHiddenFiles = excludeHiddenFiles;
             
-        inventoryBuilder = BuildInventoryBuilder("A", sessionSettings);
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings);
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
 
@@ -364,7 +366,7 @@ public class TestInventoryBuilder : IntegrationTest
         var sessionSettings = SessionSettings.BuildDefault();
         sessionSettings.ExcludeSystemFiles = excludeSystemFiles;
             
-        inventoryBuilder = BuildInventoryBuilder("A", sessionSettings);
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings);
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
 
@@ -428,7 +430,7 @@ public class TestInventoryBuilder : IntegrationTest
         sessionSettings.ExcludeHiddenFiles = excludeHiddenFiles;
         sessionSettings.ExcludeSystemFiles = excludeSystemFiles;
             
-        inventoryBuilder = BuildInventoryBuilder("A", sessionSettings);
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings);
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
 
@@ -521,7 +523,7 @@ public class TestInventoryBuilder : IntegrationTest
 
         var sessionSettings = SessionSettings.BuildDefault();
 
-        inventoryBuilder = BuildInventoryBuilder("A", sessionSettings);
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings);
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
 
@@ -608,7 +610,7 @@ public class TestInventoryBuilder : IntegrationTest
         blockingStream.Dispose();
     }
     
-    private InventoryBuilder BuildInventoryBuilder(string inventoryLetter = "A", SessionSettings? sessionSettings = null,
+    private InventoryBuilder BuildInventoryBuilder(SessionSettings? sessionSettings = null,
         InventoryProcessData? inventoryProcessData = null, ByteSyncEndpoint? byteSyncEndpoint = null)
     {
         if (sessionSettings == null)
@@ -625,8 +627,20 @@ public class TestInventoryBuilder : IntegrationTest
         {
             byteSyncEndpoint = new ByteSyncEndpoint();
         }
+        
+        var sessionMemberInfo = new SessionMemberInfo
+        {
+            Endpoint = byteSyncEndpoint,
+            PositionInList = 0,
+            PrivateData = new()
+            {
+                MachineName = "MachineA"
+            }
+        };
+        
+        Mock<ILogger<InventoryBuilder>> loggerMock = new Mock<ILogger<InventoryBuilder>>();
 
-        return new InventoryBuilder(inventoryLetter, sessionSettings, inventoryProcessData, byteSyncEndpoint, $"Machine{inventoryLetter}",
-            OSPlatforms.Windows, FingerprintModes.Rsync);
+        return new InventoryBuilder(sessionMemberInfo, sessionSettings, inventoryProcessData,
+            OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object);
     }
 }

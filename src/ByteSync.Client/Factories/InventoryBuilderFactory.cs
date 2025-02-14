@@ -2,7 +2,11 @@
 using Autofac;
 using ByteSync.Business;
 using ByteSync.Business.Communications.Downloading;
+using ByteSync.Business.Inventories;
 using ByteSync.Business.PathItems;
+using ByteSync.Business.SessionMembers;
+using ByteSync.Business.Sessions;
+using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Controls.Inventories;
@@ -24,20 +28,27 @@ public class InventoryBuilderFactory : IInventoryBuilderFactory
         _context = context;
     }
     
-    public IInventoryBuilder CreateInventoryBuilder(List<PathItem> myPathItems)
+    public IInventoryBuilder CreateInventoryBuilder()
     {
         var sessionMemberRepository = _context.Resolve<ISessionMemberRepository>();
         var sessionService = _context.Resolve<ISessionService>();
         var inventoryService = _context.Resolve<IInventoryService>();
         var environmentService = _context.Resolve<IEnvironmentService>();
-        var connectionService = _context.Resolve<IConnectionService>();
+        var pathItemRepository = _context.Resolve<IPathItemRepository>();
         
         var sessionMember = sessionMemberRepository.GetCurrentSessionMember();
         var cloudSessionSettings = sessionService.CurrentSessionSettings!;
+        var myPathItems = pathItemRepository.CurrentMemberPathItems.Items.ToList();
+        //
+        // var inventoryBuilder = new InventoryBuilder(sessionMember, cloudSessionSettings, inventoryService.InventoryProcessData, 
+        //     environmentService.OSPlatform, FingerprintModes.Rsync);
         
-        var inventoryBuilder = new InventoryBuilder(sessionMember.GetLetter(), cloudSessionSettings,
-            inventoryService.InventoryProcessData, connectionService.CurrentEndPoint!, sessionMember.MachineName,
-            environmentService.OSPlatform, FingerprintModes.Rsync);
+        var inventoryBuilder = _context.Resolve<IInventoryBuilder>(
+            new TypedParameter(typeof(SessionMemberInfo), sessionMember),
+            new TypedParameter(typeof(SessionSettings), cloudSessionSettings),
+            new TypedParameter(typeof(InventoryProcessData), inventoryService.InventoryProcessData),
+            new TypedParameter(typeof(OSPlatforms), environmentService.OSPlatform),
+            new TypedParameter(typeof(FingerprintModes), FingerprintModes.Rsync));
 
         foreach (var pathItem in myPathItems)
         {

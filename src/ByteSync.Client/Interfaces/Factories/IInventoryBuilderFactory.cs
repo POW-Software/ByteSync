@@ -5,5 +5,5 @@ namespace ByteSync.Interfaces.Factories;
 
 public interface IInventoryBuilderFactory
 {
-    IInventoryBuilder CreateInventoryBuilder(List<PathItem> myPathItems);
+    IInventoryBuilder CreateInventoryBuilder();
 }

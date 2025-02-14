@@ -1,16 +1,11 @@
 ﻿using System.Reactive.Linq;
-using System.Threading.Tasks;
 using ByteSync.Business;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.Misc;
-using ByteSync.Business.PathItems;
-using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
-using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.SharedFiles;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.TimeTracking;
@@ -20,7 +15,6 @@ using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Comparisons;
 using ByteSync.Services.Misc;
-using ByteSync.Services.Sessions;
 
 namespace ByteSync.Services.Inventories;
 
@@ -28,30 +22,25 @@ public class DataInventoryRunner : IDataInventoryRunner
 {
     private readonly ISessionService _sessionService;
     private readonly ICloudSessionLocalDataManager _cloudSessionLocalDataManager;
-    private readonly ICloudProxy _connectionManager;
     private readonly IInventoryService _inventoryService;
     private readonly IInventoryFileRepository _inventoryFileRepository;
     private readonly IFileUploaderFactory _fileUploaderFactory;
     private readonly ITimeTrackingCache _timeTrackingCache;
-    private readonly IPathItemRepository _pathItemRepository;
     private readonly ISessionMemberService _sessionMemberService;
     private readonly IInventoryBuilderFactory _inventoryBuilderFactory;
     private readonly ILogger<DataInventoryRunner> _logger;
 
     public DataInventoryRunner(ISessionService sessionService, ICloudSessionLocalDataManager cloudSessionLocalDataManager,
-        ICloudProxy connectionManager, IInventoryService inventoryService, IInventoryFileRepository inventoryFileRepository, 
-        IFileUploaderFactory fileUploaderFactory, ITimeTrackingCache timeTrackingCache, 
-        IPathItemRepository pathItemRepository, ISessionMemberService sessionMemberService, 
+        IInventoryService inventoryService, IInventoryFileRepository inventoryFileRepository, 
+        IFileUploaderFactory fileUploaderFactory, ITimeTrackingCache timeTrackingCache, ISessionMemberService sessionMemberService, 
         IInventoryBuilderFactory inventoryBuilderFactory, ILogger<DataInventoryRunner> logger)
     {
         _sessionService = sessionService;
         _cloudSessionLocalDataManager = cloudSessionLocalDataManager;
-        _connectionManager = connectionManager;
         _inventoryService = inventoryService;
         _inventoryFileRepository = inventoryFileRepository;
         _fileUploaderFactory = fileUploaderFactory;
         _timeTrackingCache = timeTrackingCache;
-        _pathItemRepository = pathItemRepository;
         _sessionMemberService = sessionMemberService;
         _inventoryBuilderFactory = inventoryBuilderFactory;
         _logger = logger;
@@ -253,12 +242,6 @@ public class DataInventoryRunner : IDataInventoryRunner
     private List<InventoryFile>? BuildInventoriesLocalSharedFiles(List<Inventory> inventories, LocalInventoryModes localInventoryMode)
     {
         var session = _sessionService.CurrentSession;
-        var endpoint = _connectionManager.CurrentEndPoint;
-
-        if (session == null || endpoint == null)
-        {
-            return null;
-        }
 
         List<InventoryFile> result = new List<InventoryFile>();
         foreach (var inventory in inventories)
@@ -275,7 +258,8 @@ public class DataInventoryRunner : IDataInventoryRunner
             {
                 sharedFileDefinition.SharedFileType = SharedFileTypes.FullInventory;
             }
-            sharedFileDefinition.ClientInstanceId = endpoint.ClientInstanceId;
+
+            sharedFileDefinition.ClientInstanceId = inventory.Endpoint.ClientInstanceId;
             sharedFileDefinition.SessionId = session.SessionId;
             sharedFileDefinition.AdditionalName = inventory.Letter;
 
@@ -293,8 +277,6 @@ public class DataInventoryRunner : IDataInventoryRunner
         
         try
         {
-            // InventoryProcessData.IsAnalysisRunning = true;
-            // InventoryProcessData.HasAnalysisStarted = true;
             InventoryProcessData.AnalysisStatus.OnNext(LocalInventoryPartStatus.Running);
 
             var inventoriesBuildersAndItems = new List<Tuple<IInventoryBuilder, HashSet<IndexedItem>>>();
@@ -354,18 +336,8 @@ public class DataInventoryRunner : IDataInventoryRunner
             InventoryProcessData.AnalysisStatus.OnNext(LocalInventoryPartStatus.Pending);
             
             var inventoryBuilders = new List<IInventoryBuilder>();
-            var myPathItems = _pathItemRepository.CurrentMemberPathItems.Items.ToList();
-            if (_sessionService.IsCloudSession)
-            {
-                _logger.LogInformation("Local Inventory parts:");
-                foreach (var pathItem in myPathItems)
-                {
-                    _logger.LogInformation(" - {@letter:l}: {@path} ({type})", pathItem.Code, pathItem.Path, pathItem.Type);
-                }
-
-                var inventoryBuilder = _inventoryBuilderFactory.CreateInventoryBuilder(myPathItems);                
-                inventoryBuilders.Add(inventoryBuilder);
-            }
+            var inventoryBuilder = _inventoryBuilderFactory.CreateInventoryBuilder();                
+            inventoryBuilders.Add(inventoryBuilder);
             
             InventoryProcessData.InventoryBuilders = inventoryBuilders;
 

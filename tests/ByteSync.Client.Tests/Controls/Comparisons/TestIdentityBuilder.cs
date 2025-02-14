@@ -3,6 +3,7 @@ using System.Linq;
 using ByteSync.Business;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.PathItems;
+using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Inventories;
@@ -12,6 +13,8 @@ using ByteSync.Services.Comparisons;
 using ByteSync.Services.Inventories;
 using ByteSync.Tests.TestUtilities.Helpers;
 using ByteSync.TestsCommon;
+using Microsoft.Extensions.Logging;
+using Moq;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 
@@ -111,14 +114,27 @@ public class TestIdentityBuilder : AbstractTester
         {
             ClassicAssert.Fail("unknown type " + pathItemRoot.GetType().Name);
         }
+        
+        Mock<ILogger<InventoryBuilder>> loggerMock = new Mock<ILogger<InventoryBuilder>>();
             
         var endpoint = new ByteSyncEndpoint
         {
             ClientInstanceId = $"CII_A"
         };
-        InventoryBuilder inventoryBuilder = new InventoryBuilder("A",
-            SessionSettingsHelper.BuildDefaultSessionSettings(DataTypes.FilesDirectories, LinkingKeys.RelativePath), new InventoryProcessData(), endpoint,
-            $"MachineA", OSPlatforms.Windows, FingerprintModes.Rsync);
+
+        var sessionMemberInfo = new SessionMemberInfo
+        {
+            Endpoint = endpoint,
+            PositionInList = 0,
+            PrivateData = new()
+            {
+                MachineName = "MachineA"
+            }
+        };
+        
+        InventoryBuilder inventoryBuilder = new InventoryBuilder(sessionMemberInfo, 
+            SessionSettingsHelper.BuildDefaultSessionSettings(DataTypes.FilesDirectories, LinkingKeys.RelativePath), 
+            new InventoryProcessData(), OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object);
 
         inventoryBuilder.AddInventoryPart(pathItem);
             
