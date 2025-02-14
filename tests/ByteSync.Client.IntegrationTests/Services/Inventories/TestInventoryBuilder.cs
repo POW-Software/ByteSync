@@ -386,9 +386,10 @@ public class TestInventoryBuilder : IntegrationTest
     }
         
     [Test]
-    [TestCase(true, 0)]
-    [TestCase(false, 6)]
-    public async Task Test_SystemFiles(bool excludeSystemFiles, int expectedSystemFiles)
+    [TestCase(true, 2, 0)]
+    [TestCase(false, 8, 2, ExcludePlatform = "Linux")]
+    [TestCase(false, 6, 2, ExcludePlatform = "Win")]
+    public async Task Test_SystemFiles(bool excludeSystemFiles, int expectedSystemFiles, int expectedDesktopIniFiles)
     {
         InventoryBuilder inventoryBuilder;
         Inventory inventory;
@@ -433,9 +434,9 @@ public class TestInventoryBuilder : IntegrationTest
         inventory = inventoryBuilder.Inventory!;
         ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
         ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
-        ClassicAssert.AreEqual(2 + expectedSystemFiles, inventory.InventoryParts[0].FileDescriptions.Count);
+        ClassicAssert.AreEqual(expectedSystemFiles, inventory.InventoryParts[0].FileDescriptions.Count);
             
-        ClassicAssert.AreEqual(expectedSystemFiles / 3, 
+        ClassicAssert.AreEqual(expectedDesktopIniFiles, 
             inventory.InventoryParts[0].FileDescriptions.Count(fd => fd.Name.Equals("desktop.ini")));
     }
         
