@@ -34,8 +34,6 @@ public class InventoryBuilder : IInventoryBuilder
         OSPlatform = osPlatform;
 
         InventoryMonitorData = new InventoryMonitorData();
-
-            
         InventoryFileAnalyzer = new InventoryFileAnalyzer(this, RaiseFileAnalyzed, RaiseFileAnalyzeError);
         InventorySaver = new InventorySaver(this);
 
@@ -83,7 +81,7 @@ public class InventoryBuilder : IInventoryBuilder
     
     private OSPlatforms OSPlatform { get; set; }
 
-    public bool IgnoreHidden
+    private bool IgnoreHidden
     {
         get
         {
@@ -91,7 +89,7 @@ public class InventoryBuilder : IInventoryBuilder
         }
     }
         
-    public bool IgnoreSystem
+    private bool IgnoreSystem
     {
         get
         {
@@ -240,10 +238,14 @@ public class InventoryBuilder : IInventoryBuilder
             return;
         }
 
-        if (directoryInfo.Attributes.HasFlag(FileAttributes.Hidden) && IgnoreHidden)
+        if (IgnoreHidden)
         {
-            Log.Information("Directory {Directory} is ignored because considered as hidden", directoryInfo.FullName);
-            return;
+            if (directoryInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
+                (OSPlatform == OSPlatforms.Linux && directoryInfo.Name.StartsWith(".")))
+            {
+                Log.Information("Directory {Directory} is ignored because considered as hidden", directoryInfo.FullName);
+                return;
+            }
         }
 
         var directoryDescription = IdentityBuilder.BuildDirectoryDescription(inventoryPart, directoryInfo);
