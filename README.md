@@ -15,6 +15,7 @@
 
 ## Table of Contents
 - [Features](#features)
+- [Gallery](#gallery)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
@@ -37,46 +38,21 @@
 
 ## Gallery
 
-<div>
-    <table>
-    <tr>
-        <td align="center">
-            <img src="assets/gallery/2025-02-create-or-join-session.png" width="400"    alt="Create or Join a Cloud Session"/><br>
-            <sub>Create or Join a Cloud Session</sub>
-        </td>
-        <td align="center">
-            <img src="assets/gallery/2025-02-settings-and-data-sources.png" width="400"  alt="Settings & Data Sources"/><br>
-            <sub>Settings & Data Sources</sub>
-        </td>
-    </tr>
-    <tr>
-        <td align="center">
-            <img src="assets/gallery/2025-02-inventory-status-and-comparison-results.png" width="400" alt="Inventory Status & Comparison Results"/><br>
-            <sub>Inventory Status & Comparison Results</sub>
-        </td>
-        <td align="center">
-            <img src="assets/gallery/2025-02-synchronization.png" width="400"    alt="Synchronization"/><br>
-            <sub>Synchronization</sub>
-        </td>
-    </tr>
-    </table>
-</div>
-
 <div style="display: flex; flex-wrap: wrap; justify-content: center;">
-  <div style="flex: 1 0 400px; text-align: center; margin: 10px;">
-    <img src="assets/gallery/2025-02-create-or-join-session.png" style="width: 80%; border: 2px solid #ccc;" alt="Create or Join a Cloud Session"/><br>
+  <div style="flex: 1 0 400px; text-align: center; margin: 10px 10px 30px 10px;">
+    <img src="assets/gallery/2025-02-create-or-join-session.png" style="width: 80%; border: 1px solid #ccc;" alt="Create or Join a Cloud Session"/><br>
     <sub>Create or Join a Cloud Session</sub>
   </div>
-  <div style="flex: 1 0 400px; text-align: center; margin: 10px;">
-    <img src="assets/gallery/2025-02-settings-and-data-sources.png" style="width: 80%; border: 2px solid #ccc;" alt="Settings & Data Sources"/><br>
+  <div style="flex: 1 0 400px; text-align: center; margin: 10px 10px 30px 10px;">
+    <img src="assets/gallery/2025-02-settings-and-data-sources.png" style="width: 80%; border: 1px solid #ccc;" alt="Settings & Data Sources"/><br>
     <sub>Settings & Data Sources</sub>
   </div>
-  <div style="flex: 1 0 400px; text-align: center; margin: 10px;">
-    <img src="assets/gallery/2025-02-inventory-status-and-comparison-results.png" style="width: 80%; border: 2px solid #ccc;" alt="Inventory Status & Comparison Results"/><br>
+  <div style="flex: 1 0 400px; text-align: center; margin: 10px 10px 30px 10px;">
+    <img src="assets/gallery/2025-02-inventory-status-and-comparison-results.png" style="width: 80%; border: 1px solid #ccc;" alt="Inventory Status & Comparison Results"/><br>
     <sub>Inventory Status & Comparison Results</sub>
   </div>
-  <div style="flex: 1 0 400px; text-align: center; margin: 10px;">
-    <img src="assets/gallery/2025-02-synchronization-status.png" style="width: 80%; border: 2px solid #ccc;" alt="Synchronization Status"/><br>
+  <div style="flex: 1 0 400px; text-align: center; margin: 10px 10px 30px 10px;">
+    <img src="assets/gallery/2025-02-synchronization-status.png" style="width: 80%; border: 1px solid #ccc;" alt="Synchronization Status"/><br>
     <sub>Synchronization</sub>
   </div>
 </div>
