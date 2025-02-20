@@ -17,8 +17,6 @@
 - [Features](#features)
 - [Gallery](#gallery)
 - [Installation](#installation)
-- [Usage](#usage)
-- [Contributing](#contributing)
 - [Support](#support)
 - [License](#license)
 
@@ -31,7 +29,7 @@
 - 🌍 **Multi-device sync** – Seamlessly synchronize files **across up to 5 remote machines** in a single session.  
 - 🎯 **Customizable sync rules** – Set up rules based on **content, date, size, or presence** to automate synchronization.  
 - ☁️ **Easy deployment** – The **server runs in the cloud**, eliminating the need for complex infrastructure or manual FTP configurations. ByteSync ensures **quick and seamless setup** for hassle-free synchronization.  
-- 💻 **Cross-platform compatibility** – Works on **Windows, macOS, and Linux** for a smooth experience everywhere.  
+- 💻 **Cross-platform compatibility** – Works on **Windows, Linux and macOS** for a smooth experience everywhere.  
 - 🛠 **Open-source and flexible** – Fully **customizable** to adapt to your workflow and needs.  
 
 
