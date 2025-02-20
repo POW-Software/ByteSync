@@ -9,7 +9,7 @@
 
 # ByteSync
 
-**ByteSync** is an open-source on-demand file synchronization software designed to efficiently and securely synchronize files across systems. With end-to-end encryption, ByteSync ensures your data remains private and protected during transfers. By transferring only the differences between files, it optimizes speed and resource usage. Its advanced features make it a modern, self-orchestrated alternative to traditional FTP solutions.
+**ByteSync** is an open-source, on-demand file synchronization software designed for fast, secure, and efficient remote sync & backup. With end-to-end encryption, your data stays private and protected. By transferring only the differences between files and leveraging optimized batching, compression, and delta transfers, ByteSync minimizes resource usage while maximizing speed. Supporting up to 5 remote locations per session, it offers a smart, self-orchestrated alternative to traditional FTP/SFTP and sync solutions.
 
 ---
 
@@ -24,15 +24,16 @@
 
 ---
 
-## Features
+## Features  
 
-- **End-to-end encryption**: Ensures your data is secure and private.
-- **Smart synchronization**: Transfers only the differences between files to reduce transfer times and resource usage.
-- **Multi-device support**: Synchronize data across up to 5 remote machines.
-- **Fine-grained sync rules**: Customize synchronization rules to meet your specific needs.
-- **Self-orchestrated system**: No need for a centralized FTP server.
-- **Cross-platform**: Compatible with Windows, MacOS, and Linux.
-- **Open-source**: Flexible and customizable for your needs.
+- 🔒 **End-to-end encryption** – Keep your data **secure and private** during transfers.  
+- ⚡ **Smart synchronization** – Transfers **only the differences** between files, **compresses data**, groups small files to reduce overhead, and uploads a file **only once** when syncing with multiple recipients.  
+- 🌍 **Multi-device sync** – Seamlessly synchronize files **across up to 5 remote machines** in a single session.  
+- 🎯 **Customizable sync rules** – Set up rules based on **content, date, size, or presence** to automate synchronization.  
+- ☁️ **Easy deployment** – The **server runs in the cloud**, eliminating the need for complex infrastructure or manual FTP configurations. ByteSync ensures **quick and seamless setup** for hassle-free synchronization.  
+- 💻 **Cross-platform compatibility** – Works on **Windows, macOS, and Linux** for a smooth experience everywhere.  
+- 🛠 **Open-source and flexible** – Fully **customizable** to adapt to your workflow and needs.  
+
 
 ---
 
