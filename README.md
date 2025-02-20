@@ -40,21 +40,24 @@
 
 <div style="display: flex; flex-wrap: wrap; justify-content: center;">
   <div style="flex: 1 0 400px; text-align: center; margin: 10px 10px 30px 10px;">
-    <img src="assets/gallery/2025-02-create-or-join-session.png" style="width: 80%; border: 1px solid #ccc;" alt="Create or Join a Cloud Session"/>
+    <img src="assets/gallery/2025-02-create-or-join-session.png" style="width: 80%; border: 1px solid #ccc;" alt="Create or Join a Cloud Session"/><br>
     <sub>Create or Join a Cloud Session</sub>
     <br><br>
   </div>
   <div style="flex: 1 0 400px; text-align: center; margin: 10px 10px 30px 10px;">
     <img src="assets/gallery/2025-02-settings-and-data-sources.png" style="width: 80%; border: 1px solid #ccc;" alt="Settings & Data Sources"/><br>
     <sub>Settings & Data Sources</sub>
+    <br><br>
   </div>
   <div style="flex: 1 0 400px; text-align: center; margin: 10px 10px 30px 10px;">
     <img src="assets/gallery/2025-02-inventory-status-and-comparison-results.png" style="width: 80%; border: 1px solid #ccc;" alt="Inventory Status & Comparison Results"/><br>
     <sub>Inventory Status & Comparison Results</sub>
+    <br><br>
   </div>
   <div style="flex: 1 0 400px; text-align: center; margin: 10px 10px 30px 10px;">
     <img src="assets/gallery/2025-02-synchronization-status.png" style="width: 80%; border: 1px solid #ccc;" alt="Synchronization Status"/><br>
     <sub>Synchronization</sub>
+    <br><br>
   </div>
 </div>
 
