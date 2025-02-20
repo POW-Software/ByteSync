@@ -40,8 +40,9 @@
 
 <div style="display: flex; flex-wrap: wrap; justify-content: center;">
   <div style="flex: 1 0 400px; text-align: center; margin: 10px 10px 30px 10px;">
-    <img src="assets/gallery/2025-02-create-or-join-session.png" style="width: 80%; border: 1px solid #ccc;" alt="Create or Join a Cloud Session"/><br>
+    <img src="assets/gallery/2025-02-create-or-join-session.png" style="width: 80%; border: 1px solid #ccc;" alt="Create or Join a Cloud Session"/>
     <sub>Create or Join a Cloud Session</sub>
+    <br><br>
   </div>
   <div style="flex: 1 0 400px; text-align: center; margin: 10px 10px 30px 10px;">
     <img src="assets/gallery/2025-02-settings-and-data-sources.png" style="width: 80%; border: 1px solid #ccc;" alt="Settings & Data Sources"/><br>
