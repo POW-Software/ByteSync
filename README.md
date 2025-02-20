@@ -74,7 +74,7 @@ If you prefer to build ByteSync from source or want to deploy specific component
 ---
 
 ## Support
-If you encounter any issues, please open an [issue](https://github.com/POW-Software/ByteSync/issues) on GitHub.
+If you encounter any issues or if you have feature requests, please open an [issue](https://github.com/POW-Software/ByteSync/issues) on GitHub.
 
 ---
 
