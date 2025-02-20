@@ -1,3 +1,12 @@
+<div align="center">
+  <img src="assets/logo_bytesync_1280x640.png" width="320" />
+  <p>
+    <a href="https://github.com/POW-Software/ByteSync/blob/master/LICENSE">
+      <img alt="GitHub License" src="https://img.shields.io/github/license/POW-Software/ByteSync" />
+    </a>
+  </p>
+</div>
+
 # ByteSync
 
 **ByteSync** is an open-source on-demand file synchronization software designed to efficiently and securely synchronize files across systems. With end-to-end encryption, ByteSync ensures your data remains private and protected during transfers. By transferring only the differences between files, it optimizes speed and resource usage. Its advanced features make it a modern, self-orchestrated alternative to traditional FTP solutions.
@@ -6,6 +15,7 @@
 
 ## Table of Contents
 - [Features](#features)
+- [Gallery](#gallery)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
@@ -26,6 +36,29 @@
 
 ---
 
+## Gallery
+
+<div style="display: flex; flex-wrap: wrap; justify-content: center;">
+  <div style="flex: 1 0 400px; text-align: center; margin: 10px 10px 30px 10px;">
+    <img src="assets/gallery/2025-02-create-or-join-session.png" style="width: 80%; border: 1px solid #ccc;" alt="Create or Join a Cloud Session"/><br>
+    <sub>Create or Join a Cloud Session</sub>
+  </div>
+  <div style="flex: 1 0 400px; text-align: center; margin: 10px 10px 30px 10px;">
+    <img src="assets/gallery/2025-02-settings-and-data-sources.png" style="width: 80%; border: 1px solid #ccc;" alt="Settings & Data Sources"/><br>
+    <sub>Settings & Data Sources</sub>
+  </div>
+  <div style="flex: 1 0 400px; text-align: center; margin: 10px 10px 30px 10px;">
+    <img src="assets/gallery/2025-02-inventory-status-and-comparison-results.png" style="width: 80%; border: 1px solid #ccc;" alt="Inventory Status & Comparison Results"/><br>
+    <sub>Inventory Status & Comparison Results</sub>
+  </div>
+  <div style="flex: 1 0 400px; text-align: center; margin: 10px 10px 30px 10px;">
+    <img src="assets/gallery/2025-02-synchronization-status.png" style="width: 80%; border: 1px solid #ccc;" alt="Synchronization Status"/><br>
+    <sub>Synchronization</sub>
+  </div>
+</div>
+
+---
+
 ## Installation
 
 ### Download the Precompiled Client 
@@ -41,7 +74,7 @@ If you prefer to build ByteSync from source or want to deploy specific component
 ---
 
 ## Support
-If you encounter any issues, please open an [issue](https://github.com/POW-Software/ByteSync/issues) on GitHub.
+If you encounter any issues or if you have feature requests, please open an [issue](https://github.com/POW-Software/ByteSync/issues) on GitHub.
 
 ---
 
