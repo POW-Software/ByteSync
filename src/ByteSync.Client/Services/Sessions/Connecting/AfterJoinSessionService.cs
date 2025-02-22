@@ -126,7 +126,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
             
             foreach (var pathItem in myPathItems)
             {
-                await _pathItemsService.CreateAndAddPathItem(pathItem.Path, pathItem.Type);
+                await _pathItemsService.CreateAndTryAddPathItem(pathItem.Path, pathItem.Type);
             }
         }
 
@@ -141,7 +141,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
                     foreach (var encryptedPathItem in encryptedPathItems)
                     {
                         var pathItem = _dataEncrypter.DecryptPathItem(encryptedPathItem);
-                        await _pathItemsService.AddPathItem(pathItem);
+                        await _pathItemsService.TryAddPathItem(pathItem);
                     }
                 }
             }
@@ -201,21 +201,6 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         {
             DebugAddDesktopPathItem("testE1");
         }
-
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTTMP))
-        {
-            DebugAddDesktopPathItem("testTmp");
-        }
-
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_MYDATA))
-        {
-            _pathItemsService.CreateAndAddPathItem(@"D:\MyData", FileSystemTypes.Directory);
-        }
-
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_SAMPLEDATA))
-        {
-            _pathItemsService.CreateAndAddPathItem(@"E:\SampleData", FileSystemTypes.Directory);
-        }
     }
     
     private void DebugAddDesktopPathItem(string folderName)
@@ -228,7 +213,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
             return;
         }
 
-        _pathItemsService.CreateAndAddPathItem(
+        _pathItemsService.CreateAndTryAddPathItem(
             IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
             FileSystemTypes.Directory);
     }
