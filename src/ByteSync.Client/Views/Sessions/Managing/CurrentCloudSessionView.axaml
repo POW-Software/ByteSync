@@ -19,7 +19,7 @@
             <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 3 0 9">
 
                 <!-- Session ID -->
-                <StackPanel Orientation="Vertical" Margin="6 3 3 5">
+                <StackPanel Orientation="Vertical" Margin="6 3 3 3">
                     <Label Content="{localizations:Loc JoinCloudSession_SessionId}"></Label>
                     <StackPanel Orientation="Horizontal">
                         <TextBox Text="{Binding SessionId}" MinWidth="180" IsReadOnly="True" CaretBrush="Transparent"/>
@@ -34,7 +34,7 @@
                 </StackPanel>
 
                 <!-- Session Password -->
-                <StackPanel Orientation="Vertical" Margin="18,3,3,5">
+                <StackPanel Orientation="Vertical" Margin="18,3,3,3">
                     <Label Content="{localizations:Loc JoinCloudSession_SessionPassword}" ></Label>
                     <StackPanel Orientation="Horizontal">
                         <TextBox Text="{Binding SessionPassword}" MinWidth="180" IsReadOnly="True" CaretBrush="Transparent"/>
@@ -49,7 +49,7 @@
                 </StackPanel>
                 
                 <!-- Session Profile Name -->
-                <StackPanel Orientation="Vertical" Margin="18,3,3,5" IsVisible="False">
+                <StackPanel Orientation="Vertical" Margin="18,3,3,3" IsVisible="False">
                     <Label Content="{localizations:Loc StartComparison_SessionProfile}" ></Label>
                     <StackPanel Orientation="Horizontal">
                         <TextBox Text="{Binding ProfileName}" MaxWidth="240" IsReadOnly="True"/>
