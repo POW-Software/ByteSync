@@ -5,16 +5,19 @@ using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Extensions.Logging;
 
 namespace ByteSync.Functions.Http;
 
 public class AuthFunction
 {
     private readonly IAuthService _authService;
+    private readonly ILogger<AuthFunction> _logger;
 
-    public AuthFunction(IAuthService authService)
+    public AuthFunction(IAuthService authService, ILogger<AuthFunction> logger)
     {
         _authService = authService;
+        _logger = logger;
     }
 
     [AllowAnonymous]
@@ -24,7 +27,7 @@ public class AuthFunction
     {
         var loginData = await FunctionHelper.DeserializeRequestBody<LoginData>(req);
                 
-        var authResult  = await _authService.Authenticate(loginData, req.ExtractIpAddress());
+        var authResult  = await _authService.Authenticate(loginData, req.ExtractIpAddress(_logger));
 
         var response = req.CreateResponse();
         if (authResult.IsSuccess)
@@ -45,7 +48,7 @@ public class AuthFunction
     {
         var refreshTokensData = await FunctionHelper.DeserializeRequestBody<RefreshTokensData>(req);
                 
-        var authResult = await _authService.RefreshTokens(refreshTokensData, req.ExtractIpAddress());
+        var authResult = await _authService.RefreshTokens(refreshTokensData, req.ExtractIpAddress(_logger));
 
         var response = req.CreateResponse();
         if (authResult.IsSuccess)
