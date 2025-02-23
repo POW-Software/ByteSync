@@ -62,6 +62,7 @@ public class TestContextGenerator
         
         var mockConnectionService = _container.Resolve<Mock<IConnectionService>>();
         mockConnectionService.Setup(m => m.CurrentEndPoint).Returns(currentEndPoint);
+        mockConnectionService.Setup(m => m.ClientInstanceId).Returns(currentEndPoint.ClientInstanceId);
 
         return currentEndPoint;
     }
