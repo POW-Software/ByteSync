@@ -10,32 +10,6 @@ namespace ByteSync.Functions.UnitTests.Helpers.Misc;
 [TestFixture]
 public class IpAddressExtractorTests
 {
-    /// <summary>
-    /// Utility method to create a simulated HttpRequestData with a given “x-forwarded-for” header.
-    /// </summary>
-    /// <param name="headerValue">The value to associate with the header.</param>
-    /// <returns>A simulated instance of HttpRequestData.</returns>
-    private HttpRequestData CreateHttpRequestDataWithHeader(string? headerValue)
-    {
-        // var mockRequest = new Mock<HttpRequestData>();
-        //
-        // // Create a collection of headers and add the “x-forwarded-for” header
-        // var headers = new HttpHeadersCollection();
-        // headers.Add("x-forwarded-for", headerValue);
-        // mockRequest.SetupGet(r => r.Headers).Returns(headers);
-        //
-        // return mockRequest.Object;
-
-        var functionContext = new Mock<FunctionContext>().Object;
-        var request = new FakeHttpRequestData(functionContext);
-        if (headerValue != null)
-        {
-            request.Headers.Add("x-forwarded-for", headerValue);
-        }
-
-        return request;
-    }
-
     [Test]
     public void ExtractIpAddress_ShouldReturnIPv4_WhenIPv4WithoutPort()
     {
@@ -135,6 +109,16 @@ public class IpAddressExtractorTests
         var result = request.ExtractIpAddress();
         result.Should().BeEmpty();
     }
+    
+    [TestCase("localhost:1234")]
+    [TestCase("localhost")]
+    public void ExtractIpAddress_ShouldReturnEmpty_WhenInputIsLocalhostAndHostIsLocalhost(string host)
+    {
+        var request = CreateHttpRequestDataWithHeader("localhost");
+        request.Headers.Add("Host", host);
+        var result = request.ExtractIpAddress();
+        result.Should().Be("localhost");
+    }
 
     [Test]
     public void ExtractIpAddress_ShouldReturnIPv6Localhost_WhenInputIsIPv6Localhost()
@@ -150,5 +134,17 @@ public class IpAddressExtractorTests
         var request = CreateHttpRequestDataWithHeader("DUMB");
         var result = request.ExtractIpAddress();
         result.Should().BeEmpty();
+    }
+    
+    private HttpRequestData CreateHttpRequestDataWithHeader(string? headerValue)
+    {
+        var functionContext = new Mock<FunctionContext>().Object;
+        var request = new FakeHttpRequestData(functionContext);
+        if (headerValue != null)
+        {
+            request.Headers.Add("x-forwarded-for", headerValue);
+        }
+
+        return request;
     }
 }
