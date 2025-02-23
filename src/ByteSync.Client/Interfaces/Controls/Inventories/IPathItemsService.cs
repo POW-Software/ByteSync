@@ -5,7 +5,7 @@ namespace ByteSync.Interfaces.Controls.Inventories;
 
 public interface IPathItemsService
 {
-    Task TryAddPathItem(PathItem pathItem);
+    Task<bool> TryAddPathItem(PathItem pathItem);
     
     Task CreateAndTryAddPathItem(string path, FileSystemTypes fileSystemType);
 

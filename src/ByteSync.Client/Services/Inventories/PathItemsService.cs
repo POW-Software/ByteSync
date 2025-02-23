@@ -67,7 +67,7 @@ public class PathItemsService : IPathItemsService
         }
     }
 
-    public async Task TryAddPathItem(PathItem pathItem)
+    public async Task<bool> TryAddPathItem(PathItem pathItem)
     {
         if (await _pathItemChecker.CheckPathItem(pathItem, _pathItemRepository.Elements))
         {
@@ -83,7 +83,11 @@ public class PathItemsService : IPathItemsService
             {
                 ApplyAddPathItemLocally(pathItem);
             }
+            
+            return isAddOK;
         }
+        
+        return false;
     }
 
     public void ApplyAddPathItemLocally(PathItem pathItem)
