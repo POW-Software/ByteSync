@@ -5,9 +5,13 @@ namespace ByteSync.Interfaces.Controls.Inventories;
 
 public interface IPathItemsService
 {
-    Task AddPathItem(PathItem pathItem);
+    Task<bool> TryAddPathItem(PathItem pathItem);
     
-    Task CreateAndAddPathItem(string path, FileSystemTypes fileSystemType);
+    Task CreateAndTryAddPathItem(string path, FileSystemTypes fileSystemType);
+
+    public void ApplyAddPathItemLocally(PathItem pathItem);
     
-    Task RemovePathItem(PathItem pathItem);
+    Task<bool> TryRemovePathItem(PathItem pathItem);
+
+    public void ApplyRemovePathItemLocally(PathItem pathItem);
 }

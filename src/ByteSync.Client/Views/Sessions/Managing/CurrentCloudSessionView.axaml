@@ -18,7 +18,8 @@
         <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" DockPanel.Dock="Left">
             <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 3 0 9">
 
-                <StackPanel Orientation="Vertical" Margin="3">
+                <!-- Session ID -->
+                <StackPanel Orientation="Vertical" Margin="6 3 3 3">
                     <Label Content="{localizations:Loc JoinCloudSession_SessionId}"></Label>
                     <StackPanel Orientation="Horizontal">
                         <TextBox Text="{Binding SessionId}" MinWidth="180" IsReadOnly="True" CaretBrush="Transparent"/>
@@ -32,6 +33,7 @@
                     </StackPanel>
                 </StackPanel>
 
+                <!-- Session Password -->
                 <StackPanel Orientation="Vertical" Margin="18,3,3,3">
                     <Label Content="{localizations:Loc JoinCloudSession_SessionPassword}" ></Label>
                     <StackPanel Orientation="Horizontal">
@@ -46,6 +48,7 @@
                     </StackPanel>
                 </StackPanel>
                 
+                <!-- Session Profile Name -->
                 <StackPanel Orientation="Vertical" Margin="18,3,3,3" IsVisible="False">
                     <Label Content="{localizations:Loc StartComparison_SessionProfile}" ></Label>
                     <StackPanel Orientation="Horizontal">
@@ -63,7 +66,7 @@
                     </StackPanel>
                 </Button>
 
-                <!-- Save Profile -->
+                <!-- Save Profile Profile -->
                 <Button Classes="GenericButton" Margin="18,3,3,5"
                         Command="{Binding Path=CreateCloudSessionProfileCommand}" HorizontalAlignment="Left" VerticalAlignment="Bottom"
                         IsVisible="False">
@@ -73,8 +76,8 @@
                     </StackPanel>
                 </Button>
                 
-                <!-- Quitter -->
-                <Button Classes="GenericButton" Margin="18,3,3,5"
+                <!-- Quit Session -->
+                <Button Classes="GenericButton" Margin="18,3,6,5"
                         Command="{Binding Path=QuitSessionCommand}" HorizontalAlignment="Left" VerticalAlignment="Bottom">
                     <StackPanel Orientation="Horizontal">
                         <misc:Icon FontSize="12" Value="RegularLogOut" />
@@ -92,7 +95,7 @@
 
             </WrapPanel>
             
-            <!-- Permet de faire des séparateurs avec Dash, remplace les Borders vides avec épaisseur de 2 en Avalonia -->
+            <!-- Can be used to make dividers with Dash, replaces empty Borders with a thickness of 2 in Avalonia -->
             <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
                        StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
             

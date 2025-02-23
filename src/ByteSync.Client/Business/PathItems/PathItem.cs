@@ -1,12 +1,11 @@
 ﻿using ByteSync.Business.SessionMembers;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Common.Business.Sessions.Cloud;
-using ByteSync.Common.Helpers;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.Business.PathItems;
 
-public class PathItem
+public class PathItem : ReactiveObject
 {
     public PathItem()
     {

@@ -7,7 +7,7 @@ using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Storage;
 using Microsoft.Azure.SignalR.Management;
 
-namespace ByteSync.Functions.Helpers;
+namespace ByteSync.Functions.Helpers.Loaders;
 
 public static class DependencyInjectionLoader
 {

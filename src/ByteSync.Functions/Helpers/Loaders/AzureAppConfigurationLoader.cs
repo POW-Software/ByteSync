@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 using Microsoft.Extensions.Hosting;
 
-namespace ByteSync.Functions.Helpers;
+namespace ByteSync.Functions.Helpers.Loaders;
 
 public static class AzureAppConfigurationLoader
 {

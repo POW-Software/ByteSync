@@ -61,13 +61,13 @@ public class PathItemsService : IPathItemsService
                 foreach (var encryptedPathItem in encryptedPathItems)
                 {
                     var pathItem = _dataEncrypter.DecryptPathItem(encryptedPathItem);
-                    await AddPathItem(pathItem);
+                    await TryAddPathItem(pathItem);
                 }
             }
         }
     }
 
-    public async Task AddPathItem(PathItem pathItem)
+    public async Task<bool> TryAddPathItem(PathItem pathItem)
     {
         if (await _pathItemChecker.CheckPathItem(pathItem, _pathItemRepository.Elements))
         {
@@ -81,12 +81,21 @@ public class PathItemsService : IPathItemsService
 
             if (isAddOK)
             {
-                _pathItemRepository.AddOrUpdate(pathItem);
+                ApplyAddPathItemLocally(pathItem);
             }
+            
+            return isAddOK;
         }
+        
+        return false;
     }
 
-    public Task CreateAndAddPathItem(string path, FileSystemTypes fileSystemType)
+    public void ApplyAddPathItemLocally(PathItem pathItem)
+    {
+        _pathItemRepository.AddOrUpdate(pathItem);
+    }
+
+    public Task CreateAndTryAddPathItem(string path, FileSystemTypes fileSystemType)
     {
         var pathItem = new PathItem();
 
@@ -98,23 +107,30 @@ public class PathItemsService : IPathItemsService
         pathItem.Code = sessionMemberInfo.GetLetter() +
                         (_pathItemRepository.Elements.Count(pi => pi.BelongsTo(sessionMemberInfo)) + 1);
 
-        return AddPathItem(pathItem);
+        return TryAddPathItem(pathItem);
     }
 
-    public async Task RemovePathItem(PathItem pathItem)
+    public async Task<bool> TryRemovePathItem(PathItem pathItem)
     {
         var encryptedPathItem = _dataEncrypter.EncryptPathItem(pathItem);
         var isRemoveOK = await _inventoryApiClient.RemovePathItem(_sessionService.SessionId!, encryptedPathItem);
         
         if (isRemoveOK)
         {
-            _pathItemRepository.Remove(pathItem);
-        
-            var sessionMemberInfo = _sessionMemberRepository.GetElement(pathItem.ClientInstanceId)!;
-            UpdateCodesForMember(sessionMemberInfo);
+            ApplyRemovePathItemLocally(pathItem);
         }
+        
+        return isRemoveOK;
     }
-    
+
+    public void ApplyRemovePathItemLocally(PathItem pathItem)
+    {
+        _pathItemRepository.Remove(pathItem);
+        
+        var sessionMemberInfo = _sessionMemberRepository.GetElement(pathItem.ClientInstanceId)!;
+        UpdateCodesForMember(sessionMemberInfo);
+    }
+
     private void UpdateCodesForAllMembers(IEnumerable<SessionMemberInfo> allSessionMembersInfos)
     {
         foreach (var sessionMemberInfo in allSessionMembersInfos)

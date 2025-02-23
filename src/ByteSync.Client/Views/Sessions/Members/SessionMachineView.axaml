@@ -133,9 +133,9 @@
                 </Interaction.Behaviors>
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding PathItem.Code}" Header="Code" Width="Auto" FontSize="14"/>
+                    <DataGridTextColumn Binding="{Binding Code}" Header="Code" Width="Auto" FontSize="14"/>
                     <DataGridTextColumn Binding="{Binding ElementType}" Header="Type" Width="Auto" FontSize="14"/>
-                    <DataGridTemplateColumn  Header="Path" Width="*" CanUserResize="True">
+                    <DataGridTemplateColumn Header="Path" Width="*" CanUserResize="True">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel VerticalAlignment="Center">

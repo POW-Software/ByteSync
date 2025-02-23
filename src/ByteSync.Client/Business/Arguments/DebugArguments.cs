@@ -16,9 +16,6 @@ public static class DebugArguments
     internal const string ADD_PATHITEM_TESTD1 = "--add-pathItem-testD1";
     internal const string ADD_PATHITEM_TESTE = "--add-pathItem-testE";
     internal const string ADD_PATHITEM_TESTE1 = "--add-pathItem-testE1";
-    internal const string ADD_PATHITEM_TESTTMP = "--add-pathItem-testTmp";
-    internal const string ADD_PATHITEM_MYDATA = "--add-pathItem-myData";
-    internal const string ADD_PATHITEM_SAMPLEDATA = "--add-pathItem-SampleData";
 
     internal const string FORCE_SLOW = "--force-slow";
 

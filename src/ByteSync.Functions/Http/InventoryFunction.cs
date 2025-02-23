@@ -3,7 +3,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions.Cloud;
-using ByteSync.Functions.Helpers;
+using ByteSync.Functions.Helpers.Misc;
 using ByteSync.ServerCommon.Commands.Inventories;
 using MediatR;
 

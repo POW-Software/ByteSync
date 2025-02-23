@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using ByteSync.Common.Business.Auth;
-using ByteSync.Functions.Helpers;
+using ByteSync.Functions.Helpers.Misc;
 using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Azure.Functions.Worker;
@@ -24,7 +24,7 @@ public class AuthFunction
     {
         var loginData = await FunctionHelper.DeserializeRequestBody<LoginData>(req);
                 
-        var authResult  = await _authService.Authenticate(loginData, ExtractIpAddress(req));
+        var authResult  = await _authService.Authenticate(loginData, req.ExtractIpAddress());
 
         var response = req.CreateResponse();
         if (authResult.IsSuccess)
@@ -45,7 +45,7 @@ public class AuthFunction
     {
         var refreshTokensData = await FunctionHelper.DeserializeRequestBody<RefreshTokensData>(req);
                 
-        var authResult = await _authService.RefreshTokens(refreshTokensData, ExtractIpAddress(req));
+        var authResult = await _authService.RefreshTokens(refreshTokensData, req.ExtractIpAddress());
 
         var response = req.CreateResponse();
         if (authResult.IsSuccess)
@@ -58,22 +58,5 @@ public class AuthFunction
         }
         
         return response;
-    }
-
-    private string ExtractIpAddress(HttpRequestData req)
-    {
-        var headerDictionary = req.Headers.ToDictionary(x => x.Key.ToLower(), x => x.Value, StringComparer.Ordinal);
-        var key = "x-forwarded-for";
-        if (headerDictionary.TryGetValue(key, out var headerValues))
-        {
-            var ipn = headerValues.FirstOrDefault()?.Split([',']).FirstOrDefault()?.Split([':']).FirstOrDefault();
-            if (IPAddress.TryParse(ipn, out var ipAddress))
-            {
-                var ipAddressString = ipAddress.ToString();
-                return ipAddressString;
-            }
-        }
-
-        return "";
     }
 }
