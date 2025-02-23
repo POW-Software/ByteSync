@@ -9,6 +9,7 @@ using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using FakeItEasy;
+using FakeItEasy.Creation;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using RedLockNet;
@@ -18,20 +19,26 @@ namespace ByteSync.ServerCommon.Tests.Commands;
 
 public class StartInventoryCommandHandlerTests
 {
-    private readonly ICloudSessionsRepository _mockCloudSessionsRepository;
-    private readonly IInventoryRepository _mockInventoryRepository;
-    private readonly ISharedFilesService _mockSharedFilesService;
-    private readonly IByteSyncClientCaller _mockByteSyncClientCaller;
-    private readonly ICacheService _mockCacheService;
-    private readonly ILogger<StartInventoryCommandHandler> _mockLogger;
+    private ICloudSessionsRepository _mockCloudSessionsRepository;
+    private IInventoryRepository _mockInventoryRepository;
+    private ISharedFilesService _mockSharedFilesService;
+    private IByteSyncClientCaller _mockByteSyncClientCaller;
+    private ICacheService _mockCacheService;
+    private ILogger<StartInventoryCommandHandler> _mockLogger;
     
-    private readonly StartInventoryCommandHandler _startInventoryCommandHandler;
+    private StartInventoryCommandHandler _startInventoryCommandHandler;
 
     public StartInventoryCommandHandlerTests()
     {
+
+    }
+
+    [SetUp]
+    public void SetUp()
+    {
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
-        _mockSharedFilesService = A.Fake<ISharedFilesService>();
+        _mockSharedFilesService = A.Fake<ISharedFilesService>(options => options.Strict());
         _mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
         _mockCacheService = A.Fake<ICacheService>();
         _mockLogger = A.Fake<ILogger<StartInventoryCommandHandler>>();
@@ -74,10 +81,12 @@ public class StartInventoryCommandHandlerTests
             .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
             .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.WaitingForTransaction));
         
-        A.CallTo(() => _mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<InventoryData, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
             .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
 
+        A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).DoesNothing();
+        
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
 
         var request = new StartInventoryRequest(sessionId, client);
@@ -87,6 +96,7 @@ public class StartInventoryCommandHandlerTests
 
         // Assert
         result.Status.Should().Be(StartInventoryStatuses.LessThan2Members);
+        A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustNotHaveHappened();
     }
     
     [Test]
@@ -108,9 +118,11 @@ public class StartInventoryCommandHandlerTests
             .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
             .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.WaitingForTransaction));
 
-        A.CallTo(() => _mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<InventoryData, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
             .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
+        
+        A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).DoesNothing();
         
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
 
@@ -121,6 +133,7 @@ public class StartInventoryCommandHandlerTests
 
         // Assert
         result.Status.Should().Be(StartInventoryStatuses.MoreThan5Members);
+        A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustNotHaveHappened();
     }
     
     [Test]
@@ -138,9 +151,11 @@ public class StartInventoryCommandHandlerTests
             .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
             .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.WaitingForTransaction));
         
-        A.CallTo(() => _mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<InventoryData, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
             .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
+        
+        A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).DoesNothing();
         
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
 
@@ -151,6 +166,7 @@ public class StartInventoryCommandHandlerTests
 
         // Assert
         result.Status.Should().Be(StartInventoryStatuses.UnknownError);
+        A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustHaveHappenedOnceExactly();
     }
     
     [Test]
@@ -172,9 +188,11 @@ public class StartInventoryCommandHandlerTests
             .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
             .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.WaitingForTransaction));
         
-        A.CallTo(() => _mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<InventoryData, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
             .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
+        
+        A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).DoesNothing();
 
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
 
@@ -185,6 +203,7 @@ public class StartInventoryCommandHandlerTests
 
         // Assert
         result.Status.Should().Be(StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
+        A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustHaveHappenedOnceExactly();
     }
     
     [Test]
@@ -209,9 +228,11 @@ public class StartInventoryCommandHandlerTests
             .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
             .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.WaitingForTransaction));
         
-        A.CallTo(() => _mockInventoryRepository.Update(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<InventoryData, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
             .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
+        
+        A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).DoesNothing();
 
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
 
@@ -223,5 +244,6 @@ public class StartInventoryCommandHandlerTests
         // Assert
         result.Status.Should().Be(StartInventoryStatuses.InventoryStartedSucessfully);
         A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).MustHaveHappenedOnceExactly();
+        A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustHaveHappenedOnceExactly();
     }
 }
