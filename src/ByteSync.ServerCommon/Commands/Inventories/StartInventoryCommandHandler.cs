@@ -2,7 +2,6 @@
 using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
-using ByteSync.ServerCommon.Helpers;
 using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
@@ -89,13 +88,11 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
         
         if (sessionUpdateResult.IsNoOperation)
         {
-            _logger.LogInformation("StartInventory: session {sessionId} already activated", sessionId);
-            startInventoryResult = StartInventoryResult.BuildOK();
+            startInventoryResult = LogAndBuildStartInventoryResult(sessionId, StartInventoryStatuses.InventoryStartedSucessfully, "already activated");
         }
         else if (sessionUpdateResult.IsNotFound)
         {
-            _logger.LogInformation("StartInventory: session {sessionId} not found", sessionId);
-            startInventoryResult = StartInventoryResult.BuildFrom(StartInventoryStatuses.SessionNotFound);
+            startInventoryResult = LogAndBuildStartInventoryResult(sessionId, StartInventoryStatuses.SessionNotFound);
         }
         else
         {
@@ -171,15 +168,23 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
         
         return sessionUpdateResult;
     }
-
-    // private StartInventoryResult LogAndBuildStartInventoryResult(CloudSessionData cloudSessionData, StartInventoryStatuses status)
-    // {
-    //     return LogAndBuildStartInventoryResult(cloudSessionData.SessionId, status);
-    // }
     
-    private StartInventoryResult LogAndBuildStartInventoryResult(CloudSessionData cloudSessionData, StartInventoryStatuses status)
+    private StartInventoryResult LogAndBuildStartInventoryResult(CloudSessionData cloudSessionData, StartInventoryStatuses status, 
+        string? details = null)
     {
-        _logger.LogInformation("StartInventory: session {SessionId} - {Status}", cloudSessionData.SessionId, status);
+        return LogAndBuildStartInventoryResult(cloudSessionData.SessionId, status, details);
+    }
+    
+    private StartInventoryResult LogAndBuildStartInventoryResult(string sessionId, StartInventoryStatuses status, string? details = null)
+    {
+        if (details != null)
+        {
+            _logger.LogInformation("StartInventory: session {SessionId} - {Status} - {Details}", sessionId, status, details);
+        }
+        else
+        {
+            _logger.LogInformation("StartInventory: session {SessionId} - {Status}", sessionId, status);
+        }
         return StartInventoryResult.BuildFrom(status);
     }
 }
