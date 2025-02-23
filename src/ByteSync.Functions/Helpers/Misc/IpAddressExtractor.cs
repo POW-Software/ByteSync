@@ -1,12 +1,11 @@
 ﻿using System.Net;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Logging;
 
 namespace ByteSync.Functions.Helpers.Misc;
 
 public static class IpAddressExtractor
 {
-    public static string ExtractIpAddress(this HttpRequestData req, ILogger? logger = null)
+    public static string ExtractIpAddress(this HttpRequestData req)
     {
         var headerDictionary = req.Headers.ToDictionary(x => x.Key.ToLower(), x => x.Value, StringComparer.Ordinal);
         if (headerDictionary.TryGetValue("x-forwarded-for", out var headerValues))
@@ -23,7 +22,6 @@ public static class IpAddressExtractor
                         var ipPart = ipSegment.Substring(1, endBracketIndex - 1);
                         if (IPAddress.TryParse(ipPart, out var ipAddress))
                         {
-                            logger?.LogInformation("return 1 - " + ipAddress.ToString());
                             return ipAddress.ToString();
                         }
                     }
@@ -33,7 +31,6 @@ public static class IpAddressExtractor
                     // Direct parsing attempt (IPv4 without port or IPv6 without port)
                     if (IPAddress.TryParse(ipSegment, out var ipAddress))
                     {
-                        logger?.LogInformation("return 2 - " + ipAddress.ToString());
                         return ipAddress.ToString();
                     }
                     
@@ -43,7 +40,6 @@ public static class IpAddressExtractor
                         var possibleIpv4 = ipSegment.Split(':')[0];
                         if (IPAddress.TryParse(possibleIpv4, out ipAddress))
                         {
-                            logger?.LogInformation("return 3 - " + ipAddress.ToString());
                             return ipAddress.ToString();
                         }
                     }
@@ -51,7 +47,6 @@ public static class IpAddressExtractor
             }
         }
         
-        logger?.LogInformation("return 4 - empty");
         return "";
     }
 }
