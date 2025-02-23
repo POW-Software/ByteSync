@@ -43,7 +43,7 @@ public class ClientSoftwareVersionService : IClientSoftwareVersionService
     {
         if (_appSettings.SkipClientsVersionCheck)
         {
-            _logger.LogWarning("SkipClientsVersionCheck is set to true, skipping version check for client {ClientInstanceId} with version {Version}", 
+            _logger.LogWarning("SkipClientsVersionCheck 222 is set to true, skipping version check for client {ClientInstanceId} with version {Version}", 
                 loginData.ClientInstanceId, loginData.Version);
             return true;
         }
