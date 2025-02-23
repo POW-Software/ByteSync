@@ -76,7 +76,7 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
             var dto = new InventoryStartedDTO(sessionId, client.ClientInstanceId, sessionUpdateResult.Element!.SessionSettings);
             await _byteSyncClientCaller.SessionGroupExcept(sessionId, client).InventoryStarted(dto);
             
-            _logger.LogInformation("StartInventory: session {@SessionId} - OK", sessionId);
+            _logger.LogInformation("StartInventory: session {SessionId} - OK", sessionId);
         }
 
         return startInventoryResult!;
