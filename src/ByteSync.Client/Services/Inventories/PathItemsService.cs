@@ -110,7 +110,7 @@ public class PathItemsService : IPathItemsService
         return TryAddPathItem(pathItem);
     }
 
-    public async Task TryRemovePathItem(PathItem pathItem)
+    public async Task<bool> TryRemovePathItem(PathItem pathItem)
     {
         var encryptedPathItem = _dataEncrypter.EncryptPathItem(pathItem);
         var isRemoveOK = await _inventoryApiClient.RemovePathItem(_sessionService.SessionId!, encryptedPathItem);
@@ -119,6 +119,8 @@ public class PathItemsService : IPathItemsService
         {
             ApplyRemovePathItemLocally(pathItem);
         }
+        
+        return isRemoveOK;
     }
 
     public void ApplyRemovePathItemLocally(PathItem pathItem)

@@ -20,14 +20,21 @@ public class TestContextGenerator
         _container = container;
     }
 
-    public void GenerateSession()
+    public string GenerateSession()
     {
+        var sessionId = Guid.NewGuid().ToString();
+        
         Mock<ISessionService> mockSessionService = _container.Resolve<Mock<ISessionService>>();
+        
         mockSessionService.Setup(m => m.CurrentSession).Returns(new CloudSession
         {
-            SessionId = Guid.NewGuid().ToString(),
+            SessionId = sessionId,
             Created = DateTime.UtcNow,
         });
+        
+        mockSessionService.Setup(m => m.SessionId).Returns(sessionId);
+        
+        return sessionId;
     }
 
     public ByteSyncEndpoint GenerateCurrentEndpoint()

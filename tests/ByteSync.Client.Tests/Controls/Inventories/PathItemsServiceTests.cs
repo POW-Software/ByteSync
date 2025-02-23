@@ -1,6 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
-using ByteSync.Business.PathItems;
+﻿using ByteSync.Business.PathItems;
+using ByteSync.Business.SessionMembers;
+using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces;
@@ -10,159 +10,120 @@ using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Inventories;
-using ByteSync.Tests.TestUtilities.Helpers;
-using ByteSync.Tests.TestUtilities.Mock;
+using DynamicData;
+using DynamicData.Binding;
 using Moq;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 
 namespace ByteSync.Tests.Controls.Inventories;
 
+[TestFixture]
 public class PathItemsServiceTests
 {
-    private Mock<ISessionService> _mockSessionService;
-    private Mock<IPathItemChecker> _mockPathItemChecker;
-    private Mock<IDataEncrypter> _mockDataEncrypter;
-    private Mock<IConnectionService> _mockConnectionService;
-    private Mock<IInventoryApiClient> _mockInventoryApiClient;
-    private Mock<IPathItemRepository> _mockPathItemRepository;
-    private Mock<ISessionMemberRepository> _mockSessionMemberRepository;
-    
-    private PathItemsService _pathItemsService;
+    private Mock<ISessionService> _sessionService;
+    private Mock<IPathItemChecker> _pathItemChecker;
+    private Mock<IDataEncrypter> _dataEncrypter;
+    private Mock<IConnectionService> _connectionService;
+    private Mock<IInventoryApiClient> _inventoryApiClient;
+    private Mock<IPathItemRepository> _pathItemRepository;
+    private Mock<ISessionMemberRepository> _sessionMemberRepository;
+    private PathItemsService _service;
 
     [SetUp]
-    public void SetUp()
+    public void Setup()
     {
-        _mockSessionService = new Mock<ISessionService>();
-        _mockPathItemChecker = new Mock<IPathItemChecker>();
-        _mockDataEncrypter = new Mock<IDataEncrypter>();
-        _mockConnectionService = new Mock<IConnectionService>();
-        _mockInventoryApiClient = new Mock<IInventoryApiClient>();
-        _mockPathItemRepository = new Mock<IPathItemRepository>();
-        _mockSessionMemberRepository = new Mock<ISessionMemberRepository>();
+        var mockObservable = new SourceCache<SessionMemberInfo, string>(r => r.ClientInstanceId).Connect()
+            .Sort(SortExpressionComparer<SessionMemberInfo>.Ascending(smi => smi.JoinedSessionOn),
+            SortOptimisations.ComparesImmutableValuesOnly);
 
-        _pathItemsService = new PathItemsService(
-            _mockSessionService.Object,
-            _mockPathItemChecker.Object,
-            _mockDataEncrypter.Object,
-            _mockConnectionService.Object,
-            _mockInventoryApiClient.Object,
-            _mockPathItemRepository.Object,
-            _mockSessionMemberRepository.Object
+        _sessionMemberRepository = new Mock<ISessionMemberRepository>();
+        _sessionMemberRepository
+            .SetupGet(x => x.SortedSessionMembersObservable)
+            .Returns(mockObservable);
+        
+        _sessionService = new Mock<ISessionService>();
+        _pathItemChecker = new Mock<IPathItemChecker>();
+        _dataEncrypter = new Mock<IDataEncrypter>();
+        _connectionService = new Mock<IConnectionService>();
+        _inventoryApiClient = new Mock<IInventoryApiClient>();
+        _pathItemRepository = new Mock<IPathItemRepository>();
+        _sessionMemberRepository = new Mock<ISessionMemberRepository>();
+
+        _service = new PathItemsService(
+            _sessionService.Object,
+            _pathItemChecker.Object,
+            _dataEncrypter.Object,
+            _connectionService.Object,
+            _inventoryApiClient.Object,
+            _pathItemRepository.Object,
+            _sessionMemberRepository.Object
         );
     }
-    /*
+
     [Test]
-    public async Task AddPathItem_ValidPathItem_AddsPathItemToCache()
+    public async Task TryAddPathItem_ShouldAddToRepository_WhenCheckPasses()
     {
-        // Arrange
-        var pathItem = new PathItem
-        {
-            Path = "/test/path",
-            Type = FileSystemTypes.File,
-            ClientInstanceId = Guid.NewGuid().ToString(),
-            Code = "A1"
-        };
+        _pathItemChecker
+            .Setup(x => x.CheckPathItem(It.IsAny<PathItem>(), It.IsAny<IEnumerable<PathItem>>()))
+            .ReturnsAsync(true);
+        _connectionService.SetupGet(x => x.ClientInstanceId).Returns("TestClient");
+        _sessionService.SetupGet(x => x.CurrentSession).Returns(new CloudSession { SessionId = "Session1" });
+        _inventoryApiClient.Setup(x => x.AddPathItem("Session1", It.IsAny<EncryptedPathItem>()))
+            .ReturnsAsync(true);
 
-        var encryptedPathItem = new EncryptedPathItem();
+        var pathItem = new PathItem { ClientInstanceId = "TestClient" };
+        await _service.TryAddPathItem(pathItem);
 
-        _mockPathItemChecker.Setup(x => x.CheckPathItem(It.IsAny<PathItem>())).ReturnsAsync(true);
-        _mockSessionService.Setup(x => x.CurrentSession).Returns(new CloudSession());
-        _mockDataEncrypter.Setup(x => x.EncryptPathItem(It.IsAny<PathItem>())).Returns(encryptedPathItem);
-        _mockConnectionManager.Setup(x => x.HubWrapper.SetPathItemAdded(It.IsAny<string>(), It.IsAny<EncryptedPathItem>()))
-            .ReturnsAsync(true)
-            .Verifiable();
-        _mockConnectionManager.SetupGetCurrentEndpoint("CID0");
-
-        // Act
-        await _pathItemsService.AddPathItem(pathItem);
-
-        // Assert
-        ClassicAssert.AreEqual(1, _pathItemsService.AllPathItems.Count);
-
-        _mockConnectionManager.Verify();
+        _pathItemRepository.Verify(repo => repo.AddOrUpdate(It.IsAny<PathItem>()), Times.Once);
     }
 
     [Test]
-    public async Task AddPathItem_ValidPathItem_AddsPathItemToCache_2()
+    public async Task TryRemovePathItem_ShouldRemoveFromRepository_WhenApiCallSucceeds()
     {
-        var encryptedPathItem = new EncryptedPathItem();
+        var pathItem = new PathItem();
+        _dataEncrypter.Setup(x => x.EncryptPathItem(pathItem)).Returns(new EncryptedPathItem());
+        _sessionService.SetupGet(x => x.SessionId).Returns("Session1");
+        _inventoryApiClient.Setup(x => x.RemovePathItem("Session1", It.IsAny<EncryptedPathItem>()))
+            .ReturnsAsync(true);
 
-        _mockPathItemChecker.Setup(x => x.CheckPathItem(It.IsAny<PathItem>())).ReturnsAsync(true)
-            .Verifiable();
-        _mockSessionService.Setup(x => x.CurrentSession).Returns(new CloudSession())
-            .Verifiable();
-        _mockDataEncrypter.Setup(x => x.EncryptPathItem(It.IsAny<PathItem>()))
-            .Returns(encryptedPathItem)
-            .Verifiable();
-        _mockSessionMembersService.Setup(x => x.GetCurrentSessionMember())
-            .Returns(new SessionMemberInfo())
-            .Verifiable();
-        _mockConnectionManager.Setup(x => x.HubWrapper.SetPathItemAdded(It.IsAny<string>(), It.IsAny<EncryptedPathItem>()))
-            .ReturnsAsync(true)
-            .Verifiable();
-        _mockConnectionManager.SetupGetCurrentEndpoint("CID0");
+        await _service.TryRemovePathItem(pathItem);
 
-        // Act
-        await _pathItemsService.CreateAndAddPathItem("/test/path", FileSystemTypes.Directory);
-
-        // Assert
-        ClassicAssert.AreEqual(1, service.AllPathItems.Count);
-        var pathItem = service.AllPathItems.Items.First();
-        ClassicAssert.AreEqual("/test/path", pathItem.Path);
-        ClassicAssert.AreEqual(FileSystemTypes.Directory, pathItem.Type);
-        ClassicAssert.AreEqual("A1", pathItem.Code);
-
-        _mockSessionMembersService.Verify();
-        _mockConnectionManager.Verify();
+        _pathItemRepository.Verify(repo => repo.Remove(pathItem), Times.Once);
     }
 
     [Test]
-    public async Task AddPathItem_ValidPathItem_AddsPathItemToCache_3()
+    public async Task TryAddPathItem_ShouldNotAdd_WhenCheckFails()
     {
-        var encryptedPathItem = new EncryptedPathItem();
+        _pathItemChecker
+            .Setup(x => x.CheckPathItem(It.IsAny<PathItem>(), It.IsAny<IEnumerable<PathItem>>()))
+            .ReturnsAsync(false);
 
-        _mockPathItemChecker.Setup(x => x.CheckPathItem(It.IsAny<PathItem>())).ReturnsAsync(true)
-            .Verifiable();
-        _mockSessionService.Setup(x => x.CurrentSession).Returns(new CloudSession())
-            .Verifiable();
-        _mockDataEncrypter.Setup(x => x.EncryptPathItem(It.IsAny<PathItem>()))
-            .Returns(encryptedPathItem)
-            .Verifiable();
-        var sessionMemberInfo = new SessionMemberInfo { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID0") };
-        _mockSessionMembersService.Setup(x => x.GetCurrentSessionMember())
-            .Returns(sessionMemberInfo)
-            .Verifiable();
-        _mockConnectionManager.Setup(x => x.HubWrapper.SetPathItemAdded(It.IsAny<string>(), It.IsAny<EncryptedPathItem>()))
-            .ReturnsAsync(true)
-            .Verifiable();
-        _mockConnectionManager.SetupGetCurrentEndpoint("CID0");
+        var pathItem = new PathItem();
+        await _service.TryAddPathItem(pathItem);
 
-        // Act
-        await _pathItemsService.CreateAndAddPathItem("/test/path1", FileSystemTypes.Directory);
-        await _pathItemsService.CreateAndAddPathItem("/test/path2", FileSystemTypes.File);
-        await _pathItemsService.CreateAndAddPathItem("/test/path3", FileSystemTypes.Directory);
+        _pathItemRepository.Verify(repo => repo.AddOrUpdate(It.IsAny<PathItem>()), Times.Never);
+    }
 
-        // Assert
-        ClassicAssert.AreEqual(3, service.AllPathItems.Count);
-        var allPathItems = service.AllPathItems.Items.ToList();
+    [Test]
+    public async Task CreateAndTryAddPathItem_ShouldGenerateCodeAndAdd()
+    {
+        _connectionService.SetupGet(x => x.ClientInstanceId).Returns("TestClient");
+        _sessionMemberRepository
+            .Setup(x => x.GetCurrentSessionMember())
+            .Returns(new SessionMemberInfo
+            {
+                Endpoint = new ByteSyncEndpoint { ClientInstanceId = "TestClient" }, PrivateData = new SessionMemberPrivateData { MachineName = "TestMachine" },
+                PositionInList = 0
+            });
+        _pathItemChecker
+            .Setup(x => x.CheckPathItem(It.IsAny<PathItem>(), It.IsAny<IEnumerable<PathItem>>()))
+            .ReturnsAsync(true);
+        _sessionService.SetupGet(x => x.CurrentSession).Returns(new CloudSession { SessionId = "Session1" });
+        _inventoryApiClient.Setup(x => x.AddPathItem("Session1", It.IsAny<EncryptedPathItem>()))
+            .ReturnsAsync(true);
 
-        var pathItem = allPathItems[0];
-        ClassicAssert.AreEqual("/test/path1", pathItem.Path);
-        ClassicAssert.AreEqual(FileSystemTypes.Directory, pathItem.Type);
-        ClassicAssert.AreEqual("A1", pathItem.Code);
+        await _service.CreateAndTryAddPathItem("C:\\testpath", FileSystemTypes.File);
 
-        pathItem = allPathItems[1];
-        ClassicAssert.AreEqual("/test/path2", pathItem.Path);
-        ClassicAssert.AreEqual(FileSystemTypes.File, pathItem.Type);
-        ClassicAssert.AreEqual("A2", pathItem.Code);
-
-        pathItem = allPathItems[2];
-        ClassicAssert.AreEqual("/test/path3", pathItem.Path);
-        ClassicAssert.AreEqual(FileSystemTypes.Directory, pathItem.Type);
-        ClassicAssert.AreEqual("A3", pathItem.Code);
-
-        _mockSessionMembersService.Verify();
-        _mockConnectionManager.Verify();
-    }*/
+        _pathItemRepository.Verify(repo => repo.AddOrUpdate(It.IsAny<PathItem>()), Times.Once);
+    }
 }

@@ -11,7 +11,7 @@ public interface IPathItemsService
 
     public void ApplyAddPathItemLocally(PathItem pathItem);
     
-    Task TryRemovePathItem(PathItem pathItem);
+    Task<bool> TryRemovePathItem(PathItem pathItem);
 
     public void ApplyRemovePathItemLocally(PathItem pathItem);
 }
