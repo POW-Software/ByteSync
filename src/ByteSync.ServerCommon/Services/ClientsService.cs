@@ -27,38 +27,14 @@ public class ClientsService : IClientsService
         _clientsRepository = clientsRepository;
         _byteSyncClientCaller = byteSyncClientCaller;
         _logger = logger;
-
-        SyncRoot = new object();
     }
 
-    private object SyncRoot { get; }
-
-    public async Task<Client?> OnClientConnected(HubCallerContext context)
-    {
-        var clientId = context.User?.Claims.FirstOrDefault(c => c.Type.Equals(AuthConstants.CLAIM_CLIENT_ID))?.Value;
-        var clientInstanceId = context.User?.Claims.FirstOrDefault(c => c.Type.Equals(AuthConstants.CLAIM_CLIENT_INSTANCE_ID))?.Value;
-        
-        if (clientId == null || clientInstanceId == null)
-        {
-            _logger.LogInformation("ClientsService.OnClientConnected: clientId ({clientId}) or clientInstanceId ({clientInstanceId}) is null",
-                clientId, clientInstanceId);
-            return null;
-        }
-
-        return await OnClientConnected(clientInstanceId, context.ConnectionId, null);
-    }
-
-    public async Task<Client?> OnClientConnected(string clientInstanceId, string connectionId, string? ipAddress)
+    public async Task<Client?> OnClientConnected(string clientInstanceId, string connectionId)
     {
         var result = await _clientsRepository.AddOrUpdate(clientInstanceId, client =>
         {
             if (client != null)
             {
-                if (ipAddress != null)
-                {
-                    client.IpAddress = ipAddress;
-                }
-                
                 client.SetConnected(connectionId);
             }
             
