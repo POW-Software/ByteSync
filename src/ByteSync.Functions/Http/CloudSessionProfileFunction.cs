@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using ByteSync.Common.Business.Lobbies.Connections;
 using ByteSync.Common.Business.Profiles;
-using ByteSync.Functions.Helpers;
+using ByteSync.Functions.Helpers.Misc;
 using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;

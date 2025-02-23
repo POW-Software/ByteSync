@@ -3,7 +3,7 @@ using ByteSync.ServerCommon.Business.Auth;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 
-namespace ByteSync.Functions.Helpers;
+namespace ByteSync.Functions.Helpers.Misc;
 
 public static class FunctionHelper
 {

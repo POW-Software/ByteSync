@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
-using ByteSync.Functions.Helpers;
+using ByteSync.Functions.Helpers.Misc;
 using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;

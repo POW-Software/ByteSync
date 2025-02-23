@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Azure.Core.Serialization;
 using ByteSync.Common.Interfaces.Hub;
-using ByteSync.Functions.Helpers;
+using ByteSync.Functions.Helpers.Misc;
 using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
