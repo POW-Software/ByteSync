@@ -2,12 +2,13 @@
 using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
-using ByteSync.ServerCommon.Helpers;
 using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using RedLockNet;
+using StackExchange.Redis;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
@@ -49,16 +50,110 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
         
         var transaction = _cacheService.OpenTransaction();
         
-        StartInventoryResult? startInventoryResult = null;
-        CloudSessionData? cloudSessionData = null;
         UpdateEntityResult<InventoryData>? inventoryUpdateResult = null;
         
+        var sessionUpdateResult = await ActivateSession(sessionId, transaction, sessionRedisLock);
+
+        var startInventoryResult = CheckSession(sessionId, sessionUpdateResult);
+        if (startInventoryResult != null)
+        {
+            return startInventoryResult;
+        }
+        
+        if (sessionUpdateResult.IsWaitingForTransaction)
+        {
+            (inventoryUpdateResult, startInventoryResult) = 
+                await UpdateInventory(sessionUpdateResult, transaction, inventoryRedisLock);
+        }
+
+        if (sessionUpdateResult.IsWaitingForTransaction 
+            && inventoryUpdateResult != null && inventoryUpdateResult.IsWaitingForTransaction)
+        {
+            await transaction.ExecuteAsync();
+            
+            await _sharedFilesService.ClearSession(sessionId);
+            
+            var dto = new InventoryStartedDTO(sessionId, client.ClientInstanceId, sessionUpdateResult.Element!.SessionSettings);
+            await _byteSyncClientCaller.SessionGroupExcept(sessionId, client).InventoryStarted(dto);
+            
+            _logger.LogInformation("StartInventory: session {SessionId} - OK", sessionId);
+        }
+
+        return startInventoryResult!;
+    }
+
+    private StartInventoryResult? CheckSession(string sessionId, UpdateEntityResult<CloudSessionData> sessionUpdateResult)
+    {
+        StartInventoryResult? startInventoryResult = null;
+        
+        if (sessionUpdateResult.IsNoOperation)
+        {
+            startInventoryResult = LogAndBuildStartInventoryResult(sessionId, StartInventoryStatuses.InventoryStartedSucessfully, "already activated");
+        }
+        else if (sessionUpdateResult.IsNotFound)
+        {
+            startInventoryResult = LogAndBuildStartInventoryResult(sessionId, StartInventoryStatuses.SessionNotFound);
+        }
+        else
+        {
+            var cloudSessionData = sessionUpdateResult.Element!;
+            if (cloudSessionData.SessionMembers.Count < 2)
+            {
+                startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.LessThan2Members);
+            }
+            else if (cloudSessionData.SessionMembers.Count > 5)
+            {
+                startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.MoreThan5Members);
+            }
+        }
+        
+        return startInventoryResult;
+    }
+
+    private async Task<(UpdateEntityResult<InventoryData> inventoryUpdateResult, StartInventoryResult? startInventoryResult)> UpdateInventory( 
+        UpdateEntityResult<CloudSessionData> sessionUpdateResult, ITransaction transaction, IRedLock inventoryRedisLock)
+    {
+        StartInventoryResult? startInventoryResult = null;
+        var cloudSessionData = sessionUpdateResult.Element!;
+        
+        UpdateEntityResult<InventoryData> inventoryUpdateResult;
+        inventoryUpdateResult = await _inventoryRepository.UpdateIfExists(cloudSessionData.SessionId, inventoryData =>
+        {
+            if (inventoryData.InventoryMembers.Count > cloudSessionData.SessionMembers.Count)
+            {
+                startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.UnknownError);
+            }
+            else if (inventoryData.InventoryMembers.Count < cloudSessionData.SessionMembers.Count
+                     || inventoryData.InventoryMembers.Any(imd => imd.SharedPathItems.Count == 0))
+            {
+                startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
+            }
+
+            if (startInventoryResult == null)
+            {
+                inventoryData.IsInventoryStarted = true;
+                startInventoryResult = StartInventoryResult.BuildOK();
+            }
+            
+            return startInventoryResult.IsOK;
+        }, transaction, inventoryRedisLock);
+
+        if (inventoryUpdateResult.IsNotFound)
+        {
+            startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, 
+                StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
+        }
+        
+        return (inventoryUpdateResult, startInventoryResult);
+    }
+
+    private async Task<UpdateEntityResult<CloudSessionData>> ActivateSession(string sessionId, ITransaction transaction, IRedLock sessionRedisLock)
+    {
         var sessionUpdateResult = await _cloudSessionsRepository.UpdateIfExists(sessionId, session =>
         {
             if (!session.IsSessionActivated)
             {
                 session.IsSessionActivated = true;
-                cloudSessionData = session;
                 return true;
             }
             else
@@ -68,67 +163,25 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
             }
         }, transaction, sessionRedisLock);
         
-        if (cloudSessionData == null)
-        {
-            _logger.LogInformation("StartInventory: session {@sessionId}: not found", sessionId);
-            return StartInventoryResult.BuildFrom(StartInventoryStatuses.SessionNotFound);
-        }
-
-        if (sessionUpdateResult.IsWaitingForTransaction)
-        {
-            inventoryUpdateResult = await _inventoryRepository.Update(sessionId, inventoryData =>
-            {
-                if (cloudSessionData!.SessionMembers.Count < 2)
-                {
-                    startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.LessThan2Members);
-                }
-                else if (cloudSessionData.SessionMembers.Count > 5)
-                {
-                    startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.MoreThan5Members);
-                }
-                else if (inventoryData.InventoryMembers.Count != cloudSessionData.SessionMembers.Count)
-                {
-                    startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.UnknownError);
-                }
-                else
-                {
-                    if (inventoryData.InventoryMembers.Any(imd => imd.SharedPathItems.Count == 0))
-                    {
-                        startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, 
-                            StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
-                    }
-                }
-
-                if (startInventoryResult == null)
-                {
-                    inventoryData.IsInventoryStarted = true;
-                    startInventoryResult = StartInventoryResult.BuildOK();
-                }
-            
-                return startInventoryResult.IsOK;
-            }, transaction, inventoryRedisLock);
-        }
-
-        if (sessionUpdateResult.IsWaitingForTransaction 
-            && inventoryUpdateResult != null && inventoryUpdateResult.IsWaitingForTransaction 
-            && startInventoryResult!.IsOK)
-        {
-            await transaction.ExecuteAsync();
-            
-            await _sharedFilesService.ClearSession(sessionId);
-            
-            var dto = new InventoryStartedDTO(sessionId, client.ClientInstanceId, cloudSessionData!.SessionSettings);
-            await _byteSyncClientCaller.SessionGroupExcept(sessionId, client).InventoryStarted(dto);
-            
-            _logger.LogInformation("StartInventory: session {@cloudSession} - OK", sessionId);
-        }
-
-        return startInventoryResult!;
+        return sessionUpdateResult;
     }
     
-    private StartInventoryResult LogAndBuildStartInventoryResult(CloudSessionData cloudSessionData, StartInventoryStatuses status)
+    private StartInventoryResult LogAndBuildStartInventoryResult(CloudSessionData cloudSessionData, StartInventoryStatuses status, 
+        string? details = null)
     {
-        _logger.LogInformation("StartInventory: session {@cloudSession} - {Status}", cloudSessionData.BuildLog(), status);
+        return LogAndBuildStartInventoryResult(cloudSessionData.SessionId, status, details);
+    }
+    
+    private StartInventoryResult LogAndBuildStartInventoryResult(string sessionId, StartInventoryStatuses status, string? details = null)
+    {
+        if (details != null)
+        {
+            _logger.LogInformation("StartInventory: session {SessionId} - {Status} - {Details}", sessionId, status, details);
+        }
+        else
+        {
+            _logger.LogInformation("StartInventory: session {SessionId} - {Status}", sessionId, status);
+        }
         return StartInventoryResult.BuildFrom(status);
     }
 }

@@ -132,7 +132,7 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
 
                 //Parts.Add(partViewModel);
 
-                _pathItemsService.AddPathItem(newPathItem);
+                _pathItemsService.TryAddPathItem(newPathItem);
                 // _sessionDataHolder.PathItems!.Add(newPathItem);
             }
 
@@ -164,11 +164,6 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
             if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTC1))
             {
                 DebugAddDesktopPathItem("testC1");
-            }
-            
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTTMP))
-            {
-                DebugAddDesktopPathItem("testTmp");
             }
         }
     #endif
@@ -205,7 +200,7 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
 
             if (result != null && Directory.Exists(result))
             {
-                await _pathItemsService.CreateAndAddPathItem(result, FileSystemTypes.Directory);
+                await _pathItemsService.CreateAndTryAddPathItem(result, FileSystemTypes.Directory);
                 //await HandleNewPathItem(result, FileSystemTypes.Directory);
             }
         }
@@ -227,7 +222,7 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
             {
                 foreach (var result in results)
                 {
-                    await _pathItemsService.CreateAndAddPathItem(result, FileSystemTypes.File);
+                    await _pathItemsService.CreateAndTryAddPathItem(result, FileSystemTypes.File);
                     //await HandleNewPathItem(result, FileSystemTypes.File);
                 }
             }
@@ -240,6 +235,6 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
 
     private async Task RemovePathItem(PathItemProxy pathItemProxy)
     {
-        await _pathItemsService.RemovePathItem(pathItemProxy.PathItem);
+        await _pathItemsService.TryRemovePathItem(pathItemProxy.PathItem);
     }
 }

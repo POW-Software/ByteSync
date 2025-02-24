@@ -71,17 +71,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
             .Where(b => b)
             .Subscribe(_ => UpdateMachineDescription());
 
-    #if DEBUG
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.SHOW_DEMO_DATA))
-        {
-            EmailAddress = "email@example.com";
-            ClientInstanceId = null;
-        }
-        else
-        {
-            ClientInstanceId = sessionMemberInfo.ClientInstanceId;
-        }
-#endif
+        ClientInstanceId = sessionMemberInfo.ClientInstanceId;
 
         RemovePathItemCommand = ReactiveCommand.CreateFromTask<PathItemProxy>(RemovePathItem);
 
@@ -97,9 +87,9 @@ public class SessionMachineViewModel : ActivatableViewModelBase
             .Filter(pathItem => pathItem.BelongsTo(sessionMemberInfo))
             .Sort(SortExpressionComparer<PathItem>.Ascending(p => p.Code))
             .Transform(pathItem => _pathItemProxyFactory.CreatePathItemProxy(pathItem))
+            .DisposeMany() // dispose when no longer required
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _data)
-            .DisposeMany() // dispose when no longer required
             .Subscribe();
         
         this.WhenActivated(disposables =>
@@ -130,9 +120,10 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         UpdateMachineDescription();
     }
     
-    private void OnLocaleChanged(PropertyChangedEventArgs objEventArgs)
+    private void OnLocaleChanged(PropertyChangedEventArgs _)
     {
         UpdateMachineDescription();
+        UpdateStatus(SessionMemberInfo.SessionMemberGeneralStatus);
     }
 
     public ReactiveCommand<PathItemProxy, Unit> RemovePathItemCommand { get; set; }
@@ -173,7 +164,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
 
     private async Task RemovePathItem(PathItemProxy pathItem)
     {
-        await _pathItemsService.RemovePathItem(pathItem.PathItem);
+        await _pathItemsService.TryRemovePathItem(pathItem.PathItem);
     }
 
     private async Task AddDirectory()
@@ -184,7 +175,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
 
             if (result != null && Directory.Exists(result))
             {
-                await _pathItemsService.CreateAndAddPathItem(result, FileSystemTypes.Directory);
+                await _pathItemsService.CreateAndTryAddPathItem(result, FileSystemTypes.Directory);
             }
         }
         catch (Exception ex)
@@ -201,7 +192,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         {
             foreach (var fileName in result)
             {
-                await _pathItemsService.CreateAndAddPathItem(fileName, FileSystemTypes.File);
+                await _pathItemsService.CreateAndTryAddPathItem(fileName, FileSystemTypes.File);
             }
         }
     }

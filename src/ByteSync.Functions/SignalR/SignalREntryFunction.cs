@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Azure.Core.Serialization;
 using ByteSync.Common.Interfaces.Hub;
-using ByteSync.Functions.Helpers;
+using ByteSync.Functions.Helpers.Misc;
 using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -69,16 +69,7 @@ public class SignalREntryFunction
     {
         try
         {
-            var xForwardedFor = invocationContext.Headers.Keys
-                .FirstOrDefault(k => k.Equals("X-Forwarded-For", StringComparison.OrdinalIgnoreCase));
-
-            string? ipAddress = null;
-            if (xForwardedFor != null)
-            {
-                ipAddress = invocationContext.Headers[xForwardedFor];
-            }
-            
-            await _clientsService.OnClientConnected(invocationContext.UserId, invocationContext.ConnectionId, ipAddress);
+            await _clientsService.OnClientConnected(invocationContext.UserId, invocationContext.ConnectionId);
         
             invocationContext.Headers.TryGetValue("Authorization", out var auth);
             _logger.LogInformation("{InvocationContextConnectionId} has connected", invocationContext.ConnectionId);

@@ -154,9 +154,9 @@ public class LobbyMemberViewModel : ActivatableViewModelBase
     {
         UpdateMachineDescription();
         
-        foreach (var pathItemViewModel in PathItems)
-        {
-            pathItemViewModel.OnLocaleChanged(_localizationService);
-        }
+        // foreach (var pathItemViewModel in PathItems)
+        // {
+        //     // pathItemViewModel.OnLocaleChanged(_localizationService);
+        // }
     }
 }
