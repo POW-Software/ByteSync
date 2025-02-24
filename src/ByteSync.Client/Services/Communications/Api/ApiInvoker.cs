@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -118,8 +119,12 @@ public class ApiInvoker : IApiInvoker
         else
         {
             string errorMessage = "An error occurred while invoking the API.";
+            if (response.ReasonPhrase != null)
+            {
+                errorMessage += $" Reason: {response.ReasonPhrase}";
+            }
             
-            if (!string.IsNullOrWhiteSpace(content) && handleResult)
+            if (response.StatusCode != HttpStatusCode.Forbidden && !string.IsNullOrWhiteSpace(content) && handleResult)
             {
                 return DeserializeContent<T>(content);
             }
