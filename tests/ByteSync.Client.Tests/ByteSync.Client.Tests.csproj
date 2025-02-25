@@ -31,7 +31,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Controls\Synchronizations\" />
       <Folder Include="TestUtilities\Business\" />
     </ItemGroup>
 
