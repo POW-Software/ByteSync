@@ -45,124 +45,197 @@ public class QuitSessionCommandHandlerTests
             _mockSynchronizationRepository, _mockCacheService, _mockSessionMemberMapper, _mockByteSyncClientCaller);
     }
 
-    [Test]
-    public async Task QuitSession_SessionMemberExists_PerformsUpdateAndNotifies()
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task QuitSession_SessionMemberExists_PerformsUpdateAndNotifies(bool isQuitterAnInventoryMember)
     {
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientInstanceId = "clientInstance1" };
-        // Create a session member that matches the client.
+        
         var sessionMember = new SessionMemberData { ClientInstanceId = "clientInstance1" };
         var cloudSessionData = new CloudSessionData();
         cloudSessionData.SessionMembers.Add(sessionMember);
-        // Mark session activated if you want to trigger synchronization update.
         cloudSessionData.IsSessionActivated = true;
+        
+
         var inventoryData = new InventoryData(sessionId);
+        if (isQuitterAnInventoryMember)
+        {
+            var inventoryMember = new InventoryMemberData { ClientInstanceId = "clientInstance1" };
+            inventoryData.InventoryMembers.Add(inventoryMember);
+        }
+        
         var synchronizationEntity = new SynchronizationEntity
         {
             SessionId = sessionId,
             EndedOn = DateTimeOffset.Now
         };
 
-        // // Simulate repository update that removes the member and returns waiting-for-transaction.
-        // A.CallTo(() => _mockCloudSessionsRepository.Update(sessionId, A<Func<CloudSessionData, bool>>.Ignored, _mockTransaction, null))
-        //     .Invokes((string id, Func<CloudSessionData, bool> updateFunc, ITransaction tx) =>
-        //     {
-        //         // Invoke function on the provided cloud session data.
-        //         var memberRemoved = updateFunc(cloudSessionData);
-        //         return new UpdateEntityResult<CloudSessionData>(cloudSessionData, 
-        //             memberRemoved ? UpdateEntityStatus.Saved : UpdateEntityStatus.NotFound);
-        //     })
-        //     .ReturnsLazily(() => new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.Saved));
-        
+        bool funcResult = false;
+        bool isTransaction = false;
         A.CallTo(() => _mockCloudSessionsRepository.Update(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
-            .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction tx, IRedLock redisLock) => func(cloudSessionData))
-            .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.WaitingForTransaction));
-
-        // // Simulate inventory update.
-        // A.CallTo(() => _mockInventoryRepository.UpdateIfExists(sessionId, A<Func<InventoryData, bool>>.Ignored, _mockTransaction, null))
-        //     .Returns(Task.CompletedTask);
+            .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction? transaction, IRedLock? _) =>
+            {
+                funcResult = func(cloudSessionData);
+                isTransaction = transaction != null;
+            })
+            .ReturnsLazily(() => BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
         
         A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, _mockTransaction, null))
-            .Invokes((string _, Func<InventoryData, bool> func, ITransaction tx, IRedLock redisLock) => func(inventoryData))
-            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.Saved));
-
-        // Simulate synchronization update.
+            .Invokes((string _, Func<InventoryData, bool> func, ITransaction? transaction, IRedLock? _) =>
+            {
+                funcResult = func(inventoryData);
+                isTransaction = transaction != null;
+            })
+            .ReturnsLazily(() => BuildUpdateResult(funcResult, inventoryData, isTransaction));
+        
         A.CallTo(() => _mockSynchronizationRepository.UpdateIfExists(sessionId, A<Func<SynchronizationEntity, bool>>.Ignored, _mockTransaction, null))
-            .Invokes((string _, Func<SynchronizationEntity, bool> func, ITransaction tx, IRedLock redisLock) => func(synchronizationEntity))
-            .Returns(new UpdateEntityResult<SynchronizationEntity>(synchronizationEntity, UpdateEntityStatus.Saved));
-
-        // Simulate transaction execution.
+            .Invokes((string _, Func<SynchronizationEntity, bool> func, ITransaction? transaction, IRedLock? _) =>
+            {
+                funcResult = func(synchronizationEntity);
+                isTransaction = transaction != null;
+            })
+            .ReturnsLazily(() => BuildUpdateResult(funcResult, synchronizationEntity, isTransaction));
+        
         A.CallTo(() => _mockTransaction.ExecuteAsync(CommandFlags.None)).Returns(true);
-
-        // Set up the client caller group.
+        
         var mockGroup = A.Fake<IHubByteSyncPush>();
         A.CallTo(() => _mockByteSyncClientCaller.SessionGroup(sessionId)).Returns(mockGroup);
-
-        // Set up session member mapper.
+        
         var sessionMemberInfo = new SessionMemberInfoDTO();
         A.CallTo(() => _mockSessionMemberMapper.Convert(sessionMember))
             .Returns(Task.FromResult(sessionMemberInfo));
-
-        var request = new QuitSessionRequest(sessionId, client);
-
+        
         // Act
+        var request = new QuitSessionRequest(sessionId, client);
         await _quitSessionCommandHandler.Handle(request, CancellationToken.None);
-
-        // Assert repository update is called.
+        
+        
+        // Assert
         cloudSessionData.SessionMembers.Should().BeEmpty();
+        cloudSessionData.IsSessionRemoved.Should().BeTrue();
+        cloudSessionData.IsSessionOnError.Should().BeFalse();
+        inventoryData.InventoryMembers.Should().BeEmpty();
+        synchronizationEntity.IsFatalError.Should().BeFalse();
         
         A.CallTo(() => _mockCloudSessionsRepository.Update(sessionId, A<Func<CloudSessionData, bool>>.Ignored, _mockTransaction, null))
             .MustHaveHappenedOnceExactly();
-        // Assert inventory and synchronization updates occurred.
+
         A.CallTo(() => _mockInventoryRepository.UpdateIfExists(sessionId, A<Func<InventoryData, bool>>.Ignored, _mockTransaction, null))
             .MustHaveHappenedOnceExactly();
+        
         A.CallTo(() => _mockSynchronizationRepository.UpdateIfExists(sessionId, A<Func<SynchronizationEntity, bool>>.Ignored, _mockTransaction, null))
             .MustHaveHappenedOnceExactly();
-        // Assert transaction was executed.
+
         A.CallTo(() => _mockTransaction.ExecuteAsync(CommandFlags.None)).MustHaveHappenedOnceExactly();
-        // Assert client was removed from group.
+
         A.CallTo(() => _mockByteSyncClientCaller.RemoveFromGroup(client, sessionId))
             .MustHaveHappenedOnceExactly();
-        // Assert session member mapper and notify call.
+
         A.CallTo(() => _mockSessionMemberMapper.Convert(sessionMember))
             .MustHaveHappenedOnceExactly();
+        
         A.CallTo(() => mockGroup.MemberQuittedSession(sessionMemberInfo))
             .MustHaveHappenedOnceExactly();
     }
 
-    /*
     [Test]
-    public async Task QuitSession_SessionMemberDoesNotExist_NoFurtherActions()
+    public async Task QuitSession_SessionMemberNotExists_()
     {
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientInstanceId = "clientInstance1" };
-        // Cloud session data with no matching member.
+        
         var cloudSessionData = new CloudSessionData();
+        cloudSessionData.IsSessionActivated = false;
+        
+        var inventoryData = new InventoryData(sessionId);
+        var inventoryMember = new InventoryMemberData { ClientInstanceId = "clientInstance1" };
+        inventoryData.InventoryMembers.Add(inventoryMember);
+        
+        var synchronizationEntity = new SynchronizationEntity
+        {
+            SessionId = sessionId,
+            EndedOn = DateTimeOffset.Now
+        };
 
-        // Simulate repository update that does nothing and returns waiting-for-transaction as false.
-        A.CallTo(() => _mockCloudSessionsRepository.Update(sessionId, A<Func<CloudSessionData, CloudSessionData>>.Ignored, _mockTransaction))
-            .Invokes((string id, Func<CloudSessionData, CloudSessionData> updateFunc, ITransaction tx) =>
+        bool funcResult = false;
+        bool isTransaction = false;
+        A.CallTo(() => _mockCloudSessionsRepository.Update(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction? transaction, IRedLock? _) =>
             {
-                updateFunc(cloudSessionData);
-                return new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.NotFound, false);
+                funcResult = func(cloudSessionData);
+                isTransaction = transaction != null;
             })
-            .ReturnsLazily(() => new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.NotFound, false));
-
-        var request = new QuitSessionRequest(sessionId, client, client.ClientInstanceId);
-
+            .ReturnsLazily(() => BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
+        
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, _mockTransaction, null))
+            .Invokes((string _, Func<InventoryData, bool> func, ITransaction? transaction, IRedLock? _) =>
+            {
+                funcResult = func(inventoryData);
+                isTransaction = transaction != null;
+            })
+            .ReturnsLazily(() => BuildUpdateResult(funcResult, inventoryData, isTransaction));
+        
+        A.CallTo(() => _mockSynchronizationRepository.UpdateIfExists(sessionId, A<Func<SynchronizationEntity, bool>>.Ignored, _mockTransaction, null))
+            .Invokes((string _, Func<SynchronizationEntity, bool> func, ITransaction? transaction, IRedLock? _) =>
+            {
+                funcResult = func(synchronizationEntity);
+                isTransaction = transaction != null;
+            })
+            .ReturnsLazily(() => BuildUpdateResult(funcResult, synchronizationEntity, isTransaction));
+        
+        A.CallTo(() => _mockTransaction.ExecuteAsync(CommandFlags.None)).Returns(true);
+        
+        var mockGroup = A.Fake<IHubByteSyncPush>();
+        A.CallTo(() => _mockByteSyncClientCaller.SessionGroup(sessionId)).Returns(mockGroup);
+        
         // Act
+        var request = new QuitSessionRequest(sessionId, client);
         await _quitSessionCommandHandler.Handle(request, CancellationToken.None);
+        
+        // Assert
+        cloudSessionData.SessionMembers.Should().BeEmpty();
+        cloudSessionData.IsSessionRemoved.Should().BeFalse();
+        cloudSessionData.IsSessionOnError.Should().BeFalse();
+        inventoryData.InventoryMembers.Should().NotBeEmpty();
+        synchronizationEntity.IsFatalError.Should().BeFalse();
+        
+        A.CallTo(() => _mockCloudSessionsRepository.Update(sessionId, A<Func<CloudSessionData, bool>>.Ignored, _mockTransaction, null))
+            .MustHaveHappenedOnceExactly();
 
-        // Assert that no inventory, synchronization, or client caller methods are invoked.
-        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(sessionId, A<Func<InventoryData, InventoryData>>.Ignored, _mockTransaction))
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(sessionId, A<Func<InventoryData, bool>>.Ignored, _mockTransaction, null))
             .MustNotHaveHappened();
-        A.CallTo(() => _mockSynchronizationRepository.UpdateIfExists(sessionId, A<Func<SynchronizationData, bool>>.Ignored, _mockTransaction))
+        
+        A.CallTo(() => _mockSynchronizationRepository.UpdateIfExists(sessionId, A<Func<SynchronizationEntity, bool>>.Ignored, _mockTransaction, null))
             .MustNotHaveHappened();
-        A.CallTo(() => _mockTransaction.ExecuteAsync()).MustNotHaveHappened();
-        A.CallTo(() => _mockByteSyncClientCaller.RemoveFromGroup(A<Client>.Ignored, A<string>.Ignored))
+
+        A.CallTo(() => _mockTransaction.ExecuteAsync(CommandFlags.None)).MustNotHaveHappened();
+
+        A.CallTo(() => _mockByteSyncClientCaller.RemoveFromGroup(client, sessionId))
+            .MustNotHaveHappened();
+
+        A.CallTo(() => _mockSessionMemberMapper.Convert(A<SessionMemberData>.Ignored))
             .MustNotHaveHappened();
     }
-    */
+
+    private UpdateEntityResult<T> BuildUpdateResult<T>(bool funcResult, T element, bool isTransaction)
+    {
+        if (funcResult)
+        {
+            if (isTransaction)
+            {
+                return new UpdateEntityResult<T>(element, UpdateEntityStatus.WaitingForTransaction);
+            }
+            else
+            {
+                return new UpdateEntityResult<T>(element, UpdateEntityStatus.Saved);
+            }
+        }
+        else
+        {
+            return new UpdateEntityResult<T>(element, UpdateEntityStatus.NotFound);
+        }
+    }
 }
