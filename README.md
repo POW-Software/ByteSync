@@ -1,8 +1,13 @@
 <div align="center">
   <img src="assets/logo_bytesync_1280x640.png" width="320" />
   <p>
+    <!-- License Badge -->
     <a href="https://github.com/POW-Software/ByteSync/blob/master/LICENSE">
       <img alt="GitHub License" src="https://img.shields.io/github/license/POW-Software/ByteSync" />
+    </a>
+    <!-- Last Commit Badge -->
+    <a href="https://github.com/POW-Software/ByteSync/commits/master">
+      <img alt="Last commit" src="https://img.shields.io/github/last-commit/POW-Software/ByteSync" />
     </a>
   </p>
 </div>
