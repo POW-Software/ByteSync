@@ -179,7 +179,6 @@ public class CloudSessionFunction
 
         var request = new QuitSessionRequest(sessionId, client);
         await _mediator.Send(request);
-        // await _cloudSessionsService.QuitCloudSession(client, sessionId).ConfigureAwait(false);
             
         var response = req.CreateResponse(HttpStatusCode.OK);
         
