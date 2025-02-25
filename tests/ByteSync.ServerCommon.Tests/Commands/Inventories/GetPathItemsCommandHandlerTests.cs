@@ -8,7 +8,7 @@ using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.ServerCommon.Tests.Commands;
+namespace ByteSync.ServerCommon.Tests.Commands.Inventories;
 
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class GetPathItemsCommandHandlerTests

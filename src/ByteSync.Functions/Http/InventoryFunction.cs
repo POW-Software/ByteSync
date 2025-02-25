@@ -13,7 +13,7 @@ public class InventoryFunction
 {
     private readonly IMediator _mediator;
 
-    public InventoryFunction( IMediator mediator)
+    public InventoryFunction(IMediator mediator)
     {
         _mediator = mediator;
     }

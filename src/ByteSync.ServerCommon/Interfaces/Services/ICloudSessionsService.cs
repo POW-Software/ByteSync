@@ -18,9 +18,7 @@ public interface ICloudSessionsService
     Task ValidateJoinCloudSession(ValidateJoinCloudSessionParameters parameters);
         
     Task<FinalizeJoinSessionResult> FinalizeJoinCloudSession(Client client, FinalizeJoinCloudSessionParameters parameters);
-
-    Task QuitCloudSession(Client client, string sessionId);
-        
+    
     Task<List<SessionMemberInfoDTO>> GetSessionMembersInfosAsync(string sessionId);
         
     Task UpdateSessionSettings(Client client, string sessionId, EncryptedSessionSettings sessionSettings);
