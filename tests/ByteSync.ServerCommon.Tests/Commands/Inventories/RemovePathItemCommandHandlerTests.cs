@@ -10,7 +10,7 @@ using ByteSync.ServerCommon.Interfaces.Services;
 using FakeItEasy;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.ServerCommon.Tests.Commands;
+namespace ByteSync.ServerCommon.Tests.Commands.Inventories;
 
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class RemovePathItemCommandHandlerTests

@@ -19,7 +19,7 @@ public interface ICloudSessionsService
         
     Task<FinalizeJoinSessionResult> FinalizeJoinCloudSession(Client client, FinalizeJoinCloudSessionParameters parameters);
 
-    Task QuitCloudSession(Client client, string sessionId);
+    // Task QuitCloudSession(Client client, string sessionId);
         
     Task<List<SessionMemberInfoDTO>> GetSessionMembersInfosAsync(string sessionId);
         
