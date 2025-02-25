@@ -20,28 +20,21 @@ public class CloudSessionsService : ICloudSessionsService
     private readonly ISharedFilesService _sharedFilesService;
     private readonly IByteSyncClientCaller _byteSyncClientCaller;
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
-    private readonly ISynchronizationRepository _synchronizationRepository;
     private readonly ISynchronizationService _synchronizationService;
-    private readonly IInventoryRepository _inventoryRepository;
     private readonly IInventoryService _inventoryService;
     private readonly ISessionMemberMapper _sessionMemberConverter;
-    private readonly ICacheService _cacheService;
 
     public CloudSessionsService(ILogger<CloudSessionsService> logger, ISharedFilesService sharedFilesService, IByteSyncClientCaller byteSyncClientCaller, 
-        ICloudSessionsRepository cloudSessionsRepository, ISynchronizationRepository synchronizationRepository, ISynchronizationService synchronizationService,
-        IInventoryRepository inventoryRepository,  IInventoryService inventoryService,
-        ISessionMemberMapper sessionMemberConverter, ICacheService cacheService)
+        ICloudSessionsRepository cloudSessionsRepository, ISynchronizationService synchronizationService, IInventoryService inventoryService,
+        ISessionMemberMapper sessionMemberConverter)
     {
         _logger = logger;
         _sharedFilesService = sharedFilesService;
         _byteSyncClientCaller = byteSyncClientCaller;
         _cloudSessionsRepository = cloudSessionsRepository;
-        _synchronizationRepository = synchronizationRepository;
         _synchronizationService = synchronizationService;
-        _inventoryRepository = inventoryRepository;
         _inventoryService = inventoryService;
         _sessionMemberConverter = sessionMemberConverter;
-        _cacheService = cacheService;
     }
     
     public async Task<CloudSessionResult> CreateCloudSession(CreateCloudSessionParameters createCloudSessionParameters, Client client)
@@ -320,71 +313,6 @@ public class CloudSessionsService : ICloudSessionsService
         FinalizeJoinSessionResult finalizeJoinSessionResult = FinalizeJoinSessionResult.BuildFrom(finalizeJoinSessionStatus!.Value);
             
         return finalizeJoinSessionResult;
-    }
-
-    public async Task QuitCloudSession(Client client, string sessionId)
-    {
-        CloudSessionData? innerCloudSessionData = null;
-        SessionMemberData? innerQuitter = null;
-        CloudSessionFatalError cloudSessionFatalError = null;
-
-        var transaction = _cacheService.OpenTransaction();
-        
-        var updateSessionResult = await _cloudSessionsRepository.Update(sessionId, cloudSessionData =>
-        {
-            var quitter = cloudSessionData.SessionMembers.FirstOrDefault(m => m.ClientInstanceId.Equals(client.ClientInstanceId));
-            
-            if (quitter != null)
-            {
-                cloudSessionData.SessionMembers.Remove(quitter);
-
-                if (cloudSessionData.SessionMembers.Count == 0)
-                {
-                    cloudSessionData.IsSessionRemoved = true;
-                }
-
-                innerCloudSessionData = cloudSessionData;
-                innerQuitter = quitter;
-            }
-
-            return quitter != null;
-        }, transaction);
-
-        if (updateSessionResult.IsWaitingForTransaction)
-        {
-            await _inventoryRepository.UpdateIfExists(sessionId, inventoryData =>
-            {
-                inventoryData.RecodePathItems(innerCloudSessionData!);
-
-                return true;
-            }, transaction);
-        }
-        
-        if (updateSessionResult.IsWaitingForTransaction)
-        {
-            await _synchronizationRepository.UpdateIfExists(sessionId, synchronizationData =>
-            {
-                if (innerCloudSessionData!.IsSessionActivated && !synchronizationData.IsEnded)
-                {
-                    synchronizationData.IsFatalError = true;
-
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }, transaction);
-        }
-
-        if (updateSessionResult.IsWaitingForTransaction)
-        {       
-            await transaction.ExecuteAsync();
-        
-            await _byteSyncClientCaller.RemoveFromGroup(client, sessionId);
-            var sessionMemberInfo = await _sessionMemberConverter.Convert(innerQuitter!);
-            await _byteSyncClientCaller.SessionGroup(sessionId).MemberQuittedSession(sessionMemberInfo);
-        }
     }
 
     private async Task<CloudSessionResult> BuildCloudSessionResult(CloudSessionData cloudSessionData, SessionMemberData sessionMemberData)

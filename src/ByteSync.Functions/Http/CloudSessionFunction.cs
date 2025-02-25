@@ -2,7 +2,9 @@
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Functions.Helpers.Misc;
+using ByteSync.ServerCommon.Commands.CloudSessions;
 using ByteSync.ServerCommon.Interfaces.Services;
+using MediatR;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 
@@ -11,10 +13,12 @@ namespace ByteSync.Functions.Http;
 public class CloudSessionFunction
 {
     private readonly ICloudSessionsService _cloudSessionsService;
+    private readonly IMediator _mediator;
 
-    public CloudSessionFunction(ICloudSessionsService cloudSessionsService)
+    public CloudSessionFunction(ICloudSessionsService cloudSessionsService, IMediator mediator)
     {
         _cloudSessionsService = cloudSessionsService;
+        _mediator = mediator;
     }
         
     [Function("CreateCloudSessionFunction")]
@@ -173,7 +177,8 @@ public class CloudSessionFunction
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
 
-        await _cloudSessionsService.QuitCloudSession(client, sessionId).ConfigureAwait(false);
+        var request = new QuitSessionRequest(sessionId, client);
+        await _mediator.Send(request);
             
         var response = req.CreateResponse(HttpStatusCode.OK);
         

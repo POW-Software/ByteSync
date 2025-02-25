@@ -9,13 +9,12 @@ using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using FakeItEasy;
-using FakeItEasy.Creation;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using RedLockNet;
 using StackExchange.Redis;
 
-namespace ByteSync.ServerCommon.Tests.Commands;
+namespace ByteSync.ServerCommon.Tests.Commands.Inventories;
 
 public class StartInventoryCommandHandlerTests
 {
