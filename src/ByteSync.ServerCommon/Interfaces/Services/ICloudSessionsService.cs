@@ -21,7 +21,7 @@ public interface ICloudSessionsService
     
     Task<List<SessionMemberInfoDTO>> GetSessionMembersInfosAsync(string sessionId);
         
-    Task UpdateSessionSettings(Client client, string sessionId, EncryptedSessionSettings sessionSettings);
+    // Task UpdateSessionSettings(Client client, string sessionId, EncryptedSessionSettings sessionSettings);
     
     Task<bool> ResetSession(string sessionId, Client client);
     

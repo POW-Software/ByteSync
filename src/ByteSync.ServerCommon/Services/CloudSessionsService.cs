@@ -349,31 +349,31 @@ public class CloudSessionsService : ICloudSessionsService
         return result;
     }
 
-    public async Task UpdateSessionSettings(Client client, string sessionId, EncryptedSessionSettings sessionSettings)
-    {
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (sessionSettings == null)
-        {
-            _logger.LogWarning("UpdateSessionSettings: sessionSettings null");
-            return;
-        }
-
-        var result = await _cloudSessionsRepository.Update(sessionId, cloudSessionData =>
-        {
-            cloudSessionData.UpdateSessionSettings(sessionSettings);
-            
-            _logger.LogInformation("UpdateSessionSettings: {@cloudSession}", cloudSessionData.BuildLog());
-
-            return true;
-        });
-
-        if (result.IsSaved)
-        {
-            var sessionSettingsUpdatedDto = new SessionSettingsUpdatedDTO(sessionId, client.ClientInstanceId, sessionSettings);
-            
-            await _byteSyncClientCaller.SessionGroupExcept(sessionId, client).SessionSettingsUpdated(sessionSettingsUpdatedDto).ConfigureAwait(false);
-        }
-    }
+    // public async Task UpdateSessionSettings(Client client, string sessionId, EncryptedSessionSettings sessionSettings)
+    // {
+    //     // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+    //     if (sessionSettings == null)
+    //     {
+    //         _logger.LogWarning("UpdateSessionSettings: sessionSettings null");
+    //         return;
+    //     }
+    //
+    //     var result = await _cloudSessionsRepository.Update(sessionId, cloudSessionData =>
+    //     {
+    //         cloudSessionData.UpdateSessionSettings(sessionSettings);
+    //         
+    //         _logger.LogInformation("UpdateSessionSettings: {@cloudSession}", cloudSessionData.BuildLog());
+    //
+    //         return true;
+    //     });
+    //
+    //     if (result.IsSaved)
+    //     {
+    //         var sessionSettingsUpdatedDto = new SessionSettingsUpdatedDTO(sessionId, client.ClientInstanceId, sessionSettings);
+    //         
+    //         await _byteSyncClientCaller.SessionGroupExcept(sessionId, client).SessionSettingsUpdated(sessionSettingsUpdatedDto).ConfigureAwait(false);
+    //     }
+    // }
     
     public async Task<bool> ResetSession(string sessionId, Client client)
     {

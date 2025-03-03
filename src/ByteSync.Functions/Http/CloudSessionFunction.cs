@@ -163,7 +163,8 @@ public class CloudSessionFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var settings = await FunctionHelper.DeserializeRequestBody<EncryptedSessionSettings>(req);
 
-        await _cloudSessionsService.UpdateSessionSettings(client, sessionId, settings).ConfigureAwait(false);
+        var request = new UpdateSessionSettingsRequest(sessionId, client, settings);
+        await _mediator.Send(request);
             
         var response = req.CreateResponse(HttpStatusCode.OK);
         
