@@ -91,7 +91,7 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
                     x => x.DataType,
                     x => x.AnalysisMode, x => x.Extensions)
                 .Skip(1)
-                // .Throttle(TimeSpan.FromMilliseconds(250), RxApp.MainThreadScheduler)
+                .Throttle(TimeSpan.FromMilliseconds(250), RxApp.MainThreadScheduler)
                 .Subscribe(_ => SendUpdate());
         });
     }
