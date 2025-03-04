@@ -4,7 +4,7 @@ using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.CloudSessions;
 
-public class UpdateSessionSettingsRequest : IRequest
+public class UpdateSessionSettingsRequest : IRequest<bool>
 {
     public UpdateSessionSettingsRequest(string sessionId, Client client, EncryptedSessionSettings settings)
     {

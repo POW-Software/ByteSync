@@ -1,4 +1,5 @@
 ﻿using ByteSync.Common.Business.Sessions;
+using ByteSync.ServerCommon.Exceptions;
 using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Mappers;
 using ByteSync.ServerCommon.Interfaces.Repositories;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Commands.CloudSessions;
 
-public class UpdateSessionSettingsCommandHandler : IRequestHandler<UpdateSessionSettingsRequest>
+public class UpdateSessionSettingsCommandHandler : IRequestHandler<UpdateSessionSettingsRequest, bool>
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly IByteSyncClientCaller _byteSyncClientCaller;
@@ -24,16 +25,20 @@ public class UpdateSessionSettingsCommandHandler : IRequestHandler<UpdateSession
         _logger = logger;
     }
     
-    public async Task Handle(UpdateSessionSettingsRequest request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(UpdateSessionSettingsRequest request, CancellationToken cancellationToken)
     {
         if (request.Settings == null)
         {
-            _logger.LogWarning("UpdateSessionSettings: sessionSettings null");
-            return;
+            throw new BadRequestException("UpdateSessionSettings: sessionSettings null");
         }
 
         var result = await _cloudSessionsRepository.Update(request.SessionId, cloudSessionData =>
         {
+            if (cloudSessionData.IsSessionActivated)
+            {
+                return false;
+            }
+            
             cloudSessionData.UpdateSessionSettings(request.Settings);
             
             _logger.LogInformation("UpdateSessionSettings: {cloudSession}", cloudSessionData.SessionId);
@@ -45,7 +50,12 @@ public class UpdateSessionSettingsCommandHandler : IRequestHandler<UpdateSession
         {
             var sessionSettingsUpdatedDto = new SessionSettingsUpdatedDTO(request.SessionId, request.Client.ClientInstanceId, request.Settings);
             
-            await _byteSyncClientCaller.SessionGroupExcept(request.SessionId, request.Client).SessionSettingsUpdated(sessionSettingsUpdatedDto).ConfigureAwait(false);
+            await _byteSyncClientCaller.SessionGroupExcept(request.SessionId, request.Client)
+                .SessionSettingsUpdated(sessionSettingsUpdatedDto).ConfigureAwait(false);
+
+            return true;
         }
+
+        return false;
     }
 }
