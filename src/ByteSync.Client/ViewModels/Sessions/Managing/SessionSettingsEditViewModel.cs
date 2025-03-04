@@ -8,7 +8,6 @@ using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Services.Sessions;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Serilog;
 
 namespace ByteSync.ViewModels.Sessions.Managing;
 
@@ -20,6 +19,7 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
     private readonly IAnalysisModeViewModelFactory _analysisModeViewModelFactory;
     private readonly IDataTypeViewModelFactory _dataTypeViewModelFactory;
     private readonly ILinkingKeyViewModelFactory _linkingKeyViewModelFactory;
+    private readonly ILogger<SessionSettingsEditViewModel> _logger;
 
 #if DEBUG
     public SessionSettingsEditViewModel()
@@ -30,7 +30,7 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
 
     public SessionSettingsEditViewModel(ISessionService sessionService, ILocalizationService localizationService, IDataInventoryStarter dataInventoryStarter,
         IAnalysisModeViewModelFactory analysisModeViewModelFactory, IDataTypeViewModelFactory dataTypeViewModelFactory, 
-        ILinkingKeyViewModelFactory linkingKeyViewModelFactory, SessionSettings? sessionSettings)
+        ILinkingKeyViewModelFactory linkingKeyViewModelFactory, SessionSettings? sessionSettings, ILogger<SessionSettingsEditViewModel> logger)
     {
         _sessionService = sessionService;
         _localizationService = localizationService;
@@ -38,6 +38,7 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
         _analysisModeViewModelFactory = analysisModeViewModelFactory ?? throw new ArgumentNullException(nameof(analysisModeViewModelFactory));
         _dataTypeViewModelFactory = dataTypeViewModelFactory;
         _linkingKeyViewModelFactory = linkingKeyViewModelFactory;
+        _logger = logger;
         
         AvailableAnalysisModes =
         [
@@ -90,6 +91,7 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
                     x => x.DataType,
                     x => x.AnalysisMode, x => x.Extensions)
                 .Skip(1)
+                .Throttle(TimeSpan.FromMilliseconds(250), RxApp.MainThreadScheduler)
                 .Subscribe(_ => SendUpdate());
         });
     }
@@ -173,11 +175,11 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
             try
             {
                 var sessionSettings = ExportSettings();
-                await _sessionService.SetSessionSettings(sessionSettings);
+                await _sessionService.SetSessionSettings(sessionSettings, true);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "SendUpdate");
+                _logger.LogError(ex, "SendUpdate");
             }
         }
     }

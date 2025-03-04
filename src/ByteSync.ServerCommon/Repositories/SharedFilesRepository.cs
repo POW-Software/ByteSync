@@ -1,5 +1,6 @@
 ﻿using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Exceptions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 
@@ -97,7 +98,7 @@ public class SharedFilesRepository : BaseRepository<SharedFileData>, ISharedFile
                 }
                 else
                 {
-                    throw new Exception("Could not acquire redis lock");
+                    throw new AcquireRedisLockException(sharedFileCacheKey, sharedFileLock);
                 }
             }
             
@@ -105,7 +106,7 @@ public class SharedFilesRepository : BaseRepository<SharedFileData>, ISharedFile
         }
         else
         {
-            throw new Exception("Could not acquire redis lock");
+            throw new AcquireRedisLockException(sessionSharedFilesKey, sessionSharedFilesLock);
         }
 
         return result;

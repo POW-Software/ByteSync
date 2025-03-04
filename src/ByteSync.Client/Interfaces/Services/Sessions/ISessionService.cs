@@ -52,7 +52,7 @@ public interface ISessionService
     
     Task SetLocalSession(LocalSession localSession, RunLocalSessionProfileInfo? runLocalSessionProfileInfo, SessionSettings sessionSettings);
     
-    Task SetSessionSettings(SessionSettings sessionSettings);
+    Task SetSessionSettings(SessionSettings sessionSettings, bool callApi);
     
     Task SetSessionStatus(SessionStatus sessionStatus);
 
