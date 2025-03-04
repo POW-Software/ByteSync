@@ -75,7 +75,8 @@ public class QuitSessionCommandHandlerTests
 
         bool funcResult = false;
         bool isTransaction = false;
-        A.CallTo(() => _mockCloudSessionsRepository.Update(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+        A.CallTo(() => _mockCloudSessionsRepository.Update(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, 
+                A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction? transaction, IRedLock? _) =>
             {
                 funcResult = func(cloudSessionData);
@@ -163,7 +164,8 @@ public class QuitSessionCommandHandlerTests
 
         bool funcResult = false;
         bool isTransaction = false;
-        A.CallTo(() => _mockCloudSessionsRepository.Update(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+        A.CallTo(() => _mockCloudSessionsRepository.Update(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, 
+                A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction? transaction, IRedLock? _) =>
             {
                 funcResult = func(cloudSessionData);

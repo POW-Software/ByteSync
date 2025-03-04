@@ -20,8 +20,6 @@ public interface ICloudSessionsService
     Task<FinalizeJoinSessionResult> FinalizeJoinCloudSession(Client client, FinalizeJoinCloudSessionParameters parameters);
     
     Task<List<SessionMemberInfoDTO>> GetSessionMembersInfosAsync(string sessionId);
-        
-    // Task UpdateSessionSettings(Client client, string sessionId, EncryptedSessionSettings sessionSettings);
     
     Task<bool> ResetSession(string sessionId, Client client);
     

@@ -84,7 +84,6 @@ public class UpdateSessionSettingsCommandHandlerTests
                 isTransaction = transaction != null;
             })
             .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
-            // .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.Saved));
 
         var mockGroupExcept = A.Fake<IHubByteSyncPush>();
         A.CallTo(() => _mockByteSyncClientCaller.SessionGroupExcept(sessionId, client)).Returns(mockGroupExcept);
@@ -121,13 +120,13 @@ public class UpdateSessionSettingsCommandHandlerTests
 
         bool funcResult = true;
         bool isTransaction = false;
-        A.CallTo(() => _mockCloudSessionsRepository.Update(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+        A.CallTo(() => _mockCloudSessionsRepository.Update(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, 
+                A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction? transaction, IRedLock? _) =>
             {
                 funcResult = func(cloudSessionData);
                 isTransaction = transaction != null;
             })
-            // .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.NoOperation));
             .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
 
         // Act
@@ -152,7 +151,8 @@ public class UpdateSessionSettingsCommandHandlerTests
         var client = new Client { ClientInstanceId = "clientInstance1" };
         var settings = new EncryptedSessionSettings();
 
-        A.CallTo(() => _mockCloudSessionsRepository.Update(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+        A.CallTo(() => _mockCloudSessionsRepository.Update(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, 
+                A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Returns(new UpdateEntityResult<CloudSessionData>(null, UpdateEntityStatus.NotFound));
 
         // Act
