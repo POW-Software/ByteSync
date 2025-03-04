@@ -164,15 +164,18 @@ public class SessionService : ISessionService
         });
     }
 
-    public async Task SetSessionSettings(SessionSettings sessionSettings)
+    public async Task SetSessionSettings(SessionSettings sessionSettings, bool callApi)
     {
         var currentSession = CurrentSession;
         
         if (currentSession is CloudSession)
         {
             var encryptedSessionSettings = _dataEncrypter.EncryptSessionSettings(sessionSettings);
-                    
-            await _cloudSessionApiClient.UpdateSettings(currentSession.SessionId, encryptedSessionSettings);
+
+            if (callApi)
+            {
+                await _cloudSessionApiClient.UpdateSettings(currentSession.SessionId, encryptedSessionSettings);
+            }
         }
 
         _sessionSettings.OnNext(sessionSettings);

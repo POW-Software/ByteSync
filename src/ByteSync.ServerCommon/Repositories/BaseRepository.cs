@@ -2,6 +2,7 @@
 using ByteSync.Common.Controls.Json;
 using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Repositories;
+using ByteSync.ServerCommon.Exceptions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using RedLockNet;
@@ -134,7 +135,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
             }
             else
             {
-                throw new Exception("Could not acquire redis lock");
+                throw new AcquireRedisLockException(key, redisLock);
             }
         }
         finally

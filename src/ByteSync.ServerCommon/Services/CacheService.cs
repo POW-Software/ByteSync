@@ -1,4 +1,5 @@
 ﻿using ByteSync.ServerCommon.Business.Settings;
+using ByteSync.ServerCommon.Exceptions;
 using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -67,7 +68,7 @@ public class CacheService : ICacheService
         }
         else
         {
-            throw new Exception("Could not acquire redis lock for key: " + key);
+            throw new AcquireRedisLockException(key, redisLock);
         }
     }
 }

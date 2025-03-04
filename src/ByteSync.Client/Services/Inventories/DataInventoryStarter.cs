@@ -1,6 +1,5 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using ByteSync.Business.PathItems;
 using ByteSync.Business.Profiles;
 using ByteSync.Business.SessionMembers;
@@ -11,7 +10,6 @@ using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Sessions.Local;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
@@ -19,7 +17,6 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 using DynamicData;
-using Serilog;
 
 namespace ByteSync.Services.Inventories;
 
@@ -32,10 +29,11 @@ public class DataInventoryStarter : IDataInventoryStarter
     private readonly IInventoryApiClient _inventoryApiClient;
     private readonly IPathItemRepository _pathItemRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
+    private readonly ILogger<DataInventoryStarter> _logger;
 
-    public DataInventoryStarter(ISessionService sessionService, ICloudProxy connectionManager, 
-        IDataEncrypter dataEncrypter, IDataInventoryRunner dataInventoryRunner, 
-        IInventoryApiClient inventoryApiClient, IPathItemRepository pathItemRepository, ISessionMemberRepository sessionMemberRepository)
+    public DataInventoryStarter(ISessionService sessionService, ICloudProxy connectionManager, IDataEncrypter dataEncrypter, 
+        IDataInventoryRunner dataInventoryRunner, IInventoryApiClient inventoryApiClient, IPathItemRepository pathItemRepository, 
+        ISessionMemberRepository sessionMemberRepository, ILogger<DataInventoryStarter> logger)
     {
         _sessionService = sessionService;
         _connectionManager = connectionManager;
@@ -44,6 +42,7 @@ public class DataInventoryStarter : IDataInventoryStarter
         _inventoryApiClient = inventoryApiClient;
         _pathItemRepository = pathItemRepository;
         _sessionMemberRepository = sessionMemberRepository;
+        _logger = logger;
         
         _connectionManager.HubPushHandler2.InventoryStarted
             .Where(dto => _sessionService.CheckSession(dto.SessionId))
@@ -65,7 +64,7 @@ public class DataInventoryStarter : IDataInventoryStarter
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, "An unexpected error occurred while checking the inventory auto-start");
+                    _logger.LogError(e, "An unexpected error occurred while checking the inventory auto-start");
                 }
                 return Unit.Default;
             })
@@ -130,11 +129,11 @@ public class DataInventoryStarter : IDataInventoryStarter
 
         if (isLaunchedByUser)
         {
-            Log.Information("The current user has requested to start the Data Inventory");
+            _logger.LogInformation("The current user has requested to start the Data Inventory");
         }
         else
         {
-            Log.Information("The Data Inventory has been automatically started");
+            _logger.LogInformation("The Data Inventory has been automatically started");
         }
         
         var sessionSettings = _sessionService.CurrentSessionSettings;
@@ -150,14 +149,12 @@ public class DataInventoryStarter : IDataInventoryStarter
         {
             return result;
         }
-
-        // todo : remonter également les autres paramètres pour contrôle par les aux parties de l'égalité des paramètres
         
         result = await SendSessionSettings(session, sessionSettings);
 
         if (result.IsOK)
         {
-            await _sessionService.SetSessionSettings(sessionSettings);
+            await _sessionService.SetSessionSettings(sessionSettings, false);
             await _dataInventoryRunner.RunDataInventory();
 
             return result;
@@ -172,17 +169,17 @@ public class DataInventoryStarter : IDataInventoryStarter
     {
         try
         {
-            Log.Information("The Data Inventory has been started by another client (ClientInstanceId:{ClientInstanceId})", 
+            _logger.LogInformation("The Data Inventory has been started by another client (ClientInstanceId:{ClientInstanceId})", 
                 inventoryStartedDto.ClientInstanceId);
                 
             var sessionSettings = _dataEncrypter.DecryptSessionSettings(inventoryStartedDto.EncryptedSessionSettings);
 
-            await _sessionService.SetSessionSettings(sessionSettings);
+            await _sessionService.SetSessionSettings(sessionSettings, false);
             await _dataInventoryRunner.RunDataInventory();
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "OnStartInventory");
+            _logger.LogError(ex, "OnStartInventory");
         }
     }
     
@@ -269,7 +266,7 @@ public class DataInventoryStarter : IDataInventoryStarter
     
     private StartInventoryResult LogAndBuildStartInventoryResult(AbstractSession localSession, StartInventoryStatuses status)
     {
-        Log.Information("StartInventory: session {@localSession} - {Status}", localSession.SessionId, status);
+        _logger.LogInformation("StartInventory: session {@localSession} - {Status}", localSession.SessionId, status);
         return StartInventoryResult.BuildFrom(status);
     }
 }
