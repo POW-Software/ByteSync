@@ -222,23 +222,4 @@ public class QuitSessionCommandHandlerTests
         A.CallTo(() => _mockSessionMemberMapper.Convert(A<SessionMemberData>.Ignored))
             .MustNotHaveHappened();
     }
-
-    // private UpdateEntityResult<T> BuildUpdateResult<T>(bool funcResult, T element, bool isTransaction)
-    // {
-    //     if (funcResult)
-    //     {
-    //         if (isTransaction)
-    //         {
-    //             return new UpdateEntityResult<T>(element, UpdateEntityStatus.WaitingForTransaction);
-    //         }
-    //         else
-    //         {
-    //             return new UpdateEntityResult<T>(element, UpdateEntityStatus.Saved);
-    //         }
-    //     }
-    //     else
-    //     {
-    //         return new UpdateEntityResult<T>(element, UpdateEntityStatus.NotFound);
-    //     }
-    // }
 }
