@@ -9,6 +9,7 @@ using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Mappers;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Tests.Helpers;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -74,13 +75,16 @@ public class UpdateSessionSettingsCommandHandlerTests
         var cloudSessionData = new CloudSessionData { IsSessionActivated = false };
 
         bool funcResult = true;
+        bool isTransaction = false;
         A.CallTo(() => _mockCloudSessionsRepository.Update(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, 
                 A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction? transaction, IRedLock? _) =>
             {
                 funcResult = func(cloudSessionData);
+                isTransaction = transaction != null;
             })
-            .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.Saved));
+            .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
+            // .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.Saved));
 
         var mockGroupExcept = A.Fake<IHubByteSyncPush>();
         A.CallTo(() => _mockByteSyncClientCaller.SessionGroupExcept(sessionId, client)).Returns(mockGroupExcept);
@@ -115,12 +119,16 @@ public class UpdateSessionSettingsCommandHandlerTests
         var settings = new EncryptedSessionSettings();
         var cloudSessionData = new CloudSessionData { IsSessionActivated = true };
 
+        bool funcResult = true;
+        bool isTransaction = false;
         A.CallTo(() => _mockCloudSessionsRepository.Update(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction? transaction, IRedLock? _) =>
             {
-                func(cloudSessionData);
+                funcResult = func(cloudSessionData);
+                isTransaction = transaction != null;
             })
-            .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.NoOperation));
+            // .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.NoOperation));
+            .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
 
         // Act
         var request = new UpdateSessionSettingsRequest(sessionId, client, settings);

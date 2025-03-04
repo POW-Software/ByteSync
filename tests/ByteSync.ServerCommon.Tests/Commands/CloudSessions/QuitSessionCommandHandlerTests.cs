@@ -9,6 +9,7 @@ using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Mappers;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Tests.Helpers;
 using FakeItEasy;
 using FluentAssertions;
 using RedLockNet;
@@ -80,7 +81,7 @@ public class QuitSessionCommandHandlerTests
                 funcResult = func(cloudSessionData);
                 isTransaction = transaction != null;
             })
-            .ReturnsLazily(() => BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
+            .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
         
         A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, _mockTransaction, null))
             .Invokes((string _, Func<InventoryData, bool> func, ITransaction? transaction, IRedLock? _) =>
@@ -88,7 +89,7 @@ public class QuitSessionCommandHandlerTests
                 funcResult = func(inventoryData);
                 isTransaction = transaction != null;
             })
-            .ReturnsLazily(() => BuildUpdateResult(funcResult, inventoryData, isTransaction));
+            .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, inventoryData, isTransaction));
         
         A.CallTo(() => _mockSynchronizationRepository.UpdateIfExists(sessionId, A<Func<SynchronizationEntity, bool>>.Ignored, _mockTransaction, null))
             .Invokes((string _, Func<SynchronizationEntity, bool> func, ITransaction? transaction, IRedLock? _) =>
@@ -96,7 +97,7 @@ public class QuitSessionCommandHandlerTests
                 funcResult = func(synchronizationEntity);
                 isTransaction = transaction != null;
             })
-            .ReturnsLazily(() => BuildUpdateResult(funcResult, synchronizationEntity, isTransaction));
+            .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, synchronizationEntity, isTransaction));
         
         A.CallTo(() => _mockTransaction.ExecuteAsync(CommandFlags.None)).Returns(true);
         
@@ -168,7 +169,7 @@ public class QuitSessionCommandHandlerTests
                 funcResult = func(cloudSessionData);
                 isTransaction = transaction != null;
             })
-            .ReturnsLazily(() => BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
+            .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
         
         A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, _mockTransaction, null))
             .Invokes((string _, Func<InventoryData, bool> func, ITransaction? transaction, IRedLock? _) =>
@@ -176,7 +177,7 @@ public class QuitSessionCommandHandlerTests
                 funcResult = func(inventoryData);
                 isTransaction = transaction != null;
             })
-            .ReturnsLazily(() => BuildUpdateResult(funcResult, inventoryData, isTransaction));
+            .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, inventoryData, isTransaction));
         
         A.CallTo(() => _mockSynchronizationRepository.UpdateIfExists(sessionId, A<Func<SynchronizationEntity, bool>>.Ignored, _mockTransaction, null))
             .Invokes((string _, Func<SynchronizationEntity, bool> func, ITransaction? transaction, IRedLock? _) =>
@@ -184,7 +185,7 @@ public class QuitSessionCommandHandlerTests
                 funcResult = func(synchronizationEntity);
                 isTransaction = transaction != null;
             })
-            .ReturnsLazily(() => BuildUpdateResult(funcResult, synchronizationEntity, isTransaction));
+            .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, synchronizationEntity, isTransaction));
         
         A.CallTo(() => _mockTransaction.ExecuteAsync(CommandFlags.None)).Returns(true);
         
@@ -220,22 +221,22 @@ public class QuitSessionCommandHandlerTests
             .MustNotHaveHappened();
     }
 
-    private UpdateEntityResult<T> BuildUpdateResult<T>(bool funcResult, T element, bool isTransaction)
-    {
-        if (funcResult)
-        {
-            if (isTransaction)
-            {
-                return new UpdateEntityResult<T>(element, UpdateEntityStatus.WaitingForTransaction);
-            }
-            else
-            {
-                return new UpdateEntityResult<T>(element, UpdateEntityStatus.Saved);
-            }
-        }
-        else
-        {
-            return new UpdateEntityResult<T>(element, UpdateEntityStatus.NotFound);
-        }
-    }
+    // private UpdateEntityResult<T> BuildUpdateResult<T>(bool funcResult, T element, bool isTransaction)
+    // {
+    //     if (funcResult)
+    //     {
+    //         if (isTransaction)
+    //         {
+    //             return new UpdateEntityResult<T>(element, UpdateEntityStatus.WaitingForTransaction);
+    //         }
+    //         else
+    //         {
+    //             return new UpdateEntityResult<T>(element, UpdateEntityStatus.Saved);
+    //         }
+    //     }
+    //     else
+    //     {
+    //         return new UpdateEntityResult<T>(element, UpdateEntityStatus.NotFound);
+    //     }
+    // }
 }
