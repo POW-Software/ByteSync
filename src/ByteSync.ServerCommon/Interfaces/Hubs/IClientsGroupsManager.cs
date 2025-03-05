@@ -6,8 +6,6 @@ namespace ByteSync.ServerCommon.Interfaces.Hubs;
 
 public interface IClientsGroupsManager
 {
-    
-    
     Task AddToSessionGroup(Client client, string sessionId);
     
     Task AddToLobbyGroup(Client client, string lobby);
