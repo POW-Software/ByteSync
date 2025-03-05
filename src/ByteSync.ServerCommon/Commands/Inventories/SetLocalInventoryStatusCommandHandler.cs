@@ -42,8 +42,7 @@ public class SetLocalInventoryStatusCommandHandler : IRequestHandler<SetLocalInv
             {
                 inventoryMember.SessionMemberGeneralStatus = parameters.SessionMemberGeneralStatus;
                 inventoryMember.LastLocalInventoryStatusUpdate = parameters.UtcChangeDate;
-
-                // Notification aux autres clients
+                
                 _clientsGroupsInvoker.SessionGroupExcept(sessionId, client).SessionMemberGeneralStatusUpdated(parameters);
 
                 return true;
