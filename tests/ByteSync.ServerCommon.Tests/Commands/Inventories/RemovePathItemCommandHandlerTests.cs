@@ -18,7 +18,7 @@ public class RemovePathItemCommandHandlerTests
     private readonly IInventoryMemberService _mockInventoryMemberService;
     private readonly ICloudSessionsRepository _mockCloudSessionsRepository;
     private readonly IInventoryRepository _mockInventoryRepository;
-    private readonly IByteSyncClientCaller _mockByteSyncClientCaller;
+    private readonly IClientsGroupsInvoker _mockClientsGroupsInvoker;
     private readonly ILogger<RemovePathItemCommandHandler> _mockLogger;
     
     private readonly RemovePathItemCommandHandler _removePathItemCommandHandler;
@@ -28,11 +28,11 @@ public class RemovePathItemCommandHandlerTests
         _mockInventoryMemberService = A.Fake<IInventoryMemberService>();
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
-        _mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        _mockClientsGroupsInvoker = A.Fake<IClientsGroupsInvoker>();
         _mockLogger = A.Fake<ILogger<RemovePathItemCommandHandler>>();
         
         _removePathItemCommandHandler = new RemovePathItemCommandHandler(_mockInventoryMemberService, _mockInventoryRepository, _mockCloudSessionsRepository, 
-            _mockByteSyncClientCaller, _mockLogger);
+            _mockClientsGroupsInvoker, _mockLogger);
     }
     
     [Test]

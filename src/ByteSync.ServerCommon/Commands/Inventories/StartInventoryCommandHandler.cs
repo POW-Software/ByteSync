@@ -17,7 +17,7 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
     private readonly IInventoryRepository _inventoryRepository;
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly ISharedFilesService _sharedFilesService;
-    private readonly IByteSyncClientCaller _byteSyncClientCaller;
+    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
     private readonly ICacheService _cacheService;
     private readonly ILogger<StartInventoryCommandHandler> _logger;
     
@@ -25,14 +25,14 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
         IInventoryRepository inventoryRepository,
         ICloudSessionsRepository cloudSessionsRepository,
         ISharedFilesService sharedFilesService,
-        IByteSyncClientCaller byteSyncClientCaller,
+        IClientsGroupsInvoker clientsGroupsInvoker,
         ICacheService cacheService,
         ILogger<StartInventoryCommandHandler> logger)
     {
         _inventoryRepository = inventoryRepository;
         _cloudSessionsRepository = cloudSessionsRepository;
         _sharedFilesService = sharedFilesService;
-        _byteSyncClientCaller = byteSyncClientCaller;
+        _clientsGroupsInvoker = clientsGroupsInvoker;
         _cacheService = cacheService;
         _logger = logger;
     }
@@ -74,7 +74,7 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
             await _sharedFilesService.ClearSession(sessionId);
             
             var dto = new InventoryStartedDTO(sessionId, client.ClientInstanceId, sessionUpdateResult.Element!.SessionSettings);
-            await _byteSyncClientCaller.SessionGroupExcept(sessionId, client).InventoryStarted(dto);
+            await _clientsGroupsInvoker.SessionGroupExcept(sessionId, client).InventoryStarted(dto);
             
             _logger.LogInformation("StartInventory: session {SessionId} - OK", sessionId);
         }

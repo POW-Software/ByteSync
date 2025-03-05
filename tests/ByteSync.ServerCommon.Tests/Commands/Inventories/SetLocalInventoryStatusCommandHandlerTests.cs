@@ -17,7 +17,7 @@ namespace ByteSync.ServerCommon.Tests.Commands.Inventories;
 public class SetLocalInventoryStatusCommandHandlerTests
 {
     private readonly IInventoryRepository _mockInventoryRepository;
-    private readonly IByteSyncClientCaller _mockByteSyncCaller;
+    private readonly IClientsGroupsInvoker _mockGroupsInvoker;
     private readonly ILogger<SetLocalInventoryStatusCommandHandler> _mockLogger;
     
     private readonly SetLocalInventoryStatusCommandHandler _setLocalInventoryStatusCommandHandler;
@@ -25,10 +25,10 @@ public class SetLocalInventoryStatusCommandHandlerTests
     public SetLocalInventoryStatusCommandHandlerTests()
     {
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
-        _mockByteSyncCaller = A.Fake<IByteSyncClientCaller>();
+        _mockGroupsInvoker = A.Fake<IClientsGroupsInvoker>();
         _mockLogger = A.Fake<ILogger<SetLocalInventoryStatusCommandHandler>>();
         
-        _setLocalInventoryStatusCommandHandler = new SetLocalInventoryStatusCommandHandler(_mockInventoryRepository, _mockByteSyncCaller, _mockLogger);
+        _setLocalInventoryStatusCommandHandler = new SetLocalInventoryStatusCommandHandler(_mockInventoryRepository, _mockGroupsInvoker, _mockLogger);
     }
     
     [Test]

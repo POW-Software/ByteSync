@@ -12,16 +12,16 @@ namespace ByteSync.ServerCommon.Commands.CloudSessions;
 public class UpdateSessionSettingsCommandHandler : IRequestHandler<UpdateSessionSettingsRequest, bool>
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
-    private readonly IByteSyncClientCaller _byteSyncClientCaller;
+    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
     private readonly ILogger<UpdateSessionSettingsCommandHandler> _logger;
 
 
     public UpdateSessionSettingsCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IInventoryRepository inventoryRepository, 
         ISynchronizationRepository synchronizationRepository, ICacheService cacheService, ISessionMemberMapper sessionMemberMapper, 
-        IByteSyncClientCaller byteSyncClientCaller, ILogger<UpdateSessionSettingsCommandHandler> logger)
+        IClientsGroupsInvoker clientsGroupsInvoker, ILogger<UpdateSessionSettingsCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
-        _byteSyncClientCaller = byteSyncClientCaller;
+        _clientsGroupsInvoker = clientsGroupsInvoker;
         _logger = logger;
     }
     
@@ -50,7 +50,7 @@ public class UpdateSessionSettingsCommandHandler : IRequestHandler<UpdateSession
         {
             var sessionSettingsUpdatedDto = new SessionSettingsUpdatedDTO(request.SessionId, request.Client.ClientInstanceId, request.Settings);
             
-            await _byteSyncClientCaller.SessionGroupExcept(request.SessionId, request.Client)
+            await _clientsGroupsInvoker.SessionGroupExcept(request.SessionId, request.Client)
                 .SessionSettingsUpdated(sessionSettingsUpdatedDto).ConfigureAwait(false);
 
             return true;

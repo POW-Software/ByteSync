@@ -13,20 +13,20 @@ public class RemovePathItemCommandHandler : IRequestHandler<RemovePathItemReques
     private readonly IInventoryMemberService _inventoryMemberService;
     private readonly IInventoryRepository _inventoryRepository;
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
-    private readonly IByteSyncClientCaller _byteSyncClientCaller;
+    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
     private readonly ILogger<RemovePathItemCommandHandler> _logger;
     
     public RemovePathItemCommandHandler(
         IInventoryMemberService inventoryMemberService,
         IInventoryRepository inventoryRepository,
         ICloudSessionsRepository cloudSessionsRepository,
-        IByteSyncClientCaller byteSyncClientCaller,
+        IClientsGroupsInvoker clientsGroupsInvoker,
         ILogger<RemovePathItemCommandHandler> logger)
     {
         _inventoryMemberService = inventoryMemberService;
         _inventoryRepository = inventoryRepository;
         _cloudSessionsRepository = cloudSessionsRepository;
-        _byteSyncClientCaller = byteSyncClientCaller;
+        _clientsGroupsInvoker = clientsGroupsInvoker;
         _logger = logger;
     }
 
@@ -63,7 +63,7 @@ public class RemovePathItemCommandHandler : IRequestHandler<RemovePathItemReques
         if (updateEntityResult.IsSaved)
         {
             var pathItemDto = new PathItemDTO(request.SessionId, request.Client.ClientInstanceId, request.EncryptedPathItem);
-            await _byteSyncClientCaller.SessionGroupExcept(request.SessionId, request.Client).PathItemRemoved(pathItemDto);
+            await _clientsGroupsInvoker.SessionGroupExcept(request.SessionId, request.Client).PathItemRemoved(pathItemDto);
         }
 
         return updateEntityResult.IsSaved;

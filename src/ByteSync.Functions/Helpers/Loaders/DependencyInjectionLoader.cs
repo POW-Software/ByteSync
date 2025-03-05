@@ -48,7 +48,11 @@ public static class DependencyInjectionLoader
                 .InstancePerLifetimeScope()
                 .AsImplementedInterfaces();
         
-            builder.RegisterType<ByteSyncClientCaller>()
+            builder.RegisterType<ClientsGroupsInvoker>()
+                .InstancePerLifetimeScope()
+                .AsImplementedInterfaces();
+            
+            builder.RegisterType<ClientsGroupsManager>()
                 .InstancePerLifetimeScope()
                 .AsImplementedInterfaces();
         

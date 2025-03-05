@@ -4,7 +4,7 @@ using ByteSync.ServerCommon.Business.Sessions;
 
 namespace ByteSync.ServerCommon.Interfaces.Hubs;
 
-public interface IByteSyncClientCaller
+public interface IClientsGroupsInvoker
 {
     IHubByteSyncPush Client(string clientInstanceId);
     
@@ -23,14 +23,4 @@ public interface IByteSyncClientCaller
     IHubByteSyncPush SessionGroupExcept(string sessionId, Client client);
     
     IHubByteSyncPush LobbyGroupExcept(string lobbyId, Client client);
-    
-    Task AddToSessionGroup(Client client, string sessionId);
-    
-    Task AddToLobbyGroup(Client client, string lobby);
-    
-    Task RemoveFromGroup(Client client, string groupName);
-    
-    Task AddClientGroup(string connectionId, Client client);
-    
-    Task RemoveClientGroup(string connectionId, Client client);
 }

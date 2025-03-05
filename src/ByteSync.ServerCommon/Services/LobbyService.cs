@@ -17,16 +17,18 @@ public class LobbyService : ILobbyService
     private readonly ILobbyRepository _lobbyRepository;
     private readonly ICloudSessionProfileRepository _cloudSessionProfileRepository;
     private readonly ILobbyFactory _lobbyFactory;
-    private readonly IByteSyncClientCaller _byteSyncClientCaller;
+    private readonly IClientsGroupsManager _clientsGroupsManager;
+    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
     private readonly ILogger<LobbyService> _logger;
     
     public LobbyService(ILobbyRepository lobbyRepository, ICloudSessionProfileRepository cloudSessionProfileRepository, 
-        ILobbyFactory lobbyFactory, IByteSyncClientCaller byteSyncClientCaller, ILogger<LobbyService> logger)
+        ILobbyFactory lobbyFactory, IClientsGroupsManager clientsGroupsManager, IClientsGroupsInvoker clientsGroupsInvoker, ILogger<LobbyService> logger)
     {
         _lobbyRepository = lobbyRepository;
         _cloudSessionProfileRepository = cloudSessionProfileRepository;
         _lobbyFactory = lobbyFactory;
-        _byteSyncClientCaller = byteSyncClientCaller;
+        _clientsGroupsManager = clientsGroupsManager;
+        _clientsGroupsInvoker = clientsGroupsInvoker;
         _logger = logger;
     }
     
@@ -122,12 +124,12 @@ public class LobbyService : ILobbyService
             
             var memberInfo = lobbyInfo.GetMember(joinLobbyParameters.ProfileClientId)!;
 
-            await _byteSyncClientCaller
+            await _clientsGroupsInvoker
                 .LobbyGroupExcept(lobbyInfo.LobbyId, client)
                 .MemberJoinedLobby(lobbyInfo.LobbyId, memberInfo)
                 .ConfigureAwait(false);
 
-            await _byteSyncClientCaller
+            await _clientsGroupsManager
                 .AddToLobbyGroup(client, lobbyInfo.LobbyId)
                 .ConfigureAwait(false);
         }
@@ -159,7 +161,7 @@ public class LobbyService : ILobbyService
 
         if (result.IsSaved)
         {
-            await _byteSyncClientCaller.LobbyGroupExcept(lobbyId, client)
+            await _clientsGroupsInvoker.LobbyGroupExcept(lobbyId, client)
                 .LobbyMemberStatusUpdated(lobbyId, client.ClientInstanceId, lobbyMemberStatus).ConfigureAwait(false);
         }
         
@@ -180,7 +182,7 @@ public class LobbyService : ILobbyService
                 _logger.LogInformation("SendLobbyCloudSessionCredentials: {@credentials} sent to {@recipient}", 
                     lobbyCloudSessionCredentials, lobbyCloudSessionCredentials.Recipient);
                 
-                await _byteSyncClientCaller.Client(lobbyCloudSessionCredentials.Recipient)
+                await _clientsGroupsInvoker.Client(lobbyCloudSessionCredentials.Recipient)
                     .LobbyCloudSessionCredentialsSent(lobbyCloudSessionCredentials).ConfigureAwait(false);
             }
         }
@@ -192,7 +194,7 @@ public class LobbyService : ILobbyService
         
         if (lobby != null && lobby.LobbyMemberCells.Any(c => c.LobbyMember != null && c.LobbyMember.ClientInstanceId == client.ClientInstanceId))
         {
-            await _byteSyncClientCaller.LobbyGroup(lobbyCheckInfo.LobbyId)
+            await _clientsGroupsInvoker.LobbyGroup(lobbyCheckInfo.LobbyId)
                 .LobbyCheckInfosSent(lobbyCheckInfo.LobbyId, lobbyCheckInfo).ConfigureAwait(false);
         }
     }
@@ -217,10 +219,10 @@ public class LobbyService : ILobbyService
 
         if (result.IsSaved || result.IsDeleted)
         {
-            await _byteSyncClientCaller.LobbyGroup(lobbyId).
+            await _clientsGroupsInvoker.LobbyGroup(lobbyId).
                 MemberQuittedLobby(lobbyId, client.ClientInstanceId).ConfigureAwait(false);
                 
-            await _byteSyncClientCaller.RemoveFromGroup(client, $"Lobby_{lobbyId}").ConfigureAwait(false);
+            await _clientsGroupsManager.RemoveFromGroup(client, $"Lobby_{lobbyId}").ConfigureAwait(false);
         }
 
         return result.IsSaved || result.IsDeleted;
