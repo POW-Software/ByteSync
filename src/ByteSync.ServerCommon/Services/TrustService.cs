@@ -13,16 +13,16 @@ public class TrustService : ITrustService
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly ILobbyRepository _lobbyRepository;
-    private readonly IByteSyncClientCaller _byteSyncClientCaller;
+    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
     private readonly ILogger<TrustService> _logger;
 
 
     public TrustService(ICloudSessionsRepository cloudSessionsRepository, ILobbyRepository lobbyRepository, 
-        IByteSyncClientCaller byteSyncClientCaller, ILogger<TrustService> logger)
+        IClientsGroupsInvoker clientsGroupsInvoker, ILogger<TrustService> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _lobbyRepository = lobbyRepository;
-        _byteSyncClientCaller = byteSyncClientCaller;
+        _clientsGroupsInvoker = clientsGroupsInvoker;
         _logger = logger;
     }
     
@@ -47,7 +47,7 @@ public class TrustService : ITrustService
                 _logger.LogInformation("StartTrustCheck: {Member} must be trusted by {Joiner}", 
                     clientInstanceId, joiner.ClientInstanceId);
                 
-                await _byteSyncClientCaller.Client(clientInstanceId).AskPublicKeyCheckData(trustCheckParameters.SessionId, joiner.ClientInstanceId,
+                await _clientsGroupsInvoker.Client(clientInstanceId).AskPublicKeyCheckData(trustCheckParameters.SessionId, joiner.ClientInstanceId,
                     trustCheckParameters.PublicKeyInfo).ConfigureAwait(false);
             }
         }
@@ -110,7 +110,7 @@ public class TrustService : ITrustService
             
             foreach (var digitalSignatureCheckInfo in parameters.DigitalSignatureCheckInfos)
             {
-                await _byteSyncClientCaller.Client(digitalSignatureCheckInfo.Recipient).RequestCheckDigitalSignature(digitalSignatureCheckInfo).ConfigureAwait(false);
+                await _clientsGroupsInvoker.Client(digitalSignatureCheckInfo.Recipient).RequestCheckDigitalSignature(digitalSignatureCheckInfo).ConfigureAwait(false);
             }
         }
         else
@@ -143,7 +143,7 @@ public class TrustService : ITrustService
         var recipient = await _cloudSessionsRepository.GetSessionMember(parameters.SessionId, parameters.SessionMemberInstanceId);
         if (recipient != null)
         {
-            await _byteSyncClientCaller.Client(recipient).RequestTrustPublicKey(parameters).ConfigureAwait(false);
+            await _clientsGroupsInvoker.Client(recipient).RequestTrustPublicKey(parameters).ConfigureAwait(false);
             
             _logger.LogInformation("RequestTrustPublicKey: {Sender} sends trust publicKey Request to {Recipient}", client.ClientInstanceId,
                 parameters.SessionMemberInstanceId);
@@ -156,7 +156,7 @@ public class TrustService : ITrustService
 
     public async Task GiveMemberPublicKeyCheckData(Client client, GiveMemberPublicKeyCheckDataParameters parameters)
     {
-        await _byteSyncClientCaller.Client(parameters.ClientInstanceId).GiveMemberPublicKeyCheckData(parameters.SessionId, parameters.PublicKeyCheckData).ConfigureAwait(false);
+        await _clientsGroupsInvoker.Client(parameters.ClientInstanceId).GiveMemberPublicKeyCheckData(parameters.SessionId, parameters.PublicKeyCheckData).ConfigureAwait(false);
             
         _logger.LogInformation("GiveMemberPublicKeyCheckData: {Sender} gives PublicKeyCheckData to {Recipient}", client.ClientInstanceId,
             parameters.ClientInstanceId);
@@ -167,7 +167,7 @@ public class TrustService : ITrustService
         var session = await _cloudSessionsRepository.Get(parameters.SessionId);
         if (session != null)
         {
-            await _byteSyncClientCaller.Client(parameters.OtherPartyClientInstanceId).InformPublicKeyValidationIsFinished(parameters).ConfigureAwait(false);
+            await _clientsGroupsInvoker.Client(parameters.OtherPartyClientInstanceId).InformPublicKeyValidationIsFinished(parameters).ConfigureAwait(false);
             
             _logger.LogInformation("InformPublicKeyValidationIsFinished: {Sender} sends PublicKeyValidation to {Recipient}", client.ClientInstanceId,
                 parameters.OtherPartyClientInstanceId);

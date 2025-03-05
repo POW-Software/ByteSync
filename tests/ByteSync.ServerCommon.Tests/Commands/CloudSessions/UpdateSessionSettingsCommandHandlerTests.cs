@@ -26,7 +26,7 @@ public class UpdateSessionSettingsCommandHandlerTests
     private ISynchronizationRepository _mockSynchronizationRepository;
     private ICacheService _mockCacheService;
     private ISessionMemberMapper _mockSessionMemberMapper;
-    private IByteSyncClientCaller _mockByteSyncClientCaller;
+    private IClientsGroupsInvoker _mockClientsGroupsInvoker;
     private ILogger<UpdateSessionSettingsCommandHandler> _mockLogger;
     private UpdateSessionSettingsCommandHandler _updateSessionSettingsCommandHandler;
 
@@ -38,7 +38,7 @@ public class UpdateSessionSettingsCommandHandlerTests
         _mockSynchronizationRepository = A.Fake<ISynchronizationRepository>();
         _mockCacheService = A.Fake<ICacheService>();
         _mockSessionMemberMapper = A.Fake<ISessionMemberMapper>();
-        _mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        _mockClientsGroupsInvoker = A.Fake<IClientsGroupsInvoker>();
         _mockLogger = A.Fake<ILogger<UpdateSessionSettingsCommandHandler>>();
 
         _updateSessionSettingsCommandHandler = new UpdateSessionSettingsCommandHandler(
@@ -47,7 +47,7 @@ public class UpdateSessionSettingsCommandHandlerTests
             _mockSynchronizationRepository,
             _mockCacheService,
             _mockSessionMemberMapper,
-            _mockByteSyncClientCaller,
+            _mockClientsGroupsInvoker,
             _mockLogger);
     }
 
@@ -86,7 +86,7 @@ public class UpdateSessionSettingsCommandHandlerTests
             .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
 
         var mockGroupExcept = A.Fake<IHubByteSyncPush>();
-        A.CallTo(() => _mockByteSyncClientCaller.SessionGroupExcept(sessionId, client)).Returns(mockGroupExcept);
+        A.CallTo(() => _mockClientsGroupsInvoker.SessionGroupExcept(sessionId, client)).Returns(mockGroupExcept);
 
         // Act
         var request = new UpdateSessionSettingsRequest(sessionId, client, settings);
@@ -99,7 +99,7 @@ public class UpdateSessionSettingsCommandHandlerTests
         A.CallTo(() => _mockCloudSessionsRepository.Update(sessionId, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .MustHaveHappenedOnceExactly();
 
-        A.CallTo(() => _mockByteSyncClientCaller.SessionGroupExcept(sessionId, client))
+        A.CallTo(() => _mockClientsGroupsInvoker.SessionGroupExcept(sessionId, client))
             .MustHaveHappenedOnceExactly();
 
         A.CallTo(() => mockGroupExcept.SessionSettingsUpdated(A<SessionSettingsUpdatedDTO>.That.Matches(dto =>
@@ -139,7 +139,7 @@ public class UpdateSessionSettingsCommandHandlerTests
         A.CallTo(() => _mockCloudSessionsRepository.Update(sessionId, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .MustHaveHappenedOnceExactly();
 
-        A.CallTo(() => _mockByteSyncClientCaller.SessionGroupExcept(A<string>.Ignored, A<Client>.Ignored))
+        A.CallTo(() => _mockClientsGroupsInvoker.SessionGroupExcept(A<string>.Ignored, A<Client>.Ignored))
             .MustNotHaveHappened();
     }
 
@@ -165,7 +165,7 @@ public class UpdateSessionSettingsCommandHandlerTests
         A.CallTo(() => _mockCloudSessionsRepository.Update(sessionId, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .MustHaveHappenedOnceExactly();
 
-        A.CallTo(() => _mockByteSyncClientCaller.SessionGroupExcept(A<string>.Ignored, A<Client>.Ignored))
+        A.CallTo(() => _mockClientsGroupsInvoker.SessionGroupExcept(A<string>.Ignored, A<Client>.Ignored))
             .MustNotHaveHappened();
     }
 }

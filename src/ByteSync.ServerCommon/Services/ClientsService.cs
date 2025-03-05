@@ -16,16 +16,16 @@ public class ClientsService : IClientsService
 {
     private readonly IByteSyncEndpointFactory _byteSyncEndpointFactory;
     private readonly IClientsRepository _clientsRepository;
-    private readonly IByteSyncClientCaller _byteSyncClientCaller;
+    private readonly IClientsGroupsManager _clientsGroupsManager;
     private readonly ILogger<ClientsService> _logger;
 
     public ClientsService(IByteSyncEndpointFactory byteSyncEndpointFactory,
-        IClientsRepository clientsRepository, IByteSyncClientCaller byteSyncClientCaller,
+        IClientsRepository clientsRepository, IClientsGroupsManager clientsGroupsManager,
         ILogger<ClientsService> logger)
     {
         _byteSyncEndpointFactory = byteSyncEndpointFactory;
         _clientsRepository = clientsRepository;
-        _byteSyncClientCaller = byteSyncClientCaller;
+        _clientsGroupsManager = clientsGroupsManager;
         _logger = logger;
     }
 
@@ -46,7 +46,7 @@ public class ClientsService : IClientsService
         {
             var client = result.Element!;
             
-            await _byteSyncClientCaller.AddClientGroup(connectionId, client);
+            await _clientsGroupsManager.AddClientGroup(connectionId, client);
 
             _logger.LogInformation("ClientsService.OnClientConnected: client:{@client}, connectionId:{connectionId}", 
                 client.BuildLog(), connectionId);

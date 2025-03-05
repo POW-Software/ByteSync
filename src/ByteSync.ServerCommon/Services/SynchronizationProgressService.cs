@@ -11,15 +11,15 @@ namespace ByteSync.ServerCommon.Services;
 
 public class SynchronizationProgressService : ISynchronizationProgressService
 {
-    private readonly IByteSyncClientCaller _byteSyncClientCaller;
+    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
     private readonly ITrackingActionMapper _trackingActionMapper;
     private readonly ISynchronizationMapper _synchronizationMapper;
     private readonly ISharedFilesService _sharedFilesService;
 
-    public SynchronizationProgressService(IByteSyncClientCaller byteSyncClientCaller, ITrackingActionMapper trackingActionMapper, 
+    public SynchronizationProgressService(IClientsGroupsInvoker clientsGroupsInvoker, ITrackingActionMapper trackingActionMapper, 
         ISynchronizationMapper synchronizationMapper, ISharedFilesService sharedFilesService)
     {
-        _byteSyncClientCaller = byteSyncClientCaller;
+        _clientsGroupsInvoker = clientsGroupsInvoker;
         _trackingActionMapper = trackingActionMapper;
         _synchronizationMapper = synchronizationMapper;
         _sharedFilesService = sharedFilesService;
@@ -48,7 +48,7 @@ public class SynchronizationProgressService : ISynchronizationProgressService
     public async Task<Synchronization> InformSynchronizationStarted(SynchronizationEntity synchronizationEntity, Client client)
     {
         var synchronization = await MapToSynchronization(synchronizationEntity);
-        await _byteSyncClientCaller.SessionGroupExcept(synchronization.SessionId, client).SynchronizationStarted(synchronization);
+        await _clientsGroupsInvoker.SessionGroupExcept(synchronization.SessionId, client).SynchronizationStarted(synchronization);
 
         return synchronization;
     }
@@ -65,7 +65,7 @@ public class SynchronizationProgressService : ISynchronizationProgressService
             ActionsGroupIds = sharedFileDefinition.ActionsGroupIds!
         };
         
-        await _byteSyncClientCaller.Clients(targetInstanceIds).UploadFinished(fileTransferPush);
+        await _clientsGroupsInvoker.Clients(targetInstanceIds).UploadFinished(fileTransferPush);
     }
 
     public async Task FilePartIsUploaded(SharedFileDefinition sharedFileDefinition, int partNumber, HashSet<string> targetInstanceIds)
@@ -80,7 +80,7 @@ public class SynchronizationProgressService : ISynchronizationProgressService
             ActionsGroupIds = sharedFileDefinition.ActionsGroupIds!
         };
         
-        await _byteSyncClientCaller.Clients(targetInstanceIds).FilePartUploaded(fileTransferPush);
+        await _clientsGroupsInvoker.Clients(targetInstanceIds).FilePartUploaded(fileTransferPush);
     }
 
     public Task<Synchronization> MapToSynchronization(SynchronizationEntity synchronizationEntity)
@@ -94,14 +94,14 @@ public class SynchronizationProgressService : ISynchronizationProgressService
     {
         var synchronization = await MapToSynchronization(synchronizationEntity);
         
-        await _byteSyncClientCaller.Clients(synchronizationEntity.Progress.Members).SynchronizationUpdated(synchronization);
+        await _clientsGroupsInvoker.Clients(synchronizationEntity.Progress.Members).SynchronizationUpdated(synchronization);
     }
 
     private async Task SendSynchronizationProgressUpdated(SynchronizationEntity synchronizationEntity)
     {
         var synchronizationProgressPush = CreateSynchronizationProgressPush(synchronizationEntity, null);
 
-        await _byteSyncClientCaller.Clients(synchronizationEntity.Progress.Members)
+        await _clientsGroupsInvoker.Clients(synchronizationEntity.Progress.Members)
             .SynchronizationProgressUpdated(synchronizationProgressPush);
     }
 
@@ -117,7 +117,7 @@ public class SynchronizationProgressService : ISynchronizationProgressService
         
         var synchronizationProgressPush = CreateSynchronizationProgressPush(trackingActionResult.SynchronizationEntity, trackingActionSummaries);
 
-        await _byteSyncClientCaller.Clients(trackingActionResult.SynchronizationEntity.Progress.Members)
+        await _clientsGroupsInvoker.Clients(trackingActionResult.SynchronizationEntity.Progress.Members)
             .SynchronizationProgressUpdated(synchronizationProgressPush);
     }
 

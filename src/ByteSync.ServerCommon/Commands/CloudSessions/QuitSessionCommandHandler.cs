@@ -14,18 +14,20 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
     private readonly ISynchronizationRepository _synchronizationRepository;
     private readonly ICacheService _cacheService;
     private readonly ISessionMemberMapper _sessionMemberMapper;
-    private readonly IByteSyncClientCaller _byteSyncClientCaller;
+    private readonly IClientsGroupsManager _clientsGroupsManager;
+    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
 
     public QuitSessionCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IInventoryRepository inventoryRepository, 
         ISynchronizationRepository synchronizationRepository, ICacheService cacheService, ISessionMemberMapper sessionMemberMapper, 
-        IByteSyncClientCaller byteSyncClientCaller)
+        IClientsGroupsManager clientsGroupsManager, IClientsGroupsInvoker clientsGroupsInvoker)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _inventoryRepository = inventoryRepository;
         _synchronizationRepository = synchronizationRepository;
         _cacheService = cacheService;
         _sessionMemberMapper = sessionMemberMapper;
-        _byteSyncClientCaller = byteSyncClientCaller;
+        _clientsGroupsManager = clientsGroupsManager;
+        _clientsGroupsInvoker = clientsGroupsInvoker;
     }
     
     public async Task Handle(QuitSessionRequest request, CancellationToken cancellationToken)
@@ -92,9 +94,9 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
         {       
             await transaction.ExecuteAsync();
         
-            await _byteSyncClientCaller.RemoveFromGroup(request.Client, request.SessionId);
+            await _clientsGroupsManager.RemoveFromGroup(request.Client, request.SessionId);
             var sessionMemberInfo = await _sessionMemberMapper.Convert(innerQuitter!);
-            await _byteSyncClientCaller.SessionGroup(request.SessionId).MemberQuittedSession(sessionMemberInfo);
+            await _clientsGroupsInvoker.SessionGroup(request.SessionId).MemberQuittedSession(sessionMemberInfo);
         }
     }
 }

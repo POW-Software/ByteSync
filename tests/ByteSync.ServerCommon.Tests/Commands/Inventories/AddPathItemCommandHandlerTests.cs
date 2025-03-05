@@ -20,7 +20,7 @@ public class AddPathItemCommandHandlerTests
     private readonly IInventoryMemberService _mockInventoryMemberService;
     private readonly ICloudSessionsRepository _mockCloudSessionsRepository;
     private readonly IInventoryRepository _mockInventoryRepository;
-    private readonly IByteSyncClientCaller _mockByteSyncClientCaller;
+    private readonly IClientsGroupsInvoker _mockClientsGroupsInvoker;
     private readonly ILogger<AddPathItemCommandHandler> _mockLogger;
     private readonly IHubByteSyncPush _mockByteSyncPush = A.Fake<IHubByteSyncPush>(x => x.Strict());
     
@@ -31,11 +31,11 @@ public class AddPathItemCommandHandlerTests
         _mockInventoryMemberService = A.Fake<IInventoryMemberService>();
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
-        _mockByteSyncClientCaller = A.Fake<IByteSyncClientCaller>();
+        _mockClientsGroupsInvoker = A.Fake<IClientsGroupsInvoker>();
         _mockLogger = A.Fake<ILogger<AddPathItemCommandHandler>>();
         
         _addPathItemCommandHandler = new AddPathItemCommandHandler(_mockInventoryMemberService, _mockInventoryRepository, _mockCloudSessionsRepository, 
-            _mockByteSyncClientCaller, _mockLogger);
+            _mockClientsGroupsInvoker, _mockLogger);
     }
     
     [Test]
@@ -57,7 +57,7 @@ public class AddPathItemCommandHandlerTests
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client))
             .Returns(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId });
 
-        A.CallTo(() => _mockByteSyncClientCaller.SessionGroupExcept(sessionId, client)).Returns(_mockByteSyncPush);
+        A.CallTo(() => _mockClientsGroupsInvoker.SessionGroupExcept(sessionId, client)).Returns(_mockByteSyncPush);
 
         A.CallTo(() => _mockByteSyncPush.PathItemAdded(A<PathItemDTO>.Ignored)).Returns(Task.CompletedTask);
 
@@ -69,7 +69,7 @@ public class AddPathItemCommandHandlerTests
         // Assert
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _mockByteSyncClientCaller.SessionGroupExcept(A<string>.Ignored, A<Client>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockClientsGroupsInvoker.SessionGroupExcept(A<string>.Ignored, A<Client>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockByteSyncPush.PathItemAdded(A<PathItemDTO>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockByteSyncPush.PathItemAdded(A<PathItemDTO>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client)).MustHaveHappenedOnceExactly();
@@ -91,7 +91,7 @@ public class AddPathItemCommandHandlerTests
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
             .Invokes((string _, Func<InventoryData, InventoryData> func) => func(inventoryData));
 
-        A.CallTo(() => _mockByteSyncClientCaller.SessionGroupExcept(sessionId, client)).Returns(_mockByteSyncPush);
+        A.CallTo(() => _mockClientsGroupsInvoker.SessionGroupExcept(sessionId, client)).Returns(_mockByteSyncPush);
 
         A.CallTo(() => _mockByteSyncPush.PathItemAdded(A<PathItemDTO>.Ignored)).Returns(Task.CompletedTask);
 
