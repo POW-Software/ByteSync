@@ -28,7 +28,8 @@ public class CloudSessionFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var createCloudSessionParameters = await FunctionHelper.DeserializeRequestBody<CreateCloudSessionParameters>(req);
             
-        var cloudSessionResult = await _cloudSessionsService.CreateCloudSession(createCloudSessionParameters, client);
+        var request = new CreateSessionRequest(createCloudSessionParameters, client);
+        var cloudSessionResult = await _mediator.Send(request);
             
         var response = req.CreateResponse();
         await response.WriteAsJsonAsync(cloudSessionResult, HttpStatusCode.OK);
@@ -101,7 +102,8 @@ public class CloudSessionFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<FinalizeJoinCloudSessionParameters>(req);
 
-        var result = await _cloudSessionsService.FinalizeJoinCloudSession(client, parameters).ConfigureAwait(false);
+        var request = new FinalizeJoinCloudSessionRequest(parameters, client);
+        var result = await _mediator.Send(request);
             
         var response = req.CreateResponse();
         await response.WriteAsJsonAsync(result, HttpStatusCode.OK);

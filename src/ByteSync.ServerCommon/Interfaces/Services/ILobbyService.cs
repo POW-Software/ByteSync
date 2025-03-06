@@ -6,9 +6,9 @@ namespace ByteSync.ServerCommon.Interfaces.Services;
 
 public interface ILobbyService
 {
-    Task<JoinLobbyResult> TryJoinLobby(JoinLobbyParameters joinLobbyParameters, Client client);
+    // Task<JoinLobbyResult> TryJoinLobby(JoinLobbyParameters joinLobbyParameters, Client client);
     
-    Task<bool> QuitLobby(string lobbyId, Client byteSyncEndpoint);
+    // Task<bool> QuitLobby(string lobbyId, Client byteSyncEndpoint);
     
     Task<LobbyMemberInfo?> UpdateLobbyMemberStatus(string lobbyId, Client client, LobbyMemberStatuses lobbyMemberStatus);
 

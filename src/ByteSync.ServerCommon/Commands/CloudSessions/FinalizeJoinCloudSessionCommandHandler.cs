@@ -1,0 +1,117 @@
+﻿using ByteSync.Common.Business.Sessions.Cloud.Connections;
+using ByteSync.Common.Helpers;
+using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Helpers;
+using ByteSync.ServerCommon.Interfaces.Hubs;
+using ByteSync.ServerCommon.Interfaces.Mappers;
+using ByteSync.ServerCommon.Interfaces.Repositories;
+using MediatR;
+using Microsoft.Extensions.Logging;
+
+namespace ByteSync.ServerCommon.Commands.CloudSessions;
+
+public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJoinCloudSessionRequest, FinalizeJoinSessionResult>
+{
+    private readonly ICloudSessionsRepository _cloudSessionsRepository;
+    private readonly ISessionMemberMapper _sessionMemberMapper;
+    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
+    private readonly IClientsGroupsManager _clientsGroupsManager;
+    private readonly ILogger<FinalizeJoinCloudSessionCommandHandler> _logger;
+
+    public FinalizeJoinCloudSessionCommandHandler(ICloudSessionsRepository cloudSessionsRepository, ISessionMemberMapper sessionMemberMapper,
+        IClientsGroupsInvoker clientsGroupsInvoker, IClientsGroupsManager clientsGroupsManager, ILogger<FinalizeJoinCloudSessionCommandHandler> logger)
+    {
+        _cloudSessionsRepository = cloudSessionsRepository;
+        _clientsGroupsInvoker = clientsGroupsInvoker;
+        _clientsGroupsManager = clientsGroupsManager;
+        _sessionMemberMapper = sessionMemberMapper;
+        _logger = logger;
+    }
+    
+    public async Task<FinalizeJoinSessionResult> Handle(FinalizeJoinCloudSessionRequest request, CancellationToken cancellationToken)
+    {
+        var parameters = request.FinalizeJoinCloudSessionParameters;
+        var client = request.Client;
+        
+        FinalizeJoinSessionStatuses? finalizeJoinSessionStatus = null;
+        SessionMemberData? joiner = null;
+
+        var updateResult = await _cloudSessionsRepository.Update(parameters.SessionId, innerCloudSessionData =>
+        {
+            if (innerCloudSessionData.IsSessionRemoved || innerCloudSessionData.IsSessionActivated)
+            {
+                finalizeJoinSessionStatus = FinalizeJoinSessionStatuses.SessionNotFound;
+            }
+            else if (innerCloudSessionData.IsSessionActivated)
+            {
+                finalizeJoinSessionStatus = FinalizeJoinSessionStatuses.SessionAlreadyActivated;
+            }
+            else if (innerCloudSessionData.SessionMembers
+                     .Count(sm => !sm.IsAuthCheckedFor(parameters.JoinerInstanceId)) > 0)
+            {
+                var nonAuthCheckedMembers = innerCloudSessionData.SessionMembers
+                    .Where(sm => !sm.IsAuthCheckedFor(parameters.JoinerInstanceId))
+                    .Select(sm => sm.ClientInstanceId)
+                    .ToList().JoinToString(",");
+
+                _logger.LogInformation("FinalizeJoinCloudSession: session {SessionId} has non-auth checked members {NonAuthCheckedMembers}",
+                    parameters.SessionId, nonAuthCheckedMembers);
+                
+                finalizeJoinSessionStatus = FinalizeJoinSessionStatuses.AuthIsNotChecked;
+            }
+            else
+            {
+               joiner = innerCloudSessionData
+                    .PreSessionMembers
+                    .FirstOrDefault(m =>
+                        Equals(m.ClientInstanceId, parameters.JoinerInstanceId) && 
+                        Equals(m.ValidatorInstanceId, parameters.ValidatorInstanceId) &&
+                        Equals(m.FinalizationPassword, parameters.FinalizationPassword));
+
+                if (joiner == null)
+                {
+                    finalizeJoinSessionStatus = FinalizeJoinSessionStatuses.PrememberNotFound;
+                }
+            }
+
+            if (joiner != null && finalizeJoinSessionStatus == null)
+            {
+                if (!innerCloudSessionData.SessionMembers.Any(smd => smd.ClientInstanceId.Equals(joiner.ClientInstanceId)))
+                {
+                    joiner.EncryptedPrivateData = parameters.EncryptedSessionMemberPrivateData;
+                    
+                    innerCloudSessionData.SessionMembers.Add(joiner);
+                    innerCloudSessionData.PreSessionMembers.Remove(joiner);
+                }
+                
+                finalizeJoinSessionStatus = FinalizeJoinSessionStatuses.FinalizeJoinSessionSucess;
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        });
+        
+        if (updateResult.IsSaved)
+        {
+            var sessionMemberInfo = await _sessionMemberMapper.Convert(joiner!);
+            
+            await _clientsGroupsInvoker.SessionGroup(parameters.SessionId).MemberJoinedSession(sessionMemberInfo).ConfigureAwait(false);
+            await _clientsGroupsManager.AddToSessionGroup(client, parameters.SessionId).ConfigureAwait(false);
+            
+            _logger.LogInformation("FinalizeJoinCloudSession: {@cloudSession} by {@joiner}", 
+                joiner!.CloudSessionData.BuildLog(), joiner.BuildLog());
+        }
+        else
+        {
+            _logger.LogInformation("FinalizeJoinCloudSession: Can not validate member {JoinerId} for session {SessionId}, status: {Status}", 
+                parameters.JoinerInstanceId, parameters.SessionId, finalizeJoinSessionStatus);
+        }
+            
+        FinalizeJoinSessionResult finalizeJoinSessionResult = FinalizeJoinSessionResult.BuildFrom(finalizeJoinSessionStatus!.Value);
+            
+        return finalizeJoinSessionResult;
+    }
+}

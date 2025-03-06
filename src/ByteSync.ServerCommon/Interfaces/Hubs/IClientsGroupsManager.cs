@@ -1,6 +1,4 @@
-﻿using ByteSync.Common.Interfaces.Hub;
-using ByteSync.ServerCommon.Business.Auth;
-using ByteSync.ServerCommon.Business.Sessions;
+﻿using ByteSync.ServerCommon.Business.Auth;
 
 namespace ByteSync.ServerCommon.Interfaces.Hubs;
 

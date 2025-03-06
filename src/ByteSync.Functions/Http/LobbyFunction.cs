@@ -4,17 +4,21 @@ using Microsoft.Azure.Functions.Worker.Http;
 using ByteSync.Common.Business.Lobbies;
 using ByteSync.Common.Business.Lobbies.Connections;
 using ByteSync.Functions.Helpers.Misc;
+using ByteSync.ServerCommon.Commands.Lobbies;
 using ByteSync.ServerCommon.Interfaces.Services;
+using MediatR;
 
 namespace ByteSync.Functions.Http;
 
 public class LobbyFunction
 {
     private readonly ILobbyService _lobbyService;
+    private readonly IMediator _mediator;
 
-    public LobbyFunction(ILobbyService lobbyService)
+    public LobbyFunction(ILobbyService lobbyService, IMediator mediator)
     {
         _lobbyService = lobbyService;
+        _mediator = mediator;
     }
     
     [Function("JoinLobbyFunction")]
@@ -27,7 +31,8 @@ public class LobbyFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<JoinLobbyParameters>(req);
             
-        var result = await _lobbyService.TryJoinLobby(parameters, client);
+        var request = new TryJoinLobbyRequest(parameters, client);
+        var result = await _mediator.Send(request);
 
         var response = req.CreateResponse();
         await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
@@ -62,7 +67,8 @@ public class LobbyFunction
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
             
-        await _lobbyService.QuitLobby(lobbyId, client);
+        var request = new QuitLobbyRequest(lobbyId, client);
+        await _mediator.Send(request);
            
         var response = req.CreateResponse();
         response.StatusCode = HttpStatusCode.OK;

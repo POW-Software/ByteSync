@@ -32,110 +32,110 @@ public class LobbyService : ILobbyService
         _logger = logger;
     }
     
-    public async Task<JoinLobbyResult> TryJoinLobby(JoinLobbyParameters joinLobbyParameters, Client client)
-    {
-        JoinLobbyResult? joinLobbyResult = null;
-        bool? isConnected = null;
-        
-        // string? lobbyId = null;
-        CloudSessionProfileEntity? cloudSessionProfile = null;
-
-        var updateResult1 = await _cloudSessionProfileRepository.AddOrUpdate(joinLobbyParameters.CloudSessionProfileId, cloudSessionProfileEntity =>
-        {
-            if (cloudSessionProfileEntity == null)
-            {
-                joinLobbyResult = JoinLobbyResult.BuildFrom(JoinLobbyStatuses.UnknownCloudSessionProfile);
-                return null;
-            }
-            else
-            {
-                cloudSessionProfile = cloudSessionProfileEntity;
-                
-                if (cloudSessionProfileEntity.CurrentLobbyId == null)
-                {
-                    Lobby lobby = _lobbyFactory.BuildLobby(cloudSessionProfileEntity);
-                    _lobbyRepository.Save(lobby.LobbyId, lobby);
-                    
-                    cloudSessionProfileEntity.CurrentLobbyId = lobby.LobbyId;
-
-                    return cloudSessionProfileEntity;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        });
-
-        if (joinLobbyResult != null)
-        {
-            return joinLobbyResult;
-        }
-        
-        var updateResult = await _lobbyRepository.AddOrUpdate(cloudSessionProfile!.CurrentLobbyId!, lobby =>
-        {
-            if (lobby == null)
-            {
-                joinLobbyResult = JoinLobbyResult.BuildFrom(JoinLobbyStatuses.UnknownCloudSessionProfile);
-                return null;
-            }
-
-            if (cloudSessionProfile.Slots.Any(s => s.ProfileClientId == joinLobbyParameters.ProfileClientId))
-            {
-                // On contrôle le JoinMode
-                int index = cloudSessionProfile.Slots.FindIndex(s => s.ProfileClientId == joinLobbyParameters.ProfileClientId);
-                bool isJoinModeOK;
-                if (index == 0)
-                {
-                    isJoinModeOK = joinLobbyParameters.JoinMode.In(JoinLobbyModes.RunInventory, JoinLobbyModes.RunSynchronization);
-                    // lobby.SetSessionMode(joinLobbyParameters.JoinMode);
-                }
-                else
-                {
-                    isJoinModeOK = joinLobbyParameters.JoinMode.In(JoinLobbyModes.Join);
-                }
-
-                if (!isJoinModeOK)
-                {
-                    joinLobbyResult = JoinLobbyResult.BuildFrom(JoinLobbyStatuses.UnexpectedLobbyJoinMode);
-                    return null;
-                }
-
-                isConnected = lobby.ConnectLobbyMember(joinLobbyParameters.ProfileClientId, joinLobbyParameters.PublicKeyInfo, 
-                    joinLobbyParameters.JoinMode, client);
-                
-                return lobby;
-            }
-            else
-            {
-                joinLobbyResult = JoinLobbyResult.BuildFrom(JoinLobbyStatuses.UnknownProfileClientId);
-                return null;
-            }
-        });
-        
-        if (updateResult.IsSaved)
-        {
-            LobbyInfo lobbyInfo = updateResult.Element!.BuildLobbyInfo();
-            
-            _logger.LogInformation("TryJoinLobby: {@joiner} joins lobby {LobbyId}", client.BuildLog(), lobbyInfo.LobbyId);
-            
-            joinLobbyResult = JoinLobbyResult.BuildFrom(lobbyInfo, 
-                isConnected!.Value ? JoinLobbyStatuses.LobbyJoinedSucessfully : JoinLobbyStatuses.LobbyPreviouslyJoined);
-            
-            var memberInfo = lobbyInfo.GetMember(joinLobbyParameters.ProfileClientId)!;
-
-            await _clientsGroupsInvoker
-                .LobbyGroupExcept(lobbyInfo.LobbyId, client)
-                .MemberJoinedLobby(lobbyInfo.LobbyId, memberInfo)
-                .ConfigureAwait(false);
-
-            await _clientsGroupsManager
-                .AddToLobbyGroup(client, lobbyInfo.LobbyId)
-                .ConfigureAwait(false);
-        }
-
-        return joinLobbyResult!;
-    }
+    // public async Task<JoinLobbyResult> TryJoinLobby(JoinLobbyParameters joinLobbyParameters, Client client)
+    // {
+    //     JoinLobbyResult? joinLobbyResult = null;
+    //     bool? isConnected = null;
+    //     
+    //     // string? lobbyId = null;
+    //     CloudSessionProfileEntity? cloudSessionProfile = null;
+    //
+    //     var updateResult1 = await _cloudSessionProfileRepository.AddOrUpdate(joinLobbyParameters.CloudSessionProfileId, cloudSessionProfileEntity =>
+    //     {
+    //         if (cloudSessionProfileEntity == null)
+    //         {
+    //             joinLobbyResult = JoinLobbyResult.BuildFrom(JoinLobbyStatuses.UnknownCloudSessionProfile);
+    //             return null;
+    //         }
+    //         else
+    //         {
+    //             cloudSessionProfile = cloudSessionProfileEntity;
+    //             
+    //             if (cloudSessionProfileEntity.CurrentLobbyId == null)
+    //             {
+    //                 Lobby lobby = _lobbyFactory.BuildLobby(cloudSessionProfileEntity);
+    //                 _lobbyRepository.Save(lobby.LobbyId, lobby);
+    //                 
+    //                 cloudSessionProfileEntity.CurrentLobbyId = lobby.LobbyId;
+    //
+    //                 return cloudSessionProfileEntity;
+    //             }
+    //             else
+    //             {
+    //                 return null;
+    //             }
+    //         }
+    //     });
+    //
+    //     if (joinLobbyResult != null)
+    //     {
+    //         return joinLobbyResult;
+    //     }
+    //     
+    //     var updateResult = await _lobbyRepository.AddOrUpdate(cloudSessionProfile!.CurrentLobbyId!, lobby =>
+    //     {
+    //         if (lobby == null)
+    //         {
+    //             joinLobbyResult = JoinLobbyResult.BuildFrom(JoinLobbyStatuses.UnknownCloudSessionProfile);
+    //             return null;
+    //         }
+    //
+    //         if (cloudSessionProfile.Slots.Any(s => s.ProfileClientId == joinLobbyParameters.ProfileClientId))
+    //         {
+    //             // On contrôle le JoinMode
+    //             int index = cloudSessionProfile.Slots.FindIndex(s => s.ProfileClientId == joinLobbyParameters.ProfileClientId);
+    //             bool isJoinModeOK;
+    //             if (index == 0)
+    //             {
+    //                 isJoinModeOK = joinLobbyParameters.JoinMode.In(JoinLobbyModes.RunInventory, JoinLobbyModes.RunSynchronization);
+    //                 // lobby.SetSessionMode(joinLobbyParameters.JoinMode);
+    //             }
+    //             else
+    //             {
+    //                 isJoinModeOK = joinLobbyParameters.JoinMode.In(JoinLobbyModes.Join);
+    //             }
+    //
+    //             if (!isJoinModeOK)
+    //             {
+    //                 joinLobbyResult = JoinLobbyResult.BuildFrom(JoinLobbyStatuses.UnexpectedLobbyJoinMode);
+    //                 return null;
+    //             }
+    //
+    //             isConnected = lobby.ConnectLobbyMember(joinLobbyParameters.ProfileClientId, joinLobbyParameters.PublicKeyInfo, 
+    //                 joinLobbyParameters.JoinMode, client);
+    //             
+    //             return lobby;
+    //         }
+    //         else
+    //         {
+    //             joinLobbyResult = JoinLobbyResult.BuildFrom(JoinLobbyStatuses.UnknownProfileClientId);
+    //             return null;
+    //         }
+    //     });
+    //     
+    //     if (updateResult.IsSaved)
+    //     {
+    //         LobbyInfo lobbyInfo = updateResult.Element!.BuildLobbyInfo();
+    //         
+    //         _logger.LogInformation("TryJoinLobby: {@joiner} joins lobby {LobbyId}", client.BuildLog(), lobbyInfo.LobbyId);
+    //         
+    //         joinLobbyResult = JoinLobbyResult.BuildFrom(lobbyInfo, 
+    //             isConnected!.Value ? JoinLobbyStatuses.LobbyJoinedSucessfully : JoinLobbyStatuses.LobbyPreviouslyJoined);
+    //         
+    //         var memberInfo = lobbyInfo.GetMember(joinLobbyParameters.ProfileClientId)!;
+    //
+    //         await _clientsGroupsInvoker
+    //             .LobbyGroupExcept(lobbyInfo.LobbyId, client)
+    //             .MemberJoinedLobby(lobbyInfo.LobbyId, memberInfo)
+    //             .ConfigureAwait(false);
+    //
+    //         await _clientsGroupsManager
+    //             .AddToLobbyGroup(client, lobbyInfo.LobbyId)
+    //             .ConfigureAwait(false);
+    //     }
+    //
+    //     return joinLobbyResult!;
+    // }
 
     public async Task<LobbyMemberInfo?> UpdateLobbyMemberStatus(string lobbyId, Client client, LobbyMemberStatuses lobbyMemberStatus)
     {
@@ -199,32 +199,32 @@ public class LobbyService : ILobbyService
         }
     }
 
-    public async Task<bool> QuitLobby(string lobbyId, Client client)
-    {
-        var result = await _lobbyRepository.QuitLobby(lobbyId, client.ClientInstanceId);
-        
-        if (result.IsSaved)
-        {
-            _logger.LogInformation("QuitLobby: {@member} quits {@lobby}", client.BuildLog(), lobbyId);
-        }
-        else if (result.IsDeleted)
-        {
-            _logger.LogInformation("QuitLobby: {@member} quits {@lobby}", client.BuildLog(), lobbyId);
-            _logger.LogInformation("QuitLobby: {@lobby} is closed", lobbyId);
-        }
-        else
-        {
-            _logger.LogWarning("QuitLobby: {@member} not found in {@lobby}", client.BuildLog(), lobbyId);
-        }
-
-        if (result.IsSaved || result.IsDeleted)
-        {
-            await _clientsGroupsInvoker.LobbyGroup(lobbyId).
-                MemberQuittedLobby(lobbyId, client.ClientInstanceId).ConfigureAwait(false);
-                
-            await _clientsGroupsManager.RemoveFromLobbyGroup(client, $"Lobby_{lobbyId}").ConfigureAwait(false);
-        }
-
-        return result.IsSaved || result.IsDeleted;
-    }
+    // public async Task<bool> QuitLobby(string lobbyId, Client client)
+    // {
+    //     var result = await _lobbyRepository.QuitLobby(lobbyId, client.ClientInstanceId);
+    //     
+    //     if (result.IsSaved)
+    //     {
+    //         _logger.LogInformation("QuitLobby: {@member} quits {@lobby}", client.BuildLog(), lobbyId);
+    //     }
+    //     else if (result.IsDeleted)
+    //     {
+    //         _logger.LogInformation("QuitLobby: {@member} quits {@lobby}", client.BuildLog(), lobbyId);
+    //         _logger.LogInformation("QuitLobby: {@lobby} is closed", lobbyId);
+    //     }
+    //     else
+    //     {
+    //         _logger.LogWarning("QuitLobby: {@member} not found in {@lobby}", client.BuildLog(), lobbyId);
+    //     }
+    //
+    //     if (result.IsSaved || result.IsDeleted)
+    //     {
+    //         await _clientsGroupsInvoker.LobbyGroup(lobbyId).
+    //             MemberQuittedLobby(lobbyId, client.ClientInstanceId).ConfigureAwait(false);
+    //             
+    //         await _clientsGroupsManager.RemoveFromLobbyGroup(client, $"Lobby_{lobbyId}").ConfigureAwait(false);
+    //     }
+    //
+    //     return result.IsSaved || result.IsDeleted;
+    // }
 }
