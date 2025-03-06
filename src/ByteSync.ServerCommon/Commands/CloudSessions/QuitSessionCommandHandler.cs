@@ -94,7 +94,7 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
         {       
             await transaction.ExecuteAsync();
         
-            await _clientsGroupsManager.RemoveFromGroup(request.Client, request.SessionId);
+            await _clientsGroupsManager.RemoveFromSessionGroup(request.Client, request.SessionId);
             var sessionMemberInfo = await _sessionMemberMapper.Convert(innerQuitter!);
             await _clientsGroupsInvoker.SessionGroup(request.SessionId).MemberQuittedSession(sessionMemberInfo);
         }

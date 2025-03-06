@@ -222,7 +222,7 @@ public class LobbyService : ILobbyService
             await _clientsGroupsInvoker.LobbyGroup(lobbyId).
                 MemberQuittedLobby(lobbyId, client.ClientInstanceId).ConfigureAwait(false);
                 
-            await _clientsGroupsManager.RemoveFromGroup(client, $"Lobby_{lobbyId}").ConfigureAwait(false);
+            await _clientsGroupsManager.RemoveFromLobbyGroup(client, $"Lobby_{lobbyId}").ConfigureAwait(false);
         }
 
         return result.IsSaved || result.IsDeleted;

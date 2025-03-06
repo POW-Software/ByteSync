@@ -136,7 +136,7 @@ public class QuitSessionCommandHandlerTests
 
         A.CallTo(() => _mockTransaction.ExecuteAsync(CommandFlags.None)).MustHaveHappenedOnceExactly();
 
-        A.CallTo(() => _mockClientsGroupsManager.RemoveFromGroup(client, sessionId))
+        A.CallTo(() => _mockClientsGroupsManager.RemoveFromSessionGroup(client, sessionId))
             .MustHaveHappenedOnceExactly();
 
         A.CallTo(() => _mockSessionMemberMapper.Convert(sessionMember))
@@ -220,7 +220,7 @@ public class QuitSessionCommandHandlerTests
 
         A.CallTo(() => _mockTransaction.ExecuteAsync(CommandFlags.None)).MustNotHaveHappened();
 
-        A.CallTo(() => _mockClientsGroupsManager.RemoveFromGroup(client, sessionId))
+        A.CallTo(() => _mockClientsGroupsManager.RemoveFromSessionGroup(client, sessionId))
             .MustNotHaveHappened();
 
         A.CallTo(() => _mockSessionMemberMapper.Convert(A<SessionMemberData>.Ignored))
