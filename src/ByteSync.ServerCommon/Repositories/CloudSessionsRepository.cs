@@ -51,7 +51,7 @@ public class CloudSessionsRepository : BaseRepository<CloudSessionData>, ICloudS
             var cacheKey = ComputeSessionCacheKey(cloudSessionData);
             await using var redisLock = await _cacheService.AcquireLockAsync(cacheKey);
             
-            string? serializedElement = await transaction.StringGetAsync(cacheKey);
+            string? serializedElement = await _cacheService.GetDatabase().StringGetAsync(cacheKey);
             if (serializedElement == null || serializedElement.IsEmpty())
             {
                 await SetElement(cacheKey, cloudSessionData, transaction);
