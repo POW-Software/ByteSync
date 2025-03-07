@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using ByteSync.Common.Business.Auth;
 using ByteSync.Functions.Helpers.Misc;
-using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;

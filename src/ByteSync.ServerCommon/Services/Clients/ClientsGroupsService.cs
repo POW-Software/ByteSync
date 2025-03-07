@@ -1,5 +1,4 @@
 ﻿using ByteSync.ServerCommon.Business.Auth;
-using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using StackExchange.Redis;
 

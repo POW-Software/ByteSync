@@ -1,6 +1,6 @@
-﻿using ByteSync.ServerCommon.Interfaces.Hubs;
+﻿using ByteSync.ServerCommon.Interfaces.Factories;
 
-namespace ByteSync.ServerCommon.Hubs;
+namespace ByteSync.ServerCommon.Factories;
 
 public class ClientsGroupIdFactory : IClientsGroupIdFactory
 {

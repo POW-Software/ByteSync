@@ -1,4 +1,4 @@
-﻿namespace ByteSync.ServerCommon.Interfaces.Hubs;
+﻿namespace ByteSync.ServerCommon.Interfaces.Factories;
 
 public interface IClientsGroupIdFactory
 {

@@ -3,7 +3,7 @@ using ByteSync.ServerCommon.Business.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 
-namespace ByteSync.ServerCommon.Interfaces.Services;
+namespace ByteSync.ServerCommon.Interfaces.Services.Clients;
 
 public interface IClientsService
 {

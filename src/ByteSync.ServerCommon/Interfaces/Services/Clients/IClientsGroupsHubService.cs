@@ -1,6 +1,6 @@
 ﻿using ByteSync.ServerCommon.Business.Auth;
 
-namespace ByteSync.ServerCommon.Interfaces.Hubs;
+namespace ByteSync.ServerCommon.Interfaces.Services.Clients;
 
 public interface IClientsGroupsHubService
 {

@@ -1,5 +1,5 @@
 ﻿using ByteSync.ServerCommon.Business.Auth;
-using ByteSync.ServerCommon.Interfaces.Hubs;
+using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using StackExchange.Redis;

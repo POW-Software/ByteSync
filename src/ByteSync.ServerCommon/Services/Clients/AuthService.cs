@@ -6,9 +6,9 @@ using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
-using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 
-namespace ByteSync.ServerCommon.Services;
+namespace ByteSync.ServerCommon.Services.Clients;
 
 public class AuthService : IAuthService
 {

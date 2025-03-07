@@ -4,6 +4,7 @@ using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Loaders;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Services;
+using ByteSync.ServerCommon.Services.Clients;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;

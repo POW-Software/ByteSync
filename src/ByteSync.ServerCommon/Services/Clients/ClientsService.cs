@@ -3,14 +3,13 @@ using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Helpers;
 using ByteSync.ServerCommon.Interfaces.Factories;
-using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
-using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.ServerCommon.Services;
+namespace ByteSync.ServerCommon.Services.Clients;
 
 public class ClientsService : IClientsService
 {

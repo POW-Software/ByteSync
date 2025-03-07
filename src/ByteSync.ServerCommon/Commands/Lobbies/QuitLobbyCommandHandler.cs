@@ -1,5 +1,4 @@
-﻿using ByteSync.ServerCommon.Interfaces.Hubs;
-using ByteSync.ServerCommon.Interfaces.Repositories;
+﻿using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;

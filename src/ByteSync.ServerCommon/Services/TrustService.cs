@@ -2,9 +2,9 @@
 using ByteSync.Common.Business.Trust.Connections;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Entities;
-using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Services;

@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Autofac;
 using ByteSync.Common.Interfaces.Hub;
-using ByteSync.ServerCommon.Hubs;
 using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Storage;

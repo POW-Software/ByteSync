@@ -1,10 +1,11 @@
 ﻿using ByteSync.Common.Interfaces.Hub;
 using ByteSync.ServerCommon.Business.Auth;
-using ByteSync.ServerCommon.Interfaces.Hubs;
+using ByteSync.ServerCommon.Interfaces.Factories;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.ServerCommon.Hubs;
+namespace ByteSync.ServerCommon.Services.Clients;
 
 public class ClientsGroupsHubService : IClientsGroupsHubService
 {

@@ -1,8 +1,8 @@
 ﻿using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Business.Sessions;
-using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.Extensions.Logging;
 

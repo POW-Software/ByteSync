@@ -4,7 +4,6 @@ using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Helpers;
 using ByteSync.ServerCommon.Interfaces.Factories;
-using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
