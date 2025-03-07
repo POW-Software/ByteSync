@@ -44,7 +44,7 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
 
         var updateResult = await _cloudSessionsRepository.Update(parameters.SessionId, innerCloudSessionData =>
         {
-            if (innerCloudSessionData.IsSessionRemoved || innerCloudSessionData.IsSessionActivated)
+            if (innerCloudSessionData.IsSessionRemoved)
             {
                 finalizeJoinSessionStatus = FinalizeJoinSessionStatuses.SessionNotFound;
             }

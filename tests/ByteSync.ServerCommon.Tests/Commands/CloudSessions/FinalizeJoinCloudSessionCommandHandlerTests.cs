@@ -10,6 +10,7 @@ using ByteSync.ServerCommon.Interfaces.Mappers;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
+using ByteSync.ServerCommon.Tests.Helpers;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -178,16 +179,18 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
         var sessionId = "123ABC456";
         var request = CreateBasicRequest(sessionId);
 
+        bool funcResult = false;
+        bool isTransaction = false;
+        var cloudSessionData = new CloudSessionData{ SessionId = sessionId, IsSessionActivated = true };
         A.CallTo(() => _mockCloudSessionsRepository.Update(
                 A<string>.That.IsEqualTo(sessionId),
                 A<Func<CloudSessionData, bool>>.Ignored,
                 A<ITransaction>.That.IsEqualTo(_mockTransaction), A<IRedLock>.Ignored))
             .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction transaction, IRedLock _) =>
             {
-                var cloudSession = new CloudSessionData { SessionId = sessionId, IsSessionActivated = true };
-                updateAction(cloudSession);
+                funcResult = updateAction(cloudSessionData);
             })
-            .Returns(_mockUpdateResult);
+            .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
 
         // Act
         var result = await _handler.Handle(request, CancellationToken.None);
