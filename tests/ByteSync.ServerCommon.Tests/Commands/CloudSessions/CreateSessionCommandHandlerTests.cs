@@ -77,7 +77,7 @@ public class CreateSessionCommandHandlerTests
                     A<CloudSessionData>.Ignored,
                     A<Func<string>>.Ignored,
                     A<ITransaction>.Ignored))
-                .Invokes((CloudSessionData session, Func<string> generateId, ITransaction _) =>
+                .Invokes((CloudSessionData session, Func<string> _, ITransaction _) =>
                 {
                     addedCloudSession = session;
                     session.SessionId = sessionId;

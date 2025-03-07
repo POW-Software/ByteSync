@@ -72,6 +72,8 @@ public class ClientsGroupsHubService : IClientsGroupsHubService
 
         foreach (var subscribedGroup in client.SubscribedGroups)
         {
+            _logger.LogInformation("Adding client {clientInstanceId} to subscribed group {subscribedGroup}", client.ClientInstanceId, subscribedGroup);
+            
             await _hubContext.Groups.AddToGroupAsync(connectionId, subscribedGroup).ConfigureAwait(false);
         }
     }

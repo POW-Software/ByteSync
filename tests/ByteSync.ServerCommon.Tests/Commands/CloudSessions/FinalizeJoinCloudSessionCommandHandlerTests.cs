@@ -95,7 +95,7 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
                 A<string>.That.IsEqualTo(sessionId),
                 A<Func<CloudSessionData, bool>>.Ignored,
                 A<ITransaction>.That.IsEqualTo(_mockTransaction), A<IRedLock>.Ignored))
-            .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction? transaction, IRedLock _) =>
+            .Invokes((string _, Func<CloudSessionData, bool> updateAction, ITransaction? transaction, IRedLock _) =>
             {
                 funcResult = updateAction(cloudSession);
                 isTransaction = transaction != null;
@@ -158,7 +158,7 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
                 A<string>.That.IsEqualTo(sessionId),
                 A<Func<CloudSessionData, bool>>.Ignored,
                 A<ITransaction>.That.IsEqualTo(_mockTransaction), A<IRedLock>.Ignored))
-            .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction? transaction, IRedLock _) =>
+            .Invokes((string _, Func<CloudSessionData, bool> updateAction, ITransaction? transaction, IRedLock _) =>
             {
                 funcResult = updateAction(cloudSessionData);
                 isTransaction = transaction != null;
@@ -187,7 +187,7 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
                 A<string>.That.IsEqualTo(sessionId),
                 A<Func<CloudSessionData, bool>>.Ignored,
                 A<ITransaction>.That.IsEqualTo(_mockTransaction), A<IRedLock>.Ignored))
-            .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction? transaction, IRedLock _) =>
+            .Invokes((string _, Func<CloudSessionData, bool> updateAction, ITransaction? transaction, IRedLock _) =>
             {
                 funcResult = updateAction(cloudSessionData);
                 isTransaction = transaction != null;
@@ -218,7 +218,7 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
                 A<string>.That.IsEqualTo(sessionId),
                 A<Func<CloudSessionData, bool>>.Ignored,
                 A<ITransaction>.That.IsEqualTo(_mockTransaction), A<IRedLock>.Ignored))
-            .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction? transaction, IRedLock _) =>
+            .Invokes((string _, Func<CloudSessionData, bool> updateAction, ITransaction? transaction, IRedLock _) =>
             {
                 funcResult = updateAction(cloudSessionData);
                 isTransaction = transaction != null;
@@ -250,7 +250,7 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
                 A<string>.That.IsEqualTo(sessionId),
                 A<Func<CloudSessionData, bool>>.Ignored,
                 A<ITransaction>.That.IsEqualTo(_mockTransaction), A<IRedLock>.Ignored))
-            .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction? transaction, IRedLock _) =>
+            .Invokes((string _, Func<CloudSessionData, bool> updateAction, ITransaction? transaction, IRedLock _) =>
             {
                 funcResult = updateAction(cloudSessionData);
                 isTransaction = transaction != null;
