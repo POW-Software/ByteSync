@@ -1,7 +1,6 @@
 ﻿using ByteSync.Common.Interfaces.Hub;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Interfaces.Hubs;
-using ByteSync.ServerCommon.Interfaces.Repositories;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
@@ -39,16 +38,6 @@ public class ClientsGroupsManager : IClientsGroupsManager
             _logger.LogWarning("ConnectionId is null for client {clientInstanceId}", client.ClientInstanceId);
             return;
         }
-        
-        // var result = await _clientsRepository.AddOrUpdate(client.ClientInstanceId, innerClient =>
-        // {
-        //     if (innerClient != null)
-        //     {
-        //         innerClient.SubscribedGroups.Add(groupName);
-        //     }
-        //     
-        //     return innerClient;
-        // }).ConfigureAwait(false);
 
         await _hubContext.Groups.AddToGroupAsync(connectionId, groupName).ConfigureAwait(false);
     }

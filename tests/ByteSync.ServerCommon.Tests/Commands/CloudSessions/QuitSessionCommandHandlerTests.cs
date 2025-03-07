@@ -25,6 +25,7 @@ public class QuitSessionCommandHandlerTests
     private ISynchronizationRepository _mockSynchronizationRepository;
     private ICacheService _mockCacheService;
     private ISessionMemberMapper _mockSessionMemberMapper;
+    private IClientsRepository _mockClientsRepository;
     private IClientsGroupsManager _mockClientsGroupsManager;
     private IClientsGroupsInvoker _mockClientsGroupsInvoker;
     
@@ -40,6 +41,7 @@ public class QuitSessionCommandHandlerTests
         _mockSynchronizationRepository = A.Fake<ISynchronizationRepository>();
         _mockCacheService = A.Fake<ICacheService>();
         _mockSessionMemberMapper = A.Fake<ISessionMemberMapper>();
+        _mockClientsRepository = A.Fake<IClientsRepository>();
         _mockClientsGroupsManager = A.Fake<IClientsGroupsManager>();
         _mockClientsGroupsInvoker = A.Fake<IClientsGroupsInvoker>();
 
@@ -47,7 +49,8 @@ public class QuitSessionCommandHandlerTests
         A.CallTo(() => _mockCacheService.OpenTransaction()).Returns(_mockTransaction);
 
         _quitSessionCommandHandler = new QuitSessionCommandHandler(_mockCloudSessionsRepository, _mockInventoryRepository,
-            _mockSynchronizationRepository, _mockCacheService, _mockSessionMemberMapper, _mockClientsGroupsManager, _mockClientsGroupsInvoker);
+            _mockSynchronizationRepository, _mockCacheService, _mockSessionMemberMapper, _mockClientsRepository, 
+            _mockClientsGroupsManager, _mockClientsGroupsInvoker);
     }
 
     [TestCase(true)]

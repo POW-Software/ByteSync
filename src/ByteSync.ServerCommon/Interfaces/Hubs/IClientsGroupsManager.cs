@@ -10,7 +10,7 @@ public interface IClientsGroupsManager
     
     Task RemoveFromSessionGroup(Client client, string sessionId);
     
-    Task RemoveFromLobbyGroup(Client client, string sessionId);
+    Task RemoveFromLobbyGroup(Client client, string lobbyId);
     
     Task AddClientGroup(string connectionId, Client client);
     
