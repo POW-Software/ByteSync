@@ -43,7 +43,7 @@ public class SynchronizationFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        List<string> actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
 
         await _synchronizationService.OnLocalCopyIsDoneAsync(sessionId, actionsGroupIds, client);
             
@@ -61,7 +61,7 @@ public class SynchronizationFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        List<string> actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
 
         await _synchronizationService.OnDateIsCopied(sessionId, actionsGroupIds, client);
         
@@ -79,7 +79,7 @@ public class SynchronizationFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        List<string> actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
 
         await _synchronizationService.OnFileOrDirectoryIsDeletedAsync(sessionId, actionsGroupIds, client);
             
@@ -97,7 +97,7 @@ public class SynchronizationFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        List<string> actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
 
         await _synchronizationService.OnDirectoryIsCreatedAsync(sessionId, actionsGroupIds, client);
             

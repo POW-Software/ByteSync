@@ -166,7 +166,7 @@ public class CloudSessionFunction
         var settings = await FunctionHelper.DeserializeRequestBody<EncryptedSessionSettings>(req);
 
         var request = new UpdateSessionSettingsRequest(sessionId, client, settings);
-        bool settingsUpdated = await _mediator.Send(request);
+        var settingsUpdated = await _mediator.Send(request);
         
         HttpResponseData response;
         if (settingsUpdated)

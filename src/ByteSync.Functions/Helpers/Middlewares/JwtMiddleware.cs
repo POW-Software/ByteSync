@@ -55,7 +55,7 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_secret);
 
-            bool isTokenChecked = false;
+            var isTokenChecked = false;
             string? clientInstanceId = null;
             try
             {
