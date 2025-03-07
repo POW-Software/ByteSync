@@ -1,5 +1,6 @@
 ﻿using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
+using StackExchange.Redis;
 
 namespace ByteSync.ServerCommon.Interfaces.Repositories;
 
@@ -11,5 +12,5 @@ public interface ICloudSessionsRepository : IRepository<CloudSessionData>
     
     public Task<SessionMemberData?> GetSessionPreMember(string sessionId, string clientInstanceId);
 
-    public Task<CloudSessionData> AddCloudSession(CloudSessionData cloudSessionData, Func<string> generateSessionIdHandler);
+    public Task<CloudSessionData> AddCloudSession(CloudSessionData cloudSessionData, Func<string> generateSessionIdHandler, ITransaction transaction);
 }

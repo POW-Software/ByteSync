@@ -6,6 +6,7 @@ using ByteSync.ServerCommon.Helpers;
 using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
+using ByteSync.ServerCommon.Interfaces.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -18,17 +19,21 @@ public class TryJoinLobbyCommandHandler : IRequestHandler<TryJoinLobbyRequest, J
     private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
     private readonly IClientsGroupsManager _clientsGroupsManager;
     private readonly ILobbyFactory _lobbyFactory;
+    private readonly IClientsRepository _clientsRepository;
+    private readonly ICacheService _cacheService;
     private readonly ILogger<TryJoinLobbyCommandHandler> _logger;
 
     public TryJoinLobbyCommandHandler(ICloudSessionProfileRepository cloudSessionProfileRepository, ILobbyRepository lobbyRepository, 
         IClientsGroupsInvoker clientsGroupsInvoker, IClientsGroupsManager clientsGroupsManager, ILobbyFactory lobbyFactory,
-        ILogger<TryJoinLobbyCommandHandler> logger)
+        IClientsRepository clientsRepository, ICacheService cacheService, ILogger<TryJoinLobbyCommandHandler> logger)
     {
         _cloudSessionProfileRepository = cloudSessionProfileRepository;
         _lobbyRepository = lobbyRepository;
         _clientsGroupsInvoker = clientsGroupsInvoker;
         _clientsGroupsManager = clientsGroupsManager;
         _lobbyFactory = lobbyFactory;
+        _clientsRepository = clientsRepository;
+        _cacheService = cacheService;
         _logger = logger;
     }
     
@@ -40,9 +45,11 @@ public class TryJoinLobbyCommandHandler : IRequestHandler<TryJoinLobbyRequest, J
         JoinLobbyResult? joinLobbyResult = null;
         bool? isConnected = null;
         
+        var transaction = _cacheService.OpenTransaction();
+        
         CloudSessionProfileEntity? cloudSessionProfile = null;
 
-        var updateResult1 = await _cloudSessionProfileRepository.AddOrUpdate(joinLobbyParameters.CloudSessionProfileId, cloudSessionProfileEntity =>
+        await _cloudSessionProfileRepository.AddOrUpdate(joinLobbyParameters.CloudSessionProfileId, cloudSessionProfileEntity =>
         {
             if (cloudSessionProfileEntity == null)
             {
@@ -67,7 +74,7 @@ public class TryJoinLobbyCommandHandler : IRequestHandler<TryJoinLobbyRequest, J
                     return null;
                 }
             }
-        });
+        }, transaction);
 
         if (joinLobbyResult != null)
         {
@@ -111,9 +118,9 @@ public class TryJoinLobbyCommandHandler : IRequestHandler<TryJoinLobbyRequest, J
                 joinLobbyResult = JoinLobbyResult.BuildFrom(JoinLobbyStatuses.UnknownProfileClientId);
                 return null;
             }
-        });
+        }, transaction);
         
-        if (updateResult.IsSaved)
+        if (updateResult.IsWaitingForTransaction)
         {
             LobbyInfo lobbyInfo = updateResult.Element!.BuildLobbyInfo();
             
@@ -124,6 +131,10 @@ public class TryJoinLobbyCommandHandler : IRequestHandler<TryJoinLobbyRequest, J
             
             var memberInfo = lobbyInfo.GetMember(joinLobbyParameters.ProfileClientId)!;
 
+            await _clientsRepository.AddLobbySubscription(client, lobbyInfo.LobbyId, transaction);
+
+            await transaction.ExecuteAsync();
+            
             await _clientsGroupsInvoker
                 .LobbyGroupExcept(lobbyInfo.LobbyId, client)
                 .MemberJoinedLobby(lobbyInfo.LobbyId, memberInfo)

@@ -14,18 +14,20 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
     private readonly ISynchronizationRepository _synchronizationRepository;
     private readonly ICacheService _cacheService;
     private readonly ISessionMemberMapper _sessionMemberMapper;
+    private readonly IClientsRepository _clientsRepository;
     private readonly IClientsGroupsManager _clientsGroupsManager;
     private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
 
     public QuitSessionCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IInventoryRepository inventoryRepository, 
         ISynchronizationRepository synchronizationRepository, ICacheService cacheService, ISessionMemberMapper sessionMemberMapper, 
-        IClientsGroupsManager clientsGroupsManager, IClientsGroupsInvoker clientsGroupsInvoker)
+        IClientsRepository clientsRepository, IClientsGroupsManager clientsGroupsManager, IClientsGroupsInvoker clientsGroupsInvoker)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _inventoryRepository = inventoryRepository;
         _synchronizationRepository = synchronizationRepository;
         _cacheService = cacheService;
         _sessionMemberMapper = sessionMemberMapper;
+        _clientsRepository = clientsRepository;
         _clientsGroupsManager = clientsGroupsManager;
         _clientsGroupsInvoker = clientsGroupsInvoker;
     }
@@ -91,10 +93,13 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
         }
 
         if (updateSessionResult.IsWaitingForTransaction)
-        {       
+        {
+            await _clientsRepository.RemoveSessionSubscription(request.Client, request.SessionId, transaction);
+            
             await transaction.ExecuteAsync();
         
             await _clientsGroupsManager.RemoveFromSessionGroup(request.Client, request.SessionId);
+            
             var sessionMemberInfo = await _sessionMemberMapper.Convert(innerQuitter!);
             await _clientsGroupsInvoker.SessionGroup(request.SessionId).MemberQuittedSession(sessionMemberInfo);
         }

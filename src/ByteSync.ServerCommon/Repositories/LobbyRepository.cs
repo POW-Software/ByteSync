@@ -2,6 +2,7 @@
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using StackExchange.Redis;
 
 namespace ByteSync.ServerCommon.Repositories;
 
@@ -13,10 +14,8 @@ public class LobbyRepository : BaseRepository<Lobby>, ILobbyRepository
     
     public override string ElementName { get; } = "Lobby";
 
-    public async Task<UpdateEntityResult<Lobby>> QuitLobby(string lobbyId, string clientInstanceId)
+    public async Task<UpdateEntityResult<Lobby>> QuitLobby(string lobbyId, string clientInstanceId, ITransaction transaction)
     {
-        var database = _cacheService.GetDatabase();
-
         var cacheKey = ComputeCacheKey(ElementName, lobbyId);
         await using var redisLock = await _cacheService.AcquireLockAsync(cacheKey);
 
@@ -42,13 +41,13 @@ public class LobbyRepository : BaseRepository<Lobby>, ILobbyRepository
 
         if (deleteLobby)
         {
-            await database.KeyDeleteAsync(cacheKey);
+            await transaction.KeyDeleteAsync(cacheKey);
 
             return new UpdateEntityResult<Lobby>(lobby, UpdateEntityStatus.Deleted);
         }
         else if (updateLobby)
         {
-            return await SetElement(cacheKey, lobby!, database);
+            return await SetElement(cacheKey, lobby!, transaction);
         }
         else
         {

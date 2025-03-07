@@ -11,15 +11,13 @@ public class ClientsGroupsManager : IClientsGroupsManager
 {
     private readonly IHubContext<Hub<IHubByteSyncPush>, IHubByteSyncPush> _hubContext;
     private readonly IClientsGroupIdFactory _clientsGroupIdFactory;
-    private readonly IClientsRepository _clientsRepository;
     private readonly ILogger<ClientsGroupsManager> _logger;
 
     public ClientsGroupsManager(IHubContext<Hub<IHubByteSyncPush>, IHubByteSyncPush> hubContext, IClientsGroupIdFactory clientsGroupIdFactory, 
-        IClientsRepository clientsRepository, ILogger<ClientsGroupsManager> logger)
+        ILogger<ClientsGroupsManager> logger)
     {
         _hubContext = hubContext;
         _clientsGroupIdFactory = clientsGroupIdFactory;
-        _clientsRepository = clientsRepository;
         _logger = logger;
     }
     
@@ -42,20 +40,17 @@ public class ClientsGroupsManager : IClientsGroupsManager
             return;
         }
         
-        var result = await _clientsRepository.AddOrUpdate(client.ClientInstanceId, innerClient =>
-        {
-            if (innerClient != null)
-            {
-                innerClient.SubscribedGroups.Add(groupName);
-            }
-            
-            return innerClient;
-        }).ConfigureAwait(false);
+        // var result = await _clientsRepository.AddOrUpdate(client.ClientInstanceId, innerClient =>
+        // {
+        //     if (innerClient != null)
+        //     {
+        //         innerClient.SubscribedGroups.Add(groupName);
+        //     }
+        //     
+        //     return innerClient;
+        // }).ConfigureAwait(false);
 
-        if (result.IsSaved)
-        {
-            await _hubContext.Groups.AddToGroupAsync(connectionId, groupName).ConfigureAwait(false);
-        }
+        await _hubContext.Groups.AddToGroupAsync(connectionId, groupName).ConfigureAwait(false);
     }
 
     public async Task RemoveFromSessionGroup(Client client, string sessionId)
@@ -78,20 +73,7 @@ public class ClientsGroupsManager : IClientsGroupsManager
             return;
         }
         
-        var result = await _clientsRepository.AddOrUpdate(client.ClientInstanceId, innerClient =>
-        {
-            if (innerClient != null)
-            {
-                innerClient.SubscribedGroups.Remove(groupName);
-            }
-            
-            return innerClient;
-        }).ConfigureAwait(false);
-
-        if (result.IsSaved)
-        {
-            await _hubContext.Groups.RemoveFromGroupAsync(connectionId, groupName).ConfigureAwait(false);
-        }
+        await _hubContext.Groups.RemoveFromGroupAsync(connectionId, groupName).ConfigureAwait(false);
     }
 
     public async Task AddClientGroup(string connectionId, Client client)

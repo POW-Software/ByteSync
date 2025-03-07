@@ -3,6 +3,7 @@ using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using StackExchange.Redis;
 
 namespace ByteSync.ServerCommon.Repositories;
 
@@ -39,10 +40,8 @@ public class CloudSessionsRepository : BaseRepository<CloudSessionData>, ICloudS
         return cloudSessionData?.PreSessionMembers.SingleOrDefault(sm => sm.ClientInstanceId == clientInstanceId);
     }
 
-    public async Task<CloudSessionData> AddCloudSession(CloudSessionData cloudSessionData, Func<string> generateSessionIdHandler)
+    public async Task<CloudSessionData> AddCloudSession(CloudSessionData cloudSessionData, Func<string> generateSessionIdHandler, ITransaction transaction)
     {
-        var database = _cacheService.GetDatabase();
-        
         bool isNewSessionOk = false;
 
         while (!isNewSessionOk) 
@@ -52,10 +51,10 @@ public class CloudSessionsRepository : BaseRepository<CloudSessionData>, ICloudS
             var cacheKey = ComputeSessionCacheKey(cloudSessionData);
             await using var redisLock = await _cacheService.AcquireLockAsync(cacheKey);
             
-            string? serializedElement = await database.StringGetAsync(cacheKey);
+            string? serializedElement = await transaction.StringGetAsync(cacheKey);
             if (serializedElement == null || serializedElement.IsEmpty())
             {
-                await SetElement(cacheKey, cloudSessionData, database);
+                await SetElement(cacheKey, cloudSessionData, transaction);
                 isNewSessionOk = true;
             }
         }
