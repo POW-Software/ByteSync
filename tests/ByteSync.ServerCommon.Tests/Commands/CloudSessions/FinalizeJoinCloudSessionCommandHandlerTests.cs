@@ -92,17 +92,20 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
 
         cloudSession.PreSessionMembers.Add(joiner);
 
-        A.CallTo(() => _mockUpdateResult.IsWaitingForTransaction).Returns(true);
+        // A.CallTo(() => _mockUpdateResult.IsWaitingForTransaction).Returns(true);
 
+        bool funcResult = false;
+        bool isTransaction = false;
         A.CallTo(() => _mockCloudSessionsRepository.Update(
                 A<string>.That.IsEqualTo(sessionId),
                 A<Func<CloudSessionData, bool>>.Ignored,
                 A<ITransaction>.That.IsEqualTo(_mockTransaction), A<IRedLock>.Ignored))
-            .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction transaction, IRedLock _) =>
+            .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction? transaction, IRedLock _) =>
             {
-                updateAction(cloudSession);
+                funcResult = updateAction(cloudSession);
+                isTransaction = transaction != null;
             })
-            .Returns(_mockUpdateResult);
+            .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSession, isTransaction));
 
         A.CallTo(() => _mockSessionMemberMapper.Convert(A<SessionMemberData>.That.IsNotNull()))
             .Returns(Task.FromResult(sessionMemberInfo));
@@ -153,16 +156,19 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
         var sessionId = "123ABC456";
         var request = CreateBasicRequest(sessionId);
 
+        bool funcResult = false;
+        bool isTransaction = false;
+        var cloudSessionData = new CloudSessionData { SessionId = sessionId, IsSessionRemoved = true };
         A.CallTo(() => _mockCloudSessionsRepository.Update(
                 A<string>.That.IsEqualTo(sessionId),
                 A<Func<CloudSessionData, bool>>.Ignored,
                 A<ITransaction>.That.IsEqualTo(_mockTransaction), A<IRedLock>.Ignored))
-            .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction transaction, IRedLock _) =>
+            .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction? transaction, IRedLock _) =>
             {
-                var cloudSession = new CloudSessionData { SessionId = sessionId, IsSessionRemoved = true };
-                updateAction(cloudSession);
+                funcResult = updateAction(cloudSessionData);
+                isTransaction = transaction != null;
             })
-            .Returns(_mockUpdateResult);
+            .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
 
         // Act
         var result = await _handler.Handle(request, CancellationToken.None);
@@ -186,9 +192,10 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
                 A<string>.That.IsEqualTo(sessionId),
                 A<Func<CloudSessionData, bool>>.Ignored,
                 A<ITransaction>.That.IsEqualTo(_mockTransaction), A<IRedLock>.Ignored))
-            .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction transaction, IRedLock _) =>
+            .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction? transaction, IRedLock _) =>
             {
                 funcResult = updateAction(cloudSessionData);
+                isTransaction = transaction != null;
             })
             .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
 
