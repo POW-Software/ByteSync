@@ -29,7 +29,6 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
     private ILogger<FinalizeJoinCloudSessionCommandHandler> _mockLogger;
     private ITransaction _mockTransaction;
     private FinalizeJoinCloudSessionCommandHandler _handler;
-    private UpdateEntityResult<CloudSessionData> _mockUpdateResult;
     private IHubByteSyncPush _byteSyncPush;
 
     [SetUp]
@@ -42,7 +41,6 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
         _mockCacheService = A.Fake<ICacheService>();
         _mockLogger = A.Fake<ILogger<FinalizeJoinCloudSessionCommandHandler>>();
         _mockTransaction = A.Fake<ITransaction>();
-        _mockUpdateResult = A.Fake<UpdateEntityResult<CloudSessionData>>();
         _byteSyncPush = A.Fake<IHubByteSyncPush>();
 
         A.CallTo(() => _mockCacheService.OpenTransaction()).Returns(_mockTransaction);
@@ -215,17 +213,20 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
         var joinerInstanceId = "joinerInstance1";
         var request = CreateBasicRequest(sessionId, joinerInstanceId);
 
+        bool funcResult = false;
+        bool isTransaction = false;
+        var cloudSessionData = new CloudSessionData { SessionId = sessionId };
+        cloudSessionData.SessionMembers.Add(new SessionMemberData { ClientInstanceId = "otherMember" });
         A.CallTo(() => _mockCloudSessionsRepository.Update(
                 A<string>.That.IsEqualTo(sessionId),
                 A<Func<CloudSessionData, bool>>.Ignored,
                 A<ITransaction>.That.IsEqualTo(_mockTransaction), A<IRedLock>.Ignored))
-            .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction transaction, IRedLock _) =>
+            .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction? transaction, IRedLock _) =>
             {
-                var cloudSession = new CloudSessionData { SessionId = sessionId };
-                cloudSession.SessionMembers.Add(new SessionMemberData { ClientInstanceId = "otherMember" });
-                updateAction(cloudSession);
+                funcResult = updateAction(cloudSessionData);
+                isTransaction = transaction != null;
             })
-            .Returns(_mockUpdateResult);
+            .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
 
         // Act
         var result = await _handler.Handle(request, CancellationToken.None);
@@ -244,24 +245,27 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
         var validatorInstanceId = "validatorInstance1";
         var finalizationPassword = "password123";
         var request = CreateBasicRequest(sessionId, joinerInstanceId, validatorInstanceId, finalizationPassword);
-
+        
+        bool funcResult = false;
+        bool isTransaction = false;
+        var cloudSessionData = new CloudSessionData { SessionId = sessionId };
         A.CallTo(() => _mockCloudSessionsRepository.Update(
                 A<string>.That.IsEqualTo(sessionId),
                 A<Func<CloudSessionData, bool>>.Ignored,
                 A<ITransaction>.That.IsEqualTo(_mockTransaction), A<IRedLock>.Ignored))
-            .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction transaction, IRedLock _) =>
+            .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction? transaction, IRedLock _) =>
             {
-                var cloudSession = new CloudSessionData { SessionId = sessionId };
-                // Add a member that doesn't match the joiner's details
-                cloudSession.PreSessionMembers.Add(new SessionMemberData
-                {
-                    ClientInstanceId = "differentJoiner",
-                    ValidatorInstanceId = validatorInstanceId,
-                    FinalizationPassword = finalizationPassword
-                });
-                updateAction(cloudSession);
+                // // Add a member that doesn't match the joiner's details
+                // cloudSessionData.PreSessionMembers.Add(new SessionMemberData
+                // {
+                //     ClientInstanceId = "differentJoiner",
+                //     ValidatorInstanceId = validatorInstanceId,
+                //     FinalizationPassword = finalizationPassword
+                // });
+                funcResult = updateAction(cloudSessionData);
+                isTransaction = transaction != null;
             })
-            .Returns(_mockUpdateResult);
+            .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
 
         // Act
         var result = await _handler.Handle(request, CancellationToken.None);
