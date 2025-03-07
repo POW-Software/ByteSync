@@ -11,12 +11,4 @@ public interface IClientsRepository : IRepository<Client>
     public Task<HashSet<Client>> GetClientsWithoutConnectionId();
     
     public Task RemoveClient(Client client);
-    
-    Task<Client> AddSessionSubscription(Client client, string sessionId, ITransaction transaction);
-    
-    Task<Client> AddLobbySubscription(Client client, string lobbyId, ITransaction transaction);
-    
-    Task<Client> RemoveSessionSubscription(Client client, string requestSessionId, ITransaction transaction);
-    
-    Task<Client> RemoveLobbySubscription(Client client, string lobbyId, ITransaction transaction);
 }

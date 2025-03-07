@@ -7,6 +7,7 @@ using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -17,22 +18,20 @@ public class TryJoinLobbyCommandHandler : IRequestHandler<TryJoinLobbyRequest, J
     private readonly ICloudSessionProfileRepository _cloudSessionProfileRepository;
     private readonly ILobbyRepository _lobbyRepository;
     private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
-    private readonly IClientsGroupsManager _clientsGroupsManager;
+    private readonly IClientsGroupsService _clientsGroupsService;
     private readonly ILobbyFactory _lobbyFactory;
-    private readonly IClientsRepository _clientsRepository;
     private readonly ICacheService _cacheService;
     private readonly ILogger<TryJoinLobbyCommandHandler> _logger;
 
     public TryJoinLobbyCommandHandler(ICloudSessionProfileRepository cloudSessionProfileRepository, ILobbyRepository lobbyRepository, 
-        IClientsGroupsInvoker clientsGroupsInvoker, IClientsGroupsManager clientsGroupsManager, ILobbyFactory lobbyFactory,
-        IClientsRepository clientsRepository, ICacheService cacheService, ILogger<TryJoinLobbyCommandHandler> logger)
+        IClientsGroupsInvoker clientsGroupsInvoker, IClientsGroupsService clientsGroupsService, ILobbyFactory lobbyFactory,
+        ICacheService cacheService, ILogger<TryJoinLobbyCommandHandler> logger)
     {
         _cloudSessionProfileRepository = cloudSessionProfileRepository;
         _lobbyRepository = lobbyRepository;
         _clientsGroupsInvoker = clientsGroupsInvoker;
-        _clientsGroupsManager = clientsGroupsManager;
+        _clientsGroupsService = clientsGroupsService;
         _lobbyFactory = lobbyFactory;
-        _clientsRepository = clientsRepository;
         _cacheService = cacheService;
         _logger = logger;
     }
@@ -131,17 +130,14 @@ public class TryJoinLobbyCommandHandler : IRequestHandler<TryJoinLobbyRequest, J
             
             var memberInfo = lobbyInfo.GetMember(joinLobbyParameters.ProfileClientId)!;
 
-            await _clientsRepository.AddLobbySubscription(client, lobbyInfo.LobbyId, transaction);
+            await _clientsGroupsService.AddLobbySubscription(client, lobbyInfo.LobbyId, transaction);
 
             await transaction.ExecuteAsync();
             
-            await _clientsGroupsInvoker
-                .LobbyGroupExcept(lobbyInfo.LobbyId, client)
-                .MemberJoinedLobby(lobbyInfo.LobbyId, memberInfo)
+            await _clientsGroupsInvoker.LobbyGroupExcept(lobbyInfo.LobbyId, client).MemberJoinedLobby(lobbyInfo.LobbyId, memberInfo)
                 .ConfigureAwait(false);
 
-            await _clientsGroupsManager
-                .AddToLobbyGroup(client, lobbyInfo.LobbyId)
+            await _clientsGroupsService.AddToLobbyGroup(client, lobbyInfo.LobbyId)
                 .ConfigureAwait(false);
         }
 

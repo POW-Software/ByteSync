@@ -6,14 +6,14 @@ using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Hubs;
 
-public class ClientsGroupsManager : IClientsGroupsManager
+public class ClientsGroupsHubService : IClientsGroupsHubService
 {
     private readonly IHubContext<Hub<IHubByteSyncPush>, IHubByteSyncPush> _hubContext;
     private readonly IClientsGroupIdFactory _clientsGroupIdFactory;
-    private readonly ILogger<ClientsGroupsManager> _logger;
+    private readonly ILogger<ClientsGroupsHubService> _logger;
 
-    public ClientsGroupsManager(IHubContext<Hub<IHubByteSyncPush>, IHubByteSyncPush> hubContext, IClientsGroupIdFactory clientsGroupIdFactory, 
-        ILogger<ClientsGroupsManager> logger)
+    public ClientsGroupsHubService(IHubContext<Hub<IHubByteSyncPush>, IHubByteSyncPush> hubContext, IClientsGroupIdFactory clientsGroupIdFactory, 
+        ILogger<ClientsGroupsHubService> logger)
     {
         _hubContext = hubContext;
         _clientsGroupIdFactory = clientsGroupIdFactory;

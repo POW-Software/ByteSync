@@ -6,6 +6,7 @@ using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Mappers;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -14,21 +15,19 @@ namespace ByteSync.ServerCommon.Commands.CloudSessions;
 public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJoinCloudSessionRequest, FinalizeJoinSessionResult>
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
-    private readonly IClientsRepository _clientsRepository;
     private readonly ISessionMemberMapper _sessionMemberMapper;
     private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
-    private readonly IClientsGroupsManager _clientsGroupsManager;
+    private readonly IClientsGroupsService _clientsGroupsService;
     private readonly ICacheService _cacheService;
     private readonly ILogger<FinalizeJoinCloudSessionCommandHandler> _logger;
     
     public FinalizeJoinCloudSessionCommandHandler(ICloudSessionsRepository cloudSessionsRepository, ISessionMemberMapper sessionMemberMapper,
-        IClientsRepository clientsRepository, IClientsGroupsInvoker clientsGroupsInvoker, IClientsGroupsManager clientsGroupsManager, 
+        IClientsGroupsInvoker clientsGroupsInvoker, IClientsGroupsService clientsGroupsService, 
         ICacheService cacheService, ILogger<FinalizeJoinCloudSessionCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
-        _clientsRepository = clientsRepository;
         _clientsGroupsInvoker = clientsGroupsInvoker;
-        _clientsGroupsManager = clientsGroupsManager;
+        _clientsGroupsService = clientsGroupsService;
         _sessionMemberMapper = sessionMemberMapper;
         _cacheService = cacheService;
         _logger = logger;
@@ -106,12 +105,12 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
         {
             var sessionMemberInfo = await _sessionMemberMapper.Convert(joiner!);
 
-            await _clientsRepository.AddSessionSubscription(client, parameters.SessionId, transaction);
+            await _clientsGroupsService.AddSessionSubscription(client, parameters.SessionId, transaction);
 
             await transaction.ExecuteAsync();
             
             await _clientsGroupsInvoker.SessionGroup(parameters.SessionId).MemberJoinedSession(sessionMemberInfo).ConfigureAwait(false);
-            await _clientsGroupsManager.AddToSessionGroup(client, parameters.SessionId).ConfigureAwait(false);
+            await _clientsGroupsService.AddToSessionGroup(client, parameters.SessionId).ConfigureAwait(false);
             
             _logger.LogInformation("FinalizeJoinCloudSession: {@cloudSession} by {@joiner}", 
                 joiner!.CloudSessionData.BuildLog(), joiner.BuildLog());

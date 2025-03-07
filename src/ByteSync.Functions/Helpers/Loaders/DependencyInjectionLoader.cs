@@ -48,14 +48,6 @@ public static class DependencyInjectionLoader
                 .InstancePerLifetimeScope()
                 .AsImplementedInterfaces();
         
-            builder.RegisterType<ClientsGroupsInvoker>()
-                .InstancePerLifetimeScope()
-                .AsImplementedInterfaces();
-            
-            builder.RegisterType<ClientsGroupsManager>()
-                .InstancePerLifetimeScope()
-                .AsImplementedInterfaces();
-        
             builder.RegisterType<BlobContainerProvider>()
                 .InstancePerLifetimeScope()
                 .AsImplementedInterfaces();

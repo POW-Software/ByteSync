@@ -2,7 +2,7 @@
 
 namespace ByteSync.ServerCommon.Interfaces.Hubs;
 
-public interface IClientsGroupsManager
+public interface IClientsGroupsHubService
 {
     Task AddToSessionGroup(Client client, string sessionId);
     

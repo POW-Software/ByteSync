@@ -17,17 +17,17 @@ public class LobbyService : ILobbyService
     private readonly ILobbyRepository _lobbyRepository;
     private readonly ICloudSessionProfileRepository _cloudSessionProfileRepository;
     private readonly ILobbyFactory _lobbyFactory;
-    private readonly IClientsGroupsManager _clientsGroupsManager;
+    private readonly IClientsGroupsHubService _clientsGroupsHubService;
     private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
     private readonly ILogger<LobbyService> _logger;
     
     public LobbyService(ILobbyRepository lobbyRepository, ICloudSessionProfileRepository cloudSessionProfileRepository, 
-        ILobbyFactory lobbyFactory, IClientsGroupsManager clientsGroupsManager, IClientsGroupsInvoker clientsGroupsInvoker, ILogger<LobbyService> logger)
+        ILobbyFactory lobbyFactory, IClientsGroupsHubService clientsGroupsHubService, IClientsGroupsInvoker clientsGroupsInvoker, ILogger<LobbyService> logger)
     {
         _lobbyRepository = lobbyRepository;
         _cloudSessionProfileRepository = cloudSessionProfileRepository;
         _lobbyFactory = lobbyFactory;
-        _clientsGroupsManager = clientsGroupsManager;
+        _clientsGroupsHubService = clientsGroupsHubService;
         _clientsGroupsInvoker = clientsGroupsInvoker;
         _logger = logger;
     }

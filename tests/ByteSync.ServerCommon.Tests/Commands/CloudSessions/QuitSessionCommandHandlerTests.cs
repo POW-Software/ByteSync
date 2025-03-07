@@ -1,7 +1,6 @@
 ﻿using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Interfaces.Hub;
 using ByteSync.ServerCommon.Business.Auth;
-using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Commands.CloudSessions;
 using ByteSync.ServerCommon.Entities;
@@ -9,6 +8,7 @@ using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Mappers;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using ByteSync.ServerCommon.Tests.Helpers;
 using FakeItEasy;
 using FluentAssertions;
@@ -25,8 +25,7 @@ public class QuitSessionCommandHandlerTests
     private ISynchronizationRepository _mockSynchronizationRepository;
     private ICacheService _mockCacheService;
     private ISessionMemberMapper _mockSessionMemberMapper;
-    private IClientsRepository _mockClientsRepository;
-    private IClientsGroupsManager _mockClientsGroupsManager;
+    private IClientsGroupsService _mockClientsGroupsService;
     private IClientsGroupsInvoker _mockClientsGroupsInvoker;
     
     private ITransaction _mockTransaction;
@@ -41,16 +40,14 @@ public class QuitSessionCommandHandlerTests
         _mockSynchronizationRepository = A.Fake<ISynchronizationRepository>();
         _mockCacheService = A.Fake<ICacheService>();
         _mockSessionMemberMapper = A.Fake<ISessionMemberMapper>();
-        _mockClientsRepository = A.Fake<IClientsRepository>();
-        _mockClientsGroupsManager = A.Fake<IClientsGroupsManager>();
+        _mockClientsGroupsService = A.Fake<IClientsGroupsService>();
         _mockClientsGroupsInvoker = A.Fake<IClientsGroupsInvoker>();
 
         _mockTransaction = A.Fake<ITransaction>();
         A.CallTo(() => _mockCacheService.OpenTransaction()).Returns(_mockTransaction);
 
         _quitSessionCommandHandler = new QuitSessionCommandHandler(_mockCloudSessionsRepository, _mockInventoryRepository,
-            _mockSynchronizationRepository, _mockCacheService, _mockSessionMemberMapper, _mockClientsRepository, 
-            _mockClientsGroupsManager, _mockClientsGroupsInvoker);
+            _mockSynchronizationRepository, _mockCacheService, _mockSessionMemberMapper, _mockClientsGroupsService, _mockClientsGroupsInvoker);
     }
 
     [TestCase(true)]
@@ -139,7 +136,7 @@ public class QuitSessionCommandHandlerTests
 
         A.CallTo(() => _mockTransaction.ExecuteAsync(CommandFlags.None)).MustHaveHappenedOnceExactly();
 
-        A.CallTo(() => _mockClientsGroupsManager.RemoveFromSessionGroup(client, sessionId))
+        A.CallTo(() => _mockClientsGroupsService.RemoveFromSessionGroup(client, sessionId))
             .MustHaveHappenedOnceExactly();
 
         A.CallTo(() => _mockSessionMemberMapper.Convert(sessionMember))
@@ -223,7 +220,7 @@ public class QuitSessionCommandHandlerTests
 
         A.CallTo(() => _mockTransaction.ExecuteAsync(CommandFlags.None)).MustNotHaveHappened();
 
-        A.CallTo(() => _mockClientsGroupsManager.RemoveFromSessionGroup(client, sessionId))
+        A.CallTo(() => _mockClientsGroupsService.RemoveFromSessionGroup(client, sessionId))
             .MustNotHaveHappened();
 
         A.CallTo(() => _mockSessionMemberMapper.Convert(A<SessionMemberData>.Ignored))

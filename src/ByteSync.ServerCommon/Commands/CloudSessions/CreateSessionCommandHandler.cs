@@ -4,6 +4,7 @@ using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -12,19 +13,17 @@ namespace ByteSync.ServerCommon.Commands.CloudSessions;
 public class CreateSessionCommandHandler : IRequestHandler<CreateSessionRequest, CloudSessionResult>
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
-    private readonly IClientsGroupsManager _clientsGroupsManager;
-    private readonly IClientsRepository _clientsRepository;
+    private readonly IClientsGroupsService _clientsGroupsService;
     private readonly ICloudSessionsService _cloudSessionsService;
     private readonly ICacheService _cacheService;
     private readonly ILogger<CreateSessionCommandHandler> _logger;
 
-    public CreateSessionCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IClientsGroupsManager clientsGroupsManager,
+    public CreateSessionCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IClientsGroupsService clientsGroupsService,
         IClientsRepository clientsRepository, ICloudSessionsService cloudSessionsService, ICacheService cacheService, 
         ILogger<CreateSessionCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
-        _clientsGroupsManager = clientsGroupsManager;
-        _clientsRepository = clientsRepository;
+        _clientsGroupsService = clientsGroupsService;
         _cloudSessionsService = cloudSessionsService;
         _cacheService = cacheService;
         _logger = logger;
@@ -48,11 +47,11 @@ public class CreateSessionCommandHandler : IRequestHandler<CreateSessionRequest,
 
         cloudSessionData = await _cloudSessionsRepository.AddCloudSession(cloudSessionData, GenerateRandomSessionId, transaction);
         
-        await _clientsRepository.AddSessionSubscription(client, cloudSessionData.SessionId, transaction);
+        await _clientsGroupsService.AddSessionSubscription(client, cloudSessionData.SessionId, transaction);
 
         await transaction.ExecuteAsync();
 
-        await _clientsGroupsManager.AddToSessionGroup(client, cloudSessionData.SessionId);
+        await _clientsGroupsService.AddToSessionGroup(client, cloudSessionData.SessionId);
 
         _logger.LogInformation("Cloud Session {SessionId} created", cloudSessionData.SessionId);
 
