@@ -9,7 +9,9 @@ using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Misc;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using ByteSync.ServerCommon.Services;
+using ByteSync.ServerCommon.Services.Clients;
 using FakeItEasy;
 
 namespace ByteSync.ServerCommon.Tests.Services;

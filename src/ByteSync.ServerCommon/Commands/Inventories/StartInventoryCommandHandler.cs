@@ -2,9 +2,9 @@
 using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
-using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using RedLockNet;
@@ -17,7 +17,7 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
     private readonly IInventoryRepository _inventoryRepository;
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly ISharedFilesService _sharedFilesService;
-    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
+    private readonly IInvokeClientsService _invokeClientsService;
     private readonly ICacheService _cacheService;
     private readonly ILogger<StartInventoryCommandHandler> _logger;
     
@@ -25,14 +25,14 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
         IInventoryRepository inventoryRepository,
         ICloudSessionsRepository cloudSessionsRepository,
         ISharedFilesService sharedFilesService,
-        IClientsGroupsInvoker clientsGroupsInvoker,
+        IInvokeClientsService invokeClientsService,
         ICacheService cacheService,
         ILogger<StartInventoryCommandHandler> logger)
     {
         _inventoryRepository = inventoryRepository;
         _cloudSessionsRepository = cloudSessionsRepository;
         _sharedFilesService = sharedFilesService;
-        _clientsGroupsInvoker = clientsGroupsInvoker;
+        _invokeClientsService = invokeClientsService;
         _cacheService = cacheService;
         _logger = logger;
     }
@@ -74,7 +74,7 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
             await _sharedFilesService.ClearSession(sessionId);
             
             var dto = new InventoryStartedDTO(sessionId, client.ClientInstanceId, sessionUpdateResult.Element!.SessionSettings);
-            await _clientsGroupsInvoker.SessionGroupExcept(sessionId, client).InventoryStarted(dto);
+            await _invokeClientsService.SessionGroupExcept(sessionId, client).InventoryStarted(dto);
             
             _logger.LogInformation("StartInventory: session {SessionId} - OK", sessionId);
         }

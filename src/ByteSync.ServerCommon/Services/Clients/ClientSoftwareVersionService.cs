@@ -2,11 +2,11 @@
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Loaders;
 using ByteSync.ServerCommon.Interfaces.Repositories;
-using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace ByteSync.ServerCommon.Services;
+namespace ByteSync.ServerCommon.Services.Clients;
 
 public class ClientSoftwareVersionService : IClientSoftwareVersionService
 {

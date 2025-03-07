@@ -2,7 +2,7 @@
 using Azure.Core.Serialization;
 using ByteSync.Common.Interfaces.Hub;
 using ByteSync.Functions.Helpers.Misc;
-using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.SignalR.Management;

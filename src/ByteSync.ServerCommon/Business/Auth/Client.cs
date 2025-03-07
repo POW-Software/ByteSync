@@ -64,6 +64,8 @@ public class Client
 
     public RefreshToken? RefreshToken { get; set; }
 
+    public List<string> SubscribedGroups { get; set; } = new();
+
     protected bool Equals(Client other)
     {
         return Equals(ClientInstanceId, other.ClientInstanceId);

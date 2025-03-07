@@ -2,12 +2,13 @@
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.ServerCommon.Business.Auth;
+using ByteSync.ServerCommon.Business.Sessions;
 
 namespace ByteSync.ServerCommon.Interfaces.Services;
 
 public interface ICloudSessionsService
 {
-    Task<CloudSessionResult> CreateCloudSession(CreateCloudSessionParameters createCloudSessionParameters, Client creator);
+    Task<CloudSessionResult> BuildCloudSessionResult(CloudSessionData cloudSessionData, SessionMemberData sessionMemberData);
 
     Task<List<string>> GetMembersInstanceIds(string sessionId);
     
@@ -16,9 +17,7 @@ public interface ICloudSessionsService
     Task<JoinSessionResult> AskJoinCloudSession(Client client, AskJoinCloudSessionParameters parameters);
     
     Task ValidateJoinCloudSession(ValidateJoinCloudSessionParameters parameters);
-        
-    Task<FinalizeJoinSessionResult> FinalizeJoinCloudSession(Client client, FinalizeJoinCloudSessionParameters parameters);
-    
+
     Task<List<SessionMemberInfoDTO>> GetSessionMembersInfosAsync(string sessionId);
     
     Task<bool> ResetSession(string sessionId, Client client);

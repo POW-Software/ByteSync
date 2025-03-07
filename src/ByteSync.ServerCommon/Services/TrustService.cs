@@ -2,9 +2,9 @@
 using ByteSync.Common.Business.Trust.Connections;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Entities;
-using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Services;
@@ -13,16 +13,16 @@ public class TrustService : ITrustService
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly ILobbyRepository _lobbyRepository;
-    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
+    private readonly IInvokeClientsService _invokeClientsService;
     private readonly ILogger<TrustService> _logger;
 
 
     public TrustService(ICloudSessionsRepository cloudSessionsRepository, ILobbyRepository lobbyRepository, 
-        IClientsGroupsInvoker clientsGroupsInvoker, ILogger<TrustService> logger)
+        IInvokeClientsService invokeClientsService, ILogger<TrustService> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _lobbyRepository = lobbyRepository;
-        _clientsGroupsInvoker = clientsGroupsInvoker;
+        _invokeClientsService = invokeClientsService;
         _logger = logger;
     }
     
@@ -47,7 +47,7 @@ public class TrustService : ITrustService
                 _logger.LogInformation("StartTrustCheck: {Member} must be trusted by {Joiner}", 
                     clientInstanceId, joiner.ClientInstanceId);
                 
-                await _clientsGroupsInvoker.Client(clientInstanceId).AskPublicKeyCheckData(trustCheckParameters.SessionId, joiner.ClientInstanceId,
+                await _invokeClientsService.Client(clientInstanceId).AskPublicKeyCheckData(trustCheckParameters.SessionId, joiner.ClientInstanceId,
                     trustCheckParameters.PublicKeyInfo).ConfigureAwait(false);
             }
         }
@@ -110,7 +110,7 @@ public class TrustService : ITrustService
             
             foreach (var digitalSignatureCheckInfo in parameters.DigitalSignatureCheckInfos)
             {
-                await _clientsGroupsInvoker.Client(digitalSignatureCheckInfo.Recipient).RequestCheckDigitalSignature(digitalSignatureCheckInfo).ConfigureAwait(false);
+                await _invokeClientsService.Client(digitalSignatureCheckInfo.Recipient).RequestCheckDigitalSignature(digitalSignatureCheckInfo).ConfigureAwait(false);
             }
         }
         else
@@ -143,7 +143,7 @@ public class TrustService : ITrustService
         var recipient = await _cloudSessionsRepository.GetSessionMember(parameters.SessionId, parameters.SessionMemberInstanceId);
         if (recipient != null)
         {
-            await _clientsGroupsInvoker.Client(recipient).RequestTrustPublicKey(parameters).ConfigureAwait(false);
+            await _invokeClientsService.Client(recipient).RequestTrustPublicKey(parameters).ConfigureAwait(false);
             
             _logger.LogInformation("RequestTrustPublicKey: {Sender} sends trust publicKey Request to {Recipient}", client.ClientInstanceId,
                 parameters.SessionMemberInstanceId);
@@ -156,7 +156,7 @@ public class TrustService : ITrustService
 
     public async Task GiveMemberPublicKeyCheckData(Client client, GiveMemberPublicKeyCheckDataParameters parameters)
     {
-        await _clientsGroupsInvoker.Client(parameters.ClientInstanceId).GiveMemberPublicKeyCheckData(parameters.SessionId, parameters.PublicKeyCheckData).ConfigureAwait(false);
+        await _invokeClientsService.Client(parameters.ClientInstanceId).GiveMemberPublicKeyCheckData(parameters.SessionId, parameters.PublicKeyCheckData).ConfigureAwait(false);
             
         _logger.LogInformation("GiveMemberPublicKeyCheckData: {Sender} gives PublicKeyCheckData to {Recipient}", client.ClientInstanceId,
             parameters.ClientInstanceId);
@@ -167,7 +167,7 @@ public class TrustService : ITrustService
         var session = await _cloudSessionsRepository.Get(parameters.SessionId);
         if (session != null)
         {
-            await _clientsGroupsInvoker.Client(parameters.OtherPartyClientInstanceId).InformPublicKeyValidationIsFinished(parameters).ConfigureAwait(false);
+            await _invokeClientsService.Client(parameters.OtherPartyClientInstanceId).InformPublicKeyValidationIsFinished(parameters).ConfigureAwait(false);
             
             _logger.LogInformation("InformPublicKeyValidationIsFinished: {Sender} sends PublicKeyValidation to {Recipient}", client.ClientInstanceId,
                 parameters.OtherPartyClientInstanceId);

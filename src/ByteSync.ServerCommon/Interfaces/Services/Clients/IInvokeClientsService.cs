@@ -2,9 +2,9 @@
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
 
-namespace ByteSync.ServerCommon.Interfaces.Hubs;
+namespace ByteSync.ServerCommon.Interfaces.Services.Clients;
 
-public interface IClientsGroupsInvoker
+public interface IInvokeClientsService
 {
     IHubByteSyncPush Client(string clientInstanceId);
     

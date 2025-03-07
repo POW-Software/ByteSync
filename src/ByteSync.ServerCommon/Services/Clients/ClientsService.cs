@@ -3,29 +3,28 @@ using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Helpers;
 using ByteSync.ServerCommon.Interfaces.Factories;
-using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
-using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.ServerCommon.Services;
+namespace ByteSync.ServerCommon.Services.Clients;
 
 public class ClientsService : IClientsService
 {
     private readonly IByteSyncEndpointFactory _byteSyncEndpointFactory;
     private readonly IClientsRepository _clientsRepository;
-    private readonly IClientsGroupsManager _clientsGroupsManager;
+    private readonly IClientsGroupsHubService _clientsGroupsHubService;
     private readonly ILogger<ClientsService> _logger;
 
     public ClientsService(IByteSyncEndpointFactory byteSyncEndpointFactory,
-        IClientsRepository clientsRepository, IClientsGroupsManager clientsGroupsManager,
+        IClientsRepository clientsRepository, IClientsGroupsHubService clientsGroupsHubService,
         ILogger<ClientsService> logger)
     {
         _byteSyncEndpointFactory = byteSyncEndpointFactory;
         _clientsRepository = clientsRepository;
-        _clientsGroupsManager = clientsGroupsManager;
+        _clientsGroupsHubService = clientsGroupsHubService;
         _logger = logger;
     }
 
@@ -46,7 +45,7 @@ public class ClientsService : IClientsService
         {
             var client = result.Element!;
             
-            await _clientsGroupsManager.AddClientGroup(connectionId, client);
+            await _clientsGroupsHubService.AddClientGroup(connectionId, client);
 
             _logger.LogInformation("ClientsService.OnClientConnected: client:{@client}, connectionId:{connectionId}", 
                 client.BuildLog(), connectionId);

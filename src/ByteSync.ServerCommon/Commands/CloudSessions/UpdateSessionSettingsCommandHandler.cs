@@ -1,9 +1,9 @@
 ﻿using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Exceptions;
-using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Mappers;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -12,16 +12,16 @@ namespace ByteSync.ServerCommon.Commands.CloudSessions;
 public class UpdateSessionSettingsCommandHandler : IRequestHandler<UpdateSessionSettingsRequest, bool>
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
-    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
+    private readonly IInvokeClientsService _invokeClientsService;
     private readonly ILogger<UpdateSessionSettingsCommandHandler> _logger;
 
 
     public UpdateSessionSettingsCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IInventoryRepository inventoryRepository, 
         ISynchronizationRepository synchronizationRepository, ICacheService cacheService, ISessionMemberMapper sessionMemberMapper, 
-        IClientsGroupsInvoker clientsGroupsInvoker, ILogger<UpdateSessionSettingsCommandHandler> logger)
+        IInvokeClientsService invokeClientsService, ILogger<UpdateSessionSettingsCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
-        _clientsGroupsInvoker = clientsGroupsInvoker;
+        _invokeClientsService = invokeClientsService;
         _logger = logger;
     }
     
@@ -50,7 +50,7 @@ public class UpdateSessionSettingsCommandHandler : IRequestHandler<UpdateSession
         {
             var sessionSettingsUpdatedDto = new SessionSettingsUpdatedDTO(request.SessionId, request.Client.ClientInstanceId, request.Settings);
             
-            await _clientsGroupsInvoker.SessionGroupExcept(request.SessionId, request.Client)
+            await _invokeClientsService.SessionGroupExcept(request.SessionId, request.Client)
                 .SessionSettingsUpdated(sessionSettingsUpdatedDto).ConfigureAwait(false);
 
             return true;

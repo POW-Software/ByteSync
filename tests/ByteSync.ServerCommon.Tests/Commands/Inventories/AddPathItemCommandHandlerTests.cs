@@ -5,9 +5,9 @@ using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Commands.Inventories;
-using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -20,7 +20,7 @@ public class AddPathItemCommandHandlerTests
     private readonly IInventoryMemberService _mockInventoryMemberService;
     private readonly ICloudSessionsRepository _mockCloudSessionsRepository;
     private readonly IInventoryRepository _mockInventoryRepository;
-    private readonly IClientsGroupsInvoker _mockClientsGroupsInvoker;
+    private readonly IInvokeClientsService _mockInvokeClientsService;
     private readonly ILogger<AddPathItemCommandHandler> _mockLogger;
     private readonly IHubByteSyncPush _mockByteSyncPush = A.Fake<IHubByteSyncPush>(x => x.Strict());
     
@@ -31,11 +31,11 @@ public class AddPathItemCommandHandlerTests
         _mockInventoryMemberService = A.Fake<IInventoryMemberService>();
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
-        _mockClientsGroupsInvoker = A.Fake<IClientsGroupsInvoker>();
+        _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
         _mockLogger = A.Fake<ILogger<AddPathItemCommandHandler>>();
         
         _addPathItemCommandHandler = new AddPathItemCommandHandler(_mockInventoryMemberService, _mockInventoryRepository, _mockCloudSessionsRepository, 
-            _mockClientsGroupsInvoker, _mockLogger);
+            _mockInvokeClientsService, _mockLogger);
     }
     
     [Test]
@@ -57,7 +57,7 @@ public class AddPathItemCommandHandlerTests
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client))
             .Returns(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId });
 
-        A.CallTo(() => _mockClientsGroupsInvoker.SessionGroupExcept(sessionId, client)).Returns(_mockByteSyncPush);
+        A.CallTo(() => _mockInvokeClientsService.SessionGroupExcept(sessionId, client)).Returns(_mockByteSyncPush);
 
         A.CallTo(() => _mockByteSyncPush.PathItemAdded(A<PathItemDTO>.Ignored)).Returns(Task.CompletedTask);
 
@@ -69,7 +69,7 @@ public class AddPathItemCommandHandlerTests
         // Assert
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _mockClientsGroupsInvoker.SessionGroupExcept(A<string>.Ignored, A<Client>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockInvokeClientsService.SessionGroupExcept(A<string>.Ignored, A<Client>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockByteSyncPush.PathItemAdded(A<PathItemDTO>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockByteSyncPush.PathItemAdded(A<PathItemDTO>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client)).MustHaveHappenedOnceExactly();
@@ -91,7 +91,7 @@ public class AddPathItemCommandHandlerTests
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
             .Invokes((string _, Func<InventoryData, InventoryData> func) => func(inventoryData));
 
-        A.CallTo(() => _mockClientsGroupsInvoker.SessionGroupExcept(sessionId, client)).Returns(_mockByteSyncPush);
+        A.CallTo(() => _mockInvokeClientsService.SessionGroupExcept(sessionId, client)).Returns(_mockByteSyncPush);
 
         A.CallTo(() => _mockByteSyncPush.PathItemAdded(A<PathItemDTO>.Ignored)).Returns(Task.CompletedTask);
 

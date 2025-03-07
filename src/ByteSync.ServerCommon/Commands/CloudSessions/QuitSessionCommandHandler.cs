@@ -1,8 +1,8 @@
 ﻿using ByteSync.ServerCommon.Business.Sessions;
-using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Mappers;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.CloudSessions;
@@ -14,20 +14,20 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
     private readonly ISynchronizationRepository _synchronizationRepository;
     private readonly ICacheService _cacheService;
     private readonly ISessionMemberMapper _sessionMemberMapper;
-    private readonly IClientsGroupsManager _clientsGroupsManager;
-    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
+    private readonly IClientsGroupsService _clientsGroupsService;
+    private readonly IInvokeClientsService _invokeClientsService;
 
     public QuitSessionCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IInventoryRepository inventoryRepository, 
         ISynchronizationRepository synchronizationRepository, ICacheService cacheService, ISessionMemberMapper sessionMemberMapper, 
-        IClientsGroupsManager clientsGroupsManager, IClientsGroupsInvoker clientsGroupsInvoker)
+        IClientsGroupsService clientsGroupsService, IInvokeClientsService invokeClientsService)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _inventoryRepository = inventoryRepository;
         _synchronizationRepository = synchronizationRepository;
         _cacheService = cacheService;
         _sessionMemberMapper = sessionMemberMapper;
-        _clientsGroupsManager = clientsGroupsManager;
-        _clientsGroupsInvoker = clientsGroupsInvoker;
+        _clientsGroupsService = clientsGroupsService;
+        _invokeClientsService = invokeClientsService;
     }
     
     public async Task Handle(QuitSessionRequest request, CancellationToken cancellationToken)
@@ -91,12 +91,15 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
         }
 
         if (updateSessionResult.IsWaitingForTransaction)
-        {       
+        {
+            await _clientsGroupsService.RemoveSessionSubscription(request.Client, request.SessionId, transaction);
+            
             await transaction.ExecuteAsync();
         
-            await _clientsGroupsManager.RemoveFromGroup(request.Client, request.SessionId);
+            await _clientsGroupsService.RemoveFromSessionGroup(request.Client, request.SessionId);
+            
             var sessionMemberInfo = await _sessionMemberMapper.Convert(innerQuitter!);
-            await _clientsGroupsInvoker.SessionGroup(request.SessionId).MemberQuittedSession(sessionMemberInfo);
+            await _invokeClientsService.SessionGroup(request.SessionId).MemberQuittedSession(sessionMemberInfo);
         }
     }
 }

@@ -30,7 +30,7 @@ public class CleanupBlobFilesFunction
     {
         _logger.LogInformation("Cleanup function executed at: {Now}", DateTime.Now);
         
-        int retentionDurationInDays = _configurationSection.GetValue<int>("RetentionDurationInDays");
+        var retentionDurationInDays = _configurationSection.GetValue<int>("RetentionDurationInDays");
         
         if (retentionDurationInDays < 1)
         {
@@ -38,14 +38,14 @@ public class CleanupBlobFilesFunction
             return 0;
         }
 
-        BlobContainerClient container = _blobContainerProvider.GetBlobContainerClient();
+        var container = _blobContainerProvider.GetBlobContainerClient();
         if (!await container.ExistsAsync())
         {
             _logger.LogWarning("...Container not found, no element deleted");
             return 0;
         }
         
-        int deletedBlobsCount = 0;
+        var deletedBlobsCount = 0;
         var blobs = container.GetBlobsAsync();
         await foreach (var blobItem in blobs)
         {

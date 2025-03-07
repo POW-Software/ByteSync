@@ -19,7 +19,7 @@ public static class FunctionHelper
 
     public static async Task<T> DeserializeRequestBody<T>(HttpRequestData req)
     {
-        string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+        var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
         
         var deserializedObject = JsonHelper.Deserialize<T>(requestBody);
         if (deserializedObject == null)

@@ -7,6 +7,7 @@ using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Loaders;
 using ByteSync.ServerCommon.Repositories;
 using ByteSync.ServerCommon.Services;
+using ByteSync.ServerCommon.Services.Clients;
 using FakeItEasy;
 using FluentAssertions;
 

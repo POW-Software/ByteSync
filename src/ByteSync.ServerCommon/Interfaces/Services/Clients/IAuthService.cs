@@ -1,6 +1,6 @@
 ﻿using ByteSync.Common.Business.Auth;
 
-namespace ByteSync.ServerCommon.Interfaces.Services;
+namespace ByteSync.ServerCommon.Interfaces.Services.Clients;
 
 public interface IAuthService
 {

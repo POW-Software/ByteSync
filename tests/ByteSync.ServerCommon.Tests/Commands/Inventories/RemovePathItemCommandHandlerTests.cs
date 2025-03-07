@@ -4,9 +4,9 @@ using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Commands.Inventories;
-using ByteSync.ServerCommon.Interfaces.Hubs;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using FakeItEasy;
 using Microsoft.Extensions.Logging;
 
@@ -18,7 +18,7 @@ public class RemovePathItemCommandHandlerTests
     private readonly IInventoryMemberService _mockInventoryMemberService;
     private readonly ICloudSessionsRepository _mockCloudSessionsRepository;
     private readonly IInventoryRepository _mockInventoryRepository;
-    private readonly IClientsGroupsInvoker _mockClientsGroupsInvoker;
+    private readonly IInvokeClientsService _mockInvokeClientsService;
     private readonly ILogger<RemovePathItemCommandHandler> _mockLogger;
     
     private readonly RemovePathItemCommandHandler _removePathItemCommandHandler;
@@ -28,11 +28,11 @@ public class RemovePathItemCommandHandlerTests
         _mockInventoryMemberService = A.Fake<IInventoryMemberService>();
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
-        _mockClientsGroupsInvoker = A.Fake<IClientsGroupsInvoker>();
+        _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
         _mockLogger = A.Fake<ILogger<RemovePathItemCommandHandler>>();
         
         _removePathItemCommandHandler = new RemovePathItemCommandHandler(_mockInventoryMemberService, _mockInventoryRepository, _mockCloudSessionsRepository, 
-            _mockClientsGroupsInvoker, _mockLogger);
+            _mockInvokeClientsService, _mockLogger);
     }
     
     [Test]

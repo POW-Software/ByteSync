@@ -1,15 +1,19 @@
 ﻿using ByteSync.Common.Business.EndPoints;
 using ByteSync.ServerCommon.Business.Auth;
+using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using StackExchange.Redis;
 
 namespace ByteSync.ServerCommon.Repositories;
 
 public class ClientsRepository : BaseRepository<Client>, IClientsRepository
 {
-    public ClientsRepository(ICacheService cacheService) : base(cacheService)
-    {
+    private readonly IClientsGroupIdFactory _clientsGroupIdFactory;
 
+    public ClientsRepository(ICacheService cacheService, IClientsGroupIdFactory clientsGroupIdFactory) : base(cacheService)
+    {
+        _clientsGroupIdFactory = clientsGroupIdFactory;
     }
     
     public override string ElementName => "Client";
