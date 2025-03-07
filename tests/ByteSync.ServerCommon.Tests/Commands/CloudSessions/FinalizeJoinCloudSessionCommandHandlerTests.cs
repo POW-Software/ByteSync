@@ -3,7 +3,6 @@ using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Interfaces.Hub;
 using ByteSync.ServerCommon.Business.Auth;
-using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Commands.CloudSessions;
 using ByteSync.ServerCommon.Interfaces.Mappers;
@@ -255,13 +254,6 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
                 A<ITransaction>.That.IsEqualTo(_mockTransaction), A<IRedLock>.Ignored))
             .Invokes((string id, Func<CloudSessionData, bool> updateAction, ITransaction? transaction, IRedLock _) =>
             {
-                // // Add a member that doesn't match the joiner's details
-                // cloudSessionData.PreSessionMembers.Add(new SessionMemberData
-                // {
-                //     ClientInstanceId = "differentJoiner",
-                //     ValidatorInstanceId = validatorInstanceId,
-                //     FinalizationPassword = finalizationPassword
-                // });
                 funcResult = updateAction(cloudSessionData);
                 isTransaction = transaction != null;
             })
