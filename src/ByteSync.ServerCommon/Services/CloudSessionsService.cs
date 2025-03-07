@@ -36,28 +36,6 @@ public class CloudSessionsService : ICloudSessionsService
         _sessionMemberConverter = sessionMemberConverter;
         _invokeClientsService = invokeClientsService;
     }
-    
-    // public async Task<CloudSessionResult> CreateCloudSession(CreateCloudSessionParameters createCloudSessionParameters, Client client)
-    // {
-    //     CloudSessionData cloudSessionData;
-    //     SessionMemberData creatorData;
-    //     
-    //     cloudSessionData = new CloudSessionData(createCloudSessionParameters.LobbyId, createCloudSessionParameters.SessionSettings, client);
-    //     creatorData = new SessionMemberData(client, createCloudSessionParameters.CreatorPublicKeyInfo, 
-    //         createCloudSessionParameters.CreatorProfileClientId, cloudSessionData, 
-    //         createCloudSessionParameters.CreatorPrivateData);
-    //     cloudSessionData.SessionMembers.Add(creatorData);
-    //
-    //     cloudSessionData = await _cloudSessionsRepository.AddCloudSession(cloudSessionData, GenerateRandomSessionId);
-    //
-    //     await _clientsGroupsManager.AddToSessionGroup(client, cloudSessionData.SessionId);
-    //
-    //     _logger.LogInformation("Cloud Session {SessionId} created", cloudSessionData.SessionId);
-    //
-    //     var cloudSessionResult = await BuildCloudSessionResult(cloudSessionData, creatorData);
-    //
-    //     return cloudSessionResult;
-    // }
 
     public async Task<List<string>> GetMembersInstanceIds(string sessionId)
     {
@@ -79,27 +57,15 @@ public class CloudSessionsService : ICloudSessionsService
         return result;
     }
 
-    // private string GenerateRandomSessionId()
-    // {
-    //     string sessionId = RandomUtils.GetRandomNumber(3) + 
-    //                 RandomUtils.GetRandomLetters(3, false) +
-    //                 RandomUtils.GetRandomNumber(3);
-    //
-    //     return sessionId;
-    // }
-
     public async Task PreJoinCloudSession(Client client, PublicKeyInfo publicKeyInfo,
         string? profileClientId,
         string sessionId, string validatorClientInstanceId)
     {
-        //var cloudSessionData = await _cloudSessionsRepository.GetCloudSession(sessionId);
-        
         var updateResult = await _cloudSessionsRepository.Update(sessionId, cloudSessionData =>
         {
             SessionMemberData joiner = new SessionMemberData(client, publicKeyInfo, profileClientId, cloudSessionData);
             joiner.ValidatorInstanceId = validatorClientInstanceId;
-                        
-            // On enlève tout ce qui peut ressemble au joiner de la liste
+            
             cloudSessionData.PreSessionMembers.Remove(joiner);
             cloudSessionData.PreSessionMembers.RemoveAll(m => m.ClientInstanceId.Equals(joiner.ClientInstanceId));
                         
@@ -230,90 +196,6 @@ public class CloudSessionsService : ICloudSessionsService
             await _invokeClientsService.Client(joiner!).YouJoinedSession(cloudSessionResult, parameters);
         }
     }
-
-    // public async Task<FinalizeJoinSessionResult> FinalizeJoinCloudSession(Client client, FinalizeJoinCloudSessionParameters parameters)
-    // {
-    //     FinalizeJoinSessionStatuses? finalizeJoinSessionStatus = null;
-    //     SessionMemberData? joiner = null;
-    //
-    //     var updateResult = await _cloudSessionsRepository.Update(parameters.SessionId, innerCloudSessionData =>
-    //     {
-    //         if (innerCloudSessionData.IsSessionRemoved || innerCloudSessionData.IsSessionActivated)
-    //         {
-    //             finalizeJoinSessionStatus = FinalizeJoinSessionStatuses.SessionNotFound;
-    //         }
-    //         else if (innerCloudSessionData.IsSessionActivated)
-    //         {
-    //             finalizeJoinSessionStatus = FinalizeJoinSessionStatuses.SessionAlreadyActivated;
-    //         }
-    //         else if (innerCloudSessionData.SessionMembers
-    //                  .Count(sm => !sm.IsAuthCheckedFor(parameters.JoinerInstanceId)) > 0)
-    //         {
-    //             var nonAuthCheckedMembers = innerCloudSessionData.SessionMembers
-    //                 .Where(sm => !sm.IsAuthCheckedFor(parameters.JoinerInstanceId))
-    //                 .Select(sm => sm.ClientInstanceId)
-    //                 .ToList().JoinToString(",");
-    //
-    //             _logger.LogInformation("FinalizeJoinCloudSession: session {SessionId} has non-auth checked members {NonAuthCheckedMembers}",
-    //                 parameters.SessionId, nonAuthCheckedMembers);
-    //             
-    //             finalizeJoinSessionStatus = FinalizeJoinSessionStatuses.AuthIsNotChecked;
-    //         }
-    //         else
-    //         {
-    //            joiner = innerCloudSessionData
-    //                 .PreSessionMembers
-    //                 .FirstOrDefault(m =>
-    //                     Equals(m.ClientInstanceId, parameters.JoinerInstanceId) && 
-    //                     Equals(m.ValidatorInstanceId, parameters.ValidatorInstanceId) &&
-    //                     Equals(m.FinalizationPassword, parameters.FinalizationPassword));
-    //
-    //             if (joiner == null)
-    //             {
-    //                 finalizeJoinSessionStatus = FinalizeJoinSessionStatuses.PrememberNotFound;
-    //             }
-    //         }
-    //
-    //         if (joiner != null && finalizeJoinSessionStatus == null)
-    //         {
-    //             if (!innerCloudSessionData!.SessionMembers.Any(smd => smd.ClientInstanceId.Equals(joiner.ClientInstanceId)))
-    //             {
-    //                 joiner.EncryptedPrivateData = parameters.EncryptedSessionMemberPrivateData;
-    //                 
-    //                 innerCloudSessionData.SessionMembers.Add(joiner);
-    //                 innerCloudSessionData.PreSessionMembers.Remove(joiner);
-    //             }
-    //             
-    //             finalizeJoinSessionStatus = FinalizeJoinSessionStatuses.FinalizeJoinSessionSucess;
-    //
-    //             return true;
-    //         }
-    //         else
-    //         {
-    //             return false;
-    //         }
-    //     });
-    //     
-    //     if (updateResult.IsSaved)
-    //     {
-    //         var sessionMemberInfo = await _sessionMemberConverter.Convert(joiner!);
-    //         
-    //         await _clientsGroupsInvoker.SessionGroup(parameters.SessionId).MemberJoinedSession(sessionMemberInfo).ConfigureAwait(false);
-    //         await _clientsGroupsManager.AddToSessionGroup(client, parameters.SessionId).ConfigureAwait(false);
-    //         
-    //         _logger.LogInformation("FinalizeJoinCloudSession: {@cloudSession} by {@joiner}", 
-    //             joiner!.CloudSessionData.BuildLog(), joiner.BuildLog());
-    //     }
-    //     else
-    //     {
-    //         _logger.LogInformation("FinalizeJoinCloudSession: Can not validate member {JoinerId} for session {SessionId}, status: {Status}", 
-    //             parameters.JoinerInstanceId, parameters.SessionId, finalizeJoinSessionStatus);
-    //     }
-    //         
-    //     FinalizeJoinSessionResult finalizeJoinSessionResult = FinalizeJoinSessionResult.BuildFrom(finalizeJoinSessionStatus!.Value);
-    //         
-    //     return finalizeJoinSessionResult;
-    // }
 
     public async Task<CloudSessionResult> BuildCloudSessionResult(CloudSessionData cloudSessionData, SessionMemberData sessionMemberData)
     {

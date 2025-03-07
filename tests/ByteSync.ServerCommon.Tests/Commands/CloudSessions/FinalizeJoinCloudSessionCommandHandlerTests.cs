@@ -89,8 +89,6 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
 
         cloudSession.PreSessionMembers.Add(joiner);
 
-        // A.CallTo(() => _mockUpdateResult.IsWaitingForTransaction).Returns(true);
-
         bool funcResult = false;
         bool isTransaction = false;
         A.CallTo(() => _mockCloudSessionsRepository.Update(
