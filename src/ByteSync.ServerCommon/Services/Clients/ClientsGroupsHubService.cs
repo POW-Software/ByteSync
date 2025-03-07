@@ -69,6 +69,11 @@ public class ClientsGroupsHubService : IClientsGroupsHubService
     public async Task AddClientGroup(string connectionId, Client client)
     {
         await _hubContext.Groups.AddToGroupAsync(connectionId, _clientsGroupIdFactory.GetClientGroupId(client.ClientInstanceId)).ConfigureAwait(false);
+
+        foreach (var subscribedGroup in client.SubscribedGroups)
+        {
+            await _hubContext.Groups.AddToGroupAsync(connectionId, subscribedGroup).ConfigureAwait(false);
+        }
     }
 
     public async Task RemoveClientGroup(string connectionId, Client client)
