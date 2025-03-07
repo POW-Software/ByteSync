@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ByteSync.ServerCommon.Services.Clients;
 
-public class ClientsGroupsInvoker : IClientsGroupsInvoker
+public class InvokeClientsService : IInvokeClientsService
 {
     private readonly IHubContext<Hub<IHubByteSyncPush>, IHubByteSyncPush> _hubContext;
     private readonly IClientsGroupIdFactory _clientsGroupIdFactory;
 
-    public ClientsGroupsInvoker(IHubContext<Hub<IHubByteSyncPush>, IHubByteSyncPush> hubContext, IClientsGroupIdFactory clientsGroupIdFactory)
+    public InvokeClientsService(IHubContext<Hub<IHubByteSyncPush>, IHubByteSyncPush> hubContext, IClientsGroupIdFactory clientsGroupIdFactory)
     {
         _hubContext = hubContext;
         _clientsGroupIdFactory = clientsGroupIdFactory;

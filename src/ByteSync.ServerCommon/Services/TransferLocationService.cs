@@ -13,21 +13,21 @@ public class TransferLocationService : ITransferLocationService
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly IBlobUrlService _blobUrlService;
-    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
+    private readonly IInvokeClientsService _invokeClientsService;
     private readonly ISharedFilesService _sharedFilesService;
     private readonly IUsageStatisticsService _usageStatisticsService;
     private readonly ISynchronizationService _synchronizationService;
     private readonly ILogger<TransferLocationService> _logger;
 
     public TransferLocationService(ICloudSessionsRepository cloudSessionsRepository, IBlobUrlService blobUrlService,
-        IClientsGroupsInvoker clientsGroupsInvoker, 
+        IInvokeClientsService invokeClientsService, 
         ISharedFilesService sharedFilesService, IUsageStatisticsService usageStatisticsService, 
         ISynchronizationService synchronizationService,
         ILogger<TransferLocationService> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _blobUrlService = blobUrlService;
-        _clientsGroupsInvoker = clientsGroupsInvoker;
+        _invokeClientsService = invokeClientsService;
         _sharedFilesService = sharedFilesService;
         _usageStatisticsService = usageStatisticsService;
         _synchronizationService = synchronizationService;
@@ -105,7 +105,7 @@ public class TransferLocationService : ITransferLocationService
                     TotalParts = totalParts,
                     ActionsGroupIds = transferParameters.ActionsGroupIds
                 };
-                await _clientsGroupsInvoker.Clients(otherSessionMembers).UploadFinished(transferPush);
+                await _invokeClientsService.Clients(otherSessionMembers).UploadFinished(transferPush);
             }
             else
             {
@@ -139,7 +139,7 @@ public class TransferLocationService : ITransferLocationService
                     PartNumber = partNumber,
                     ActionsGroupIds = transferParameters.ActionsGroupIds
                 };
-                await _clientsGroupsInvoker.Clients(otherSessionMembers).FilePartUploaded(transferPush);
+                await _invokeClientsService.Clients(otherSessionMembers).FilePartUploaded(transferPush);
             }
             else
             {

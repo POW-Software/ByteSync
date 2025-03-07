@@ -18,17 +18,17 @@ public class LobbyService : ILobbyService
     private readonly ICloudSessionProfileRepository _cloudSessionProfileRepository;
     private readonly ILobbyFactory _lobbyFactory;
     private readonly IClientsGroupsHubService _clientsGroupsHubService;
-    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
+    private readonly IInvokeClientsService _invokeClientsService;
     private readonly ILogger<LobbyService> _logger;
     
     public LobbyService(ILobbyRepository lobbyRepository, ICloudSessionProfileRepository cloudSessionProfileRepository, 
-        ILobbyFactory lobbyFactory, IClientsGroupsHubService clientsGroupsHubService, IClientsGroupsInvoker clientsGroupsInvoker, ILogger<LobbyService> logger)
+        ILobbyFactory lobbyFactory, IClientsGroupsHubService clientsGroupsHubService, IInvokeClientsService invokeClientsService, ILogger<LobbyService> logger)
     {
         _lobbyRepository = lobbyRepository;
         _cloudSessionProfileRepository = cloudSessionProfileRepository;
         _lobbyFactory = lobbyFactory;
         _clientsGroupsHubService = clientsGroupsHubService;
-        _clientsGroupsInvoker = clientsGroupsInvoker;
+        _invokeClientsService = invokeClientsService;
         _logger = logger;
     }
     
@@ -161,7 +161,7 @@ public class LobbyService : ILobbyService
 
         if (result.IsSaved)
         {
-            await _clientsGroupsInvoker.LobbyGroupExcept(lobbyId, client)
+            await _invokeClientsService.LobbyGroupExcept(lobbyId, client)
                 .LobbyMemberStatusUpdated(lobbyId, client.ClientInstanceId, lobbyMemberStatus).ConfigureAwait(false);
         }
         
@@ -182,7 +182,7 @@ public class LobbyService : ILobbyService
                 _logger.LogInformation("SendLobbyCloudSessionCredentials: {@credentials} sent to {@recipient}", 
                     lobbyCloudSessionCredentials, lobbyCloudSessionCredentials.Recipient);
                 
-                await _clientsGroupsInvoker.Client(lobbyCloudSessionCredentials.Recipient)
+                await _invokeClientsService.Client(lobbyCloudSessionCredentials.Recipient)
                     .LobbyCloudSessionCredentialsSent(lobbyCloudSessionCredentials).ConfigureAwait(false);
             }
         }
@@ -194,7 +194,7 @@ public class LobbyService : ILobbyService
         
         if (lobby != null && lobby.LobbyMemberCells.Any(c => c.LobbyMember != null && c.LobbyMember.ClientInstanceId == client.ClientInstanceId))
         {
-            await _clientsGroupsInvoker.LobbyGroup(lobbyCheckInfo.LobbyId)
+            await _invokeClientsService.LobbyGroup(lobbyCheckInfo.LobbyId)
                 .LobbyCheckInfosSent(lobbyCheckInfo.LobbyId, lobbyCheckInfo).ConfigureAwait(false);
         }
     }

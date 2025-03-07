@@ -8,16 +8,16 @@ namespace ByteSync.ServerCommon.Commands.Inventories;
 public class SetLocalInventoryStatusCommandHandler : IRequestHandler<SetLocalInventoryStatusRequest, bool>
 {
     private readonly IInventoryRepository _inventoryRepository;
-    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
+    private readonly IInvokeClientsService _invokeClientsService;
     private readonly ILogger<SetLocalInventoryStatusCommandHandler> _logger;
 
     public SetLocalInventoryStatusCommandHandler(
         IInventoryRepository inventoryRepository,
-        IClientsGroupsInvoker clientsGroupsInvoker,
+        IInvokeClientsService invokeClientsService,
         ILogger<SetLocalInventoryStatusCommandHandler> logger)
     {
         _inventoryRepository = inventoryRepository;
-        _clientsGroupsInvoker = clientsGroupsInvoker;
+        _invokeClientsService = invokeClientsService;
         _logger = logger;
     }
 
@@ -43,7 +43,7 @@ public class SetLocalInventoryStatusCommandHandler : IRequestHandler<SetLocalInv
                 inventoryMember.SessionMemberGeneralStatus = parameters.SessionMemberGeneralStatus;
                 inventoryMember.LastLocalInventoryStatusUpdate = parameters.UtcChangeDate;
                 
-                _clientsGroupsInvoker.SessionGroupExcept(sessionId, client).SessionMemberGeneralStatusUpdated(parameters);
+                _invokeClientsService.SessionGroupExcept(sessionId, client).SessionMemberGeneralStatusUpdated(parameters);
 
                 return true;
             }

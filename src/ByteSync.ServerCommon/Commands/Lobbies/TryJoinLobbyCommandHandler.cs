@@ -16,19 +16,19 @@ public class TryJoinLobbyCommandHandler : IRequestHandler<TryJoinLobbyRequest, J
 {
     private readonly ICloudSessionProfileRepository _cloudSessionProfileRepository;
     private readonly ILobbyRepository _lobbyRepository;
-    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
+    private readonly IInvokeClientsService _invokeClientsService;
     private readonly IClientsGroupsService _clientsGroupsService;
     private readonly ILobbyFactory _lobbyFactory;
     private readonly ICacheService _cacheService;
     private readonly ILogger<TryJoinLobbyCommandHandler> _logger;
 
     public TryJoinLobbyCommandHandler(ICloudSessionProfileRepository cloudSessionProfileRepository, ILobbyRepository lobbyRepository, 
-        IClientsGroupsInvoker clientsGroupsInvoker, IClientsGroupsService clientsGroupsService, ILobbyFactory lobbyFactory,
+        IInvokeClientsService invokeClientsService, IClientsGroupsService clientsGroupsService, ILobbyFactory lobbyFactory,
         ICacheService cacheService, ILogger<TryJoinLobbyCommandHandler> logger)
     {
         _cloudSessionProfileRepository = cloudSessionProfileRepository;
         _lobbyRepository = lobbyRepository;
-        _clientsGroupsInvoker = clientsGroupsInvoker;
+        _invokeClientsService = invokeClientsService;
         _clientsGroupsService = clientsGroupsService;
         _lobbyFactory = lobbyFactory;
         _cacheService = cacheService;
@@ -133,7 +133,7 @@ public class TryJoinLobbyCommandHandler : IRequestHandler<TryJoinLobbyRequest, J
 
             await transaction.ExecuteAsync();
             
-            await _clientsGroupsInvoker.LobbyGroupExcept(lobbyInfo.LobbyId, client).MemberJoinedLobby(lobbyInfo.LobbyId, memberInfo)
+            await _invokeClientsService.LobbyGroupExcept(lobbyInfo.LobbyId, client).MemberJoinedLobby(lobbyInfo.LobbyId, memberInfo)
                 .ConfigureAwait(false);
 
             await _clientsGroupsService.AddToLobbyGroup(client, lobbyInfo.LobbyId)

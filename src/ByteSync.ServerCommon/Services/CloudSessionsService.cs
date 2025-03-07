@@ -22,11 +22,11 @@ public class CloudSessionsService : ICloudSessionsService
     private readonly ISynchronizationService _synchronizationService;
     private readonly IInventoryService _inventoryService;
     private readonly ISessionMemberMapper _sessionMemberConverter;
-    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
+    private readonly IInvokeClientsService _invokeClientsService;
 
     public CloudSessionsService(ILogger<CloudSessionsService> logger, ISharedFilesService sharedFilesService,
         ICloudSessionsRepository cloudSessionsRepository, ISynchronizationService synchronizationService, IInventoryService inventoryService,
-        ISessionMemberMapper sessionMemberConverter, IClientsGroupsInvoker clientsGroupsInvoker)
+        ISessionMemberMapper sessionMemberConverter, IInvokeClientsService invokeClientsService)
     {
         _logger = logger;
         _sharedFilesService = sharedFilesService;
@@ -34,7 +34,7 @@ public class CloudSessionsService : ICloudSessionsService
         _synchronizationService = synchronizationService;
         _inventoryService = inventoryService;
         _sessionMemberConverter = sessionMemberConverter;
-        _clientsGroupsInvoker = clientsGroupsInvoker;
+        _invokeClientsService = invokeClientsService;
     }
     
     // public async Task<CloudSessionResult> CreateCloudSession(CreateCloudSessionParameters createCloudSessionParameters, Client client)
@@ -143,7 +143,7 @@ public class CloudSessionsService : ICloudSessionsService
                 PublicKeyInfo = parameters.PublicKeyInfo,
                 RequesterInstanceId = client.ClientInstanceId,
             };
-            await _clientsGroupsInvoker.Client(member.ClientInstanceId).AskCloudSessionPasswordExchangeKey(pushData).ConfigureAwait(false);
+            await _invokeClientsService.Client(member.ClientInstanceId).AskCloudSessionPasswordExchangeKey(pushData).ConfigureAwait(false);
 
             return JoinSessionResult.BuildProcessingNormally();
         }
@@ -227,7 +227,7 @@ public class CloudSessionsService : ICloudSessionsService
 
             var cloudSessionResult = await BuildCloudSessionResult(updateResult.Element, joiner!);
 
-            await _clientsGroupsInvoker.Client(joiner!).YouJoinedSession(cloudSessionResult, parameters);
+            await _invokeClientsService.Client(joiner!).YouJoinedSession(cloudSessionResult, parameters);
         }
     }
 
@@ -366,7 +366,7 @@ public class CloudSessionsService : ICloudSessionsService
         
         _logger.LogInformation("ResetSession: session {sessionId} reset by {clientInstanceId}", sessionId, client.ClientInstanceId);
         
-        await _clientsGroupsInvoker.SessionGroupExcept(sessionId, client)
+        await _invokeClientsService.SessionGroupExcept(sessionId, client)
             .SessionResetted(new BaseSessionDto(sessionId, client.ClientInstanceId));
 
         return true;
@@ -408,7 +408,7 @@ public class CloudSessionsService : ICloudSessionsService
 
             if (member != null)
             {
-                await _clientsGroupsInvoker.Client(member).CheckCloudSessionPasswordExchangeKey(parameters).ConfigureAwait(false);
+                await _invokeClientsService.Client(member).CheckCloudSessionPasswordExchangeKey(parameters).ConfigureAwait(false);
 
                 return JoinSessionResult.BuildProcessingNormally();
             }
@@ -438,7 +438,7 @@ public class CloudSessionsService : ICloudSessionsService
         if (sessionMemberData != null && sessionMemberData.ValidatorInstanceId.IsNotEmpty()
                                       && Equals(sessionMemberData.ValidatorInstanceId, client.ClientInstanceId))
         {
-            await _clientsGroupsInvoker.Client(sessionMemberData).YouGaveAWrongPassword(sessionId).ConfigureAwait(false);
+            await _invokeClientsService.Client(sessionMemberData).YouGaveAWrongPassword(sessionId).ConfigureAwait(false);
         }
     }
     
@@ -459,6 +459,6 @@ public class CloudSessionsService : ICloudSessionsService
 
         _logger.LogInformation("GiveCloudSessionPasswordExchangeKey: Giving PasswordExchangeKey to {clientDestination}",
             preSessionMemberData.BuildLog());
-        await _clientsGroupsInvoker.Client(preSessionMemberData).GiveCloudSessionPasswordExchangeKey(parameters).ConfigureAwait(false);
+        await _invokeClientsService.Client(preSessionMemberData).GiveCloudSessionPasswordExchangeKey(parameters).ConfigureAwait(false);
     }
 }

@@ -15,17 +15,17 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly ISessionMemberMapper _sessionMemberMapper;
-    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
+    private readonly IInvokeClientsService _invokeClientsService;
     private readonly IClientsGroupsService _clientsGroupsService;
     private readonly ICacheService _cacheService;
     private readonly ILogger<FinalizeJoinCloudSessionCommandHandler> _logger;
     
     public FinalizeJoinCloudSessionCommandHandler(ICloudSessionsRepository cloudSessionsRepository, ISessionMemberMapper sessionMemberMapper,
-        IClientsGroupsInvoker clientsGroupsInvoker, IClientsGroupsService clientsGroupsService, 
+        IInvokeClientsService invokeClientsService, IClientsGroupsService clientsGroupsService, 
         ICacheService cacheService, ILogger<FinalizeJoinCloudSessionCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
-        _clientsGroupsInvoker = clientsGroupsInvoker;
+        _invokeClientsService = invokeClientsService;
         _clientsGroupsService = clientsGroupsService;
         _sessionMemberMapper = sessionMemberMapper;
         _cacheService = cacheService;
@@ -108,7 +108,7 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
 
             await transaction.ExecuteAsync();
             
-            await _clientsGroupsInvoker.SessionGroup(parameters.SessionId).MemberJoinedSession(sessionMemberInfo).ConfigureAwait(false);
+            await _invokeClientsService.SessionGroup(parameters.SessionId).MemberJoinedSession(sessionMemberInfo).ConfigureAwait(false);
             await _clientsGroupsService.AddToSessionGroup(client, parameters.SessionId).ConfigureAwait(false);
             
             _logger.LogInformation("FinalizeJoinCloudSession: {@cloudSession} by {@joiner}", 

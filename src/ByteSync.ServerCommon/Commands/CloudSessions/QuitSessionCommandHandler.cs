@@ -15,11 +15,11 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
     private readonly ICacheService _cacheService;
     private readonly ISessionMemberMapper _sessionMemberMapper;
     private readonly IClientsGroupsService _clientsGroupsService;
-    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
+    private readonly IInvokeClientsService _invokeClientsService;
 
     public QuitSessionCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IInventoryRepository inventoryRepository, 
         ISynchronizationRepository synchronizationRepository, ICacheService cacheService, ISessionMemberMapper sessionMemberMapper, 
-        IClientsGroupsService clientsGroupsService, IClientsGroupsInvoker clientsGroupsInvoker)
+        IClientsGroupsService clientsGroupsService, IInvokeClientsService invokeClientsService)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _inventoryRepository = inventoryRepository;
@@ -27,7 +27,7 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
         _cacheService = cacheService;
         _sessionMemberMapper = sessionMemberMapper;
         _clientsGroupsService = clientsGroupsService;
-        _clientsGroupsInvoker = clientsGroupsInvoker;
+        _invokeClientsService = invokeClientsService;
     }
     
     public async Task Handle(QuitSessionRequest request, CancellationToken cancellationToken)
@@ -99,7 +99,7 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
             await _clientsGroupsService.RemoveFromSessionGroup(request.Client, request.SessionId);
             
             var sessionMemberInfo = await _sessionMemberMapper.Convert(innerQuitter!);
-            await _clientsGroupsInvoker.SessionGroup(request.SessionId).MemberQuittedSession(sessionMemberInfo);
+            await _invokeClientsService.SessionGroup(request.SessionId).MemberQuittedSession(sessionMemberInfo);
         }
     }
 }

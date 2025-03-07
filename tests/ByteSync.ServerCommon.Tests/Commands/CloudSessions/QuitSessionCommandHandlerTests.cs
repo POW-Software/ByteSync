@@ -25,7 +25,7 @@ public class QuitSessionCommandHandlerTests
     private ICacheService _mockCacheService;
     private ISessionMemberMapper _mockSessionMemberMapper;
     private IClientsGroupsService _mockClientsGroupsService;
-    private IClientsGroupsInvoker _mockClientsGroupsInvoker;
+    private IInvokeClientsService _mockInvokeClientsService;
     
     private ITransaction _mockTransaction;
     
@@ -40,13 +40,13 @@ public class QuitSessionCommandHandlerTests
         _mockCacheService = A.Fake<ICacheService>();
         _mockSessionMemberMapper = A.Fake<ISessionMemberMapper>();
         _mockClientsGroupsService = A.Fake<IClientsGroupsService>();
-        _mockClientsGroupsInvoker = A.Fake<IClientsGroupsInvoker>();
+        _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
 
         _mockTransaction = A.Fake<ITransaction>();
         A.CallTo(() => _mockCacheService.OpenTransaction()).Returns(_mockTransaction);
 
         _quitSessionCommandHandler = new QuitSessionCommandHandler(_mockCloudSessionsRepository, _mockInventoryRepository,
-            _mockSynchronizationRepository, _mockCacheService, _mockSessionMemberMapper, _mockClientsGroupsService, _mockClientsGroupsInvoker);
+            _mockSynchronizationRepository, _mockCacheService, _mockSessionMemberMapper, _mockClientsGroupsService, _mockInvokeClientsService);
     }
 
     [TestCase(true)]
@@ -106,7 +106,7 @@ public class QuitSessionCommandHandlerTests
         A.CallTo(() => _mockTransaction.ExecuteAsync(CommandFlags.None)).Returns(true);
         
         var mockGroup = A.Fake<IHubByteSyncPush>();
-        A.CallTo(() => _mockClientsGroupsInvoker.SessionGroup(sessionId)).Returns(mockGroup);
+        A.CallTo(() => _mockInvokeClientsService.SessionGroup(sessionId)).Returns(mockGroup);
         
         var sessionMemberInfo = new SessionMemberInfoDTO();
         A.CallTo(() => _mockSessionMemberMapper.Convert(sessionMember))
@@ -195,7 +195,7 @@ public class QuitSessionCommandHandlerTests
         A.CallTo(() => _mockTransaction.ExecuteAsync(CommandFlags.None)).Returns(true);
         
         var mockGroup = A.Fake<IHubByteSyncPush>();
-        A.CallTo(() => _mockClientsGroupsInvoker.SessionGroup(sessionId)).Returns(mockGroup);
+        A.CallTo(() => _mockInvokeClientsService.SessionGroup(sessionId)).Returns(mockGroup);
         
         // Act
         var request = new QuitSessionRequest(sessionId, client);

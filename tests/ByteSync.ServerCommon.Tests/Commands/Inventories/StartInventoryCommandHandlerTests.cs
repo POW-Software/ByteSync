@@ -21,7 +21,7 @@ public class StartInventoryCommandHandlerTests
     private ICloudSessionsRepository _mockCloudSessionsRepository;
     private IInventoryRepository _mockInventoryRepository;
     private ISharedFilesService _mockSharedFilesService;
-    private IClientsGroupsInvoker _mockClientsGroupsInvoker;
+    private IInvokeClientsService _mockInvokeClientsService;
     private ICacheService _mockCacheService;
     private ILogger<StartInventoryCommandHandler> _mockLogger;
     
@@ -38,12 +38,12 @@ public class StartInventoryCommandHandlerTests
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
         _mockSharedFilesService = A.Fake<ISharedFilesService>(options => options.Strict());
-        _mockClientsGroupsInvoker = A.Fake<IClientsGroupsInvoker>();
+        _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
         _mockCacheService = A.Fake<ICacheService>();
         _mockLogger = A.Fake<ILogger<StartInventoryCommandHandler>>();
         
         _startInventoryCommandHandler = new StartInventoryCommandHandler(_mockInventoryRepository, _mockCloudSessionsRepository, _mockSharedFilesService, 
-            _mockClientsGroupsInvoker, _mockCacheService, _mockLogger);
+            _mockInvokeClientsService, _mockCacheService, _mockLogger);
     }
     
     [Test]

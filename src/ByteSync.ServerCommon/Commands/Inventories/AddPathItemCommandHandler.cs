@@ -13,20 +13,20 @@ public class AddPathItemCommandHandler : IRequestHandler<AddPathItemRequest, boo
     private readonly IInventoryMemberService _inventoryMemberService;
     private readonly IInventoryRepository _inventoryRepository;
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
-    private readonly IClientsGroupsInvoker _clientsGroupsInvoker;
+    private readonly IInvokeClientsService _invokeClientsService;
     private readonly ILogger<AddPathItemCommandHandler> _logger;
     
     public AddPathItemCommandHandler(
         IInventoryMemberService inventoryMemberService,
         IInventoryRepository inventoryRepository,
         ICloudSessionsRepository cloudSessionsRepository,
-        IClientsGroupsInvoker clientsGroupsInvoker,
+        IInvokeClientsService invokeClientsService,
         ILogger<AddPathItemCommandHandler> logger)
     {
         _inventoryMemberService = inventoryMemberService;
         _inventoryRepository = inventoryRepository;
         _cloudSessionsRepository = cloudSessionsRepository;
-        _clientsGroupsInvoker = clientsGroupsInvoker;
+        _invokeClientsService = invokeClientsService;
         _logger = logger;
     }
 
@@ -69,7 +69,7 @@ public class AddPathItemCommandHandler : IRequestHandler<AddPathItemRequest, boo
         {
             var pathItemDto = new PathItemDTO(sessionId, client.ClientInstanceId, encryptedPathItem);
             
-            await _clientsGroupsInvoker.SessionGroupExcept(sessionId, client).PathItemAdded(pathItemDto);
+            await _invokeClientsService.SessionGroupExcept(sessionId, client).PathItemAdded(pathItemDto);
         }
 
         return updateEntityResult.IsSaved;
