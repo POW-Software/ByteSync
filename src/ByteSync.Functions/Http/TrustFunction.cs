@@ -4,17 +4,21 @@ using Microsoft.Azure.Functions.Worker.Http;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Business.Trust.Connections;
 using ByteSync.Functions.Helpers.Misc;
+using ByteSync.ServerCommon.Commands.Trusts;
 using ByteSync.ServerCommon.Interfaces.Services;
+using MediatR;
 
 namespace ByteSync.Functions.Http;
 
 public class TrustFunction
 {
     private readonly ITrustService _trustService;
+    private readonly IMediator _mediator;
 
-    public TrustFunction(ITrustService trustService)
+    public TrustFunction(ITrustService trustService, IMediator mediator)
     {
         _trustService = trustService;
+        _mediator = mediator;
     }
     
     [Function("StartTrustCheckFunction")]
@@ -26,7 +30,8 @@ public class TrustFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<TrustCheckParameters>(req);
 
-        var result = await _trustService.StartTrustCheck(client, parameters);
+        var request = new StartTrustCheckRequest(parameters, client);
+        var result = await _mediator.Send(request);
         
         var response = req.CreateResponse();
         await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
@@ -43,9 +48,10 @@ public class TrustFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<GiveMemberPublicKeyCheckDataParameters>(req);
 
-        await _trustService.GiveMemberPublicKeyCheckData(client, parameters);
-        var response = req.CreateResponse();
+        var request = new GiveMemberPublicKeyCheckDataRequest(parameters, client);
+        await _mediator.Send(request);
         
+        var response = req.CreateResponse();
         response.StatusCode = HttpStatusCode.OK;
         
         return response;
@@ -60,7 +66,8 @@ public class TrustFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<SendDigitalSignaturesParameters>(req);
 
-        await _trustService.SendDigitalSignatures(client, parameters);
+        var request = new SendDigitalSignaturesRequest(parameters, client);
+        await _mediator.Send(request);
            
         var response = req.CreateResponse();
         response.StatusCode = HttpStatusCode.OK;
