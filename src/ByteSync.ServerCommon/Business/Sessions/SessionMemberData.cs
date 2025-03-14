@@ -48,7 +48,7 @@ public class SessionMemberData
     public DateTimeOffset JoinedSessionOn { get; set; }
 
     /// <summary>
-    /// InstanceId du client qui doit valider le SessionMemberData
+    /// InstanceId of the client that must validate the SessionMemberData
     /// </summary>
     public string ValidatorInstanceId { get; set; }
 
