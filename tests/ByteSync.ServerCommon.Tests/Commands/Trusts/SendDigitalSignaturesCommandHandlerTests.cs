@@ -24,7 +24,7 @@ public class SendDigitalSignaturesCommandHandlerTests
     private readonly ILobbyRepository _mockLobbyRepository;
     private readonly IInvokeClientsService _mockInvokeClientsService;
     private readonly ILogger<SendDigitalSignaturesCommandHandler> _mockLogger;
-    private readonly IHubByteSyncPush _mockByteSyncClient;
+    private readonly IHubByteSyncPush _mockHubByteSyncPush;
 
     private readonly SendDigitalSignaturesCommandHandler _sendDigitalSignaturesCommandHandler;
 
@@ -34,7 +34,7 @@ public class SendDigitalSignaturesCommandHandlerTests
         _mockLobbyRepository = A.Fake<ILobbyRepository>();
         _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
         _mockLogger = A.Fake<ILogger<SendDigitalSignaturesCommandHandler>>();
-        _mockByteSyncClient = A.Fake<IHubByteSyncPush>();
+        _mockHubByteSyncPush = A.Fake<IHubByteSyncPush>();
 
         _sendDigitalSignaturesCommandHandler = new SendDigitalSignaturesCommandHandler(
             _mockCloudSessionsRepository,
@@ -73,9 +73,9 @@ public class SendDigitalSignaturesCommandHandlerTests
             .Returns(Task.FromResult<CloudSessionData?>(cloudSession));
             
         A.CallTo(() => _mockInvokeClientsService.Client(recipientInstanceId))
-            .Returns(_mockByteSyncClient);
+            .Returns(_mockHubByteSyncPush);
             
-        A.CallTo(() => _mockByteSyncClient.RequestCheckDigitalSignature(A<DigitalSignatureCheckInfo>.Ignored))
+        A.CallTo(() => _mockHubByteSyncPush.RequestCheckDigitalSignature(A<DigitalSignatureCheckInfo>.Ignored))
             .Returns(Task.CompletedTask);
 
         var request = new SendDigitalSignaturesRequest(parameters, client);
@@ -87,7 +87,7 @@ public class SendDigitalSignaturesCommandHandlerTests
         A.CallTo(() => _mockCloudSessionsRepository.Get(dataId)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockLobbyRepository.Get(A<string>.Ignored)).MustNotHaveHappened();
         A.CallTo(() => _mockInvokeClientsService.Client(recipientInstanceId)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _mockByteSyncClient.RequestCheckDigitalSignature(A<DigitalSignatureCheckInfo>.Ignored))
+        A.CallTo(() => _mockHubByteSyncPush.RequestCheckDigitalSignature(A<DigitalSignatureCheckInfo>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockCloudSessionsRepository.Update(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, 
                 A<ITransaction>.Ignored, A<IRedLock>.Ignored))
@@ -132,9 +132,9 @@ public class SendDigitalSignaturesCommandHandlerTests
             .Returns(Task.FromResult<Lobby?>(lobby));
             
         A.CallTo(() => _mockInvokeClientsService.Client(recipientInstanceId))
-            .Returns(_mockByteSyncClient);
+            .Returns(_mockHubByteSyncPush);
             
-        A.CallTo(() => _mockByteSyncClient.RequestCheckDigitalSignature(A<DigitalSignatureCheckInfo>.Ignored))
+        A.CallTo(() => _mockHubByteSyncPush.RequestCheckDigitalSignature(A<DigitalSignatureCheckInfo>.Ignored))
             .Returns(Task.CompletedTask);
 
         var request = new SendDigitalSignaturesRequest(parameters, client);
@@ -146,7 +146,7 @@ public class SendDigitalSignaturesCommandHandlerTests
         A.CallTo(() => _mockCloudSessionsRepository.Get(dataId)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockLobbyRepository.Get(dataId)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInvokeClientsService.Client(recipientInstanceId)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _mockByteSyncClient.RequestCheckDigitalSignature(A<DigitalSignatureCheckInfo>.Ignored))
+        A.CallTo(() => _mockHubByteSyncPush.RequestCheckDigitalSignature(A<DigitalSignatureCheckInfo>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockCloudSessionsRepository.Update(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored,
                 A<ITransaction>.Ignored, A<IRedLock>.Ignored))
