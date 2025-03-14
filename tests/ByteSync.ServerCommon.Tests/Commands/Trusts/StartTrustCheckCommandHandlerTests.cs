@@ -1,6 +1,7 @@
 ﻿using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
+using ByteSync.Common.Interfaces.Hub;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Commands.Trusts;
@@ -18,6 +19,7 @@ public class StartTrustCheckCommandHandlerTests
     private readonly ICloudSessionsRepository _mockCloudSessionsRepository;
     private readonly IInvokeClientsService _mockInvokeClientsService;
     private readonly ILogger<StartTrustCheckCommandHandler> _mockLogger;
+    private readonly IHubByteSyncPush _mockByteSyncPush;
     
     private readonly StartTrustCheckCommandHandler _startTrustCheckCommandHandler;
 
@@ -26,6 +28,7 @@ public class StartTrustCheckCommandHandlerTests
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
         _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
         _mockLogger = A.Fake<ILogger<StartTrustCheckCommandHandler>>();
+        _mockByteSyncPush = A.Fake<IHubByteSyncPush>();
         
         _startTrustCheckCommandHandler = new StartTrustCheckCommandHandler(
             _mockCloudSessionsRepository, 
@@ -57,14 +60,14 @@ public class StartTrustCheckCommandHandlerTests
         
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSession);
+        
+        A.CallTo(() => _mockInvokeClientsService.Client(member1))
+            .Returns(_mockByteSyncPush);
+        A.CallTo(() => _mockInvokeClientsService.Client(member2))
+            .Returns(_mockByteSyncPush);
             
-        // A.CallTo(() => _mockInvokeClientsService.Client(member1))
-        //     .Returns(_mockByteSyncClient);
-        // A.CallTo(() => _mockInvokeClientsService.Client(member2))
-        //     .Returns(_mockByteSyncClient);
-            
-        // A.CallTo(() => _mockByteSyncClient.AskPublicKeyCheckData(sessionId, joinerClient.ClientInstanceId, publicKeyInfo))
-        //     .Returns(Task.CompletedTask);
+        A.CallTo(() => _mockByteSyncPush.AskPublicKeyCheckData(sessionId, joinerClient.ClientInstanceId, publicKeyInfo))
+            .Returns(Task.CompletedTask);
         
         var request = new StartTrustCheckRequest(parameters, joinerClient);
         
@@ -82,8 +85,8 @@ public class StartTrustCheckCommandHandlerTests
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInvokeClientsService.Client(member1)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInvokeClientsService.Client(member2)).MustHaveHappenedOnceExactly();
-        // A.CallTo(() => _mockByteSyncClient.AskPublicKeyCheckData(sessionId, joinerClient.ClientInstanceId, publicKeyInfo))
-        //     .MustHaveHappened(2, Times.Exactly);
+        A.CallTo(() => _mockByteSyncPush.AskPublicKeyCheckData(sessionId, joinerClient.ClientInstanceId, publicKeyInfo))
+            .MustHaveHappened(2, Times.Exactly);
     }
     
     [Test]
