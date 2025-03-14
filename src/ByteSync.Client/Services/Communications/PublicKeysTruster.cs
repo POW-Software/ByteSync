@@ -52,7 +52,7 @@ public class PublicKeysTruster : IPublicKeysTruster
             }
         }
 
-        // Pour tous les membres non trustés, on demande un trust
+        // For all non-trusted members, a trust protocol is initiated
         if (nonFullyTrustedMembersIds.Count > 0)
         {
             var joinSessionResult = await DoTrustMembersPublicKeys(sessionId, nonFullyTrustedMembersIds, cancellationToken);
