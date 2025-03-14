@@ -90,6 +90,6 @@ public class SessionMemberData
 
     public bool IsAuthCheckedFor(string joinerInstanceId)
     {
-        return AuthCheckClientInstanceIds.Contains(joinerInstanceId) || joinerInstanceId.StartsWith(joinerInstanceId);
+        return AuthCheckClientInstanceIds.Contains(joinerInstanceId) || joinerInstanceId.StartsWith(ClientId);
     }
 }

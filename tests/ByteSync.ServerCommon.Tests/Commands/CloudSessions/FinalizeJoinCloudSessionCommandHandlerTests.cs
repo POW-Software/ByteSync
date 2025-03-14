@@ -213,7 +213,7 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
         bool funcResult = false;
         bool isTransaction = false;
         var cloudSessionData = new CloudSessionData { SessionId = sessionId };
-        cloudSessionData.SessionMembers.Add(new SessionMemberData { ClientInstanceId = "otherMember" });
+        cloudSessionData.SessionMembers.Add(new SessionMemberData { ClientInstanceId = "otherMember", ClientId = "other"});
         A.CallTo(() => _mockCloudSessionsRepository.Update(
                 A<string>.That.IsEqualTo(sessionId),
                 A<Func<CloudSessionData, bool>>.Ignored,

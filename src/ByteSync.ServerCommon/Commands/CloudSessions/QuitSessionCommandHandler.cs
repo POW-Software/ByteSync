@@ -43,12 +43,12 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
             
             if (quitter != null)
             {
-                // cloudSessionData.SessionMembers.Remove(quitter);
-                //
-                // if (cloudSessionData.SessionMembers.Count == 0)
-                // {
-                //     cloudSessionData.IsSessionRemoved = true;
-                // }
+                cloudSessionData.SessionMembers.Remove(quitter);
+                
+                if (cloudSessionData.SessionMembers.Count == 0)
+                {
+                    cloudSessionData.IsSessionRemoved = true;
+                }
 
                 innerCloudSessionData = cloudSessionData;
                 innerQuitter = quitter;
