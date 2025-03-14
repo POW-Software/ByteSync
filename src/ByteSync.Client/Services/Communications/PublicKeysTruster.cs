@@ -216,7 +216,13 @@ public class PublicKeysTruster : IPublicKeysTruster
             LogProblem("Members list is empty");
             return JoinSessionResult.BuildFrom(JoinSessionStatus.SessionNotFound);
         }
-   
+        
+        memberIdsToCheck.RemoveAll(id => id.StartsWith(_environmentService.ClientId));
+        if (memberIdsToCheck.Count == 0)
+        {
+            return JoinSessionResult.BuildProcessingNormally();
+        }
+
         var parameters = new TrustCheckParameters 
         { 
             SessionId = sessionId, 
