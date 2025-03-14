@@ -98,6 +98,6 @@ public class CloudSessionData
 
     public SessionMemberData? FindMemberOrPreMember(string clientInstanceId)
     {
-        return SessionMembers.Concat(PreSessionMembers).SingleOrDefault(m => m.ClientInstanceId == clientInstanceId);
+        return SessionMembers.Concat(PreSessionMembers).Distinct().SingleOrDefault(m => m.ClientInstanceId == clientInstanceId);
     }
 }
