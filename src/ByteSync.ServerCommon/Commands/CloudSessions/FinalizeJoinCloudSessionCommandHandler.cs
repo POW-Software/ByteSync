@@ -82,13 +82,11 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
 
             if (joiner != null && finalizeJoinSessionStatus == null)
             {
-                if (!innerCloudSessionData.SessionMembers.Any(smd => smd.ClientInstanceId.Equals(joiner.ClientInstanceId)))
-                {
-                    joiner.EncryptedPrivateData = parameters.EncryptedSessionMemberPrivateData;
+                joiner.EncryptedPrivateData = parameters.EncryptedSessionMemberPrivateData;
                     
-                    innerCloudSessionData.SessionMembers.Add(joiner);
-                    innerCloudSessionData.PreSessionMembers.Remove(joiner);
-                }
+                innerCloudSessionData.SessionMembers.Remove(joiner);
+                innerCloudSessionData.SessionMembers.Add(joiner);
+                innerCloudSessionData.PreSessionMembers.Remove(joiner);
                 
                 finalizeJoinSessionStatus = FinalizeJoinSessionStatuses.FinalizeJoinSessionSucess;
 

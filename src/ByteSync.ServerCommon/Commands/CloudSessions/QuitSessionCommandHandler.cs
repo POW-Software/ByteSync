@@ -17,8 +17,8 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
     private readonly IClientsGroupsService _clientsGroupsService;
     private readonly IInvokeClientsService _invokeClientsService;
 
-    public QuitSessionCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IInventoryRepository inventoryRepository, 
-        ISynchronizationRepository synchronizationRepository, ICacheService cacheService, ISessionMemberMapper sessionMemberMapper, 
+    public QuitSessionCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IInventoryRepository inventoryRepository,
+        ISynchronizationRepository synchronizationRepository, ICacheService cacheService, ISessionMemberMapper sessionMemberMapper,
         IClientsGroupsService clientsGroupsService, IInvokeClientsService invokeClientsService)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
@@ -29,18 +29,18 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
         _clientsGroupsService = clientsGroupsService;
         _invokeClientsService = invokeClientsService;
     }
-    
+
     public async Task Handle(QuitSessionRequest request, CancellationToken cancellationToken)
     {
         CloudSessionData? innerCloudSessionData = null;
         SessionMemberData? innerQuitter = null;
 
         var transaction = _cacheService.OpenTransaction();
-        
+
         var updateSessionResult = await _cloudSessionsRepository.Update(request.SessionId, cloudSessionData =>
         {
             var quitter = cloudSessionData.SessionMembers.FirstOrDefault(m => m.ClientInstanceId.Equals(request.ClientInstanceId));
-            
+
             if (quitter != null)
             {
                 cloudSessionData.SessionMembers.Remove(quitter);
@@ -66,13 +66,13 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
                 {
                     inventoryData.InventoryMembers.Remove(inventoryMember);
                 }
-                
+
                 inventoryData.RecodePathItems(innerCloudSessionData!);
 
                 return true;
             }, transaction);
         }
-        
+
         if (updateSessionResult.IsWaitingForTransaction)
         {
             await _synchronizationRepository.UpdateIfExists(request.SessionId, synchronizationData =>
@@ -93,11 +93,11 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
         if (updateSessionResult.IsWaitingForTransaction)
         {
             await _clientsGroupsService.RemoveSessionSubscription(request.Client, request.SessionId, transaction);
-            
+
             await transaction.ExecuteAsync();
-        
+
             await _clientsGroupsService.RemoveFromSessionGroup(request.Client, request.SessionId);
-            
+
             var sessionMemberInfo = await _sessionMemberMapper.Convert(innerQuitter!);
             await _invokeClientsService.SessionGroup(request.SessionId).MemberQuittedSession(sessionMemberInfo);
         }

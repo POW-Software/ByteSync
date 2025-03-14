@@ -52,7 +52,7 @@ public class PublicKeysTruster : IPublicKeysTruster
             }
         }
 
-        // Pour tous les membres non trustés, on demande un trust
+        // For all non-trusted members, a trust protocol is initiated
         if (nonFullyTrustedMembersIds.Count > 0)
         {
             var joinSessionResult = await DoTrustMembersPublicKeys(sessionId, nonFullyTrustedMembersIds, cancellationToken);
@@ -216,7 +216,13 @@ public class PublicKeysTruster : IPublicKeysTruster
             LogProblem("Members list is empty");
             return JoinSessionResult.BuildFrom(JoinSessionStatus.SessionNotFound);
         }
-   
+        
+        memberIdsToCheck.RemoveAll(id => id.StartsWith(_environmentService.ClientId));
+        if (memberIdsToCheck.Count == 0)
+        {
+            return JoinSessionResult.BuildProcessingNormally();
+        }
+
         var parameters = new TrustCheckParameters 
         { 
             SessionId = sessionId, 
