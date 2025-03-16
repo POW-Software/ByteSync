@@ -36,7 +36,7 @@ public class InventoryFunction
         return response;
     }
     
-    [Function("InventoryLocalInventoryStatusFunction")]
+    [Function("InventorySetLocalInventoryStatusFunction")]
     public async Task<HttpResponseData> SetLocalInventoryStatus(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/inventory/localStatus")] 
         HttpRequestData req,

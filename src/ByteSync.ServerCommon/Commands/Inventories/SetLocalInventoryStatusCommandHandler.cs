@@ -1,4 +1,5 @@
-﻿using ByteSync.ServerCommon.Interfaces.Repositories;
+﻿using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -27,14 +28,16 @@ public class SetLocalInventoryStatusCommandHandler : IRequestHandler<SetLocalInv
         var client = request.Client;
         var parameters = request.Parameters;
 
-        var updateResult = await _inventoryRepository.Update(sessionId, inventoryData =>
+        var updateResult = await _inventoryRepository.AddOrUpdate(sessionId, inventoryData =>
         {
+            inventoryData ??= new InventoryData(sessionId);
+            
             var inventoryMember = inventoryData.InventoryMembers.SingleOrDefault(m => m.ClientInstanceId == client.ClientInstanceId);
             if (inventoryMember == null)
             {
                 _logger.LogInformation("SetLocalInventoryStatus: clientInstanceId {clientInstanceId} not found in session {sessionId}", client.ClientInstanceId,
                     sessionId);
-                return false;
+                return null;
             }
 
             if (inventoryMember.LastLocalInventoryStatusUpdate == null ||
@@ -45,13 +48,13 @@ public class SetLocalInventoryStatusCommandHandler : IRequestHandler<SetLocalInv
                 
                 _invokeClientsService.SessionGroupExcept(sessionId, client).SessionMemberGeneralStatusUpdated(parameters);
 
-                return true;
+                return inventoryData;
             }
             else
             {
                 _logger.LogWarning("SetLocalInventoryStatus: session {sessionId}, client {clientInstanceId} has a more recent status update", sessionId,
                     client.ClientInstanceId);
-                return false;
+                return null;
             }
         });
 
