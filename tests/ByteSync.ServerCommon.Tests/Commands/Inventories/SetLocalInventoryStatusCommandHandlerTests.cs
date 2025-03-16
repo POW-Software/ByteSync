@@ -4,6 +4,7 @@ using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Commands.Inventories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
+using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using ByteSync.ServerCommon.Tests.Helpers;
 using FakeItEasy;
@@ -16,18 +17,21 @@ namespace ByteSync.ServerCommon.Tests.Commands.Inventories;
 public class SetLocalInventoryStatusCommandHandlerTests
 {
     private readonly IInventoryRepository _mockInventoryRepository;
-    private readonly IInvokeClientsService _mockService;
+    private readonly IInventoryMemberService _mockInventoryMemberService;
+    private readonly IInvokeClientsService _mockInvokeClientsService;
     private readonly ILogger<SetLocalInventoryStatusCommandHandler> _mockLogger;
     
     private readonly SetLocalInventoryStatusCommandHandler _setLocalInventoryStatusCommandHandler;
-
+    
     public SetLocalInventoryStatusCommandHandlerTests()
     {
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
-        _mockService = A.Fake<IInvokeClientsService>();
+        _mockInventoryMemberService = A.Fake<IInventoryMemberService>();
+        _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
         _mockLogger = A.Fake<ILogger<SetLocalInventoryStatusCommandHandler>>();
         
-        _setLocalInventoryStatusCommandHandler = new SetLocalInventoryStatusCommandHandler(_mockInventoryRepository, _mockService, _mockLogger);
+        _setLocalInventoryStatusCommandHandler = new SetLocalInventoryStatusCommandHandler(_mockInventoryRepository, _mockInventoryMemberService, 
+            _mockInvokeClientsService, _mockLogger);
     }
     
     [Test]
@@ -44,7 +48,11 @@ public class SetLocalInventoryStatusCommandHandlerTests
         };
 
         var inventoryData = new InventoryData(sessionId);
-        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId });
+        var inventoryMemberData = new InventoryMemberData { ClientInstanceId = client.ClientInstanceId };
+        
+        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client))
+            .Invokes(() => inventoryData.InventoryMembers.Add(inventoryMemberData))
+            .Returns(inventoryMemberData);
 
         InventoryData? funcResult = null;
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
@@ -83,13 +91,16 @@ public class SetLocalInventoryStatusCommandHandlerTests
         };
 
         var inventoryData = new InventoryData(sessionId);
-        var inventoryMember = new InventoryMemberData 
+        var inventoryMemberData = new InventoryMemberData 
         { 
             ClientInstanceId = client.ClientInstanceId,
             SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryFinished,
             LastLocalInventoryStatusUpdate = newerDate
         };
-        inventoryData.InventoryMembers.Add(inventoryMember);
+        
+        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client))
+            .Invokes(() => inventoryData.InventoryMembers.Add(inventoryMemberData))
+            .Returns(inventoryMemberData);
 
         InventoryData? funcResult = null;
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
@@ -125,6 +136,20 @@ public class SetLocalInventoryStatusCommandHandlerTests
             UtcChangeDate = currentDate,
             SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryRunningAnalysis
         };
+        
+        var inventoryMemberData = new InventoryMemberData 
+        { 
+            ClientInstanceId = client.ClientInstanceId,
+            SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryFinished,
+            LastLocalInventoryStatusUpdate = null
+        };
+        
+        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client))
+            .Invokes((InventoryData inventoryData, string _, Client _) => 
+            {
+                inventoryData.InventoryMembers.Add(inventoryMemberData);
+            })
+            .Returns(inventoryMemberData);
 
         InventoryData? capturedInventoryData = null;
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
@@ -133,7 +158,7 @@ public class SetLocalInventoryStatusCommandHandlerTests
                 // Pass null to simulate non-existing inventory data
                 capturedInventoryData = func(null);
             })
-            .ReturnsLazily(() => UpdateResultBuilder.BuildAddOrUpdateResult(capturedInventoryData, true));
+            .ReturnsLazily(() => UpdateResultBuilder.BuildAddOrUpdateResult(capturedInventoryData, false));
 
         var request = new SetLocalInventoryStatusRequest(client, parameters);
 
@@ -141,8 +166,15 @@ public class SetLocalInventoryStatusCommandHandlerTests
         var result = await _setLocalInventoryStatusCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        result.Should().Be(false);
-        capturedInventoryData.Should().BeNull();
+        result.Should().Be(true);
+        capturedInventoryData.Should().NotBeNull();
+        capturedInventoryData!.SessionId.Should().Be(sessionId);
+        capturedInventoryData.InventoryMembers.Should().HaveCount(1);
+
+        var inventoryMember = capturedInventoryData.InventoryMembers.Single();
+        inventoryMember.ClientInstanceId.Should().Be(client.ClientInstanceId);
+        inventoryMember.SessionMemberGeneralStatus.Should().Be(parameters.SessionMemberGeneralStatus);
+        inventoryMember.LastLocalInventoryStatusUpdate.Should().Be(parameters.UtcChangeDate);
 
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored))
             .MustHaveHappenedOnceExactly();

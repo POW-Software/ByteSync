@@ -1,5 +1,6 @@
 ﻿using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
+using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -9,15 +10,15 @@ namespace ByteSync.ServerCommon.Commands.Inventories;
 public class SetLocalInventoryStatusCommandHandler : IRequestHandler<SetLocalInventoryStatusRequest, bool>
 {
     private readonly IInventoryRepository _inventoryRepository;
+    private readonly IInventoryMemberService _inventoryMemberService;
     private readonly IInvokeClientsService _invokeClientsService;
     private readonly ILogger<SetLocalInventoryStatusCommandHandler> _logger;
 
-    public SetLocalInventoryStatusCommandHandler(
-        IInventoryRepository inventoryRepository,
-        IInvokeClientsService invokeClientsService,
-        ILogger<SetLocalInventoryStatusCommandHandler> logger)
+    public SetLocalInventoryStatusCommandHandler(IInventoryRepository inventoryRepository, IInventoryMemberService inventoryMemberService, 
+        IInvokeClientsService invokeClientsService, ILogger<SetLocalInventoryStatusCommandHandler> logger)
     {
         _inventoryRepository = inventoryRepository;
+        _inventoryMemberService = inventoryMemberService;
         _invokeClientsService = invokeClientsService;
         _logger = logger;
     }
@@ -31,29 +32,31 @@ public class SetLocalInventoryStatusCommandHandler : IRequestHandler<SetLocalInv
         var updateResult = await _inventoryRepository.AddOrUpdate(sessionId, inventoryData =>
         {
             inventoryData ??= new InventoryData(sessionId);
-            
-            var inventoryMember = inventoryData.InventoryMembers.SingleOrDefault(m => m.ClientInstanceId == client.ClientInstanceId);
-            if (inventoryMember == null)
-            {
-                _logger.LogInformation("SetLocalInventoryStatus: clientInstanceId {clientInstanceId} not found in session {sessionId}", client.ClientInstanceId,
-                    sessionId);
-                return null;
-            }
 
-            if (inventoryMember.LastLocalInventoryStatusUpdate == null ||
-                parameters.UtcChangeDate > inventoryMember.LastLocalInventoryStatusUpdate)
+            if (!inventoryData.IsInventoryStarted)
             {
-                inventoryMember.SessionMemberGeneralStatus = parameters.SessionMemberGeneralStatus;
-                inventoryMember.LastLocalInventoryStatusUpdate = parameters.UtcChangeDate;
+                var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
                 
-                _invokeClientsService.SessionGroupExcept(sessionId, client).SessionMemberGeneralStatusUpdated(parameters);
+                if (inventoryMember.LastLocalInventoryStatusUpdate == null ||
+                    parameters.UtcChangeDate > inventoryMember.LastLocalInventoryStatusUpdate)
+                {
+                    inventoryMember.SessionMemberGeneralStatus = parameters.SessionMemberGeneralStatus;
+                    inventoryMember.LastLocalInventoryStatusUpdate = parameters.UtcChangeDate;
+                
+                    _invokeClientsService.SessionGroupExcept(sessionId, client).SessionMemberGeneralStatusUpdated(parameters);
 
-                return inventoryData;
+                    return inventoryData;
+                }
+                else
+                {
+                    _logger.LogWarning("SetLocalInventoryStatus: session {sessionId}, client {clientInstanceId} has a more recent status update", sessionId,
+                        client.ClientInstanceId);
+                    return null;
+                }
             }
             else
             {
-                _logger.LogWarning("SetLocalInventoryStatus: session {sessionId}, client {clientInstanceId} has a more recent status update", sessionId,
-                    client.ClientInstanceId);
+                _logger.LogWarning("RemovePathItem: session {sessionId} is already activated", sessionId);
                 return null;
             }
         });
