@@ -1,12 +1,10 @@
-﻿using System.Buffers;
-using System.IO.Pipelines;
-using System.Net;
-using Autofac;
+﻿using Autofac;
 using ByteSync.Business.Communications;
 using ByteSync.Client.IntegrationTests.TestHelpers;
 using ByteSync.Common.Business.Auth;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Misc;
+using ByteSync.Exceptions;
 using ByteSync.Factories;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications.Http;
@@ -15,12 +13,7 @@ using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Services.Communications;
 using ByteSync.TestsCommon;
 using FluentAssertions;
-using Microsoft.AspNetCore.Connections;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.AspNetCore.SignalR.Protocol;
-using Microsoft.Extensions.Logging;
 using Moq;
 using IConnectionFactory = ByteSync.Interfaces.Factories.IConnectionFactory;
 
@@ -87,5 +80,30 @@ public class TestConnectionService : IntegrationTest
         capturedConnection.Should().Be(mockHubConnection);
         _connectionService.CurrentEndPoint.Should().Be(endPoint);
         _connectionService.ClientInstanceId.Should().Be(endPoint.ClientInstanceId);
+    }
+    
+    [Test]
+    public async Task StartConnectionAsync_VersionNotAllowed_ShouldThrowException()
+    {
+        // Arrange
+        var initialAuthenticationResponse = new InitialAuthenticationResponse
+        {
+            AuthenticationTokens = null,
+            EndPoint = null,
+            InitialConnectionStatus = InitialConnectionStatus.VersionNotAllowed
+        };
+
+        var mockAuthApiClient = Container.Resolve<Mock<IAuthApiClient>>();
+        mockAuthApiClient.Setup(m => m.Login(It.IsAny<LoginData>())).ReturnsAsync(initialAuthenticationResponse);
+
+        // Act & Assert
+        var exception =  await FluentActions.Invoking(async () => await _connectionService.StartConnectionAsync())
+            .Should()
+            .ThrowAsync<BuildConnectionException>()
+            .WithMessage("*Unable to connect*");
+        
+        exception.Which.InitialConnectionStatus.Should().Be(InitialConnectionStatus.VersionNotAllowed);
+
+        _connectionService.CurrentConnectionStatus.Should().Be(ConnectionStatuses.NotConnected);
     }
 }
