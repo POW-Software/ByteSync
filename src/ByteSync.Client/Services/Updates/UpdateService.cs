@@ -43,7 +43,12 @@ class UpdateService : IUpdateService
                 }
             }
 
-            var nextAvailableVersions = applicableUpdates.OrderBy(u => new Version(u.Version)).ToList();
+            var nextAvailableVersions = applicableUpdates
+                .OrderBy(u => new Version(u.Version))
+                .ThenBy(u => u.Level)
+                .ToList();
+            
+            nextAvailableVersions = DeduplicateVersions(nextAvailableVersions);
             
             if (nextAvailableVersions.Count == 0)
             {
@@ -68,6 +73,21 @@ class UpdateService : IUpdateService
             
             _availableUpdateRepository.Clear();
         }
+    }
+
+    private List<SoftwareVersion> DeduplicateVersions(List<SoftwareVersion> nextAvailableVersions)
+    {
+        var deduplicatedVersions = new List<SoftwareVersion>();
+        
+        foreach (var softwareVersion in nextAvailableVersions)
+        {
+            if (deduplicatedVersions.All(v => v.Version != softwareVersion.Version))
+            {
+                deduplicatedVersions.Add(softwareVersion);
+            }
+        }
+        
+        return deduplicatedVersions;
     }
 
     public async Task<bool> UpdateAsync(SoftwareVersion softwareVersion, CancellationToken cancellationToken)
