@@ -1131,9 +1131,9 @@ namespace ByteSync.Assets.Resources {
         /// <summary>
         ///   Recherche une chaîne localisée semblable à The version of this application is not supported. Please update the application..
         /// </summary>
-        internal static string Login_SigninError_UpdateNeeded {
+        internal static string Login_SigninError_VersionNotAllowed {
             get {
-                return ResourceManager.GetString("Login_SigninError_UpdateNeeded", resourceCulture);
+                return ResourceManager.GetString("Login_SigninError_VersionNotAllowed", resourceCulture);
             }
         }
         

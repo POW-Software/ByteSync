@@ -651,7 +651,7 @@ Would you like to continue ?</value>
   <data name="Login_SigninError_EmailOrSerialNotFound" xml:space="preserve">
     <value>Unknown email address or serial number</value>
   </data>
-  <data name="Login_SigninError_UpdateNeeded" xml:space="preserve">
+  <data name="Login_SigninError_VersionNotAllowed" xml:space="preserve">
     <value>This version of the application is no longer supported. Please update the application.</value>
   </data>
   <data name="Misc_SeparatorDot" xml:space="preserve">
