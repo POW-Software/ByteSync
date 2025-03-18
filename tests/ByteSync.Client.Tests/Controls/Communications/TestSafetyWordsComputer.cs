@@ -1,5 +1,4 @@
-﻿using System;
-using ByteSync.Common.Helpers;
+﻿using ByteSync.Common.Helpers;
 using ByteSync.Services.Communications;
 using ByteSync.TestsCommon;
 using NUnit.Framework;
