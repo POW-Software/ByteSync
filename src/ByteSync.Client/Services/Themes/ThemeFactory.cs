@@ -121,13 +121,11 @@ public class ThemeFactory : IThemeFactory
         style.Resources.Add("ConnectedMemberLetterBorder", colorScheme.ConnectedMemberLetterBorder);
         style.Resources.Add("DisabledMemberLetterBorder", colorScheme.DisabledMemberLetterBorder);
         
-        style.Resources.Add("PowAccentButtonBackGround", colorScheme.PowAccentButtonBackGround);
-        style.Resources.Add("PowAccentButtonPointerOverBackGround", colorScheme.PowAccentButtonPointerOverBackGround);
+        style.Resources.Add("BsAccentButtonBackGround", colorScheme.BsAccentButtonBackGround);
+        style.Resources.Add("BsAccentButtonPointerOverBackGround", colorScheme.BsAccentButtonPointerOverBackGround);
         
-        // style.Resources.Add("CurrentMemberBackGroundBrush", new SolidColorBrush(colorScheme.CurrentMemberBackGround.AvaloniaColor));
-        // style.Resources.Add("CurrentMemberOppositeBackGroundBrush", new SolidColorBrush(colorScheme.CurrentMemberOppositeBackGround.AvaloniaColor));
-        // style.Resources.Add("OtherMemberBackGroundBrush", new SolidColorBrush(colorScheme.OtherMemberBackGround.AvaloniaColor));
-        // style.Resources.Add("OtherMemberOppositeBackGroundBrush", new SolidColorBrush(colorScheme.OtherMemberOppositeBackGround.AvaloniaColor));
+        style.Resources.Add("OppositeButtonBackGround", colorScheme.OppositeButtonBackGround);
+        style.Resources.Add("OppositeButtonPointerOverBackGround", colorScheme.OppositeButtonPointerOverBackGround);
         
         style.Resources.Add("StatusMainBackGroundBrush", new SolidColorBrush(colorScheme.StatusMainBackGround.AvaloniaColor));
         style.Resources.Add("StatusOppositeBackGroundBrush", new SolidColorBrush(colorScheme.StatusOppositeBackGround.AvaloniaColor));
@@ -264,9 +262,15 @@ public class ThemeFactory : IThemeFactory
                 .SetSaturationValue(0.0, 0.23).AvaloniaColor;
             
             // AccentButton
-            colorScheme.PowAccentButtonBackGround = themeColor
+            colorScheme.BsAccentButtonBackGround = themeColor
                 .SetSaturationValue(0.55, 0.25).AvaloniaColor;
-            colorScheme.PowAccentButtonPointerOverBackGround = themeColor
+            colorScheme.BsAccentButtonPointerOverBackGround = themeColor
+                .SetSaturationValue(0.55, 0.35).AvaloniaColor;
+            
+            // OppositeButton
+            colorScheme.OppositeButtonBackGround = colorScheme.MainOppositeColor
+                .SetSaturationValue(0.55, 0.25).AvaloniaColor;
+            colorScheme.OppositeButtonPointerOverBackGround = colorScheme.MainOppositeColor
                 .SetSaturationValue(0.55, 0.35).AvaloniaColor;
             
             
@@ -333,9 +337,15 @@ public class ThemeFactory : IThemeFactory
                 .SetSaturationValue(0.0, 0.92).AvaloniaColor;
             
             // AccentButton
-            colorScheme.PowAccentButtonBackGround = themeColor
+            colorScheme.BsAccentButtonBackGround = themeColor
                 .SetSaturationValue(0.15, 0.95).AvaloniaColor;
-            colorScheme.PowAccentButtonPointerOverBackGround = themeColor
+            colorScheme.BsAccentButtonPointerOverBackGround = themeColor
+                .SetSaturationValue(0.12, 0.98).AvaloniaColor;
+            
+            // OppositeButton
+            colorScheme.OppositeButtonBackGround = colorScheme.MainOppositeColor
+                .SetSaturationValue(0.15, 0.95).AvaloniaColor;
+            colorScheme.OppositeButtonPointerOverBackGround = colorScheme.MainOppositeColor
                 .SetSaturationValue(0.12, 0.98).AvaloniaColor;
             
             colorScheme.StatusMainBackGround = themeColor

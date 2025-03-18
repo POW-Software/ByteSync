@@ -55,7 +55,7 @@
                         
                         <Interaction.Behaviors>
                             <DataTriggerBehavior Binding="{Binding IsAVersionMandatory}" ComparisonCondition="Equal" Value="true">
-                                <ChangePropertyAction TargetObject="{Binding #UpdateButton}" PropertyName="Background" Value="{StaticResource PowAccentButtonBackGround}" />
+                                <ChangePropertyAction TargetObject="{Binding #UpdateButton}" PropertyName="Background" Value="{StaticResource OppositeButtonBackGround}" />
                             </DataTriggerBehavior>
                             <DataTriggerBehavior Binding="{Binding IsAVersionMandatory}" ComparisonCondition="Equal" Value="false">
                                 <ChangePropertyAction TargetObject="{Binding #UpdateButton}" PropertyName="Background" Value="{StaticResource VeryLightGray}" />

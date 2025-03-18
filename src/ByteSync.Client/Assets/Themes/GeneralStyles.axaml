@@ -170,11 +170,11 @@
     <!-- SEPARATOR -->
     
     <Style Selector="Button.Accent">
-	    <Setter Property="Background" Value="{DynamicResource PowAccentButtonBackGround}"/>
+	    <Setter Property="Background" Value="{DynamicResource BsAccentButtonBackGround}"/>
     </Style>
     
     <Style Selector="Button.Accent:pointerover /template/ ContentPresenter#PART_ContentPresenter2">
-	    <Setter Property="Background" Value="{DynamicResource PowAccentButtonPointerOverBackGround}" />
+	    <Setter Property="Background" Value="{DynamicResource BsAccentButtonPointerOverBackGround}" />
     </Style>
     
     <!-- SEPARATOR -->
@@ -184,7 +184,7 @@
     <!--SystemAccentColor  CurrentMemberBackGround-->
     
     <Style Selector="Button.AccentButton">
-        <Setter Property="Background" Value="{DynamicResource PowAccentButtonBackGround}"/>
+        <Setter Property="Background" Value="{DynamicResource BsAccentButtonBackGround}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="BorderBrush" Value="{DynamicResource GenericButtonBorder}"/>
         <Setter Property="TextBlock.Foreground" Value="{DynamicResource SystemBaseHighColor}" />
@@ -208,7 +208,7 @@
     </Style>
     
     <Style Selector="Button.AccentButton:pointerover /template/ ContentPresenter#PART_ContentPresenter2">
-	    <Setter Property="Background" Value="{DynamicResource PowAccentButtonPointerOverBackGround}" />
+	    <Setter Property="Background" Value="{DynamicResource BsAccentButtonPointerOverBackGround}" />
 	    <!-- <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushPointerOver}" /> -->
 	    <!-- <Setter Property="TextBlock.Foreground" Value="{DynamicResource ButtonForegroundPointerOver}" /> -->
     </Style>
