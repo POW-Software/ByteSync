@@ -1,21 +1,14 @@
-﻿using System.Threading;
-using Autofac;
+﻿using Autofac;
 using ByteSync.Business;
-using ByteSync.Business.Communications.Downloading;
 using ByteSync.Business.Inventories;
-using ByteSync.Business.PathItems;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Controls.Applications;
-using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Repositories;
-using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Services.Sessions;
-using ByteSync.Services.Inventories;
-using ByteSync.Services.Sessions;
 
 namespace ByteSync.Factories;
 

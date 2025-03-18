@@ -1,8 +1,5 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Business.Communications;
+﻿using ByteSync.Business.Communications;
 using ByteSync.Common.Business.Auth;
-using ByteSync.Common.Helpers;
-using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Factories;
@@ -17,19 +14,18 @@ public class ConnectionFactory : IConnectionFactory
 {
     private readonly IAuthenticationTokensRepository _authenticationTokensRepository;
     private readonly IEnvironmentService _environmentService;
-    private readonly IConnectionConstantsService _connectionConstantsService;
     private readonly IAuthApiClient _authApiClient;
+    private readonly IHubConnectionFactory _hubConnectionFactory;
     private readonly ILogger<ConnectionFactory> _logger;
 
     public ConnectionFactory(IAuthenticationTokensRepository authenticationTokensRepository, IEnvironmentService environmentService,
-        IConnectionConstantsService connectionConstantsService,IAuthApiClient authApiClient, ILogger<ConnectionFactory> logger)
+        IAuthApiClient authApiClient, IHubConnectionFactory hubConnectionFactory, ILogger<ConnectionFactory> logger)
     {
         _authenticationTokensRepository = authenticationTokensRepository;
         _environmentService = environmentService;
-        _connectionConstantsService = connectionConstantsService;
         _authApiClient = authApiClient;
+        _hubConnectionFactory = hubConnectionFactory;
         _logger = logger;
-
     }
     
     public async Task<BuildConnectionResult> BuildConnection()
@@ -46,7 +42,7 @@ public class ConnectionFactory : IConnectionFactory
             };
         }
 
-        var hubConnection = await StartConnection();
+        var hubConnection = await _hubConnectionFactory.BuildConnection();
         
         var result = new BuildConnectionResult
         {
@@ -88,55 +84,55 @@ public class ConnectionFactory : IConnectionFactory
         return isSuccess;
     }
 
-    private async Task<HubConnection> StartConnection()
-    {
-        var apiUrl = await _connectionConstantsService.GetApiUrl();
-        var url = UrlUtils.AppendSegment(apiUrl, "auth");
-        
-        var tokens = (await _authenticationTokensRepository.GetTokens())!;
-        
-        var connectionBuilder =
-
-            new HubConnectionBuilder()
-                .WithUrl(url,
-                    options =>
-                    {
-                        options.Headers.Add("Authorization", tokens.JwtToken);
-                        options.Transports = HttpTransportType.WebSockets;
-                    })
-            #if DEBUG
-                .ConfigureLogging(logging =>
-                {
-                    // This will set ALL logging to Debug level
-                    logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Debug);
-                })
-            #endif
-                .WithAutomaticReconnect(_connectionConstantsService.GetRetriesTimeSpans());
-
-        var connection = connectionBuilder.Build();
-
-        connection.Closed += _ =>
-        {
-            _logger.LogWarning("connection closed");
-            return Task.CompletedTask;
-        };
-        
-        connection.Reconnected += _ =>
-        {
-            _logger.LogWarning("connection reconnected");
-            return Task.CompletedTask;
-        };
-        
-        connection.Reconnecting += _ =>
-        {
-            _logger.LogWarning("connection reconnecting");
-            return Task.CompletedTask;
-        };
-
-        await connection.StartAsync();
-
-        return connection;
-    }
+    // private async Task<HubConnection> StartConnection()
+    // {
+    //     var apiUrl = await _connectionConstantsService.GetApiUrl();
+    //     var url = UrlUtils.AppendSegment(apiUrl, "auth");
+    //     
+    //     var tokens = (await _authenticationTokensRepository.GetTokens())!;
+    //     
+    //     var connectionBuilder =
+    //
+    //         new HubConnectionBuilder()
+    //             .WithUrl(url,
+    //                 options =>
+    //                 {
+    //                     options.Headers.Add("Authorization", tokens.JwtToken);
+    //                     options.Transports = HttpTransportType.WebSockets;
+    //                 })
+    //         #if DEBUG
+    //             .ConfigureLogging(logging =>
+    //             {
+    //                 // This will set ALL logging to Debug level
+    //                 logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Debug);
+    //             })
+    //         #endif
+    //             .WithAutomaticReconnect(_connectionConstantsService.GetRetriesTimeSpans());
+    //
+    //     var connection = connectionBuilder.Build();
+    //
+    //     connection.Closed += _ =>
+    //     {
+    //         _logger.LogWarning("connection closed");
+    //         return Task.CompletedTask;
+    //     };
+    //     
+    //     connection.Reconnected += _ =>
+    //     {
+    //         _logger.LogWarning("connection reconnected");
+    //         return Task.CompletedTask;
+    //     };
+    //     
+    //     connection.Reconnecting += _ =>
+    //     {
+    //         _logger.LogWarning("connection reconnecting");
+    //         return Task.CompletedTask;
+    //     };
+    //
+    //     await connection.StartAsync();
+    //
+    //     return connection;
+    // }
     
     private async Task<InitialAuthenticationResponse?> GetInitialAuthenticationTokens()
     {

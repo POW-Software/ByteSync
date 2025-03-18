@@ -3,7 +3,6 @@ using Autofac;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Factories;
-using ByteSync.Services.Encryptions;
 
 namespace ByteSync.Factories;
 
