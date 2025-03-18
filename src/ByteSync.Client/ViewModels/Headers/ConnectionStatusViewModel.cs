@@ -65,6 +65,7 @@ public class ConnectionStatusViewModel : ActivatableViewModelBase
                         ConnectionStatuses.Connected => "Green",
                         ConnectionStatuses.Connecting => "Blue",
                         ConnectionStatuses.ConnectionFailed => "Red",
+                        ConnectionStatuses.UpdateNeeded => "Red",
                         ConnectionStatuses.NotConnected => "Red",
                         ConnectionStatuses.RetryConnectingSoon => "Gray",
                         _ => "Disconnected"
@@ -95,6 +96,7 @@ public class ConnectionStatusViewModel : ActivatableViewModelBase
             ConnectionStatuses.Connected => ConnectedBadgeBrush,
             ConnectionStatuses.Connecting => ConnectingBadgeBrush,
             ConnectionStatuses.ConnectionFailed => ConnectionFailedBadgeBrush,
+            ConnectionStatuses.UpdateNeeded => ConnectionFailedBadgeBrush,
             ConnectionStatuses.NotConnected => NotConnectedBadgeBrush,
             ConnectionStatuses.RetryConnectingSoon => RetryConnectingSoonBadgeBrush,
             _ => UnknownBadgeBrush
@@ -122,6 +124,7 @@ public class ConnectionStatusViewModel : ActivatableViewModelBase
             ConnectionStatuses.Connected => _localizationService[nameof(Resources.ConnectionStatus_Connected)],
             ConnectionStatuses.Connecting => _localizationService[nameof(Resources.ConnectionStatus_Connecting)],
             ConnectionStatuses.ConnectionFailed => _localizationService[nameof(Resources.ConnectionStatus_ConnectionFailed)],
+            ConnectionStatuses.UpdateNeeded => _localizationService[nameof(Resources.ConnectionStatus_UpdateNeeded)],
             ConnectionStatuses.NotConnected => _localizationService[nameof(Resources.ConnectionStatus_NotConnected)],
             ConnectionStatuses.RetryConnectingSoon => _localizationService[nameof(Resources.ConnectionStatus_RetryConnectingSoon)],
             _ => _localizationService[nameof(Resources.ConnectionStatus_Unkown)]

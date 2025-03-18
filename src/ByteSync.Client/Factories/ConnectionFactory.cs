@@ -40,7 +40,10 @@ public class ConnectionFactory : IConnectionFactory
         if (authenticationResponse is not { IsSuccess: true })
         {
             _logger.LogError("Login with the server failed. Details: {details}", authenticationResponse?.InitialConnectionStatus);
-            return new BuildConnectionResult();
+            return new BuildConnectionResult
+            {
+                AuthenticateResponseStatus = authenticationResponse?.InitialConnectionStatus
+            };
         }
 
         var hubConnection = await StartConnection();

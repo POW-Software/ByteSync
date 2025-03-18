@@ -651,7 +651,7 @@ Would you like to continue ?</value>
   <data name="Login_SigninError_EmailOrSerialNotFound" xml:space="preserve">
     <value>Unknown email address or serial number</value>
   </data>
-  <data name="Login_SigninError_VersionNotAllowed" xml:space="preserve">
+  <data name="Login_SigninError_UpdateNeeded" xml:space="preserve">
     <value>This version of the application is no longer supported. Please update the application.</value>
   </data>
   <data name="Misc_SeparatorDot" xml:space="preserve">
@@ -1580,8 +1580,8 @@ Do you want to save this new Session Profile with this name?</value>
   <data name="ConnectionStatus_Connecting" xml:space="preserve">
     <value>Connecting...</value>
   </data>
-  <data name="ConnectionStatus_ConnectionFailed" xml:space="preserve">
-    <value>Connection failed</value>
+  <data name="ConnectionStatus_UpdateNeeded" xml:space="preserve">
+    <value>Update Needed</value>
   </data>
   <data name="ConnectionStatus_NotConnected" xml:space="preserve">
     <value>Not connected</value>

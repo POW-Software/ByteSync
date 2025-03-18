@@ -124,13 +124,45 @@ public class ApiInvoker : IApiInvoker
                 errorMessage += $" Reason: {response.ReasonPhrase}";
             }
             
-            if (response.StatusCode != HttpStatusCode.Forbidden && !string.IsNullOrWhiteSpace(content) && handleResult)
+            if (!IsEmptyContent(content) && handleResult)
             {
                 return DeserializeContent<T>(content);
             }
 
             _logger.LogError("API call failed with status code {StatusCode}: {ErrorMessage}", response.StatusCode, errorMessage);
-            throw new ApiException($"API call failed with status code {response.StatusCode}: {errorMessage}");
+            throw new ApiException($"API call failed with status code {response.StatusCode}: {errorMessage}", response.StatusCode);
+        }
+    }
+    
+    private bool IsEmptyContent(string content)
+    {
+        if (string.IsNullOrWhiteSpace(content) || content == "null")
+        {
+            return true;
+        }
+        else
+        {
+            var trimmed = content.Trim();
+            if (trimmed == "{}")
+            {
+                return true;
+            }
+
+            if (trimmed.StartsWith("{") && trimmed.EndsWith("}"))
+            {
+                var trimmedNoSpaces = trimmed
+                    .Replace(" ", "")
+                    .Replace("\t", "")
+                    .Replace("\n", "")
+                    .Replace("\r", "");
+
+                if (trimmedNoSpaces == """{"$id":"1"}""")
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 

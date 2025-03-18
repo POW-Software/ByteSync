@@ -543,7 +543,7 @@ Voulez-vous continuer ?</value>
 	<data name="Login_SigninError_EmailOrSerialNotFound" xml:space="preserve">
 		<value>Adresse email ou numéro de série inconnu</value>
 	</data>
-  <data name="Login_SigninError_VersionNotAllowed" xml:space="preserve">
+  <data name="Login_SigninError_UpdateNeeded" xml:space="preserve">
 	  <value>Cette version de l'application n'est plus supportée. Veuillez mettre à jour l'application.</value>
   </data>
 	<data name="Header_GeneralSettings_Tooltip" xml:space="preserve">
@@ -1456,6 +1456,9 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	</data>
 	<data name="ConnectionStatus_ConnectionFailed" xml:space="preserve">
 		<value>Connexion échouée</value>
+	</data>
+	<data name="ConnectionStatus_UpdateNeeded" xml:space="preserve">
+		<value>Mise à jour nécessaire</value>
 	</data>
 	<data name="ConnectionStatus_NotConnected" xml:space="preserve">
 		<value>Non connecté</value>
