@@ -100,7 +100,7 @@ public class ConnectionService : IConnectionService, IDisposable
             {
                 if (result.AuthenticateResponseStatus == InitialConnectionStatus.VersionNotAllowed)
                 {
-                    ConnectionStatusSubject.OnNext(ConnectionStatuses.UpdateNeeded);
+                    ConnectionStatusSubject.OnNext(ConnectionStatuses.NotConnected);
                 }
                 
                 throw new BuildConnectionException("Unable to connect", result.AuthenticateResponseStatus);

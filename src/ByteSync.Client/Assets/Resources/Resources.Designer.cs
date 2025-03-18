@@ -2846,12 +2846,6 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
-        public static string ConnectionStatus_UpdateNeeded {
-            get {
-                return ResourceManager.GetString("ConnectionStatus_UpdateNeeded", resourceCulture);
-            }
-        }
-        
         public static string ConnectionStatus_NotConnected {
             get {
                 return ResourceManager.GetString("ConnectionStatus_NotConnected", resourceCulture);

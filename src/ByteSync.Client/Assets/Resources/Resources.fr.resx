@@ -570,7 +570,7 @@ Voulez-vous continuer ?</value>
 	<data name="JoinCloudSession_WrongPassword" xml:space="preserve">
 		<value>Le mot de passe fourni est incorrect. Veuillez réessayer.</value>
 	</data>
-	<data name="Header_Update" xml:space="preserve">
+	<data name="Header_Update_Tooltip_Header" xml:space="preserve">
 		<value>Mise à jour disponible</value>
 	</data>
 	<data name="Header_Update_Tooltip" xml:space="preserve">
@@ -1457,9 +1457,6 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	<data name="ConnectionStatus_ConnectionFailed" xml:space="preserve">
 		<value>Connexion échouée</value>
 	</data>
-	<data name="ConnectionStatus_UpdateNeeded" xml:space="preserve">
-		<value>Mise à jour nécessaire</value>
-	</data>
 	<data name="ConnectionStatus_NotConnected" xml:space="preserve">
 		<value>Non connecté</value>
 	</data>
@@ -1549,5 +1546,14 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	</data>
 	<data name="CreateCloudSession_CanceledByUser" xml:space="preserve">
 		<value>Opération annulée par l'utilisateur.</value>
+	</data>
+	<data name="Header_Update_Required" xml:space="preserve">
+		<value>MISE A JOUR REQUISE</value>
+	</data>
+	<data name="Header_Update_Required_Tooltip_Header" xml:space="preserve">
+		<value>Mise à jour requise</value>
+	</data>
+	<data name="Header_Update_Required_Tooltip" xml:space="preserve">
+		<value>Une mise à jour est requise. Afficher plus de détails.</value>
 	</data>
 </root>

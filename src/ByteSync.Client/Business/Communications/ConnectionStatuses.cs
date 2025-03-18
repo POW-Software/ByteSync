@@ -7,5 +7,4 @@ public enum ConnectionStatuses
     Connected = 2,
     RetryConnectingSoon = 3,
     ConnectionFailed = 4,
-    UpdateNeeded = 5,
 }
