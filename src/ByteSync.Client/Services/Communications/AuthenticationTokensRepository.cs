@@ -5,7 +5,7 @@ using ByteSync.Interfaces.Services.Communications;
 
 namespace ByteSync.Services.Communications 
 {
-    class AuthenticationTokensRepository : IAuthenticationTokensRepository
+    public class AuthenticationTokensRepository : IAuthenticationTokensRepository
     {
         private AuthenticationTokens? _tokens;
         

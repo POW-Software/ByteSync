@@ -6,7 +6,5 @@ namespace ByteSync.Interfaces.Updates;
 
 public interface IUpdateService
 {
-    Task SearchNextAvailableVersionsAsync();
-
     Task<bool> UpdateAsync(SoftwareVersion softwareVersion, CancellationToken cancellationToken);
 }

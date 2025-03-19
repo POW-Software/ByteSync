@@ -13,14 +13,16 @@ namespace ByteSync.Services.Automating;
 public class CommandLineModeHandler : ICommandLineModeHandler
 {
     private readonly IProfileAutoRunner _profileAutoRunner;
+    private readonly ISearchUpdateService _searchUpdateService;
     private readonly IUpdateService _updateService;
     private readonly IAvailableUpdateRepository _availableUpdateRepository;
     private readonly ILogger<CommandLineModeHandler> _logger;
 
-    public CommandLineModeHandler(IProfileAutoRunner profileAutoRunner, IUpdateService updateService, IAvailableUpdateRepository availableUpdateRepository, 
-        ILogger<CommandLineModeHandler> logger)
+    public CommandLineModeHandler(IProfileAutoRunner profileAutoRunner, ISearchUpdateService searchUpdateService, 
+        IUpdateService updateService, IAvailableUpdateRepository availableUpdateRepository, ILogger<CommandLineModeHandler> logger)
     {
         _profileAutoRunner = profileAutoRunner;
+        _searchUpdateService = searchUpdateService;
         _updateService = updateService;
         _availableUpdateRepository = availableUpdateRepository;
         _logger = logger;
@@ -142,7 +144,7 @@ public class CommandLineModeHandler : ICommandLineModeHandler
     {
         _logger.LogInformation("Argument -update: trying to update automatically");
         
-        await _updateService.SearchNextAvailableVersionsAsync();
+        await _searchUpdateService.SearchNextAvailableVersionsAsync();
 
         var softwareVersions = _availableUpdateRepository.Elements.ToList();
 

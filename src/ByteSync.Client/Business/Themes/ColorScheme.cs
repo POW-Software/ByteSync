@@ -49,9 +49,13 @@ public class ColorScheme
     
     public Color DisabledMemberLetterBorder { get; set; }
     
-    public Color PowAccentButtonBackGround { get; set; }
+    public Color BsAccentButtonBackGround { get; set; }
     
-    public Color PowAccentButtonPointerOverBackGround { get; set; }
+    public Color BsAccentButtonPointerOverBackGround { get; set; }
+    
+    public Color OppositeButtonBackGround { get; set; }
+    
+    public Color OppositeButtonPointerOverBackGround { get; set; }
     
     public ThemeColor SystemAccentColorDark1 { get; set; }
     

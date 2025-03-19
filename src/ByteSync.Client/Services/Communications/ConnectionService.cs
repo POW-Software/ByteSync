@@ -2,9 +2,10 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Business.Communications;
+using ByteSync.Common.Business.Auth;
 using ByteSync.Common.Business.EndPoints;
+using ByteSync.Exceptions;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Services.Communications;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -19,9 +20,10 @@ public class ConnectionService : IConnectionService, IDisposable
     private readonly ILogger<ConnectionService> _logger;
     
     private readonly IDisposable? _connectionSubscription;
-    private CancellationTokenSource? _jwtTokensRefreshCancellationTokenSource;
+    private CancellationTokenSource? _refreshCancellationTokenSource;
 
-    public ConnectionService(IConnectionFactory connectionFactory, IAuthenticationTokensRepository authenticationTokensRepository, ILogger<ConnectionService> logger)
+    public ConnectionService(IConnectionFactory connectionFactory, IAuthenticationTokensRepository authenticationTokensRepository, 
+        ILogger<ConnectionService> logger)
     {
         _connectionFactory = connectionFactory;
         _authenticationTokensRepository = authenticationTokensRepository;
@@ -43,7 +45,7 @@ public class ConnectionService : IConnectionService, IDisposable
                 {
                     _logger.LogError("Connection closed: {Error}", error?.Message ?? "Unknown error");
                     
-                    _jwtTokensRefreshCancellationTokenSource?.Cancel();
+                    _refreshCancellationTokenSource?.Cancel();
                     
                     return Task.CompletedTask;
                 };
@@ -67,7 +69,7 @@ public class ConnectionService : IConnectionService, IDisposable
     public async Task StartConnectionAsync()
     {
         var retryPolicy = Policy
-            .Handle<Exception>()
+            .Handle<Exception>(ex => !(ex is BuildConnectionException bce && bce.InitialConnectionStatus == InitialConnectionStatus.VersionNotAllowed))
             .WaitAndRetryForeverAsync(
                 retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                 (exception, _, _) =>
@@ -96,17 +98,22 @@ public class ConnectionService : IConnectionService, IDisposable
             }
             else
             {
-                throw new Exception("Unable to connect");
+                if (result.AuthenticateResponseStatus == InitialConnectionStatus.VersionNotAllowed)
+                {
+                    ConnectionStatusSubject.OnNext(ConnectionStatuses.NotConnected);
+                }
+                
+                throw new BuildConnectionException("Unable to connect", result.AuthenticateResponseStatus);
             }
-            
         });
     }
     
     private async Task StartOrRestartJwtTokensRefreshTimer()
     {
-        _jwtTokensRefreshCancellationTokenSource?.Cancel();
-        _jwtTokensRefreshCancellationTokenSource = new CancellationTokenSource();
-        var cancellationToken = _jwtTokensRefreshCancellationTokenSource.Token;
+        await CancelCurrentRefreshCancellationTokenSource();
+
+        _refreshCancellationTokenSource = new CancellationTokenSource();
+        var cancellationToken = _refreshCancellationTokenSource.Token;
 
         try
         {
@@ -176,15 +183,9 @@ public class ConnectionService : IConnectionService, IDisposable
         });
     }
 
-    private async Task RestartConnection()
-    {
-        await StopConnection();
-        await StartConnectionAsync();
-    }
-
     public async Task StopConnection()
     {
-        _jwtTokensRefreshCancellationTokenSource?.Cancel();
+        await CancelCurrentRefreshCancellationTokenSource();
         
         var connection = ConnectionSubject.Value;
         if (connection != null)
@@ -206,6 +207,23 @@ public class ConnectionService : IConnectionService, IDisposable
     public void Dispose()
     {
         _connectionSubscription?.Dispose();
-        _jwtTokensRefreshCancellationTokenSource?.Dispose();
+        _refreshCancellationTokenSource?.Dispose();
+    }
+    
+    private async Task RestartConnection()
+    {
+        await StopConnection();
+        await StartConnectionAsync();
+    }
+    
+    private Task CancelCurrentRefreshCancellationTokenSource()
+    {
+        var currentRefreshCancellationTokenSource = _refreshCancellationTokenSource;
+        if (currentRefreshCancellationTokenSource != null)
+        {
+            _ = currentRefreshCancellationTokenSource.CancelAsync();
+        }
+        
+        return Task.CompletedTask;
     }
 }

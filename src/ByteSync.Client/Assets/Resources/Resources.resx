@@ -681,7 +681,7 @@ Would you like to continue ?</value>
   <data name="JoinCloudSession_WrongPassword" xml:space="preserve">
     <value>The provided password is incorrect. Please try again..</value>
   </data>
-  <data name="Header_Update" xml:space="preserve">
+  <data name="Header_Update_Tooltip_Header" xml:space="preserve">
     <value>Update available</value>
   </data>
   <data name="Header_Update_Tooltip" xml:space="preserve">
@@ -1580,9 +1580,6 @@ Do you want to save this new Session Profile with this name?</value>
   <data name="ConnectionStatus_Connecting" xml:space="preserve">
     <value>Connecting...</value>
   </data>
-  <data name="ConnectionStatus_ConnectionFailed" xml:space="preserve">
-    <value>Connection failed</value>
-  </data>
   <data name="ConnectionStatus_NotConnected" xml:space="preserve">
     <value>Not connected</value>
   </data>
@@ -1684,5 +1681,14 @@ Do you want to save this new Session Profile with this name?</value>
   </data>
   <data name="CreateCloudSession_CanceledByUser" xml:space="preserve">
     <value>Operation canceled by the user.</value>
+  </data>
+  <data name="Header_Update_Required" xml:space="preserve">
+    <value>UPDATE REQUIRED</value>
+  </data>
+  <data name="Header_Update_Required_Tooltip_Header" xml:space="preserve">
+    <value>Update required</value>
+  </data>
+  <data name="Header_Update_Required_Tooltip" xml:space="preserve">
+    <value>An update is required. Display more details.</value>
   </data>
 </root>

@@ -124,13 +124,13 @@ public class ApiInvoker : IApiInvoker
                 errorMessage += $" Reason: {response.ReasonPhrase}";
             }
             
-            if (response.StatusCode != HttpStatusCode.Forbidden && !string.IsNullOrWhiteSpace(content) && handleResult)
+            if (!ApiResponseContentHelper.IsEmptyContent(content) && handleResult)
             {
                 return DeserializeContent<T>(content);
             }
 
             _logger.LogError("API call failed with status code {StatusCode}: {ErrorMessage}", response.StatusCode, errorMessage);
-            throw new ApiException($"API call failed with status code {response.StatusCode}: {errorMessage}");
+            throw new ApiException($"API call failed with status code {response.StatusCode}: {errorMessage}", response.StatusCode);
         }
     }
 

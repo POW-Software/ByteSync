@@ -17,11 +17,11 @@
             <Grid Background="{DynamicResource VeryLightGray}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"></ColumnDefinition>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" HorizontalAlignment="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Grid.Column="0" HorizontalAlignment="Left" Orientation="Horizontal" VerticalAlignment="Center" Margin="6 0">
                     <Image Source="/Assets/Logo.png" 
                            Width="40" 
                            Height="40" 
@@ -33,7 +33,7 @@
                 </StackPanel>
 
                 <!-- TITRE CENTRAL -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="6 0">
                     <misc:Icon FontSize="26" Value="{Binding IconName}" Foreground="{DynamicResource SystemBaseHighColor}" 
                                Margin="6 0" VerticalAlignment="Center"/>
                     
@@ -55,7 +55,7 @@
                         
                         <Interaction.Behaviors>
                             <DataTriggerBehavior Binding="{Binding IsAVersionMandatory}" ComparisonCondition="Equal" Value="true">
-                                <ChangePropertyAction TargetObject="{Binding #UpdateButton}" PropertyName="Background" Value="{StaticResource PowAccentButtonBackGround}" />
+                                <ChangePropertyAction TargetObject="{Binding #UpdateButton}" PropertyName="Background" Value="{StaticResource OppositeButtonBackGround}" />
                             </DataTriggerBehavior>
                             <DataTriggerBehavior Binding="{Binding IsAVersionMandatory}" ComparisonCondition="Equal" Value="false">
                                 <ChangePropertyAction TargetObject="{Binding #UpdateButton}" PropertyName="Background" Value="{StaticResource VeryLightGray}" />
@@ -63,13 +63,26 @@
                         </Interaction.Behaviors>
                         
                         <StackPanel Orientation="Horizontal">
-                            <misc:Icon FontSize="20" Value="RegularSync" Margin="2" />
+                            <StackPanel IsVisible="{Binding !IsAVersionMandatory}">
+                                <misc:Icon FontSize="20" Value="RegularSync" Margin="2" />
+                            </StackPanel>
+                            
+                            <StackPanel IsVisible="{Binding IsAVersionMandatory}" Orientation="Horizontal">
+                                <misc:Icon FontSize="20" Value="RegularSync" Margin="0 2" />
+                                <TextBlock Text="{localizations:Loc Header_Update_Required}"/>
+                            </StackPanel>
                         </StackPanel>
 
                         <ToolTip.Tip>
-                            <StackPanel Classes="ByteSyncToolTip">
-                                <TextBlock Text="{localizations:Loc Header_Update}"/>
-                                <TextBlock Text="{localizations:Loc Header_Update_Tooltip}"/>
+                            <StackPanel>
+                                <StackPanel IsVisible="{Binding !IsAVersionMandatory}" Classes="ByteSyncToolTip">
+                                    <TextBlock Text="{localizations:Loc Header_Update_Tooltip_Header}"/>
+                                    <TextBlock Text="{localizations:Loc Header_Update_Tooltip}"/>
+                                </StackPanel>
+                                <StackPanel IsVisible="{Binding IsAVersionMandatory}" Classes="ByteSyncToolTip">
+                                    <TextBlock Text="{localizations:Loc Header_Update_Required_Tooltip_Header}"/>
+                                    <TextBlock Text="{localizations:Loc Header_Update_Required_Tooltip}"/>
+                                </StackPanel>
                             </StackPanel>
                         </ToolTip.Tip>
                     </Button>
@@ -116,7 +129,6 @@
                         <ToolTip.Tip>
                             <StackPanel Classes="ByteSyncToolTip">
                                 <TextBlock Text="{localizations:Loc Header_Documentation}"/>
-                                <TextBlock Text="{localizations:Loc Header_Documentation_Tooltip}"/>
                             </StackPanel>
                         </ToolTip.Tip>
                     </Button>

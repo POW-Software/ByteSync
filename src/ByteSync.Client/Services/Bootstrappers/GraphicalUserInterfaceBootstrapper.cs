@@ -15,7 +15,7 @@ namespace ByteSync.Services.Bootstrappers;
 
 public class GraphicalUserInterfaceBootstrapper : BaseBootstrapper
 {
-    private readonly IUpdateService _updateService;
+    private readonly ISearchUpdateService _searchUpdateService;
     private readonly ILocalizationService _localizationService;
     private readonly IZoomService _zoomService;
     private readonly IThemeFactory _themeFactory;
@@ -24,15 +24,15 @@ public class GraphicalUserInterfaceBootstrapper : BaseBootstrapper
     private readonly IDeleteUpdateBackupSnippetsService _deleteUpdateBackupSnippetsService;
     private readonly IPushReceiversStarter _pushReceiversStarter;
 
-    public GraphicalUserInterfaceBootstrapper(IEnvironmentService environmentService, IUpdateService updateManager, 
-        ILocalApplicationDataManager localApplicationDataManager, ILocalizationService localizationManager, 
+    public GraphicalUserInterfaceBootstrapper(IEnvironmentService environmentService, ISearchUpdateService searchUpdateService, 
+        ILocalApplicationDataManager localApplicationDataManager, ILocalizationService localizationService, 
         IZoomService zoomService, IThemeFactory themeFactory, INavigationService navigationService,
         IConnectionService connectionService, IDeleteUpdateBackupSnippetsService updateBackupSnippetsDeleter,
         IPushReceiversStarter pushReceiversStarter, ILogger<GraphicalUserInterfaceBootstrapper> logger) 
         : base(environmentService, logger, localApplicationDataManager)
     {
-        _updateService = updateManager;
-        _localizationService = localizationManager;
+        _searchUpdateService = searchUpdateService;
+        _localizationService = localizationService;
         _zoomService = zoomService;
         _themeFactory = themeFactory;
         _navigationService = navigationService;
@@ -88,7 +88,7 @@ public class GraphicalUserInterfaceBootstrapper : BaseBootstrapper
             //     AttachConsole?.Invoke();
             // }
 
-            _updateService.SearchNextAvailableVersionsAsync();
+            _searchUpdateService.SearchNextAvailableVersionsAsync();
             // _connectionManager.Connect();
 
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(_environmentService.Arguments);
