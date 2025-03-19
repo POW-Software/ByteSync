@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.SignalR.Protocol;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.Client.IntegrationTests.TestHelpers;
+namespace ByteSync.TestsCommon.TestHelpers;
 
 public class TestableHubConnection : HubConnection
 {

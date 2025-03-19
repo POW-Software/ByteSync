@@ -22,7 +22,8 @@ public class ConnectionService : IConnectionService, IDisposable
     private readonly IDisposable? _connectionSubscription;
     private CancellationTokenSource? _refreshCancellationTokenSource;
 
-    public ConnectionService(IConnectionFactory connectionFactory, IAuthenticationTokensRepository authenticationTokensRepository, ILogger<ConnectionService> logger)
+    public ConnectionService(IConnectionFactory connectionFactory, IAuthenticationTokensRepository authenticationTokensRepository, 
+        ILogger<ConnectionService> logger)
     {
         _connectionFactory = connectionFactory;
         _authenticationTokensRepository = authenticationTokensRepository;

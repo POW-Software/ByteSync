@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using ByteSync.Business.Communications;
-using ByteSync.Client.IntegrationTests.TestHelpers;
 using ByteSync.Common.Business.Auth;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Misc;
@@ -12,6 +11,7 @@ using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Services.Communications;
 using ByteSync.TestsCommon;
+using ByteSync.TestsCommon.TestHelpers;
 using FluentAssertions;
 using Microsoft.AspNetCore.SignalR.Client;
 using Moq;
