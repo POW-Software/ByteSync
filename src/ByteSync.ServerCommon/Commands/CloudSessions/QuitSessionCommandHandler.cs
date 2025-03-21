@@ -1,4 +1,6 @@
-﻿using ByteSync.ServerCommon.Business.Sessions;
+﻿using ByteSync.Common.Business.Inventories;
+using ByteSync.Common.Business.Sessions;
+using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Interfaces.Mappers;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
@@ -57,6 +59,7 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
             return quitter != null;
         }, transaction);
 
+        List<EncryptedPathItem>? pathItems = null;
         if (updateSessionResult.IsWaitingForTransaction)
         {
             await _inventoryRepository.UpdateIfExists(request.SessionId, inventoryData =>
@@ -64,6 +67,7 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
                 var inventoryMember = inventoryData.InventoryMembers.SingleOrDefault(m => m.ClientInstanceId.Equals(request.ClientInstanceId));
                 if (inventoryMember != null)
                 {
+                    pathItems = inventoryMember.SharedPathItems;
                     inventoryData.InventoryMembers.Remove(inventoryMember);
                 }
 
@@ -100,6 +104,15 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
 
             var sessionMemberInfo = await _sessionMemberMapper.Convert(innerQuitter!);
             await _invokeClientsService.SessionGroup(request.SessionId).MemberQuittedSession(sessionMemberInfo);
+            
+            if (pathItems != null)
+            {
+                foreach (var pathItem in pathItems)
+                {            
+                    var pathItemDto = new PathItemDTO(request.SessionId, request.ClientInstanceId, pathItem);
+                    await _invokeClientsService.SessionGroup(request.SessionId).PathItemRemoved(pathItemDto);
+                }
+            }
         }
     }
 }
