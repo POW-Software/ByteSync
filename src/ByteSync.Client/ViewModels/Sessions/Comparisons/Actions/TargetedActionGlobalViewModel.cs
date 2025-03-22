@@ -100,7 +100,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
 
     public ReactiveCommand<Unit, Unit> SaveValidItemsCommand { get; set; }
 
-    internal AtomicAction? BaseSynchronizationAction { get; set; }
+    internal AtomicAction? BaseAtomicAction { get; set; }
     internal ObservableCollection<AtomicActionEditViewModel> Actions { get; }
     
     private FileSystemTypes FileSystemType { get; }
@@ -127,12 +127,9 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
     private void AddAction()
     {
         var atomicActionEditViewModel = 
-            _actionEditViewModelFactory.BuildAtomicActionEditViewModel(FileSystemType, false, ComparisonItems);
+            _actionEditViewModelFactory.BuildAtomicActionEditViewModel(FileSystemType, false, null, ComparisonItems);
         
         atomicActionEditViewModel.PropertyChanged += AtomicActionEditViewModelOnPropertyChanged;
-        
-        // AtomicActionEditViewModel atomicActionEditViewModel =
-        //     new AtomicActionEditViewModel(FileSystemType, false, ComparisonItemViewModels, _actionEditionEventsHub);
             
         Actions.Add(atomicActionEditViewModel);
     }
@@ -201,9 +198,9 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
 
         if (atomicAction != null)
         {
-            if (BaseSynchronizationAction != null)
+            if (BaseAtomicAction != null)
             {
-                atomicAction.AtomicActionId = BaseSynchronizationAction.AtomicActionId;
+                atomicAction.AtomicActionId = BaseAtomicAction.AtomicActionId;
             }
         }
 
@@ -213,7 +210,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
 
     private void Reset()
     {
-        if (BaseSynchronizationAction == null)
+        if (BaseAtomicAction == null)
         {
             ResetToCreation();
         }
@@ -236,12 +233,11 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
     {
         ClearActions();
 
-        var atomicActionEditViewModel = _actionEditViewModelFactory.BuildAtomicActionEditViewModel(FileSystemType, false,
-            ComparisonItems, BaseSynchronizationAction);
+        var atomicActionEditViewModel = _actionEditViewModelFactory.BuildAtomicActionEditViewModel(FileSystemType, false, BaseAtomicAction, ComparisonItems);
 
         atomicActionEditViewModel.PropertyChanged += AtomicActionEditViewModelOnPropertyChanged;
             
-        atomicActionEditViewModel.SetSynchronizationAction(BaseSynchronizationAction!);
+        atomicActionEditViewModel.SetAtomicAction(BaseAtomicAction!);
         
         Actions.Add(atomicActionEditViewModel);
     }

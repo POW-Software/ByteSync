@@ -16,23 +16,34 @@ public class ActionEditViewModelFactory : IActionEditViewModelFactory
         _context = context;
     }
     
-    public AtomicActionEditViewModel BuildAtomicActionEditViewModel(FileSystemTypes fileSystemType, bool showDeleteButton, 
-        List<ComparisonItem>? comparisonItems, AtomicAction? baseSynchronizationAction = null)
+    public AtomicActionEditViewModel BuildAtomicActionEditViewModel(FileSystemTypes fileSystemType, bool showDeleteButton,
+        AtomicAction? atomicAction = null,
+        List<ComparisonItem>? comparisonItems = null)
     {
         var result = _context.Resolve<AtomicActionEditViewModel>(
             new TypedParameter(typeof(FileSystemTypes), fileSystemType),
             new TypedParameter(typeof(bool), showDeleteButton),
-            new TypedParameter(typeof(List<ComparisonItem>), comparisonItems),
-            new TypedParameter(typeof(AtomicAction), baseSynchronizationAction));
+            new TypedParameter(typeof(List<ComparisonItem>), comparisonItems));
+        
+        if (atomicAction != null)
+        {
+            result.SetAtomicAction(atomicAction);
+        }
 
         return result;
     }
 
-    public AtomicConditionEditViewModel BuildAtomicConditionEditViewModel(FileSystemTypes fileSystemType)
+    public AtomicConditionEditViewModel BuildAtomicConditionEditViewModel(FileSystemTypes fileSystemType, 
+        AtomicCondition? atomicCondition = null)
     {
         var result = _context.Resolve<AtomicConditionEditViewModel>(
             new TypedParameter(typeof(FileSystemTypes), fileSystemType));
 
+        if (atomicCondition != null)
+        {
+            result.SetAtomicCondition(atomicCondition);
+        }
+        
         return result;
     }
 }
