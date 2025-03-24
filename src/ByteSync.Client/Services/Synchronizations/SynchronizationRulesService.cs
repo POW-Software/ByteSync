@@ -28,42 +28,40 @@ public class SynchronizationRulesService : ISynchronizationRulesService
     
     public void AddOrUpdateSynchronizationRule(SynchronizationRule synchronizationRule)
     {
-        var allSynchronizationRules = _synchronizationRuleRepository.Elements.ToHashSet();
-        allSynchronizationRules.Remove(synchronizationRule);
-        allSynchronizationRules.Add(synchronizationRule);
+        var updatedSynchronizationRules = _synchronizationRuleRepository.Elements.ToHashSet();
+        updatedSynchronizationRules.Remove(synchronizationRule);
+        updatedSynchronizationRules.Add(synchronizationRule);
         
-        var allComparisonItems = _comparisonItemRepository.Elements.ToList();
-        
-        _dataPartIndexer.Remap(allSynchronizationRules);
-        _synchronizationRuleMatcher.MakeMatches(allComparisonItems, allSynchronizationRules);
-        
+        RefreshRulesAndMatches(updatedSynchronizationRules);
+
         _synchronizationRuleRepository.AddOrUpdate(synchronizationRule);
     }
-
     public void Remove(SynchronizationRule synchronizationRule)
     {
         _synchronizationRuleRepository.Remove(synchronizationRule);
         
-        var allSynchronizationRules = _synchronizationRuleRepository.Elements.ToList();
-        var allComparisonItems = _comparisonItemRepository.Elements.ToList();
-        
-        _dataPartIndexer.Remap(allSynchronizationRules);
-        _synchronizationRuleMatcher.MakeMatches(allComparisonItems, allSynchronizationRules);
+        RefreshRulesAndMatches();
     }
 
     public void Clear()
     {
         _synchronizationRuleRepository.Clear();
         
-        var allSynchronizationRules = _synchronizationRuleRepository.Elements.ToList();
-        var allComparisonItems = _comparisonItemRepository.Elements.ToList();
-        
-        _dataPartIndexer.Remap(allSynchronizationRules);
-        _synchronizationRuleMatcher.MakeMatches(allComparisonItems, new List<SynchronizationRule>());
+        RefreshRulesAndMatches();
     }
     
     public List<LooseSynchronizationRule> GetLooseSynchronizationRules()
     {
         return _synchronizationRulesConverter.ConvertLooseSynchronizationRules(_synchronizationRuleRepository.Elements.ToList());
+    }
+    
+    private void RefreshRulesAndMatches(HashSet<SynchronizationRule>? allSynchronizationRules = null)
+    {
+        allSynchronizationRules ??= _synchronizationRuleRepository.Elements.ToHashSet();
+        
+        var allComparisonItems = _comparisonItemRepository.Elements.ToList();
+        
+        _dataPartIndexer.Remap(allSynchronizationRules);
+        _synchronizationRuleMatcher.MakeMatches(allComparisonItems, allSynchronizationRules);
     }
 }
