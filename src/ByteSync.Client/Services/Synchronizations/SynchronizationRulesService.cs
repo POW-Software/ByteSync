@@ -26,9 +26,10 @@ public class SynchronizationRulesService : ISynchronizationRulesService
         _synchronizationRulesConverter = synchronizationRulesConverter;
     }
     
-    public void AddSynchronizationRule(SynchronizationRule synchronizationRule)
+    public void AddOrUpdateSynchronizationRule(SynchronizationRule synchronizationRule)
     {
-        var allSynchronizationRules = _synchronizationRuleRepository.Elements.ToList();
+        var allSynchronizationRules = _synchronizationRuleRepository.Elements.ToHashSet();
+        allSynchronizationRules.Remove(synchronizationRule);
         allSynchronizationRules.Add(synchronizationRule);
         
         var allComparisonItems = _comparisonItemRepository.Elements.ToList();
@@ -39,6 +40,28 @@ public class SynchronizationRulesService : ISynchronizationRulesService
         _synchronizationRuleRepository.AddOrUpdate(synchronizationRule);
     }
 
+    public void Remove(SynchronizationRule synchronizationRule)
+    {
+        _synchronizationRuleRepository.Remove(synchronizationRule);
+        
+        var allSynchronizationRules = _synchronizationRuleRepository.Elements.ToList();
+        var allComparisonItems = _comparisonItemRepository.Elements.ToList();
+        
+        _dataPartIndexer.Remap(allSynchronizationRules);
+        _synchronizationRuleMatcher.MakeMatches(allComparisonItems, allSynchronizationRules);
+    }
+
+    public void Clear()
+    {
+        _synchronizationRuleRepository.Clear();
+        
+        var allSynchronizationRules = _synchronizationRuleRepository.Elements.ToList();
+        var allComparisonItems = _comparisonItemRepository.Elements.ToList();
+        
+        _dataPartIndexer.Remap(allSynchronizationRules);
+        _synchronizationRuleMatcher.MakeMatches(allComparisonItems, new List<SynchronizationRule>());
+    }
+    
     public List<LooseSynchronizationRule> GetLooseSynchronizationRules()
     {
         return _synchronizationRulesConverter.ConvertLooseSynchronizationRules(_synchronizationRuleRepository.Elements.ToList());

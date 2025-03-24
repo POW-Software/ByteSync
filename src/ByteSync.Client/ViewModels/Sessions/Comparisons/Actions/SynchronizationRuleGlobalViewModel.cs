@@ -210,7 +210,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
             {
                 ShowWarning = false;
                 
-                _synchronizationRulesService.AddSynchronizationRule(synchronizationRule);
+                _synchronizationRulesService.AddOrUpdateSynchronizationRule(synchronizationRule);
 
                 _dialogService.CloseFlyout();
             }

@@ -5,10 +5,10 @@ using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Factories.ViewModels;
-using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -20,7 +20,7 @@ public class SynchronizationRuleSummaryViewModel : ViewModelBase
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;
     private readonly IDescriptionBuilderFactory _descriptionBuilderFactory;
-    private readonly ISynchronizationRuleRepository _synchronizationRuleRepository;
+    private readonly ISynchronizationRulesService _synchronizationRulesService;
     private readonly IDialogService _dialogService;
     private readonly IFlyoutElementViewModelFactory _flyoutElementViewModelFactory;
 
@@ -33,14 +33,14 @@ public class SynchronizationRuleSummaryViewModel : ViewModelBase
     }
 
     public SynchronizationRuleSummaryViewModel(SynchronizationRule synchronizationRule, ISessionService sessionService, ILocalizationService localizationService, 
-        IDescriptionBuilderFactory descriptionBuilderFactory, ISynchronizationRuleRepository synchronizationRuleRepository, 
+        IDescriptionBuilderFactory descriptionBuilderFactory, ISynchronizationRulesService synchronizationRulesService, 
         IDialogService dialogService, IFlyoutElementViewModelFactory flyoutElementViewModelFactory) 
         : this()
     {
         _sessionService = sessionService;
         _localizationService = localizationService;
         _descriptionBuilderFactory = descriptionBuilderFactory;
-        _synchronizationRuleRepository = synchronizationRuleRepository;
+        _synchronizationRulesService = synchronizationRulesService;
         _dialogService = dialogService;
         _flyoutElementViewModelFactory = flyoutElementViewModelFactory;
         
@@ -115,7 +115,7 @@ public class SynchronizationRuleSummaryViewModel : ViewModelBase
 
     private void Remove()
     {
-        _synchronizationRuleRepository.Remove(SynchronizationRule);
+        _synchronizationRulesService.Remove(SynchronizationRule);
     }
     
     private void Duplicate()
