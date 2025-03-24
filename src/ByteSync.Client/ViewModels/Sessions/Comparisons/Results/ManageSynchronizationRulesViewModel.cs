@@ -44,6 +44,7 @@ public class ManageSynchronizationRulesViewModel : ActivatableViewModelBase
         _synchronizationRuleRepository.ObservableCache
             .Connect() // make the source an observable change set
             .Transform(sr => _synchronizationRuleSummaryViewModelFactory.Create(sr))
+            .DisposeMany()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _bindingData)
             .Subscribe();
