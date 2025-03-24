@@ -9,13 +9,13 @@ using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
 
 namespace ByteSync.Services.Comparisons;
 
-public class ComparisonItemActionsManager : IComparisonItemActionsManager
+public class TargetedActionsManager : ITargetedActionsManager
 {
     private readonly ISynchronizationRuleMatcher _synchronizationRuleMatcher;
     private readonly IAtomicActionRepository _atomicActionRepository;
     private readonly ISynchronizationRuleRepository _synchronizationRuleRepository;
 
-    public ComparisonItemActionsManager(ISynchronizationRuleMatcher synchronizationRuleMatcher, IAtomicActionRepository atomicActionRepository,
+    public TargetedActionsManager(ISynchronizationRuleMatcher synchronizationRuleMatcher, IAtomicActionRepository atomicActionRepository,
         ISynchronizationRuleRepository synchronizationRuleRepository)
     {
         _synchronizationRuleMatcher = synchronizationRuleMatcher;
@@ -23,10 +23,17 @@ public class ComparisonItemActionsManager : IComparisonItemActionsManager
         _synchronizationRuleRepository = synchronizationRuleRepository;
     }
     
+    public void AddTargetedAction(AtomicAction atomicAction, ICollection<ComparisonItem> comparisonItems)
+    {
+        foreach (var comparisonItem in comparisonItems)
+        {
+            AddTargetedAction(atomicAction, comparisonItem);
+        }
+    }
+    
     public void AddTargetedAction(AtomicAction atomicAction, ComparisonItem comparisonItem)
     {
         var currentAtomicActions = _atomicActionRepository.GetAtomicActions(comparisonItem);
-        var currentTargetedAtomicActions = currentAtomicActions.Where(aa => aa.IsTargeted).ToList();
         
         atomicAction = atomicAction.CloneNew();
 
@@ -37,8 +44,8 @@ public class ComparisonItemActionsManager : IComparisonItemActionsManager
         }
         else
         {
-            if (currentTargetedAtomicActions.Count == 1 && 
-                currentTargetedAtomicActions.First().Operator == ActionOperatorTypes.DoNothing)
+            if (currentAtomicActions.Count == 1 && currentAtomicActions.First().IsTargeted &&
+                currentAtomicActions.First().Operator == ActionOperatorTypes.DoNothing)
             {
                 clearBefore = true;
             }
@@ -46,20 +53,12 @@ public class ComparisonItemActionsManager : IComparisonItemActionsManager
 
         if (clearBefore)
         {
-            _atomicActionRepository.Remove(currentTargetedAtomicActions);
+            _atomicActionRepository.Remove(currentAtomicActions);
         }
 
         atomicAction.ComparisonItem = comparisonItem;
 
         _atomicActionRepository.AddOrUpdate(atomicAction);
-    }
-
-    public void AddTargetedAction(AtomicAction atomicAction, ICollection<ComparisonItem> comparisonItems)
-    {
-        foreach (var comparisonItem in comparisonItems)
-        {
-            AddTargetedAction(atomicAction, comparisonItem);
-        }
     }
 
     public void ClearTargetedActions(ComparisonItemViewModel comparisonItemViewModel)

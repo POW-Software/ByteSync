@@ -24,7 +24,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
 
     private readonly ILocalizationService _localizationService;
     private readonly IDialogService _dialogService;
-    private readonly IComparisonItemActionsManager _comparisonItemActionsManager;
+    private readonly ITargetedActionsManager _targetedActionsManager;
     private readonly IAtomicActionConsistencyChecker _atomicActionConsistencyChecker;
     private readonly IActionEditViewModelFactory _actionEditViewModelFactory;
 
@@ -37,7 +37,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
 
     public TargetedActionGlobalViewModel(List<ComparisonItem> comparisonItems, 
         IDialogService dialogService, ILocalizationService localizationService,
-        IComparisonItemActionsManager comparisonItemActionsManager, IAtomicActionConsistencyChecker atomicActionConsistencyChecker,
+        ITargetedActionsManager targetedActionsManager, IAtomicActionConsistencyChecker atomicActionConsistencyChecker,
         IActionEditViewModelFactory actionEditViewModelFactory)
     {
         ComparisonItems = comparisonItems;
@@ -46,7 +46,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         
         _dialogService = dialogService;
         _localizationService = localizationService;
-        _comparisonItemActionsManager = comparisonItemActionsManager;
+        _targetedActionsManager = targetedActionsManager;
         _atomicActionConsistencyChecker = atomicActionConsistencyChecker;
         _actionEditViewModelFactory = actionEditViewModelFactory;
 
@@ -156,7 +156,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
             {
                 ResetWarning();
                 
-                _comparisonItemActionsManager.AddTargetedAction(atomicAction, ComparisonItems);
+                _targetedActionsManager.AddTargetedAction(atomicAction, ComparisonItems);
 
                 _dialogService.CloseFlyout();
             }
@@ -180,7 +180,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
             
             ResetWarning();
 
-            _comparisonItemActionsManager.AddTargetedAction(atomicAction, result.ValidComparisons);
+            _targetedActionsManager.AddTargetedAction(atomicAction, result.ValidComparisons);
 
             _dialogService.CloseFlyout();
         }

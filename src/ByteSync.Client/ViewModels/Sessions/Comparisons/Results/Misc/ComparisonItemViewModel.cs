@@ -22,7 +22,7 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
 
 public class ComparisonItemViewModel : IDisposable
 {
-    private readonly IComparisonItemActionsManager _comparisonItemActionsManager;
+    private readonly ITargetedActionsManager _targetedActionsManager;
     private readonly IAtomicActionRepository _atomicActionRepository;
     private readonly IContentIdentityViewModelFactory _contentIdentityViewModelFactory;
     private readonly IStatusViewModelFactory _statusViewModelFactory;
@@ -31,7 +31,7 @@ public class ComparisonItemViewModel : IDisposable
     private readonly CompositeDisposable _compositeDisposable;
     private readonly IFormatKbSizeConverter _formatKbSizeConverter;
 
-    public ComparisonItemViewModel(IComparisonItemActionsManager comparisonItemActionsManager,
+    public ComparisonItemViewModel(ITargetedActionsManager targetedActionsManager,
         IAtomicActionRepository atomicActionRepository, IContentIdentityViewModelFactory contentIdentityViewModelFactory,
         IStatusViewModelFactory statusViewModelFactory, ComparisonItem comparisonItem, List<Inventory> inventories,
         ISynchronizationActionViewModelFactory synchronizationActionViewModelFactory, IFormatKbSizeConverter formatKbSizeConverter)
@@ -39,7 +39,7 @@ public class ComparisonItemViewModel : IDisposable
         ComparisonItem = comparisonItem;
         Inventories = inventories;
         
-        _comparisonItemActionsManager = comparisonItemActionsManager;
+        _targetedActionsManager = targetedActionsManager;
         _atomicActionRepository = atomicActionRepository;
         _contentIdentityViewModelFactory = contentIdentityViewModelFactory;
         _statusViewModelFactory = statusViewModelFactory;
@@ -160,7 +160,7 @@ public class ComparisonItemViewModel : IDisposable
 
     public void ClearTargetedActions()
     {
-        _comparisonItemActionsManager.ClearTargetedActions(this);
+        _targetedActionsManager.ClearTargetedActions(this);
     }
     
     private void BuildLinkingKeyNameTooltip()

@@ -18,7 +18,7 @@ public class SynchronizationActionViewModel : ViewModelBase, IDisposable
 {
     private readonly ISynchronizationService _synchronizationService;
     private readonly ILocalizationService _localizationService;
-    private readonly IComparisonItemActionsManager _comparisonItemActionsManager;
+    private readonly ITargetedActionsManager _targetedActionsManager;
     
     private readonly CompositeDisposable _compositeDisposable;
 
@@ -31,12 +31,12 @@ public class SynchronizationActionViewModel : ViewModelBase, IDisposable
 
     public SynchronizationActionViewModel(AtomicAction atomicAction, ComparisonItemViewModel comparisonItemViewModel, 
         ILocalizationService localizationService, ISynchronizationService synchronizationService, 
-        IComparisonItemActionsManager comparisonItemActionsManager)
+        ITargetedActionsManager targetedActionsManager)
         : this()
     {
         _localizationService = localizationService;
         _synchronizationService = synchronizationService;
-        _comparisonItemActionsManager = comparisonItemActionsManager;
+        _targetedActionsManager = targetedActionsManager;
         
         _compositeDisposable = new CompositeDisposable();
         
@@ -89,7 +89,7 @@ public class SynchronizationActionViewModel : ViewModelBase, IDisposable
     
     private void Remove()
     {
-        _comparisonItemActionsManager.RemoveTargetedAction(ComparisonItemViewModel, this);
+        _targetedActionsManager.RemoveTargetedAction(ComparisonItemViewModel, this);
     }
 
     private void Edit()
