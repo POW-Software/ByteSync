@@ -6,7 +6,6 @@ using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions.Misc;
@@ -17,16 +16,11 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Actions;
 
 public class AtomicActionEditViewModel : BaseAtomicEditViewModel
 {
-    // private readonly IActionEditionEventsHub _actionEditionEventsHub;
-
     private ObservableAsPropertyHelper<bool> _isSourceVisible;
     private ObservableAsPropertyHelper<bool> _isDestinationVisible;
     private ObservableAsPropertyHelper<bool> _isDestinationToVisible;
     private ObservableAsPropertyHelper<bool> _isDestinationOnVisible;
     private readonly IDataPartIndexer _dataPartIndexer;
-    
-    
-
 
     public AtomicActionEditViewModel()
     {
@@ -259,7 +253,7 @@ public class AtomicActionEditViewModel : BaseAtomicEditViewModel
         return atomicAction;
     }
 
-    internal void SetSynchronizationAction(AtomicAction atomicAction)
+    internal void SetAtomicAction(AtomicAction atomicAction)
     {
         SelectedAction = Actions.FirstOrDefault(a => Equals(a.ActionOperatorType, atomicAction.Operator));
 

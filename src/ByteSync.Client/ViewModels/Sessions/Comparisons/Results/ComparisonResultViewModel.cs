@@ -139,7 +139,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
             _sessionService.SessionStatusObservable
                 .Where(s => s.In(SessionStatus.Preparation))
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => OnSessionResetted())
+                .Subscribe(_ => OnSessionReset())
                 .DisposeWith(disposables);
             
             _themeService.SelectedTheme
@@ -214,12 +214,6 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
 
     [Reactive]
     public bool IsEditionEnabled { get; set; }
-        
-    [Reactive]
-    public int PageIndex { get; set; }
-        
-    [Reactive]
-    public int PageCount { get; set; }
         
     [Reactive]
     internal ObservableCollection<ComparisonItemViewModel> SelectedItems { get; set; }
@@ -366,7 +360,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         }
     }
     
-    private void OnSessionResetted()
+    private void OnSessionReset()
     {
         IsResultLoadingError = false;
         AreResultsLoaded = false;

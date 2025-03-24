@@ -8,7 +8,8 @@ namespace ByteSync.Interfaces.Factories.ViewModels;
 public interface IActionEditViewModelFactory
 {
     AtomicActionEditViewModel BuildAtomicActionEditViewModel(FileSystemTypes fileSystemType, bool showDeleteButton,
-        List<ComparisonItem>? comparisonItems = null, AtomicAction? baseSynchronizationAction = null);
+        AtomicAction? atomicAction = null,
+        List<ComparisonItem>? comparisonItems = null);
     
-    AtomicConditionEditViewModel BuildAtomicConditionEditViewModel(FileSystemTypes fileSystemType);
+    AtomicConditionEditViewModel BuildAtomicConditionEditViewModel(FileSystemTypes fileSystemType, AtomicCondition? atomicCondition = null);
 }

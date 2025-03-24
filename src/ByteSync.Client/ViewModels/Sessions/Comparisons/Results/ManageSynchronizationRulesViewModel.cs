@@ -21,19 +21,21 @@ public class ManageSynchronizationRulesViewModel : ActivatableViewModelBase
     private readonly IFlyoutElementViewModelFactory _flyoutElementViewModelFactory;
     
     private ReadOnlyObservableCollection<SynchronizationRuleSummaryViewModel> _bindingData;
+    private readonly ISynchronizationRulesService _synchronizationRulesService;
 
 
     public ManageSynchronizationRulesViewModel(){}
     
     public ManageSynchronizationRulesViewModel(ISynchronizationRuleRepository synchronizationRuleRepository, ISynchronizationService synchronizationService,
         ISynchronizationRuleSummaryViewModelFactory synchronizationRuleSummaryViewModelFactory, IDialogService dialogService,
-        IFlyoutElementViewModelFactory flyoutElementViewModelFactory)
+        IFlyoutElementViewModelFactory flyoutElementViewModelFactory, ISynchronizationRulesService synchronizationRulesService)
     {
         _synchronizationRuleRepository = synchronizationRuleRepository;
         _synchronizationService = synchronizationService;
         _synchronizationRuleSummaryViewModelFactory = synchronizationRuleSummaryViewModelFactory;
         _dialogService = dialogService;
         _flyoutElementViewModelFactory = flyoutElementViewModelFactory;
+        _synchronizationRulesService = synchronizationRulesService;
 
         var canAddOrClearSynchronizationRules = _synchronizationService.SynchronizationProcessData.SynchronizationStart
             .Select(ss => ss == null)
@@ -42,6 +44,7 @@ public class ManageSynchronizationRulesViewModel : ActivatableViewModelBase
         _synchronizationRuleRepository.ObservableCache
             .Connect() // make the source an observable change set
             .Transform(sr => _synchronizationRuleSummaryViewModelFactory.Create(sr))
+            .DisposeMany()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _bindingData)
             .Subscribe();
@@ -64,6 +67,6 @@ public class ManageSynchronizationRulesViewModel : ActivatableViewModelBase
 
     private void ClearSynchronizationRules()
     {
-        _synchronizationRuleRepository.Clear();
+        _synchronizationRulesService.Clear();
     }
 }

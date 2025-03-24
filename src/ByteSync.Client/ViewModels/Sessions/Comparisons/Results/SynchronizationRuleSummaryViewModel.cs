@@ -1,28 +1,31 @@
 ﻿using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Factories.ViewModels;
-using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Results;
 
-public class SynchronizationRuleSummaryViewModel : ViewModelBase
+public class SynchronizationRuleSummaryViewModel : ViewModelBase, IDisposable
 {
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;
     private readonly IDescriptionBuilderFactory _descriptionBuilderFactory;
-    private readonly ISynchronizationRuleRepository _synchronizationRuleRepository;
+    private readonly ISynchronizationRulesService _synchronizationRulesService;
     private readonly IDialogService _dialogService;
     private readonly IFlyoutElementViewModelFactory _flyoutElementViewModelFactory;
+    private readonly ISynchronizationService _synchronizationService;
+    private readonly CompositeDisposable _compositeDisposable;
 
     private const string ICON_FILE = "RegularFile";
     private const string ICON_FOLDER = "RegularFolder";
@@ -33,16 +36,18 @@ public class SynchronizationRuleSummaryViewModel : ViewModelBase
     }
 
     public SynchronizationRuleSummaryViewModel(SynchronizationRule synchronizationRule, ISessionService sessionService, ILocalizationService localizationService, 
-        IDescriptionBuilderFactory descriptionBuilderFactory, ISynchronizationRuleRepository synchronizationRuleRepository, 
-        IDialogService dialogService, IFlyoutElementViewModelFactory flyoutElementViewModelFactory) 
+        IDescriptionBuilderFactory descriptionBuilderFactory, ISynchronizationRulesService synchronizationRulesService, 
+        IDialogService dialogService, IFlyoutElementViewModelFactory flyoutElementViewModelFactory,
+        ISynchronizationService synchronizationService) 
         : this()
     {
         _sessionService = sessionService;
         _localizationService = localizationService;
         _descriptionBuilderFactory = descriptionBuilderFactory;
-        _synchronizationRuleRepository = synchronizationRuleRepository;
+        _synchronizationRulesService = synchronizationRulesService;
         _dialogService = dialogService;
         _flyoutElementViewModelFactory = flyoutElementViewModelFactory;
+        _synchronizationService = synchronizationService;
         
         var canEditOrRemove = this
             .WhenAnyValue(x => x.HasSynchronizationStarted,
@@ -68,6 +73,23 @@ public class SynchronizationRuleSummaryViewModel : ViewModelBase
         UpdateAutomaticAction(synchronizationRule);
         
         UpdateElementType();
+        
+        _compositeDisposable = new CompositeDisposable();
+        
+        _sessionService.SessionStatusObservable
+            .CombineLatest(_synchronizationService.SynchronizationProcessData.SynchronizationStart)
+            .Select(tuple => 
+                !tuple.First.In(SessionStatus.None, SessionStatus.Preparation, SessionStatus.Comparison, 
+                    SessionStatus.CloudSessionCreation, SessionStatus.CloudSessionJunction, SessionStatus.Inventory)
+                && tuple.Second != null)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .ToPropertyEx(this, x => x.HasSynchronizationStarted)
+            .DisposeWith(_compositeDisposable);
+            
+        _localizationService.CurrentCultureObservable
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(_ => OnLocaleChanged())
+            .DisposeWith(_compositeDisposable);
     }
 
     public ReactiveCommand<Unit, Unit> RemoveCommand { get; set; }
@@ -96,8 +118,7 @@ public class SynchronizationRuleSummaryViewModel : ViewModelBase
     [Reactive]
     public bool IsIconVisible { get; set; }
     
-    [Reactive]
-    public bool HasSynchronizationStarted { get; set; }
+    public extern bool HasSynchronizationStarted { [ObservableAsProperty] get; }
 
     [Reactive]
     public string ElementType { get; set; }
@@ -115,7 +136,7 @@ public class SynchronizationRuleSummaryViewModel : ViewModelBase
 
     private void Remove()
     {
-        _synchronizationRuleRepository.Remove(SynchronizationRule);
+        _synchronizationRulesService.Remove(SynchronizationRule);
     }
     
     private void Duplicate()
@@ -155,14 +176,9 @@ public class SynchronizationRuleSummaryViewModel : ViewModelBase
 
         UpdateElementType();
     }
-
-    internal void OnSynchronizationStarted()
+    
+    public void Dispose()
     {
-        HasSynchronizationStarted = true;
-    }
-
-    public void OnSessionResetted()
-    {
-        HasSynchronizationStarted = false;
+        _compositeDisposable.Dispose();
     }
 }

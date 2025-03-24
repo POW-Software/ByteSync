@@ -4,7 +4,7 @@ using ByteSync.Interfaces.Business.Actions;
 
 namespace ByteSync.Business.Actions.Local
 {
-    class AtomicCondition : IAtomicCondition
+    public class AtomicCondition : IAtomicCondition
     {
         public AtomicCondition()
         {

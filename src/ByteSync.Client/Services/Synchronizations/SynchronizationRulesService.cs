@@ -26,21 +26,42 @@ public class SynchronizationRulesService : ISynchronizationRulesService
         _synchronizationRulesConverter = synchronizationRulesConverter;
     }
     
-    public void AddSynchronizationRule(SynchronizationRule synchronizationRule)
+    public void AddOrUpdateSynchronizationRule(SynchronizationRule synchronizationRule)
     {
-        var allSynchronizationRules = _synchronizationRuleRepository.Elements.ToList();
-        allSynchronizationRules.Add(synchronizationRule);
+        var updatedSynchronizationRules = _synchronizationRuleRepository.Elements.ToHashSet();
+        updatedSynchronizationRules.Remove(synchronizationRule);
+        updatedSynchronizationRules.Add(synchronizationRule);
+        
+        RefreshRulesAndMatches(updatedSynchronizationRules);
+
+        _synchronizationRuleRepository.AddOrUpdate(synchronizationRule);
+    }
+    public void Remove(SynchronizationRule synchronizationRule)
+    {
+        _synchronizationRuleRepository.Remove(synchronizationRule);
+        
+        RefreshRulesAndMatches();
+    }
+
+    public void Clear()
+    {
+        _synchronizationRuleRepository.Clear();
+        
+        RefreshRulesAndMatches();
+    }
+    
+    public List<LooseSynchronizationRule> GetLooseSynchronizationRules()
+    {
+        return _synchronizationRulesConverter.ConvertLooseSynchronizationRules(_synchronizationRuleRepository.Elements.ToList());
+    }
+    
+    private void RefreshRulesAndMatches(HashSet<SynchronizationRule>? allSynchronizationRules = null)
+    {
+        allSynchronizationRules ??= _synchronizationRuleRepository.Elements.ToHashSet();
         
         var allComparisonItems = _comparisonItemRepository.Elements.ToList();
         
         _dataPartIndexer.Remap(allSynchronizationRules);
         _synchronizationRuleMatcher.MakeMatches(allComparisonItems, allSynchronizationRules);
-        
-        _synchronizationRuleRepository.AddOrUpdate(synchronizationRule);
-    }
-
-    public List<LooseSynchronizationRule> GetLooseSynchronizationRules()
-    {
-        return _synchronizationRulesConverter.ConvertLooseSynchronizationRules(_synchronizationRuleRepository.Elements.ToList());
     }
 }

@@ -5,11 +5,11 @@ namespace ByteSync.Interfaces.Controls.Synchronizations;
 
 public interface ISynchronizationRulesService
 {
-    // public IObservableCache<SynchronizationRule, string> SynchronizationRules { get; }
+    void AddOrUpdateSynchronizationRule(SynchronizationRule synchronizationRule);
     
-    void AddSynchronizationRule(SynchronizationRule synchronizationRule);
+    void Remove(SynchronizationRule synchronizationRule);
     
-    // void ClearSynchronizationRules();
+    void Clear();
     
     List<LooseSynchronizationRule> GetLooseSynchronizationRules();
 }

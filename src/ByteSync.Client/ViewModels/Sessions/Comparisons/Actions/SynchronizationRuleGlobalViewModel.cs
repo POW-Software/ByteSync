@@ -172,7 +172,12 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
     {
         var atomicConditionEditViewModel = _actionEditViewModelFactory.BuildAtomicConditionEditViewModel(
             SelectedFileSystemType.FileSystemType);
-        
+
+        AddCondition(atomicConditionEditViewModel);
+    }
+
+    private void AddCondition(AtomicConditionEditViewModel atomicConditionEditViewModel)
+    {
         atomicConditionEditViewModel.PropertyChanged += OnConditionOrActionPropertyChanged;
         atomicConditionEditViewModel.RemoveRequested += OnConditionRemoveRequested;
         
@@ -184,6 +189,11 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
         var atomicActionEditViewModel = _actionEditViewModelFactory.BuildAtomicActionEditViewModel(
             SelectedFileSystemType.FileSystemType, true);
 
+        AddAction(atomicActionEditViewModel);
+    }
+
+    private void AddAction(AtomicActionEditViewModel atomicActionEditViewModel)
+    {
         atomicActionEditViewModel.PropertyChanged += OnConditionOrActionPropertyChanged;
         atomicActionEditViewModel.RemoveRequested += OnActionRemoveRequested;
         
@@ -200,7 +210,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
             {
                 ShowWarning = false;
                 
-                _synchronizationRulesService.AddSynchronizationRule(synchronizationRule);
+                _synchronizationRulesService.AddOrUpdateSynchronizationRule(synchronizationRule);
 
                 _dialogService.CloseFlyout();
             }
@@ -299,23 +309,22 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
         Conditions.Clear();
         Actions.Clear();
 
-        SelectedFileSystemType = FileSystemTypes.FirstOrDefault(fst => Equals(fst.FileSystemType, BaseAutomaticAction!.FileSystemType));
-        SelectedConditionMode = ConditionModes.FirstOrDefault(cm => Equals(cm.Mode, BaseAutomaticAction!.ConditionMode));
+        SelectedFileSystemType = FileSystemTypes.First(fst => Equals(fst.FileSystemType, BaseAutomaticAction!.FileSystemType));
+        SelectedConditionMode = ConditionModes.First(cm => Equals(cm.Mode, BaseAutomaticAction!.ConditionMode));
 
         foreach (var condition in BaseAutomaticAction!.Conditions)
         {
-            var atomicConditionEditViewModel = _actionEditViewModelFactory.BuildAtomicConditionEditViewModel(SelectedFileSystemType.FileSystemType);
-            atomicConditionEditViewModel.SetAtomicCondition(condition);
-            Conditions.Add(atomicConditionEditViewModel);
+            var atomicConditionEditViewModel = _actionEditViewModelFactory.BuildAtomicConditionEditViewModel(SelectedFileSystemType.FileSystemType, condition);
+            
+            AddCondition(atomicConditionEditViewModel);
         }
 
         foreach (var action in BaseAutomaticAction.Actions)
         {
             var automaticActionsActionEditViewModel = _actionEditViewModelFactory.BuildAtomicActionEditViewModel(
-                SelectedFileSystemType.FileSystemType, true);
+                SelectedFileSystemType.FileSystemType, true, action);
             
-            automaticActionsActionEditViewModel.SetSynchronizationAction(action);
-            Actions.Add(automaticActionsActionEditViewModel);
+            AddAction(automaticActionsActionEditViewModel);
         }
     }
 
