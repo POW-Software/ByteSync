@@ -1,4 +1,5 @@
-﻿using ByteSync.Common.Business.Versions;
+﻿using ByteSync.Common.Business.Misc;
+using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Updates;
@@ -25,6 +26,15 @@ public class SearchUpdateService : ISearchUpdateService
     {
         try
         {
+            if (IsApplicationInstalledFromStore)
+            {
+                _availableUpdateRepository.UpdateAvailableUpdates(new List<SoftwareVersion>());
+                
+                _logger.LogInformation("UpdateSystem: Application is installed from store, update check is disabled");
+                
+                return;
+            }
+            
             var updates = await _availableUpdatesLister.GetAvailableUpdates();
                 
             var applicableUpdates = new List<SoftwareVersion>();
@@ -47,15 +57,15 @@ public class SearchUpdateService : ISearchUpdateService
             
             if (nextAvailableVersions.Count == 0)
             {
-                _logger.LogInformation("UpdateManager.GetNextAvailableVersions: no available update found");
+                _logger.LogInformation("UpdateSystem: No available update found");
             }
             else
             {
-                _logger.LogInformation("UpdateManager.GetNextAvailableVersions: {count} available update(s) found", nextAvailableVersions.Count);
+                _logger.LogInformation("UpdateSystem: {count} available update(s) found", nextAvailableVersions.Count);
 
                 foreach (var softwareVersion in nextAvailableVersions)
                 {
-                    _logger.LogInformation("UpdateManager.GetNextAvailableVersions: - {version}, {level}", 
+                    _logger.LogInformation("UpdateSystem: - {version}, {level}", 
                         softwareVersion.Version, softwareVersion.Level);
                 }
             }
@@ -64,9 +74,26 @@ public class SearchUpdateService : ISearchUpdateService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "UpdateManager.GetNextAvailableVersions");
+            _logger.LogError(ex, "UpdateSystem");
             
             _availableUpdateRepository.Clear();
+        }
+    }
+
+    public bool IsApplicationInstalledFromStore
+    {
+        get
+        {
+            if (_environmentService.OSPlatform == OSPlatforms.Windows)
+            {
+                if (_environmentService.AssemblyFullName.Contains("\\Program Files\\WindowsApps\\")
+                    || _environmentService.AssemblyFullName.Contains("\\Program Files (x86)\\WindowsApps\\"))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 

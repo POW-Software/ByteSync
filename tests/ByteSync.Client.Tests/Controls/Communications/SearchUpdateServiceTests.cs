@@ -1,4 +1,5 @@
-﻿using ByteSync.Common.Business.Versions;
+﻿using ByteSync.Common.Business.Misc;
+using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Updates;
@@ -60,6 +61,8 @@ public class SearchUpdateServiceTests
                     list[0].Version == "1.0.1" && list[0].Level == PriorityLevel.Minimal &&
                     list[1].Version == "1.1.0" && list[1].Level == PriorityLevel.Recommended &&
                     list[2].Version == "2.0.0" && list[2].Level == PriorityLevel.Optional)), Times.Once);
+        _mockAvailableUpdateRepository.Verify(
+            m => m.Clear(), Times.Never);
     }
 
     [Test]
@@ -87,6 +90,8 @@ public class SearchUpdateServiceTests
             list => list.Count == 2 &&
                     list[0].Version == "1.1.0" && list[0].Level == PriorityLevel.Minimal &&
                     list[1].Version == "2.0.0" && list[1].Level == PriorityLevel.Optional)), Times.Once);
+        _mockAvailableUpdateRepository.Verify(
+            m => m.Clear(), Times.Never);
     }
     
     [Test]
@@ -114,6 +119,8 @@ public class SearchUpdateServiceTests
             list => list.Count == 2 &&
                     list[0].Version == "1.2.0" && list[0].Level == PriorityLevel.Recommended &&
                     list[1].Version == "2.0.0" && list[1].Level == PriorityLevel.Optional)), Times.Once);
+        _mockAvailableUpdateRepository.Verify(
+            m => m.Clear(), Times.Never);
     }
 
     [Test]
@@ -140,6 +147,34 @@ public class SearchUpdateServiceTests
         _mockAvailableUpdateRepository.Verify(m => m.UpdateAvailableUpdates(It.Is<List<SoftwareVersion>>(
             list => list.Count == 1 &&
                     list[0].Version == "1.1.0" && list[0].Level == PriorityLevel.Minimal)), Times.Once);
+        _mockAvailableUpdateRepository.Verify(
+            m => m.Clear(), Times.Never);
+    }
+    
+    [Theory]
+    [TestCase(@"C:\Program Files\WindowsApps\MyApp.exe")]
+    [TestCase(@"C:\Program Files (x86)\WindowsApps\MyApp.exe")]
+    public async Task SearchNextAvailableVersionsAsync_WhenInstalledFromStore_ShouldUpdateWithEmptyList(string assemblyFullName)
+    {
+        // Arrange
+        _mockEnvironmentService.SetupGet(m => m.AssemblyFullName)
+            .Returns(@"C:\Program Files\WindowsApps\MyApp.exe");
+        _mockEnvironmentService.SetupGet(m => m.OSPlatform)
+            .Returns(OSPlatforms.Windows);
+
+        // Act
+        await _searchUpdateService.SearchNextAvailableVersionsAsync();
+
+        // Assert
+        _mockAvailableUpdateRepository.Verify(
+            m => m.UpdateAvailableUpdates(It.Is<List<SoftwareVersion>>(list => list.Count == 0)),
+            Times.Once
+        );
+        _mockAvailableUpdateRepository.Verify(
+            m => m.UpdateAvailableUpdates(It.IsAny<List<SoftwareVersion>>()), Times.Once);
+        _mockAvailableUpdateRepository.Verify(
+            m => m.Clear(), Times.Never);
+        _mockAvailableUpdatesLister.Verify(m => m.GetAvailableUpdates(), Times.Never);
     }
 
     private SoftwareVersion CreateSoftwareVersion(string version, PriorityLevel level)
