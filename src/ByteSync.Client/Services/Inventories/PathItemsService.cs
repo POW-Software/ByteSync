@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Linq;
-using System.Threading.Tasks;
 using ByteSync.Business.PathItems;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Common.Business.Inventories;
@@ -127,8 +126,12 @@ public class PathItemsService : IPathItemsService
     {
         _pathItemRepository.Remove(pathItem);
         
-        var sessionMemberInfo = _sessionMemberRepository.GetElement(pathItem.ClientInstanceId)!;
-        UpdateCodesForMember(sessionMemberInfo);
+        var sessionMemberInfo = _sessionMemberRepository.GetElement(pathItem.ClientInstanceId);
+
+        if (sessionMemberInfo != null)
+        {
+            UpdateCodesForMember(sessionMemberInfo);
+        }
     }
 
     private void UpdateCodesForAllMembers(IEnumerable<SessionMemberInfo> allSessionMembersInfos)

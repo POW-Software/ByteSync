@@ -1,7 +1,7 @@
 ﻿using ByteSync.Business.Inventories;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Common.Helpers;
+using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
@@ -9,11 +9,12 @@ using ByteSync.Services.Inventories;
 
 namespace ByteSync.Services.Comparisons;
 
-public class InventoryComparer : IDisposable
+public class InventoryComparer : IInventoryComparer
 {
-    public InventoryComparer(SessionSettings sessionSettings)
+    public InventoryComparer(SessionSettings sessionSettings, InventoryIndexer? inventoryIndexer = null)
     {
         SessionSettings = sessionSettings;
+        Indexer = inventoryIndexer;
             
         InventoryLoaders = new List<InventoryLoader>();
         ComparisonResult = new ComparisonResult();

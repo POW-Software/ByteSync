@@ -1,0 +1,80 @@
+﻿using ByteSync.Business;
+using ByteSync.Business.Inventories;
+using ByteSync.Common.Business.Sessions.Cloud;
+using ByteSync.Common.Business.SharedFiles;
+using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Models.Inventories;
+using ByteSync.Services.Misc;
+
+namespace ByteSync.Services.Inventories;
+
+public class InventoryFinishedService : IInventoryFinishedService
+{
+    private readonly ISessionService _sessionService;
+    private readonly ICloudSessionLocalDataManager _cloudSessionLocalDataManager;
+    private readonly IFileUploaderFactory _fileUploaderFactory;
+    private readonly IInventoryService _inventoryService;
+    private readonly ISessionMemberService _sessionMemberService;
+
+    public InventoryFinishedService(ISessionService sessionService, ICloudSessionLocalDataManager cloudSessionLocalDataManager, 
+        IFileUploaderFactory fileUploaderFactory, IInventoryService inventoryService, ISessionMemberService sessionMemberService)
+    {
+        _sessionService = sessionService;
+        _cloudSessionLocalDataManager = cloudSessionLocalDataManager;
+        _fileUploaderFactory = fileUploaderFactory;
+        _inventoryService = inventoryService;
+        _sessionMemberService = sessionMemberService;
+    }
+    
+    public async Task SetLocalInventoryFinished(List<Inventory> inventories, LocalInventoryModes localInventoryMode)
+    {
+        var inventoriesFiles = BuildInventoriesLocalSharedFiles(inventories, localInventoryMode);
+
+        if (_sessionService.CurrentSession is CloudSession)
+        {
+            foreach (var localSharedFile in inventoriesFiles)
+            {
+                var fileUploader = _fileUploaderFactory.Build(localSharedFile.FullName, localSharedFile.SharedFileDefinition);
+                await fileUploader.Upload();
+            }
+        }
+
+        await _inventoryService.SetLocalInventory(inventoriesFiles, localInventoryMode);
+
+        await _sessionMemberService.UpdateCurrentMemberGeneralStatus(localInventoryMode.ConvertFinishInventory());
+    }
+    
+    private List<InventoryFile> BuildInventoriesLocalSharedFiles(List<Inventory> inventories, LocalInventoryModes localInventoryMode)
+    {
+        var session = _sessionService.CurrentSession!;
+
+        List<InventoryFile> result = new List<InventoryFile>();
+        foreach (var inventory in inventories)
+        {
+            var inventoryFullName = _cloudSessionLocalDataManager.GetCurrentMachineInventoryPath(inventory.Letter, localInventoryMode);
+            
+            var sharedFileDefinition = new SharedFileDefinition();
+
+            if (localInventoryMode == LocalInventoryModes.Base)
+            {
+                sharedFileDefinition.SharedFileType = SharedFileTypes.BaseInventory;
+            }
+            else
+            {
+                sharedFileDefinition.SharedFileType = SharedFileTypes.FullInventory;
+            }
+
+            sharedFileDefinition.ClientInstanceId = inventory.Endpoint.ClientInstanceId;
+            sharedFileDefinition.SessionId = session.SessionId;
+            sharedFileDefinition.AdditionalName = inventory.Letter;
+
+            var inventoryFile = new InventoryFile(sharedFileDefinition, inventoryFullName);
+
+            result.Add(inventoryFile);
+        }
+
+        return result;
+    }
+}
