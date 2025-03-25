@@ -2,7 +2,6 @@
 using ByteSync.Business.Comparisons;
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
@@ -55,12 +54,12 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         var doNothingAction = allActions.FirstOrDefault(a => a.IsDoNothing);
         if (doNothingAction != null)
         {
-            // Si une des actions est une doNothing, on n'utilisera que celle là
+            // If one of the actions is a doNothing, we will only use that one
             appliableActions.Add(doNothingAction);
         }
         else
         {
-            // Sinon, on regarde un par une
+            // Otherwise, we look one by one
             foreach (var atomicAction in allActions)
             {
                 if (CheckConsistencyAgainstAlreadySetActions(atomicAction, appliableActions))
@@ -103,11 +102,11 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         {
             if (comparisonItem.FileSystemType == FileSystemTypes.Directory)
             {
-                // Ces opérateurs ne peuvent pas s'appliquer à un Directory
+                // These operators cannot be applied to a Directory
                 return false;
             }
                 
-            // Sur une copie de contenu et/ou de date, Source et Destination doivent être définis
+            // On a content and/or date copy, Source and Destination must be defined
             if (atomicAction.Source == null)
             {
                 return false;
@@ -120,12 +119,12 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         }
         else if (atomicAction.Operator == ActionOperatorTypes.DoNothing)
         {
-            // Ne rien faire: toujours OK
+            // Do nothing: always OK
             return true;
         }
         else if (atomicAction.Operator == ActionOperatorTypes.Delete)
         {
-            // Sur une suppression, Source doit toujours être nulle, Destination doit toujours être définie
+            // On a deletion, Source must always be null, Destination must always be defined
             if (atomicAction.Source != null)
             {
                 return false;
@@ -140,11 +139,11 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         {
             if (comparisonItem.FileSystemType == FileSystemTypes.File)
             {
-                // Cet opérateur ne peut pas s'appliquer à un File
+                // This operator cannot be applied to a File
                 return false;
             }
                 
-            // Sur une création, Source doit toujours être nulle, Destination doit toujours être définie
+            // On a creation, Source must always be null, Destination must always be defined
             if (atomicAction.Source != null)
             {
                 return false;
@@ -179,14 +178,14 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
 
                 if (contentIdentitiesSources.Count != 1)
                 {
-                    // Pas de source ou trop de sources !
+                    // No source or too many sources!
                     return false;
                 }
                 var contentIdentitySource = contentIdentitiesSources.Single();
                 
                 if (contentIdentitySource.HasAnalysisError)
                 {
-                    // Si la source est en erreur d'analyse, on ne peut pas
+                    // If the source has an analysis error, we cannot proceed
                     return false;
                 }
                     
@@ -194,7 +193,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
                 var targetInventoryPart = atomicAction.Destination.GetApplicableInventoryPart();
                 var contentIdentityViewsTargets = comparisonItem.GetContentIdentities(targetInventoryPart);
 
-                // On ne peut pas envoyer sur un InventoryPartTypes.File qui n'est pas présent
+                // We cannot send to an InventoryPartTypes.File that is not present
                 if (contentIdentityViewsTargets.Count == 0 && targetInventoryPart.InventoryPartType == FileSystemTypes.File)
                 {
                     return false;
@@ -207,19 +206,18 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
                                                              && ci.InventoryPartsByLastWriteTimes.Keys.Single()
                                                                  .Equals(contentIdentitySource.InventoryPartsByLastWriteTimes.Keys.Single())))
                 {
-                    // Dans ce cas, le contenu est le même et il n'y a qu'une seule date => il n'y a rien à copier
+                    // In this case, the content is the same and there is only one date => there is nothing to copy
                     return false;
                 }
 
                 if (contentIdentityViewsTargets.Count > 0 && contentIdentityViewsTargets.All(t => t.HasAnalysisError))
                 {
-                    // Si toutes les targets sont en erreur d'analyse, on ne peut pas
+                    // If all targets have an analysis error, we cannot proceed
                     return false;
                 }
-                        
-                    
-                // Si CopyContentOnly et pas de cible ou si une cible dont contenu différent, c'est OK
-                // On inverse la condition
+                
+                // If CopyContentOnly and no target or if a target with different content, it's OK
+                // We invert the condition
                 if (atomicAction.IsSynchronizeContentOnly && contentIdentityViewsTargets.Count != 0 &&
                     contentIdentityViewsTargets.All(t => contentIdentitySource.Core!.Equals(t.Core!)))
                 {
@@ -235,7 +233,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
                 
             if (contentIdentitiesTargets.Count == 0)
             {
-                // Pas de destination, interdit sur une date ou une suppression 
+                // No destination, forbidden on a date or a deletion 
                 return false;
             }
         }
@@ -244,7 +242,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         {
             var targetInventoryPart = atomicAction.Destination.GetApplicableInventoryPart();
                 
-            // On ne peut rien faire sur une target de type InventoryPartTypes.File
+            // We cannot do anything on a target of type InventoryPartTypes.File
             if (targetInventoryPart.InventoryPartType == FileSystemTypes.File)
             {
                 return false;
@@ -254,7 +252,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
 
             if (contentIdentitiesTargets.Count != 0)
             {
-                // Il y a une destination, interdit sur une création de répertoire
+                // There is a destination, forbidden on a directory creation
                 return false;
             }
         }
@@ -271,19 +269,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
             alreadySetAtomicActions = alreadySetAtomicActions
                 .Where(a => a.IsTargeted)
                 .ToList();
-            
-            // // 14/02/2023 : Une targetedAction est prioritaire (et écrase) sur les SynchronizationRules
-            // // Du coup, on ne considère que que les targetedActions déjà en place // ou les actions similaires
-            // alreadySetAtomicActions = comparisonItemViewModel.TD_SynchronizationActions
-            //     .Select(sa => sa.AtomicAction)
-            //     //.Where(a => a.IsTargeted || a.IsSimilarTo(atomicAction))
-            //     .Where(a => a.IsTargeted)
-            //     .ToList();
         }
-        // else
-        // {
-        //     alreadySetAtomicActions = comparisonItemViewModel.TD_SynchronizationActions.Select(sa => sa.AtomicAction).ToList();
-        // }
 
         return CheckConsistencyAgainstAlreadySetActions(atomicAction, alreadySetAtomicActions);
     }
@@ -297,33 +283,24 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         
         if (!atomicAction.IsTargeted && alreadySetAtomicActions.Any(a => a.IsDoNothing))
         {
-            // Si l'action n'est pas Targeted et qu'une action est déjà en DoNothing, on ne peut pas l'enregistrer
+            // If the action is not Targeted and an action is already in DoNothing, we cannot register it
             return false;
         }
 
-        // Une source ne pas être destination
-        // On ne peut pas être destination plusieurs fois, mais on peut être source plusieurs fois
-        // On ne peut pas être supprimé si on est source ou destination d'une autre action
+        // A source cannot be a destination
+        // We cannot be a destination multiple times, but we can be a source multiple times
+        // We cannot be deleted if we are the source or destination of another action
         if (alreadySetAtomicActions.Any(ma =>
-                !atomicAction.IsDelete && // 16/02/2023: A quoi sert ce IsDelete ?
+                !atomicAction.IsDelete && // 16/02/2023: What is the purpose of this IsDelete?
                 Equals(ma.Destination, atomicAction.Source)))
         {
-            // Une source ne pas être destination d'une autre action déjà enregistrée
+            // A source cannot be the destination of another already registered action
             return false;
         }
             
-        // 16/02/2023: Règle commentée car en doublon avec la règle ci dessous
-        // if (alreadySetAtomicActions.Any(ma =>
-        //         !atomicAction.IsDelete &&
-        //         Equals(ma.Source, atomicAction.Destination)))
-        // {
-        //     // Une source ne pas être destination d'une autre action déjà enregistrée
-        //     return false;
-        // }
-            
         if (alreadySetAtomicActions.Any(ma => Equals(ma.Source, atomicAction.Destination)))
         {
-            // Une destination ne peut pas être source d'une autre action déjà enregistrée
+            // A destination cannot be the source of another already registered action
             return false;
         }
         
@@ -336,16 +313,16 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
                 if ((!alreadySetAtomicAction.IsSynchronizeDate || !atomicAction.IsSynchronizeContentOnly)
                     && (!alreadySetAtomicAction.IsSynchronizeContentOnly || !atomicAction.IsSynchronizeDate))
                 {
-                    // On peut être destination plusieurs fois si une est en IsSynchronizeDate et l'autre en IsSynchronizeContentOnly
-                    // Car complémentaire
+                    // We can be a destination multiple times if one is in IsSynchronizeDate and the other in IsSynchronizeContentOnly
+                    // Because they are complementary
                     
-                    // Dans le cas contraire, c'est pas OK
+                    // Otherwise, it's not OK
                     return false;
                 }
             }
             else
             {
-                // On ne peut pas être destination plusieurs fois => Une destination ne peut être destination d'une autre action déjà enregistrée
+                // We cannot be a destination multiple times => A destination cannot be the destination of another already registered action
                 return false;
             }
         }
@@ -355,7 +332,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
             if (alreadySetAtomicActions.Any(ma => 
                     Equals(ma.Destination, atomicAction.Destination) || Equals(ma.Source, atomicAction.Destination)))
             {
-                // Impossible d'enregistrer l'opération de suppression si la destination est déjà source ou destination d'une autre action
+                // Impossible to register the deletion operation if the destination is already the source or destination of another action
                 return false;
             }
         }
@@ -363,13 +340,13 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         if (alreadySetAtomicActions.Any(ma => ma.Operator == ActionOperatorTypes.Delete &&
                 (Equals(ma.Destination, atomicAction.Destination) || Equals(ma.Destination, atomicAction.Source))))
         {
-            // Impossible d'enregistrer une opération si la Source ou la Destination sont destination d'une suppression
+            // Impossible to register an operation if the Source or Destination are the destination of a deletion
             return false;
         }
 
         if (atomicAction.Operator != ActionOperatorTypes.DoNothing && alreadySetAtomicActions.Any(s => s.IsSimilarTo(atomicAction)))
         {
-            // Impossible d'enregistrer un doublon d'une action déjà enregistrée
+            // Impossible to register a duplicate of an already registered action
             return false;
         }
 
