@@ -106,7 +106,8 @@ public class ComparisonResultPreparer
 
         foreach (var inventoryData in InventoryDatas)
         {
-            using InventoryComparer inventoryComparer = new InventoryComparer(SessionSettings);
+            var initialStatusBuilder = new InitialStatusBuilder();
+            using InventoryComparer inventoryComparer = new InventoryComparer(SessionSettings, initialStatusBuilder);
             inventoryComparer.Indexer = inventoryData.InventoryBuilder.Indexer;
 
             foreach (var inventoryBaseFile in BaseInventoryFiles)
@@ -124,7 +125,8 @@ public class ComparisonResultPreparer
             await inventoryData.InventoryBuilder.RunAnalysisAsync(inventoryFull, items, new CancellationToken());
         }
 
-        using InventoryComparer inventoryComparerFull = new InventoryComparer(SessionSettings);
+        var initialStatusBuilderFull = new InitialStatusBuilder();
+        using InventoryComparer inventoryComparerFull = new InventoryComparer(SessionSettings, initialStatusBuilderFull);
         foreach (var fullInventoryFile in FullInventoryFiles)
         {
             inventoryComparerFull.AddInventory(fullInventoryFile);
