@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Runtime.InteropServices;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Common.Helpers;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 
