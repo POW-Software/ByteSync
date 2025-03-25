@@ -5,7 +5,7 @@ using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
 
 namespace ByteSync.Interfaces.Controls.Comparisons;
 
-public interface ITargetedActionsManager
+public interface ITargetedActionsService
 {
     public void AddTargetedAction(AtomicAction atomicAction, ComparisonItem comparisonItem);
     

@@ -12,12 +12,12 @@ using ByteSync.Interfaces.Controls.Synchronizations;
 namespace ByteSync.Tests.Controls.Comparisons;
 
 [TestFixture]
-public class TargetedActionsManagerTests
+public class TargetedActionsServiceTests
 {
     private Mock<ISynchronizationRuleMatcher> _synchronizationRuleMatcherMock;
     private Mock<IAtomicActionRepository> _atomicActionRepositoryMock;
     private Mock<ISynchronizationRuleRepository> _synchronizationRuleRepositoryMock;
-    private TargetedActionsManager _manager;
+    private TargetedActionsService _targetedActionsService;
 
     [SetUp]
     public void SetUp()
@@ -26,7 +26,7 @@ public class TargetedActionsManagerTests
         _atomicActionRepositoryMock = new Mock<IAtomicActionRepository>();
         _synchronizationRuleRepositoryMock = new Mock<ISynchronizationRuleRepository>();
 
-        _manager = new TargetedActionsManager(
+        _targetedActionsService = new TargetedActionsService(
             _synchronizationRuleMatcherMock.Object,
             _atomicActionRepositoryMock.Object,
             _synchronizationRuleRepositoryMock.Object
@@ -44,7 +44,7 @@ public class TargetedActionsManagerTests
         
         var comparisonItem = new ComparisonItem(pathIdentity);
 
-        _manager.AddTargetedAction(atomicAction, comparisonItem);
+        _targetedActionsService.AddTargetedAction(atomicAction, comparisonItem);
 
         _atomicActionRepositoryMock.Verify(r => r.Remove(It.IsAny<AtomicAction>()), Times.Never);
         _atomicActionRepositoryMock.Verify(r => r.AddOrUpdate(It.IsAny<AtomicAction>()), Times.Once);
@@ -63,7 +63,7 @@ public class TargetedActionsManagerTests
             .Returns(new List<AtomicAction>());
         var atomicAction = new AtomicAction { Operator = ActionOperatorTypes.Create };
 
-        _manager.AddTargetedAction(atomicAction, comparisonItems);
+        _targetedActionsService.AddTargetedAction(atomicAction, comparisonItems);
 
         _atomicActionRepositoryMock.Verify(r => r.AddOrUpdate(It.IsAny<AtomicAction>()),
             Times.Exactly(comparisonItems.Count));
@@ -83,7 +83,7 @@ public class TargetedActionsManagerTests
         var doNothingAction = new AtomicAction { Operator = ActionOperatorTypes.DoNothing };
 
         // Act
-        _manager.AddTargetedAction(doNothingAction, new ComparisonItem(new PathIdentity(FileSystemTypes.File, "key", "name", "data")));
+        _targetedActionsService.AddTargetedAction(doNothingAction, new ComparisonItem(new PathIdentity(FileSystemTypes.File, "key", "name", "data")));
 
         // Assert
         _atomicActionRepositoryMock.Verify(r => r.Remove(existingActions), Times.Once);
@@ -104,7 +104,7 @@ public class TargetedActionsManagerTests
         var newDoNothingAction = new AtomicAction { Operator = ActionOperatorTypes.DoNothing };
 
         // Act
-        _manager.AddTargetedAction(newDoNothingAction, new ComparisonItem(new PathIdentity(FileSystemTypes.File, "key", "name", "data")));
+        _targetedActionsService.AddTargetedAction(newDoNothingAction, new ComparisonItem(new PathIdentity(FileSystemTypes.File, "key", "name", "data")));
 
         // Assert
         _atomicActionRepositoryMock.Verify(r => r.Remove(doNothingExisting), Times.Once);

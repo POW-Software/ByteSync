@@ -9,13 +9,13 @@ using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
 
 namespace ByteSync.Services.Comparisons;
 
-public class TargetedActionsManager : ITargetedActionsManager
+public class TargetedActionsService : ITargetedActionsService
 {
     private readonly ISynchronizationRuleMatcher _synchronizationRuleMatcher;
     private readonly IAtomicActionRepository _atomicActionRepository;
     private readonly ISynchronizationRuleRepository _synchronizationRuleRepository;
 
-    public TargetedActionsManager(ISynchronizationRuleMatcher synchronizationRuleMatcher, IAtomicActionRepository atomicActionRepository,
+    public TargetedActionsService(ISynchronizationRuleMatcher synchronizationRuleMatcher, IAtomicActionRepository atomicActionRepository,
         ISynchronizationRuleRepository synchronizationRuleRepository)
     {
         _synchronizationRuleMatcher = synchronizationRuleMatcher;

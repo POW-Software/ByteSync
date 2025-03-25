@@ -24,7 +24,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
 
     private readonly ILocalizationService _localizationService;
     private readonly IDialogService _dialogService;
-    private readonly ITargetedActionsManager _targetedActionsManager;
+    private readonly ITargetedActionsService _targetedActionsService;
     private readonly IAtomicActionConsistencyChecker _atomicActionConsistencyChecker;
     private readonly IActionEditViewModelFactory _actionEditViewModelFactory;
 
@@ -37,7 +37,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
 
     public TargetedActionGlobalViewModel(List<ComparisonItem> comparisonItems, 
         IDialogService dialogService, ILocalizationService localizationService,
-        ITargetedActionsManager targetedActionsManager, IAtomicActionConsistencyChecker atomicActionConsistencyChecker,
+        ITargetedActionsService targetedActionsService, IAtomicActionConsistencyChecker atomicActionConsistencyChecker,
         IActionEditViewModelFactory actionEditViewModelFactory)
     {
         ComparisonItems = comparisonItems;
@@ -46,7 +46,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         
         _dialogService = dialogService;
         _localizationService = localizationService;
-        _targetedActionsManager = targetedActionsManager;
+        _targetedActionsService = targetedActionsService;
         _atomicActionConsistencyChecker = atomicActionConsistencyChecker;
         _actionEditViewModelFactory = actionEditViewModelFactory;
 
@@ -156,7 +156,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
             {
                 ResetWarning();
                 
-                _targetedActionsManager.AddTargetedAction(atomicAction, ComparisonItems);
+                _targetedActionsService.AddTargetedAction(atomicAction, ComparisonItems);
 
                 _dialogService.CloseFlyout();
             }
@@ -180,7 +180,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
             
             ResetWarning();
 
-            _targetedActionsManager.AddTargetedAction(atomicAction, result.ValidComparisons);
+            _targetedActionsService.AddTargetedAction(atomicAction, result.ValidComparisons);
 
             _dialogService.CloseFlyout();
         }
