@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Linq;
-using System.Threading.Tasks;
 using ByteSync.Business.PathItems;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Common.Business.Inventories;

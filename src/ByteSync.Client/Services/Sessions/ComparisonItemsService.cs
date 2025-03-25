@@ -3,6 +3,7 @@ using System.Reactive.Subjects;
 using ByteSync.Business;
 using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
@@ -16,16 +17,16 @@ public class ComparisonItemsService : IComparisonItemsService
     private readonly IInventoryService _inventoryService;
     private readonly IDataPartIndexer _dataPartIndexer;
     private readonly IComparisonItemRepository _comparisonItemRepository;
-    private readonly IInventoryFileRepository _inventoryFileRepository;
+    private readonly IInventoryComparerFactory _inventoryComparerFactory;
 
     public ComparisonItemsService(ISessionService sessionService, IInventoryService inventoriesService, IInventoryFileRepository inventoryFileRepository, 
-        IComparisonItemRepository comparisonItemRepository, IDataPartIndexer dataPartIndexer)
+        IComparisonItemRepository comparisonItemRepository, IDataPartIndexer dataPartIndexer, IInventoryComparerFactory inventoryComparerFactory)
     {
         _sessionService = sessionService;
         _inventoryService = inventoriesService;
-        _inventoryFileRepository = inventoryFileRepository;
         _comparisonItemRepository = comparisonItemRepository;
         _dataPartIndexer = dataPartIndexer;
+        _inventoryComparerFactory = inventoryComparerFactory;
         
         ComparisonResult = new ReplaySubject<ComparisonResult?>(1);
         ComparisonResult.OnNext(null);
@@ -67,10 +68,7 @@ public class ComparisonItemsService : IComparisonItemsService
 
     private async Task ComputeComparisonResult()
     {
-        using var inventoryComparer = new InventoryComparer(_sessionService.CurrentSessionSettings!);
-                
-        var inventoriesFiles = _inventoryFileRepository.GetAllInventoriesFiles(LocalInventoryModes.Full);
-        inventoryComparer.AddInventories(inventoriesFiles);
+        using var inventoryComparer = _inventoryComparerFactory.CreateInventoryComparer(LocalInventoryModes.Full);
         var comparisonResult = inventoryComparer.Compare();
 
         _dataPartIndexer.BuildMap(comparisonResult.Inventories);

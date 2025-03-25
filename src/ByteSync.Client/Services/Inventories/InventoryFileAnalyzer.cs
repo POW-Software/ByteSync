@@ -1,10 +1,8 @@
 ﻿using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Business;
 using ByteSync.Business.Arguments;
 using ByteSync.Common.Business.Misc;
-using ByteSync.Common.Helpers;
 using ByteSync.Models.FileSystems;
 using FastRsync.Signature;
 using Serilog;
