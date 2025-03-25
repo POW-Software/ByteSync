@@ -1,7 +1,7 @@
 ﻿using ByteSync.Business;
 using ByteSync.Business.Inventories;
-using ByteSync.Factories;
 using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Inventories;
@@ -11,11 +11,11 @@ public class FullInventoryRunner : IFullInventoryRunner
     private readonly IInventoryFinishedService _inventoryFinishedService;
     private readonly IInventoryService _inventoryService;
     private readonly ICloudSessionLocalDataManager _cloudSessionLocalDataManager;
-    private readonly InventoryComparerFactory _inventoryComparerFactory;
+    private readonly IInventoryComparerFactory _inventoryComparerFactory;
     private readonly ILogger<FullInventoryRunner> _logger;
 
     public FullInventoryRunner(IInventoryFinishedService inventoryFinishedService, IInventoryService inventoryService, 
-        ICloudSessionLocalDataManager cloudSessionLocalDataManager, InventoryComparerFactory inventoryComparerFactory, ILogger<FullInventoryRunner> logger)
+        ICloudSessionLocalDataManager cloudSessionLocalDataManager, IInventoryComparerFactory inventoryComparerFactory, ILogger<FullInventoryRunner> logger)
     {
         _inventoryFinishedService = inventoryFinishedService;
         _inventoryService = inventoryService;

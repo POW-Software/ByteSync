@@ -126,8 +126,12 @@ public class PathItemsService : IPathItemsService
     {
         _pathItemRepository.Remove(pathItem);
         
-        var sessionMemberInfo = _sessionMemberRepository.GetElement(pathItem.ClientInstanceId)!;
-        UpdateCodesForMember(sessionMemberInfo);
+        var sessionMemberInfo = _sessionMemberRepository.GetElement(pathItem.ClientInstanceId);
+
+        if (sessionMemberInfo != null)
+        {
+            UpdateCodesForMember(sessionMemberInfo);
+        }
     }
 
     private void UpdateCodesForAllMembers(IEnumerable<SessionMemberInfo> allSessionMembersInfos)
