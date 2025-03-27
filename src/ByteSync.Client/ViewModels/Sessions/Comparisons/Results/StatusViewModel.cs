@@ -5,10 +5,10 @@ using Avalonia.Threading;
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Controls.Themes;
+using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.Inventories;
-using ByteSync.Services.Comparisons;
 using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
 using DynamicData;
 using ReactiveUI.Fody.Helpers;
@@ -51,7 +51,7 @@ public class StatusViewModel : ViewModelBase, IDisposable
     }
 
     public StatusViewModel(ComparisonItem comparisonItem, List<Inventory> inventories, IThemeService themeService, 
-        ISharedActionsGroupRepository sharedActionsGroupRepository) : this()
+        ISharedActionsGroupRepository sharedActionsGroupRepository, IStatusViewGroupsComputerFactory statusViewGroupsComputerFactory ) : this()
     {
         ComparisonItem = comparisonItem;
         AllInventories = inventories;
@@ -97,7 +97,7 @@ public class StatusViewModel : ViewModelBase, IDisposable
 
         if (!Status.IsOK)
         {
-            using var statusViewGroupsComputer = new StatusViewGroupsComputer(this);
+            var statusViewGroupsComputer = statusViewGroupsComputerFactory.BuildStatusViewGroupsComputer(this);
             statusViewGroupsComputer.Compute();
 
             InitBrushes();
