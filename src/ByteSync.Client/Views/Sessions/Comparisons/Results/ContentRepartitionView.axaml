@@ -7,10 +7,10 @@
              xmlns:misc1="clr-namespace:ByteSync.Views.Misc"
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="100"
-             x:Class="ByteSync.Views.Sessions.Comparisons.Results.StatusView">
+             x:Class="ByteSync.Views.Sessions.Comparisons.Results.ContentRepartitionView">
     
     <Design.DataContext>
-        <results:StatusViewModel />
+        <results:ContentRepartitionViewModel />
     </Design.DataContext>
     
     <UserControl.Resources>

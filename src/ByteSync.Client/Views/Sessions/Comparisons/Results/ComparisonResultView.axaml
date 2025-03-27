@@ -215,7 +215,18 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <results:StatusView DataContext="{Binding StatusViewModel}" />
+                                <results:ContentRepartitionView DataContext="{Binding ContentRepartitionViewModel}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    
+                    <DataGridTemplateColumn Width="Auto" CanUserResize="True">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="CRV_TEMP" Classes="PowDataGridHeader" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <results:ItemSynchronizationStatusView DataContext="{Binding ItemSynchronizationStatusViewModel}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

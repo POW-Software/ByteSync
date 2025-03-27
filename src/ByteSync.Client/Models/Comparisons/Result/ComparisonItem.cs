@@ -10,7 +10,8 @@ public class ComparisonItem
     {
         PathIdentity = pathIdentity;
         ContentIdentities = new HashSet<ContentIdentity>();
-        Status = new Status(PathIdentity);
+        ContentRepartition = new ContentRepartition(PathIdentity);
+        ItemSynchronizationStatus = new ItemSynchronizationStatus(PathIdentity);
     }
 
     public PathIdentity PathIdentity { get; }
@@ -19,7 +20,9 @@ public class ComparisonItem
         
     public ComparisonResult ComparisonResult { get; set; }
 
-    public Status Status { get; set; }
+    public ContentRepartition ContentRepartition { get; set; }
+    
+    public ItemSynchronizationStatus ItemSynchronizationStatus { get; set; }
 
     public FileSystemTypes FileSystemType
     {

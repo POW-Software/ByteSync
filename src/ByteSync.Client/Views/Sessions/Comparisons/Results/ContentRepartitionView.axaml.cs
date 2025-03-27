@@ -3,9 +3,9 @@ using Avalonia.Markup.Xaml;
 
 namespace ByteSync.Views.Sessions.Comparisons.Results
 {
-    public class StatusView : UserControl
+    public class ContentRepartitionView : UserControl
     {
-        public StatusView()
+        public ContentRepartitionView()
         {
             InitializeComponent();
         }

@@ -40,8 +40,8 @@ public class InitialStatusBuilder : IInitialStatusBuilder
             BuildInitialStatusForDirectory(comparisonItem);
         }
         
-        comparisonItem.Status.MissingInventories.AddAll(NonFoundInventories);
-        comparisonItem.Status.MissingInventoryParts.AddAll(NonFoundInventoryParts);
+        comparisonItem.ContentRepartition.MissingInventories.AddAll(NonFoundInventories);
+        comparisonItem.ContentRepartition.MissingInventoryParts.AddAll(NonFoundInventoryParts);
     }
 
     private void BuildInitialStatusForFile(ComparisonItem comparisonItem)
@@ -50,15 +50,15 @@ public class InitialStatusBuilder : IInitialStatusBuilder
         {
             if (comparisonItem.FileSystemType == FileSystemTypes.File)
             {
-                if (!comparisonItem.Status.FingerPrintGroups.ContainsKey(contentIdentity.Core))
+                if (!comparisonItem.ContentRepartition.FingerPrintGroups.ContainsKey(contentIdentity.Core))
                 {
-                    comparisonItem.Status.FingerPrintGroups.Add(contentIdentity.Core, new HashSet<InventoryPart>());
+                    comparisonItem.ContentRepartition.FingerPrintGroups.Add(contentIdentity.Core, new HashSet<InventoryPart>());
                 }
             }
 
             foreach (KeyValuePair<DateTime, HashSet<InventoryPart>> pair in contentIdentity.InventoryPartsByLastWriteTimes)
             {
-                comparisonItem.Status.FingerPrintGroups[contentIdentity.Core].AddAll(pair.Value);
+                comparisonItem.ContentRepartition.FingerPrintGroups[contentIdentity.Core].AddAll(pair.Value);
 
                 foreach (var inventoryPart in pair.Value)
                 {
@@ -69,12 +69,12 @@ public class InitialStatusBuilder : IInitialStatusBuilder
             
             foreach (var pair in contentIdentity.InventoryPartsByLastWriteTimes)
             {
-                if (!comparisonItem.Status.LastWriteTimeGroups.ContainsKey(pair.Key))
+                if (!comparisonItem.ContentRepartition.LastWriteTimeGroups.ContainsKey(pair.Key))
                 {
-                    comparisonItem.Status.LastWriteTimeGroups.Add(pair.Key, new HashSet<InventoryPart>());
+                    comparisonItem.ContentRepartition.LastWriteTimeGroups.Add(pair.Key, new HashSet<InventoryPart>());
                 }
 
-                comparisonItem.Status.LastWriteTimeGroups[pair.Key].AddAll(pair.Value);
+                comparisonItem.ContentRepartition.LastWriteTimeGroups[pair.Key].AddAll(pair.Value);
 
                 foreach (var inventoryPart in pair.Value)
                 {

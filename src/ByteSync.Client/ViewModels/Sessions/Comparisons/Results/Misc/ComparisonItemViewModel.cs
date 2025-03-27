@@ -25,7 +25,8 @@ public class ComparisonItemViewModel : IDisposable
     private readonly ITargetedActionsService _targetedActionsService;
     private readonly IAtomicActionRepository _atomicActionRepository;
     private readonly IContentIdentityViewModelFactory _contentIdentityViewModelFactory;
-    private readonly IStatusViewModelFactory _statusViewModelFactory;
+    private readonly IContentRepartitionViewModelFactory _contentRepartitionViewModelFactory;
+    private readonly IItemSynchronizationStatusViewModelFactory _itemSynchronizationStatusViewModelFactory;
     private ReadOnlyObservableCollection<SynchronizationActionViewModel> _data;
     private readonly ISynchronizationActionViewModelFactory _synchronizationActionViewModelFactory;
     private readonly CompositeDisposable _compositeDisposable;
@@ -33,7 +34,8 @@ public class ComparisonItemViewModel : IDisposable
 
     public ComparisonItemViewModel(ITargetedActionsService targetedActionsService,
         IAtomicActionRepository atomicActionRepository, IContentIdentityViewModelFactory contentIdentityViewModelFactory,
-        IStatusViewModelFactory statusViewModelFactory, ComparisonItem comparisonItem, List<Inventory> inventories,
+        IContentRepartitionViewModelFactory contentRepartitionViewModelFactory, 
+        IItemSynchronizationStatusViewModelFactory itemSynchronizationStatusViewModelFactory, ComparisonItem comparisonItem, List<Inventory> inventories,
         ISynchronizationActionViewModelFactory synchronizationActionViewModelFactory, IFormatKbSizeConverter formatKbSizeConverter)
     {
         ComparisonItem = comparisonItem;
@@ -42,7 +44,8 @@ public class ComparisonItemViewModel : IDisposable
         _targetedActionsService = targetedActionsService;
         _atomicActionRepository = atomicActionRepository;
         _contentIdentityViewModelFactory = contentIdentityViewModelFactory;
-        _statusViewModelFactory = statusViewModelFactory;
+        _contentRepartitionViewModelFactory = contentRepartitionViewModelFactory;
+        _itemSynchronizationStatusViewModelFactory = itemSynchronizationStatusViewModelFactory;
         _synchronizationActionViewModelFactory = synchronizationActionViewModelFactory;
         _formatKbSizeConverter = formatKbSizeConverter;
 
@@ -87,8 +90,10 @@ public class ComparisonItemViewModel : IDisposable
             }
         }
 
-        StatusViewModel = _statusViewModelFactory.CreateStatusViewModel(ComparisonItem, inventories);
-        _compositeDisposable.Add(StatusViewModel);
+        ContentRepartitionViewModel = _contentRepartitionViewModelFactory.CreateContentRepartitionViewModel(ComparisonItem, inventories);
+        _compositeDisposable.Add(ContentRepartitionViewModel);
+        
+        ItemSynchronizationStatusViewModel = _itemSynchronizationStatusViewModelFactory.CreateItemSynchronizationStatusViewModel(ComparisonItem, inventories);
     }
 
     internal ComparisonItem ComparisonItem { get; }
@@ -111,7 +116,9 @@ public class ComparisonItemViewModel : IDisposable
     
     public ReadOnlyObservableCollection<SynchronizationActionViewModel> SynchronizationActions => _data;
 
-    internal StatusViewModel StatusViewModel { get; private set; }
+    internal ContentRepartitionViewModel ContentRepartitionViewModel { get; private set; }
+    
+    internal ItemSynchronizationStatusViewModel ItemSynchronizationStatusViewModel { get; private set; }
     
     private List<string>? AtomicActionsIds { get; set; }
     
@@ -235,7 +242,7 @@ public class ComparisonItemViewModel : IDisposable
 
     public void OnThemeChanged()
     {
-        StatusViewModel.OnThemeChanged();
+        ContentRepartitionViewModel.OnThemeChanged();
     }
 
     public void OnLocaleChanged(ILocalizationService localizationService)

@@ -385,20 +385,20 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
 
             foreach (var advancedExpression in advancedExpressions)
             {
-                if (advancedExpression.Equals(":notok", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    if (comparisonItem.Status.IsOK)
-                    {
-                        return false;
-                    }
-                }
-                if (advancedExpression.Equals(":ok", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    if (!comparisonItem.Status.IsOK)
-                    {
-                        return false;
-                    }
-                }
+                // if (advancedExpression.Equals(":notok", StringComparison.InvariantCultureIgnoreCase))
+                // {
+                //     if (comparisonItem.ContentRepartition.IsOK)
+                //     {
+                //         return false;
+                //     }
+                // }
+                // if (advancedExpression.Equals(":ok", StringComparison.InvariantCultureIgnoreCase))
+                // {
+                //     if (!comparisonItem.ContentRepartition.IsOK)
+                //     {
+                //         return false;
+                //     }
+                // }
                 if (advancedExpression.Equals(":file", StringComparison.InvariantCultureIgnoreCase))
                 {
                     if (comparisonItem.FileSystemType == FileSystemTypes.Directory)

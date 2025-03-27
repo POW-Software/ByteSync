@@ -1,6 +1,6 @@
 ﻿namespace ByteSync.Interfaces.Controls.Inventories;
 
-public interface IStatusViewGroupsComputer
+public interface IContentRepartitionGroupsComputer
 {
     void Compute();
 }

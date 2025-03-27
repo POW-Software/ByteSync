@@ -6,18 +6,18 @@ using ByteSync.ViewModels.Sessions.Comparisons.Results;
 
 namespace ByteSync.Factories.ViewModels;
 
-public class StatusViewModelFactory : IStatusViewModelFactory
+public class ContentRepartitionViewModelFactory : IContentRepartitionViewModelFactory
 {
     private readonly IComponentContext _context;
 
-    public StatusViewModelFactory(IComponentContext context)
+    public ContentRepartitionViewModelFactory(IComponentContext context)
     {
         _context = context;
     }
     
-    public StatusViewModel CreateStatusViewModel(ComparisonItem comparisonItem, List<Inventory> inventories)
+    public ContentRepartitionViewModel CreateContentRepartitionViewModel(ComparisonItem comparisonItem, List<Inventory> inventories)
     {
-        var result = _context.Resolve<StatusViewModel>(
+        var result = _context.Resolve<ContentRepartitionViewModel>(
             new TypedParameter(typeof(ComparisonItem), comparisonItem),
             new TypedParameter(typeof(List<Inventory>), inventories));
 

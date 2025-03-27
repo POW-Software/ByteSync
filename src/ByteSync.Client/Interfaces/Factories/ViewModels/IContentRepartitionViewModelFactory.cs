@@ -4,7 +4,7 @@ using ByteSync.ViewModels.Sessions.Comparisons.Results;
 
 namespace ByteSync.Interfaces.Factories.ViewModels;
 
-public interface IStatusViewModelFactory
+public interface IContentRepartitionViewModelFactory
 {
-    StatusViewModel CreateStatusViewModel(ComparisonItem comparisonItem, List<Inventory> inventories);
+    ContentRepartitionViewModel CreateContentRepartitionViewModel(ComparisonItem comparisonItem, List<Inventory> inventories);
 }

@@ -145,7 +145,7 @@
       <DependentUpon>ComparisonResultView.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\Sessions\Comparisons\Results\StatusView.axaml.cs">
+    <Compile Update="Views\Sessions\Comparisons\Results\ContentRepartitionView.axaml.cs">
       <DependentUpon>StatusView.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
