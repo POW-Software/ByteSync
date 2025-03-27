@@ -40,8 +40,6 @@ public class InitialStatusBuilder : IInitialStatusBuilder
             BuildInitialStatusForDirectory(comparisonItem);
         }
         
-        // NonFoundInventoryParts.Clear();
-        
         comparisonItem.Status.MissingInventories.AddAll(NonFoundInventories);
         comparisonItem.Status.MissingInventoryParts.AddAll(NonFoundInventoryParts);
     }
