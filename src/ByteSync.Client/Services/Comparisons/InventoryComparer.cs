@@ -11,10 +11,15 @@ namespace ByteSync.Services.Comparisons;
 
 public class InventoryComparer : IInventoryComparer
 {
-    public InventoryComparer(SessionSettings sessionSettings, InventoryIndexer? inventoryIndexer = null)
+    private readonly IInitialStatusBuilder _initialStatusBuilder;
+
+    public InventoryComparer(SessionSettings sessionSettings, IInitialStatusBuilder initialStatusBuilder, 
+        InventoryIndexer? inventoryIndexer = null)
     {
         SessionSettings = sessionSettings;
         Indexer = inventoryIndexer;
+        
+        _initialStatusBuilder = initialStatusBuilder;
             
         InventoryLoaders = new List<InventoryLoader>();
         ComparisonResult = new ComparisonResult();
@@ -78,7 +83,7 @@ public class InventoryComparer : IInventoryComparer
 
         foreach (var comparisonItem in ComparisonResult.ComparisonItems)
         {
-            BuildStatus(comparisonItem);
+            _initialStatusBuilder.BuildStatus(comparisonItem, InventoryLoaders);
         }
 
         return ComparisonResult;
@@ -206,79 +211,6 @@ public class InventoryComparer : IInventoryComparer
         return pathIdentity;
     }
 
-    private void BuildStatus(ComparisonItem comparisonItem)
-    {
-        HashSet<Inventory> nonfoundInventories = new HashSet<Inventory>();
-        HashSet<InventoryPart> nonfoundInventoryParts = new HashSet<InventoryPart>();
-        foreach (var inventoryLoader in InventoryLoaders.OrderBy(il => il.Inventory.Letter))
-        {
-            nonfoundInventories.Add(inventoryLoader.Inventory);
-            foreach (var inventoryPart in inventoryLoader.Inventory.InventoryParts)
-            {
-                nonfoundInventoryParts.Add(inventoryPart);
-            }
-        }
-
-        if (comparisonItem.FileSystemType == FileSystemTypes.File)
-        {
-            foreach (var contentIdentity in comparisonItem.ContentIdentities)
-            {
-                if (comparisonItem.FileSystemType == FileSystemTypes.File)
-                {
-                    if (!comparisonItem.Status.FingerPrintGroups.ContainsKey(contentIdentity.Core))
-                    {
-                        comparisonItem.Status.FingerPrintGroups.Add(contentIdentity.Core, new HashSet<InventoryPart>());
-                    }
-                }
-
-                foreach (KeyValuePair<DateTime, HashSet<InventoryPart>> pair in contentIdentity.InventoryPartsByLastWriteTimes)
-                {
-                    comparisonItem.Status.FingerPrintGroups[contentIdentity.Core].AddAll(pair.Value);
-
-                    foreach (var inventoryPart in pair.Value)
-                    {
-                        nonfoundInventories.Remove(inventoryPart.Inventory);
-                        nonfoundInventoryParts.Remove(inventoryPart);
-                    }
-                }
-
-
-                foreach (var pair in contentIdentity.InventoryPartsByLastWriteTimes)
-                {
-                    if (!comparisonItem.Status.LastWriteTimeGroups.ContainsKey(pair.Key))
-                    {
-                        comparisonItem.Status.LastWriteTimeGroups.Add(pair.Key, new HashSet<InventoryPart>());
-                    }
-
-                    comparisonItem.Status.LastWriteTimeGroups[pair.Key].AddAll(pair.Value);
-
-                    foreach (var inventoryPart in pair.Value)
-                    {
-                        nonfoundInventories.Remove(inventoryPart.Inventory);
-                        nonfoundInventoryParts.Remove(inventoryPart);
-                    }
-                }
-            }
-        }
-        else
-        {
-            HashSet<Inventory> inventoriesOK = new HashSet<Inventory>();
-            HashSet<InventoryPart> inventoryPartsOK = new HashSet<InventoryPart>();
-            foreach (var contentIdentity in comparisonItem.ContentIdentities)
-            {
-                inventoriesOK.AddAll(contentIdentity.GetInventories());
-                inventoryPartsOK.AddAll(contentIdentity.GetInventoryParts());
-            }
-
-            nonfoundInventories.RemoveAll(inventoriesOK);
-            nonfoundInventoryParts.RemoveAll(inventoryPartsOK);
-        }
-
-
-        comparisonItem.Status.MissingInventories.AddAll(nonfoundInventories);
-        comparisonItem.Status.MissingInventoryParts.AddAll(nonfoundInventoryParts);
-    }
-
     private ContentIdentityCore BuildContentIdentityCore(InventoryLoader inventoryLoader,
         FileDescription fileDescription)
     {
@@ -302,5 +234,7 @@ public class InventoryComparer : IInventoryComparer
         {
             inventoryLoader.Dispose();
         }
+        
+        _initialStatusBuilder.Dispose();
     }
 }
