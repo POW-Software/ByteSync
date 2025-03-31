@@ -305,18 +305,12 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         }
         else
         {
-            // return comparisonResult.Inventories[inventoryIndex].InventoryParts[0].RootName
-            //     .Trim('\\', '/');
-                
             var result = comparisonResult.Inventories[inventoryIndex].InventoryParts[0].RootPath
                 .Trim('\\', '/');
-                
-            // ici, on pourra introduire une méthode / classe en charge de gérer le namining si besoin
+            
             const int maxLength = 30;
             if (result.Length > maxLength)
             {
-                // int remainingLength = maxLength - 9 - 3;
-                // result = result.Substring(0, 9) + "..." + result.Substring(result.Length - remainingLength, remainingLength);
                 result = result.Substring(0, 12).Trim() + "..." + comparisonResult.Inventories[inventoryIndex].InventoryParts[0].RootName;
             }
 
@@ -364,20 +358,6 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
 
             foreach (var advancedExpression in advancedExpressions)
             {
-                // if (advancedExpression.Equals(":notok", StringComparison.InvariantCultureIgnoreCase))
-                // {
-                //     if (comparisonItem.ContentRepartition.IsOK)
-                //     {
-                //         return false;
-                //     }
-                // }
-                // if (advancedExpression.Equals(":ok", StringComparison.InvariantCultureIgnoreCase))
-                // {
-                //     if (!comparisonItem.ContentRepartition.IsOK)
-                //     {
-                //         return false;
-                //     }
-                // }
                 if (advancedExpression.Equals(":file", StringComparison.InvariantCultureIgnoreCase))
                 {
                     if (comparisonItem.FileSystemType == FileSystemTypes.Directory)

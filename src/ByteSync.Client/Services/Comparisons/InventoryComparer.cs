@@ -4,7 +4,6 @@ using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
-using ByteSync.Models.Inventories;
 using ByteSync.Services.Inventories;
 
 namespace ByteSync.Services.Comparisons;

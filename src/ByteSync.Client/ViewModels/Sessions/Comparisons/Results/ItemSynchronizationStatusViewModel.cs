@@ -148,26 +148,12 @@ public class ItemSynchronizationStatusViewModel : ViewModelBase, IDisposable
     
     public void SetSynchronizationSuccess()
     {
-        // ShowFileOKStatus = false;
-        // ShowDirectoryOKStatus = false;
-        // ShowFileDifferences = false;
-        // ShowDirectoryDifferences = false;
-        // ShowSyncSuccessStatus = true;
-        // ShowSyncErrorStatus = false;
-
         ItemSynchronizationStatus.IsSuccessStatus = true;
         ShowSyncSuccessStatus = true;
     }
     
     public void SetSynchronizationError()
     {
-        // ShowFileOKStatus = false;
-        // ShowDirectoryOKStatus = false;
-        // ShowFileDifferences = false;
-        // ShowDirectoryDifferences = false;
-        // ShowSyncSuccessStatus = false;
-        // ShowSyncErrorStatus = true;
-        
         ItemSynchronizationStatus.IsErrorStatus = true;
         ShowSyncErrorStatus = true;
     }
