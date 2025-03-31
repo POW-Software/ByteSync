@@ -1,16 +1,14 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using Avalonia.Media;
-using Avalonia.Threading;
-using ByteSync.Business.Actions.Shared;
+using ByteSync.Business.Themes;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Factories;
-using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.Inventories;
 using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
-using DynamicData;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Results;
@@ -18,14 +16,13 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Results;
 public class ContentRepartitionViewModel : ViewModelBase, IDisposable
 {
     private IThemeService _themeService;
-    // private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository;
 
     private SolidColorBrush? _grayBrush;
     private SolidColorBrush? _mahAppsGray10Brush;
     private SolidColorBrush? _oppositeBackgroundBrush;
     private SolidColorBrush? _mainBackgroundBrush;
     private SolidColorBrush? _mainForeColorBrush;
-    // private readonly IDisposable _subscription;
+    private readonly IDisposable _subscription;
 
     public enum BrushColors
     {
@@ -41,13 +38,9 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         FingerPrintGroups = new ObservableCollection<StatusItemViewModel>();
         LastWriteTimeGroups = new ObservableCollection<StatusItemViewModel>();
         PresenceGroups = new ObservableCollection<StatusItemViewModel>();
-
-        // ShowFileOKStatus = false;
-        // ShowDirectoryOKStatus = false;
+        
         ShowFileDifferences = false;
         ShowDirectoryDifferences = false;
-        // ShowSyncSuccessStatus = false;
-        // ShowSyncErrorStatus = true;
     }
 
     public ContentRepartitionViewModel(ComparisonItem comparisonItem, List<Inventory> inventories, IThemeService themeService, 
@@ -57,59 +50,24 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         AllInventories = inventories;
         ContentRepartition = comparisonItem.ContentRepartition!;
         _themeService = themeService;
-        // _sharedActionsGroupRepository = sharedActionsGroupRepository;
 
         FingerPrintGroups?.Clear();
         LastWriteTimeGroups?.Clear();
         PresenceGroups?.Clear();
         
         SetUnfinishedStatus();
-
-        // var sharedActionsGroups = _sharedActionsGroupRepository.ObservableCache.Connect()
-        //     .Filter(sag => sag.PathIdentity.Equals(ContentRepartition.PathIdentity))
-        //     .AsObservableCache();
-        
-        // _subscription = sharedActionsGroups.Connect()
-        //     .Throttle(TimeSpan.FromMilliseconds(200))
-        //     .Subscribe(_ =>
-        //     {
-        //         var allItems = sharedActionsGroups.Items.ToList();
-        //         if (allItems.All(x => x.SynchronizationStatus == Business.Actions.Shared.SynchronizationStatus.Success))
-        //         {
-        //             SetSynchronizationSuccess();
-        //         }
-        //         else if (allItems.All(x => x.SynchronizationStatus == Business.Actions.Shared.SynchronizationStatus.Error))
-        //         {
-        //             SetSynchronizationError();
-        //         }
-        //         else
-        //         {
-        //             if (ContentRepartition.IsSuccessStatus || ContentRepartition.IsErrorStatus)
-        //             {
-        //                 ContentRepartition.IsSuccessStatus = false;
-        //                 ContentRepartition.IsErrorStatus = false;
-        //                 
-        //                 SetUnfinishedStatus();
-        //             }
-        //         }
-        //     });
-            
-
-        // if (!ContentRepartition.IsOK)
-        // {
-        //     var statusViewGroupsComputer = contentRepartitionGroupsComputerFactory.BuildStatusViewGroupsComputer(this);
-        //     statusViewGroupsComputer.Compute();
-        //
-        //     InitBrushes();
-        // }
         
         var statusViewGroupsComputer = contentRepartitionGroupsComputerFactory.BuildStatusViewGroupsComputer(this);
         statusViewGroupsComputer.Compute();
 
+        _subscription = _themeService.SelectedTheme
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(OnThemeChanged);
+
         InitBrushes();
     }
 
-    internal void OnThemeChanged()
+    private void OnThemeChanged(Theme theme)
     {
         UpdateBrushes();
     }
@@ -179,23 +137,11 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         }
     }
 
-    // [Reactive]
-    // public bool ShowFileOKStatus { get; set; }
-    //
-    // [Reactive]
-    // public bool ShowDirectoryOKStatus { get; set; }
-
     [Reactive]
     public bool ShowFileDifferences { get; set; }
     
     [Reactive]
     public bool ShowDirectoryDifferences { get; set; }
-
-    // [Reactive]
-    // public bool ShowSyncSuccessStatus { get; set; }
-    //
-    // [Reactive]
-    // public bool ShowSyncErrorStatus { get; set; }
 
     public ContentRepartition ContentRepartition { get; }
     
@@ -219,19 +165,17 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
 
     private void InitBrushes()
     {
-        Dispatcher.UIThread.InvokeAsync(() => { DoResetBrushes(true); });
+        DoResetBrushes(true);
     }
     
     private void UpdateBrushes()
     {
-        Dispatcher.UIThread.InvokeAsync(() => { DoResetBrushes(false); });
+        DoResetBrushes(false);
     }
 
     private void DoResetBrushes(bool isInit)
     {
-        // Reset des brushs dynamiques
         _mainForeColorBrush = null;
-        // _mainBackColorBrush = null;
         _oppositeBackgroundBrush = null;
         _mainBackgroundBrush = null;
         _mahAppsGray10Brush = null;
@@ -296,40 +240,11 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
 
         return null;
     }
-
-    // public void SetSynchronizationSuccess()
-    // {
-    //     ShowFileOKStatus = false;
-    //     ShowDirectoryOKStatus = false;
-    //     ShowFileDifferences = false;
-    //     ShowDirectoryDifferences = false;
-    //     ShowSyncSuccessStatus = true;
-    //     ShowSyncErrorStatus = false;
-    //
-    //     ContentRepartition.IsSuccessStatus = true;
-    // }
-    //
-    // public void SetSynchronizationError()
-    // {
-    //     ShowFileOKStatus = false;
-    //     ShowDirectoryOKStatus = false;
-    //     ShowFileDifferences = false;
-    //     ShowDirectoryDifferences = false;
-    //     ShowSyncSuccessStatus = false;
-    //     ShowSyncErrorStatus = true;
-    //     
-    //     ContentRepartition.IsErrorStatus = true;
-    // }
-    //
+    
     private void SetUnfinishedStatus()
     {
-        // ShowFileOKStatus = ContentRepartition.IsOK && FileSystemType == FileSystemTypes.File;
-        // ShowDirectoryOKStatus = ContentRepartition.IsOK && FileSystemType == FileSystemTypes.Directory;
         ShowFileDifferences = FileSystemType == FileSystemTypes.File;
         ShowDirectoryDifferences = FileSystemType == FileSystemTypes.Directory;
-        
-        // ShowSyncSuccessStatus = ContentRepartition.IsSuccessStatus;
-        // ShowSyncErrorStatus = ContentRepartition.IsErrorStatus;
     }
 
     public void Dispose()
@@ -338,6 +253,6 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         LastWriteTimeGroups = null;
         PresenceGroups = null;
         
-        // _subscription.Dispose();
+        _subscription.Dispose();
     }
 }
