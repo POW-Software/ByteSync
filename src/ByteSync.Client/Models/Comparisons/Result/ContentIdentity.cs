@@ -1,5 +1,4 @@
-﻿using ByteSync.Common.Helpers;
-using ByteSync.Models.FileSystems;
+﻿using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 
 namespace ByteSync.Models.Comparisons.Result;

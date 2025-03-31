@@ -2,10 +2,8 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using ByteSync.Business.Arguments;
 using ByteSync.Common.Controls;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Updates;
 using Serilog;

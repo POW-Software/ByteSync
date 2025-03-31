@@ -1,5 +1,4 @@
 ﻿using ByteSync.Business.Inventories;
-using ByteSync.Common.Business.Inventories;
 using ByteSync.Models.Inventories;
 
 namespace ByteSync.Models.Comparisons.Result;
@@ -26,6 +25,4 @@ public class ContentRepartition
     public HashSet<Inventory> MissingInventories { get; set; }
         
     public HashSet<InventoryPart> MissingInventoryParts { get; set; }
-        
-
 }

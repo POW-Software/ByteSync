@@ -2,7 +2,6 @@
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Business.Updates;
 using ByteSync.Interfaces.Repositories.Updates;
 using ByteSync.Interfaces.Updates;

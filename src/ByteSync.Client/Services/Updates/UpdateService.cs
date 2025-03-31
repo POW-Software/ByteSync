@@ -1,9 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Common.Business.Versions;
-using ByteSync.Interfaces.Controls.Applications;
-using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Updates;
 
 namespace ByteSync.Services.Updates;
