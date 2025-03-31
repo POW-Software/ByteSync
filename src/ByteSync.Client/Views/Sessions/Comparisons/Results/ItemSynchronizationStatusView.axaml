@@ -11,28 +11,15 @@
         <results:ItemSynchronizationStatusViewModel />
     </Design.DataContext>
     
-    <!-- <UserControl.Resources> -->
-    <!--     <DataTemplate x:Key="StatusItemDataTemplate" DataType="misc:StatusItemViewModel"> -->
-    <!--         <Border BorderBrush="Gray" BorderThickness="0"> -->
-    <!--             <Grid Width="24" VerticalAlignment="Stretch" Background="{Binding BackBrush}"> -->
-    <!--                 <TextBlock Text="{Binding Letter}"  -->
-    <!--                            HorizontalAlignment="Center" VerticalAlignment="Center" -->
-    <!--                            Margin="0" -->
-    <!--                            FontWeight="Bold" Foreground="{Binding ForeBrush}" Grid.ColumnSpan="2" /> -->
-    <!--             </Grid> -->
-    <!--         </Border> -->
-    <!--     </DataTemplate> -->
-    <!-- </UserControl.Resources> -->
-    
     <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4" >
         <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+            
             <!-- Synchronization Success -->
             <Border BorderBrush="Gray" BorderThickness="0" IsVisible="{Binding ShowSyncSuccessStatus}">
                 <Grid Height="24" Background="{Binding MahAppsGray10Brush}">
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="24" />
-                        <!--<ColumnDefinition Width="24"></ColumnDefinition>-->
                         <ColumnDefinition Width="72" />
                     </Grid.ColumnDefinitions>
 
@@ -55,7 +42,6 @@
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="24" />
-                        <!--<ColumnDefinition Width="24"></ColumnDefinition>-->
                         <ColumnDefinition Width="72" />
                     </Grid.ColumnDefinitions>
 

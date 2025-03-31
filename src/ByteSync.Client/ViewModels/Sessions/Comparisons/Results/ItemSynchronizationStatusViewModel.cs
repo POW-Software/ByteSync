@@ -112,18 +112,18 @@ public class ItemSynchronizationStatusViewModel : ViewModelBase, IDisposable
         }
     }
     
-    // private Brush? MainBackgroundBrush
-    // {
-    //     get
-    //     {
-    //         if (_mainBackgroundBrush == null)
-    //         {
-    //             _themeService.GetResource("StatusMainBackGroundBrush", out _mainBackgroundBrush);
-    //         }
-    //
-    //         return _mainBackgroundBrush;
-    //     }
-    // }
+    private Brush? MainBackgroundBrush
+    {
+        get
+        {
+            if (_mainBackgroundBrush == null)
+            {
+                _themeService.GetResource("StatusMainBackGroundBrush", out _mainBackgroundBrush);
+            }
+    
+            return _mainBackgroundBrush;
+        }
+    }
     
     private Brush? OppositeBackgroundBrush
     {
