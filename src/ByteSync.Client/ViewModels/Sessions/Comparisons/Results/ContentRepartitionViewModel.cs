@@ -15,17 +15,17 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Results;
 
-public class StatusViewModel : ViewModelBase, IDisposable
+public class ContentRepartitionViewModel : ViewModelBase, IDisposable
 {
     private IThemeService _themeService;
-    private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository;
+    // private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository;
 
     private SolidColorBrush? _grayBrush;
     private SolidColorBrush? _mahAppsGray10Brush;
     private SolidColorBrush? _oppositeBackgroundBrush;
     private SolidColorBrush? _mainBackgroundBrush;
     private SolidColorBrush? _mainForeColorBrush;
-    private readonly IDisposable _subscription;
+    // private readonly IDisposable _subscription;
 
     public enum BrushColors
     {
@@ -36,28 +36,28 @@ public class StatusViewModel : ViewModelBase, IDisposable
         OppositeBackground
     }
 
-    public StatusViewModel()
+    public ContentRepartitionViewModel()
     {
         FingerPrintGroups = new ObservableCollection<StatusItemViewModel>();
         LastWriteTimeGroups = new ObservableCollection<StatusItemViewModel>();
         PresenceGroups = new ObservableCollection<StatusItemViewModel>();
 
-        ShowFileOKStatus = false;
-        ShowDirectoryOKStatus = false;
+        // ShowFileOKStatus = false;
+        // ShowDirectoryOKStatus = false;
         ShowFileDifferences = false;
         ShowDirectoryDifferences = false;
-        ShowSyncSuccessStatus = false;
-        ShowSyncErrorStatus = true;
+        // ShowSyncSuccessStatus = false;
+        // ShowSyncErrorStatus = true;
     }
 
-    public StatusViewModel(ComparisonItem comparisonItem, List<Inventory> inventories, IThemeService themeService, 
-        ISharedActionsGroupRepository sharedActionsGroupRepository, IStatusViewGroupsComputerFactory statusViewGroupsComputerFactory ) : this()
+    public ContentRepartitionViewModel(ComparisonItem comparisonItem, List<Inventory> inventories, IThemeService themeService, 
+        IContentRepartitionGroupsComputerFactory contentRepartitionGroupsComputerFactory ) : this()
     {
         ComparisonItem = comparisonItem;
         AllInventories = inventories;
-        Status = comparisonItem.Status!;
+        ContentRepartition = comparisonItem.ContentRepartition!;
         _themeService = themeService;
-        _sharedActionsGroupRepository = sharedActionsGroupRepository;
+        // _sharedActionsGroupRepository = sharedActionsGroupRepository;
 
         FingerPrintGroups?.Clear();
         LastWriteTimeGroups?.Clear();
@@ -65,43 +65,48 @@ public class StatusViewModel : ViewModelBase, IDisposable
         
         SetUnfinishedStatus();
 
-        var sharedActionsGroups = _sharedActionsGroupRepository.ObservableCache.Connect()
-            .Filter(sag => sag.PathIdentity.Equals(Status.PathIdentity))
-            .AsObservableCache();
+        // var sharedActionsGroups = _sharedActionsGroupRepository.ObservableCache.Connect()
+        //     .Filter(sag => sag.PathIdentity.Equals(ContentRepartition.PathIdentity))
+        //     .AsObservableCache();
         
-        _subscription = sharedActionsGroups.Connect()
-            .Throttle(TimeSpan.FromMilliseconds(200)) // Vous pouvez ajuster cela pour minimiser les réactions trop fréquentes
-            .Subscribe(_ =>
-            {
-                var allItems = sharedActionsGroups.Items.ToList();
-                if (allItems.All(x => x.SynchronizationStatus == SynchronizationStatus.Success))
-                {
-                    SetSynchronizationSuccess();
-                }
-                else if (allItems.All(x => x.SynchronizationStatus == SynchronizationStatus.Error))
-                {
-                    SetSynchronizationError();
-                }
-                else
-                {
-                    if (Status.IsSuccessStatus || Status.IsErrorStatus)
-                    {
-                        Status.IsSuccessStatus = false;
-                        Status.IsErrorStatus = false;
-                        
-                        SetUnfinishedStatus();
-                    }
-                }
-            });
+        // _subscription = sharedActionsGroups.Connect()
+        //     .Throttle(TimeSpan.FromMilliseconds(200))
+        //     .Subscribe(_ =>
+        //     {
+        //         var allItems = sharedActionsGroups.Items.ToList();
+        //         if (allItems.All(x => x.SynchronizationStatus == Business.Actions.Shared.SynchronizationStatus.Success))
+        //         {
+        //             SetSynchronizationSuccess();
+        //         }
+        //         else if (allItems.All(x => x.SynchronizationStatus == Business.Actions.Shared.SynchronizationStatus.Error))
+        //         {
+        //             SetSynchronizationError();
+        //         }
+        //         else
+        //         {
+        //             if (ContentRepartition.IsSuccessStatus || ContentRepartition.IsErrorStatus)
+        //             {
+        //                 ContentRepartition.IsSuccessStatus = false;
+        //                 ContentRepartition.IsErrorStatus = false;
+        //                 
+        //                 SetUnfinishedStatus();
+        //             }
+        //         }
+        //     });
             
 
-        if (!Status.IsOK)
-        {
-            var statusViewGroupsComputer = statusViewGroupsComputerFactory.BuildStatusViewGroupsComputer(this);
-            statusViewGroupsComputer.Compute();
+        // if (!ContentRepartition.IsOK)
+        // {
+        //     var statusViewGroupsComputer = contentRepartitionGroupsComputerFactory.BuildStatusViewGroupsComputer(this);
+        //     statusViewGroupsComputer.Compute();
+        //
+        //     InitBrushes();
+        // }
+        
+        var statusViewGroupsComputer = contentRepartitionGroupsComputerFactory.BuildStatusViewGroupsComputer(this);
+        statusViewGroupsComputer.Compute();
 
-            InitBrushes();
-        }
+        InitBrushes();
     }
 
     internal void OnThemeChanged()
@@ -174,11 +179,11 @@ public class StatusViewModel : ViewModelBase, IDisposable
         }
     }
 
-    [Reactive]
-    public bool ShowFileOKStatus { get; set; }
-    
-    [Reactive]
-    public bool ShowDirectoryOKStatus { get; set; }
+    // [Reactive]
+    // public bool ShowFileOKStatus { get; set; }
+    //
+    // [Reactive]
+    // public bool ShowDirectoryOKStatus { get; set; }
 
     [Reactive]
     public bool ShowFileDifferences { get; set; }
@@ -186,13 +191,13 @@ public class StatusViewModel : ViewModelBase, IDisposable
     [Reactive]
     public bool ShowDirectoryDifferences { get; set; }
 
-    [Reactive]
-    public bool ShowSyncSuccessStatus { get; set; }
-    
-    [Reactive]
-    public bool ShowSyncErrorStatus { get; set; }
+    // [Reactive]
+    // public bool ShowSyncSuccessStatus { get; set; }
+    //
+    // [Reactive]
+    // public bool ShowSyncErrorStatus { get; set; }
 
-    public Status Status { get; }
+    public ContentRepartition ContentRepartition { get; }
     
     public ComparisonItem ComparisonItem { get; }
     
@@ -292,39 +297,39 @@ public class StatusViewModel : ViewModelBase, IDisposable
         return null;
     }
 
-    public void SetSynchronizationSuccess()
-    {
-        ShowFileOKStatus = false;
-        ShowDirectoryOKStatus = false;
-        ShowFileDifferences = false;
-        ShowDirectoryDifferences = false;
-        ShowSyncSuccessStatus = true;
-        ShowSyncErrorStatus = false;
-
-        Status.IsSuccessStatus = true;
-    }
-    
-    public void SetSynchronizationError()
-    {
-        ShowFileOKStatus = false;
-        ShowDirectoryOKStatus = false;
-        ShowFileDifferences = false;
-        ShowDirectoryDifferences = false;
-        ShowSyncSuccessStatus = false;
-        ShowSyncErrorStatus = true;
-        
-        Status.IsErrorStatus = true;
-    }
-    
+    // public void SetSynchronizationSuccess()
+    // {
+    //     ShowFileOKStatus = false;
+    //     ShowDirectoryOKStatus = false;
+    //     ShowFileDifferences = false;
+    //     ShowDirectoryDifferences = false;
+    //     ShowSyncSuccessStatus = true;
+    //     ShowSyncErrorStatus = false;
+    //
+    //     ContentRepartition.IsSuccessStatus = true;
+    // }
+    //
+    // public void SetSynchronizationError()
+    // {
+    //     ShowFileOKStatus = false;
+    //     ShowDirectoryOKStatus = false;
+    //     ShowFileDifferences = false;
+    //     ShowDirectoryDifferences = false;
+    //     ShowSyncSuccessStatus = false;
+    //     ShowSyncErrorStatus = true;
+    //     
+    //     ContentRepartition.IsErrorStatus = true;
+    // }
+    //
     private void SetUnfinishedStatus()
     {
-        ShowFileOKStatus = Status.IsOK && FileSystemType == FileSystemTypes.File;
-        ShowDirectoryOKStatus = Status.IsOK && FileSystemType == FileSystemTypes.Directory;
-        ShowFileDifferences = !Status.IsOK && FileSystemType == FileSystemTypes.File;
-        ShowDirectoryDifferences = !Status.IsOK && FileSystemType == FileSystemTypes.Directory;
+        // ShowFileOKStatus = ContentRepartition.IsOK && FileSystemType == FileSystemTypes.File;
+        // ShowDirectoryOKStatus = ContentRepartition.IsOK && FileSystemType == FileSystemTypes.Directory;
+        ShowFileDifferences = FileSystemType == FileSystemTypes.File;
+        ShowDirectoryDifferences = FileSystemType == FileSystemTypes.Directory;
         
-        ShowSyncSuccessStatus = Status.IsSuccessStatus;
-        ShowSyncErrorStatus = Status.IsErrorStatus;
+        // ShowSyncSuccessStatus = ContentRepartition.IsSuccessStatus;
+        // ShowSyncErrorStatus = ContentRepartition.IsErrorStatus;
     }
 
     public void Dispose()
@@ -333,6 +338,6 @@ public class StatusViewModel : ViewModelBase, IDisposable
         LastWriteTimeGroups = null;
         PresenceGroups = null;
         
-        _subscription.Dispose();
+        // _subscription.Dispose();
     }
 }

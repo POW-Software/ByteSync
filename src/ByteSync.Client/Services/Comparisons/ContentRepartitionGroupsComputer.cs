@@ -9,47 +9,47 @@ using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
 
 namespace ByteSync.Services.Comparisons;
 
-class StatusViewGroupsComputer : IStatusViewGroupsComputer
+class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
 {
-    public StatusViewGroupsComputer(StatusViewModel statusViewModel, List<Inventory> allInventories)
+    public ContentRepartitionGroupsComputer(ContentRepartitionViewModel contentRepartitionViewModel, List<Inventory> allInventories)
     {
-        StatusViewModel = statusViewModel;
+        ContentRepartitionViewModel = contentRepartitionViewModel;
         AllInventories = allInventories;
     }
 
-    public StatusViewModel StatusViewModel { get; }
+    public ContentRepartitionViewModel ContentRepartitionViewModel { get; }
     
     private List<Inventory> AllInventories { get; }
 
-    private Status Status
+    private ContentRepartition Status
     {
         get
         {
-            return StatusViewModel.Status;
+            return ContentRepartitionViewModel.ContentRepartition;
         }
     }
 
     public void Compute()
     {
-        StatusViewModel.FingerPrintGroups!.Clear();
-        StatusViewModel.LastWriteTimeGroups!.Clear();
-        StatusViewModel.PresenceGroups!.Clear();
+        ContentRepartitionViewModel.FingerPrintGroups!.Clear();
+        ContentRepartitionViewModel.LastWriteTimeGroups!.Clear();
+        ContentRepartitionViewModel.PresenceGroups!.Clear();
 
-        if (StatusViewModel.FileSystemType == FileSystemTypes.File)
+        if (ContentRepartitionViewModel.FileSystemType == FileSystemTypes.File)
         {
             var fingerPrintMembers = ComputeMembers(Status.FingerPrintGroups);
             var fingerPrintGroups = ComputeGroups(fingerPrintMembers);
-            SetStatusViewGroups(fingerPrintGroups, StatusViewModel.FingerPrintGroups);
+            SetStatusViewGroups(fingerPrintGroups, ContentRepartitionViewModel.FingerPrintGroups);
 
             var lastWriteTimeMembers = ComputeMembers(Status.LastWriteTimeGroups);
             var lastWriteTimeGroups = ComputeGroups(lastWriteTimeMembers);
-            SetStatusViewGroups(lastWriteTimeGroups, StatusViewModel.LastWriteTimeGroups);
+            SetStatusViewGroups(lastWriteTimeGroups, ContentRepartitionViewModel.LastWriteTimeGroups);
         }
         else
         {
             var presenceMembers = ComputePresenceMembers(Status.FingerPrintGroups);
             var presenceGroups = ComputeGroups(presenceMembers);
-            SetStatusViewGroups(presenceGroups, StatusViewModel.PresenceGroups);
+            SetStatusViewGroups(presenceGroups, ContentRepartitionViewModel.PresenceGroups);
         }
     }
 
@@ -58,26 +58,26 @@ class StatusViewGroupsComputer : IStatusViewGroupsComputer
         var cpt = 0;
         foreach (var group in groups)
         {
-            StatusViewModel.BrushColors backBrushColor;
-            StatusViewModel.BrushColors foreBrushColor;
+            ContentRepartitionViewModel.BrushColors backBrushColor;
+            ContentRepartitionViewModel.BrushColors foreBrushColor;
 
             if (group.IsMissing)
             {
-                backBrushColor = StatusViewModel.BrushColors.MahAppsGray10;
-                foreBrushColor = StatusViewModel.BrushColors.Gray;
+                backBrushColor = ContentRepartitionViewModel.BrushColors.MahAppsGray10;
+                foreBrushColor = ContentRepartitionViewModel.BrushColors.Gray;
             }
             else
             {
                 if (cpt % 2 == 0)
                 {
-                    backBrushColor = StatusViewModel.BrushColors.MainBackground;
+                    backBrushColor = ContentRepartitionViewModel.BrushColors.MainBackground;
                 }
                 else
                 {
-                    backBrushColor = StatusViewModel.BrushColors.OppositeBackground;
+                    backBrushColor = ContentRepartitionViewModel.BrushColors.OppositeBackground;
                 }
 
-                foreBrushColor = StatusViewModel.BrushColors.MainForeColor;
+                foreBrushColor = ContentRepartitionViewModel.BrushColors.MainForeColor;
 
                 cpt += 1;
             }
@@ -192,7 +192,7 @@ class StatusViewGroupsComputer : IStatusViewGroupsComputer
     {
         var result = new List<StatusGroupMember>();
 
-        foreach (var inventory in StatusViewModel.AllInventories)
+        foreach (var inventory in ContentRepartitionViewModel.AllInventories)
         {
             if (!Status.MissingInventories.Contains(inventory))
             {

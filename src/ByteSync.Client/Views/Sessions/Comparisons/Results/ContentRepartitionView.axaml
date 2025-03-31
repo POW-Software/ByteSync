@@ -44,105 +44,105 @@
         <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
         <!--<Border BorderBrush="Gray" BorderThickness="1">-->
         
-            <!-- File OK -->
-            <Border BorderBrush="Gray" BorderThickness="0" IsVisible="{Binding ShowFileOKStatus}">
-                <Grid Height="24" Background="{Binding MahAppsGray10Brush}">
-
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="24" />
-                        <ColumnDefinition Width="24" />
-                        <ColumnDefinition Width="48" />
-                    </Grid.ColumnDefinitions>
-
-                    <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}">
-                        <misc1:Icon FontSize="14" Value="RegularHash" Foreground="{Binding MainForeColorBrush}" />
-                    </Border>
-
-                    <Border Grid.Column="1" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}">
-                        <misc1:Icon FontSize="14" Value="RegularTime" Foreground="{Binding MainForeColorBrush}" />
-                    </Border>
-
-                    <Grid Grid.Column="2" VerticalAlignment="Stretch" Background="{Binding MainBackgroundBrush}">
-                        <TextBlock Text="{localizations:Loc Status_OK}" 
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   Margin="0"
-                                   FontWeight="Bold" Foreground="{Binding MainForeColorBrush}" />
-                    </Grid>
-                </Grid>
-            </Border>
-        
-            <!-- Directory OK -->
-            <Border BorderBrush="Gray" BorderThickness="0" IsVisible="{Binding ShowDirectoryOKStatus}">
-                <Grid Height="24" Background="{Binding MahAppsGray10Brush}">
-
-                    <Grid.ColumnDefinitions>
-                        <!-- <ColumnDefinition Width="24" /> -->
-                        <ColumnDefinition Width="24" />
-                        <ColumnDefinition Width="48" />
-                    </Grid.ColumnDefinitions>
-
-                    <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}">
-                        <misc1:Icon FontSize="14" Value="RegularFolder" Foreground="{Binding MainForeColorBrush}" />
-                    </Border>
-                    <!-- -->
-                    <!-- <Border Grid.Column="1" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}"> -->
-                    <!--     <misc1:Icon FontSize="14" Value="RegularTime" Foreground="{Binding MainForeColorBrush}" /> -->
-                    <!-- </Border> -->
-
-                    <Grid Grid.Column="1" VerticalAlignment="Stretch" Background="{Binding MainBackgroundBrush}">
-                        <TextBlock Text="{localizations:Loc Status_OK}" 
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   Margin="0"
-                                   FontWeight="Bold" Foreground="{Binding MainForeColorBrush}" />
-                    </Grid>
-                </Grid>
-            </Border>
-
-            <!-- Synchronization Success -->
-            <Border BorderBrush="Gray" BorderThickness="0" IsVisible="{Binding ShowSyncSuccessStatus}">
-                <Grid Height="24" Background="{Binding MahAppsGray10Brush}">
-
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="24" />
-                        <!--<ColumnDefinition Width="24"></ColumnDefinition>-->
-                        <ColumnDefinition Width="72" />
-                    </Grid.ColumnDefinitions>
-
-                    <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}">
-                        <misc1:Icon FontSize="14" Value="RegularCheck" Foreground="{Binding MainForeColorBrush}" />
-                    </Border>
-
-                    <Grid Grid.Column="1" VerticalAlignment="Stretch" Background="{Binding MainBackgroundBrush}">
-                        <TextBlock Text="{localizations:Loc Status_Done}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   Margin="0"
-                                   FontWeight="Bold" Foreground="{Binding MainForeColorBrush}" />
-                    </Grid>
-                </Grid>
-            </Border>
-        
-            <!-- Synchronization Error -->
-            <Border BorderBrush="Gray" BorderThickness="0" IsVisible="{Binding ShowSyncErrorStatus}">
-                <Grid Height="24" Background="{Binding MahAppsGray10Brush}">
-
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="24" />
-                        <!--<ColumnDefinition Width="24"></ColumnDefinition>-->
-                        <ColumnDefinition Width="72" />
-                    </Grid.ColumnDefinitions>
-
-                    <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource MainBackFOpposite2Brush}">
-                        <misc1:Icon FontSize="14" Value="RegularX" Foreground="{Binding MainForeColorBrush}" />
-                    </Border>
-
-                    <Grid Grid.Column="1" VerticalAlignment="Stretch" Background="{Binding OppositeBackgroundBrush}">
-                        <TextBlock Text="{localizations:Loc Status_Error}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   Margin="0"
-                                   FontWeight="Bold" Foreground="{Binding MainForeColorBrush}" />
-                    </Grid>
-                </Grid>
-            </Border>
+            <!-- ~1~ File OK @1@ -->
+            <!-- <Border BorderBrush="Gray" BorderThickness="0" IsVisible="{Binding ShowFileOKStatus}"> -->
+            <!--     <Grid Height="24" Background="{Binding MahAppsGray10Brush}"> -->
+            <!-- -->
+            <!--         <Grid.ColumnDefinitions> -->
+            <!--             <ColumnDefinition Width="24" /> -->
+            <!--             <ColumnDefinition Width="24" /> -->
+            <!--             <ColumnDefinition Width="48" /> -->
+            <!--         </Grid.ColumnDefinitions> -->
+            <!-- -->
+            <!--         <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}"> -->
+            <!--             <misc1:Icon FontSize="14" Value="RegularHash" Foreground="{Binding MainForeColorBrush}" /> -->
+            <!--         </Border> -->
+            <!-- -->
+            <!--         <Border Grid.Column="1" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}"> -->
+            <!--             <misc1:Icon FontSize="14" Value="RegularTime" Foreground="{Binding MainForeColorBrush}" /> -->
+            <!--         </Border> -->
+            <!-- -->
+            <!--         <Grid Grid.Column="2" VerticalAlignment="Stretch" Background="{Binding MainBackgroundBrush}"> -->
+            <!--             <TextBlock Text="{localizations:Loc Status_OK}"  -->
+            <!--                        HorizontalAlignment="Center" VerticalAlignment="Center" -->
+            <!--                        Margin="0" -->
+            <!--                        FontWeight="Bold" Foreground="{Binding MainForeColorBrush}" /> -->
+            <!--         </Grid> -->
+            <!--     </Grid> -->
+            <!-- </Border> -->
+            <!-- -->
+            <!-- ~1~ Directory OK @1@ -->
+            <!-- <Border BorderBrush="Gray" BorderThickness="0" IsVisible="{Binding ShowDirectoryOKStatus}"> -->
+            <!--     <Grid Height="24" Background="{Binding MahAppsGray10Brush}"> -->
+            <!-- -->
+            <!--         <Grid.ColumnDefinitions> -->
+            <!--             ~1~ <ColumnDefinition Width="24" /> @1@ -->
+            <!--             <ColumnDefinition Width="24" /> -->
+            <!--             <ColumnDefinition Width="48" /> -->
+            <!--         </Grid.ColumnDefinitions> -->
+            <!-- -->
+            <!--         <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}"> -->
+            <!--             <misc1:Icon FontSize="14" Value="RegularFolder" Foreground="{Binding MainForeColorBrush}" /> -->
+            <!--         </Border> -->
+            <!--         ~1~ @1@ -->
+            <!--         ~1~ <Border Grid.Column="1" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}"> @1@ -->
+            <!--         ~1~     <misc1:Icon FontSize="14" Value="RegularTime" Foreground="{Binding MainForeColorBrush}" /> @1@ -->
+            <!--         ~1~ </Border> @1@ -->
+            <!-- -->
+            <!--         <Grid Grid.Column="1" VerticalAlignment="Stretch" Background="{Binding MainBackgroundBrush}"> -->
+            <!--             <TextBlock Text="{localizations:Loc Status_OK}"  -->
+            <!--                        HorizontalAlignment="Center" VerticalAlignment="Center" -->
+            <!--                        Margin="0" -->
+            <!--                        FontWeight="Bold" Foreground="{Binding MainForeColorBrush}" /> -->
+            <!--         </Grid> -->
+            <!--     </Grid> -->
+            <!-- </Border> -->
+            <!-- -->
+            <!-- ~1~ Synchronization Success @1@ -->
+            <!-- <Border BorderBrush="Gray" BorderThickness="0" IsVisible="{Binding ShowSyncSuccessStatus}"> -->
+            <!--     <Grid Height="24" Background="{Binding MahAppsGray10Brush}"> -->
+            <!-- -->
+            <!--         <Grid.ColumnDefinitions> -->
+            <!--             <ColumnDefinition Width="24" /> -->
+            <!--             ~1~<ColumnDefinition Width="24"></ColumnDefinition>@1@ -->
+            <!--             <ColumnDefinition Width="72" /> -->
+            <!--         </Grid.ColumnDefinitions> -->
+            <!-- -->
+            <!--         <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}"> -->
+            <!--             <misc1:Icon FontSize="14" Value="RegularCheck" Foreground="{Binding MainForeColorBrush}" /> -->
+            <!--         </Border> -->
+            <!-- -->
+            <!--         <Grid Grid.Column="1" VerticalAlignment="Stretch" Background="{Binding MainBackgroundBrush}"> -->
+            <!--             <TextBlock Text="{localizations:Loc Status_Done}" -->
+            <!--                        HorizontalAlignment="Center" VerticalAlignment="Center" -->
+            <!--                        Margin="0" -->
+            <!--                        FontWeight="Bold" Foreground="{Binding MainForeColorBrush}" /> -->
+            <!--         </Grid> -->
+            <!--     </Grid> -->
+            <!-- </Border> -->
+            <!-- -->
+            <!-- ~1~ Synchronization Error @1@ -->
+            <!-- <Border BorderBrush="Gray" BorderThickness="0" IsVisible="{Binding ShowSyncErrorStatus}"> -->
+            <!--     <Grid Height="24" Background="{Binding MahAppsGray10Brush}"> -->
+            <!-- -->
+            <!--         <Grid.ColumnDefinitions> -->
+            <!--             <ColumnDefinition Width="24" /> -->
+            <!--             ~1~<ColumnDefinition Width="24"></ColumnDefinition>@1@ -->
+            <!--             <ColumnDefinition Width="72" /> -->
+            <!--         </Grid.ColumnDefinitions> -->
+            <!-- -->
+            <!--         <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource MainBackFOpposite2Brush}"> -->
+            <!--             <misc1:Icon FontSize="14" Value="RegularX" Foreground="{Binding MainForeColorBrush}" /> -->
+            <!--         </Border> -->
+            <!-- -->
+            <!--         <Grid Grid.Column="1" VerticalAlignment="Stretch" Background="{Binding OppositeBackgroundBrush}"> -->
+            <!--             <TextBlock Text="{localizations:Loc Status_Error}" -->
+            <!--                        HorizontalAlignment="Center" VerticalAlignment="Center" -->
+            <!--                        Margin="0" -->
+            <!--                        FontWeight="Bold" Foreground="{Binding MainForeColorBrush}" /> -->
+            <!--         </Grid> -->
+            <!--     </Grid> -->
+            <!-- </Border> -->
 
             <!-- FileDifferences -->
             <Border BorderBrush="Gray" BorderThickness="0" IsVisible="{Binding ShowFileDifferences}">

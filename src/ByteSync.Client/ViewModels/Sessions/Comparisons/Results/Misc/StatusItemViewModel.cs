@@ -9,7 +9,7 @@ public class StatusItemViewModel : ViewModelBase
     private Brush? _foreBrush;
     public string? Letter { get; set; }
     
-    public StatusViewModel.BrushColors ForeBrushColor { get; set; }
+    public ContentRepartitionViewModel.BrushColors ForeBrushColor { get; set; }
 
     /// <summary>
     /// Ne pas utiliser [Reactive] ici pour des raisons de performances
@@ -21,7 +21,7 @@ public class StatusItemViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _foreBrush, value);
     }
 
-    public StatusViewModel.BrushColors BackBrushColor { get; set; }
+    public ContentRepartitionViewModel.BrushColors BackBrushColor { get; set; }
 
     /// <summary>
     /// Ne pas utiliser [Reactive] ici pour des raisons de performances
