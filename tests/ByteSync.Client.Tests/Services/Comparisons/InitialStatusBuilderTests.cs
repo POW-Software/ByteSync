@@ -98,4 +98,81 @@ public class InitialStatusBuilderTests : AbstractTester
         comparisonItem.ContentRepartition.MissingInventories.Should().NotBeEmpty();
         comparisonItem.ContentRepartition.MissingInventoryParts.Should().NotBeEmpty();
     }
+
+    [Test]
+    public void Test_BuildStatus_ForDirectory_With_DirectoryDescription()
+    {
+        // Arrange
+        var pathIdentity = new PathIdentity(FileSystemTypes.Directory, "/dir1", "dir1", "dir1");
+        var comparisonItem = new ComparisonItem(pathIdentity);
+        
+        var contentIdentityCore = new ContentIdentityCore
+        {
+            SignatureHash = "dirhash1",
+            Size = 0
+        };
+        var contentIdentity = new ContentIdentity(contentIdentityCore);
+        
+        comparisonItem.AddContentIdentity(contentIdentity);
+        
+        var id = $"IID_{Guid.NewGuid()}";
+        var inventory = new Inventory
+        {
+            Letter = "A",
+            InventoryId = id
+        };
+        var inventoryPart = new InventoryPart(inventory, "rootpath", FileSystemTypes.Directory);
+        inventory.Add(inventoryPart);
+        
+        var directoryDescription = new DirectoryDescription
+        {
+            InventoryPart = inventoryPart
+        };
+        
+        contentIdentity.Add(directoryDescription);
+
+        var initialStatusBuilder = new InitialStatusBuilder();
+        
+        // Act
+        initialStatusBuilder.BuildStatus(comparisonItem, [inventory]);
+        
+        // Assert
+        comparisonItem.ContentRepartition.MissingInventories.Should().BeEmpty();
+        comparisonItem.ContentRepartition.MissingInventoryParts.Should().BeEmpty();
+    }
+    
+    [Test]
+    public void Test_BuildStatus_ForDirectory_Without_DirectoryDescription()
+    {
+        // Arrange
+        var pathIdentity = new PathIdentity(FileSystemTypes.Directory, "/dir1", "dir1", "dir1");
+        var comparisonItem = new ComparisonItem(pathIdentity);
+        
+        var contentIdentityCore = new ContentIdentityCore
+        {
+            SignatureHash = "dirhash1",
+            Size = 0
+        };
+        var contentIdentity = new ContentIdentity(contentIdentityCore);
+        
+        comparisonItem.AddContentIdentity(contentIdentity);
+        
+        var id = $"IID_{Guid.NewGuid()}";
+        var inventory = new Inventory
+        {
+            Letter = "A",
+            InventoryId = id
+        };
+        var inventoryPart = new InventoryPart(inventory, "rootpath", FileSystemTypes.Directory);
+        inventory.Add(inventoryPart);
+
+        var initialStatusBuilder = new InitialStatusBuilder();
+        
+        // Act
+        initialStatusBuilder.BuildStatus(comparisonItem, [inventory]);
+        
+        // Assert
+        comparisonItem.ContentRepartition.MissingInventories.Should().NotBeEmpty();
+        comparisonItem.ContentRepartition.MissingInventoryParts.Should().NotBeEmpty();
+    }
 }
