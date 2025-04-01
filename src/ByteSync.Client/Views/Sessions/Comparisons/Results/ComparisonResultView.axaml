@@ -211,7 +211,7 @@
 
                     <DataGridTemplateColumn Width="Auto" CanUserResize="True">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{localizations:Loc ComparisonResult_Status}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{localizations:Loc ComparisonResult_ContentRepartition}" Classes="PowDataGridHeader" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -236,7 +236,7 @@
                     
                     <DataGridTemplateColumn Width="Auto" CanUserResize="True">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="SYNC_STATUS" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{localizations:Loc ComparisonResult_SynchronizationStatus}" Classes="PowDataGridHeader" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

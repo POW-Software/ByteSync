@@ -318,8 +318,8 @@
   <data name="ComparisonResult_Inventory" xml:space="preserve">
 	  <value>INVENTAIRE</value>
   </data>
-	<data name="ComparisonResult_Status" xml:space="preserve">
-		<value>ÉTAT</value>
+	<data name="ComparisonResult_ContentRepartition" xml:space="preserve">
+		<value>INITIAL</value>
 	</data>
   <data name="TargetedActionEditionGlobal_SaveWarning" xml:space="preserve">
 	  <value>L'action que vous êtes en train de créer ne peut pas être appliquée à tous les éléments sélectionnés.
@@ -1555,5 +1555,8 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	</data>
 	<data name="Header_Update_Required_Tooltip" xml:space="preserve">
 		<value>Une mise à jour est requise. Afficher plus de détails.</value>
+	</data>
+	<data name="ComparisonResult_SynchronizationStatus" xml:space="preserve">
+		<value>SYNCHRONISATION</value>
 	</data>
 </root>
