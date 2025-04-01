@@ -1,36 +1,35 @@
 ﻿using Avalonia.Styling;
 
-namespace ByteSync.Business.Themes
+namespace ByteSync.Business.Themes;
+
+public class Theme
 {
-    public class Theme
+    public Theme(string themeName, ThemeModes mode, Styles style)
     {
-        public Theme(string themeName, ThemeModes mode, Styles style)
-        {
-            Name = themeName;
-            Mode = mode;
-            Style = style;
-        }
+        Name = themeName;
+        Mode = mode;
+        Style = style;
+    }
         
-        public string Name { get; }
+    public string Name { get; }
         
-        public ThemeModes Mode { get; }
+    public ThemeModes Mode { get; }
         
-        public Styles Style { get; }
+    public Styles Style { get; }
 
-        public string Key
+    public string Key
+    {
+        get
         {
-            get
-            {
-                return $"{Mode}.{Name}";
-            }
+            return $"{Mode}.{Name}";
         }
+    }
 
-        public bool IsDarkMode
+    public bool IsDarkMode
+    {
+        get
         {
-            get
-            {
-                return Mode == ThemeModes.Dark;
-            }
+            return Mode == ThemeModes.Dark;
         }
     }
 }

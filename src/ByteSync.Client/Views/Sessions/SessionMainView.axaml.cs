@@ -3,19 +3,18 @@ using Avalonia.ReactiveUI;
 using ByteSync.ViewModels.Sessions;
 using ReactiveUI;
 
-namespace ByteSync.Views.Sessions
-{
-    class SessionMainView : ReactiveUserControl<SessionMainViewModel>
-    {
-        public SessionMainView()
-        {
-            this.WhenActivated(disposables => { });
-            InitializeComponent();
-        }
+namespace ByteSync.Views.Sessions;
 
-        private void InitializeComponent()
-        {
-            AvaloniaXamlLoader.Load(this);
-        }
+class SessionMainView : ReactiveUserControl<SessionMainViewModel>
+{
+    public SessionMainView()
+    {
+        this.WhenActivated(disposables => { });
+        InitializeComponent();
+    }
+
+    private void InitializeComponent()
+    {
+        AvaloniaXamlLoader.Load(this);
     }
 }

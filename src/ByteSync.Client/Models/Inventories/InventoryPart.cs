@@ -2,102 +2,101 @@
 using ByteSync.Common.Business.Misc;
 using ByteSync.Models.FileSystems;
 
-namespace ByteSync.Models.Inventories
+namespace ByteSync.Models.Inventories;
+
+public class InventoryPart
 {
-    public class InventoryPart
+    public InventoryPart()
     {
-        public InventoryPart()
-        {
-            FileDescriptions = new List<FileDescription>();
-            DirectoryDescriptions = new List<DirectoryDescription>();
-        }
+        FileDescriptions = new List<FileDescription>();
+        DirectoryDescriptions = new List<DirectoryDescription>();
+    }
 
-        public InventoryPart(Inventory inventory, string rootPath, FileSystemTypes inventoryPartType) : this()
-        {
-            Inventory = inventory;
-            RootPath = rootPath;
-            InventoryPartType = inventoryPartType;
-        }
+    public InventoryPart(Inventory inventory, string rootPath, FileSystemTypes inventoryPartType) : this()
+    {
+        Inventory = inventory;
+        RootPath = rootPath;
+        InventoryPartType = inventoryPartType;
+    }
 
-        public Inventory Inventory { get; set; }
+    public Inventory Inventory { get; set; }
         
-        public string RootPath { get; set; }
+    public string RootPath { get; set; }
 
-        public FileSystemTypes InventoryPartType { get; set; }
+    public FileSystemTypes InventoryPartType { get; set; }
         
-        public string Code { get; set; }
+    public string Code { get; set; }
 
-        public List<FileDescription> FileDescriptions { get; set; }
+    public List<FileDescription> FileDescriptions { get; set; }
 
-        public List<DirectoryDescription> DirectoryDescriptions { get; set; }
+    public List<DirectoryDescription> DirectoryDescriptions { get; set; }
 
-        public string RootName
+    public string RootName
+    {
+        get
         {
-            get
+            string directorySeparatorChar;
+            switch (Inventory.Endpoint.OSPlatform)
             {
-                string directorySeparatorChar;
-                switch (Inventory.Endpoint.OSPlatform)
-                {
-                    case OSPlatforms.Windows:
-                        directorySeparatorChar = "\\";
-                        break;
-                    case OSPlatforms.Linux:
-                    case OSPlatforms.MacOs:
-                        directorySeparatorChar = "/";
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(directorySeparatorChar));
-                }
+                case OSPlatforms.Windows:
+                    directorySeparatorChar = "\\";
+                    break;
+                case OSPlatforms.Linux:
+                case OSPlatforms.MacOs:
+                    directorySeparatorChar = "/";
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(directorySeparatorChar));
+            }
                 
-                return RootPath.Substring(RootPath.LastIndexOf(directorySeparatorChar, StringComparison.Ordinal));
-            }
+            return RootPath.Substring(RootPath.LastIndexOf(directorySeparatorChar, StringComparison.Ordinal));
         }
+    }
 
-        protected bool Equals(InventoryPart other)
+    protected bool Equals(InventoryPart other)
+    {
+        return Equals(Inventory, other.Inventory) && RootPath == other.RootPath && InventoryPartType == other.InventoryPartType;
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != this.GetType()) return false;
+        return Equals((InventoryPart) obj);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
         {
-            return Equals(Inventory, other.Inventory) && RootPath == other.RootPath && InventoryPartType == other.InventoryPartType;
+            var hashCode = Inventory.GetHashCode();
+            hashCode = (hashCode * 397) ^ RootPath.GetHashCode();
+            hashCode = (hashCode * 397) ^ (int) InventoryPartType;
+            return hashCode;
         }
+    }
 
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((InventoryPart) obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                var hashCode = Inventory.GetHashCode();
-                hashCode = (hashCode * 397) ^ RootPath.GetHashCode();
-                hashCode = (hashCode * 397) ^ (int) InventoryPartType;
-                return hashCode;
-            }
-        }
-
-        public override string ToString()
-        {
-#if DEBUG
-            return $"InventoryPart {RootName} {RootPath}";
-#endif
+    public override string ToString()
+    {
+    #if DEBUG
+        return $"InventoryPart {RootName} {RootPath}";
+    #endif
 
 #pragma warning disable 162
-            return base.ToString();
+        return base.ToString();
 #pragma warning restore 162
-        }
+    }
 
-        public void AddFileSystemDescription(FileSystemDescription fileSystemDescription)
+    public void AddFileSystemDescription(FileSystemDescription fileSystemDescription)
+    {
+        if (fileSystemDescription.FileSystemType == FileSystemTypes.File)
         {
-            if (fileSystemDescription.FileSystemType == FileSystemTypes.File)
-            {
-                FileDescriptions.Add((FileDescription) fileSystemDescription);
-            }
-            else
-            {
-                DirectoryDescriptions.Add((DirectoryDescription) fileSystemDescription);
-            }
+            FileDescriptions.Add((FileDescription) fileSystemDescription);
+        }
+        else
+        {
+            DirectoryDescriptions.Add((DirectoryDescription) fileSystemDescription);
         }
     }
 }

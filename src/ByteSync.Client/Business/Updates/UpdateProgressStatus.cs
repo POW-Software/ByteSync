@@ -1,12 +1,11 @@
-﻿namespace ByteSync.Business.Updates
+﻿namespace ByteSync.Business.Updates;
+
+public enum UpdateProgressStatus
 {
-    public enum UpdateProgressStatus
-    {
-        Downloading, 
-        Extracting,
-        UpdatingFiles,
-        BackingUpExistingFiles,
-        MovingNewFiles,
-        RestartingApplication
-    }
+    Downloading, 
+    Extracting,
+    UpdatingFiles,
+    BackingUpExistingFiles,
+    MovingNewFiles,
+    RestartingApplication
 }

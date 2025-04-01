@@ -1,10 +1,8 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.Inventories;
-using ByteSync.Services.Inventories;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

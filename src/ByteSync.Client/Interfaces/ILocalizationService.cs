@@ -2,24 +2,23 @@
 using System.ComponentModel;
 using ByteSync.Business;
 
-namespace ByteSync.Interfaces
+namespace ByteSync.Interfaces;
+
+public interface ILocalizationService : INotifyPropertyChanged
 {
-    public interface ILocalizationService : INotifyPropertyChanged
-    {
-        void Initialize();
+    void Initialize();
         
-        ReadOnlyCollection<CultureDefinition> GetAvailableCultures();
+    ReadOnlyCollection<CultureDefinition> GetAvailableCultures();
 
-        public IObservable<CultureDefinition> CurrentCultureObservable { get; }
+    public IObservable<CultureDefinition> CurrentCultureObservable { get; }
         
-        CultureDefinition CurrentCultureDefinition { get; }
+    CultureDefinition CurrentCultureDefinition { get; }
         
-        // CultureInfo CurrentCulture { get; }
+    // CultureInfo CurrentCulture { get; }
 
-        void SetCurrentCulture(CultureDefinition selectedCulture);
+    void SetCurrentCulture(CultureDefinition selectedCulture);
         
-        string this[string key] { get; }
+    string this[string key] { get; }
 
-        string GetMonthName(int monthNumber0to11);
-    }
+    string GetMonthName(int monthNumber0to11);
 }

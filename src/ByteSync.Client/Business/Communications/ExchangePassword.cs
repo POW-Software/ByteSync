@@ -1,6 +1,4 @@
-﻿using ByteSync.Common.Helpers;
-
-namespace ByteSync.Business.Communications;
+﻿namespace ByteSync.Business.Communications;
 
 public class ExchangePassword
 {

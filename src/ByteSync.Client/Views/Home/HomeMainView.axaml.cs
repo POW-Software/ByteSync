@@ -3,19 +3,18 @@ using Avalonia.ReactiveUI;
 using ByteSync.ViewModels.Home;
 using ReactiveUI;
 
-namespace ByteSync.Views.Home
-{
-    public class HomeMainView : ReactiveUserControl<HomeMainViewModel>
-    {
-        public HomeMainView()
-        {
-            this.WhenActivated(disposables => { });
-            InitializeComponent();
-        }
+namespace ByteSync.Views.Home;
 
-        private void InitializeComponent()
-        {
-            AvaloniaXamlLoader.Load(this);
-        }
+public class HomeMainView : ReactiveUserControl<HomeMainViewModel>
+{
+    public HomeMainView()
+    {
+        this.WhenActivated(disposables => { });
+        InitializeComponent();
+    }
+
+    private void InitializeComponent()
+    {
+        AvaloniaXamlLoader.Load(this);
     }
 }

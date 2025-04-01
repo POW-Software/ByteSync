@@ -6,44 +6,43 @@ using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Interfaces;
 
-namespace ByteSync.Interfaces.Repositories
+namespace ByteSync.Interfaces.Repositories;
+
+public interface ICloudSessionConnectionRepository : IRepository<CloudSessionConnectionData>
 {
-    public interface ICloudSessionConnectionRepository : IRepository<CloudSessionConnectionData>
-    {
-        void SetAesEncryptionKey(byte[] aesEncryptionKey);
+    void SetAesEncryptionKey(byte[] aesEncryptionKey);
         
-        byte[]? GetAesEncryptionKey();
+    byte[]? GetAesEncryptionKey();
 
-        Task SetCloudSessionConnectionData(string sessionId, string sessionPassword, RunCloudSessionProfileInfo? lobbySessionDetails);
+    Task SetCloudSessionConnectionData(string sessionId, string sessionPassword, RunCloudSessionProfileInfo? lobbySessionDetails);
 
-        Task<string?> GetTempSessionPassword(string sessionId);
+    Task<string?> GetTempSessionPassword(string sessionId);
         
-        public Task<RunCloudSessionProfileInfo?> GetTempLobbySessionDetails(string sessionId);
+    public Task<RunCloudSessionProfileInfo?> GetTempLobbySessionDetails(string sessionId);
 
-        Task SetPasswordExchangeKeyReceived(string sessionId);
+    Task SetPasswordExchangeKeyReceived(string sessionId);
 
-        Task SetJoinSessionResultReceived(string sessionId);
+    Task SetJoinSessionResultReceived(string sessionId);
         
-        Task<bool> CheckConnectingCloudSession(string? sessionId);
+    Task<bool> CheckConnectingCloudSession(string? sessionId);
         
-        IObservable<SessionConnectionStatus> ConnectionStatusObservable { get; }
+    IObservable<SessionConnectionStatus> ConnectionStatusObservable { get; }
         
-        IObservable<CreateSessionError?> CreateSessionErrorObservable { get; }
+    IObservable<CreateSessionError?> CreateSessionErrorObservable { get; }
         
-        IObservable<JoinSessionError?> JoinSessionErrorObservable { get; }
+    IObservable<JoinSessionError?> JoinSessionErrorObservable { get; }
     
-        SessionConnectionStatus CurrentConnectionStatus { get; }
+    SessionConnectionStatus CurrentConnectionStatus { get; }
         
-        CancellationTokenSource CancellationTokenSource { get; set; }
+    CancellationTokenSource CancellationTokenSource { get; set; }
         
-        CancellationToken CancellationToken { get; }
+    CancellationToken CancellationToken { get; }
 
-        void SetConnectionStatus(SessionConnectionStatus connectionStatus);
+    void SetConnectionStatus(SessionConnectionStatus connectionStatus);
         
-        void SetCreateSessionError(CreateSessionError createSessionError);
+    void SetCreateSessionError(CreateSessionError createSessionError);
         
-        void SetJoinSessionError(JoinSessionError joinSessionError);
+    void SetJoinSessionError(JoinSessionError joinSessionError);
         
-        void ClearErrors();
-    }
+    void ClearErrors();
 }
