@@ -5,7 +5,7 @@ using ByteSync.Models.Inventories;
 
 namespace ByteSync.Services.Inventories;
 
-class InventoryLoader : IDisposable
+public class InventoryLoader : IDisposable
 {
     public InventoryLoader(string fullName)
     {

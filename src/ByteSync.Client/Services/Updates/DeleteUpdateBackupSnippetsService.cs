@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using ByteSync.Business.Updates;
 using ByteSync.Interfaces.Updates;
 

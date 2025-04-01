@@ -1,6 +1,5 @@
 ﻿using System.Net.Http;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Controls.Json;
 using ByteSync.Interfaces.Controls.Applications;

@@ -1,7 +1,6 @@
 ﻿using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
-using System.Threading.Tasks;
 using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Controls;
 using ByteSync.Interfaces.Repositories.Updates;

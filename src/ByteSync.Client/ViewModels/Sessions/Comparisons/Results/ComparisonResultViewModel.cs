@@ -5,7 +5,6 @@ using Avalonia.Controls.Mixins;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Arguments;
 using ByteSync.Business.Sessions;
-using ByteSync.Business.Themes;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Inventories;
@@ -30,7 +29,6 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     private readonly IDialogService _dialogService;
     private readonly IInventoryService _inventoryService;
     private readonly IComparisonItemsService _comparisonItemsService;
-    private readonly IThemeService _themeService;
     private readonly IComparisonItemViewModelFactory _comparisonItemViewModelFactory;
     private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly IFlyoutElementViewModelFactory _flyoutElementViewModelFactory;
@@ -45,7 +43,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     }
 
     public ComparisonResultViewModel(ISessionService sessionService, ILocalizationService localizationService, 
-        IDialogService dialogService, IInventoryService inventoriesService, IComparisonItemsService comparisonItemsService, IThemeService themeService, 
+        IDialogService dialogService, IInventoryService inventoriesService, IComparisonItemsService comparisonItemsService,  
         IComparisonItemViewModelFactory comparisonItemViewModelFactory, ISessionMemberRepository sessionMemberRepository, 
         IFlyoutElementViewModelFactory flyoutElementViewModelFactory, ManageSynchronizationRulesViewModel manageSynchronizationRulesViewModel,
         IComparisonItemRepository comparisonItemRepository, ILogger<ComparisonResultViewModel> logger)
@@ -55,7 +53,6 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         _dialogService = dialogService;
         _inventoryService = inventoriesService;
         _comparisonItemsService = comparisonItemsService;
-        _themeService = themeService;
         _comparisonItemViewModelFactory = comparisonItemViewModelFactory;
         _sessionMemberRepository = sessionMemberRepository;
         _flyoutElementViewModelFactory = flyoutElementViewModelFactory;
@@ -120,12 +117,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
             .Transform(comparisonItem => _comparisonItemViewModelFactory.Create(comparisonItem))
             .DisposeMany()
             .ObserveOn(RxApp.MainThreadScheduler)
-            // .Do(changes => PageParameters.Update(changes.Response))
-            // Make sure this line^^ is only right before the Bind()
-            // This may be important to avoid threading issues if
-            // 'mySource' is updated on a different thread.
             .Bind(out _bindingData)
-            // .DisposeMany()
             .Subscribe();
             // .DisposeWith(disposables);
         
@@ -140,11 +132,6 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
                 .Where(s => s.In(SessionStatus.Preparation))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => OnSessionReset())
-                .DisposeWith(disposables);
-            
-            _themeService.SelectedTheme
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(OnThemeChanged)
                 .DisposeWith(disposables);
 
             this.HandleActivation(disposables);
@@ -318,18 +305,12 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         }
         else
         {
-            // return comparisonResult.Inventories[inventoryIndex].InventoryParts[0].RootName
-            //     .Trim('\\', '/');
-                
             var result = comparisonResult.Inventories[inventoryIndex].InventoryParts[0].RootPath
                 .Trim('\\', '/');
-                
-            // ici, on pourra introduire une méthode / classe en charge de gérer le namining si besoin
+            
             const int maxLength = 30;
             if (result.Length > maxLength)
             {
-                // int remainingLength = maxLength - 9 - 3;
-                // result = result.Substring(0, 9) + "..." + result.Substring(result.Length - remainingLength, remainingLength);
                 result = result.Substring(0, 12).Trim() + "..." + comparisonResult.Inventories[inventoryIndex].InventoryParts[0].RootName;
             }
 
@@ -349,14 +330,6 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         foreach (var comparisonItemView in SelectedComparisonItemViews)
         {
             comparisonItemView.ClearTargetedActions();
-        }
-    }
-    
-    private void OnThemeChanged(Theme? theme)
-    {
-        foreach (var comparisonItem in ComparisonItems)
-        {
-            comparisonItem?.OnThemeChanged();
         }
     }
     
@@ -385,20 +358,6 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
 
             foreach (var advancedExpression in advancedExpressions)
             {
-                if (advancedExpression.Equals(":notok", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    if (comparisonItem.Status.IsOK)
-                    {
-                        return false;
-                    }
-                }
-                if (advancedExpression.Equals(":ok", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    if (!comparisonItem.Status.IsOK)
-                    {
-                        return false;
-                    }
-                }
                 if (advancedExpression.Equals(":file", StringComparison.InvariantCultureIgnoreCase))
                 {
                     if (comparisonItem.FileSystemType == FileSystemTypes.Directory)

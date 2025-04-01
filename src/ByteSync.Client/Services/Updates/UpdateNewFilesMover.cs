@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Interfaces.Repositories.Updates;
 using ByteSync.Interfaces.Updates;
 

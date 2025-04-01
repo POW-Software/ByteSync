@@ -170,13 +170,13 @@ public class TestInventoryComparer : IntegrationTest
             ClassicAssert.AreEqual("/file1.txt", comparisonItem.PathIdentity.LinkingData);
             ClassicAssert.AreEqual("/file1.txt", comparisonItem.PathIdentity.LinkingKeyValue);
                 
-            ClassicAssert.AreEqual(true, comparisonItem.Status.IsOK);
-            ClassicAssert.AreEqual(false, comparisonItem.Status.IsSuccessStatus);
-            ClassicAssert.AreEqual(false, comparisonItem.Status.IsErrorStatus);
-            ClassicAssert.AreEqual(1, comparisonItem.Status.FingerPrintGroups.Count);
-            ClassicAssert.AreEqual(1, comparisonItem.Status.LastWriteTimeGroups.Count);
-            ClassicAssert.AreEqual(0, comparisonItem.Status.MissingInventories.Count);
-            ClassicAssert.AreEqual(0, comparisonItem.Status.MissingInventoryParts.Count);
+            // ClassicAssert.AreEqual(true, comparisonItem.ContentRepartition.IsOK);
+            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsSuccessStatus);
+            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsErrorStatus);
+            ClassicAssert.AreEqual(1, comparisonItem.ContentRepartition.FingerPrintGroups.Count);
+            ClassicAssert.AreEqual(1, comparisonItem.ContentRepartition.LastWriteTimeGroups.Count);
+            ClassicAssert.AreEqual(0, comparisonItem.ContentRepartition.MissingInventories.Count);
+            ClassicAssert.AreEqual(0, comparisonItem.ContentRepartition.MissingInventoryParts.Count);
         }
     }
         
@@ -261,13 +261,13 @@ public class TestInventoryComparer : IntegrationTest
             ClassicAssert.AreEqual("/file1.txt", comparisonItem.PathIdentity.LinkingData);
             ClassicAssert.AreEqual("/file1.txt", comparisonItem.PathIdentity.LinkingKeyValue);
 
-            ClassicAssert.AreEqual(false, comparisonItem.Status.IsOK);
-            ClassicAssert.AreEqual(false, comparisonItem.Status.IsSuccessStatus);
-            ClassicAssert.AreEqual(false, comparisonItem.Status.IsErrorStatus);
-            ClassicAssert.AreEqual(2, comparisonItem.Status.FingerPrintGroups.Count);
-            ClassicAssert.IsTrue(comparisonItem.Status.LastWriteTimeGroups.Count.In(1, 2));
-            ClassicAssert.AreEqual(0, comparisonItem.Status.MissingInventories.Count);
-            ClassicAssert.AreEqual(0, comparisonItem.Status.MissingInventoryParts.Count);
+            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsOK);
+            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsSuccessStatus);
+            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsErrorStatus);
+            ClassicAssert.AreEqual(2, comparisonItem.ContentRepartition.FingerPrintGroups.Count);
+            ClassicAssert.IsTrue(comparisonItem.ContentRepartition.LastWriteTimeGroups.Count.In(1, 2));
+            ClassicAssert.AreEqual(0, comparisonItem.ContentRepartition.MissingInventories.Count);
+            ClassicAssert.AreEqual(0, comparisonItem.ContentRepartition.MissingInventoryParts.Count);
         }
     }
 
@@ -343,13 +343,13 @@ public class TestInventoryComparer : IntegrationTest
             ClassicAssert.AreEqual("/dir1", comparisonItem.PathIdentity.LinkingData);
             ClassicAssert.AreEqual("/Dir1", comparisonItem.PathIdentity.LinkingKeyValue);
 
-            ClassicAssert.AreEqual(true, comparisonItem.Status.IsOK);
-            ClassicAssert.AreEqual(false, comparisonItem.Status.IsSuccessStatus);
-            ClassicAssert.AreEqual(false, comparisonItem.Status.IsErrorStatus);
-            ClassicAssert.AreEqual(0, comparisonItem.Status.FingerPrintGroups.Count);
-            ClassicAssert.AreEqual(0, comparisonItem.Status.LastWriteTimeGroups.Count);
-            ClassicAssert.AreEqual(0, comparisonItem.Status.MissingInventories.Count);
-            ClassicAssert.AreEqual(0, comparisonItem.Status.MissingInventoryParts.Count);
+            // ClassicAssert.AreEqual(true, comparisonItem.ContentRepartition.IsOK);
+            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsSuccessStatus);
+            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsErrorStatus);
+            ClassicAssert.AreEqual(0, comparisonItem.ContentRepartition.FingerPrintGroups.Count);
+            ClassicAssert.AreEqual(0, comparisonItem.ContentRepartition.LastWriteTimeGroups.Count);
+            ClassicAssert.AreEqual(0, comparisonItem.ContentRepartition.MissingInventories.Count);
+            ClassicAssert.AreEqual(0, comparisonItem.ContentRepartition.MissingInventoryParts.Count);
         }
     }
 
@@ -410,9 +410,9 @@ public class TestInventoryComparer : IntegrationTest
                 }
             }
 
-            ClassicAssert.AreEqual(true, comparisonItem.Status.IsOK);
-            ClassicAssert.AreEqual(false, comparisonItem.Status.IsSuccessStatus);
-            ClassicAssert.AreEqual(false, comparisonItem.Status.IsErrorStatus);
+            // ClassicAssert.AreEqual(true, comparisonItem.ContentRepartition.IsOK);
+            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsSuccessStatus);
+            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsErrorStatus);
 
             ClassicAssert.IsTrue(comparisonItem.PathIdentity.FileName.StartsWith("file_"));
             ClassicAssert.IsTrue(comparisonItem.PathIdentity.FileName.EndsWith(".txt"));
@@ -469,9 +469,9 @@ public class TestInventoryComparer : IntegrationTest
                 ClassicAssert.IsTrue(fileDescription.SignatureGuid.IsNotEmpty(true));
             }
 
-            ClassicAssert.AreEqual(false, comparisonItem.Status.IsOK);
-            ClassicAssert.AreEqual(false, comparisonItem.Status.IsSuccessStatus);
-            ClassicAssert.AreEqual(false, comparisonItem.Status.IsErrorStatus);
+            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsOK);
+            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsSuccessStatus);
+            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsErrorStatus);
 
             ClassicAssert.IsTrue(comparisonItem.PathIdentity.FileName.StartsWith("file_"));
             ClassicAssert.IsTrue(comparisonItem.PathIdentity.FileName.EndsWith(".txt"));

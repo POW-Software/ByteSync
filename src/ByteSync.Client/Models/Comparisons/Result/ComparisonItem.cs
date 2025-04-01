@@ -2,64 +2,66 @@
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Models.Inventories;
 
-namespace ByteSync.Models.Comparisons.Result
+namespace ByteSync.Models.Comparisons.Result;
+
+public class ComparisonItem
 {
-    public class ComparisonItem
+    public ComparisonItem(PathIdentity pathIdentity)
     {
-        public ComparisonItem(PathIdentity pathIdentity)
-        {
-            PathIdentity = pathIdentity;
-            ContentIdentities = new HashSet<ContentIdentity>();
-            Status = new Status(PathIdentity);
-        }
+        PathIdentity = pathIdentity;
+        ContentIdentities = new HashSet<ContentIdentity>();
+        ContentRepartition = new ContentRepartition(PathIdentity);
+        ItemSynchronizationStatus = new ItemSynchronizationStatus(PathIdentity);
+    }
 
-        public PathIdentity PathIdentity { get; }
+    public PathIdentity PathIdentity { get; }
 
-        public HashSet<ContentIdentity> ContentIdentities { get; }
+    public HashSet<ContentIdentity> ContentIdentities { get; }
         
-        public ComparisonResult ComparisonResult { get; set; }
+    public ComparisonResult ComparisonResult { get; set; }
 
-        public Status Status { get; set; }
+    public ContentRepartition ContentRepartition { get; set; }
+    
+    public ItemSynchronizationStatus ItemSynchronizationStatus { get; set; }
 
-        public FileSystemTypes FileSystemType
+    public FileSystemTypes FileSystemType
+    {
+        get
         {
-            get
-            {
-                return PathIdentity.FileSystemType;
-            }
+            return PathIdentity.FileSystemType;
         }
+    }
 
-        public void AddContentIdentity(ContentIdentity contentIdentity)
-        {
-            ContentIdentities.Add(contentIdentity);
-        }
+    public void AddContentIdentity(ContentIdentity contentIdentity)
+    {
+        ContentIdentities.Add(contentIdentity);
+    }
 
-        public ContentIdentity? GetContentIdentity(ContentIdentityCore contentIdentityCore)
-        {
-            return ContentIdentities.SingleOrDefault(ci => Equals(ci.Core, contentIdentityCore));
-        }
+    public ContentIdentity? GetContentIdentity(ContentIdentityCore contentIdentityCore)
+    {
+        return ContentIdentities.SingleOrDefault(ci => Equals(ci.Core, contentIdentityCore));
+    }
 
-        protected bool Equals(ComparisonItem other)
-        {
-            return Equals(PathIdentity, other.PathIdentity);
-        }
+    protected bool Equals(ComparisonItem other)
+    {
+        return Equals(PathIdentity, other.PathIdentity);
+    }
 
-        public override bool Equals(object? obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((ComparisonItem) obj);
-        }
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((ComparisonItem) obj);
+    }
 
-        public override int GetHashCode()
-        {
-            return PathIdentity.GetHashCode();
-        }
+    public override int GetHashCode()
+    {
+        return PathIdentity.GetHashCode();
+    }
 
-        public List<ContentIdentity> GetContentIdentities(InventoryPart inventoryPart)
-        {
-            return ContentIdentities.Where(ci => ci.IsPresentIn(inventoryPart)).ToList();
-        }
+    public List<ContentIdentity> GetContentIdentities(InventoryPart inventoryPart)
+    {
+        return ContentIdentities.Where(ci => ci.IsPresentIn(inventoryPart)).ToList();
     }
 }

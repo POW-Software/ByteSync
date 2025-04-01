@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Comparisons;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Business.Actions;
 using ByteSync.Interfaces.Converters;

@@ -1,0 +1,111 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:results="clr-namespace:ByteSync.ViewModels.Sessions.Comparisons.Results"
+             xmlns:misc="clr-namespace:ByteSync.ViewModels.Sessions.Comparisons.Results.Misc"
+             xmlns:misc1="clr-namespace:ByteSync.Views.Misc"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="100"
+             x:Class="ByteSync.Views.Sessions.Comparisons.Results.ContentRepartitionView">
+    
+    <Design.DataContext>
+        <results:ContentRepartitionViewModel />
+    </Design.DataContext>
+    
+    <UserControl.Resources>
+        <DataTemplate x:Key="StatusItemDataTemplate" DataType="misc:StatusItemViewModel">
+            <Border BorderBrush="Gray" BorderThickness="0">
+                <Grid Width="24" VerticalAlignment="Stretch" Background="{Binding BackBrush}">
+                    <TextBlock Text="{Binding Letter}" 
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Margin="0"
+                               FontWeight="Bold" Foreground="{Binding ForeBrush}" Grid.ColumnSpan="2" />
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+    
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4" >
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+            
+            <!-- FileDifferences -->
+            <Border BorderBrush="Gray" BorderThickness="0" IsVisible="{Binding ShowFileDifferences}">
+                <Grid Height="48" HorizontalAlignment="Left"
+                      >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="24" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="24" />
+                        <RowDefinition Height="24" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}">
+                        <misc1:Icon FontSize="14" Value="RegularHash" Foreground="{Binding MainForeColorBrush}" />
+                    </Border>
+
+                    <Border Grid.Row="0" Grid.Column="1" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}">
+                        <Grid  VerticalAlignment="Stretch">
+                            <ItemsControl Items="{Binding FingerPrintGroups}" ItemTemplate="{StaticResource StatusItemDataTemplate}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="1" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}">
+                        <misc1:Icon FontSize="14" Value="RegularTime" Foreground="{Binding MainForeColorBrush}" />
+                    </Border>
+                    
+                    <Border Grid.Row="1" Grid.Column="1" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}">
+                        <Grid VerticalAlignment="Stretch">
+
+
+                            <ItemsControl Items="{Binding LastWriteTimeGroups}" ItemTemplate="{StaticResource StatusItemDataTemplate}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+
+        
+            <!-- DirectoryDifferences -->
+            <Border BorderBrush="Gray" BorderThickness="0" IsVisible="{Binding ShowDirectoryDifferences}">
+                <Grid Height="48" HorizontalAlignment="Left">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="24" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Height="24" VerticalAlignment="Center" 
+                            BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}">
+                        <misc1:Icon FontSize="14" Value="RegularFolder" Foreground="{Binding MainForeColorBrush}" />
+                    </Border>
+                    
+                    <Border Grid.Column="1" Height="24" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}"
+                            VerticalAlignment="Center">
+                        <Grid  VerticalAlignment="Stretch">
+                            <ItemsControl Items="{Binding PresenceGroups}" ItemTemplate="{StaticResource StatusItemDataTemplate}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </Grid>
+</UserControl>

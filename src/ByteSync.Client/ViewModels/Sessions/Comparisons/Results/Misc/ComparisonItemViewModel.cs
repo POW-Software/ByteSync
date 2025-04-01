@@ -2,14 +2,11 @@
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
-using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Inventories;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Converters;
-using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
@@ -25,7 +22,8 @@ public class ComparisonItemViewModel : IDisposable
     private readonly ITargetedActionsService _targetedActionsService;
     private readonly IAtomicActionRepository _atomicActionRepository;
     private readonly IContentIdentityViewModelFactory _contentIdentityViewModelFactory;
-    private readonly IStatusViewModelFactory _statusViewModelFactory;
+    private readonly IContentRepartitionViewModelFactory _contentRepartitionViewModelFactory;
+    private readonly IItemSynchronizationStatusViewModelFactory _itemSynchronizationStatusViewModelFactory;
     private ReadOnlyObservableCollection<SynchronizationActionViewModel> _data;
     private readonly ISynchronizationActionViewModelFactory _synchronizationActionViewModelFactory;
     private readonly CompositeDisposable _compositeDisposable;
@@ -33,7 +31,8 @@ public class ComparisonItemViewModel : IDisposable
 
     public ComparisonItemViewModel(ITargetedActionsService targetedActionsService,
         IAtomicActionRepository atomicActionRepository, IContentIdentityViewModelFactory contentIdentityViewModelFactory,
-        IStatusViewModelFactory statusViewModelFactory, ComparisonItem comparisonItem, List<Inventory> inventories,
+        IContentRepartitionViewModelFactory contentRepartitionViewModelFactory, 
+        IItemSynchronizationStatusViewModelFactory itemSynchronizationStatusViewModelFactory, ComparisonItem comparisonItem, List<Inventory> inventories,
         ISynchronizationActionViewModelFactory synchronizationActionViewModelFactory, IFormatKbSizeConverter formatKbSizeConverter)
     {
         ComparisonItem = comparisonItem;
@@ -42,7 +41,8 @@ public class ComparisonItemViewModel : IDisposable
         _targetedActionsService = targetedActionsService;
         _atomicActionRepository = atomicActionRepository;
         _contentIdentityViewModelFactory = contentIdentityViewModelFactory;
-        _statusViewModelFactory = statusViewModelFactory;
+        _contentRepartitionViewModelFactory = contentRepartitionViewModelFactory;
+        _itemSynchronizationStatusViewModelFactory = itemSynchronizationStatusViewModelFactory;
         _synchronizationActionViewModelFactory = synchronizationActionViewModelFactory;
         _formatKbSizeConverter = formatKbSizeConverter;
 
@@ -52,13 +52,15 @@ public class ComparisonItemViewModel : IDisposable
         ContentIdentitiesD = new HashSet<ContentIdentityViewModel>();
         ContentIdentitiesE = new HashSet<ContentIdentityViewModel>();
 
-        ContentIdentitiesList = new List<HashSet<ContentIdentityViewModel>>();
-        ContentIdentitiesList.Add(ContentIdentitiesA);
-        ContentIdentitiesList.Add(ContentIdentitiesB);
-        ContentIdentitiesList.Add(ContentIdentitiesC);
-        ContentIdentitiesList.Add(ContentIdentitiesD);
-        ContentIdentitiesList.Add(ContentIdentitiesE);
-        
+        ContentIdentitiesList =
+        [
+            ContentIdentitiesA,
+            ContentIdentitiesB,
+            ContentIdentitiesC,
+            ContentIdentitiesD,
+            ContentIdentitiesE
+        ];
+
         _compositeDisposable = new CompositeDisposable();
 
         _atomicActionRepository.ObservableCache.Connect()
@@ -83,12 +85,14 @@ public class ComparisonItemViewModel : IDisposable
                 var contentIdentityView = _contentIdentityViewModelFactory.CreateContentIdentityViewModel(this, contentIdentity, inventory);
                 
                 collection.Add(contentIdentityView);
-
             }
         }
 
-        StatusViewModel = _statusViewModelFactory.CreateStatusViewModel(ComparisonItem, inventories);
-        _compositeDisposable.Add(StatusViewModel);
+        ContentRepartitionViewModel = _contentRepartitionViewModelFactory.CreateContentRepartitionViewModel(ComparisonItem, inventories);
+        _compositeDisposable.Add(ContentRepartitionViewModel);
+        
+        ItemSynchronizationStatusViewModel = _itemSynchronizationStatusViewModelFactory.CreateItemSynchronizationStatusViewModel(ComparisonItem, inventories);
+        _compositeDisposable.Add(ItemSynchronizationStatusViewModel);
     }
 
     internal ComparisonItem ComparisonItem { get; }
@@ -111,7 +115,9 @@ public class ComparisonItemViewModel : IDisposable
     
     public ReadOnlyObservableCollection<SynchronizationActionViewModel> SynchronizationActions => _data;
 
-    internal StatusViewModel StatusViewModel { get; private set; }
+    internal ContentRepartitionViewModel ContentRepartitionViewModel { get; private set; }
+    
+    internal ItemSynchronizationStatusViewModel ItemSynchronizationStatusViewModel { get; private set; }
     
     private List<string>? AtomicActionsIds { get; set; }
     
@@ -147,16 +153,16 @@ public class ComparisonItemViewModel : IDisposable
         }
     }
 
-    internal HashSet<ContentIdentityViewModel> GetContentIdentityViews(InventoryPart inventoryPart)
-    {
-        var contentIdentityViewModelsByInventory =
-            GetContentIdentityViews(inventoryPart.Inventory);
-
-        var result = Enumerable.ToHashSet(contentIdentityViewModelsByInventory
-                .Where(civm => civm.ContentIdentity.IsPresentIn(inventoryPart)).ToList());
-
-        return result;
-    }
+    // internal HashSet<ContentIdentityViewModel> GetContentIdentityViews(InventoryPart inventoryPart)
+    // {
+    //     var contentIdentityViewModelsByInventory =
+    //         GetContentIdentityViews(inventoryPart.Inventory);
+    //
+    //     var result = Enumerable.ToHashSet(contentIdentityViewModelsByInventory
+    //             .Where(civm => civm.ContentIdentity.IsPresentIn(inventoryPart)).ToList());
+    //
+    //     return result;
+    // }
 
     public void ClearTargetedActions()
     {
@@ -231,11 +237,6 @@ public class ComparisonItemViewModel : IDisposable
         _compositeDisposable.Dispose();
 
         AtomicActionsIds = null;
-    }
-
-    public void OnThemeChanged()
-    {
-        StatusViewModel.OnThemeChanged();
     }
 
     public void OnLocaleChanged(ILocalizationService localizationService)
