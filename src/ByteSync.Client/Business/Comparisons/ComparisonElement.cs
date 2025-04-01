@@ -1,10 +1,9 @@
-﻿namespace ByteSync.Business.Comparisons
+﻿namespace ByteSync.Business.Comparisons;
+
+public enum ComparisonElement
 {
-    public enum ComparisonElement
-    {
-        Content = 1,
-        Date = 2,
-        Size = 3,
-        Presence = 4,
-    }
+    Content = 1,
+    Date = 2,
+    Size = 3,
+    Presence = 4,
 }

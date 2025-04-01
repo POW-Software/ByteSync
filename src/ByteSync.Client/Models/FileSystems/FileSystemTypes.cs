@@ -1,7 +1,6 @@
-﻿namespace ByteSync.Models.FileSystems
-{
-    // public enum FileSystemTypes
-    // {
-    //     Directory, File
-    // }
-}
+﻿namespace ByteSync.Models.FileSystems;
+
+// public enum FileSystemTypes
+// {
+//     Directory, File
+// }

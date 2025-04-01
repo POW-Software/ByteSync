@@ -1,8 +1,7 @@
-﻿namespace ByteSync.Business.Themes
+﻿namespace ByteSync.Business.Themes;
+
+public enum ThemeModes
 {
-    public enum ThemeModes
-    {
-        Light = 0,
-        Dark = 1,
-    }
+    Light = 0,
+    Dark = 1,
 }

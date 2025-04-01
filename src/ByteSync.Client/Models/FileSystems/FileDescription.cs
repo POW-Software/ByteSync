@@ -3,51 +3,50 @@ using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Helpers;
 using ByteSync.Models.Inventories;
 
-namespace ByteSync.Models.FileSystems
+namespace ByteSync.Models.FileSystems;
+
+public class FileDescription : FileSystemDescription
 {
-    public class FileDescription : FileSystemDescription
+    public FileDescription()
     {
-        public FileDescription()
-        {
 
-        }
+    }
 
-        internal FileDescription(InventoryPart inventoryPart, string relativePath)
-            : base(inventoryPart, relativePath)
-        {
+    internal FileDescription(InventoryPart inventoryPart, string relativePath)
+        : base(inventoryPart, relativePath)
+    {
 
-        }
+    }
 
-        public FingerprintModes? FingerprintMode { get; set; }
+    public FingerprintModes? FingerprintMode { get; set; }
 
-        public string? Sha256 { get; set; }
+    public string? Sha256 { get; set; }
 
-        public string? SignatureGuid { get; set; }
+    public string? SignatureGuid { get; set; }
 
-        public long Size { get; set; }
+    public long Size { get; set; }
 
-        public DateTime CreationTimeUtc { get; set; }
+    public DateTime CreationTimeUtc { get; set; }
         
-        public DateTime LastWriteTimeUtc { get; set; }
+    public DateTime LastWriteTimeUtc { get; set; }
         
-        public string? AnalysisErrorType { get; set; }
+    public string? AnalysisErrorType { get; set; }
         
-        public string? AnalysisErrorDescription { get; set; }
+    public string? AnalysisErrorDescription { get; set; }
 
-        public override FileSystemTypes FileSystemType
+    public override FileSystemTypes FileSystemType
+    {
+        get
         {
-            get
-            {
-                return FileSystemTypes.File;
-            }
+            return FileSystemTypes.File;
         }
+    }
 
-        public bool HasAnalysisError
+    public bool HasAnalysisError
+    {
+        get
         {
-            get
-            {
-                return AnalysisErrorDescription.IsNotEmpty();
-            }
+            return AnalysisErrorDescription.IsNotEmpty();
         }
     }
 }
