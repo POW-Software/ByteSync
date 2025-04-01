@@ -1,6 +1,4 @@
-﻿using ByteSync.Common.Helpers;
-
-namespace ByteSync.Business.Navigations;
+﻿namespace ByteSync.Business.Navigations;
 
 public class NavigationDetails
 {

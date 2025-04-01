@@ -1,16 +1,15 @@
 ﻿using ByteSync.Business.Configurations;
 using ByteSync.Common.Business.Serials;
 
-namespace ByteSync.Interfaces
+namespace ByteSync.Interfaces;
+
+public interface IApplicationSettingsRepository
 {
-    public interface IApplicationSettingsRepository
-    {
-        ApplicationSettings GetCurrentApplicationSettings();
+    ApplicationSettings GetCurrentApplicationSettings();
 
-        ApplicationSettings UpdateCurrentApplicationSettings(Action<ApplicationSettings> handler, bool saveAfter = true);
+    ApplicationSettings UpdateCurrentApplicationSettings(Action<ApplicationSettings> handler, bool saveAfter = true);
 
-        ProductSerialDescription? ProductSerialDescription { get; }
+    ProductSerialDescription? ProductSerialDescription { get; }
         
-        string EncryptionPassword { get; }
-    }
+    string EncryptionPassword { get; }
 }

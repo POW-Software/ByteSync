@@ -5,14 +5,14 @@ using Avalonia.ReactiveUI;
 using ByteSync.ViewModels.Sessions.Synchronizations;
 using ReactiveUI;
 
-namespace ByteSync.Views.Sessions.Synchronizations
+namespace ByteSync.Views.Sessions.Synchronizations;
+
+public class SynchronizationMainView : ReactiveUserControl<SynchronizationMainViewModel>
 {
-    public class SynchronizationMainView : ReactiveUserControl<SynchronizationMainViewModel>
+    public SynchronizationMainView()
     {
-        public SynchronizationMainView()
+        this.WhenActivated(disposables =>
         {
-            this.WhenActivated(disposables =>
-            {
                 
         #if DEBUG
             this.WhenAnyValue(x => x.Bounds)
@@ -20,21 +20,20 @@ namespace ByteSync.Views.Sessions.Synchronizations
                 .DisposeWith(disposables);
         #endif
             
-            });
+        });
             
-            InitializeComponent();
-        }
+        InitializeComponent();
+    }
         
-    #if DEBUG
-        private void BoundsChanged(Rect bounds)
-        {
-            // 08/04/2022: Permet de récupérer facilement la hauteur si jamais ce panneau venait à changer de taille
-        }
-    #endif
+#if DEBUG
+    private void BoundsChanged(Rect bounds)
+    {
+        // 08/04/2022: Permet de récupérer facilement la hauteur si jamais ce panneau venait à changer de taille
+    }
+#endif
 
-        private void InitializeComponent()
-        {
-            AvaloniaXamlLoader.Load(this);
-        }
+    private void InitializeComponent()
+    {
+        AvaloniaXamlLoader.Load(this);
     }
 }

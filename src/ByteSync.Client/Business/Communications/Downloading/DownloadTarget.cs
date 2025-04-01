@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using ByteSync.Common.Business.SharedFiles;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Synchronizations;
 
 namespace ByteSync.Business.Communications.Downloading;

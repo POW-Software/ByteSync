@@ -1,5 +1,4 @@
 ﻿using System.Threading;
-using System.Threading.Tasks;
 
 namespace ByteSync.Business.Communications.PublicKeysTrusting;
 

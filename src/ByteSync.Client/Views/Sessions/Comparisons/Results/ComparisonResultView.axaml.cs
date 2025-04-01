@@ -6,45 +6,44 @@ using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
 using DynamicData;
 using ReactiveUI;
 
-namespace ByteSync.Views.Sessions.Comparisons.Results
+namespace ByteSync.Views.Sessions.Comparisons.Results;
+
+public class ComparisonResultView : ReactiveUserControl<ComparisonResultViewModel>
 {
-    public class ComparisonResultView : ReactiveUserControl<ComparisonResultViewModel>
-    {
-        public DataGrid DataGrid => this.FindControl<DataGrid>("DataGrid");
+    public DataGrid DataGrid => this.FindControl<DataGrid>("DataGrid");
         
-        public ComparisonResultView()
-        {
-            this.WhenActivated(disposables => { });
-            InitializeComponent();
-        }
+    public ComparisonResultView()
+    {
+        this.WhenActivated(disposables => { });
+        InitializeComponent();
+    }
 
-        private void InitializeComponent()
-        {
-            AvaloniaXamlLoader.Load(this);
-        }
+    private void InitializeComponent()
+    {
+        AvaloniaXamlLoader.Load(this);
+    }
 
-        private void TheGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
-        {
-            var l = DataGrid.SelectedItems;
+    private void TheGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        var l = DataGrid.SelectedItems;
 
-            List<ComparisonItemViewModel> toRemove = new List<ComparisonItemViewModel>();
-            foreach (var item in ViewModel!.SelectedItems)
+        List<ComparisonItemViewModel> toRemove = new List<ComparisonItemViewModel>();
+        foreach (var item in ViewModel!.SelectedItems)
+        {
+            if (!l.Contains(item))
             {
-                if (!l.Contains(item))
-                {
-                    toRemove.Add(item);
-                }
+                toRemove.Add(item);
             }
-            ViewModel.SelectedItems.Remove(toRemove);
+        }
+        ViewModel.SelectedItems.Remove(toRemove);
             
-            foreach (var item in l)
+        foreach (var item in l)
+        {
+            if (item is ComparisonItemViewModel comparisonItemViewModel)
             {
-                if (item is ComparisonItemViewModel comparisonItemViewModel)
+                if (!ViewModel.SelectedItems.Contains(comparisonItemViewModel))
                 {
-                    if (!ViewModel.SelectedItems.Contains(comparisonItemViewModel))
-                    {
-                        ViewModel.SelectedItems.Add(comparisonItemViewModel);
-                    }
+                    ViewModel.SelectedItems.Add(comparisonItemViewModel);
                 }
             }
         }

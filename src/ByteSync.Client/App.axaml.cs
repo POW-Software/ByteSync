@@ -10,70 +10,69 @@ using ByteSync.Views;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 
-namespace ByteSync
+namespace ByteSync;
+
+public class App : Application
 {
-    public class App : Application
+    public override void Initialize()
     {
-        public override void Initialize()
+        try
         {
-            try
-            {
-                AvaloniaXamlLoader.Load(this);
+            AvaloniaXamlLoader.Load(this);
                 
-                // https://lvcharts.com/docs/Avalonia/2.0.0-beta.700/Overview.Installation
-                LiveCharts.Configure(config => 
-                        config 
-                            // registers SkiaSharp as the library backend
-                            // REQUIRED unless you build your own
-                            .AddSkiaSharp() 
+            // https://lvcharts.com/docs/Avalonia/2.0.0-beta.700/Overview.Installation
+            LiveCharts.Configure(config => 
+                config 
+                    // registers SkiaSharp as the library backend
+                    // REQUIRED unless you build your own
+                    .AddSkiaSharp() 
 
-                            // adds the default supported types
-                            // OPTIONAL but highly recommend
-                            .AddDefaultMappers() 
+                    // adds the default supported types
+                    // OPTIONAL but highly recommend
+                    .AddDefaultMappers() 
 
-                            // select a theme, default is Light
-                            // OPTIONAL
-                            //.AddDarkTheme()
-                            .AddLightTheme()
-                );
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+                    // select a theme, default is Light
+                    // OPTIONAL
+                    //.AddDarkTheme()
+                    .AddLightTheme()
+            );
         }
-
-        public override void OnFrameworkInitializationCompleted()
+        catch (Exception e)
         {
-            if (Design.IsDesignMode)
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public override void OnFrameworkInitializationCompleted()
+    {
+        if (Design.IsDesignMode)
+        {
+            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                desktop.MainWindow = new MainWindow
                 {
-                    desktop.MainWindow = new MainWindow
-                    {
-                        DataContext = new MainWindowViewModel()
-                    };
-                }
-            
-                base.OnFrameworkInitializationCompleted();
+                    DataContext = new MainWindowViewModel()
+                };
             }
-            else
-            {
-                var container = ContainerProvider.Container;
             
-                var bootstrapperFactory = container.Resolve<IBootstrapperFactory>();
+            base.OnFrameworkInitializationCompleted();
+        }
+        else
+        {
+            var container = ContainerProvider.Container;
             
-                var bootStrapper = bootstrapperFactory.CreateBootstrapper();
-                bootStrapper.AfterFrameworkInitializationCompleted();
+            var bootstrapperFactory = container.Resolve<IBootstrapperFactory>();
+            
+            var bootStrapper = bootstrapperFactory.CreateBootstrapper();
+            bootStrapper.AfterFrameworkInitializationCompleted();
                 
-                if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-                {
-                    desktop.MainWindow = container.Resolve<MainWindow>();
-                }
-            
-                base.OnFrameworkInitializationCompleted();
+            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                desktop.MainWindow = container.Resolve<MainWindow>();
             }
+            
+            base.OnFrameworkInitializationCompleted();
         }
     }
 }

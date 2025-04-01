@@ -8,124 +8,123 @@ using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 
-namespace ByteSync.Services.Configurations
+namespace ByteSync.Services.Configurations;
+
+public class LocalApplicationDataManager : ILocalApplicationDataManager
 {
-    public class LocalApplicationDataManager : ILocalApplicationDataManager
+    private readonly IEnvironmentService _environmentService;
+
+    public LocalApplicationDataManager(IEnvironmentService environmentService)
     {
-        private readonly IEnvironmentService _environmentService;
+        _environmentService = environmentService;
 
-        public LocalApplicationDataManager(IEnvironmentService environmentService)
-        {
-            _environmentService = environmentService;
+        Initialize();
+    }
 
-            Initialize();
-        }
-
-        public string ApplicationDataPath { get; private set; } = null!;
+    public string ApplicationDataPath { get; private set; } = null!;
         
-        private void Initialize()
+    private void Initialize()
+    {
+        string thisApplicationDataPath;
+        if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
         {
-            string thisApplicationDataPath;
-            if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
-            {
-                // https://stackoverflow.com/questions/3820613/where-the-application-should-store-its-logs-in-mac-os
-                // Beaucoup d'application sont dans Environment.SpecialFolder.LocalApplicationData
+            // https://stackoverflow.com/questions/3820613/where-the-application-should-store-its-logs-in-mac-os
+            // Beaucoup d'application sont dans Environment.SpecialFolder.LocalApplicationData
                 
-                var globalApplicationDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var globalApplicationDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
-                thisApplicationDataPath = IOUtils.Combine(globalApplicationDataPath, "POW Software", "ByteSync");
+            thisApplicationDataPath = IOUtils.Combine(globalApplicationDataPath, "POW Software", "ByteSync");
+        }
+        else
+        {
+                
+            if (_environmentService.IsPortableApplication)
+            {
+                var fileInfo = new FileInfo(_environmentService.AssemblyFullName);
+                var parent = fileInfo.Directory!;
+                
+                thisApplicationDataPath = IOUtils.Combine(parent.FullName, "ApplicationData");
             }
             else
             {
-                
-                if (_environmentService.IsPortableApplication)
+                string globalApplicationDataPath;
+                if (IOUtils.IsSubPathOf(_environmentService.AssemblyFullName, Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)))
                 {
-                    var fileInfo = new FileInfo(_environmentService.AssemblyFullName);
-                    var parent = fileInfo.Directory!;
-                
-                    thisApplicationDataPath = IOUtils.Combine(parent.FullName, "ApplicationData");
+                    // On est installé dans Roaming
+                    globalApplicationDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
                 }
                 else
                 {
-                    string globalApplicationDataPath;
-                    if (IOUtils.IsSubPathOf(_environmentService.AssemblyFullName, Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)))
-                    {
-                        // On est installé dans Roaming
-                        globalApplicationDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                    }
-                    else
-                    {
-                        // On utilise Local
-                        globalApplicationDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                    }
+                    // On utilise Local
+                    globalApplicationDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                }
                     
-                    thisApplicationDataPath = IOUtils.Combine(globalApplicationDataPath, "POW Software", "ByteSync");
-                }
+                thisApplicationDataPath = IOUtils.Combine(globalApplicationDataPath, "POW Software", "ByteSync");
             }
+        }
 
-            if (_environmentService.ExecutionMode == ExecutionMode.Debug)
+        if (_environmentService.ExecutionMode == ExecutionMode.Debug)
+        {
+            if (Environment.GetCommandLineArgs().Any(a => a.StartsWith(DebugArguments.LADM_USE_APPDATA)))
             {
-                if (Environment.GetCommandLineArgs().Any(a => a.StartsWith(DebugArguments.LADM_USE_APPDATA)))
-                {
-                    var arg = Environment.GetCommandLineArgs()
-                        .First(a => a.StartsWith(DebugArguments.LADM_USE_APPDATA))
-                        .Substring(DebugArguments.LADM_USE_APPDATA.Length);
+                var arg = Environment.GetCommandLineArgs()
+                    .First(a => a.StartsWith(DebugArguments.LADM_USE_APPDATA))
+                    .Substring(DebugArguments.LADM_USE_APPDATA.Length);
                 
-                    thisApplicationDataPath += $" {arg}";
-                }
-                else if (!Environment.GetCommandLineArgs().Contains(DebugArguments.LADM_USE_STANDARD_APPDATA))
-                {
-                    thisApplicationDataPath += " Debug";
-
-                    var debugPath = DateTime.Now.ToString("yy-MM-dd HH-mm") + "_" + Process.GetCurrentProcess().Id;
-                    thisApplicationDataPath = IOUtils.Combine(thisApplicationDataPath, debugPath);
-                }
+                thisApplicationDataPath += $" {arg}";
             }
-
-            if (!Directory.Exists(thisApplicationDataPath))
+            else if (!Environment.GetCommandLineArgs().Contains(DebugArguments.LADM_USE_STANDARD_APPDATA))
             {
-                Directory.CreateDirectory(thisApplicationDataPath);
-            }
+                thisApplicationDataPath += " Debug";
 
-            ApplicationDataPath = thisApplicationDataPath;
+                var debugPath = DateTime.Now.ToString("yy-MM-dd HH-mm") + "_" + Process.GetCurrentProcess().Id;
+                thisApplicationDataPath = IOUtils.Combine(thisApplicationDataPath, debugPath);
+            }
         }
+
+        if (!Directory.Exists(thisApplicationDataPath))
+        {
+            Directory.CreateDirectory(thisApplicationDataPath);
+        }
+
+        ApplicationDataPath = thisApplicationDataPath;
+    }
         
-        public string? LogFilePath
+    public string? LogFilePath
+    {
+        get
         {
-            get
-            {
-                // https://stackoverflow.com/questions/39973928/serilog-open-log-file
+            // https://stackoverflow.com/questions/39973928/serilog-open-log-file
 
-                var directoryInfo = new DirectoryInfo(
-                    IOUtils.Combine(ApplicationDataPath, LocalApplicationDataConstants.LOGS_DIRECTORY));
+            var directoryInfo = new DirectoryInfo(
+                IOUtils.Combine(ApplicationDataPath, LocalApplicationDataConstants.LOGS_DIRECTORY));
 
-                var files = directoryInfo.GetFiles("ByteSync_*.log", SearchOption.TopDirectoryOnly);
+            var files = directoryInfo.GetFiles("ByteSync_*.log", SearchOption.TopDirectoryOnly);
 
-                var currentLogFilePath = files
-                    .Where(f => !f.Name.Contains("_debug"))
-                    .MaxBy(f => f.LastWriteTime)?.FullName;
+            var currentLogFilePath = files
+                .Where(f => !f.Name.Contains("_debug"))
+                .MaxBy(f => f.LastWriteTime)?.FullName;
 
-                return currentLogFilePath;
-            }
+            return currentLogFilePath;
         }
+    }
 
-        public string? DebugLogFilePath
+    public string? DebugLogFilePath
+    {
+        get
         {
-            get
-            {
-                // https://stackoverflow.com/questions/39973928/serilog-open-log-file
+            // https://stackoverflow.com/questions/39973928/serilog-open-log-file
 
-                var directoryInfo = new DirectoryInfo(
-                    IOUtils.Combine(ApplicationDataPath, LocalApplicationDataConstants.LOGS_DIRECTORY));
+            var directoryInfo = new DirectoryInfo(
+                IOUtils.Combine(ApplicationDataPath, LocalApplicationDataConstants.LOGS_DIRECTORY));
 
-                var files = directoryInfo.GetFiles("ByteSync_*.log", SearchOption.TopDirectoryOnly);
+            var files = directoryInfo.GetFiles("ByteSync_*.log", SearchOption.TopDirectoryOnly);
 
-                var currentLogFilePath = files
-                    .Where(f => f.Name.Contains("_debug"))
-                    .MaxBy(f => f.LastWriteTime)?.FullName;
+            var currentLogFilePath = files
+                .Where(f => f.Name.Contains("_debug"))
+                .MaxBy(f => f.LastWriteTime)?.FullName;
 
-                return currentLogFilePath;
-            }
+            return currentLogFilePath;
         }
     }
 }

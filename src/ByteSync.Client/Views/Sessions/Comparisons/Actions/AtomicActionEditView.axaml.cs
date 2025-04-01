@@ -2,18 +2,17 @@
 using Avalonia.ReactiveUI;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions;
 
-namespace ByteSync.Views.Sessions.Comparisons.Actions
-{
-    public class AtomicActionEditView : ReactiveUserControl<AtomicActionEditViewModel>
-    {
-        public AtomicActionEditView()
-        {
-            InitializeComponent();
-        }
+namespace ByteSync.Views.Sessions.Comparisons.Actions;
 
-        private void InitializeComponent()
-        {
-            AvaloniaXamlLoader.Load(this);
-        }
+public class AtomicActionEditView : ReactiveUserControl<AtomicActionEditViewModel>
+{
+    public AtomicActionEditView()
+    {
+        InitializeComponent();
+    }
+
+    private void InitializeComponent()
+    {
+        AvaloniaXamlLoader.Load(this);
     }
 }

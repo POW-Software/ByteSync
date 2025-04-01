@@ -1,6 +1,4 @@
-﻿using ByteSync.Common.Helpers;
-
-namespace ByteSync.Business.Misc;
+﻿namespace ByteSync.Business.Misc;
 
 public class TimeTrack : ICloneable
 {

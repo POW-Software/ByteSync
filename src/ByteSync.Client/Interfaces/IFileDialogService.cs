@@ -1,11 +1,10 @@
 ﻿using System.Threading.Tasks;
 
-namespace ByteSync.Interfaces
+namespace ByteSync.Interfaces;
+
+public interface IFileDialogService
 {
-    public interface IFileDialogService
-    {
-        Task<string[]?> ShowOpenFileDialogAsync(string title, bool allowMultiple);
+    Task<string[]?> ShowOpenFileDialogAsync(string title, bool allowMultiple);
         
-        Task<string?> ShowOpenFolderDialogAsync(string title);
-    }
+    Task<string?> ShowOpenFolderDialogAsync(string title);
 }

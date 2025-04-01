@@ -1,6 +1,4 @@
-﻿using ByteSync.Common.Helpers;
-
-namespace ByteSync.Business.Themes;
+﻿namespace ByteSync.Business.Themes;
 
 public class ThemeColor
 {

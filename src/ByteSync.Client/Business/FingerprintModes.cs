@@ -1,8 +1,7 @@
-﻿namespace ByteSync.Business
+﻿namespace ByteSync.Business;
+
+public enum FingerprintModes
 {
-    public enum FingerprintModes
-    {
-        Rsync = 1,
-        Sha256 = 2,
-    } 
+    Rsync = 1,
+    Sha256 = 2,
 }

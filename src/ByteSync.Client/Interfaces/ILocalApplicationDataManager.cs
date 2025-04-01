@@ -1,17 +1,16 @@
-﻿namespace ByteSync.Interfaces
+﻿namespace ByteSync.Interfaces;
+
+public interface ILocalApplicationDataManager
 {
-    public interface ILocalApplicationDataManager
-    {
-        // string ClientInstanceId { get; }
-        //
-        // ByteSyncEndpoint? CurrentEndPoint { get; set; }
+    // string ClientInstanceId { get; }
+    //
+    // ByteSyncEndpoint? CurrentEndPoint { get; set; }
 
-        // Task ExploreApplicationDataPath();
+    // Task ExploreApplicationDataPath();
         
-        string ApplicationDataPath { get; }
+    string ApplicationDataPath { get; }
         
-        string? LogFilePath { get; }
+    string? LogFilePath { get; }
 
-        string? DebugLogFilePath { get; }
-    }
+    string? DebugLogFilePath { get; }
 }

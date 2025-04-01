@@ -1,21 +1,20 @@
 ﻿using System.Threading.Tasks;
 
-namespace ByteSync.Interfaces.Controls.Communications
+namespace ByteSync.Interfaces.Controls.Communications;
+
+public interface IWebAccessor
 {
-    public interface IWebAccessor
-    {
-        Task OpenDocumentationUrl();
+    Task OpenDocumentationUrl();
 
-        Task OpenByteSyncWebSite();
+    Task OpenByteSyncWebSite();
         
-        Task OpenPowSoftwareWebSite();
+    Task OpenPowSoftwareWebSite();
         
-        Task OpenByteSyncRepository();
+    Task OpenByteSyncRepository();
         
-        Task OpenReleaseNotes();
+    Task OpenReleaseNotes();
         
-        Task OpenReleaseNotes(Version version);
+    Task OpenReleaseNotes(Version version);
 
-        Task OpenUrl(string url);
-    }
+    Task OpenUrl(string url);
 }

@@ -2,7 +2,6 @@
 using System.Runtime.CompilerServices;
 using ByteSync.Business.Profiles;
 using ByteSync.Common.Business.Lobbies;
-using ByteSync.Common.Helpers;
 
 namespace ByteSync.Business.Lobbies;
 
