@@ -82,7 +82,7 @@ public class InventoryComparer : IInventoryComparer
 
         foreach (var comparisonItem in ComparisonResult.ComparisonItems)
         {
-            _initialStatusBuilder.BuildStatus(comparisonItem, InventoryLoaders);
+            _initialStatusBuilder.BuildStatus(comparisonItem, InventoryLoaders.Select(il => il.Inventory));
         }
 
         return ComparisonResult;

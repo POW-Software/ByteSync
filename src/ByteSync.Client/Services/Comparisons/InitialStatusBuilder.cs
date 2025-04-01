@@ -17,15 +17,15 @@ public class InitialStatusBuilder : IInitialStatusBuilder
     HashSet<Inventory> NonFoundInventories { get; set; }
     HashSet<InventoryPart> NonFoundInventoryParts { get; set; }
     
-    public void BuildStatus(ComparisonItem comparisonItem, List<InventoryLoader> inventoryLoaders)
+    public void BuildStatus(ComparisonItem comparisonItem, IEnumerable<Inventory> inventories)
     {
         NonFoundInventories = new HashSet<Inventory>();
         NonFoundInventoryParts = new HashSet<InventoryPart>();
         
-        foreach (var inventoryLoader in inventoryLoaders.OrderBy(il => il.Inventory.Letter))
+        foreach (var inventory in inventories.OrderBy(i => i.Letter))
         {
-            NonFoundInventories.Add(inventoryLoader.Inventory);
-            foreach (var inventoryPart in inventoryLoader.Inventory.InventoryParts)
+            NonFoundInventories.Add(inventory);
+            foreach (var inventoryPart in inventory.InventoryParts)
             {
                 NonFoundInventoryParts.Add(inventoryPart);
             }
