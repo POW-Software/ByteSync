@@ -121,8 +121,6 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
                 InventoryPart = inventoryPart,
             };
         
-            member.InventoryPart = inventoryPart;
-        
             result.Add(member);
         }
 

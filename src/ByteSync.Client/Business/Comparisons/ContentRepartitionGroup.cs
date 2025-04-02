@@ -32,7 +32,7 @@ internal class ContentRepartitionGroup
         {
             if (Members.Count == 0)
             {
-                throw new InvalidOperationException("No members in the group.");
+                throw new InvalidOperationException("No members in the group");
             }
             else
             {
