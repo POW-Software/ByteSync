@@ -42,7 +42,7 @@
                         <RowDefinition Height="24" />
                     </Grid.RowDefinitions>
 
-                    <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}">
+                    <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{Binding HashBackBrush}">
                         <misc1:Icon FontSize="14" Value="RegularHash" Foreground="{Binding MainForeColorBrush}" />
                     </Border>
 
@@ -58,14 +58,12 @@
                         </Grid>
                     </Border>
 
-                    <Border Grid.Row="1" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}">
+                    <Border Grid.Row="1" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{Binding TimeBackBrush}">
                         <misc1:Icon FontSize="14" Value="RegularTime" Foreground="{Binding MainForeColorBrush}" />
                     </Border>
                     
                     <Border Grid.Row="1" Grid.Column="1" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}">
                         <Grid VerticalAlignment="Stretch">
-
-
                             <ItemsControl Items="{Binding LastWriteTimeGroups}" ItemTemplate="{StaticResource StatusItemDataTemplate}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -88,7 +86,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Column="0" Height="24" VerticalAlignment="Center" 
-                            BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}">
+                            BorderBrush="Gray" BorderThickness="0" Background="{Binding FolderBackBrush}">
                         <misc1:Icon FontSize="14" Value="RegularFolder" Foreground="{Binding MainForeColorBrush}" />
                     </Border>
                     

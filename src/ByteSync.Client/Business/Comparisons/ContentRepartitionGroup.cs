@@ -1,17 +1,17 @@
 ﻿namespace ByteSync.Business.Comparisons;
 
-internal class StatusGroup
+internal class ContentRepartitionGroup
 {
-    public StatusGroup(StatusGroupMember firstMember)
+    public ContentRepartitionGroup(ContentRepartitionGroupMember firstMember)
     {
-        Members = new List<StatusGroupMember>();
+        Members = new List<ContentRepartitionGroupMember>();
 
         Members.Add(firstMember);
     }
 
-    public List<StatusGroupMember> Members { get; set; }
+    public List<ContentRepartitionGroupMember> Members { get; set; }
 
-    public object Link
+    public object? Link
     {
         get
         {
@@ -32,7 +32,7 @@ internal class StatusGroup
         {
             if (Members.Count == 0)
             {
-                return null;
+                throw new InvalidOperationException("No members in the group.");
             }
             else
             {

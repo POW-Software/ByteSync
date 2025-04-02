@@ -5,5 +5,5 @@ namespace ByteSync.Interfaces.Factories;
 
 public interface IContentRepartitionGroupsComputerFactory
 {
-    IContentRepartitionGroupsComputer BuildStatusViewGroupsComputer(ContentRepartitionViewModel contentRepartitionViewModel);
+    IContentRepartitionGroupsComputer Build(ContentRepartitionViewModel contentRepartitionViewModel);
 }

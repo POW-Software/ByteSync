@@ -28,11 +28,13 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
         }
     }
 
-    public void Compute()
+    public ContentRepartitionComputeResult Compute()
     {
         ContentRepartitionViewModel.FingerPrintGroups!.Clear();
         ContentRepartitionViewModel.LastWriteTimeGroups!.Clear();
         ContentRepartitionViewModel.PresenceGroups!.Clear();
+
+        ContentRepartitionComputeResult result = new ContentRepartitionComputeResult(ContentRepartitionViewModel.FileSystemType);
 
         if (ContentRepartitionViewModel.FileSystemType == FileSystemTypes.File)
         {
@@ -43,16 +45,23 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
             var lastWriteTimeMembers = ComputeMembers(Status.LastWriteTimeGroups);
             var lastWriteTimeGroups = ComputeGroups(lastWriteTimeMembers);
             SetStatusViewGroups(lastWriteTimeGroups, ContentRepartitionViewModel.LastWriteTimeGroups);
+
+            result.FingerPrintGroups = fingerPrintGroups.Count;
+            result.LastWriteTimeGroups = lastWriteTimeGroups.Count;
         }
         else
         {
             var presenceMembers = ComputePresenceMembers(Status.FingerPrintGroups);
             var presenceGroups = ComputeGroups(presenceMembers);
             SetStatusViewGroups(presenceGroups, ContentRepartitionViewModel.PresenceGroups);
+            
+            result.PresenceGroups = presenceGroups.Count;
         }
+
+        return result;
     }
 
-    private void SetStatusViewGroups(List<StatusGroup> groups, ICollection<StatusItemViewModel> targetGroup)
+    private void SetStatusViewGroups(List<ContentRepartitionGroup> groups, ICollection<StatusItemViewModel> targetGroup)
     {
         var cpt = 0;
         foreach (var group in groups)
@@ -95,19 +104,22 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
         }
     }
 
-    private List<StatusGroupMember> ComputeMembers<T>(Dictionary<T, HashSet<InventoryPart>> dictionary) where T : notnull
+    private List<ContentRepartitionGroupMember> ComputeMembers<T>(Dictionary<T, HashSet<InventoryPart>> dictionary) where T : notnull
     {
         var isOnlyOnePartByInventory = AllInventories.All(i => i.InventoryParts.Count == 1);
         
-        var result = new List<StatusGroupMember>();
+        var result = new List<ContentRepartitionGroupMember>();
         
         foreach (var inventoryPart in Status.MissingInventoryParts)
         {
             var letter = isOnlyOnePartByInventory ? inventoryPart.Inventory.Letter : inventoryPart.Code;
                 
-            var member = new StatusGroupMember();
-            member.Letter = letter;
-            member.IsMissing = true;
+            var member = new ContentRepartitionGroupMember
+            {
+                Letter = letter,
+                IsMissing = true,
+                InventoryPart = inventoryPart,
+            };
         
             member.InventoryPart = inventoryPart;
         
@@ -120,10 +132,12 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
             {
                 var letter = isOnlyOnePartByInventory ? inventoryPart.Inventory.Letter : inventoryPart.Code;
                 
-                var member = new StatusGroupMember();
-                member.Letter = letter;
-                member.InventoryPart = inventoryPart;
-                member.Link = pair.Key;
+                var member = new ContentRepartitionGroupMember
+                {
+                    Letter = letter,
+                    InventoryPart = inventoryPart,
+                    Link = pair.Key
+                };
 
                 result.Add(member);
             }
@@ -132,19 +146,21 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
         return result;
     }
         
-    private List<StatusGroupMember> ComputePresenceMembers(Dictionary<ContentIdentityCore, HashSet<InventoryPart>> statusFingerPrintGroups)
+    private List<ContentRepartitionGroupMember> ComputePresenceMembers(Dictionary<ContentIdentityCore, HashSet<InventoryPart>> statusFingerPrintGroups)
     {
-        var result = new List<StatusGroupMember>();
+        var result = new List<ContentRepartitionGroupMember>();
 
         foreach (var inventory in ContentRepartitionViewModel.AllInventories)
         {
             if (!Status.MissingInventories.Contains(inventory))
             {
-                var member = new StatusGroupMember();
-                member.Letter = inventory.Letter;
-                member.Inventory = inventory;
-                member.IsMissing = false;
-                member.Link = "present";
+                var member = new ContentRepartitionGroupMember
+                {
+                    Letter = inventory.Letter,
+                    Inventory = inventory,
+                    IsMissing = false,
+                    Link = "present"
+                };
 
                 result.Add(member);
             }
@@ -152,11 +168,12 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
 
         foreach (var inventory in Status.MissingInventories)
         {
-            var member = new StatusGroupMember();
-            member.Letter = inventory.Letter;
-            member.IsMissing = true;
-
-            member.Inventory = inventory;
+            var member = new ContentRepartitionGroupMember
+            {
+                Letter = inventory.Letter,
+                IsMissing = true,
+                Inventory = inventory,
+            };
 
             result.Add(member);
         }
@@ -164,15 +181,15 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
         return result;
     }
 
-    private List<StatusGroup> ComputeGroups(List<StatusGroupMember> groupMembers)
+    private List<ContentRepartitionGroup> ComputeGroups(List<ContentRepartitionGroupMember> groupMembers)
     {
-        var result = new List<StatusGroup>();
+        var result = new List<ContentRepartitionGroup>();
         
         foreach (var groupMember in groupMembers)
         {
             if (groupMember.IsMissing)
             {
-                var statusGroup = new StatusGroup(groupMember);
+                var statusGroup = new ContentRepartitionGroup(groupMember);
                 result.Add(statusGroup);
             }
             else
@@ -181,7 +198,7 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
 
                 if (statusGroup == null)
                 {
-                    statusGroup = new StatusGroup(groupMember);
+                    statusGroup = new ContentRepartitionGroup(groupMember);
                     result.Add(statusGroup);
                 }
                 else
