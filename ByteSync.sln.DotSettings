@@ -2,5 +2,14 @@
 	<s:Boolean x:Key="/Default/CodeInspection/ExcludedFiles/FileMasksToSkip/=BoxIcons_002Examl/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=UI/@EntryIndexedValue">UI</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=UX/@EntryIndexedValue">UX</s:String>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=ByteSync_002EFunctions_003B_002A_003BByteSync_002EFunctions_002EDirectFunctionExecutor_003B_002A/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=ByteSync_002EFunctions_003B_002A_003BByteSync_002EFunctions_002EFunctionExecutorAutoStartup_003B_002A/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=ByteSync_002EFunctions_003B_002A_003BByteSync_002EFunctions_002EFunctionExecutorHostBuilderExtensions_003B_002A/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=ByteSync_002EFunctions_003B_002A_003BByteSync_002EFunctions_002EFunctionMetadataProviderAutoStartup_003B_002A/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=ByteSync_002EFunctions_003B_002A_003BByteSync_002EFunctions_002EGeneratedFunctionMetadataProvider_003B_002A/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=ByteSync_002EFunctions_003B_002A_003BByteSync_002EFunctions_002EWorkerHostBuilderFunctionMetadataProviderExtension_003B_002A/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=ByteSync_003B_002A_003BAvalonia_002EControls_002E_002A_003B_002A/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=ByteSync_003B_002A_003BCompiledAvaloniaXaml_002E_002A_003B_002A/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=ByteSync_003B_002A_003BReactiveMarbles_002EObservableEvents_002E_002A_003B_002A/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=activatable/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=encrypter/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
