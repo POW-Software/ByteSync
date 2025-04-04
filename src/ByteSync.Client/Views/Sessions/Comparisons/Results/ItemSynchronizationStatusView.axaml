@@ -16,14 +16,14 @@
             
             <!-- Synchronization Success -->
             <Border BorderBrush="Gray" BorderThickness="0" IsVisible="{Binding ShowSyncSuccessStatus}">
-                <Grid Height="24" Background="{Binding MahAppsGray10Brush}">
+                <Grid Height="24" Background="{Binding MainBackgroundBrush}">
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="24" />
                         <ColumnDefinition Width="72" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}">
+                    <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{Binding MainBackgroundBrush}">
                         <misc1:Icon FontSize="14" Value="RegularCheck" Foreground="{Binding MainForeColorBrush}" />
                     </Border>
 
@@ -38,14 +38,14 @@
         
             <!-- Synchronization Error -->
             <Border BorderBrush="Gray" BorderThickness="0" IsVisible="{Binding ShowSyncErrorStatus}">
-                <Grid Height="24" Background="{Binding MahAppsGray10Brush}">
+                <Grid Height="24" Background="{Binding OppositeBackgroundBrush}">
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="24" />
                         <ColumnDefinition Width="72" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource MainBackFOpposite2Brush}">
+                    <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{Binding OppositeBackgroundBrush}">
                         <misc1:Icon FontSize="14" Value="RegularX" Foreground="{Binding MainForeColorBrush}" />
                     </Border>
 
