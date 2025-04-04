@@ -127,6 +127,8 @@ public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConne
     
     public void SetJoinSessionError(JoinSessionError joinSessionError)
     {
+        CancellationTokenSource.Cancel();
+        
         _joinSessionError.OnNext(joinSessionError);
     }
 
