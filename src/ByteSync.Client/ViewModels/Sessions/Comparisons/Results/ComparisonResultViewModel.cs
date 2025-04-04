@@ -109,11 +109,11 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         _comparisonItemRepository.ObservableCache
             .Connect() // make the source an observable change set
             .Filter(filter)
-            // .Transform(comparisonItem => _comparisonItemViewModelFactory.CreateSynchronizationActionViewModel(comparisonItem))
             .Sort(SortExpressionComparer<ComparisonItem>.Ascending(c => c.PathIdentity.LinkingKeyValue))
             .ObserveOn(RxApp.MainThreadScheduler)
             .Page(pager)
             .Do(changes => PageParameters.Update(changes.Response))
+            .ObserveOn(RxApp.MainThreadScheduler)
             .Transform(comparisonItem => _comparisonItemViewModelFactory.Create(comparisonItem))
             .DisposeMany()
             .ObserveOn(RxApp.MainThreadScheduler)

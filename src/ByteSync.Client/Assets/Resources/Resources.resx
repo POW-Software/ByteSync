@@ -426,8 +426,8 @@
   <data name="ComparisonResult_Inventory" xml:space="preserve">
     <value>INVENTORY</value>
   </data>
-  <data name="ComparisonResult_Status" xml:space="preserve">
-    <value>STATUS</value>
+  <data name="ComparisonResult_ContentRepartition" xml:space="preserve">
+    <value>INITIAL</value>
   </data>
   <data name="TargetedActionEditionGlobal_SaveWarning" xml:space="preserve">
     <value>The action you are creating can not be applied to every selected item.
@@ -1690,5 +1690,8 @@ Do you want to save this new Session Profile with this name?</value>
   </data>
   <data name="Header_Update_Required_Tooltip" xml:space="preserve">
     <value>An update is required. Display more details.</value>
+  </data>
+  <data name="ComparisonResult_SynchronizationStatus" xml:space="preserve">
+    <value>SYNCHRONIZATION</value>
   </data>
 </root>

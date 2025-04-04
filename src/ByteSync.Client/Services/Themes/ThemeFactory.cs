@@ -17,25 +17,13 @@ public class ThemeFactory : IThemeFactory
     
     public void BuildThemes()
     {
-        // See:
-        // https://github.com/wieslawsoltes/Avalonia.ThemeManager/blob/master/src/Avalonia.ThemeManager/ThemeSelector.cs
-        // https://github.com/MahApps/MahApps.Metro/blob/develop/src/MahApps.Metro/Styles/Themes/GeneratorParameters.json
-        // https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Themes.Fluent/Accents/AccentColors.xaml
-        
-        // To select the secondaryColor:
-        // https://m2.material.io/design/color/the-color-system.html#tools-for-picking-colors
-        // Take one of the 5 suggested colors
-        // IMPORTANT: see if we don't take more than 2 colors per theme later
-        // So we can use paletton : https://paletton.com/#uid=50I0u0kjQn59o-se-smoYhYuscr
-        // Or handle manually with the Hue
-
         BuildThemes(ThemeConstants.BLUE, "#094177");      // PowBlue
         BuildThemes(ThemeConstants.GOLD, "#b88746");      // PowGold 
         
-        BuildThemes("Green", "#0d990d");   // Custom
-        BuildThemes("Red", "#E51400");     // From MahApps
-        BuildThemes("Pink", "#F472D0");    // From MahApps
-        BuildThemes("Purple", "#763dc2");  // Custom
+        BuildThemes("Green", "#0d990d");
+        BuildThemes("Red", "#E51400");
+        BuildThemes("Pink", "#F472D0"); 
+        BuildThemes("Purple", "#763dc2");
         
         _themeService.OnThemesRegistred();
     }
@@ -56,7 +44,7 @@ public class ThemeFactory : IThemeFactory
         ColorScheme colorSchemeLight = BuildColorScheme(themeColor, secondaryColorHue, ThemeModes.Light);
 
 
-        // Permet de masquer le DataGrid lorsqu'il est désactivé
+        // Allows the DataGrid to be hidden when it is disabled
         genericStyle.Resources.Add("DataGridDisabledVisualElementBackground", Color.FromArgb(0, 0, 0, 0));
         genericStyle.Resources.Add("ContentControlThemeFontFamily", new FontFamily("SansSerif"));
         genericStyle.Resources.Add("ControlContentThemeFontSize", 14d);

@@ -450,9 +450,15 @@ namespace ByteSync.Assets.Resources {
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Status.
         /// </summary>
-        internal static string ComparisonResult_Status {
+        internal static string ComparisonResult_ContentRepartition {
             get {
-                return ResourceManager.GetString("ComparisonResult_Status", resourceCulture);
+                return ResourceManager.GetString("ComparisonResult_ContentRepartition", resourceCulture);
+            }
+        }
+        
+        internal static string ComparisonResult_SynchronizationStatus {
+            get {
+                return ResourceManager.GetString("ComparisonResult_SynchronizationStatus", resourceCulture);
             }
         }
         

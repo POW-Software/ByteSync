@@ -82,8 +82,6 @@ class ThemeService : IThemeService
 
     private void SelectTheme(Theme theme)
     {
-        _selectedTheme.OnNext(theme);
-
         var styles = Application.Current?.Styles;
         if (styles == null)
         {
@@ -100,6 +98,8 @@ class ThemeService : IThemeService
             // Otherwise, we replace
             styles[^1] = theme.Style;
         }
+        
+        _selectedTheme.OnNext(theme);
     }
 
     private void UseDefaultTheme()
@@ -114,7 +114,7 @@ class ThemeService : IThemeService
     private void UpdateSettings()
     {
         _applicationSettingsRepository.UpdateCurrentApplicationSettings(
-            settings => settings.Theme = _selectedTheme.Value?.Key);
+            settings => settings.Theme = _selectedTheme.Value.Key);
     }
 
     public void GetResource<T>(string resourceName, out T? resource)
@@ -147,7 +147,7 @@ class ThemeService : IThemeService
         }
         else
         {
-            return default;
+            return null;
         }
     }
 }
