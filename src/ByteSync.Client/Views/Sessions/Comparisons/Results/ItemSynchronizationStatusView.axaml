@@ -16,44 +16,44 @@
             
             <!-- Synchronization Success -->
             <Border BorderBrush="Gray" BorderThickness="0" IsVisible="{Binding ShowSyncSuccessStatus}">
-                <Grid Height="24" Background="{Binding MainBackgroundBrush}">
+                <Grid Height="24" Background="{DynamicResource StatusMainBackGroundBrush}">
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="24" />
                         <ColumnDefinition Width="72" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{Binding MainBackgroundBrush}">
-                        <misc1:Icon FontSize="14" Value="RegularCheck" Foreground="{Binding MainForeColorBrush}" />
+                    <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource StatusMainBackGroundBrush}">
+                        <misc1:Icon FontSize="14" Value="RegularCheck" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
                     </Border>
 
-                    <Grid Grid.Column="1" VerticalAlignment="Stretch" Background="{Binding MainBackgroundBrush}">
+                    <Grid Grid.Column="1" VerticalAlignment="Stretch" Background="{DynamicResource StatusMainBackGroundBrush}">
                         <TextBlock Text="{localizations:Loc Status_Done}"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                    Margin="0"
-                                   FontWeight="Bold" Foreground="{Binding MainForeColorBrush}" />
+                                   FontWeight="Bold" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
                     </Grid>
                 </Grid>
             </Border>
         
             <!-- Synchronization Error -->
             <Border BorderBrush="Gray" BorderThickness="0" IsVisible="{Binding ShowSyncErrorStatus}">
-                <Grid Height="24" Background="{Binding OppositeBackgroundBrush}">
+                <Grid Height="24" Background="{DynamicResource StatusOppositeBackGroundBrush}">
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="24" />
                         <ColumnDefinition Width="72" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{Binding OppositeBackgroundBrush}">
-                        <misc1:Icon FontSize="14" Value="RegularX" Foreground="{Binding MainForeColorBrush}" />
+                    <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource StatusOppositeBackGroundBrush}">
+                        <misc1:Icon FontSize="14" Value="RegularX" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
                     </Border>
 
-                    <Grid Grid.Column="1" VerticalAlignment="Stretch" Background="{Binding OppositeBackgroundBrush}">
+                    <Grid Grid.Column="1" VerticalAlignment="Stretch" Background="{DynamicResource StatusOppositeBackGroundBrush}">
                         <TextBlock Text="{localizations:Loc Status_Error}"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                    Margin="0"
-                                   FontWeight="Bold" Foreground="{Binding MainForeColorBrush}" />
+                                   FontWeight="Bold" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
                     </Grid>
                 </Grid>
             </Border>
