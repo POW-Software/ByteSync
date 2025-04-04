@@ -114,7 +114,7 @@ class ThemeService : IThemeService
     private void UpdateSettings()
     {
         _applicationSettingsRepository.UpdateCurrentApplicationSettings(
-            settings => settings.Theme = _selectedTheme.Value?.Key);
+            settings => settings.Theme = _selectedTheme.Value.Key);
     }
 
     public void GetResource<T>(string resourceName, out T? resource)
@@ -147,7 +147,7 @@ class ThemeService : IThemeService
         }
         else
         {
-            return default;
+            return null;
         }
     }
 }
