@@ -19,7 +19,7 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
     private IThemeService _themeService;
 
     private SolidColorBrush? _grayBrush;
-    private SolidColorBrush? _mahAppsGray10Brush;
+    private SolidColorBrush? _lightGrayBrush;
     private SolidColorBrush? _oppositeBackgroundBrush;
     private SolidColorBrush? _mainBackgroundBrush;
     private SolidColorBrush? _mainForeColorBrush;
@@ -27,7 +27,7 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
 
     public enum BrushColors
     {
-        MahAppsGray10,
+        LightGray,
         Gray,
         MainForeColor,
         MainBackground,
@@ -96,16 +96,16 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         }
     }
 
-    public Brush? MahAppsGray10Brush
+    public Brush? LightGrayBrush
     {
         get
         {
-            if (_mahAppsGray10Brush == null)
+            if (_lightGrayBrush == null)
             {
-                _themeService.GetResource("VeryLightGrayBrush", out _mahAppsGray10Brush);
+                _themeService.GetResource("VeryLightGrayBrush", out _lightGrayBrush);
             }
 
-            return _mahAppsGray10Brush;
+            return _lightGrayBrush;
         }
     }
     
@@ -185,7 +185,7 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         _mainForeColorBrush = null;
         _oppositeBackgroundBrush = null;
         _mainBackgroundBrush = null;
-        _mahAppsGray10Brush = null;
+        _lightGrayBrush = null;
 
         if (FingerPrintGroups != null)
         {
@@ -222,7 +222,7 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         }
         else
         {
-            HashBackBrush = MahAppsGray10Brush;
+            HashBackBrush = LightGrayBrush;
         }
 
         if (ComputeResult.LastWriteTimeGroups == 1)
@@ -231,7 +231,7 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         }
         else
         {
-            TimeBackBrush = MahAppsGray10Brush;
+            TimeBackBrush = LightGrayBrush;
         }
         
         if (ComputeResult.PresenceGroups == 1)
@@ -240,7 +240,7 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         }
         else
         {
-            FolderBackBrush = MahAppsGray10Brush;
+            FolderBackBrush = LightGrayBrush;
         }
     }
 
@@ -264,8 +264,8 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
             case BrushColors.Gray:
                 return GrayBrush;
 
-            case BrushColors.MahAppsGray10:
-                return MahAppsGray10Brush;
+            case BrushColors.LightGray:
+                return LightGrayBrush;
 
             case BrushColors.MainBackground:
                 return MainBackgroundBrush;

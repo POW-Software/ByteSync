@@ -71,7 +71,7 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
 
             if (group.IsMissing)
             {
-                backBrushColor = ContentRepartitionViewModel.BrushColors.MahAppsGray10;
+                backBrushColor = ContentRepartitionViewModel.BrushColors.LightGray;
                 foreBrushColor = ContentRepartitionViewModel.BrushColors.Gray;
             }
             else

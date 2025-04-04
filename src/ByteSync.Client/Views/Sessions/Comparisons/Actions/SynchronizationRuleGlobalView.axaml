@@ -60,10 +60,8 @@
                         </ComboBox>
                         
                         <TextBlock Text="{Binding Path=TextAfterConditionModesComboBox}" VerticalAlignment="Center" Margin="3 0"/>
-                        <!--Foreground="{DynamicResource MahApps.Brushes.Gray1}"-->
                     </StackPanel>
-
-                    <!-- <ItemsControl mvvm:RegionManager.RegionName="{x:Static inf:RegionNames.SynchronizationRulesConditionsRegion}"> -->
+                    
                     <ItemsControl Items="{Binding Conditions}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -97,8 +95,7 @@
                 
                 <StackPanel Orientation="Vertical" Margin="3 0">
                     <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_DoTheFollowingActions}" VerticalAlignment="Center" Margin="3 0"/>
-
-                    <!-- <ItemsControl mvvm:RegionManager.RegionName="{x:Static inf:RegionNames.SynchronizationRulesActionsRegion}"> -->
+                    
                     <ItemsControl Items="{Binding Actions}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -140,7 +137,8 @@
 
                     <StackPanel Orientation="Horizontal">
                         <misc:Icon FontSize="12" Value="RegularReset" /> 
-                        <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_Reset}" Margin="6 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}" />
+                        <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_Reset}" Margin="6 0 0 0" VerticalAlignment="Center" 
+                                   Foreground="{DynamicResource MahApps.Brushes.Gray1}" />
                     </StackPanel>
                 </Button>
 
@@ -149,7 +147,8 @@
 
                     <StackPanel Orientation="Horizontal">
                         <misc:Icon FontSize="12" Value="RegularExit" /> 
-                        <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_Cancel}" Margin="6 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource MahApps.Brushes.Gray1}" />
+                        <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_Cancel}" Margin="6 0 0 0" VerticalAlignment="Center" 
+                                   Foreground="{DynamicResource MahApps.Brushes.Gray1}" />
                     </StackPanel>
                 </Button>
             </StackPanel>
