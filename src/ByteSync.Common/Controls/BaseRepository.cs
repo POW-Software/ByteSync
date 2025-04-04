@@ -186,7 +186,8 @@ public abstract class BaseRepository<T> : IRepository<T>
         CheckAndRun(dataId, myFunc);
         
         timeout ??= new TimeSpan(-1);
-        List<WaitHandle> waitHandles = new List<WaitHandle> {waitHandle!};
+        List<WaitHandle> waitHandles = [waitHandle!];
+        
         if (endEvent != null)
         {
             waitHandles.Add(endEvent);
@@ -202,16 +203,20 @@ public abstract class BaseRepository<T> : IRepository<T>
         {
             return true;
         }
-        if (index == 1)
+        if (waitHandles[index] == endEvent)
         {
             Log.Error("Wait: Process has ended");
             return false;
         }
-        else
+        if (waitHandles[index] == cancellationToken.WaitHandle)
         {
-            Log.Error("Wait: timeout has occured");
-            return false;
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return true;
+            }
         }
+        Log.Error("Wait: timeout has occured");
+        return false;
     }
 
     private void CheckAndRun(string? dataId, Action<T> func)

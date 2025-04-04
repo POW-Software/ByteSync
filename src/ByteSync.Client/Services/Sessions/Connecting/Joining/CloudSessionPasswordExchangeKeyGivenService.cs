@@ -80,7 +80,8 @@ public class CloudSessionPasswordExchangeKeyGivenService : ICloudSessionPassword
                 else
                 {
                     await _cloudSessionConnectionRepository.WaitOrThrowAsync(request.SessionId, 
-                        data => data.WaitForJoinSessionEvent, data => data.WaitTimeSpan, "Join session failed");
+                        data => data.WaitForJoinSessionEvent, data => data.WaitTimeSpan, "Join session failed",
+                        _cloudSessionConnectionRepository.CancellationToken);
                 }
             }
             else
