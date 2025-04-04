@@ -32,7 +32,7 @@
                 </Style>
             </StackPanel.Styles>
             
-            <Grid  HorizontalAlignment="Stretch"><!--Background="{DynamicResource MahApps.Brushes.Gray10}"-->
+            <Grid  HorizontalAlignment="Stretch">
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="18"></ColumnDefinition>
@@ -40,31 +40,6 @@
                     <ColumnDefinition Width="*"></ColumnDefinition>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-
-                <!--
-                <b:Interaction.Triggers>
-                    <b:EventTrigger EventName="MouseLeftButtonUp">
-                        <b:InvokeCommandAction Command="{Binding EditCommand}"/>
-                    </b:EventTrigger>
-                </b:Interaction.Triggers>
-
-                <Grid.Style>
-                    <Style TargetType="{x:Type Grid}">
-                        <Style.Triggers> 
-
-                            <Trigger Property="StackPanel.IsMouseOver" Value="True" >
-                                <Setter Property="StackPanel.Background" Value="{Binding MouseOverBrush}" />
-                                <Setter Property="StackPanel.Cursor" Value="{Binding Path=IsEditableOrRemovable, Converter={StaticResource TrueToCursorConverter}}" />
-                            </Trigger>
-                            <Trigger Property="StackPanel.IsMouseOver" Value="False">
-                                <Setter Property="StackPanel.Background" Value="{Binding MahAppsGray10Brush}" />
-                                <Setter Property="StackPanel.Cursor" Value="{Binding Path=IsEditableOrRemovable, Converter={StaticResource TrueToCursorConverter}}" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Grid.Style>
-                -->
-
               
                 <Label Grid.Column="0" Content="{Binding Letter}" VerticalAlignment="Center" VerticalContentAlignment="Center" 
                        HorizontalAlignment="Center"
@@ -79,22 +54,9 @@
                         Margin="0" BorderThickness="0" 
                         Focusable="False" Cursor="Hand" IsVisible="{Binding Path=IsEditableOrRemovable}" 
                         Background="Transparent" CornerRadius="0">
-                    <!--<Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.Square}">
-
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="Width" Value="24" />
-                        </Style>
-                    </Button.Style>-->
 
                     <StackPanel Orientation="Horizontal" Background="Transparent" Cursor="Hand" VerticalAlignment="Center">
                         <misc:Icon FontSize="12" Value="RegularX" VerticalAlignment="Center" Margin="0 1 0 0"/>
-                        
-                        <!--<iconPacks:PackIconBoxIcons Kind="RegularX"
-                                                    Margin="0"
-                                                    Width="12"
-                                                    Height="12"
-                                                    VerticalAlignment="Center" />-->
                     </StackPanel>
                 </Button>
             </Grid>
