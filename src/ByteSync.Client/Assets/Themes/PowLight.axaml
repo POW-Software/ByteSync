@@ -3,12 +3,11 @@
        xmlns:sys="clr-namespace:System;assembly=netstandard">
     <Style.Resources>
         <!-- System Control Colors -->
-        <Color x:Key="VeryLightGray">#FFF7F7F7</Color> <!-- MahApps.Colors.Gray10 -->
+        <Color x:Key="VeryLightGray">#FFF7F7F7</Color>
         <Color x:Key="GenericButtonBorder">#FFAAAAAA</Color>
         <Color x:Key="Gray1">#FF333333</Color>
         <Color x:Key="Gray2">#FF7F7F7F</Color>
         <Color x:Key="Gray5">#FFB9B9B9</Color>
-        <!-- <Color x:Key="Gray7">#FFD8D8D8</Color> -->
         <Color x:Key="Gray8">#FFE0E0E0</Color>
         
         <Color x:Key="SettingsHeaderColor">#FFE6E6E6</Color>

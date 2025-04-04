@@ -1,6 +1,8 @@
-﻿namespace ByteSync.Interfaces.Controls.Inventories;
+﻿using ByteSync.Business.Comparisons;
+
+namespace ByteSync.Interfaces.Controls.Inventories;
 
 public interface IContentRepartitionGroupsComputer
 {
-    void Compute();
+    ContentRepartitionComputeResult Compute();
 }

@@ -15,7 +15,7 @@ public class ContentRepartitionGroupsComputerFactory : IContentRepartitionGroups
         _context = context;
     }
     
-    public IContentRepartitionGroupsComputer BuildStatusViewGroupsComputer(ContentRepartitionViewModel contentRepartitionViewModel)
+    public IContentRepartitionGroupsComputer Build(ContentRepartitionViewModel contentRepartitionViewModel)
     {
         var inventoryService = _context.Resolve<IInventoryService>();
         var allInventories = inventoryService.InventoryProcessData.Inventories!;

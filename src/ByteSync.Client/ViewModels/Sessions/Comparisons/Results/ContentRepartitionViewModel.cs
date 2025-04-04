@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using Avalonia.Media;
+using ByteSync.Business.Comparisons;
 using ByteSync.Business.Themes;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Controls.Themes;
@@ -18,7 +19,7 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
     private IThemeService _themeService;
 
     private SolidColorBrush? _grayBrush;
-    private SolidColorBrush? _mahAppsGray10Brush;
+    private SolidColorBrush? _lightGrayBrush;
     private SolidColorBrush? _oppositeBackgroundBrush;
     private SolidColorBrush? _mainBackgroundBrush;
     private SolidColorBrush? _mainForeColorBrush;
@@ -26,7 +27,7 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
 
     public enum BrushColors
     {
-        MahAppsGray10,
+        LightGray,
         Gray,
         MainForeColor,
         MainBackground,
@@ -55,10 +56,10 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         LastWriteTimeGroups?.Clear();
         PresenceGroups?.Clear();
         
-        SetUnfinishedStatus();
+        InitializeMode();
         
-        var statusViewGroupsComputer = contentRepartitionGroupsComputerFactory.BuildStatusViewGroupsComputer(this);
-        statusViewGroupsComputer.Compute();
+        var contentRepartitionGroupsComputer = contentRepartitionGroupsComputerFactory.Build(this);
+        ComputeResult = contentRepartitionGroupsComputer.Compute();
 
         _subscription = _themeService.SelectedTheme
             .ObserveOn(RxApp.MainThreadScheduler)
@@ -67,10 +68,7 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         InitBrushes();
     }
 
-    private void OnThemeChanged(Theme theme)
-    {
-        UpdateBrushes();
-    }
+    private ContentRepartitionComputeResult ComputeResult { get; set; }
 
     private Brush GrayBrush
     {
@@ -98,16 +96,16 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         }
     }
 
-    public Brush? MahAppsGray10Brush
+    public Brush? LightGrayBrush
     {
         get
         {
-            if (_mahAppsGray10Brush == null)
+            if (_lightGrayBrush == null)
             {
-                _themeService.GetResource("VeryLightGrayBrush", out _mahAppsGray10Brush);
+                _themeService.GetResource("VeryLightGrayBrush", out _lightGrayBrush);
             }
 
-            return _mahAppsGray10Brush;
+            return _lightGrayBrush;
         }
     }
     
@@ -154,6 +152,15 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
     public ObservableCollection<StatusItemViewModel>? LastWriteTimeGroups { get; set; }
     
     public ObservableCollection<StatusItemViewModel>? PresenceGroups { get; set; }
+    
+    [Reactive]
+    public Brush? HashBackBrush { get; set; }
+    
+    [Reactive]
+    public Brush? TimeBackBrush { get; set; }
+    
+    [Reactive]
+    public Brush? FolderBackBrush { get; set; }
 
     public FileSystemTypes FileSystemType
     {
@@ -178,7 +185,7 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         _mainForeColorBrush = null;
         _oppositeBackgroundBrush = null;
         _mainBackgroundBrush = null;
-        _mahAppsGray10Brush = null;
+        _lightGrayBrush = null;
 
         if (FingerPrintGroups != null)
         {
@@ -203,6 +210,38 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
                 DoResetBrushes(isInit, statusItemViewModel);
             }
         }
+
+        UpdateBackBrushes();
+    }
+
+    private void UpdateBackBrushes()
+    {
+        if (ComputeResult.FingerPrintGroups == 1)
+        {
+            HashBackBrush = MainBackgroundBrush;
+        }
+        else
+        {
+            HashBackBrush = LightGrayBrush;
+        }
+
+        if (ComputeResult.LastWriteTimeGroups == 1)
+        {
+            TimeBackBrush = MainBackgroundBrush;
+        }
+        else
+        {
+            TimeBackBrush = LightGrayBrush;
+        }
+        
+        if (ComputeResult.PresenceGroups == 1)
+        {
+            FolderBackBrush = MainBackgroundBrush;
+        }
+        else
+        {
+            FolderBackBrush = LightGrayBrush;
+        }
     }
 
     private void DoResetBrushes(bool isInit, StatusItemViewModel statusItemViewModel)
@@ -225,8 +264,8 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
             case BrushColors.Gray:
                 return GrayBrush;
 
-            case BrushColors.MahAppsGray10:
-                return MahAppsGray10Brush;
+            case BrushColors.LightGray:
+                return LightGrayBrush;
 
             case BrushColors.MainBackground:
                 return MainBackgroundBrush;
@@ -241,10 +280,15 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         return null;
     }
     
-    private void SetUnfinishedStatus()
+    private void InitializeMode()
     {
         ShowFileDifferences = FileSystemType == FileSystemTypes.File;
         ShowDirectoryDifferences = FileSystemType == FileSystemTypes.Directory;
+    }
+    
+    private void OnThemeChanged(Theme theme)
+    {
+        UpdateBrushes();
     }
 
     public void Dispose()
