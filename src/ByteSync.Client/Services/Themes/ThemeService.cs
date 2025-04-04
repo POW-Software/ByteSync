@@ -82,8 +82,6 @@ class ThemeService : IThemeService
 
     private void SelectTheme(Theme theme)
     {
-        _selectedTheme.OnNext(theme);
-
         var styles = Application.Current?.Styles;
         if (styles == null)
         {
@@ -100,6 +98,8 @@ class ThemeService : IThemeService
             // Otherwise, we replace
             styles[^1] = theme.Style;
         }
+        
+        _selectedTheme.OnNext(theme);
     }
 
     private void UseDefaultTheme()
