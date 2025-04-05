@@ -57,6 +57,7 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
 
             var isTokenChecked = false;
             string? clientInstanceId = null;
+            string? clientVersion = null;
             try
             {
                 var claims = tokenHandler.ValidateToken(token, new TokenValidationParameters
@@ -89,6 +90,8 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
                         throw new SecurityTokenExpiredException("Client is null");
                     }
                     
+                    clientVersion = client.Version;
+                    
                     context.Items.Add(AuthConstants.FUNCTION_CONTEXT_CLIENT, client);
                 }
                 
@@ -105,7 +108,8 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
             {
                 var scopeProperties = new Dictionary<string, object>
                 {
-                    ["ClientInstanceId"] = clientInstanceId!
+                    ["ClientInstanceId"] = clientInstanceId!,
+                    ["ClientVersion"] = clientVersion!
                 };
 
                 using (_logger.BeginScope(scopeProperties))
