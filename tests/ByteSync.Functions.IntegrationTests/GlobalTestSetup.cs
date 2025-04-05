@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using ByteSync.Functions.IntegrationTests.Helpers.Autofac;
+using ByteSync.Functions.IntegrationTests.TestHelpers.Autofac;
 using ByteSync.ServerCommon.Business.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

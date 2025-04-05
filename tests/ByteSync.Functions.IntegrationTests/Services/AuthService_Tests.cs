@@ -2,11 +2,10 @@
 using ByteSync.Common.Business.Auth;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Business.Versions;
-using ByteSync.Functions.IntegrationTests.Helpers.Autofac;
+using ByteSync.Functions.IntegrationTests.TestHelpers.Autofac;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Loaders;
 using ByteSync.ServerCommon.Repositories;
-using ByteSync.ServerCommon.Services;
 using ByteSync.ServerCommon.Services.Clients;
 using FakeItEasy;
 using FluentAssertions;
