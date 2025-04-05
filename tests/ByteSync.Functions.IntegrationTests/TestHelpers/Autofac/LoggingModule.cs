@@ -4,7 +4,7 @@ using FakeItEasy;
 using FakeItEasy.Sdk;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.Functions.IntegrationTests.Helpers.Autofac;
+namespace ByteSync.Functions.IntegrationTests.TestHelpers.Autofac;
 
 public class LoggingModule : Module
 {   

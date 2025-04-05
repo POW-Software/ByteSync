@@ -1,7 +1,7 @@
 ﻿using FakeItEasy;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.Functions.IntegrationTests.Helpers.Logging;
+namespace ByteSync.Functions.IntegrationTests.TestHelpers.Logging;
 
 public class FakeLogger<T> : ILogger<T>
 {

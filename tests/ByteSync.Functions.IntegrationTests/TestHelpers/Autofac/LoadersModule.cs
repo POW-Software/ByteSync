@@ -1,4 +1,4 @@
-﻿namespace ByteSync.Functions.IntegrationTests.Helpers.Autofac;
+﻿namespace ByteSync.Functions.IntegrationTests.TestHelpers.Autofac;
 
 public class LoadersModule : BaseElementTypeModule
 {

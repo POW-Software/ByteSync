@@ -1,14 +1,14 @@
 ﻿using Autofac;
 using Module = Autofac.Module;
 
-namespace ByteSync.Functions.IntegrationTests.Helpers.Autofac;
+namespace ByteSync.Functions.IntegrationTests.TestHelpers.Autofac;
 
-public class FactoriesModule : Module
+public class ServicesModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
         builder.RegisterAssemblyTypes(GlobalTestSetup.ByteSyncServerCommonAssembly)
-            .Where(t => t.Name.EndsWith("Factory"))
+            .Where(t => t.Name.EndsWith("Service"))
             .AsImplementedInterfaces()
             .AsSelf()
             .InstancePerLifetimeScope();

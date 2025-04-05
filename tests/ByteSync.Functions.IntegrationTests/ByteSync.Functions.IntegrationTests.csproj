@@ -33,6 +33,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\ByteSync.Common\ByteSync.Common.csproj" />
+      <ProjectReference Include="..\..\src\ByteSync.Functions\ByteSync.Functions.csproj" />
       <ProjectReference Include="..\..\src\ByteSync.ServerCommon\ByteSync.ServerCommon.csproj" />
     </ItemGroup>
 

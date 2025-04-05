@@ -1,7 +1,7 @@
 ﻿using Autofac;
 using FakeItEasy.Sdk;
 
-namespace ByteSync.Functions.IntegrationTests.Helpers.Autofac;
+namespace ByteSync.Functions.IntegrationTests.TestHelpers.Autofac;
 
 public abstract class BaseElementTypeModule : Module
 {
