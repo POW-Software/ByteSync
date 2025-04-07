@@ -250,7 +250,7 @@ public class DataInventoryStarter : IDataInventoryStarter
     {
         if (session is LocalSession)
         {
-            var pathItems = _pathItemRepository.CurrentMemberPathItems.Items.ToList();
+            var pathItems = _pathItemRepository.SortedCurrentMemberPathItems;
             if (pathItems.Count < 2)
             {
                 return LogAndBuildStartInventoryResult(session, StartInventoryStatuses.LessThan2DataSources);

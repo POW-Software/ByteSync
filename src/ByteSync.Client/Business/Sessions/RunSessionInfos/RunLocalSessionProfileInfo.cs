@@ -19,7 +19,7 @@ public class RunLocalSessionProfileInfo : AbstractRunSessionProfileInfo
     
     public LocalSessionProfileDetails ProfileDetails { get; set; }
 
-    public List<PathItem> GetMyPathItems()
+    public IList<PathItem> GetMyPathItems()
     {
         return ProfileDetails.PathItems;
     }

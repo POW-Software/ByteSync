@@ -23,4 +23,12 @@ public class PathItemRepository : BaseSourceCacheRepository<PathItem, string>, I
     protected override string KeySelector(PathItem pathItem) => pathItem.Key;
     
     public IObservableCache<PathItem, string> CurrentMemberPathItems { get; }
+    
+    public IList<PathItem> SortedCurrentMemberPathItems
+    {
+        get
+        {
+            return CurrentMemberPathItems.Items.OrderBy(pi => pi.Code).ToList();
+        }
+    }
 }
