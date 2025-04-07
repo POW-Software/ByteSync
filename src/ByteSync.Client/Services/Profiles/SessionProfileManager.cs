@@ -395,8 +395,7 @@ public class SessionProfileManager : ISessionProfileManager
         localSessionProfileDetails.CreationDatetime = DateTime.Now;
         localSessionProfileDetails.CreatedWithVersion = _connectionService.CurrentEndPoint!.Version;
         localSessionProfileDetails.Options = localSessionProfileOptions;
-        localSessionProfileDetails.PathItems = _pathItemRepository.CurrentMemberPathItems.Items
-            .ToList();
+        localSessionProfileDetails.PathItems = _pathItemRepository.SortedCurrentMemberPathItems;
         
         var synchronizationRules = _synchronizationRulesConverter.ConvertLooseSynchronizationRules(
             _synchronizationRuleRepository.Elements.ToList());

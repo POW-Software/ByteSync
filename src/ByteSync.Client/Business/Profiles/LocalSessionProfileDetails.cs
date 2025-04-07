@@ -23,5 +23,5 @@ public class LocalSessionProfileDetails : AbstrastSessionProfileDetails
 
     public LocalSessionProfileOptions Options { get; set; }
     
-    public List<PathItem> PathItems { get; set; }
+    public IList<PathItem> PathItems { get; set; }
 }
