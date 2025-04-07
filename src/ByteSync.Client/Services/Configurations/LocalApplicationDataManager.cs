@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using ByteSync.Business.Arguments;
 using ByteSync.Business.Configurations;
 using ByteSync.Business.Misc;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 
@@ -29,7 +28,7 @@ public class LocalApplicationDataManager : ILocalApplicationDataManager
         if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
         {
             // https://stackoverflow.com/questions/3820613/where-the-application-should-store-its-logs-in-mac-os
-            // Beaucoup d'application sont dans Environment.SpecialFolder.LocalApplicationData
+            // Many applications are in Environment.SpecialFolder.LocalApplicationData
                 
             var globalApplicationDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
@@ -50,12 +49,12 @@ public class LocalApplicationDataManager : ILocalApplicationDataManager
                 string globalApplicationDataPath;
                 if (IOUtils.IsSubPathOf(_environmentService.AssemblyFullName, Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)))
                 {
-                    // On est installé dans Roaming
+                    // Installed in Roaming
                     globalApplicationDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
                 }
                 else
                 {
-                    // On utilise Local
+                    // We use Local
                     globalApplicationDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
                 }
                     
@@ -65,7 +64,7 @@ public class LocalApplicationDataManager : ILocalApplicationDataManager
 
         if (_environmentService.ExecutionMode == ExecutionMode.Debug)
         {
-            if (Environment.GetCommandLineArgs().Any(a => a.StartsWith(DebugArguments.LADM_USE_APPDATA)))
+            if (_environmentService.Arguments.Any(a => a.StartsWith(DebugArguments.LADM_USE_APPDATA)))
             {
                 var arg = Environment.GetCommandLineArgs()
                     .First(a => a.StartsWith(DebugArguments.LADM_USE_APPDATA))
@@ -73,7 +72,7 @@ public class LocalApplicationDataManager : ILocalApplicationDataManager
                 
                 thisApplicationDataPath += $" {arg}";
             }
-            else if (!Environment.GetCommandLineArgs().Contains(DebugArguments.LADM_USE_STANDARD_APPDATA))
+            else if (!_environmentService.Arguments.Contains(DebugArguments.LADM_USE_STANDARD_APPDATA))
             {
                 thisApplicationDataPath += " Debug";
 
