@@ -30,14 +30,6 @@ public class CacheService : ICacheService
         RedLockRetryConfiguration redLockRetryConfiguration = new RedLockRetryConfiguration(5, 500);
         _redLockFactory = RedLockFactory.Create(multiplexers, redLockRetryConfiguration, loggerFactory);
     }
-    
-    public RedLockFactory RedLockFactory
-    {
-        get
-        {
-            return _redLockFactory;
-        }
-    }
 
     public string Prefix => _redisSettings.Prefix;
 

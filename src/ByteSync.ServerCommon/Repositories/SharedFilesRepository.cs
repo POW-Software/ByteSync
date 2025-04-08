@@ -73,41 +73,27 @@ public class SharedFilesRepository : BaseRepository<SharedFileData>, ISharedFile
 
         var database = _cacheService.GetDatabase();
         
-        await using var sessionSharedFilesLock = await _cacheService.RedLockFactory.CreateLockAsync(sessionSharedFilesKey, TimeSpan.FromSeconds(30));
+        await using var sessionSharedFilesLock = await _cacheService.AcquireLockAsync(sessionSharedFilesKey);
 
-        if (sessionSharedFilesLock.IsAcquired)
+        var redisValues = await database.SetMembersAsync(sessionSharedFilesKey);
+        List<string> sharedFileDefinitionIds = redisValues.Select(value => value.ToString()).ToList();
+
+        foreach (var sharedFileDefinitionId in sharedFileDefinitionIds)
         {
-            var redisValues = await database.SetMembersAsync(sessionSharedFilesKey);
-            List<string> sharedFileDefinitionIds = redisValues.Select(value => value.ToString()).ToList();
+            var sharedFileCacheKey = ComputeSharedFileCacheKey(sharedFileDefinitionId);
+            await using var sharedFileLock = await _cacheService.AcquireLockAsync(sharedFileCacheKey);
 
-            foreach (var sharedFileDefinitionId in sharedFileDefinitionIds)
-            {
-                var sharedFileCacheKey = ComputeSharedFileCacheKey(sharedFileDefinitionId);
-                await using var sharedFileLock = await _cacheService.RedLockFactory.CreateLockAsync(sharedFileCacheKey, TimeSpan.FromSeconds(30));
-
-                if (sharedFileLock.IsAcquired)
-                {
-                    var sharedFileData = await GetCachedElement(sharedFileCacheKey);
+            var sharedFileData = await GetCachedElement(sharedFileCacheKey);
                     
-                    if (sharedFileData != null)
-                    {
-                        result.Add(sharedFileData);
+            if (sharedFileData != null)
+            {
+                result.Add(sharedFileData);
                         
-                        await database.KeyDeleteAsync(sharedFileCacheKey);
-                    }
-                }
-                else
-                {
-                    throw new AcquireRedisLockException(sharedFileCacheKey, sharedFileLock);
-                }
+                await database.KeyDeleteAsync(sharedFileCacheKey);
             }
+        }
             
-            await database.KeyDeleteAsync(sessionSharedFilesKey);
-        }
-        else
-        {
-            throw new AcquireRedisLockException(sessionSharedFilesKey, sessionSharedFilesLock);
-        }
+        await database.KeyDeleteAsync(sessionSharedFilesKey);
 
         return result;
     }

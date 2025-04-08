@@ -6,8 +6,6 @@ namespace ByteSync.ServerCommon.Interfaces.Services;
 
 public interface ICacheService
 {
-    public RedLockFactory RedLockFactory { get; }
-    
     public string Prefix { get; }
     
     ITransaction OpenTransaction();

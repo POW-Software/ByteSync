@@ -41,6 +41,9 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
         SessionMemberData? joiner = null;
         
         var transaction = _cacheService.OpenTransaction();
+        
+        await using var sessionRedisLock = await _cacheService.AcquireLockAsync(_cloudSessionsRepository.ComputeCacheKey(_cloudSessionsRepository.ElementName, 
+            parameters.SessionId));
 
         var updateResult = await _cloudSessionsRepository.Update(parameters.SessionId, innerCloudSessionData =>
         {
@@ -96,7 +99,7 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
             {
                 return false;
             }
-        }, transaction);
+        }, transaction, sessionRedisLock);
         
         if (updateResult.IsWaitingForTransaction)
         {

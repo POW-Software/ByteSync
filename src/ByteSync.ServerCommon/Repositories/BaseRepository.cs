@@ -99,43 +99,36 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
         IRedLock? redisLock = redisLockParam;
         bool shouldDispose = false;
         
-        if (redisLock == null)
-        {
-            redisLock = await _cacheService.RedLockFactory.CreateLockAsync(cacheKey, TimeSpan.FromSeconds(30));
-            shouldDispose = true;
-        }
-
         try
         {
-            if (redisLock.IsAcquired)
+            if (redisLock == null)
             {
-                var cachedElement = await GetCachedElement(cacheKey);
+                redisLock = await _cacheService.AcquireLockAsync(cacheKey);
+                shouldDispose = true;
+            }
+            
+            var cachedElement = await GetCachedElement(cacheKey);
 
-                if (cachedElement == null)
+            if (cachedElement == null)
+            {
+                if (throwIfNotExists)
                 {
-                    if (throwIfNotExists)
-                    {
-                        throw new Exception("Could not find element to update");
-                    }
-                    else
-                    {
-                        return new UpdateEntityResult<T>(cachedElement, UpdateEntityStatus.NotFound);
-                    }
-                }
-
-                bool isUpdateDone = updateHandler.Invoke(cachedElement);
-                if (!isUpdateDone)
-                {
-                    return new UpdateEntityResult<T>(cachedElement, UpdateEntityStatus.NoOperation);
+                    throw new Exception("Could not find element to update");
                 }
                 else
                 {
-                    return await SetElement(cacheKey, cachedElement, database);
+                    return new UpdateEntityResult<T>(cachedElement, UpdateEntityStatus.NotFound);
                 }
+            }
+
+            bool isUpdateDone = updateHandler.Invoke(cachedElement);
+            if (!isUpdateDone)
+            {
+                return new UpdateEntityResult<T>(cachedElement, UpdateEntityStatus.NoOperation);
             }
             else
             {
-                throw new AcquireRedisLockException(key, redisLock);
+                return await SetElement(cacheKey, cachedElement, database);
             }
         }
         finally
