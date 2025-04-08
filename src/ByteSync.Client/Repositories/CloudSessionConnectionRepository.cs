@@ -1,13 +1,10 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Business.Sessions.RunSessionInfos;
-using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Controls;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Repositories;
 
 namespace ByteSync.Repositories;
@@ -18,7 +15,8 @@ public class CloudSessionConnectionRepository : BaseRepository<CloudSessionConne
     private readonly BehaviorSubject<CreateSessionError?> _createSessionError;
     private readonly BehaviorSubject<JoinSessionError?> _joinSessionError;
 
-    public CloudSessionConnectionRepository()
+    public CloudSessionConnectionRepository(ILogger<CloudSessionConnectionRepository> logger) : 
+        base(logger)
     {
         _connectionStatus = new BehaviorSubject<SessionConnectionStatus>(SessionConnectionStatus.NoSession);
         _createSessionError = new BehaviorSubject<CreateSessionError?>(null);

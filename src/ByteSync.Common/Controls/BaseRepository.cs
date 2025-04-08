@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Common.Helpers;
 using ByteSync.Common.Interfaces;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 // ReSharper disable UnusedType.Global
 // ReSharper disable UnusedMember.Global
@@ -13,8 +13,12 @@ namespace ByteSync.Common.Controls;
 
 public abstract class BaseRepository<T> : IRepository<T>
 {
-    protected BaseRepository()
+    protected readonly ILogger<BaseRepository<T>> _logger;
+
+    protected BaseRepository(ILogger<BaseRepository<T>> logger)
     {
+        _logger = logger;
+        
         SyncRoot = new object();
 
         IsDataSetEvent = new ManualResetEvent(false); 
@@ -63,7 +67,7 @@ public abstract class BaseRepository<T> : IRepository<T>
                 Data = (T) Activator.CreateInstance(typeof(T), newDataId);
                 IsDataSetEvent.Set();
                 
-                Log.Debug("{HolderType}.ResetDataAsync, DataId:{DataId}", GetType().Name, GetDataId(Data));
+                _logger.LogDebug("{HolderType}.ResetDataAsync, DataId:{DataId}", GetType().Name, GetDataId(Data));
 
                 if (func != null)
                 {
@@ -203,19 +207,19 @@ public abstract class BaseRepository<T> : IRepository<T>
         {
             return true;
         }
-        if (waitHandles[index] == endEvent)
+        if (index < waitHandles.Count && waitHandles[index] == endEvent)
         {
-            Log.Error("Wait: Process has ended");
+            _logger.LogError("Wait: Process has ended");
             return false;
         }
-        if (waitHandles[index] == cancellationToken.WaitHandle)
+        if (index < waitHandles.Count && waitHandles[index] == cancellationToken.WaitHandle)
         {
             if (cancellationToken.IsCancellationRequested)
             {
                 return true;
             }
         }
-        Log.Error("Wait: timeout has occured");
+        _logger.LogError("Wait: timeout has occured");
         return false;
     }
 
@@ -239,7 +243,7 @@ public abstract class BaseRepository<T> : IRepository<T>
             {
                 if (dataId != null && !CheckDataId(dataId, Data))
                 {
-                    Log.Debug("dataId is not expected. Current DataId:{CurrentDataId}, Incoming dataId:{IncomingDataId}", GetDataId(Data), dataId);
+                    _logger.LogDebug("dataId is not expected. Current DataId:{CurrentDataId}, Incoming dataId:{IncomingDataId}", GetDataId(Data), dataId);
                     throw new ArgumentOutOfRangeException(nameof(dataId), "dataId is not expected");
                 }
                 
