@@ -1,16 +1,19 @@
 ﻿using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Business.Communications;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Controls;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Communications;
 
 namespace ByteSync.Services.Communications;
 
 public class DigitalSignaturesRepository : BaseRepository<DigitalSignaturesData>, IDigitalSignaturesRepository
 {
+    public DigitalSignaturesRepository(ILogger<DigitalSignaturesRepository> logger) 
+        : base(logger)
+    {
+    }
+    
     public async Task Start(string sessionId)
     {
         await ResetDataAsync(sessionId);

@@ -14,7 +14,6 @@ using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Lobbies;
 using ByteSync.ViewModels.Lobbies;
 using Prism.Events;
-using Serilog;
 using Splat;
 
 namespace ByteSync.Services.Lobbies;
@@ -31,7 +30,8 @@ public class LobbyRepository : BaseRepository<LobbyDetails>, ILobbyRepository
     internal const string LOCAL_LOBBY_PREFIX = "Local_Lobby_";
     
     public LobbyRepository(ILobbyMemberViewModelFactory lobbyMemberViewModelFactory, IEventAggregator eventAggregator, ICloudProxy connectionManager, 
-        IPublicKeysManager publicKeysManager, IUIHelper uiHelper, ILobbyApiClient lobbyApiClient)
+        IPublicKeysManager publicKeysManager, IUIHelper uiHelper, ILobbyApiClient lobbyApiClient, ILogger<LobbyRepository> logger) :
+            base(logger)
     {
         _lobbyMemberViewModelFactory = lobbyMemberViewModelFactory;
 
@@ -352,7 +352,7 @@ public class LobbyRepository : BaseRepository<LobbyDetails>, ILobbyRepository
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "UpdateLobbyMemberStatus");
+                _logger.LogError(ex, "UpdateLobbyMemberStatus");
             }
         });
     }
@@ -454,7 +454,7 @@ public class LobbyRepository : BaseRepository<LobbyDetails>, ILobbyRepository
     private async Task HandleError(Exception exception, string? lobbyId, [CallerMemberName] string caller = "")
     {
         // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
-        Log.Error(exception, caller);
+        _logger.LogError(exception, caller);
 
         if (exception is ArgumentOutOfRangeException && exception.Message.Contains("dataId is not expected", StringComparison.InvariantCultureIgnoreCase))
         {
@@ -471,7 +471,7 @@ public class LobbyRepository : BaseRepository<LobbyDetails>, ILobbyRepository
             }
             catch (Exception ex2)
             {
-                Log.Error(ex2, "RunSecurityCheck // LobbyEndedEvent.Set()");
+                _logger.LogError(ex2, "RunSecurityCheck // LobbyEndedEvent.Set()");
             }
 
             try
@@ -480,7 +480,7 @@ public class LobbyRepository : BaseRepository<LobbyDetails>, ILobbyRepository
             }
             catch (Exception ex2)
             {
-                Log.Error(ex2, "RunSecurityCheck // UpdateLobbyMemberStatus");
+                _logger.LogError(ex2, "RunSecurityCheck // UpdateLobbyMemberStatus");
             }
         }
     }

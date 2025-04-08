@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Business.Communications.PublicKeysTrusting;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
@@ -12,11 +11,10 @@ namespace ByteSync.Services.Communications;
 
 public class TrustProcessPublicKeysRepository : BaseRepository<TrustProcessPublicKeysData>, ITrustProcessPublicKeysRepository
 {
-    private readonly IConnectionService _connectionService;
-
-    public TrustProcessPublicKeysRepository(IConnectionService connectionService)
+    public TrustProcessPublicKeysRepository(ILogger<TrustProcessPublicKeysRepository> logger)
+        : base(logger)
     {
-        _connectionService = connectionService;
+
     }
 
     public async Task Start(string sessionId)
@@ -26,9 +24,6 @@ public class TrustProcessPublicKeysRepository : BaseRepository<TrustProcessPubli
     
     public async Task SetExpectedPublicKeyCheckDataCount(string sessionId, List<string> cloudSessionMembersIds)
     {
-        // var clone = cloudSessionMembersIds.ToList();
-        // clone.RemoveAll(i => i.Equals(_connectionService.FullId));
-        //
         await RunAsync(sessionId, data => data.JoinerTrustProcessData.SetExpectedPublicKeyCheckDataCount(cloudSessionMembersIds));
     }
     
