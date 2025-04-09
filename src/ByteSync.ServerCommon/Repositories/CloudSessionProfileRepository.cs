@@ -10,5 +10,5 @@ public class CloudSessionProfileRepository : BaseRepository<CloudSessionProfileE
     {
     }
 
-    public override string ElementName { get; } = "CloudSessionProfile";
+    public override EntityType EntityType { get; } = EntityType.CloudSessionProfile;
 }

@@ -1,7 +1,9 @@
 ﻿using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Helpers;
+using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Mappers;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
@@ -42,8 +44,7 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
         
         var transaction = _cacheService.OpenTransaction();
         
-        await using var sessionRedisLock = await _cacheService.AcquireLockAsync(_cloudSessionsRepository.ComputeCacheKey(_cloudSessionsRepository.ElementName, 
-            parameters.SessionId));
+        await using var sessionRedisLock = await _cacheService.AcquireLockAsync(EntityType.Session, parameters.SessionId);
 
         var updateResult = await _cloudSessionsRepository.Update(parameters.SessionId, innerCloudSessionData =>
         {

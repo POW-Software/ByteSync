@@ -1,4 +1,5 @@
 ﻿using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 
@@ -10,7 +11,7 @@ public class InventoryRepository : BaseRepository<InventoryData>, IInventoryRepo
     {
     }
     
-    public override string ElementName { get; } = "Inventory";
+    public override EntityType EntityType { get; } = EntityType.Inventory;
     
     public async Task<InventoryMemberData?> GetInventoryMember(string sessionId, string clientInstanceId)
     {

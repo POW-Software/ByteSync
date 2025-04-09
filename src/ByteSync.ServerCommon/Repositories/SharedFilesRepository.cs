@@ -1,5 +1,7 @@
 ﻿using ByteSync.Common.Business.SharedFiles;
+using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Exceptions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
@@ -12,32 +14,32 @@ public class SharedFilesRepository : BaseRepository<SharedFileData>, ISharedFile
     {
     }
     
-    private string ComputeSharedFileCacheKey(SharedFileDefinition sharedFileDefinition)
+    private CacheKey ComputeSharedFileCacheKey(SharedFileDefinition sharedFileDefinition)
     {
         return ComputeSharedFileCacheKey(sharedFileDefinition.Id);
     }
     
-    private string ComputeSharedFileCacheKey(string sharedFileDefinitionId)
+    private CacheKey ComputeSharedFileCacheKey(string sharedFileDefinitionId)
     {
-        return ComputeCacheKey("SharedFile", sharedFileDefinitionId);
+        return _cacheService.ComputeCacheKey(EntityType.SharedFile, sharedFileDefinitionId);
     }
     
-    public override string ElementName { get; } = "SharedFile";
+    public override EntityType EntityType { get; } = EntityType.SharedFile;
 
-    private string ComputeSessionSharedFilesKey(SharedFileDefinition sharedFileDefinition)
+    private CacheKey ComputeSessionSharedFilesKey(SharedFileDefinition sharedFileDefinition)
     {
         return ComputeSessionSharedFilesKey(sharedFileDefinition.SessionId);
     }
     
-    private string ComputeSessionSharedFilesKey(string sessionId)
+    private CacheKey ComputeSessionSharedFilesKey(string sessionId)
     {
-        return ComputeCacheKey("SessionSharedFiles", sessionId);
+        return _cacheService.ComputeCacheKey(EntityType.SessionSharedFiles, sessionId);
     }
     
     public async Task AddOrUpdate(SharedFileDefinition sharedFileDefinition, Func<SharedFileData?, SharedFileData> updateHandler)
     {
-        string sessionSharedFilesKey = ComputeSessionSharedFilesKey(sharedFileDefinition);
-        string sharedFileCacheKey = ComputeSharedFileCacheKey(sharedFileDefinition);
+        var sessionSharedFilesKey = ComputeSessionSharedFilesKey(sharedFileDefinition);
+        var sharedFileCacheKey = ComputeSharedFileCacheKey(sharedFileDefinition);
 
         var database = _cacheService.GetDatabase();
         
@@ -47,13 +49,13 @@ public class SharedFilesRepository : BaseRepository<SharedFileData>, ISharedFile
         var cachedElement = await GetCachedElement(sharedFileCacheKey); 
         var element = updateHandler.Invoke(cachedElement);
         await SetElement(sharedFileCacheKey, element, database);
-        await database.SetAddAsync(sessionSharedFilesKey, sharedFileDefinition.Id);
+        await database.SetAddAsync(sessionSharedFilesKey.Value, sharedFileDefinition.Id);
     }
 
     public async Task Forget(SharedFileDefinition sharedFileDefinition)
     {
-        string sessionSharedFilesKey = ComputeSessionSharedFilesKey(sharedFileDefinition);
-        string sharedFileCacheKey = ComputeSharedFileCacheKey(sharedFileDefinition);
+        var sessionSharedFilesKey = ComputeSessionSharedFilesKey(sharedFileDefinition);
+        var sharedFileCacheKey = ComputeSharedFileCacheKey(sharedFileDefinition);
 
         var database = _cacheService.GetDatabase();
         
@@ -61,21 +63,21 @@ public class SharedFilesRepository : BaseRepository<SharedFileData>, ISharedFile
         await using var sessionSharedFilesLock = await _cacheService.AcquireLockAsync(sessionSharedFilesKey); 
         await using var sharedFileLock = await _cacheService.AcquireLockAsync(sharedFileCacheKey);
 
-        await database.KeyDeleteAsync(sharedFileCacheKey);
-        await database.SetRemoveAsync(sessionSharedFilesKey, sharedFileDefinition.Id);
+        await database.KeyDeleteAsync(sharedFileCacheKey.Value);
+        await database.SetRemoveAsync(sessionSharedFilesKey.Value, sharedFileDefinition.Id);
     }
     
     public async Task<List<SharedFileData>> Clear(string sessionId)
     {
         List<SharedFileData> result = new List<SharedFileData>();
         
-        string sessionSharedFilesKey = ComputeSessionSharedFilesKey(sessionId);
+        var sessionSharedFilesKey = ComputeSessionSharedFilesKey(sessionId);
 
         var database = _cacheService.GetDatabase();
         
         await using var sessionSharedFilesLock = await _cacheService.AcquireLockAsync(sessionSharedFilesKey);
 
-        var redisValues = await database.SetMembersAsync(sessionSharedFilesKey);
+        var redisValues = await database.SetMembersAsync(sessionSharedFilesKey.Value);
         List<string> sharedFileDefinitionIds = redisValues.Select(value => value.ToString()).ToList();
 
         foreach (var sharedFileDefinitionId in sharedFileDefinitionIds)
@@ -89,11 +91,11 @@ public class SharedFilesRepository : BaseRepository<SharedFileData>, ISharedFile
             {
                 result.Add(sharedFileData);
                         
-                await database.KeyDeleteAsync(sharedFileCacheKey);
+                await database.KeyDeleteAsync(sharedFileCacheKey.Value);
             }
         }
             
-        await database.KeyDeleteAsync(sessionSharedFilesKey);
+        await database.KeyDeleteAsync(sessionSharedFilesKey.Value);
 
         return result;
     }

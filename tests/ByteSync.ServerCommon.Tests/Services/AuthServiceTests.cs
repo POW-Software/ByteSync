@@ -6,11 +6,8 @@ using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Factories;
-using ByteSync.ServerCommon.Interfaces.Misc;
 using ByteSync.ServerCommon.Interfaces.Repositories;
-using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
-using ByteSync.ServerCommon.Services;
 using ByteSync.ServerCommon.Services.Clients;
 using FakeItEasy;
 

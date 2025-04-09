@@ -1,5 +1,6 @@
 ﻿using ByteSync.Common.Business.EndPoints;
 using ByteSync.ServerCommon.Business.Auth;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
@@ -16,7 +17,7 @@ public class ClientsRepository : BaseRepository<Client>, IClientsRepository
         _clientsGroupIdFactory = clientsGroupIdFactory;
     }
     
-    public override string ElementName => "Client";
+    public override EntityType EntityType => EntityType.Client;
 
     public Task<Client?> Get(ByteSyncEndpoint byteSyncEndpoint)
     {

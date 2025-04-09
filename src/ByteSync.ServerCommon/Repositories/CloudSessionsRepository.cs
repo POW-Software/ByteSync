@@ -1,6 +1,8 @@
 ﻿using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Auth;
+using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using StackExchange.Redis;
@@ -14,12 +16,12 @@ public class CloudSessionsRepository : BaseRepository<CloudSessionData>, ICloudS
 
     }
     
-    private string ComputeSessionCacheKey(CloudSessionData cloudSessionData)
+    private CacheKey ComputeSessionCacheKey(CloudSessionData cloudSessionData)
     {
-        return ComputeCacheKey("Session", cloudSessionData.SessionId);
+        return _cacheService.ComputeCacheKey(EntityType, cloudSessionData.SessionId);
     }
     
-    public override string ElementName => "Session";
+    public override EntityType EntityType => EntityType.Session;
 
     public Task<SessionMemberData?> GetSessionMember(string sessionId, Client client)
     {
@@ -51,7 +53,7 @@ public class CloudSessionsRepository : BaseRepository<CloudSessionData>, ICloudS
             var cacheKey = ComputeSessionCacheKey(cloudSessionData);
             await using var redisLock = await _cacheService.AcquireLockAsync(cacheKey);
             
-            string? serializedElement = await _cacheService.GetDatabase().StringGetAsync(cacheKey);
+            string? serializedElement = await _cacheService.GetDatabase().StringGetAsync(cacheKey.Value);
             if (serializedElement == null || serializedElement.IsEmpty())
             {
                 await SetElement(cacheKey, cloudSessionData, transaction);

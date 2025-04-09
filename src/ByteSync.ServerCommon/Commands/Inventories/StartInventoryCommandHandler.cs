@@ -2,6 +2,7 @@
 using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
@@ -42,11 +43,9 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
         var sessionId = request.SessionId;
         var client = request.Client;
         
-        await using var sessionRedisLock = await _cacheService.AcquireLockAsync(_cloudSessionsRepository.ComputeCacheKey(_cloudSessionsRepository.ElementName, 
-            sessionId));
+        await using var sessionRedisLock = await _cacheService.AcquireLockAsync(EntityType.Session, sessionId);
         
-        await using var inventoryRedisLock = await _cacheService.AcquireLockAsync(_inventoryRepository.ComputeCacheKey(_inventoryRepository.ElementName, 
-            sessionId));
+        await using var inventoryRedisLock = await _cacheService.AcquireLockAsync(EntityType.Inventory, sessionId);
         
         var transaction = _cacheService.OpenTransaction();
         

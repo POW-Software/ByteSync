@@ -1,8 +1,7 @@
-﻿using System.Text;
-using ByteSync.Common.Controls.Json;
+﻿using ByteSync.Common.Controls.Json;
 using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Repositories;
-using ByteSync.ServerCommon.Exceptions;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using RedLockNet;
@@ -19,23 +18,23 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
         _cacheService = cacheService;
     }
     
-    private string Prefix => _cacheService.Prefix;
+    // private string Prefix => _cacheService.Prefix;
     
-    public abstract string ElementName { get; }
+    public abstract EntityType EntityType { get; }
     
     private TimeSpan Expiry => TimeSpan.FromDays(2);
     
-    public string ComputeCacheKey(params string[] keyParts)
-    {
-        StringBuilder sb = new StringBuilder(Prefix);
-
-        foreach (var keyPart in keyParts)
-        {
-            sb.Append($":{keyPart}");
-        }
-        
-        return sb.ToString();
-    }
+    // public string ComputeCacheKey(params string[] keyParts)
+    // {
+    //     StringBuilder sb = new StringBuilder(Prefix);
+    //
+    //     foreach (var keyPart in keyParts)
+    //     {
+    //         sb.Append($":{keyPart}");
+    //     }
+    //     
+    //     return sb.ToString();
+    // }
     
     public Task<T?> Get(string key)
     {
@@ -44,7 +43,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
     
     public async Task<T?> Get(string key, ITransaction? transaction)
     {
-        var cacheKey = ComputeCacheKey(ElementName, key);
+        var cacheKey = _cacheService.ComputeCacheKey(EntityType, key);
         
         var cachedElement = await GetCachedElement(cacheKey);
         return cachedElement;
@@ -57,7 +56,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
 
     public async Task<UpdateEntityResult<T>> AddOrUpdate(string key, Func<T?, T?> handler, ITransaction? transaction)
     {
-        var cacheKey = ComputeCacheKey(ElementName, key);
+        var cacheKey = _cacheService.ComputeCacheKey(EntityType, key);
         IDatabaseAsync database = _cacheService.GetDatabase(transaction);
         await using var redisLock = await _cacheService.AcquireLockAsync(cacheKey); 
         
@@ -93,7 +92,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
     private async Task<UpdateEntityResult<T>> DoUpdate(string key, Func<T, bool> updateHandler, bool throwIfNotExists, ITransaction? transaction,
         IRedLock? redisLockParam)
     {
-        var cacheKey = ComputeCacheKey(ElementName, key);
+        var cacheKey = _cacheService.ComputeCacheKey(EntityType, key);
         IDatabaseAsync database = _cacheService.GetDatabase(transaction);
         
         IRedLock? redisLock = redisLockParam;
@@ -142,18 +141,23 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
     
     public async Task<UpdateEntityResult<T>> Save(string key, T element, ITransaction? transaction = null)
     {
-        var cacheKey = ComputeCacheKey(ElementName, key);
+        var cacheKey = _cacheService.ComputeCacheKey(EntityType, key);
+        return await Save(cacheKey, element, transaction);
+    }
+    
+    public async Task<UpdateEntityResult<T>> Save(CacheKey cacheKey, T element, ITransaction? transaction = null)
+    {
         IDatabaseAsync database = _cacheService.GetDatabase(transaction);
         
         await using var redisLock = await _cacheService.AcquireLockAsync(cacheKey); 
         return await SetElement(cacheKey, element, database);
     }
 
-    protected async Task<T?> GetCachedElement(string cacheKey)
+    protected async Task<T?> GetCachedElement(CacheKey cacheKey)
     {
         T? cachedElement = default(T);
                 
-        string? serializedElement = await _cacheService.GetDatabase().StringGetAsync(cacheKey);
+        string? serializedElement = await _cacheService.GetDatabase().StringGetAsync(cacheKey.Value);
         if (serializedElement.IsNotEmpty())
         {
             cachedElement = JsonHelper.Deserialize<T>(serializedElement!);
@@ -162,19 +166,19 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
         return cachedElement;
     }
     
-    public async Task<UpdateEntityResult<T>> SetElement(string cacheKey, T createdOrUpdatedElement, IDatabaseAsync database)
+    public async Task<UpdateEntityResult<T>> SetElement(CacheKey cacheKey, T createdOrUpdatedElement, IDatabaseAsync database)
     {
         string serializedElement = JsonHelper.Serialize(createdOrUpdatedElement);
 
         if (database is ITransaction)
         {
-            _ = database.StringSetAsync(cacheKey, serializedElement, Expiry);
+            _ = database.StringSetAsync(cacheKey.Value, serializedElement, Expiry);
             
             return new UpdateEntityResult<T>(createdOrUpdatedElement, UpdateEntityStatus.WaitingForTransaction);
         }
         else
         {
-            await database.StringSetAsync(cacheKey, serializedElement, Expiry);
+            await database.StringSetAsync(cacheKey.Value, serializedElement, Expiry);
             
             return new UpdateEntityResult<T>(createdOrUpdatedElement, UpdateEntityStatus.Saved);
         }
@@ -187,9 +191,9 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
     
     public async Task Delete(string key, ITransaction? transaction)
     {
-        var cacheKey = ComputeCacheKey(ElementName, key);
+        var cacheKey = _cacheService.ComputeCacheKey(EntityType, key);
         IDatabaseAsync database = _cacheService.GetDatabase(transaction);
         
-        await database.KeyDeleteAsync(cacheKey);
+        await database.KeyDeleteAsync(cacheKey.Value);
     }
 }

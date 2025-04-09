@@ -1,4 +1,5 @@
 ﻿using ByteSync.ServerCommon.Business.Repositories;
+using ByteSync.ServerCommon.Entities;
 using RedLockNet;
 using StackExchange.Redis;
 
@@ -6,9 +7,9 @@ namespace ByteSync.ServerCommon.Interfaces.Repositories;
 
 public interface IRepository<T>
 {
-    string ComputeCacheKey(params string[] keyParts);
+    // string ComputeCacheKey(params string[] keyParts);
     
-    string ElementName { get; }
+    EntityType EntityType { get; }
     
     Task<T?> Get(string key);
     
@@ -22,9 +23,11 @@ public interface IRepository<T>
     
     Task<UpdateEntityResult<T>> UpdateIfExists(string key, Func<T, bool> updateHandler, ITransaction? transaction = null, IRedLock? redisLock = null);
     
+    Task<UpdateEntityResult<T>> Save(CacheKey cacheKey, T element, ITransaction? transaction = null);
+    
     Task<UpdateEntityResult<T>> Save(string key, T element, ITransaction? transaction = null);
 
-    Task<UpdateEntityResult<T>> SetElement(string cacheKey, T createdOrUpdatedElement, IDatabaseAsync database);
+    Task<UpdateEntityResult<T>> SetElement(CacheKey cacheKey, T createdOrUpdatedElement, IDatabaseAsync database);
 
     Task Delete(string key);
     

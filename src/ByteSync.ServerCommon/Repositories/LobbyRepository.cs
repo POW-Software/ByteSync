@@ -12,11 +12,11 @@ public class LobbyRepository : BaseRepository<Lobby>, ILobbyRepository
     {
     }
     
-    public override string ElementName { get; } = "Lobby";
+    public override EntityType EntityType { get; } = EntityType.Lobby;
 
     public async Task<UpdateEntityResult<Lobby>> QuitLobby(string lobbyId, string clientInstanceId, ITransaction transaction)
     {
-        var cacheKey = ComputeCacheKey(ElementName, lobbyId);
+        var cacheKey = _cacheService.ComputeCacheKey(EntityType, lobbyId);
         await using var redisLock = await _cacheService.AcquireLockAsync(cacheKey);
 
         var lobby = await GetCachedElement(cacheKey);
@@ -41,7 +41,7 @@ public class LobbyRepository : BaseRepository<Lobby>, ILobbyRepository
 
         if (deleteLobby)
         {
-            await transaction.KeyDeleteAsync(cacheKey);
+            await transaction.KeyDeleteAsync(cacheKey.Value);
 
             return new UpdateEntityResult<Lobby>(lobby, UpdateEntityStatus.Deleted);
         }

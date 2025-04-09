@@ -1,7 +1,5 @@
-﻿using Azure.Identity;
-using ByteSync.ServerCommon.Business.Settings;
+﻿using ByteSync.ServerCommon.Business.Settings;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 
 namespace ByteSync.ServerCommon.Tests.Helpers;
 

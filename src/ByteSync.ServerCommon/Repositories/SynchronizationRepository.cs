@@ -14,7 +14,7 @@ public class SynchronizationRepository : BaseRepository<SynchronizationEntity>, 
         _actionsGroupDefinitionsRepository = actionsGroupDefinitionsRepository;
     }
 
-    public override string ElementName => "Synchronization";
+    public override EntityType EntityType => EntityType.Synchronization;
 
     public async Task AddSynchronization(SynchronizationEntity synchronizationEntity, List<ActionsGroupDefinition> actionsGroupDefinitions)
     {

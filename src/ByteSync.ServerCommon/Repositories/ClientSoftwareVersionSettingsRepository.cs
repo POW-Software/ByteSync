@@ -1,4 +1,5 @@
 ﻿using ByteSync.ServerCommon.Business.Settings;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 
@@ -10,7 +11,7 @@ public class ClientSoftwareVersionSettingsRepository : BaseRepository<ClientSoft
     {
     }
 
-    public override string ElementName => "ClientSoftwareVersionSettings";
+    public override EntityType EntityType => EntityType.ClientSoftwareVersionSettings;
     
     public const string UniqueKey = "Unique";
     

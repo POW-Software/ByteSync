@@ -25,17 +25,18 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
         _logger = logger;
     }
 
-    public override string ElementName => "TrackingAction";
+    public override EntityType EntityType => EntityType.TrackingAction;
     
     public async Task<TrackingActionEntity> GetOrBuild(string sessionId, string actionsGroupId)
     {
-        var cacheKey = ComputeCacheKey(ElementName, $"{sessionId}_{actionsGroupId}");
+        var cacheKey = _cacheService.ComputeCacheKey(EntityType, $"{sessionId}_{actionsGroupId}");
+        
         await using var actionsGroupIdLock = await _cacheService.AcquireLockAsync(cacheKey);
 
         return await DoGetOrBuild(sessionId, actionsGroupId, cacheKey);
     }
 
-    private async Task<TrackingActionEntity> DoGetOrBuild(string sessionId, string actionsGroupId, string cacheKey)
+    private async Task<TrackingActionEntity> DoGetOrBuild(string sessionId, string actionsGroupId, CacheKey cacheKey)
     {
         var trackingActionEntity = await Get($"{sessionId}_{actionsGroupId}");
         
@@ -52,7 +53,7 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
     public async Task<TrackingActionResult> AddOrUpdate(string sessionId, List<string> actionsGroupIds, 
         Func<TrackingActionEntity, SynchronizationEntity, bool> updateHandler)
     {
-        var synchronizationCacheKey = _synchronizationRepository.ComputeCacheKey(_synchronizationRepository.ElementName, sessionId);
+        var synchronizationCacheKey = _cacheService.ComputeCacheKey(EntityType.Synchronization, sessionId);
         await using var synchronizationLock = await _cacheService.AcquireLockAsync(synchronizationCacheKey);
         
         var synchronizationEntity = (await _synchronizationRepository.Get(sessionId))!;
@@ -69,7 +70,7 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
                 break;
             }
             
-            var cacheKey = ComputeCacheKey(ElementName, $"{sessionId}_{actionsGroupId}");
+            var cacheKey  = _cacheService.ComputeCacheKey(EntityType, $"{sessionId}_{actionsGroupId}");
             var actionsGroupIdLock = await _cacheService.AcquireLockAsync(cacheKey); 
             locks.Add(actionsGroupIdLock);
             

@@ -1,11 +1,10 @@
 ﻿using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Sessions;
-using ByteSync.ServerCommon.Business.Settings;
+using ByteSync.ServerCommon.Factories;
 using ByteSync.ServerCommon.Repositories;
 using ByteSync.ServerCommon.Services;
 using ByteSync.ServerCommon.Tests.Helpers;
 using FakeItEasy;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -29,8 +28,9 @@ public class SharedFilesRepositoryTests
     {
         // Arrange
         var redisSettings = TestSettingsInitializer.GetRedisSettings();
+        var cacheKeyFactory = new CacheKeyFactory(Options.Create(redisSettings));
         var loggerFactoryMock = A.Fake<ILoggerFactory>();
-        var cacheService = new CacheService(Options.Create(redisSettings), loggerFactoryMock);
+        var cacheService = new CacheService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock);
         var repository = new SharedFilesRepository(cacheService);
 
         var sharedFileDefinition = new SharedFileDefinition
