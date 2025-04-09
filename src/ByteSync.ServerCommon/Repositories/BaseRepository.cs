@@ -18,23 +18,9 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
         _cacheService = cacheService;
     }
     
-    // private string Prefix => _cacheService.Prefix;
-    
     public abstract EntityType EntityType { get; }
     
     private TimeSpan Expiry => TimeSpan.FromDays(2);
-    
-    // public string ComputeCacheKey(params string[] keyParts)
-    // {
-    //     StringBuilder sb = new StringBuilder(Prefix);
-    //
-    //     foreach (var keyPart in keyParts)
-    //     {
-    //         sb.Append($":{keyPart}");
-    //     }
-    //     
-    //     return sb.ToString();
-    // }
     
     public Task<T?> Get(string key)
     {
@@ -155,7 +141,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
 
     protected async Task<T?> GetCachedElement(CacheKey cacheKey)
     {
-        T? cachedElement = default(T);
+        T? cachedElement = null;
                 
         string? serializedElement = await _cacheService.GetDatabase().StringGetAsync(cacheKey.Value);
         if (serializedElement.IsNotEmpty())
