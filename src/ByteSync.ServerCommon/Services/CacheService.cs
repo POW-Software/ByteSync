@@ -36,8 +36,6 @@ public class CacheService : ICacheService
         _redLockFactory = RedLockFactory.Create(multiplexers, redLockRetryConfiguration, loggerFactory);
     }
 
-    // public string Prefix => _redisSettings.Prefix;
-
     public ITransaction OpenTransaction()
     {
         return _connectionMultiplexer.GetDatabase().CreateTransaction();
