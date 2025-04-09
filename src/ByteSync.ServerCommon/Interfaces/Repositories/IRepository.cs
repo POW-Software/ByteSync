@@ -7,8 +7,6 @@ namespace ByteSync.ServerCommon.Interfaces.Repositories;
 
 public interface IRepository<T>
 {
-    // string ComputeCacheKey(params string[] keyParts);
-    
     EntityType EntityType { get; }
     
     Task<T?> Get(string key);
