@@ -67,12 +67,6 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
         return await _cacheRepository.Save(cacheKey, element, transaction, redisLock);
     }
     
-    // public Task<UpdateEntityResult<T>> SetElement(CacheKey cacheKey, T createdOrUpdatedElement, IDatabaseAsync database)
-    // {
-    //     // Cette méthode est maintenue pour compatibilité avec l'interface
-    //     throw new NotImplementedException("Cette méthode est dépréciée. Utilisez Save à la place.");
-    // }
-    
     public async Task Delete(string key)
     {
         await Delete(key, null);

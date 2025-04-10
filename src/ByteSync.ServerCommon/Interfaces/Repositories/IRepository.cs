@@ -25,8 +25,6 @@ public interface IRepository<T>
     
     Task<UpdateEntityResult<T>> Save(string key, T element, ITransaction? transaction = null, IRedLock? redisLock = null);
 
-    // Task<UpdateEntityResult<T>> SetElement(CacheKey cacheKey, T createdOrUpdatedElement, IDatabaseAsync database);
-
     Task Delete(string key);
     
     Task Delete(string key, ITransaction? transaction);
