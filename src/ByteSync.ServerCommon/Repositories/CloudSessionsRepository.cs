@@ -59,7 +59,7 @@ public class CloudSessionsRepository : BaseRepository<CloudSessionData>, ICloudS
             string? serializedElement = await _redisInfrastructureService.GetDatabase().StringGetAsync(cacheKey.Value);
             if (serializedElement == null || serializedElement.IsEmpty())
             {
-                await Save(cacheKey, cloudSessionData, transaction);
+                await Save(cacheKey, cloudSessionData, transaction, redisLock);
                 isNewSessionOk = true;
             }
         }
