@@ -12,24 +12,34 @@ using Microsoft.Extensions.Options;
 
 namespace ByteSync.ServerCommon.Tests.Repositories;
 
+[TestFixture]
 public class SharedFilesRepositoryTests
 {
-    public SharedFilesRepositoryTests()
+    private SharedFilesRepository _repository;
+    private CacheRepository<SharedFileData> _cacheRepository;
+    private RedisInfrastructureService _redisInfrastructureService;
+    
+    [SetUp]
+    public void SetUp()
     {
-
+        var redisSettings = TestSettingsInitializer.GetRedisSettings();
+        var cacheKeyFactory = new CacheKeyFactory(Options.Create(redisSettings));
+        var loggerFactoryMock = A.Fake<ILoggerFactory>();
+        
+        _redisInfrastructureService = new RedisInfrastructureService(
+            Options.Create(redisSettings), 
+            cacheKeyFactory, 
+            loggerFactoryMock);
+            
+        _cacheRepository = new CacheRepository<SharedFileData>(_redisInfrastructureService);
+        
+        _repository = new SharedFilesRepository(_redisInfrastructureService, _cacheRepository);
     }
     
     [Test]
     public async Task AddOrUpdate_IntegrationTest()
     {
         // Arrange
-        var redisSettings = TestSettingsInitializer.GetRedisSettings();
-        var cacheKeyFactory = new CacheKeyFactory(Options.Create(redisSettings));
-        var loggerFactoryMock = A.Fake<ILoggerFactory>();
-        var redisInfrastructureService = new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock);
-        var cacheRepository = new CacheRepository<SharedFileData>(redisInfrastructureService);
-        var repository = new SharedFilesRepository(redisInfrastructureService, cacheRepository);
-
         var sharedFileDefinition = new SharedFileDefinition
         {
             SessionId = "testSession_" + DateTime.Now.Ticks,
@@ -44,11 +54,11 @@ public class SharedFilesRepositoryTests
         };
 
         // Act
-        await repository.AddOrUpdate(sharedFileDefinition, updateHandler);
+        await _repository.AddOrUpdate(sharedFileDefinition, updateHandler);
 
         // Assert
-        var cacheKey = redisInfrastructureService.ComputeCacheKey(EntityType.SharedFile, sharedFileDefinition.Id);
-        var value = await cacheRepository.Get(cacheKey);
+        var cacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.SharedFile, sharedFileDefinition.Id);
+        var value = await _cacheRepository.Get(cacheKey);
         value.Should().NotBeNull();
         value.Should().BeOfType<SharedFileData>();
         value.SharedFileDefinition.Should().BeEquivalentTo(sharedFileDefinition);
@@ -58,13 +68,6 @@ public class SharedFilesRepositoryTests
     public async Task Forget_IntegrationTest()
     {
         // Arrange
-        var redisSettings = TestSettingsInitializer.GetRedisSettings();
-        var cacheKeyFactory = new CacheKeyFactory(Options.Create(redisSettings));
-        var loggerFactoryMock = A.Fake<ILoggerFactory>();
-        var redisInfrastructureService = new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock);
-        var cacheRepository = new CacheRepository<SharedFileData>(redisInfrastructureService);
-        var repository = new SharedFilesRepository(redisInfrastructureService, cacheRepository);
-
         var sharedFileDefinition = new SharedFileDefinition
         {
             SessionId = "testSession_" + DateTime.Now.Ticks,
@@ -79,12 +82,12 @@ public class SharedFilesRepositoryTests
         };
 
         // Act
-        await repository.AddOrUpdate(sharedFileDefinition, updateHandler);
-        await repository.Forget(sharedFileDefinition);
+        await _repository.AddOrUpdate(sharedFileDefinition, updateHandler);
+        await _repository.Forget(sharedFileDefinition);
 
         // Assert
-        var cacheKey = redisInfrastructureService.ComputeCacheKey(EntityType.SharedFile, sharedFileDefinition.Id);
-        var value = await cacheRepository.Get(cacheKey);
+        var cacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.SharedFile, sharedFileDefinition.Id);
+        var value = await _cacheRepository.Get(cacheKey);
         value.Should().BeNull();
     }
     
@@ -92,13 +95,6 @@ public class SharedFilesRepositoryTests
     public async Task Clear_IntegrationTest()
     {
         // Arrange
-        var redisSettings = TestSettingsInitializer.GetRedisSettings();
-        var cacheKeyFactory = new CacheKeyFactory(Options.Create(redisSettings));
-        var loggerFactoryMock = A.Fake<ILoggerFactory>();
-        var redisInfrastructureService = new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock);
-        var cacheRepository = new CacheRepository<SharedFileData>(redisInfrastructureService);
-        var repository = new SharedFilesRepository(redisInfrastructureService, cacheRepository);
-
         var sharedFileDefinition = new SharedFileDefinition
         {
             SessionId = "testSession_" + DateTime.Now.Ticks,
@@ -113,12 +109,12 @@ public class SharedFilesRepositoryTests
         };
 
         // Act
-        await repository.AddOrUpdate(sharedFileDefinition, updateHandler);
-        await repository.Clear(sharedFileDefinition.SessionId);
+        await _repository.AddOrUpdate(sharedFileDefinition, updateHandler);
+        await _repository.Clear(sharedFileDefinition.SessionId);
 
         // Assert
-        var cacheKey = redisInfrastructureService.ComputeCacheKey(EntityType.SharedFile, sharedFileDefinition.Id);
-        var value = await cacheRepository.Get(cacheKey);
+        var cacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.SharedFile, sharedFileDefinition.Id);
+        var value = await _cacheRepository.Get(cacheKey);
         value.Should().BeNull();
     }
 }
