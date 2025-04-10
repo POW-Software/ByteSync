@@ -11,14 +11,34 @@ using Microsoft.Extensions.Options;
 
 namespace ByteSync.ServerCommon.Tests.Repositories;
 
+[TestFixture]
 public class InventoryRepositoryTests
 {
+    private InventoryRepository _repository;
+    private CacheRepository<InventoryData> _cacheRepository;
+    private RedisInfrastructureService _redisInfrastructureService;
+    
+    [SetUp]
+    public void SetUp()
+    {
+        var redisSettings = TestSettingsInitializer.GetRedisSettings();
+        var cacheKeyFactory = new CacheKeyFactory(Options.Create(redisSettings));
+        var loggerFactoryMock = A.Fake<ILoggerFactory>();
+        
+        _redisInfrastructureService = new RedisInfrastructureService(
+            Options.Create(redisSettings), 
+            cacheKeyFactory, 
+            loggerFactoryMock);
+            
+        _cacheRepository = new CacheRepository<InventoryData>(_redisInfrastructureService);
+        
+        _repository = new InventoryRepository(_redisInfrastructureService, _cacheRepository);
+    }
+
     [Test]
     public async Task Get_IntegrationTest()
     {
         // Arrange
-        var (repository, cacheRepository, redisInfrastructureService) = SetupRepositoryAndDependencies();
-        
         string sessionId = "testSession_" + DateTime.Now.Ticks;
         var inventoryData = new InventoryData
         {
@@ -26,11 +46,11 @@ public class InventoryRepositoryTests
             InventoryMembers = [new() { ClientInstanceId = "client1" }]
         };
         
-        var cacheKey = redisInfrastructureService.ComputeCacheKey(EntityType.Inventory, sessionId);
-        await cacheRepository.Save(cacheKey, inventoryData);
+        var cacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.Inventory, sessionId);
+        await _cacheRepository.Save(cacheKey, inventoryData);
 
         // Act
-        var result = await repository.Get(sessionId);
+        var result = await _repository.Get(sessionId);
 
         // Assert
         result.Should().NotBeNull();
@@ -43,8 +63,6 @@ public class InventoryRepositoryTests
     public async Task GetInventoryMember_IntegrationTest()
     {
         // Arrange
-        var (repository, cacheRepository, redisInfrastructureService) = SetupRepositoryAndDependencies();
-        
         string sessionId = "testSession_" + DateTime.Now.Ticks;
         string clientId1 = "client1";
         string clientId2 = "client2";
@@ -59,11 +77,11 @@ public class InventoryRepositoryTests
             ]
         };
         
-        var cacheKey = redisInfrastructureService.ComputeCacheKey(EntityType.Inventory, sessionId);
-        await cacheRepository.Save(cacheKey, inventoryData);
+        var cacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.Inventory, sessionId);
+        await _cacheRepository.Save(cacheKey, inventoryData);
 
         // Act
-        var result = await repository.GetInventoryMember(sessionId, clientId2);
+        var result = await _repository.GetInventoryMember(sessionId, clientId2);
 
         // Assert
         result.Should().NotBeNull();
@@ -74,8 +92,6 @@ public class InventoryRepositoryTests
     public async Task GetInventoryMember_WhenMemberNotFound_ReturnsNull()
     {
         // Arrange
-        var (repository, cacheRepository, redisInfrastructureService) = SetupRepositoryAndDependencies();
-        
         string sessionId = "testSession_" + DateTime.Now.Ticks;
         var inventoryData = new InventoryData
         {
@@ -83,11 +99,11 @@ public class InventoryRepositoryTests
             InventoryMembers = [new() { ClientInstanceId = "client1" }]
         };
         
-        var cacheKey = redisInfrastructureService.ComputeCacheKey(EntityType.Inventory, sessionId);
-        await cacheRepository.Save(cacheKey, inventoryData);
+        var cacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.Inventory, sessionId);
+        await _cacheRepository.Save(cacheKey, inventoryData);
 
         // Act
-        var result = await repository.GetInventoryMember(sessionId, "nonExistentClient");
+        var result = await _repository.GetInventoryMember(sessionId, "nonExistentClient");
 
         // Assert
         result.Should().BeNull();
@@ -97,12 +113,10 @@ public class InventoryRepositoryTests
     public async Task GetInventoryMember_WhenInventoryNotFound_ReturnsNull()
     {
         // Arrange
-        var (repository, _, _) = SetupRepositoryAndDependencies();
-        
         string nonExistentSessionId = "nonExistentSession_" + DateTime.Now.Ticks;
 
         // Act
-        var result = await repository.GetInventoryMember(nonExistentSessionId, "anyClient");
+        var result = await _repository.GetInventoryMember(nonExistentSessionId, "anyClient");
 
         // Assert
         result.Should().BeNull();
@@ -112,8 +126,6 @@ public class InventoryRepositoryTests
     public async Task Save_IntegrationTest()
     {
         // Arrange
-        var (repository, _, redisInfrastructureService) = SetupRepositoryAndDependencies();
-        
         string sessionId = "testSession_" + DateTime.Now.Ticks;
         var inventoryData = new InventoryData
         {
@@ -121,33 +133,16 @@ public class InventoryRepositoryTests
             InventoryMembers = [new() { ClientInstanceId = "client1" }]
         };
 
-        var cacheKey = redisInfrastructureService.ComputeCacheKey(EntityType.Inventory, sessionId);
+        var cacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.Inventory, sessionId);
 
         // Act
-        await repository.Save(cacheKey, inventoryData);
-        var result = await repository.Get(sessionId);
+        await _repository.Save(cacheKey, inventoryData);
+        var result = await _repository.Get(sessionId);
 
         // Assert
         result.Should().NotBeNull();
         result.SessionId.Should().Be(sessionId);
         result.InventoryMembers.Should().HaveCount(1);
         result.InventoryMembers[0].ClientInstanceId.Should().Be("client1");
-    }
-
-    private (InventoryRepository, CacheRepository<InventoryData>, RedisInfrastructureService) SetupRepositoryAndDependencies()
-    {
-        var redisSettings = TestSettingsInitializer.GetRedisSettings();
-        var cacheKeyFactory = new CacheKeyFactory(Options.Create(redisSettings));
-        var loggerFactoryMock = A.Fake<ILoggerFactory>();
-        
-        var redisInfrastructureService = new RedisInfrastructureService(
-            Options.Create(redisSettings), 
-            cacheKeyFactory, 
-            loggerFactoryMock);
-            
-        var cacheRepository = new CacheRepository<InventoryData>(redisInfrastructureService);
-        var repository = new InventoryRepository(redisInfrastructureService, cacheRepository);
-        
-        return (repository, cacheRepository, redisInfrastructureService);
     }
 }
