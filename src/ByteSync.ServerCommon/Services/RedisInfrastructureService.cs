@@ -13,14 +13,14 @@ using StackExchange.Redis;
 
 namespace ByteSync.ServerCommon.Services;
 
-public class CacheService : ICacheService
+public class RedisInfrastructureService : IRedisInfrastructureService
 {
     private readonly RedisSettings _redisSettings;
     private readonly ICacheKeyFactory _cacheKeyFactory;
     private readonly ConnectionMultiplexer _connectionMultiplexer;
     private readonly RedLockFactory _redLockFactory;
 
-    public CacheService(IOptions<RedisSettings> redisSettings, ICacheKeyFactory cacheKeyFactory, ILoggerFactory loggerFactory)
+    public RedisInfrastructureService(IOptions<RedisSettings> redisSettings, ICacheKeyFactory cacheKeyFactory, ILoggerFactory loggerFactory)
     {
         _redisSettings = redisSettings.Value;
         _cacheKeyFactory = cacheKeyFactory;

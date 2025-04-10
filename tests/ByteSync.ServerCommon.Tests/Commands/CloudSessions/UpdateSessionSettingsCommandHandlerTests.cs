@@ -24,7 +24,7 @@ public class UpdateSessionSettingsCommandHandlerTests
     private ICloudSessionsRepository _mockCloudSessionsRepository;
     private IInventoryRepository _mockInventoryRepository;
     private ISynchronizationRepository _mockSynchronizationRepository;
-    private ICacheService _mockCacheService;
+    private IRedisInfrastructureService _mockRedisInfrastructureService;
     private ISessionMemberMapper _mockSessionMemberMapper;
     private IInvokeClientsService _mockInvokeClientsService;
     private ILogger<UpdateSessionSettingsCommandHandler> _mockLogger;
@@ -36,7 +36,7 @@ public class UpdateSessionSettingsCommandHandlerTests
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
         _mockSynchronizationRepository = A.Fake<ISynchronizationRepository>();
-        _mockCacheService = A.Fake<ICacheService>();
+        _mockRedisInfrastructureService = A.Fake<IRedisInfrastructureService>();
         _mockSessionMemberMapper = A.Fake<ISessionMemberMapper>();
         _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
         _mockLogger = A.Fake<ILogger<UpdateSessionSettingsCommandHandler>>();
@@ -45,7 +45,7 @@ public class UpdateSessionSettingsCommandHandlerTests
             _mockCloudSessionsRepository,
             _mockInventoryRepository,
             _mockSynchronizationRepository,
-            _mockCacheService,
+            _mockRedisInfrastructureService,
             _mockSessionMemberMapper,
             _mockInvokeClientsService,
             _mockLogger);

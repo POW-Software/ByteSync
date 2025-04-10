@@ -24,7 +24,7 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
     private ISessionMemberMapper _mockSessionMemberMapper;
     private IInvokeClientsService _mockInvokeClientsService;
     private IClientsGroupsService _mockClientsGroupsService;
-    private ICacheService _mockCacheService;
+    private IRedisInfrastructureService _mockRedisInfrastructureService;
     private ILogger<FinalizeJoinCloudSessionCommandHandler> _mockLogger;
     private ITransaction _mockTransaction;
     private FinalizeJoinCloudSessionCommandHandler _handler;
@@ -37,12 +37,12 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
         _mockSessionMemberMapper = A.Fake<ISessionMemberMapper>();
         _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
         _mockClientsGroupsService = A.Fake<IClientsGroupsService>();
-        _mockCacheService = A.Fake<ICacheService>();
+        _mockRedisInfrastructureService = A.Fake<IRedisInfrastructureService>();
         _mockLogger = A.Fake<ILogger<FinalizeJoinCloudSessionCommandHandler>>();
         _mockTransaction = A.Fake<ITransaction>();
         _byteSyncPush = A.Fake<IHubByteSyncPush>();
 
-        A.CallTo(() => _mockCacheService.OpenTransaction()).Returns(_mockTransaction);
+        A.CallTo(() => _mockRedisInfrastructureService.OpenTransaction()).Returns(_mockTransaction);
         A.CallTo(() => _mockInvokeClientsService.SessionGroup(A<string>.Ignored))
             .Returns(_byteSyncPush);
 
@@ -51,7 +51,7 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
             _mockSessionMemberMapper,
             _mockInvokeClientsService,
             _mockClientsGroupsService,
-            _mockCacheService,
+            _mockRedisInfrastructureService,
             _mockLogger);
     }
 

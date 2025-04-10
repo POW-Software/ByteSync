@@ -11,7 +11,7 @@ public interface IRepository<T>
     
     Task<T?> Get(string key);
     
-    Task<T?> Get(string key, ITransaction? transaction);
+    Task<T?> Get(CacheKey cacheKey);
     
     Task<UpdateEntityResult<T>> AddOrUpdate(string key, Func<T?, T?> handler);
     
@@ -21,11 +21,11 @@ public interface IRepository<T>
     
     Task<UpdateEntityResult<T>> UpdateIfExists(string key, Func<T, bool> updateHandler, ITransaction? transaction = null, IRedLock? redisLock = null);
     
-    Task<UpdateEntityResult<T>> Save(CacheKey cacheKey, T element, ITransaction? transaction = null);
+    Task<UpdateEntityResult<T>> Save(CacheKey cacheKey, T element, ITransaction? transaction = null, IRedLock? redisLock = null);
     
-    Task<UpdateEntityResult<T>> Save(string key, T element, ITransaction? transaction = null);
+    Task<UpdateEntityResult<T>> Save(string key, T element, ITransaction? transaction = null, IRedLock? redisLock = null);
 
-    Task<UpdateEntityResult<T>> SetElement(CacheKey cacheKey, T createdOrUpdatedElement, IDatabaseAsync database);
+    // Task<UpdateEntityResult<T>> SetElement(CacheKey cacheKey, T createdOrUpdatedElement, IDatabaseAsync database);
 
     Task Delete(string key);
     

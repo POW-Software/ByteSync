@@ -1,5 +1,4 @@
-﻿using ByteSync.Common.Business.Sessions;
-using ByteSync.Common.Business.Sessions.Cloud;
+﻿using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;

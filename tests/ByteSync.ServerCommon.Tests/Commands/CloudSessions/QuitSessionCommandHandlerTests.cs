@@ -24,7 +24,7 @@ public class QuitSessionCommandHandlerTests
     private ICloudSessionsRepository _mockCloudSessionsRepository;
     private IInventoryRepository _mockInventoryRepository;
     private ISynchronizationRepository _mockSynchronizationRepository;
-    private ICacheService _mockCacheService;
+    private IRedisInfrastructureService _mockRedisInfrastructureService;
     private ISessionMemberMapper _mockSessionMemberMapper;
     private IClientsGroupsService _mockClientsGroupsService;
     private IInvokeClientsService _mockInvokeClientsService;
@@ -39,16 +39,16 @@ public class QuitSessionCommandHandlerTests
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
         _mockSynchronizationRepository = A.Fake<ISynchronizationRepository>();
-        _mockCacheService = A.Fake<ICacheService>();
+        _mockRedisInfrastructureService = A.Fake<IRedisInfrastructureService>();
         _mockSessionMemberMapper = A.Fake<ISessionMemberMapper>();
         _mockClientsGroupsService = A.Fake<IClientsGroupsService>();
         _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
 
         _mockTransaction = A.Fake<ITransaction>();
-        A.CallTo(() => _mockCacheService.OpenTransaction()).Returns(_mockTransaction);
+        A.CallTo(() => _mockRedisInfrastructureService.OpenTransaction()).Returns(_mockTransaction);
 
         _quitSessionCommandHandler = new QuitSessionCommandHandler(_mockCloudSessionsRepository, _mockInventoryRepository,
-            _mockSynchronizationRepository, _mockCacheService, _mockSessionMemberMapper, _mockClientsGroupsService, _mockInvokeClientsService);
+            _mockSynchronizationRepository, _mockRedisInfrastructureService, _mockSessionMemberMapper, _mockClientsGroupsService, _mockInvokeClientsService);
     }
 
     [TestCase(true)]

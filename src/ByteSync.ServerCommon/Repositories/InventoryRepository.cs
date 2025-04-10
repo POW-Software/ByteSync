@@ -7,7 +7,8 @@ namespace ByteSync.ServerCommon.Repositories;
 
 public class InventoryRepository : BaseRepository<InventoryData>, IInventoryRepository
 {
-    public InventoryRepository(ICacheService cacheService) : base(cacheService)
+    public InventoryRepository(IRedisInfrastructureService redisInfrastructureService,
+        ICacheRepository<InventoryData> cacheRepository) : base(redisInfrastructureService, cacheRepository)
     {
     }
     

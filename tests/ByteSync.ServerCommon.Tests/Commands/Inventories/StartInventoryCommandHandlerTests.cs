@@ -22,7 +22,7 @@ public class StartInventoryCommandHandlerTests
     private IInventoryRepository _mockInventoryRepository;
     private ISharedFilesService _mockSharedFilesService;
     private IInvokeClientsService _mockInvokeClientsService;
-    private ICacheService _mockCacheService;
+    private IRedisInfrastructureService _mockRedisInfrastructureService;
     private ILogger<StartInventoryCommandHandler> _mockLogger;
     
     private StartInventoryCommandHandler _startInventoryCommandHandler;
@@ -39,11 +39,11 @@ public class StartInventoryCommandHandlerTests
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
         _mockSharedFilesService = A.Fake<ISharedFilesService>(options => options.Strict());
         _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
-        _mockCacheService = A.Fake<ICacheService>();
+        _mockRedisInfrastructureService = A.Fake<IRedisInfrastructureService>();
         _mockLogger = A.Fake<ILogger<StartInventoryCommandHandler>>();
         
         _startInventoryCommandHandler = new StartInventoryCommandHandler(_mockInventoryRepository, _mockCloudSessionsRepository, _mockSharedFilesService, 
-            _mockInvokeClientsService, _mockCacheService, _mockLogger);
+            _mockInvokeClientsService, _mockRedisInfrastructureService, _mockLogger);
     }
     
     [Test]

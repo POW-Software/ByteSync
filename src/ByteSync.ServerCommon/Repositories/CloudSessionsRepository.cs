@@ -11,14 +11,17 @@ namespace ByteSync.ServerCommon.Repositories;
 
 public class CloudSessionsRepository : BaseRepository<CloudSessionData>, ICloudSessionsRepository
 {
-    public CloudSessionsRepository(ICacheService cacheService) : base(cacheService)
-    {
+    private readonly IRedisInfrastructureService _redisInfrastructureService;
 
+    public CloudSessionsRepository(IRedisInfrastructureService redisInfrastructureService,
+        ICacheRepository<CloudSessionData> cacheRepository) : base(redisInfrastructureService, cacheRepository)
+    {
+        _redisInfrastructureService = redisInfrastructureService;
     }
     
     private CacheKey ComputeSessionCacheKey(CloudSessionData cloudSessionData)
     {
-        return _cacheService.ComputeCacheKey(EntityType, cloudSessionData.SessionId);
+        return _redisInfrastructureService.ComputeCacheKey(EntityType, cloudSessionData.SessionId);
     }
     
     public override EntityType EntityType => EntityType.Session;
@@ -51,12 +54,12 @@ public class CloudSessionsRepository : BaseRepository<CloudSessionData>, ICloudS
             cloudSessionData.SessionId = generateSessionIdHandler.Invoke();
         
             var cacheKey = ComputeSessionCacheKey(cloudSessionData);
-            await using var redisLock = await _cacheService.AcquireLockAsync(cacheKey);
+            await using var redisLock = await _redisInfrastructureService.AcquireLockAsync(cacheKey);
             
-            string? serializedElement = await _cacheService.GetDatabase().StringGetAsync(cacheKey.Value);
+            string? serializedElement = await _redisInfrastructureService.GetDatabase().StringGetAsync(cacheKey.Value);
             if (serializedElement == null || serializedElement.IsEmpty())
             {
-                await SetElement(cacheKey, cloudSessionData, transaction);
+                await Save(cacheKey, cloudSessionData, transaction);
                 isNewSessionOk = true;
             }
         }

@@ -8,18 +8,22 @@ namespace ByteSync.ServerCommon.Repositories;
 
 public class LobbyRepository : BaseRepository<Lobby>, ILobbyRepository
 {
-    public LobbyRepository(ICacheService cacheService) : base(cacheService)
+    private readonly IRedisInfrastructureService _redisInfrastructureService;
+
+    public LobbyRepository(IRedisInfrastructureService redisInfrastructureService,
+        ICacheRepository<Lobby> cacheRepository) : base(redisInfrastructureService, cacheRepository)
     {
+        _redisInfrastructureService = redisInfrastructureService;
     }
     
     public override EntityType EntityType { get; } = EntityType.Lobby;
 
     public async Task<UpdateEntityResult<Lobby>> QuitLobby(string lobbyId, string clientInstanceId, ITransaction transaction)
     {
-        var cacheKey = _cacheService.ComputeCacheKey(EntityType, lobbyId);
-        await using var redisLock = await _cacheService.AcquireLockAsync(cacheKey);
+        var cacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType, lobbyId);
+        await using var redisLock = await _redisInfrastructureService.AcquireLockAsync(cacheKey);
 
-        var lobby = await GetCachedElement(cacheKey);
+        var lobby = await Get(cacheKey);
 
         bool updateLobby = false;
         bool deleteLobby = false;
@@ -47,7 +51,7 @@ public class LobbyRepository : BaseRepository<Lobby>, ILobbyRepository
         }
         else if (updateLobby)
         {
-            return await SetElement(cacheKey, lobby!, transaction);
+            return await Save(cacheKey, lobby!, transaction);
         }
         else
         {

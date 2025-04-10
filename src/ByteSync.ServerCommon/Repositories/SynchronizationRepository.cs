@@ -9,7 +9,8 @@ public class SynchronizationRepository : BaseRepository<SynchronizationEntity>, 
 {
     private readonly IActionsGroupDefinitionsRepository _actionsGroupDefinitionsRepository;
 
-    public SynchronizationRepository(ICacheService cacheService, IActionsGroupDefinitionsRepository actionsGroupDefinitionsRepository) : base(cacheService)
+    public SynchronizationRepository(IRedisInfrastructureService redisInfrastructureService, ICacheRepository<SynchronizationEntity> cacheRepository,
+        IActionsGroupDefinitionsRepository actionsGroupDefinitionsRepository) : base(redisInfrastructureService, cacheRepository)
     {
         _actionsGroupDefinitionsRepository = actionsGroupDefinitionsRepository;
     }

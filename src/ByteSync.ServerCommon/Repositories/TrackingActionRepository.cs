@@ -1,5 +1,4 @@
-﻿using ByteSync.Common.Business.Actions;
-using ByteSync.ServerCommon.Business.Repositories;
+﻿using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
@@ -10,16 +9,16 @@ namespace ByteSync.ServerCommon.Repositories;
 
 public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, ITrackingActionRepository
 {
-    private readonly IActionsGroupDefinitionsRepository _actionsGroupDefinitionsRepository;
+    private readonly IRedisInfrastructureService _redisInfrastructureService;
     private readonly ISynchronizationRepository _synchronizationRepository;
     private readonly ITrackingActionEntityFactory _trackingActionEntityFactory;
     private readonly ILogger<TrackingActionRepository> _logger;
-
-    public TrackingActionRepository(ICacheService cacheService, IActionsGroupDefinitionsRepository actionsGroupDefinitionsRepository, 
-        ISynchronizationRepository synchronizationRepository, ITrackingActionEntityFactory trackingActionEntityFactory, 
-        ILogger<TrackingActionRepository> logger) : base(cacheService)
+    
+    public TrackingActionRepository(IRedisInfrastructureService redisInfrastructureService, ISynchronizationRepository synchronizationRepository, 
+        ITrackingActionEntityFactory trackingActionEntityFactory, ICacheRepository<TrackingActionEntity> cacheRepository,
+        ILogger<TrackingActionRepository> logger) : base(redisInfrastructureService, cacheRepository)
     {
-        _actionsGroupDefinitionsRepository = actionsGroupDefinitionsRepository;
+        _redisInfrastructureService = redisInfrastructureService;
         _synchronizationRepository = synchronizationRepository;
         _trackingActionEntityFactory = trackingActionEntityFactory;
         _logger = logger;
@@ -29,9 +28,9 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
     
     public async Task<TrackingActionEntity> GetOrBuild(string sessionId, string actionsGroupId)
     {
-        var cacheKey = _cacheService.ComputeCacheKey(EntityType, $"{sessionId}_{actionsGroupId}");
+        var cacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType, $"{sessionId}_{actionsGroupId}");
         
-        await using var actionsGroupIdLock = await _cacheService.AcquireLockAsync(cacheKey);
+        await using var actionsGroupIdLock = await _redisInfrastructureService.AcquireLockAsync(cacheKey);
 
         return await DoGetOrBuild(sessionId, actionsGroupId, cacheKey);
     }
@@ -53,11 +52,11 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
     public async Task<TrackingActionResult> AddOrUpdate(string sessionId, List<string> actionsGroupIds, 
         Func<TrackingActionEntity, SynchronizationEntity, bool> updateHandler)
     {
-        var synchronizationCacheKey = _cacheService.ComputeCacheKey(EntityType.Synchronization, sessionId);
-        await using var synchronizationLock = await _cacheService.AcquireLockAsync(synchronizationCacheKey);
+        var synchronizationCacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.Synchronization, sessionId);
+        await using var synchronizationLock = await _redisInfrastructureService.AcquireLockAsync(synchronizationCacheKey);
         
         var synchronizationEntity = (await _synchronizationRepository.Get(sessionId))!;
-        var transaction = _cacheService.OpenTransaction();
+        var transaction = _redisInfrastructureService.OpenTransaction();
 
         var locks = new List<IAsyncDisposable>();
         
@@ -70,8 +69,8 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
                 break;
             }
             
-            var cacheKey  = _cacheService.ComputeCacheKey(EntityType, $"{sessionId}_{actionsGroupId}");
-            var actionsGroupIdLock = await _cacheService.AcquireLockAsync(cacheKey); 
+            var cacheKey  = _redisInfrastructureService.ComputeCacheKey(EntityType, $"{sessionId}_{actionsGroupId}");
+            var actionsGroupIdLock = await _redisInfrastructureService.AcquireLockAsync(cacheKey); 
             locks.Add(actionsGroupIdLock);
             
             var trackingActionEntity = await DoGetOrBuild(sessionId, actionsGroupId, cacheKey);
@@ -79,7 +78,7 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
 
             if (isUpdated)
             {
-                await SetElement(cacheKey, trackingActionEntity, transaction);
+                await Save(cacheKey, trackingActionEntity, transaction);
                 trackingActionEntities.Add(trackingActionEntity);
             }
             else
@@ -93,7 +92,7 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
 
         if (areAllUpdated)
         {
-            await _synchronizationRepository.SetElement(synchronizationCacheKey, synchronizationEntity, transaction);
+            await _synchronizationRepository.Save(synchronizationCacheKey, synchronizationEntity, transaction);
             
             await transaction.ExecuteAsync();
         }

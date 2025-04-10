@@ -17,7 +17,7 @@ public class UpdateSessionSettingsCommandHandler : IRequestHandler<UpdateSession
 
 
     public UpdateSessionSettingsCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IInventoryRepository inventoryRepository, 
-        ISynchronizationRepository synchronizationRepository, ICacheService cacheService, ISessionMemberMapper sessionMemberMapper, 
+        ISynchronizationRepository synchronizationRepository, IRedisInfrastructureService redisInfrastructureService, ISessionMemberMapper sessionMemberMapper, 
         IInvokeClientsService invokeClientsService, ILogger<UpdateSessionSettingsCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;

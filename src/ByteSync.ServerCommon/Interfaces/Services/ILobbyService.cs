@@ -1,5 +1,4 @@
 ﻿using ByteSync.Common.Business.Lobbies;
-using ByteSync.Common.Business.Lobbies.Connections;
 using ByteSync.ServerCommon.Business.Auth;
 
 namespace ByteSync.ServerCommon.Interfaces.Services;

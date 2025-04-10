@@ -14,17 +14,17 @@ public class CreateSessionCommandHandler : IRequestHandler<CreateSessionRequest,
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly IClientsGroupsService _clientsGroupsService;
     private readonly ICloudSessionsService _cloudSessionsService;
-    private readonly ICacheService _cacheService;
+    private readonly IRedisInfrastructureService _redisInfrastructureService;
     private readonly ILogger<CreateSessionCommandHandler> _logger;
 
     public CreateSessionCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IClientsGroupsService clientsGroupsService,
-        IClientsRepository clientsRepository, ICloudSessionsService cloudSessionsService, ICacheService cacheService, 
+        IClientsRepository clientsRepository, ICloudSessionsService cloudSessionsService, IRedisInfrastructureService redisInfrastructureService, 
         ILogger<CreateSessionCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _clientsGroupsService = clientsGroupsService;
         _cloudSessionsService = cloudSessionsService;
-        _cacheService = cacheService;
+        _redisInfrastructureService = redisInfrastructureService;
         _logger = logger;
     }
     
@@ -33,7 +33,7 @@ public class CreateSessionCommandHandler : IRequestHandler<CreateSessionRequest,
         var createCloudSessionParameters = request.CreateCloudSessionParameters;
         var client = request.Client;
         
-        var transaction = _cacheService.OpenTransaction();
+        var transaction = _redisInfrastructureService.OpenTransaction();
         
         CloudSessionData cloudSessionData;
         SessionMemberData creatorData;

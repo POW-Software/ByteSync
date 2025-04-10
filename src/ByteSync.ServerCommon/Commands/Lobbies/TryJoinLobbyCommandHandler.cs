@@ -19,19 +19,19 @@ public class TryJoinLobbyCommandHandler : IRequestHandler<TryJoinLobbyRequest, J
     private readonly IInvokeClientsService _invokeClientsService;
     private readonly IClientsGroupsService _clientsGroupsService;
     private readonly ILobbyFactory _lobbyFactory;
-    private readonly ICacheService _cacheService;
+    private readonly IRedisInfrastructureService _redisInfrastructureService;
     private readonly ILogger<TryJoinLobbyCommandHandler> _logger;
 
     public TryJoinLobbyCommandHandler(ICloudSessionProfileRepository cloudSessionProfileRepository, ILobbyRepository lobbyRepository, 
         IInvokeClientsService invokeClientsService, IClientsGroupsService clientsGroupsService, ILobbyFactory lobbyFactory,
-        ICacheService cacheService, ILogger<TryJoinLobbyCommandHandler> logger)
+        IRedisInfrastructureService redisInfrastructureService, ILogger<TryJoinLobbyCommandHandler> logger)
     {
         _cloudSessionProfileRepository = cloudSessionProfileRepository;
         _lobbyRepository = lobbyRepository;
         _invokeClientsService = invokeClientsService;
         _clientsGroupsService = clientsGroupsService;
         _lobbyFactory = lobbyFactory;
-        _cacheService = cacheService;
+        _redisInfrastructureService = redisInfrastructureService;
         _logger = logger;
     }
     
@@ -43,7 +43,7 @@ public class TryJoinLobbyCommandHandler : IRequestHandler<TryJoinLobbyRequest, J
         JoinLobbyResult? joinLobbyResult = null;
         bool? isConnected = null;
         
-        var transaction = _cacheService.OpenTransaction();
+        var transaction = _redisInfrastructureService.OpenTransaction();
         
         CloudSessionProfileEntity? cloudSessionProfile = null;
 

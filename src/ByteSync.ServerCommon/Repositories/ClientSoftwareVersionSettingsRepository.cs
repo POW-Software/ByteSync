@@ -7,7 +7,8 @@ namespace ByteSync.ServerCommon.Repositories;
 
 public class ClientSoftwareVersionSettingsRepository : BaseRepository<ClientSoftwareVersionSettings>, IClientSoftwareVersionSettingsRepository
 {
-    public ClientSoftwareVersionSettingsRepository(ICacheService cacheService) : base(cacheService)
+    public ClientSoftwareVersionSettingsRepository(IRedisInfrastructureService redisInfrastructureService, 
+        ICacheRepository<ClientSoftwareVersionSettings> cacheRepository) : base(redisInfrastructureService, cacheRepository)
     {
     }
 

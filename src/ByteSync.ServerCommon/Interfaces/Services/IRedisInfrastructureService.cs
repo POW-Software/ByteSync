@@ -5,7 +5,7 @@ using StackExchange.Redis;
 
 namespace ByteSync.ServerCommon.Interfaces.Services;
 
-public interface ICacheService
+public interface IRedisInfrastructureService
 {
     ITransaction OpenTransaction();
     

@@ -23,6 +23,20 @@ public abstract class BaseElementTypeModule : Module
                 .AsImplementedInterfaces()
                 .AsSelf()
                 .InstancePerLifetimeScope();
+            
+            var genericRepositoryTypes_ = GlobalTestSetup.ByteSyncServerCommonAssembly.GetTypes()
+                .Where(t => t.Name.EndsWith(ElementsType) && t.IsGenericTypeDefinition);
+            
+            var genericRepositoryTypes = GlobalTestSetup.ByteSyncServerCommonAssembly.GetTypes()
+                .Where(t => t.Name.Contains(ElementsType + "`") && t.IsGenericTypeDefinition && !t.IsInterface);
+            
+            foreach (var genericType in genericRepositoryTypes)
+            {
+                builder.RegisterGeneric(genericType)
+                    .AsImplementedInterfaces()
+                    .AsSelf()
+                    .InstancePerLifetimeScope();
+            }
         }
         else
         {
@@ -35,6 +49,47 @@ public abstract class BaseElementTypeModule : Module
                     .As(repositoryInterface)
                     .InstancePerLifetimeScope();
             }
+        }
+
+        /*
+        foreach (var type in SpecificTypes)
+        {
+            // builder.Register(_ => Create.Fake(type))
+            //     .As(type)
+            //     .AsImplementedInterfaces()
+            //     .InstancePerLifetimeScope();
+            
+            // builder.RegisterType(type)
+            //     .AsImplementedInterfaces()
+            //     .InstancePerLifetimeScope();
+            // builder.Register(type)
+            //     .As(type)
+            //     .AsImplementedInterfaces()
+            //     .InstancePerLifetimeScope();
+            
+            
+            if (type.IsGenericTypeDefinition)
+            {
+                // Utiliser RegisterGeneric pour les types génériques ouverts
+                builder.RegisterGeneric(type)
+                    .AsImplementedInterfaces()
+                    .InstancePerLifetimeScope();
+            }
+            else
+            {
+                // Garder RegisterType pour les types concrets
+                builder.RegisterType(type)
+                    .AsImplementedInterfaces()
+                    .InstancePerLifetimeScope();
+            }
+        }*/
+    }
+
+    protected virtual IEnumerable<Type> SpecificTypes
+    {
+        get
+        {
+            return new List<Type>();
         }
     }
 }

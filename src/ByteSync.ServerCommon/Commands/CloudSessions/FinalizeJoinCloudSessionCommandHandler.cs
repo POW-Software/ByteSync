@@ -3,7 +3,6 @@ using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Helpers;
-using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Mappers;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
@@ -19,18 +18,18 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
     private readonly ISessionMemberMapper _sessionMemberMapper;
     private readonly IInvokeClientsService _invokeClientsService;
     private readonly IClientsGroupsService _clientsGroupsService;
-    private readonly ICacheService _cacheService;
+    private readonly IRedisInfrastructureService _redisInfrastructureService;
     private readonly ILogger<FinalizeJoinCloudSessionCommandHandler> _logger;
     
     public FinalizeJoinCloudSessionCommandHandler(ICloudSessionsRepository cloudSessionsRepository, ISessionMemberMapper sessionMemberMapper,
         IInvokeClientsService invokeClientsService, IClientsGroupsService clientsGroupsService, 
-        ICacheService cacheService, ILogger<FinalizeJoinCloudSessionCommandHandler> logger)
+        IRedisInfrastructureService redisInfrastructureService, ILogger<FinalizeJoinCloudSessionCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _invokeClientsService = invokeClientsService;
         _clientsGroupsService = clientsGroupsService;
         _sessionMemberMapper = sessionMemberMapper;
-        _cacheService = cacheService;
+        _redisInfrastructureService = redisInfrastructureService;
         _logger = logger;
     }
     
@@ -42,9 +41,9 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
         FinalizeJoinSessionStatuses? finalizeJoinSessionStatus = null;
         SessionMemberData? joiner = null;
         
-        var transaction = _cacheService.OpenTransaction();
+        var transaction = _redisInfrastructureService.OpenTransaction();
         
-        await using var sessionRedisLock = await _cacheService.AcquireLockAsync(EntityType.Session, parameters.SessionId);
+        await using var sessionRedisLock = await _redisInfrastructureService.AcquireLockAsync(EntityType.Session, parameters.SessionId);
 
         var updateResult = await _cloudSessionsRepository.Update(parameters.SessionId, innerCloudSessionData =>
         {
