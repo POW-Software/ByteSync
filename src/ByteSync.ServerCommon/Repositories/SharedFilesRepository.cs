@@ -45,7 +45,6 @@ public class SharedFilesRepository : BaseRepository<SharedFileData>, ISharedFile
         var sharedFileCacheKey = ComputeSharedFileCacheKey(sharedFileDefinition);
         
         var transaction = _redisInfrastructureService.OpenTransaction();
-        // var transaction = _redisInfrastructureService.GetDatabase();
         
         await using var sessionSharedFilesLock = await _redisInfrastructureService.AcquireLockAsync(sessionSharedFilesKey); 
         await using var sharedFileLock = await _redisInfrastructureService.AcquireLockAsync(sharedFileCacheKey);
@@ -53,7 +52,6 @@ public class SharedFilesRepository : BaseRepository<SharedFileData>, ISharedFile
         var cachedElement = await Get(sharedFileCacheKey); 
         var element = updateHandler.Invoke(cachedElement);
         await Save(sharedFileCacheKey, element, transaction, sessionSharedFilesLock);
-        // await Save(sharedFileCacheKey, element, null, sessionSharedFilesLock);
         _ = transaction.SetAddAsync(sessionSharedFilesKey.Value, sharedFileDefinition.Id);
         
         await transaction.ExecuteAsync();
