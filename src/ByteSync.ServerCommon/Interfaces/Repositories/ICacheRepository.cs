@@ -6,7 +6,7 @@ namespace ByteSync.ServerCommon.Interfaces.Repositories;
 
 public interface ICacheRepository<T> where T : class
 {
-    Task<T?> Get(CacheKey cacheKey, ITransaction? transaction = null);
+    Task<T?> Get(CacheKey cacheKey);
     
     Task<UpdateEntityResult<T>> Save(CacheKey cacheKey, T element, ITransaction? transaction = null, IRedLock? redisLock = null);
     

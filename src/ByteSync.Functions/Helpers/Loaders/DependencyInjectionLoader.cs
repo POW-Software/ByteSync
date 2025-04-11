@@ -25,6 +25,17 @@ public static class DependencyInjectionLoader
             .Where(t => t.Name.EndsWith("Repository"))
             .InstancePerLifetimeScope()
             .AsImplementedInterfaces();
+        
+        var genericRepositoryTypes = executingAssembly.GetTypes()
+            .Where(t => t.Name.Contains("Repository`") && t.IsGenericTypeDefinition && !t.IsInterface);
+            
+        foreach (var genericType in genericRepositoryTypes)
+        {
+            builder.RegisterGeneric(genericType)
+                .AsImplementedInterfaces()
+                .AsSelf()
+                .InstancePerLifetimeScope();
+        }
     
         builder.RegisterAssemblyTypes(executingAssembly)
             .Where(t => t.Name.EndsWith("Service"))

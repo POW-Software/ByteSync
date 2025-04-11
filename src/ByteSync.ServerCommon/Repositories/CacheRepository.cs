@@ -18,9 +18,9 @@ public class CacheRepository<T> : ICacheRepository<T> where T : class
         _redisInfrastructureService = redisInfrastructureService;
     }
 
-    public async Task<T?> Get(CacheKey cacheKey, ITransaction? transaction = null)
+    public async Task<T?> Get(CacheKey cacheKey)
     {
-        IDatabaseAsync database = _redisInfrastructureService.GetDatabase(transaction);
+        IDatabaseAsync database = _redisInfrastructureService.GetDatabase();
         string? serializedElement = await database.StringGetAsync(cacheKey.Value);
 
         if (serializedElement.IsNullOrEmpty())
@@ -59,7 +59,7 @@ public class CacheRepository<T> : ICacheRepository<T> where T : class
         
         try
         {
-            var cachedElement = await Get(cacheKey, transaction);
+            var cachedElement = await Get(cacheKey);
             
             if (cachedElement == null)
             {
@@ -93,7 +93,7 @@ public class CacheRepository<T> : ICacheRepository<T> where T : class
         
         await using var redisLock = await _redisInfrastructureService.AcquireLockAsync(cacheKey);
         
-        var cachedElement = await Get(cacheKey, transaction);
+        var cachedElement = await Get(cacheKey);
         var createdOrUpdatedElement = handler.Invoke(cachedElement);
 
         if (createdOrUpdatedElement == null)
