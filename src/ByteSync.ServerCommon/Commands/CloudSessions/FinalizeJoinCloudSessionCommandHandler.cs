@@ -43,8 +43,6 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
         
         var transaction = _redisInfrastructureService.OpenTransaction();
         
-        await using var sessionRedisLock = await _redisInfrastructureService.AcquireLockAsync(EntityType.Session, parameters.SessionId);
-
         var updateResult = await _cloudSessionsRepository.Update(parameters.SessionId, innerCloudSessionData =>
         {
             if (innerCloudSessionData.IsSessionRemoved)
@@ -99,7 +97,7 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
             {
                 return false;
             }
-        }, transaction, sessionRedisLock);
+        }, transaction);
         
         if (updateResult.IsWaitingForTransaction)
         {

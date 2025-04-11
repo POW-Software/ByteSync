@@ -71,7 +71,11 @@ public class SendDigitalSignaturesCommandHandler : IRequestHandler<SendDigitalSi
                     {
                         foreach (var digitalSignatureCheckInfo in parameters.DigitalSignatureCheckInfos)
                         {
-                            member.AuthCheckClientInstanceIds.Add(digitalSignatureCheckInfo.Recipient);
+                            var recipient = digitalSignatureCheckInfo.Recipient;
+                            if (!member.AuthCheckClientInstanceIds.Contains(recipient))
+                            {
+                                member.AuthCheckClientInstanceIds.Add(recipient);
+                            }
                         }
 
                         return true;
