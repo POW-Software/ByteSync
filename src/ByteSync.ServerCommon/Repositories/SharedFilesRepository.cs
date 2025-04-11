@@ -1,6 +1,7 @@
 ﻿using ByteSync.Common.Business.SharedFiles;
+using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
-using ByteSync.ServerCommon.Exceptions;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 
@@ -8,106 +9,101 @@ namespace ByteSync.ServerCommon.Repositories;
 
 public class SharedFilesRepository : BaseRepository<SharedFileData>, ISharedFilesRepository
 {
-    public SharedFilesRepository(ICacheService cacheService) : base(cacheService)
+    private readonly IRedisInfrastructureService _redisInfrastructureService;
+
+    public SharedFilesRepository(IRedisInfrastructureService redisInfrastructureService, 
+        ICacheRepository<SharedFileData> cacheRepository) : base(redisInfrastructureService, cacheRepository)
     {
+        _redisInfrastructureService = redisInfrastructureService;
     }
     
-    private string ComputeSharedFileCacheKey(SharedFileDefinition sharedFileDefinition)
+    private CacheKey ComputeSharedFileCacheKey(SharedFileDefinition sharedFileDefinition)
     {
         return ComputeSharedFileCacheKey(sharedFileDefinition.Id);
     }
     
-    private string ComputeSharedFileCacheKey(string sharedFileDefinitionId)
+    private CacheKey ComputeSharedFileCacheKey(string sharedFileDefinitionId)
     {
-        return ComputeCacheKey("SharedFile", sharedFileDefinitionId);
+        return _redisInfrastructureService.ComputeCacheKey(EntityType.SharedFile, sharedFileDefinitionId);
     }
     
-    public override string ElementName { get; } = "SharedFile";
+    public override EntityType EntityType { get; } = EntityType.SharedFile;
 
-    private string ComputeSessionSharedFilesKey(SharedFileDefinition sharedFileDefinition)
+    private CacheKey ComputeSessionSharedFilesKey(SharedFileDefinition sharedFileDefinition)
     {
         return ComputeSessionSharedFilesKey(sharedFileDefinition.SessionId);
     }
     
-    private string ComputeSessionSharedFilesKey(string sessionId)
+    private CacheKey ComputeSessionSharedFilesKey(string sessionId)
     {
-        return ComputeCacheKey("SessionSharedFiles", sessionId);
+        return _redisInfrastructureService.ComputeCacheKey(EntityType.SessionSharedFiles, sessionId);
     }
     
     public async Task AddOrUpdate(SharedFileDefinition sharedFileDefinition, Func<SharedFileData?, SharedFileData> updateHandler)
     {
-        string sessionSharedFilesKey = ComputeSessionSharedFilesKey(sharedFileDefinition);
-        string sharedFileCacheKey = ComputeSharedFileCacheKey(sharedFileDefinition);
-
-        var database = _cacheService.GetDatabase();
+        var sessionSharedFilesKey = ComputeSessionSharedFilesKey(sharedFileDefinition);
+        var sharedFileCacheKey = ComputeSharedFileCacheKey(sharedFileDefinition);
         
-        await using var sessionSharedFilesLock = await _cacheService.AcquireLockAsync(sessionSharedFilesKey); 
-        await using var sharedFileLock = await _cacheService.AcquireLockAsync(sharedFileCacheKey);
+        var transaction = _redisInfrastructureService.OpenTransaction();
+        
+        await using var sessionSharedFilesLock = await _redisInfrastructureService.AcquireLockAsync(sessionSharedFilesKey); 
+        await using var sharedFileLock = await _redisInfrastructureService.AcquireLockAsync(sharedFileCacheKey);
 
-        var cachedElement = await GetCachedElement(sharedFileCacheKey); 
+        var cachedElement = await Get(sharedFileCacheKey); 
         var element = updateHandler.Invoke(cachedElement);
-        await SetElement(sharedFileCacheKey, element, database);
-        await database.SetAddAsync(sessionSharedFilesKey, sharedFileDefinition.Id);
+        await Save(sharedFileCacheKey, element, transaction, sessionSharedFilesLock);
+        _ = transaction.SetAddAsync(sessionSharedFilesKey.Value, sharedFileDefinition.Id);
+        
+        await transaction.ExecuteAsync();
     }
 
     public async Task Forget(SharedFileDefinition sharedFileDefinition)
     {
-        string sessionSharedFilesKey = ComputeSessionSharedFilesKey(sharedFileDefinition);
-        string sharedFileCacheKey = ComputeSharedFileCacheKey(sharedFileDefinition);
+        var sessionSharedFilesKey = ComputeSessionSharedFilesKey(sharedFileDefinition);
+        var sharedFileCacheKey = ComputeSharedFileCacheKey(sharedFileDefinition);
 
-        var database = _cacheService.GetDatabase();
+        var transaction = _redisInfrastructureService.OpenTransaction();
         
-        
-        await using var sessionSharedFilesLock = await _cacheService.AcquireLockAsync(sessionSharedFilesKey); 
-        await using var sharedFileLock = await _cacheService.AcquireLockAsync(sharedFileCacheKey);
+        await using var sessionSharedFilesLock = await _redisInfrastructureService.AcquireLockAsync(sessionSharedFilesKey); 
+        await using var sharedFileLock = await _redisInfrastructureService.AcquireLockAsync(sharedFileCacheKey);
 
-        await database.KeyDeleteAsync(sharedFileCacheKey);
-        await database.SetRemoveAsync(sessionSharedFilesKey, sharedFileDefinition.Id);
+        _ = transaction.KeyDeleteAsync(sharedFileCacheKey.Value);
+        _ = transaction.SetRemoveAsync(sessionSharedFilesKey.Value, sharedFileDefinition.Id);
+        
+        await transaction.ExecuteAsync();
     }
     
     public async Task<List<SharedFileData>> Clear(string sessionId)
     {
         List<SharedFileData> result = new List<SharedFileData>();
         
-        string sessionSharedFilesKey = ComputeSessionSharedFilesKey(sessionId);
-
-        var database = _cacheService.GetDatabase();
+        var sessionSharedFilesKey = ComputeSessionSharedFilesKey(sessionId);
         
-        await using var sessionSharedFilesLock = await _cacheService.RedLockFactory.CreateLockAsync(sessionSharedFilesKey, TimeSpan.FromSeconds(30));
+        await using var sessionSharedFilesLock = await _redisInfrastructureService.AcquireLockAsync(sessionSharedFilesKey);
 
-        if (sessionSharedFilesLock.IsAcquired)
+        var database = _redisInfrastructureService.GetDatabase();
+        var redisValues = await database.SetMembersAsync(sessionSharedFilesKey.Value);
+        List<string> sharedFileDefinitionIds = redisValues.Select(value => value.ToString()).ToList();
+
+        var transaction = _redisInfrastructureService.OpenTransaction();
+        foreach (var sharedFileDefinitionId in sharedFileDefinitionIds)
         {
-            var redisValues = await database.SetMembersAsync(sessionSharedFilesKey);
-            List<string> sharedFileDefinitionIds = redisValues.Select(value => value.ToString()).ToList();
+            var sharedFileCacheKey = ComputeSharedFileCacheKey(sharedFileDefinitionId);
+            await using var sharedFileLock = await _redisInfrastructureService.AcquireLockAsync(sharedFileCacheKey);
 
-            foreach (var sharedFileDefinitionId in sharedFileDefinitionIds)
-            {
-                var sharedFileCacheKey = ComputeSharedFileCacheKey(sharedFileDefinitionId);
-                await using var sharedFileLock = await _cacheService.RedLockFactory.CreateLockAsync(sharedFileCacheKey, TimeSpan.FromSeconds(30));
-
-                if (sharedFileLock.IsAcquired)
-                {
-                    var sharedFileData = await GetCachedElement(sharedFileCacheKey);
+            var sharedFileData = await Get(sharedFileCacheKey);
                     
-                    if (sharedFileData != null)
-                    {
-                        result.Add(sharedFileData);
+            if (sharedFileData != null)
+            {
+                result.Add(sharedFileData);
                         
-                        await database.KeyDeleteAsync(sharedFileCacheKey);
-                    }
-                }
-                else
-                {
-                    throw new AcquireRedisLockException(sharedFileCacheKey, sharedFileLock);
-                }
+                _ = transaction.KeyDeleteAsync(sharedFileCacheKey.Value);
             }
+        }
             
-            await database.KeyDeleteAsync(sessionSharedFilesKey);
-        }
-        else
-        {
-            throw new AcquireRedisLockException(sessionSharedFilesKey, sessionSharedFilesLock);
-        }
+        _ = transaction.KeyDeleteAsync(sessionSharedFilesKey.Value);
+        
+        await transaction.ExecuteAsync();
 
         return result;
     }

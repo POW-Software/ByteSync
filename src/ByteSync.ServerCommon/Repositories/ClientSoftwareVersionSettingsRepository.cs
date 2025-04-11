@@ -1,4 +1,5 @@
 ﻿using ByteSync.ServerCommon.Business.Settings;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 
@@ -6,11 +7,12 @@ namespace ByteSync.ServerCommon.Repositories;
 
 public class ClientSoftwareVersionSettingsRepository : BaseRepository<ClientSoftwareVersionSettings>, IClientSoftwareVersionSettingsRepository
 {
-    public ClientSoftwareVersionSettingsRepository(ICacheService cacheService) : base(cacheService)
+    public ClientSoftwareVersionSettingsRepository(IRedisInfrastructureService redisInfrastructureService, 
+        ICacheRepository<ClientSoftwareVersionSettings> cacheRepository) : base(redisInfrastructureService, cacheRepository)
     {
     }
 
-    public override string ElementName => "ClientSoftwareVersionSettings";
+    public override EntityType EntityType => EntityType.ClientSoftwareVersionSettings;
     
     public const string UniqueKey = "Unique";
     

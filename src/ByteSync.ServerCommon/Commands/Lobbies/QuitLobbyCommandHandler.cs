@@ -11,16 +11,16 @@ public class QuitLobbyCommandHandler : IRequestHandler<QuitLobbyRequest, bool>
     private readonly ILobbyRepository _lobbyRepository;
     private readonly IClientsGroupsService _clientsGroupsService;
     private readonly IInvokeClientsService _invokeClientsService;    
-    private readonly ICacheService _cacheService;
+    private readonly IRedisInfrastructureService _redisInfrastructureService;
     private readonly ILogger<QuitLobbyCommandHandler> _logger;
     
     public QuitLobbyCommandHandler(ILobbyRepository lobbyRepository, IClientsGroupsService clientsGroupsService, IInvokeClientsService invokeClientsService,
-        ICacheService cacheService, ILogger<QuitLobbyCommandHandler> logger)
+        IRedisInfrastructureService redisInfrastructureService, ILogger<QuitLobbyCommandHandler> logger)
     {
         _lobbyRepository = lobbyRepository;
         _clientsGroupsService = clientsGroupsService;
         _invokeClientsService = invokeClientsService;
-        _cacheService = cacheService;
+        _redisInfrastructureService = redisInfrastructureService;
         _logger = logger;
     }
     
@@ -29,7 +29,7 @@ public class QuitLobbyCommandHandler : IRequestHandler<QuitLobbyRequest, bool>
         var lobbyId = request.LobbyId;
         var client = request.Client;
 
-        var transaction = _cacheService.OpenTransaction();
+        var transaction = _redisInfrastructureService.OpenTransaction();
 
         var result = await _lobbyRepository.QuitLobby(lobbyId, client.ClientInstanceId, transaction);
         

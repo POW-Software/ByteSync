@@ -2,6 +2,7 @@
 using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
@@ -18,7 +19,7 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly ISharedFilesService _sharedFilesService;
     private readonly IInvokeClientsService _invokeClientsService;
-    private readonly ICacheService _cacheService;
+    private readonly IRedisInfrastructureService _redisInfrastructureService;
     private readonly ILogger<StartInventoryCommandHandler> _logger;
     
     public StartInventoryCommandHandler(
@@ -26,14 +27,14 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
         ICloudSessionsRepository cloudSessionsRepository,
         ISharedFilesService sharedFilesService,
         IInvokeClientsService invokeClientsService,
-        ICacheService cacheService,
+        IRedisInfrastructureService redisInfrastructureService,
         ILogger<StartInventoryCommandHandler> logger)
     {
         _inventoryRepository = inventoryRepository;
         _cloudSessionsRepository = cloudSessionsRepository;
         _sharedFilesService = sharedFilesService;
         _invokeClientsService = invokeClientsService;
-        _cacheService = cacheService;
+        _redisInfrastructureService = redisInfrastructureService;
         _logger = logger;
     }
     
@@ -42,13 +43,11 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
         var sessionId = request.SessionId;
         var client = request.Client;
         
-        await using var sessionRedisLock = await _cacheService.AcquireLockAsync(_cloudSessionsRepository.ComputeCacheKey(_cloudSessionsRepository.ElementName, 
-            sessionId));
+        await using var sessionRedisLock = await _redisInfrastructureService.AcquireLockAsync(EntityType.Session, sessionId);
         
-        await using var inventoryRedisLock = await _cacheService.AcquireLockAsync(_inventoryRepository.ComputeCacheKey(_inventoryRepository.ElementName, 
-            sessionId));
+        await using var inventoryRedisLock = await _redisInfrastructureService.AcquireLockAsync(EntityType.Inventory, sessionId);
         
-        var transaction = _cacheService.OpenTransaction();
+        var transaction = _redisInfrastructureService.OpenTransaction();
         
         UpdateEntityResult<InventoryData>? inventoryUpdateResult = null;
         

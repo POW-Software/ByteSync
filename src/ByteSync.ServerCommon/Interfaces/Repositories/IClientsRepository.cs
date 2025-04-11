@@ -1,6 +1,5 @@
 ﻿using ByteSync.Common.Business.EndPoints;
 using ByteSync.ServerCommon.Business.Auth;
-using StackExchange.Redis;
 
 namespace ByteSync.ServerCommon.Interfaces.Repositories;
 

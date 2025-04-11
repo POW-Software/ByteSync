@@ -6,9 +6,10 @@ namespace ByteSync.ServerCommon.Repositories;
 
 public class CloudSessionProfileRepository : BaseRepository<CloudSessionProfileEntity>, ICloudSessionProfileRepository
 {
-    public CloudSessionProfileRepository(ICacheService cacheService) : base(cacheService)
+    public CloudSessionProfileRepository(IRedisInfrastructureService redisInfrastructureService,
+        ICacheRepository<CloudSessionProfileEntity> cacheRepository) : base(redisInfrastructureService, cacheRepository)
     {
     }
 
-    public override string ElementName { get; } = "CloudSessionProfile";
+    public override EntityType EntityType { get; } = EntityType.CloudSessionProfile;
 }

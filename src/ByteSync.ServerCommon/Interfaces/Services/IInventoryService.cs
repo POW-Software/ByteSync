@@ -1,8 +1,4 @@
-﻿using ByteSync.Common.Business.Inventories;
-using ByteSync.Common.Business.Sessions.Cloud;
-using ByteSync.ServerCommon.Business.Auth;
-
-namespace ByteSync.ServerCommon.Interfaces.Services;
+﻿namespace ByteSync.ServerCommon.Interfaces.Services;
 
 public interface IInventoryService
 {

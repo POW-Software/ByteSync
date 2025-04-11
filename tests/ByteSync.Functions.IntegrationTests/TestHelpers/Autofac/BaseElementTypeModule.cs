@@ -23,6 +23,17 @@ public abstract class BaseElementTypeModule : Module
                 .AsImplementedInterfaces()
                 .AsSelf()
                 .InstancePerLifetimeScope();
+            
+            var genericRepositoryTypes = GlobalTestSetup.ByteSyncServerCommonAssembly.GetTypes()
+                .Where(t => t.Name.Contains(ElementsType + "`") && t.IsGenericTypeDefinition && !t.IsInterface);
+            
+            foreach (var genericType in genericRepositoryTypes)
+            {
+                builder.RegisterGeneric(genericType)
+                    .AsImplementedInterfaces()
+                    .AsSelf()
+                    .InstancePerLifetimeScope();
+            }
         }
         else
         {

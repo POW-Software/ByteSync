@@ -1,10 +1,8 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Common.Business.Sessions.Cloud.Connections;
+﻿using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Business.Trust.Connections;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
-using Serilog;
 
 namespace ByteSync.Services.Communications;
 
@@ -15,28 +13,27 @@ public class DigitalSignaturesChecker : IDigitalSignaturesChecker
     private readonly IDigitalSignaturesRepository _digitalSignaturesRepository;
     private readonly ITrustApiClient _trustApiClient;
     private readonly IDigitalSignatureComputer _digitalSignatureComputer;
+    private readonly ILogger<DigitalSignaturesChecker> _logger;
 
-    public DigitalSignaturesChecker(IEnvironmentService environmentService,
-        IPublicKeysManager publicKeysManager, IDigitalSignaturesRepository digitalSignaturesRepository,
-        ITrustApiClient trustApiClient, IDigitalSignatureComputer digitalSignatureComputer)
+    public DigitalSignaturesChecker(IEnvironmentService environmentService, IPublicKeysManager publicKeysManager, 
+        IDigitalSignaturesRepository digitalSignaturesRepository, ITrustApiClient trustApiClient, IDigitalSignatureComputer digitalSignatureComputer,
+        ILogger<DigitalSignaturesChecker> logger)
     {
         _environmentService = environmentService;
         _publicKeysManager = publicKeysManager;
         _digitalSignaturesRepository = digitalSignaturesRepository;
         _trustApiClient = trustApiClient;
         _digitalSignatureComputer = digitalSignatureComputer;
+        _logger = logger;
     }
     
     public async Task<bool> CheckExistingMembersDigitalSignatures(string dataId, ICollection<string> clientInstanceIds)
     {
-        // Tout le monde est trusté, on fait un Check Auth
         var signatureCheckInfos = new List<DigitalSignatureCheckInfo>();
-
-        // On enlève, au cas où, le clientInstanceId du client actuel
+        
         clientInstanceIds.Remove(_environmentService.ClientInstanceId);
         foreach (var memberInstanceId in clientInstanceIds)
         {
-            // On calcule la signature d'authentification
             var digitalSignatureCheckInfo = _digitalSignatureComputer
                 .BuildDigitalSignatureCheckInfo(dataId, memberInstanceId, true);
 
@@ -75,7 +72,7 @@ public class DigitalSignaturesChecker : IDigitalSignaturesChecker
 
         if (isDataOK)
         {
-            Log.Information("Digital Signature successfully checked for Client {ClientInstanceId} with Public Key {@PublicKeyInfo}", 
+            _logger.LogInformation("Digital Signature successfully checked for Client {ClientInstanceId} with Public Key {@PublicKeyInfo}", 
                 digitalSignatureCheckInfo.Issuer, otherPartyPublicKeyInfo);
             
             await _digitalSignaturesRepository.SetDigitalSignatureChecked(digitalSignatureCheckInfo.DataId, digitalSignatureCheckInfo.Issuer);
@@ -108,17 +105,7 @@ public class DigitalSignaturesChecker : IDigitalSignaturesChecker
         }
         else
         {
-            Log.Warning("Digital Signature check failed for Client {ClientInstanceId}", digitalSignatureCheckInfo.Issuer);
+            _logger.LogWarning("Digital Signature check failed for Client {ClientInstanceId}", digitalSignatureCheckInfo.Issuer);
         }
     }
-    
-    // private void LogUnknownSessionReceived(string? sessionId, [CallerMemberName] string caller = "")
-    // {
-    //     if (caller.IsNullOrEmpty())
-    //     {
-    //         caller = "UnknownCaller";
-    //     }
-    //
-    //     Log.Error("DigitalSignaturesChecker.{caller}: unknown sessionId received ({sessionId})", caller, sessionId);
-    // }
 }

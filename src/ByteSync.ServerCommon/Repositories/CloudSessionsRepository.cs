@@ -1,6 +1,8 @@
 ﻿using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Auth;
+using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using StackExchange.Redis;
@@ -9,17 +11,20 @@ namespace ByteSync.ServerCommon.Repositories;
 
 public class CloudSessionsRepository : BaseRepository<CloudSessionData>, ICloudSessionsRepository
 {
-    public CloudSessionsRepository(ICacheService cacheService) : base(cacheService)
-    {
+    private readonly IRedisInfrastructureService _redisInfrastructureService;
 
-    }
-    
-    private string ComputeSessionCacheKey(CloudSessionData cloudSessionData)
+    public CloudSessionsRepository(IRedisInfrastructureService redisInfrastructureService,
+        ICacheRepository<CloudSessionData> cacheRepository) : base(redisInfrastructureService, cacheRepository)
     {
-        return ComputeCacheKey("Session", cloudSessionData.SessionId);
+        _redisInfrastructureService = redisInfrastructureService;
     }
     
-    public override string ElementName => "Session";
+    private CacheKey ComputeSessionCacheKey(CloudSessionData cloudSessionData)
+    {
+        return _redisInfrastructureService.ComputeCacheKey(EntityType, cloudSessionData.SessionId);
+    }
+    
+    public override EntityType EntityType => EntityType.Session;
 
     public Task<SessionMemberData?> GetSessionMember(string sessionId, Client client)
     {
@@ -49,12 +54,12 @@ public class CloudSessionsRepository : BaseRepository<CloudSessionData>, ICloudS
             cloudSessionData.SessionId = generateSessionIdHandler.Invoke();
         
             var cacheKey = ComputeSessionCacheKey(cloudSessionData);
-            await using var redisLock = await _cacheService.AcquireLockAsync(cacheKey);
+            await using var redisLock = await _redisInfrastructureService.AcquireLockAsync(cacheKey);
             
-            string? serializedElement = await _cacheService.GetDatabase().StringGetAsync(cacheKey);
+            string? serializedElement = await _redisInfrastructureService.GetDatabase().StringGetAsync(cacheKey.Value);
             if (serializedElement == null || serializedElement.IsEmpty())
             {
-                await SetElement(cacheKey, cloudSessionData, transaction);
+                await Save(cacheKey, cloudSessionData, transaction, redisLock);
                 isNewSessionOk = true;
             }
         }

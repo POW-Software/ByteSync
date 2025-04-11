@@ -14,19 +14,19 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly IInventoryRepository _inventoryRepository;
     private readonly ISynchronizationRepository _synchronizationRepository;
-    private readonly ICacheService _cacheService;
+    private readonly IRedisInfrastructureService _redisInfrastructureService;
     private readonly ISessionMemberMapper _sessionMemberMapper;
     private readonly IClientsGroupsService _clientsGroupsService;
     private readonly IInvokeClientsService _invokeClientsService;
 
     public QuitSessionCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IInventoryRepository inventoryRepository,
-        ISynchronizationRepository synchronizationRepository, ICacheService cacheService, ISessionMemberMapper sessionMemberMapper,
+        ISynchronizationRepository synchronizationRepository, IRedisInfrastructureService redisInfrastructureService, ISessionMemberMapper sessionMemberMapper,
         IClientsGroupsService clientsGroupsService, IInvokeClientsService invokeClientsService)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _inventoryRepository = inventoryRepository;
         _synchronizationRepository = synchronizationRepository;
-        _cacheService = cacheService;
+        _redisInfrastructureService = redisInfrastructureService;
         _sessionMemberMapper = sessionMemberMapper;
         _clientsGroupsService = clientsGroupsService;
         _invokeClientsService = invokeClientsService;
@@ -37,7 +37,7 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
         CloudSessionData? innerCloudSessionData = null;
         SessionMemberData? innerQuitter = null;
 
-        var transaction = _cacheService.OpenTransaction();
+        var transaction = _redisInfrastructureService.OpenTransaction();
 
         var updateSessionResult = await _cloudSessionsRepository.Update(request.SessionId, cloudSessionData =>
         {

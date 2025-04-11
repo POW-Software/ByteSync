@@ -1,5 +1,8 @@
-﻿using ByteSync.ServerCommon.Business.Settings;
+﻿using ByteSync.ServerCommon.Business.Repositories;
+using ByteSync.ServerCommon.Business.Settings;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Exceptions;
+using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,15 +13,17 @@ using StackExchange.Redis;
 
 namespace ByteSync.ServerCommon.Services;
 
-public class CacheService : ICacheService
+public class RedisInfrastructureService : IRedisInfrastructureService
 {
     private readonly RedisSettings _redisSettings;
+    private readonly ICacheKeyFactory _cacheKeyFactory;
     private readonly ConnectionMultiplexer _connectionMultiplexer;
     private readonly RedLockFactory _redLockFactory;
 
-    public CacheService(IOptions<RedisSettings> redisSettings, ILoggerFactory loggerFactory)
+    public RedisInfrastructureService(IOptions<RedisSettings> redisSettings, ICacheKeyFactory cacheKeyFactory, ILoggerFactory loggerFactory)
     {
         _redisSettings = redisSettings.Value;
+        _cacheKeyFactory = cacheKeyFactory;
         
         _connectionMultiplexer = ConnectionMultiplexer.Connect(_redisSettings.ConnectionString);
 
@@ -30,16 +35,6 @@ public class CacheService : ICacheService
         RedLockRetryConfiguration redLockRetryConfiguration = new RedLockRetryConfiguration(5, 500);
         _redLockFactory = RedLockFactory.Create(multiplexers, redLockRetryConfiguration, loggerFactory);
     }
-    
-    public RedLockFactory RedLockFactory
-    {
-        get
-        {
-            return _redLockFactory;
-        }
-    }
-
-    public string Prefix => _redisSettings.Prefix;
 
     public ITransaction OpenTransaction()
     {
@@ -58,9 +53,16 @@ public class CacheService : ICacheService
         return database;
     }
 
-    public async Task<IRedLock> AcquireLockAsync(string key)
+    public async Task<IRedLock> AcquireLockAsync(EntityType entityType, string entityId)
     {
-        var redisLock = await _redLockFactory.CreateLockAsync(key, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(1));
+        var cacheKey = ComputeCacheKey(entityType, entityId);
+        
+        return await AcquireLockAsync(cacheKey);
+    }
+
+    public async Task<IRedLock> AcquireLockAsync(CacheKey cacheKey)
+    {
+        var redisLock = await _redLockFactory.CreateLockAsync(cacheKey.Value, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(1));
 
         if (redisLock.IsAcquired)
         {
@@ -68,7 +70,14 @@ public class CacheService : ICacheService
         }
         else
         {
-            throw new AcquireRedisLockException(key, redisLock);
+            throw new AcquireRedisLockException(cacheKey.Value, redisLock);
         }
+    }
+
+    public CacheKey ComputeCacheKey(EntityType entityType, string entityId)
+    {
+        CacheKey cacheKey = _cacheKeyFactory.Create(entityType, entityId);
+
+        return cacheKey;
     }
 }

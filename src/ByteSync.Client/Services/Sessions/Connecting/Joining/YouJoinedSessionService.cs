@@ -7,12 +7,10 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Repositories;
-using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ByteSync.Interfaces.Services.Sessions.Connecting.Joining;
-using Serilog;
 
-namespace ByteSync.Services.Sessions.Connecting;
+namespace ByteSync.Services.Sessions.Connecting.Joining;
 
 public class YouJoinedSessionService : IYouJoinedSessionService
 {
@@ -23,8 +21,8 @@ public class YouJoinedSessionService : IYouJoinedSessionService
     private readonly IDataEncrypter _dataEncrypter;
     private readonly ICloudSessionApiClient _cloudSessionApiClient;
     private readonly IPublicKeysManager _publicKeysManager;
-    private readonly ISessionService _sessionService;
     private readonly IAfterJoinSessionService _afterJoinSessionService;
+    private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
     private readonly ILogger<YouJoinedSessionService> _logger;
     
     private const string UNKNOWN_RECEIVED_SESSION_ID = "unknown received sessionId {sessionId}";
@@ -32,8 +30,8 @@ public class YouJoinedSessionService : IYouJoinedSessionService
 
     public YouJoinedSessionService(ICloudSessionConnectionRepository cloudSessionConnectionRepository,
         IEnvironmentService environmentService, IPublicKeysTruster publicKeysTruster, IDigitalSignaturesChecker digitalSignaturesChecker,
-        IDataEncrypter dataEncrypter, ICloudSessionApiClient cloudSessionApiClient, IPublicKeysManager publicKeysManager, ISessionService sessionService,
-        IAfterJoinSessionService afterJoinSessionService, ILogger<YouJoinedSessionService> logger)
+        IDataEncrypter dataEncrypter, ICloudSessionApiClient cloudSessionApiClient, IPublicKeysManager publicKeysManager, 
+        IAfterJoinSessionService afterJoinSessionService, ICloudSessionConnectionService cloudSessionConnectionService, ILogger<YouJoinedSessionService> logger)
     {
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         _environmentService = environmentService;
@@ -42,8 +40,8 @@ public class YouJoinedSessionService : IYouJoinedSessionService
         _dataEncrypter = dataEncrypter;
         _cloudSessionApiClient = cloudSessionApiClient;
         _publicKeysManager = publicKeysManager;
-        _sessionService = sessionService;
         _afterJoinSessionService = afterJoinSessionService;
+        _cloudSessionConnectionService = cloudSessionConnectionService;
         _logger = logger;
     }
     
@@ -138,24 +136,26 @@ public class YouJoinedSessionService : IYouJoinedSessionService
             var lobbySessionDetails = await _cloudSessionConnectionRepository
                 .GetTempLobbySessionDetails(cloudSessionResult.CloudSession.SessionId);
             
-            await _afterJoinSessionService.Process(
-                new AfterJoinSessionRequest(cloudSessionResult, lobbySessionDetails, false));
-            
+            var afterJoinSessionRequest = new AfterJoinSessionRequest(cloudSessionResult, lobbySessionDetails, false);
+            await _afterJoinSessionService.Process(afterJoinSessionRequest);
             
             await _cloudSessionConnectionRepository.SetJoinSessionResultReceived(cloudSessionResult.CloudSession.SessionId);
             
             _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.InSession);
-
-            // ReSharper disable once PossibleNullReferenceException
-            Log.Information("JoinSession: {CloudSession}", cloudSessionResult.SessionId);
+            
+            _logger.LogInformation("JoinSession: {CloudSession}", cloudSessionResult.SessionId);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "OnYouJoinedSession");
+            _logger.LogError(ex, "OnYouJoinedSession");
             
-            _sessionService.ClearCloudSession();
+            var joinSessionError = new JoinSessionError
+            {
+                Exception = ex,
+                Status = JoinSessionStatus.UnexpectedError
+            };
             
-            _cloudSessionConnectionRepository.SetConnectionStatus(SessionConnectionStatus.NoSession);
+            await _cloudSessionConnectionService.OnJoinSessionError(joinSessionError);
         }
     }
 }

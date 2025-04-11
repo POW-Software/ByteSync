@@ -20,7 +20,7 @@ public class CreateSessionCommandHandlerTests
     private IClientsGroupsService _mockClientsGroupsService;
     private IClientsRepository _mockClientsRepository;
     private ICloudSessionsService _mockCloudSessionsService;
-    private ICacheService _mockCacheService;
+    private IRedisInfrastructureService _mockRedisInfrastructureService;
     private ILogger<CreateSessionCommandHandler> _mockLogger;
     private ITransaction _mockTransaction;
     private CreateSessionCommandHandler _createSessionCommandHandler;
@@ -32,18 +32,18 @@ public class CreateSessionCommandHandlerTests
         _mockClientsGroupsService = A.Fake<IClientsGroupsService>();
         _mockClientsRepository = A.Fake<IClientsRepository>();
         _mockCloudSessionsService = A.Fake<ICloudSessionsService>();
-        _mockCacheService = A.Fake<ICacheService>();
+        _mockRedisInfrastructureService = A.Fake<IRedisInfrastructureService>();
         _mockLogger = A.Fake<ILogger<CreateSessionCommandHandler>>();
         _mockTransaction = A.Fake<ITransaction>();
 
-        A.CallTo(() => _mockCacheService.OpenTransaction()).Returns(_mockTransaction);
+        A.CallTo(() => _mockRedisInfrastructureService.OpenTransaction()).Returns(_mockTransaction);
 
         _createSessionCommandHandler = new CreateSessionCommandHandler(
             _mockCloudSessionsRepository,
             _mockClientsGroupsService,
             _mockClientsRepository,
             _mockCloudSessionsService,
-            _mockCacheService,
+            _mockRedisInfrastructureService,
             _mockLogger);
     }
 
