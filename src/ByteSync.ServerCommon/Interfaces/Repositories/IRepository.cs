@@ -11,8 +11,6 @@ public interface IRepository<T>
     
     Task<T?> Get(string key);
     
-    Task<T?> Get(CacheKey cacheKey);
-    
     Task<UpdateEntityResult<T>> AddOrUpdate(string key, Func<T?, T?> handler);
     
     Task<UpdateEntityResult<T>> AddOrUpdate(string key, Func<T?, T?> handler, ITransaction? transaction);
