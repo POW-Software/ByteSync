@@ -21,8 +21,6 @@ public interface IRepository<T>
     
     Task<UpdateEntityResult<T>> UpdateIfExists(string key, Func<T, bool> updateHandler, ITransaction? transaction = null, IRedLock? redisLock = null);
     
-    Task<UpdateEntityResult<T>> Save(CacheKey cacheKey, T element, ITransaction? transaction = null, IRedLock? redisLock = null);
-    
     Task<UpdateEntityResult<T>> Save(string key, T element, ITransaction? transaction = null, IRedLock? redisLock = null);
 
     Task Delete(string key);

@@ -23,6 +23,7 @@ public class TrackingActionRepositoryTests
     private ISynchronizationRepository _synchronizationRepository;
     private ITrackingActionEntityFactory _trackingActionEntityFactory;
     private ICacheRepository<TrackingActionEntity> _cacheRepository;
+    private ICacheRepository<SynchronizationEntity> _synchronizationCacheRepository;
     private ActionsGroupDefinitionsRepository _actionsGroupDefinitionsRepository;
 
     [SetUp]
@@ -43,8 +44,9 @@ public class TrackingActionRepositoryTests
             _actionsGroupDefinitionsRepository);
         _redisInfrastructureService = new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock);
         _cacheRepository = new CacheRepository<TrackingActionEntity>(_redisInfrastructureService);
+        _synchronizationCacheRepository = new CacheRepository<SynchronizationEntity>(_redisInfrastructureService);
         _repository = new TrackingActionRepository(_redisInfrastructureService, _synchronizationRepository, _trackingActionEntityFactory, _cacheRepository, 
-            loggerMock);
+            _synchronizationCacheRepository, loggerMock);
     }
 
     [Test]

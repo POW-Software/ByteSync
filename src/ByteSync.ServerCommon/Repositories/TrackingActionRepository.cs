@@ -13,15 +13,18 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
     private readonly IRedisInfrastructureService _redisInfrastructureService;
     private readonly ISynchronizationRepository _synchronizationRepository;
     private readonly ITrackingActionEntityFactory _trackingActionEntityFactory;
+    private readonly ICacheRepository<SynchronizationEntity> _synchronizationCacheRepository;
     private readonly ILogger<TrackingActionRepository> _logger;
     
     public TrackingActionRepository(IRedisInfrastructureService redisInfrastructureService, ISynchronizationRepository synchronizationRepository, 
         ITrackingActionEntityFactory trackingActionEntityFactory, ICacheRepository<TrackingActionEntity> cacheRepository,
-        ILogger<TrackingActionRepository> logger) : base(redisInfrastructureService, cacheRepository)
+        ICacheRepository<SynchronizationEntity> synchronizationCacheRepository, ILogger<TrackingActionRepository> logger) 
+        : base(redisInfrastructureService, cacheRepository)
     {
         _redisInfrastructureService = redisInfrastructureService;
         _synchronizationRepository = synchronizationRepository;
         _trackingActionEntityFactory = trackingActionEntityFactory;
+        _synchronizationCacheRepository = synchronizationCacheRepository;
         _logger = logger;
     }
 
@@ -98,7 +101,7 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
 
         if (areAllUpdated)
         {
-            await _synchronizationRepository.Save(synchronizationCacheKey, synchronizationEntity, transaction, synchronizationLock);
+            await _synchronizationCacheRepository.Save(synchronizationCacheKey, synchronizationEntity, transaction, synchronizationLock);
             
             await transaction.ExecuteAsync();
         }
