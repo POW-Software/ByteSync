@@ -42,7 +42,7 @@ public class DeleteUpdateBackupSnippetsService : IDeleteUpdateBackupSnippetsServ
 
     private void DeleteSnippets(Regex regex)
     {
-        foreach (var fileSystemInfo in ApplicationBaseDirectory!.GetFileSystemInfos("*", SearchOption.AllDirectories))
+        foreach (var fileSystemInfo in ApplicationBaseDirectory!.GetFileSystemInfos("*", SearchOption.TopDirectoryOnly))
         {
             if (regex.IsMatch(fileSystemInfo.Name))
             {
