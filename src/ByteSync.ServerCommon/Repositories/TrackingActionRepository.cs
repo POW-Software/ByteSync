@@ -4,6 +4,7 @@ using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.Extensions.Logging;
+using RedLockNet;
 
 namespace ByteSync.ServerCommon.Repositories;
 
@@ -32,10 +33,10 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
         
         await using var actionsGroupIdLock = await _redisInfrastructureService.AcquireLockAsync(cacheKey);
 
-        return await DoGetOrBuild(sessionId, actionsGroupId, cacheKey);
+        return await DoGetOrBuild(sessionId, actionsGroupId, cacheKey, actionsGroupIdLock);
     }
 
-    private async Task<TrackingActionEntity> DoGetOrBuild(string sessionId, string actionsGroupId, CacheKey cacheKey)
+    private async Task<TrackingActionEntity> DoGetOrBuild(string sessionId, string actionsGroupId, CacheKey cacheKey, IRedLock actionsGroupIdLock)
     {
         var trackingActionEntity = await Get($"{sessionId}_{actionsGroupId}");
         
@@ -43,7 +44,7 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
         {
             trackingActionEntity = await _trackingActionEntityFactory.Create(sessionId, actionsGroupId);
             
-            await Save(cacheKey, trackingActionEntity);
+            await Save(cacheKey, trackingActionEntity, null, actionsGroupIdLock);
         }
         
         return trackingActionEntity;
@@ -55,7 +56,12 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
         var synchronizationCacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.Synchronization, sessionId);
         await using var synchronizationLock = await _redisInfrastructureService.AcquireLockAsync(synchronizationCacheKey);
         
-        var synchronizationEntity = (await _synchronizationRepository.Get(sessionId))!;
+        var synchronizationEntity = (await _synchronizationRepository.Get(sessionId));
+        if (synchronizationEntity == null)
+        {
+            throw new InvalidOperationException($"SynchronizationEntity for session {sessionId} not found");
+        }
+        
         var transaction = _redisInfrastructureService.OpenTransaction();
 
         var locks = new List<IAsyncDisposable>();
@@ -73,12 +79,12 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
             var actionsGroupIdLock = await _redisInfrastructureService.AcquireLockAsync(cacheKey); 
             locks.Add(actionsGroupIdLock);
             
-            var trackingActionEntity = await DoGetOrBuild(sessionId, actionsGroupId, cacheKey);
+            var trackingActionEntity = await DoGetOrBuild(sessionId, actionsGroupId, cacheKey, actionsGroupIdLock);
             bool isUpdated = updateHandler.Invoke(trackingActionEntity, synchronizationEntity);
 
             if (isUpdated)
             {
-                await Save(cacheKey, trackingActionEntity, transaction);
+                await Save(cacheKey, trackingActionEntity, transaction, actionsGroupIdLock);
                 trackingActionEntities.Add(trackingActionEntity);
             }
             else
@@ -92,7 +98,7 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
 
         if (areAllUpdated)
         {
-            await _synchronizationRepository.Save(synchronizationCacheKey, synchronizationEntity, transaction);
+            await _synchronizationRepository.Save(synchronizationCacheKey, synchronizationEntity, transaction, synchronizationLock);
             
             await transaction.ExecuteAsync();
         }
