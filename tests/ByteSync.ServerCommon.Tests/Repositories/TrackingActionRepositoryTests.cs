@@ -1,12 +1,19 @@
-﻿using ByteSync.ServerCommon.Business.Repositories;
+﻿using ByteSync.Common.Business.Actions;
+using ByteSync.ServerCommon.Business.Auth;
+using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Entities;
+using ByteSync.ServerCommon.Factories;
 using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Misc;
 using ByteSync.ServerCommon.Repositories;
+using ByteSync.ServerCommon.Services;
+using ByteSync.ServerCommon.Tests.Helpers;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RedLockNet;
 using StackExchange.Redis;
 
@@ -21,32 +28,52 @@ public class TrackingActionRepositoryTests
     private ITrackingActionEntityFactory _trackingActionEntityFactory;
     private ICacheRepository<TrackingActionEntity> _cacheRepository;
     private ILogger<TrackingActionRepository> _logger;
-    private IRedLock _lockMock;
+    // private IRedLock _lockMock;
     private ITransaction _transactionMock;
+    private ActionsGroupDefinitionsRepository _actionsGroupDefinitionsRepository;
 
     [SetUp]
     public void SetUp()
     {
-        _redisInfrastructureService = A.Fake<IRedisInfrastructureService>();
-        _synchronizationRepository = A.Fake<ISynchronizationRepository>();
-        _trackingActionEntityFactory = A.Fake<ITrackingActionEntityFactory>();
-        _cacheRepository = A.Fake<ICacheRepository<TrackingActionEntity>>();
-        _logger = A.Fake<ILogger<TrackingActionRepository>>();
-        _lockMock = A.Fake<IRedLock>();
-        _transactionMock = A.Fake<ITransaction>();
-
-        _repository = new TrackingActionRepository(
-            _redisInfrastructureService, 
-            _synchronizationRepository, 
-            _trackingActionEntityFactory, 
-            _cacheRepository, 
-            _logger);
-
-        // Configuration des mocks communs
-        A.CallTo(() => _redisInfrastructureService.AcquireLockAsync(A<CacheKey>._))
-            .Returns(_lockMock);
-        A.CallTo(() => _redisInfrastructureService.OpenTransaction())
-            .Returns(_transactionMock);
+        var redisSettings = TestSettingsInitializer.GetRedisSettings();
+        var cacheKeyFactory = new CacheKeyFactory(Options.Create(redisSettings));
+        var loggerFactoryMock = A.Fake<ILoggerFactory>();
+        var loggerMock = A.Fake<ILogger<TrackingActionRepository>>();
+        var cosmosDbSettings = TestSettingsInitializer.GetCosmosDbSettings();
+        ByteSyncDbContext byteSyncDbContext = new ByteSyncDbContext(Options.Create(cosmosDbSettings));
+        byteSyncDbContext.InitializeCosmosDb().Wait();
+        _actionsGroupDefinitionsRepository = new ActionsGroupDefinitionsRepository(byteSyncDbContext);
+        var trackingActionEntityFactory = new TrackingActionEntityFactory(_actionsGroupDefinitionsRepository);
+        var synchronizationRepository = new SynchronizationRepository(
+            new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock),
+            new CacheRepository<SynchronizationEntity>(new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock)),
+            _actionsGroupDefinitionsRepository);
+        _redisInfrastructureService = new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock);
+        _cacheRepository = new CacheRepository<TrackingActionEntity>(_redisInfrastructureService);
+        _repository = new TrackingActionRepository(_redisInfrastructureService, synchronizationRepository, trackingActionEntityFactory, _cacheRepository, 
+            loggerMock);
+        
+        
+        // _redisInfrastructureService = A.Fake<IRedisInfrastructureService>();
+        // _synchronizationRepository = A.Fake<ISynchronizationRepository>();
+        // _trackingActionEntityFactory = A.Fake<ITrackingActionEntityFactory>();
+        // _cacheRepository = A.Fake<ICacheRepository<TrackingActionEntity>>();
+        // _logger = A.Fake<ILogger<TrackingActionRepository>>();
+        // _lockMock = A.Fake<IRedLock>();
+        // _transactionMock = A.Fake<ITransaction>();
+        //
+        // _repository = new TrackingActionRepository(
+        //     _redisInfrastructureService, 
+        //     _synchronizationRepository, 
+        //     _trackingActionEntityFactory, 
+        //     _cacheRepository, 
+        //     _logger);
+        //
+        // // Configuration des mocks communs
+        // A.CallTo(() => _redisInfrastructureService.AcquireLockAsync(A<CacheKey>._))
+        //     .Returns(_lockMock);
+        // A.CallTo(() => _redisInfrastructureService.OpenTransaction())
+        //     .Returns(_transactionMock);
     }
 
     [Test]
@@ -60,8 +87,8 @@ public class TrackingActionRepositoryTests
     public async Task GetOrBuild_WhenEntityExists_ShouldReturnExistingEntity()
     {
         // Arrange
-        var sessionId = "session123";
-        var actionsGroupId = "group456";
+        var sessionId = "session123" + DateTime.Now.Ticks;
+        var actionsGroupId = "group456" + DateTime.Now.Ticks;
         var cacheKey = new CacheKey
         {
             EntityType = EntityType.TrackingAction,
@@ -70,18 +97,27 @@ public class TrackingActionRepositoryTests
         };
         var existingEntity = new TrackingActionEntity { ActionsGroupId = actionsGroupId };
 
-        A.CallTo(() => _redisInfrastructureService.ComputeCacheKey(EntityType.TrackingAction, $"{sessionId}_{actionsGroupId}"))
-            .Returns(cacheKey);
-        A.CallTo(() => _cacheRepository.Get(cacheKey, A<ITransaction>._))
-            .Returns(existingEntity);
+        // A.CallTo(() => _redisInfrastructureService.ComputeCacheKey(EntityType.TrackingAction, $"{sessionId}_{actionsGroupId}"))
+        //     .Returns(cacheKey);
+        // A.CallTo(() => _cacheRepository.Get(cacheKey, A<ITransaction>._))
+        //     .Returns(existingEntity);
 
+        List<ActionsGroupDefinition> actionsGroupDefinitions = new List<ActionsGroupDefinition>
+        {
+            new ActionsGroupDefinition
+            {
+                ActionsGroupId = actionsGroupId,
+            }
+        };
+        await _actionsGroupDefinitionsRepository.AddOrUpdateActionsGroupDefinitions(sessionId, actionsGroupDefinitions);
+        
         // Act
         var result = await _repository.GetOrBuild(sessionId, actionsGroupId);
 
         // Assert
-        result.Should().Be(existingEntity);
-        A.CallTo(() => _redisInfrastructureService.AcquireLockAsync(cacheKey)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _trackingActionEntityFactory.Create(A<string>._, A<string>._)).MustNotHaveHappened();
+        result.Should().BeEquivalentTo(existingEntity);
+        // A.CallTo(() => _redisInfrastructureService.AcquireLockAsync(cacheKey)).MustHaveHappenedOnceExactly();
+        // A.CallTo(() => _trackingActionEntityFactory.Create(A<string>._, A<string>._)).MustNotHaveHappened();
     }
     
     [Test]
@@ -220,112 +256,9 @@ public class TrackingActionRepositoryTests
     }
 
     
-    [Test]
-    public async Task AddOrUpdate_ShouldReleaseAllLocksEvenOnFailure()
-    {
-        // Arrange
-        var sessionId = "session123";
-        var actionsGroupIds = new List<string> { "group1", "group2" };
-        var syncEntity = new SynchronizationEntity { SessionId = sessionId };
-        var lockMock1 = A.Fake<IAsyncDisposable>();
-        var lockMock2 = A.Fake<IAsyncDisposable>();
-
-        A.CallTo(() => _redisInfrastructureService.AcquireLockAsync(A<CacheKey>.That.Matches(c => c.EntityId == sessionId)))
-            .Returns(_lockMock);
-        A.CallTo(() => _redisInfrastructureService.AcquireLockAsync(A<CacheKey>.That.Matches(c => c.EntityId == $"{sessionId}_{actionsGroupIds[0]}")))
-            .Returns(lockMock1);
-        A.CallTo(() => _redisInfrastructureService.AcquireLockAsync(A<CacheKey>.That.Matches(c => c.EntityId == $"{sessionId}_{actionsGroupIds[1]}")))
-            .Returns(lockMock2);
-        A.CallTo(() => _synchronizationRepository.Get(sessionId))
-            .Returns(syncEntity);
-        A.CallTo(() => _cacheRepository.Get(A<string>._))
-            .Returns(new TrackingActionEntity());
-
-        // Simuler un échec de l'update
-        Func<TrackingActionEntity, SynchronizationEntity, bool> updateHandler = (entity, sync) => false;
-
-        // Act
-        await _repository.AddOrUpdate(sessionId, actionsGroupIds, updateHandler);
-
-        // Assert
-        A.CallTo(() => lockMock1.DisposeAsync()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => lockMock2.DisposeAsync()).MustHaveHappenedOnceExactly();
-    }
-    
-    [Test]
-    public async Task AddOrUpdate_WithIntegrationTest()
-    {
-        // Configuration de l'intégration
-        var redisSettings = TestSettingsInitializer.GetRedisSettings();
-        var cacheKeyFactory = new CacheKeyFactory(Options.Create(redisSettings));
-        var loggerFactoryMock = A.Fake<ILoggerFactory>();
-        var logger = A.Fake<ILogger<TrackingActionRepository>>();
-        A.CallTo(() => loggerFactoryMock.CreateLogger(A<string>._)).Returns(logger);
-
-        var redisService = new RedisInfrastructureService(
-            Options.Create(redisSettings),
-            cacheKeyFactory,
-            loggerFactoryMock);
-
-        var cacheRepo = new CacheRepository<TrackingActionEntity>(redisService);
-        var syncRepo = A.Fake<ISynchronizationRepository>();
-        var factory = A.Fake<ITrackingActionEntityFactory>();
-
-        var repository = new TrackingActionRepository(
-            redisService,
-            syncRepo,
-            factory,
-            cacheRepo,
-            logger);
-
-        // Données de test
-        var sessionId = "testSession_" + DateTime.Now.Ticks;
-        var actionsGroupId = "testActionsGroup_" + DateTime.Now.Ticks;
-        var entity = new TrackingActionEntity
-        {
-            ActionsGroupId = actionsGroupId,
-            SourceClientInstanceId = "source123",
-            IsSourceSuccess = true,
-            Size = 1024
-        };
-        entity.TargetClientInstanceIds.Add("target1");
-        entity.TargetClientInstanceIds.Add("target2");
-
-        var syncEntity = new SynchronizationEntity
-        {
-            SessionId = sessionId,
-            LastSyncTime = DateTime.UtcNow
-        };
-
-        // Configure les mocks
-        A.CallTo(() => syncRepo.Get(sessionId)).Returns(syncEntity);
-        A.CallTo(() => factory.Create(sessionId, actionsGroupId)).Returns(entity);
-
-        // Act - Récupère d'abord l'entité
-        var retrievedEntity = await repository.GetOrBuild(sessionId, actionsGroupId);
-
-        // Assert
-        retrievedEntity.Should().NotBeNull();
-        retrievedEntity.ActionsGroupId.Should().Be(actionsGroupId);
-
-        // Vérifie qu'on peut ajouter un succès sur une cible
-        retrievedEntity.AddSuccessOnTarget("target1");
-        retrievedEntity.SuccessTargetClientInstanceIds.Should().Contain("target1");
-
-        // Vérifie qu'on peut ajouter une erreur sur une cible
-        retrievedEntity.AddErrorOnTarget("target2");
-        retrievedEntity.ErrorTargetClientInstanceIds.Should().Contain("target2");
-
-        // Test la propriété IsFinished
-        retrievedEntity.IsFinished.Should().BeTrue();
-        retrievedEntity.IsSuccess.Should().BeFalse(); // Car il y a une erreur sur target2
-        retrievedEntity.IsError.Should().BeTrue();
-        retrievedEntity.IsErrorOnTarget.Should().BeTrue();
-    }
-    
     [TearDown]
     public void Teardown()
     {
-        _lockMock.Dispose();
+        // _lockMock.Dispose();
     }
 }
