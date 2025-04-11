@@ -42,12 +42,19 @@ public class DeleteUpdateBackupSnippetsService : IDeleteUpdateBackupSnippetsServ
 
     private void DeleteSnippets(Regex regex)
     {
-        foreach (var fileSystemInfo in ApplicationBaseDirectory!.GetFileSystemInfos("*", SearchOption.TopDirectoryOnly))
+        try
         {
-            if (regex.IsMatch(fileSystemInfo.Name))
+            foreach (var fileSystemInfo in ApplicationBaseDirectory!.GetFileSystemInfos("*", SearchOption.TopDirectoryOnly))
             {
-                DeleteSnippet(fileSystemInfo);
+                if (regex.IsMatch(fileSystemInfo.Name))
+                {
+                    DeleteSnippet(fileSystemInfo);
+                }
             }
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogError(ex, "Error while deleting update snippets: {Message}", ex.Message);
         }
     }
 
