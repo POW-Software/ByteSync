@@ -7,7 +7,7 @@ using ByteSync.Services.Encryptions;
 using ByteSync.TestsCommon;
 using Moq;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
+using FluentAssertions;
 
 namespace ByteSync.Tests.Services.Encryptions;
 
@@ -35,53 +35,53 @@ public class TestDataEncrypter : AbstractTester
         
         _mockCloudSessionConnectionDataHolder.Setup(x => x.GetAesEncryptionKey()).Returns(Aes.Create().Key);
         
-        // DataEncrypter dataEncrypter = new DataEncrypter(generator.CloudSessionConnectionDataHolder.Object);
         sessionSettings = SessionSettings.BuildDefault();
         
-        // Encryptage 1
+        // Encryption 1
         encryptedSessionSettings1 = _dataEncrypter.EncryptSessionSettings(sessionSettings);
         
-        // Encryptage 2
+        // Encryption 2
         encryptedSessionSettings2 = _dataEncrypter.EncryptSessionSettings(sessionSettings);
         
-        ClassicAssert.IsTrue(encryptedSessionSettings1.Data.Length > 0);
-        ClassicAssert.IsTrue(encryptedSessionSettings1.IV.Length > 0);
+        encryptedSessionSettings1.Data.Length.Should().BeGreaterThan(0);
+        encryptedSessionSettings1.IV.Length.Should().BeGreaterThan(0);
         
-        ClassicAssert.IsTrue(encryptedSessionSettings2.Data.Length > 0);
-        ClassicAssert.IsTrue(encryptedSessionSettings2.IV.Length > 0);
+        encryptedSessionSettings2.Data.Length.Should().BeGreaterThan(0);
+        encryptedSessionSettings2.IV.Length.Should().BeGreaterThan(0);
         
-        ClassicAssert.IsTrue(encryptedSessionSettings1.Data.SequenceEqual(encryptedSessionSettings1.Data));
-        ClassicAssert.IsTrue(encryptedSessionSettings1.IV.SequenceEqual(encryptedSessionSettings1.IV));
+        encryptedSessionSettings1.Data.Should().Equal(encryptedSessionSettings1.Data);
+        encryptedSessionSettings1.IV.Should().Equal(encryptedSessionSettings1.IV);
         
-        ClassicAssert.IsFalse(encryptedSessionSettings1.Data.SequenceEqual(encryptedSessionSettings2.Data));
-        ClassicAssert.IsFalse(encryptedSessionSettings1.IV.SequenceEqual(encryptedSessionSettings2.IV));
+        encryptedSessionSettings1.Data.Should().NotEqual(encryptedSessionSettings2.Data);
+        encryptedSessionSettings1.IV.Should().NotEqual(encryptedSessionSettings2.IV);
         
-        // Décryptage 1
+        // Decryption 1
         sessionSettings1 = _dataEncrypter.DecryptSessionSettings(encryptedSessionSettings1);
         
-        // Décryptage 2
+        // Decryption 2
         sessionSettings2 = _dataEncrypter.DecryptSessionSettings(encryptedSessionSettings2);
         
-        // On teste certaines propriétés
-        ClassicAssert.AreEqual(sessionSettings.Extensions, sessionSettings1.Extensions);
-        ClassicAssert.AreEqual(sessionSettings.AllowedExtensions, sessionSettings1.AllowedExtensions);
-        ClassicAssert.IsTrue(sessionSettings.AllowedExtensions.HaveSameContent(sessionSettings1.AllowedExtensions));
-        ClassicAssert.AreEqual(sessionSettings.AnalysisMode, sessionSettings1.AnalysisMode);
-        ClassicAssert.AreEqual(sessionSettings.DataType, sessionSettings1.DataType);
-        ClassicAssert.AreEqual(sessionSettings.LinkingCase, sessionSettings1.LinkingCase);
-        ClassicAssert.AreEqual(sessionSettings.LinkingKey, sessionSettings1.LinkingKey);
-        ClassicAssert.AreEqual(sessionSettings.ForbiddenExtensions, sessionSettings1.ForbiddenExtensions);
-        ClassicAssert.IsTrue(sessionSettings.ForbiddenExtensions.HaveSameContent(sessionSettings1.ForbiddenExtensions));
+        // Test some properties
+        sessionSettings.Extensions.Should().BeEquivalentTo(sessionSettings1.Extensions);
+        sessionSettings.AllowedExtensions.Should().BeEquivalentTo(sessionSettings1.AllowedExtensions);
+        sessionSettings.AllowedExtensions.HaveSameContent(sessionSettings1.AllowedExtensions).Should().BeTrue();
+        sessionSettings.AnalysisMode.Should().Be(sessionSettings1.AnalysisMode);
+        sessionSettings.DataType.Should().Be(sessionSettings1.DataType);
+        sessionSettings.LinkingCase.Should().Be(sessionSettings1.LinkingCase);
+        sessionSettings.LinkingKey.Should().Be(sessionSettings1.LinkingKey);
+        sessionSettings.ForbiddenExtensions.Should().BeEquivalentTo(sessionSettings1.ForbiddenExtensions);
+        sessionSettings.ForbiddenExtensions.HaveSameContent(sessionSettings1.ForbiddenExtensions).Should().BeTrue();
         
-        // On teste certaines propriétés
-        ClassicAssert.AreEqual(sessionSettings.Extensions, sessionSettings2.Extensions);
-        ClassicAssert.AreEqual(sessionSettings.AllowedExtensions, sessionSettings2.AllowedExtensions);
-        ClassicAssert.IsTrue(sessionSettings.AllowedExtensions.HaveSameContent(sessionSettings2.AllowedExtensions));
-        ClassicAssert.AreEqual(sessionSettings.AnalysisMode, sessionSettings2.AnalysisMode);
-        ClassicAssert.AreEqual(sessionSettings.DataType, sessionSettings2.DataType);
-        ClassicAssert.AreEqual(sessionSettings.LinkingCase, sessionSettings2.LinkingCase);
-        ClassicAssert.AreEqual(sessionSettings.LinkingKey, sessionSettings2.LinkingKey);
-        ClassicAssert.AreEqual(sessionSettings.ForbiddenExtensions, sessionSettings2.ForbiddenExtensions);
-        ClassicAssert.IsTrue(sessionSettings.ForbiddenExtensions.HaveSameContent(sessionSettings2.ForbiddenExtensions));
+        // Test some properties
+        sessionSettings.Extensions.Should().BeEquivalentTo(sessionSettings2.Extensions);
+        sessionSettings.AllowedExtensions.Should().BeEquivalentTo(sessionSettings2.AllowedExtensions);
+        sessionSettings.AllowedExtensions.HaveSameContent(sessionSettings2.AllowedExtensions).Should().BeTrue();
+        sessionSettings.AnalysisMode.Should().Be(sessionSettings2.AnalysisMode);
+        sessionSettings.DataType.Should().Be(sessionSettings2.DataType);
+        sessionSettings.LinkingCase.Should().Be(sessionSettings2.LinkingCase);
+        sessionSettings.LinkingKey.Should().Be(sessionSettings2.LinkingKey);
+        sessionSettings.ForbiddenExtensions.Should().BeEquivalentTo(sessionSettings2.ForbiddenExtensions);
+        sessionSettings.ForbiddenExtensions.HaveSameContent(sessionSettings2.ForbiddenExtensions).Should().BeTrue();
     }
 }
+
