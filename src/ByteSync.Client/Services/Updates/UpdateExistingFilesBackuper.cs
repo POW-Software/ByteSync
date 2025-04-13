@@ -44,7 +44,6 @@ public class UpdateExistingFilesBackuper : IUpdateExistingFilesBackuper
             catch (OperationCanceledException)
             {
                 _logger.LogWarning("UpdateExistingFilesBackuper.BackupExistingFiles: Operation was canceled");
-                // Terminer proprement sans propager l'exception
             }
             catch (Exception ex)
             {
@@ -63,33 +62,39 @@ public class UpdateExistingFilesBackuper : IUpdateExistingFilesBackuper
             if (cancellationToken.IsCancellationRequested)
                 break;
                 
-            if (fileSystemInfo is DirectoryInfo)
+            if (fileSystemInfo is DirectoryInfo directoryInfo)
             {
-                if (!fileSystemInfo.Name.Equals("Contents", StringComparison.InvariantCultureIgnoreCase) &&
-                    !fileSystemInfo.Name.Equals("ByteSync.app", StringComparison.InvariantCultureIgnoreCase))
+                // Only include files specifically named “Contents” or “ByteSync.app”
+                if (directoryInfo.Name.Equals("Contents", StringComparison.InvariantCultureIgnoreCase) ||
+                    directoryInfo.Name.Equals("ByteSync.app", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    result.Add(fileSystemInfo);
+                }
+                else
                 {
                     _logger.LogInformation("UpdateExistingFilesBackuper.GetFilesToBackup: ignored directory {directory}", fileSystemInfo.FullName);
-                    continue;
                 }
             }
-
-            if (fileSystemInfo is FileInfo fi)
+            else if (fileSystemInfo is FileInfo fileInfo)
             {
-                // Skip files if:
-                // - Name doesn't contain ByteSync
-                // - Extension is .log, .dat, .xml, .json or .zip
-                // - Starts with "unins" and ends with .exe
-                if (!fileSystemInfo.Name.Contains("ByteSync", StringComparison.InvariantCultureIgnoreCase) ||
-                    fi.Extension.ToLower().In(".log", ".dat", ".xml", ".json", ".zip") ||
-                    (fi.Name.StartsWith("unins", StringComparison.InvariantCultureIgnoreCase)
-                     && fi.Extension.Equals(".exe", StringComparison.InvariantCultureIgnoreCase)))
+                // Only include files that:
+                // - Contain “ByteSync” in their name
+                // - Do not have a .log, .dat, .xml, .json or .zip extension
+                // - Do not start with “unins” if the extension is .exe
+                bool containsByteSyncName = fileInfo.Name.Contains("ByteSync", StringComparison.InvariantCultureIgnoreCase);
+                bool hasAllowedExtension = !fileInfo.Extension.ToLower().In(".log", ".dat", ".xml", ".json", ".zip");
+                bool isUninstaller = fileInfo.Name.StartsWith("unins", StringComparison.InvariantCultureIgnoreCase) 
+                                     && fileInfo.Extension.Equals(".exe", StringComparison.InvariantCultureIgnoreCase);
+                
+                if (containsByteSyncName && hasAllowedExtension && !isUninstaller)
+                {
+                    result.Add(fileSystemInfo);
+                }
+                else
                 {
                     _logger.LogInformation("UpdateExistingFilesBackuper.GetFilesToBackup: ignored file {file}", fileSystemInfo.FullName);
-                    continue;
                 }
             }
-            
-            result.Add(fileSystemInfo);
         }
         
         return result;
@@ -122,3 +127,4 @@ public class UpdateExistingFilesBackuper : IUpdateExistingFilesBackuper
         BackedUpFileSystemInfos.Add(new Tuple<string, string>(previousFullName, backupDestination));
     }
 }
+
