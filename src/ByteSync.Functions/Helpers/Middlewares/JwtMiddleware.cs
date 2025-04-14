@@ -47,15 +47,20 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
         if (token != null)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            
+
             try
             {
                 var claims = ValidateToken(tokenHandler, token);
 
                 var client = await GetClient(claims);
                 context.Items.Add(AuthConstants.FUNCTION_CONTEXT_CLIENT, client!);
-                    
+
                 await BeginScopeAndGoNext(context, next, client);
+            }
+            catch (SecurityTokenExpiredException ex)
+            {
+                _logger.LogWarning(ex, "Token expired");
+                await HandleTokenError(context, "Invalid token");
             }
             catch (Exception ex)
             {
