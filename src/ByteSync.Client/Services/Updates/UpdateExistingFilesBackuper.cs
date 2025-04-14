@@ -21,76 +21,110 @@ public class UpdateExistingFilesBackuper : IUpdateExistingFilesBackuper
     
     public List<Tuple<string, string>> BackedUpFileSystemInfos { get; }
 
-    public async Task BackupExistingFilesAsync(CancellationToken cancellationToken)
+    public Task BackupExistingFilesAsync(CancellationToken cancellationToken)
     {
-        await Task.Run(() => BackupExistingFiles(cancellationToken));
+        return Task.Run(() => 
+        {
+            try
+            {
+                var applicationBaseDirectoryInfo = new DirectoryInfo(_updateRepository.UpdateData.ApplicationBaseDirectory);
+                var filesToBackup = GetFilesToBackup(applicationBaseDirectoryInfo, cancellationToken);
+                
+                foreach (var fileSystemInfo in filesToBackup)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        _logger.LogWarning("UpdateExistingFilesBackuper.BackupExistingFiles: Cancellation requested");
+                        return;
+                    }
+                    
+                    BackupFileSystemInfo(fileSystemInfo);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning("UpdateExistingFilesBackuper.BackupExistingFiles: Operation was canceled");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "UpdateExistingFilesBackuper.BackupExistingFiles: An error occurred");
+                throw;
+            }
+        }, cancellationToken);
     }
 
-    private void BackupExistingFiles(CancellationToken cancellationToken)
+    private IEnumerable<FileSystemInfo> GetFilesToBackup(DirectoryInfo baseDirectory, CancellationToken cancellationToken)
     {
-        DirectoryInfo applicationBaseDirectoryInfo = new DirectoryInfo(_updateRepository.UpdateData.ApplicationBaseDirectory);
+        var result = new List<FileSystemInfo>();
         
-        foreach (var fileSystemInfo in applicationBaseDirectoryInfo.GetFileSystemInfos())
+        foreach (var fileSystemInfo in baseDirectory.GetFileSystemInfos())
         {
             if (cancellationToken.IsCancellationRequested)
-            {
-                _logger.LogWarning("UpdateExistingFilesBackuper.BackupExistingFiles: Cancellation requested");
+                break;
                 
-                return;
-            }
-            
-            if (fileSystemInfo is DirectoryInfo)
+            if (fileSystemInfo is DirectoryInfo directoryInfo)
             {
-                if (!fileSystemInfo.Name.Equals("Contents", StringComparison.InvariantCultureIgnoreCase) &&
-                    !fileSystemInfo.Name.Equals("ByteSync.app", StringComparison.InvariantCultureIgnoreCase))
+                // Only include files specifically named “Contents” or “ByteSync.app”
+                if (directoryInfo.Name.Equals("Contents", StringComparison.InvariantCultureIgnoreCase) ||
+                    directoryInfo.Name.Equals("ByteSync.app", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    _logger.LogInformation("UpdateExistingFilesBackuper.BackupExistingFiles: ignored directory {directory}", fileSystemInfo.FullName);
-                    
-                    continue;
+                    result.Add(fileSystemInfo);
+                }
+                else
+                {
+                    _logger.LogInformation("UpdateExistingFilesBackuper.GetFilesToBackup: ignored directory {directory}", fileSystemInfo.FullName);
                 }
             }
-
-            if (fileSystemInfo is FileInfo fi)
+            else if (fileSystemInfo is FileInfo fileInfo)
             {
-                // Si l'une des conditions est réunies
-                //  - Le Nom ne contient pas ByteSync
-                //  - Son extension est dans .log, .dat, .xml, .json ou .zip
-                //  - Il commence par unins et finit par .exe
-                // => On l'ignore
-                if (!fileSystemInfo.Name.Contains("ByteSync", StringComparison.InvariantCultureIgnoreCase) ||
-                    fi.Extension.ToLower().In(".log", ".dat", ".xml", ".json", ".zip") ||
-                    (fi.Name.StartsWith("unins", StringComparison.InvariantCultureIgnoreCase)
-                     && fi.Extension.Equals(".exe", StringComparison.InvariantCultureIgnoreCase)))
+                // Only include files that:
+                // - Contain “ByteSync” in their name
+                // - Do not have a .log, .dat, .xml, .json or .zip extension
+                // - Do not start with “unins” if the extension is .exe
+                bool containsByteSyncName = fileInfo.Name.Contains("ByteSync", StringComparison.InvariantCultureIgnoreCase);
+                bool hasAllowedExtension = !fileInfo.Extension.ToLower().In(".log", ".dat", ".xml", ".json", ".zip");
+                bool isUninstaller = fileInfo.Name.StartsWith("unins", StringComparison.InvariantCultureIgnoreCase) 
+                                     && fileInfo.Extension.Equals(".exe", StringComparison.InvariantCultureIgnoreCase);
+                
+                if (containsByteSyncName && hasAllowedExtension && !isUninstaller)
                 {
-                    _logger.LogInformation("UpdateExistingFilesBackuper.BackupExistingFiles: ignored file {file}", fileSystemInfo.FullName);
-                    
-                    continue;
+                    result.Add(fileSystemInfo);
+                }
+                else
+                {
+                    _logger.LogInformation("UpdateExistingFilesBackuper.GetFilesToBackup: ignored file {file}", fileSystemInfo.FullName);
                 }
             }
-            
-            string previousFullName = fileSystemInfo.FullName;
-            
-            int cpt = 0;
-            var backupDestination = $"{fileSystemInfo.FullName}.{UpdateConstants.BAK_EXTENSION}{cpt}";
-            
-            while (File.Exists(backupDestination) || Directory.Exists(backupDestination))
-            {
-                cpt += 1;
-                backupDestination = $"{fileSystemInfo.FullName}.{UpdateConstants.BAK_EXTENSION}{cpt}";
-            }
-            
-            _logger.LogInformation("UpdateExistingFilesBackuper: Renaming {Source} to {Destination}", previousFullName, backupDestination);
-
-            if (fileSystemInfo is FileInfo fileInfo)
-            {
-                fileInfo.MoveTo(backupDestination);
-            }
-            else if (fileSystemInfo is DirectoryInfo directoryInfo)
-            {
-                directoryInfo.MoveTo(backupDestination);
-            }
-
-            BackedUpFileSystemInfos.Add(new Tuple<string, string>(previousFullName, backupDestination));
         }
+        
+        return result;
+    }
+    
+    private void BackupFileSystemInfo(FileSystemInfo fileSystemInfo)
+    {
+        string previousFullName = fileSystemInfo.FullName;
+        
+        int cpt = 0;
+        var backupDestination = $"{fileSystemInfo.FullName}.{UpdateConstants.BAK_EXTENSION}{cpt}";
+        
+        while (File.Exists(backupDestination) || Directory.Exists(backupDestination))
+        {
+            cpt += 1;
+            backupDestination = $"{fileSystemInfo.FullName}.{UpdateConstants.BAK_EXTENSION}{cpt}";
+        }
+        
+        _logger.LogInformation("UpdateExistingFilesBackuper: Renaming {Source} to {Destination}", previousFullName, backupDestination);
+
+        if (fileSystemInfo is FileInfo fileInfo)
+        {
+            fileInfo.MoveTo(backupDestination);
+        }
+        else if (fileSystemInfo is DirectoryInfo directoryInfo)
+        {
+            directoryInfo.MoveTo(backupDestination);
+        }
+
+        BackedUpFileSystemInfos.Add(new Tuple<string, string>(previousFullName, backupDestination));
     }
 }
+

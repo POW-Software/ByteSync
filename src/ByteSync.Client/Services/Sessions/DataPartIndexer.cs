@@ -26,18 +26,19 @@ public class DataPartIndexer : IDataPartIndexer
         
         DataPartsByNames.Clear();
         
+        bool isInventoryWithMultipleParts = inventories.Any(i => i.InventoryParts.Count > 1);
+        
         var cptInventory = 0;
         foreach (var inventory in Inventories)
         {
             var inventoryLetter = ((char)('A' + cptInventory)).ToString();
             
-            if (inventory.InventoryParts.Count == 1)
+            if (!isInventoryWithMultipleParts)
             {
                 var dataPart = new DataPart(inventoryLetter, inventory);
                 DataPartsByNames.Add(dataPart.Name, dataPart);
             }
-
-            if (inventory.InventoryParts.Count > 1)
+            else
             {
                 var cptPart = 1;
                 foreach (var inventoryPart in inventory.InventoryParts)

@@ -34,11 +34,11 @@ public class SynchronizationRule : ISynchronizationRule
         return new List<IAtomicAction>(Actions);
     }
 
-    internal List<AtomicCondition> Conditions { get; set; }
+    public List<AtomicCondition> Conditions { get; set; }
         
-    internal List<AtomicAction> Actions { get; set; }
+    public List<AtomicAction> Actions { get; set; }
         
-    internal void AddAction(AtomicAction atomicAction)
+    public void AddAction(AtomicAction atomicAction)
     {
         atomicAction.SynchronizationRule = this;
             
