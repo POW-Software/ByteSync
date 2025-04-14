@@ -102,13 +102,33 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
         }
     }
 
-    private static async Task<string?> ExtractToken(FunctionContext context)
+    private async Task<string?> ExtractToken(FunctionContext context)
     {
         var requestData = await context.GetHttpRequestDataAsync();
-        var authorizationHeader = requestData?.Headers.FirstOrDefault(p => p.Key.Equals("Authorization"));
-        var token = authorizationHeader?.Value.LastOrDefault();
+        if (requestData == null)
+        {
+            return null;
+        }
+
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (!requestData.Headers.TryGetValues("Authorization", out var authorizationValues) || authorizationValues == null)
+        {
+            return null;
+        }
+
+        var token = authorizationValues.LastOrDefault();
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return null;
+        }
         
-        return token;
+        const string bearerPrefix = "Bearer ";
+        if (token.StartsWith(bearerPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            token = token.Substring(bearerPrefix.Length);
+        }
+
+        return string.IsNullOrWhiteSpace(token) ? null : token;
     }
 
     private TokenValidationParameters BuildTokenValidationParameters()
