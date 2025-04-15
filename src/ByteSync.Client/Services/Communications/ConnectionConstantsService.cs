@@ -49,6 +49,12 @@ class ConnectionConstantsService : IConnectionConstantsService
     {
         if (_environmentService.ExecutionMode == ExecutionMode.Regular)
         {
+            if (_environmentService.Arguments.Contains(RegularArguments.CF_API_URL_STAGING))
+            {
+                _logger.LogWarning("*** Staging API URL is used, but the application is running in production mode ***");
+                return _configuration["StagingUrl"]!;
+            }
+            
             return _configuration["ProductionUrl"]!;
         }
         else
