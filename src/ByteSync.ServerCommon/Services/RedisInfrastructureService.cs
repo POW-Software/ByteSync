@@ -17,15 +17,18 @@ public class RedisInfrastructureService : IRedisInfrastructureService
 {
     private readonly RedisSettings _redisSettings;
     private readonly ICacheKeyFactory _cacheKeyFactory;
-    private readonly ConnectionMultiplexer _connectionMultiplexer;
     private readonly RedLockFactory _redLockFactory;
+    private static string? _cachedConnectionString;
+    private readonly ConnectionMultiplexer _connectionMultiplexer;
 
     public RedisInfrastructureService(IOptions<RedisSettings> redisSettings, ICacheKeyFactory cacheKeyFactory, ILoggerFactory loggerFactory)
     {
         _redisSettings = redisSettings.Value;
         _cacheKeyFactory = cacheKeyFactory;
         
-        _connectionMultiplexer = ConnectionMultiplexer.Connect(_redisSettings.ConnectionString);
+        _cachedConnectionString ??= _redisSettings.ConnectionString;
+
+        _connectionMultiplexer = _lazyMultiplexer.Value;
 
         var multiplexers = new List<RedLockMultiplexer>
         {
@@ -35,6 +38,21 @@ public class RedisInfrastructureService : IRedisInfrastructureService
         RedLockRetryConfiguration redLockRetryConfiguration = new RedLockRetryConfiguration(5, 500);
         _redLockFactory = RedLockFactory.Create(multiplexers, redLockRetryConfiguration, loggerFactory);
     }
+    
+    private static readonly Lazy<ConnectionMultiplexer> _lazyMultiplexer = new(() =>
+    {
+        var options = ConfigurationOptions.Parse(_cachedConnectionString!);
+        
+        options.Ssl = true;
+        options.AbortOnConnectFail = false;
+        
+        if (options.ConnectTimeout < 10000)
+        {
+            options.ConnectTimeout = 10000;
+        }
+        
+        return ConnectionMultiplexer.Connect(options);
+    });
 
     public ITransaction OpenTransaction()
     {

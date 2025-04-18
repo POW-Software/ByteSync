@@ -4,8 +4,8 @@ using ByteSync.Common.Helpers;
 namespace ByteSync.Services.Communications;
 
 /// <summary>
-/// Cette classe permet de déterminer une liste de mots à partir d'un MD5.
-/// Elle se base sur mnemonicode pour associer des mots au MD5.
+/// This class allows you to determine a list of words from an MD5.
+/// It is based on mnemonicode to associate words with MD5.
 /// Infos : https://github.com/singpolyma/mnemonicode // https://github.com/singpolyma/mnemonicode/blob/master/mn_wordlist.c
 /// </summary>
 public class SafetyWordsComputer
@@ -19,7 +19,7 @@ public class SafetyWordsComputer
 
     public string[] Compute(string hexInput)
     {
-        // On contrôle la valeur entrante
+        // The incoming value is checked.
         if (hexInput.IsNullOrEmpty())
         {
             throw new ArgumentOutOfRangeException(nameof(hexInput), "input can not be empty");
@@ -29,17 +29,17 @@ public class SafetyWordsComputer
             throw new ArgumentOutOfRangeException(nameof(hexInput), "wrong input format");
         }
 
-        // On convertit hexInput en decimal
-        // On détermine combien de mots seront nécessaires pour couvrir la 
-        // Puis on le convertit en base 1633 / mnemonicode en effectuant une division
-        // On complète éventuellement avec les mots manquants
-        
-        // Précédemment, on découpait la chaîne en groupes de 4 caractères, mais cela entraînait des sauts lors de la division
-        // et diminuait la qualité de la conversion
+        // Convert hexInput to decimal
+        // We determine how many words will be needed to cover the 
+        // Then we convert it to base 1633 / mnemonicode by performing a division
+        // We fill in any missing words
+
+        // Previously, we split the string into groups of 4 characters, but this caused jumps during division
+        // and reduced the quality of the conversion
 
         var result = new List<string>();
         
-        // On calcule combien de valeurs possibles existent en fonction de la longueur de la chaîne en entrée
+        // We calculate how many possible values exist based on the length of the input string
         var hexaInputPossibleValues = Math.Pow(16, hexInput.Length);
         var coverWordCount = 1;
         while (Math.Pow(AvailableWords.Length, coverWordCount) < hexaInputPossibleValues)
@@ -51,9 +51,9 @@ public class SafetyWordsComputer
         string word;
         while (quotient > AvailableWords.Length)
         {
-            // On procède à des divisions successives pour le changement de base
-            // Le reste est ajouté à la liste, le quotient est ensuite redivisé
-            // On continu tant que "quotient est divisable", c'est à dire tant que "quotient > AvailableWords.Length"
+            // Successive divisions are performed to change the base
+            // The remainder is added to the list, and the quotient is then divided again
+            // This is continued as long as “quotient is divisible,” i.e., as long as “quotient > AvailableWords.Length”
             
             var modulo = (int) (quotient % AvailableWords.Length);
             word = AvailableWords[modulo];
@@ -62,18 +62,18 @@ public class SafetyWordsComputer
             quotient = quotient / AvailableWords.Length;
         }
         
-        // A la fin, on ajoute le dernier quotient à la liste
+        // At the end, add the last quotient to the list
         word = AvailableWords[(int) quotient];
         result.Add(word);
         
-        // Si le nombre en entrée est trop petit, on n'a pas atteint le nombre de mots attendu
-        // On complète
+        // If the number entered is too small, the expected number of words has not been reached
+        // Complete
         while (result.Count < coverWordCount)
         {
             result.Add(AvailableWords[0]);
         }
 
-        // On a ajouté les mots à l'envers, on retourne la liste
+        // We added the words backwards, then reversed the list
         result.Reverse();
 
         return result.ToArray();
