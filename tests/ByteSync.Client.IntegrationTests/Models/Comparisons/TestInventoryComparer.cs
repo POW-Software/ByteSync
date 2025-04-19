@@ -11,6 +11,7 @@ using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
 using ByteSync.Services.Sessions;
 using ByteSync.TestsCommon;
+using FluentAssertions;
 using Moq;
 using NUnit.Framework.Legacy;
 
@@ -61,38 +62,37 @@ public class TestInventoryComparer : IntegrationTest
         sessionSettings.ExcludeHiddenFiles = true;
         sessionSettings.ExcludeSystemFiles = true;
         comparisonResult = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
-        ClassicAssert.AreEqual(0, comparisonResult.ComparisonItems.Count);
+        comparisonResult.ComparisonItems.Should().HaveCount(0);
 
         // Test
         sessionSettings.DataType = DataTypes.Directories;
         comparisonResult = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
-        ClassicAssert.AreEqual(0, comparisonResult.ComparisonItems.Count);
+        comparisonResult.ComparisonItems.Should().HaveCount(0);
             
         // Test
         sessionSettings.DataType = DataTypes.Files;
         comparisonResult = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
-        ClassicAssert.AreEqual(0, comparisonResult.ComparisonItems.Count);
+        comparisonResult.ComparisonItems.Should().HaveCount(0);
             
         // Test
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
         sessionSettings.DataType = DataTypes.FilesDirectories;
         comparisonResult = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
-        ClassicAssert.AreEqual(0, comparisonResult.ComparisonItems.Count);
+        comparisonResult.ComparisonItems.Should().HaveCount(0);
             
         // Test
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
         sessionSettings.DataType = DataTypes.Directories;
         comparisonResult = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
-        ClassicAssert.AreEqual(0, comparisonResult.ComparisonItems.Count);
+        comparisonResult.ComparisonItems.Should().HaveCount(0);
             
         // Test
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
         sessionSettings.DataType = DataTypes.Files;
         comparisonResult = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
-        ClassicAssert.AreEqual(0, comparisonResult.ComparisonItems.Count);
+        comparisonResult.ComparisonItems.Should().HaveCount(0);
     }
         
-    
     [Test]
     public async Task Test_2_Inventories_1_Same_File()
     {
@@ -148,39 +148,35 @@ public class TestInventoryComparer : IntegrationTest
             
         void DoChecksEmpty()
         {
-            ClassicAssert.AreEqual(0, comparisonResult.ComparisonItems.Count);
+            comparisonResult.ComparisonItems.Should().HaveCount(0);
         }
 
         void DoChecks()
         {
-            ClassicAssert.AreEqual(1, comparisonResult.ComparisonItems.Count);
+            comparisonResult.ComparisonItems.Should().HaveCount(1);
             var comparisonItem = comparisonResult.ComparisonItems.Single();
-            ClassicAssert.AreEqual(1, comparisonItem.ContentIdentities.Count);
+            comparisonItem.ContentIdentities.Should().HaveCount(1);
             var contentIdentity = comparisonItem.ContentIdentities.Single();
                 
-            ClassicAssert.AreEqual(null, contentIdentity.Core.SignatureHash);
-            ClassicAssert.AreEqual(8, contentIdentity.Core.Size);
+            contentIdentity.Core.SignatureHash.Should().BeNull();
+            contentIdentity.Core.Size.Should().Be(8);
                 
-            ClassicAssert.AreEqual(2, contentIdentity.FileSystemDescriptions.Count);
-            ClassicAssert.AreEqual(1, contentIdentity.InventoryPartsByLastWriteTimes.Count);
-            ClassicAssert.AreEqual(false, contentIdentity.HasAnalysisError);
+            contentIdentity.FileSystemDescriptions.Should().HaveCount(2);
+            contentIdentity.InventoryPartsByLastWriteTimes.Should().HaveCount(1);
+            contentIdentity.HasAnalysisError.Should().BeFalse();
                 
-            ClassicAssert.AreEqual("file1.txt", comparisonItem.PathIdentity.FileName);
-            ClassicAssert.AreEqual(FileSystemTypes.File, comparisonItem.PathIdentity.FileSystemType);
-            ClassicAssert.AreEqual("/file1.txt", comparisonItem.PathIdentity.LinkingData);
-            ClassicAssert.AreEqual("/file1.txt", comparisonItem.PathIdentity.LinkingKeyValue);
+            comparisonItem.PathIdentity.FileName.Should().Be("file1.txt");
+            comparisonItem.PathIdentity.FileSystemType.Should().Be(FileSystemTypes.File);
+            comparisonItem.PathIdentity.LinkingData.Should().Be("/file1.txt");
+            comparisonItem.PathIdentity.LinkingKeyValue.Should().Be("/file1.txt");
                 
-            // ClassicAssert.AreEqual(true, comparisonItem.ContentRepartition.IsOK);
-            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsSuccessStatus);
-            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsErrorStatus);
-            ClassicAssert.AreEqual(1, comparisonItem.ContentRepartition.FingerPrintGroups.Count);
-            ClassicAssert.AreEqual(1, comparisonItem.ContentRepartition.LastWriteTimeGroups.Count);
-            ClassicAssert.AreEqual(0, comparisonItem.ContentRepartition.MissingInventories.Count);
-            ClassicAssert.AreEqual(0, comparisonItem.ContentRepartition.MissingInventoryParts.Count);
+            comparisonItem.ContentRepartition.FingerPrintGroups.Should().HaveCount(1);
+            comparisonItem.ContentRepartition.LastWriteTimeGroups.Should().HaveCount(1);
+            comparisonItem.ContentRepartition.MissingInventories.Should().BeEmpty();
+            comparisonItem.ContentRepartition.MissingInventoryParts.Should().BeEmpty();
         }
     }
         
-    
     [Test]
     public async Task Test_2_Inventories_1_File_Different()
     {
@@ -209,7 +205,7 @@ public class TestInventoryComparer : IntegrationTest
         // Test
         sessionSettings.DataType = DataTypes.Directories;
         comparisonResult = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
-        ClassicAssert.AreEqual(0, comparisonResult.ComparisonItems.Count);
+        comparisonResult.ComparisonItems.Should().HaveCount(0);
 
         // Test
         sessionSettings.DataType = DataTypes.Files;
@@ -226,7 +222,7 @@ public class TestInventoryComparer : IntegrationTest
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
         sessionSettings.DataType = DataTypes.Directories;
         comparisonResult = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
-        ClassicAssert.AreEqual(0, comparisonResult.ComparisonItems.Count);
+        comparisonResult.ComparisonItems.Should().HaveCount(0);
 
         // Test
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
@@ -236,42 +232,37 @@ public class TestInventoryComparer : IntegrationTest
 
         void DoChecks()
         {
-            ClassicAssert.AreEqual(1, comparisonResult.ComparisonItems.Count);
+            comparisonResult.ComparisonItems.Should().HaveCount(1);
             var comparisonItem = comparisonResult.ComparisonItems.Single();
-            ClassicAssert.AreEqual(2, comparisonItem.ContentIdentities.Count);
+            comparisonItem.ContentIdentities.Should().HaveCount(2);
             var contentIdentityA = comparisonItem.ContentIdentities.Single(ci => ci.IsPresentIn(inventoryDataA.Inventory));
             var contentIdentityB = comparisonItem.ContentIdentities.Single(ci => ci.IsPresentIn(inventoryDataB.Inventory));
 
-            ClassicAssert.IsNotNull(contentIdentityA.Core.SignatureHash);
-            ClassicAssert.IsNotEmpty(contentIdentityA.Core.SignatureHash);
-            ClassicAssert.AreEqual(8, contentIdentityA.Core.Size);
-            ClassicAssert.AreEqual(1, contentIdentityA.FileSystemDescriptions.Count);
-            ClassicAssert.AreEqual(1, contentIdentityA.InventoryPartsByLastWriteTimes.Count);
-            ClassicAssert.AreEqual(false, contentIdentityA.HasAnalysisError);
+            contentIdentityA.Core.SignatureHash.Should().NotBeNull();
+            contentIdentityA.Core.SignatureHash.Should().NotBeEmpty();
+            contentIdentityA.Core.Size.Should().Be(8);
+            contentIdentityA.FileSystemDescriptions.Should().HaveCount(1);
+            contentIdentityA.InventoryPartsByLastWriteTimes.Should().HaveCount(1);
+            contentIdentityA.HasAnalysisError.Should().BeFalse();
 
-            ClassicAssert.IsNotNull(contentIdentityB.Core.SignatureHash);
-            ClassicAssert.IsNotEmpty(contentIdentityB.Core.SignatureHash);
-            ClassicAssert.AreEqual(9, contentIdentityB.Core.Size);
-            ClassicAssert.AreEqual(1, contentIdentityB.FileSystemDescriptions.Count);
-            ClassicAssert.AreEqual(1, contentIdentityB.InventoryPartsByLastWriteTimes.Count);
-            ClassicAssert.AreEqual(false, contentIdentityB.HasAnalysisError);
+            contentIdentityB.Core.SignatureHash.Should().NotBeNull();
+            contentIdentityB.Core.SignatureHash.Should().NotBeEmpty();
+            contentIdentityB.Core.Size.Should().Be(9);
+            contentIdentityB.FileSystemDescriptions.Should().HaveCount(1);
+            contentIdentityB.InventoryPartsByLastWriteTimes.Should().HaveCount(1);
+            contentIdentityB.HasAnalysisError.Should().BeFalse();
 
-            ClassicAssert.AreEqual("file1.txt", comparisonItem.PathIdentity.FileName);
-            ClassicAssert.AreEqual(FileSystemTypes.File, comparisonItem.PathIdentity.FileSystemType);
-            ClassicAssert.AreEqual("/file1.txt", comparisonItem.PathIdentity.LinkingData);
-            ClassicAssert.AreEqual("/file1.txt", comparisonItem.PathIdentity.LinkingKeyValue);
+            comparisonItem.PathIdentity.FileName.Should().Be("file1.txt");
+            comparisonItem.PathIdentity.FileSystemType.Should().Be(FileSystemTypes.File);
+            comparisonItem.PathIdentity.LinkingData.Should().Be("/file1.txt");
+            comparisonItem.PathIdentity.LinkingKeyValue.Should().Be("/file1.txt");
 
-            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsOK);
-            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsSuccessStatus);
-            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsErrorStatus);
-            ClassicAssert.AreEqual(2, comparisonItem.ContentRepartition.FingerPrintGroups.Count);
-            ClassicAssert.IsTrue(comparisonItem.ContentRepartition.LastWriteTimeGroups.Count.In(1, 2));
-            ClassicAssert.AreEqual(0, comparisonItem.ContentRepartition.MissingInventories.Count);
-            ClassicAssert.AreEqual(0, comparisonItem.ContentRepartition.MissingInventoryParts.Count);
+            comparisonItem.ContentRepartition.FingerPrintGroups.Should().HaveCount(2);
+            comparisonItem.ContentRepartition.LastWriteTimeGroups.Count.Should().BeOneOf(1, 2);
+            comparisonItem.ContentRepartition.MissingInventories.Should().BeEmpty();
+            comparisonItem.ContentRepartition.MissingInventoryParts.Should().BeEmpty();
         }
     }
-
-
 
     [Test]
     public async Task Test_2_Inventories_1_Directory()
@@ -306,7 +297,7 @@ public class TestInventoryComparer : IntegrationTest
         // Test
         sessionSettings.DataType = DataTypes.Files;
         comparisonResult = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
-        ClassicAssert.AreEqual(0, comparisonResult.ComparisonItems.Count);
+        comparisonResult.ComparisonItems.Should().HaveCount(0);
 
         // Test
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
@@ -324,32 +315,29 @@ public class TestInventoryComparer : IntegrationTest
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
         sessionSettings.DataType = DataTypes.Files;
         comparisonResult = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
-        ClassicAssert.AreEqual(0, comparisonResult.ComparisonItems.Count);
+        comparisonResult.ComparisonItems.Should().HaveCount(0);
 
         void DoChecks()
         {
-            ClassicAssert.AreEqual(1, comparisonResult.ComparisonItems.Count);
+            comparisonResult.ComparisonItems.Should().HaveCount(1);
             var comparisonItem = comparisonResult.ComparisonItems.Single();
-            ClassicAssert.AreEqual(1, comparisonItem.ContentIdentities.Count);
+            comparisonItem.ContentIdentities.Should().HaveCount(1);
             var contentIdentity = comparisonItem.ContentIdentities.Single();
 
-            ClassicAssert.IsNull(contentIdentity.Core);
-            ClassicAssert.AreEqual(2, contentIdentity.FileSystemDescriptions.Count);
-            ClassicAssert.AreEqual(0, contentIdentity.InventoryPartsByLastWriteTimes.Count);
-            ClassicAssert.AreEqual(false, contentIdentity.HasAnalysisError);
+            contentIdentity.Core.Should().BeNull();
+            contentIdentity.FileSystemDescriptions.Should().HaveCount(2);
+            contentIdentity.InventoryPartsByLastWriteTimes.Should().HaveCount(0);
+            contentIdentity.HasAnalysisError.Should().BeFalse();
 
-            ClassicAssert.AreEqual("Dir1", comparisonItem.PathIdentity.FileName);
-            ClassicAssert.AreEqual(FileSystemTypes.Directory, comparisonItem.PathIdentity.FileSystemType);
-            ClassicAssert.AreEqual("/dir1", comparisonItem.PathIdentity.LinkingData);
-            ClassicAssert.AreEqual("/Dir1", comparisonItem.PathIdentity.LinkingKeyValue);
+            comparisonItem.PathIdentity.FileName.Should().Be("Dir1");
+            comparisonItem.PathIdentity.FileSystemType.Should().Be(FileSystemTypes.Directory);
+            comparisonItem.PathIdentity.LinkingData.Should().Be("/dir1");
+            comparisonItem.PathIdentity.LinkingKeyValue.Should().Be("/Dir1");
 
-            // ClassicAssert.AreEqual(true, comparisonItem.ContentRepartition.IsOK);
-            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsSuccessStatus);
-            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsErrorStatus);
-            ClassicAssert.AreEqual(0, comparisonItem.ContentRepartition.FingerPrintGroups.Count);
-            ClassicAssert.AreEqual(0, comparisonItem.ContentRepartition.LastWriteTimeGroups.Count);
-            ClassicAssert.AreEqual(0, comparisonItem.ContentRepartition.MissingInventories.Count);
-            ClassicAssert.AreEqual(0, comparisonItem.ContentRepartition.MissingInventoryParts.Count);
+            comparisonItem.ContentRepartition.FingerPrintGroups.Should().BeEmpty();
+            comparisonItem.ContentRepartition.LastWriteTimeGroups.Should().BeEmpty();
+            comparisonItem.ContentRepartition.MissingInventories.Should().BeEmpty();
+            comparisonItem.ContentRepartition.MissingInventoryParts.Should().BeEmpty();
         }
     }
 
@@ -389,33 +377,29 @@ public class TestInventoryComparer : IntegrationTest
         sessionSettings.ExcludeSystemFiles = true;
         comparisonResult = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
 
-        ClassicAssert.AreEqual(10, comparisonResult.ComparisonItems.Count);
+        comparisonResult.ComparisonItems.Should().HaveCount(10);
         foreach (var comparisonItem in comparisonResult.ComparisonItems)
         {
-            ClassicAssert.AreEqual(1, comparisonItem.ContentIdentities.Count);
+            comparisonItem.ContentIdentities.Should().HaveCount(1);
             var contentIdentity = comparisonItem.ContentIdentities.Single();
 
-            ClassicAssert.AreEqual(2, contentIdentity.FileSystemDescriptions.Count);
+            contentIdentity.FileSystemDescriptions.Should().HaveCount(2);
             foreach (var fileSystemDescription in contentIdentity.FileSystemDescriptions)
             {
                 var fileDescription = (FileDescription)fileSystemDescription;
 
                 if (analysisMode == AnalysisModes.Smart)
                 {
-                    ClassicAssert.IsNull(fileDescription.SignatureGuid);
+                    fileDescription.SignatureGuid.Should().BeNull();
                 }
                 else
                 {
-                    ClassicAssert.IsTrue(fileDescription.SignatureGuid.IsNotEmpty(true));
+                    fileDescription.SignatureGuid.IsNotEmpty(true).Should().BeTrue();
                 }
             }
-
-            // ClassicAssert.AreEqual(true, comparisonItem.ContentRepartition.IsOK);
-            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsSuccessStatus);
-            // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsErrorStatus);
-
-            ClassicAssert.IsTrue(comparisonItem.PathIdentity.FileName.StartsWith("file_"));
-            ClassicAssert.IsTrue(comparisonItem.PathIdentity.FileName.EndsWith(".txt"));
+            
+            comparisonItem.PathIdentity.FileName.Should().StartWith("file_");
+            comparisonItem.PathIdentity.FileName.Should().EndWith(".txt");
         }
     }
 
