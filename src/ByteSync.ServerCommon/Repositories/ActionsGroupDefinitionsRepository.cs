@@ -9,6 +9,8 @@ namespace ByteSync.ServerCommon.Repositories;
 public class ActionsGroupDefinitionsRepository : IActionsGroupDefinitionsRepository
 {
     private readonly ICosmosDbService _cosmosDbService;
+    
+    private const int TTL_3_DAYS = 3 * 24 * 60 * 60; // 3 days in seconds
 
     public ActionsGroupDefinitionsRepository(ICosmosDbService cosmosDbService)
     {
@@ -41,6 +43,7 @@ public class ActionsGroupDefinitionsRepository : IActionsGroupDefinitionsReposit
                 Source = definition.Source,
                 Targets = definition.Targets,
                 FileSystemType = definition.FileSystemType,
+                TimeToLive = TTL_3_DAYS
             };
 
             var task = container.UpsertItemAsync(entity, new PartitionKey(sessionId))

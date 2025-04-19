@@ -28,4 +28,7 @@ public class ActionsGroupDefinitionEntity
     public bool AppliesOnlySynchronizeDate { get; set; }
     
     public DateTime? LastWriteTimeUtc { get; set; }
+    
+    [JsonProperty(PropertyName = "ttl", NullValueHandling = NullValueHandling.Ignore)]
+    public int? TimeToLive { get; set; }
 }
