@@ -1,10 +1,14 @@
 ﻿using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.Inventories;
+using Newtonsoft.Json;
 
 namespace ByteSync.ServerCommon.Entities;
 
 public class ActionsGroupDefinitionEntity
 {
+    [JsonProperty("id")]
+    public string Id => ActionsGroupDefinitionEntityId;
+    
     public string ActionsGroupDefinitionEntityId { get; set; } = null!;
     
     public string SessionId { get; set; } = null!;

@@ -4,7 +4,7 @@ using DynamicData;
 namespace ByteSync.Repositories;
 
 public abstract class BaseSourceCacheRepository<TObject, TKey> : IBaseSourceCacheRepository<TObject, TKey> 
-    where TKey : notnull 
+    where TKey : notnull where TObject : notnull
 {
     protected BaseSourceCacheRepository()
     {

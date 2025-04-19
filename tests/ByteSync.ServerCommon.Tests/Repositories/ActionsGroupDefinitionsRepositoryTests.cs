@@ -24,7 +24,7 @@ public class ActionsGroupDefinitionsRepositoryTests
         ByteSyncDbContext byteSyncDbContext = new ByteSyncDbContext(Options.Create(cosmosDbSettings));
         await byteSyncDbContext.InitializeCosmosDb();
         
-        var repository = new ActionsGroupDefinitionsRepository(byteSyncDbContext);
+        var repository = new ActionsGroupDefinitionsRepository(byteSyncDbContext, Options.Create(cosmosDbSettings));
 
         string sessionId = "sessionId_" + DateTime.Now.Ticks;
         var actionsGroupId1 = "ActionsGroupId_1_" + DateTime.Now.Ticks;
@@ -75,7 +75,7 @@ public class ActionsGroupDefinitionsRepositoryTests
         ByteSyncDbContext byteSyncDbContext = new ByteSyncDbContext(Options.Create(cosmosDbSettings));
         await byteSyncDbContext.InitializeCosmosDb();
         
-        var repository = new ActionsGroupDefinitionsRepository(byteSyncDbContext);
+        var repository = new ActionsGroupDefinitionsRepository(byteSyncDbContext, Options.Create(cosmosDbSettings));
 
         string sessionId = "sessionId_" + DateTime.Now.Ticks;
         var actionsGroupId1 = "ActionsGroupId_1_" + DateTime.Now.Ticks;

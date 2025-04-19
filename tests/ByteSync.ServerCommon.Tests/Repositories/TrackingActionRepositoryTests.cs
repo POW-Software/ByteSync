@@ -36,7 +36,7 @@ public class TrackingActionRepositoryTests
         var cosmosDbSettings = TestSettingsInitializer.GetCosmosDbSettings();
         ByteSyncDbContext byteSyncDbContext = new ByteSyncDbContext(Options.Create(cosmosDbSettings));
         byteSyncDbContext.InitializeCosmosDb().Wait();
-        _actionsGroupDefinitionsRepository = new ActionsGroupDefinitionsRepository(byteSyncDbContext);
+        _actionsGroupDefinitionsRepository = new ActionsGroupDefinitionsRepository(byteSyncDbContext, Options.Create(cosmosDbSettings));
         _trackingActionEntityFactory = new TrackingActionEntityFactory(_actionsGroupDefinitionsRepository);
         _synchronizationRepository = new SynchronizationRepository(
             new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock),
