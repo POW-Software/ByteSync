@@ -4,7 +4,6 @@ using ByteSync.ServerCommon.Factories;
 using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
-using ByteSync.ServerCommon.Misc;
 using ByteSync.ServerCommon.Repositories;
 using ByteSync.ServerCommon.Services;
 using ByteSync.ServerCommon.Tests.Helpers;
@@ -34,9 +33,9 @@ public class TrackingActionRepositoryTests
         var loggerFactoryMock = A.Fake<ILoggerFactory>();
         var loggerMock = A.Fake<ILogger<TrackingActionRepository>>();
         var cosmosDbSettings = TestSettingsInitializer.GetCosmosDbSettings();
-        ByteSyncDbContext byteSyncDbContext = new ByteSyncDbContext(Options.Create(cosmosDbSettings));
-        byteSyncDbContext.InitializeCosmosDb().Wait();
-        _actionsGroupDefinitionsRepository = new ActionsGroupDefinitionsRepository(byteSyncDbContext, Options.Create(cosmosDbSettings));
+        var cosmosDbService = new CosmosDbService(Options.Create(cosmosDbSettings));
+        cosmosDbService.InitializeAsync().Wait();
+        _actionsGroupDefinitionsRepository = new ActionsGroupDefinitionsRepository(cosmosDbService);
         _trackingActionEntityFactory = new TrackingActionEntityFactory(_actionsGroupDefinitionsRepository);
         _synchronizationRepository = new SynchronizationRepository(
             new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock),

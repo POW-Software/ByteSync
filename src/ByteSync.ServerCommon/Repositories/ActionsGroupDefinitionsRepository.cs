@@ -1,38 +1,18 @@
 ﻿using ByteSync.Common.Business.Actions;
-using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
-using ByteSync.ServerCommon.Misc;
+using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.Azure.Cosmos;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 
 namespace ByteSync.ServerCommon.Repositories;
 
 public class ActionsGroupDefinitionsRepository : IActionsGroupDefinitionsRepository
 {
-    private readonly CosmosClient _cosmosClient;
+    private readonly ICosmosDbService _cosmosDbService;
 
-    private readonly CosmosDbSettings _cosmosDbSettings;
-    // private readonly ByteSyncDbContext _dbContext;
-
-    public ActionsGroupDefinitionsRepository(ByteSyncDbContext dbContext, IOptions<CosmosDbSettings> cosmosDbSettings)
+    public ActionsGroupDefinitionsRepository(ICosmosDbService cosmosDbService)
     {
-        // _dbContext = dbContext;
-        
-        _cosmosDbSettings = cosmosDbSettings.Value;
-
-        var clientOptions = new CosmosClientOptions
-        {
-            AllowBulkExecution = true
-        };
-        _cosmosClient = new CosmosClient(_cosmosDbSettings.ConnectionString, clientOptions);
-    }
-    
-    private Container GetContainer()
-    {
-        return _cosmosClient.GetContainer(_cosmosDbSettings.DatabaseName, "ActionsGroupDefinitions");
+        _cosmosDbService = cosmosDbService;
     }
     
     public async Task AddOrUpdateActionsGroupDefinitions(
@@ -41,7 +21,7 @@ public class ActionsGroupDefinitionsRepository : IActionsGroupDefinitionsReposit
     {
         const int maxConcurrentOperations = 100;
 
-        var container = GetContainer();
+        var container = _cosmosDbService.ActionsGroupDefinitionsContainer;
         var semaphore = new SemaphoreSlim(maxConcurrentOperations);
         var tasks = new List<Task>();
 
@@ -79,81 +59,10 @@ public class ActionsGroupDefinitionsRepository : IActionsGroupDefinitionsReposit
 
         await Task.WhenAll(tasks);
     }
-
-    // public async Task AddOrUpdateActionsGroupDefinitions(string sessionId, List<ActionsGroupDefinition> synchronizationActionsDefinitions)
-    // {
-    //     var container = _cosmosClient.GetContainer("YourDatabase", "YourContainer");
-    //
-    //     var tasks = new List<Task>();
-    //     foreach (var def in synchronizationActionsDefinitions)
-    //     {
-    //         var entity = new ActionsGroupDefinitionEntity
-    //         {
-    //             ActionsGroupDefinitionEntityId = def.ActionsGroupId,
-    //             Operator = def.Operator,
-    //             Size = def.Size,
-    //             CreationTimeUtc = def.CreationTimeUtc,
-    //             AppliesOnlySynchronizeDate = def.AppliesOnlySynchronizeDate,
-    //             LastWriteTimeUtc = def.LastWriteTimeUtc,
-    //             SessionId = sessionId,
-    //             Source = def.Source,
-    //             Targets = def.Targets,
-    //             FileSystemType = def.FileSystemType,
-    //             id = def.ActionsGroupId // obligatoire pour Cosmos
-    //         };
-    //
-    //         tasks.Add(container.UpsertItemAsync(entity, new PartitionKey(sessionId)));
-    //
-    //         // Optionnel : limitation à un nombre max de tâches en parallèle
-    //         if (tasks.Count >= 500)
-    //         {
-    //             await Task.WhenAll(tasks);
-    //             tasks.Clear();
-    //         }
-    //     }
-    //
-    //     if (tasks.Count > 0)
-    //         await Task.WhenAll(tasks);
-    //     
-    //     
-    //     
-    //     const int batchSize = 100;
-    //
-    //     for (int i = 0; i < synchronizationActionsDefinitions.Count; i += batchSize)
-    //     {
-    //         var batch = synchronizationActionsDefinitions
-    //             .Skip(i)
-    //             .Take(batchSize)
-    //             .Select(definition => new ActionsGroupDefinitionEntity
-    //             {
-    //                 ActionsGroupDefinitionEntityId = definition.ActionsGroupId,
-    //                 Operator = definition.Operator,
-    //                 Size = definition.Size,
-    //                 CreationTimeUtc = definition.CreationTimeUtc,
-    //                 AppliesOnlySynchronizeDate = definition.AppliesOnlySynchronizeDate,
-    //                 LastWriteTimeUtc = definition.LastWriteTimeUtc,
-    //                 SessionId = sessionId,
-    //                 Source = definition.Source,
-    //                 Targets = definition.Targets,
-    //                 FileSystemType = definition.FileSystemType,
-    //             })
-    //             .ToList();
-    //         
-    //         await _dbContext.ActionsGroupDefinitions.AddRangeAsync(batch);
-    //         await _dbContext.SaveChangesAsync();
-    //     }
-    // }
-
-    // public async Task<ActionsGroupDefinitionEntity> GetActionGroupDefinition(string actionsGroupId, string sessionId)
-    // {
-    //     return await _dbContext.ActionsGroupDefinitions
-    //         .FirstAsync(e => e.ActionsGroupDefinitionEntityId == actionsGroupId && 
-    //                          e.SessionId == sessionId);
-    // }
-    //
+    
     public async Task<ActionsGroupDefinitionEntity> GetActionGroupDefinition(string actionsGroupId, string sessionId)
     {
-        var container = GetContainer();
+        var container = _cosmosDbService.ActionsGroupDefinitionsContainer;
 
         try
         {
@@ -171,7 +80,7 @@ public class ActionsGroupDefinitionsRepository : IActionsGroupDefinitionsReposit
     
     public async Task DeleteActionsGroupDefinitions(string sessionId)
     {
-        var container = GetContainer();
+        var container = _cosmosDbService.ActionsGroupDefinitionsContainer;
 
         var query = new QueryDefinition("SELECT c.id FROM c WHERE c.SessionId = @sessionId")
             .WithParameter("@sessionId", sessionId);
@@ -198,21 +107,4 @@ public class ActionsGroupDefinitionsRepository : IActionsGroupDefinitionsReposit
 
         await Task.WhenAll(deleteTasks);
     }
-
-    private class IdOnlyResult
-    {
-        [JsonProperty("id")]
-        public string Id { get; set; }
-    }
-    
-    // public async Task DeleteActionsGroupDefinitions(string sessionId)
-    // {
-    //     var entitiesToDelete = await _dbContext.ActionsGroupDefinitions
-    //         .Where(e => e.SessionId == sessionId)
-    //         .ToListAsync();
-    //     
-    //     _dbContext.ActionsGroupDefinitions.RemoveRange(entitiesToDelete);
-    //     
-    //     await _dbContext.SaveChangesAsync();
-    // }
 }

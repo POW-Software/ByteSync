@@ -8,7 +8,8 @@ using ByteSync.Functions.Helpers.Middlewares;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Commands.Inventories;
 using ByteSync.ServerCommon.Helpers;
-using ByteSync.ServerCommon.Misc;
+using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Services;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -94,8 +95,6 @@ var host = new HostBuilder()
         
         services.AddClaimAuthorization();
         services.AddJwtAuthentication(appSettings!.Secret);
-
-        services.AddDbContext<ByteSyncDbContext>();
         
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(AddPathItemRequest).Assembly));
     })
@@ -103,9 +102,8 @@ var host = new HostBuilder()
 
 using (var scope = host.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    var dbContext = services.GetRequiredService<ByteSyncDbContext>();
-    await dbContext.InitializeCosmosDb();
+    var cosmosService = scope.ServiceProvider.GetRequiredService<ICosmosDbService>();
+    await (cosmosService as CosmosDbService)!.InitializeAsync();
 }
 
 host.Run();

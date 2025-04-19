@@ -14,7 +14,7 @@
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.13" />
       <PackageReference Include="Microsoft.Azure.SignalR" Version="1.30.2" />
       <PackageReference Include="Microsoft.Azure.SignalR.Management" Version="1.30.2" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="8.0.13" />
+      <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.48.1" />
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
       <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
