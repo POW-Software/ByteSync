@@ -33,30 +33,22 @@ public class SetLocalInventoryStatusCommandHandler : IRequestHandler<SetLocalInv
         {
             inventoryData ??= new InventoryData(sessionId);
 
-            if (!inventoryData.IsInventoryStarted)
+            var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
+                
+            if (inventoryMember.LastLocalInventoryStatusUpdate == null ||
+                parameters.UtcChangeDate > inventoryMember.LastLocalInventoryStatusUpdate)
             {
-                var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
+                inventoryMember.SessionMemberGeneralStatus = parameters.SessionMemberGeneralStatus;
+                inventoryMember.LastLocalInventoryStatusUpdate = parameters.UtcChangeDate;
                 
-                if (inventoryMember.LastLocalInventoryStatusUpdate == null ||
-                    parameters.UtcChangeDate > inventoryMember.LastLocalInventoryStatusUpdate)
-                {
-                    inventoryMember.SessionMemberGeneralStatus = parameters.SessionMemberGeneralStatus;
-                    inventoryMember.LastLocalInventoryStatusUpdate = parameters.UtcChangeDate;
-                
-                    _invokeClientsService.SessionGroupExcept(sessionId, client).SessionMemberGeneralStatusUpdated(parameters);
+                _invokeClientsService.SessionGroupExcept(sessionId, client).SessionMemberGeneralStatusUpdated(parameters);
 
-                    return inventoryData;
-                }
-                else
-                {
-                    _logger.LogWarning("SetLocalInventoryStatus: session {sessionId}, client {clientInstanceId} has a more recent status update", sessionId,
-                        client.ClientInstanceId);
-                    return null;
-                }
+                return inventoryData;
             }
             else
             {
-                _logger.LogWarning("RemovePathItem: session {sessionId} is already activated", sessionId);
+                _logger.LogWarning("SetLocalInventoryStatus: session {sessionId}, client {clientInstanceId} has a more recent status update", sessionId,
+                    client.ClientInstanceId);
                 return null;
             }
         });
