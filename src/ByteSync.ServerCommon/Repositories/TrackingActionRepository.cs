@@ -53,11 +53,21 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
         return trackingActionEntity;
     }
 
-    public async Task<TrackingActionResult> AddOrUpdate(string sessionId, List<string> actionsGroupIds, 
+    public async Task<TrackingActionResult> AddOrUpdate(string sessionId, List<string> actionsGroupIds, bool updateSynchronization,
         Func<TrackingActionEntity, SynchronizationEntity, bool> updateHandler)
     {
-        var synchronizationCacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.Synchronization, sessionId);
-        await using var synchronizationLock = await _redisInfrastructureService.AcquireLockAsync(synchronizationCacheKey);
+        CacheKey? synchronizationCacheKey = null;
+        IRedLock? synchronizationLock = null;
+        
+        var locks = new List<IAsyncDisposable>();
+
+        if (updateSynchronization)
+        {
+            synchronizationCacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.Synchronization, sessionId);
+            synchronizationLock = await _redisInfrastructureService.AcquireLockAsync(synchronizationCacheKey);
+            locks.Add(synchronizationLock);
+        }
+
         
         var synchronizationEntity = (await _synchronizationRepository.Get(sessionId));
         if (synchronizationEntity == null)
@@ -66,8 +76,6 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
         }
         
         var transaction = _redisInfrastructureService.OpenTransaction();
-
-        var locks = new List<IAsyncDisposable>();
         
         List<TrackingActionEntity> trackingActionEntities = new List<TrackingActionEntity>();
         bool areAllUpdated = true;
@@ -101,7 +109,10 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
 
         if (areAllUpdated)
         {
-            await _synchronizationCacheRepository.Save(synchronizationCacheKey, synchronizationEntity, transaction, synchronizationLock);
+            if (updateSynchronization)
+            {
+                await _synchronizationCacheRepository.Save(synchronizationCacheKey!, synchronizationEntity, transaction, synchronizationLock);
+            }
             
             await transaction.ExecuteAsync();
         }
