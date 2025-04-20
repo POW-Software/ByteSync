@@ -40,8 +40,11 @@ public class SynchronizationService : ISynchronizationService
             .Where(tuple => tuple is { First: not null, Second: true })
             .Subscribe(_ =>
             {
-                var synchronizationLooper = _synchronizationLooperFactory.CreateSynchronizationLooper();
-                synchronizationLooper.CloudSessionSynchronizationLoop();
+                Task.Run(() =>
+                {
+                    var synchronizationLooper = _synchronizationLooperFactory.CreateSynchronizationLooper();
+                    synchronizationLooper.CloudSessionSynchronizationLoop();
+                });
             });
         
         _sessionService.SessionStatusObservable
