@@ -3,6 +3,7 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Auth;
+using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Exceptions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
@@ -82,18 +83,18 @@ public class SynchronizationService : ISynchronizationService
 
         HashSet<string> targetInstanceIds = new HashSet<string>();
                 
-        var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, actionsGroupsIds!, false, (trackingAction, synchronization) =>
+        var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, actionsGroupsIds!, (trackingAction, synchronization) =>
         {
             if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
             {
-                return false;
+                return new TrackingActionUpdateHandlerResult(false);
             }
             
             trackingAction.IsSourceSuccess = true;
                 
             targetInstanceIds.AddAll(trackingAction.TargetClientInstanceIds);
 
-            return true;
+            return new TrackingActionUpdateHandlerResult(true);
         });
 
         if (result.IsSuccess)
@@ -128,28 +129,29 @@ public class SynchronizationService : ISynchronizationService
 
         bool needSendSynchronizationUpdated = false;
                 
-        var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, actionsGroupsIds!, true, (trackingAction, synchronization) =>
+        var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, actionsGroupsIds!, (trackingAction, synchronization) =>
         {
             if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
             {
-                return false;
+                return new TrackingActionUpdateHandlerResult(false);
             }
             
+            var trackingActionUpdateHandlerResult = new TrackingActionUpdateHandlerResult(true);
             bool wasTrackingActionFinished = trackingAction.IsFinished;
             
             trackingAction.AddSuccessOnTarget(client.ClientInstanceId);
 
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                synchronization.Progress.IncrementFinishedActionsCount();
-                synchronization.Progress.IncrementProcessedVolume(trackingAction.Size ?? 0);
+                trackingActionUpdateHandlerResult.FinishedActionsCount = 1;
+                trackingActionUpdateHandlerResult.ProcessedVolume = trackingAction.Size ?? 0;
             }
 
-            synchronization.Progress.IncrementExchangedVolume(sharedFileDefinition.UploadedFileLength);
+            trackingActionUpdateHandlerResult.ExchangedVolume = sharedFileDefinition.UploadedFileLength;
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
 
-            return true;
+            return trackingActionUpdateHandlerResult;
         });
 
         if (result.IsSuccess)
@@ -183,25 +185,26 @@ public class SynchronizationService : ISynchronizationService
         
         bool needSendSynchronizationUpdated = false;
         
-        var result = await _trackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, true, (trackingAction, synchronization) =>
+        var result = await _trackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, (trackingAction, synchronization) =>
         {
             if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
             {
-                return false;
+                return new TrackingActionUpdateHandlerResult(false);
             }
             
+            var trackingActionUpdateHandlerResult = new TrackingActionUpdateHandlerResult(true);
             bool wasTrackingActionFinished = trackingAction.IsFinished;
             
             trackingAction.AddSuccessOnTarget(client.ClientInstanceId);
             
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                synchronization.Progress.IncrementFinishedActionsCount();
+                trackingActionUpdateHandlerResult.FinishedActionsCount = 1;
             }
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
 
-            return true;
+            return trackingActionUpdateHandlerResult;
         });
 
         if (result.IsSuccess)
@@ -220,13 +223,14 @@ public class SynchronizationService : ISynchronizationService
         
         bool needSendSynchronizationUpdated = false;
                 
-        var result = await _trackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, true, (trackingAction, synchronization) =>
+        var result = await _trackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, (trackingAction, synchronization) =>
         {
             if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
             {
-                return false;
+                return new TrackingActionUpdateHandlerResult(false);;
             }
             
+            var trackingActionUpdateHandlerResult = new TrackingActionUpdateHandlerResult(true);
             bool wasTrackingActionFinished = trackingAction.IsFinished;
             
             trackingAction.IsSourceSuccess = true;
@@ -234,14 +238,14 @@ public class SynchronizationService : ISynchronizationService
 
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                synchronization.Progress.IncrementFinishedActionsCount();
+                trackingActionUpdateHandlerResult.FinishedActionsCount = 1;
             }
             
-            synchronization.Progress.IncrementProcessedVolume(trackingAction.Size ?? 0);
+            trackingActionUpdateHandlerResult.ProcessedVolume = trackingAction.Size ?? 0;
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
 
-            return true;
+            return trackingActionUpdateHandlerResult;
         });
 
         if (result.IsSuccess)
@@ -260,13 +264,14 @@ public class SynchronizationService : ISynchronizationService
         
         bool needSendSynchronizationUpdated = false;
         
-        var result = await _trackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, true, (trackingAction, synchronization) =>
+        var result = await _trackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, (trackingAction, synchronization) =>
         {
             if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
             {
-                return false;
+                return new TrackingActionUpdateHandlerResult(false);
             }
             
+            var trackingActionUpdateHandlerResult = new TrackingActionUpdateHandlerResult(true);
             bool wasTrackingActionFinished = trackingAction.IsFinished;
             bool isNewError = !trackingAction.IsError;
             
@@ -288,16 +293,16 @@ public class SynchronizationService : ISynchronizationService
             
             if (isNewError)
             {
-                synchronization.Progress.IncrementErrorsCount();
+                trackingActionUpdateHandlerResult.ErrorsCount = 1;
             }
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                synchronization.Progress.IncrementFinishedActionsCount();
+                trackingActionUpdateHandlerResult.FinishedActionsCount = 1;
             }
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
 
-            return true;
+            return trackingActionUpdateHandlerResult;
         });
 
         if (result.IsSuccess)

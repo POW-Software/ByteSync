@@ -171,8 +171,8 @@ public class SynchronizationServiceTests
         trackingActionEntity.TargetClientInstanceIds.Add("targetClientInstanceId");
         SynchronizationEntity synchronizationEntity = new SynchronizationEntity();
 
-        A.CallTo(() => _trackingActionRepository.AddOrUpdate(sessionId, A<List<string>>.Ignored, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>.Ignored))
-            .Invokes((string _, List<string> _, Func<TrackingActionEntity, SynchronizationEntity, bool> func) => func(trackingActionEntity, synchronizationEntity))
+        A.CallTo(() => _trackingActionRepository.AddOrUpdate(sessionId, A<List<string>>.Ignored, A<Func<TrackingActionEntity, SynchronizationEntity, TrackingActionUpdateHandlerResult>>.Ignored))
+            .Invokes((string _, List<string> _, Func<TrackingActionEntity, SynchronizationEntity, TrackingActionUpdateHandlerResult> func) => func(trackingActionEntity, synchronizationEntity))
             .Returns(new TrackingActionResult(true, new List<TrackingActionEntity>(), synchronizationEntity));
             
         A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
@@ -185,7 +185,7 @@ public class SynchronizationServiceTests
         await _synchronizationService.OnUploadIsFinishedAsync(sharedFileDefinition, 1, client);
 
         // Assert
-        A.CallTo(() => _trackingActionRepository.AddOrUpdate(sessionId, A<List<string>>.Ignored, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>.Ignored))
+        A.CallTo(() => _trackingActionRepository.AddOrUpdate(sessionId, A<List<string>>.Ignored, A<Func<TrackingActionEntity, SynchronizationEntity, TrackingActionUpdateHandlerResult>>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .MustHaveHappenedOnceExactly();
@@ -205,8 +205,8 @@ public class SynchronizationServiceTests
         trackingActionEntity.TargetClientInstanceIds.Add("targetClientInstanceId");
         SynchronizationEntity synchronizationEntity = new SynchronizationEntity();
 
-        A.CallTo(() => _trackingActionRepository.AddOrUpdate(sessionId, A<List<string>>.Ignored, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>.Ignored))
-            .Invokes((string _, List<string> _, Func<TrackingActionEntity, SynchronizationEntity, bool> func) => func(trackingActionEntity, synchronizationEntity))
+        A.CallTo(() => _trackingActionRepository.AddOrUpdate(sessionId, A<List<string>>.Ignored, A<Func<TrackingActionEntity, SynchronizationEntity, TrackingActionUpdateHandlerResult>>.Ignored))
+            .Invokes((string _, List<string> _, Func<TrackingActionEntity, SynchronizationEntity, TrackingActionUpdateHandlerResult> func) => func(trackingActionEntity, synchronizationEntity))
             .Returns(new TrackingActionResult(false, new List<TrackingActionEntity>(), synchronizationEntity));
             
         A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
@@ -216,7 +216,7 @@ public class SynchronizationServiceTests
         await _synchronizationService.OnUploadIsFinishedAsync(sharedFileDefinition, 1, client);
 
         // Assert
-        A.CallTo(() => _trackingActionRepository.AddOrUpdate(sessionId, A<List<string>>.Ignored, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>.Ignored))
+        A.CallTo(() => _trackingActionRepository.AddOrUpdate(sessionId, A<List<string>>.Ignored, A<Func<TrackingActionEntity, SynchronizationEntity, TrackingActionUpdateHandlerResult>>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .MustHaveHappenedOnceExactly();

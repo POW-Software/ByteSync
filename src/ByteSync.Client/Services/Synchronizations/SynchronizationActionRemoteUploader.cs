@@ -97,6 +97,8 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
             try
             {
                 await CloseAndUploadCurrentMultiZip();
+
+                // await Task.Delay(3000);
             }
             catch (Exception ex)
             {

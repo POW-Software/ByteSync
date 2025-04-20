@@ -1,4 +1,5 @@
 ﻿using ByteSync.Common.Business.Actions;
+using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Factories;
 using ByteSync.ServerCommon.Interfaces.Factories;
@@ -96,9 +97,9 @@ public class TrackingActionRepositoryTests
         
         await _synchronizationRepository.AddSynchronization(synchronizationEntity, actionsGroupDefinitions);
 
-        Func<TrackingActionEntity, SynchronizationEntity, bool> updateHandler = (_, _) =>
+        Func<TrackingActionEntity, SynchronizationEntity, TrackingActionUpdateHandlerResult> updateHandler = (_, _) =>
         {
-            return true;
+            return new TrackingActionUpdateHandlerResult(true);
         };
 
         // Act
