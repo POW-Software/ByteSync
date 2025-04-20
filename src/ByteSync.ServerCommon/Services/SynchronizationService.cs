@@ -82,7 +82,7 @@ public class SynchronizationService : ISynchronizationService
 
         HashSet<string> targetInstanceIds = new HashSet<string>();
                 
-        var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, actionsGroupsIds!, (trackingAction, synchronization) =>
+        var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, actionsGroupsIds!, false, (trackingAction, synchronization) =>
         {
             if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
             {
@@ -128,7 +128,7 @@ public class SynchronizationService : ISynchronizationService
 
         bool needSendSynchronizationUpdated = false;
                 
-        var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, actionsGroupsIds!, (trackingAction, synchronization) =>
+        var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, actionsGroupsIds!, true, (trackingAction, synchronization) =>
         {
             if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
             {
@@ -141,11 +141,11 @@ public class SynchronizationService : ISynchronizationService
 
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                synchronization.Progress.FinishedActionsCount += 1;
-                synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
+                synchronization.Progress.IncrementFinishedActionsCount();
+                synchronization.Progress.IncrementProcessedVolume(trackingAction.Size ?? 0);
             }
-            
-            synchronization.Progress.ExchangedVolume += sharedFileDefinition.UploadedFileLength;
+
+            synchronization.Progress.IncrementExchangedVolume(sharedFileDefinition.UploadedFileLength);
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
 
@@ -183,7 +183,7 @@ public class SynchronizationService : ISynchronizationService
         
         bool needSendSynchronizationUpdated = false;
         
-        var result = await _trackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, (trackingAction, synchronization) =>
+        var result = await _trackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, true, (trackingAction, synchronization) =>
         {
             if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
             {
@@ -196,7 +196,7 @@ public class SynchronizationService : ISynchronizationService
             
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                synchronization.Progress.FinishedActionsCount += 1;
+                synchronization.Progress.IncrementFinishedActionsCount();
             }
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
@@ -220,7 +220,7 @@ public class SynchronizationService : ISynchronizationService
         
         bool needSendSynchronizationUpdated = false;
                 
-        var result = await _trackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, (trackingAction, synchronization) =>
+        var result = await _trackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, true, (trackingAction, synchronization) =>
         {
             if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
             {
@@ -234,10 +234,10 @@ public class SynchronizationService : ISynchronizationService
 
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                synchronization.Progress.FinishedActionsCount += 1;
+                synchronization.Progress.IncrementFinishedActionsCount();
             }
             
-            synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
+            synchronization.Progress.IncrementProcessedVolume(trackingAction.Size ?? 0);
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
 
@@ -260,7 +260,7 @@ public class SynchronizationService : ISynchronizationService
         
         bool needSendSynchronizationUpdated = false;
         
-        var result = await _trackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, (trackingAction, synchronization) =>
+        var result = await _trackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, true, (trackingAction, synchronization) =>
         {
             if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
             {
@@ -288,11 +288,11 @@ public class SynchronizationService : ISynchronizationService
             
             if (isNewError)
             {
-                synchronization.Progress.ErrorsCount += 1;
+                synchronization.Progress.IncrementErrorsCount();
             }
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                synchronization.Progress.FinishedActionsCount += 1;
+                synchronization.Progress.IncrementFinishedActionsCount();
             }
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
@@ -314,7 +314,7 @@ public class SynchronizationService : ISynchronizationService
         {
             if (synchronizationEntity.Progress.Members.Contains(client.ClientInstanceId))
             {
-                synchronizationEntity.Progress.CompletedMembers.Add(client.ClientInstanceId);
+                synchronizationEntity.Progress.AddCompletedMember(client.ClientInstanceId);;
 
                 needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronizationEntity);
                 
