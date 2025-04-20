@@ -54,7 +54,7 @@ public class MultiUploadZip : IDisposable
     public bool CanAdd(FileInfo fileInfo, string actionsGroupId)
     {
         return 
-            ActionGroupsIds.Count < 200 &&
+            ActionGroupsIds.Count < 50 &&
             ActionsGroupIdsConcatenationLength + actionsGroupId.Length + 5 < 25000 &&
             Size + fileInfo.Length < 8 * SizeConstants.ONE_MEGA_BYTES;
     }

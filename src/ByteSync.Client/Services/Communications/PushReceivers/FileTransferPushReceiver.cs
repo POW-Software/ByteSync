@@ -81,7 +81,9 @@ public class FileTransferPushReceiver : IPushReceiver
 
         try
         {
-            _logger.LogInformation("OnUploadFinished: {SharedFileType}", fileTransferPush.SharedFileDefinition.SharedFileType);
+            _logger.LogInformation("OnUploadFinished: {SharedFileId} ({SharedFileType})", 
+                fileTransferPush.SharedFileDefinition.Id,
+                fileTransferPush.SharedFileDefinition.SharedFileType);
             
             if (_sessionService.CurrentSession?.SessionId == fileTransferPush.SessionId)
             {

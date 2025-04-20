@@ -35,7 +35,7 @@ public class RedisInfrastructureService : IRedisInfrastructureService
             _connectionMultiplexer,
         };
         
-        RedLockRetryConfiguration redLockRetryConfiguration = new RedLockRetryConfiguration(5, 500);
+        RedLockRetryConfiguration redLockRetryConfiguration = new RedLockRetryConfiguration(10, 1000);
         _redLockFactory = RedLockFactory.Create(multiplexers, redLockRetryConfiguration, loggerFactory);
     }
     
@@ -80,7 +80,7 @@ public class RedisInfrastructureService : IRedisInfrastructureService
 
     public async Task<IRedLock> AcquireLockAsync(CacheKey cacheKey)
     {
-        var redisLock = await _redLockFactory.CreateLockAsync(cacheKey.Value, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(1));
+        var redisLock = await _redLockFactory.CreateLockAsync(cacheKey.Value, TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(2));
 
         if (redisLock.IsAcquired)
         {

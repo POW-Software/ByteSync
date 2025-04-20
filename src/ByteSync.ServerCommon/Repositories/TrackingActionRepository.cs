@@ -62,7 +62,7 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
 
         var locks = new ConcurrentBag<IAsyncDisposable>(); // Thread-safe
         var trackingActionEntities = new ConcurrentBag<TrackingActionEntity>();
-        var updateHandlerResults = new List<TrackingActionUpdateHandlerResult>();
+        var updateHandlerResults = new ConcurrentBag<TrackingActionUpdateHandlerResult>();
         // bool areAllUpdated = true;
 
         // if (updateSynchronization)
@@ -71,6 +71,10 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
         //     synchronizationLock = await _redisInfrastructureService.AcquireLockAsync(synchronizationCacheKey);
         //     locks.Add(synchronizationLock);
         // }
+        
+        var synchronizationCacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.Synchronization, sessionId);
+        var synchronizationLock = await _redisInfrastructureService.AcquireLockAsync(synchronizationCacheKey);
+        locks.Add(synchronizationLock);
 
         var synchronizationEntity = await _synchronizationRepository.Get(sessionId);
         if (synchronizationEntity == null)
@@ -89,15 +93,15 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
             try
             {
                 var cacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType, $"{sessionId}_{actionsGroupId}");
-                var actionsGroupIdLock = await _redisInfrastructureService.AcquireLockAsync(cacheKey);
-                locks.Add(actionsGroupIdLock);
+                // var actionsGroupIdLock = await _redisInfrastructureService.AcquireLockAsync(cacheKey);
+                // locks.Add(actionsGroupIdLock);
 
-                var trackingActionEntity = await DoGetOrBuild(sessionId, actionsGroupId, cacheKey, actionsGroupIdLock);
+                var trackingActionEntity = await DoGetOrBuild(sessionId, actionsGroupId, cacheKey, synchronizationLock);
                 var updateHandlerResult = updateHandler.Invoke(trackingActionEntity, synchronizationEntity);
 
                 if (updateHandlerResult.IsSuccess)
                 {
-                    await Save(cacheKey, trackingActionEntity, transaction, actionsGroupIdLock);
+                    await Save(cacheKey, trackingActionEntity, transaction, synchronizationLock);
                     trackingActionEntities.Add(trackingActionEntity);
                     updateHandlerResults.Add(updateHandlerResult);
                 }
@@ -123,7 +127,7 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
         {
             if (updateHandlerResults.Any(uhr => uhr.IsAChange))
             {
-                var synchronizationCacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.Synchronization, sessionId);
+                // var synchronizationCacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.Synchronization, sessionId);
                 await _synchronizationCacheRepository.AddOrUpdate(synchronizationCacheKey, synEnt =>
                 {
                     foreach (var updateHandlerResult in updateHandlerResults)
@@ -135,7 +139,7 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
                     }
 
                     return synEnt;
-                }, transaction);
+                }, transaction, synchronizationLock);
 
                 // await _synchronizationCacheRepository.Save(synchronizationCacheKey!, synchronizationEntity, transaction, synchronizationLock);
             }

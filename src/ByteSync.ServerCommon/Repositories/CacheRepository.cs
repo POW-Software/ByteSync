@@ -87,21 +87,31 @@ public class CacheRepository<T> : ICacheRepository<T> where T : class
         }
     }
 
-    public async Task<UpdateEntityResult<T>> AddOrUpdate(CacheKey cacheKey, Func<T?, T?> handler, ITransaction? transaction = null)
+    public async Task<UpdateEntityResult<T>> AddOrUpdate(CacheKey cacheKey, Func<T?, T?> handler, ITransaction? transaction = null, IRedLock? redisLock = null)
     {
         IDatabaseAsync database = _redisInfrastructureService.GetDatabase(transaction);
+        bool shouldDispose = redisLock == null;
+        redisLock ??= await _redisInfrastructureService.AcquireLockAsync(cacheKey);
         
-        await using var redisLock = await _redisInfrastructureService.AcquireLockAsync(cacheKey);
-        
-        var cachedElement = await Get(cacheKey);
-        var createdOrUpdatedElement = handler.Invoke(cachedElement);
-
-        if (createdOrUpdatedElement == null)
+        try
         {
-            return new UpdateEntityResult<T>(cachedElement, UpdateEntityStatus.NoOperation);
+            var cachedElement = await Get(cacheKey);
+            var createdOrUpdatedElement = handler.Invoke(cachedElement);
+
+            if (createdOrUpdatedElement == null)
+            {
+                return new UpdateEntityResult<T>(cachedElement, UpdateEntityStatus.NoOperation);
+            }
+                
+            return await SaveInternal(cacheKey, createdOrUpdatedElement, database);
         }
-            
-        return await SaveInternal(cacheKey, createdOrUpdatedElement, database);
+        finally
+        {
+            if (shouldDispose)
+            {
+                await redisLock.DisposeAsync();
+            }
+        }
     }
 
     public async Task Delete(CacheKey cacheKey, ITransaction? transaction = null)
