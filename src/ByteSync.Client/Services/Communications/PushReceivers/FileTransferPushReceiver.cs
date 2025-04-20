@@ -100,7 +100,15 @@ public class FileTransferPushReceiver : IPushReceiver
 
             if (afterTransferSharedFile != null)
             {
-                await afterTransferSharedFile.OnUploadFinishedError(sharedFileDefinition, ex);
+                try
+                {
+                    await afterTransferSharedFile.OnUploadFinishedError(sharedFileDefinition, ex);
+                }
+                catch (Exception ex2)
+                {
+                    _logger.LogError(ex2, "CloudSessionManager.OnUploadFinishedError sharedFileDefinition.Id :{id}, uploadedBy:{UploaderClientInstanceId} ", 
+                        fileTransferPush.SharedFileDefinition.Id, fileTransferPush.SharedFileDefinition.ClientInstanceId);
+                }
             }
         }
     }
