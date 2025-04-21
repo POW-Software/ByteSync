@@ -22,7 +22,7 @@ public class SynchronizationRepository : BaseRepository<SynchronizationEntity>, 
     public async Task AddSynchronization(SynchronizationEntity synchronizationEntity, List<ActionsGroupDefinition> actionsGroupDefinitions)
     {
         var synchronizationCacheKey = _cacheService.ComputeCacheKey(EntityType.Synchronization, synchronizationEntity.SessionId);
-        var synchronizationLock = await _cacheService.AcquireLockAsync(synchronizationCacheKey);
+        await using var synchronizationLock = await _cacheService.AcquireLockAsync(synchronizationCacheKey);
         
         await Save(synchronizationEntity.SessionId, synchronizationEntity, null, synchronizationLock);
         

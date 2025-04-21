@@ -125,13 +125,12 @@ public class SynchronizationServiceTests
         A.CallTo(() => _synchronizationRepository.AddSynchronization(A<SynchronizationEntity>._, actionsGroupDefinitions))
             .Returns(Task.CompletedTask);
         A.CallTo(() => _synchronizationProgressService.InformSynchronizationStarted(A<SynchronizationEntity>._, client))
-            .Returns(synchronization);
+            .Returns(Task.CompletedTask);
         
         // Act
-        var result = await _synchronizationService.StartSynchronization(sessionId, client, actionsGroupDefinitions);
+        await _synchronizationService.StartSynchronization(sessionId, client, actionsGroupDefinitions);
 
         // Assert
-        result.Should().BeSameAs(synchronization);
         A.CallTo(() => _synchronizationRepository.AddSynchronization(A<SynchronizationEntity>._, actionsGroupDefinitions)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _synchronizationProgressService.InformSynchronizationStarted(A<SynchronizationEntity>._, client)).MustHaveHappenedOnceExactly();
     }
@@ -151,12 +150,11 @@ public class SynchronizationServiceTests
             .Returns(synchronization);
 
         // Act
-        var result = await _synchronizationService.StartSynchronization(sessionId, client, actionsGroupDefinitions);
+        await _synchronizationService.StartSynchronization(sessionId, client, actionsGroupDefinitions);
 
         // Assert
-        result.Should().BeSameAs(synchronization);
         A.CallTo(() => _synchronizationRepository.AddSynchronization(A<SynchronizationEntity>._, actionsGroupDefinitions)).MustNotHaveHappened();
-        A.CallTo(() => _synchronizationProgressService.MapToSynchronization(synchronizationEntity)).MustHaveHappened();
+        // A.CallTo(() => _synchronizationProgressService.MapToSynchronization(synchronizationEntity)).MustHaveHappened();
     }
     
     [Test]

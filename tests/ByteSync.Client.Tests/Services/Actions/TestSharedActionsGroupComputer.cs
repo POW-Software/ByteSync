@@ -56,7 +56,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
         
         List<IEnumerable<SharedActionsGroup>> capturedGroups = new List<IEnumerable<SharedActionsGroup>>();
         _sharedActionsGroupRepository.Setup(s => s.AddOrUpdate(It.IsAny<IEnumerable<SharedActionsGroup>>()))
-            .Callback<IEnumerable<SharedActionsGroup>>(groups => capturedGroups.Add(groups));
+            .Callback<IEnumerable<SharedActionsGroup>>(groups => capturedGroups.Add(groups.ToList()));
         
         // sharedActionsGroupComputer = new SharedActionsGroupComputer();
         // sharedActionsGroups = sharedActionsGroupComputer.ComputeSharedActionsGroups(sharedAtomicActions);
@@ -164,7 +164,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
         
         List<IEnumerable<SharedActionsGroup>> capturedGroups = new List<IEnumerable<SharedActionsGroup>>();
         _sharedActionsGroupRepository.Setup(s => s.AddOrUpdate(It.IsAny<IEnumerable<SharedActionsGroup>>()))
-            .Callback<IEnumerable<SharedActionsGroup>>(groups => capturedGroups.Add(groups));
+            .Callback<IEnumerable<SharedActionsGroup>>(groups => capturedGroups.Add(groups.ToList()));
         
         await _sharedActionsGroupComputer.ComputeSharedActionsGroups();
         
@@ -239,7 +239,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
         
         List<IEnumerable<SharedActionsGroup>> capturedGroups = new List<IEnumerable<SharedActionsGroup>>();
         _sharedActionsGroupRepository.Setup(s => s.AddOrUpdate(It.IsAny<IEnumerable<SharedActionsGroup>>()))
-            .Callback<IEnumerable<SharedActionsGroup>>(groups => capturedGroups.Add(groups));
+            .Callback<IEnumerable<SharedActionsGroup>>(groups => capturedGroups.Add(groups.ToList()));
         
         await _sharedActionsGroupComputer.ComputeSharedActionsGroups();
         Assert.That(capturedGroups.Count, Is.EqualTo(1));
@@ -312,7 +312,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
         
         List<IEnumerable<SharedActionsGroup>> capturedGroups = new List<IEnumerable<SharedActionsGroup>>();
         _sharedActionsGroupRepository.Setup(s => s.AddOrUpdate(It.IsAny<IEnumerable<SharedActionsGroup>>()))
-            .Callback<IEnumerable<SharedActionsGroup>>(groups => capturedGroups.Add(groups));
+            .Callback<IEnumerable<SharedActionsGroup>>(groups => capturedGroups.Add(groups.ToList()));
         
         await _sharedActionsGroupComputer.ComputeSharedActionsGroups();
         
@@ -385,7 +385,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
         
         List<IEnumerable<SharedActionsGroup>> capturedGroups = new List<IEnumerable<SharedActionsGroup>>();
         _sharedActionsGroupRepository.Setup(s => s.AddOrUpdate(It.IsAny<IEnumerable<SharedActionsGroup>>()))
-            .Callback<IEnumerable<SharedActionsGroup>>(groups => capturedGroups.Add(groups));
+            .Callback<IEnumerable<SharedActionsGroup>>(groups => capturedGroups.Add(groups.ToList()));
         
         await _sharedActionsGroupComputer.ComputeSharedActionsGroups();
         
@@ -458,7 +458,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
         
         List<IEnumerable<SharedActionsGroup>> capturedGroups = new List<IEnumerable<SharedActionsGroup>>();
         _sharedActionsGroupRepository.Setup(s => s.AddOrUpdate(It.IsAny<IEnumerable<SharedActionsGroup>>()))
-            .Callback<IEnumerable<SharedActionsGroup>>(groups => capturedGroups.Add(groups));
+            .Callback<IEnumerable<SharedActionsGroup>>(groups => capturedGroups.Add(groups.ToList()));
         
         await _sharedActionsGroupComputer.ComputeSharedActionsGroups();
         
