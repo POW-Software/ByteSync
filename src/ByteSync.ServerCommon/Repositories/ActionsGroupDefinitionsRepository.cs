@@ -14,13 +14,15 @@ public class ActionsGroupDefinitionsRepository : IActionsGroupDefinitionsReposit
 
     public ActionsGroupDefinitionsRepository(ICosmosDbService cosmosDbService)
     {
-        _cosmosDbService = cosmosDbService;
+        // _cosmosDbService = cosmosDbService;
     }
     
     public async Task AddOrUpdateActionsGroupDefinitions(
         string sessionId,
         List<ActionsGroupDefinition> synchronizationActionsDefinitions)
     {
+        return;
+        
         const int maxConcurrentOperations = 100;
 
         var container = _cosmosDbService.ActionsGroupDefinitionsContainer;

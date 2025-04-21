@@ -46,7 +46,10 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
 
         if (trackingActionEntity == null)
         {
-            trackingActionEntity = await _trackingActionEntityFactory.Create(sessionId, actionsGroupId);
+
+            throw new Exception("TrackingActionEntity is null");
+            
+            // trackingActionEntity = await _trackingActionEntityFactory.Create(sessionId, actionsGroupId);
 
             // await Save(cacheKey, trackingActionEntity, null, actionsGroupIdLock);
         }

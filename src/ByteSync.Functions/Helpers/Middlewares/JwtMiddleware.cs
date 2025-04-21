@@ -5,6 +5,7 @@ using System.Text;
 using ByteSync.Functions.Http;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Settings;
+using ByteSync.ServerCommon.Exceptions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -61,6 +62,11 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
             {
                 _logger.LogWarning(ex, "Token expired");
                 await HandleTokenError(context, "Invalid token");
+            }
+            catch (AcquireRedisLockException ex)
+            {
+                _logger.LogWarning(ex, "Can not acquire redis lock");
+                await HandleTokenError(context, "Invalid token", HttpStatusCode.InternalServerError);
             }
             catch (Exception ex)
             {
@@ -166,12 +172,13 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
         return client;
     }
 
-    private static async Task HandleTokenError(FunctionContext context, string message)
+    private static async Task HandleTokenError(FunctionContext context, string message, 
+        HttpStatusCode httpStatusCode = HttpStatusCode.Unauthorized)
     {
         var httpReqData = await context.GetHttpRequestDataAsync();
         if (httpReqData != null)
         {
-            var newHttpResponse = httpReqData.CreateResponse(HttpStatusCode.Unauthorized);
+            var newHttpResponse = httpReqData.CreateResponse(httpStatusCode);
             await newHttpResponse.WriteAsJsonAsync(new { ResponseStatus = message }, newHttpResponse.StatusCode);
             context.GetInvocationResult().Value = newHttpResponse;
         }
