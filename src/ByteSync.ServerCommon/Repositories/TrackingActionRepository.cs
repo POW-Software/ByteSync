@@ -48,7 +48,7 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
         {
             trackingActionEntity = await _trackingActionEntityFactory.Create(sessionId, actionsGroupId);
 
-            await Save(cacheKey, trackingActionEntity, null, actionsGroupIdLock);
+            // await Save(cacheKey, trackingActionEntity, null, actionsGroupIdLock);
         }
 
         return trackingActionEntity;

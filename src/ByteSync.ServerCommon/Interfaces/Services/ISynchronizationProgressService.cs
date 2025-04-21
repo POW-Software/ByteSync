@@ -12,7 +12,7 @@ public interface ISynchronizationProgressService
 
     Task UpdateSynchronizationProgress(SynchronizationEntity synchronizationEntity, bool needSendSynchronizationUpdated);
     
-    Task<Synchronization> InformSynchronizationStarted(SynchronizationEntity synchronizationEntity, Client client);
+    Task InformSynchronizationStarted(SynchronizationEntity synchronizationEntity, Client client);
     
     Task<Synchronization> MapToSynchronization(SynchronizationEntity synchronizationEntity);
     

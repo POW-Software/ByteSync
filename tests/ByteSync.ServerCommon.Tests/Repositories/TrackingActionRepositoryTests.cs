@@ -41,7 +41,8 @@ public class TrackingActionRepositoryTests
         _synchronizationRepository = new SynchronizationRepository(
             new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock),
             new CacheRepository<SynchronizationEntity>(new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock)),
-            _actionsGroupDefinitionsRepository);
+            _actionsGroupDefinitionsRepository,
+            new CacheRepository<TrackingActionEntity>(new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock)));
         _redisInfrastructureService = new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock);
         _cacheRepository = new CacheRepository<TrackingActionEntity>(_redisInfrastructureService);
         _synchronizationCacheRepository = new CacheRepository<SynchronizationEntity>(_redisInfrastructureService);

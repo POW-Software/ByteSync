@@ -47,7 +47,7 @@ public class SynchronizationService : ISynchronizationService
         }
     }
     
-    public async Task<Synchronization> StartSynchronization(string sessionId, Client client, List<ActionsGroupDefinition> actionsGroupDefinitions)
+    public async Task StartSynchronization(string sessionId, Client client, List<ActionsGroupDefinition> actionsGroupDefinitions)
     {
         var synchronizationEntity = await _synchronizationRepository.Get(sessionId);
         
@@ -69,11 +69,7 @@ public class SynchronizationService : ISynchronizationService
             
             await _synchronizationRepository.AddSynchronization(synchronizationEntity, actionsGroupDefinitions);
 
-            return await _synchronizationProgressService.InformSynchronizationStarted(synchronizationEntity, client);
-        }
-        else
-        {
-            return await _synchronizationProgressService.MapToSynchronization(synchronizationEntity);
+            await _synchronizationProgressService.InformSynchronizationStarted(synchronizationEntity, client);
         }
     }
     
