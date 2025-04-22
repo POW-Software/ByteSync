@@ -176,7 +176,7 @@ public class SynchronizationServiceTests
         A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .Returns(true);
 
-        A.CallTo(() => _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, 1, A<HashSet<string>>.That.Contains("targetClientInstanceId")))
+        A.CallTo(() => _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, 1, A<ICollection<string>>.That.Contains("targetClientInstanceId")))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -187,7 +187,7 @@ public class SynchronizationServiceTests
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, 1, A<HashSet<string>>.That.Contains("targetClientInstanceId")))
+        A.CallTo(() => _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, 1, A<ICollection<string>>.That.Contains("targetClientInstanceId")))
             .MustHaveHappenedOnceExactly();
     }
     

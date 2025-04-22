@@ -1,4 +1,5 @@
-﻿using ByteSync.Common.Business.Actions;
+﻿using System.Collections.Concurrent;
+using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Common.Helpers;
@@ -77,7 +78,7 @@ public class SynchronizationService : ISynchronizationService
     {
         var actionsGroupsIds = sharedFileDefinition.ActionsGroupIds;
 
-        HashSet<string> targetInstanceIds = new HashSet<string>();
+        ConcurrentBag<string> targetInstanceIds = new ConcurrentBag<string>();
                 
         var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, actionsGroupsIds!, (trackingAction, synchronization) =>
         {
@@ -87,15 +88,18 @@ public class SynchronizationService : ISynchronizationService
             }
             
             trackingAction.IsSourceSuccess = true;
-                
-            targetInstanceIds.AddAll(trackingAction.TargetClientInstanceIds);
+
+            foreach (var targetClientInstanceId in trackingAction.TargetClientInstanceIds)
+            {
+                targetInstanceIds.Add(targetClientInstanceId);
+            }
 
             return new TrackingActionUpdateHandlerResult(true);
         });
 
         if (result.IsSuccess)
         {
-            await _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, totalParts, targetInstanceIds);
+            await _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, totalParts, targetInstanceIds.ToList());
         }
     }
 

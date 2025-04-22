@@ -51,7 +51,7 @@ public class SynchronizationProgressService : ISynchronizationProgressService
         await _invokeClientsService.SessionGroup(synchronization.SessionId).SynchronizationStarted(synchronization);
     }
 
-    public async Task UploadIsFinished(SharedFileDefinition sharedFileDefinition, int totalParts, HashSet<string> targetInstanceIds)
+    public async Task UploadIsFinished(SharedFileDefinition sharedFileDefinition, int totalParts, ICollection<string> targetInstanceIds)
     {
         await _sharedFilesService.AssertUploadIsFinished(sharedFileDefinition, totalParts, targetInstanceIds);
 
