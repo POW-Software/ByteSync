@@ -80,28 +80,28 @@ public class RedisInfrastructureService : IRedisInfrastructureService
 
     public async Task<IRedLock> AcquireLockAsync(CacheKey cacheKey)
     {
-        var redisLock = await _redLockFactory.CreateLockAsync(cacheKey.Value, TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(2));
-
-        if (redisLock.IsAcquired)
-        {
-            return redisLock;
-        }
-        else
-        {
-            throw new AcquireRedisLockException(cacheKey.Value, redisLock);
-        }
-        
-        // var myLock = new MyLock
-        // {
-        //     Resource = cacheKey.Value,
-        //     LockId = Guid.NewGuid().ToString(),
-        //     IsAcquired = true,
-        //     Status = RedLockStatus.Acquired,
-        //     InstanceSummary = new RedLockInstanceSummary(),
-        //     ExtendCount = 0
-        // };
+        // var redisLock = await _redLockFactory.CreateLockAsync(cacheKey.Value, TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(2));
         //
-        // return myLock;
+        // if (redisLock.IsAcquired)
+        // {
+        //     return redisLock;
+        // }
+        // else
+        // {
+        //     throw new AcquireRedisLockException(cacheKey.Value, redisLock);
+        // }
+        
+        var myLock = new MyLock
+        {
+            Resource = cacheKey.Value,
+            LockId = Guid.NewGuid().ToString(),
+            IsAcquired = true,
+            Status = RedLockStatus.Acquired,
+            InstanceSummary = new RedLockInstanceSummary(),
+            ExtendCount = 0
+        };
+        
+        return myLock;
         
        
     }
@@ -113,29 +113,29 @@ public class RedisInfrastructureService : IRedisInfrastructureService
         return cacheKey;
     }
     
-    // public class MyLock : IRedLock
-    // {
-    //     public MyLock()
-    //     {
-    //
-    //     }
-    //
-    //
-    //     public void Dispose()
-    //     {
-    //
-    //     }
-    //
-    //     public ValueTask DisposeAsync()
-    //     {
-    //         return ValueTask.CompletedTask;
-    //     }
-    //
-    //     public string Resource { get; set; }
-    //     public string LockId { get; set; }
-    //     public bool IsAcquired { get; set; }
-    //     public RedLockStatus Status { get; set; }
-    //     public RedLockInstanceSummary InstanceSummary { get; set; }
-    //     public int ExtendCount { get; set; }
-    // }
+    public class MyLock : IRedLock
+    {
+        public MyLock()
+        {
+    
+        }
+    
+    
+        public void Dispose()
+        {
+    
+        }
+    
+        public ValueTask DisposeAsync()
+        {
+            return ValueTask.CompletedTask;
+        }
+    
+        public string Resource { get; set; }
+        public string LockId { get; set; }
+        public bool IsAcquired { get; set; }
+        public RedLockStatus Status { get; set; }
+        public RedLockInstanceSummary InstanceSummary { get; set; }
+        public int ExtendCount { get; set; }
+    }
 }
