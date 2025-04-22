@@ -49,14 +49,16 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
+            bool isOK = false;
+            Client? client = null;
             try
             {
                 var claims = ValidateToken(tokenHandler, token);
 
-                var client = await GetClient(claims);
+                client = await GetClient(claims);
                 context.Items.Add(AuthConstants.FUNCTION_CONTEXT_CLIENT, client!);
-
-                await BeginScopeAndGoNext(context, next, client);
+                
+                isOK = true;
             }
             catch (SecurityTokenExpiredException ex)
             {
@@ -72,6 +74,11 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
             {
                 _logger.LogError(ex, "Error validating token");
                 await HandleTokenError(context, "Invalid token");
+            }
+
+            if (isOK)
+            {
+                await BeginScopeAndGoNext(context, next, client!);
             }
         }
         else
