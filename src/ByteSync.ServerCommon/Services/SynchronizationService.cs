@@ -99,7 +99,7 @@ public class SynchronizationService : ISynchronizationService
 
         if (result.IsSuccess)
         {
-            await _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, totalParts, targetInstanceIds.ToList());
+            await _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, totalParts, targetInstanceIds.ToHashSet());
         }
     }
 

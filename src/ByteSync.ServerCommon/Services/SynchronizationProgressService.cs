@@ -53,6 +53,8 @@ public class SynchronizationProgressService : ISynchronizationProgressService
 
     public async Task UploadIsFinished(SharedFileDefinition sharedFileDefinition, int totalParts, ICollection<string> targetInstanceIds)
     {
+        targetInstanceIds = new HashSet<string>(targetInstanceIds);
+        
         await _sharedFilesService.AssertUploadIsFinished(sharedFileDefinition, totalParts, targetInstanceIds);
 
         var fileTransferPush = new FileTransferPush
