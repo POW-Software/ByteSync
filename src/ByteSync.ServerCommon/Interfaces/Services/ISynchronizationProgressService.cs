@@ -16,7 +16,7 @@ public interface ISynchronizationProgressService
     
     Task<Synchronization> MapToSynchronization(SynchronizationEntity synchronizationEntity);
     
-    Task UploadIsFinished(SharedFileDefinition sharedFileDefinition, int totalParts, ICollection<string> targetInstanceIds);
+    Task UploadIsFinished(SharedFileDefinition sharedFileDefinition, int totalParts, HashSet<string> targetInstanceIds);
     
     Task FilePartIsUploaded(SharedFileDefinition sharedFileDefinition, int partNumber, HashSet<string> targetInstanceIds);
 }
