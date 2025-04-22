@@ -17,5 +17,5 @@ public interface ICacheRepository<T> where T : class
     
     Task Delete(CacheKey cacheKey, ITransaction? transaction = null);
     
-    Task<IRedLock> AcquireLockAsync(CacheKey cacheKey);
+    // Task<IRedLock> AcquireLockAsync(CacheKey cacheKey);
 }

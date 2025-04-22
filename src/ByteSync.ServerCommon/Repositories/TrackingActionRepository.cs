@@ -61,7 +61,7 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
         // CacheKey? synchronizationCacheKey = null;
         // IRedLock? synchronizationLock = null;
 
-        var locks = new ConcurrentBag<IAsyncDisposable>(); // Thread-safe
+        // var locks = new ConcurrentBag<IAsyncDisposable>(); // Thread-safe
         var trackingActionEntities = new ConcurrentBag<TrackingActionEntity>();
         var updateHandlerResults = new ConcurrentBag<TrackingActionUpdateHandlerResult>();
         // bool areAllUpdated = true;
@@ -74,8 +74,8 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
         // }
         
         var synchronizationCacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.Synchronization, sessionId);
-        var synchronizationLock = await _redisInfrastructureService.AcquireLockAsync(synchronizationCacheKey);
-        locks.Add(synchronizationLock);
+        await using var synchronizationLock = await _redisInfrastructureService.AcquireLockAsync(synchronizationCacheKey);
+        // locks.Add(synchronizationLock);
 
         var synchronizationEntity = await _synchronizationRepository.Get(sessionId);
         if (synchronizationEntity == null)
@@ -148,10 +148,10 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
             await transaction.ExecuteAsync();
         }
 
-        foreach (var redisLock in locks)
-        {
-            await redisLock.DisposeAsync();
-        }
+        // foreach (var redisLock in locks)
+        // {
+        //     await redisLock.DisposeAsync();
+        // }
 
         return new TrackingActionResult(areAllUpdated, trackingActionEntities.ToList(), synchronizationEntity);
     }

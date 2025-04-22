@@ -80,29 +80,29 @@ public class RedisInfrastructureService : IRedisInfrastructureService
 
     public async Task<IRedLock> AcquireLockAsync(CacheKey cacheKey)
     {
-        // var redisLock = await _redLockFactory.CreateLockAsync(cacheKey.Value, TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(2));
-        //
-        // if (redisLock.IsAcquired)
-        // {
-        //     return redisLock;
-        // }
-        // else
-        // {
-        //     throw new AcquireRedisLockException(cacheKey.Value, redisLock);
-        // }
+        var redisLock = await _redLockFactory.CreateLockAsync(cacheKey.Value, TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(2));
         
-        var myLock = new MyLock
+        if (redisLock.IsAcquired)
         {
-            Resource = cacheKey.Value,
-            LockId = Guid.NewGuid().ToString(),
-            IsAcquired = true,
-            Status = RedLockStatus.Acquired,
-            InstanceSummary = new RedLockInstanceSummary(),
-            ExtendCount = 0
-        };
+            return redisLock;
+        }
+        else
+        {
+            throw new AcquireRedisLockException(cacheKey.Value, redisLock);
+        }
         
-        return myLock;
-        
+        // var myLock = new MyLock
+        // {
+        //     Resource = cacheKey.Value,
+        //     LockId = Guid.NewGuid().ToString(),
+        //     IsAcquired = true,
+        //     Status = RedLockStatus.Acquired,
+        //     InstanceSummary = new RedLockInstanceSummary(),
+        //     ExtendCount = 0
+        // };
+        //
+        // return myLock;
+        //
        
     }
 
