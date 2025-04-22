@@ -100,10 +100,10 @@ var host = new HostBuilder()
     })
     .Build();
 
-using (var scope = host.Services.CreateScope())
-{
-    var cosmosService = scope.ServiceProvider.GetRequiredService<ICosmosDbService>();
-    await (cosmosService as CosmosDbService)!.InitializeAsync();
-}
+// using (var scope = host.Services.CreateScope())
+// {
+//     var cosmosService = scope.ServiceProvider.GetRequiredService<ICosmosDbService>();
+//     await (cosmosService as CosmosDbService)!.InitializeAsync();
+// }
 
 host.Run();

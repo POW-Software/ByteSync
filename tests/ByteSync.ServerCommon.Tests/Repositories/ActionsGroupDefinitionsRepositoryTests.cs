@@ -5,7 +5,7 @@ using ByteSync.ServerCommon.Repositories;
 using ByteSync.ServerCommon.Services;
 using ByteSync.ServerCommon.Tests.Helpers;
 using FluentAssertions;
-using Microsoft.Azure.Cosmos;
+// using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Options;
 
 namespace ByteSync.ServerCommon.Tests.Repositories;
@@ -23,51 +23,51 @@ public class ActionsGroupDefinitionsRepositoryTests
         Assert.Pass();
         return;
         
-        // Arrange
-        var cosmosDbSettings = TestSettingsInitializer.GetCosmosDbSettings();
-        
-        var cosmosDbService = new CosmosDbService(Options.Create(cosmosDbSettings));
-        await cosmosDbService.InitializeAsync();
-        
-        var repository = new ActionsGroupDefinitionsRepository(cosmosDbService);
-
-        string sessionId = "sessionId_" + DateTime.Now.Ticks;
-        var actionsGroupId1 = "ActionsGroupId_1_" + DateTime.Now.Ticks;
-        var actionsGroupId2 = "ActionsGroupId_2_" + DateTime.Now.Ticks;
-        var actionsGroupDefinitions = new List<ActionsGroupDefinition>
-        {
-            new ()
-            {
-                Operator = ActionOperatorTypes.SynchronizeContentAndDate,
-                Size = 100,
-                Source = "SourceTest",
-                Targets = ["TargetTest"],
-                FileSystemType = FileSystemTypes.File,
-                CreationTimeUtc = DateTime.UtcNow.AddMinutes(-10),
-                LastWriteTimeUtc = DateTime.UtcNow.AddMinutes(-5),
-                AppliesOnlySynchronizeDate = false,
-                ActionsGroupId = actionsGroupId1,
-            },
-            new ()
-            {
-                Operator = ActionOperatorTypes.SynchronizeContentAndDate,
-                Size = 200,
-                Source = "SourceTest",
-                Targets = ["TargetTest"],
-                FileSystemType = FileSystemTypes.File,
-                CreationTimeUtc = DateTime.UtcNow.AddMinutes(-20),
-                LastWriteTimeUtc = DateTime.UtcNow.AddMinutes(-10),
-                AppliesOnlySynchronizeDate = false,
-                ActionsGroupId = actionsGroupId2,
-            },
-        };
-        
-        // Act
-        await repository.AddOrUpdateActionsGroupDefinitions(sessionId, actionsGroupDefinitions);
-        
-        // Assert
-        (await repository.GetActionGroupDefinition(actionsGroupId1, sessionId)).Should().NotBeNull();
-        (await repository.GetActionGroupDefinition(actionsGroupId2, sessionId)).Should().NotBeNull();
+        // // Arrange
+        // var cosmosDbSettings = TestSettingsInitializer.GetCosmosDbSettings();
+        //
+        // var cosmosDbService = new CosmosDbService(Options.Create(cosmosDbSettings));
+        // await cosmosDbService.InitializeAsync();
+        //
+        // var repository = new ActionsGroupDefinitionsRepository(cosmosDbService);
+        //
+        // string sessionId = "sessionId_" + DateTime.Now.Ticks;
+        // var actionsGroupId1 = "ActionsGroupId_1_" + DateTime.Now.Ticks;
+        // var actionsGroupId2 = "ActionsGroupId_2_" + DateTime.Now.Ticks;
+        // var actionsGroupDefinitions = new List<ActionsGroupDefinition>
+        // {
+        //     new ()
+        //     {
+        //         Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+        //         Size = 100,
+        //         Source = "SourceTest",
+        //         Targets = ["TargetTest"],
+        //         FileSystemType = FileSystemTypes.File,
+        //         CreationTimeUtc = DateTime.UtcNow.AddMinutes(-10),
+        //         LastWriteTimeUtc = DateTime.UtcNow.AddMinutes(-5),
+        //         AppliesOnlySynchronizeDate = false,
+        //         ActionsGroupId = actionsGroupId1,
+        //     },
+        //     new ()
+        //     {
+        //         Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+        //         Size = 200,
+        //         Source = "SourceTest",
+        //         Targets = ["TargetTest"],
+        //         FileSystemType = FileSystemTypes.File,
+        //         CreationTimeUtc = DateTime.UtcNow.AddMinutes(-20),
+        //         LastWriteTimeUtc = DateTime.UtcNow.AddMinutes(-10),
+        //         AppliesOnlySynchronizeDate = false,
+        //         ActionsGroupId = actionsGroupId2,
+        //     },
+        // };
+        //
+        // // Act
+        // await repository.AddOrUpdateActionsGroupDefinitions(sessionId, actionsGroupDefinitions);
+        //
+        // // Assert
+        // (await repository.GetActionGroupDefinition(actionsGroupId1, sessionId)).Should().NotBeNull();
+        // (await repository.GetActionGroupDefinition(actionsGroupId2, sessionId)).Should().NotBeNull();
     }
     
     [Test]
@@ -76,72 +76,72 @@ public class ActionsGroupDefinitionsRepositoryTests
         Assert.Pass();
         return;
         
-        // Arrange
-        var cosmosDbSettings = TestSettingsInitializer.GetCosmosDbSettings();
-        
-        var cosmosDbService = new CosmosDbService(Options.Create(cosmosDbSettings));
-        await cosmosDbService.InitializeAsync();
-        
-        var repository = new ActionsGroupDefinitionsRepository(cosmosDbService);
-
-        string sessionId = "sessionId_" + DateTime.Now.Ticks;
-        var actionsGroupId1 = "ActionsGroupId_1_" + DateTime.Now.Ticks;
-        var actionsGroupId2 = "ActionsGroupId_2_" + DateTime.Now.Ticks;
-        var actionsGroupDefinitions = new List<ActionsGroupDefinition>
-        {
-            new ()
-            {
-                Operator = ActionOperatorTypes.SynchronizeContentAndDate,
-                Size = 100,
-                Source = "SourceTest",
-                Targets = ["TargetTest"],
-                FileSystemType = FileSystemTypes.File,
-                CreationTimeUtc = DateTime.UtcNow.AddMinutes(-10),
-                LastWriteTimeUtc = DateTime.UtcNow.AddMinutes(-5),
-                AppliesOnlySynchronizeDate = false,
-                ActionsGroupId = actionsGroupId1,
-            },
-            new ()
-            {
-                Operator = ActionOperatorTypes.SynchronizeContentAndDate,
-                Size = 200,
-                Source = "SourceTest",
-                Targets = ["TargetTest"],
-                FileSystemType = FileSystemTypes.File,
-                CreationTimeUtc = DateTime.UtcNow.AddMinutes(-20),
-                LastWriteTimeUtc = DateTime.UtcNow.AddMinutes(-10),
-                AppliesOnlySynchronizeDate = false,
-                ActionsGroupId = actionsGroupId2,
-            },
-        };
-        
-        await repository.AddOrUpdateActionsGroupDefinitions(sessionId, actionsGroupDefinitions);
-        
-        (await repository.GetActionGroupDefinition(actionsGroupId1, sessionId)).Should().NotBeNull();
-        (await repository.GetActionGroupDefinition(actionsGroupId2, sessionId)).Should().NotBeNull();
-
-        // Act
-        await repository.DeleteActionsGroupDefinitions(sessionId);
-        
-        // Assert
-        var query = new QueryDefinition("SELECT * FROM c WHERE c.SessionId = @sessionId")
-            .WithParameter("@sessionId", sessionId);
-
-        var iterator = cosmosDbService.ActionsGroupDefinitionsContainer
-            .GetItemQueryIterator<ActionsGroupDefinitionEntity>(
-                query,
-                requestOptions: new QueryRequestOptions
-                {
-                    PartitionKey = new PartitionKey(sessionId) // La clé de partition est toujours spécifiée ici
-                });
-
-        var results = new List<ActionsGroupDefinitionEntity>();
-        while (iterator.HasMoreResults)
-        {
-            var response = await iterator.ReadNextAsync();
-            results.AddRange(response);
-        }
-        results.Should().BeEmpty();
+        // // Arrange
+        // var cosmosDbSettings = TestSettingsInitializer.GetCosmosDbSettings();
+        //
+        // var cosmosDbService = new CosmosDbService(Options.Create(cosmosDbSettings));
+        // await cosmosDbService.InitializeAsync();
+        //
+        // var repository = new ActionsGroupDefinitionsRepository(cosmosDbService);
+        //
+        // string sessionId = "sessionId_" + DateTime.Now.Ticks;
+        // var actionsGroupId1 = "ActionsGroupId_1_" + DateTime.Now.Ticks;
+        // var actionsGroupId2 = "ActionsGroupId_2_" + DateTime.Now.Ticks;
+        // var actionsGroupDefinitions = new List<ActionsGroupDefinition>
+        // {
+        //     new ()
+        //     {
+        //         Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+        //         Size = 100,
+        //         Source = "SourceTest",
+        //         Targets = ["TargetTest"],
+        //         FileSystemType = FileSystemTypes.File,
+        //         CreationTimeUtc = DateTime.UtcNow.AddMinutes(-10),
+        //         LastWriteTimeUtc = DateTime.UtcNow.AddMinutes(-5),
+        //         AppliesOnlySynchronizeDate = false,
+        //         ActionsGroupId = actionsGroupId1,
+        //     },
+        //     new ()
+        //     {
+        //         Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+        //         Size = 200,
+        //         Source = "SourceTest",
+        //         Targets = ["TargetTest"],
+        //         FileSystemType = FileSystemTypes.File,
+        //         CreationTimeUtc = DateTime.UtcNow.AddMinutes(-20),
+        //         LastWriteTimeUtc = DateTime.UtcNow.AddMinutes(-10),
+        //         AppliesOnlySynchronizeDate = false,
+        //         ActionsGroupId = actionsGroupId2,
+        //     },
+        // };
+        //
+        // await repository.AddOrUpdateActionsGroupDefinitions(sessionId, actionsGroupDefinitions);
+        //
+        // (await repository.GetActionGroupDefinition(actionsGroupId1, sessionId)).Should().NotBeNull();
+        // (await repository.GetActionGroupDefinition(actionsGroupId2, sessionId)).Should().NotBeNull();
+        //
+        // // Act
+        // await repository.DeleteActionsGroupDefinitions(sessionId);
+        //
+        // // Assert
+        // var query = new QueryDefinition("SELECT * FROM c WHERE c.SessionId = @sessionId")
+        //     .WithParameter("@sessionId", sessionId);
+        //
+        // var iterator = cosmosDbService.ActionsGroupDefinitionsContainer
+        //     .GetItemQueryIterator<ActionsGroupDefinitionEntity>(
+        //         query,
+        //         requestOptions: new QueryRequestOptions
+        //         {
+        //             PartitionKey = new PartitionKey(sessionId) // La clé de partition est toujours spécifiée ici
+        //         });
+        //
+        // var results = new List<ActionsGroupDefinitionEntity>();
+        // while (iterator.HasMoreResults)
+        // {
+        //     var response = await iterator.ReadNextAsync();
+        //     results.AddRange(response);
+        // }
+        // results.Should().BeEmpty();
     }
     
     // [Test]

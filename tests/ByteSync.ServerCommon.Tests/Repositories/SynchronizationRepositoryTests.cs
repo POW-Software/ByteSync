@@ -40,7 +40,6 @@ public class SynchronizationRepositoryTests
         _repository = new SynchronizationRepository(
             _redisInfrastructureService, 
             _synchronizationEntityCacheRepository, 
-            _actionsGroupDefRepo,
             _trackingActionEntityCacheRepository);
     }
 

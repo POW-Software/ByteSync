@@ -21,10 +21,9 @@ public class TrackingActionRepositoryTests
     private TrackingActionRepository _repository;
     private IRedisInfrastructureService _redisInfrastructureService;
     private ISynchronizationRepository _synchronizationRepository;
-    private ITrackingActionEntityFactory _trackingActionEntityFactory;
     private ICacheRepository<TrackingActionEntity> _cacheRepository;
     private ICacheRepository<SynchronizationEntity> _synchronizationCacheRepository;
-    private ActionsGroupDefinitionsRepository _actionsGroupDefinitionsRepository;
+    // private ActionsGroupDefinitionsRepository _actionsGroupDefinitionsRepository;
 
     [SetUp]
     public void SetUp()
@@ -34,19 +33,17 @@ public class TrackingActionRepositoryTests
         var loggerFactoryMock = A.Fake<ILoggerFactory>();
         var loggerMock = A.Fake<ILogger<TrackingActionRepository>>();
         var cosmosDbSettings = TestSettingsInitializer.GetCosmosDbSettings();
-        var cosmosDbService = new CosmosDbService(Options.Create(cosmosDbSettings));
-        cosmosDbService.InitializeAsync().Wait();
-        _actionsGroupDefinitionsRepository = new ActionsGroupDefinitionsRepository(cosmosDbService);
-        _trackingActionEntityFactory = new TrackingActionEntityFactory(_actionsGroupDefinitionsRepository);
+        // var cosmosDbService = new CosmosDbService(Options.Create(cosmosDbSettings));
+        // cosmosDbService.InitializeAsync().Wait();
+        // _actionsGroupDefinitionsRepository = new ActionsGroupDefinitionsRepository(cosmosDbService);
         _synchronizationRepository = new SynchronizationRepository(
             new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock),
             new CacheRepository<SynchronizationEntity>(new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock)),
-            _actionsGroupDefinitionsRepository,
             new CacheRepository<TrackingActionEntity>(new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock)));
         _redisInfrastructureService = new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock);
         _cacheRepository = new CacheRepository<TrackingActionEntity>(_redisInfrastructureService);
         _synchronizationCacheRepository = new CacheRepository<SynchronizationEntity>(_redisInfrastructureService);
-        _repository = new TrackingActionRepository(_redisInfrastructureService, _synchronizationRepository, _trackingActionEntityFactory, _cacheRepository, 
+        _repository = new TrackingActionRepository(_redisInfrastructureService, _synchronizationRepository, _cacheRepository, 
             _synchronizationCacheRepository, loggerMock);
     }
 
@@ -56,26 +53,26 @@ public class TrackingActionRepositoryTests
         Assert.Pass();
         return;
         
-        // Arrange
-        var nowTicks = DateTime.Now.Ticks;
-        var sessionId = "session_" + nowTicks;
-        var actionsGroupId = "group_" + nowTicks;
-        var existingEntity = new TrackingActionEntity { ActionsGroupId = actionsGroupId };
-
-        List<ActionsGroupDefinition> actionsGroupDefinitions =
-        [
-            new()
-            {
-                ActionsGroupId = actionsGroupId,
-            }
-        ];
-        await _actionsGroupDefinitionsRepository.AddOrUpdateActionsGroupDefinitions(sessionId, actionsGroupDefinitions);
-        
-        // Act
-        var result = await _repository.GetOrBuild(sessionId, actionsGroupId);
-
-        // Assert
-        result.Should().BeEquivalentTo(existingEntity);
+        // // Arrange
+        // var nowTicks = DateTime.Now.Ticks;
+        // var sessionId = "session_" + nowTicks;
+        // var actionsGroupId = "group_" + nowTicks;
+        // var existingEntity = new TrackingActionEntity { ActionsGroupId = actionsGroupId };
+        //
+        // List<ActionsGroupDefinition> actionsGroupDefinitions =
+        // [
+        //     new()
+        //     {
+        //         ActionsGroupId = actionsGroupId,
+        //     }
+        // ];
+        // await _actionsGroupDefinitionsRepository.AddOrUpdateActionsGroupDefinitions(sessionId, actionsGroupDefinitions);
+        //
+        // // Act
+        // var result = await _repository.GetOrBuild(sessionId, actionsGroupId);
+        //
+        // // Assert
+        // result.Should().BeEquivalentTo(existingEntity);
     }
 
     [Test]

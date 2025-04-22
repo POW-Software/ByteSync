@@ -7,13 +7,12 @@ namespace ByteSync.ServerCommon.Repositories;
 
 public class SynchronizationRepository : BaseRepository<SynchronizationEntity>, ISynchronizationRepository
 {
-    private readonly IActionsGroupDefinitionsRepository _actionsGroupDefinitionsRepository;
+
     private readonly ICacheRepository<TrackingActionEntity> _cacheTrackingAction;
     
     public SynchronizationRepository(IRedisInfrastructureService redisInfrastructureService, ICacheRepository<SynchronizationEntity> cacheRepository,
-        IActionsGroupDefinitionsRepository actionsGroupDefinitionsRepository, ICacheRepository<TrackingActionEntity> cacheTrackingAction) : base(redisInfrastructureService, cacheRepository)
+        ICacheRepository<TrackingActionEntity> cacheTrackingAction) : base(redisInfrastructureService, cacheRepository)
     {
-        _actionsGroupDefinitionsRepository = actionsGroupDefinitionsRepository;
         _cacheTrackingAction = cacheTrackingAction;
     }
 

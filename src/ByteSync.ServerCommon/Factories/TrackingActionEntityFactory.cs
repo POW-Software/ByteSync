@@ -9,30 +9,32 @@ public class TrackingActionEntityFactory : ITrackingActionEntityFactory
 {
     private readonly IActionsGroupDefinitionsRepository _actionsGroupDefinitionsRepository;
     
-    public TrackingActionEntityFactory(IActionsGroupDefinitionsRepository actionsGroupDefinitionsRepository)
+    public TrackingActionEntityFactory()
     {
-        _actionsGroupDefinitionsRepository = actionsGroupDefinitionsRepository;
+
     }
     
     public async Task<TrackingActionEntity> Create(string sessionId, string actionsGroupId)
     {
-        var actionGroupDefinition = await _actionsGroupDefinitionsRepository.GetActionGroupDefinition(actionsGroupId, sessionId);
-            
-        string? source = actionGroupDefinition.Source;
-        if (actionGroupDefinition.Operator == ActionOperatorTypes.SynchronizeDate
-            || (actionGroupDefinition.Operator == ActionOperatorTypes.SynchronizeContentAndDate && actionGroupDefinition.AppliesOnlySynchronizeDate))
-        {
-            source = null;
-        }
-            
-        var trackingActionEntity = new TrackingActionEntity
-        {
-            ActionsGroupId = actionsGroupId,
-            SourceClientInstanceId = source,
-            TargetClientInstanceIds = [..actionGroupDefinition.Targets],
-            Size = actionGroupDefinition.Size,
-        };
+        return new TrackingActionEntity();
         
-        return trackingActionEntity;
+        // var actionGroupDefinition = await _actionsGroupDefinitionsRepository.GetActionGroupDefinition(actionsGroupId, sessionId);
+        //     
+        // string? source = actionGroupDefinition.Source;
+        // if (actionGroupDefinition.Operator == ActionOperatorTypes.SynchronizeDate
+        //     || (actionGroupDefinition.Operator == ActionOperatorTypes.SynchronizeContentAndDate && actionGroupDefinition.AppliesOnlySynchronizeDate))
+        // {
+        //     source = null;
+        // }
+        //     
+        // var trackingActionEntity = new TrackingActionEntity
+        // {
+        //     ActionsGroupId = actionsGroupId,
+        //     SourceClientInstanceId = source,
+        //     TargetClientInstanceIds = [..actionGroupDefinition.Targets],
+        //     Size = actionGroupDefinition.Size,
+        // };
+        //
+        // return trackingActionEntity;
     }
 }
