@@ -154,7 +154,6 @@ public class SynchronizationServiceTests
 
         // Assert
         A.CallTo(() => _synchronizationRepository.AddSynchronization(A<SynchronizationEntity>._, actionsGroupDefinitions)).MustNotHaveHappened();
-        // A.CallTo(() => _synchronizationProgressService.MapToSynchronization(synchronizationEntity)).MustHaveHappened();
     }
     
     [Test]
