@@ -97,8 +97,6 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
             try
             {
                 await CloseAndUploadCurrentMultiZip();
-
-                // await Task.Delay(3000);
             }
             catch (Exception ex)
             {
@@ -112,7 +110,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
             {
                 await MultiZipPrepareSemaphore.WaitAsync();
 
-                // on crée le currentMultiUploadZip
+                // create the currentMultiUploadZip
                 var sharedFileDefinition = BuildSharedFileDefinition(sharedFileType);
 
                 _logger.LogInformation("Creating MultiUploadZip with id:{MultiZipId} for grouped upload (delta:{isDelta})",
@@ -183,7 +181,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
     {
         return Task.Run(() =>
         {
-            // L'abandon de la synchro a été demandé, on doit libérer les ressources
+            // The synchronization has been requested to be abandoned; we must free up resources
             if (_currentMultiUploadZip != null)
             {
                 try
