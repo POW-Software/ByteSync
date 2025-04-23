@@ -30,46 +30,9 @@ public class SharedActionsGroupComputer : ISharedActionsGroupComputer
     public async Task ComputeSharedActionsGroups()
     {
         var sharedAtomicActions = _sharedAtomicActionRepository.Elements;
-        
-        // var tasks = new List<Task>();
+
         var dictionary = sharedAtomicActions.GroupBy(saa => saa.PathIdentity)
             .ToDictionary(g => g.Key, g => g.ToList());
-        
-        // foreach (KeyValuePair<PathIdentity, List<SharedAtomicAction>> pair in dictionary)
-        // {
-        //     tasks.Add(Task.Run(() => ComputeGroups_CopyContentAndDate(pair.Value)));
-        //     tasks.Add(Task.Run(() => ComputeGroups_CopyContent(pair.Value)));
-        //     tasks.Add(Task.Run(() => ComputeGroups_CopyDate(pair.Value)));
-        //     tasks.Add(Task.Run(() => ComputeGroups_Create(pair.Value)));
-        //     tasks.Add(Task.Run(() => ComputeGroups_Delete(pair.Value)));
-        // }
-        //
-        // await Task.WhenAll(tasks);
-        
-        // await Task.Run(() => {
-        //     Parallel.ForEach(
-        //         dictionary,
-        //         new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount * 2 },
-        //         pair => {
-        //             ComputeGroups_CopyContentAndDate(pair.Value).Wait();
-        //             ComputeGroups_CopyContent(pair.Value).Wait();
-        //             ComputeGroups_CopyDate(pair.Value).Wait();
-        //             ComputeGroups_Create(pair.Value).Wait();
-        //             ComputeGroups_Delete(pair.Value).Wait();
-        //         }
-        //     );
-        // });
-        
-        // await Parallel.ForEachAsync(dictionary, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount * 2 }, async (pair, ct) =>
-        // {
-        //     await Task.WhenAll(
-        //         Task.Run(() => ComputeGroups_CopyContentAndDate(pair.Value)),
-        //         Task.Run(() => ComputeGroups_CopyContent(pair.Value)),
-        //         Task.Run(() => ComputeGroups_CopyDate(pair.Value)),
-        //         Task.Run(() => ComputeGroups_Create(pair.Value)),
-        //         Task.Run(() => ComputeGroups_Delete(pair.Value))
-        //     );
-        // });
         
         await Parallel.ForEachAsync(dictionary, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount * 2 }, (pair, _) =>
         {
@@ -246,13 +209,6 @@ public class SharedActionsGroupComputer : ISharedActionsGroupComputer
     
     private void AddSharedActionsGroups(List<SharedActionsGroup> sharedActionsGroups)
     {
-        // if (sharedActionsGroups.Count > 0)
-        // {
-        //     _sharedActionsGroupRepository.AddOrUpdate(sharedActionsGroups);
-        // }
-        //
-        // AddToBuffer(sharedActionsGroups);
-        
         lock (_lock)
         {
             _buffer.AddAll(sharedActionsGroups);
@@ -262,11 +218,6 @@ public class SharedActionsGroupComputer : ISharedActionsGroupComputer
 
     }
 
-    // private void AddToBuffer(List<SharedActionsGroup> sharedActionsGroups)
-    // {
-    //     _buffer.AddAll(sharedActionsGroups);
-    // }
-
     private void AddSharedActionsGroup(SharedActionsGroup sharedActionsGroup)
     {
         lock (_lock)
@@ -275,8 +226,6 @@ public class SharedActionsGroupComputer : ISharedActionsGroupComputer
             
             CheckBuffer();
         }
-
-        // _sharedActionsGroupRepository.AddOrUpdate(sharedActionsGroup);
     }
 
     private void CheckBuffer()
@@ -291,7 +240,7 @@ public class SharedActionsGroupComputer : ISharedActionsGroupComputer
     private static List<List<SharedAtomicAction>> GetCopyGroups(IEnumerable<SharedAtomicAction> sharedAtomicActions, bool isContentAndDate)
     {
         var root = sharedAtomicActions
-            .Where(saa => saa.Target != null) // La target peut être null dans certains cas avec les règles de synchronisation
+            .Where(saa => saa.Target != null) // The target may be null in some cases with synchronization rules
             .GroupBy(saa => saa.Source!)
             .Select(x => new
             {
