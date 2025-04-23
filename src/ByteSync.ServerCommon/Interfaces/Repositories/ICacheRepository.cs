@@ -16,6 +16,4 @@ public interface ICacheRepository<T> where T : class
     Task<UpdateEntityResult<T>> AddOrUpdate(CacheKey cacheKey, Func<T?, T?> handler, ITransaction? transaction = null, IRedLock? redisLock = null);
     
     Task Delete(CacheKey cacheKey, ITransaction? transaction = null);
-    
-    // Task<IRedLock> AcquireLockAsync(CacheKey cacheKey);
 }
