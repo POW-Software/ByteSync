@@ -119,11 +119,6 @@ public class CacheRepository<T> : ICacheRepository<T> where T : class
         IDatabaseAsync database = _redisInfrastructureService.GetDatabase(transaction);
         await database.KeyDeleteAsync(cacheKey.Value);
     }
-
-    // public async Task<IRedLock> AcquireLockAsync(CacheKey cacheKey)
-    // {
-    //     return await _redisInfrastructureService.AcquireLockAsync(cacheKey);
-    // }
     
     private async Task<UpdateEntityResult<T>> SaveInternal(CacheKey cacheKey, T element, IDatabaseAsync database)
     {
