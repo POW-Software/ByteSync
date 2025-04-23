@@ -8,8 +8,6 @@ using ByteSync.Functions.Helpers.Middlewares;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Commands.Inventories;
 using ByteSync.ServerCommon.Helpers;
-using ByteSync.ServerCommon.Interfaces.Services;
-using ByteSync.ServerCommon.Services;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
