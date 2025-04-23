@@ -1,4 +1,6 @@
-﻿using ByteSync.Business.Arguments;
+﻿using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using ByteSync.Business.Arguments;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Sessions.Local;
@@ -16,22 +18,33 @@ public class SynchronizationLooper : ISynchronizationLooper
     private readonly ISynchronizationActionHandler _synchronizationActionHandler;
     private readonly ISynchronizationApiClient _synchronizationApiClient;
     private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository;
+    private readonly ISynchronizationService _synchronizationService;
     private readonly ILogger<SynchronizationLooper> _logger;
+    
+    private readonly CompositeDisposable _disposables = new();
 
     public SynchronizationLooper(ISessionService sessionService, ISessionMemberService sessionMemberService, 
         ISynchronizationActionHandler synchronizationActionHandler, 
         ISynchronizationApiClient synchronizationApiClient, ISharedActionsGroupRepository sharedActionsGroupRepository,
-        ILogger<SynchronizationLooper> logger)
+        ISynchronizationService synchronizationService, ILogger<SynchronizationLooper> logger)
     {
         _sessionService = sessionService;
         _sessionMemberService = sessionMemberService;
         _synchronizationActionHandler = synchronizationActionHandler;
         _synchronizationApiClient = synchronizationApiClient;
         _sharedActionsGroupRepository = sharedActionsGroupRepository;
+        _synchronizationService = synchronizationService;
         _logger = logger;
 
         Session = null;
-        _sessionService.SessionObservable.Subscribe(value => Session = value); 
+        
+        var subscription = _sessionService.SessionObservable
+            .Subscribe(value => Session = value); 
+        _disposables.Add(subscription);
+
+        subscription = _synchronizationService.SynchronizationProcessData.SynchronizationAbortRequest.DistinctUntilChanged()
+            .Subscribe(synchronizationAbortRequest => IsSynchronizationAbortRequested = synchronizationAbortRequest != null);
+        _disposables.Add(subscription);
     }
 
     private AbstractSession? Session { get; set; }
@@ -108,5 +121,12 @@ public class SynchronizationLooper : ISynchronizationLooper
         {
             _logger.LogError(ex, "Error while informing server");
         }
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        _disposables.Dispose();
+        
+        return ValueTask.CompletedTask;
     }
 }

@@ -2,9 +2,7 @@
 
 namespace ByteSync.Interfaces.Controls.Synchronizations;
 
-public interface ISynchronizationLooper
+public interface ISynchronizationLooper : IAsyncDisposable
 {
-    // Task InitializeData();
-
     Task CloudSessionSynchronizationLoop();
 }
