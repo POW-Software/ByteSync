@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Mixins;
 using ByteSync.Assets.Resources;
@@ -12,12 +11,10 @@ using ByteSync.Business.Sessions;
 using ByteSync.Business.Synchronizations;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Synchronizations;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Interfaces.Dialogs;
-using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.ViewModels.Misc;
@@ -212,14 +209,6 @@ public class SynchronizationMainViewModel : ViewModelBase, IActivatableViewModel
             
         IsMainProgressRingVisible = false;
         IsMainCheckVisible = false;
-    }
-
-    private bool ComputeCanStartSynchronization(bool isSyncStarted, bool isCloudSession, bool isCloudSessionCreatedByMe, 
-        ObservableCollection<SharedAtomicAction>? actions, int actionsCount, bool isInventoryError)
-    {
-        var result = !isSyncStarted && (!isCloudSession || isCloudSessionCreatedByMe) && actions != null && actionsCount > 0 && !isInventoryError;
-
-        return result;
     }
 
     private bool ComputeShowStartSynchronizationObservable(bool isSynchronizationRunning, bool isCloudSession, bool isSessionCreatedByMe, 
