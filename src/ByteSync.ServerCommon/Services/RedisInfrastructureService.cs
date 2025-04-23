@@ -90,20 +90,6 @@ public class RedisInfrastructureService : IRedisInfrastructureService
         {
             throw new AcquireRedisLockException(cacheKey.Value, redisLock);
         }
-        
-        // var myLock = new MyLock
-        // {
-        //     Resource = cacheKey.Value,
-        //     LockId = Guid.NewGuid().ToString(),
-        //     IsAcquired = true,
-        //     Status = RedLockStatus.Acquired,
-        //     InstanceSummary = new RedLockInstanceSummary(),
-        //     ExtendCount = 0
-        // };
-        //
-        // return myLock;
-        //
-       
     }
 
     public CacheKey ComputeCacheKey(EntityType entityType, string entityId)
@@ -111,31 +97,5 @@ public class RedisInfrastructureService : IRedisInfrastructureService
         CacheKey cacheKey = _cacheKeyFactory.Create(entityType, entityId);
 
         return cacheKey;
-    }
-    
-    public class MyLock : IRedLock
-    {
-        public MyLock()
-        {
-    
-        }
-    
-    
-        public void Dispose()
-        {
-    
-        }
-    
-        public ValueTask DisposeAsync()
-        {
-            return ValueTask.CompletedTask;
-        }
-    
-        public string Resource { get; set; }
-        public string LockId { get; set; }
-        public bool IsAcquired { get; set; }
-        public RedLockStatus Status { get; set; }
-        public RedLockInstanceSummary InstanceSummary { get; set; }
-        public int ExtendCount { get; set; }
     }
 }
