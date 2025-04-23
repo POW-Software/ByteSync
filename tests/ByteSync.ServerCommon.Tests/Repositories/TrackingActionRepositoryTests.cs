@@ -65,9 +65,9 @@ public class TrackingActionRepositoryTests
         
         await _synchronizationRepository.AddSynchronization(synchronizationEntity, actionsGroupDefinitions);
 
-        Func<TrackingActionEntity, SynchronizationEntity, TrackingActionUpdateHandlerResult> updateHandler = (_, _) =>
+        Func<TrackingActionEntity, SynchronizationEntity, bool> updateHandler = (_, _) =>
         {
-            return new TrackingActionUpdateHandlerResult(true);
+            return true;
         };
 
         // Act

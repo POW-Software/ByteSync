@@ -84,7 +84,7 @@ public class SynchronizationService : ISynchronizationService
         {
             if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
             {
-                return new TrackingActionUpdateHandlerResult(false);
+                return false;
             }
             
             trackingAction.IsSourceSuccess = true;
@@ -94,7 +94,7 @@ public class SynchronizationService : ISynchronizationService
                 targetInstanceIds.Add(targetClientInstanceId);
             }
 
-            return new TrackingActionUpdateHandlerResult(true);
+            return true;
         });
 
         if (result.IsSuccess)
@@ -133,25 +133,23 @@ public class SynchronizationService : ISynchronizationService
         {
             if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
             {
-                return new TrackingActionUpdateHandlerResult(false);
+                return false;
             }
             
-            var trackingActionUpdateHandlerResult = new TrackingActionUpdateHandlerResult(true);
             bool wasTrackingActionFinished = trackingAction.IsFinished;
             
             trackingAction.AddSuccessOnTarget(client.ClientInstanceId);
 
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                trackingActionUpdateHandlerResult.FinishedActionsCount = 1;
-                trackingActionUpdateHandlerResult.ProcessedVolume = trackingAction.Size ?? 0;
+                synchronization.Progress.FinishedActionsCount += 1;
+                synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
             }
-
-            trackingActionUpdateHandlerResult.ExchangedVolume = sharedFileDefinition.UploadedFileLength;
+            synchronization.Progress.ExchangedVolume = sharedFileDefinition.UploadedFileLength;
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
 
-            return trackingActionUpdateHandlerResult;
+            return true;
         });
 
         if (result.IsSuccess)
@@ -189,22 +187,21 @@ public class SynchronizationService : ISynchronizationService
         {
             if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
             {
-                return new TrackingActionUpdateHandlerResult(false);
+                return false;
             }
             
-            var trackingActionUpdateHandlerResult = new TrackingActionUpdateHandlerResult(true);
             bool wasTrackingActionFinished = trackingAction.IsFinished;
             
             trackingAction.AddSuccessOnTarget(client.ClientInstanceId);
             
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                trackingActionUpdateHandlerResult.FinishedActionsCount = 1;
+                synchronization.Progress.FinishedActionsCount = 1;
             }
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
 
-            return trackingActionUpdateHandlerResult;
+            return true;
         });
 
         if (result.IsSuccess)
@@ -227,10 +224,9 @@ public class SynchronizationService : ISynchronizationService
         {
             if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
             {
-                return new TrackingActionUpdateHandlerResult(false);;
+                return false;
             }
             
-            var trackingActionUpdateHandlerResult = new TrackingActionUpdateHandlerResult(true);
             bool wasTrackingActionFinished = trackingAction.IsFinished;
             
             trackingAction.IsSourceSuccess = true;
@@ -238,14 +234,14 @@ public class SynchronizationService : ISynchronizationService
 
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                trackingActionUpdateHandlerResult.FinishedActionsCount = 1;
+                synchronization.Progress.FinishedActionsCount = 1;
             }
             
-            trackingActionUpdateHandlerResult.ProcessedVolume = trackingAction.Size ?? 0;
+            synchronization.Progress.ProcessedVolume = trackingAction.Size ?? 0;
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
 
-            return trackingActionUpdateHandlerResult;
+            return true;
         });
 
         if (result.IsSuccess)
@@ -268,10 +264,9 @@ public class SynchronizationService : ISynchronizationService
         {
             if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
             {
-                return new TrackingActionUpdateHandlerResult(false);
+                return false;
             }
             
-            var trackingActionUpdateHandlerResult = new TrackingActionUpdateHandlerResult(true);
             bool wasTrackingActionFinished = trackingAction.IsFinished;
             bool isNewError = !trackingAction.IsError;
             
@@ -293,16 +288,16 @@ public class SynchronizationService : ISynchronizationService
             
             if (isNewError)
             {
-                trackingActionUpdateHandlerResult.ErrorsCount = 1;
+                synchronization.Progress.ErrorsCount = 1;
             }
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                trackingActionUpdateHandlerResult.FinishedActionsCount = 1;
+                synchronization.Progress.FinishedActionsCount = 1;
             }
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
 
-            return trackingActionUpdateHandlerResult;
+            return true;
         });
 
         if (result.IsSuccess)

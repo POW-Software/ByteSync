@@ -8,5 +8,5 @@ public interface ITrackingActionRepository : IRepository<TrackingActionEntity>
     Task<TrackingActionEntity> GetOrBuild(string sessionId, string key);
     
     Task<TrackingActionResult> AddOrUpdate(string sessionId, List<string> actionsGroupIds,
-        Func<TrackingActionEntity, SynchronizationEntity, TrackingActionUpdateHandlerResult> updateHandler);
+        Func<TrackingActionEntity, SynchronizationEntity, bool> updateHandler);
 }
