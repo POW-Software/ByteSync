@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Entities;
+using ByteSync.ServerCommon.Exceptions;
 using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
@@ -29,22 +30,20 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
 
     public override EntityType EntityType => EntityType.TrackingAction;
 
-    public async Task<TrackingActionEntity> GetOrBuild(string sessionId, string actionsGroupId)
+    public async Task<TrackingActionEntity> GetOrThrow(string sessionId, string actionsGroupId)
     {
         var cacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType, $"{sessionId}_{actionsGroupId}");
 
-        await using var actionsGroupIdLock = await _redisInfrastructureService.AcquireLockAsync(cacheKey);
-
-        return await DoGetOrBuild(sessionId, actionsGroupId, cacheKey, actionsGroupIdLock);
+        return await GetOrThrow(cacheKey);
     }
-
-    private async Task<TrackingActionEntity> DoGetOrBuild(string sessionId, string actionsGroupId, CacheKey cacheKey, IRedLock actionsGroupIdLock)
+    
+    private async Task<TrackingActionEntity> GetOrThrow(CacheKey cacheKey)
     {
-        var trackingActionEntity = await Get($"{sessionId}_{actionsGroupId}");
+        var trackingActionEntity = await Get(cacheKey);
 
         if (trackingActionEntity == null)
         {
-            throw new Exception("TrackingActionEntity is null");
+            throw new ElementNotFoundException(cacheKey);
         }
 
         return trackingActionEntity;
@@ -74,15 +73,15 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
             await semaphore.WaitAsync();
             try
             {
-                var cacheKey  = _redisInfrastructureService.ComputeCacheKey(EntityType, $"{sessionId}_{actionsGroupId}");
-                var actionsGroupIdLock = await _redisInfrastructureService.AcquireLockAsync(cacheKey); 
+                var cacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType, $"{sessionId}_{actionsGroupId}");
             
-                var trackingActionEntity = await DoGetOrBuild(sessionId, actionsGroupId, cacheKey, actionsGroupIdLock);
+                var trackingActionEntity = await GetOrThrow(cacheKey);
                 bool isUpdated = updateHandler.Invoke(trackingActionEntity, synchronizationEntity);
 
                 if (isUpdated)
                 {
-                    await Save(cacheKey, trackingActionEntity, transaction, actionsGroupIdLock);
+                    // ReSharper disable once AccessToDisposedClosure
+                    await Save(cacheKey, trackingActionEntity, transaction, synchronizationLock);
                     trackingActionEntities.Add(trackingActionEntity);
                 }
                 else

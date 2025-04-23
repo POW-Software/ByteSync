@@ -26,7 +26,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
         return await Get(cacheKey);
     }
     
-    public async Task<T?> Get(CacheKey cacheKey)
+    protected async Task<T?> Get(CacheKey cacheKey)
     {
         return await _cacheRepository.Get(cacheKey);
     }

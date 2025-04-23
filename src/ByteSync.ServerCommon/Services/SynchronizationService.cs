@@ -69,7 +69,7 @@ public class SynchronizationService : ISynchronizationService
             };
             
             await _synchronizationRepository.AddSynchronization(synchronizationEntity, actionsGroupDefinitions);
-
+            
             await _synchronizationProgressService.InformSynchronizationStarted(synchronizationEntity, client);
         }
     }
@@ -118,7 +118,7 @@ public class SynchronizationService : ISynchronizationService
         }
         
         var actionsGroupsId = sharedFileDefinition.ActionsGroupIds!.First();
-        var trackingAction = await _trackingActionRepository.GetOrBuild(sharedFileDefinition.SessionId, actionsGroupsId);
+        var trackingAction = await _trackingActionRepository.GetOrThrow(sharedFileDefinition.SessionId, actionsGroupsId);
         
         await _synchronizationProgressService.FilePartIsUploaded(sharedFileDefinition, partNumber, trackingAction.TargetClientInstanceIds);
     }

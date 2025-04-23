@@ -236,7 +236,7 @@ public class SynchronizationServiceTests
         trackingActionEntity.TargetClientInstanceIds.Add("targetClientInstanceId");
         SynchronizationEntity synchronizationEntity = new SynchronizationEntity();
 
-        A.CallTo(() => _trackingActionRepository.GetOrBuild(sessionId, "ActionGroupId"))
+        A.CallTo(() => _trackingActionRepository.GetOrThrow(sessionId, "ActionGroupId"))
             .Returns(trackingActionEntity);
             
         A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
@@ -251,7 +251,7 @@ public class SynchronizationServiceTests
         // Act
         await _synchronizationService.OnFilePartIsUploadedAsync(sharedFileDefinition, 1);
         
-        A.CallTo(() => _trackingActionRepository.GetOrBuild(sessionId, "ActionGroupId"))
+        A.CallTo(() => _trackingActionRepository.GetOrThrow(sessionId, "ActionGroupId"))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .MustHaveHappenedOnceExactly();
