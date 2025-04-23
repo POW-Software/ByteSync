@@ -25,22 +25,7 @@ public class SynchronizationRepository : BaseRepository<SynchronizationEntity>, 
         
         await Save(synchronizationEntity.SessionId, synchronizationEntity, null, synchronizationLock);
         
-        // foreach (var groupDefinition in actionsGroupDefinitions)
-        // {
-        //     var trackingActionEntity = new TrackingActionEntity
-        //     {
-        //         ActionsGroupId = groupDefinition.ActionsGroupId,
-        //         SourceClientInstanceId = groupDefinition.Source,
-        //         TargetClientInstanceIds = [..groupDefinition.Targets],
-        //         Size = groupDefinition.Size,
-        //     };
-        //     
-        //     var cacheKey = _redisInfrastructureService2.ComputeCacheKey(EntityType.TrackingAction, $"{synchronizationEntity.SessionId}_{groupDefinition.ActionsGroupId}");
-        //     
-        //     await _cacheTrackingAction.Save(cacheKey, trackingActionEntity, null, synchronizationLock);
-        // }
-        
-        var semaphore = new SemaphoreSlim(20); // Limite à 20 tâches en parallèle
+        var semaphore = new SemaphoreSlim(20); // Limit to 20 tasks in parallel
         var tasks = actionsGroupDefinitions.Select(async groupDefinition =>
         {
             await semaphore.WaitAsync();
@@ -56,6 +41,7 @@ public class SynchronizationRepository : BaseRepository<SynchronizationEntity>, 
         
                 var cacheKey = _cacheService.ComputeCacheKey(EntityType.TrackingAction, $"{synchronizationEntity.SessionId}_{groupDefinition.ActionsGroupId}");
         
+                // ReSharper disable once AccessToDisposedClosure
                 await _cacheTrackingAction.Save(cacheKey, trackingActionEntity, null, synchronizationLock);
             }
             finally
@@ -65,14 +51,10 @@ public class SynchronizationRepository : BaseRepository<SynchronizationEntity>, 
         });
 
         await Task.WhenAll(tasks);
-        
-        // await _actionsGroupDefinitionsRepository.AddOrUpdateActionsGroupDefinitions(synchronizationEntity.SessionId, actionsGroupDefinitions);
     }
 
     public async Task ResetSession(string sessionId)
     {
         await Delete(sessionId);
-        
-        // await _actionsGroupDefinitionsRepository.DeleteActionsGroupDefinitions(sessionId);
     }
 }

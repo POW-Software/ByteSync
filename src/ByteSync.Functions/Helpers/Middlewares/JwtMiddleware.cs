@@ -65,11 +65,6 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
                 _logger.LogWarning(ex, "Token expired");
                 await HandleTokenError(context, "Invalid token");
             }
-            catch (AcquireRedisLockException ex)
-            {
-                _logger.LogWarning(ex, "Can not acquire redis lock");
-                await HandleTokenError(context, "Invalid token", HttpStatusCode.InternalServerError);
-            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error validating token");
