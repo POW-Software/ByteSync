@@ -203,7 +203,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
 
     private bool IsFileUploadableWithMultiUpload(FileInfo fileInfo)
     {
-        return fileInfo.Length <= 200 * SizeConstants.ONE_KILO_BYTES;
+        return fileInfo.Length <= 250 * SizeConstants.ONE_KILO_BYTES;
     }
 
     private async Task CloseAndUploadCurrentMultiZip()
