@@ -145,7 +145,8 @@ public class SynchronizationService : ISynchronizationService
                 synchronization.Progress.FinishedActionsCount += 1;
                 synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
             }
-            synchronization.Progress.ExchangedVolume = sharedFileDefinition.UploadedFileLength;
+            
+            synchronization.Progress.ExchangedVolume += sharedFileDefinition.UploadedFileLength;
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
 
@@ -234,7 +235,7 @@ public class SynchronizationService : ISynchronizationService
 
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                synchronization.Progress.FinishedActionsCount = +1;
+                synchronization.Progress.FinishedActionsCount += 1;
             }
             
             synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
@@ -314,7 +315,7 @@ public class SynchronizationService : ISynchronizationService
         {
             if (synchronizationEntity.Progress.Members.Contains(client.ClientInstanceId))
             {
-                synchronizationEntity.Progress.CompletedMembers.Add(client.ClientInstanceId);;
+                synchronizationEntity.Progress.CompletedMembers.Add(client.ClientInstanceId);
 
                 needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronizationEntity);
                 
