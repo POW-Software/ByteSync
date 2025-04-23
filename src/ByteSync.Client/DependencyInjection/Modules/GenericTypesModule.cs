@@ -15,6 +15,10 @@ public class GenericTypesModule : Module
             .As(typeof(ISessionInvalidationSourceCachePolicy<,>))
             .InstancePerDependency();
         
+        builder.RegisterGeneric(typeof(IndexedCache<,>))
+            .As(typeof(IIndexedCache<,>))
+            .InstancePerDependency();
+        
         builder.RegisterType<ConfigurationReader<ApplicationSettings>>().As<IConfigurationReader<ApplicationSettings>>();
         builder.RegisterType<ConfigurationWriter<ApplicationSettings>>().As<IConfigurationWriter<ApplicationSettings>>();
     }
