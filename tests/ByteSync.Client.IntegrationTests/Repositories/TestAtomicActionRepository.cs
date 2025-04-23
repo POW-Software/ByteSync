@@ -27,8 +27,8 @@ public class TestAtomicActionRepository : IntegrationTest
         RegisterType<HubPushHandler2, IHubPushHandler2>();
         RegisterType<CloudProxy, ICloudProxy>();
         RegisterType<SessionService, ISessionService>();
-        RegisterType<SessionInvalidationCachePolicy<AtomicAction, string>, ISessionInvalidationSourceCachePolicy<AtomicAction, string>>();
-        RegisterType<IndexedCache<AtomicAction, ComparisonItem>, IIndexedCache<AtomicAction, ComparisonItem>>();
+        RegisterType<SessionInvalidationCachePolicy<AtomicAction, string>, ISessionInvalidationCachePolicy<AtomicAction, string>>();
+        RegisterType<PropertyIndexer<AtomicAction, ComparisonItem>, IPropertyIndexer<AtomicAction, ComparisonItem>>();
         RegisterType<AtomicActionRepository>();
         BuildMoqContainer();
         

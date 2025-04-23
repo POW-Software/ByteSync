@@ -6,12 +6,12 @@ namespace ByteSync.Repositories;
 
 public class InventoryFileRepository : BaseSourceCacheRepository<InventoryFile, string>, IInventoryFileRepository
 {
-    private readonly ISessionInvalidationSourceCachePolicy<InventoryFile, string> _sessionInvalidationSourceCachePolicy;
+    private readonly ISessionInvalidationCachePolicy<InventoryFile, string> _sessionInvalidationCachePolicy;
 
-    public InventoryFileRepository(ISessionInvalidationSourceCachePolicy<InventoryFile, string> sessionInvalidationSourceCachePolicy)
+    public InventoryFileRepository(ISessionInvalidationCachePolicy<InventoryFile, string> sessionInvalidationCachePolicy)
     {
-        _sessionInvalidationSourceCachePolicy = sessionInvalidationSourceCachePolicy;
-        _sessionInvalidationSourceCachePolicy.Initialize(SourceCache, true, true);
+        _sessionInvalidationCachePolicy = sessionInvalidationCachePolicy;
+        _sessionInvalidationCachePolicy.Initialize(SourceCache, true, true);
     }
     
     protected override string KeySelector(InventoryFile inventoryFile) => inventoryFile.FullName;

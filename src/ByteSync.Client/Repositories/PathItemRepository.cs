@@ -7,17 +7,17 @@ namespace ByteSync.Repositories;
 
 public class PathItemRepository : BaseSourceCacheRepository<PathItem, string>, IPathItemRepository
 {
-    private readonly ISessionInvalidationSourceCachePolicy<PathItem, string> _sessionInvalidationSourceCachePolicy;
+    private readonly ISessionInvalidationCachePolicy<PathItem, string> _sessionInvalidationCachePolicy;
 
-    public PathItemRepository(IEnvironmentService environmentService, ISessionInvalidationSourceCachePolicy<PathItem, string> sessionInvalidationSourceCachePolicy)
+    public PathItemRepository(IEnvironmentService environmentService, ISessionInvalidationCachePolicy<PathItem, string> sessionInvalidationCachePolicy)
     {
         CurrentMemberPathItems = SourceCache
             .Connect()
             .Filter(pathItem => Equals(pathItem.ClientInstanceId, environmentService.ClientInstanceId!))
             .AsObservableCache();
         
-        _sessionInvalidationSourceCachePolicy = sessionInvalidationSourceCachePolicy;
-        _sessionInvalidationSourceCachePolicy.Initialize(SourceCache, true, false);
+        _sessionInvalidationCachePolicy = sessionInvalidationCachePolicy;
+        _sessionInvalidationCachePolicy.Initialize(SourceCache, true, false);
     }
 
     protected override string KeySelector(PathItem pathItem) => pathItem.Key;

@@ -6,7 +6,9 @@ using DynamicData;
 
 namespace ByteSync.Repositories;
 
-public class SessionInvalidationCachePolicy<TObject, TKey> : ISessionInvalidationSourceCachePolicy<TObject, TKey> where TKey : notnull
+public class SessionInvalidationCachePolicy<TObject, TKey> : ISessionInvalidationCachePolicy<TObject, TKey> 
+    where TKey : notnull 
+    where TObject : notnull
 {
     private readonly ISessionService _sessionService;
     private IDisposable? _sessionSubscription;

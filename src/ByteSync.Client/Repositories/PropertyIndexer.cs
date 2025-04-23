@@ -1,17 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using ByteSync.Interfaces.Repositories;
 using DynamicData;
 
 namespace ByteSync.Repositories;
 
-public class IndexedCache<TObject, TIndex> : IIndexedCache<TObject, TIndex>
+public class PropertyIndexer<TObject, TIndex> : IPropertyIndexer<TObject, TIndex> where TObject : notnull
 {
     private Func<TObject, TIndex> _indexSelector;
     private readonly Dictionary<TIndex, List<TObject>> _cache = new();
 
-    public IndexedCache()
+    public PropertyIndexer()
     {
         
     }
@@ -20,13 +17,13 @@ public class IndexedCache<TObject, TIndex> : IIndexedCache<TObject, TIndex>
     {
         _indexSelector = indexSelector;
         
-        // Initialisation du cache avec les objets existants
+        // Initializing the cache with existing objects
         foreach (var obj in sourceCache.Items)
         {
             Update(obj);
         }
 
-        // Synchronisation avec le SourceCache
+        // Synchronization with SourceCache
         sourceCache.Connect()
             .Subscribe(changes =>
             {
@@ -55,8 +52,7 @@ public class IndexedCache<TObject, TIndex> : IIndexedCache<TObject, TIndex>
             objects = new List<TObject>();
             _cache[index] = objects;
         }
-
-        // Mise à jour ou ajout de l'objet
+        
         var existingObject = objects.FirstOrDefault(o => o.Equals(obj));
         if (existingObject != null)
         {

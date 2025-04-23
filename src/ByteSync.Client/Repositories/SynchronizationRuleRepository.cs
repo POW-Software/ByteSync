@@ -5,12 +5,12 @@ namespace ByteSync.Repositories;
 
 public class SynchronizationRuleRepository : BaseSourceCacheRepository<SynchronizationRule, string>, ISynchronizationRuleRepository
 {
-    private readonly ISessionInvalidationSourceCachePolicy<SynchronizationRule, string> _sessionInvalidationSourceCachePolicy;
+    private readonly ISessionInvalidationCachePolicy<SynchronizationRule, string> _sessionInvalidationCachePolicy;
 
-    public SynchronizationRuleRepository(ISessionInvalidationSourceCachePolicy<SynchronizationRule, string> sessionInvalidationSourceCachePolicy)
+    public SynchronizationRuleRepository(ISessionInvalidationCachePolicy<SynchronizationRule, string> sessionInvalidationCachePolicy)
     {
-        _sessionInvalidationSourceCachePolicy = sessionInvalidationSourceCachePolicy;
-        _sessionInvalidationSourceCachePolicy.Initialize(SourceCache, true, true);
+        _sessionInvalidationCachePolicy = sessionInvalidationCachePolicy;
+        _sessionInvalidationCachePolicy.Initialize(SourceCache, true, true);
     }
     
     protected override string KeySelector(SynchronizationRule synchronizationRule) => synchronizationRule.SynchronizationRuleId;

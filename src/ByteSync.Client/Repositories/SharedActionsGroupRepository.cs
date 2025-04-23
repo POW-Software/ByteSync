@@ -9,14 +9,14 @@ namespace ByteSync.Repositories;
 
 public class SharedActionsGroupRepository : BaseSourceCacheRepository<SharedActionsGroup, string>, ISharedActionsGroupRepository
 {
-    private readonly ISessionInvalidationSourceCachePolicy<SharedActionsGroup, string> _sessionInvalidationSourceCachePolicy;
+    private readonly ISessionInvalidationCachePolicy<SharedActionsGroup, string> _sessionInvalidationCachePolicy;
 
-    public SharedActionsGroupRepository(ISessionInvalidationSourceCachePolicy<SharedActionsGroup, string> sessionInvalidationSourceCachePolicy)
+    public SharedActionsGroupRepository(ISessionInvalidationCachePolicy<SharedActionsGroup, string> sessionInvalidationCachePolicy)
     {
         OrganizedSharedActionsGroups = new List<SharedActionsGroup>();
         
-        _sessionInvalidationSourceCachePolicy = sessionInvalidationSourceCachePolicy;
-        _sessionInvalidationSourceCachePolicy.Initialize(SourceCache, true, true);
+        _sessionInvalidationCachePolicy = sessionInvalidationCachePolicy;
+        _sessionInvalidationCachePolicy.Initialize(SourceCache, true, true);
     }
     
     protected override string KeySelector(SharedActionsGroup sharedAtomicAction) => sharedAtomicAction.ActionsGroupId;

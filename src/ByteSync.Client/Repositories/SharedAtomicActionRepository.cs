@@ -6,12 +6,12 @@ namespace ByteSync.Repositories;
 
 public class SharedAtomicActionRepository : BaseSourceCacheRepository<SharedAtomicAction, string>, ISharedAtomicActionRepository
 {
-    private readonly ISessionInvalidationSourceCachePolicy<SharedAtomicAction, string> _sessionInvalidationSourceCachePolicy;
+    private readonly ISessionInvalidationCachePolicy<SharedAtomicAction, string> _sessionInvalidationCachePolicy;
 
-    public SharedAtomicActionRepository(ISessionInvalidationSourceCachePolicy<SharedAtomicAction, string> sessionInvalidationSourceCachePolicy)
+    public SharedAtomicActionRepository(ISessionInvalidationCachePolicy<SharedAtomicAction, string> sessionInvalidationCachePolicy)
     {
-        _sessionInvalidationSourceCachePolicy = sessionInvalidationSourceCachePolicy;
-        _sessionInvalidationSourceCachePolicy.Initialize(SourceCache, true, true);
+        _sessionInvalidationCachePolicy = sessionInvalidationCachePolicy;
+        _sessionInvalidationCachePolicy.Initialize(SourceCache, true, true);
     }
     
     protected override string KeySelector(SharedAtomicAction sharedAtomicAction) => sharedAtomicAction.AtomicActionId;
