@@ -31,21 +31,6 @@ public class TestAtomicActionRepository : IntegrationTest
         RegisterType<PropertyIndexer<AtomicAction, ComparisonItem>, IPropertyIndexer<AtomicAction, ComparisonItem>>();
         RegisterType<AtomicActionRepository>();
         BuildMoqContainer();
-        
-        // var contextHelper = new TestContextGenerator(Container);
-        // contextHelper.GenerateSession();
-        // contextHelper.GenerateCurrentEndpoint();
-        // var testDirectory = _testDirectoryService.CreateTestDirectory();
-        
-        // var mockEnvironmentService = Container.Resolve<Mock<IEnvironmentService>>();
-        // mockEnvironmentService.Setup(m => m.AssemblyFullName).Returns(IOUtils.Combine(testDirectory.FullName, "Assembly", "Assembly.exe"));
-        //
-        // var mockLocalApplicationDataManager = Container.Resolve<Mock<ILocalApplicationDataManager>>();
-        // mockLocalApplicationDataManager.Setup(m => m.ApplicationDataPath).Returns(IOUtils.Combine(testDirectory.FullName, 
-        //     "ApplicationDataPath"));
-        
-        // var atomicActionRepository = Container.Resolve<Mock<IAtomicActionRepository>>();
-        // atomicActionRepository.Setup(m => m.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
 
         _testDirectoryService.CreateTestDirectory();
         _atomicActionRepository = Container.Resolve<AtomicActionRepository>();
