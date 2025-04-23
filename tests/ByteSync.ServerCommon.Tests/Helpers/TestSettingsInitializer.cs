@@ -8,7 +8,6 @@ public class TestSettingsInitializer
     private static IConfiguration? _config;
     
     private static RedisSettings? _redisSettings;
-    private static CosmosDbSettings? _cosmosDbSettings;
 
     public IConfiguration InitConfiguration()
     {
@@ -32,19 +31,5 @@ public class TestSettingsInitializer
         }
         
         return _redisSettings;
-    }
-
-    public static CosmosDbSettings GetCosmosDbSettings()
-    {
-        if (_cosmosDbSettings == null)
-        {
-            _config ??= new TestSettingsInitializer().InitConfiguration();
-            
-            var cosmosDbSettings = _config.GetSection("CosmosDb").Get<CosmosDbSettings>();
-
-            _cosmosDbSettings = cosmosDbSettings;
-        }
-        
-        return _cosmosDbSettings;
     }
 }

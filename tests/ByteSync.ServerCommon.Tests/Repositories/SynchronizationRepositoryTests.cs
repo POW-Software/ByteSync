@@ -18,7 +18,6 @@ public class SynchronizationRepositoryTests
     private SynchronizationRepository _repository;
     private CacheRepository<SynchronizationEntity> _synchronizationEntityCacheRepository;
     private RedisInfrastructureService _redisInfrastructureService;
-    private IActionsGroupDefinitionsRepository _actionsGroupDefRepo;
     private CacheRepository<TrackingActionEntity> _trackingActionEntityCacheRepository;
 
     [SetUp]
@@ -35,7 +34,6 @@ public class SynchronizationRepositoryTests
 
         _synchronizationEntityCacheRepository = new CacheRepository<SynchronizationEntity>(_redisInfrastructureService);
         _trackingActionEntityCacheRepository = new CacheRepository<TrackingActionEntity>(_redisInfrastructureService);
-        _actionsGroupDefRepo = A.Fake<IActionsGroupDefinitionsRepository>();
         
         _repository = new SynchronizationRepository(
             _redisInfrastructureService, 
@@ -43,7 +41,7 @@ public class SynchronizationRepositoryTests
             _trackingActionEntityCacheRepository);
     }
 
-    /*
+    
     [Test]
     public async Task AddSynchronization_IntegrationTest()
     {
@@ -66,11 +64,6 @@ public class SynchronizationRepositoryTests
         
         savedEntity.Should().NotBeNull();
         savedEntity.Should().BeEquivalentTo(synchronizationEntity);
-        
-        A.CallTo(() => _actionsGroupDefRepo.AddOrUpdateActionsGroupDefinitions(
-            sessionId, 
-            A<List<ActionsGroupDefinition>>.That.IsSameSequenceAs(actionsGroupDefinitions)))
-            .MustHaveHappenedOnceExactly();
     }
 
     [Test]
@@ -93,9 +86,5 @@ public class SynchronizationRepositoryTests
         // Assert
         var entityAfterReset = await _synchronizationEntityCacheRepository.Get(cacheKey);
         entityAfterReset.Should().BeNull();
-        
-        A.CallTo(() => _actionsGroupDefRepo.DeleteActionsGroupDefinitions(sessionId))
-            .MustHaveHappenedOnceExactly();
     }
-    */
 }

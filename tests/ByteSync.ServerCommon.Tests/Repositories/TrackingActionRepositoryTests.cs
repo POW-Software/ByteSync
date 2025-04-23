@@ -23,7 +23,6 @@ public class TrackingActionRepositoryTests
     private ISynchronizationRepository _synchronizationRepository;
     private ICacheRepository<TrackingActionEntity> _cacheRepository;
     private ICacheRepository<SynchronizationEntity> _synchronizationCacheRepository;
-    // private ActionsGroupDefinitionsRepository _actionsGroupDefinitionsRepository;
 
     [SetUp]
     public void SetUp()
@@ -32,10 +31,6 @@ public class TrackingActionRepositoryTests
         var cacheKeyFactory = new CacheKeyFactory(Options.Create(redisSettings));
         var loggerFactoryMock = A.Fake<ILoggerFactory>();
         var loggerMock = A.Fake<ILogger<TrackingActionRepository>>();
-        var cosmosDbSettings = TestSettingsInitializer.GetCosmosDbSettings();
-        // var cosmosDbService = new CosmosDbService(Options.Create(cosmosDbSettings));
-        // cosmosDbService.InitializeAsync().Wait();
-        // _actionsGroupDefinitionsRepository = new ActionsGroupDefinitionsRepository(cosmosDbService);
         _synchronizationRepository = new SynchronizationRepository(
             new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock),
             new CacheRepository<SynchronizationEntity>(new RedisInfrastructureService(Options.Create(redisSettings), cacheKeyFactory, loggerFactoryMock)),
@@ -45,34 +40,6 @@ public class TrackingActionRepositoryTests
         _synchronizationCacheRepository = new CacheRepository<SynchronizationEntity>(_redisInfrastructureService);
         _repository = new TrackingActionRepository(_redisInfrastructureService, _synchronizationRepository, _cacheRepository, 
             _synchronizationCacheRepository, loggerMock);
-    }
-
-    [Test]
-    public async Task GetOrBuild_WhenEntityExists_ShouldReturnExistingEntity()
-    {
-        Assert.Pass();
-        return;
-        
-        // // Arrange
-        // var nowTicks = DateTime.Now.Ticks;
-        // var sessionId = "session_" + nowTicks;
-        // var actionsGroupId = "group_" + nowTicks;
-        // var existingEntity = new TrackingActionEntity { ActionsGroupId = actionsGroupId };
-        //
-        // List<ActionsGroupDefinition> actionsGroupDefinitions =
-        // [
-        //     new()
-        //     {
-        //         ActionsGroupId = actionsGroupId,
-        //     }
-        // ];
-        // await _actionsGroupDefinitionsRepository.AddOrUpdateActionsGroupDefinitions(sessionId, actionsGroupDefinitions);
-        //
-        // // Act
-        // var result = await _repository.GetOrBuild(sessionId, actionsGroupId);
-        //
-        // // Assert
-        // result.Should().BeEquivalentTo(existingEntity);
     }
 
     [Test]

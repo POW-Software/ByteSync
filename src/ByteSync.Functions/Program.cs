@@ -89,7 +89,6 @@ var host = new HostBuilder()
         services.Configure<RedisSettings>(configuration.GetSection("Redis"));
         services.Configure<BlobStorageSettings>(configuration.GetSection("BlobStorage"));
         services.Configure<SignalRSettings>(configuration.GetSection("SignalR"));
-        services.Configure<CosmosDbSettings>(configuration.GetSection("CosmosDb"));
         services.Configure<AppSettings>(appSettingsSection);
         var appSettings = appSettingsSection.Get<AppSettings>();
         
