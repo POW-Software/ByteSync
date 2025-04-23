@@ -196,7 +196,7 @@ public class SynchronizationService : ISynchronizationService
             
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                synchronization.Progress.FinishedActionsCount = 1;
+                synchronization.Progress.FinishedActionsCount += 1;
             }
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
@@ -234,10 +234,10 @@ public class SynchronizationService : ISynchronizationService
 
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                synchronization.Progress.FinishedActionsCount = 1;
+                synchronization.Progress.FinishedActionsCount = +1;
             }
             
-            synchronization.Progress.ProcessedVolume = trackingAction.Size ?? 0;
+            synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
 
@@ -288,11 +288,11 @@ public class SynchronizationService : ISynchronizationService
             
             if (isNewError)
             {
-                synchronization.Progress.ErrorsCount = 1;
+                synchronization.Progress.ErrorsCount += 1;
             }
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                synchronization.Progress.FinishedActionsCount = 1;
+                synchronization.Progress.FinishedActionsCount += 1;
             }
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
@@ -314,7 +314,7 @@ public class SynchronizationService : ISynchronizationService
         {
             if (synchronizationEntity.Progress.Members.Contains(client.ClientInstanceId))
             {
-                synchronizationEntity.Progress.AddCompletedMember(client.ClientInstanceId);;
+                synchronizationEntity.Progress.CompletedMembers.Add(client.ClientInstanceId);;
 
                 needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronizationEntity);
                 
