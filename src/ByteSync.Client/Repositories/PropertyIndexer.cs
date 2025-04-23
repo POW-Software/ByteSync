@@ -3,15 +3,12 @@ using DynamicData;
 
 namespace ByteSync.Repositories;
 
-public class PropertyIndexer<TObject, TIndex> : IPropertyIndexer<TObject, TIndex> where TObject : notnull
+public class PropertyIndexer<TObject, TIndex> : IPropertyIndexer<TObject, TIndex> 
+    where TObject : notnull 
+    where TIndex : notnull
 {
     private Func<TObject, TIndex> _indexSelector;
     private readonly Dictionary<TIndex, List<TObject>> _cache = new();
-
-    public PropertyIndexer()
-    {
-        
-    }
     
     public void Initialize(SourceCache<TObject, string> sourceCache, Func<TObject, TIndex> indexSelector)
     {
