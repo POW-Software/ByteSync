@@ -78,7 +78,7 @@ public class SynchronizationService : ISynchronizationService
     {
         var actionsGroupsIds = sharedFileDefinition.ActionsGroupIds;
 
-        ConcurrentBag<string> targetInstanceIds = new ConcurrentBag<string>();
+        HashSet<string> targetInstanceIds = new HashSet<string>();
                 
         var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, actionsGroupsIds!, (trackingAction, synchronization) =>
         {
@@ -99,7 +99,7 @@ public class SynchronizationService : ISynchronizationService
 
         if (result.IsSuccess)
         {
-            await _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, totalParts, targetInstanceIds.ToHashSet());
+            await _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, totalParts, targetInstanceIds);
         }
     }
 

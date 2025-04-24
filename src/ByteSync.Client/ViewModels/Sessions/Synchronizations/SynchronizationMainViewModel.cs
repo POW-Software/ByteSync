@@ -117,6 +117,14 @@ public class SynchronizationMainViewModel : ViewModelBase, IActivatableViewModel
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(tuple => OnSynchronizationStarted(tuple.First!))
                 .DisposeWith(disposables);
+            
+            _synchronizationService.SynchronizationProcessData.SynchronizationDataTransmitted
+                .CombineLatest(_synchronizationService.SynchronizationProcessData.SynchronizationAbortRequest, 
+                    _synchronizationService.SynchronizationProcessData.SynchronizationEnd)
+                .Where(tuple => tuple.Second == null && tuple.Third == null)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(tuple => OnSynchronizationDataTransmitted(tuple.First))
+                .DisposeWith(disposables);
 
             _synchronizationService.SynchronizationProcessData.SynchronizationAbortRequest.DistinctUntilChanged()
                 .Where(synchronizationAbortRequest => synchronizationAbortRequest != null)
@@ -355,7 +363,6 @@ public class SynchronizationMainViewModel : ViewModelBase, IActivatableViewModel
     private void OnSynchronizationStarted(Synchronization synchronizationStart)
     {
         StartDateTime = synchronizationStart.Started.LocalDateTime;
-        TreatableActions = _synchronizationService.SynchronizationProcessData.TotalActionsToProcess;
 
         MainStatus = Resources.SynchronizationMain_SynchronizationRunning;
         
@@ -370,6 +377,10 @@ public class SynchronizationMainViewModel : ViewModelBase, IActivatableViewModel
         IsMainProgressRingVisible = true;
     }
     
+    private void OnSynchronizationDataTransmitted(bool tupleFirst)
+    {
+        TreatableActions = _synchronizationService.SynchronizationProcessData.TotalActionsToProcess;
+    }
     
     private void OnSynchronizationAbortRequested(SynchronizationAbortRequest synchronizationAbortRequest)
     {

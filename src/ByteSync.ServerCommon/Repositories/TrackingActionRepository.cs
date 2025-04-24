@@ -66,6 +66,8 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
         var semaphore = new SemaphoreSlim(20);
         var updateFailures = new ConcurrentBag<bool>();
 
+        var invokeLock = new object();
+
         var tasks = actionsGroupIds.Select(async actionsGroupId =>
         {
             await semaphore.WaitAsync();
@@ -74,7 +76,12 @@ public class TrackingActionRepository : BaseRepository<TrackingActionEntity>, IT
                 var cacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType, $"{sessionId}_{actionsGroupId}");
             
                 var trackingActionEntity = await GetOrThrow(cacheKey);
-                bool isUpdated = updateHandler.Invoke(trackingActionEntity, synchronizationEntity);
+
+                bool isUpdated;
+                lock (invokeLock)
+                {
+                    isUpdated = updateHandler.Invoke(trackingActionEntity, synchronizationEntity);
+                }
 
                 if (isUpdated)
                 {

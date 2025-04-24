@@ -106,6 +106,8 @@ public class SynchronizationService : ISynchronizationService
 
     public async Task OnSynchronizationStarted(Synchronization synchronization)
     {
+        // _logger.LogInformation("OnSynchronizationStarted: {@Synchronization}", synchronization);
+        
         try
         {
             await _sessionService.SetSessionStatus(SessionStatus.Synchronization);
@@ -127,6 +129,8 @@ public class SynchronizationService : ISynchronizationService
 
     public Task OnSynchronizationDataTransmitted(SharedSynchronizationStartData sharedSynchronizationStartData)
     {
+        // _logger.LogInformation("OnSynchronizationDataTransmitted: {@SharedSynchronizationStartData}", sharedSynchronizationStartData);
+        
         SynchronizationProcessData.TotalVolumeToProcess = sharedSynchronizationStartData.TotalVolumeToProcess;
         SynchronizationProcessData.TotalActionsToProcess = sharedSynchronizationStartData.TotalActionsToProcess;
         
