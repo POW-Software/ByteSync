@@ -18,16 +18,14 @@ public class SynchronizationProgressService : ISynchronizationProgressService
     private readonly ITrackingActionMapper _trackingActionMapper;
     private readonly ISynchronizationMapper _synchronizationMapper;
     private readonly ISharedFilesService _sharedFilesService;
-    private readonly ILogger<SynchronizationProgressService> _logger;
 
     public SynchronizationProgressService(IInvokeClientsService invokeClientsService, ITrackingActionMapper trackingActionMapper, 
-        ISynchronizationMapper synchronizationMapper, ISharedFilesService sharedFilesService, ILogger<SynchronizationProgressService> logger)
+        ISynchronizationMapper synchronizationMapper, ISharedFilesService sharedFilesService)
     {
         _invokeClientsService = invokeClientsService;
         _trackingActionMapper = trackingActionMapper;
         _synchronizationMapper = synchronizationMapper;
         _sharedFilesService = sharedFilesService;
-        _logger = logger;
     }
 
     public async Task UpdateSynchronizationProgress(TrackingActionResult trackingActionResult, bool needSendSynchronizationUpdated)
@@ -97,8 +95,6 @@ public class SynchronizationProgressService : ISynchronizationProgressService
     {
         var synchronization = await MapToSynchronization(synchronizationEntity);
         
-        _logger.LogInformation("SendSynchronizationUpdated, value: {value}", JsonSerializer.Serialize(synchronization));
-        
         await _invokeClientsService.Clients(synchronizationEntity.Progress.Members).SynchronizationUpdated(synchronization);
     }
 
@@ -106,8 +102,6 @@ public class SynchronizationProgressService : ISynchronizationProgressService
     {
         var synchronizationProgressPush = CreateSynchronizationProgressPush(synchronizationEntity, null);
         
-        _logger.LogInformation("SendSynchronizationProgressUpdated, value: {value}", JsonSerializer.Serialize(synchronizationProgressPush));
-
         await _invokeClientsService.Clients(synchronizationEntity.Progress.Members)
             .SynchronizationProgressUpdated(synchronizationProgressPush);
     }
@@ -123,8 +117,6 @@ public class SynchronizationProgressService : ISynchronizationProgressService
         }
         
         var synchronizationProgressPush = CreateSynchronizationProgressPush(trackingActionResult.SynchronizationEntity, trackingActionSummaries);
-
-        _logger.LogInformation("SendSynchronizationProgressUpdated, value: {value}", JsonSerializer.Serialize(synchronizationProgressPush));
         
         await _invokeClientsService.Clients(trackingActionResult.SynchronizationEntity.Progress.Members)
             .SynchronizationProgressUpdated(synchronizationProgressPush);

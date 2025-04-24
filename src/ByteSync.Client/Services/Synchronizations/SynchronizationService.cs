@@ -32,7 +32,6 @@ public class SynchronizationService : ISynchronizationService
         _synchronizationLooperFactory = synchronizationLooperFactory;
         _timeTrackingCache = timeTrackingCache;
         _logger = logger;
-
         
         SynchronizationProcessData = new SynchronizationProcessData();
         
@@ -71,8 +70,6 @@ public class SynchronizationService : ISynchronizationService
 
     public async Task OnSynchronizationUpdated(Synchronization synchronization)
     {
-        _logger.LogInformation("OnSynchronizationUpdated: {@Synchronization}", synchronization);
-        
         if (synchronization.IsEnded)
         {
             var timeTrackingComputer = await _timeTrackingCache
@@ -106,8 +103,6 @@ public class SynchronizationService : ISynchronizationService
 
     public async Task OnSynchronizationStarted(Synchronization synchronization)
     {
-        // _logger.LogInformation("OnSynchronizationStarted: {@Synchronization}", synchronization);
-        
         try
         {
             await _sessionService.SetSessionStatus(SessionStatus.Synchronization);
@@ -129,8 +124,6 @@ public class SynchronizationService : ISynchronizationService
 
     public Task OnSynchronizationDataTransmitted(SharedSynchronizationStartData sharedSynchronizationStartData)
     {
-        // _logger.LogInformation("OnSynchronizationDataTransmitted: {@SharedSynchronizationStartData}", sharedSynchronizationStartData);
-        
         SynchronizationProcessData.TotalVolumeToProcess = sharedSynchronizationStartData.TotalVolumeToProcess;
         SynchronizationProcessData.TotalActionsToProcess = sharedSynchronizationStartData.TotalActionsToProcess;
         
@@ -141,8 +134,6 @@ public class SynchronizationService : ISynchronizationService
 
     public Task OnSynchronizationProgressChanged(SynchronizationProgressPush synchronizationProgressPush)
     {
-        _logger.LogInformation("OnSynchronizationProgressChanged: {@SynchronizationProgressPush}", synchronizationProgressPush);
-        
         var synchronizationProgress = SynchronizationProcessData.SynchronizationProgress.Value ?? new SynchronizationProgress();
         
         if (synchronizationProgressPush.Version > synchronizationProgress.Version)

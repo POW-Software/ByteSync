@@ -13,7 +13,6 @@ public class SynchronizationPushReceiver : IPushReceiver
     private readonly ISynchronizationService _synchronizationService;
     private readonly ILogger<SynchronizationPushReceiver> _logger;
 
-
     public SynchronizationPushReceiver(IHubPushHandler2 hubPushHandler2, ISessionService sessionService, ISynchronizationService synchronizationService,
         ILogger<SynchronizationPushReceiver> logger)
     {
@@ -30,7 +29,7 @@ public class SynchronizationPushReceiver : IPushReceiver
             {
                 if (latestSession != null && latestSession.SessionId.Equals(synchronization.SessionId))
                 {
-                    _logger.LogInformation("The Data Synchronization has been started by another client ({@StartedBy}). " +
+                    _logger.LogInformation("The Data Synchronization has been started by client ({@StartedBy}). " +
                                            "Retrieving data...", synchronization.StartedBy);
                     
                     _synchronizationService.OnSynchronizationStarted(synchronization);
