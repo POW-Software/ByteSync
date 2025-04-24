@@ -71,6 +71,8 @@ public class SynchronizationService : ISynchronizationService
 
     public async Task OnSynchronizationUpdated(Synchronization synchronization)
     {
+        _logger.LogInformation("OnSynchronizationUpdated: {@Synchronization}", synchronization);
+        
         if (synchronization.IsEnded)
         {
             var timeTrackingComputer = await _timeTrackingCache
@@ -135,6 +137,8 @@ public class SynchronizationService : ISynchronizationService
 
     public Task OnSynchronizationProgressChanged(SynchronizationProgressPush synchronizationProgressPush)
     {
+        _logger.LogInformation("OnSynchronizationProgressChanged: {@SynchronizationProgressPush}", synchronizationProgressPush);
+        
         var synchronizationProgress = SynchronizationProcessData.SynchronizationProgress.Value ?? new SynchronizationProgress();
         
         if (synchronizationProgressPush.Version > synchronizationProgress.Version)
