@@ -1,8 +1,10 @@
-﻿using ByteSync.Common.Business.Actions;
+﻿using System.Collections.Concurrent;
+using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Auth;
+using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Exceptions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
@@ -46,7 +48,7 @@ public class SynchronizationService : ISynchronizationService
         }
     }
     
-    public async Task<Synchronization> StartSynchronization(string sessionId, Client client, List<ActionsGroupDefinition> actionsGroupDefinitions)
+    public async Task StartSynchronization(string sessionId, Client client, List<ActionsGroupDefinition> actionsGroupDefinitions)
     {
         var synchronizationEntity = await _synchronizationRepository.Get(sessionId);
         
@@ -67,12 +69,8 @@ public class SynchronizationService : ISynchronizationService
             };
             
             await _synchronizationRepository.AddSynchronization(synchronizationEntity, actionsGroupDefinitions);
-
-            return await _synchronizationProgressService.InformSynchronizationStarted(synchronizationEntity, client);
-        }
-        else
-        {
-            return await _synchronizationProgressService.MapToSynchronization(synchronizationEntity);
+            
+            await _synchronizationProgressService.InformSynchronizationStarted(synchronizationEntity, client);
         }
     }
     
@@ -90,8 +88,11 @@ public class SynchronizationService : ISynchronizationService
             }
             
             trackingAction.IsSourceSuccess = true;
-                
-            targetInstanceIds.AddAll(trackingAction.TargetClientInstanceIds);
+
+            foreach (var targetClientInstanceId in trackingAction.TargetClientInstanceIds)
+            {
+                targetInstanceIds.Add(targetClientInstanceId);
+            }
 
             return true;
         });
@@ -117,7 +118,7 @@ public class SynchronizationService : ISynchronizationService
         }
         
         var actionsGroupsId = sharedFileDefinition.ActionsGroupIds!.First();
-        var trackingAction = await _trackingActionRepository.GetOrBuild(sharedFileDefinition.SessionId, actionsGroupsId);
+        var trackingAction = await _trackingActionRepository.GetOrThrow(sharedFileDefinition.SessionId, actionsGroupsId);
         
         await _synchronizationProgressService.FilePartIsUploaded(sharedFileDefinition, partNumber, trackingAction.TargetClientInstanceIds);
     }
@@ -144,8 +145,15 @@ public class SynchronizationService : ISynchronizationService
                 synchronization.Progress.FinishedActionsCount += 1;
                 synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
             }
-            
-            synchronization.Progress.ExchangedVolume += sharedFileDefinition.UploadedFileLength;
+
+            if (sharedFileDefinition.IsMultiFileZip)
+            {
+                synchronization.Progress.ExchangedVolume += trackingAction.Size ?? 0;
+            }
+            else
+            {
+                synchronization.Progress.ExchangedVolume += sharedFileDefinition.UploadedFileLength;
+            }
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
 

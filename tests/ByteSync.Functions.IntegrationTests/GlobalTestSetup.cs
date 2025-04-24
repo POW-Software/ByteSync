@@ -51,7 +51,6 @@ public class GlobalTestSetup
         services.Configure<RedisSettings>(Configuration.GetSection("Redis"));
         services.Configure<BlobStorageSettings>(Configuration.GetSection("BlobStorage"));
         services.Configure<SignalRSettings>(Configuration.GetSection("SignalR"));
-        services.Configure<CosmosDbSettings>(Configuration.GetSection("CosmosDb"));
         services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
     }
     

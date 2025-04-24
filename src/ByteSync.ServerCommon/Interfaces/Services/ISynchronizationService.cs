@@ -7,7 +7,7 @@ namespace ByteSync.ServerCommon.Interfaces.Services;
 
 public interface ISynchronizationService
 {
-    Task<Synchronization> StartSynchronization(string sessionId, Client client, List<ActionsGroupDefinition> actionsGroupDefinitions);
+    Task StartSynchronization(string sessionId, Client client, List<ActionsGroupDefinition> actionsGroupDefinitions);
     
     Task OnUploadIsFinishedAsync(SharedFileDefinition sharedFileDefinition, int totalParts, Client client);
     

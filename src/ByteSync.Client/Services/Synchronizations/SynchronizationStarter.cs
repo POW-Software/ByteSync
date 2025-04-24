@@ -92,16 +92,8 @@ public class SynchronizationStarter : ISynchronizationStarter
             SessionId = cloudSession.SessionId,
             ActionsGroupDefinitions = actionsGroupDefinitions,
         };
-        var synchronization = await _synchronizationApiClient.StartSynchronization(synchronizationStartRequest);
-
-        try
-        {
-            await _synchronizationService.OnSynchronizationStarted(synchronization);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error during synchronization loop");
-        }
+        
+        await _synchronizationApiClient.StartSynchronization(synchronizationStartRequest);
     }
 
     private async Task UploadSynchronizationStartData(CloudSession cloudSession, SharedSynchronizationStartData sharedSynchronizationStartData)

@@ -27,10 +27,10 @@ public class SynchronizationFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var synchronizationStartRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationStartRequest>(req);
             
-        var result = await _synchronizationService.StartSynchronization(sessionId, client, synchronizationStartRequest.ActionsGroupDefinitions);
+        await _synchronizationService.StartSynchronization(sessionId, client, synchronizationStartRequest.ActionsGroupDefinitions);
 
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+        response.StatusCode = HttpStatusCode.OK;
         
         return response;
     }

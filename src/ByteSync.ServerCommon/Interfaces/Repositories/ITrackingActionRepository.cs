@@ -5,8 +5,8 @@ namespace ByteSync.ServerCommon.Interfaces.Repositories;
 
 public interface ITrackingActionRepository : IRepository<TrackingActionEntity>
 {
-    Task<TrackingActionEntity> GetOrBuild(string sessionId, string key);
+    Task<TrackingActionEntity> GetOrThrow(string sessionId, string key);
     
-    Task<TrackingActionResult> AddOrUpdate(string sessionId, List<string> actionsGroupIds, 
+    Task<TrackingActionResult> AddOrUpdate(string sessionId, List<string> actionsGroupIds,
         Func<TrackingActionEntity, SynchronizationEntity, bool> updateHandler);
 }

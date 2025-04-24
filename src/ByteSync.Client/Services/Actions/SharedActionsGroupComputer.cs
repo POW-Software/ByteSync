@@ -13,40 +13,48 @@ public class SharedActionsGroupComputer : ISharedActionsGroupComputer
 {
     private readonly ISharedAtomicActionRepository _sharedAtomicActionRepository;
     private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository;
-    
-    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+
+    private List<SharedActionsGroup> _buffer;
+    private int _counter; 
+    private readonly object _lock = new();
 
     public SharedActionsGroupComputer(ISharedAtomicActionRepository sharedAtomicActionRepository, ISharedActionsGroupRepository sharedActionsGroupRepository)
     {
         _sharedAtomicActionRepository = sharedAtomicActionRepository;
         _sharedActionsGroupRepository = sharedActionsGroupRepository;
+        _buffer = new List<SharedActionsGroup>();
             
-        Counter = 0;
+        _counter = 0;
     }
-
-    private int Counter { get; set; }
 
     public async Task ComputeSharedActionsGroups()
     {
         var sharedAtomicActions = _sharedAtomicActionRepository.Elements;
-        
-        var tasks = new List<Task>();
+
         var dictionary = sharedAtomicActions.GroupBy(saa => saa.PathIdentity)
             .ToDictionary(g => g.Key, g => g.ToList());
         
-        foreach (KeyValuePair<PathIdentity, List<SharedAtomicAction>> pair in dictionary)
+        await Parallel.ForEachAsync(dictionary, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount * 2 }, (pair, _) =>
         {
-            tasks.Add(Task.Run(() => ComputeGroups_CopyContentAndDate(pair.Value)));
-            tasks.Add(Task.Run(() => ComputeGroups_CopyContent(pair.Value)));
-            tasks.Add(Task.Run(() => ComputeGroups_CopyDate(pair.Value)));
-            tasks.Add(Task.Run(() => ComputeGroups_Create(pair.Value)));
-            tasks.Add(Task.Run(() => ComputeGroups_Delete(pair.Value)));
-        }
+            ComputeGroups_CopyContentAndDate(pair.Value);
+            ComputeGroups_CopyContent(pair.Value);
+            ComputeGroups_CopyDate(pair.Value);
+            ComputeGroups_Create(pair.Value);
+            ComputeGroups_Delete(pair.Value);
+            return ValueTask.CompletedTask;
+        });
 
-        await Task.WhenAll(tasks);
+        lock (_lock)
+        {
+            if (_buffer.Count > 0)
+            {
+                _sharedActionsGroupRepository.AddOrUpdate(_buffer);
+                _buffer.Clear();
+            }
+        }
     }
 
-    private async Task ComputeGroups_CopyContentAndDate(List<SharedAtomicAction> atomicActions)
+    private void ComputeGroups_CopyContentAndDate(List<SharedAtomicAction> atomicActions)
     {
         var sharedAtomicActions = GetSharedAtomicActions(atomicActions, ActionOperatorTypes.SynchronizeContentAndDate);
         
@@ -55,7 +63,7 @@ public class SharedActionsGroupComputer : ISharedActionsGroupComputer
         var sharedActionsGroups = new List<SharedActionsGroup>();
         foreach (var group in groups)
         {
-            var sharedActionsGroup = await BuildSharedActionsGroup(ActionOperatorTypes.SynchronizeContentAndDate);
+            var sharedActionsGroup = BuildSharedActionsGroup(ActionOperatorTypes.SynchronizeContentAndDate);
 
             sharedActionsGroup.Source = group.First().Source;
             sharedActionsGroup.Targets.AddAll(group.Select(saa => saa.Target!));
@@ -78,7 +86,7 @@ public class SharedActionsGroupComputer : ISharedActionsGroupComputer
         AddSharedActionsGroups(sharedActionsGroups);
     }
 
-    private async Task ComputeGroups_CopyContent(List<SharedAtomicAction> atomicActions)
+    private void ComputeGroups_CopyContent(List<SharedAtomicAction> atomicActions)
     {
         var sharedAtomicActions = GetSharedAtomicActions(atomicActions, ActionOperatorTypes.SynchronizeContentOnly);
 
@@ -87,7 +95,7 @@ public class SharedActionsGroupComputer : ISharedActionsGroupComputer
         var sharedActionsGroups = new List<SharedActionsGroup>();
         foreach (var group in groups)
         {
-            var sharedActionsGroup = await BuildSharedActionsGroup(ActionOperatorTypes.SynchronizeContentOnly);
+            var sharedActionsGroup = BuildSharedActionsGroup(ActionOperatorTypes.SynchronizeContentOnly);
 
             sharedActionsGroup.Source = group.First().Source;
             sharedActionsGroup.Targets.AddAll(group.Select(saa => saa.Target!));
@@ -104,7 +112,7 @@ public class SharedActionsGroupComputer : ISharedActionsGroupComputer
         AddSharedActionsGroups(sharedActionsGroups);
     }
 
-    private async Task ComputeGroups_CopyDate(List<SharedAtomicAction> atomicActions)
+    private void ComputeGroups_CopyDate(List<SharedAtomicAction> atomicActions)
     {
         var sharedAtomicActions = GetSharedAtomicActions(atomicActions, ActionOperatorTypes.SynchronizeDate);
 
@@ -114,7 +122,7 @@ public class SharedActionsGroupComputer : ISharedActionsGroupComputer
                  sharedAtomicActions.GroupBy(aa => aa.Source!)
                      .ToDictionary(g => g.Key, g => g.ToList()))
         {
-            var sharedActionsGroup = await BuildSharedActionsGroup(ActionOperatorTypes.SynchronizeDate);
+            var sharedActionsGroup = BuildSharedActionsGroup(ActionOperatorTypes.SynchronizeDate);
 
             sharedActionsGroup.Source = pair.Key;
             sharedActionsGroup.Targets.AddAll(pair.Value.Select(saa => saa.Target!));
@@ -131,17 +139,17 @@ public class SharedActionsGroupComputer : ISharedActionsGroupComputer
         AddSharedActionsGroups(sharedActionsGroups);
     }
     
-    private Task ComputeGroups_Create(List<SharedAtomicAction> atomicActions)
+    private void ComputeGroups_Create(List<SharedAtomicAction> atomicActions)
     {
-        return DoComputeGroups_CreateDelete(ActionOperatorTypes.Create, atomicActions);
+        DoComputeGroups_CreateDelete(ActionOperatorTypes.Create, atomicActions);
     }
     
-    private Task ComputeGroups_Delete(List<SharedAtomicAction> atomicActions)
+    private void ComputeGroups_Delete(List<SharedAtomicAction> atomicActions)
     {
-        return DoComputeGroups_CreateDelete(ActionOperatorTypes.Delete, atomicActions);
+        DoComputeGroups_CreateDelete(ActionOperatorTypes.Delete, atomicActions);
     }
 
-    private async Task DoComputeGroups_CreateDelete(ActionOperatorTypes operatorType, List<SharedAtomicAction> atomicActions)
+    private void DoComputeGroups_CreateDelete(ActionOperatorTypes operatorType, List<SharedAtomicAction> atomicActions)
     {
         if (!operatorType.In(ActionOperatorTypes.Create, ActionOperatorTypes.Delete))
         {
@@ -155,7 +163,7 @@ public class SharedActionsGroupComputer : ISharedActionsGroupComputer
             return;
         }
 
-        var sharedActionsGroup = await BuildSharedActionsGroup(operatorType);
+        var sharedActionsGroup = BuildSharedActionsGroup(operatorType);
 
         sharedActionsGroup.Source = null;
         sharedActionsGroup.Targets.AddAll(sharedAtomicActions.Select(saa => saa.Target!));
@@ -175,24 +183,20 @@ public class SharedActionsGroupComputer : ISharedActionsGroupComputer
         return automaticActions;
     }
 
-    private async Task<SharedActionsGroup> BuildSharedActionsGroup(ActionOperatorTypes operatorType)
+    private SharedActionsGroup BuildSharedActionsGroup(ActionOperatorTypes operatorType)
     {
-        await _semaphore.WaitAsync();
-        try
-        {
-            var group = new SharedActionsGroup();
-
-            Counter += 1;
+        var group = new SharedActionsGroup();
         
-            group.Operator = operatorType;
-            group.ActionsGroupId = $"AGID_{Counter}";
+        group.Operator = operatorType;
+        group.ActionsGroupId = GenerateUniqueId();
         
-            return group;
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
+        return group;
+    }
+    
+    private string GenerateUniqueId()
+    {
+        var newCounter = Interlocked.Increment(ref _counter);
+        return $"AGID_{newCounter}";
     }
     
     private void AffectSharedActionsGroupId(SharedActionsGroup sharedActionsGroup, List<SharedAtomicAction> sharedAtomicActions)
@@ -205,21 +209,38 @@ public class SharedActionsGroupComputer : ISharedActionsGroupComputer
     
     private void AddSharedActionsGroups(List<SharedActionsGroup> sharedActionsGroups)
     {
-        if (sharedActionsGroups.Count > 0)
+        lock (_lock)
         {
-            _sharedActionsGroupRepository.AddOrUpdate(sharedActionsGroups);
+            _buffer.AddAll(sharedActionsGroups);
+
+            CheckBuffer();
         }
+
     }
-    
+
     private void AddSharedActionsGroup(SharedActionsGroup sharedActionsGroup)
     {
-        _sharedActionsGroupRepository.AddOrUpdate(sharedActionsGroup);
+        lock (_lock)
+        {
+            _buffer.Add(sharedActionsGroup);
+            
+            CheckBuffer();
+        }
     }
-    
+
+    private void CheckBuffer()
+    {
+        if (_buffer.Count > 500)
+        {
+            _sharedActionsGroupRepository.AddOrUpdate(_buffer);
+            _buffer.Clear();
+        }
+    }
+
     private static List<List<SharedAtomicAction>> GetCopyGroups(IEnumerable<SharedAtomicAction> sharedAtomicActions, bool isContentAndDate)
     {
         var root = sharedAtomicActions
-            .Where(saa => saa.Target != null) // La target peut être null dans certains cas avec les règles de synchronisation
+            .Where(saa => saa.Target != null) // The target may be null in some cases with synchronization rules
             .GroupBy(saa => saa.Source!)
             .Select(x => new
             {

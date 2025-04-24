@@ -12,7 +12,6 @@ public class MultiUploadZip : IDisposable
         Key = key;
             
         SharedFileDefinition = sharedFileDefinition;
-        // ZipPath = zipPath;
         
         SharedFileDefinition.IsMultiFileZip = true;
         CreationDate = DateTime.Now;
@@ -21,8 +20,6 @@ public class MultiUploadZip : IDisposable
         MemoryStream = new MemoryStream();
 
         ZipArchive = new ZipArchive(MemoryStream, ZipArchiveMode.Create, true);
-        
-        // ZipArchive = ZipFile.Open(zipPath, ZipArchiveMode.Update);
 
         ActionGroupsIds = new List<string>();
         
@@ -34,8 +31,6 @@ public class MultiUploadZip : IDisposable
     public string Key { get; }
         
     public SharedFileDefinition SharedFileDefinition { get; }
-    
-    // public string ZipPath { get; }
     
     public MemoryStream MemoryStream { get; }
     
@@ -54,7 +49,7 @@ public class MultiUploadZip : IDisposable
     public bool CanAdd(FileInfo fileInfo, string actionsGroupId)
     {
         return 
-            ActionGroupsIds.Count < 1500 &&
+            ActionGroupsIds.Count < 100 &&
             ActionsGroupIdsConcatenationLength + actionsGroupId.Length + 5 < 25000 &&
             Size + fileInfo.Length < 8 * SizeConstants.ONE_MEGA_BYTES;
     }

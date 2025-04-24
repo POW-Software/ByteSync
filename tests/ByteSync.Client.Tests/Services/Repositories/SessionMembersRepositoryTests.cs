@@ -16,7 +16,7 @@ namespace ByteSync.Tests.Services.Repositories;
 public class SessionMembersRepositoryTests
 {
     private Mock<IConnectionService> _mockConnectionService;
-    private Mock<ISessionInvalidationSourceCachePolicy<SessionMemberInfo, string>> _mockSessionInvalidationCachePolicy;
+    private Mock<ISessionInvalidationCachePolicy<SessionMemberInfo, string>> _mockSessionInvalidationCachePolicy;
     
     private SessionMemberRepository _sessionMemberRepository;
 
@@ -27,7 +27,7 @@ public class SessionMembersRepositoryTests
     public void SetUp()
     {
         _mockConnectionService = new Mock<IConnectionService>();
-        _mockSessionInvalidationCachePolicy = new Mock<ISessionInvalidationSourceCachePolicy<SessionMemberInfo, string>>();
+        _mockSessionInvalidationCachePolicy = new Mock<ISessionInvalidationCachePolicy<SessionMemberInfo, string>>();
 
         _sessionMemberRepository = new SessionMemberRepository(
             _mockConnectionService.Object,

@@ -125,13 +125,12 @@ public class SynchronizationServiceTests
         A.CallTo(() => _synchronizationRepository.AddSynchronization(A<SynchronizationEntity>._, actionsGroupDefinitions))
             .Returns(Task.CompletedTask);
         A.CallTo(() => _synchronizationProgressService.InformSynchronizationStarted(A<SynchronizationEntity>._, client))
-            .Returns(synchronization);
+            .Returns(Task.CompletedTask);
         
         // Act
-        var result = await _synchronizationService.StartSynchronization(sessionId, client, actionsGroupDefinitions);
+        await _synchronizationService.StartSynchronization(sessionId, client, actionsGroupDefinitions);
 
         // Assert
-        result.Should().BeSameAs(synchronization);
         A.CallTo(() => _synchronizationRepository.AddSynchronization(A<SynchronizationEntity>._, actionsGroupDefinitions)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _synchronizationProgressService.InformSynchronizationStarted(A<SynchronizationEntity>._, client)).MustHaveHappenedOnceExactly();
     }
@@ -151,12 +150,10 @@ public class SynchronizationServiceTests
             .Returns(synchronization);
 
         // Act
-        var result = await _synchronizationService.StartSynchronization(sessionId, client, actionsGroupDefinitions);
+        await _synchronizationService.StartSynchronization(sessionId, client, actionsGroupDefinitions);
 
         // Assert
-        result.Should().BeSameAs(synchronization);
         A.CallTo(() => _synchronizationRepository.AddSynchronization(A<SynchronizationEntity>._, actionsGroupDefinitions)).MustNotHaveHappened();
-        A.CallTo(() => _synchronizationProgressService.MapToSynchronization(synchronizationEntity)).MustHaveHappened();
     }
     
     [Test]
@@ -239,7 +236,7 @@ public class SynchronizationServiceTests
         trackingActionEntity.TargetClientInstanceIds.Add("targetClientInstanceId");
         SynchronizationEntity synchronizationEntity = new SynchronizationEntity();
 
-        A.CallTo(() => _trackingActionRepository.GetOrBuild(sessionId, "ActionGroupId"))
+        A.CallTo(() => _trackingActionRepository.GetOrThrow(sessionId, "ActionGroupId"))
             .Returns(trackingActionEntity);
             
         A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
@@ -254,7 +251,7 @@ public class SynchronizationServiceTests
         // Act
         await _synchronizationService.OnFilePartIsUploadedAsync(sharedFileDefinition, 1);
         
-        A.CallTo(() => _trackingActionRepository.GetOrBuild(sessionId, "ActionGroupId"))
+        A.CallTo(() => _trackingActionRepository.GetOrThrow(sessionId, "ActionGroupId"))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .MustHaveHappenedOnceExactly();

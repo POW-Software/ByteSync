@@ -23,8 +23,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
     private readonly ILogger<SynchronizationActionRemoteUploader> _logger;
     
     private MultiUploadZip? _currentMultiUploadZip;
-
-
+    
     public SynchronizationActionRemoteUploader(ICloudProxy connectionManager, ISessionService sessionService, 
         IDeltaManager deltaManager, ISynchronizationActionServerInformer synchronizationActionServerInformer, IFileUploaderFactory fileUploaderFactory,
         ILogger<SynchronizationActionRemoteUploader> logger)
@@ -51,8 +50,6 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
     private SemaphoreSlim UploadSemaphore { get; }
     
     private ByteSyncEndpoint CurrentEndPoint => _connectionManager.CurrentEndPoint;
-
-    // public AbstractSession Session => _sessionService.SessionObservable.Value!;
 
     public async Task UploadForRemote(SharedActionsGroup sharedActionsGroup)
     {
@@ -113,7 +110,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
             {
                 await MultiZipPrepareSemaphore.WaitAsync();
 
-                // on crée le currentMultiUploadZip
+                // create the currentMultiUploadZip
                 var sharedFileDefinition = BuildSharedFileDefinition(sharedFileType);
 
                 _logger.LogInformation("Creating MultiUploadZip with id:{MultiZipId} for grouped upload (delta:{isDelta})",
@@ -184,7 +181,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
     {
         return Task.Run(() =>
         {
-            // L'abandon de la synchro a été demandé, on doit libérer les ressources
+            // The synchronization has been requested to be abandoned; we must free up resources
             if (_currentMultiUploadZip != null)
             {
                 try
@@ -206,7 +203,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
 
     private bool IsFileUploadableWithMultiUpload(FileInfo fileInfo)
     {
-        return fileInfo.Length <= 200 * SizeConstants.ONE_KILO_BYTES;
+        return fileInfo.Length <= 250 * SizeConstants.ONE_KILO_BYTES;
     }
 
     private async Task CloseAndUploadCurrentMultiZip()

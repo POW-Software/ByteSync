@@ -16,9 +16,9 @@ namespace ByteSync.ServerCommon.Tests.Repositories;
 public class SynchronizationRepositoryTests
 {
     private SynchronizationRepository _repository;
-    private CacheRepository<SynchronizationEntity> _cacheRepository;
+    private CacheRepository<SynchronizationEntity> _synchronizationEntityCacheRepository;
     private RedisInfrastructureService _redisInfrastructureService;
-    private IActionsGroupDefinitionsRepository _actionsGroupDefRepo;
+    private CacheRepository<TrackingActionEntity> _trackingActionEntityCacheRepository;
 
     [SetUp]
     public void SetUp()
@@ -31,16 +31,17 @@ public class SynchronizationRepositoryTests
             Options.Create(redisSettings), 
             cacheKeyFactory, 
             loggerFactoryMock);
-            
-        _cacheRepository = new CacheRepository<SynchronizationEntity>(_redisInfrastructureService);
-        _actionsGroupDefRepo = A.Fake<IActionsGroupDefinitionsRepository>();
+
+        _synchronizationEntityCacheRepository = new CacheRepository<SynchronizationEntity>(_redisInfrastructureService);
+        _trackingActionEntityCacheRepository = new CacheRepository<TrackingActionEntity>(_redisInfrastructureService);
         
         _repository = new SynchronizationRepository(
             _redisInfrastructureService, 
-            _cacheRepository, 
-            _actionsGroupDefRepo);
+            _synchronizationEntityCacheRepository, 
+            _trackingActionEntityCacheRepository);
     }
 
+    
     [Test]
     public async Task AddSynchronization_IntegrationTest()
     {
@@ -59,15 +60,10 @@ public class SynchronizationRepositoryTests
 
         // Assert
         var cacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.Synchronization, sessionId);
-        var savedEntity = await _cacheRepository.Get(cacheKey);
+        var savedEntity = await _synchronizationEntityCacheRepository.Get(cacheKey);
         
         savedEntity.Should().NotBeNull();
         savedEntity.Should().BeEquivalentTo(synchronizationEntity);
-        
-        A.CallTo(() => _actionsGroupDefRepo.AddOrUpdateActionsGroupDefinitions(
-            sessionId, 
-            A<List<ActionsGroupDefinition>>.That.IsSameSequenceAs(actionsGroupDefinitions)))
-            .MustHaveHappenedOnceExactly();
     }
 
     [Test]
@@ -78,20 +74,17 @@ public class SynchronizationRepositoryTests
         var synchronizationEntity = new SynchronizationEntity { SessionId = sessionId };
         
         var cacheKey = _redisInfrastructureService.ComputeCacheKey(EntityType.Synchronization, sessionId);
-        await _cacheRepository.Save(cacheKey, synchronizationEntity);
+        await _synchronizationEntityCacheRepository.Save(cacheKey, synchronizationEntity);
 
         // Verify entity exists before resetting
-        var entityBeforeReset = await _cacheRepository.Get(cacheKey);
+        var entityBeforeReset = await _synchronizationEntityCacheRepository.Get(cacheKey);
         entityBeforeReset.Should().NotBeNull();
 
         // Act
         await _repository.ResetSession(sessionId);
 
         // Assert
-        var entityAfterReset = await _cacheRepository.Get(cacheKey);
+        var entityAfterReset = await _synchronizationEntityCacheRepository.Get(cacheKey);
         entityAfterReset.Should().BeNull();
-        
-        A.CallTo(() => _actionsGroupDefRepo.DeleteActionsGroupDefinitions(sessionId))
-            .MustHaveHappenedOnceExactly();
     }
 }

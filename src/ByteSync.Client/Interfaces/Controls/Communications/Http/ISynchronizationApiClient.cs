@@ -7,7 +7,7 @@ namespace ByteSync.Interfaces.Controls.Communications.Http;
 
 public interface ISynchronizationApiClient
 {
-    public Task<Synchronization> StartSynchronization(SynchronizationStartRequest synchronizationStartRequest);
+    public Task StartSynchronization(SynchronizationStartRequest synchronizationStartRequest);
     
     public Task AssertLocalCopyIsDone(string sessionId, List<string> actionsGroupIds);
 

@@ -17,14 +17,12 @@ public class SynchronizationApiClient : ISynchronizationApiClient
         _logger = logger;
     }
     
-    public async Task<Synchronization> StartSynchronization(SynchronizationStartRequest synchronizationStartRequest)
+    public async Task StartSynchronization(SynchronizationStartRequest synchronizationStartRequest)
     {
         try
         {
-            var result = await _apiInvoker.PostAsync<Synchronization>($"session/{synchronizationStartRequest.SessionId}/synchronization/start", 
+            await _apiInvoker.PostAsync($"session/{synchronizationStartRequest.SessionId}/synchronization/start", 
                 synchronizationStartRequest);
-
-            return result;
         }
         catch (Exception ex)
         {

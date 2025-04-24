@@ -5,6 +5,7 @@ using System.Text;
 using ByteSync.Functions.Http;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Settings;
+using ByteSync.ServerCommon.Exceptions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -48,14 +49,16 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
+            bool isOK = false;
+            Client? client = null;
             try
             {
                 var claims = ValidateToken(tokenHandler, token);
 
-                var client = await GetClient(claims);
+                client = await GetClient(claims);
                 context.Items.Add(AuthConstants.FUNCTION_CONTEXT_CLIENT, client!);
-
-                await BeginScopeAndGoNext(context, next, client);
+                
+                isOK = true;
             }
             catch (SecurityTokenExpiredException ex)
             {
@@ -66,6 +69,11 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
             {
                 _logger.LogError(ex, "Error validating token");
                 await HandleTokenError(context, "Invalid token");
+            }
+
+            if (isOK)
+            {
+                await BeginScopeAndGoNext(context, next, client!);
             }
         }
         else
@@ -166,12 +174,13 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
         return client;
     }
 
-    private static async Task HandleTokenError(FunctionContext context, string message)
+    private static async Task HandleTokenError(FunctionContext context, string message, 
+        HttpStatusCode httpStatusCode = HttpStatusCode.Unauthorized)
     {
         var httpReqData = await context.GetHttpRequestDataAsync();
         if (httpReqData != null)
         {
-            var newHttpResponse = httpReqData.CreateResponse(HttpStatusCode.Unauthorized);
+            var newHttpResponse = httpReqData.CreateResponse(httpStatusCode);
             await newHttpResponse.WriteAsJsonAsync(new { ResponseStatus = message }, newHttpResponse.StatusCode);
             context.GetInvocationResult().Value = newHttpResponse;
         }

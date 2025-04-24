@@ -32,7 +32,6 @@ public class SynchronizationService : ISynchronizationService
         _synchronizationLooperFactory = synchronizationLooperFactory;
         _timeTrackingCache = timeTrackingCache;
         _logger = logger;
-
         
         SynchronizationProcessData = new SynchronizationProcessData();
         
@@ -40,8 +39,12 @@ public class SynchronizationService : ISynchronizationService
             .Where(tuple => tuple is { First: not null, Second: true })
             .Subscribe(_ =>
             {
-                var synchronizationLooper = _synchronizationLooperFactory.CreateSynchronizationLooper();
-                synchronizationLooper.CloudSessionSynchronizationLoop();
+                Task.Run(async () =>
+                {
+                    var synchronizationLooper = _synchronizationLooperFactory.CreateSynchronizationLooper();
+                    await synchronizationLooper.CloudSessionSynchronizationLoop();
+                    await synchronizationLooper.DisposeAsync();
+                });
             });
         
         _sessionService.SessionStatusObservable

@@ -45,12 +45,10 @@ public class SynchronizationProgressService : ISynchronizationProgressService
         }
     }
 
-    public async Task<Synchronization> InformSynchronizationStarted(SynchronizationEntity synchronizationEntity, Client client)
+    public async Task InformSynchronizationStarted(SynchronizationEntity synchronizationEntity, Client client)
     {
         var synchronization = await MapToSynchronization(synchronizationEntity);
-        await _invokeClientsService.SessionGroupExcept(synchronization.SessionId, client).SynchronizationStarted(synchronization);
-
-        return synchronization;
+        await _invokeClientsService.SessionGroup(synchronization.SessionId).SynchronizationStarted(synchronization);
     }
 
     public async Task UploadIsFinished(SharedFileDefinition sharedFileDefinition, int totalParts, HashSet<string> targetInstanceIds)
@@ -100,7 +98,7 @@ public class SynchronizationProgressService : ISynchronizationProgressService
     private async Task SendSynchronizationProgressUpdated(SynchronizationEntity synchronizationEntity)
     {
         var synchronizationProgressPush = CreateSynchronizationProgressPush(synchronizationEntity, null);
-
+        
         await _invokeClientsService.Clients(synchronizationEntity.Progress.Members)
             .SynchronizationProgressUpdated(synchronizationProgressPush);
     }
@@ -116,7 +114,7 @@ public class SynchronizationProgressService : ISynchronizationProgressService
         }
         
         var synchronizationProgressPush = CreateSynchronizationProgressPush(trackingActionResult.SynchronizationEntity, trackingActionSummaries);
-
+        
         await _invokeClientsService.Clients(trackingActionResult.SynchronizationEntity.Progress.Members)
             .SynchronizationProgressUpdated(synchronizationProgressPush);
     }

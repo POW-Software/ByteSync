@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Mixins;
 using ByteSync.Assets.Resources;
@@ -12,12 +11,10 @@ using ByteSync.Business.Sessions;
 using ByteSync.Business.Synchronizations;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Synchronizations;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Interfaces.Dialogs;
-using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.ViewModels.Misc;
@@ -120,6 +117,14 @@ public class SynchronizationMainViewModel : ViewModelBase, IActivatableViewModel
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(tuple => OnSynchronizationStarted(tuple.First!))
                 .DisposeWith(disposables);
+            
+            _synchronizationService.SynchronizationProcessData.SynchronizationDataTransmitted
+                .CombineLatest(_synchronizationService.SynchronizationProcessData.SynchronizationAbortRequest, 
+                    _synchronizationService.SynchronizationProcessData.SynchronizationEnd)
+                .Where(tuple => tuple.Second == null && tuple.Third == null)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(tuple => OnSynchronizationDataTransmitted(tuple.First))
+                .DisposeWith(disposables);
 
             _synchronizationService.SynchronizationProcessData.SynchronizationAbortRequest.DistinctUntilChanged()
                 .Where(synchronizationAbortRequest => synchronizationAbortRequest != null)
@@ -212,14 +217,6 @@ public class SynchronizationMainViewModel : ViewModelBase, IActivatableViewModel
             
         IsMainProgressRingVisible = false;
         IsMainCheckVisible = false;
-    }
-
-    private bool ComputeCanStartSynchronization(bool isSyncStarted, bool isCloudSession, bool isCloudSessionCreatedByMe, 
-        ObservableCollection<SharedAtomicAction>? actions, int actionsCount, bool isInventoryError)
-    {
-        var result = !isSyncStarted && (!isCloudSession || isCloudSessionCreatedByMe) && actions != null && actionsCount > 0 && !isInventoryError;
-
-        return result;
     }
 
     private bool ComputeShowStartSynchronizationObservable(bool isSynchronizationRunning, bool isCloudSession, bool isSessionCreatedByMe, 
@@ -366,7 +363,6 @@ public class SynchronizationMainViewModel : ViewModelBase, IActivatableViewModel
     private void OnSynchronizationStarted(Synchronization synchronizationStart)
     {
         StartDateTime = synchronizationStart.Started.LocalDateTime;
-        TreatableActions = _synchronizationService.SynchronizationProcessData.TotalActionsToProcess;
 
         MainStatus = Resources.SynchronizationMain_SynchronizationRunning;
         
@@ -381,6 +377,10 @@ public class SynchronizationMainViewModel : ViewModelBase, IActivatableViewModel
         IsMainProgressRingVisible = true;
     }
     
+    private void OnSynchronizationDataTransmitted(bool tupleFirst)
+    {
+        TreatableActions = _synchronizationService.SynchronizationProcessData.TotalActionsToProcess;
+    }
     
     private void OnSynchronizationAbortRequested(SynchronizationAbortRequest synchronizationAbortRequest)
     {

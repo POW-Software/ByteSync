@@ -6,22 +6,23 @@ namespace ByteSync.Repositories;
 
 public class AtomicActionRepository : BaseSourceCacheRepository<AtomicAction, string>, IAtomicActionRepository
 {
-    private readonly ISessionInvalidationSourceCachePolicy<AtomicAction, string> _sessionInvalidationSourceCachePolicy;
+    private readonly ISessionInvalidationCachePolicy<AtomicAction, string> _sessionInvalidationCachePolicy;
+    private readonly IPropertyIndexer<AtomicAction, ComparisonItem> _propertyIndexer;
 
-    public AtomicActionRepository(ISessionInvalidationSourceCachePolicy<AtomicAction, string> sessionInvalidationSourceCachePolicy)
+    public AtomicActionRepository(ISessionInvalidationCachePolicy<AtomicAction, string> sessionInvalidationCachePolicy,
+        IPropertyIndexer<AtomicAction, ComparisonItem> propertyIndexer)
     {
-        _sessionInvalidationSourceCachePolicy = sessionInvalidationSourceCachePolicy;
-        _sessionInvalidationSourceCachePolicy.Initialize(SourceCache, true, true);
+        _sessionInvalidationCachePolicy = sessionInvalidationCachePolicy;
+        _sessionInvalidationCachePolicy.Initialize(SourceCache, true, true);
+
+        _propertyIndexer = propertyIndexer;
+        _propertyIndexer.Initialize(SourceCache, atomicAction => atomicAction.ComparisonItem!);
     }
-    
+
     protected override string KeySelector(AtomicAction atomicAction) => atomicAction.AtomicActionId;
 
     public List<AtomicAction> GetAtomicActions(ComparisonItem comparisonItem)
     {
-        var result = SourceCache.Items
-            .Where(atomicAction => Equals(atomicAction.ComparisonItem, comparisonItem))
-            .ToList();
-
-        return result;
+        return _propertyIndexer.GetByIndex(comparisonItem);
     }
 }

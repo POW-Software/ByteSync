@@ -14,10 +14,10 @@ public class SessionMemberRepository : BaseSourceCacheRepository<SessionMemberIn
     private readonly IConnectionService _connectionService;
     private readonly ReadOnlyObservableCollection<SessionMemberInfo> _sortedSessionMembersList;
     private readonly ReadOnlyObservableCollection<SessionMemberInfo> _sortedOtherSessionMembersList;
-    private readonly ISessionInvalidationSourceCachePolicy<SessionMemberInfo, string> _sessionInvalidationSourceCachePolicy;
+    private readonly ISessionInvalidationCachePolicy<SessionMemberInfo, string> _sessionInvalidationCachePolicy;
 
     public SessionMemberRepository(IConnectionService connectionService, 
-        ISessionInvalidationSourceCachePolicy<SessionMemberInfo, string> sessionInvalidationSourceCachePolicy)
+        ISessionInvalidationCachePolicy<SessionMemberInfo, string> sessionInvalidationCachePolicy)
     {
         _connectionService = connectionService;
         
@@ -34,8 +34,8 @@ public class SessionMemberRepository : BaseSourceCacheRepository<SessionMemberIn
         IsCurrentUserFirstSessionMemberObservable
             .Subscribe(value => IsCurrentUserFirstSessionMemberCurrentValue = value);
         
-        _sessionInvalidationSourceCachePolicy = sessionInvalidationSourceCachePolicy;
-        _sessionInvalidationSourceCachePolicy.Initialize(SourceCache, true, false);
+        _sessionInvalidationCachePolicy = sessionInvalidationCachePolicy;
+        _sessionInvalidationCachePolicy.Initialize(SourceCache, true, false);
     }
 
     protected override string KeySelector(SessionMemberInfo sessionMemberInfo) => sessionMemberInfo.ClientInstanceId;

@@ -8,7 +8,6 @@ using ByteSync.Functions.Helpers.Middlewares;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Commands.Inventories;
 using ByteSync.ServerCommon.Helpers;
-using ByteSync.ServerCommon.Misc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -88,24 +87,14 @@ var host = new HostBuilder()
         services.Configure<RedisSettings>(configuration.GetSection("Redis"));
         services.Configure<BlobStorageSettings>(configuration.GetSection("BlobStorage"));
         services.Configure<SignalRSettings>(configuration.GetSection("SignalR"));
-        services.Configure<CosmosDbSettings>(configuration.GetSection("CosmosDb"));
         services.Configure<AppSettings>(appSettingsSection);
         var appSettings = appSettingsSection.Get<AppSettings>();
         
         services.AddClaimAuthorization();
         services.AddJwtAuthentication(appSettings!.Secret);
-
-        services.AddDbContext<ByteSyncDbContext>();
         
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(AddPathItemRequest).Assembly));
     })
     .Build();
-
-using (var scope = host.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var dbContext = services.GetRequiredService<ByteSyncDbContext>();
-    await dbContext.InitializeCosmosDb();
-}
 
 host.Run();
