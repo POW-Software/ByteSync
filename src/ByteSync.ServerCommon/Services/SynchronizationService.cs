@@ -145,8 +145,15 @@ public class SynchronizationService : ISynchronizationService
                 synchronization.Progress.FinishedActionsCount += 1;
                 synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
             }
-            
-            synchronization.Progress.ExchangedVolume += sharedFileDefinition.UploadedFileLength;
+
+            if (sharedFileDefinition.IsMultiFileZip)
+            {
+                synchronization.Progress.ExchangedVolume += trackingAction.Size ?? 0;
+            }
+            else
+            {
+                synchronization.Progress.ExchangedVolume += sharedFileDefinition.UploadedFileLength;
+            }
             
             needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
 
