@@ -10,9 +10,13 @@ namespace ByteSync.Repositories;
 public class SharedActionsGroupRepository : BaseSourceCacheRepository<SharedActionsGroup, string>, ISharedActionsGroupRepository
 {
     private readonly ISessionInvalidationCachePolicy<SharedActionsGroup, string> _sessionInvalidationCachePolicy;
+    private readonly ILogger<SharedActionsGroupRepository> _logger;
 
-    public SharedActionsGroupRepository(ISessionInvalidationCachePolicy<SharedActionsGroup, string> sessionInvalidationCachePolicy)
+    public SharedActionsGroupRepository(ISessionInvalidationCachePolicy<SharedActionsGroup, string> sessionInvalidationCachePolicy,
+        ILogger<SharedActionsGroupRepository> logger)
     {
+        _logger = logger;
+        
         OrganizedSharedActionsGroups = new List<SharedActionsGroup>();
         
         _sessionInvalidationCachePolicy = sessionInvalidationCachePolicy;
@@ -52,8 +56,16 @@ public class SharedActionsGroupRepository : BaseSourceCacheRepository<SharedActi
     
     public SharedActionsGroup GetSharedActionsGroup(string actionsGroupId)
     {
-        var result = SourceCache.Items.Single(i => i.ActionsGroupId == actionsGroupId);
-        return result;
+        try
+        {
+            var result = SourceCache.Items.Single(i => i.ActionsGroupId == actionsGroupId);
+            return result;
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Error getting shared actions group with id {ActionsGroupId}", actionsGroupId);
+            throw;
+        }
     }
 
     public Task OnSynchronizationProgressChanged(SynchronizationProgressPush synchronizationProgressPush)

@@ -266,13 +266,13 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
         var semaphoreAcquired = false;
         try
         {
+            await UploadSemaphore.WaitAsync();
+            semaphoreAcquired = true;
+            
             if (_synchronizationService.SynchronizationProcessData.SynchronizationAbortRequest.Value != null)
             {
                 return;
             }
-            
-            await UploadSemaphore.WaitAsync();
-            semaphoreAcquired = true;
 
             await fileUploader.Upload();
         }
