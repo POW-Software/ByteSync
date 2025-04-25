@@ -263,14 +263,16 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
 
     private async Task RunUploadTask(List<string> actionsGroupsIds, IFileUploader fileUploader, Action? postAction = null)
     {
+        var semaphoreAcquired = false;
         try
         {
-            await UploadSemaphore.WaitAsync();
-
             if (_synchronizationService.SynchronizationProcessData.SynchronizationAbortRequest.Value != null)
             {
                 return;
             }
+            
+            await UploadSemaphore.WaitAsync();
+            semaphoreAcquired = true;
 
             await fileUploader.Upload();
         }
@@ -282,7 +284,10 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
         }
         finally
         {
-            UploadSemaphore.Release();
+            if (semaphoreAcquired)
+            {
+                UploadSemaphore.Release();
+            }
 
             postAction?.Invoke();
         }
