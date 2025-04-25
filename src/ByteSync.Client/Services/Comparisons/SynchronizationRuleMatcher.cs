@@ -22,20 +22,31 @@ class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
 
     public void MakeMatches(ICollection<ComparisonItem> comparisonItems, ICollection<SynchronizationRule> synchronizationRules)
     {
+        var allAtomicActions = new HashSet<AtomicAction>();
         foreach (var comparisonItem in comparisonItems)
         {
-            MakeMatches(comparisonItem, synchronizationRules);
+            var atomicActions = DoMakeMatches(comparisonItem, synchronizationRules);
+            allAtomicActions.UnionWith(atomicActions);
         }
+        
+        _atomicActionRepository.AddOrUpdate(allAtomicActions);
     }
 
     public void MakeMatches(ComparisonItem comparisonItem, ICollection<SynchronizationRule> synchronizationRules)
+    {
+        var atomicActions = DoMakeMatches(comparisonItem, synchronizationRules);
+        
+        _atomicActionRepository.AddOrUpdate(atomicActions);
+    }
+
+    private HashSet<AtomicAction> DoMakeMatches(ComparisonItem comparisonItem, ICollection<SynchronizationRule> synchronizationRules)
     {
         var initialAtomicActions = _atomicActionRepository.GetAtomicActions(comparisonItem);
         var actionsToRemove = initialAtomicActions.Where(a => a.IsFromSynchronizationRule).ToList();
         _atomicActionRepository.Remove(actionsToRemove);
         
         HashSet<AtomicAction> atomicActions = GetApplicableActions(comparisonItem, synchronizationRules);
-        _atomicActionRepository.AddOrUpdate(atomicActions);
+        return atomicActions;
     }
 
     private HashSet<AtomicAction> GetApplicableActions(ComparisonItem comparisonItem, 

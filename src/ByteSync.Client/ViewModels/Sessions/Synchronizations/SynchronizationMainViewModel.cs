@@ -1,11 +1,9 @@
-﻿using System.Collections.ObjectModel;
-using System.Reactive;
+﻿using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Controls;
 using Avalonia.Controls.Mixins;
 using ByteSync.Assets.Resources;
 using ByteSync.Business;
-using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Misc;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Synchronizations;
@@ -82,14 +80,14 @@ public class SynchronizationMainViewModel : ViewModelBase, IActivatableViewModel
 
         StartSynchronizationError = errorViewModel;
         var canStartSynchronization = _sessionService.SessionObservable
-            .CombineLatest(_atomicActionRepository.ObservableCache.Connect(), _sessionMemberRepository.IsCurrentUserFirstSessionMemberObservable,
+            .CombineLatest(
+                _atomicActionRepository.ObservableCache.Connect().ToCollection(), 
+                _sessionMemberRepository.IsCurrentUserFirstSessionMemberObservable,
                 (session, atomicActions, isCurrentUserFirstSessionMember) =>
                     (Session: session, AtomicActions: atomicActions, IsCurrentUserFirstSessionMember: isCurrentUserFirstSessionMember))
-            // .CombineLatest(_sessionMembersService.IsCurrentUserFirstSessionMemberObservable)
             .DistinctUntilChanged()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Select(tuple => tuple.Session is CloudSession && tuple.IsCurrentUserFirstSessionMember && tuple.AtomicActions.Count > 0);
-            // .Select(tuple => tuple.First == SessionStatus.Preparation && tuple.Second == null)
         
         StartSynchronizationCommand = ReactiveCommand.CreateFromTask(StartSynchronization, canStartSynchronization);
         

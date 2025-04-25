@@ -20,19 +20,21 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
     private readonly ISessionService _sessionService;
     private readonly ISynchronizationActionServerInformer _synchronizationActionServerInformer;
     private readonly IFileUploaderFactory _fileUploaderFactory;
+    private readonly ISynchronizationService _synchronizationService;
     private readonly ILogger<SynchronizationActionRemoteUploader> _logger;
     
     private MultiUploadZip? _currentMultiUploadZip;
     
     public SynchronizationActionRemoteUploader(ICloudProxy connectionManager, ISessionService sessionService, 
         IDeltaManager deltaManager, ISynchronizationActionServerInformer synchronizationActionServerInformer, IFileUploaderFactory fileUploaderFactory,
-        ILogger<SynchronizationActionRemoteUploader> logger)
+        ISynchronizationService synchronizationService, ILogger<SynchronizationActionRemoteUploader> logger)
     {
         _connectionManager = connectionManager;
         _sessionService = sessionService;
         _deltaManager = deltaManager;
         _synchronizationActionServerInformer = synchronizationActionServerInformer;
         _fileUploaderFactory = fileUploaderFactory;
+        _synchronizationService = synchronizationService;
         _logger = logger;
         
         _currentMultiUploadZip = null;
@@ -177,9 +179,9 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
         }
     }
 
-    public Task Abort()
+    public async Task Abort()
     {
-        return Task.Run(() =>
+        await Task.Run(() =>
         {
             // The synchronization has been requested to be abandoned; we must free up resources
             if (_currentMultiUploadZip != null)
@@ -199,6 +201,8 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
                 }
             }
         });
+        
+        await Task.WhenAll(UploadTasks);
     }
 
     private bool IsFileUploadableWithMultiUpload(FileInfo fileInfo)
@@ -261,9 +265,16 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
 
     private async Task RunUploadTask(List<string> actionsGroupsIds, IFileUploader fileUploader, Action? postAction = null)
     {
+        var semaphoreAcquired = false;
         try
         {
             await UploadSemaphore.WaitAsync();
+            semaphoreAcquired = true;
+            
+            if (_synchronizationService.SynchronizationProcessData.SynchronizationAbortRequest.Value != null)
+            {
+                return;
+            }
 
             await fileUploader.Upload();
         }
@@ -275,7 +286,10 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
         }
         finally
         {
-            UploadSemaphore.Release();
+            if (semaphoreAcquired)
+            {
+                UploadSemaphore.Release();
+            }
 
             postAction?.Invoke();
         }
