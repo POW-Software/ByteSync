@@ -42,9 +42,6 @@ class FileUploader : IFileUploader
         LocalFileToUpload = localFileToUpload;
         MemoryStream = memoryStream;
         SharedFileDefinition = sharedFileDefinition ?? throw new NullReferenceException("SharedFileDefinition is null");
-        
-        // _slicerSemaphore = new SemaphoreSlim(8);
-        // _uploaderSemaphore = new SemaphoreSlim(4);
 
         TotalCreatedSlices = 0;
         TotalUploadedSlices = 0;
@@ -53,7 +50,6 @@ class FileUploader : IFileUploader
 
         SyncRoot = new object();
 
-        // SlicingIsFinished = new ManualResetEvent(false);
         UploadingIsFinished = new ManualResetEvent(false);
         ExceptionOccurred = new ManualResetEvent(false);
     }
@@ -61,8 +57,6 @@ class FileUploader : IFileUploader
     private object SyncRoot { get; }
 
     private Channel<FileUploaderSlice> AvailableSlices { get; set; }
-    
-    // private ManualResetEvent SlicingIsFinished { get; set; }
     
     private ManualResetEvent UploadingIsFinished { get; set; }
     
