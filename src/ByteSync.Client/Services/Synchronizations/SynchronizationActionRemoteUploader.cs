@@ -179,9 +179,9 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
         }
     }
 
-    public Task Abort()
+    public async Task Abort()
     {
-        return Task.Run(() =>
+        await Task.Run(() =>
         {
             // The synchronization has been requested to be abandoned; we must free up resources
             if (_currentMultiUploadZip != null)
@@ -201,6 +201,8 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
                 }
             }
         });
+        
+        await Task.WhenAll(UploadTasks);
     }
 
     private bool IsFileUploadableWithMultiUpload(FileInfo fileInfo)

@@ -60,8 +60,15 @@ public class SynchronizationProgressPushReceiver : IPushReceiver
 
             if (sessionId != null && synchronizationProgressPush.TrackingActionSummaries != null)
             {
-                await _synchronizationApiClient.AssertSynchronizationActionErrors(sessionId!,
-                    synchronizationProgressPush.TrackingActionSummaries.Select(tas => tas.ActionsGroupId).ToList());
+                try
+                {
+                    await _synchronizationApiClient.AssertSynchronizationActionErrors(sessionId!,
+                        synchronizationProgressPush.TrackingActionSummaries.Select(tas => tas.ActionsGroupId).ToList());
+                }
+                catch (Exception ex2)
+                {
+                    _logger.LogError(ex2, "Error asserting synchronization action errors");
+                }
             }
         }
     }
