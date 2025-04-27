@@ -30,7 +30,7 @@ public class FilterParser : IFilterParser
         End
     }
 
-    public FilterParser(string filterText, IDataPartIndexer dataPartIndexer, IOperatorParser operatorParser)
+    public FilterParser(IDataPartIndexer dataPartIndexer, IOperatorParser operatorParser)
     {
         _dataPartIndexer = dataPartIndexer;
         _operatorParser = operatorParser;
@@ -328,7 +328,9 @@ public class FilterParser : IFilterParser
 
             while (_position < _filterText.Length &&
                    (char.IsDigit(_filterText[_position]) || _filterText[_position] == '.'))
+            {
                 _position++;
+            }
 
             _currentToken = _filterText.Substring(start, _position - start);
             _currentTokenType = FilterTokenType.Number;
@@ -340,7 +342,9 @@ public class FilterParser : IFilterParser
 
             if (_position < _filterText.Length &&
                 (_filterText[_position] == '=' || _filterText[_position] == '~'))
+            {
                 _position++;
+            }
 
             _currentToken = _filterText.Substring(start, _position - start);
             _currentTokenType = FilterTokenType.Operator;
@@ -359,9 +363,20 @@ public class FilterParser : IFilterParser
                 _currentToken.Equals("OR", StringComparison.OrdinalIgnoreCase) ||
                 _currentToken.Equals("NOT", StringComparison.OrdinalIgnoreCase) ||
                 _currentToken == "&&" || _currentToken == "||")
+            {
                 _currentTokenType = FilterTokenType.LogicalOperator;
+            }
             else
-                _currentTokenType = FilterTokenType.Identifier;
+            {
+                if (_dataPartIndexer.GetDataPart(_currentToken) != null || _currentToken.ToLower().Equals("content"))
+                {
+                    _currentTokenType = FilterTokenType.Identifier;
+                }
+                else
+                {
+                    _currentTokenType = FilterTokenType.String;
+                }
+            }
         }
     }
 }
