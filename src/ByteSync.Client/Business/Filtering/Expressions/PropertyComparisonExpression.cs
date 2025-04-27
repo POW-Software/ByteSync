@@ -1,30 +1,32 @@
 ﻿using System.Text.RegularExpressions;
+using ByteSync.Business.Comparisons;
 using ByteSync.Business.Filtering.Comparing;
 using ByteSync.Business.Filtering.Extensions;
+using ByteSync.Business.Filtering.Values;
 using ByteSync.Models.Comparisons.Result;
 
 namespace ByteSync.Business.Filtering.Expressions;
 
 public class PropertyComparisonExpression : FilterExpression
 {
-    private readonly string _sourceDataSource;
+    private readonly DataPart _sourceDataPart;
     private readonly string _property;
     private readonly string _operator;
-    private readonly string _targetDataSource;
+    private readonly DataPart? _targetDataPart;
     private readonly string? _targetProperty;
     private readonly string? _targetValue;
     private readonly bool _isDataSourceComparison;
 
-    public PropertyComparisonExpression(string sourceDataSource, string property, string @operator, string targetDataSource,
+    public PropertyComparisonExpression(DataPart sourceDataPart, string property, string @operator, DataPart? targetDataPart,
         string? targetPropertyOrValue = null)
     {
-        _sourceDataSource = sourceDataSource;
+        _sourceDataPart = sourceDataPart;
         _property = property;
         _operator = @operator;
-        _targetDataSource = targetDataSource;
+        _targetDataPart = targetDataPart;
 
         // Determine if this is a comparison between two data sources or a data source and a value
-        _isDataSourceComparison = targetDataSource != null;
+        _isDataSourceComparison = _targetDataPart != null;
 
         if (_isDataSourceComparison)
         {
@@ -39,9 +41,9 @@ public class PropertyComparisonExpression : FilterExpression
     public override bool Evaluate(ComparisonItem item)
     {
         // Get source property value
-        object sourceValue = PropertyComparer.GetPropertyValue(item, _sourceDataSource, _property);
+        var sourceValues = PropertyComparer.GetPropertyValue(item, _sourceDataPart, _property);
 
-        if (sourceValue == null)
+        if (sourceValues.Count == 0)
         {
             return _operator == "!=" || _operator == "<>";
         }
@@ -50,24 +52,24 @@ public class PropertyComparisonExpression : FilterExpression
         if (_isDataSourceComparison)
         {
             // Compare with another data source property
-            object targetValue = PropertyComparer.GetPropertyValue(item, _targetDataSource, _targetProperty ?? _property);
-            return PropertyComparer.CompareValues(sourceValue, targetValue, _operator);
+            var targetValues = PropertyComparer.GetPropertyValue(item, _targetDataPart, _targetProperty ?? _property);
+            return PropertyComparer.CompareValues(sourceValues, targetValues, _operator);
         }
         else
         {
             // Compare with a literal value
-            return CompareWithLiteral(sourceValue, _targetValue, _operator, _property);
+            return CompareWithLiteral(sourceValues, _targetValue, _operator, _property);
         }
     }
 
-    private bool CompareWithLiteral(object sourceValue, string targetValue, string op, string property)
+    private bool CompareWithLiteral(List<PropertyValue> sourceValues, string targetValue, string op, string property)
     {
         // Handle special case for regex
-        if (op == "=~" && sourceValue is string sourceString)
+        if (op == "=~" && sourceValues.Any(sv => sv.Value is string))
         {
             try
             {
-                return Regex.IsMatch(sourceString, targetValue);
+                return sourceValues.Any(sv => Regex.IsMatch(sv.Value.ToString()!, targetValue));
             }
             catch (ArgumentException)
             {
@@ -106,25 +108,25 @@ public class PropertyComparisonExpression : FilterExpression
                 return false;
             }
         }
-        else if (propertyLower == "date")
-        {
-            // Parse date
-            if (DateTime.TryParse(targetValue.Trim('"', '\''), out DateTime targetDate))
-            {
-                return PropertyComparer.CompareValues(sourceValue, targetDate, op);
-            }
-
-            return false;
-        }
-        else if (propertyLower == "content" || propertyLower == "contentanddate")
-        {
-            // Direct comparison for content hashes
-            return PropertyComparer.CompareValues(sourceValue, targetValue, op);
-        }
-        else
-        {
-            // Default string comparison
-            return PropertyComparer.CompareValues(sourceValue, targetValue, op);
-        }
+        // else if (propertyLower == "date")
+        // {
+        //     // Parse date
+        //     if (DateTime.TryParse(targetValue.Trim('"', '\''), out DateTime targetDate))
+        //     {
+        //         return PropertyComparer.CompareValues(sourceValues, targetDate, op);
+        //     }
+        //
+        //     return false;
+        // }
+        // else if (propertyLower == "content" || propertyLower == "contentanddate")
+        // {
+        //     // Direct comparison for content hashes
+        //     return PropertyComparer.CompareValues(sourceValues, targetValue, op);
+        // }
+        // else
+        // {
+        //     // Default string comparison
+        //     return PropertyComparer.CompareValues(sourceValues, targetValue, op);
+        // }
     }
 }

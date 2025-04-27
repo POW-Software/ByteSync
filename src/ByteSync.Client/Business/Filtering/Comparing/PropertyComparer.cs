@@ -1,4 +1,6 @@
 ﻿using System.Text.RegularExpressions;
+using ByteSync.Business.Comparisons;
+using ByteSync.Business.Filtering.Values;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.Inventories;
 
@@ -9,63 +11,101 @@ public class PropertyComparer
     /// <summary>
     /// Gets property value from a ComparisonItem for a specific DataSource
     /// </summary>
-    public static object GetPropertyValue(ComparisonItem item, string dataSource, string property)
+    public static List<PropertyValue> GetPropertyValue(ComparisonItem item, DataPart? dataPart, string property)
     {
-        if (dataSource == null)
+        if (dataPart == null)
+        {
             return GetGeneralPropertyValue(item, property);
+        }
 
         // Find content identities for the specific data source
-        var inventories = item.ContentIdentities
-            .SelectMany(ci => ci.GetInventories())
-            .Where(i => i.Letter.Equals(dataSource, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        if (!inventories.Any())
-            return null; // Data source not found
+        var contentIdentities = item.GetContentIdentities(dataPart.GetApplicableInventoryPart());
+        
+        // var inventories = item.ContentIdentities
+        //     .SelectMany(ci => ci.GetInventories())
+        //     .Where(i => i.Letter.Equals(dataSource, StringComparison.OrdinalIgnoreCase))
+        //     .ToList();
+        //
+        // if (!inventories.Any())
+        // {
+        //     return null; // Data source not found
+        // }
 
         var propertyLower = property.ToLowerInvariant();
 
         switch (propertyLower)
         {
             case "content":
-                return GetContent(item, inventories[0]);
-            case "contentanddate":
-                return GetContentAndDate(item, inventories[0]);
-            case "size":
-                return GetSize(item, inventories[0]);
-            case "date":
-                return GetDate(item, inventories[0]);
-            case "ext":
-                return System.IO.Path.GetExtension(item.PathIdentity.FileName).TrimStart('.');
-            case "name":
-                return System.IO.Path.GetFileNameWithoutExtension(item.PathIdentity.FileName);
-            case "path":
-                return item.PathIdentity.FileName;
+                return ExtractContent(contentIdentities);
+                
+            
+            // case "content":
+            //     return GetContent(item, inventories[0]);
+            // case "contentanddate":
+            //     return GetContentAndDate(item, inventories[0]);
+            // case "size":
+            //     return GetSize(item, inventories[0]);
+            // case "date":
+            //     return GetDate(item, inventories[0]);
+            // case "ext":
+            //     return System.IO.Path.GetExtension(item.PathIdentity.FileName).TrimStart('.');
+            // case "name":
+            //     return System.IO.Path.GetFileNameWithoutExtension(item.PathIdentity.FileName);
+            // case "path":
+            //     return item.PathIdentity.FileName;
             default:
                 throw new ArgumentException($"Unknown property: {property}");
         }
     }
 
+    private static List<PropertyValue> ExtractContent(List<ContentIdentity> contentIdentities)
+    {
+        var contents = new HashSet<string>();
+
+        foreach (var contentIdentity in contentIdentities)
+        {
+            contents.Add(contentIdentity.Core!.SignatureHash!);
+        }
+        
+        var result = new List<PropertyValue>();
+        foreach (var content in contents)
+        {
+            result.Add(new PropertyValue(content));
+        }
+
+        return result;
+    }
+
     /// <summary>
     /// Gets property value that's not specific to a data source
     /// </summary>
-    private static object GetGeneralPropertyValue(ComparisonItem item, string property)
+    private static List<PropertyValue> GetGeneralPropertyValue(ComparisonItem item, string property)
     {
         var propertyLower = property.ToLowerInvariant();
 
+        object value;
         switch (propertyLower)
         {
             case "ext":
-                return System.IO.Path.GetExtension(item.PathIdentity.FileName).TrimStart('.');
+                value = System.IO.Path.GetExtension(item.PathIdentity.FileName).TrimStart('.');
+                break;
             case "name":
-                return System.IO.Path.GetFileNameWithoutExtension(item.PathIdentity.FileName);
+                value = System.IO.Path.GetFileNameWithoutExtension(item.PathIdentity.FileName);
+                break;
             case "path":
-                return item.PathIdentity.FileName;
+                value = item.PathIdentity.FileName;
+                break;
             default:
                 throw new ArgumentException($"Property '{property}' requires a data source");
         }
+        
+        var result = new List<PropertyValue>();
+        result.Add(new PropertyValue(result));
+        
+        return result;
     }
 
+    /*
     /// <summary>
     /// Gets content for an inventory
     /// </summary>
@@ -112,11 +152,12 @@ public class PropertyComparer
 
         return contentIdentity?.Core.LastWriteTimeUtc;
     }
+    */
 
     /// <summary>
     /// Compare two property values using the specified operator
     /// </summary>
-    public static bool CompareValues(object value1, object value2, string op)
+    public static bool CompareValues(List<PropertyValue> value1, List<PropertyValue> value2, string op)
     {
         if (value1 == null && value2 == null)
             return op == "==" || op == "=";

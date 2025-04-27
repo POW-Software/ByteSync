@@ -1,11 +1,14 @@
 ﻿using ByteSync.Business.Filtering.Expressions;
 using ByteSync.Common.Business.Inventories;
+using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Business.Filtering.Parsing;
 
 public class FilterParser
 {
     private readonly string _filterText;
+    private readonly IDataPartIndexer _dataPartIndexer;
+    
     private int _position;
     private string _currentToken;
     private FilterTokenType _currentTokenType;
@@ -25,9 +28,12 @@ public class FilterParser
         End
     }
 
-    public FilterParser(string filterText)
+    public FilterParser(string filterText, IDataPartIndexer dataPartIndexer)
     {
         _filterText = filterText ?? string.Empty;
+        
+        _dataPartIndexer = dataPartIndexer;
+        
         _position = 0;
         _currentToken = string.Empty;
         NextToken();
@@ -152,16 +158,22 @@ public class FilterParser
             {
                 NextToken();
                 if (_currentTokenType != FilterTokenType.Identifier)
+                {
                     throw new InvalidOperationException("Expected property name after dot");
+                }
 
                 var property = _currentToken;
                 NextToken();
 
                 if (_currentTokenType != FilterTokenType.Operator)
+                {
                     throw new InvalidOperationException("Expected operator after property name");
+                }
 
                 var op = _currentToken;
                 NextToken();
+                
+                var leftDataPart = _dataPartIndexer.GetDataPart(identifier)!;
 
                 // Check if the right side is a data source or a value
                 if (_currentTokenType == FilterTokenType.Identifier)
@@ -175,23 +187,25 @@ public class FilterParser
                         NextToken();
                         if (_currentTokenType != FilterTokenType.Identifier)
                             throw new InvalidOperationException("Expected property name after dot");
+                        
+                        var rightDataPart = _dataPartIndexer.GetDataPart(rightIdentifier)!;
 
                         var rightProperty = _currentToken;
                         NextToken();
 
-                        return new PropertyComparisonExpression(identifier, property, op, rightIdentifier, rightProperty);
+                        return new PropertyComparisonExpression(leftDataPart, property, op, rightDataPart, rightProperty);
                     }
                     else
                     {
                         // This is a comparison with a value
-                        return new PropertyComparisonExpression(identifier, property, op, null, rightIdentifier);
+                        return new PropertyComparisonExpression(leftDataPart, property, op, null, rightIdentifier);
                     }
                 }
                 else if (_currentTokenType == FilterTokenType.String || _currentTokenType == FilterTokenType.Number)
                 {
                     var value = _currentToken;
                     NextToken();
-                    return new PropertyComparisonExpression(identifier, property, op, null, value);
+                    return new PropertyComparisonExpression(leftDataPart, property, op, null, value);
                 }
                 else
                 {
