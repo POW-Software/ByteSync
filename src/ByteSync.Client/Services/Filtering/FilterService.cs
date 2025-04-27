@@ -1,26 +1,23 @@
-﻿using ByteSync.Business.Filtering.Parsing;
-using ByteSync.Common.Business.Inventories;
+﻿using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Services.Filtering;
-using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 
 namespace ByteSync.Services.Filtering;
 
 public class FilterService : IFilterService
 {
-    private readonly IDataPartIndexer _dataPartIndexer;
+    private readonly IFilterParser _filterParser;
 
-    public FilterService(IDataPartIndexer dataPartIndexer)
+    public FilterService(IFilterParser filterParser)
     {
-        _dataPartIndexer = dataPartIndexer;
+        _filterParser = filterParser;
     }
     
     public Func<ComparisonItem, bool> BuildFilter(string filterText)
     {
         try
         {
-            var parser = new FilterParser(filterText, _dataPartIndexer);
-            var expression = parser.Parse();
+            var expression = _filterParser.Parse(filterText);
 
             return item => expression.Evaluate(item);
         }

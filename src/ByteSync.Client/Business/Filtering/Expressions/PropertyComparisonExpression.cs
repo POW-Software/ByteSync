@@ -11,13 +11,13 @@ public class PropertyComparisonExpression : FilterExpression
 {
     private readonly DataPart _sourceDataPart;
     private readonly string _property;
-    private readonly string _operator;
+    private readonly FilterOperator _operator;
     private readonly DataPart? _targetDataPart;
     private readonly string? _targetProperty;
     private readonly string? _targetValue;
     private readonly bool _isDataSourceComparison;
 
-    public PropertyComparisonExpression(DataPart sourceDataPart, string property, string @operator, DataPart? targetDataPart,
+    public PropertyComparisonExpression(DataPart sourceDataPart, string property, FilterOperator @operator, DataPart? targetDataPart,
         string? targetPropertyOrValue = null)
     {
         _sourceDataPart = sourceDataPart;
@@ -45,7 +45,7 @@ public class PropertyComparisonExpression : FilterExpression
 
         if (sourceValues.Count == 0)
         {
-            return _operator == "!=" || _operator == "<>";
+            return _operator == FilterOperator.NotEquals;
         }
 
         // Handle comparison based on type
@@ -62,10 +62,10 @@ public class PropertyComparisonExpression : FilterExpression
         }
     }
 
-    private bool CompareWithLiteral(List<PropertyValue> sourceValues, string targetValue, string op, string property)
+    private bool CompareWithLiteral(List<PropertyValue> sourceValues, string targetValue, FilterOperator op, string property)
     {
         // Handle special case for regex
-        if (op == "=~" && sourceValues.Any(sv => sv.Value is string))
+        if (op == FilterOperator.RegexMatch && sourceValues.Any(sv => sv.Value is string))
         {
             try
             {
@@ -83,18 +83,21 @@ public class PropertyComparisonExpression : FilterExpression
 
         if (propertyLower == "size")
         {
+            var targetValues = new List<PropertyValue>();
+            
             // Parse size with units
-            long size = (long)sourceValue;
+            // long size = (long)sourceValue;
             if (targetValue.IndexOfAny(new[] { 'k', 'K', 'm', 'M', 'g', 'G', 't', 'T' }) >= 0)
             {
                 try
                 {
                     long targetSize = targetValue.ToBytes();
-                    return PropertyComparer.CompareValues(size, targetSize, op);
+                    // return PropertyComparer.CompareValues(size, targetSize, op);
+                    targetValues.Add(new PropertyValue(targetSize));
                 }
                 catch
                 {
-                    return false;
+                    // return false;
                 }
             }
             else
@@ -102,12 +105,18 @@ public class PropertyComparisonExpression : FilterExpression
                 // Plain number, try to parse
                 if (long.TryParse(targetValue, out long targetSize))
                 {
-                    return PropertyComparer.CompareValues(size, targetSize, op);
+                    targetValues.Add(new PropertyValue(targetSize));
+                    // return PropertyComparer.CompareValues(size, targetSize, op);
                 }
 
-                return false;
+                // return false;
             }
+            
+            return PropertyComparer.CompareValues(sourceValues, targetValues, op);
         }
+        
+        return false;
+        
         // else if (propertyLower == "date")
         // {
         //     // Parse date

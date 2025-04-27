@@ -2,16 +2,17 @@
 
 public enum FilterOperator
 {
-    And,
-    Or,
-    Not,
+    // And,
+    // Or,
+    // Not,
     Equals,
     NotEquals,
-    Contains,
-    StartsWith,
-    EndsWith,
+    // Contains,
+    // StartsWith,
+    // EndsWith,
     GreaterThan,
     LessThan,
     GreaterThanOrEqual,
     LessThanOrEqual,
+    RegexMatch
 }

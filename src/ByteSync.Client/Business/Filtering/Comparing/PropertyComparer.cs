@@ -157,13 +157,13 @@ public class PropertyComparer
     /// <summary>
     /// Compare two property values using the specified operator
     /// </summary>
-    public static bool CompareValues(List<PropertyValue> value1, List<PropertyValue> value2, string op)
+    public static bool CompareValues(List<PropertyValue> value1, List<PropertyValue> value2, FilterOperator op)
     {
-        if (value1 == null && value2 == null)
-            return op == "==" || op == "=";
+        if (value1.Count == 0 && value2.Count == 0)
+            return op == FilterOperator.Equals;
 
-        if (value1 == null || value2 == null)
-            return op == "!=" || op == "<>";
+        if (value1.Count == 0 || value2.Count == 0)
+            return op == FilterOperator.NotEquals;
 
         // Try to convert to common type
         if (value1 is string s1 && value2 is string s2)
