@@ -1,4 +1,6 @@
 ﻿using System.Text.RegularExpressions;
+using ByteSync.Business.Filtering.Comparing;
+using ByteSync.Business.Filtering.Extensions;
 using ByteSync.Models.Comparisons.Result;
 
 namespace ByteSync.Business.Filtering.Expressions;
@@ -9,120 +11,120 @@ public class PropertyComparisonExpression : FilterExpression
     private readonly string _property;
     private readonly string _operator;
     private readonly string _targetDataSource;
-    private readonly string _targetValue;
+    private readonly string? _targetProperty;
+    private readonly string? _targetValue;
+    private readonly bool _isDataSourceComparison;
 
-    public PropertyComparisonExpression(string sourceDataSource, string property, string @operator, string targetDataSource, string targetValue = null)
+    public PropertyComparisonExpression(string sourceDataSource, string property, string @operator, string targetDataSource,
+        string? targetPropertyOrValue = null)
     {
         _sourceDataSource = sourceDataSource;
         _property = property;
         _operator = @operator;
         _targetDataSource = targetDataSource;
-        _targetValue = targetValue;
+
+        // Determine if this is a comparison between two data sources or a data source and a value
+        _isDataSourceComparison = targetDataSource != null;
+
+        if (_isDataSourceComparison)
+        {
+            _targetProperty = targetPropertyOrValue;
+        }
+        else
+        {
+            _targetValue = targetPropertyOrValue;
+        }
     }
 
     public override bool Evaluate(ComparisonItem item)
     {
-        // This is a simplified implementation that needs to be expanded
-        // based on the actual structure of ComparisonItem
+        // Get source property value
+        object sourceValue = PropertyComparer.GetPropertyValue(item, _sourceDataSource, _property);
 
-        switch (_property.ToLowerInvariant())
+        if (sourceValue == null)
         {
-            case "content":
-                return CompareContent(item);
-            case "contentanddate":
-                return CompareContentAndDate(item);
-            case "size":
-                return CompareSize(item);
-            case "date":
-                return CompareDate(item);
-            case "ext":
-                return CompareExtension(item);
-            case "name":
-                return CompareName(item);
-            case "path":
-                return ComparePath(item);
-            default:
+            return _operator == "!=" || _operator == "<>";
+        }
+
+        // Handle comparison based on type
+        if (_isDataSourceComparison)
+        {
+            // Compare with another data source property
+            object targetValue = PropertyComparer.GetPropertyValue(item, _targetDataSource, _targetProperty ?? _property);
+            return PropertyComparer.CompareValues(sourceValue, targetValue, _operator);
+        }
+        else
+        {
+            // Compare with a literal value
+            return CompareWithLiteral(sourceValue, _targetValue, _operator, _property);
+        }
+    }
+
+    private bool CompareWithLiteral(object sourceValue, string targetValue, string op, string property)
+    {
+        // Handle special case for regex
+        if (op == "=~" && sourceValue is string sourceString)
+        {
+            try
+            {
+                return Regex.IsMatch(sourceString, targetValue);
+            }
+            catch (ArgumentException)
+            {
+                // Invalid regex
                 return false;
+            }
         }
-    }
 
-    private bool CompareContent(ComparisonItem item)
-    {
-        // Implementation depends on actual content comparison logic
-        // This is a placeholder
-        return false;
-    }
+        // Handle special cases by property type
+        var propertyLower = property.ToLowerInvariant();
 
-    private bool CompareContentAndDate(ComparisonItem item)
-    {
-        // Implementation depends on actual content and date comparison logic
-        // This is a placeholder
-        return false;
-    }
-
-    private bool CompareSize(ComparisonItem item)
-    {
-        // Implementation for size comparison
-        // This is a placeholder
-        return false;
-    }
-
-    private bool CompareDate(ComparisonItem item)
-    {
-        // Implementation for date comparison
-        // This is a placeholder
-        return false;
-    }
-
-    private bool CompareExtension(ComparisonItem item)
-    {
-        if (_operator == "==" || _operator == "=")
+        if (propertyLower == "size")
         {
-            var extension = System.IO.Path.GetExtension(item.PathIdentity.FileName);
-            if (extension.StartsWith("."))
-                extension = extension.Substring(1);
+            // Parse size with units
+            long size = (long)sourceValue;
+            if (targetValue.IndexOfAny(new[] { 'k', 'K', 'm', 'M', 'g', 'G', 't', 'T' }) >= 0)
+            {
+                try
+                {
+                    long targetSize = targetValue.ToBytes();
+                    return PropertyComparer.CompareValues(size, targetSize, op);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                // Plain number, try to parse
+                if (long.TryParse(targetValue, out long targetSize))
+                {
+                    return PropertyComparer.CompareValues(size, targetSize, op);
+                }
 
-            return extension.Equals(_targetValue, StringComparison.OrdinalIgnoreCase);
+                return false;
+            }
         }
-        else if (_operator == "=~")
+        else if (propertyLower == "date")
         {
-            var extension = System.IO.Path.GetExtension(item.PathIdentity.FileName);
-            if (extension.StartsWith("."))
-                extension = extension.Substring(1);
+            // Parse date
+            if (DateTime.TryParse(targetValue.Trim('"', '\''), out DateTime targetDate))
+            {
+                return PropertyComparer.CompareValues(sourceValue, targetDate, op);
+            }
 
-            return Regex.IsMatch(extension, _targetValue);
+            return false;
         }
-
-        return false;
-    }
-
-    private bool CompareName(ComparisonItem item)
-    {
-        var fileName = System.IO.Path.GetFileNameWithoutExtension(item.PathIdentity.FileName);
-
-        if (_operator == "==" || _operator == "=")
+        else if (propertyLower == "content" || propertyLower == "contentanddate")
         {
-            return fileName.Equals(_targetValue, StringComparison.OrdinalIgnoreCase);
+            // Direct comparison for content hashes
+            return PropertyComparer.CompareValues(sourceValue, targetValue, op);
         }
-        else if (_operator == "=~")
+        else
         {
-            return Regex.IsMatch(fileName, _targetValue);
+            // Default string comparison
+            return PropertyComparer.CompareValues(sourceValue, targetValue, op);
         }
-
-        return false;
-    }
-
-    private bool ComparePath(ComparisonItem item)
-    {
-        if (_operator == "==" || _operator == "=")
-        {
-            return item.PathIdentity.FileName.Equals(_targetValue, StringComparison.OrdinalIgnoreCase);
-        }
-        else if (_operator == "=~")
-        {
-            return Regex.IsMatch(item.PathIdentity.FileName, _targetValue);
-        }
-
-        return false;
     }
 }
