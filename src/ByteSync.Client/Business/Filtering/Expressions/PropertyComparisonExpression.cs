@@ -62,7 +62,7 @@ public class PropertyComparisonExpression : FilterExpression
         }
     }
 
-    private bool CompareWithLiteral(List<PropertyValue> sourceValues, string targetValue, FilterOperator op, string property)
+    private bool CompareWithLiteral(PropertyValueCollection sourceValues, string targetValue, FilterOperator op, string property)
     {
         // Handle special case for regex
         if (op == FilterOperator.RegexMatch && sourceValues.Any(sv => sv.Value is string))
@@ -83,7 +83,7 @@ public class PropertyComparisonExpression : FilterExpression
 
         if (propertyLower == "size")
         {
-            var targetValues = new List<PropertyValue>();
+            var targetValues = new PropertyValueCollection();
             
             // Parse size with units
             // long size = (long)sourceValue;

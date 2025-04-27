@@ -11,7 +11,7 @@ public class PropertyComparer
     /// <summary>
     /// Gets property value from a ComparisonItem for a specific DataSource
     /// </summary>
-    public static List<PropertyValue> GetPropertyValue(ComparisonItem item, DataPart? dataPart, string property)
+    public static PropertyValueCollection GetPropertyValue(ComparisonItem item, DataPart? dataPart, string property)
     {
         if (dataPart == null)
         {
@@ -58,7 +58,7 @@ public class PropertyComparer
         }
     }
 
-    private static List<PropertyValue> ExtractContent(List<ContentIdentity> contentIdentities)
+    private static PropertyValueCollection ExtractContent(List<ContentIdentity> contentIdentities)
     {
         var contents = new HashSet<string>();
 
@@ -66,8 +66,8 @@ public class PropertyComparer
         {
             contents.Add(contentIdentity.Core!.SignatureHash!);
         }
-        
-        var result = new List<PropertyValue>();
+
+        var result = new PropertyValueCollection();
         foreach (var content in contents)
         {
             result.Add(new PropertyValue(content));
@@ -79,7 +79,7 @@ public class PropertyComparer
     /// <summary>
     /// Gets property value that's not specific to a data source
     /// </summary>
-    private static List<PropertyValue> GetGeneralPropertyValue(ComparisonItem item, string property)
+    private static PropertyValueCollection GetGeneralPropertyValue(ComparisonItem item, string property)
     {
         var propertyLower = property.ToLowerInvariant();
 
@@ -98,9 +98,9 @@ public class PropertyComparer
             default:
                 throw new ArgumentException($"Property '{property}' requires a data source");
         }
-        
-        var result = new List<PropertyValue>();
-        result.Add(new PropertyValue(result));
+
+        var result = new PropertyValueCollection();
+        result.Add(new PropertyValue(value));
         
         return result;
     }
@@ -157,79 +157,130 @@ public class PropertyComparer
     /// <summary>
     /// Compare two property values using the specified operator
     /// </summary>
-    public static bool CompareValues(List<PropertyValue> value1, List<PropertyValue> value2, FilterOperator op)
+    public static bool CompareValues(PropertyValueCollection collection1, PropertyValueCollection collection2, FilterOperator op)
     {
-        if (value1.Count == 0 && value2.Count == 0)
+        if (collection1.Count == 0 && collection2.Count == 0)
             return op == FilterOperator.Equals;
 
-        if (value1.Count == 0 || value2.Count == 0)
+        if (collection1.Count == 0 || collection2.Count == 0)
             return op == FilterOperator.NotEquals;
 
         // Try to convert to common type
-        if (value1 is string s1 && value2 is string s2)
+        if (collection1.CollectionType == PropertyValueType.String && collection2.CollectionType == PropertyValueType.String)
         {
-            return CompareStrings(s1, s2, op);
+            return CompareStrings(collection1, collection2, op);
         }
-        else if (value1 is DateTime d1 && value2 is DateTime d2)
+        else if (collection1.CollectionType == PropertyValueType.DateTime && collection2.CollectionType == PropertyValueType.DateTime)
         {
-            return CompareDateTimes(d1, d2, op);
+            return CompareDateTimes(collection1, collection2, op);
         }
-        else if (IsNumeric(value1) && IsNumeric(value2))
+        else if (collection1.CollectionType == PropertyValueType.Numeric && collection2.CollectionType == PropertyValueType.Numeric)
         {
-            return CompareNumbers(Convert.ToDouble(value1), Convert.ToDouble(value2), op);
+            return CompareNumbers(collection1, collection1, op);
+        }
+        
+        return false;
+
+        // // Fall back to string comparison
+        // return CompareStrings(value1.ToString(), value2.ToString(), op);
+    }
+
+    // private static bool IsNumeric(object value)
+    // {
+    //     return value is sbyte || value is byte || value is short || value is ushort ||
+    //            value is int || value is uint || value is long || value is ulong ||
+    //            value is float || value is double || value is decimal;
+    // }
+
+    private static bool CompareStrings(PropertyValueCollection collection1, PropertyValueCollection collection2, FilterOperator op)
+    {
+        foreach (var value1 in collection1)
+        {
+            var s1 = (value1.Value as string)!;
+            
+            foreach (var value2 in collection2)
+            {
+                var s2 = (value2.Value as string)!;
+
+                if (op switch
+                    {
+                        FilterOperator.Equals => string.Equals(s1, s2, StringComparison.OrdinalIgnoreCase),
+                        FilterOperator.NotEquals => !string.Equals(s1, s2, StringComparison.OrdinalIgnoreCase),
+                        FilterOperator.GreaterThan => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) > 0,
+                        FilterOperator.LessThan => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) < 0,
+                        FilterOperator.GreaterThanOrEqual => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) >= 0,
+                        FilterOperator.LessThanOrEqual => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) <= 0,
+                        FilterOperator.RegexMatch => Regex.IsMatch(s1, s2),
+                        _ => throw new ArgumentException($"Unsupported string operator: {op}")
+                    })
+                {
+                    return true;
+                }
+            }
         }
 
-        // Fall back to string comparison
-        return CompareStrings(value1.ToString(), value2.ToString(), op);
+        return false;
     }
 
-    private static bool IsNumeric(object value)
+    private static bool CompareDateTimes(PropertyValueCollection collection1, PropertyValueCollection collection2, FilterOperator op)
     {
-        return value is sbyte || value is byte || value is short || value is ushort ||
-               value is int || value is uint || value is long || value is ulong ||
-               value is float || value is double || value is decimal;
-    }
-
-    private static bool CompareStrings(string s1, string s2, string op)
-    {
-        return op switch
+        foreach (var value1 in collection1)
         {
-            "==" or "=" => s1.Equals(s2, StringComparison.OrdinalIgnoreCase),
-            "!=" or "<>" => !s1.Equals(s2, StringComparison.OrdinalIgnoreCase),
-            ">" => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) > 0,
-            "<" => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) < 0,
-            ">=" => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) >= 0,
-            "<=" => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) <= 0,
-            "=~" => Regex.IsMatch(s1, s2),
-            _ => throw new ArgumentException($"Unsupported string operator: {op}")
-        };
+            if (value1.Value is not DateTime d1)
+                continue;
+
+            foreach (var value2 in collection2)
+            {
+                if (value2.Value is not DateTime d2)
+                    continue;
+
+                if (op switch
+                    {
+                        FilterOperator.Equals => d1 == d2,
+                        FilterOperator.NotEquals => d1 != d2,
+                        FilterOperator.GreaterThan => d1 > d2,
+                        FilterOperator.LessThan => d1 < d2,
+                        FilterOperator.GreaterThanOrEqual => d1 >= d2,
+                        FilterOperator.LessThanOrEqual => d1 <= d2,
+                        _ => throw new ArgumentException($"Unsupported datetime operator: {op}")
+                    })
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
-    private static bool CompareDateTimes(DateTime d1, DateTime d2, string op)
+    private static bool CompareNumbers(PropertyValueCollection collection1, PropertyValueCollection collection2, FilterOperator op)
     {
-        return op switch
+        const double epsilon = 1e-8;
+        
+        foreach (var value1 in collection1)
         {
-            "==" or "=" => d1 == d2,
-            "!=" or "<>" => d1 != d2,
-            ">" => d1 > d2,
-            "<" => d1 < d2,
-            ">=" => d1 >= d2,
-            "<=" => d1 <= d2,
-            _ => throw new ArgumentException($"Unsupported datetime operator: {op}")
-        };
-    }
+            var n1 = Convert.ToDouble(value1.Value);
 
-    private static bool CompareNumbers(double n1, double n2, string op)
-    {
-        return op switch
-        {
-            "==" or "=" => Math.Abs(n1 - n2) < 0.0000001, // Use epsilon for floating point comparison
-            "!=" or "<>" => Math.Abs(n1 - n2) >= 0.0000001,
-            ">" => n1 > n2,
-            "<" => n1 < n2,
-            ">=" => n1 >= n2,
-            "<=" => n1 <= n2,
-            _ => throw new ArgumentException($"Unsupported numeric operator: {op}")
-        };
+            foreach (var value2 in collection2)
+            {
+                var n2 = Convert.ToDouble(value2.Value);
+
+                if (op switch
+                    {
+                        FilterOperator.Equals => Math.Abs(n1 - n2) < epsilon, 
+                        FilterOperator.NotEquals => Math.Abs(n1 - n2) >= epsilon,
+                        FilterOperator.GreaterThan => n1 > n2,
+                        FilterOperator.LessThan => n1 < n2,
+                        FilterOperator.GreaterThanOrEqual => n1 >= n2,
+                        FilterOperator.LessThanOrEqual => n1 <= n2,
+                        _ => throw new ArgumentException($"Unsupported numeric operator: {op}")
+                    })
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
