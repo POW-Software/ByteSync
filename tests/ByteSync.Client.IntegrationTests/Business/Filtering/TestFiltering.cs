@@ -201,14 +201,30 @@ public class TestFiltering : IntegrationTest
         // Assert.IsTrue(((AndExpression)expression).Expressions.Any(e => e is TextSearchExpression));
     }
     
-    [TestCase("2023-10-01", "2023-10-02", "==", false)]
-    [TestCase("2023-10-01", "2023-10-01", "!=", true)]
-    public void TestDateComparison(string leftDate, string rightDate, string @operator, bool expectedResult)
+    [TestCase(100, 100, "==", true)]
+    [TestCase(100, 100, ">=", true)]
+    [TestCase(100, 100, "<=", true)]
+    [TestCase(100, 200, "==", false)]
+    [TestCase(100, 200, "!=", true)]
+    [TestCase(100, 200, "<=", true)]
+    [TestCase(100, 200, "<", true)]
+    [TestCase(100, 200, ">=", false)]
+    [TestCase(100, 200, ">", false)]
+    [TestCase(200, 100, ">=", true)]
+    [TestCase(200, 100, ">", true)]
+    [TestCase(200, 100, "<=", false)]
+    [TestCase(200, 100, "<", false)]
+    [TestCase(100, 101, "<", true)]
+    [TestCase(100, 100, "<", false)]
+    [TestCase(101, 100, ">", true)]
+    [TestCase(100, 100, ">", false)]
+    public void TestSizeComparison(long leftSize, long rightSize, string @operator, bool expectedResult)
     {
         // Arrange
+        var now = DateTime.Now;
         var comparisonItem = PrepareComparisonWithTwoContents(
-            "A1", "sameHash", DateTime.Parse(leftDate, System.Globalization.CultureInfo.InvariantCulture), 100,
-            "B1", "sameHash", DateTime.Parse(rightDate, System.Globalization.CultureInfo.InvariantCulture), 200);
+            "A1", "sameHash", now, leftSize,
+            "B1", "sameHash", now, rightSize);
     
         var filterText = $"A1.size{@operator}B1.size";
     
