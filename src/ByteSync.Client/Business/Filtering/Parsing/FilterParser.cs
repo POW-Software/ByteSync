@@ -341,7 +341,7 @@ public class FilterParser : IFilterParser
             _position++;
 
             if (_position < _filterText.Length &&
-                (_filterText[_position] == '=' || _filterText[_position] == '~'))
+                (_filterText[_position] == '=' || _filterText[_position] == '~' || _filterText[_position] == '>'))
             {
                 _position++;
             }
