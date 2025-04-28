@@ -368,7 +368,8 @@ public class FilterParser : IFilterParser
             }
             else
             {
-                if (_dataPartIndexer.GetDataPart(_currentToken) != null || _currentToken.ToLower().Equals("content"))
+                if (_dataPartIndexer.GetDataPart(_currentToken) != null || 
+                    Enum.GetNames(typeof(PropertyType)).Any(name => _currentToken.ToLower().Equals(name.ToLower())))
                 {
                     _currentTokenType = FilterTokenType.Identifier;
                 }

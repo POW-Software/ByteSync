@@ -2,6 +2,7 @@
 using ByteSync.Business.Comparisons;
 using ByteSync.Business.Filtering.Values;
 using ByteSync.Models.Comparisons.Result;
+using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 
 namespace ByteSync.Business.Filtering.Comparing;
@@ -37,6 +38,8 @@ public class PropertyComparer
         {
             case "content":
                 return ExtractContent(contentIdentities);
+            case "contentanddate":
+                return ExtractContentAndDate(contentIdentities, dataPart);
                 
             
             // case "content":
@@ -65,6 +68,44 @@ public class PropertyComparer
         foreach (var contentIdentity in contentIdentities)
         {
             contents.Add(contentIdentity.Core!.SignatureHash!);
+        }
+
+        var result = new PropertyValueCollection();
+        foreach (var content in contents)
+        {
+            result.Add(new PropertyValue(content));
+        }
+
+        return result;
+    }
+    
+    private static PropertyValueCollection ExtractContentAndDate(List<ContentIdentity> contentIdentities, DataPart dataPart)
+    {
+        var contents = new HashSet<string>();
+
+        foreach (var contentIdentity in contentIdentities)
+        {
+            var signatureHash = contentIdentity.Core!.SignatureHash;
+            var lastWriteTime = contentIdentity.GetLastWriteTimeUtc(dataPart.GetApplicableInventoryPart());
+            
+            contents.Add($"{signatureHash}_{lastWriteTime?.Ticks}");
+            
+            // foreach (var fileSystemDescription in contentIdentity.GetFileSystemDescriptions(dataPart.GetApplicableInventoryPart()))
+            // {
+            //     if (fileSystemDescription is FileDescription fileDescription)
+            //     {
+            //         var hash = fileDescription.None_;
+            //         var lastWriteTime = contentIdentity.GetLastWriteTimeUtc(dataPart.GetApplicableInventoryPart());
+            //         
+            //         contents.Add($"{hash}_{lastWriteTime?.Ticks}");
+            //     }
+            // }
+            
+            // // var signatureHash = contentIdentity.Core!.SignatureHash;
+            // var signatureHash = contentIdentity.Core!.SignatureHash;
+            // var lastWriteTime = contentIdentity.GetLastWriteTimeUtc(dataPart.GetApplicableInventoryPart());
+            //
+            // contents.Add($"{signatureHash}_{lastWriteTime?.Ticks}");
         }
 
         var result = new PropertyValueCollection();
