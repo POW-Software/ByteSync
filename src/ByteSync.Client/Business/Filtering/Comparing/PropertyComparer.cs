@@ -40,7 +40,8 @@ public class PropertyComparer
                 return ExtractContent(contentIdentities);
             case "contentanddate":
                 return ExtractContentAndDate(contentIdentities, dataPart);
-                
+            case "size":
+                return ExtractSize(contentIdentities, dataPart);
             
             // case "content":
             //     return GetContent(item, inventories[0]);
@@ -100,6 +101,36 @@ public class PropertyComparer
             //         contents.Add($"{hash}_{lastWriteTime?.Ticks}");
             //     }
             // }
+            
+            // // var signatureHash = contentIdentity.Core!.SignatureHash;
+            // var signatureHash = contentIdentity.Core!.SignatureHash;
+            // var lastWriteTime = contentIdentity.GetLastWriteTimeUtc(dataPart.GetApplicableInventoryPart());
+            //
+            // contents.Add($"{signatureHash}_{lastWriteTime?.Ticks}");
+        }
+
+        var result = new PropertyValueCollection();
+        foreach (var content in contents)
+        {
+            result.Add(new PropertyValue(content));
+        }
+
+        return result;
+    }
+    
+    private static PropertyValueCollection ExtractSize(List<ContentIdentity> contentIdentities, DataPart dataPart)
+    {
+        var contents = new HashSet<long>();
+
+        foreach (var contentIdentity in contentIdentities)
+        {
+            foreach (var fileSystemDescription in contentIdentity.GetFileSystemDescriptions(dataPart.GetApplicableInventoryPart()))
+            {
+                if (fileSystemDescription is FileDescription fileDescription)
+                {
+                    contents.Add(fileDescription.Size);
+                }
+            }
             
             // // var signatureHash = contentIdentity.Core!.SignatureHash;
             // var signatureHash = contentIdentity.Core!.SignatureHash;
@@ -217,7 +248,7 @@ public class PropertyComparer
         }
         else if (collection1.CollectionType == PropertyValueType.Numeric && collection2.CollectionType == PropertyValueType.Numeric)
         {
-            return CompareNumbers(collection1, collection1, op);
+            return CompareNumbers(collection1, collection2, op);
         }
         
         return false;

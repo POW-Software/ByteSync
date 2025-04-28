@@ -200,6 +200,151 @@ public class TestFiltering : IntegrationTest
         // Assert.IsInstanceOf<AndExpression>(expression);
         // Assert.IsTrue(((AndExpression)expression).Expressions.Any(e => e is TextSearchExpression));
     }
+    
+    [TestCase("2023-10-01", "2023-10-02", "==", false)]
+    [TestCase("2023-10-01", "2023-10-01", "!=", true)]
+    public void TestDateComparison(string leftDate, string rightDate, string @operator, bool expectedResult)
+    {
+        // Arrange
+        var comparisonItem = PrepareComparisonWithTwoContents(
+            "A1", "sameHash", DateTime.Parse(leftDate, System.Globalization.CultureInfo.InvariantCulture), 100,
+            "B1", "sameHash", DateTime.Parse(rightDate, System.Globalization.CultureInfo.InvariantCulture), 200);
+    
+        var filterText = $"A1.size{@operator}B1.size";
+    
+        // Act
+        var expression = _filterParser.Parse(filterText);
+        bool result = expression.Evaluate(comparisonItem);
+    
+        // Assert
+        result.Should().Be(expectedResult);
+    }
+
+    private ComparisonItem CreateBasicComparisonItem(string filePath = "/file1.txt", string fileName = "file1.txt")
+    {
+        var pathIdentity = new PathIdentity(FileSystemTypes.File, filePath, fileName, filePath);
+        return new ComparisonItem(pathIdentity);
+    }
+
+    private (FileDescription, InventoryPart) CreateFileDescription(
+        string inventoryId,
+        string rootPath,
+        DateTime lastWriteTime,
+        string hash,
+        long size = 100)
+    {
+        var inventory = new Inventory { InventoryId = inventoryId };
+        var inventoryPart = new InventoryPart(inventory, rootPath, FileSystemTypes.Directory);
+
+        var fileDescription = new FileDescription
+        {
+            InventoryPart = inventoryPart,
+            LastWriteTimeUtc = lastWriteTime,
+            Size = size,
+            FingerprintMode = FingerprintModes.Sha256,
+            SignatureGuid = null,
+            Sha256 = hash
+        };
+
+        return (fileDescription, inventoryPart);
+    }
+
+    private void ConfigureDataPartIndex(
+        Dictionary<string, (InventoryPart, FileDescription)> dataParts)
+    {
+        var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
+
+        foreach (var pair in dataParts)
+        {
+            var dataPart = new DataPart(pair.Key, pair.Value.Item1);
+            mockDataPartIndexer.Setup(m => m.GetDataPart(pair.Key))
+                .Returns(dataPart);
+        }
+    }
+
+    private ComparisonItem PrepareComparisonWithTwoContents(
+        string leftDataPartId,
+        string leftHash,
+        DateTime leftDateTime,
+        string rightDataPartId,
+        string rightHash,
+        DateTime rightDateTime
+        )
+    {
+        return PrepareComparisonWithTwoContents(
+            leftDataPartId,
+            leftHash,
+            leftDateTime,
+            100,
+            rightDataPartId,
+            rightHash,
+            rightDateTime,
+            100);
+    }
+
+    private ComparisonItem PrepareComparisonWithTwoContents(
+        string leftDataPartId,
+        string leftHash,
+        DateTime leftDateTime,
+        long leftSize,
+        string rightDataPartId,
+        string rightHash,
+        DateTime rightDateTime,
+        long rightSize)
+    {
+        var comparisonItem = CreateBasicComparisonItem();
+
+        var (fileDescA, inventoryPartA) = CreateFileDescription(
+            "Id_A",
+            "/testRootA",
+            leftDateTime,
+            leftHash,
+            leftSize);
+
+        var (fileDescB, inventoryPartB) = CreateFileDescription(
+            "Id_B",
+            "/testRootB",
+            rightDateTime,
+            rightHash,
+            rightSize);
+
+        // Créer et ajouter les identités de contenu
+        var contentIdCoreA = new ContentIdentityCore
+        {
+            SignatureHash = leftHash,
+            Size = 21
+        };
+        var contentIdA = new ContentIdentity(contentIdCoreA);
+        comparisonItem.AddContentIdentity(contentIdA);
+        contentIdA.Add(fileDescA);
+
+        if (leftHash == rightHash)
+        {
+            contentIdA.Add(fileDescB);
+        }
+        else
+        {
+            var contentIdCoreB = new ContentIdentityCore
+            {
+                SignatureHash = rightHash,
+                Size = 23
+            };
+            var contentIdB = new ContentIdentity(contentIdCoreB);
+            comparisonItem.AddContentIdentity(contentIdB);
+            contentIdB.Add(fileDescB);
+        }
+
+        // Configurer l'indexeur de DataPart
+        var dataParts = new Dictionary<string, (InventoryPart, FileDescription)>
+        {
+            { leftDataPartId, (inventoryPartA, fileDescA) },
+            { rightDataPartId, (inventoryPartB, fileDescB) }
+        };
+
+        ConfigureDataPartIndex(dataParts);
+
+        return comparisonItem;
+    }
 
     // [Test]
     // public void Parse_PropertyComparison_ReturnsCorrectExpression()
