@@ -22,19 +22,6 @@ public class PropertyComparer
 
         // Find content identities for the specific data source
         var contentIdentities = item.GetContentIdentities(dataPart.GetApplicableInventoryPart());
-        
-        // var inventories = item.ContentIdentities
-        //     .SelectMany(ci => ci.GetInventories())
-        //     .Where(i => i.Letter.Equals(dataSource, StringComparison.OrdinalIgnoreCase))
-        //     .ToList();
-        //
-        // if (!inventories.Any())
-        // {
-        //     return null; // Data source not found
-        // }
-        
-        
-        
 
         var propertyLower = property.ToLowerInvariant();
         
@@ -110,23 +97,6 @@ public class PropertyComparer
             var lastWriteTime = contentIdentity.GetLastWriteTimeUtc(dataPart.GetApplicableInventoryPart());
             
             contents.Add($"{signatureHash}_{lastWriteTime?.Ticks}");
-            
-            // foreach (var fileSystemDescription in contentIdentity.GetFileSystemDescriptions(dataPart.GetApplicableInventoryPart()))
-            // {
-            //     if (fileSystemDescription is FileDescription fileDescription)
-            //     {
-            //         var hash = fileDescription.None_;
-            //         var lastWriteTime = contentIdentity.GetLastWriteTimeUtc(dataPart.GetApplicableInventoryPart());
-            //         
-            //         contents.Add($"{hash}_{lastWriteTime?.Ticks}");
-            //     }
-            // }
-            
-            // // var signatureHash = contentIdentity.Core!.SignatureHash;
-            // var signatureHash = contentIdentity.Core!.SignatureHash;
-            // var lastWriteTime = contentIdentity.GetLastWriteTimeUtc(dataPart.GetApplicableInventoryPart());
-            //
-            // contents.Add($"{signatureHash}_{lastWriteTime?.Ticks}");
         }
 
         var result = new PropertyValueCollection();
@@ -151,12 +121,6 @@ public class PropertyComparer
                     contents.Add(fileDescription.Size);
                 }
             }
-            
-            // // var signatureHash = contentIdentity.Core!.SignatureHash;
-            // var signatureHash = contentIdentity.Core!.SignatureHash;
-            // var lastWriteTime = contentIdentity.GetLastWriteTimeUtc(dataPart.GetApplicableInventoryPart());
-            //
-            // contents.Add($"{signatureHash}_{lastWriteTime?.Ticks}");
         }
 
         var result = new PropertyValueCollection();
