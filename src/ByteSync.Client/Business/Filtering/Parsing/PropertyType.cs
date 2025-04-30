@@ -4,6 +4,7 @@ public enum PropertyType
 {
     Content,
     ContentAndDate,
+    LastWriteTime,
     Size,
     Ext,
     Name,

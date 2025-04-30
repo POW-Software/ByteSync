@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using ByteSync.Business.Comparisons;
+using ByteSync.Business.Filtering.Parsing;
 using ByteSync.Business.Filtering.Values;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
@@ -31,35 +32,54 @@ public class PropertyComparer
         // {
         //     return null; // Data source not found
         // }
+        
+        
+        
 
         var propertyLower = property.ToLowerInvariant();
-
-        switch (propertyLower)
+        
+        var propertyActions = new Dictionary<string, Func<PropertyValueCollection>>
         {
-            case "content":
-                return ExtractContent(contentIdentities);
-            case "contentanddate":
-                return ExtractContentAndDate(contentIdentities, dataPart);
-            case "size":
-                return ExtractSize(contentIdentities, dataPart);
-            
-            // case "content":
-            //     return GetContent(item, inventories[0]);
-            // case "contentanddate":
-            //     return GetContentAndDate(item, inventories[0]);
-            // case "size":
-            //     return GetSize(item, inventories[0]);
-            // case "date":
-            //     return GetDate(item, inventories[0]);
-            // case "ext":
-            //     return System.IO.Path.GetExtension(item.PathIdentity.FileName).TrimStart('.');
-            // case "name":
-            //     return System.IO.Path.GetFileNameWithoutExtension(item.PathIdentity.FileName);
-            // case "path":
-            //     return item.PathIdentity.FileName;
-            default:
-                throw new ArgumentException($"Unknown property: {property}");
+            { nameof(PropertyType.Content).ToLowerInvariant(), () => ExtractContent(contentIdentities) },
+            { nameof(PropertyType.ContentAndDate).ToLowerInvariant(), () => ExtractContentAndDate(contentIdentities, dataPart) },
+            { nameof(PropertyType.Size).ToLowerInvariant(), () => ExtractSize(contentIdentities, dataPart) },
+            { nameof(PropertyType.LastWriteTime).ToLowerInvariant(), () => ExtractLastWriteTime(contentIdentities, dataPart) }
+        };
+
+        if (propertyActions.TryGetValue(propertyLower, out var action))
+        {
+            return action();
         }
+
+        throw new ArgumentException($"Unknown property: {property}");
+        
+
+        // switch (propertyLower)
+        // {
+        //     case Enum.GetName(PropertyType.Content).Tolower():
+        //         return ExtractContent(contentIdentities);
+        //     case "contentanddate":
+        //         return ExtractContentAndDate(contentIdentities, dataPart);
+        //     case "size":
+        //         return ExtractSize(contentIdentities, dataPart);
+        //     
+        //     // case "content":
+        //     //     return GetContent(item, inventories[0]);
+        //     // case "contentanddate":
+        //     //     return GetContentAndDate(item, inventories[0]);
+        //     // case "size":
+        //     //     return GetSize(item, inventories[0]);
+        //     // case "date":
+        //     //     return GetDate(item, inventories[0]);
+        //     // case "ext":
+        //     //     return System.IO.Path.GetExtension(item.PathIdentity.FileName).TrimStart('.');
+        //     // case "name":
+        //     //     return System.IO.Path.GetFileNameWithoutExtension(item.PathIdentity.FileName);
+        //     // case "path":
+        //     //     return item.PathIdentity.FileName;
+        //     default:
+        //         throw new ArgumentException($"Unknown property: {property}");
+        // }
     }
 
     private static PropertyValueCollection ExtractContent(List<ContentIdentity> contentIdentities)
@@ -129,6 +149,36 @@ public class PropertyComparer
                 if (fileSystemDescription is FileDescription fileDescription)
                 {
                     contents.Add(fileDescription.Size);
+                }
+            }
+            
+            // // var signatureHash = contentIdentity.Core!.SignatureHash;
+            // var signatureHash = contentIdentity.Core!.SignatureHash;
+            // var lastWriteTime = contentIdentity.GetLastWriteTimeUtc(dataPart.GetApplicableInventoryPart());
+            //
+            // contents.Add($"{signatureHash}_{lastWriteTime?.Ticks}");
+        }
+
+        var result = new PropertyValueCollection();
+        foreach (var content in contents)
+        {
+            result.Add(new PropertyValue(content));
+        }
+
+        return result;
+    }
+    
+    private static PropertyValueCollection ExtractLastWriteTime(List<ContentIdentity> contentIdentities, DataPart dataPart)
+    {
+        var contents = new HashSet<DateTime>();
+
+        foreach (var contentIdentity in contentIdentities)
+        {
+            foreach (var fileSystemDescription in contentIdentity.GetFileSystemDescriptions(dataPart.GetApplicableInventoryPart()))
+            {
+                if (fileSystemDescription is FileDescription fileDescription)
+                {
+                    contents.Add(fileDescription.LastWriteTimeUtc);
                 }
             }
             
