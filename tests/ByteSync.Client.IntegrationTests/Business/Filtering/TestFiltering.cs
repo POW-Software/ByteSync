@@ -236,6 +236,47 @@ public class TestFiltering : IntegrationTest
         result.Should().Be(expectedResult);
     }
     
+    // [TestCase(100, 100, "==", true)]
+    // [TestCase(100, 100, ">=", true)]
+    // [TestCase(100, 100, "<=", true)]
+    // [TestCase(100, 200, "==", false)]
+    // [TestCase(100, 200, "!=", true)]
+    // [TestCase(100, 200, "<=", true)]
+    // [TestCase(100, 200, "<", true)]
+    // [TestCase(100, 200, ">=", false)]
+    // [TestCase(100, 200, ">", false)]
+    // [TestCase(200, 100, ">=", true)]
+    // [TestCase(200, 100, ">", true)]
+    // [TestCase(200, 100, "<=", false)]
+    // [TestCase(200, 100, "<", false)]
+    // [TestCase(100, 101, "<", true)]
+    // [TestCase(100, 100, "<", false)]
+    // [TestCase(101, 100, ">", true)]
+    
+    
+    [TestCase(105 * 1024, ">", true)]
+    [TestCase(105 * 1024, "<", false)]
+    [TestCase(80 * 1024, ">", false)]
+    [TestCase(80 * 1024, "<", true)]
+    [Test]
+    public void TestSizeComparison_2(long leftSize, string @operator, bool expectedResult)
+    {
+        // Arrange
+        var now = DateTime.Now;
+        var comparisonItem = PrepareComparisonWithTwoContents(
+            "A1", "sameHash", now, leftSize,
+            "B1", "sameHash", now, 1);
+    
+        var filterText = $"A1.size{@operator}100kb";
+    
+        // Act
+        var expression = _filterParser.Parse(filterText);
+        bool result = expression.Evaluate(comparisonItem);
+    
+        // Assert
+        result.Should().Be(expectedResult);
+    }
+    
     [TestCase("2024-05-01", "2024-05-01", "==", true)]
     [TestCase("2024-05-01", "2024-05-01", ">=", true)]
     [TestCase("2024-05-01", "2024-05-01", "<=", true)]

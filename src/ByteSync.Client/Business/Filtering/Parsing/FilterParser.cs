@@ -12,35 +12,21 @@ public class FilterParser : IFilterParser
     
     private string _filterText;
     private int _position;
-    private string _currentToken;
-    private FilterTokenType _currentTokenType;
-
-    private enum FilterTokenType
-    {
-        None,
-        Identifier,
-        Operator,
-        String,
-        Number,
-        OpenParenthesis,
-        CloseParenthesis,
-        LogicalOperator,
-        Dot,
-        Colon,
-        End
-    }
+   
 
     public FilterParser(IDataPartIndexer dataPartIndexer, IOperatorParser operatorParser)
     {
         _dataPartIndexer = dataPartIndexer;
         _operatorParser = operatorParser;
     }
+    
+    private FilterToken? CurrentToken { get; set; }
 
     public FilterExpression Parse(string filterText)
     {
         _filterText = filterText ?? string.Empty;
         _position = 0;
-        _currentToken = string.Empty;
+        CurrentToken = null;
         NextToken();
         
         if (string.IsNullOrWhiteSpace(_filterText))
@@ -74,9 +60,9 @@ public class FilterParser : IFilterParser
     {
         var left = ParseTerm();
 
-        while (_currentTokenType == FilterTokenType.LogicalOperator &&
-               (_currentToken.Equals("OR", StringComparison.OrdinalIgnoreCase) ||
-                _currentToken.Equals("||", StringComparison.OrdinalIgnoreCase)))
+        while (CurrentToken?.Type == FilterTokenType.LogicalOperator &&
+               (CurrentToken.Token.Equals("OR", StringComparison.OrdinalIgnoreCase) ||
+                CurrentToken.Token.Equals("||", StringComparison.OrdinalIgnoreCase)))
         {
             NextToken();
             var right = ParseTerm();
@@ -90,9 +76,9 @@ public class FilterParser : IFilterParser
     {
         var left = ParseFactor();
 
-        while (_currentTokenType == FilterTokenType.LogicalOperator &&
-               (_currentToken.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
-                _currentToken.Equals("&&", StringComparison.OrdinalIgnoreCase)))
+        while (CurrentToken?.Type == FilterTokenType.LogicalOperator &&
+               (CurrentToken.Token.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
+                CurrentToken.Token.Equals("&&", StringComparison.OrdinalIgnoreCase)))
         {
             NextToken();
             var right = ParseFactor();
@@ -104,31 +90,31 @@ public class FilterParser : IFilterParser
 
     private FilterExpression ParseFactor()
     {
-        if (_currentTokenType == FilterTokenType.LogicalOperator &&
-            (_currentToken.Equals("NOT", StringComparison.OrdinalIgnoreCase) ||
-             _currentToken.Equals("!", StringComparison.OrdinalIgnoreCase)))
+        if (CurrentToken?.Type == FilterTokenType.LogicalOperator &&
+            (CurrentToken.Token.Equals("NOT", StringComparison.OrdinalIgnoreCase) ||
+             CurrentToken.Token.Equals("!", StringComparison.OrdinalIgnoreCase)))
         {
             NextToken();
             var expression = ParseFactor();
             return new NotExpression(expression);
         }
 
-        if (_currentTokenType == FilterTokenType.OpenParenthesis)
+        if (CurrentToken?.Type == FilterTokenType.OpenParenthesis)
         {
             NextToken();
             var expression = ParseExpression();
 
-            if (_currentTokenType != FilterTokenType.CloseParenthesis)
+            if (CurrentToken?.Type != FilterTokenType.CloseParenthesis)
                 throw new InvalidOperationException("Expected closing parenthesis");
 
             NextToken();
             return expression;
         }
 
-        if (_currentTokenType == FilterTokenType.Identifier && _currentToken.Equals("wb", StringComparison.OrdinalIgnoreCase))
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals("wb", StringComparison.OrdinalIgnoreCase))
         {
             NextToken();
-            if (_currentTokenType != FilterTokenType.Colon)
+            if (CurrentToken?.Type != FilterTokenType.Colon)
                 throw new InvalidOperationException("Expected colon after 'wb'");
 
             NextToken();
@@ -136,43 +122,43 @@ public class FilterParser : IFilterParser
             return new FutureStateExpression(baseExpression);
         }
 
-        if (_currentTokenType == FilterTokenType.Identifier && _currentToken.Equals("on", StringComparison.OrdinalIgnoreCase))
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals("on", StringComparison.OrdinalIgnoreCase))
         {
             NextToken();
-            if (_currentTokenType != FilterTokenType.Colon)
+            if (CurrentToken?.Type != FilterTokenType.Colon)
                 throw new InvalidOperationException("Expected colon after 'on'");
 
             NextToken();
-            if (_currentTokenType != FilterTokenType.Identifier)
+            if (CurrentToken?.Type != FilterTokenType.Identifier)
                 throw new InvalidOperationException("Expected data source identifier after 'on:'");
 
-            var dataSource = _currentToken;
+            var dataSource = CurrentToken?.Token;
             NextToken();
             return new ExistsExpression(dataSource);
         }
 
-        if (_currentTokenType == FilterTokenType.Identifier)
+        if (CurrentToken?.Type == FilterTokenType.Identifier)
         {
-            var identifier = _currentToken;
+            var identifier = CurrentToken?.Token;
             NextToken();
 
-            if (_currentTokenType == FilterTokenType.Dot)
+            if (CurrentToken?.Type == FilterTokenType.Dot)
             {
                 NextToken();
-                if (_currentTokenType != FilterTokenType.Identifier)
+                if (CurrentToken?.Type != FilterTokenType.Identifier)
                 {
                     throw new InvalidOperationException("Expected property name after dot");
                 }
 
-                var property = _currentToken;
+                var property = CurrentToken?.Token;
                 NextToken();
 
-                if (_currentTokenType != FilterTokenType.Operator)
+                if (CurrentToken?.Type != FilterTokenType.Operator)
                 {
                     throw new InvalidOperationException("Expected operator after property name");
                 }
 
-                var op = _currentToken;
+                var op = CurrentToken?.Token;
                 NextToken();
                 
                 var filterOperator = _operatorParser.Parse(op);
@@ -180,21 +166,21 @@ public class FilterParser : IFilterParser
                 var leftDataPart = _dataPartIndexer.GetDataPart(identifier)!;
 
                 // Check if the right side is a data source or a value
-                if (_currentTokenType == FilterTokenType.Identifier)
+                if (CurrentToken?.Type == FilterTokenType.Identifier)
                 {
-                    var rightIdentifier = _currentToken;
+                    var rightIdentifier = CurrentToken?.Token;
                     NextToken();
 
-                    if (_currentTokenType == FilterTokenType.Dot)
+                    if (CurrentToken?.Type == FilterTokenType.Dot)
                     {
                         // This is a comparison between two properties
                         NextToken();
-                        if (_currentTokenType != FilterTokenType.Identifier)
+                        if (CurrentToken?.Type != FilterTokenType.Identifier)
                             throw new InvalidOperationException("Expected property name after dot");
                         
                         var rightDataPart = _dataPartIndexer.GetDataPart(rightIdentifier)!;
 
-                        var rightProperty = _currentToken;
+                        var rightProperty = CurrentToken?.Token;
                         NextToken();
 
                         return new PropertyComparisonExpression(leftDataPart, property, filterOperator, rightDataPart, rightProperty);
@@ -205,9 +191,9 @@ public class FilterParser : IFilterParser
                         return new PropertyComparisonExpression(leftDataPart, property, filterOperator, null, rightIdentifier);
                     }
                 }
-                else if (_currentTokenType == FilterTokenType.String || _currentTokenType == FilterTokenType.Number)
+                else if (CurrentToken?.Type == FilterTokenType.String || CurrentToken?.Type == FilterTokenType.Number)
                 {
-                    var value = _currentToken;
+                    var value = CurrentToken?.Token;
                     NextToken();
                     return new PropertyComparisonExpression(leftDataPart, property, filterOperator, null, value);
                 }
@@ -223,13 +209,13 @@ public class FilterParser : IFilterParser
             }
         }
 
-        if (_currentTokenType == FilterTokenType.Colon && _currentToken == ":")
+        if (CurrentToken?.Type == FilterTokenType.Colon && CurrentToken?.Token == ":")
         {
             NextToken();
-            if (_currentTokenType != FilterTokenType.Identifier)
+            if (CurrentToken?.Type != FilterTokenType.Identifier)
                 throw new InvalidOperationException("Expected identifier after colon");
 
-            var identifier = _currentToken.ToLowerInvariant();
+            var identifier = CurrentToken?.Token.ToLowerInvariant();
             NextToken();
 
             if (identifier == "file")
@@ -257,7 +243,7 @@ public class FilterParser : IFilterParser
         }
 
         // Simple text search as fallback
-        var textSearchExpression = new TextSearchExpression(_currentToken);
+        var textSearchExpression = new TextSearchExpression(CurrentToken?.Token);
         NextToken();
         return textSearchExpression;
     }
@@ -270,8 +256,12 @@ public class FilterParser : IFilterParser
 
         if (_position >= _filterText.Length)
         {
-            _currentToken = string.Empty;
-            _currentTokenType = FilterTokenType.End;
+            CurrentToken = new FilterToken
+            {
+                Token = string.Empty,
+                Type = FilterTokenType.End
+            };
+            
             return;
         }
 
@@ -279,26 +269,42 @@ public class FilterParser : IFilterParser
 
         if (c == '(')
         {
-            _currentToken = "(";
-            _currentTokenType = FilterTokenType.OpenParenthesis;
+            CurrentToken = new FilterToken
+            {
+                Token = "(",
+                Type = FilterTokenType.OpenParenthesis
+            };
+            
             _position++;
         }
         else if (c == ')')
         {
-            _currentToken = ")";
-            _currentTokenType = FilterTokenType.CloseParenthesis;
+            CurrentToken = new FilterToken
+            {
+                Token = ")",
+                Type = FilterTokenType.CloseParenthesis
+            };
+            
             _position++;
         }
         else if (c == '.')
         {
-            _currentToken = ".";
-            _currentTokenType = FilterTokenType.Dot;
+            CurrentToken = new FilterToken
+            {
+                Token = ".",
+                Type = FilterTokenType.Dot
+            };
+            
             _position++;
         }
         else if (c == ':')
         {
-            _currentToken = ":";
-            _currentTokenType = FilterTokenType.Colon;
+            CurrentToken = new FilterToken
+            {
+                Token = ":",
+                Type = FilterTokenType.Colon
+            };
+            
             _position++;
         }
         else if (c == '"' || c == '\'')
@@ -312,14 +318,21 @@ public class FilterParser : IFilterParser
 
             if (_position < _filterText.Length)
             {
-                _currentToken = _filterText.Substring(start, _position - start);
-                _currentTokenType = FilterTokenType.String;
+                CurrentToken = new FilterToken
+                {
+                    Token = _filterText.Substring(start, _position - start),
+                    Type = FilterTokenType.String
+                };
+                
                 _position++;
             }
             else
             {
-                _currentToken = _filterText.Substring(start);
-                _currentTokenType = FilterTokenType.String;
+                CurrentToken = new FilterToken
+                {
+                    Token = _filterText.Substring(start),
+                    Type = FilterTokenType.String
+                };
             }
         }
         else if (char.IsDigit(c))
@@ -331,9 +344,20 @@ public class FilterParser : IFilterParser
             {
                 _position++;
             }
+            
+            var unitStart = _position;
+            while (_position < _filterText.Length && char.IsLetter(_filterText[_position]))
+            {
+                _position++;
+            }
+            
+            var tokenValue = _filterText.Substring(start, _position - start);
 
-            _currentToken = _filterText.Substring(start, _position - start);
-            _currentTokenType = FilterTokenType.Number;
+            CurrentToken = new FilterToken
+            {
+                Token =tokenValue,
+                Type = FilterTokenType.Number
+            };
         }
         else if (c == '=' || c == '!' || c == '<' || c == '>' || c == '~')
         {
@@ -346,8 +370,11 @@ public class FilterParser : IFilterParser
                 _position++;
             }
 
-            _currentToken = _filterText.Substring(start, _position - start);
-            _currentTokenType = FilterTokenType.Operator;
+            CurrentToken = new FilterToken
+            {
+                Token = _filterText.Substring(start, _position - start),
+                Type = FilterTokenType.Operator
+            };
         }
         else
         {
@@ -357,27 +384,34 @@ public class FilterParser : IFilterParser
                    (char.IsLetterOrDigit(_filterText[_position]) || _filterText[_position] == '_'))
                 _position++;
 
-            _currentToken = _filterText.Substring(start, _position - start);
+            var currentToken = _filterText.Substring(start, _position - start);
+            FilterTokenType currentTokenType;
 
-            if (_currentToken.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
-                _currentToken.Equals("OR", StringComparison.OrdinalIgnoreCase) ||
-                _currentToken.Equals("NOT", StringComparison.OrdinalIgnoreCase) ||
-                _currentToken == "&&" || _currentToken == "||")
+            if (currentToken.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
+                currentToken.Equals("OR", StringComparison.OrdinalIgnoreCase) ||
+                currentToken.Equals("NOT", StringComparison.OrdinalIgnoreCase) ||
+                currentToken == "&&" || currentToken == "||")
             {
-                _currentTokenType = FilterTokenType.LogicalOperator;
+                currentTokenType = FilterTokenType.LogicalOperator;
             }
             else
             {
-                if (_dataPartIndexer.GetDataPart(_currentToken) != null || 
-                    Enum.GetNames(typeof(PropertyType)).Any(name => _currentToken.ToLower().Equals(name.ToLower())))
+                if (_dataPartIndexer.GetDataPart(currentToken) != null || 
+                    Enum.GetNames(typeof(PropertyType)).Any(name => currentToken.ToLower().Equals(name.ToLower())))
                 {
-                    _currentTokenType = FilterTokenType.Identifier;
+                    currentTokenType = FilterTokenType.Identifier;
                 }
                 else
                 {
-                    _currentTokenType = FilterTokenType.String;
+                    currentTokenType = FilterTokenType.String;
                 }
             }
+            
+            CurrentToken = new FilterToken
+            {
+                Token = currentToken,
+                Type = currentTokenType
+            };
         }
     }
 }
