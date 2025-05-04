@@ -4,5 +4,5 @@ namespace ByteSync.Business.Filtering.Expressions;
 
 public abstract class FilterExpression
 {
-    public abstract bool Evaluate(ComparisonItem item);
+
 }

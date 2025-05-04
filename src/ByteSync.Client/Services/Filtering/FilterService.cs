@@ -7,10 +7,12 @@ namespace ByteSync.Services.Filtering;
 public class FilterService : IFilterService
 {
     private readonly IFilterParser _filterParser;
+    private readonly IExpressionEvaluatorFactory _expressionEvaluatorFactory;
 
-    public FilterService(IFilterParser filterParser)
+    public FilterService(IFilterParser filterParser, IExpressionEvaluatorFactory expressionEvaluatorFactory)
     {
         _filterParser = filterParser;
+        _expressionEvaluatorFactory = expressionEvaluatorFactory;
     }
     
     public Func<ComparisonItem, bool> BuildFilter(string filterText)
@@ -19,7 +21,9 @@ public class FilterService : IFilterService
         {
             var expression = _filterParser.Parse(filterText);
 
-            return item => expression.Evaluate(item);
+            var evaluator = _expressionEvaluatorFactory.GetEvaluator(expression);
+
+            return item => evaluator.Evaluate(expression, item);
         }
         catch (Exception)
         {

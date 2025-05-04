@@ -4,15 +4,10 @@ namespace ByteSync.Business.Filtering.Expressions;
 
 public class NotExpression : FilterExpression
 {
-    private readonly FilterExpression _expression;
+    public FilterExpression Expression { get; }
 
     public NotExpression(FilterExpression expression)
     {
-        _expression = expression;
-    }
-
-    public override bool Evaluate(ComparisonItem item)
-    {
-        return !_expression.Evaluate(item);
+        Expression = expression;
     }
 }

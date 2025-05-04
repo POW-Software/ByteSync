@@ -1,6 +1,8 @@
 ﻿using Autofac;
 using ByteSync.Business;
 using ByteSync.Business.Comparisons;
+using ByteSync.Business.Filtering.Evaluators;
+using ByteSync.Business.Filtering.Expressions;
 using ByteSync.Business.Filtering.Parsing;
 using ByteSync.Business.Inventories;
 using ByteSync.Common.Business.Inventories;
@@ -18,16 +20,69 @@ namespace ByteSync.Client.IntegrationTests.Business.Filtering;
 public class TestFiltering : IntegrationTest
 {
     private FilterParser _filterParser;
+    private ExpressionEvaluatorFactory _evaluatorFactory;
 
     [SetUp]
     public void Setup()
     {
         RegisterType<OperatorParser, IOperatorParser>();
         RegisterType<FilterTokenizer, IFilterTokenizer>();
+        
+        /*
+        RegisterType<AndExpressionEvaluator, IExpressionEvaluator>();
+        // RegisterType<AndExpressionEvaluator, IExpressionEvaluator<AndExpression>>();
+        RegisterType<OrExpressionEvaluator, IExpressionEvaluator>();
+        // RegisterType<OrExpressionEvaluator, IExpressionEvaluator<OrExpression>>();
+        RegisterType<NotExpressionEvaluator, IExpressionEvaluator>();
+        // RegisterType<NotExpressionEvaluator, IExpressionEvaluator<NotExpression>>();
+        RegisterType<TrueExpressionEvaluator, IExpressionEvaluator>();
+        // RegisterType<TrueExpressionEvaluator, IExpressionEvaluator<TrueExpression>>();
+        RegisterType<ExistsExpressionEvaluator, IExpressionEvaluator>();
+        // RegisterType<ExistsExpressionEvaluator, IExpressionEvaluator<ExistsExpression>>();
+        RegisterType<FileSystemTypeExpressionEvaluator, IExpressionEvaluator>();
+        // RegisterType<FileSystemTypeExpressionEvaluator, IExpressionEvaluator<FileSystemTypeExpression>>();
+        RegisterType<FutureStateExpressionEvaluator, IExpressionEvaluator>();
+        // RegisterType<FutureStateExpressionEvaluator, IExpressionEvaluator<FutureStateExpression>>();
+        RegisterType<OnlyExpressionEvaluator, IExpressionEvaluator>();
+        // RegisterType<OnlyExpressionEvaluator, IExpressionEvaluator<OnlyExpression>>();
+        RegisterType<PropertyComparisonExpressionEvaluator, IExpressionEvaluator>();
+        // RegisterType<PropertyComparisonExpressionEvaluator, IExpressionEvaluator<PropertyComparisonExpression>>();
+        RegisterType<TextSearchExpressionEvaluator, IExpressionEvaluator>();
+        // RegisterType<TextSearchExpressionEvaluator, IExpressionEvaluator<TextSearchExpression>>();
+        */
+        
+        // _builder.RegisterType<AndExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
+        // _builder.RegisterType<OrExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
+        // _builder.RegisterType<NotExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
+        // _builder.RegisterType<TrueExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
+        // _builder.RegisterType<ExistsExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
+        // _builder.RegisterType<FileSystemTypeExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
+        // _builder.RegisterType<FutureStateExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
+        // _builder.RegisterType<OnlyExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
+        // _builder.RegisterType<PropertyComparisonExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
+        // _builder.RegisterType<TextSearchExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
+        //
+        
+        _builder.RegisterType<AndExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
+        _builder.RegisterType<OrExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
+        _builder.RegisterType<NotExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
+        _builder.RegisterType<TrueExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
+        _builder.RegisterType<ExistsExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
+        _builder.RegisterType<FileSystemTypeExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
+        _builder.RegisterType<FutureStateExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
+        _builder.RegisterType<OnlyExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
+        _builder.RegisterType<PropertyComparisonExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
+        _builder.RegisterType<TextSearchExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
+        
+        
+        
+        RegisterType<ExpressionEvaluatorFactory>();
+        
         RegisterType<FilterParser>();
         BuildMoqContainer();
         
         _filterParser = Container.Resolve<FilterParser>();
+        _evaluatorFactory = Container.Resolve<ExpressionEvaluatorFactory>();
     }
 
     [Test]
@@ -49,7 +104,8 @@ public class TestFiltering : IntegrationTest
 
         // Act
         var expression = _filterParser.Parse(filterText);
-        bool result = expression.Evaluate(comparisonItem);
+        var evaluator = _evaluatorFactory.GetEvaluator(expression);
+        bool result = evaluator.Evaluate(expression, comparisonItem);
 
         result.Should().Be(expectedResult);
 
@@ -110,7 +166,8 @@ public class TestFiltering : IntegrationTest
 
         // Act
         var expression = _filterParser.Parse(filterText);
-        bool result = expression.Evaluate(comparisonItem);
+        var evaluator = _evaluatorFactory.GetEvaluator(expression);
+        bool result = evaluator.Evaluate(expression, comparisonItem);
 
         result.Should().Be(true);
 
@@ -193,7 +250,8 @@ public class TestFiltering : IntegrationTest
 
         // Act
         var expression = _filterParser.Parse(filterText);
-        bool result = expression.Evaluate(comparisonItem);
+        var evaluator = _evaluatorFactory.GetEvaluator(expression);
+        bool result = evaluator.Evaluate(expression, comparisonItem);
 
         result.Should().Be(expectedResult);
 
@@ -231,7 +289,8 @@ public class TestFiltering : IntegrationTest
     
         // Act
         var expression = _filterParser.Parse(filterText);
-        bool result = expression.Evaluate(comparisonItem);
+        var evaluator = _evaluatorFactory.GetEvaluator(expression);
+        bool result = evaluator.Evaluate(expression, comparisonItem);
     
         // Assert
         result.Should().Be(expectedResult);
@@ -272,7 +331,8 @@ public class TestFiltering : IntegrationTest
     
         // Act
         var expression = _filterParser.Parse(filterText);
-        bool result = expression.Evaluate(comparisonItem);
+        var evaluator = _evaluatorFactory.GetEvaluator(expression);
+        bool result = evaluator.Evaluate(expression, comparisonItem);
     
         // Assert
         result.Should().Be(expectedResult);
@@ -307,7 +367,8 @@ public class TestFiltering : IntegrationTest
     
         // Act
         var expression = _filterParser.Parse(filterText);
-        bool result = expression.Evaluate(comparisonItem);
+        var evaluator = _evaluatorFactory.GetEvaluator(expression);
+        bool result = evaluator.Evaluate(expression, comparisonItem);
     
         // Assert
         result.Should().Be(expectedResult);

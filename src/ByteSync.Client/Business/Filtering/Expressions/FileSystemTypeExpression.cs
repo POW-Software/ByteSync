@@ -5,15 +5,10 @@ namespace ByteSync.Business.Filtering.Expressions;
 
 public class FileSystemTypeExpression : FilterExpression
 {
-    private readonly FileSystemTypes _fileSystemType;
+    public FileSystemTypes FileSystemType { get; }
 
     public FileSystemTypeExpression(FileSystemTypes fileSystemType)
     {
-        _fileSystemType = fileSystemType;
-    }
-
-    public override bool Evaluate(ComparisonItem item)
-    {
-        return item.FileSystemType == _fileSystemType;
+        FileSystemType = fileSystemType;
     }
 }

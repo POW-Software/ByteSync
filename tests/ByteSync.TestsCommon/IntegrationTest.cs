@@ -10,7 +10,7 @@ namespace ByteSync.TestsCommon;
 public abstract class IntegrationTest
 {
     private IContainer _container = null!;
-    private ContainerBuilder _builder;
+    protected ContainerBuilder _builder;
     
     protected ITestDirectoryService _testDirectoryService = null!;
 
