@@ -1,18 +1,27 @@
 ﻿using System.Text.RegularExpressions;
-using ByteSync.Business.Filtering.Comparing;
 using ByteSync.Business.Filtering.Expressions;
 using ByteSync.Business.Filtering.Extensions;
 using ByteSync.Business.Filtering.Values;
+using ByteSync.Interfaces.Services.Filtering;
 using ByteSync.Models.Comparisons.Result;
 
 namespace ByteSync.Business.Filtering.Evaluators;
 
 public class PropertyComparisonExpressionEvaluator : ExpressionEvaluator<PropertyComparisonExpression>
 {
+    private readonly IPropertyValueExtractor _propertyValueExtractor;
+    private readonly IPropertyComparer _propertyComparer;
+
+    public PropertyComparisonExpressionEvaluator(IPropertyValueExtractor propertyValueExtractor, IPropertyComparer propertyComparer)
+    {
+        _propertyValueExtractor = propertyValueExtractor;
+        _propertyComparer = propertyComparer;
+    }
+    
     public override bool Evaluate(PropertyComparisonExpression expression, ComparisonItem item)
     {
         // Get source property value
-        var sourceValues = PropertyComparer.GetPropertyValue(item, expression.SourceDataPart, expression.Property);
+        var sourceValues = _propertyValueExtractor.GetPropertyValue(item, expression.SourceDataPart, expression.Property);
 
         if (sourceValues.Count == 0)
         {
@@ -23,8 +32,8 @@ public class PropertyComparisonExpressionEvaluator : ExpressionEvaluator<Propert
         if (expression.IsDataSourceComparison)
         {
             // Compare with another data source property
-            var targetValues = PropertyComparer.GetPropertyValue(item, expression.TargetDataPart, expression.TargetProperty ?? expression.Property);
-            return PropertyComparer.CompareValues(sourceValues, targetValues, expression.Operator);
+            var targetValues = _propertyValueExtractor.GetPropertyValue(item, expression.TargetDataPart, expression.TargetProperty ?? expression.Property);
+            return _propertyComparer.CompareValues(sourceValues, targetValues, expression.Operator);
         }
         else
         {
@@ -78,7 +87,7 @@ public class PropertyComparisonExpressionEvaluator : ExpressionEvaluator<Propert
                 }
             }
             
-            return PropertyComparer.CompareValues(sourceValues, targetValues, op);
+            return _propertyComparer.CompareValues(sourceValues, targetValues, op);
         }
         
         return false;

@@ -27,6 +27,8 @@ public class TestFiltering : IntegrationTest
     {
         RegisterType<OperatorParser, IOperatorParser>();
         RegisterType<FilterTokenizer, IFilterTokenizer>();
+        RegisterType<PropertyValueExtractor, IPropertyValueExtractor>();
+        RegisterType<PropertyComparer, IPropertyComparer>();
         
         RegisterType<AndExpressionEvaluator, IExpressionEvaluator>();
         RegisterType<OrExpressionEvaluator, IExpressionEvaluator>();

@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using ByteSync.Business.Comparisons;
-using ByteSync.Business.Filtering.Comparing;
 using ByteSync.Business.Filtering.Extensions;
 using ByteSync.Business.Filtering.Values;
 using ByteSync.Models.Comparisons.Result;
