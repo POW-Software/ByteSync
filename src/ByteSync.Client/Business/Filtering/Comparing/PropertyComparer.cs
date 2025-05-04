@@ -4,7 +4,6 @@ using ByteSync.Business.Filtering.Parsing;
 using ByteSync.Business.Filtering.Values;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
-using ByteSync.Models.Inventories;
 
 namespace ByteSync.Business.Filtering.Comparing;
 
