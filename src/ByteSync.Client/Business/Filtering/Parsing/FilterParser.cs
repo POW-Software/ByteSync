@@ -9,31 +9,28 @@ public class FilterParser : IFilterParser
 {
     private readonly IDataPartIndexer _dataPartIndexer;
     private readonly IOperatorParser _operatorParser;
-    
-    private string _filterText;
-    private int _position;
-   
-
-    public FilterParser(IDataPartIndexer dataPartIndexer, IOperatorParser operatorParser)
-    {
-        _dataPartIndexer = dataPartIndexer;
-        _operatorParser = operatorParser;
-    }
+    private readonly IFilterTokenizer _tokenizer;
     
     private FilterToken? CurrentToken { get; set; }
 
+    public FilterParser(IDataPartIndexer dataPartIndexer, IOperatorParser operatorParser, IFilterTokenizer tokenizer)
+    {
+        _dataPartIndexer = dataPartIndexer;
+        _operatorParser = operatorParser;
+        _tokenizer = tokenizer;
+    }
+
     public FilterExpression Parse(string filterText)
     {
-        _filterText = filterText ?? string.Empty;
-        _position = 0;
+        _tokenizer.Initialize(filterText ?? string.Empty);
         CurrentToken = null;
         NextToken();
         
-        if (string.IsNullOrWhiteSpace(_filterText))
+        if (string.IsNullOrWhiteSpace(filterText))
             return new TrueExpression();
 
         // Split by whitespace for simple text search
-        var terms = _filterText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        var terms = filterText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
         // Check if there are any special expressions
         if (!terms.Any(t => t.Contains(":") || t.Contains(".") || t.Contains("(") ||
@@ -250,169 +247,6 @@ public class FilterParser : IFilterParser
 
     private void NextToken()
     {
-        // Skip whitespace
-        while (_position < _filterText.Length && char.IsWhiteSpace(_filterText[_position]))
-            _position++;
-
-        if (_position >= _filterText.Length)
-        {
-            CurrentToken = new FilterToken
-            {
-                Token = string.Empty,
-                Type = FilterTokenType.End
-            };
-            
-            return;
-        }
-
-        var c = _filterText[_position];
-
-        if (c == '(')
-        {
-            CurrentToken = new FilterToken
-            {
-                Token = "(",
-                Type = FilterTokenType.OpenParenthesis
-            };
-            
-            _position++;
-        }
-        else if (c == ')')
-        {
-            CurrentToken = new FilterToken
-            {
-                Token = ")",
-                Type = FilterTokenType.CloseParenthesis
-            };
-            
-            _position++;
-        }
-        else if (c == '.')
-        {
-            CurrentToken = new FilterToken
-            {
-                Token = ".",
-                Type = FilterTokenType.Dot
-            };
-            
-            _position++;
-        }
-        else if (c == ':')
-        {
-            CurrentToken = new FilterToken
-            {
-                Token = ":",
-                Type = FilterTokenType.Colon
-            };
-            
-            _position++;
-        }
-        else if (c == '"' || c == '\'')
-        {
-            var quoteChar = c;
-            _position++;
-            var start = _position;
-
-            while (_position < _filterText.Length && _filterText[_position] != quoteChar)
-                _position++;
-
-            if (_position < _filterText.Length)
-            {
-                CurrentToken = new FilterToken
-                {
-                    Token = _filterText.Substring(start, _position - start),
-                    Type = FilterTokenType.String
-                };
-                
-                _position++;
-            }
-            else
-            {
-                CurrentToken = new FilterToken
-                {
-                    Token = _filterText.Substring(start),
-                    Type = FilterTokenType.String
-                };
-            }
-        }
-        else if (char.IsDigit(c))
-        {
-            var start = _position;
-
-            while (_position < _filterText.Length &&
-                   (char.IsDigit(_filterText[_position]) || _filterText[_position] == '.'))
-            {
-                _position++;
-            }
-            
-            var unitStart = _position;
-            while (_position < _filterText.Length && char.IsLetter(_filterText[_position]))
-            {
-                _position++;
-            }
-            
-            var tokenValue = _filterText.Substring(start, _position - start);
-
-            CurrentToken = new FilterToken
-            {
-                Token =tokenValue,
-                Type = FilterTokenType.Number
-            };
-        }
-        else if (c == '=' || c == '!' || c == '<' || c == '>' || c == '~')
-        {
-            var start = _position;
-            _position++;
-
-            if (_position < _filterText.Length &&
-                (_filterText[_position] == '=' || _filterText[_position] == '~' || _filterText[_position] == '>'))
-            {
-                _position++;
-            }
-
-            CurrentToken = new FilterToken
-            {
-                Token = _filterText.Substring(start, _position - start),
-                Type = FilterTokenType.Operator
-            };
-        }
-        else
-        {
-            var start = _position;
-
-            while (_position < _filterText.Length &&
-                   (char.IsLetterOrDigit(_filterText[_position]) || _filterText[_position] == '_'))
-                _position++;
-
-            var currentToken = _filterText.Substring(start, _position - start);
-            FilterTokenType currentTokenType;
-
-            if (currentToken.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
-                currentToken.Equals("OR", StringComparison.OrdinalIgnoreCase) ||
-                currentToken.Equals("NOT", StringComparison.OrdinalIgnoreCase) ||
-                currentToken == "&&" || currentToken == "||")
-            {
-                currentTokenType = FilterTokenType.LogicalOperator;
-            }
-            else
-            {
-                if (_dataPartIndexer.GetDataPart(currentToken) != null || 
-                    Enum.GetNames(typeof(PropertyType)).Any(name => currentToken.ToLower().Equals(name.ToLower())))
-                {
-                    currentTokenType = FilterTokenType.Identifier;
-                }
-                else
-                {
-                    currentTokenType = FilterTokenType.String;
-                }
-            }
-            
-            CurrentToken = new FilterToken
-            {
-                Token = currentToken,
-                Type = currentTokenType
-            };
-        }
+        CurrentToken = _tokenizer.GetNextToken();
     }
 }
-    

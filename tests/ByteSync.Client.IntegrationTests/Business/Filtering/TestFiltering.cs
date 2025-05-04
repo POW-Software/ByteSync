@@ -23,6 +23,7 @@ public class TestFiltering : IntegrationTest
     public void Setup()
     {
         RegisterType<OperatorParser, IOperatorParser>();
+        RegisterType<FilterTokenizer, IFilterTokenizer>();
         RegisterType<FilterParser>();
         BuildMoqContainer();
         
