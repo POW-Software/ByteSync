@@ -28,53 +28,16 @@ public class TestFiltering : IntegrationTest
         RegisterType<OperatorParser, IOperatorParser>();
         RegisterType<FilterTokenizer, IFilterTokenizer>();
         
-        /*
         RegisterType<AndExpressionEvaluator, IExpressionEvaluator>();
-        // RegisterType<AndExpressionEvaluator, IExpressionEvaluator<AndExpression>>();
         RegisterType<OrExpressionEvaluator, IExpressionEvaluator>();
-        // RegisterType<OrExpressionEvaluator, IExpressionEvaluator<OrExpression>>();
         RegisterType<NotExpressionEvaluator, IExpressionEvaluator>();
-        // RegisterType<NotExpressionEvaluator, IExpressionEvaluator<NotExpression>>();
         RegisterType<TrueExpressionEvaluator, IExpressionEvaluator>();
-        // RegisterType<TrueExpressionEvaluator, IExpressionEvaluator<TrueExpression>>();
         RegisterType<ExistsExpressionEvaluator, IExpressionEvaluator>();
-        // RegisterType<ExistsExpressionEvaluator, IExpressionEvaluator<ExistsExpression>>();
         RegisterType<FileSystemTypeExpressionEvaluator, IExpressionEvaluator>();
-        // RegisterType<FileSystemTypeExpressionEvaluator, IExpressionEvaluator<FileSystemTypeExpression>>();
         RegisterType<FutureStateExpressionEvaluator, IExpressionEvaluator>();
-        // RegisterType<FutureStateExpressionEvaluator, IExpressionEvaluator<FutureStateExpression>>();
         RegisterType<OnlyExpressionEvaluator, IExpressionEvaluator>();
-        // RegisterType<OnlyExpressionEvaluator, IExpressionEvaluator<OnlyExpression>>();
         RegisterType<PropertyComparisonExpressionEvaluator, IExpressionEvaluator>();
-        // RegisterType<PropertyComparisonExpressionEvaluator, IExpressionEvaluator<PropertyComparisonExpression>>();
         RegisterType<TextSearchExpressionEvaluator, IExpressionEvaluator>();
-        // RegisterType<TextSearchExpressionEvaluator, IExpressionEvaluator<TextSearchExpression>>();
-        */
-        
-        // _builder.RegisterType<AndExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
-        // _builder.RegisterType<OrExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
-        // _builder.RegisterType<NotExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
-        // _builder.RegisterType<TrueExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
-        // _builder.RegisterType<ExistsExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
-        // _builder.RegisterType<FileSystemTypeExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
-        // _builder.RegisterType<FutureStateExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
-        // _builder.RegisterType<OnlyExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
-        // _builder.RegisterType<PropertyComparisonExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
-        // _builder.RegisterType<TextSearchExpressionEvaluator>().As<IExpressionEvaluator>().InstancePerDependency();
-        //
-        
-        _builder.RegisterType<AndExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
-        _builder.RegisterType<OrExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
-        _builder.RegisterType<NotExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
-        _builder.RegisterType<TrueExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
-        _builder.RegisterType<ExistsExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
-        _builder.RegisterType<FileSystemTypeExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
-        _builder.RegisterType<FutureStateExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
-        _builder.RegisterType<OnlyExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
-        _builder.RegisterType<PropertyComparisonExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
-        _builder.RegisterType<TextSearchExpressionEvaluator>().AsSelf().As<IExpressionEvaluator>().SingleInstance();
-        
-        
         
         RegisterType<ExpressionEvaluatorFactory>();
         

@@ -39,7 +39,7 @@ public abstract class IntegrationTest
     
     protected void RegisterType<TImplementation, TInterface>() where TImplementation : notnull where TInterface : notnull
     {
-        _builder.RegisterType<TImplementation>().As<TInterface>().SingleInstance();
+        _builder.RegisterType<TImplementation>().AsSelf().As<TInterface>().SingleInstance();
     }
     
     [TearDown]
