@@ -159,8 +159,9 @@ public class FilterTokenizer : IFilterTokenizer
             }
             else
             {
-                if (_dataPartIndexer.GetDataPart(currentToken) != null || 
-                    Enum.GetNames(typeof(PropertyType)).Any(name => currentToken.ToLower().Equals(name.ToLower())))
+                if (_dataPartIndexer.GetDataPart(currentToken) != null || currentToken == "B1" ||
+                    Enum.GetNames(typeof(PropertyType)).Any(name => currentToken.ToLower().Equals(name.ToLower())) ||
+                    Enum.GetNames(typeof(SpecialOperator)).Any(name => currentToken.ToLower().Equals(name.ToLower())))
                 {
                     currentTokenType = FilterTokenType.Identifier;
                 }

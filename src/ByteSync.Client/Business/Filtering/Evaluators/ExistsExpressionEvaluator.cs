@@ -10,7 +10,16 @@ public class ExistsExpressionEvaluator : ExpressionEvaluator<ExistsExpression>
         var inventories = item.ContentIdentities
             .SelectMany(ci => ci.GetInventories())
             .ToHashSet();
+        
+        var inventoryParts = item.ContentIdentities
+            .SelectMany(ci => ci.GetInventoryParts())
+            .ToHashSet();
+        
+        List<string> codes = inventories
+            .Select(i => i.Letter)
+            .Union(inventoryParts.Select(i => i.Code))
+            .ToList();
 
-        return inventories.Any(i => i.Letter.Equals(expression.DataSource, StringComparison.OrdinalIgnoreCase));
+        return codes.Any(c => c.Equals(expression.DataSource, StringComparison.OrdinalIgnoreCase));
     }
 }

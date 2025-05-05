@@ -261,24 +261,6 @@ public class TestFiltering : IntegrationTest
         result.Should().Be(expectedResult);
     }
     
-    // [TestCase(100, 100, "==", true)]
-    // [TestCase(100, 100, ">=", true)]
-    // [TestCase(100, 100, "<=", true)]
-    // [TestCase(100, 200, "==", false)]
-    // [TestCase(100, 200, "!=", true)]
-    // [TestCase(100, 200, "<=", true)]
-    // [TestCase(100, 200, "<", true)]
-    // [TestCase(100, 200, ">=", false)]
-    // [TestCase(100, 200, ">", false)]
-    // [TestCase(200, 100, ">=", true)]
-    // [TestCase(200, 100, ">", true)]
-    // [TestCase(200, 100, "<=", false)]
-    // [TestCase(200, 100, "<", false)]
-    // [TestCase(100, 101, "<", true)]
-    // [TestCase(100, 100, "<", false)]
-    // [TestCase(101, 100, ">", true)]
-    
-    
     [TestCase(105 * 1024, ">", true)]
     [TestCase(105 * 1024, "<", false)]
     [TestCase(80 * 1024, ">", false)]
@@ -338,6 +320,27 @@ public class TestFiltering : IntegrationTest
         // Assert
         result.Should().Be(expectedResult);
     }
+    
+    [TestCase("A1", true)]
+    [TestCase("B1", false)]
+    [Test]
+    public void TestIsOn(string location, bool expectedResult)
+    {
+        // Arrange
+        var now = DateTime.Now;
+        var comparisonItem = PrepareComparisonWithOneContent(
+            "A1", "sameHash", now, 50);
+    
+        var filterText = $"on:{location}";
+    
+        // Act
+        var expression = _filterParser.Parse(filterText);
+        var evaluator = _evaluatorFactory.GetEvaluator(expression);
+        bool result = evaluator.Evaluate(expression, comparisonItem);
+    
+        // Assert
+        result.Should().Be(expectedResult);
+    }
 
     private ComparisonItem CreateBasicComparisonItem(string filePath = "/file1.txt", string fileName = "file1.txt")
     {
@@ -352,8 +355,12 @@ public class TestFiltering : IntegrationTest
         string hash,
         long size = 100)
     {
-        var inventory = new Inventory { InventoryId = inventoryId };
+        string letter = inventoryId.Replace("Id_", "");
+        var inventory = new Inventory { InventoryId = inventoryId, Letter = letter };
+        
+        string code = $"{letter}1";
         var inventoryPart = new InventoryPart(inventory, rootPath, FileSystemTypes.Directory);
+        inventoryPart.Code = code;
 
         var fileDescription = new FileDescription
         {
@@ -465,50 +472,37 @@ public class TestFiltering : IntegrationTest
         return comparisonItem;
     }
 
-    // [Test]
-    // public void Parse_PropertyComparison_ReturnsCorrectExpression()
-    // {
-    //     // Arrange
-    //     var filterText = "file.size > 1024";
-    //     var parser = new FilterParser(_dataPartIndexer, _operatorParser);
-    //
-    //     // Act
-    //     var expression = parser.Parse(filterText);
-    //
-    //     // Assert
-    //     Assert.IsInstanceOf<PropertyComparisonExpression>(expression);
-    //     var comparisonExpression = (PropertyComparisonExpression)expression;
-    //     Assert.AreEqual("size", comparisonExpression.Property);
-    // }
-    //
-    // [Test]
-    // public void Evaluate_PropertyComparisonExpression_ReturnsTrue()
-    // {
-    //     // Arrange
-    //     var filterText = "file.size > 1024";
-    //     var parser = new FilterParser(_dataPartIndexer, _operatorParser);
-    //     var expression = parser.Parse(filterText);
-    //
-    //     var comparisonItem = new ComparisonItem(new PathIdentity("testFile", FileSystemTypes.File))
-    //     {
-    //         ContentRepartition = { Size = 2048 }
-    //     };
-    //
-    //     // Act
-    //     var result = expression.Evaluate(comparisonItem);
-    //
-    //     // Assert
-    //     Assert.IsTrue(result);
-    // }
-    //
-    // [Test]
-    // public void Parse_InvalidExpression_ThrowsException()
-    // {
-    //     // Arrange
-    //     var filterText = "file.size >";
-    //     var parser = new FilterParser(_dataPartIndexer, _operatorParser);
-    //
-    //     // Act & Assert
-    //     Assert.Throws<InvalidOperationException>(() => parser.Parse(filterText));
-    // }
+    private ComparisonItem PrepareComparisonWithOneContent(
+        string leftDataPartId,
+        string leftHash,
+        DateTime leftDateTime,
+        long leftSize)
+    {
+        var comparisonItem = CreateBasicComparisonItem();
+
+        var (fileDescA, inventoryPartA) = CreateFileDescription(
+            "Id_A",
+            "/testRootA",
+            leftDateTime,
+            leftHash,
+            leftSize);
+        
+        var contentIdCoreA = new ContentIdentityCore
+        {
+            SignatureHash = leftHash,
+            Size = 21
+        };
+        var contentIdA = new ContentIdentity(contentIdCoreA);
+        comparisonItem.AddContentIdentity(contentIdA);
+        contentIdA.Add(fileDescA);
+        
+        var dataParts = new Dictionary<string, (InventoryPart, FileDescription)>
+        {
+            { leftDataPartId, (inventoryPartA, fileDescA) }
+        };
+
+        ConfigureDataPartIndex(dataParts);
+
+        return comparisonItem;
+    }
 }
