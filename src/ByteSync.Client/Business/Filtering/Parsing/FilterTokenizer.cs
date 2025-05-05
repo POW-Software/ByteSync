@@ -5,14 +5,8 @@ namespace ByteSync.Business.Filtering.Parsing;
 
 public class FilterTokenizer : IFilterTokenizer
 {
-    private readonly IDataPartIndexer _dataPartIndexer;
-    private string _filterText;
+    private string _filterText = null!;
     private int _position;
-
-    public FilterTokenizer(IDataPartIndexer dataPartIndexer)
-    {
-        _dataPartIndexer = dataPartIndexer;
-    }
 
     public void Initialize(string filterText)
     {
@@ -159,7 +153,8 @@ public class FilterTokenizer : IFilterTokenizer
             }
             else
             {
-                if (_dataPartIndexer.GetDataPart(currentToken) != null || currentToken == "B1" ||
+                if ((char.IsLetter(currentToken[0]) && 
+                     (currentToken.Length == 1 || currentToken.Skip(1).All(char.IsDigit))) ||
                     Enum.GetNames(typeof(PropertyType)).Any(name => currentToken.ToLower().Equals(name.ToLower())) ||
                     Enum.GetNames(typeof(SpecialOperator)).Any(name => currentToken.ToLower().Equals(name.ToLower())))
                 {
