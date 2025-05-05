@@ -2,7 +2,6 @@
 using ByteSync.Business;
 using ByteSync.Business.Comparisons;
 using ByteSync.Business.Filtering.Evaluators;
-using ByteSync.Business.Filtering.Expressions;
 using ByteSync.Business.Filtering.Parsing;
 using ByteSync.Business.Inventories;
 using ByteSync.Common.Business.Inventories;
