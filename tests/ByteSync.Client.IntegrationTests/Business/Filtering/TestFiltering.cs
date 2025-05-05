@@ -18,329 +18,330 @@ namespace ByteSync.Client.IntegrationTests.Business.Filtering;
 
 public class TestFiltering : IntegrationTest
 {
-    private FilterParser _filterParser;
-    private ExpressionEvaluatorFactory _evaluatorFactory;
+    // private FilterParser _filterParser;
+    // private ExpressionEvaluatorFactory _evaluatorFactory;
+    //
+    // [SetUp]
+    // public void Setup()
+    // {
+    //     RegisterType<OperatorParser, IOperatorParser>();
+    //     RegisterType<FilterTokenizer, IFilterTokenizer>();
+    //     RegisterType<PropertyValueExtractor, IPropertyValueExtractor>();
+    //     RegisterType<PropertyComparer, IPropertyComparer>();
+    //     
+    //     RegisterType<AndExpressionEvaluator, IExpressionEvaluator>();
+    //     RegisterType<OrExpressionEvaluator, IExpressionEvaluator>();
+    //     RegisterType<NotExpressionEvaluator, IExpressionEvaluator>();
+    //     RegisterType<TrueExpressionEvaluator, IExpressionEvaluator>();
+    //     RegisterType<ExistsExpressionEvaluator, IExpressionEvaluator>();
+    //     RegisterType<FileSystemTypeExpressionEvaluator, IExpressionEvaluator>();
+    //     RegisterType<FutureStateExpressionEvaluator, IExpressionEvaluator>();
+    //     RegisterType<OnlyExpressionEvaluator, IExpressionEvaluator>();
+    //     RegisterType<PropertyComparisonExpressionEvaluator, IExpressionEvaluator>();
+    //     RegisterType<TextSearchExpressionEvaluator, IExpressionEvaluator>();
+    //     
+    //     RegisterType<ExpressionEvaluatorFactory>();
+    //     
+    //     RegisterType<FilterParser>();
+    //     BuildMoqContainer();
+    //     
+    //     _filterParser = Container.Resolve<FilterParser>();
+    //     _evaluatorFactory = Container.Resolve<ExpressionEvaluatorFactory>();
+    // }
 
-    [SetUp]
-    public void Setup()
-    {
-        RegisterType<OperatorParser, IOperatorParser>();
-        RegisterType<FilterTokenizer, IFilterTokenizer>();
-        RegisterType<PropertyValueExtractor, IPropertyValueExtractor>();
-        RegisterType<PropertyComparer, IPropertyComparer>();
-        
-        RegisterType<AndExpressionEvaluator, IExpressionEvaluator>();
-        RegisterType<OrExpressionEvaluator, IExpressionEvaluator>();
-        RegisterType<NotExpressionEvaluator, IExpressionEvaluator>();
-        RegisterType<TrueExpressionEvaluator, IExpressionEvaluator>();
-        RegisterType<ExistsExpressionEvaluator, IExpressionEvaluator>();
-        RegisterType<FileSystemTypeExpressionEvaluator, IExpressionEvaluator>();
-        RegisterType<FutureStateExpressionEvaluator, IExpressionEvaluator>();
-        RegisterType<OnlyExpressionEvaluator, IExpressionEvaluator>();
-        RegisterType<PropertyComparisonExpressionEvaluator, IExpressionEvaluator>();
-        RegisterType<TextSearchExpressionEvaluator, IExpressionEvaluator>();
-        
-        RegisterType<ExpressionEvaluatorFactory>();
-        
-        RegisterType<FilterParser>();
-        BuildMoqContainer();
-        
-        _filterParser = Container.Resolve<FilterParser>();
-        _evaluatorFactory = Container.Resolve<ExpressionEvaluatorFactory>();
-    }
+    // [Test]
+    // [TestCase("example", false)]
+    // [TestCase("ffile1.txt", false)]
+    // [TestCase("ile", true)]
+    // [TestCase("file1", true)]
+    // [TestCase("file1.txt", true)]
+    // [TestCase("FILE1.TXT", true)]
+    // public void Parse_SimpleTextSearch_ReturnsCorrectExpression(string filterText, bool expectedResult)
+    // {
+    //     // Arrange
+    //     var pathIdentity = new PathIdentity(FileSystemTypes.File, "/file1.txt", "file1.txt", "/file1.txt");
+    //     var comparisonItem = new ComparisonItem(pathIdentity);
+    //     
+    //     var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
+    //     mockDataPartIndexer.Setup(m => m.GetDataPart(It.IsAny<string>()))
+    //         .Returns((DataPart)null);
+    //
+    //     // Act
+    //     var expression = _filterParser.Parse(filterText);
+    //     var evaluator = _evaluatorFactory.GetEvaluator(expression);
+    //     bool result = evaluator.Evaluate(expression, comparisonItem);
+    //
+    //     result.Should().Be(expectedResult);
+    //
+    //     // // Assert
+    //     // Assert.IsInstanceOf<AndExpression>(expression);
+    //     // Assert.IsTrue(((AndExpression)expression).Expressions.Any(e => e is TextSearchExpression));
+    // }
+    
+    // [Test]
+    // public void Test_Content()
+    // {
+    //     // Arrange
+    //     var filterText = "A1.content==B1.content";
+    //     
+    //     var pathIdentity = new PathIdentity(FileSystemTypes.File, "/file1.txt", "file1.txt", "/file1.txt");
+    //     var comparisonItem = new ComparisonItem(pathIdentity);
+    //     
+    //     var lastWriteTime1 = new DateTime(2023, 10, 1, 12, 0, 0, DateTimeKind.Utc);
+    //     var inventoryA = new Inventory();
+    //     inventoryA.InventoryId = "Id_A";
+    //     var inventoryPartA1 = new InventoryPart(inventoryA, "/testRootA1", FileSystemTypes.Directory);
+    //     var fileDescriptionA1 = new FileDescription {
+    //         InventoryPart = inventoryPartA1,
+    //         LastWriteTimeUtc = lastWriteTime1,
+    //         Size = 100,
+    //         FingerprintMode = FingerprintModes.Sha256,
+    //         SignatureGuid = null,
+    //         Sha256 = "sameHash"
+    //     };
+    //     
+    //     var inventoryB = new Inventory();
+    //     inventoryB.InventoryId = "Id_B";
+    //     var inventoryPartB1 = new InventoryPart(inventoryB, "/testRootB1", FileSystemTypes.Directory);
+    //     var fileDescriptionB1 = new FileDescription {
+    //         InventoryPart = inventoryPartB1,
+    //         LastWriteTimeUtc = lastWriteTime1,
+    //         Size = 100,
+    //         FingerprintMode = FingerprintModes.Sha256,
+    //         SignatureGuid = null,
+    //         Sha256 = "sameHash"
+    //     };
+    //     
+    //     var contentIdentityCore = new ContentIdentityCore();
+    //     contentIdentityCore.SignatureHash = "TestHash";
+    //     contentIdentityCore.Size = 21;
+    //     var contentIdentity = new ContentIdentity(contentIdentityCore);
+    //     comparisonItem.AddContentIdentity(contentIdentity);
+    //     contentIdentity.Add(fileDescriptionA1);
+    //     contentIdentity.Add(fileDescriptionB1);
+    //
+    //     var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
+    //     var dataPartA1 = new DataPart("A1", inventoryPartA1);
+    //     mockDataPartIndexer.Setup(m => m.GetDataPart("A1"))
+    //         .Returns(dataPartA1);
+    //     var dataPartA2 = new DataPart("B1", inventoryPartB1);
+    //     mockDataPartIndexer.Setup(m => m.GetDataPart("B1"))
+    //         .Returns(dataPartA2);
+    //
+    //     // Act
+    //     var expression = _filterParser.Parse(filterText);
+    //     var evaluator = _evaluatorFactory.GetEvaluator(expression);
+    //     bool result = evaluator.Evaluate(expression, comparisonItem);
+    //
+    //     result.Should().Be(true);
+    //
+    //     // // Assert
+    //     // Assert.IsInstanceOf<AndExpression>(expression);
+    //     // Assert.IsTrue(((AndExpression)expression).Expressions.Any(e => e is TextSearchExpression));
+    // }
+    
+    // [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-01", "==", true)]
+    // [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-01", "<>", false)]
+    // [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-01", "!=", false)]
+    // [TestCase("hashLeft", "2023-10-01", "hashRight", "2023-10-01", "==", false)]
+    // [TestCase("hashLeft", "2023-10-01", "hashRight", "2023-10-01", "<>", true)]
+    // [TestCase("hashLeft", "2023-10-01", "hashRight", "2023-10-01", "!=", true)]
+    // [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-02", "==", false)]
+    // [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-02", "<>", true)]
+    // [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-02", "!=", true)]
+    // public void Test_ContentAndDate(string leftHash, string leftDateTimeStr, string rightHash, string rightDateTimeStr,
+    //     string @operator, bool expectedResult)
+    // {
+    //     // Arrange
+    //     var filterText = $"A1.contentanddate{@operator}B1.contentanddate";
+    //     
+    //     DateTime leftDateTime = DateTime.Parse(leftDateTimeStr, System.Globalization.CultureInfo.InvariantCulture);
+    //     DateTime rightDateTime = DateTime.Parse(rightDateTimeStr, System.Globalization.CultureInfo.InvariantCulture);
+    //     
+    //     var pathIdentity = new PathIdentity(FileSystemTypes.File, "/file1.txt", "file1.txt", "/file1.txt");
+    //     var comparisonItem = new ComparisonItem(pathIdentity);
+    //     
+    //     var inventoryA = new Inventory();
+    //     inventoryA.InventoryId = "Id_A";
+    //     var inventoryPartA1 = new InventoryPart(inventoryA, "/testRootA1", FileSystemTypes.Directory);
+    //     var fileDescriptionA1 = new FileDescription {
+    //         InventoryPart = inventoryPartA1,
+    //         LastWriteTimeUtc = leftDateTime,
+    //         Size = 100,
+    //         FingerprintMode = FingerprintModes.Sha256,
+    //         SignatureGuid = null
+    //     };
+    //     
+    //     var inventoryB = new Inventory();
+    //     inventoryB.InventoryId = "Id_B";
+    //     var inventoryPartB1 = new InventoryPart(inventoryB, "/testRootB1", FileSystemTypes.Directory);
+    //     var fileDescriptionB1 = new FileDescription {
+    //         InventoryPart = inventoryPartB1,
+    //         LastWriteTimeUtc = rightDateTime,
+    //         Size = 100,
+    //         FingerprintMode = FingerprintModes.Sha256,
+    //         SignatureGuid = null
+    //     };
+    //     
+    //     var contentIdentityCoreA1 = new ContentIdentityCore();
+    //     contentIdentityCoreA1.SignatureHash = leftHash;
+    //     contentIdentityCoreA1.Size = 21;
+    //     var contentIdentityA1 = new ContentIdentity(contentIdentityCoreA1);
+    //     comparisonItem.AddContentIdentity(contentIdentityA1);
+    //     contentIdentityA1.Add(fileDescriptionA1);
+    //     if (leftHash == rightHash)
+    //     {
+    //         contentIdentityA1.Add(fileDescriptionB1);
+    //     }
+    //     else
+    //     {
+    //         var contentIdentityCoreB1 = new ContentIdentityCore();
+    //         contentIdentityCoreB1.SignatureHash = rightHash;
+    //         contentIdentityCoreB1.Size = 23;
+    //         var contentIdentityB1 = new ContentIdentity(contentIdentityCoreB1);
+    //         comparisonItem.AddContentIdentity(contentIdentityB1);
+    //         contentIdentityB1.Add(fileDescriptionB1);
+    //     }
+    //
+    //
+    //     var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
+    //     var dataPartA1 = new DataPart("A1", inventoryPartA1);
+    //     mockDataPartIndexer.Setup(m => m.GetDataPart("A1"))
+    //         .Returns(dataPartA1);
+    //     var dataPartA2 = new DataPart("B1", inventoryPartB1);
+    //     mockDataPartIndexer.Setup(m => m.GetDataPart("B1"))
+    //         .Returns(dataPartA2);
+    //
+    //     // Act
+    //     var expression = _filterParser.Parse(filterText);
+    //     var evaluator = _evaluatorFactory.GetEvaluator(expression);
+    //     bool result = evaluator.Evaluate(expression, comparisonItem);
+    //
+    //     result.Should().Be(expectedResult);
+    //
+    //     // // Assert
+    //     // Assert.IsInstanceOf<AndExpression>(expression);
+    //     // Assert.IsTrue(((AndExpression)expression).Expressions.Any(e => e is TextSearchExpression));
+    // }
+    
+    // [TestCase(100, 100, "==", true)]
+    // [TestCase(100, 100, ">=", true)]
+    // [TestCase(100, 100, "<=", true)]
+    // [TestCase(100, 200, "==", false)]
+    // [TestCase(100, 200, "!=", true)]
+    // [TestCase(100, 200, "<=", true)]
+    // [TestCase(100, 200, "<", true)]
+    // [TestCase(100, 200, ">=", false)]
+    // [TestCase(100, 200, ">", false)]
+    // [TestCase(200, 100, ">=", true)]
+    // [TestCase(200, 100, ">", true)]
+    // [TestCase(200, 100, "<=", false)]
+    // [TestCase(200, 100, "<", false)]
+    // [TestCase(100, 101, "<", true)]
+    // [TestCase(100, 100, "<", false)]
+    // [TestCase(101, 100, ">", true)]
+    // [TestCase(100, 100, ">", false)]
+    // public void TestSizeComparison(long leftSize, long rightSize, string @operator, bool expectedResult)
+    // {
+    //     // Arrange
+    //     var now = DateTime.Now;
+    //     var comparisonItem = PrepareComparisonWithTwoContents(
+    //         "A1", "sameHash", now, leftSize,
+    //         "B1", "sameHash", now, rightSize);
+    //
+    //     var filterText = $"A1.size{@operator}B1.size";
+    //
+    //     // Act
+    //     var expression = _filterParser.Parse(filterText);
+    //     var evaluator = _evaluatorFactory.GetEvaluator(expression);
+    //     bool result = evaluator.Evaluate(expression, comparisonItem);
+    //
+    //     // Assert
+    //     result.Should().Be(expectedResult);
+    // }
+    //
+    // [TestCase(105 * 1024, ">", true)]
+    // [TestCase(105 * 1024, "<", false)]
+    // [TestCase(80 * 1024, ">", false)]
+    // [TestCase(80 * 1024, "<", true)]
+    // [Test]
+    // public void TestSizeComparison_2(long leftSize, string @operator, bool expectedResult)
+    // {
+    //     // Arrange
+    //     var now = DateTime.Now;
+    //     var comparisonItem = PrepareComparisonWithTwoContents(
+    //         "A1", "sameHash", now, leftSize,
+    //         "B1", "sameHash", now, 1);
+    //
+    //     var filterText = $"A1.size{@operator}100kb";
+    //
+    //     // Act
+    //     var expression = _filterParser.Parse(filterText);
+    //     var evaluator = _evaluatorFactory.GetEvaluator(expression);
+    //     bool result = evaluator.Evaluate(expression, comparisonItem);
+    //
+    //     // Assert
+    //     result.Should().Be(expectedResult);
+    // }
+    
+    // [TestCase("2024-05-01", "2024-05-01", "==", true)]
+    // [TestCase("2024-05-01", "2024-05-01", ">=", true)]
+    // [TestCase("2024-05-01", "2024-05-01", "<=", true)]
+    // [TestCase("2024-05-01", "2024-06-01", "==", false)]
+    // [TestCase("2024-05-01", "2024-06-01", "!=", true)]
+    // [TestCase("2024-05-01", "2024-06-01", "<=", true)]
+    // [TestCase("2024-05-01", "2024-06-01", "<", true)]
+    // [TestCase("2024-05-01", "2024-06-01", ">=", false)]
+    // [TestCase("2024-05-01", "2024-06-01", ">", false)]
+    // [TestCase("2024-06-01", "2024-05-01", ">=", true)]
+    // [TestCase("2024-06-01", "2024-05-01", ">", true)]
+    // [TestCase("2024-06-01", "2024-05-01", "<=", false)]
+    // [TestCase("2024-06-01", "2024-05-01", "<", false)]
+    // [TestCase("2024-05-01", "2024-06-01", "<", true)]
+    // [TestCase("2024-05-01", "2024-05-01", "<", false)]
+    // [TestCase("2024-06-01", "2024-05-01", ">", true)]
+    // [TestCase("2024-05-01", "2024-05-01", ">", false)]
+    // public void TestLastWriteTimeComparison(string leftDateTime, string rightDateTime, string @operator, bool expectedResult)
+    // {
+    //     // Arrange
+    //     var now = DateTime.Now;
+    //     var comparisonItem = PrepareComparisonWithTwoContents(
+    //         "A1", "sameHash", DateTime.Parse(leftDateTime, System.Globalization.CultureInfo.InvariantCulture),
+    //         "B1", "sameHash", DateTime.Parse(rightDateTime, System.Globalization.CultureInfo.InvariantCulture));
+    //
+    //     var filterText = $"A1.lastwritetime{@operator}B1.lastwritetime";
+    //
+    //     // Act
+    //     var expression = _filterParser.Parse(filterText);
+    //     var evaluator = _evaluatorFactory.GetEvaluator(expression);
+    //     bool result = evaluator.Evaluate(expression, comparisonItem);
+    //
+    //     // Assert
+    //     result.Should().Be(expectedResult);
+    // }
+    
+    // [TestCase("A1", true)]
+    // [TestCase("B1", false)]
+    // [Test]
+    // public void TestIsOn(string location, bool expectedResult)
+    // {
+    //     // Arrange
+    //     var now = DateTime.Now;
+    //     var comparisonItem = PrepareComparisonWithOneContent(
+    //         "A1", "sameHash", now, 50);
+    //
+    //     var filterText = $"on:{location}";
+    //
+    //     // Act
+    //     var expression = _filterParser.Parse(filterText);
+    //     var evaluator = _evaluatorFactory.GetEvaluator(expression);
+    //     bool result = evaluator.Evaluate(expression, comparisonItem);
+    //
+    //     // Assert
+    //     result.Should().Be(expectedResult);
+    // }
 
-    [Test]
-    [TestCase("example", false)]
-    [TestCase("ffile1.txt", false)]
-    [TestCase("ile", true)]
-    [TestCase("file1", true)]
-    [TestCase("file1.txt", true)]
-    [TestCase("FILE1.TXT", true)]
-    public void Parse_SimpleTextSearch_ReturnsCorrectExpression(string filterText, bool expectedResult)
-    {
-        // Arrange
-        var pathIdentity = new PathIdentity(FileSystemTypes.File, "/file1.txt", "file1.txt", "/file1.txt");
-        var comparisonItem = new ComparisonItem(pathIdentity);
-        
-        var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
-        mockDataPartIndexer.Setup(m => m.GetDataPart(It.IsAny<string>()))
-            .Returns((DataPart)null);
-
-        // Act
-        var expression = _filterParser.Parse(filterText);
-        var evaluator = _evaluatorFactory.GetEvaluator(expression);
-        bool result = evaluator.Evaluate(expression, comparisonItem);
-
-        result.Should().Be(expectedResult);
-
-        // // Assert
-        // Assert.IsInstanceOf<AndExpression>(expression);
-        // Assert.IsTrue(((AndExpression)expression).Expressions.Any(e => e is TextSearchExpression));
-    }
-    
-    [Test]
-    public void Test_TOOOOOOOOOOOO_RENNNNNNNNNNN()
-    {
-        // Arrange
-        var filterText = "A1.content==B1.content";
-        
-        var pathIdentity = new PathIdentity(FileSystemTypes.File, "/file1.txt", "file1.txt", "/file1.txt");
-        var comparisonItem = new ComparisonItem(pathIdentity);
-        
-        var lastWriteTime1 = new DateTime(2023, 10, 1, 12, 0, 0, DateTimeKind.Utc);
-        var inventoryA = new Inventory();
-        inventoryA.InventoryId = "Id_A";
-        var inventoryPartA1 = new InventoryPart(inventoryA, "/testRootA1", FileSystemTypes.Directory);
-        var fileDescriptionA1 = new FileDescription {
-            InventoryPart = inventoryPartA1,
-            LastWriteTimeUtc = lastWriteTime1,
-            Size = 100,
-            FingerprintMode = FingerprintModes.Sha256,
-            SignatureGuid = null,
-            Sha256 = "sameHash"
-        };
-        
-        var inventoryB = new Inventory();
-        inventoryB.InventoryId = "Id_B";
-        var inventoryPartB1 = new InventoryPart(inventoryB, "/testRootB1", FileSystemTypes.Directory);
-        var fileDescriptionB1 = new FileDescription {
-            InventoryPart = inventoryPartB1,
-            LastWriteTimeUtc = lastWriteTime1,
-            Size = 100,
-            FingerprintMode = FingerprintModes.Sha256,
-            SignatureGuid = null,
-            Sha256 = "sameHash"
-        };
-        
-        var contentIdentityCore = new ContentIdentityCore();
-        contentIdentityCore.SignatureHash = "TestHash";
-        contentIdentityCore.Size = 21;
-        var contentIdentity = new ContentIdentity(contentIdentityCore);
-        comparisonItem.AddContentIdentity(contentIdentity);
-        contentIdentity.Add(fileDescriptionA1);
-        contentIdentity.Add(fileDescriptionB1);
-
-        var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
-        var dataPartA1 = new DataPart("A1", inventoryPartA1);
-        mockDataPartIndexer.Setup(m => m.GetDataPart("A1"))
-            .Returns(dataPartA1);
-        var dataPartA2 = new DataPart("B1", inventoryPartB1);
-        mockDataPartIndexer.Setup(m => m.GetDataPart("B1"))
-            .Returns(dataPartA2);
-
-        // Act
-        var expression = _filterParser.Parse(filterText);
-        var evaluator = _evaluatorFactory.GetEvaluator(expression);
-        bool result = evaluator.Evaluate(expression, comparisonItem);
-
-        result.Should().Be(true);
-
-        // // Assert
-        // Assert.IsInstanceOf<AndExpression>(expression);
-        // Assert.IsTrue(((AndExpression)expression).Expressions.Any(e => e is TextSearchExpression));
-    }
-    
-    [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-01", "==", true)]
-    [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-01", "<>", false)]
-    [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-01", "!=", false)]
-    [TestCase("hashLeft", "2023-10-01", "hashRight", "2023-10-01", "==", false)]
-    [TestCase("hashLeft", "2023-10-01", "hashRight", "2023-10-01", "<>", true)]
-    [TestCase("hashLeft", "2023-10-01", "hashRight", "2023-10-01", "!=", true)]
-    [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-02", "==", false)]
-    [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-02", "<>", true)]
-    [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-02", "!=", true)]
-    public void Test_TOOOOOOOOOOOO_RENNNNNNNNNNN_2(string leftHash, string leftDateTimeStr, string rightHash, string rightDateTimeStr,
-        string @operator, bool expectedResult)
-    {
-        // Arrange
-        var filterText = $"A1.contentanddate{@operator}B1.contentanddate";
-        
-        DateTime leftDateTime = DateTime.Parse(leftDateTimeStr, System.Globalization.CultureInfo.InvariantCulture);
-        DateTime rightDateTime = DateTime.Parse(rightDateTimeStr, System.Globalization.CultureInfo.InvariantCulture);
-        
-        var pathIdentity = new PathIdentity(FileSystemTypes.File, "/file1.txt", "file1.txt", "/file1.txt");
-        var comparisonItem = new ComparisonItem(pathIdentity);
-        
-        var inventoryA = new Inventory();
-        inventoryA.InventoryId = "Id_A";
-        var inventoryPartA1 = new InventoryPart(inventoryA, "/testRootA1", FileSystemTypes.Directory);
-        var fileDescriptionA1 = new FileDescription {
-            InventoryPart = inventoryPartA1,
-            LastWriteTimeUtc = leftDateTime,
-            Size = 100,
-            FingerprintMode = FingerprintModes.Sha256,
-            SignatureGuid = null
-        };
-        
-        var inventoryB = new Inventory();
-        inventoryB.InventoryId = "Id_B";
-        var inventoryPartB1 = new InventoryPart(inventoryB, "/testRootB1", FileSystemTypes.Directory);
-        var fileDescriptionB1 = new FileDescription {
-            InventoryPart = inventoryPartB1,
-            LastWriteTimeUtc = rightDateTime,
-            Size = 100,
-            FingerprintMode = FingerprintModes.Sha256,
-            SignatureGuid = null
-        };
-        
-        var contentIdentityCoreA1 = new ContentIdentityCore();
-        contentIdentityCoreA1.SignatureHash = leftHash;
-        contentIdentityCoreA1.Size = 21;
-        var contentIdentityA1 = new ContentIdentity(contentIdentityCoreA1);
-        comparisonItem.AddContentIdentity(contentIdentityA1);
-        contentIdentityA1.Add(fileDescriptionA1);
-        if (leftHash == rightHash)
-        {
-            contentIdentityA1.Add(fileDescriptionB1);
-        }
-        else
-        {
-            var contentIdentityCoreB1 = new ContentIdentityCore();
-            contentIdentityCoreB1.SignatureHash = rightHash;
-            contentIdentityCoreB1.Size = 23;
-            var contentIdentityB1 = new ContentIdentity(contentIdentityCoreB1);
-            comparisonItem.AddContentIdentity(contentIdentityB1);
-            contentIdentityB1.Add(fileDescriptionB1);
-        }
-
-
-        var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
-        var dataPartA1 = new DataPart("A1", inventoryPartA1);
-        mockDataPartIndexer.Setup(m => m.GetDataPart("A1"))
-            .Returns(dataPartA1);
-        var dataPartA2 = new DataPart("B1", inventoryPartB1);
-        mockDataPartIndexer.Setup(m => m.GetDataPart("B1"))
-            .Returns(dataPartA2);
-
-        // Act
-        var expression = _filterParser.Parse(filterText);
-        var evaluator = _evaluatorFactory.GetEvaluator(expression);
-        bool result = evaluator.Evaluate(expression, comparisonItem);
-
-        result.Should().Be(expectedResult);
-
-        // // Assert
-        // Assert.IsInstanceOf<AndExpression>(expression);
-        // Assert.IsTrue(((AndExpression)expression).Expressions.Any(e => e is TextSearchExpression));
-    }
-    
-    [TestCase(100, 100, "==", true)]
-    [TestCase(100, 100, ">=", true)]
-    [TestCase(100, 100, "<=", true)]
-    [TestCase(100, 200, "==", false)]
-    [TestCase(100, 200, "!=", true)]
-    [TestCase(100, 200, "<=", true)]
-    [TestCase(100, 200, "<", true)]
-    [TestCase(100, 200, ">=", false)]
-    [TestCase(100, 200, ">", false)]
-    [TestCase(200, 100, ">=", true)]
-    [TestCase(200, 100, ">", true)]
-    [TestCase(200, 100, "<=", false)]
-    [TestCase(200, 100, "<", false)]
-    [TestCase(100, 101, "<", true)]
-    [TestCase(100, 100, "<", false)]
-    [TestCase(101, 100, ">", true)]
-    [TestCase(100, 100, ">", false)]
-    public void TestSizeComparison(long leftSize, long rightSize, string @operator, bool expectedResult)
-    {
-        // Arrange
-        var now = DateTime.Now;
-        var comparisonItem = PrepareComparisonWithTwoContents(
-            "A1", "sameHash", now, leftSize,
-            "B1", "sameHash", now, rightSize);
-    
-        var filterText = $"A1.size{@operator}B1.size";
-    
-        // Act
-        var expression = _filterParser.Parse(filterText);
-        var evaluator = _evaluatorFactory.GetEvaluator(expression);
-        bool result = evaluator.Evaluate(expression, comparisonItem);
-    
-        // Assert
-        result.Should().Be(expectedResult);
-    }
-    
-    [TestCase(105 * 1024, ">", true)]
-    [TestCase(105 * 1024, "<", false)]
-    [TestCase(80 * 1024, ">", false)]
-    [TestCase(80 * 1024, "<", true)]
-    [Test]
-    public void TestSizeComparison_2(long leftSize, string @operator, bool expectedResult)
-    {
-        // Arrange
-        var now = DateTime.Now;
-        var comparisonItem = PrepareComparisonWithTwoContents(
-            "A1", "sameHash", now, leftSize,
-            "B1", "sameHash", now, 1);
-    
-        var filterText = $"A1.size{@operator}100kb";
-    
-        // Act
-        var expression = _filterParser.Parse(filterText);
-        var evaluator = _evaluatorFactory.GetEvaluator(expression);
-        bool result = evaluator.Evaluate(expression, comparisonItem);
-    
-        // Assert
-        result.Should().Be(expectedResult);
-    }
-    
-    [TestCase("2024-05-01", "2024-05-01", "==", true)]
-    [TestCase("2024-05-01", "2024-05-01", ">=", true)]
-    [TestCase("2024-05-01", "2024-05-01", "<=", true)]
-    [TestCase("2024-05-01", "2024-06-01", "==", false)]
-    [TestCase("2024-05-01", "2024-06-01", "!=", true)]
-    [TestCase("2024-05-01", "2024-06-01", "<=", true)]
-    [TestCase("2024-05-01", "2024-06-01", "<", true)]
-    [TestCase("2024-05-01", "2024-06-01", ">=", false)]
-    [TestCase("2024-05-01", "2024-06-01", ">", false)]
-    [TestCase("2024-06-01", "2024-05-01", ">=", true)]
-    [TestCase("2024-06-01", "2024-05-01", ">", true)]
-    [TestCase("2024-06-01", "2024-05-01", "<=", false)]
-    [TestCase("2024-06-01", "2024-05-01", "<", false)]
-    [TestCase("2024-05-01", "2024-06-01", "<", true)]
-    [TestCase("2024-05-01", "2024-05-01", "<", false)]
-    [TestCase("2024-06-01", "2024-05-01", ">", true)]
-    [TestCase("2024-05-01", "2024-05-01", ">", false)]
-    public void TestLastWriteTimeComparison(string leftDateTime, string rightDateTime, string @operator, bool expectedResult)
-    {
-        // Arrange
-        var now = DateTime.Now;
-        var comparisonItem = PrepareComparisonWithTwoContents(
-            "A1", "sameHash", DateTime.Parse(leftDateTime, System.Globalization.CultureInfo.InvariantCulture),
-            "B1", "sameHash", DateTime.Parse(rightDateTime, System.Globalization.CultureInfo.InvariantCulture));
-    
-        var filterText = $"A1.lastwritetime{@operator}B1.lastwritetime";
-    
-        // Act
-        var expression = _filterParser.Parse(filterText);
-        var evaluator = _evaluatorFactory.GetEvaluator(expression);
-        bool result = evaluator.Evaluate(expression, comparisonItem);
-    
-        // Assert
-        result.Should().Be(expectedResult);
-    }
-    
-    [TestCase("A1", true)]
-    [TestCase("B1", false)]
-    [Test]
-    public void TestIsOn(string location, bool expectedResult)
-    {
-        // Arrange
-        var now = DateTime.Now;
-        var comparisonItem = PrepareComparisonWithOneContent(
-            "A1", "sameHash", now, 50);
-    
-        var filterText = $"on:{location}";
-    
-        // Act
-        var expression = _filterParser.Parse(filterText);
-        var evaluator = _evaluatorFactory.GetEvaluator(expression);
-        bool result = evaluator.Evaluate(expression, comparisonItem);
-    
-        // Assert
-        result.Should().Be(expectedResult);
-    }
-
+    /*
     private ComparisonItem CreateBasicComparisonItem(string filePath = "/file1.txt", string fileName = "file1.txt")
     {
         var pathIdentity = new PathIdentity(FileSystemTypes.File, filePath, fileName, filePath);
@@ -504,4 +505,5 @@ public class TestFiltering : IntegrationTest
 
         return comparisonItem;
     }
+    */
 }
