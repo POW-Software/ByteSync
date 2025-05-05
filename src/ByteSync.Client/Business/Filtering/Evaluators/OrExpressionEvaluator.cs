@@ -1,21 +1,22 @@
 ﻿using ByteSync.Business.Filtering.Expressions;
+using ByteSync.Interfaces.Services.Filtering;
 using ByteSync.Models.Comparisons.Result;
 
 namespace ByteSync.Business.Filtering.Evaluators;
 
 public class OrExpressionEvaluator : ExpressionEvaluator<OrExpression>
 {
-    private readonly ExpressionEvaluatorFactory _evaluatorFactory;
+    private readonly IExpressionEvaluatorFactory _expressionEvaluatorFactory;
 
-    public OrExpressionEvaluator(ExpressionEvaluatorFactory evaluatorFactory)
+    public OrExpressionEvaluator(IExpressionEvaluatorFactory expressionEvaluatorFactory)
     {
-        _evaluatorFactory = evaluatorFactory;
+        _expressionEvaluatorFactory = expressionEvaluatorFactory;
     }
 
     public override bool Evaluate(OrExpression expression, ComparisonItem item)
     {
-        var leftEvaluator = _evaluatorFactory.GetEvaluator(expression.Left);
-        var rightEvaluator = _evaluatorFactory.GetEvaluator(expression.Right);
+        var leftEvaluator = _expressionEvaluatorFactory.GetEvaluator(expression.Left);
+        var rightEvaluator = _expressionEvaluatorFactory.GetEvaluator(expression.Right);
         
         return leftEvaluator.Evaluate(expression.Left, item) || 
                rightEvaluator.Evaluate(expression.Right, item);

@@ -4,7 +4,7 @@ using ByteSync.Interfaces.Services.Filtering;
 
 namespace ByteSync.Business.Filtering.Evaluators;
 
-public class ExpressionEvaluatorFactory
+public class ExpressionEvaluatorFactory : IExpressionEvaluatorFactory
 {
     private readonly IComponentContext _context;
     private readonly Dictionary<Type, Type> _evaluatorTypes;

@@ -8,11 +8,13 @@ public class FilterService : IFilterService
 {
     private readonly IFilterParser _filterParser;
     private readonly IExpressionEvaluatorFactory _expressionEvaluatorFactory;
+    private readonly ILogger<FilterService> _logger;
 
-    public FilterService(IFilterParser filterParser, IExpressionEvaluatorFactory expressionEvaluatorFactory)
+    public FilterService(IFilterParser filterParser, IExpressionEvaluatorFactory expressionEvaluatorFactory, ILogger<FilterService> logger)
     {
         _filterParser = filterParser;
         _expressionEvaluatorFactory = expressionEvaluatorFactory;
+        _logger = logger;
     }
     
     public Func<ComparisonItem, bool> BuildFilter(string filterText)
@@ -25,8 +27,10 @@ public class FilterService : IFilterService
 
             return item => evaluator.Evaluate(expression, item);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to parse filter expression: {FilterText}", filterText);
+            
             // If parsing fails, fall back to a simpler approach
             return BuildLegacyFilter(filterText);
         }

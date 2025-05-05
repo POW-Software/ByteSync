@@ -34,6 +34,7 @@ public static class ServiceRegistrar
         builder.RegisterModule<ViewModelsModule>();
         builder.RegisterModule<ViewsModule>();
         builder.RegisterModule<ExternalAssembliesModule>();
+        builder.RegisterModule<ExpressionFilterModule>();
 
         builder.InitializeAvalonia();
 
