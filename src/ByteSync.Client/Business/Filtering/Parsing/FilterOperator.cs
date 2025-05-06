@@ -1,6 +1,7 @@
 ﻿namespace ByteSync.Business.Filtering.Parsing;
 
-public enum SpecialOperator
+public enum FilterOperator
 {
     On,
+    Only
 }

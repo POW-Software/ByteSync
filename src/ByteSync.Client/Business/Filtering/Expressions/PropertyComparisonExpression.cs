@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using ByteSync.Business.Comparisons;
 using ByteSync.Business.Filtering.Extensions;
+using ByteSync.Business.Filtering.Parsing;
 using ByteSync.Business.Filtering.Values;
 using ByteSync.Models.Comparisons.Result;
 
@@ -10,13 +11,13 @@ public class PropertyComparisonExpression : FilterExpression
 {
     public DataPart SourceDataPart { get; }
     public string Property { get; }
-    public FilterOperator Operator { get; }
+    public ComparisonOperator Operator { get; }
     public DataPart? TargetDataPart { get; }
     public string? TargetProperty { get; private set; }
     public string? TargetValue { get; private set; }
     public bool IsDataSourceComparison { get; }
 
-    public PropertyComparisonExpression(DataPart sourceDataPart, string property, FilterOperator @operator, 
+    public PropertyComparisonExpression(DataPart sourceDataPart, string property, ComparisonOperator @operator, 
         DataPart? targetDataPart, string? targetPropertyOrValue = null)
     {
         SourceDataPart = sourceDataPart;

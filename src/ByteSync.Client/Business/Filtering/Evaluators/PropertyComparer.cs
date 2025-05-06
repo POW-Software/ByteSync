@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using ByteSync.Business.Filtering.Parsing;
 using ByteSync.Business.Filtering.Values;
 using ByteSync.Interfaces.Services.Filtering;
 
@@ -6,13 +7,13 @@ namespace ByteSync.Business.Filtering.Evaluators;
 
 public class PropertyComparer : IPropertyComparer
 {
-    public bool CompareValues(PropertyValueCollection collection1, PropertyValueCollection collection2, FilterOperator op)
+    public bool CompareValues(PropertyValueCollection collection1, PropertyValueCollection collection2, ComparisonOperator op)
     {
         if (collection1.Count == 0 && collection2.Count == 0)
-            return op == FilterOperator.Equals;
+            return op == ComparisonOperator.Equals;
 
         if (collection1.Count == 0 || collection2.Count == 0)
-            return op == FilterOperator.NotEquals;
+            return op == ComparisonOperator.NotEquals;
 
         // Try to convert to common type
         if (collection1.CollectionType == PropertyValueType.String && collection2.CollectionType == PropertyValueType.String)
@@ -30,7 +31,7 @@ public class PropertyComparer : IPropertyComparer
         
         return false;
     }
-    private bool CompareStrings(PropertyValueCollection collection1, PropertyValueCollection collection2, FilterOperator op)
+    private bool CompareStrings(PropertyValueCollection collection1, PropertyValueCollection collection2, ComparisonOperator op)
     {
         foreach (var value1 in collection1)
         {
@@ -42,13 +43,13 @@ public class PropertyComparer : IPropertyComparer
 
                 if (op switch
                     {
-                        FilterOperator.Equals => string.Equals(s1, s2, StringComparison.OrdinalIgnoreCase),
-                        FilterOperator.NotEquals => !string.Equals(s1, s2, StringComparison.OrdinalIgnoreCase),
-                        FilterOperator.GreaterThan => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) > 0,
-                        FilterOperator.LessThan => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) < 0,
-                        FilterOperator.GreaterThanOrEqual => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) >= 0,
-                        FilterOperator.LessThanOrEqual => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) <= 0,
-                        FilterOperator.RegexMatch => Regex.IsMatch(s1, s2),
+                        ComparisonOperator.Equals => string.Equals(s1, s2, StringComparison.OrdinalIgnoreCase),
+                        ComparisonOperator.NotEquals => !string.Equals(s1, s2, StringComparison.OrdinalIgnoreCase),
+                        ComparisonOperator.GreaterThan => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) > 0,
+                        ComparisonOperator.LessThan => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) < 0,
+                        ComparisonOperator.GreaterThanOrEqual => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) >= 0,
+                        ComparisonOperator.LessThanOrEqual => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) <= 0,
+                        ComparisonOperator.RegexMatch => Regex.IsMatch(s1, s2),
                         _ => throw new ArgumentException($"Unsupported string operator: {op}")
                     })
                 {
@@ -60,7 +61,7 @@ public class PropertyComparer : IPropertyComparer
         return false;
     }
 
-    private bool CompareDateTimes(PropertyValueCollection collection1, PropertyValueCollection collection2, FilterOperator op)
+    private bool CompareDateTimes(PropertyValueCollection collection1, PropertyValueCollection collection2, ComparisonOperator op)
     {
         foreach (var value1 in collection1)
         {
@@ -74,12 +75,12 @@ public class PropertyComparer : IPropertyComparer
 
                 if (op switch
                     {
-                        FilterOperator.Equals => d1 == d2,
-                        FilterOperator.NotEquals => d1 != d2,
-                        FilterOperator.GreaterThan => d1 > d2,
-                        FilterOperator.LessThan => d1 < d2,
-                        FilterOperator.GreaterThanOrEqual => d1 >= d2,
-                        FilterOperator.LessThanOrEqual => d1 <= d2,
+                        ComparisonOperator.Equals => d1 == d2,
+                        ComparisonOperator.NotEquals => d1 != d2,
+                        ComparisonOperator.GreaterThan => d1 > d2,
+                        ComparisonOperator.LessThan => d1 < d2,
+                        ComparisonOperator.GreaterThanOrEqual => d1 >= d2,
+                        ComparisonOperator.LessThanOrEqual => d1 <= d2,
                         _ => throw new ArgumentException($"Unsupported datetime operator: {op}")
                     })
                 {
@@ -91,7 +92,7 @@ public class PropertyComparer : IPropertyComparer
         return false;
     }
 
-    private bool CompareNumbers(PropertyValueCollection collection1, PropertyValueCollection collection2, FilterOperator op)
+    private bool CompareNumbers(PropertyValueCollection collection1, PropertyValueCollection collection2, ComparisonOperator op)
     {
         const double epsilon = 1e-8;
         
@@ -105,12 +106,12 @@ public class PropertyComparer : IPropertyComparer
 
                 if (op switch
                     {
-                        FilterOperator.Equals => Math.Abs(n1 - n2) < epsilon, 
-                        FilterOperator.NotEquals => Math.Abs(n1 - n2) >= epsilon,
-                        FilterOperator.GreaterThan => n1 > n2,
-                        FilterOperator.LessThan => n1 < n2,
-                        FilterOperator.GreaterThanOrEqual => n1 >= n2,
-                        FilterOperator.LessThanOrEqual => n1 <= n2,
+                        ComparisonOperator.Equals => Math.Abs(n1 - n2) < epsilon, 
+                        ComparisonOperator.NotEquals => Math.Abs(n1 - n2) >= epsilon,
+                        ComparisonOperator.GreaterThan => n1 > n2,
+                        ComparisonOperator.LessThan => n1 < n2,
+                        ComparisonOperator.GreaterThanOrEqual => n1 >= n2,
+                        ComparisonOperator.LessThanOrEqual => n1 <= n2,
                         _ => throw new ArgumentException($"Unsupported numeric operator: {op}")
                     })
                 {

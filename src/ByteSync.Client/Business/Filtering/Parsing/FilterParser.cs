@@ -228,7 +228,7 @@ public class FilterParser : IFilterParser
                 var letter = identifier.Substring(4).ToUpperInvariant();
                 return new OnlyExpression(letter);
             }
-            else if (identifier.StartsWith(nameof(SpecialOperator.On).ToLower()))
+            else if (identifier.StartsWith(nameof(FilterOperator.On).ToLower()))
             {
                 var letter = identifier.Substring(2).ToUpperInvariant();
                 return new ExistsExpression(letter);

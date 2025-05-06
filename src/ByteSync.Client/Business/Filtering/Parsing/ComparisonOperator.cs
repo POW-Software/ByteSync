@@ -1,6 +1,6 @@
-﻿namespace ByteSync.Business.Filtering;
+﻿namespace ByteSync.Business.Filtering.Parsing;
 
-public enum FilterOperator
+public enum ComparisonOperator
 {
     // And,
     // Or,

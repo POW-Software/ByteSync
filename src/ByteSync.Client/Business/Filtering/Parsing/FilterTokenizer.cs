@@ -156,7 +156,7 @@ public class FilterTokenizer : IFilterTokenizer
                 if ((char.IsLetter(currentToken[0]) && 
                      (currentToken.Length == 1 || currentToken.Skip(1).All(char.IsDigit))) ||
                     Enum.GetNames(typeof(PropertyType)).Any(name => currentToken.ToLower().Equals(name.ToLower())) ||
-                    Enum.GetNames(typeof(SpecialOperator)).Any(name => currentToken.ToLower().Equals(name.ToLower())))
+                    Enum.GetNames(typeof(FilterOperator)).Any(name => currentToken.ToLower().Equals(name.ToLower())))
                 {
                     currentTokenType = FilterTokenType.Identifier;
                 }

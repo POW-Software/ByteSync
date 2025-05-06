@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using ByteSync.Business.Filtering.Expressions;
 using ByteSync.Business.Filtering.Extensions;
+using ByteSync.Business.Filtering.Parsing;
 using ByteSync.Business.Filtering.Values;
 using ByteSync.Interfaces.Services.Filtering;
 using ByteSync.Models.Comparisons.Result;
@@ -25,7 +26,7 @@ public class PropertyComparisonExpressionEvaluator : ExpressionEvaluator<Propert
 
         if (sourceValues.Count == 0)
         {
-            return expression.Operator == FilterOperator.NotEquals;
+            return expression.Operator == ComparisonOperator.NotEquals;
         }
 
         // Handle comparison based on type
@@ -42,10 +43,10 @@ public class PropertyComparisonExpressionEvaluator : ExpressionEvaluator<Propert
         }
     }
 
-    private bool CompareWithLiteral(PropertyValueCollection sourceValues, string targetValue, FilterOperator op, string property)
+    private bool CompareWithLiteral(PropertyValueCollection sourceValues, string targetValue, ComparisonOperator op, string property)
     {
         // Handle special case for regex
-        if (op == FilterOperator.RegexMatch && sourceValues.Any(sv => sv.Value is string))
+        if (op == ComparisonOperator.RegexMatch && sourceValues.Any(sv => sv.Value is string))
         {
             try
             {
