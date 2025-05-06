@@ -1,8 +1,6 @@
 ﻿using Autofac;
 using ByteSync.Business.Comparisons;
-using ByteSync.Business.Filtering;
 using ByteSync.Business.Filtering.Expressions;
-using ByteSync.Business.Filtering.Parsing;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Inventories;

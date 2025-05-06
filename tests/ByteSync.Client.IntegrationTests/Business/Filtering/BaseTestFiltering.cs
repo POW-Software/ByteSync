@@ -212,18 +212,6 @@ public abstract class BaseTestFiltering : IntegrationTest
         return comparisonItem;
     }
     
-    // New helper method that gets the expression from a parse result and handles errors
-    protected FilterExpression GetExpressionFromParseResult(string filterText)
-    {
-        var parseResult = _filterParser.TryParse(filterText);
-        if (!parseResult.IsComplete)
-        {
-            throw new InvalidOperationException($"Parse error: {parseResult.ErrorMessage}");
-        }
-        return parseResult.Expression!;
-    }
-    
-    // Helper method to evaluate a filter expression
     protected bool EvaluateFilterExpression(string filterText, ComparisonItem item)
     {
         var parseResult = _filterParser.TryParse(filterText);

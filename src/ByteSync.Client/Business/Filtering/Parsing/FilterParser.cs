@@ -20,17 +20,6 @@ public class FilterParser : IFilterParser
         _tokenizer = tokenizer;
     }
 
-    [Obsolete("Use TryParse instead to handle incomplete inputs gracefully")]
-    public FilterExpression Parse(string filterText)
-    {
-        var result = TryParse(filterText);
-        if (!result.IsComplete)
-        {
-            throw new InvalidOperationException(result.ErrorMessage);
-        }
-        return result.Expression!;
-    }
-
     public ParseResult TryParse(string filterText)
     {
         _tokenizer.Initialize(filterText ?? string.Empty);
