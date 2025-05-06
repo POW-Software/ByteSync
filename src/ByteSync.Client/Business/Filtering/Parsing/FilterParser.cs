@@ -92,7 +92,9 @@ public class FilterParser : IFilterParser
              CurrentToken.Token.Equals("!", StringComparison.OrdinalIgnoreCase)))
         {
             NextToken();
+            
             var expression = ParseFactor();
+            
             return new NotExpression(expression);
         }
 
@@ -102,9 +104,12 @@ public class FilterParser : IFilterParser
             var expression = ParseExpression();
 
             if (CurrentToken?.Type != FilterTokenType.CloseParenthesis)
+            {
                 throw new InvalidOperationException("Expected closing parenthesis");
+            }
 
             NextToken();
+            
             return expression;
         }
 
@@ -112,10 +117,13 @@ public class FilterParser : IFilterParser
         {
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Colon)
+            {
                 throw new InvalidOperationException("Expected colon after 'wb'");
+            }
 
             NextToken();
             var baseExpression = ParseFactor();
+            
             return new FutureStateExpression(baseExpression);
         }
 
@@ -123,14 +131,19 @@ public class FilterParser : IFilterParser
         {
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Colon)
+            {
                 throw new InvalidOperationException("Expected colon after 'on'");
+            }
 
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Identifier)
+            {
                 throw new InvalidOperationException("Expected data source identifier after 'on:'");
+            }
 
             var dataSource = CurrentToken?.Token;
             NextToken();
+            
             return new ExistsExpression(dataSource);
         }
 
@@ -210,7 +223,9 @@ public class FilterParser : IFilterParser
         {
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Identifier)
+            {
                 throw new InvalidOperationException("Expected identifier after colon");
+            }
 
             var identifier = CurrentToken?.Token.ToLowerInvariant();
             NextToken();
