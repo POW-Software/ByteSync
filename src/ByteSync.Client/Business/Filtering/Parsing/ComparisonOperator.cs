@@ -2,14 +2,8 @@
 
 public enum ComparisonOperator
 {
-    // And,
-    // Or,
-    // Not,
     Equals,
     NotEquals,
-    // Contains,
-    // StartsWith,
-    // EndsWith,
     GreaterThan,
     LessThan,
     GreaterThanOrEqual,
