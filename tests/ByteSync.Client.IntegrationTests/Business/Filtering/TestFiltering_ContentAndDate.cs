@@ -20,7 +20,7 @@ public class TestFiltering_ContentAndDate : BaseTestFiltering
         SetupBase();
     }
 
-        [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-01", "==", true)]
+    [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-01", "==", true)]
     [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-01", "<>", false)]
     [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-01", "!=", false)]
     [TestCase("hashLeft", "2023-10-01", "hashRight", "2023-10-01", "==", false)]
@@ -98,9 +98,5 @@ public class TestFiltering_ContentAndDate : BaseTestFiltering
         bool result = evaluator.Evaluate(expression, comparisonItem);
 
         result.Should().Be(expectedResult);
-
-        // // Assert
-        // Assert.IsInstanceOf<AndExpression>(expression);
-        // Assert.IsTrue(((AndExpression)expression).Expressions.Any(e => e is TextSearchExpression));
     }
 }
