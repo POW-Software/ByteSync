@@ -101,19 +101,6 @@ public class FilterParser : IFilterParser
 
     private ParseResult TryParseFactor()
     {
-        // if (CurrentToken?.Type == FilterTokenType.LogicalOperator &&
-        //     (CurrentToken.Token.Equals("NOT", StringComparison.OrdinalIgnoreCase) ||
-        //      CurrentToken.Token.Equals("!", StringComparison.OrdinalIgnoreCase)))
-        // {
-        //     NextToken();
-        //     
-        //     var expressionResult = TryParseFactor();
-        //     if (!expressionResult.IsComplete)
-        //         return ParseResult.Incomplete($"Incomplete expression after NOT: {expressionResult.ErrorMessage}");
-        //     
-        //     return ParseResult.Success(new NotExpression(expressionResult.Expression!));
-        // }
-        
         if (CurrentToken?.Type == FilterTokenType.LogicalOperator &&
             (CurrentToken.Token.Equals("NOT", StringComparison.OrdinalIgnoreCase) ||
              CurrentToken.Token.Equals("!", StringComparison.OrdinalIgnoreCase)))
