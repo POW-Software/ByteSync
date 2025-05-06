@@ -12,6 +12,7 @@ using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Filtering;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
@@ -33,6 +34,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly IFlyoutElementViewModelFactory _flyoutElementViewModelFactory;
     private readonly IComparisonItemRepository _comparisonItemRepository;
+    private readonly IFilterService _filterService;
     private readonly ILogger<ComparisonResultViewModel> _logger;
 
     private const int PAGE_SIZE = 10;
@@ -46,7 +48,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         IDialogService dialogService, IInventoryService inventoriesService, IComparisonItemsService comparisonItemsService,  
         IComparisonItemViewModelFactory comparisonItemViewModelFactory, ISessionMemberRepository sessionMemberRepository, 
         IFlyoutElementViewModelFactory flyoutElementViewModelFactory, ManageSynchronizationRulesViewModel manageSynchronizationRulesViewModel,
-        IComparisonItemRepository comparisonItemRepository, ILogger<ComparisonResultViewModel> logger)
+        IComparisonItemRepository comparisonItemRepository, IFilterService filterService, ILogger<ComparisonResultViewModel> logger)
     {
         _sessionService = sessionService;
         _localizationService = localizationService;
@@ -57,6 +59,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         _sessionMemberRepository = sessionMemberRepository;
         _flyoutElementViewModelFactory = flyoutElementViewModelFactory;
         _comparisonItemRepository = comparisonItemRepository;
+        _filterService = filterService;
         _logger = logger;
         
         ManageSynchronizationRules = manageSynchronizationRulesViewModel;
@@ -344,73 +347,11 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
 
     private Func<ComparisonItem, bool> BuildFilter(string? filterText)
     {
-        if (filterText.IsNullOrEmpty())
+        if (string.IsNullOrWhiteSpace(filterText))
         {
             return _ => true;
         }
 
-        return comparisonItem =>
-        {
-            List<string> expressions = Enumerable.ToList(filterText!.Split(" ", StringSplitOptions.RemoveEmptyEntries));
-
-            var advancedExpressions = expressions.Where(e => e.StartsWith(":"));
-            var otherExpressions = expressions.Where(e => !e.StartsWith(":")).ToList();
-
-            foreach (var advancedExpression in advancedExpressions)
-            {
-                if (advancedExpression.Equals(":file", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    if (comparisonItem.FileSystemType == FileSystemTypes.Directory)
-                    {
-                        return false;
-                    }
-                }
-                if (advancedExpression.Equals(":dir", StringComparison.InvariantCultureIgnoreCase) 
-                    || advancedExpression.Equals(":directory", StringComparison.InvariantCultureIgnoreCase) )
-                {
-                    if (comparisonItem.FileSystemType == FileSystemTypes.File)
-                    {
-                        return false;
-                    }
-                }
-                
-                if (advancedExpression.StartsWith(":only", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    var letter = advancedExpression.Substring(":only".Length).ToUpper();
-                    
-                    var inventories = comparisonItem.ContentIdentities.SelectMany(ci => ci.GetInventories())
-                        .ToHashSet();
-
-                    if (inventories.Count != 1 || !inventories.First().Letter.Equals(letter))
-                    {
-                        return false;
-                    }
-                }
-
-                if (advancedExpression.StartsWith(":ison", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    var letter = advancedExpression.Substring(":ison".Length).ToUpper();
-                    
-                    var inventories = comparisonItem.ContentIdentities.SelectMany(ci => ci.GetInventories())
-                        .ToHashSet();
-
-                    if (!inventories.Any(i => i.Letter.Equals(letter)))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            if (otherExpressions.Count == 0)
-            {
-                return true;
-            }
-            else
-            {
-                var containsAll = otherExpressions.All(e => comparisonItem.PathIdentity.FileName.Contains(e));
-
-                return containsAll;
-            }
-        };
+        return _filterService.BuildFilter(filterText);
     }
 }

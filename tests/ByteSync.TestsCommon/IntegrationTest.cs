@@ -10,7 +10,7 @@ namespace ByteSync.TestsCommon;
 public abstract class IntegrationTest
 {
     private IContainer _container = null!;
-    private ContainerBuilder _builder;
+    protected ContainerBuilder _builder;
     
     protected ITestDirectoryService _testDirectoryService = null!;
 
@@ -39,7 +39,7 @@ public abstract class IntegrationTest
     
     protected void RegisterType<TImplementation, TInterface>() where TImplementation : notnull where TInterface : notnull
     {
-        _builder.RegisterType<TImplementation>().As<TInterface>().SingleInstance();
+        _builder.RegisterType<TImplementation>().AsSelf().As<TInterface>().SingleInstance();
     }
     
     [TearDown]
