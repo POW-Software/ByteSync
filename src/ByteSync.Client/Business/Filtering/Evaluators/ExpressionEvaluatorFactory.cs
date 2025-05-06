@@ -37,13 +37,13 @@ public class ExpressionEvaluatorFactory : IExpressionEvaluatorFactory
 
         var expressionType = expression.GetType();
         
-        // Recherche d'une correspondance exacte
+        // Search for an exact match
         if (_evaluatorTypes.TryGetValue(expressionType, out var evaluatorType))
         {
             return (IExpressionEvaluator)_context.Resolve(evaluatorType);
         }
         
-        // Recherche d'un évaluateur compatible (gère l'héritage)
+        // Search for a compatible evaluator (handles inheritance)
         foreach (var (exprType, evalType) in _evaluatorTypes)
         {
             if (exprType.IsAssignableFrom(expressionType))
@@ -52,6 +52,6 @@ public class ExpressionEvaluatorFactory : IExpressionEvaluatorFactory
             }
         }
         
-        throw new ArgumentException($"Aucun évaluateur enregistré pour le type d'expression : {expressionType.Name}");
+        throw new ArgumentException($"No evaluators registered for this type of expression: {expressionType.Name}");
     }
 }

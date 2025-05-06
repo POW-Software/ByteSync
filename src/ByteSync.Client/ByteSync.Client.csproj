@@ -47,7 +47,6 @@
     <None Update="local.settings.template.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-    <None Remove="Business\Filtering\Filtering.zip" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />

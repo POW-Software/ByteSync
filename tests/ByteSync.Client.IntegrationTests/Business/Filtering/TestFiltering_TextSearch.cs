@@ -40,9 +40,5 @@ public class TestFiltering_TextSearch : BaseTestFiltering
         bool result = evaluator.Evaluate(expression, comparisonItem);
 
         result.Should().Be(expectedResult);
-
-        // // Assert
-        // Assert.IsInstanceOf<AndExpression>(expression);
-        // Assert.IsTrue(((AndExpression)expression).Expressions.Any(e => e is TextSearchExpression));
     }
 }

@@ -113,12 +113,6 @@ public class PropertyValueExtractor : IPropertyValueExtractor
                     contents.Add(fileDescription.LastWriteTimeUtc);
                 }
             }
-            
-            // // var signatureHash = contentIdentity.Core!.SignatureHash;
-            // var signatureHash = contentIdentity.Core!.SignatureHash;
-            // var lastWriteTime = contentIdentity.GetLastWriteTimeUtc(dataPart.GetApplicableInventoryPart());
-            //
-            // contents.Add($"{signatureHash}_{lastWriteTime?.Ticks}");
         }
 
         var result = new PropertyValueCollection();
