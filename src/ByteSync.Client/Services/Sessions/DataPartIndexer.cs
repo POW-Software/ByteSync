@@ -73,14 +73,27 @@ public class DataPartIndexer : IDataPartIndexer
             return null;
         }
         
-        if (DataPartsByNames.TryGetValue(dataPartName, out var dataPart))
-        {
-            return dataPart;
-        }
-        else
+        if (DataPartsByNames.Count == 0)
         {
             return null;
         }
+        
+        var result = DataPartsByNames.GetValueOrDefault(dataPartName);
+
+        if (result == null)
+        {
+            bool areAllMonoPartInventories = Inventories.All(i => i.InventoryParts.Count == 1);
+
+            if (areAllMonoPartInventories)
+            {
+                if (dataPartName.Length == 2 && char.IsLetter(dataPartName[0]) && dataPartName[1] == '1')
+                {
+                    result = DataPartsByNames.GetValueOrDefault(dataPartName[0].ToString());
+                }
+            }
+        }
+        
+        return result;
     }
     
     public void Remap(ICollection<SynchronizationRule> synchronizationRules)

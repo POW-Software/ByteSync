@@ -14,6 +14,7 @@ public class ExpressionFilterModule : Module
         builder.RegisterType<FilterTokenizer>().AsSelf().AsImplementedInterfaces();
         builder.RegisterType<OperatorParser>().AsSelf().AsImplementedInterfaces();
         builder.RegisterType<PropertyValueExtractor>().AsSelf().AsImplementedInterfaces();
+        builder.RegisterType<PropertyComparer>().AsSelf().AsImplementedInterfaces();
         
         var executingAssembly = Assembly.GetExecutingAssembly();
         builder.RegisterAssemblyTypes(executingAssembly)

@@ -35,10 +35,9 @@ public class TestFiltering_TextSearch : BaseTestFiltering
             .Returns((DataPart)null);
 
         // Act
-        var expression = _filterParser.Parse(filterText);
-        var evaluator = _evaluatorFactory.GetEvaluator(expression);
-        bool result = evaluator.Evaluate(expression, comparisonItem);
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
 
+        // Assert
         result.Should().Be(expectedResult);
     }
 }

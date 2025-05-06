@@ -26,6 +26,7 @@ public class Inventory
     public void Add(InventoryPart inventoryPart)
     {
         InventoryParts.Add(inventoryPart);
+        inventoryPart.Inventory = this;
     }
 
     protected bool Equals(Inventory other)

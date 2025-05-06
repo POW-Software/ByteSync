@@ -2,6 +2,7 @@ using Autofac;
 using ByteSync.Business;
 using ByteSync.Business.Comparisons;
 using ByteSync.Business.Filtering.Evaluators;
+using ByteSync.Business.Filtering.Expressions;
 using ByteSync.Business.Filtering.Parsing;
 using ByteSync.Business.Inventories;
 using ByteSync.Common.Business.Inventories;
@@ -209,5 +210,31 @@ public abstract class BaseTestFiltering : IntegrationTest
         ConfigureDataPartIndex(dataParts);
 
         return comparisonItem;
+    }
+    
+    // New helper method that gets the expression from a parse result and handles errors
+    protected FilterExpression GetExpressionFromParseResult(string filterText)
+    {
+        var parseResult = _filterParser.TryParse(filterText);
+        if (!parseResult.IsComplete)
+        {
+            throw new InvalidOperationException($"Parse error: {parseResult.ErrorMessage}");
+        }
+        return parseResult.Expression!;
+    }
+    
+    // Helper method to evaluate a filter expression
+    protected bool EvaluateFilterExpression(string filterText, ComparisonItem item)
+    {
+        var parseResult = _filterParser.TryParse(filterText);
+        if (!parseResult.IsComplete)
+        {
+            // Test will clearly show what's happening rather than just failing
+            throw new InvalidOperationException($"Parse error: {parseResult.ErrorMessage}");
+        }
+        
+        var expression = parseResult.Expression!;
+        var evaluator = _evaluatorFactory.GetEvaluator(expression);
+        return evaluator.Evaluate(expression, item);
     }
 }

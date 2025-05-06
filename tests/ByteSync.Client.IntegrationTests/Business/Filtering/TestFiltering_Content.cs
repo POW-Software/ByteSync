@@ -71,10 +71,9 @@ public class TestFiltering_Content : BaseTestFiltering
             .Returns(dataPartA2);
 
         // Act
-        var expression = _filterParser.Parse(filterText);
-        var evaluator = _evaluatorFactory.GetEvaluator(expression);
-        bool result = evaluator.Evaluate(expression, comparisonItem);
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
 
-        result.Should().Be(true);
+        // Assert
+        result.Should().BeTrue();
     }
 }

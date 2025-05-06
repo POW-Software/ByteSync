@@ -74,6 +74,24 @@ public class DataPartIndexerTests
         dataPart.Should().NotBeNull();
         dataPart.Name.Should().Be("A");
     }
+    
+    [Test]
+    public void GetDataPart_ShouldReturnCorrectDataPart_WhenSinglePartInventoryAndInventoryPartName()
+    {
+        // Arrange
+        var inventory = new Inventory
+        {
+            InventoryParts = [new InventoryPart()]
+        };
+        _dataPartIndexer.BuildMap([inventory]);
+
+        // Act
+        var dataPart = _dataPartIndexer.GetDataPart("A1");
+
+        // Assert
+        dataPart.Should().NotBeNull();
+        dataPart.Name.Should().Be("A");
+    }
 
     [Test]
     public void GetDataPart_ShouldReturnNull_WhenNameDoesNotExist()

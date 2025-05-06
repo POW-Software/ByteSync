@@ -20,14 +20,25 @@ public class FilterParser : IFilterParser
         _tokenizer = tokenizer;
     }
 
+    [Obsolete("Use TryParse instead to handle incomplete inputs gracefully")]
     public FilterExpression Parse(string filterText)
+    {
+        var result = TryParse(filterText);
+        if (!result.IsComplete)
+        {
+            throw new InvalidOperationException(result.ErrorMessage);
+        }
+        return result.Expression!;
+    }
+
+    public ParseResult TryParse(string filterText)
     {
         _tokenizer.Initialize(filterText ?? string.Empty);
         CurrentToken = null;
         NextToken();
         
         if (string.IsNullOrWhiteSpace(filterText))
-            return new TrueExpression();
+            return ParseResult.Success(new TrueExpression());
 
         // Split by whitespace for simple text search
         var terms = filterText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -46,71 +57,108 @@ public class FilterParser : IFilterParser
                 compositeExpression = new AndExpression(compositeExpression, textExpression);
             }
 
-            return compositeExpression;
+            return ParseResult.Success(compositeExpression);
         }
 
         // Otherwise, parse the expression
-        return ParseExpression();
+        return TryParseExpression();
     }
 
-    private FilterExpression ParseExpression()
+    private ParseResult TryParseExpression()
     {
-        var left = ParseTerm();
+        var leftResult = TryParseTerm();
+        if (!leftResult.IsComplete)
+            return leftResult;
+
+        var left = leftResult.Expression!;
 
         while (CurrentToken?.Type == FilterTokenType.LogicalOperator &&
                (CurrentToken.Token.Equals("OR", StringComparison.OrdinalIgnoreCase) ||
                 CurrentToken.Token.Equals("||", StringComparison.OrdinalIgnoreCase)))
         {
             NextToken();
-            var right = ParseTerm();
-            left = new OrExpression(left, right);
+            var rightResult = TryParseTerm();
+            if (!rightResult.IsComplete)
+                return ParseResult.Incomplete($"Incomplete right operand for OR expression: {rightResult.ErrorMessage}");
+                
+            left = new OrExpression(left, rightResult.Expression!);
         }
 
-        return left;
+        return ParseResult.Success(left);
     }
 
-    private FilterExpression ParseTerm()
+    private ParseResult TryParseTerm()
     {
-        var left = ParseFactor();
+        var leftResult = TryParseFactor();
+        if (!leftResult.IsComplete)
+            return leftResult;
+
+        var left = leftResult.Expression!;
 
         while (CurrentToken?.Type == FilterTokenType.LogicalOperator &&
                (CurrentToken.Token.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
                 CurrentToken.Token.Equals("&&", StringComparison.OrdinalIgnoreCase)))
         {
             NextToken();
-            var right = ParseFactor();
-            left = new AndExpression(left, right);
+            var rightResult = TryParseFactor();
+            if (!rightResult.IsComplete)
+                return ParseResult.Incomplete($"Incomplete right operand for AND expression: {rightResult.ErrorMessage}");
+                
+            left = new AndExpression(left, rightResult.Expression!);
         }
 
-        return left;
+        return ParseResult.Success(left);
     }
 
-    private FilterExpression ParseFactor()
+    private ParseResult TryParseFactor()
     {
+        // if (CurrentToken?.Type == FilterTokenType.LogicalOperator &&
+        //     (CurrentToken.Token.Equals("NOT", StringComparison.OrdinalIgnoreCase) ||
+        //      CurrentToken.Token.Equals("!", StringComparison.OrdinalIgnoreCase)))
+        // {
+        //     NextToken();
+        //     
+        //     var expressionResult = TryParseFactor();
+        //     if (!expressionResult.IsComplete)
+        //         return ParseResult.Incomplete($"Incomplete expression after NOT: {expressionResult.ErrorMessage}");
+        //     
+        //     return ParseResult.Success(new NotExpression(expressionResult.Expression!));
+        // }
+        
         if (CurrentToken?.Type == FilterTokenType.LogicalOperator &&
             (CurrentToken.Token.Equals("NOT", StringComparison.OrdinalIgnoreCase) ||
              CurrentToken.Token.Equals("!", StringComparison.OrdinalIgnoreCase)))
         {
             NextToken();
-            
-            var expression = ParseFactor();
-            
-            return new NotExpression(expression);
+    
+            // Check if we've reached the end of input after consuming NOT/!
+            if (CurrentToken?.Type == FilterTokenType.End)
+            {
+                return ParseResult.Incomplete("Incomplete expression after NOT: expected an expression to negate");
+            }
+    
+            var expressionResult = TryParseFactor();
+            if (!expressionResult.IsComplete)
+                return ParseResult.Incomplete($"Incomplete expression after NOT: {expressionResult.ErrorMessage}");
+    
+            return ParseResult.Success(new NotExpression(expressionResult.Expression!));
         }
 
         if (CurrentToken?.Type == FilterTokenType.OpenParenthesis)
         {
             NextToken();
-            var expression = ParseExpression();
+            var expressionResult = TryParseExpression();
+            if (!expressionResult.IsComplete)
+                return ParseResult.Incomplete($"Incomplete expression in parentheses: {expressionResult.ErrorMessage}");
 
             if (CurrentToken?.Type != FilterTokenType.CloseParenthesis)
             {
-                throw new InvalidOperationException("Expected closing parenthesis");
+                return ParseResult.Incomplete("Expected closing parenthesis");
             }
 
             NextToken();
             
-            return expression;
+            return ParseResult.Success(expressionResult.Expression!);
         }
 
         if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals("wb", StringComparison.OrdinalIgnoreCase))
@@ -118,13 +166,15 @@ public class FilterParser : IFilterParser
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Colon)
             {
-                throw new InvalidOperationException("Expected colon after 'wb'");
+                return ParseResult.Incomplete("Expected colon after 'wb'");
             }
 
             NextToken();
-            var baseExpression = ParseFactor();
+            var baseExpressionResult = TryParseFactor();
+            if (!baseExpressionResult.IsComplete)
+                return ParseResult.Incomplete($"Incomplete expression after wb:: {baseExpressionResult.ErrorMessage}");
             
-            return new FutureStateExpression(baseExpression);
+            return ParseResult.Success(new FutureStateExpression(baseExpressionResult.Expression!));
         }
 
         if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals("on", StringComparison.OrdinalIgnoreCase))
@@ -132,19 +182,19 @@ public class FilterParser : IFilterParser
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Colon)
             {
-                throw new InvalidOperationException("Expected colon after 'on'");
+                return ParseResult.Incomplete("Expected colon after 'on'");
             }
 
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Identifier)
             {
-                throw new InvalidOperationException("Expected data source identifier after 'on:'");
+                return ParseResult.Incomplete("Expected data source identifier after 'on:'");
             }
 
             var dataSource = CurrentToken?.Token;
             NextToken();
             
-            return new ExistsExpression(dataSource);
+            return ParseResult.Success(new ExistsExpression(dataSource));
         }
 
         if (CurrentToken?.Type == FilterTokenType.Identifier)
@@ -157,7 +207,7 @@ public class FilterParser : IFilterParser
                 NextToken();
                 if (CurrentToken?.Type != FilterTokenType.Identifier)
                 {
-                    throw new InvalidOperationException("Expected property name after dot");
+                    return ParseResult.Incomplete("Expected property name after dot");
                 }
 
                 var property = CurrentToken?.Token;
@@ -165,57 +215,71 @@ public class FilterParser : IFilterParser
 
                 if (CurrentToken?.Type != FilterTokenType.Operator)
                 {
-                    throw new InvalidOperationException("Expected operator after property name");
+                    return ParseResult.Incomplete("Expected operator after property name");
                 }
 
                 var op = CurrentToken?.Token;
                 NextToken();
                 
-                var filterOperator = _operatorParser.Parse(op);
-                
-                var leftDataPart = _dataPartIndexer.GetDataPart(identifier)!;
+                try {
+                    var filterOperator = _operatorParser.Parse(op);
+                    
+                    var leftDataPart = _dataPartIndexer.GetDataPart(identifier);
+                    if (leftDataPart == null)
+                    { 
+                        return ParseResult.Incomplete($"Unknown data part: {identifier}");
+                    }
 
-                // Check if the right side is a data source or a value
-                if (CurrentToken?.Type == FilterTokenType.Identifier)
-                {
-                    var rightIdentifier = CurrentToken?.Token;
-                    NextToken();
-
-                    if (CurrentToken?.Type == FilterTokenType.Dot)
+                    // Check if the right side is a data source or a value
+                    if (CurrentToken?.Type == FilterTokenType.Identifier)
                     {
-                        // This is a comparison between two properties
-                        NextToken();
-                        if (CurrentToken?.Type != FilterTokenType.Identifier)
-                            throw new InvalidOperationException("Expected property name after dot");
-                        
-                        var rightDataPart = _dataPartIndexer.GetDataPart(rightIdentifier)!;
-
-                        var rightProperty = CurrentToken?.Token;
+                        var rightIdentifier = CurrentToken?.Token;
                         NextToken();
 
-                        return new PropertyComparisonExpression(leftDataPart, property, filterOperator, rightDataPart, rightProperty);
+                        if (CurrentToken?.Type == FilterTokenType.Dot)
+                        {
+                            // This is a comparison between two properties
+                            NextToken();
+                            if (CurrentToken?.Type != FilterTokenType.Identifier)
+                                return ParseResult.Incomplete("Expected property name after dot");
+                            
+                            var rightDataPart = _dataPartIndexer.GetDataPart(rightIdentifier);
+                            if (rightDataPart == null)
+                            {
+                                return ParseResult.Incomplete($"Unknown data part: {rightIdentifier}");
+                            }
+
+                            var rightProperty = CurrentToken?.Token;
+                            NextToken();
+
+                            return ParseResult.Success(new PropertyComparisonExpression(leftDataPart, property, filterOperator, rightDataPart, rightProperty));
+                        }
+                        else
+                        {
+                            // This is a comparison with a value
+                            return ParseResult.Success(new PropertyComparisonExpression(leftDataPart, property, filterOperator, null, rightIdentifier));
+                        }
+                    }
+                    else if (CurrentToken?.Type == FilterTokenType.String || CurrentToken?.Type == FilterTokenType.Number)
+                    {
+                        var value = CurrentToken?.Token;
+                        NextToken();
+                        return ParseResult.Success(new PropertyComparisonExpression(leftDataPart, property, filterOperator, null, value));
                     }
                     else
                     {
-                        // This is a comparison with a value
-                        return new PropertyComparisonExpression(leftDataPart, property, filterOperator, null, rightIdentifier);
+                        return ParseResult.Incomplete("Expected value after operator");
                     }
                 }
-                else if (CurrentToken?.Type == FilterTokenType.String || CurrentToken?.Type == FilterTokenType.Number)
+                catch (ArgumentException ex)
                 {
-                    var value = CurrentToken?.Token;
-                    NextToken();
-                    return new PropertyComparisonExpression(leftDataPart, property, filterOperator, null, value);
-                }
-                else
-                {
-                    throw new InvalidOperationException("Expected value after operator");
+                    return ParseResult.Incomplete(ex.Message);
                 }
             }
             else
             {
                 // Simple text search
-                return new TextSearchExpression(identifier);
+                return ParseResult.Success(new TextSearchExpression(identifier));
             }
         }
 
@@ -224,7 +288,7 @@ public class FilterParser : IFilterParser
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Identifier)
             {
-                throw new InvalidOperationException("Expected identifier after colon");
+                return ParseResult.Incomplete("Expected identifier after colon");
             }
 
             var identifier = CurrentToken?.Token.ToLowerInvariant();
@@ -232,32 +296,32 @@ public class FilterParser : IFilterParser
 
             if (identifier == "file")
             {
-                return new FileSystemTypeExpression(FileSystemTypes.File);
+                return ParseResult.Success(new FileSystemTypeExpression(FileSystemTypes.File));
             }
             else if (identifier == "dir" || identifier == "directory")
             {
-                return new FileSystemTypeExpression(FileSystemTypes.Directory);
+                return ParseResult.Success(new FileSystemTypeExpression(FileSystemTypes.Directory));
             }
             else if (identifier.StartsWith("only"))
             {
                 var letter = identifier.Substring(4).ToUpperInvariant();
-                return new OnlyExpression(letter);
+                return ParseResult.Success(new OnlyExpression(letter));
             }
             else if (identifier.StartsWith(nameof(FilterOperator.On).ToLower()))
             {
                 var letter = identifier.Substring(2).ToUpperInvariant();
-                return new ExistsExpression(letter);
+                return ParseResult.Success(new ExistsExpression(letter));
             }
             else
             {
-                throw new InvalidOperationException($"Unknown filter type: {identifier}");
+                return ParseResult.Incomplete($"Unknown filter type: {identifier}");
             }
         }
 
         // Simple text search as fallback
         var textSearchExpression = new TextSearchExpression(CurrentToken?.Token);
         NextToken();
-        return textSearchExpression;
+        return ParseResult.Success(textSearchExpression);
     }
 
     private void NextToken()

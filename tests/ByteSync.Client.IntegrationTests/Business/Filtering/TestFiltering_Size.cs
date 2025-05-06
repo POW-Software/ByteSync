@@ -38,9 +38,7 @@ public class TestFiltering_Size : BaseTestFiltering
         var filterText = $"A1.size{@operator}B1.size";
     
         // Act
-        var expression = _filterParser.Parse(filterText);
-        var evaluator = _evaluatorFactory.GetEvaluator(expression);
-        bool result = evaluator.Evaluate(expression, comparisonItem);
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
     
         // Assert
         result.Should().Be(expectedResult);
@@ -62,9 +60,7 @@ public class TestFiltering_Size : BaseTestFiltering
         var filterText = $"A1.size{@operator}100kb";
     
         // Act
-        var expression = _filterParser.Parse(filterText);
-        var evaluator = _evaluatorFactory.GetEvaluator(expression);
-        bool result = evaluator.Evaluate(expression, comparisonItem);
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
     
         // Assert
         result.Should().Be(expectedResult);
