@@ -179,32 +179,34 @@ public abstract class BaseTestFiltering : IntegrationTest
     }
 
     protected ComparisonItem PrepareComparisonWithOneContent(
-        string leftDataPartId,
+        string dataPartId,
         string leftHash,
         DateTime leftDateTime,
         long leftSize)
     {
         var comparisonItem = CreateBasicComparisonItem();
 
-        var (fileDescA, inventoryPartA) = CreateFileDescription(
-            "Id_A",
-            "/testRootA",
+        string letter = dataPartId[0].ToString();
+
+        var (fileDesc, inventoryPart) = CreateFileDescription(
+            $"Id_{letter}",
+            $"/testRoot{letter}",
             leftDateTime,
             leftHash,
             leftSize);
         
-        var contentIdCoreA = new ContentIdentityCore
+        var contentIdCore = new ContentIdentityCore
         {
             SignatureHash = leftHash,
             Size = 21
         };
-        var contentIdA = new ContentIdentity(contentIdCoreA);
-        comparisonItem.AddContentIdentity(contentIdA);
-        contentIdA.Add(fileDescA);
+        var contentId = new ContentIdentity(contentIdCore);
+        comparisonItem.AddContentIdentity(contentId);
+        contentId.Add(fileDesc);
         
         var dataParts = new Dictionary<string, (InventoryPart, FileDescription)>
         {
-            { leftDataPartId, (inventoryPartA, fileDescA) }
+            { dataPartId, (inventoryPart, fileDesc) }
         };
 
         ConfigureDataPartIndex(dataParts);

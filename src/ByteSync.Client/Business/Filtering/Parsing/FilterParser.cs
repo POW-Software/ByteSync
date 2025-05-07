@@ -153,7 +153,7 @@ public class FilterParser : IFilterParser
             return ParseResult.Success(new FutureStateExpression(baseExpressionResult.Expression!));
         }
 
-        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals("on", StringComparison.OrdinalIgnoreCase))
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(nameof(FilterOperator.On), StringComparison.OrdinalIgnoreCase))
         {
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Colon)
@@ -171,6 +171,26 @@ public class FilterParser : IFilterParser
             NextToken();
             
             return ParseResult.Success(new ExistsExpression(dataSource));
+        }
+        
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(nameof(FilterOperator.Only), StringComparison.OrdinalIgnoreCase))
+        {
+            NextToken();
+            if (CurrentToken?.Type != FilterTokenType.Colon)
+            {
+                return ParseResult.Incomplete("Expected colon after 'only'");
+            }
+
+            NextToken();
+            if (CurrentToken?.Type != FilterTokenType.Identifier)
+            {
+                return ParseResult.Incomplete("Expected data source identifier after 'only:'");
+            }
+
+            var dataSource = CurrentToken?.Token;
+            NextToken();
+            
+            return ParseResult.Success(new OnlyExpression(dataSource));
         }
 
         if (CurrentToken?.Type == FilterTokenType.Identifier)
@@ -278,16 +298,19 @@ public class FilterParser : IFilterParser
             {
                 return ParseResult.Success(new FileSystemTypeExpression(FileSystemTypes.Directory));
             }
-            else if (identifier.StartsWith("only"))
-            {
-                var letter = identifier.Substring(4).ToUpperInvariant();
-                return ParseResult.Success(new OnlyExpression(letter));
-            }
-            else if (identifier.StartsWith(nameof(FilterOperator.On).ToLower()))
-            {
-                var letter = identifier.Substring(2).ToUpperInvariant();
-                return ParseResult.Success(new ExistsExpression(letter));
-            }
+            
+            // Following lines are commented out as they are not used in the current implementation
+            // else if (identifier.StartsWith(nameof(FilterOperator.Only), StringComparison.InvariantCultureIgnoreCase))
+            // {
+            //     var letter = identifier.Substring(4).ToUpperInvariant();
+            //     return ParseResult.Success(new OnlyExpression(letter));
+            // }
+            // else if (identifier.StartsWith(nameof(FilterOperator.On), StringComparison.InvariantCultureIgnoreCase))
+            // {
+            //     var letter = identifier.Substring(2).ToUpperInvariant();
+            //     return ParseResult.Success(new ExistsExpression(letter));
+            // }
+            
             else
             {
                 return ParseResult.Incomplete($"Unknown filter type: {identifier}");
