@@ -23,9 +23,7 @@ public class TestFiltering_Existence : BaseTestFiltering
         var filterText = $"on:{location}";
     
         // Act
-        var expression = _filterParser.Parse(filterText);
-        var evaluator = _evaluatorFactory.GetEvaluator(expression);
-        bool result = evaluator.Evaluate(expression, comparisonItem);
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
     
         // Assert
         result.Should().Be(expectedResult);
@@ -44,9 +42,7 @@ public class TestFiltering_Existence : BaseTestFiltering
         var filterText = $"NOT on:{location}";
     
         // Act
-        var expression = _filterParser.Parse(filterText);
-        var evaluator = _evaluatorFactory.GetEvaluator(expression);
-        bool result = evaluator.Evaluate(expression, comparisonItem);
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
     
         // Assert
         result.Should().Be(expectedResult);
@@ -67,9 +63,7 @@ public class TestFiltering_Existence : BaseTestFiltering
             "B1", "sameHash2", now, 51);
     
         // Act
-        var expression = _filterParser.Parse(filterText);
-        var evaluator = _evaluatorFactory.GetEvaluator(expression);
-        bool result = evaluator.Evaluate(expression, comparisonItem);
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
     
         // Assert
         result.Should().Be(expectedResult);
