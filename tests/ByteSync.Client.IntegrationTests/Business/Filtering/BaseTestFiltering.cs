@@ -48,9 +48,10 @@ public abstract class BaseTestFiltering : IntegrationTest
         _evaluatorFactory = Container.Resolve<ExpressionEvaluatorFactory>();
     }
 
-    protected ComparisonItem CreateBasicComparisonItem(string filePath = "/file1.txt", string fileName = "file1.txt")
+    protected ComparisonItem CreateBasicComparisonItem(FileSystemTypes fileSystemType = FileSystemTypes.File,
+        string filePath = "/file1.txt", string fileName = "file1.txt")
     {
-        var pathIdentity = new PathIdentity(FileSystemTypes.File, filePath, fileName, filePath);
+        var pathIdentity = new PathIdentity(fileSystemType, filePath, fileName, filePath);
         return new ComparisonItem(pathIdentity);
     }
 
@@ -80,9 +81,41 @@ public abstract class BaseTestFiltering : IntegrationTest
 
         return (fileDescription, inventoryPart);
     }
+    
+    protected (DirectoryDescription, InventoryPart) CreateDirectoryDescription(
+        string inventoryId,
+        string rootPath)
+    {
+        string letter = inventoryId.Replace("Id_", "");
+        var inventory = new Inventory { InventoryId = inventoryId, Letter = letter };
+        
+        string code = $"{letter}1";
+        var inventoryPart = new InventoryPart(inventory, rootPath, FileSystemTypes.Directory);
+        inventoryPart.Code = code;
+
+        var directoryDescription = new DirectoryDescription
+        {
+            InventoryPart = inventoryPart,
+        };
+
+        return (directoryDescription, inventoryPart);
+    }
 
     protected void ConfigureDataPartIndex(
         Dictionary<string, (InventoryPart, FileDescription)> dataParts)
+    {
+        var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
+
+        foreach (var pair in dataParts)
+        {
+            var dataPart = new DataPart(pair.Key, pair.Value.Item1);
+            mockDataPartIndexer.Setup(m => m.GetDataPart(pair.Key))
+                .Returns(dataPart);
+        }
+    }
+    
+    protected void ConfigureDataPartIndex(
+        Dictionary<string, (InventoryPart, DirectoryDescription)> dataParts)
     {
         var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
 
@@ -207,6 +240,31 @@ public abstract class BaseTestFiltering : IntegrationTest
         var dataParts = new Dictionary<string, (InventoryPart, FileDescription)>
         {
             { dataPartId, (inventoryPart, fileDesc) }
+        };
+
+        ConfigureDataPartIndex(dataParts);
+
+        return comparisonItem;
+    }
+    
+    protected ComparisonItem PrepareComparisonWithOneDirectory(string dataPartId)
+    {
+        var comparisonItem = CreateBasicComparisonItem(FileSystemTypes.Directory);
+
+        string letter = dataPartId[0].ToString();
+
+        var (dirDesc, inventoryPart) = CreateDirectoryDescription(
+            $"Id_{letter}",
+            $"/testRoot{letter}");
+        
+        var contentIdCore = new ContentIdentityCore();
+        var contentId = new ContentIdentity(contentIdCore);
+        comparisonItem.AddContentIdentity(contentId);
+        contentId.Add(dirDesc);
+        
+        var dataParts = new Dictionary<string, (InventoryPart, DirectoryDescription)>
+        {
+            { dataPartId, (inventoryPart, dirDesc) }
         };
 
         ConfigureDataPartIndex(dataParts);

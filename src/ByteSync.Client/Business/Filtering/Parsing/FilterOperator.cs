@@ -3,5 +3,6 @@
 public enum FilterOperator
 {
     On,
-    Only
+    Only,
+    Is
 }
