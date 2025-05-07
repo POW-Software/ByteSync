@@ -192,6 +192,37 @@ public class FilterParser : IFilterParser
             
             return ParseResult.Success(new OnlyExpression(dataSource));
         }
+        
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(nameof(FilterOperator.Is), StringComparison.OrdinalIgnoreCase))
+        {
+            NextToken();
+            if (CurrentToken?.Type != FilterTokenType.Colon)
+            {
+                return ParseResult.Incomplete("Expected colon after 'is'");
+            }
+
+            NextToken();
+            if (CurrentToken?.Type != FilterTokenType.Identifier)
+            {
+                return ParseResult.Incomplete("Expected file type identifier after 'is:'");
+            }
+
+            var typeIdentifier = CurrentToken?.Token.ToLowerInvariant();
+            NextToken();
+    
+            if (typeIdentifier == "file")
+            {
+                return ParseResult.Success(new FileSystemTypeExpression(FileSystemTypes.File));
+            }
+            else if (typeIdentifier == "dir" || typeIdentifier == "directory")
+            {
+                return ParseResult.Success(new FileSystemTypeExpression(FileSystemTypes.Directory));
+            }
+            else
+            {
+                return ParseResult.Incomplete($"Unknown file type: {typeIdentifier}");
+            }
+        }
 
         if (CurrentToken?.Type == FilterTokenType.Identifier)
         {
@@ -286,18 +317,20 @@ public class FilterParser : IFilterParser
             {
                 return ParseResult.Incomplete("Expected identifier after colon");
             }
-
+        
             var identifier = CurrentToken?.Token.ToLowerInvariant();
             NextToken();
-
-            if (identifier == "file")
-            {
-                return ParseResult.Success(new FileSystemTypeExpression(FileSystemTypes.File));
-            }
-            else if (identifier == "dir" || identifier == "directory")
-            {
-                return ParseResult.Success(new FileSystemTypeExpression(FileSystemTypes.Directory));
-            }
+            
+            return ParseResult.Incomplete($"Unknown filter type: {identifier}");
+            
+            // if (identifier == "file")
+            // {
+            //     return ParseResult.Success(new FileSystemTypeExpression(FileSystemTypes.File));
+            // }
+            // else if (identifier == "dir" || identifier == "directory")
+            // {
+            //     return ParseResult.Success(new FileSystemTypeExpression(FileSystemTypes.Directory));
+            // }
             
             // Following lines are commented out as they are not used in the current implementation
             // else if (identifier.StartsWith(nameof(FilterOperator.Only), StringComparison.InvariantCultureIgnoreCase))
@@ -311,10 +344,10 @@ public class FilterParser : IFilterParser
             //     return ParseResult.Success(new ExistsExpression(letter));
             // }
             
-            else
-            {
-                return ParseResult.Incomplete($"Unknown filter type: {identifier}");
-            }
+            // else
+            // {
+            //     return ParseResult.Incomplete($"Unknown filter type: {identifier}");
+            // }
         }
 
         // Simple text search as fallback

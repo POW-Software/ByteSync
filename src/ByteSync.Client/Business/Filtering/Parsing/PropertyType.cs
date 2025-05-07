@@ -6,6 +6,9 @@ public enum PropertyType
     ContentAndDate,
     LastWriteTime,
     Size,
+    File,
+    Directory,
+    Dir,
     Ext,
     Name,
     Path
