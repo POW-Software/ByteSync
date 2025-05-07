@@ -7,10 +7,29 @@ public class OnlyExpressionEvaluator : ExpressionEvaluator<OnlyExpression>
 {
     public override bool Evaluate(OnlyExpression expression, ComparisonItem item)
     {
-        var inventories = item.ContentIdentities
-            .SelectMany(ci => ci.GetInventories())
-            .ToHashSet();
+        bool result;
+        
+        if (expression.DataSource.Length == 1)
+        {
+            var inventories = item.ContentIdentities
+                .SelectMany(ci => ci.GetInventories())
+                .ToHashSet();
 
-        return inventories.Count == 1 && inventories.First().Letter.Equals(expression.DataSource, StringComparison.OrdinalIgnoreCase);
+            result = inventories.Count == 1 && inventories.First().Letter.Equals(expression.DataSource, StringComparison.OrdinalIgnoreCase);
+        }
+        else if (expression.DataSource.Length > 1)
+        {
+            var inventoryParts = item.ContentIdentities
+                .SelectMany(ci => ci.GetInventoryParts())
+                .ToHashSet();
+            
+            result = inventoryParts.Count == 1 && inventoryParts.First().Code.Equals(expression.DataSource, StringComparison.OrdinalIgnoreCase);
+        }
+        else
+        {
+            result = false;
+        }
+
+        return result;
     }
 }
