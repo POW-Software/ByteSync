@@ -26,14 +26,14 @@ public class DataPartIndexer : IDataPartIndexer
         
         DataPartsByNames.Clear();
         
-        bool isInventoryWithMultipleParts = inventories.Any(i => i.InventoryParts.Count > 1);
+        bool areMultiPartsInventories = inventories.Any(i => i.InventoryParts.Count > 1);
         
         var cptInventory = 0;
         foreach (var inventory in Inventories)
         {
             var inventoryLetter = ((char)('A' + cptInventory)).ToString();
             
-            if (!isInventoryWithMultipleParts)
+            if (!areMultiPartsInventories)
             {
                 var dataPart = new DataPart(inventoryLetter, inventory);
                 DataPartsByNames.Add(dataPart.Name, dataPart);
@@ -82,11 +82,11 @@ public class DataPartIndexer : IDataPartIndexer
 
         if (result == null)
         {
-            bool areAllMonoPartInventories = Inventories.All(i => i.InventoryParts.Count == 1);
+            bool areAllSinglePartInventories = Inventories.All(i => i.InventoryParts.Count == 1);
 
-            if (areAllMonoPartInventories)
+            if (areAllSinglePartInventories)
             {
-                if (dataPartName.Length == 2 && char.IsLetter(dataPartName[0]) && dataPartName[1] == '1')
+                if (IsSinglePartDataPartName(dataPartName))
                 {
                     result = DataPartsByNames.GetValueOrDefault(dataPartName[0].ToString());
                 }
@@ -94,6 +94,11 @@ public class DataPartIndexer : IDataPartIndexer
         }
         
         return result;
+    }
+
+    private bool IsSinglePartDataPartName(string dataPartName)
+    {
+        return dataPartName.Length == 2 && char.IsLetter(dataPartName[0]) && dataPartName[1] == '1';
     }
     
     public void Remap(ICollection<SynchronizationRule> synchronizationRules)
