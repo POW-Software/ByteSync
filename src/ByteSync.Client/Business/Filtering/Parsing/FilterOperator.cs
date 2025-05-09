@@ -4,5 +4,11 @@ public enum FilterOperator
 {
     On,
     Only,
-    Is
+    Is,
+    Actions,
+    Targeted,
+    Rules,
+    Create,
+    Delete,
+    SynchronizeContent
 }

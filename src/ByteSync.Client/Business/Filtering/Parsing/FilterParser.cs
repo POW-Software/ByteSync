@@ -34,6 +34,7 @@ public class FilterParser : IFilterParser
 
         // Check if there are any special expressions
         if (!terms.Any(t => t.Contains(":") || t.Contains(".") || t.Contains("(") ||
+                            t.StartsWith("actions", StringComparison.OrdinalIgnoreCase) ||
                             t.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
                             t.Equals("OR", StringComparison.OrdinalIgnoreCase) ||
                             t.Equals("NOT", StringComparison.OrdinalIgnoreCase)))
@@ -221,6 +222,55 @@ public class FilterParser : IFilterParser
             else
             {
                 return ParseResult.Incomplete($"Unknown file type: {typeIdentifier}");
+            }
+        }
+        
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.StartsWith("actions", StringComparison.OrdinalIgnoreCase))
+        {
+            string actionPath = CurrentToken?.Token.ToLowerInvariant();
+            NextToken();
+    
+            // Traiter le cas où il y a un chemin d'action avec des points
+            while (CurrentToken?.Type == FilterTokenType.Dot)
+            {
+                NextToken();
+                if (CurrentToken?.Type != FilterTokenType.Identifier)
+                {
+                    return ParseResult.Incomplete("Expected identifier after dot in action path");
+                }
+        
+                actionPath += "." + CurrentToken?.Token.ToLowerInvariant();
+                NextToken();
+            }
+    
+            if (CurrentToken?.Type != FilterTokenType.Operator)
+            {
+                return ParseResult.Incomplete("Expected operator after action path");
+            }
+    
+            var op = CurrentToken?.Token;
+            NextToken();
+    
+            try {
+                var comparisonOperator = _operatorParser.Parse(op);
+        
+                if (CurrentToken?.Type != FilterTokenType.Number)
+                {
+                    return ParseResult.Incomplete("Expected numeric value after operator in action comparison");
+                }
+        
+                if (!int.TryParse(CurrentToken?.Token, out int value))
+                {
+                    return ParseResult.Incomplete("Invalid numeric value in action comparison");
+                }
+        
+                NextToken();
+        
+                return ParseResult.Success(new ActionComparisonExpression(actionPath, comparisonOperator, value));
+            }
+            catch (ArgumentException ex)
+            {
+                return ParseResult.Incomplete(ex.Message);
             }
         }
 

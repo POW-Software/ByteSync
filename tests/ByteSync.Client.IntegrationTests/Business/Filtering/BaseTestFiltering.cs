@@ -1,16 +1,18 @@
 using Autofac;
 using ByteSync.Business;
+using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
 using ByteSync.Business.Filtering.Evaluators;
-using ByteSync.Business.Filtering.Expressions;
 using ByteSync.Business.Filtering.Parsing;
 using ByteSync.Business.Inventories;
 using ByteSync.Common.Business.Inventories;
+using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Filtering;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
+using ByteSync.Repositories;
 using ByteSync.TestsCommon;
 using Moq;
 
@@ -29,6 +31,9 @@ public abstract class BaseTestFiltering : IntegrationTest
         RegisterType<PropertyValueExtractor, IPropertyValueExtractor>();
         RegisterType<PropertyComparer, IPropertyComparer>();
         
+        RegisterType<PropertyIndexer<AtomicAction, ComparisonItem>, IPropertyIndexer<AtomicAction, ComparisonItem>>();
+        RegisterType<AtomicActionRepository, IAtomicActionRepository>();
+        
         RegisterType<AndExpressionEvaluator, IExpressionEvaluator>();
         RegisterType<OrExpressionEvaluator, IExpressionEvaluator>();
         RegisterType<NotExpressionEvaluator, IExpressionEvaluator>();
@@ -39,6 +44,7 @@ public abstract class BaseTestFiltering : IntegrationTest
         RegisterType<OnlyExpressionEvaluator, IExpressionEvaluator>();
         RegisterType<PropertyComparisonExpressionEvaluator, IExpressionEvaluator>();
         RegisterType<TextSearchExpressionEvaluator, IExpressionEvaluator>();
+        RegisterType<ActionComparisonExpressionEvaluator, IExpressionEvaluator>();
         
         RegisterType<ExpressionEvaluatorFactory, IExpressionEvaluatorFactory>();
         RegisterType<FilterParser>();

@@ -24,7 +24,8 @@ public class ExpressionEvaluatorFactory : IExpressionEvaluatorFactory
             { typeof(FutureStateExpression), typeof(FutureStateExpressionEvaluator) },
             { typeof(OnlyExpression), typeof(OnlyExpressionEvaluator) },
             { typeof(PropertyComparisonExpression), typeof(PropertyComparisonExpressionEvaluator) },
-            { typeof(TextSearchExpression), typeof(TextSearchExpressionEvaluator) }
+            { typeof(TextSearchExpression), typeof(TextSearchExpressionEvaluator) },
+            { typeof(ActionComparisonExpression), typeof(ActionComparisonExpressionEvaluator) }
         };
     }
 
