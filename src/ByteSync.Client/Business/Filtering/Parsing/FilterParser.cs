@@ -229,8 +229,7 @@ public class FilterParser : IFilterParser
         {
             string actionPath = CurrentToken?.Token.ToLowerInvariant();
             NextToken();
-    
-            // Traiter le cas où il y a un chemin d'action avec des points
+            
             while (CurrentToken?.Type == FilterTokenType.Dot)
             {
                 NextToken();
