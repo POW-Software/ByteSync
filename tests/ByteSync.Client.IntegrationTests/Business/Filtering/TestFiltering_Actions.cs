@@ -231,7 +231,6 @@ public class TestFiltering_Actions : BaseTestFiltering
 
         if (!isTargeted)
         {
-            // Créer une règle de synchronisation factice
             action.SynchronizationRule = new SynchronizationRule(comparisonItem.FileSystemType, ConditionModes.All);
         }
 
