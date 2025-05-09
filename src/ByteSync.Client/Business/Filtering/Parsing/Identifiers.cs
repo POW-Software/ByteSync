@@ -15,6 +15,15 @@ public class Identifiers
     public const string OPERATOR_ONLY = "only";
     public const string OPERATOR_IS = "is";
     public const string OPERATOR_ACTIONS = "actions";
+    
+    public const string PROPERTY_CONTENT = "content";
+    public const string PROPERTY_CONTENT_AND_DATE = "contentanddate";
+    public const string PROPERTY_LAST_WRITE_TIME = "lastwritetime";
+    public const string PROPERTY_SIZE = "size";
+    
+    public const string PROPERTY_FILE = "file";
+    public const string PROPERTY_DIRECTORY = "directory";
+    public const string PROPERTY_DIR = "dir";
 
     private static List<string>? _cachedAll;
 

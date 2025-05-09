@@ -23,10 +23,10 @@ public class PropertyValueExtractor : IPropertyValueExtractor
         
         var propertyActions = new Dictionary<string, Func<PropertyValueCollection>>
         {
-            { nameof(PropertyType.Content).ToLowerInvariant(), () => ExtractContent(contentIdentities) },
-            { nameof(PropertyType.ContentAndDate).ToLowerInvariant(), () => ExtractContentAndDate(contentIdentities, dataPart) },
-            { nameof(PropertyType.Size).ToLowerInvariant(), () => ExtractSize(contentIdentities, dataPart) },
-            { nameof(PropertyType.LastWriteTime).ToLowerInvariant(), () => ExtractLastWriteTime(contentIdentities, dataPart) }
+            { Identifiers.PROPERTY_CONTENT, () => ExtractContent(contentIdentities) },
+            { Identifiers.PROPERTY_CONTENT_AND_DATE, () => ExtractContentAndDate(contentIdentities, dataPart) },
+            { Identifiers.PROPERTY_SIZE, () => ExtractSize(contentIdentities, dataPart) },
+            { Identifiers.PROPERTY_LAST_WRITE_TIME, () => ExtractLastWriteTime(contentIdentities, dataPart) }
         };
 
         if (propertyActions.TryGetValue(propertyLower, out var action))

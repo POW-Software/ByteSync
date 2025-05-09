@@ -159,13 +159,13 @@ public class FilterParser : IFilterParser
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Colon)
             {
-                return ParseResult.Incomplete("Expected colon after 'on'");
+                return ParseResult.Incomplete($"Expected colon after '{Identifiers.OPERATOR_ON}'");
             }
 
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Identifier)
             {
-                return ParseResult.Incomplete("Expected data source identifier after 'on:'");
+                return ParseResult.Incomplete($"Expected data source identifier after '{Identifiers.OPERATOR_ON}:'");
             }
 
             var dataSource = CurrentToken?.Token;
@@ -179,13 +179,13 @@ public class FilterParser : IFilterParser
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Colon)
             {
-                return ParseResult.Incomplete("Expected colon after 'only'");
+                return ParseResult.Incomplete($"Expected colon after '{Identifiers.OPERATOR_ONLY}'");
             }
 
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Identifier)
             {
-                return ParseResult.Incomplete("Expected data source identifier after 'only:'");
+                return ParseResult.Incomplete($"Expected data source identifier after '{Identifiers.OPERATOR_ONLY}:'");
             }
 
             var dataSource = CurrentToken?.Token;
@@ -199,23 +199,23 @@ public class FilterParser : IFilterParser
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Colon)
             {
-                return ParseResult.Incomplete("Expected colon after 'is'");
+                return ParseResult.Incomplete($"Expected colon after '{Identifiers.OPERATOR_IS}'");
             }
 
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Identifier)
             {
-                return ParseResult.Incomplete("Expected file type identifier after 'is:'");
+                return ParseResult.Incomplete($"Expected file type identifier after '{Identifiers.OPERATOR_IS}:'");
             }
 
             var typeIdentifier = CurrentToken?.Token.ToLowerInvariant();
             NextToken();
     
-            if (typeIdentifier == "file")
+            if (typeIdentifier == Identifiers.PROPERTY_FILE)
             {
                 return ParseResult.Success(new FileSystemTypeExpression(FileSystemTypes.File));
             }
-            else if (typeIdentifier == "dir" || typeIdentifier == "directory")
+            else if (typeIdentifier == Identifiers.PROPERTY_DIR || typeIdentifier == Identifiers.PROPERTY_DIRECTORY)
             {
                 return ParseResult.Success(new FileSystemTypeExpression(FileSystemTypes.Directory));
             }
