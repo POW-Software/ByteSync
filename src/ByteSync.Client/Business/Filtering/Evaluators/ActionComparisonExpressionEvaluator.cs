@@ -18,12 +18,12 @@ public class ActionComparisonExpressionEvaluator : ExpressionEvaluator<ActionCom
     
     public override bool Evaluate(ActionComparisonExpression expression, ComparisonItem item)
     {
-        // Extraire les parties du chemin d'action (actions, targeted/rules, type d'action)
+        // Extract parts of the action path (actions, targeted/rules, action type)
         string[] pathParts = expression.ActionPath.Split('.');
         
         int actionCount = GetActionCount(item, pathParts);
         
-        // Comparer avec l'opérateur spécifié
+        // Compare with the specified operator
         return expression.Operator switch
         {
             ComparisonOperator.Equals => actionCount == expression.Value,
@@ -38,13 +38,13 @@ public class ActionComparisonExpressionEvaluator : ExpressionEvaluator<ActionCom
 
     private int GetActionCount(ComparisonItem item, string[] pathParts)
     {
-        // Base du chemin est toujours "actions"
+        // The base of the path is always "actions"
         if (pathParts.Length == 0 || pathParts[0] != "actions")
         {
             return 0;
         }
             
-        // Obtenir la liste complète des actions
+        // Get the full list of actions
         var allActions = _actionRepository.GetAtomicActions(item);
 
         if (!allActions.Any())
@@ -52,25 +52,25 @@ public class ActionComparisonExpressionEvaluator : ExpressionEvaluator<ActionCom
             return 0;
         }
         
-        // Filtrer par origine si spécifiée (targeted/rules)
+        // Filter by origin if specified (targeted/rules)
         if (pathParts.Length > 1)
         {
-            if (pathParts[1].Equals("targeted", StringComparison.OrdinalIgnoreCase))
+            if (pathParts[1].Equals(Identifiers.ACTION_TARGETED, StringComparison.OrdinalIgnoreCase))
             {
                 allActions = allActions.Where(a => a.IsTargeted).ToList();
             }
-            else if (pathParts[1].Equals("rules", StringComparison.OrdinalIgnoreCase))
+            else if (pathParts[1].Equals(Identifiers.ACTION_RULES, StringComparison.OrdinalIgnoreCase))
             {
                 allActions = allActions.Where(a => a.IsFromSynchronizationRule).ToList();
             }
             else
             {
-                // Si ce n'est pas targeted/rules, c'est un type d'action
+                // If it's not targeted/rules, it's an action type
                 return FilterActionsByType(allActions, pathParts[1]);
             }
         }
         
-        // Filtrer par type d'action si spécifié
+        // Filter by action type if specified
         if (pathParts.Length > 2)
         {
             return FilterActionsByType(allActions, pathParts[2]);
@@ -91,13 +91,12 @@ public class ActionComparisonExpressionEvaluator : ExpressionEvaluator<ActionCom
         
         return normalizedActionType switch
         {
-            "synchronizecontent" => actions.Count(a => a.IsSynchronizeContent),
-            "synchronizecontentonly" => actions.Count(a => a.IsSynchronizeContentOnly),
-            "synchronizecontentanddate" => actions.Count(a => a.IsSynchronizeContentAndDate),
-            "synchronizedate" => actions.Count(a => a.IsSynchronizeDate),
-            "delete" => actions.Count(a => a.IsDelete),
-            "create" => actions.Count(a => a.IsCreate),
-            "donothing" => actions.Count(a => a.IsDoNothing),
+            Identifiers.ACTION_SYNCHRONIZE_CONTENT => actions.Count(a => a.IsSynchronizeContent),
+            Identifiers.ACTION_SYNCHRONIZE_CONTENT_AND_DATE => actions.Count(a => a.IsSynchronizeContentAndDate),
+            Identifiers.ACTION_SYNCHRONIZE_DATE => actions.Count(a => a.IsSynchronizeDate),
+            Identifiers.ACTION_SYNCHRONIZE_DELETE => actions.Count(a => a.IsDelete),
+            Identifiers.ACTION_SYNCHRONIZE_CREATE => actions.Count(a => a.IsCreate),
+            Identifiers.ACTION_DO_NOTHING => actions.Count(a => a.IsDoNothing),
             _ => 0
         };
     }
