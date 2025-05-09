@@ -34,7 +34,7 @@ public class FilterParser : IFilterParser
 
         // Check if there are any special expressions
         if (!terms.Any(t => t.Contains(":") || t.Contains(".") || t.Contains("(") ||
-                            t.StartsWith("actions", StringComparison.OrdinalIgnoreCase) ||
+                            t.StartsWith(Identifiers.OPERATOR_ACTIONS, StringComparison.OrdinalIgnoreCase) ||
                             t.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
                             t.Equals("OR", StringComparison.OrdinalIgnoreCase) ||
                             t.Equals("NOT", StringComparison.OrdinalIgnoreCase)))
