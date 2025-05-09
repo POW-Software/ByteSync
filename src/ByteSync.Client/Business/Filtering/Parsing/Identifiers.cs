@@ -10,6 +10,11 @@ public class Identifiers
     public const string ACTION_DO_NOTHING = "do_nothing";
     public const string ACTION_TARGETED = "targeted";
     public const string ACTION_RULES = "rules";
+    
+    public const string OPERATOR_ON = "on";
+    public const string OPERATOR_ONLY = "only";
+    public const string OPERATOR_IS = "is";
+    public const string OPERATOR_ACTIONS = "actions";
 
     private static List<string>? _cachedAll;
 

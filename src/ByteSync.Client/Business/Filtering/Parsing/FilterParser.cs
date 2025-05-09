@@ -154,7 +154,7 @@ public class FilterParser : IFilterParser
             return ParseResult.Success(new FutureStateExpression(baseExpressionResult.Expression!));
         }
 
-        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(nameof(FilterOperator.On), StringComparison.OrdinalIgnoreCase))
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(Identifiers.OPERATOR_ON, StringComparison.OrdinalIgnoreCase))
         {
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Colon)
@@ -174,7 +174,7 @@ public class FilterParser : IFilterParser
             return ParseResult.Success(new ExistsExpression(dataSource));
         }
         
-        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(nameof(FilterOperator.Only), StringComparison.OrdinalIgnoreCase))
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(Identifiers.OPERATOR_ONLY, StringComparison.OrdinalIgnoreCase))
         {
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Colon)
@@ -194,7 +194,7 @@ public class FilterParser : IFilterParser
             return ParseResult.Success(new OnlyExpression(dataSource));
         }
         
-        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(nameof(FilterOperator.Is), StringComparison.OrdinalIgnoreCase))
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(Identifiers.OPERATOR_IS, StringComparison.OrdinalIgnoreCase))
         {
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Colon)
@@ -225,7 +225,7 @@ public class FilterParser : IFilterParser
             }
         }
         
-        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.StartsWith("actions", StringComparison.OrdinalIgnoreCase))
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(Identifiers.OPERATOR_ACTIONS, StringComparison.OrdinalIgnoreCase))
         {
             string actionPath = CurrentToken?.Token.ToLowerInvariant();
             NextToken();
