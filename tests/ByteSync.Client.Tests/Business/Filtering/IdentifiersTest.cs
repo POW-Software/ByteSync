@@ -24,7 +24,7 @@ public class IdentifiersTest
     }
     
     [Test]
-    public void All_ShouldContain_SYNCHRONIZE_CONTENT()
+    public void All_ShouldContain_ACTION_SYNCHRONIZE_CONTENT()
     {
         // Arrange
         var expectedConstant = Identifiers.ACTION_SYNCHRONIZE_CONTENT;
