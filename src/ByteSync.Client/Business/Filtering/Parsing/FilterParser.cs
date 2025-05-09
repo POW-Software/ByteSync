@@ -34,6 +34,7 @@ public class FilterParser : IFilterParser
 
         // Check if there are any special expressions
         if (!terms.Any(t => t.Contains(":") || t.Contains(".") || t.Contains("(") ||
+                            t.StartsWith(Identifiers.OPERATOR_ACTIONS, StringComparison.OrdinalIgnoreCase) ||
                             t.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
                             t.Equals("OR", StringComparison.OrdinalIgnoreCase) ||
                             t.Equals("NOT", StringComparison.OrdinalIgnoreCase)))
@@ -153,18 +154,18 @@ public class FilterParser : IFilterParser
             return ParseResult.Success(new FutureStateExpression(baseExpressionResult.Expression!));
         }
 
-        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(nameof(FilterOperator.On), StringComparison.OrdinalIgnoreCase))
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(Identifiers.OPERATOR_ON, StringComparison.OrdinalIgnoreCase))
         {
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Colon)
             {
-                return ParseResult.Incomplete("Expected colon after 'on'");
+                return ParseResult.Incomplete($"Expected colon after '{Identifiers.OPERATOR_ON}'");
             }
 
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Identifier)
             {
-                return ParseResult.Incomplete("Expected data source identifier after 'on:'");
+                return ParseResult.Incomplete($"Expected data source identifier after '{Identifiers.OPERATOR_ON}:'");
             }
 
             var dataSource = CurrentToken?.Token;
@@ -173,18 +174,18 @@ public class FilterParser : IFilterParser
             return ParseResult.Success(new ExistsExpression(dataSource));
         }
         
-        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(nameof(FilterOperator.Only), StringComparison.OrdinalIgnoreCase))
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(Identifiers.OPERATOR_ONLY, StringComparison.OrdinalIgnoreCase))
         {
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Colon)
             {
-                return ParseResult.Incomplete("Expected colon after 'only'");
+                return ParseResult.Incomplete($"Expected colon after '{Identifiers.OPERATOR_ONLY}'");
             }
 
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Identifier)
             {
-                return ParseResult.Incomplete("Expected data source identifier after 'only:'");
+                return ParseResult.Incomplete($"Expected data source identifier after '{Identifiers.OPERATOR_ONLY}:'");
             }
 
             var dataSource = CurrentToken?.Token;
@@ -193,34 +194,82 @@ public class FilterParser : IFilterParser
             return ParseResult.Success(new OnlyExpression(dataSource));
         }
         
-        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(nameof(FilterOperator.Is), StringComparison.OrdinalIgnoreCase))
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(Identifiers.OPERATOR_IS, StringComparison.OrdinalIgnoreCase))
         {
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Colon)
             {
-                return ParseResult.Incomplete("Expected colon after 'is'");
+                return ParseResult.Incomplete($"Expected colon after '{Identifiers.OPERATOR_IS}'");
             }
 
             NextToken();
             if (CurrentToken?.Type != FilterTokenType.Identifier)
             {
-                return ParseResult.Incomplete("Expected file type identifier after 'is:'");
+                return ParseResult.Incomplete($"Expected file type identifier after '{Identifiers.OPERATOR_IS}:'");
             }
 
             var typeIdentifier = CurrentToken?.Token.ToLowerInvariant();
             NextToken();
     
-            if (typeIdentifier == "file")
+            if (typeIdentifier == Identifiers.PROPERTY_FILE)
             {
                 return ParseResult.Success(new FileSystemTypeExpression(FileSystemTypes.File));
             }
-            else if (typeIdentifier == "dir" || typeIdentifier == "directory")
+            else if (typeIdentifier == Identifiers.PROPERTY_DIR || typeIdentifier == Identifiers.PROPERTY_DIRECTORY)
             {
                 return ParseResult.Success(new FileSystemTypeExpression(FileSystemTypes.Directory));
             }
             else
             {
                 return ParseResult.Incomplete($"Unknown file type: {typeIdentifier}");
+            }
+        }
+        
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(Identifiers.OPERATOR_ACTIONS, StringComparison.OrdinalIgnoreCase))
+        {
+            string actionPath = CurrentToken?.Token.ToLowerInvariant();
+            NextToken();
+            
+            while (CurrentToken?.Type == FilterTokenType.Dot)
+            {
+                NextToken();
+                if (CurrentToken?.Type != FilterTokenType.Identifier)
+                {
+                    return ParseResult.Incomplete("Expected identifier after dot in action path");
+                }
+        
+                actionPath += "." + CurrentToken?.Token.ToLowerInvariant();
+                NextToken();
+            }
+    
+            if (CurrentToken?.Type != FilterTokenType.Operator)
+            {
+                return ParseResult.Incomplete("Expected operator after action path");
+            }
+    
+            var op = CurrentToken?.Token;
+            NextToken();
+    
+            try {
+                var comparisonOperator = _operatorParser.Parse(op);
+        
+                if (CurrentToken?.Type != FilterTokenType.Number)
+                {
+                    return ParseResult.Incomplete("Expected numeric value after operator in action comparison");
+                }
+        
+                if (!int.TryParse(CurrentToken?.Token, out int value))
+                {
+                    return ParseResult.Incomplete("Invalid numeric value in action comparison");
+                }
+        
+                NextToken();
+        
+                return ParseResult.Success(new ActionComparisonExpression(actionPath, comparisonOperator, value));
+            }
+            catch (ArgumentException ex)
+            {
+                return ParseResult.Incomplete(ex.Message);
             }
         }
 
