@@ -17,13 +17,7 @@ public class TestFiltering_Actions : BaseTestFiltering
     {
         SetupBase();
         
-        // Créer un mock du repository d'actions
-        // _mockActionRepository = new Mock<IAtomicActionRepository>();
-
         _mockActionRepository = Container.Resolve<IAtomicActionRepository>();
-
-        // // Enregistrer le mock dans le conteneur
-        // Container.RegisterInstance(_mockActionRepository.Object);
     }
     
     [Test]
@@ -39,9 +33,6 @@ public class TestFiltering_Actions : BaseTestFiltering
         };
         
         _mockActionRepository.AddOrUpdate(actions);
-        
-        // _mockActionRepository.Setup(repo => repo.GetAtomicActions(comparisonItem))
-        //     .Returns(actions);
         
         var filterText = "actions>0";
         
@@ -59,8 +50,6 @@ public class TestFiltering_Actions : BaseTestFiltering
         var comparisonItem = CreateBasicComparisonItem();
         
         _mockActionRepository.AddOrUpdate(new List<AtomicAction>());
-        // _mockActionRepository.Setup(repo => repo.GetAtomicActions(comparisonItem))
-        //     .Returns(new List<AtomicAction>());
         
         var filterText = "actions==0";
         
@@ -84,8 +73,6 @@ public class TestFiltering_Actions : BaseTestFiltering
         };
 
         _mockActionRepository.AddOrUpdate(actions);
-        // _mockActionRepository.Setup(repo => repo.GetAtomicActions(comparisonItem))
-        //     .Returns(actions);
 
         var filterText = "actions.targeted>0";
 
@@ -251,32 +238,3 @@ public class TestFiltering_Actions : BaseTestFiltering
         return action;
     }
 }
-
-// // Classe SynchronizationRule factice pour les tests
-// public class SynchronizationRule
-// {
-//     public string RuleId { get; set; }
-// }
-
-// Extension de ComparisonItemExtensions pour les tests
-// public static class ComparisonItemActionExtensions
-// {
-//     public static List<AtomicAction> GetAllActions(this ComparisonItem item, IAtomicActionRepository actionRepository)
-//     {
-//         return actionRepository.GetAtomicActions(item);
-//     }
-//     
-//     public static List<AtomicAction> GetTargetedActions(this ComparisonItem item, IAtomicActionRepository actionRepository)
-//     {
-//         return actionRepository.GetAtomicActions(item)
-//             .Where(a => a.IsTargeted)
-//             .ToList();
-//     }
-//     
-//     public static List<AtomicAction> GetRuleBasedActions(this ComparisonItem item, IAtomicActionRepository actionRepository)
-//     {
-//         return actionRepository.GetAtomicActions(item)
-//             .Where(a => a.IsFromSynchronizationRule)
-//             .ToList();
-//     }
-// }
