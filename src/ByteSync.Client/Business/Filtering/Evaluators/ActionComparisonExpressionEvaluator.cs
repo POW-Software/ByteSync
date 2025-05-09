@@ -39,7 +39,7 @@ public class ActionComparisonExpressionEvaluator : ExpressionEvaluator<ActionCom
     private int GetActionCount(ComparisonItem item, string[] pathParts)
     {
         // The base of the path is always "actions"
-        if (pathParts.Length == 0 || pathParts[0] != "actions")
+        if (pathParts.Length == 0 || !pathParts[0].Equals(Identifiers.OPERATOR_ACTIONS, StringComparison.OrdinalIgnoreCase))
         {
             return 0;
         }
