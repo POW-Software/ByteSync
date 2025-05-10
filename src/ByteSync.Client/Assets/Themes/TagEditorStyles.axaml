@@ -7,7 +7,7 @@
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:misc="clr-namespace:ByteSync.Views.Misc">
         <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="3"/>
         <Setter Property="Padding" Value="4"/>
@@ -19,8 +19,8 @@
                         BorderThickness="{TemplateBinding BorderThickness}"
                         CornerRadius="{TemplateBinding CornerRadius}"
                         Padding="{TemplateBinding Padding}">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <ItemsControl Name="PART_TagsPanel" Grid.Column="0" Items="{TemplateBinding Tags}">
+                    <WrapPanel VerticalAlignment="Center">
+                        <ItemsControl Name="PART_TagsPanel" Items="{TemplateBinding Tags}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <WrapPanel Orientation="Horizontal" />
@@ -34,8 +34,9 @@
                                             Padding="4,2">
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="{Binding}" 
-                                                      Foreground="{Binding Path=TagForeground, RelativeSource={RelativeSource AncestorType=misc:TagEditor}}"
-                                                      VerticalAlignment="Center"/>
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{Binding Path=TagForeground, RelativeSource={RelativeSource AncestorType=misc:TagEditor}}"
+                                                       VerticalAlignment="Center"/>
                                             <Button Content="×" 
                                                     Padding="2,0"
                                                     Margin="3,0,0,0"
@@ -49,16 +50,16 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                        
+
+                        <!-- TextBox amélioré -->
                         <TextBox Name="PART_TextBox" 
-                                Grid.Column="0"
-                                Background="Transparent"
-                                BorderThickness="0"
-                                VerticalAlignment="Center"
-                                Text="{TemplateBinding CurrentText}"
-                                Watermark="{TemplateBinding Watermark}"
-                                Margin="3,0"/>
-                    </Grid>
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 VerticalAlignment="Center"
+                                 Text="{TemplateBinding CurrentText}"
+                                 Watermark="{TemplateBinding Watermark}"
+                                 Margin="3,0"/>
+                    </WrapPanel>
                 </Border>
             </ControlTemplate>
         </Setter>
