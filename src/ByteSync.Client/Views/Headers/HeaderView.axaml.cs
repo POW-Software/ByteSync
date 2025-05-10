@@ -5,7 +5,7 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Headers;
 
-public class HeaderView : ReactiveUserControl<HeaderViewModel>
+public partial class HeaderView : ReactiveUserControl<HeaderViewModel>
 {
     public HeaderView()
     {

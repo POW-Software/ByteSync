@@ -3,7 +3,7 @@ using Avalonia.Markup.Xaml;
 
 namespace ByteSync.Views.Sessions.Comparisons.Results;
 
-public class SynchronizationActionView : UserControl
+public partial class SynchronizationActionView : UserControl
 {
     public SynchronizationActionView()
     {

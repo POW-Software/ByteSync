@@ -3,7 +3,7 @@ using Avalonia.Markup.Xaml;
 
 namespace ByteSync.Views.Sessions.Comparisons.Results;
 
-public class ContentIdentityView : UserControl
+public partial class ContentIdentityView : UserControl
 {
     public ContentIdentityView()
     {

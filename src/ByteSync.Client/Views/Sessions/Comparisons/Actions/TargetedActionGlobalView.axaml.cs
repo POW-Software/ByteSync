@@ -4,7 +4,7 @@ using ByteSync.ViewModels.Sessions.Comparisons.Actions;
 
 namespace ByteSync.Views.Sessions.Comparisons.Actions;
 
-public class TargetedActionGlobalView : ReactiveUserControl<TargetedActionGlobalViewModel>
+public partial class TargetedActionGlobalView : ReactiveUserControl<TargetedActionGlobalViewModel>
 {
     public TargetedActionGlobalView()
     {

@@ -5,7 +5,7 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Sessions.Local;
 
-public class LocalSessionManagementView : ReactiveUserControl<LocalSessionManagementViewModel>
+public partial class LocalSessionManagementView : ReactiveUserControl<LocalSessionManagementViewModel>
 {
     public LocalSessionManagementView()
     {

@@ -6,7 +6,7 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Sessions.Inventories;
 
-public class InventoryProcessView : ReactiveUserControl<InventoryProcessViewModel>
+public partial class InventoryProcessView : ReactiveUserControl<InventoryProcessViewModel>
 {
     public InventoryProcessView()
     {

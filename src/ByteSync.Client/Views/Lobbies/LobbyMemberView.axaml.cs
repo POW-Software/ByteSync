@@ -5,7 +5,7 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Lobbies;
 
-public class LobbyMemberView : ReactiveUserControl<LobbyMemberViewModel>
+public partial class LobbyMemberView : ReactiveUserControl<LobbyMemberViewModel>
 {
     public LobbyMemberView()
     {

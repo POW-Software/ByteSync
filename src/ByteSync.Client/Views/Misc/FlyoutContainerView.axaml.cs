@@ -5,7 +5,7 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Misc;
 
-public class FlyoutContainerView : ReactiveUserControl<FlyoutContainerViewModel>
+public partial class FlyoutContainerView : ReactiveUserControl<FlyoutContainerViewModel>
 {
     public FlyoutContainerView()
     {

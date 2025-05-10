@@ -5,7 +5,7 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Profiles;
 
-public class ProfilesView : ReactiveUserControl<ProfilesViewModel>
+public partial class ProfilesView : ReactiveUserControl<ProfilesViewModel>
 {
     public ProfilesView()
     {

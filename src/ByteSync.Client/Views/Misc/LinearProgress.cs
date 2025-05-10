@@ -38,7 +38,7 @@ public class LinearProgress : TemplatedControl
     public static readonly StyledProperty<bool> IsActiveProperty =
         AvaloniaProperty.Register<LinearProgress, bool>(nameof(IsActive), defaultValue: true, notifying: OnIsActiveChanged);
 
-    private static void OnIsActiveChanged(IAvaloniaObject obj, bool arg2)
+    private static void OnIsActiveChanged(AvaloniaObject obj, bool arg2)
     {
         ((LinearProgress)obj).UpdateVisualStates();
     }

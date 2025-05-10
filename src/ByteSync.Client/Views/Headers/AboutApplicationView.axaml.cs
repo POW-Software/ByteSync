@@ -6,7 +6,7 @@ using ByteSync.ViewModels.Headers;
 
 namespace ByteSync.Views.Headers;
 
-public class AboutApplicationView : ReactiveUserControl<AboutApplicationViewModel>
+public partial class AboutApplicationView : ReactiveUserControl<AboutApplicationViewModel>
 {
     public AboutApplicationView()
     {

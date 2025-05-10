@@ -8,7 +8,7 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Sessions.Comparisons.Results;
 
-public class ComparisonResultView : ReactiveUserControl<ComparisonResultViewModel>
+public partial class ComparisonResultView : ReactiveUserControl<ComparisonResultViewModel>
 {
     public DataGrid DataGrid => this.FindControl<DataGrid>("DataGrid");
         

@@ -5,7 +5,7 @@ using ReactiveUI;
 
 namespace ByteSync.Views.AccountDetails;
 
-public class AccountDetailsView : ReactiveUserControl<AccountDetailsViewModel>
+public partial class AccountDetailsView : ReactiveUserControl<AccountDetailsViewModel>
 {
     public AccountDetailsView()
     {

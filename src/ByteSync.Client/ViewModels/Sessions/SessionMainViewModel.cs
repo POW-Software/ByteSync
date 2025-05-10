@@ -19,7 +19,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions;
 
-class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivatableViewModel 
+public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivatableViewModel 
 {
     public string? UrlPathSegment { get; }
         

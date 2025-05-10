@@ -5,7 +5,7 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Sessions.Managing;
 
-public class SessionSettingsEditView : ReactiveUserControl<SessionSettingsEditViewModel>
+public partial class SessionSettingsEditView : ReactiveUserControl<SessionSettingsEditViewModel>
 {
     public SessionSettingsEditView()
     {

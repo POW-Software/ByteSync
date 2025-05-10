@@ -10,13 +10,13 @@ using System.Reactive.Linq;
 
 namespace ByteSync.Views.Home;
 
-public class JoinCloudSessionView : ReactiveUserControl<JoinCloudSessionViewModel>
+public partial class JoinCloudSessionView : ReactiveUserControl<JoinCloudSessionViewModel>
 {
-    public TextBox TextBoxSessionId => this.FindControl<TextBox>("TextBoxSessionId");
-        
-    public TextBox TextBoxSessionPassword => this.FindControl<TextBox>("TextBoxSessionPassword");
-        
-    public Button ButtonJoin => this.FindControl<Button>("ButtonJoin");
+    // public TextBox TextBoxSessionId => this.FindControl<TextBox>("TextBoxSessionId");
+    //     
+    // public TextBox TextBoxSessionPassword => this.FindControl<TextBox>("TextBoxSessionPassword");
+    //     
+    // public Button ButtonJoin => this.FindControl<Button>("ButtonJoin");
     
     public JoinCloudSessionView()
     {
@@ -24,8 +24,10 @@ public class JoinCloudSessionView : ReactiveUserControl<JoinCloudSessionViewMode
         
         this.WhenActivated(disposables =>
         {
-            TextBoxSessionId.Events().KeyUp
-                .Where(k => k.Key == Key.Enter)
+            Observable.FromEventPattern<KeyEventArgs>(
+                    h => TextBoxSessionId.KeyUp += h,
+                    h => TextBoxSessionId.KeyUp -= h)
+                .Where(x => x.EventArgs.Key == Key.Enter)
                 .Subscribe(e =>
                 {
                     ButtonJoin.Focus();
@@ -33,8 +35,10 @@ public class JoinCloudSessionView : ReactiveUserControl<JoinCloudSessionViewMode
                 })
                 .DisposeWith(disposables);
                 
-            TextBoxSessionPassword.Events().KeyUp
-                .Where(k => k.Key == Key.Enter)
+            Observable.FromEventPattern<KeyEventArgs>(
+                    h => TextBoxSessionPassword.KeyUp += h,
+                    h => TextBoxSessionPassword.KeyUp -= h)
+                .Where(x => x.EventArgs.Key == Key.Enter)
                 .Subscribe(e =>
                 {
                     ButtonJoin.Focus();

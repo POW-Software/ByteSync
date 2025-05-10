@@ -5,7 +5,7 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Misc;
 
-class SelectLocaleView : ReactiveUserControl<SelectLocaleViewModel>
+public partial class SelectLocaleView : ReactiveUserControl<SelectLocaleViewModel>
 {
     public SelectLocaleView()
     {

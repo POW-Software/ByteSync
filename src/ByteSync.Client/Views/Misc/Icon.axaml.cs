@@ -6,7 +6,7 @@ using Avalonia.Media;
 namespace ByteSync.Views.Misc;
 
 // Voir Projektanker.Icons.Avalonia.Icon
-public class Icon : TemplatedControl
+public partial class Icon : TemplatedControl
 {
     public static readonly DirectProperty<Icon, DrawingImage> DrawingImageProperty =
         AvaloniaProperty.RegisterDirect<Icon, DrawingImage>(nameof(DrawingImage), o => o.DrawingImage);

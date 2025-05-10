@@ -4,7 +4,7 @@ using ByteSync.ViewModels.Sessions.Inventories;
 
 namespace ByteSync.Views.Sessions.Inventories;
 
-public class InventoryIdentificationView : ReactiveUserControl<InventoryIdentificationViewModel>
+public partial class InventoryIdentificationView : ReactiveUserControl<InventoryIdentificationViewModel>
 {
     public InventoryIdentificationView()
     {

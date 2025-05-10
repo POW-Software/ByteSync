@@ -7,7 +7,7 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Headers;
 
-public class GeneralSettingsView : ReactiveUserControl<GeneralSettingsViewModel>
+public partial class GeneralSettingsView : ReactiveUserControl<GeneralSettingsViewModel>
 {
     public GeneralSettingsView()
     {

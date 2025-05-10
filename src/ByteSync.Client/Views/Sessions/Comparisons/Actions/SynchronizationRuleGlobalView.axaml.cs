@@ -5,7 +5,7 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Sessions.Comparisons.Actions;
 
-internal class SynchronizationRuleGlobalView : ReactiveUserControl<SynchronizationRuleGlobalViewModel>
+internal partial class SynchronizationRuleGlobalView : ReactiveUserControl<SynchronizationRuleGlobalViewModel>
 {
     public SynchronizationRuleGlobalView()
     {

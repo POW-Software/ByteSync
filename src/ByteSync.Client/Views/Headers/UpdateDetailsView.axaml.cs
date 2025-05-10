@@ -4,7 +4,7 @@ using ByteSync.ViewModels.Headers;
 
 namespace ByteSync.Views.Headers;
 
-public class UpdateDetailsView : ReactiveUserControl<UpdateDetailsViewModel>
+public partial class UpdateDetailsView : ReactiveUserControl<UpdateDetailsViewModel>
 {
     public UpdateDetailsView()
     {

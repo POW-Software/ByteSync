@@ -5,7 +5,7 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Lobbies;
 
-public class LobbyMainView : ReactiveUserControl<LobbyMainViewModel>
+public partial class LobbyMainView : ReactiveUserControl<LobbyMainViewModel>
 {
     public LobbyMainView()
     {

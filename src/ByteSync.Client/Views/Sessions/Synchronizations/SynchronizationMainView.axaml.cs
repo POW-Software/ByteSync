@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using System.Reactive.Disposables;
+using Avalonia;
 using Avalonia.Controls.Mixins;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
@@ -7,7 +8,7 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Sessions.Synchronizations;
 
-public class SynchronizationMainView : ReactiveUserControl<SynchronizationMainViewModel>
+public partial class SynchronizationMainView : ReactiveUserControl<SynchronizationMainViewModel>
 {
     public SynchronizationMainView()
     {

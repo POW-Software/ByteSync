@@ -7,7 +7,7 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Sessions.Managing;
 
-public class CurrentCloudSessionView : ReactiveUserControl<CurrentCloudSessionViewModel>
+public partial class CurrentCloudSessionView : ReactiveUserControl<CurrentCloudSessionViewModel>
 {
     public CurrentCloudSessionView()
     {

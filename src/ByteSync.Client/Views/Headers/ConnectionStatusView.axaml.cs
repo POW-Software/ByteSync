@@ -4,7 +4,7 @@ using ByteSync.ViewModels.Headers;
 
 namespace ByteSync.Views.Headers;
 
-public class ConnectionStatusView : ReactiveUserControl<ConnectionStatusViewModel>
+public partial class ConnectionStatusView : ReactiveUserControl<ConnectionStatusViewModel>
 {
     public ConnectionStatusView()
     {

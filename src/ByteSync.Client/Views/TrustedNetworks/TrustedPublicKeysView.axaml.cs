@@ -6,7 +6,7 @@ using ByteSync.ViewModels.TrustedNetworks;
 
 namespace ByteSync.Views.TrustedNetworks;
 
-public class TrustedPublicKeysView : ReactiveUserControl<TrustedPublicKeysViewModel>
+public partial class TrustedPublicKeysView : ReactiveUserControl<TrustedPublicKeysViewModel>
 {
     public TrustedPublicKeysView()
     {

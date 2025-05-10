@@ -4,7 +4,7 @@ using ByteSync.ViewModels.Home;
 
 namespace ByteSync.Views.Home;
 
-public class CreateCloudSessionView : ReactiveUserControl<CreateCloudSessionViewModel>
+public partial class CreateCloudSessionView : ReactiveUserControl<CreateCloudSessionViewModel>
 {
     public CreateCloudSessionView()
     {

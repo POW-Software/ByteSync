@@ -5,7 +5,7 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Home;
 
-public class HomeMainView : ReactiveUserControl<HomeMainViewModel>
+public partial class HomeMainView : ReactiveUserControl<HomeMainViewModel>
 {
     public HomeMainView()
     {
