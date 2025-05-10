@@ -1,0 +1,66 @@
+﻿<!-- <ResourceDictionary xmlns="https://github.com/avaloniaui" -->
+<!--                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" -->
+<!--                     xmlns:misc="clr-namespace:ByteSync.Views.Misc"> -->
+
+    <!-- Style pour TagEditor (compatible avec Avalonia 0.10.22) -->
+    <Style Selector="misc|TagEditor" xmlns="https://github.com/avaloniaui"
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+           xmlns:misc="clr-namespace:ByteSync.Views.Misc">
+        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="3"/>
+        <Setter Property="Padding" Value="4"/>
+        <Setter Property="MinHeight" Value="30"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <ItemsControl Name="PART_TagsPanel" Grid.Column="0" Items="{TemplateBinding Tags}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{Binding Path=TagBackground, RelativeSource={RelativeSource AncestorType=misc:TagEditor}}"
+                                            CornerRadius="3"
+                                            Margin="0,1,3,1"
+                                            Padding="4,2">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}" 
+                                                      Foreground="{Binding Path=TagForeground, RelativeSource={RelativeSource AncestorType=misc:TagEditor}}"
+                                                      VerticalAlignment="Center"/>
+                                            <Button Content="×" 
+                                                    Padding="2,0"
+                                                    Margin="3,0,0,0"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Foreground="{Binding Path=TagForeground, RelativeSource={RelativeSource AncestorType=misc:TagEditor}}"
+                                                    Command="{Binding Path=RemoveTag, RelativeSource={RelativeSource AncestorType=misc:TagEditor}}"
+                                                    CommandParameter="{Binding}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        
+                        <TextBox Name="PART_TextBox" 
+                                Grid.Column="0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                VerticalAlignment="Center"
+                                Text="{TemplateBinding CurrentText}"
+                                Watermark="{TemplateBinding Watermark}"
+                                Margin="3,0"/>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+<!-- </ResourceDictionary> -->

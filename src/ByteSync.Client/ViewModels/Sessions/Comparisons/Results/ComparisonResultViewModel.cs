@@ -123,6 +123,8 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
             .Bind(out _bindingData)
             .Subscribe();
             // .DisposeWith(disposables);
+
+        InitializeTagSupport();
         
         this.WhenActivated(disposables =>
         {
@@ -353,5 +355,74 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         }
 
         return _filterService.BuildFilter(filterText);
+    }
+    
+    [Reactive]
+    public ObservableCollection<string> FilterTags { get; set; }
+
+    // Property pour configurer le compléteur automatique de tags
+    [Reactive]
+    public Func<string, bool> TagFilterValidator { get; set; }
+
+    // Méthode d'initialisation pour le support des tags
+    private void InitializeTagSupport()
+    {
+        FilterTags = new ObservableCollection<string>();
+        
+        // Configurer la validation des tags (éviter les doublons, mots vides, etc.)
+        TagFilterValidator = tag => !string.IsNullOrWhiteSpace(tag) && tag.Length >= 2;
+        
+        // Observer les changements dans les tags et mettre à jour le FilterText
+        this.WhenAnyValue(x => x.FilterTags.Count)
+            .Throttle(TimeSpan.FromMilliseconds(100))
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(_ => UpdateFilterFromTags());
+    }
+    
+    // Cette méthode met à jour le FilterText basé sur les tags
+    private void UpdateFilterFromTags()
+    {
+        if (FilterTags.Count == 0)
+        {
+            FilterText = string.Empty;
+            return;
+        }
+        
+        // Pour la syntaxe de filtre complexe, on peut construire des expressions comme:
+        // "tag1 AND tag2" ou "(tag1 OR tag2) AND tag3"
+        if (FilterTags.Count == 1)
+        {
+            FilterText = FilterTags[0];
+        }
+        else
+        {
+            FilterText = string.Join(" AND ", FilterTags);
+        }
+    }
+    
+    // Méthode pour gérer les changements de tags
+    public void OnTagsChanged()
+    {
+        UpdateFilterFromTags();
+    }
+    
+    // Construit un filtre complexe basé sur les tags
+    private Func<ComparisonItem, bool> BuildTagFilter(IEnumerable<string> tags)
+    {
+        if (tags == null || !tags.Any())
+            return _ => true;
+        
+        var tagList = tags.Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
+        
+        return item =>
+        {
+            // Chaque tag doit être présent pour que l'élément corresponde
+            foreach (var tag in tagList)
+            {
+                if (!_filterService.BuildFilter(tag)(item))
+                    return false;
+            }
+            return true;
+        };
     }
 }

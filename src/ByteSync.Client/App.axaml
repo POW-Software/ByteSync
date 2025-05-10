@@ -4,6 +4,7 @@
              xmlns:converters="clr-namespace:ByteSync.Services.Converters"
              x:Class="ByteSync.App" Name="ByteSync">
     <Application.Resources>
+        <!-- <ResourceDictionary> -->
         <converters:FormatKbSizeConverter x:Key="FormatKbSizeConverter" />
         <converters:LobbyMemberStatusConverter x:Key="LobbyMemberStatusConverter" />
         <converters:BoolToDeploymentModeConverter x:Key="BoolToDeploymentModeConverter" />
@@ -12,6 +13,15 @@
         <converters:LocalInventoryPartStatusToIconConverter x:Key="InventoryProcessStatusToIconConverter" />
         <converters:LocalInventoryPartStatusToTextConverter x:Key="InventoryProcessStatusToTextConverter" />
         <converters:IntToLetterConverter x:Key="IntToLetterConverter" />
+        <!--     <ResourceDictionary.MergedDictionaries> -->
+        <!--         <ResourceInclude Source="avares://ByteSync/Assets/Themes/TagEditorStyles.axaml"/> -->
+        <!--     </ResourceDictionary.MergedDictionaries> -->
+        <!-- </ResourceDictionary> -->
+        <!-- <ResourceDictionary> -->
+        <!--     <ResourceDictionary.MergedDictionaries> -->
+        <!--         <ResourceInclude Source="avares://ByteSync/Assets/Themes/TagEditorStyles.axaml" /> -->
+        <!--     </ResourceDictionary.MergedDictionaries> -->
+        <!-- </ResourceDictionary> -->
     </Application.Resources>
     <Application.DataTemplates>
         <byteSync:ViewLocator/>
@@ -56,6 +66,8 @@
 		<StyleInclude Source="avares://ByteSync/Assets/Icons/BoxIcons.axaml"/>
         <StyleInclude Source="avares://ByteSync/Assets/Themes/LinearProgress.axaml"/>
         <StyleInclude Source="avares://ByteSync/Assets/Themes/GeneralStyles.axaml"/>
+        <StyleInclude Source="avares://ByteSync/Assets/Themes/TagEditorStyles.axaml" />
+        <!-- <StyleInclude Source="avares://ByteSync/Assets/Themes/TagEditorStyles.axaml"/> -->
         
         <!-- <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/> -->
         
