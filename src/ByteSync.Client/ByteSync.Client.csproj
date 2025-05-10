@@ -49,6 +49,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="8.3.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
     <PackageReference Include="Avalonia" Version="0.10.22" />
     <PackageReference Include="Avalonia.Desktop" Version="0.10.22" />
@@ -56,15 +57,15 @@
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.22" />
     <PackageReference Include="Avalonia.Xaml.Behaviors" Version="0.10.22" />
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.23.0" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.24.0" />
     <PackageReference Include="FastRsyncNet" Version="2.4.3" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0-beta.700" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.15" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.13" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.15" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
     <PackageReference Include="Polly" Version="8.4.2" />
     <PackageReference Include="Prism.Core" Version="8.1.97" />
