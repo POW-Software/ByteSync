@@ -9,12 +9,7 @@ public partial class SelectLocaleView : ReactiveUserControl<SelectLocaleViewMode
 {
     public SelectLocaleView()
     {
-        this.WhenActivated(disposables => { });
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        this.WhenActivated(disposables => { });
     }
 }

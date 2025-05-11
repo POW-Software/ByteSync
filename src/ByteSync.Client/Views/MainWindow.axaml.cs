@@ -133,11 +133,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
         }
     }
 
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
-
     public async Task<string[]?> ShowOpenFileDialogAsync(string title, bool allowMultiple)
     {
         OpenFileDialog openFileDialog = new OpenFileDialog();

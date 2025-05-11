@@ -10,9 +10,4 @@ public partial class InventoryMainStatusView : ReactiveUserControl<InventoryMain
     {
         InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

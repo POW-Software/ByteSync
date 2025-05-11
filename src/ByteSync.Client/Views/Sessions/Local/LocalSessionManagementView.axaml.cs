@@ -9,12 +9,7 @@ public partial class LocalSessionManagementView : ReactiveUserControl<LocalSessi
 {
     public LocalSessionManagementView()
     {
-        this.WhenActivated(disposables => { });
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        this.WhenActivated(disposables => { });
     }
 }

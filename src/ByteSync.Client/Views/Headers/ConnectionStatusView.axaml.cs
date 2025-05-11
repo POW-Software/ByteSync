@@ -10,9 +10,4 @@ public partial class ConnectionStatusView : ReactiveUserControl<ConnectionStatus
     {
         InitializeComponent();
     }
-    
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

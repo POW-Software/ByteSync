@@ -10,9 +10,4 @@ public partial class AddTrustedClientView : ReactiveUserControl<AddTrustedClient
     {
         InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

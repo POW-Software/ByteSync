@@ -9,12 +9,7 @@ public partial class FlyoutContainerView : ReactiveUserControl<FlyoutContainerVi
 {
     public FlyoutContainerView()
     {
-        this.WhenActivated(disposables => { });
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        this.WhenActivated(disposables => { });
     }
 }

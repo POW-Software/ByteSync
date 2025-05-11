@@ -10,9 +10,4 @@ public partial class ManageSynchronizationRulesView : ReactiveUserControl<Manage
     {
         InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

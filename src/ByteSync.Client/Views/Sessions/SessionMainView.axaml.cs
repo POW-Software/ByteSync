@@ -12,9 +12,4 @@ public partial class SessionMainView : ReactiveUserControl<SessionMainViewModel>
         this.WhenActivated(disposables => { });
         InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

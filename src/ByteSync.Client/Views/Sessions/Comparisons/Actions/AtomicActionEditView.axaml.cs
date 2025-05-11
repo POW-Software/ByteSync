@@ -10,9 +10,4 @@ public partial class AtomicActionEditView : ReactiveUserControl<AtomicActionEdit
     {
         InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

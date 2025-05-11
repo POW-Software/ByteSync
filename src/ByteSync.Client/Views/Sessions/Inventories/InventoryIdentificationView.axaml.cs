@@ -10,9 +10,4 @@ public partial class InventoryIdentificationView : ReactiveUserControl<Inventory
     {
         InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

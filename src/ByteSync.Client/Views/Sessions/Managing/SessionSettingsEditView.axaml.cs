@@ -9,12 +9,7 @@ public partial class SessionSettingsEditView : ReactiveUserControl<SessionSettin
 {
     public SessionSettingsEditView()
     {
-        this.WhenActivated(disposables => { });
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        this.WhenActivated(disposables => { });
     }
 }

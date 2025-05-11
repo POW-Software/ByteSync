@@ -10,9 +10,4 @@ public partial class SessionMachineView : ReactiveUserControl<SessionMachineView
     {
         InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

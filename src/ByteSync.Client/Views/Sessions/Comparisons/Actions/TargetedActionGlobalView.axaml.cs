@@ -10,9 +10,4 @@ public partial class TargetedActionGlobalView : ReactiveUserControl<TargetedActi
     {
         InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

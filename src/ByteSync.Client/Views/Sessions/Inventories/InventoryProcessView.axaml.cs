@@ -10,24 +10,9 @@ public partial class InventoryProcessView : ReactiveUserControl<InventoryProcess
 {
     public InventoryProcessView()
     {
-        this.WhenActivated(disposables => { });
         InitializeComponent();
-
-    #if DEBUG
-        this.WhenAnyValue(x => x.Bounds)
-            .Subscribe(bounds => BoundsChanged(bounds));
-    #endif
-    }
-
-#if DEBUG
-    private void BoundsChanged(Rect bounds)
-    {
-        // 05/04/2022: Permet de récupérer facilement la hauteur si jamais ce panneau venait à changer de taille
-    }
-#endif
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        
+        this.WhenActivated(disposables => { });
+        
     }
 }

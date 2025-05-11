@@ -9,9 +9,4 @@ public partial class SynchronizationRuleSummaryView : UserControl
     {
         InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

@@ -9,12 +9,7 @@ internal partial class SynchronizationRuleGlobalView : ReactiveUserControl<Synch
 {
     public SynchronizationRuleGlobalView()
     {
-        this.WhenActivated(disposables => { });
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        this.WhenActivated(disposables => { });
     }
 }

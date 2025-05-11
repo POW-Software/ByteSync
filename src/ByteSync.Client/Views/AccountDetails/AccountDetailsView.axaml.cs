@@ -9,13 +9,8 @@ public partial class AccountDetailsView : ReactiveUserControl<AccountDetailsView
 {
     public AccountDetailsView()
     {
-        this.WhenActivated(disposables => { });
-        
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        
+        this.WhenActivated(disposables => { });
     }
 }

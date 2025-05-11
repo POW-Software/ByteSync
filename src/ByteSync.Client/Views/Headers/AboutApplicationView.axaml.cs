@@ -12,9 +12,4 @@ public partial class AboutApplicationView : ReactiveUserControl<AboutApplication
     {
         InitializeComponent();
     }
-    
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

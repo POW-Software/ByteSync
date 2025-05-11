@@ -13,11 +13,6 @@ public partial class TrustedPublicKeysView : ReactiveUserControl<TrustedPublicKe
         InitializeComponent();
     }
 
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
-
     // 01/12/2022 : Pour l'instant, on gère le tri comme ça. C'est pas top, mais ça fonctionne en DEBUG
     // Ne fonctionne que s'il y a des éléments dans la liste
     private void TrustedPublicKeysGrid_OnLoadingRow(object? sender, DataGridRowEventArgs e)

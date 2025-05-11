@@ -10,9 +10,4 @@ public partial class UpdateDetailsView : ReactiveUserControl<UpdateDetailsViewMo
     {
         InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

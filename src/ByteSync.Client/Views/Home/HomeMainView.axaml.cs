@@ -9,12 +9,7 @@ public partial class HomeMainView : ReactiveUserControl<HomeMainViewModel>
 {
     public HomeMainView()
     {
-        this.WhenActivated(disposables => { });
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        this.WhenActivated(disposables => { });
     }
 }

@@ -43,9 +43,4 @@ public partial class CreateSessionProfileView : ReactiveUserControl<CreateSessio
     }
 
     private bool HasFocused { get; set; }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

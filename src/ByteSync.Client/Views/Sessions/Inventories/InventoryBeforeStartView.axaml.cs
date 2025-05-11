@@ -10,9 +10,4 @@ public partial class InventoryBeforeStartView : ReactiveUserControl<InventoryBef
     {
         InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

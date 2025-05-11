@@ -11,6 +11,8 @@ public partial class GeneralSettingsView : ReactiveUserControl<GeneralSettingsVi
 {
     public GeneralSettingsView()
     {
+        InitializeComponent();
+        
         this.WhenActivated(disposables =>
         {
             this
@@ -20,14 +22,12 @@ public partial class GeneralSettingsView : ReactiveUserControl<GeneralSettingsVi
                     value => $"{value} %")
                 .DisposeWith(disposables);
         });
-            
-        InitializeComponent();
     }
 
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
+    // private void InitializeComponent()
+    // {
+    //     AvaloniaXamlLoader.Load(this);
+    // }
         
     // private TextBlock tblZoomLevel => this.FindControl<TextBlock>("tblZoomLevel");
     //

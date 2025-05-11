@@ -10,9 +10,4 @@ public partial class CreateCloudSessionView : ReactiveUserControl<CreateCloudSes
     {
         InitializeComponent();
     }
-    
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

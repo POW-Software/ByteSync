@@ -12,13 +12,8 @@ public partial class ComparisonResultView : ReactiveUserControl<ComparisonResult
 {
     public ComparisonResultView()
     {
-        this.WhenActivated(disposables => { });
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        this.WhenActivated(disposables => { });
     }
 
     private void TheGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)

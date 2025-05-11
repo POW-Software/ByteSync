@@ -9,12 +9,7 @@ public partial class LobbyMainView : ReactiveUserControl<LobbyMainViewModel>
 {
     public LobbyMainView()
     {
-        this.WhenActivated(disposables => { });
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        this.WhenActivated(disposables => { });
     }
 }
