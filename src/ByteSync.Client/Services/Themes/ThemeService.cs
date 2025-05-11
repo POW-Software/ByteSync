@@ -32,48 +32,48 @@ class ThemeService : IThemeService
 
     public void OnThemesRegistred()
     {
-        Theme? theme = null;
-
-        var fluentThemes = Application.Current?.Styles.Where(s => s is Avalonia.Themes.Fluent.FluentTheme).ToList();
-        if (fluentThemes != null)
-        {
-            foreach (var fluentTheme in fluentThemes)
-            {
-                Application.Current!.Styles.Remove(fluentTheme);
-            }
-        }
-        
-        var applicationSettings = _applicationSettingsRepository.GetCurrentApplicationSettings();
-        if (applicationSettings.Theme.IsNotEmpty())
-        {
-            theme = AvailableThemes.FirstOrDefault(t => t.Key.Equals(applicationSettings.Theme, StringComparison.CurrentCultureIgnoreCase));
-        }
-
-        if (theme == null)
-        {
-            UseDefaultTheme();
-            
-            UpdateSettings();
-        }
-        else
-        {
-            SelectTheme(theme);
-        }
+        // Theme? theme = null;
+        //
+        // var fluentThemes = Application.Current?.Styles.Where(s => s is Avalonia.Themes.Fluent.FluentTheme).ToList();
+        // if (fluentThemes != null)
+        // {
+        //     foreach (var fluentTheme in fluentThemes)
+        //     {
+        //         Application.Current!.Styles.Remove(fluentTheme);
+        //     }
+        // }
+        //
+        // var applicationSettings = _applicationSettingsRepository.GetCurrentApplicationSettings();
+        // if (applicationSettings.Theme.IsNotEmpty())
+        // {
+        //     theme = AvailableThemes.FirstOrDefault(t => t.Key.Equals(applicationSettings.Theme, StringComparison.CurrentCultureIgnoreCase));
+        // }
+        //
+        // if (theme == null)
+        // {
+        //     UseDefaultTheme();
+        //     
+        //     UpdateSettings();
+        // }
+        // else
+        // {
+        //     SelectTheme(theme);
+        // }
     }
     
     public void SelectTheme(string? name, bool isDarkMode)
     {
-        var currentTheme = _selectedTheme.Value;
-
-        if (!currentTheme.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) ||
-            currentTheme.IsDarkMode != isDarkMode)
-        {
-            var theme = AvailableThemes.Single(t => t.Name.Equals(name) && t.IsDarkMode == isDarkMode);
-
-            SelectTheme(theme);
-        
-            UpdateSettings();
-        }
+        // var currentTheme = _selectedTheme.Value;
+        //
+        // if (!currentTheme.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) ||
+        //     currentTheme.IsDarkMode != isDarkMode)
+        // {
+        //     var theme = AvailableThemes.Single(t => t.Name.Equals(name) && t.IsDarkMode == isDarkMode);
+        //
+        //     SelectTheme(theme);
+        //
+        //     UpdateSettings();
+        // }
     }
 
     public void RegisterTheme(Theme theme)
@@ -83,33 +83,33 @@ class ThemeService : IThemeService
 
     private void SelectTheme(Theme theme)
     {
-        var styles = Application.Current?.Styles;
-        if (styles == null)
-        {
-            return;
-        }
-                    
-        if (styles.Count == 0 || styles.All(s => s is StyleInclude))
-        {
-            // We haven't added the style yet, we are adding it
-            styles.Add(theme.Style);
-        }
-        else
-        {
-            // Otherwise, we replace
-            styles[^1] = theme.Style;
-        }
-        
-        _selectedTheme.OnNext(theme);
+        // var styles = Application.Current?.Styles;
+        // if (styles == null)
+        // {
+        //     return;
+        // }
+        //             
+        // if (styles.Count == 0 || styles.All(s => s is StyleInclude))
+        // {
+        //     // We haven't added the style yet, we are adding it
+        //     styles.Add(theme.Style);
+        // }
+        // else
+        // {
+        //     // Otherwise, we replace
+        //     styles[^1] = theme.Style;
+        // }
+        //
+        // _selectedTheme.OnNext(theme);
     }
 
     private void UseDefaultTheme()
     {
-        var defaultTheme = AvailableThemes.Single(t => 
-            (t.Name.Equals(ThemeConstants.BLUE) || t.Name.Equals(ThemeConstants.BLUE + "1"))
-            && t.Mode == ThemeModes.Light);
-        
-        SelectTheme(defaultTheme);
+        // var defaultTheme = AvailableThemes.Single(t => 
+        //     (t.Name.Equals(ThemeConstants.BLUE) || t.Name.Equals(ThemeConstants.BLUE + "1"))
+        //     && t.Mode == ThemeModes.Light);
+        //
+        // SelectTheme(defaultTheme);
     }
     
     private void UpdateSettings()

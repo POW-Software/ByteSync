@@ -10,10 +10,10 @@
         <home:HomeMainViewModel />
     </Design.DataContext>
     
-    <Grid Background="{DynamicResource BlockBackColor}"> 
+    <Grid Background="{DynamicResource SystemChromeLowColor}"> 
         
-        <Border BorderBrush="{DynamicResource OtherMemberBackGround}" CornerRadius="4" BorderThickness="5" 
-                HorizontalAlignment="Center" VerticalAlignment="Center" Background="{DynamicResource OtherMemberBackGround}">
+        <Border BorderBrush="{DynamicResource SystemChromeLowColor}" CornerRadius="4" BorderThickness="5" 
+                HorizontalAlignment="Center" VerticalAlignment="Center" Background="{DynamicResource SystemChromeLowColor}">
             <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
                         >
                 <ContentControl Content="{Binding CreateCloudSession}" Margin="24 12" 

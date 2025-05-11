@@ -32,7 +32,7 @@
                         IsEnabled="{Binding !IsJoiningCloudSession}">
                 
                 <!-- Create Button -->
-                <Button Classes="GenericButton" Margin="9" Height="32"
+                <Button Classes="accent" Margin="9" Height="32"
                         HorizontalAlignment="Center" 
                         Command="{Binding Path=CreateCloudSessionCommand}" IsVisible="{Binding !IsCreatingCloudSession}">
                     <StackPanel Orientation="Horizontal">
@@ -47,7 +47,7 @@
                                      IsVisible="{Binding IsCreatingCloudSession}" />
                 
                 <!-- Cancel Button -->
-                <Button Classes="GenericButton" Margin="9" Height="32"
+                <Button Margin="9" Height="32"
                         HorizontalAlignment="Center"
                         Command="{Binding Path=CancelCloudSessionCreationCommand}" IsVisible="{Binding IsCreatingCloudSession}">
                     <StackPanel Orientation="Horizontal">

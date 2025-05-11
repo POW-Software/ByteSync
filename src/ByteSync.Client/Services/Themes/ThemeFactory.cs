@@ -17,15 +17,15 @@ public class ThemeFactory : IThemeFactory
     
     public void BuildThemes()
     {
-        BuildThemes(ThemeConstants.BLUE, "#094177");      // PowBlue
-        BuildThemes(ThemeConstants.GOLD, "#b88746");      // PowGold 
-        
-        BuildThemes("Green", "#0d990d");
-        BuildThemes("Red", "#E51400");
-        BuildThemes("Pink", "#F472D0"); 
-        BuildThemes("Purple", "#763dc2");
-        
-        _themeService.OnThemesRegistred();
+        // BuildThemes(ThemeConstants.BLUE, "#094177");      // PowBlue
+        // BuildThemes(ThemeConstants.GOLD, "#b88746");      // PowGold 
+        //
+        // BuildThemes("Green", "#0d990d");
+        // BuildThemes("Red", "#E51400");
+        // BuildThemes("Pink", "#F472D0"); 
+        // BuildThemes("Purple", "#763dc2");
+        //
+        // _themeService.OnThemesRegistred();
     }
     
     private void BuildThemes(string themeName, string primaryColorHex)
