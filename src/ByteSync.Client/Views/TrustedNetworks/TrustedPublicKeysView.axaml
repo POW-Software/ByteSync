@@ -15,7 +15,7 @@
     </Design.DataContext>
     
     
-    <DataGrid AutoGenerateColumns="False" Margin="12" Items="{Binding Path=TrustedPublicKeys}" 
+    <DataGrid AutoGenerateColumns="False" Margin="12" ItemsSource="{Binding Path=TrustedPublicKeys}" 
               IsReadOnly="True" x:Name="TrustedPublicKeysGrid" 
               LoadingRow="TrustedPublicKeysGrid_OnLoadingRow">
 

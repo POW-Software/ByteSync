@@ -45,8 +45,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
         
     private bool CanCloseApplication { get; set; }
     private bool IsCtrlDown { get; set; }
-
-    protected override void OnClosing(CancelEventArgs e)
+    
+    protected override void OnClosing(WindowClosingEventArgs e)
     {
         // CanCloseApplication indicates if the user has already authorized the end of the application
         if (!CanCloseApplication)

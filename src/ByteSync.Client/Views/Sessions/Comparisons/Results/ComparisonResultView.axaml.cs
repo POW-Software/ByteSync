@@ -10,8 +10,6 @@ namespace ByteSync.Views.Sessions.Comparisons.Results;
 
 public partial class ComparisonResultView : ReactiveUserControl<ComparisonResultViewModel>
 {
-    public DataGrid DataGrid => this.FindControl<DataGrid>("DataGrid");
-        
     public ComparisonResultView()
     {
         this.WhenActivated(disposables => { });

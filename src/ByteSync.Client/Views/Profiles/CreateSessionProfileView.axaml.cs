@@ -9,8 +9,6 @@ namespace ByteSync.Views.Profiles;
 
 public partial class CreateSessionProfileView : ReactiveUserControl<CreateSessionProfileViewModel>
 {
-    public AutoCompleteBox AutoCompleteBoxProfile => this.FindControl<AutoCompleteBox>("AutoCompleteBoxProfile");
-    
     public CreateSessionProfileView()
     {
         InitializeComponent();

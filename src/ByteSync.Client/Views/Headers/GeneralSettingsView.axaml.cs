@@ -29,7 +29,7 @@ public partial class GeneralSettingsView : ReactiveUserControl<GeneralSettingsVi
         AvaloniaXamlLoader.Load(this);
     }
         
-    private TextBlock tblZoomLevel => this.FindControl<TextBlock>("tblZoomLevel");
-    
-    private ToggleSwitch tsDarkMode => this.FindControl<ToggleSwitch>("tsDarkMode");
+    // private TextBlock tblZoomLevel => this.FindControl<TextBlock>("tblZoomLevel");
+    //
+    // private ToggleSwitch tsDarkMode => this.FindControl<ToggleSwitch>("tsDarkMode");
 }
