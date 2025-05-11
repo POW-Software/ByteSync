@@ -1,40 +1,20 @@
-﻿using System.Reactive.Linq;
-using Avalonia;
-using Avalonia.Controls.Primitives;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Styling;
 
 namespace ByteSync.Views.Misc;
 
-// Voir Projektanker.Icons.Avalonia.Icon
-public partial class Icon : TemplatedControl
+public partial class Icon : UserControl
 {
-    public static readonly DirectProperty<Icon, DrawingImage> DrawingImageProperty =
-        AvaloniaProperty.RegisterDirect<Icon, DrawingImage>(nameof(DrawingImage), o => o.DrawingImage);
+    private Image _iconImage;
 
     public static readonly StyledProperty<string> ValueProperty =
         AvaloniaProperty.Register<Icon, string>(nameof(Value));
 
-    private DrawingImage _drawingImage;
-
-    static Icon()
-    {
-        ValueProperty.Changed
-            .Select(e => e.Sender)
-            .OfType<Icon>()
-            .Subscribe(icon => icon.OnValueChanged());
-
-        ForegroundProperty.Changed
-            .Select(e => e.Sender)
-            .OfType<Icon>()
-            .Subscribe(icon => icon.OnForegroundChanged());
-    }
-
-    public DrawingImage DrawingImage
-    {
-        get => _drawingImage;
-        private set => SetAndRaise(DrawingImageProperty, ref _drawingImage, value);
-    }
+    public static readonly StyledProperty<double> FontSizeProperty =
+        AvaloniaProperty.Register<Icon, double>(nameof(FontSize), 16);
 
     public string Value
     {
@@ -42,52 +22,72 @@ public partial class Icon : TemplatedControl
         set => SetValue(ValueProperty, value);
     }
 
-    private void OnValueChanged()
+    public double FontSize
     {
-        if (Value == null)
+        get => GetValue(FontSizeProperty);
+        set => SetValue(FontSizeProperty, value);
+    }
+
+    public Icon()
+    {
+        InitializeComponent();
+        _iconImage = this.FindControl<Image>("IconImage");
+
+        // S'abonner aux changements de propriété
+        this.GetObservable(ValueProperty).Subscribe(_ => UpdateIcon());
+        this.GetObservable(ForegroundProperty).Subscribe(_ => UpdateIcon());
+    }
+
+    private void InitializeComponent()
+    {
+        AvaloniaXamlLoader.Load(this);
+    }
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        UpdateIcon();
+    }
+
+    private void UpdateIcon()
+    {
+        if (string.IsNullOrEmpty(Value))
         {
-            // 23/11/2021 : Survient lorsqu'on change de thème, raison inconnue pour le moment
+            _iconImage.Source = null;
             return;
         }
-            
-        string value;
+
+        string key;
         if (Value.StartsWith("BoxIcons."))
         {
-            value = Value;
+            key = Value;
         }
         else
         {
-            value = "BoxIcons." + Value;
+            key = "BoxIcons." + Value;
         }
 
         object? styleResource = null;
-        Application.Current?.Styles.TryGetResource(value, ThemeVariant.Default,  out styleResource);
-        // var resource = App.Current.Tr["BoxIcons.LogosDigitalocean"];
-            
-        // string path = IconProvider.GetIconPath(Value);
-        // var geometry = styleResource as GeometryDrawing;
-            
-        if (styleResource is GeometryDrawing geometryDrawing)
+        if (Application.Current?.Styles.TryGetResource(key, ThemeVariant.Default,  out styleResource) == true)
         {
-            var drawing = new GeometryDrawing()
+            if (styleResource is GeometryDrawing geometryDrawing)
             {
-                Geometry = geometryDrawing.Geometry, // Geometry.Parse(path),
-                Brush = Foreground ?? new SolidColorBrush(0),
-            };
+                var drawing = new GeometryDrawing()
+                {
+                    Geometry = geometryDrawing.Geometry,
+                    Brush = Foreground ?? new SolidColorBrush(Colors.Black),
+                };
 
-            DrawingImage = new DrawingImage { Drawing = drawing };
+                _iconImage.Source = new DrawingImage { Drawing = drawing };
+            }
+            else
+            {
+                Console.WriteLine($"Resource found but not a GeometryDrawing: {key}");
+            }
         }
-    }
-
-    private void OnForegroundChanged()
-    {
-        if (DrawingImage?.Drawing is GeometryDrawing geometryDrawing)
+        else
         {
-            DrawingImage.Drawing = new GeometryDrawing
-            {
-                Geometry = geometryDrawing.Geometry,
-                Brush = Foreground,
-            };
+            Console.WriteLine($"Icon resource not found: {key}");
         }
     }
 }

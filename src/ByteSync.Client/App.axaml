@@ -3,7 +3,7 @@
              xmlns:byteSync="clr-namespace:ByteSync"
              xmlns:converters="clr-namespace:ByteSync.Services.Converters"
              x:Class="ByteSync.App" Name="ByteSync"
-             RequestedThemeVariant="Dark">
+             RequestedThemeVariant="Light">
     <Application.Resources>
         <ResourceDictionary>
             <!-- <ResourceDictionary.MergedDictionaries> -->

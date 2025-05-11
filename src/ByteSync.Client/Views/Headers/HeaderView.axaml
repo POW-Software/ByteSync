@@ -104,7 +104,7 @@
                     </Button>
 
                     <!-- Parameters -->
-                    <Button Classes="GenericButton" Margin="3"
+                    <Button Margin="3"
                             Command="{Binding Path=ViewGeneralSettingsCommand}" 
                             HorizontalAlignment="Left" >
                         <StackPanel Orientation="Horizontal">

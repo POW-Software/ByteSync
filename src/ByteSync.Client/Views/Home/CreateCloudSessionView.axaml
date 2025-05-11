@@ -36,7 +36,7 @@
                         HorizontalAlignment="Center" 
                         Command="{Binding Path=CreateCloudSessionCommand}" IsVisible="{Binding !IsCreatingCloudSession}">
                     <StackPanel Orientation="Horizontal">
-                        <misc:Icon FontSize="16" Value="RegularAnalyse" Margin="0" />
+                        <misc:Icon FontSize="16" Value="RegularAnalyse" Margin="0" Width="24" Height="24" />
                         <TextBlock Text="{localizations:Loc CreateCloudSession_Create}" />
                     </StackPanel>
                 </Button>

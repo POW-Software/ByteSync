@@ -10,7 +10,7 @@
         <home:HomeMainViewModel />
     </Design.DataContext>
     
-    <Grid Background="{DynamicResource SystemChromeLowColor}"> 
+    <Grid Background="{DynamicResource SystemAltHighColor}"> 
         
         <Border BorderBrush="{DynamicResource SystemChromeLowColor}" CornerRadius="4" BorderThickness="5" 
                 HorizontalAlignment="Center" VerticalAlignment="Center" Background="{DynamicResource SystemChromeLowColor}">
