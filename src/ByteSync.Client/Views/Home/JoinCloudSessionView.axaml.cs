@@ -18,6 +18,8 @@ public partial class JoinCloudSessionView : ReactiveUserControl<JoinCloudSession
     //     
     // public Button ButtonJoin => this.FindControl<Button>("ButtonJoin");
     
+    // private TextBox TextBoxSessionId;
+    
     public JoinCloudSessionView()
     {
         InitializeComponent();
@@ -48,8 +50,8 @@ public partial class JoinCloudSessionView : ReactiveUserControl<JoinCloudSession
         });
     }
     
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
+    // private void InitializeComponent()
+    // {
+    //     AvaloniaXamlLoader.Load(this);
+    // }
 }

@@ -135,42 +135,42 @@ public class ThemeFactory : IThemeFactory
         // RegisterOppositeColor(style, colorScheme.Accent2, "2");
         // RegisterOppositeColor(style, colorScheme.Accent3, "3");
         
-        string specificUri1;
+        // string specificUri1;
         string specificUri2;
 
         if (colorScheme.ThemeMode == ThemeModes.Light)
         {
-            specificUri1 = "avares://Avalonia.Themes.Fluent/Accents/BaseLight.xaml";
+            // specificUri1 = "avares://Avalonia.Themes.Fluent/Accents/BaseLight.xaml";
             specificUri2 = "avares://ByteSync/Assets/Themes/PowLight.axaml";
         }
         else
         {
-            specificUri1 = "avares://Avalonia.Themes.Fluent/Accents/BaseDark.xaml";
+            // specificUri1 = "avares://Avalonia.Themes.Fluent/Accents/BaseDark.xaml";
             specificUri2 = "avares://ByteSync/Assets/Themes/PowDark.axaml";
         }
 
         Styles styles = new Styles
         {
-            new StyleInclude(new Uri("avares://Avalonia.ThemeManager/Styles"))
-            {
-                Source = new Uri(specificUri1)
-            },
-            new StyleInclude(new Uri("avares://Avalonia.ThemeManager/Styles"))
-            {
-                Source = new Uri("avares://Avalonia.Themes.Fluent/Accents/Base.xaml")
-            },
-            new StyleInclude(new Uri("avares://Avalonia.ThemeManager/Styles"))
-            {
-                Source = new Uri("avares://Avalonia.Themes.Fluent/Accents/FluentControlResourcesLight.xaml")
-            },
-            new StyleInclude(new Uri("avares://Avalonia.ThemeManager/Styles"))
-            {
-                Source = new Uri("avares://Avalonia.Themes.Fluent/Controls/FluentControls.xaml")
-            },
-            new StyleInclude(new Uri("avares://Avalonia.ThemeManager/Styles"))
-            {
-                Source = new Uri("avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml")
-            },
+            // new StyleInclude(new Uri("avares://Avalonia.ThemeManager/Styles"))
+            // {
+            //     Source = new Uri(specificUri1)
+            // },
+            // new StyleInclude(new Uri("avares://Avalonia.ThemeManager/Styles"))
+            // {
+            //     Source = new Uri("avares://Avalonia.Themes.Fluent/Accents/Base.xaml")
+            // },
+            // new StyleInclude(new Uri("avares://Avalonia.ThemeManager/Styles"))
+            // {
+            //     Source = new Uri("avares://Avalonia.Themes.Fluent/Accents/FluentControlResourcesLight.xaml")
+            // },
+            // new StyleInclude(new Uri("avares://Avalonia.ThemeManager/Styles"))
+            // {
+            //     Source = new Uri("avares://Avalonia.Themes.Fluent/Controls/FluentControls.xaml")
+            // },
+            // new StyleInclude(new Uri("avares://Avalonia.ThemeManager/Styles"))
+            // {
+            //     Source = new Uri("avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml")
+            // },
             new StyleInclude(new Uri("avares://Avalonia.ThemeManager/Styles"))
             {
                 Source = new Uri(specificUri2)

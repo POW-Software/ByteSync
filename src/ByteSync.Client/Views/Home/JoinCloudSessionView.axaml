@@ -31,14 +31,14 @@
                 <!-- SessionId -->
                 <StackPanel Orientation="Vertical" Margin="3" HorizontalAlignment="Left">
                     <Label Content="{localizations:Loc JoinCloudSession_SessionId}" />
-                    <TextBox Text="{Binding SessionId}" Name="TextBoxSessionId" 
+                    <TextBox Text="{Binding SessionId}" x:Name="TextBoxSessionId" 
                              IsEnabled="{Binding !IsJoiningCloudSession}" MinWidth="200" HorizontalAlignment="Left"/>
                 </StackPanel>
 
                 <!-- Password -->
                 <StackPanel Orientation="Vertical" Margin="3" HorizontalAlignment="Left">
                     <Label Content="{localizations:Loc JoinCloudSession_SessionPassword}" />
-                    <TextBox Text="{Binding SessionPassword}" Name="TextBoxSessionPassword" 
+                    <TextBox Text="{Binding SessionPassword}" x:Name="TextBoxSessionPassword" 
                              IsEnabled="{Binding !IsJoiningCloudSession}" MinWidth="200" HorizontalAlignment="Left"/>
                 </StackPanel>
             </StackPanel>
