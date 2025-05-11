@@ -41,7 +41,7 @@
                           VerticalAlignment="Center" HorizontalAlignment="Center"
                           SelectedItem="{Binding SelectedThemeName}"
                           BorderThickness="0"
-                          Items="{Binding AvailableThemesNames}">
+                          ItemsSource="{Binding AvailableThemesNames}">
                 </ComboBox>
 
                 <TextBlock Grid.Row="3" Grid.Column="0" Text="{localizations:Loc AccountDetails_Zoom}" Margin="6" VerticalAlignment="Center"></TextBlock>

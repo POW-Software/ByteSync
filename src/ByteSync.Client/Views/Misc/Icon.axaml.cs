@@ -2,6 +2,7 @@
 using Avalonia;
 using Avalonia.Controls.Primitives;
 using Avalonia.Media;
+using Avalonia.Styling;
 
 namespace ByteSync.Views.Misc;
 
@@ -60,7 +61,7 @@ public partial class Icon : TemplatedControl
         }
 
         object? styleResource = null;
-        Application.Current?.Styles.TryGetResource(value, out styleResource);
+        Application.Current?.Styles.TryGetResource(value, ThemeVariant.Default,  out styleResource);
         // var resource = App.Current.Tr["BoxIcons.LogosDigitalocean"];
             
         // string path = IconProvider.GetIconPath(Value);

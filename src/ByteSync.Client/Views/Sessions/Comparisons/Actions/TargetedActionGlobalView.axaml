@@ -32,7 +32,7 @@
                     <Label Content="{localizations:Loc TargetedActionEditionGlobal_DoTheFollowingAction}"></Label>
                 </StackPanel>
 
-                <ItemsControl IsEnabled="{Binding CanEditAction}" Items="{Binding Actions}">
+                <ItemsControl IsEnabled="{Binding CanEditAction}" ItemsSource="{Binding Actions}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Vertical" Margin="40 10"/>

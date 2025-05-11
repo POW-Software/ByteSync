@@ -17,7 +17,7 @@
         <TextBlock FontSize="18" Margin="18 18 18 0" Text="{localizations:Loc ProfilesView_SavedProfiled, True}"/>
         
         <!-- Classes="NoHeaders" HeadersVisibility="None" -->
-        <DataGrid AutoGenerateColumns="False" Margin="18" Items="{Binding Path=Profiles}" 
+        <DataGrid AutoGenerateColumns="False" Margin="18" ItemsSource="{Binding Path=Profiles}" 
                   IsReadOnly="True" x:Name="TheGrid"   >
             
             <DataGrid.Styles>

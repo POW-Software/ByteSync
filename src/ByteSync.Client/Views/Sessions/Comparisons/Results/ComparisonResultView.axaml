@@ -121,7 +121,7 @@
                                 Background="{DynamicResource SystemChromeMediumColor}" />
             </WrapPanel>
 
-            <DataGrid Name="DataGrid" AutoGenerateColumns="False" Margin="3 3 3 0" Items="{Binding Path=ComparisonItems}"
+            <DataGrid Name="DataGrid" AutoGenerateColumns="False" Margin="3 3 3 0" ItemsSource="{Binding Path=ComparisonItems}"
                       IsReadOnly="True" x:Name="TheGrid" CanUserResizeColumns="True" SelectionMode="Extended"
                       Width="{Binding Path=Width, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=Grid,AncestorLevel=1}}"
                       HeadersVisibility="Column" Background="Transparent" GridLinesVisibility="Horizontal"
@@ -158,7 +158,7 @@
 
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ItemsControl Items="{Binding ContentIdentitiesA}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                                <ItemsControl ItemsSource="{Binding ContentIdentitiesA}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -169,7 +169,7 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ItemsControl Items="{Binding ContentIdentitiesB}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                                <ItemsControl ItemsSource="{Binding ContentIdentitiesB}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -181,7 +181,7 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ItemsControl Items="{Binding ContentIdentitiesC}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                                <ItemsControl ItemsSource="{Binding ContentIdentitiesC}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -192,7 +192,7 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ItemsControl Items="{Binding ContentIdentitiesD}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                                <ItemsControl ItemsSource="{Binding ContentIdentitiesD}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -203,7 +203,7 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ItemsControl Items="{Binding ContentIdentitiesE}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                                <ItemsControl ItemsSource="{Binding ContentIdentitiesE}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -226,7 +226,7 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ItemsControl Items="{Binding SynchronizationActions}"
+                                <ItemsControl ItemsSource="{Binding SynchronizationActions}"
                                               ItemTemplate="{StaticResource SynchronizationActionDataTemplate}"
                                               VerticalAlignment="Center" />
 

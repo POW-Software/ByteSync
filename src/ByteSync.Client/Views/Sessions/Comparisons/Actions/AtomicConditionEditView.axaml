@@ -32,7 +32,7 @@
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="3 0" VerticalAlignment="Center">
                             <ComboBox Classes="PowComboBox"  x:Name="SourceDataComboBox" Margin="0 0" MinWidth="100"
-                                  Items="{Binding Path=ConditionSources}"
+                                  ItemsSource="{Binding Path=ConditionSources}"
                                   PlaceholderText="{localizations:Loc AtomicConditionEdit_Source}"
                                   SelectedItem="{Binding Path=SelectedSource}"> 
                                 
@@ -47,7 +47,7 @@
                             <TextBlock Text="." FontWeight="ExtraBold" VerticalAlignment="Center" Margin="3 0"/>
 
                             <ComboBox Classes="PowComboBox" x:Name="SourceTypeComboBox" Margin="0 0" MinWidth="160"
-                                      Items="{Binding Path=ComparisonElements}" 
+                                      ItemsSource="{Binding Path=ComparisonElements}" 
                                       PlaceholderText="{localizations:Loc AtomicConditionEdit_ComparisonElement}"
                                       SelectedItem="{Binding Path=SelectedComparisonElement}">
                                 
@@ -61,7 +61,7 @@
 
 
                         <ComboBox Classes="PowComboBox" Grid.Column="1" x:Name="OperatorComboBox" Margin="24 0"
-                                  Items="{Binding Path=ComparisonOperators}"
+                                  ItemsSource="{Binding Path=ComparisonOperators}"
                                   PlaceholderText="{localizations:Loc AtomicConditionEdit_ComparisonOperator}"
                                   SelectedItem="{Binding Path=SelectedComparisonOperator}" VerticalAlignment="Center">
                             <ComboBox.ItemTemplate>
@@ -74,7 +74,7 @@
                         <Grid Grid.Column="2" RowDefinitions="Auto, Auto">
                             <StackPanel Grid.Row="0" Orientation="Horizontal">
                                 <ComboBox Classes="PowComboBox" x:Name="DestinationComboBox" Margin="3 0"
-                                          Items="{Binding Path=ConditionDestinations}" 
+                                          ItemsSource="{Binding Path=ConditionDestinations}" 
                                           PlaceholderText="{localizations:Loc AtomicConditionEdit_Destination}"
                                           SelectedItem="{Binding Path=SelectedDestination}">
                                     <ComboBox.ItemTemplate>
@@ -102,7 +102,7 @@
                                 <!-- 10/03/2022 Marge haut de 4 pour respecter le décalage erreur dans DatePicker et TimePicker !!! -->
                                 <ComboBox Classes="PowComboBox" x:Name="SizeUnitComboBox" Margin="3 4 3 0" MinWidth="60"
                                           IsVisible="{Binding Path=IsSizeVisible}"
-                                          Items="{Binding Path=SizeUnits}"
+                                          ItemsSource="{Binding Path=SizeUnits}"
                                           SelectedItem="{Binding Path=SelectedSizeUnit}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>

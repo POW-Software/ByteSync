@@ -21,7 +21,7 @@
                             Margin="6" VerticalAlignment="Center" />
                     <AutoCompleteBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=ProfileName}" Name="AutoCompleteBoxProfile" 
                             Margin="6" VerticalAlignment="Center" Width="250" 
-                            Items="{Binding SuggestedItems}">
+                            ItemsSource="{Binding SuggestedItems}">
                         <Interaction.Behaviors>
                             <behaviors:AutoCompleteZeroMinimumPrefixLengthDropdownBehavior/>
                         </Interaction.Behaviors>

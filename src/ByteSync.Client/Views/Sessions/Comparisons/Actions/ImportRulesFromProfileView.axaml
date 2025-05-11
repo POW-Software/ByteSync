@@ -23,7 +23,7 @@
                           VerticalAlignment="Center" HorizontalAlignment="Center"
                           SelectedItem="{Binding SelectedSessionProfile}"
                           BorderThickness="0"
-                          Items="{Binding AvailableSessionProfiles}">
+                          ItemsSource="{Binding AvailableSessionProfiles}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Name}"  />
@@ -36,7 +36,7 @@
                                  Margin="20,0,0,3"  HorizontalAlignment="Center" VerticalAlignment="Bottom"
                                  IsActive="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
             
-            <ItemsControl Items="{Binding CloudSessionProfileSynchronizationRules}" IsVisible="{Binding CloudSessionProfileSynchronizationRules.Count}" Margin="6">
+            <ItemsControl ItemsSource="{Binding CloudSessionProfileSynchronizationRules}" IsVisible="{Binding CloudSessionProfileSynchronizationRules.Count}" Margin="6">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Vertical" HorizontalAlignment="Center"/>

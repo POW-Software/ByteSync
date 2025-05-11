@@ -148,7 +148,7 @@
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                         <TextBlock FontSize="18" Margin="18 18 18 0" Text="{localizations:Loc LobbyMainView_SessionMembers, True}"/>
                     
-                        <ItemsControl Items="{Binding Members}">
+                        <ItemsControl ItemsSource="{Binding Members}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
@@ -170,7 +170,7 @@
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                         <TextBlock FontSize="18" Margin="18 18 18 0" Text="{localizations:Loc LobbyMainView_SynchronizationRules, True}"/>
                     
-                        <ItemsControl Items="{Binding SynchronizationRules}" IsVisible="{Binding SynchronizationRules.Count}" Margin="6">
+                        <ItemsControl ItemsSource="{Binding SynchronizationRules}" IsVisible="{Binding SynchronizationRules.Count}" Margin="6">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center"/>

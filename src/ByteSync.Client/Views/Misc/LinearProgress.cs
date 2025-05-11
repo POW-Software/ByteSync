@@ -19,7 +19,7 @@ public class LinearProgress : TemplatedControl
 
     static LinearProgress()
     {
-
+        IsActiveProperty.Changed.Subscribe(OnIsActiveChanged);
     }
 
     public LinearProgress()
@@ -33,14 +33,16 @@ public class LinearProgress : TemplatedControl
         get => (bool)GetValue(IsActiveProperty);
         set => SetValue(IsActiveProperty, value);
     }
-
-
+    
     public static readonly StyledProperty<bool> IsActiveProperty =
-        AvaloniaProperty.Register<LinearProgress, bool>(nameof(IsActive), defaultValue: true, notifying: OnIsActiveChanged);
+        AvaloniaProperty.Register<LinearProgress, bool>(nameof(IsActive), defaultValue: true);
 
-    private static void OnIsActiveChanged(AvaloniaObject obj, bool arg2)
+    private static void OnIsActiveChanged(AvaloniaPropertyChangedEventArgs e)
     {
-        ((LinearProgress)obj).UpdateVisualStates();
+        if (e.Sender is LinearProgress linearProgress)
+        {
+            linearProgress.UpdateVisualStates();
+        }
     }
     
     public static readonly DirectProperty<LinearProgress, double> RectangleWidthProperty =

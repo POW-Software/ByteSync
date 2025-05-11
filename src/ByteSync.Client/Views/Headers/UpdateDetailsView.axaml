@@ -17,7 +17,7 @@
             <Label Content="{Binding AvailableUpdatesMessage}" Margin="6" 
                        HorizontalAlignment="Center" HorizontalContentAlignment="Center" VerticalAlignment="Center"/>
             
-            <ItemsControl Items="{Binding SoftwareVersions}">
+            <ItemsControl ItemsSource="{Binding SoftwareVersions}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Vertical" Margin="12" />

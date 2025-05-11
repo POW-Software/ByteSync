@@ -3,6 +3,7 @@ using System.Reactive.Subjects;
 using Avalonia;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Media;
+using Avalonia.Styling;
 using ByteSync.Business.Themes;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
@@ -120,7 +121,7 @@ class ThemeService : IThemeService
     public void GetResource<T>(string resourceName, out T? resource)
     {
         object? styleResource = null;
-        Application.Current?.Styles.TryGetResource(resourceName, out styleResource);
+        Application.Current?.Styles.TryGetResource(resourceName, ThemeVariant.Default, out styleResource);
 
         if (styleResource is T)
         {
@@ -135,7 +136,7 @@ class ThemeService : IThemeService
     public IBrush? GetBrush(string resourceName)
     {
         object? styleResource = null;
-        Application.Current?.Styles.TryGetResource(resourceName, out styleResource);
+        Application.Current?.Styles.TryGetResource(resourceName, ThemeVariant.Default,  out styleResource);
 
         if (styleResource is IBrush brush)
         {
