@@ -4,18 +4,24 @@ namespace ByteSync.Business.Themes;
 
 public class Theme
 {
-    public Theme(string themeName, ThemeModes mode, Styles style)
+    public Theme(string themeName, ThemeModes mode, Styles? style, ThemeColor themeColor, ThemeColor secondaryThemeColor)
     {
         Name = themeName;
         Mode = mode;
-        Style = style;
+        // Style = style;
+        ThemeColor = themeColor;
+        SecondaryThemeColor = secondaryThemeColor;
     }
+
+    public ThemeColor SecondaryThemeColor { get; set; }
+
+    public ThemeColor ThemeColor { get; set; }
         
     public string Name { get; }
         
     public ThemeModes Mode { get; }
         
-    public Styles Style { get; }
+    // public Styles Style { get; }
 
     public string Key
     {

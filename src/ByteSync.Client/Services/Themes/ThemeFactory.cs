@@ -17,59 +17,69 @@ public class ThemeFactory : IThemeFactory
     
     public void BuildThemes()
     {
-        // BuildThemes(ThemeConstants.BLUE, "#094177");      // PowBlue
-        // BuildThemes(ThemeConstants.GOLD, "#b88746");      // PowGold 
-        //
-        // BuildThemes("Green", "#0d990d");
-        // BuildThemes("Red", "#E51400");
-        // BuildThemes("Pink", "#F472D0"); 
-        // BuildThemes("Purple", "#763dc2");
-        //
-        // _themeService.OnThemesRegistred();
+        BuildThemes(ThemeConstants.BLUE, "#094177");      // PowBlue
+        BuildThemes(ThemeConstants.GOLD, "#b88746");      // PowGold 
+        
+        BuildThemes("Green", "#0d990d");
+        BuildThemes("Red", "#E51400");
+        BuildThemes("Pink", "#F472D0"); 
+        BuildThemes("Purple", "#763dc2");
+        
+        _themeService.OnThemesRegistred();
     }
     
     private void BuildThemes(string themeName, string primaryColorHex)
     {
         ThemeColor themeColor = new ThemeColor(primaryColorHex);
 
-        BuildAndRegisterThemes(themeName + "1", themeColor, themeColor.Hue - 40);
-        BuildAndRegisterThemes(themeName + "2", themeColor, themeColor.Hue + 40);
+        BuildAndRegisterThemes(themeName + "1", themeColor, themeColor.Hue - 40, primaryColorHex);
+        BuildAndRegisterThemes(themeName + "2", themeColor, themeColor.Hue + 40, primaryColorHex);
     }
 
-    private void BuildAndRegisterThemes(string themeName, ThemeColor themeColor, double secondaryColorHue)
+    private void BuildAndRegisterThemes(string themeName, ThemeColor themeColor, double secondaryColorHue, string primaryColorHex)
     {
-        Style genericStyle = new Style();
+        // Style genericStyle = new Style();
+        //
+        // ThemeColor
+        
+        var newSystemColor = ColorUtils.ColorFromHSV(secondaryColorHue, themeColor.Saturation, themeColor.Value);
+        ThemeColor secondaryThemeColor = new ThemeColor(newSystemColor);
 
-        ColorScheme colorSchemeDark = BuildColorScheme(themeColor, secondaryColorHue, ThemeModes.Dark);
-        ColorScheme colorSchemeLight = BuildColorScheme(themeColor, secondaryColorHue, ThemeModes.Light);
+        // ThemeColor result = new ThemeColor(newSystemColor);
+        
+        
+
+        // ColorScheme colorSchemeDark = BuildColorScheme(themeColor, secondaryColorHue, ThemeModes.Dark);
+        // ColorScheme colorSchemeLight = BuildColorScheme(themeColor, secondaryColorHue, ThemeModes.Light);
+        //
+        //
+        // // Allows the DataGrid to be hidden when it is disabled
+        // genericStyle.Resources.Add("DataGridDisabledVisualElementBackground", Color.FromArgb(0, 0, 0, 0));
+        // genericStyle.Resources.Add("ContentControlThemeFontFamily", new FontFamily("SansSerif"));
+        // genericStyle.Resources.Add("ControlContentThemeFontSize", 14d);
+        // genericStyle.Resources.Add("ToolTipContentMaxWidth", 450d); // https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Themes.Fluent/Controls/ToolTip.xaml
+        //
+        //
+        // Style specificLightStyle = new Style();
+        // specificLightStyle.Resources.Add("TextControlSelectionHighlightColor", Color.FromArgb(51, 0, 0, 0)); // SystemBaseLowColor
+        // Styles lightStyles = BuildStyles(colorSchemeLight, specificLightStyle);
+        // lightStyles.Add(genericStyle);
+        //
+        //
+        // Style specificDarkStyle = new Style();
+        // specificDarkStyle.Resources.Add("TextControlSelectionHighlightColor", Color.FromArgb(51, 255, 255, 255)); // SystemBaseLowColor
+        // Styles darkStyles = BuildStyles(colorSchemeDark, specificDarkStyle);
+        // darkStyles.Add(genericStyle);
 
 
-        // Allows the DataGrid to be hidden when it is disabled
-        genericStyle.Resources.Add("DataGridDisabledVisualElementBackground", Color.FromArgb(0, 0, 0, 0));
-        genericStyle.Resources.Add("ContentControlThemeFontFamily", new FontFamily("SansSerif"));
-        genericStyle.Resources.Add("ControlContentThemeFontSize", 14d);
-        genericStyle.Resources.Add("ToolTipContentMaxWidth", 450d); // https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Themes.Fluent/Controls/ToolTip.xaml
-
-
-        Style specificLightStyle = new Style();
-        specificLightStyle.Resources.Add("TextControlSelectionHighlightColor", Color.FromArgb(51, 0, 0, 0)); // SystemBaseLowColor
-        Styles lightStyles = BuildStyles(colorSchemeLight, specificLightStyle);
-        lightStyles.Add(genericStyle);
-
-
-        Style specificDarkStyle = new Style();
-        specificDarkStyle.Resources.Add("TextControlSelectionHighlightColor", Color.FromArgb(51, 255, 255, 255)); // SystemBaseLowColor
-        Styles darkStyles = BuildStyles(colorSchemeDark, specificDarkStyle);
-        darkStyles.Add(genericStyle);
-
-
-        Theme lightTheme = new Theme(themeName, ThemeModes.Light, lightStyles);
+        Theme lightTheme = new Theme(themeName, ThemeModes.Light, null, themeColor, secondaryThemeColor);
         _themeService.RegisterTheme(lightTheme);
 
-        Theme darkTheme = new Theme(themeName, ThemeModes.Dark, darkStyles);
+        Theme darkTheme = new Theme(themeName, ThemeModes.Dark, null, themeColor, secondaryThemeColor);
         _themeService.RegisterTheme(darkTheme);
     }
 
+    /*
     private Styles BuildStyles(ColorScheme colorScheme, Style themeModeFixedStyle)
     {
         Style style = new Style();
@@ -395,4 +405,5 @@ public class ThemeFactory : IThemeFactory
         colorScheme.SystemAccentColorLight4 = colorScheme.MainAccentColor.PercentIncreaseSaturationValue(0, 0.40);
         colorScheme.SystemAccentColorLight5 = colorScheme.MainAccentColor.PercentIncreaseSaturationValue(0, 0.50);
     }
+    */
 }
