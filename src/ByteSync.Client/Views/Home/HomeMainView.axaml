@@ -12,10 +12,14 @@
     
     <Grid Background="{DynamicResource SystemAltHighColor}"> 
         
-        <Border BorderBrush="{DynamicResource SystemChromeLowColor}" CornerRadius="4" BorderThickness="5" 
-                HorizontalAlignment="Center" VerticalAlignment="Center" Background="{DynamicResource SystemChromeLowColor}">
-            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
-                        >
+        <Border BorderBrush="{DynamicResource SystemControlAccentAltTranslucentLowBrush  }" CornerRadius="4" BorderThickness="5" 
+                HorizontalAlignment="Center" VerticalAlignment="Center">
+            
+            <Border.Background>
+                <SolidColorBrush Color="{DynamicResource SystemAccentColor}" Opacity="0.2" />
+            </Border.Background>
+            
+            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <ContentControl Content="{Binding CreateCloudSession}" Margin="24 12" 
                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
                 

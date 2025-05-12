@@ -87,9 +87,20 @@ class ThemeService : IThemeService
     {
         if (Application.Current?.Styles.OfType<FluentTheme>().FirstOrDefault() is FluentTheme fluentTheme)
         {
-            fluentTheme.Resources["SystemAccentColor"] = theme.ThemeColor.AvaloniaColor;
-            
-            Application.Current.RequestedThemeVariant = theme.IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
+            try
+            {
+                ChangerThemeColors(fluentTheme, theme.ThemeColor, "Accent");
+                ChangerThemeColors(fluentTheme, theme.SecondaryThemeColor, "Secondary");
+
+                // fluentTheme.Resources["SystemAccentColor"] = theme.ThemeColor.AvaloniaColor;
+
+                Application.Current.RequestedThemeVariant = theme.IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
+            }
+            catch (Exception ex)
+            {
+                
+            }
+        
             
             // Application.Current.Set = theme.IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
             // fluentTheme.Mode
@@ -113,6 +124,58 @@ class ThemeService : IThemeService
         // }
         
         _selectedTheme.OnNext(theme);
+    }
+    
+    public void ChangerThemeColors(FluentTheme fluentTheme, ThemeColor couleurPrincipale, string mainName)
+    {
+        // var resources = Application.Current.Resources;
+    
+        // Définir la couleur d'accentuation principale
+        fluentTheme.Resources[$"System{mainName}Color"] = couleurPrincipale.AvaloniaColor;
+    
+        // Calculer automatiquement les variantes (assombrissement/éclaircissement)
+        var hsl = couleurPrincipale.AvaloniaColor.ToHsl();
+        
+        // dark1step = (hslAccent.L - SystemAccentColorDark1.L) * 255
+        const double dark1step = 28.5 / 255d;
+        const double dark2step = 49 / 255d;
+        const double dark3step = 74.5 / 255d;
+        // light1step = (SystemAccentColorLight1.L - hslAccent.L) * 255
+        const double light1step = 39 / 255d;
+        const double light2step = 70 / 255d;
+        const double light3step = 103 / 255d;
+        
+        var hslAccent =  couleurPrincipale.AvaloniaColor.ToHsl();
+
+        // return (
+        //     // Darker shades
+        //     new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L - dark1step).ToRgb(),
+        //     new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L - dark2step).ToRgb(),
+        //     new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L - dark3step).ToRgb(),
+        //
+        //     // Lighter shades
+        //     new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light1step).ToRgb(),
+        //     new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light2step).ToRgb(),
+        //     new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light3step).ToRgb()
+        // );
+        //
+        // Variantes foncées (réduire la luminosité)
+        var dark1 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L - dark1step).ToRgb();
+        var dark2 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L - dark2step).ToRgb(); 
+        var dark3 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L - dark3step).ToRgb();
+    
+        // Variantes claires (augmenter la luminosité)
+        var light1 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light1step).ToRgb();
+        var light2 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light2step).ToRgb();
+        var light3 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light3step).ToRgb();
+    
+        // Appliquer les variantes
+        fluentTheme.Resources[$"System{mainName}ColorDark1"] = dark1;
+        fluentTheme.Resources[$"System{mainName}ColorDark2"] = dark2;
+        fluentTheme.Resources[$"System{mainName}ColorDark3"] = dark3;
+        fluentTheme.Resources[$"System{mainName}ColorLight1"] = light1;
+        fluentTheme.Resources[$"System{mainName}ColorLight2"] = light2;
+        fluentTheme.Resources[$"System{mainName}ColorLight3"] = light3;
     }
 
     private void UseDefaultTheme()
