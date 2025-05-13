@@ -82,8 +82,6 @@ public class ConnectionStatusViewModel : ActivatableViewModelBase
 
     private void InitializeBrushes(Theme theme)
     {
-        _connectedBrush = new SolidColorBrush();
-
         _connectedBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
         _connectingBrush = _themeService.GetBrush("SystemControlForegroundBaseHighBrush");
         _connectionFailedBrush = _themeService.GetBrush("HomeLocalSynchronizationBackGround");
