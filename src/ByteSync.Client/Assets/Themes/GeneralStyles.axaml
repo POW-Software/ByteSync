@@ -281,7 +281,7 @@
     <!-- SEPARATOR -->
     
     <Style Selector="TextBlock.GroupBoxHeader">
-	    <Setter Property="Background" Value="{DynamicResource CurrentMemberBackGround}"/>
+	    <Setter Property="Background" Value="{DynamicResource SystemAccentColorDark1}"/>
 	    <Setter Property="MinHeight" Value="30"/>
 	    <Setter Property="VerticalAlignment" Value="Center"/>
 	    <Setter Property="Padding" Value="6" />
@@ -297,7 +297,7 @@
     
     <Style Selector="ComboBox.PowComboBox">
 	    <Setter Property="PlaceholderForeground" Value="Gray"/>
-	    <Setter Property="Background" Value="{DynamicResource BlockBackColor}"/>
+	    <Setter Property="Background" Value="{DynamicResource SystemAltHighColor}"/>
     </Style>
     
     <!--<Style Selector="ComboBox.TestComboBox /template/ Border#HighlightBackground">
@@ -314,7 +314,7 @@
     <!-- SEPARATOR -->
     
     <Style Selector="TimePicker.Pow">
-	    <Setter Property="Background" Value="{DynamicResource BlockBackColor}"/>
+	    <Setter Property="Background" Value="{DynamicResource SystemAltHighColor}"/>
     </Style>
     
     <!-- SEPARATOR -->
@@ -322,7 +322,7 @@
     <!-- SEPARATOR -->
     
     <Style Selector="DatePicker.Pow">
-	    <Setter Property="Background" Value="{DynamicResource BlockBackColor}"/>
+	    <Setter Property="Background" Value="{DynamicResource SystemAltHighColor}"/>
     </Style>
     
     <Style Selector="ToggleSwitch.Pow > Grid#MovingKnobs">

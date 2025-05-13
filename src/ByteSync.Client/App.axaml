@@ -19,6 +19,21 @@
             <converters:LocalInventoryPartStatusToTextConverter x:Key="InventoryProcessStatusToTextConverter" />
             <converters:IntToLetterConverter x:Key="IntToLetterConverter" />
         </ResourceDictionary>
+        
+        <!-- <DynamicResourceExtension x:Key="BlockBackColor" ResourceKey="SystemAltHighColor" /> -->
+        
+        <!-- <StaticResourceExtension x:Key="BlockBackColor" ResourceKey="SystemAltHighColor" /> -->
+        
+        <StaticResource x:Key="BlockBackColor" ResourceKey="SystemAltHighColor" />
+        
+        <StaticResourceExtension x:Key="CurrentMemberBackGround" ResourceKey="SystemAccentColorLight1" />
+        <StaticResourceExtension x:Key="OtherMemberBackGround" ResourceKey="SystemAccentColorLight2" />
+        <StaticResourceExtension x:Key="DisabledMemberBackGround" ResourceKey="SystemChromeGrayColor" />
+        
+        <StaticResourceExtension x:Key="ConnectedMemberLetterBackGround" ResourceKey="SystemAccentColor" />
+        <StaticResourceExtension x:Key="ConnectedMemberLetterBorder" ResourceKey="SystemAccentColor" />
+        <StaticResourceExtension x:Key="DisabledMemberLetterBackGround" ResourceKey="SystemChromeGrayColor" />
+        <StaticResourceExtension x:Key="DisabledMemberLetterBorder" ResourceKey="SystemChromeGrayColor" />
     </Application.Resources>
     <Application.DataTemplates>
         <byteSync:ViewLocator/>

@@ -10,13 +10,13 @@
         <home:HomeMainViewModel />
     </Design.DataContext>
     
-    <Grid Background="{DynamicResource SystemAltHighColor}"> 
+    <Grid> 
         
-        <Border BorderBrush="{DynamicResource SystemControlAccentAltTranslucentLowBrush  }" CornerRadius="4" BorderThickness="5" 
+        <Border BorderBrush="{DynamicResource SystemAltHighColor}" CornerRadius="4" BorderThickness="5" 
                 HorizontalAlignment="Center" VerticalAlignment="Center">
             
             <Border.Background>
-                <SolidColorBrush Color="{DynamicResource SystemAccentColor}" Opacity="0.2" />
+                <SolidColorBrush Color="{DynamicResource SystemAltHighColor}" />
             </Border.Background>
             
             <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">

@@ -142,7 +142,7 @@
                 </Grid>
 
                 <!-- Membres de la Session -->
-                <StackPanel Orientation="Vertical" Background="{DynamicResource BlockBackColor}" 
+                <StackPanel Orientation="Vertical" Background="{DynamicResource SystemAltHighColor}" 
                             HorizontalAlignment="Stretch" Margin="6">
                     
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
@@ -164,7 +164,7 @@
                 </StackPanel>
                 
                 <!-- Règles de Synchronisation -->
-                <StackPanel Orientation="Vertical" Background="{DynamicResource BlockBackColor}" 
+                <StackPanel Orientation="Vertical" Background="{DynamicResource SystemAltHighColor}" 
                             HorizontalAlignment="Stretch" Margin="6">
                     
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">

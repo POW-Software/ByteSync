@@ -126,15 +126,15 @@ class ThemeService : IThemeService
         _selectedTheme.OnNext(theme);
     }
     
-    public void ChangerThemeColors(FluentTheme fluentTheme, ThemeColor couleurPrincipale, string mainName)
+    public void ChangerThemeColors(FluentTheme fluentTheme, ThemeColor themeColor, string mainName)
     {
         // var resources = Application.Current.Resources;
     
         // Définir la couleur d'accentuation principale
-        fluentTheme.Resources[$"System{mainName}Color"] = couleurPrincipale.AvaloniaColor;
+        fluentTheme.Resources[$"System{mainName}Color"] = themeColor.AvaloniaColor;
     
         // Calculer automatiquement les variantes (assombrissement/éclaircissement)
-        var hsl = couleurPrincipale.AvaloniaColor.ToHsl();
+        var hsl = themeColor.AvaloniaColor.ToHsl();
         
         // dark1step = (hslAccent.L - SystemAccentColorDark1.L) * 255
         const double dark1step = 28.5 / 255d;
@@ -145,7 +145,7 @@ class ThemeService : IThemeService
         const double light2step = 70 / 255d;
         const double light3step = 103 / 255d;
         
-        var hslAccent =  couleurPrincipale.AvaloniaColor.ToHsl();
+        var hslAccent =  themeColor.AvaloniaColor.ToHsl();
 
         // return (
         //     // Darker shades
