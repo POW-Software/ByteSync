@@ -38,4 +38,6 @@ public class Theme
             return Mode == ThemeModes.Dark;
         }
     }
+
+    public ColorScheme ColorScheme { get; set; }
 }

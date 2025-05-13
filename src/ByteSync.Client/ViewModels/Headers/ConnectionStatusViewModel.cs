@@ -41,7 +41,11 @@ public class ConnectionStatusViewModel : ActivatableViewModelBase
         {
             _themeService.SelectedTheme
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(InitializeBrushes)
+                .Subscribe(theme =>
+                {
+                    InitializeBrushes(theme);
+                    SetBrush();
+                })
                 .DisposeWith(disposables);
             
             _connectionService.ConnectionStatus

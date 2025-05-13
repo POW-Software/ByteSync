@@ -1,6 +1,7 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Media;
 using Avalonia.Styling;
@@ -89,12 +90,23 @@ class ThemeService : IThemeService
         {
             try
             {
-                ChangerThemeColors(fluentTheme, theme.ThemeColor, "Accent");
-                ChangerThemeColors(fluentTheme, theme.SecondaryThemeColor, "Secondary");
+                ChangerThemeColors(fluentTheme, theme, theme.ThemeColor, "Accent");
+                ChangerThemeColors(fluentTheme, theme, theme.SecondaryThemeColor, "Secondary");
 
                 // fluentTheme.Resources["SystemAccentColor"] = theme.ThemeColor.AvaloniaColor;
 
                 Application.Current.RequestedThemeVariant = theme.IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
+
+                // var vs = Application.Current.Styles;
+                // vs.Remove(fluentTheme);
+                // // if (DateTime.Now.Ticks % 2 == 0)
+                // // {
+                // //     vs.Add(fluentTheme);
+                // // }
+                // vs.Add(fluentTheme);
+                // // vs.Add(fluentTheme);
+
+                // Application.Current.NotifyHostedResourcesChanged(ResourcesChangedEventArgs.Empty);
             }
             catch (Exception ex)
             {
@@ -126,7 +138,7 @@ class ThemeService : IThemeService
         _selectedTheme.OnNext(theme);
     }
     
-    public void ChangerThemeColors(FluentTheme fluentTheme, ThemeColor themeColor, string mainName)
+    public void ChangerThemeColors(FluentTheme fluentTheme, Theme theme, ThemeColor themeColor, string mainName)
     {
         // var resources = Application.Current.Resources;
     
@@ -168,7 +180,7 @@ class ThemeService : IThemeService
         var light1 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light1step).ToRgb();
         var light2 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light2step).ToRgb();
         var light3 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light3step).ToRgb();
-    
+        
         // Appliquer les variantes
         fluentTheme.Resources[$"System{mainName}ColorDark1"] = dark1;
         fluentTheme.Resources[$"System{mainName}ColorDark2"] = dark2;
@@ -176,6 +188,26 @@ class ThemeService : IThemeService
         fluentTheme.Resources[$"System{mainName}ColorLight1"] = light1;
         fluentTheme.Resources[$"System{mainName}ColorLight2"] = light2;
         fluentTheme.Resources[$"System{mainName}ColorLight3"] = light3;
+        
+        var colorScheme = theme.ColorScheme;
+        if (colorScheme != null)
+        {
+            var properties = colorScheme.GetType().GetProperties();
+
+            foreach (var property in properties)
+            {
+                if (property.PropertyType == typeof(Color))
+                {
+                    var color = (Color)property.GetValue(colorScheme)!;
+                    fluentTheme.Resources[property.Name] = color;
+                }
+                else if (property.PropertyType == typeof(ThemeColor))
+                {
+                    var themeColorProperty = (ThemeColor)property.GetValue(colorScheme)!;
+                    fluentTheme.Resources[property.Name] = themeColorProperty.AvaloniaColor;
+                }
+            }
+        }
     }
 
     private void UseDefaultTheme()

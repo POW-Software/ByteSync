@@ -94,6 +94,41 @@
         </LinearGradientBrush>
     </Window.Background>
     
+    <!-- <Window.Resources> -->
+    <!--     ~1~ Brosse pour le thème clair @1@ -->
+    <!--     <LinearGradientBrush x:Key="LightThemeBrush" StartPoint="0%,0%" EndPoint="0%,100%"> -->
+    <!--         <GradientStop Offset="0" Color="{DynamicResource SystemAltHighColor}" /> -->
+    <!--         <GradientStop Offset="1" Color="{DynamicResource SystemChromeMediumColor}" /> -->
+    <!--     </LinearGradientBrush> -->
+    <!-- -->
+    <!--     ~1~ Brosse pour le thème sombre (inversé) @1@ -->
+    <!--     <LinearGradientBrush x:Key="DarkThemeBrush" StartPoint="0%,0%" EndPoint="0%,100%"> -->
+    <!--         <GradientStop Offset="0" Color="{DynamicResource SystemChromeMediumColor}" /> -->
+    <!--         <GradientStop Offset="1" Color="{DynamicResource SystemAltHighColor}" /> -->
+    <!--     </LinearGradientBrush> -->
+    <!-- </Window.Resources> -->
+    <!-- -->
+    <!-- ~1~ Utiliser un thème conditionnel @1@ -->
+    <!-- <Window.Background> -->
+    <!--     <ThemeVariantScope.Resources> -->
+    <!--         <ResourceDictionary> -->
+    <!--             <ResourceDictionary.ThemeDictionaries> -->
+    <!--                 <ResourceDictionary x:Key="Light"> -->
+    <!--                     <StaticResource x:Key="CurrentThemeBrush" ResourceKey="LightThemeBrush" /> -->
+    <!--                 </ResourceDictionary> -->
+    <!--                 <ResourceDictionary x:Key="Dark"> -->
+    <!--                     <StaticResource x:Key="CurrentThemeBrush" ResourceKey="DarkThemeBrush" /> -->
+    <!--                 </ResourceDictionary> -->
+    <!--             </ResourceDictionary.ThemeDictionaries> -->
+    <!--         </ResourceDictionary> -->
+    <!--     </ThemeVariantScope.Resources> -->
+    <!--     <DynamicResource ResourceKey="CurrentThemeBrush" /> -->
+    <!-- </Window.Background> -->
+    
+    <!-- <Window.Background> -->
+    <!--     <DynamicResource ResourceKey="WindowBackgroundBrush" /> -->
+    <!-- </Window.Background> -->
+    
     <LayoutTransformControl>
                     
         <LayoutTransformControl.LayoutTransform>

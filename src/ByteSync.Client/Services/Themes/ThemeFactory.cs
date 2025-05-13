@@ -73,10 +73,223 @@ public class ThemeFactory : IThemeFactory
 
 
         Theme lightTheme = new Theme(themeName, ThemeModes.Light, null, themeColor, secondaryThemeColor);
+        BuildColorScheme(lightTheme, themeColor, secondaryColorHue, ThemeModes.Light);
         _themeService.RegisterTheme(lightTheme);
 
         Theme darkTheme = new Theme(themeName, ThemeModes.Dark, null, themeColor, secondaryThemeColor);
+        BuildColorScheme(darkTheme, themeColor, secondaryColorHue, ThemeModes.Dark);
         _themeService.RegisterTheme(darkTheme);
+    }
+    
+    private ColorScheme BuildColorScheme(Theme theme, ThemeColor themeColor, double secondaryColorHue, ThemeModes themeMode)
+    {
+        var colorScheme = new ColorScheme(themeMode);
+        
+        if (themeMode == ThemeModes.Dark)
+        {
+            //*** Dark *** \\
+
+            // colorScheme.MainAccentColor = themeColor
+            //      .GetWithSaturationValue(0.80, 0.60);
+
+
+            
+            colorScheme.MainAccentColor = themeColor
+                .SetSaturationValue(0.65, 0.50);
+            
+            colorScheme.MainOppositeColor = colorScheme.MainAccentColor
+                .SetHue(secondaryColorHue);
+            
+            // colorScheme.MainAccentColor = themeColor;
+
+            colorScheme.AccentTextForeGround = themeColor
+                // .GetWithSaturationValue(0.35, 0.80).AvaloniaColor;
+                .SetSaturationValue(0.33, 0.85).AvaloniaColor;
+
+            // Home
+            colorScheme.HomeCloudSynchronizationBackGround = themeColor
+                .SetSaturationValue(0.55, 0.70).AvaloniaColor;
+            colorScheme.HomeCloudSynchronizationPointerOverBackGround = themeColor
+                .SetSaturationValue(0.25, 0.50).AvaloniaColor;
+            colorScheme.HomeLocalSynchronizationBackGround = colorScheme.MainOppositeColor
+                .SetSaturationValue(0.55, 0.70).AvaloniaColor;
+            colorScheme.HomeLocalSynchronizationPointerOverBackGround = colorScheme.MainOppositeColor
+                .SetSaturationValue(0.25, 0.50).AvaloniaColor;
+            
+            
+            // Charts
+            colorScheme.ChartsMainBarColor = themeColor
+                .SetSaturationValue(0.50, 0.75).AvaloniaColor;
+            colorScheme.ChartsAlternateBarColor = colorScheme.MainOppositeColor
+                .SetSaturationValue(0.50, 0.75).AvaloniaColor;
+            colorScheme.ChartsMainLineColor = colorScheme.MainAccentColor.AvaloniaColor;
+            
+            
+            // SessionMember / LobbyMember
+            colorScheme.CurrentMemberBackGround = themeColor
+                .SetSaturationValue(0.55, 0.32);
+            colorScheme.DisabledMemberBackGround = themeColor
+                .SetSaturationValue(0.0, 0.22);
+            colorScheme.OtherMemberBackGround = themeColor
+                .SetSaturationValue(0.35, 0.22);
+            
+            colorScheme.ConnectedMemberLetterBackGround = themeColor
+                .SetSaturationValue(0.50, 0.18).AvaloniaColor;
+            colorScheme.DisabledMemberLetterBackGround = themeColor
+                .SetSaturationValue(0.0, 0.20).AvaloniaColor;
+            
+            colorScheme.ConnectedMemberLetterBorder = themeColor
+                .SetSaturationValue(0.50, 0.21).AvaloniaColor;
+            colorScheme.DisabledMemberLetterBorder = themeColor
+                .SetSaturationValue(0.0, 0.23).AvaloniaColor;
+            
+            // AccentButton
+            colorScheme.BsAccentButtonBackGround = themeColor
+                .SetSaturationValue(0.55, 0.25).AvaloniaColor;
+            colorScheme.BsAccentButtonPointerOverBackGround = themeColor
+                .SetSaturationValue(0.55, 0.35).AvaloniaColor;
+            
+            // OppositeButton
+            colorScheme.OppositeButtonBackGround = colorScheme.MainOppositeColor
+                .SetSaturationValue(0.55, 0.25).AvaloniaColor;
+            colorScheme.OppositeButtonPointerOverBackGround = colorScheme.MainOppositeColor
+                .SetSaturationValue(0.55, 0.35).AvaloniaColor;
+            
+            
+            colorScheme.StatusMainBackGround = themeColor
+                .SetSaturationValue(0.45, 0.25);
+
+            ComputeAttenuations(colorScheme);
+
+            colorScheme.Accent1 = colorScheme.SystemAccentColorDark1.AvaloniaColor;
+            colorScheme.Accent2 = colorScheme.SystemAccentColorDark2.AvaloniaColor;
+            colorScheme.Accent3 = colorScheme.SystemAccentColorDark3.AvaloniaColor;
+            colorScheme.Accent4 = colorScheme.SystemAccentColorDark4.AvaloniaColor;
+            colorScheme.Accent5 = colorScheme.SystemAccentColorDark5.AvaloniaColor;
+            
+            ComputeOpposites(colorScheme, secondaryColorHue);
+        }
+        else
+        {
+            //*** Light *** \\
+            
+            colorScheme.MainAccentColor = themeColor;
+            
+            colorScheme.MainOppositeColor = colorScheme.MainAccentColor
+                .SetHue(secondaryColorHue);
+            
+            
+            colorScheme.AccentTextForeGround = themeColor.AvaloniaColor;
+            
+            // Home
+            colorScheme.HomeCloudSynchronizationBackGround = themeColor
+                .SetSaturationValue(0.50, 0.65).AvaloniaColor;
+            colorScheme.HomeCloudSynchronizationPointerOverBackGround = themeColor
+                .SetSaturationValue(0.25, 0.55).AvaloniaColor;
+            colorScheme.HomeLocalSynchronizationBackGround = colorScheme.MainOppositeColor
+                .SetSaturationValue(0.50, 0.65).AvaloniaColor;
+            colorScheme.HomeLocalSynchronizationPointerOverBackGround = colorScheme.MainOppositeColor
+                .SetSaturationValue(0.25, 0.55).AvaloniaColor;
+            
+            
+            // Charts
+            colorScheme.ChartsMainBarColor = themeColor
+                .SetSaturationValue(0.50, 0.80).AvaloniaColor;
+            colorScheme.ChartsAlternateBarColor = colorScheme.MainOppositeColor
+                .SetSaturationValue(0.50, 0.80).AvaloniaColor;
+            colorScheme.ChartsMainLineColor = colorScheme.MainAccentColor.AvaloniaColor;
+            
+            
+            // SessionMember / LobbyMember
+            colorScheme.CurrentMemberBackGround = themeColor
+                .SetSaturationValue(0.45, 0.85);
+            colorScheme.DisabledMemberBackGround = themeColor
+                .SetSaturationValue(0.0, 0.88);
+            colorScheme.OtherMemberBackGround = themeColor
+                .SetSaturationValue(0.20, 0.92);
+            
+            colorScheme.ConnectedMemberLetterBackGround = themeColor
+                .SetSaturationValue(0.20, 0.95).AvaloniaColor;
+            colorScheme.DisabledMemberLetterBackGround = themeColor
+                .SetSaturationValue(0.0, 0.95).AvaloniaColor;
+                
+            colorScheme.ConnectedMemberLetterBorder = themeColor
+                .SetSaturationValue(0.20, 0.92).AvaloniaColor;
+            colorScheme.DisabledMemberLetterBorder = themeColor
+                .SetSaturationValue(0.0, 0.92).AvaloniaColor;
+            
+            // AccentButton
+            colorScheme.BsAccentButtonBackGround = themeColor
+                .SetSaturationValue(0.15, 0.95).AvaloniaColor;
+            colorScheme.BsAccentButtonPointerOverBackGround = themeColor
+                .SetSaturationValue(0.12, 0.98).AvaloniaColor;
+            
+            // OppositeButton
+            colorScheme.OppositeButtonBackGround = colorScheme.MainOppositeColor
+                .SetSaturationValue(0.15, 0.95).AvaloniaColor;
+            colorScheme.OppositeButtonPointerOverBackGround = colorScheme.MainOppositeColor
+                .SetSaturationValue(0.12, 0.98).AvaloniaColor;
+            
+            colorScheme.StatusMainBackGround = themeColor
+                .SetSaturationValue(0.35, 0.90);
+            
+            ComputeAttenuations(colorScheme);
+            
+            colorScheme.Accent1 = colorScheme.SystemAccentColorLight1.AvaloniaColor;
+            colorScheme.Accent2 = colorScheme.SystemAccentColorLight2.AvaloniaColor;
+            colorScheme.Accent3 = colorScheme.SystemAccentColorLight3.AvaloniaColor;
+            colorScheme.Accent4 = colorScheme.SystemAccentColorLight4.AvaloniaColor;
+            colorScheme.Accent5 = colorScheme.SystemAccentColorLight5.AvaloniaColor;
+            
+            ComputeOpposites(colorScheme, secondaryColorHue);
+        }
+        
+        theme.ColorScheme = colorScheme;
+        
+        return colorScheme;
+    }
+    
+        private void ComputeOpposites(ColorScheme colorScheme, double secondaryColorHue)
+    {
+        for (int i = 1; i <= 3; i++)
+        {
+            double basePercent;
+            if (colorScheme.ThemeMode == ThemeModes.Dark)
+            {
+                basePercent = -0.10;
+            }
+            else
+            {
+                basePercent = -0.10;
+            }
+
+            var opposite = colorScheme.MainOppositeColor.PercentIncreaseSaturationValue(0, basePercent * i);
+            colorScheme.OppositeColors.Add(opposite);
+        }
+        
+        colorScheme.CurrentMemberOppositeBackGround = colorScheme.CurrentMemberBackGround
+            .SetHue(secondaryColorHue);
+        
+        colorScheme.OtherMemberOppositeBackGround = colorScheme.OtherMemberBackGround
+            .SetHue(secondaryColorHue);
+        
+        colorScheme.StatusOppositeBackGround = colorScheme.StatusMainBackGround
+            .SetHue(secondaryColorHue);
+    }
+
+    private static void ComputeAttenuations(ColorScheme colorScheme)
+    {
+        colorScheme.SystemAccentColorDark1 = colorScheme.MainAccentColor.PercentIncreaseSaturationValue(0, -0.10);
+        colorScheme.SystemAccentColorDark2 = colorScheme.MainAccentColor.PercentIncreaseSaturationValue(0, -0.20);
+        colorScheme.SystemAccentColorDark3 = colorScheme.MainAccentColor.PercentIncreaseSaturationValue(0, -0.30);
+        colorScheme.SystemAccentColorDark4 = colorScheme.MainAccentColor.PercentIncreaseSaturationValue(0, -0.40);
+        colorScheme.SystemAccentColorDark5 = colorScheme.MainAccentColor.PercentIncreaseSaturationValue(0, -0.50);
+
+        colorScheme.SystemAccentColorLight1 = colorScheme.MainAccentColor.PercentIncreaseSaturationValue(0, 0.10);
+        colorScheme.SystemAccentColorLight2 = colorScheme.MainAccentColor.PercentIncreaseSaturationValue(0, 0.20);
+        colorScheme.SystemAccentColorLight3 = colorScheme.MainAccentColor.PercentIncreaseSaturationValue(0, 0.30);
+        colorScheme.SystemAccentColorLight4 = colorScheme.MainAccentColor.PercentIncreaseSaturationValue(0, 0.40);
+        colorScheme.SystemAccentColorLight5 = colorScheme.MainAccentColor.PercentIncreaseSaturationValue(0, 0.50);
     }
 
     /*
