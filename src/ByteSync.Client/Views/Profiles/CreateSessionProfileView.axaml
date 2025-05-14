@@ -91,7 +91,7 @@
 
                     <misc:LinearProgress Width="48" Height="48" 
                                          Margin="20,0,0,3"  HorizontalAlignment="Center"
-                                         IsActive="{Binding IsCreatingProfile}" IsVisible="{Binding IsCreatingProfile}"/>
+                                         IsVisible="{Binding IsCreatingProfile}"/>
                     
                     <StackPanel Height="48" IsVisible="{Binding ShowSuccess}">
                         <misc:Icon FontSize="48" Value="SolidCheckCircle" Foreground="{DynamicResource HomeCloudSynchronizationBackGround}"

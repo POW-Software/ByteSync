@@ -58,7 +58,6 @@
                 <!-- Progress Bar -->
                 <misc:LinearProgress Width="120" Margin="9" Height="32" 
                                      HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                                     IsActive="{Binding IsJoiningCloudSession}" 
                                      IsVisible="{Binding IsJoiningCloudSession}"/>
 
                 <!-- Cancel Button -->
