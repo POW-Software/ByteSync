@@ -2,7 +2,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:ByteSync.Views.Misc">
   
-  <!-- Basé sur https://github.com/Deadpikle/AvaloniaProgressRing/blob/master/AvaloniaProgressRing/Styles/ProgressRing.xaml -->
   <Style Selector="local|LinearProgress">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{DynamicResource SystemAccentColor}" />
@@ -15,52 +14,42 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate>
-          
-          <!--MaxWidth="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=MaxSideLength}"
-          MaxHeight="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=MaxSideLength}"-->
-          
           <Border
             x:Name="ExternalBorder"
             Background="{TemplateBinding Background}"
             BorderThickness="{TemplateBinding BorderThickness}"
             BorderBrush="{TemplateBinding BorderBrush}"
             CornerRadius="0"
-            Padding="{TemplateBinding Padding}"
-            IsVisible="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsActive}">
+            Padding="{TemplateBinding Padding}">
             
             <Grid ColumnDefinitions="2*, *, 2*, *, 2*, *, 2*">
-              
-              <!-- Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RectangleWidth}" -->
-              <!-- Margin="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RectangleMargin}" -->
-              
-              <Border Grid.Column="0"  x:Name="R1"
+              <Border Grid.Column="0" x:Name="R1" Classes="cR1"
                   Height="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RectangleHeight}"
                   CornerRadius="2"
                   Background="Transparent" 
                   BorderBrush="{DynamicResource TextControlBorderBrush}"
                   BorderThickness="1"/>
                 
-              <Border Grid.Column="2" x:Name="R2"
+              <Border Grid.Column="2" x:Name="R2" Classes="cR2"
                   Height="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RectangleHeight}"
                   CornerRadius="2"
                   Background="Transparent" 
                   BorderBrush="{DynamicResource TextControlBorderBrush}"
                   BorderThickness="1"/>
               
-              <Border Grid.Column="4" x:Name="R3"
+              <Border Grid.Column="4" x:Name="R3" Classes="cR3"
                   Height="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RectangleHeight}"
                   CornerRadius="2"
                   Background="Transparent" 
                   BorderBrush="{DynamicResource TextControlBorderBrush}"
                   BorderThickness="1"/>
               
-              <Border Grid.Column="6" x:Name="R4"
+              <Border Grid.Column="6" x:Name="R4" Classes="cR4"
                   Height="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RectangleHeight}"
                   CornerRadius="2"
                   Background="Transparent" 
                   BorderBrush="{DynamicResource TextControlBorderBrush}"
                   BorderThickness="1"/>
-                  
             </Grid>
           </Border>
         </ControlTemplate>
@@ -68,7 +57,7 @@
     </Setter>
   </Style>
   
-  <Style Selector="local|LinearProgress:active > Border#R1"  >
+  <Style Selector="local|LinearProgress:active Border.cR1">
     <Style.Animations>
       <Animation Duration="0:0:4.0" IterationCount="Infinite" Delay="0" FillMode="None">
         <KeyFrame KeyTime="0:0:0.0">
@@ -91,7 +80,7 @@
     </Style.Animations>
   </Style>
   
-  <Style Selector="local|LinearProgress:active > Border#R2"  >
+  <Style Selector="local|LinearProgress:active Border.cR2">
     <Style.Animations>
       <Animation Duration="0:0:4.0" IterationCount="Infinite" Delay="0" FillMode="None">
         <KeyFrame KeyTime="0:0:0.0">
@@ -122,7 +111,7 @@
     </Style.Animations>
   </Style>
   
-  <Style Selector="local|LinearProgress:active > Border#R3"  >
+  <Style Selector="local|LinearProgress:active Border.cR3">
     <Style.Animations>
       <Animation Duration="0:0:4.0" IterationCount="Infinite" Delay="0" FillMode="None">
         <KeyFrame KeyTime="0:0:0.0">
@@ -153,7 +142,7 @@
     </Style.Animations>
   </Style>
   
-  <Style Selector="local|LinearProgress:active > Border#R4"  >
+  <Style Selector="local|LinearProgress:active Border.cR4">
     <Style.Animations>
       <Animation Duration="0:0:4.0" IterationCount="Infinite" Delay="0" FillMode="None">
         <KeyFrame KeyTime="0:0:0.0">
@@ -178,5 +167,25 @@
         </KeyFrame>
       </Animation>
     </Style.Animations>
+  </Style>
+  
+  <Style Selector="local|LinearProgress:inactive Border.cR1">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+  </Style>
+  
+  <Style Selector="local|LinearProgress:inactive Border.cR2">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+  </Style>
+  
+  <Style Selector="local|LinearProgress:inactive Border.cR3">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+  </Style>
+  
+  <Style Selector="local|LinearProgress:inactive Border.cR4">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
   </Style>
 </Styles>

@@ -7,16 +7,19 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Avalonia.Controls.Mixins;
+using Avalonia.Media;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Arguments;
 using ByteSync.Business.PathItems;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
+using ByteSync.Business.Themes;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Factories.Proxies;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
@@ -36,9 +39,14 @@ public class SessionMachineViewModel : ActivatableViewModelBase
     private readonly IPathItemRepository _pathItemRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly IFileDialogService _fileDialogService;
+    private readonly IThemeService _themeService;
     private readonly ILogger<SessionMachineViewModel> _logger;
     
     private ReadOnlyObservableCollection<PathItemProxy> _data;
+    
+    private IBrush? _currentMemberBackGround;
+    private IBrush? _otherMemberBackGround;
+    private IBrush? _unknownBadgeBrush;
 
     public SessionMachineViewModel()
     {
@@ -48,7 +56,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
     public SessionMachineViewModel(SessionMemberInfo sessionMemberInfo, ISessionService sessionService, IPathItemsService pathItemsService, 
         ILocalizationService localizationService, IEnvironmentService environmentService, IPathItemProxyFactory pathItemProxyFactory,
         IPathItemRepository pathItemRepository, ISessionMemberRepository sessionMemberRepository, IFileDialogService fileDialogService,
-        ILogger<SessionMachineViewModel> logger)
+        IThemeService themeService, ILogger<SessionMachineViewModel> logger)
     {
         _sessionService = sessionService;
         _pathItemsService = pathItemsService;
@@ -57,6 +65,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         _pathItemRepository = pathItemRepository;
         _sessionMemberRepository = sessionMemberRepository;
         _fileDialogService = fileDialogService;
+        _themeService = themeService;
         _logger = logger;
 
         SessionMemberInfo = sessionMemberInfo;
@@ -116,11 +125,44 @@ public class SessionMachineViewModel : ActivatableViewModelBase
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(evt => OnLocaleChanged(evt.EventArgs))
                 .DisposeWith(disposables);
+            
+            _themeService.SelectedTheme
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(theme =>
+                {
+                    InitializeBrushes(theme);
+                    SetMainGridBrush();
+                })
+                .DisposeWith(disposables);
         });
+
+        SetMainGridBrush();
 
         UpdateMachineDescription();
     }
+
+    private void SetMainGridBrush()
+    {
+        MainGridBrush = IsLocalMachine switch
+        {
+            true => CurrentMemberBackGround,
+            false => OtherMemberBackGround,
+        };
+    }
     
+    private void InitializeBrushes(Theme _)
+    {
+        _currentMemberBackGround = _themeService.GetBrush("CurrentMemberBackGround");
+        _otherMemberBackGround = _themeService.GetBrush("OtherMemberBackGround");
+        _unknownBadgeBrush = _themeService.GetBrush("OtherMemberBackGround");
+    }
+
+    private IBrush CurrentMemberBackGround => _currentMemberBackGround;
+    
+    private IBrush OtherMemberBackGround => _otherMemberBackGround;
+    
+    private IBrush UnknownBadgeBrush => _unknownBadgeBrush;
+
     private void OnLocaleChanged(PropertyChangedEventArgs _)
     {
         UpdateMachineDescription();
@@ -144,6 +186,9 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         
     [Reactive]
     public bool IsLocalMachine { get; set; }
+    
+    [Reactive]
+    public IBrush MainGridBrush { get; set; }
     
     [Reactive]
     public DateTimeOffset JoinedSessionOn { get; set; } 

@@ -34,7 +34,7 @@
                 <Label Content="{Binding ElementType}" 
                        FontStyle="Italic" VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
                 
-                <Border BorderBrush="{DynamicResource BlockBackColor}" BorderThickness="1,0,1,0" Margin="6 0 0,0" />
+                <Border BorderBrush="{DynamicResource SystemAltHighColor}" BorderThickness="1,0,1,0" Margin="6 0 0,0" />
                 
                 <Label Content="{Binding Path}" Margin="6 0"
                        VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>

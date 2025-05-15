@@ -1,9 +1,11 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Media;
 using Avalonia.Styling;
+using Avalonia.Themes.Fluent;
 using ByteSync.Business.Themes;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
@@ -23,7 +25,8 @@ class ThemeService : IThemeService
 
         AvailableThemes = new List<Theme>();
         
-        _selectedTheme = new BehaviorSubject<Theme>(new Theme("undefined", ThemeModes.Light, null!));
+        _selectedTheme = new BehaviorSubject<Theme>(new Theme("undefined", ThemeModes.Light, null!, 
+            new ThemeColor("#094177"), new ThemeColor("#b88746")));
     }
     
     public IObservable<Theme> SelectedTheme => _selectedTheme.AsObservable();
@@ -33,22 +36,22 @@ class ThemeService : IThemeService
     public void OnThemesRegistred()
     {
         Theme? theme = null;
-
-        var fluentThemes = Application.Current?.Styles.Where(s => s is Avalonia.Themes.Fluent.FluentTheme).ToList();
-        if (fluentThemes != null)
-        {
-            foreach (var fluentTheme in fluentThemes)
-            {
-                Application.Current!.Styles.Remove(fluentTheme);
-            }
-        }
+        
+        // var fluentThemes = Application.Current?.Styles.Where(s => s is Avalonia.Themes.Fluent.FluentTheme).ToList();
+        // if (fluentThemes != null)
+        // {
+        //     foreach (var fluentTheme in fluentThemes)
+        //     {
+        //         Application.Current!.Styles.Remove(fluentTheme);
+        //     }
+        // }
         
         var applicationSettings = _applicationSettingsRepository.GetCurrentApplicationSettings();
         if (applicationSettings.Theme.IsNotEmpty())
         {
             theme = AvailableThemes.FirstOrDefault(t => t.Key.Equals(applicationSettings.Theme, StringComparison.CurrentCultureIgnoreCase));
         }
-
+        
         if (theme == null)
         {
             UseDefaultTheme();
@@ -64,12 +67,12 @@ class ThemeService : IThemeService
     public void SelectTheme(string? name, bool isDarkMode)
     {
         var currentTheme = _selectedTheme.Value;
-
+        
         if (!currentTheme.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) ||
             currentTheme.IsDarkMode != isDarkMode)
         {
             var theme = AvailableThemes.Single(t => t.Name.Equals(name) && t.IsDarkMode == isDarkMode);
-
+        
             SelectTheme(theme);
         
             UpdateSettings();
@@ -83,24 +86,128 @@ class ThemeService : IThemeService
 
     private void SelectTheme(Theme theme)
     {
-        var styles = Application.Current?.Styles;
-        if (styles == null)
+        if (Application.Current?.Styles.OfType<FluentTheme>().FirstOrDefault() is FluentTheme fluentTheme)
         {
-            return;
-        }
-                    
-        if (styles.Count == 0 || styles.All(s => s is StyleInclude))
-        {
-            // We haven't added the style yet, we are adding it
-            styles.Add(theme.Style);
-        }
-        else
-        {
-            // Otherwise, we replace
-            styles[^1] = theme.Style;
+            try
+            {
+                ChangerThemeColors(fluentTheme, theme, theme.ThemeColor, "Accent");
+                ChangerThemeColors(fluentTheme, theme, theme.SecondaryThemeColor, "Secondary");
+
+                // fluentTheme.Resources["SystemAccentColor"] = theme.ThemeColor.AvaloniaColor;
+
+                Application.Current.RequestedThemeVariant = theme.IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
+
+                // var vs = Application.Current.Styles;
+                // vs.Remove(fluentTheme);
+                // // if (DateTime.Now.Ticks % 2 == 0)
+                // // {
+                // //     vs.Add(fluentTheme);
+                // // }
+                // vs.Add(fluentTheme);
+                // // vs.Add(fluentTheme);
+
+                // Application.Current.NotifyHostedResourcesChanged(ResourcesChangedEventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                
+            }
+        
+            
+            // Application.Current.Set = theme.IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
+            // fluentTheme.Mode
         }
         
+        // var styles = Application.Current?.Styles;
+        // if (styles == null)
+        // {
+        //     return;
+        // }
+        //             
+        // if (styles.Count == 0 || styles.All(s => s is StyleInclude))
+        // {
+        //     // We haven't added the style yet, we are adding it
+        //     styles.Add(theme.Style);
+        // }
+        // else
+        // {
+        //     // Otherwise, we replace
+        //     styles[^1] = theme.Style;
+        // }
+        
         _selectedTheme.OnNext(theme);
+    }
+    
+    public void ChangerThemeColors(FluentTheme fluentTheme, Theme theme, ThemeColor themeColor, string mainName)
+    {
+        // var resources = Application.Current.Resources;
+    
+        // Définir la couleur d'accentuation principale
+        fluentTheme.Resources[$"System{mainName}Color"] = themeColor.AvaloniaColor;
+    
+        // Calculer automatiquement les variantes (assombrissement/éclaircissement)
+        var hsl = themeColor.AvaloniaColor.ToHsl();
+        
+        // dark1step = (hslAccent.L - SystemAccentColorDark1.L) * 255
+        const double dark1step = 28.5 / 255d;
+        const double dark2step = 49 / 255d;
+        const double dark3step = 74.5 / 255d;
+        // light1step = (SystemAccentColorLight1.L - hslAccent.L) * 255
+        const double light1step = 39 / 255d;
+        const double light2step = 70 / 255d;
+        const double light3step = 103 / 255d;
+        
+        var hslAccent =  themeColor.AvaloniaColor.ToHsl();
+
+        // return (
+        //     // Darker shades
+        //     new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L - dark1step).ToRgb(),
+        //     new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L - dark2step).ToRgb(),
+        //     new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L - dark3step).ToRgb(),
+        //
+        //     // Lighter shades
+        //     new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light1step).ToRgb(),
+        //     new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light2step).ToRgb(),
+        //     new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light3step).ToRgb()
+        // );
+        //
+        // Variantes foncées (réduire la luminosité)
+        var dark1 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L - dark1step).ToRgb();
+        var dark2 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L - dark2step).ToRgb(); 
+        var dark3 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L - dark3step).ToRgb();
+    
+        // Variantes claires (augmenter la luminosité)
+        var light1 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light1step).ToRgb();
+        var light2 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light2step).ToRgb();
+        var light3 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light3step).ToRgb();
+        
+        // Appliquer les variantes
+        fluentTheme.Resources[$"System{mainName}ColorDark1"] = dark1;
+        fluentTheme.Resources[$"System{mainName}ColorDark2"] = dark2;
+        fluentTheme.Resources[$"System{mainName}ColorDark3"] = dark3;
+        fluentTheme.Resources[$"System{mainName}ColorLight1"] = light1;
+        fluentTheme.Resources[$"System{mainName}ColorLight2"] = light2;
+        fluentTheme.Resources[$"System{mainName}ColorLight3"] = light3;
+        
+        var colorScheme = theme.ColorScheme;
+        if (colorScheme != null)
+        {
+            var properties = colorScheme.GetType().GetProperties();
+
+            foreach (var property in properties)
+            {
+                if (property.PropertyType == typeof(Color))
+                {
+                    var color = (Color)property.GetValue(colorScheme)!;
+                    fluentTheme.Resources[property.Name] = color;
+                }
+                else if (property.PropertyType == typeof(ThemeColor))
+                {
+                    var themeColorProperty = (ThemeColor)property.GetValue(colorScheme)!;
+                    fluentTheme.Resources[property.Name] = themeColorProperty.AvaloniaColor;
+                }
+            }
+        }
     }
 
     private void UseDefaultTheme()

@@ -53,14 +53,14 @@
                             IsVisible="{Binding ShowUpdateObservable}"
                             HorizontalAlignment="Left" >
                         
-                        <Interaction.Behaviors>
-                            <DataTriggerBehavior Binding="{Binding IsAVersionMandatory}" ComparisonCondition="Equal" Value="true">
-                                <ChangePropertyAction TargetObject="{Binding #UpdateButton}" PropertyName="Background" Value="{StaticResource OppositeButtonBackGround}" />
-                            </DataTriggerBehavior>
-                            <DataTriggerBehavior Binding="{Binding IsAVersionMandatory}" ComparisonCondition="Equal" Value="false">
-                                <ChangePropertyAction TargetObject="{Binding #UpdateButton}" PropertyName="Background" Value="{StaticResource VeryLightGray}" />
-                            </DataTriggerBehavior>
-                        </Interaction.Behaviors>
+                        <!-- <Interaction.Behaviors> -->
+                        <!--     <DataTriggerBehavior Binding="{Binding IsAVersionMandatory}" ComparisonCondition="Equal" Value="true"> -->
+                        <!--         <ChangePropertyAction TargetObject="{Binding #UpdateButton}" PropertyName="Background" Value="{StaticResource OppositeButtonBackGround}" /> -->
+                        <!--     </DataTriggerBehavior> -->
+                        <!--     <DataTriggerBehavior Binding="{Binding IsAVersionMandatory}" ComparisonCondition="Equal" Value="false"> -->
+                        <!--         <ChangePropertyAction TargetObject="{Binding #UpdateButton}" PropertyName="Background" Value="{StaticResource VeryLightGray}" /> -->
+                        <!--     </DataTriggerBehavior> -->
+                        <!-- </Interaction.Behaviors> -->
                         
                         <StackPanel Orientation="Horizontal">
                             <StackPanel IsVisible="{Binding !IsAVersionMandatory}">
@@ -104,7 +104,7 @@
                     </Button>
 
                     <!-- Parameters -->
-                    <Button Classes="GenericButton" Margin="3"
+                    <Button Margin="3"
                             Command="{Binding Path=ViewGeneralSettingsCommand}" 
                             HorizontalAlignment="Left" >
                         <StackPanel Orientation="Horizontal">
