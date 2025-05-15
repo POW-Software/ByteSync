@@ -181,13 +181,7 @@ class ThemeService : IThemeService
         var light2 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light2step).ToRgb();
         var light3 = new HslColor(hslAccent.A, hslAccent.H, hslAccent.S, hslAccent.L + light3step).ToRgb();
         
-        // Appliquer les variantes
-        fluentTheme.Resources[$"System{mainName}ColorDark1"] = dark1;
-        fluentTheme.Resources[$"System{mainName}ColorDark2"] = dark2;
-        fluentTheme.Resources[$"System{mainName}ColorDark3"] = dark3;
-        fluentTheme.Resources[$"System{mainName}ColorLight1"] = light1;
-        fluentTheme.Resources[$"System{mainName}ColorLight2"] = light2;
-        fluentTheme.Resources[$"System{mainName}ColorLight3"] = light3;
+
         
         var colorScheme = theme.ColorScheme;
         if (colorScheme != null)
@@ -208,6 +202,14 @@ class ThemeService : IThemeService
                 }
             }
         }
+        
+        // Appliquer les variantes
+        fluentTheme.Resources[$"System{mainName}ColorDark1"] = dark1;
+        fluentTheme.Resources[$"System{mainName}ColorDark2"] = dark2;
+        fluentTheme.Resources[$"System{mainName}ColorDark3"] = dark3;
+        fluentTheme.Resources[$"System{mainName}ColorLight1"] = light1;
+        fluentTheme.Resources[$"System{mainName}ColorLight2"] = light2;
+        fluentTheme.Resources[$"System{mainName}ColorLight3"] = light3;
     }
 
     private void UseDefaultTheme()

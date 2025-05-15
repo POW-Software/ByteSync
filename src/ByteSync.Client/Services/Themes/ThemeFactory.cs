@@ -167,6 +167,15 @@ public class ThemeFactory : IThemeFactory
             colorScheme.Accent4 = colorScheme.SystemAccentColorDark4.AvaloniaColor;
             colorScheme.Accent5 = colorScheme.SystemAccentColorDark5.AvaloniaColor;
             
+            colorScheme.VeryLightGray = Color.FromArgb(0xFF, 0x12, 0x12, 0x12);
+            colorScheme.GenericButtonBorder = Color.FromArgb(0xFF, 0x55, 0x55, 0x55);
+            colorScheme.Gray1 = Color.FromArgb(0xFF, 0xCC, 0xCC, 0xCC);
+            colorScheme.Gray2 = Color.FromArgb(0xFF, 0x80, 0x80, 0x80);
+            colorScheme.Gray5 = Color.FromArgb(0xFF, 0x46, 0x46, 0x46);
+            colorScheme.Gray8 = Color.FromArgb(0xFF, 0x27, 0x27, 0x27);
+            colorScheme.SettingsHeaderColor = Color.FromArgb(0xFF, 0x30, 0x30, 0x30);
+            colorScheme.BlockBackColor = Color.FromArgb(0xFF, 0x1F, 0x1F, 0x1F);
+            
             ComputeOpposites(colorScheme, secondaryColorHue);
         }
         else
@@ -240,6 +249,15 @@ public class ThemeFactory : IThemeFactory
             colorScheme.Accent3 = colorScheme.SystemAccentColorLight3.AvaloniaColor;
             colorScheme.Accent4 = colorScheme.SystemAccentColorLight4.AvaloniaColor;
             colorScheme.Accent5 = colorScheme.SystemAccentColorLight5.AvaloniaColor;
+                
+            colorScheme.VeryLightGray = Color.FromArgb(0xFF, 0xF7, 0xF7, 0xF7);
+            colorScheme.GenericButtonBorder = Color.FromArgb(0xFF, 0xAA, 0xAA, 0xAA);
+            colorScheme.Gray1 = Color.FromArgb(0xFF, 0x33, 0x33, 0x33);
+            colorScheme.Gray2 = Color.FromArgb(0xFF, 0x7F, 0x7F, 0x7F);
+            colorScheme.Gray5 = Color.FromArgb(0xFF, 0xB9, 0xB9, 0xB9);
+            colorScheme.Gray8 = Color.FromArgb(0xFF, 0xE0, 0xE0, 0xE0);
+            colorScheme.SettingsHeaderColor = Color.FromArgb(0xFF, 0xE6, 0xE6, 0xE6);
+            colorScheme.BlockBackColor = Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF);
             
             ComputeOpposites(colorScheme, secondaryColorHue);
         }
