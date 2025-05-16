@@ -105,7 +105,6 @@ public class LinearProgress : TemplatedControl
         double rectangleWidth = unitWidth * 2;
         double rightMargin = unitWidth;
         
-        const double goldenRatio = 1.61803398874989484820458683436;
         double preferredMaxheight = rectangleWidth;
 
         RectangleWidth = rectangleWidth;

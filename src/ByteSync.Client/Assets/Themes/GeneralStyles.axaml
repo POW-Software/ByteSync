@@ -117,7 +117,6 @@
         <Setter Property="Background" Value="{DynamicResource VeryLightGray}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="BorderBrush" Value="{DynamicResource GenericButtonBorder}"/>
-        <Setter Property="Padding" Value="10"/>
         <Setter Property="TextBlock.Foreground" Value="{DynamicResource SystemBaseHighColor}" />
         <Setter Property="TextBlock.FontWeight" Value="Bold" />
 
@@ -140,8 +139,6 @@
     
     <Style Selector="Button.GenericButton:pointerover ContentPresenter#PART_ContentPresenter2">
 	    <Setter Property="Background" Value="{DynamicResource Gray8}" />
-	    <!-- <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" /> -->
-	    <!-- <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushPointerOver}" /> -->
 	    <Setter Property="TextBlock.Foreground" Value="{DynamicResource ButtonForegroundPointerOver}" />
     </Style>
     
@@ -249,35 +246,6 @@
 	    <Setter Property="IsVisible" Value="False" />
     </Style>
     
-    
-    
-    
-    <!-- Ne fonctionne pas pour le moment, je suis passé par ThemeManager : style.Resources.Add("DataGridDisabledVisualElementBackground",  Color.FromArgb(0, 0, 0, 0));
-    <Style Selector="DataGrid:disabled /template/ Border#PART_DisabledVisualElement">
-	    <Setter Property="Background" Value="Transparent" />
-	    <Setter Property="CornerRadius" Value="2" />
-    </Style>
-    
-    <Style Selector="DataGrid /template/ Border#PART_DisabledVisualElement">
-	    <Setter Property="IsVisible" Value="False" />
-	    <Setter Property="Background" Value="Transparent" />
-    </Style>
-    
-    <Style Selector="Border#PART_DisabledVisualElement">
-	    <Setter Property="IsVisible" Value="False" />
-	    <Setter Property="Background" Value="Transparent" />
-    </Style>
-    
-    <Style Selector="Border#PART_DisabledVisualElement:disabled">
-	    <Setter Property="IsVisible" Value="False" />
-	    <Setter Property="Background" Value="Transparent" />
-    </Style>
-    
-    <Style Selector="DataGrid:disabled /template/ Border#PART_DisabledVisualElement:disabled">
-	    <Setter Property="IsVisible" Value="False" />
-	    <Setter Property="Background" Value="Transparent" />
-    </Style>-->
-    
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
@@ -294,22 +262,10 @@
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     
-    <!-- https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Themes.Fluent/Controls/ComboBox.xaml
-         https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Themes.Fluent/Accents/FluentControlResourcesLight.xaml -->
-    
     <Style Selector="ComboBox.PowComboBox">
 	    <Setter Property="PlaceholderForeground" Value="Gray"/>
 	    <Setter Property="Background" Value="{DynamicResource BlockBackColor}"/>
     </Style>
-    
-    <!--<Style Selector="ComboBox.TestComboBox /template/ Border#HighlightBackground">
-	    <Setter Property="IsVisible" Value="{TemplateBinding SelectionBoxItem, Converter={x:Static ObjectConverters.IsNull}}" />
-    </Style>-->
-    
-    <!--<Style Selector="ComboBox.TestComboBox /template/ TextBlock#PlaceholderTextBlock">
-	    ~1~ <Setter Property="Background" Value="{DynamicResource ComboBoxBackground}" /> @1@
-	    <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltMediumLowBrush}" />
-    </Style>-->
     
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->

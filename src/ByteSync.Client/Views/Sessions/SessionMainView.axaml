@@ -29,7 +29,7 @@
                         
                     </StackPanel>
                     
-                    <ItemsControl IsVisible="{Binding IsCloudSession}" Margin="6" Background="{DynamicResource SystemAltHighColor}"
+                    <ItemsControl IsVisible="{Binding IsCloudSession}" Margin="6" Background="{DynamicResource BlockBackColor}"
                                   ItemsSource="{Binding Machines}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -43,13 +43,13 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                     
-                    <ContentControl Content="{Binding InventoryProcess}" Background="{DynamicResource SystemAltHighColor}"
+                    <ContentControl Content="{Binding InventoryProcess}" Background="{DynamicResource BlockBackColor}"
                                     IsVisible="{Binding IsInventoryVisible}" MinHeight="320" Margin="6" />
                     
-                    <ContentControl Content="{Binding ComparisonResult}" Background="{DynamicResource SystemAltHighColor}"
+                    <ContentControl Content="{Binding ComparisonResult}" Background="{DynamicResource BlockBackColor}"
                                     IsVisible="{Binding IsComparisonVisible}" Margin="6" />
                     
-                    <ContentControl Content="{Binding SynchronizationProcess}" Background="{DynamicResource SystemAltHighColor}"
+                    <ContentControl Content="{Binding SynchronizationProcess}" Background="{DynamicResource BlockBackColor}"
                                     IsVisible="{Binding ComparisonResult.AreResultsLoaded}" MinHeight="185" Margin="6" /> <!--IsVisible="{Binding IsSynchronizationVisible}"-->
 
                 </StackPanel>
