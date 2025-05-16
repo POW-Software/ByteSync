@@ -9,7 +9,7 @@ public partial class SessionMainView : ReactiveUserControl<SessionMainViewModel>
 {
     public SessionMainView()
     {
-        this.WhenActivated(disposables => { });
+        this.WhenActivated(_ => { });
         InitializeComponent();
     }
 }
