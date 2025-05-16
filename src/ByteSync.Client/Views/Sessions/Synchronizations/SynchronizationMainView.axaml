@@ -32,7 +32,7 @@
                 <StackPanel MinWidth="300" MaxWidth="450" Margin="12"
                             IsVisible="{Binding ShowStartSynchronizationObservable}" 
                             HorizontalAlignment="Center" Orientation="Vertical">
-                    <Button Classes="AccentButton"
+                    <Button Classes="AccentButton" Margin="9" Height="32"
                             Command="{Binding Path=StartSynchronizationCommand}" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
                             <misc:Icon FontSize="12" Value="RegularPlay"  />
