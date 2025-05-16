@@ -127,15 +127,17 @@ public class SessionMachineViewModel : ActivatableViewModelBase
                 .DisposeWith(disposables);
             
             _themeService.SelectedTheme
+                .Skip(1)
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(theme =>
+                .Subscribe(_ =>
                 {
-                    InitializeBrushes(theme);
+                    InitializeBrushes();
                     SetMainGridBrush();
                 })
                 .DisposeWith(disposables);
         });
 
+        InitializeBrushes();
         SetMainGridBrush();
 
         UpdateMachineDescription();
@@ -150,7 +152,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         };
     }
     
-    private void InitializeBrushes(Theme _)
+    private void InitializeBrushes()
     {
         _currentMemberBackGround = _themeService.GetBrush("CurrentMemberBackGround");
         _otherMemberBackGround = _themeService.GetBrush("OtherMemberBackGround");

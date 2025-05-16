@@ -51,6 +51,7 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
         SynchronizationProcess = synchronizationMainViewModel;
         
         var sessionMemberCache = _sessionMemberRepository.ObservableCache.Connect()
+            .ObserveOn(RxApp.MainThreadScheduler)
             .Transform(smi => _sessionMachineViewModelFactory.CreateSessionMachineViewModel(smi))
             .AutoRefresh(vm => vm.JoinedSessionOn)
             .Sort(SortExpressionComparer<SessionMachineViewModel>.Ascending(vm => vm.JoinedSessionOn))
