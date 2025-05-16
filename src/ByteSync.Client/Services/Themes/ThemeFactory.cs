@@ -177,6 +177,10 @@ public class ThemeFactory : IThemeFactory
             colorScheme.BlockBackColor = Color.FromArgb(0xFF, 0x1F, 0x1F, 0x1F);
             
             ComputeOpposites(colorScheme, secondaryColorHue);
+            
+            colorScheme.StatusMainBackGroundBrush = new SolidColorBrush(colorScheme.StatusMainBackGround.AvaloniaColor);
+            colorScheme.StatusOppositeBackGroundBrush = new SolidColorBrush(colorScheme.StatusOppositeBackGround.AvaloniaColor);
+            colorScheme.VeryLightGrayBrush = new SolidColorBrush(colorScheme.VeryLightGray);
         }
         else
         {
@@ -241,7 +245,7 @@ public class ThemeFactory : IThemeFactory
             
             colorScheme.StatusMainBackGround = themeColor
                 .SetSaturationValue(0.35, 0.90);
-            
+
             ComputeAttenuations(colorScheme);
             
             colorScheme.Accent1 = colorScheme.SystemAccentColorLight1.AvaloniaColor;
@@ -260,6 +264,10 @@ public class ThemeFactory : IThemeFactory
             colorScheme.BlockBackColor = Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF);
             
             ComputeOpposites(colorScheme, secondaryColorHue);
+            
+            colorScheme.StatusMainBackGroundBrush = new SolidColorBrush(colorScheme.StatusMainBackGround.AvaloniaColor);
+            colorScheme.StatusOppositeBackGroundBrush = new SolidColorBrush(colorScheme.StatusOppositeBackGround.AvaloniaColor);
+            colorScheme.VeryLightGrayBrush = new SolidColorBrush(colorScheme.VeryLightGray);
         }
         
         theme.ColorScheme = colorScheme;

@@ -110,4 +110,10 @@ public class ColorScheme
     public Color SettingsHeaderColor { get; set; }
     
     public Color BlockBackColor { get; set; }
+    
+    public SolidColorBrush StatusMainBackGroundBrush { get; set; }
+    
+    public SolidColorBrush StatusOppositeBackGroundBrush { get; set; }
+    
+    public SolidColorBrush VeryLightGrayBrush { get; set; }
 }

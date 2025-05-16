@@ -16,12 +16,14 @@ namespace ByteSync.Services.Themes;
 class ThemeService : IThemeService
 {
     private readonly IApplicationSettingsRepository _applicationSettingsRepository;
+    private readonly ILogger<ThemeService> _logger;
     
     private readonly BehaviorSubject<Theme> _selectedTheme;
 
-    public ThemeService(IApplicationSettingsRepository applicationSettingsManager)
+    public ThemeService(IApplicationSettingsRepository applicationSettingsRepository, ILogger<ThemeService> logger)
     {
-        _applicationSettingsRepository = applicationSettingsManager;
+        _applicationSettingsRepository = applicationSettingsRepository;
+        _logger = logger;
 
         AvailableThemes = new List<Theme>();
         
@@ -200,6 +202,15 @@ class ThemeService : IThemeService
                     var themeColorProperty = (ThemeColor)property.GetValue(colorScheme)!;
                     fluentTheme.Resources[property.Name] = themeColorProperty.AvaloniaColor;
                 }
+                else if (property.PropertyType == typeof(SolidColorBrush))
+                {
+                    var brush = (SolidColorBrush)property.GetValue(colorScheme)!;
+                    fluentTheme.Resources[property.Name] = brush;
+                }
+                else
+                {
+                    
+                }
             }
         }
         
@@ -229,8 +240,10 @@ class ThemeService : IThemeService
 
     public void GetResource<T>(string resourceName, out T? resource)
     {
+        var themeVariant = Application.Current?.RequestedThemeVariant ?? ThemeVariant.Default;
+        
         object? styleResource = null;
-        Application.Current?.Styles.TryGetResource(resourceName, ThemeVariant.Default, out styleResource);
+        Application.Current?.Styles.TryGetResource(resourceName, themeVariant, out styleResource);
 
         if (styleResource is T)
         {
@@ -239,13 +252,16 @@ class ThemeService : IThemeService
         else
         {
             resource = default;
+            _logger.LogWarning("Resource {ResourceName} not found", resourceName);
         }
     }
     
     public IBrush? GetBrush(string resourceName)
     {
+        var themeVariant = Application.Current?.RequestedThemeVariant ?? ThemeVariant.Default;
+        
         object? styleResource = null;
-        Application.Current?.Styles.TryGetResource(resourceName, ThemeVariant.Default,  out styleResource);
+        Application.Current?.Styles.TryGetResource(resourceName, themeVariant,  out styleResource);
 
         if (styleResource is IBrush brush)
         {
@@ -257,6 +273,7 @@ class ThemeService : IThemeService
         }
         else
         {
+            _logger.LogWarning("Resource {ResourceName} not found", resourceName);
             return null;
         }
     }
