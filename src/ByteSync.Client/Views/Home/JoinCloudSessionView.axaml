@@ -47,7 +47,7 @@
                         IsEnabled="{Binding !IsCreatingCloudSession}">
 
                 <!-- Join Button -->
-                <Button Classes="accent" Name="ButtonJoin" Margin="9" Height="32" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                <Button Classes="Accent" Name="ButtonJoin" Margin="9" Height="32" HorizontalAlignment="Center" VerticalAlignment="Bottom"
                         Command="{Binding Path=JoinCommand}" IsVisible="{Binding !IsJoiningCloudSession}">
                     <StackPanel Orientation="Horizontal">
                         <misc:Icon FontSize="16" Value="RegularLogInCircle" Margin="0" />
