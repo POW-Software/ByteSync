@@ -242,7 +242,7 @@
     <!-- SEPARATOR -->
     
     <!-- Pour masquer le séparateur lorsqu'il n'y a pas de header -->
-    <Style Selector="DataGrid.NoHeaders > Rectangle#PART_ColumnHeadersAndRowsSeparator">
+    <Style Selector="DataGrid.NoHeaders Rectangle#PART_ColumnHeadersAndRowsSeparator">
 	    <Setter Property="IsVisible" Value="False" />
     </Style>
     
