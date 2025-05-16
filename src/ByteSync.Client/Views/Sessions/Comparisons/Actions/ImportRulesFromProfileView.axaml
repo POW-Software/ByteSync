@@ -18,7 +18,7 @@
 
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="{localizations:Loc ImportRulesFromProfileView_Profile}" Margin="6 6 6 12" VerticalAlignment="Center"/>
-                <ComboBox x:Name="AccentSelector" Classes="PowComboBox"
+                <ComboBox x:Name="AccentSelector" Classes="BsComboBox"
                           Margin="6 6 6 12"
                           VerticalAlignment="Center" HorizontalAlignment="Center"
                           SelectedItem="{Binding SelectedSessionProfile}"

@@ -11,7 +11,7 @@
     </Design.DataContext>
     
     <Grid>
-        <ComboBox BorderThickness="0" ItemsSource="{Binding Path=CultureDefinitions}" Classes="PowComboBox"
+        <ComboBox BorderThickness="0" ItemsSource="{Binding Path=CultureDefinitions}" Classes="BsComboBox"
                   SelectedItem="{Binding Path=SelectedCulture}"
                   MinWidth="100">
             <ComboBox.ItemTemplate>

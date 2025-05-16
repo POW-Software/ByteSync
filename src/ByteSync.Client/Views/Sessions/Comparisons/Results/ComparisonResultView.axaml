@@ -134,7 +134,7 @@
                     <DataGridTemplateColumn Width="Auto" CanUserResize="True">
 
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{Binding PathHeader}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{Binding PathHeader}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
 
                         <DataGridTemplateColumn.CellTemplate>
@@ -153,7 +153,7 @@
                     <!-- Header="{Binding InventoryAName}" -->
                     <DataGridTemplateColumn Width="Auto" CanUserResize="True">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{Binding InventoryAName}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{Binding InventoryAName}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
 
                         <DataGridTemplateColumn.CellTemplate>
@@ -165,7 +165,7 @@
 
                     <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumnBVisible}">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{Binding InventoryBName}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{Binding InventoryBName}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -177,7 +177,7 @@
 
                     <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumnCVisible}">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{Binding InventoryCName}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{Binding InventoryCName}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -188,7 +188,7 @@
 
                     <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumnDVisible}">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{Binding InventoryDName}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{Binding InventoryDName}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -199,7 +199,7 @@
 
                     <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumnEVisible}">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{Binding InventoryEName}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{Binding InventoryEName}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -211,7 +211,7 @@
 
                     <DataGridTemplateColumn Width="Auto" CanUserResize="True">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{localizations:Loc ComparisonResult_ContentRepartition}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{localizations:Loc ComparisonResult_ContentRepartition}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -222,7 +222,7 @@
 
                     <DataGridTemplateColumn Width="Auto" CanUserResize="True">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{localizations:Loc ComparisonResult_Actions}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{localizations:Loc ComparisonResult_Actions}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -236,7 +236,7 @@
                     
                     <DataGridTemplateColumn Width="Auto" CanUserResize="True">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{localizations:Loc ComparisonResult_SynchronizationStatus}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{localizations:Loc ComparisonResult_SynchronizationStatus}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

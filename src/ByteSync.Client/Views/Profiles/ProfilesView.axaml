@@ -30,26 +30,26 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Name}"  Width="Auto" FontSize="14">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="{localizations:Loc ProfilesView_Name}" Classes="PowDataGridHeader"/>
+                        <TextBlock Text="{localizations:Loc ProfilesView_Name}" Classes="BsDataGridHeader"/>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
                 
                 <DataGridTextColumn Binding="{Binding Type, Converter={StaticResource ProfileTypeConverter}}" 
                                     Width="Auto" FontSize="14" IsReadOnly="True">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="{localizations:Loc ProfilesView_Type}" Classes="PowDataGridHeader"/>
+                        <TextBlock Text="{localizations:Loc ProfilesView_Type}" Classes="BsDataGridHeader"/>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
                 
                 <DataGridTextColumn Binding="{Binding Members}" Width="Auto" FontSize="14" CellStyleClasses="AlignRight">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="{localizations:Loc ProfilesView_Members}" Classes="PowDataGridHeader"/>
+                        <TextBlock Text="{localizations:Loc ProfilesView_Members}" Classes="BsDataGridHeader"/>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
                 
                 <DataGridTextColumn Binding="{Binding Creation}" Width="Auto" FontSize="14">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="{localizations:Loc ProfilesView_CreationDate}" Classes="PowDataGridHeader"/>
+                        <TextBlock Text="{localizations:Loc ProfilesView_CreationDate}" Classes="BsDataGridHeader"/>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
 
@@ -143,7 +143,7 @@
                     
                     <DataGridTemplateColumn.HeaderTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{localizations:Loc ProfilesView_Actions}" Classes="PowDataGridHeader"/>
+                            <TextBlock Text="{localizations:Loc ProfilesView_Actions}" Classes="BsDataGridHeader"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.HeaderTemplate>
                 </DataGridTemplateColumn>
@@ -173,7 +173,7 @@
                     
                     <DataGridTemplateColumn.HeaderTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{localizations:Loc General_Delete}" Classes="PowDataGridHeader"/>
+                            <TextBlock Text="{localizations:Loc General_Delete}" Classes="BsDataGridHeader"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.HeaderTemplate>
                 </DataGridTemplateColumn>

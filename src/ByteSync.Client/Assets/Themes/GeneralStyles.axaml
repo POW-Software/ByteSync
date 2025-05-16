@@ -262,7 +262,7 @@
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     
-    <Style Selector="ComboBox.PowComboBox">
+    <Style Selector="ComboBox.BsComboBox">
 	    <Setter Property="PlaceholderForeground" Value="Gray"/>
 	    <Setter Property="Background" Value="{DynamicResource BlockBackColor}"/>
     </Style>
@@ -271,7 +271,7 @@
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     
-    <Style Selector="TimePicker.Pow">
+    <Style Selector="TimePicker.Bs">
 	    <Setter Property="Background" Value="{DynamicResource BlockBackColor}"/>
     </Style>
     
@@ -279,11 +279,11 @@
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     
-    <Style Selector="DatePicker.Pow">
+    <Style Selector="DatePicker.Bs">
 	    <Setter Property="Background" Value="{DynamicResource BlockBackColor}"/>
     </Style>
     
-    <Style Selector="ToggleSwitch.Pow Grid#MovingKnobs">
+    <Style Selector="ToggleSwitch.Bs Grid#MovingKnobs">
 	    <Setter Property="Transitions">
 		    <Transitions>
 			    <DoubleTransition Property="Canvas.Left" Duration="0:0:0" Easing="CubicEaseOut"/>
@@ -291,7 +291,7 @@
 	    </Setter>
     </Style>
     
-    <Style Selector="TextBlock.PowDataGridHeader">
+    <Style Selector="TextBlock.BsDataGridHeader">
 	    <Setter Property="Foreground" Value="{DynamicResource AccentTextForeGround}" />
 	    <Setter Property="FontSize" Value="14" />
 	    <Setter Property="FontWeight" Value="SemiBold" />
