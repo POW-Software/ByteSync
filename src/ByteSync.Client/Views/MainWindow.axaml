@@ -137,7 +137,7 @@
             <ScaleTransform ScaleX="{Binding ZoomLevel}" ScaleY="{Binding ZoomLevel}"></ScaleTransform>
         </LayoutTransformControl.LayoutTransform>
         
-        <Grid RowDefinitions="Auto,*"  >
+        <Grid RowDefinitions="Auto,Auto,*" >
             <Grid.Background>
                 <!-- <SolidColorBrush Color="{DynamicResource SystemAccentColor}" Opacity="0.05" /> -->
                 <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%" Opacity="0.05">
@@ -153,11 +153,16 @@
             <!--     </LinearGradientBrush> -->
             <!-- </Grid.Background> -->
             <!-- -->
-            <ContentControl Grid.Row="0" Content="{Binding Header}"/>
+            
+            <Border Grid.Row="0" x:Name="FocusSink"
+                    IsVisible="True"
+                    Focusable="True" />
+            
+            <ContentControl Grid.Row="1" Content="{Binding Header}"/>
 
-            <rxui:RoutedViewHost PageTransition="{Binding PageTransition}" Grid.Row="1" Router="{Binding Router}" />
+            <rxui:RoutedViewHost PageTransition="{Binding PageTransition}" Grid.Row="2" Router="{Binding Router}" />
 
-            <ContentControl Grid.Row="1" Content="{Binding FlyoutContainer}" IsVisible="{Binding FlyoutContainer.IsFlyoutContainerVisible}"/>
+            <ContentControl Grid.Row="2" Content="{Binding FlyoutContainer}" IsVisible="{Binding FlyoutContainer.IsFlyoutContainerVisible}"/>
         </Grid>
     </LayoutTransformControl>
 </Window>
