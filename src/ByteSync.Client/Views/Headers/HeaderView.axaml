@@ -46,19 +46,12 @@
                     <ContentControl Content="{Binding ConnectionStatus}" Margin="3" VerticalContentAlignment="Center" />
                     
                     <!-- Update -->
-                    <Button Classes="GenericButton" Name="UpdateButton"  Margin="3"
+                    <Button Name="UpdateButton"  Margin="3"
                             Command="{Binding Path=ShowUpdateCommand}" 
                             IsVisible="{Binding ShowUpdateObservable}"
-                            HorizontalAlignment="Left" >
-                        
-                        <!-- <Interaction.Behaviors> -->
-                        <!--     <DataTriggerBehavior Binding="{Binding IsAVersionMandatory}" ComparisonCondition="Equal" Value="true"> -->
-                        <!--         <ChangePropertyAction TargetObject="{Binding #UpdateButton}" PropertyName="Background" Value="{StaticResource OppositeButtonBackGround}" /> -->
-                        <!--     </DataTriggerBehavior> -->
-                        <!--     <DataTriggerBehavior Binding="{Binding IsAVersionMandatory}" ComparisonCondition="Equal" Value="false"> -->
-                        <!--         <ChangePropertyAction TargetObject="{Binding #UpdateButton}" PropertyName="Background" Value="{StaticResource VeryLightGray}" /> -->
-                        <!--     </DataTriggerBehavior> -->
-                        <!-- </Interaction.Behaviors> -->
+                            HorizontalAlignment="Left"
+                            Classes.GenericButton="True"
+                            Classes.Accent="{Binding IsAVersionMandatory}">
                         
                         <StackPanel Orientation="Horizontal">
                             <StackPanel IsVisible="{Binding !IsAVersionMandatory}">
