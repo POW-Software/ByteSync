@@ -6,7 +6,7 @@
         xmlns:viewModels="clr-namespace:ByteSync.ViewModels"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" 
         x:Class="ByteSync.Views.MainWindow"
-        Icon="/Assets/POW_ByteSync.ico"  
+        Icon="/Assets/ByteSync.ico"  
         Title="ByteSync">
     <Design.DataContext>
         <viewModels:MainWindowViewModel/>

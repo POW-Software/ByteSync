@@ -22,11 +22,9 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" HorizontalAlignment="Left" Orientation="Horizontal" VerticalAlignment="Center" Margin="6 0">
-                    <Image Source="/Assets/Logo.png" 
-                           Width="40" 
-                           Height="40" 
-                           Margin="10">
-                    </Image>
+                    <Svg Path="/Assets/ByteSyncLogo.svg"
+                         Height="40"
+                         Margin="10 0" />
 
                     <TextBlock VerticalAlignment="Center" Margin="0 0 20 0">ByteSync</TextBlock>
                     

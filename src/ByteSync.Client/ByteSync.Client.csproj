@@ -3,7 +3,7 @@
     <OutputType>WinExe</OutputType>
     <Nullable>enable</Nullable>
     <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
-    <ApplicationIcon>Assets\POW_ByteSync.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\ByteSync.ico</ApplicationIcon>
     <TargetFramework>net8.0</TargetFramework>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
     <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
@@ -44,7 +44,7 @@
     <AvaloniaXaml Remove="Assets\Themes\GeneralStyles.axaml" />
     <AvaloniaXaml Remove="Assets\Themes\PowBlueAccentColors.axaml" />
     <None Remove=".gitignore" />
-    <None Remove="Assets\Logo.png" />
+    <None Remove="Assets\ByteSyncLogo.png" />
     <AvaloniaXaml Remove="Assets\Themes\LinearProgress.axaml" />
     <None Update="local.settings.template.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
@@ -58,6 +58,7 @@
     <PackageReference Include="Avalonia.Desktop" Version="11.3.0" />
     <PackageReference Include="Avalonia.Diagnostics" Version="11.3.0" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Svg.Skia" Version="11.3.0" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
     <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.3.0" />
     <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="11.*" />
