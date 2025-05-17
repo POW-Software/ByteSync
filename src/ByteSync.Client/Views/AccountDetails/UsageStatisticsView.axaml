@@ -51,21 +51,21 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="12 0">
                 <TextBlock Text="{localizations:Loc UsageStatisticsView_ShowPreviousPeriod}" Margin="3 6" VerticalAlignment="Center"/>
                 <!-- <TextBlock Text="{Binding PreviousYear}" Margin="3 6" VerticalAlignment="Center"/> -->
-                <ToggleSwitch Classes="Pow" Margin="6" IsChecked="{Binding ShowPreviousPeriod}" VerticalAlignment="Center"
+                <ToggleSwitch Classes="Bs" Margin="6" IsChecked="{Binding ShowPreviousPeriod}" VerticalAlignment="Center"
                               HorizontalAlignment="Center"
                               OffContent="" OnContent="">
                 </ToggleSwitch>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="12 0">
                 <TextBlock Text="{localizations:Loc UsageStatisticsView_ShowLimit}" Margin="3 6" VerticalAlignment="Center"/>
-                <ToggleSwitch Classes="Pow" Margin="6" IsChecked="{Binding ShowLimit}" VerticalAlignment="Center"
+                <ToggleSwitch Classes="Bs" Margin="6" IsChecked="{Binding ShowLimit}" VerticalAlignment="Center"
                               HorizontalAlignment="Center"
                               OffContent="" OnContent="">
                 </ToggleSwitch>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="12 0">
                 <TextBlock Text="{localizations:Loc UsageStatisticsView_ProgressiveScale}" Margin="3 6" VerticalAlignment="Center"/>
-                <ToggleSwitch Classes="Pow" Margin="6" IsChecked="{Binding UseProgressiveScale}" VerticalAlignment="Center"
+                <ToggleSwitch Classes="Bs" Margin="6" IsChecked="{Binding UseProgressiveScale}" VerticalAlignment="Center"
                               HorizontalAlignment="Center"
                               OffContent="" OnContent="">
                 </ToggleSwitch>

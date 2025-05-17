@@ -6,20 +6,15 @@ using ByteSync.ViewModels.TrustedNetworks;
 
 namespace ByteSync.Views.TrustedNetworks;
 
-public class TrustedPublicKeysView : ReactiveUserControl<TrustedPublicKeysViewModel>
+public partial class TrustedPublicKeysView : ReactiveUserControl<TrustedPublicKeysViewModel>
 {
     public TrustedPublicKeysView()
     {
         InitializeComponent();
     }
 
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
-
-    // 01/12/2022 : Pour l'instant, on gère le tri comme ça. C'est pas top, mais ça fonctionne en DEBUG
-    // Ne fonctionne que s'il y a des éléments dans la liste
+    // 12/01/2022: For now, we're handling sorting this way. It's not great, but it works in DEBUG mode.
+    // Only works if there are items in the list.
     private void TrustedPublicKeysGrid_OnLoadingRow(object? sender, DataGridRowEventArgs e)
     {
         if (IsInitialSortDone)

@@ -52,7 +52,7 @@
                 </Button>
             </StackPanel>
             
-            <ItemsControl Items="{Binding SynchronizationRules}">
+            <ItemsControl ItemsSource="{Binding SynchronizationRules}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Vertical" Margin="3 3" />

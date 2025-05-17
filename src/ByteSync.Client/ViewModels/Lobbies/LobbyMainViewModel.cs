@@ -94,9 +94,10 @@ public class LobbyMainViewModel : ActivatableViewModelBase, IRoutableViewModel
     {
         try
         {
-            DisposableMixin.DisposeWith(_localizationService.CurrentCultureObservable
-                    .ObserveOn(RxApp.MainThreadScheduler)
-                    .Subscribe(_ => OnLocaleChanged()), disposables);
+            _localizationService.CurrentCultureObservable
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ => OnLocaleChanged())
+                .DisposeWith(disposables);
             
             IsFirstLobbyMember = await _lobbyRepository.IsFirstLobbyMember(LobbyId);
         }

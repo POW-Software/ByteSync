@@ -5,16 +5,11 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Sessions;
 
-class SessionMainView : ReactiveUserControl<SessionMainViewModel>
+public partial class SessionMainView : ReactiveUserControl<SessionMainViewModel>
 {
     public SessionMainView()
     {
-        this.WhenActivated(disposables => { });
+        this.WhenActivated(_ => { });
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
     }
 }

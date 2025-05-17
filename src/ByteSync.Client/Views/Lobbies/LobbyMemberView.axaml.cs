@@ -5,16 +5,11 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Lobbies;
 
-public class LobbyMemberView : ReactiveUserControl<LobbyMemberViewModel>
+public partial class LobbyMemberView : ReactiveUserControl<LobbyMemberViewModel>
 {
     public LobbyMemberView()
     {
-        this.WhenActivated(disposables => { });
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        this.WhenActivated(disposables => { });
     }
 }

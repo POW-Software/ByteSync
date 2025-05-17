@@ -94,4 +94,26 @@ public class ColorScheme
     public Color ChartsAlternateBarColor { get; set; }
     
     public Color ChartsMainLineColor { get; set; }
+    
+    public Color VeryLightGray { get; set; }
+    
+    public Color GenericButtonBorder { get; set; }
+    
+    public Color Gray1 { get; set; }
+    
+    public Color Gray2 { get; set; }
+    
+    public Color Gray5 { get; set; }
+    
+    public Color Gray8 { get; set; }
+    
+    public Color SettingsHeaderColor { get; set; }
+    
+    public Color BlockBackColor { get; set; }
+    
+    public SolidColorBrush StatusMainBackGroundBrush { get; set; }
+    
+    public SolidColorBrush StatusOppositeBackGroundBrush { get; set; }
+    
+    public SolidColorBrush VeryLightGrayBrush { get; set; }
 }

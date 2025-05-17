@@ -47,7 +47,7 @@
 
                     <Border Grid.Row="0" Grid.Column="1" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}">
                         <Grid  VerticalAlignment="Stretch">
-                            <ItemsControl Items="{Binding FingerPrintGroups}" ItemTemplate="{StaticResource StatusItemDataTemplate}">
+                            <ItemsControl ItemsSource="{Binding FingerPrintGroups}" ItemTemplate="{StaticResource StatusItemDataTemplate}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Horizontal"/>
@@ -63,7 +63,7 @@
                     
                     <Border Grid.Row="1" Grid.Column="1" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}">
                         <Grid VerticalAlignment="Stretch">
-                            <ItemsControl Items="{Binding LastWriteTimeGroups}" ItemTemplate="{StaticResource StatusItemDataTemplate}">
+                            <ItemsControl ItemsSource="{Binding LastWriteTimeGroups}" ItemTemplate="{StaticResource StatusItemDataTemplate}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Horizontal"/>
@@ -92,7 +92,7 @@
                     <Border Grid.Column="1" Height="24" BorderBrush="Gray" BorderThickness="0" Background="{DynamicResource VeryLightGray}"
                             VerticalAlignment="Center">
                         <Grid  VerticalAlignment="Stretch">
-                            <ItemsControl Items="{Binding PresenceGroups}" ItemTemplate="{StaticResource StatusItemDataTemplate}">
+                            <ItemsControl ItemsSource="{Binding PresenceGroups}" ItemTemplate="{StaticResource StatusItemDataTemplate}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Horizontal"/>

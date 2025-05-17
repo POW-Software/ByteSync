@@ -17,7 +17,7 @@
         <StackPanel MinWidth="300" MaxWidth="450" Margin="12"
                     IsVisible="{Binding IsCurrentUserAllowedToStartInventory}"
                     HorizontalAlignment="Center" Orientation="Vertical">
-            <Button Classes="AccentButton"
+            <Button Classes="AccentButton" Margin="9" Height="32"
                     Command="{Binding Path=StartInventoryCommand}" HorizontalAlignment="Center"
                     VerticalAlignment="Center">
                 <Button.CommandParameter>

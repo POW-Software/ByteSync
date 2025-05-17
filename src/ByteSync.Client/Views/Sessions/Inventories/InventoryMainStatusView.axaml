@@ -14,7 +14,6 @@
 
     <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 6 0 6">
         <misc:LinearProgress Width="120" Height="100"
-                             IsActive="{Binding IsInventoryRunning}"
                              IsVisible="{Binding IsInventoryRunning}" />
 
         <misc:Icon FontSize="100"

@@ -7,10 +7,8 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Profiles;
 
-public class CreateSessionProfileView : ReactiveUserControl<CreateSessionProfileViewModel>
+public partial class CreateSessionProfileView : ReactiveUserControl<CreateSessionProfileViewModel>
 {
-    public AutoCompleteBox AutoCompleteBoxProfile => this.FindControl<AutoCompleteBox>("AutoCompleteBoxProfile");
-    
     public CreateSessionProfileView()
     {
         InitializeComponent();
@@ -20,8 +18,8 @@ public class CreateSessionProfileView : ReactiveUserControl<CreateSessionProfile
 
         });
 
-        // Fonctionne pour mettre le focus, mais un peu lourd. Essayé avec d'autres events (OnAttachedToVisualTree, OnGotFocus), ca ne passait pas
-        // Autre piste : https://stackoverflow.com/questions/21211596/focus-on-control-using-reactiveui
+        // Works to set focus, but a little heavy. Tried with other events (OnAttachedToVisualTree, OnGotFocus), but it didn't work.
+        // Another possibility : https://stackoverflow.com/questions/21211596/focus-on-control-using-reactiveui
         this.LayoutUpdated += (sender, args) =>
         {
             if (!HasFocused)
@@ -45,9 +43,4 @@ public class CreateSessionProfileView : ReactiveUserControl<CreateSessionProfile
     }
 
     private bool HasFocused { get; set; }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

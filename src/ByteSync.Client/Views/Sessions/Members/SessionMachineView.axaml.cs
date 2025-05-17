@@ -4,15 +4,10 @@ using ByteSync.ViewModels.Sessions.Members;
 
 namespace ByteSync.Views.Sessions.Members;
 
-class SessionMachineView : ReactiveUserControl<SessionMachineViewModel>
+public partial class SessionMachineView : ReactiveUserControl<SessionMachineViewModel>
 {
     public SessionMachineView()
     {
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
     }
 }

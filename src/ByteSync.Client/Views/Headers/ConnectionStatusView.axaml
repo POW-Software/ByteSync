@@ -14,7 +14,7 @@
     <StackPanel Orientation="Vertical">
         <Border Background="{Binding BadgeBrush}" CornerRadius="4" VerticalAlignment="Stretch" >
             <TextBlock Text="{Binding Text}" FontWeight="Bold"
-                       Margin="12 6" Foreground="{DynamicResource BlockBackColor}" 
+                       Margin="12 6" Foreground="{DynamicResource SystemAltHighColor}" 
                        VerticalAlignment="Center"/>
         </Border>
     </StackPanel>

@@ -31,7 +31,7 @@
                                 IsVisible="{Binding ShowFileSystemTypeSelection}" Margin="0 0 0 0">
                         <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_FileSystemType}" VerticalAlignment="Center" Margin="3 0"/>
                         
-                        <ComboBox Classes="PowComboBox" Items="{Binding Path=FileSystemTypes}" Margin="3 0"
+                        <ComboBox Classes="BsComboBox" ItemsSource="{Binding Path=FileSystemTypes}" Margin="3 0"
                                   SelectedItem="{Binding Path=SelectedFileSystemType}" VerticalContentAlignment="Center">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -50,7 +50,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_If}" VerticalAlignment="Center" Margin="3 0"/>
                         
-                        <ComboBox Classes="PowComboBox" Items="{Binding Path=ConditionModes}" Margin="3 0"
+                        <ComboBox Classes="BsComboBox" ItemsSource="{Binding Path=ConditionModes}" Margin="3 0"
                                   SelectedItem="{Binding Path=SelectedConditionMode}" VerticalContentAlignment="Center">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -62,7 +62,7 @@
                         <TextBlock Text="{Binding Path=TextAfterConditionModesComboBox}" VerticalAlignment="Center" Margin="3 0"/>
                     </StackPanel>
                     
-                    <ItemsControl Items="{Binding Conditions}">
+                    <ItemsControl ItemsSource="{Binding Conditions}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Vertical" Margin="40 10 6 10" />
@@ -96,7 +96,7 @@
                 <StackPanel Orientation="Vertical" Margin="3 0">
                     <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_DoTheFollowingActions}" VerticalAlignment="Center" Margin="3 0"/>
                     
-                    <ItemsControl Items="{Binding Actions}">
+                    <ItemsControl ItemsSource="{Binding Actions}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Vertical" Margin="40 10 6 10"/>

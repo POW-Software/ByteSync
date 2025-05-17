@@ -22,11 +22,9 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" HorizontalAlignment="Left" Orientation="Horizontal" VerticalAlignment="Center" Margin="6 0">
-                    <Image Source="/Assets/Logo.png" 
-                           Width="40" 
-                           Height="40" 
-                           Margin="10">
-                    </Image>
+                    <Svg Path="/Assets/ByteSyncLogo.svg"
+                         Height="40"
+                         Margin="10 0" />
 
                     <TextBlock VerticalAlignment="Center" Margin="0 0 20 0">ByteSync</TextBlock>
                     
@@ -48,19 +46,12 @@
                     <ContentControl Content="{Binding ConnectionStatus}" Margin="3" VerticalContentAlignment="Center" />
                     
                     <!-- Update -->
-                    <Button Classes="GenericButton" Name="UpdateButton"  Margin="3"
+                    <Button Name="UpdateButton"  Margin="3"
                             Command="{Binding Path=ShowUpdateCommand}" 
                             IsVisible="{Binding ShowUpdateObservable}"
-                            HorizontalAlignment="Left" >
-                        
-                        <Interaction.Behaviors>
-                            <DataTriggerBehavior Binding="{Binding IsAVersionMandatory}" ComparisonCondition="Equal" Value="true">
-                                <ChangePropertyAction TargetObject="{Binding #UpdateButton}" PropertyName="Background" Value="{StaticResource OppositeButtonBackGround}" />
-                            </DataTriggerBehavior>
-                            <DataTriggerBehavior Binding="{Binding IsAVersionMandatory}" ComparisonCondition="Equal" Value="false">
-                                <ChangePropertyAction TargetObject="{Binding #UpdateButton}" PropertyName="Background" Value="{StaticResource VeryLightGray}" />
-                            </DataTriggerBehavior>
-                        </Interaction.Behaviors>
+                            HorizontalAlignment="Left"
+                            Classes.GenericButton="True"
+                            Classes.Accent="{Binding IsAVersionMandatory}">
                         
                         <StackPanel Orientation="Horizontal">
                             <StackPanel IsVisible="{Binding !IsAVersionMandatory}">

@@ -5,17 +5,12 @@ using ReactiveUI;
 
 namespace ByteSync.Views.AccountDetails;
 
-public class AccountDetailsView : ReactiveUserControl<AccountDetailsViewModel>
+public partial class AccountDetailsView : ReactiveUserControl<AccountDetailsViewModel>
 {
     public AccountDetailsView()
     {
-        this.WhenActivated(disposables => { });
-        
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        
+        this.WhenActivated(disposables => { });
     }
 }

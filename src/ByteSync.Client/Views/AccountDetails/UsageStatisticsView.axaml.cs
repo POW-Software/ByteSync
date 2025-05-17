@@ -9,13 +9,8 @@ public partial class UsageStatisticsView : ReactiveUserControl<UsageStatisticsVi
 {
     public UsageStatisticsView()
     {
-        this.WhenActivated(disposables => { });
-        
         InitializeComponent();
-    }
 
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        this.WhenActivated(disposables => { });
     }
 }

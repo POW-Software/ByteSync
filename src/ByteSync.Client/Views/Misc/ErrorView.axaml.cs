@@ -10,9 +10,4 @@ public partial class ErrorView : ReactiveUserControl<ErrorViewModel>
     {
         InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

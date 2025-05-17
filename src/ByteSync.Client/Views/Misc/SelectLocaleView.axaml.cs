@@ -5,16 +5,11 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Misc;
 
-class SelectLocaleView : ReactiveUserControl<SelectLocaleViewModel>
+public partial class SelectLocaleView : ReactiveUserControl<SelectLocaleViewModel>
 {
     public SelectLocaleView()
     {
-        this.WhenActivated(disposables => { });
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        this.WhenActivated(disposables => { });
     }
 }

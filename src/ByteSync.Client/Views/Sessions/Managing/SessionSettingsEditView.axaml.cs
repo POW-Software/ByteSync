@@ -5,16 +5,11 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Sessions.Managing;
 
-public class SessionSettingsEditView : ReactiveUserControl<SessionSettingsEditViewModel>
+public partial class SessionSettingsEditView : ReactiveUserControl<SessionSettingsEditViewModel>
 {
     public SessionSettingsEditView()
     {
-        this.WhenActivated(disposables => { });
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        this.WhenActivated(disposables => { });
     }
 }

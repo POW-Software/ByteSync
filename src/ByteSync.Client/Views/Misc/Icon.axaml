@@ -1,19 +1,13 @@
-﻿<TemplatedControl xmlns="https://github.com/avaloniaui"
-                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                  mc:Ignorable="d"
-                  d:DesignWidth="800"
-                  d:DesignHeight="450"
-                  x:Class="ByteSync.Views.Misc.Icon">
-
-    <TemplatedControl.Template>
-        <ControlTemplate>
-            <Image Height="{TemplateBinding FontSize}"
-                   Width="{TemplateBinding FontSize}"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   Source="{TemplateBinding DrawingImage}" />
-        </ControlTemplate>
-    </TemplatedControl.Template>
-</TemplatedControl>
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Misc.Icon">
+    
+    <Image Name="IconImage" Margin="2"
+           Height="{Binding FontSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+           Width="{Binding FontSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+           HorizontalAlignment="Center"
+           VerticalAlignment="Center" />
+</UserControl>
