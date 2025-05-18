@@ -51,7 +51,7 @@
                             IsVisible="{Binding ShowUpdateObservable}"
                             HorizontalAlignment="Left"
                             Classes.GenericButton="True"
-                            Classes.Accent="{Binding IsAVersionMandatory}">
+                            Classes.Secondary="{Binding IsAVersionMandatory}">
                         
                         <StackPanel Orientation="Horizontal">
                             <StackPanel IsVisible="{Binding !IsAVersionMandatory}">
