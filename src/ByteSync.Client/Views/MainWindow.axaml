@@ -12,122 +12,12 @@
         <viewModels:MainWindowViewModel/>
     </Design.DataContext>
     
-    <!-- <Window.Background> -->
-    <!--     <LinearGradientBrush StartPoint="0,0" EndPoint="0,1"> -->
-    <!--         <GradientStop Offset="0" Color="{DynamicResource SystemAltHighColor}" /> -->
-    <!--         <GradientStop Offset="1"> -->
-    <!--             <GradientStop.Color> -->
-    <!--                 <MultiBinding Converter="{x:Static ColorConverters.AdjustBrightness}"> -->
-    <!--                     <Binding Source="{DynamicResource SystemAltHighColor}"/> -->
-    <!--                     <Binding Source="-0.1"/> -->
-    <!--                 </MultiBinding> -->
-    <!--             </GradientStop.Color> -->
-    <!--         </GradientStop> -->
-    <!--     </LinearGradientBrush> -->
-    <!-- </Window.Background> -->
-    
-    <!-- <Window.Styles> -->
-    <!--     <Style Selector="Window"> -->
-    <!--         <Setter Property="Background"> -->
-    <!--             <Setter.Value> -->
-    <!--                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1"> -->
-    <!--                     <GradientStop Color="{DynamicResource SystemAccentColorLight1}" Offset="0"/> -->
-    <!--                     <GradientStop Color="{DynamicResource SystemAccentColorDark1}" Offset="1"/> -->
-    <!--                 </LinearGradientBrush> -->
-    <!--             </Setter.Value> -->
-    <!--         </Setter> -->
-    <!--     </Style> -->
-    <!-- </Window.Styles> -->
-    
-    <!-- <Window.Resources> -->
-    <!--     ~1~ Création d'une version avec transparence de SystemAccentColorLight3 @1@ -->
-    <!--     <Color x:Key="TransparentAccentColor"> -->
-    <!--         ~1~ On prend la même couleur mais avec une valeur Alpha réduite @1@ -->
-    <!--         <Color x:Key="TransparentAccentColor" -->
-    <!--                A="51" -->
-    <!--                R="{Binding Color.R, Source={DynamicResource SystemAccentColorLight3}}" -->
-    <!--                G="{Binding Color.G, Source={DynamicResource SystemAccentColorLight3}}" -->
-    <!--                B="{Binding Color.B, Source={DynamicResource SystemAccentColorLight3}}" /> -->
-    <!--     </Color> -->
-    <!-- </Window.Resources> -->
-    
-    <!-- <Window.Background> -->
-    <!--     <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%" Opacity=".65"> -->
-    <!--         <GradientStop Offset="0" Color="White" /> -->
-    <!--         <GradientStop Offset="1" Color="{DynamicResource SystemAccentColorLight3}" /> -->
-    <!--     </LinearGradientBrush> -->
-    <!-- </Window.Background> -->
-    
-    <!-- <Window.Background> -->
-    <!--     <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%"> -->
-    <!--         ~1~ Couleur du haut : plus claire @1@ -->
-    <!--         <GradientStop Offset="0" Color="{DynamicResource SystemChromeLowColor}" /> -->
-    <!--          -->
-    <!--         ~1~ Couleur du milieu : ajout d'une légère teinte d'accent @1@ -->
-    <!--         <GradientStop Offset="0.5"> -->
-    <!--             <GradientStop.Color> -->
-    <!--                 <Color  -->
-    <!--                     A="255" -->
-    <!--                     R="{Binding Color.R, Source={DynamicResource SystemChromeMediumLowColor}}" -->
-    <!--                     G="{Binding Color.G, Source={DynamicResource SystemChromeMediumLowColor}}" -->
-    <!--                     B="{Binding Color.B, Source={DynamicResource SystemChromeMediumLowColor}}" /> -->
-    <!--             </GradientStop.Color> -->
-    <!--         </GradientStop> -->
-    <!--          -->
-    <!--         ~1~ Couleur du bas : plus foncée avec une teinte d'accent plus prononcée @1@ -->
-    <!--         <GradientStop Offset="1"> -->
-    <!--             <GradientStop.Color> -->
-    <!--                 <Color  -->
-    <!--                     A="255" -->
-    <!--                     R="{Binding (Color.R * 0.9 + Color.R * 0.1), Source={DynamicResource SystemChromeMediumColor}, Source2={DynamicResource SystemAccentColor}}" -->
-    <!--                     G="{Binding (Color.G * 0.9 + Color.G * 0.1), Source={DynamicResource SystemChromeMediumColor}, Source2={DynamicResource SystemAccentColor}}" -->
-    <!--                     B="{Binding (Color.B * 0.9 + Color.B * 0.1), Source={DynamicResource SystemChromeMediumColor}, Source2={DynamicResource SystemAccentColor}}" /> -->
-    <!--             </GradientStop.Color> -->
-    <!--         </GradientStop> -->
-    <!--     </LinearGradientBrush> -->
-    <!-- </Window.Background> -->
-    
     <Window.Background>
         <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
             <GradientStop Offset="0" Color="{DynamicResource SystemAltHighColor}" /> <!-- SystemAltHighColor SystemChromeLowColor SystemChromeMediumColor -->
             <GradientStop Offset="1" Color="{DynamicResource SystemChromeMediumColor}" />
         </LinearGradientBrush>
     </Window.Background>
-    
-    <!-- <Window.Resources> -->
-    <!--     ~1~ Brosse pour le thème clair @1@ -->
-    <!--     <LinearGradientBrush x:Key="LightThemeBrush" StartPoint="0%,0%" EndPoint="0%,100%"> -->
-    <!--         <GradientStop Offset="0" Color="{DynamicResource SystemAltHighColor}" /> -->
-    <!--         <GradientStop Offset="1" Color="{DynamicResource SystemChromeMediumColor}" /> -->
-    <!--     </LinearGradientBrush> -->
-    <!-- -->
-    <!--     ~1~ Brosse pour le thème sombre (inversé) @1@ -->
-    <!--     <LinearGradientBrush x:Key="DarkThemeBrush" StartPoint="0%,0%" EndPoint="0%,100%"> -->
-    <!--         <GradientStop Offset="0" Color="{DynamicResource SystemChromeMediumColor}" /> -->
-    <!--         <GradientStop Offset="1" Color="{DynamicResource SystemAltHighColor}" /> -->
-    <!--     </LinearGradientBrush> -->
-    <!-- </Window.Resources> -->
-    <!-- -->
-    <!-- ~1~ Utiliser un thème conditionnel @1@ -->
-    <!-- <Window.Background> -->
-    <!--     <ThemeVariantScope.Resources> -->
-    <!--         <ResourceDictionary> -->
-    <!--             <ResourceDictionary.ThemeDictionaries> -->
-    <!--                 <ResourceDictionary x:Key="Light"> -->
-    <!--                     <StaticResource x:Key="CurrentThemeBrush" ResourceKey="LightThemeBrush" /> -->
-    <!--                 </ResourceDictionary> -->
-    <!--                 <ResourceDictionary x:Key="Dark"> -->
-    <!--                     <StaticResource x:Key="CurrentThemeBrush" ResourceKey="DarkThemeBrush" /> -->
-    <!--                 </ResourceDictionary> -->
-    <!--             </ResourceDictionary.ThemeDictionaries> -->
-    <!--         </ResourceDictionary> -->
-    <!--     </ThemeVariantScope.Resources> -->
-    <!--     <DynamicResource ResourceKey="CurrentThemeBrush" /> -->
-    <!-- </Window.Background> -->
-    
-    <!-- <Window.Background> -->
-    <!--     <DynamicResource ResourceKey="WindowBackgroundBrush" /> -->
-    <!-- </Window.Background> -->
     
     <LayoutTransformControl>
                     
@@ -139,20 +29,11 @@
         
         <Grid RowDefinitions="Auto,Auto,*" >
             <Grid.Background>
-                <!-- <SolidColorBrush Color="{DynamicResource SystemAccentColor}" Opacity="0.05" /> -->
                 <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%" Opacity="0.05">
                     <GradientStop Offset="0" Color="{DynamicResource SystemAltHighColor}" />
                     <GradientStop Offset="1" Color="{DynamicResource SystemAccentColor}" />
                 </LinearGradientBrush>
             </Grid.Background>
-            <!-- <Grid.Background> -->
-            <!--     <LinearGradientBrush StartPoint="0,0" EndPoint="0,1"> -->
-            <!--         <GradientStop Offset="0" Color="{DynamicResource SystemAccentColor}" Opacity="0.1" /> -->
-            <!--         <GradientStop Offset="0.5" Color="{DynamicResource SystemAccentColor}" Opacity="0.2" /> -->
-            <!--         <GradientStop Offset="1" Color="{DynamicResource SystemAccentColor}" Opacity="0.3" /> -->
-            <!--     </LinearGradientBrush> -->
-            <!-- </Grid.Background> -->
-            <!-- -->
             
             <Border Grid.Row="0" x:Name="FocusSink"
                     IsVisible="True"
