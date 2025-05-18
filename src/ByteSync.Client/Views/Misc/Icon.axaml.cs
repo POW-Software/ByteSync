@@ -38,11 +38,6 @@ public partial class Icon : UserControl
         this.GetObservable(ForegroundProperty).Subscribe(_ => UpdateIcon());
     }
 
-    // private void InitializeComponent()
-    // {
-    //     AvaloniaXamlLoader.Load(this);
-    // }
-
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
