@@ -42,7 +42,7 @@
                 </Button>
                 
                 <!-- Progress Bar -->
-                <misc:LinearProgress Width="120" Margin="9" Height="32"
+                <misc:ActivityIndicator Width="120" Margin="9" Height="32"
                                      IsVisible="{Binding IsCreatingCloudSession}" />
                 
                 <!-- Cancel Button -->

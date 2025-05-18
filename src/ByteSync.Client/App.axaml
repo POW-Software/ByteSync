@@ -23,7 +23,7 @@
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="avares://ByteSync/Assets/Icons/BoxIcons.axaml"/>
-        <StyleInclude Source="avares://ByteSync/Assets/Themes/LinearProgress.axaml"/>
+        <StyleInclude Source="avares://ByteSync/Assets/Themes/ActivityIndicator.axaml"/>
         <StyleInclude Source="avares://ByteSync/Assets/Themes/GeneralStyles.axaml"/>
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
     </Application.Styles>

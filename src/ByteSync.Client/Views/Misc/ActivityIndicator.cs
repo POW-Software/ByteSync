@@ -4,7 +4,7 @@ using Avalonia.LogicalTree;
 
 namespace ByteSync.Views.Misc;
 
-public class LinearProgress : TemplatedControl
+public class ActivityIndicator : TemplatedControl
 {
     private const string InactiveState = ":inactive";
     private const string ActiveState = ":active";
@@ -13,13 +13,13 @@ public class LinearProgress : TemplatedControl
     private double _rectangleHeight = 10;
     private Thickness _rectangleMargin = new Thickness(1);
 
-    static LinearProgress()
+    static ActivityIndicator()
     {
         IsActiveProperty.Changed.Subscribe(OnIsActiveChanged);
-        IsVisibleProperty.Changed.AddClassHandler<LinearProgress>((x, e) => x.OnIsVisibleChanged(e));
+        IsVisibleProperty.Changed.AddClassHandler<ActivityIndicator>((x, e) => x.OnIsVisibleChanged(e));
     }
 
-    public LinearProgress()
+    public ActivityIndicator()
     {
         LayoutUpdated += (_, _) =>
         {
@@ -41,13 +41,13 @@ public class LinearProgress : TemplatedControl
     }
     
     public static readonly StyledProperty<bool> IsActiveProperty =
-        AvaloniaProperty.Register<LinearProgress, bool>(nameof(IsActive), defaultValue: false);
+        AvaloniaProperty.Register<ActivityIndicator, bool>(nameof(IsActive), defaultValue: false);
     
     private static void OnIsActiveChanged(AvaloniaPropertyChangedEventArgs e)
     {
-        if (e.Sender is LinearProgress linearProgress)
+        if (e.Sender is ActivityIndicator activityIndicator)
         {
-            linearProgress.UpdateVisualStates();
+            activityIndicator.UpdateVisualStates();
         }
     }
 
@@ -59,8 +59,8 @@ public class LinearProgress : TemplatedControl
         }
     }
     
-    public static readonly DirectProperty<LinearProgress, double> RectangleWidthProperty =
-        AvaloniaProperty.RegisterDirect<LinearProgress, double>(
+    public static readonly DirectProperty<ActivityIndicator, double> RectangleWidthProperty =
+        AvaloniaProperty.RegisterDirect<ActivityIndicator, double>(
             nameof(RectangleWidth),
             o => o.RectangleWidth);
 
@@ -70,8 +70,8 @@ public class LinearProgress : TemplatedControl
         private set { SetAndRaise(RectangleWidthProperty, ref _rectangleWidth, value); }
     }
     
-    public static readonly DirectProperty<LinearProgress, double> RectangleHeightProperty =
-        AvaloniaProperty.RegisterDirect<LinearProgress, double>(
+    public static readonly DirectProperty<ActivityIndicator, double> RectangleHeightProperty =
+        AvaloniaProperty.RegisterDirect<ActivityIndicator, double>(
             nameof(RectangleHeight),
             o => o.RectangleHeight);
 
@@ -81,8 +81,8 @@ public class LinearProgress : TemplatedControl
         private set { SetAndRaise(RectangleHeightProperty, ref _rectangleHeight, value); }
     }
 
-    public static readonly DirectProperty<LinearProgress, Thickness> RectangleMarginProperty =
-        AvaloniaProperty.RegisterDirect<LinearProgress, Thickness>(
+    public static readonly DirectProperty<ActivityIndicator, Thickness> RectangleMarginProperty =
+        AvaloniaProperty.RegisterDirect<ActivityIndicator, Thickness>(
             nameof(RectangleMargin),
             o => o.RectangleMargin);
 
