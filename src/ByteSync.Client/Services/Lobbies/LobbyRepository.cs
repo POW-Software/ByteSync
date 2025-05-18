@@ -23,14 +23,13 @@ public class LobbyRepository : BaseRepository<LobbyDetails>, ILobbyRepository
     private readonly IEventAggregator _eventAggregator;
     private readonly ICloudProxy _connectionManager;
     private readonly IPublicKeysManager _publicKeysManager;
-    private readonly IUIHelper _uiHelper;
     private readonly ILobbyMemberViewModelFactory _lobbyMemberViewModelFactory;
     private readonly ILobbyApiClient _lobbyApiClient;
 
     internal const string LOCAL_LOBBY_PREFIX = "Local_Lobby_";
     
     public LobbyRepository(ILobbyMemberViewModelFactory lobbyMemberViewModelFactory, IEventAggregator eventAggregator, ICloudProxy connectionManager, 
-        IPublicKeysManager publicKeysManager, IUIHelper uiHelper, ILobbyApiClient lobbyApiClient, ILogger<LobbyRepository> logger) :
+        IPublicKeysManager publicKeysManager, ILobbyApiClient lobbyApiClient, ILogger<LobbyRepository> logger) :
             base(logger)
     {
         _lobbyMemberViewModelFactory = lobbyMemberViewModelFactory;
@@ -38,7 +37,6 @@ public class LobbyRepository : BaseRepository<LobbyDetails>, ILobbyRepository
         _eventAggregator = eventAggregator;
         _connectionManager = connectionManager;
         _publicKeysManager = publicKeysManager;
-        _uiHelper = uiHelper;
         _lobbyApiClient = lobbyApiClient;
 
         _eventAggregator.GetEvent<OnServerMemberJoinedLobby>().Subscribe(OnMemberJoinedLobby);
@@ -65,7 +63,9 @@ public class LobbyRepository : BaseRepository<LobbyDetails>, ILobbyRepository
             
             if (member != null)
             {
-                _uiHelper.ExecuteOnUi(() => { member.LobbyMember.LobbyMemberInfo = tuple.memberInfo; }).Wait();
+                member.LobbyMember.LobbyMemberInfo = tuple.memberInfo;
+                // todo uihelper
+                // _uiHelper.ExecuteOnUi(() => { member.LobbyMember.LobbyMemberInfo = tuple.memberInfo; }).Wait();
             }
 
             await RunAsync(tuple.lobbyId, details =>
@@ -98,7 +98,9 @@ public class LobbyRepository : BaseRepository<LobbyDetails>, ILobbyRepository
 
                 if (member != null)
                 {
-                    _uiHelper.ExecuteOnUi(() => { member.LobbyMember.LobbyMemberInfo = null; }).Wait();
+                    member.LobbyMember.LobbyMemberInfo = null;
+                    // todo uihelper
+                    // _uiHelper.ExecuteOnUi(() => { member.LobbyMember.LobbyMemberInfo = null; }).Wait();
                 }
             });
         }
@@ -184,7 +186,9 @@ public class LobbyRepository : BaseRepository<LobbyDetails>, ILobbyRepository
 
                 if (member != null)
                 {
-                    _uiHelper.ExecuteOnUi(() => { member.LobbyMember.Status = tuple.lobbyMemberStatus; }).Wait();
+                    member.LobbyMember.Status = tuple.lobbyMemberStatus;
+                    // todo uihelper
+                    // _uiHelper.ExecuteOnUi(() => { member.LobbyMember.Status = tuple.lobbyMemberStatus; }).Wait();
                 }
             });
         }
@@ -247,7 +251,9 @@ public class LobbyRepository : BaseRepository<LobbyDetails>, ILobbyRepository
                     details.ExpectedJoiningMember.ClientInstanceId
                         .Equals(sessionMemberInfo.ClientInstanceId))
                 {
-                    _uiHelper.ExecuteOnUi(() => { details.ExpectedJoiningMember.LobbyMember.Status = LobbyMemberStatuses.JoinedSession; }).Wait();
+                    details.ExpectedJoiningMember.LobbyMember.Status = LobbyMemberStatuses.JoinedSession;
+                    // todo uihelper
+                    // _uiHelper.ExecuteOnUi(() => { details.ExpectedJoiningMember.LobbyMember.Status = LobbyMemberStatuses.JoinedSession; }).Wait();
                     
                     details.ExpectedMemberWaitHandler.Set();
                 }

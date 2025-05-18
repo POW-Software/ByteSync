@@ -29,19 +29,19 @@
 
                 <!-- Theme -->
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="{localizations:Loc AccountDetails_DarkMode}" Margin="6 12 6 6" VerticalAlignment="Center"/>
-                <ToggleSwitch Name="tsDarkMode" Classes="Pow" Grid.Row="1" Grid.Column="2" Margin="6 12 6 6" IsChecked="{Binding IsDarkMode}"
+                <ToggleSwitch Name="tsDarkMode" Classes="Bs" Grid.Row="1" Grid.Column="2" Margin="6 12 6 6" IsChecked="{Binding IsDarkMode}"
                               HorizontalAlignment="Center"
                               OffContent=""
                               OnContent="">
                 </ToggleSwitch>
                 
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="{localizations:Loc AccountDetails_Theme}" Margin="6 6 6 12" VerticalAlignment="Center"/>
-                <ComboBox Grid.Row="2" Grid.Column="2" x:Name="AccentSelector" Classes="PowComboBox"
+                <ComboBox Grid.Row="2" Grid.Column="2" x:Name="AccentSelector" Classes="BsComboBox"
                           Margin="6 6 6 12"
                           VerticalAlignment="Center" HorizontalAlignment="Center"
                           SelectedItem="{Binding SelectedThemeName}"
                           BorderThickness="0"
-                          Items="{Binding AvailableThemesNames}">
+                          ItemsSource="{Binding AvailableThemesNames}">
                 </ComboBox>
 
                 <TextBlock Grid.Row="3" Grid.Column="0" Text="{localizations:Loc AccountDetails_Zoom}" Margin="6" VerticalAlignment="Center"></TextBlock>

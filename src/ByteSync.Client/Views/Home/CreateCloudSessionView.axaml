@@ -32,22 +32,21 @@
                         IsEnabled="{Binding !IsJoiningCloudSession}">
                 
                 <!-- Create Button -->
-                <Button Classes="GenericButton" Margin="9" Height="32"
+                <Button Classes="AccentButton" Margin="9" Height="32"
                         HorizontalAlignment="Center" 
-                        Command="{Binding Path=CreateCloudSessionCommand}" IsVisible="{Binding !IsCreatingCloudSession}">
+                        Command="{Binding Path=CreateCloudSessionCommand}" IsVisible="{Binding !IsCreatingCloudSession}" >
                     <StackPanel Orientation="Horizontal">
-                        <misc:Icon FontSize="16" Value="RegularAnalyse" Margin="0" />
+                        <misc:Icon FontSize="16" Value="RegularAnalyse" Margin="0" Width="24" Height="24" />
                         <TextBlock Text="{localizations:Loc CreateCloudSession_Create}" />
                     </StackPanel>
                 </Button>
                 
                 <!-- Progress Bar -->
                 <misc:LinearProgress Width="120" Margin="9" Height="32"
-                                     IsActive="{Binding IsCreatingCloudSession}"
                                      IsVisible="{Binding IsCreatingCloudSession}" />
                 
                 <!-- Cancel Button -->
-                <Button Classes="GenericButton" Margin="9" Height="32"
+                <Button Margin="9" Height="32"
                         HorizontalAlignment="Center"
                         Command="{Binding Path=CancelCloudSessionCreationCommand}" IsVisible="{Binding IsCreatingCloudSession}">
                     <StackPanel Orientation="Horizontal">

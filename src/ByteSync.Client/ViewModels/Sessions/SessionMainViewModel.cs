@@ -19,7 +19,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions;
 
-class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivatableViewModel 
+public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivatableViewModel 
 {
     public string? UrlPathSegment { get; }
         
@@ -51,6 +51,7 @@ class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivatableView
         SynchronizationProcess = synchronizationMainViewModel;
         
         var sessionMemberCache = _sessionMemberRepository.ObservableCache.Connect()
+            .ObserveOn(RxApp.MainThreadScheduler)
             .Transform(smi => _sessionMachineViewModelFactory.CreateSessionMachineViewModel(smi))
             .AutoRefresh(vm => vm.JoinedSessionOn)
             .Sort(SortExpressionComparer<SessionMachineViewModel>.Ascending(vm => vm.JoinedSessionOn))

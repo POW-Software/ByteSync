@@ -121,7 +121,7 @@
                                 Background="{DynamicResource SystemChromeMediumColor}" />
             </WrapPanel>
 
-            <DataGrid Name="DataGrid" AutoGenerateColumns="False" Margin="3 3 3 0" Items="{Binding Path=ComparisonItems}"
+            <DataGrid Name="DataGrid" AutoGenerateColumns="False" Margin="3 3 3 0" ItemsSource="{Binding Path=ComparisonItems}"
                       IsReadOnly="True" x:Name="TheGrid" CanUserResizeColumns="True" SelectionMode="Extended"
                       Width="{Binding Path=Width, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=Grid,AncestorLevel=1}}"
                       HeadersVisibility="Column" Background="Transparent" GridLinesVisibility="Horizontal"
@@ -134,7 +134,7 @@
                     <DataGridTemplateColumn Width="Auto" CanUserResize="True">
 
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{Binding PathHeader}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{Binding PathHeader}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
 
                         <DataGridTemplateColumn.CellTemplate>
@@ -153,23 +153,23 @@
                     <!-- Header="{Binding InventoryAName}" -->
                     <DataGridTemplateColumn Width="Auto" CanUserResize="True">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{Binding InventoryAName}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{Binding InventoryAName}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
 
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ItemsControl Items="{Binding ContentIdentitiesA}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                                <ItemsControl ItemsSource="{Binding ContentIdentitiesA}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
                     <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumnBVisible}">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{Binding InventoryBName}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{Binding InventoryBName}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ItemsControl Items="{Binding ContentIdentitiesB}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                                <ItemsControl ItemsSource="{Binding ContentIdentitiesB}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -177,33 +177,33 @@
 
                     <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumnCVisible}">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{Binding InventoryCName}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{Binding InventoryCName}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ItemsControl Items="{Binding ContentIdentitiesC}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                                <ItemsControl ItemsSource="{Binding ContentIdentitiesC}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
                     <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumnDVisible}">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{Binding InventoryDName}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{Binding InventoryDName}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ItemsControl Items="{Binding ContentIdentitiesD}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                                <ItemsControl ItemsSource="{Binding ContentIdentitiesD}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
                     <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumnEVisible}">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{Binding InventoryEName}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{Binding InventoryEName}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ItemsControl Items="{Binding ContentIdentitiesE}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                                <ItemsControl ItemsSource="{Binding ContentIdentitiesE}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -211,7 +211,7 @@
 
                     <DataGridTemplateColumn Width="Auto" CanUserResize="True">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{localizations:Loc ComparisonResult_ContentRepartition}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{localizations:Loc ComparisonResult_ContentRepartition}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -222,11 +222,11 @@
 
                     <DataGridTemplateColumn Width="Auto" CanUserResize="True">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{localizations:Loc ComparisonResult_Actions}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{localizations:Loc ComparisonResult_Actions}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ItemsControl Items="{Binding SynchronizationActions}"
+                                <ItemsControl ItemsSource="{Binding SynchronizationActions}"
                                               ItemTemplate="{StaticResource SynchronizationActionDataTemplate}"
                                               VerticalAlignment="Center" />
 
@@ -236,7 +236,7 @@
                     
                     <DataGridTemplateColumn Width="Auto" CanUserResize="True">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{localizations:Loc ComparisonResult_SynchronizationStatus}" Classes="PowDataGridHeader" />
+                            <TextBlock Text="{localizations:Loc ComparisonResult_SynchronizationStatus}" Classes="BsDataGridHeader" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

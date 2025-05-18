@@ -18,12 +18,12 @@
 
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="{localizations:Loc ImportRulesFromProfileView_Profile}" Margin="6 6 6 12" VerticalAlignment="Center"/>
-                <ComboBox x:Name="AccentSelector" Classes="PowComboBox"
+                <ComboBox x:Name="AccentSelector" Classes="BsComboBox"
                           Margin="6 6 6 12"
                           VerticalAlignment="Center" HorizontalAlignment="Center"
                           SelectedItem="{Binding SelectedSessionProfile}"
                           BorderThickness="0"
-                          Items="{Binding AvailableSessionProfiles}">
+                          ItemsSource="{Binding AvailableSessionProfiles}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Name}"  />
@@ -34,9 +34,9 @@
             
             <misc:LinearProgress Width="48" Height="32" 
                                  Margin="20,0,0,3"  HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                                 IsActive="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+                                 IsVisible="{Binding IsLoading}" />
             
-            <ItemsControl Items="{Binding CloudSessionProfileSynchronizationRules}" IsVisible="{Binding CloudSessionProfileSynchronizationRules.Count}" Margin="6">
+            <ItemsControl ItemsSource="{Binding CloudSessionProfileSynchronizationRules}" IsVisible="{Binding CloudSessionProfileSynchronizationRules.Count}" Margin="6">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Vertical" HorizontalAlignment="Center"/>

@@ -31,14 +31,14 @@
                 <!-- SessionId -->
                 <StackPanel Orientation="Vertical" Margin="3" HorizontalAlignment="Left">
                     <Label Content="{localizations:Loc JoinCloudSession_SessionId}" />
-                    <TextBox Text="{Binding SessionId}" Name="TextBoxSessionId" 
+                    <TextBox Text="{Binding SessionId}" x:Name="TextBoxSessionId" 
                              IsEnabled="{Binding !IsJoiningCloudSession}" MinWidth="200" HorizontalAlignment="Left"/>
                 </StackPanel>
 
                 <!-- Password -->
                 <StackPanel Orientation="Vertical" Margin="3" HorizontalAlignment="Left">
                     <Label Content="{localizations:Loc JoinCloudSession_SessionPassword}" />
-                    <TextBox Text="{Binding SessionPassword}" Name="TextBoxSessionPassword" 
+                    <TextBox Text="{Binding SessionPassword}" x:Name="TextBoxSessionPassword" 
                              IsEnabled="{Binding !IsJoiningCloudSession}" MinWidth="200" HorizontalAlignment="Left"/>
                 </StackPanel>
             </StackPanel>
@@ -47,7 +47,7 @@
                         IsEnabled="{Binding !IsCreatingCloudSession}">
 
                 <!-- Join Button -->
-                <Button Classes="GenericButton" Name="ButtonJoin" Margin="9" Height="32" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                <Button Classes="Accent" Name="ButtonJoin" Margin="9" Height="32" HorizontalAlignment="Center" VerticalAlignment="Bottom"
                         Command="{Binding Path=JoinCommand}" IsVisible="{Binding !IsJoiningCloudSession}">
                     <StackPanel Orientation="Horizontal">
                         <misc:Icon FontSize="16" Value="RegularLogInCircle" Margin="0" />
@@ -58,11 +58,10 @@
                 <!-- Progress Bar -->
                 <misc:LinearProgress Width="120" Margin="9" Height="32" 
                                      HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                                     IsActive="{Binding IsJoiningCloudSession}" 
                                      IsVisible="{Binding IsJoiningCloudSession}"/>
 
                 <!-- Cancel Button -->
-                <Button Classes="GenericButton" Margin="9" Height="32" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                <Button Classes="accent" Margin="9" Height="32" HorizontalAlignment="Center" VerticalAlignment="Bottom"
                         IsVisible="{Binding IsJoiningCloudSession}"
                         Command="{Binding Path=CancelCommand}">
                     <StackPanel Orientation="Horizontal">

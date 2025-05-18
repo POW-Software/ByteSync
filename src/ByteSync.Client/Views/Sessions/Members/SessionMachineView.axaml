@@ -12,7 +12,7 @@
         <members:SessionMachineViewModel />
     </Design.DataContext>
     
-    <Grid Width="600" Margin=" 6" Height="320" Name="MainGrid" > <!-- Background="{Binding GridBackground}" -->
+    <Grid Width="600" Margin=" 6" Height="320" Name="MainGrid" Background="{Binding MainGridBrush}"> <!--   Background="{DynamicResource CurrentMemberBackGround}"    Background="{Binding GridBackground}" -->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -20,20 +20,6 @@
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        
-        <!-- https://gist.github.com/darinkes/5c3b4317099e060a7d7c9c4e0bc68682 -->
-        <!-- Attention, ici on sette des StaticResource. Si on sette des DynamicResource, ca ne passe pas -->
-        <Interaction.Behaviors>
-            <DataTriggerBehavior Binding="{Binding IsLocalMachine}" ComparisonCondition="Equal" Value="true">
-                <ChangePropertyAction TargetObject="{Binding #MainGrid}" PropertyName="Background" Value="{StaticResource CurrentMemberBackGround}" />
-            </DataTriggerBehavior>
-            <DataTriggerBehavior Binding="{Binding IsLocalMachine}" ComparisonCondition="Equal" Value="false">
-                <ChangePropertyAction TargetObject="{Binding #MainGrid}" PropertyName="Background" Value="{StaticResource OtherMemberBackGround}" />
-            </DataTriggerBehavior>
-            <DataTriggerBehavior Binding="{Binding HasQuittedSessionAfterActivation}" ComparisonCondition="Equal" Value="true">
-                <ChangePropertyAction TargetObject="{Binding #MainGrid}" PropertyName="Background" Value="{StaticResource DisabledMemberBackGround}" />
-            </DataTriggerBehavior>
-        </Interaction.Behaviors>
 
         <!-- First Row -->
         <Grid Grid.Row="0">
@@ -43,38 +29,18 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Label Grid.Column="0" Content="{Binding PositionInList, Converter={StaticResource IntToLetterConverter}}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontWeight="Bold" FontSize="24"
-                       Margin="6 6" BorderThickness="1" Width="36">
-                
-                <Interaction.Behaviors>
-                    <DataTriggerBehavior Binding="{Binding HasQuittedSessionAfterActivation}" ComparisonCondition="Equal" Value="false">
-                        <ChangePropertyAction TargetObject="{Binding #LetterLabel}" PropertyName="Background" Value="{StaticResource ConnectedMemberLetterBackGround}" />
-                        <ChangePropertyAction TargetObject="{Binding #LetterLabel}" PropertyName="BorderBrush" Value="{StaticResource ConnectedMemberLetterBorder}" />
-                    </DataTriggerBehavior>
-                    <DataTriggerBehavior Binding="{Binding HasQuittedSessionAfterActivation}" ComparisonCondition="Equal" Value="true">
-                        <ChangePropertyAction TargetObject="{Binding #LetterLabel}" PropertyName="Background" Value="{StaticResource DisabledMemberLetterBackGround}" />
-                        <ChangePropertyAction TargetObject="{Binding #LetterLabel}" PropertyName="BorderBrush" Value="{StaticResource DisabledMemberLetterBorder}" />
-                    </DataTriggerBehavior>
-                </Interaction.Behaviors>
+                       Margin="6 6" BorderThickness="1" Width="36"
+                       Background="{DynamicResource ConnectedMemberLetterBackGround}" BorderBrush="{DynamicResource ConnectedMemberLetterBorder}">
             </Label>
 
             <StackPanel Orientation="Vertical" Grid.Column="2"  Margin="6,0">
-                <TextBlock Name="MachineDescriptionTextBlock" FontWeight="Bold" Text="{Binding MachineDescription}" Margin="3"/>
+                <TextBlock Name="MachineDescriptionTextBlock" FontWeight="Bold" Text="{Binding MachineDescription}" Margin="3"
+                           />
                 <TextBlock Name="ClientInstanceIdTextBlock" FontStyle="Italic" Text="{Binding ClientInstanceId}" Margin="3"
-                           IsVisible="{Binding ClientInstanceId, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
-                <TextBlock Name="EmailAddressTextBlock" Text="{Binding EmailAddress}" Margin="3"/>
-                
-                <Interaction.Behaviors>
-                    <DataTriggerBehavior Binding="{Binding HasQuittedSessionAfterActivation}" ComparisonCondition="Equal" Value="false">
-                        <ChangePropertyAction TargetObject="{Binding #MachineDescriptionTextBlock}" PropertyName="Foreground" Value="{StaticResource SystemBaseHighColor}" />
-                        <ChangePropertyAction TargetObject="{Binding #ClientInstanceIdTextBlock}" PropertyName="Foreground" Value="{StaticResource SystemBaseHighColor}" />
-                        <ChangePropertyAction TargetObject="{Binding #EmailAddressTextBlock}" PropertyName="Foreground" Value="{StaticResource SystemBaseHighColor}" />
-                    </DataTriggerBehavior>
-                    <DataTriggerBehavior Binding="{Binding HasQuittedSessionAfterActivation}" ComparisonCondition="Equal" Value="true">
-                        <ChangePropertyAction TargetObject="{Binding #MachineDescriptionTextBlock}" PropertyName="Foreground" Value="{StaticResource SystemBaseMediumColor}" />
-                        <ChangePropertyAction TargetObject="{Binding #ClientInstanceIdTextBlock}" PropertyName="Foreground" Value="{StaticResource SystemBaseMediumColor}" />
-                        <ChangePropertyAction TargetObject="{Binding #EmailAddressTextBlock}" PropertyName="Foreground" Value="{StaticResource SystemBaseMediumColor}" />
-                    </DataTriggerBehavior>
-                </Interaction.Behaviors>
+                           IsVisible="{Binding ClientInstanceId, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                           />  <!--  Foreground="{StaticResource SystemBaseHighColor}" -->
+                <TextBlock Name="EmailAddressTextBlock" Text="{Binding EmailAddress}" Margin="3"
+                           Foreground="{StaticResource SystemBaseHighColor}"/>
             </StackPanel>
         </Grid>
 
@@ -119,18 +85,9 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             
-            <DataGrid AutoGenerateColumns="False" Margin="6" Items="{Binding Path=PathItems}" Classes="NoHeaders"
+            <DataGrid AutoGenerateColumns="False" Margin="6" ItemsSource="{Binding Path=PathItems}" Classes="NoHeaders"
                       IsReadOnly="True" x:Name="TheGrid" IsEnabled="{Binding Path=IsFileSystemSelectionEnabled}"
-                      HeadersVisibility="None" >
-                
-                <Interaction.Behaviors>
-                    <DataTriggerBehavior Binding="{Binding HasQuittedSessionAfterActivation}" ComparisonCondition="Equal" Value="false">
-                        <ChangePropertyAction TargetObject="{Binding #TheGrid}" PropertyName="Foreground" Value="{StaticResource SystemBaseHighColor}" />
-                    </DataTriggerBehavior>
-                    <DataTriggerBehavior Binding="{Binding HasQuittedSessionAfterActivation}" ComparisonCondition="Equal" Value="true">
-                        <ChangePropertyAction TargetObject="{Binding #TheGrid}" PropertyName="Foreground" Value="{StaticResource SystemBaseMediumColor}" />
-                    </DataTriggerBehavior>
-                </Interaction.Behaviors>
+                      HeadersVisibility="None" Foreground="{DynamicResource SystemBaseHighColor}">
 
                 <DataGrid.Columns>
                     <DataGridTextColumn Binding="{Binding Code}" Header="Code" Width="Auto" FontSize="14"/>
@@ -187,16 +144,8 @@
             <Rectangle Height="1" Fill="{DynamicResource SystemBaseLowColor}" Margin="3,3"/>
             
             <StackPanel Orientation="Horizontal" Margin="3">
-                <Label Name="StatusLabel" FontWeight="Bold" Content="{Binding Status}" IsEnabled="{Binding IsLocalMachine}">
-                    
-                    <Interaction.Behaviors>
-                        <DataTriggerBehavior Binding="{Binding HasQuittedSessionAfterActivation}" ComparisonCondition="Equal" Value="false">
-                            <ChangePropertyAction TargetObject="{Binding #StatusLabel}" PropertyName="Foreground" Value="{StaticResource SystemBaseHighColor}" />
-                        </DataTriggerBehavior>
-                        <DataTriggerBehavior Binding="{Binding HasQuittedSessionAfterActivation}" ComparisonCondition="Equal" Value="true">
-                            <ChangePropertyAction TargetObject="{Binding #StatusLabel}" PropertyName="Foreground" Value="{StaticResource SystemBaseMediumColor}" />
-                        </DataTriggerBehavior>
-                    </Interaction.Behaviors>
+                <Label Name="StatusLabel" FontWeight="Bold" Content="{Binding Status}" IsEnabled="{Binding IsLocalMachine}"
+                       Foreground="{DynamicResource SystemBaseHighColor}">
                     
                 </Label>
             </StackPanel>

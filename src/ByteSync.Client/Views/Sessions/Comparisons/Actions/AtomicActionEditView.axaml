@@ -37,8 +37,8 @@
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         
-                        <ComboBox Classes="PowComboBox" Grid.Column="0" x:Name="ActionComboBox" Margin="0 0" MinWidth="190"
-                                  Items="{Binding Path=Actions}" PlaceholderText="{localizations:Loc AtomicActionEdit_Action}"
+                        <ComboBox Classes="BsComboBox" Grid.Column="0" x:Name="ActionComboBox" Margin="0 0" MinWidth="190"
+                                  ItemsSource="{Binding Path=Actions}" PlaceholderText="{localizations:Loc AtomicActionEdit_Action}"
                                   SelectedItem="{Binding Path=SelectedAction}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -51,9 +51,9 @@
                                    VerticalAlignment="Center" Margin="24 0 3 0"
                                    IsVisible="{Binding Path=IsSourceVisible}" />
 
-                        <ComboBox Classes="PowComboBox" Grid.Column="2" x:Name="SourceComboBox" Margin="0 0" MinWidth="140"
+                        <ComboBox Classes="BsComboBox" Grid.Column="2" x:Name="SourceComboBox" Margin="0 0" MinWidth="140"
                                   IsVisible="{Binding Path=IsSourceVisible}"
-                                  Items="{Binding Path=Sources}" 
+                                  ItemsSource="{Binding Path=Sources}" 
                                   PlaceholderText="{localizations:Loc AtomicActionEdit_Source}"
                                   SelectedItem="{Binding Path=SelectedSource}">
                             <ComboBox.ItemTemplate>
@@ -71,9 +71,9 @@
                                    VerticalAlignment="Center" Margin="18 0 3 0"
                                    IsVisible="{Binding Path=IsDestinationOnVisible}"/>
 
-                        <ComboBox Classes="PowComboBox" Grid.Column="4" x:Name="DestinationComboBox" Margin="0 0" MinWidth="140"
+                        <ComboBox Classes="BsComboBox" Grid.Column="4" x:Name="DestinationComboBox" Margin="0 0" MinWidth="140"
                                   IsVisible="{Binding Path=IsDestinationVisible}"
-                                  Items="{Binding Path=Destinations}" 
+                                  ItemsSource="{Binding Path=Destinations}" 
                                   PlaceholderText="{localizations:Loc AtomicActionEdit_Destination}"
                                   SelectedItem="{Binding Path=SelectedDestination}">
                             <ComboBox.ItemTemplate>

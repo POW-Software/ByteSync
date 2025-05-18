@@ -3,7 +3,7 @@
     <OutputType>WinExe</OutputType>
     <Nullable>enable</Nullable>
     <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
-    <ApplicationIcon>Assets\POW_ByteSync.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\ByteSync.ico</ApplicationIcon>
     <TargetFramework>net8.0</TargetFramework>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
     <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
@@ -13,6 +13,10 @@
     <PackageId>ByteSync.Client</PackageId>
     <RootNamespace>ByteSync</RootNamespace>
     <AssemblyName>ByteSync</AssemblyName>
+    <UseWpf>false</UseWpf>
+    <UseWindowsForms>false</UseWindowsForms>
+    <AvaloniaUseStatic>true</AvaloniaUseStatic>
+    <AvaloniaXamlLoaderUseNameReferences>true</AvaloniaXamlLoaderUseNameReferences>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsWindows)'=='true'">
@@ -34,15 +38,13 @@
     <AvaloniaResource Remove="Assets\Resources\Resources.en.resx" />
     <AvaloniaResource Remove="Assets\Resources\Resources.fr.resx" />
     <AvaloniaResource Remove="Assets\Resources\Resources.resx" />
-    <AvaloniaResource Remove="Assets\Themes\FluentPowBlueLight.axaml" />
-    <AvaloniaResource Remove="Assets\Themes\PowBlueAccentColors.axaml" />
     <AvaloniaXaml Remove="Assets\BoxIcons.axaml" />
     <AvaloniaXaml Remove="Assets\Icons\BoxIcons.axaml" />
     <AvaloniaXaml Remove="Assets\Themes\FluentPowBlueLight.axaml" />
     <AvaloniaXaml Remove="Assets\Themes\GeneralStyles.axaml" />
     <AvaloniaXaml Remove="Assets\Themes\PowBlueAccentColors.axaml" />
     <None Remove=".gitignore" />
-    <None Remove="Assets\Logo.png" />
+    <None Remove="Assets\ByteSyncLogo.png" />
     <AvaloniaXaml Remove="Assets\Themes\LinearProgress.axaml" />
     <None Update="local.settings.template.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
@@ -51,12 +53,15 @@
   <ItemGroup>
     <PackageReference Include="Autofac" Version="8.3.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
-    <PackageReference Include="Avalonia" Version="0.10.22" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.10.22" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.22" />
-    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.22" />
-    <PackageReference Include="Avalonia.Xaml.Behaviors" Version="0.10.22" />
+    <PackageReference Include="Avalonia" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.0" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Svg.Skia" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="11.*" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.24.0" />
     <PackageReference Include="FastRsyncNet" Version="2.4.3" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0-beta.700" />

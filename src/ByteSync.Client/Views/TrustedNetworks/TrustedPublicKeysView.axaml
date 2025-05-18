@@ -15,25 +15,25 @@
     </Design.DataContext>
     
     
-    <DataGrid AutoGenerateColumns="False" Margin="12" Items="{Binding Path=TrustedPublicKeys}" 
+    <DataGrid AutoGenerateColumns="False" Margin="12" ItemsSource="{Binding Path=TrustedPublicKeys}" 
               IsReadOnly="True" x:Name="TrustedPublicKeysGrid" 
               LoadingRow="TrustedPublicKeysGrid_OnLoadingRow">
 
         <DataGrid.Columns>
             <DataGridTextColumn Binding="{Binding ClientId}" Width="Auto" FontSize="14">
                 <DataGridTextColumn.Header>
-                    <TextBlock Text="{localizations:Loc TrustedPublicKeysView_ClientIdentifier}" Classes="PowDataGridHeader"/>
+                    <TextBlock Text="{localizations:Loc TrustedPublicKeysView_ClientIdentifier}" Classes="BsDataGridHeader"/>
                 </DataGridTextColumn.Header>
             </DataGridTextColumn>
             <DataGridTextColumn Binding="{Binding PublicKey}" Width="Auto" FontSize="14">
                 <DataGridTextColumn.Header>
-                    <TextBlock Text="{localizations:Loc TrustedPublicKeysView_PublicKey}" Classes="PowDataGridHeader"/>
+                    <TextBlock Text="{localizations:Loc TrustedPublicKeysView_PublicKey}" Classes="BsDataGridHeader"/>
                 </DataGridTextColumn.Header>
             </DataGridTextColumn>
             <DataGridTextColumn Binding="{Binding ValidationDateTimeUtc, StringFormat={}{0:g}}" 
                                 Width="Auto" FontSize="14">
                 <DataGridTextColumn.Header>
-                    <TextBlock Text="{localizations:Loc TrustedPublicKeysView_ValidationDate}" Classes="PowDataGridHeader"/>
+                    <TextBlock Text="{localizations:Loc TrustedPublicKeysView_ValidationDate}" Classes="BsDataGridHeader"/>
                 </DataGridTextColumn.Header>
             </DataGridTextColumn>
 
@@ -55,7 +55,7 @@
                     
                 <DataGridTemplateColumn.HeaderTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{localizations:Loc General_Delete}" Classes="PowDataGridHeader"/>
+                        <TextBlock Text="{localizations:Loc General_Delete}" Classes="BsDataGridHeader"/>
                     </DataTemplate>
                 </DataGridTemplateColumn.HeaderTemplate>
             </DataGridTemplateColumn>

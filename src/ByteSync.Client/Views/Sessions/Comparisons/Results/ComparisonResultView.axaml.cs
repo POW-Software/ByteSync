@@ -8,19 +8,12 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Sessions.Comparisons.Results;
 
-public class ComparisonResultView : ReactiveUserControl<ComparisonResultViewModel>
+public partial class ComparisonResultView : ReactiveUserControl<ComparisonResultViewModel>
 {
-    public DataGrid DataGrid => this.FindControl<DataGrid>("DataGrid");
-        
     public ComparisonResultView()
     {
-        this.WhenActivated(disposables => { });
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        this.WhenActivated(disposables => { });
     }
 
     private void TheGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
