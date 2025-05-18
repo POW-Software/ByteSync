@@ -79,4 +79,7 @@ public class ColorScheme
     public SolidColorBrush StatusMainBackGroundBrush { get; set; }
     public SolidColorBrush StatusSecondaryBackGroundBrush { get; set; }
     public SolidColorBrush VeryLightGrayBrush { get; set; }
+    
+    public Color MainWindowTopColor { get; set; }
+    public Color MainWindowBottomColor { get; set; }
 }

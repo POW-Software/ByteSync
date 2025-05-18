@@ -14,7 +14,7 @@
     
     <Grid Height="60">
         <Border BorderThickness="0 0 0 1" BorderBrush="{DynamicResource SystemBaseMediumLowColor}">
-            <Grid Background="{DynamicResource VeryLightGray}">
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"></ColumnDefinition>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
