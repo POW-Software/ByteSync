@@ -21,17 +21,9 @@ public class LinearProgress : TemplatedControl
 
     public LinearProgress()
     {
-        // PropertyChanged += (sender, args) =>
-        // {
-        //     if (args.Property.Name == nameof(IsEffectivelyVisible))
-        //     {
-        //         IsActive = IsVisible && IsEffectivelyVisible;
-        //     }
-        // };
-        
-        LayoutUpdated += (sender, args) =>
+        LayoutUpdated += (_, _) =>
         {
-            // Mettre à jour l'état actif seulement si nécessaire pour éviter des boucles infinies
+            // Update active state only if necessary to avoid infinite loops
             bool shouldBeActive = IsVisible && IsEffectivelyVisible;
             if (IsActive != shouldBeActive)
             {

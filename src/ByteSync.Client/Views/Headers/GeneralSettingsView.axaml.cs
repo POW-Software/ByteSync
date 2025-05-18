@@ -23,13 +23,4 @@ public partial class GeneralSettingsView : ReactiveUserControl<GeneralSettingsVi
                 .DisposeWith(disposables);
         });
     }
-
-    // private void InitializeComponent()
-    // {
-    //     AvaloniaXamlLoader.Load(this);
-    // }
-        
-    // private TextBlock tblZoomLevel => this.FindControl<TextBlock>("tblZoomLevel");
-    //
-    // private ToggleSwitch tsDarkMode => this.FindControl<ToggleSwitch>("tsDarkMode");
 }
