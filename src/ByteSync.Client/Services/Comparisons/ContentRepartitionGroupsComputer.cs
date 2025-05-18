@@ -82,7 +82,7 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
                 }
                 else
                 {
-                    backBrushColor = ContentRepartitionViewModel.BrushColors.OppositeBackground;
+                    backBrushColor = ContentRepartitionViewModel.BrushColors.SecondaryBackground;
                 }
 
                 foreBrushColor = ContentRepartitionViewModel.BrushColors.MainForeColor;
