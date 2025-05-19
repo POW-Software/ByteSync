@@ -26,5 +26,6 @@
         <StyleInclude Source="avares://ByteSync/Assets/Themes/ActivityIndicator.axaml"/>
         <StyleInclude Source="avares://ByteSync/Assets/Themes/GeneralStyles.axaml"/>
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+        <StyleInclude Source="avares://ByteSync/Assets/Themes/TagEditorStyles.axaml" />
     </Application.Styles>
 </Application>

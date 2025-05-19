@@ -20,7 +20,7 @@
                         CornerRadius="{TemplateBinding CornerRadius}"
                         Padding="{TemplateBinding Padding}">
                     <WrapPanel VerticalAlignment="Center">
-                        <ItemsControl Name="PART_TagsPanel" Items="{TemplateBinding Tags}">
+                        <ItemsControl Name="PART_TagsPanel" ItemsSource="{TemplateBinding Tags}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <WrapPanel Orientation="Horizontal" />
