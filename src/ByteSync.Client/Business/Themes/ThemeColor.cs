@@ -1,4 +1,5 @@
-﻿using ByteSync.Helpers;
+﻿using Avalonia.Media;
+using ByteSync.Helpers;
 
 namespace ByteSync.Business.Themes;
 
@@ -11,7 +12,7 @@ public class ThemeColor
         InitializeHsv();
     }
 
-    public ThemeColor(Avalonia.Media.Color color)
+    public ThemeColor(Color color)
     {
         HexaColor = ColorUtils.ToHex(color);
         AvaloniaColor = color;
@@ -28,7 +29,7 @@ public class ThemeColor
 
     public string HexaColor { get; }
     
-    public Avalonia.Media.Color AvaloniaColor { get; }
+    public Color AvaloniaColor { get; }
     
     public double Hue { get; private set; }
     
@@ -40,22 +41,22 @@ public class ThemeColor
     
     public ThemeColor WithHue(double hue)
     {
-        var newSystemColor = ColorUtils.ColorFromHsv(hue, this.Saturation, this.Value);
+        var newSystemColor = ColorUtils.ColorFromHsv(hue, Saturation, Value);
         return new ThemeColor(newSystemColor);
     }
 
     public ThemeColor WithSaturationValue(double saturation, double value)
     {
-        var newSystemColor = ColorUtils.ColorFromHsv(this.Hue, saturation, value);
+        var newSystemColor = ColorUtils.ColorFromHsv(Hue, saturation, value);
         return new ThemeColor(newSystemColor);
     }
     
     public ThemeColor AdjustSaturationValue(double saturationPercent, double valuePercent)
     {
-        double newSaturation = ComputeAdjustedValue(this.Saturation, saturationPercent);
-        double newValue = ComputeAdjustedValue(this.Value, valuePercent);
+        double newSaturation = ComputeAdjustedValue(Saturation, saturationPercent);
+        double newValue = ComputeAdjustedValue(Value, valuePercent);
         
-        var newSystemColor = ColorUtils.ColorFromHsv(this.Hue, newSaturation, newValue);
+        var newSystemColor = ColorUtils.ColorFromHsv(Hue, newSaturation, newValue);
         return new ThemeColor(newSystemColor);
     }
     
