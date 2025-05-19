@@ -8,17 +8,17 @@ public class ThemeColor
     {
         HexaColor = hexaColor;
         AvaloniaColor = ColorUtils.FromHex(HexaColor);
-        InitializeHSV();
+        InitializeHsv();
     }
 
     public ThemeColor(Avalonia.Media.Color color)
     {
         HexaColor = ColorUtils.ToHex(color);
         AvaloniaColor = color;
-        InitializeHSV();
+        InitializeHsv();
     }
     
-    private void InitializeHSV()
+    private void InitializeHsv()
     {
         ColorUtils.ColorToHsv(AvaloniaColor, out double hue, out double saturation, out double value);
         Hue = hue;
