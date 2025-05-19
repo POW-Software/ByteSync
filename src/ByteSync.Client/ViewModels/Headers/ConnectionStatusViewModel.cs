@@ -62,21 +62,21 @@ public class ConnectionStatusViewModel : ActivatableViewModelBase
                 .Subscribe(_ => SetText())
                 .DisposeWith(disposables);
             
-            _connectionService.ConnectionStatus
-                .Select(cs =>
-                {
-                    return cs switch
-                    {
-                        ConnectionStatuses.Connected => "Green",
-                        ConnectionStatuses.Connecting => "Blue",
-                        ConnectionStatuses.ConnectionFailed => "Red",
-                        ConnectionStatuses.NotConnected => "Red",
-                        ConnectionStatuses.RetryConnectingSoon => "Gray",
-                        _ => "Disconnected"
-                    };
-                })
-                .ToPropertyEx(this, x => x.TextColor)
-                .DisposeWith(disposables);
+            // _connectionService.ConnectionStatus
+            //     .Select(cs =>
+            //     {
+            //         return cs switch
+            //         {
+            //             ConnectionStatuses.Connected => "Green",
+            //             ConnectionStatuses.Connecting => "Blue",
+            //             ConnectionStatuses.ConnectionFailed => "Red",
+            //             ConnectionStatuses.NotConnected => "Red",
+            //             ConnectionStatuses.RetryConnectingSoon => "Gray",
+            //             _ => "Disconnected"
+            //         };
+            //     })
+            //     .ToPropertyEx(this, x => x.TextColor)
+            //     .DisposeWith(disposables);
         }); 
     }
 
@@ -131,7 +131,7 @@ public class ConnectionStatusViewModel : ActivatableViewModelBase
         };
     }
     
-    public extern string TextColor { [ObservableAsProperty] get; }
+    // public extern string TextColor { [ObservableAsProperty] get; }
     
     [Reactive]
     public string Text { get; set; }

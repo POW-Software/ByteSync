@@ -48,7 +48,7 @@
                             Tags="{Binding FilterTags}"
                             TagFilter="{Binding TagFilterValidator}"
                             MinWidth="220"
-                            TagBackground="{DynamicResource SystemAccentColor}"
+                            TagBackground="{DynamicResource HomeCloudSynchronizationBackGround}"
                             TagForeground="{DynamicResource SystemAltHighColor}"
                             TagsChanged="TagEditor_TagsChanged"
                         />
