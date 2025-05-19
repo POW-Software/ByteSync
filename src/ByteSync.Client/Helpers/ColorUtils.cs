@@ -43,9 +43,23 @@ public static class ColorUtils
         return "#" + color.A.ToString("X2") + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
     }
 
+    /// <summary>
+    /// Converts a hexadecimal character to its numeric value (0-15).
+    /// </summary>
+    /// <param name="hex">Hexadecimal character ('0'-'9', 'A'-'F', or 'a'-'f')</param>
+    /// <returns>
+    /// Integer value between 0-15 corresponding to the hex character:
+    /// - '0'-'9' (ASCII 48-57) → 0-9
+    /// - 'A'-'F' (ASCII 65-70) → 10-15
+    /// - 'a'-'f' (ASCII 97-102) → 10-15
+    /// </returns>
     public static int GetHexVal(char hex) 
     {
         int val = (int)hex;
+        // ASCII adjustment based on character range:
+        // - Digits: Subtract 48 from ASCII ('0' = 48 → value 0)
+        // - Uppercase: Subtract 55 from ASCII ('A' = 65 → value 10)
+        // - Lowercase: Subtract 87 from ASCII ('a' = 97 → value 10)
         return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
     }
 
