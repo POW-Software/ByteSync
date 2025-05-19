@@ -1,26 +1,27 @@
-﻿namespace ByteSync.Business.Themes;
+﻿using Avalonia.Media;
+using ByteSync.Helpers;
+
+namespace ByteSync.Business.Themes;
 
 public class ThemeColor
 {
     public ThemeColor(string hexaColor)
     {
         HexaColor = hexaColor;
-        SystemColor = ColorUtils.FromHex(HexaColor);
-        AvaloniaColor = FromSystemColor(SystemColor);
-        InitializeHSV();
+        AvaloniaColor = ColorUtils.FromHex(HexaColor);
+        InitializeHsv();
     }
 
-    public ThemeColor(System.Drawing.Color systemColor)
+    public ThemeColor(Color color)
     {
-        SystemColor = systemColor;
-        HexaColor = ColorUtils.ToHex(systemColor);
-        AvaloniaColor = FromSystemColor(SystemColor);
-        InitializeHSV();
+        HexaColor = ColorUtils.ToHex(color);
+        AvaloniaColor = color;
+        InitializeHsv();
     }
     
-    private void InitializeHSV()
+    private void InitializeHsv()
     {
-        ColorUtils.ColorToHSV(SystemColor, out double hue, out double saturation, out double value);
+        ColorUtils.ColorToHsv(AvaloniaColor, out double hue, out double saturation, out double value);
         Hue = hue;
         Saturation = saturation;
         Value = value;
@@ -28,9 +29,7 @@ public class ThemeColor
 
     public string HexaColor { get; }
     
-    public Avalonia.Media.Color AvaloniaColor { get; }
-    
-    public System.Drawing.Color SystemColor { get; }
+    public Color AvaloniaColor { get; }
     
     public double Hue { get; private set; }
     
@@ -38,30 +37,26 @@ public class ThemeColor
     
     public double Value { get; private set; }
     
-
-    private Avalonia.Media.Color FromSystemColor(System.Drawing.Color color)
-    {
-        return Avalonia.Media.Color.FromArgb(color.A, color.R, color.G, color.B);
-    }
+    
     
     public ThemeColor WithHue(double hue)
     {
-        var newSystemColor = ColorUtils.ColorFromHSV(hue, this.Saturation, this.Value);
+        var newSystemColor = ColorUtils.ColorFromHsv(hue, Saturation, Value);
         return new ThemeColor(newSystemColor);
     }
 
     public ThemeColor WithSaturationValue(double saturation, double value)
     {
-        var newSystemColor = ColorUtils.ColorFromHSV(this.Hue, saturation, value);
+        var newSystemColor = ColorUtils.ColorFromHsv(Hue, saturation, value);
         return new ThemeColor(newSystemColor);
     }
     
     public ThemeColor AdjustSaturationValue(double saturationPercent, double valuePercent)
     {
-        double newSaturation = ComputeAdjustedValue(this.Saturation, saturationPercent);
-        double newValue = ComputeAdjustedValue(this.Value, valuePercent);
+        double newSaturation = ComputeAdjustedValue(Saturation, saturationPercent);
+        double newValue = ComputeAdjustedValue(Value, valuePercent);
         
-        var newSystemColor = ColorUtils.ColorFromHSV(this.Hue, newSaturation, newValue);
+        var newSystemColor = ColorUtils.ColorFromHsv(Hue, newSaturation, newValue);
         return new ThemeColor(newSystemColor);
     }
     

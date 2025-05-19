@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:ByteSync.Views.Misc">
   
-  <Style Selector="local|LinearProgress">
+  <Style Selector="local|ActivityIndicator">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{DynamicResource SystemAccentColor}" />
     <Setter Property="IsHitTestVisible" Value="False" />
@@ -23,28 +23,28 @@
             Padding="{TemplateBinding Padding}">
             
             <Grid ColumnDefinitions="2*, *, 2*, *, 2*, *, 2*">
-              <Border Grid.Column="0" x:Name="R1" Classes="cR1"
+              <Border Grid.Column="0" x:Name="R1" Classes="Shape1"
                   Height="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RectangleHeight}"
                   CornerRadius="2"
                   Background="Transparent" 
                   BorderBrush="{DynamicResource TextControlBorderBrush}"
                   BorderThickness="1"/>
                 
-              <Border Grid.Column="2" x:Name="R2" Classes="cR2"
+              <Border Grid.Column="2" x:Name="R2" Classes="Shape2"
                   Height="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RectangleHeight}"
                   CornerRadius="2"
                   Background="Transparent" 
                   BorderBrush="{DynamicResource TextControlBorderBrush}"
                   BorderThickness="1"/>
               
-              <Border Grid.Column="4" x:Name="R3" Classes="cR3"
+              <Border Grid.Column="4" x:Name="R3" Classes="Shape3"
                   Height="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RectangleHeight}"
                   CornerRadius="2"
                   Background="Transparent" 
                   BorderBrush="{DynamicResource TextControlBorderBrush}"
                   BorderThickness="1"/>
               
-              <Border Grid.Column="6" x:Name="R4" Classes="cR4"
+              <Border Grid.Column="6" x:Name="R4" Classes="Shape4"
                   Height="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RectangleHeight}"
                   CornerRadius="2"
                   Background="Transparent" 
@@ -57,7 +57,7 @@
     </Setter>
   </Style>
   
-  <Style Selector="local|LinearProgress:active Border.cR1">
+  <Style Selector="local|ActivityIndicator:active Border.Shape1">
     <Style.Animations>
       <Animation Duration="0:0:4.0" IterationCount="Infinite" Delay="0" FillMode="None">
         <KeyFrame KeyTime="0:0:0.0">
@@ -80,7 +80,7 @@
     </Style.Animations>
   </Style>
   
-  <Style Selector="local|LinearProgress:active Border.cR2">
+  <Style Selector="local|ActivityIndicator:active Border.Shape2">
     <Style.Animations>
       <Animation Duration="0:0:4.0" IterationCount="Infinite" Delay="0" FillMode="None">
         <KeyFrame KeyTime="0:0:0.0">
@@ -111,7 +111,7 @@
     </Style.Animations>
   </Style>
   
-  <Style Selector="local|LinearProgress:active Border.cR3">
+  <Style Selector="local|ActivityIndicator:active Border.Shape3">
     <Style.Animations>
       <Animation Duration="0:0:4.0" IterationCount="Infinite" Delay="0" FillMode="None">
         <KeyFrame KeyTime="0:0:0.0">
@@ -142,7 +142,7 @@
     </Style.Animations>
   </Style>
   
-  <Style Selector="local|LinearProgress:active Border.cR4">
+  <Style Selector="local|ActivityIndicator:active Border.Shape4">
     <Style.Animations>
       <Animation Duration="0:0:4.0" IterationCount="Infinite" Delay="0" FillMode="None">
         <KeyFrame KeyTime="0:0:0.0">
@@ -169,22 +169,22 @@
     </Style.Animations>
   </Style>
   
-  <Style Selector="local|LinearProgress:inactive Border.cR1">
+  <Style Selector="local|ActivityIndicator:inactive Border.Shape1">
     <Setter Property="Background" Value="Transparent"/>
     <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
   </Style>
   
-  <Style Selector="local|LinearProgress:inactive Border.cR2">
+  <Style Selector="local|ActivityIndicator:inactive Border.Shape2">
     <Setter Property="Background" Value="Transparent"/>
     <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
   </Style>
   
-  <Style Selector="local|LinearProgress:inactive Border.cR3">
+  <Style Selector="local|ActivityIndicator:inactive Border.Shape3">
     <Setter Property="Background" Value="Transparent"/>
     <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
   </Style>
   
-  <Style Selector="local|LinearProgress:inactive Border.cR4">
+  <Style Selector="local|ActivityIndicator:inactive Border.Shape4">
     <Setter Property="Background" Value="Transparent"/>
     <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
   </Style>

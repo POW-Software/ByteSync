@@ -89,7 +89,7 @@
                 
                 <Grid>
 
-                    <misc:LinearProgress Width="48" Height="48" 
+                    <misc:ActivityIndicator Width="48" Height="48" 
                                          Margin="20,0,0,3"  HorizontalAlignment="Center"
                                          IsVisible="{Binding IsCreatingProfile}"/>
                     

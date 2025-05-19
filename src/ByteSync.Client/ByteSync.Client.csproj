@@ -45,7 +45,7 @@
     <AvaloniaXaml Remove="Assets\Themes\PowBlueAccentColors.axaml" />
     <None Remove=".gitignore" />
     <None Remove="Assets\ByteSyncLogo.png" />
-    <AvaloniaXaml Remove="Assets\Themes\LinearProgress.axaml" />
+    <AvaloniaXaml Remove="Assets\Themes\ActivityIndicator.axaml" />
     <None Update="local.settings.template.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
@@ -128,8 +128,8 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="Assets\Themes\LinearProgress.xaml.cs">
-      <DependentUpon>LinearProgress.axaml</DependentUpon>
+    <Compile Update="Assets\Themes\ActivityIndicator.xaml.cs">
+      <DependentUpon>ActivityIndicator.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Sessions\Managing\CurrentCloudSessionView.axaml.cs">
       <DependentUpon>CurrentCloudSessionView.axaml</DependentUpon>

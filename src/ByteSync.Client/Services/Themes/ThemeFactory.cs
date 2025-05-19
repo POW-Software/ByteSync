@@ -1,5 +1,6 @@
 ﻿using Avalonia.Media;
 using ByteSync.Business.Themes;
+using ByteSync.Helpers;
 using ByteSync.Interfaces.Controls.Themes;
 
 namespace ByteSync.Services.Themes;
@@ -38,7 +39,7 @@ public class ThemeFactory : IThemeFactory
     private void BuildAndRegisterThemes(string themeName, ThemeColor themeColor, double secondaryColorHue, string primaryColorHex)
     {
         // Create secondary theme color with given hue but same saturation/value as primary
-        var secondarySystemColor = ColorUtils.ColorFromHSV(secondaryColorHue, themeColor.Saturation, themeColor.Value);
+        var secondarySystemColor = ColorUtils.ColorFromHsv(secondaryColorHue, themeColor.Saturation, themeColor.Value);
         ThemeColor secondaryThemeColor = new ThemeColor(secondarySystemColor);
 
         // Create light theme
@@ -130,6 +131,9 @@ public class ThemeFactory : IThemeFactory
             colorScheme.Gray8 = Color.FromArgb(0xFF, 0x27, 0x27, 0x27);
             colorScheme.SettingsHeaderColor = Color.FromArgb(0xFF, 0x30, 0x30, 0x30);
             colorScheme.BlockBackColor = Color.FromArgb(0xFF, 0x1F, 0x1F, 0x1F);
+
+            colorScheme.MainWindowTopColor = ColorUtils.BlendWithTransparency(colorScheme.VeryLightGray, colorScheme.MainAccentColor.AvaloniaColor, 0.05);
+            colorScheme.MainWindowBottomColor = ColorUtils.BlendWithTransparency(Color.FromArgb(0xFF, 0x04, 0x04, 0x04), colorScheme.MainAccentColor.AvaloniaColor, 0.05);
             
             ComputeSecondaryColors(colorScheme, secondaryColorHue);
             
@@ -211,6 +215,9 @@ public class ThemeFactory : IThemeFactory
             colorScheme.Gray8 = Color.FromArgb(0xFF, 0xE0, 0xE0, 0xE0);
             colorScheme.SettingsHeaderColor = Color.FromArgb(0xFF, 0xE6, 0xE6, 0xE6);
             colorScheme.BlockBackColor = Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF);
+            
+            colorScheme.MainWindowTopColor = ColorUtils.BlendWithTransparency(colorScheme.VeryLightGray, colorScheme.MainAccentColor.AvaloniaColor, 0.05);
+            colorScheme.MainWindowBottomColor = ColorUtils.BlendWithTransparency(Color.FromArgb(0xFF, 0xEF, 0xEF, 0xEF), colorScheme.MainAccentColor.AvaloniaColor, 0.05);
             
             ComputeSecondaryColors(colorScheme, secondaryColorHue);
             

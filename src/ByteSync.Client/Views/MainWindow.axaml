@@ -14,8 +14,8 @@
     
     <Window.Background>
         <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
-            <GradientStop Offset="0" Color="{DynamicResource SystemAltHighColor}" /> <!-- SystemAltHighColor SystemChromeLowColor SystemChromeMediumColor -->
-            <GradientStop Offset="1" Color="{DynamicResource SystemChromeMediumColor}" />
+            <GradientStop Offset="0" Color="{DynamicResource MainWindowTopColor}" />
+            <GradientStop Offset="1" Color="{DynamicResource MainWindowBottomColor}" />
         </LinearGradientBrush>
     </Window.Background>
     
@@ -28,12 +28,6 @@
         </LayoutTransformControl.LayoutTransform>
         
         <Grid RowDefinitions="Auto,Auto,*" >
-            <Grid.Background>
-                <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%" Opacity="0.05">
-                    <GradientStop Offset="0" Color="{DynamicResource SystemAltHighColor}" />
-                    <GradientStop Offset="1" Color="{DynamicResource SystemAccentColor}" />
-                </LinearGradientBrush>
-            </Grid.Background>
             
             <Border Grid.Row="0" x:Name="FocusSink"
                     IsVisible="True"

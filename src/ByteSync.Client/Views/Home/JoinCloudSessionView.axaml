@@ -47,7 +47,7 @@
                         IsEnabled="{Binding !IsCreatingCloudSession}">
 
                 <!-- Join Button -->
-                <Button Classes="Accent" Name="ButtonJoin" Margin="9" Height="32" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                <Button Classes="AccentButton" Name="ButtonJoin" Margin="9" Height="32" HorizontalAlignment="Center" VerticalAlignment="Bottom"
                         Command="{Binding Path=JoinCommand}" IsVisible="{Binding !IsJoiningCloudSession}">
                     <StackPanel Orientation="Horizontal">
                         <misc:Icon FontSize="16" Value="RegularLogInCircle" Margin="0" />
@@ -56,12 +56,12 @@
                 </Button>
                 
                 <!-- Progress Bar -->
-                <misc:LinearProgress Width="120" Margin="9" Height="32" 
+                <misc:ActivityIndicator Width="120" Margin="9" Height="32" 
                                      HorizontalAlignment="Center" VerticalAlignment="Bottom"
                                      IsVisible="{Binding IsJoiningCloudSession}"/>
 
                 <!-- Cancel Button -->
-                <Button Classes="accent" Margin="9" Height="32" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                <Button Margin="9" Height="32" HorizontalAlignment="Center" VerticalAlignment="Bottom"
                         IsVisible="{Binding IsJoiningCloudSession}"
                         Command="{Binding Path=CancelCommand}">
                     <StackPanel Orientation="Horizontal">

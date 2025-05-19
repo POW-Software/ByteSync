@@ -175,6 +175,14 @@
 	    <Setter Property="Background" Value="{DynamicResource BsAccentButtonPointerOverBackGround}" />
     </Style>
     
+    <Style Selector="Button.Secondary">
+	    <Setter Property="Background" Value="{DynamicResource SecondaryButtonBackGround}"/>
+    </Style>
+    
+    <Style Selector="Button.Secondary:pointerover > ContentPresenter#PART_ContentPresenter2">
+	    <Setter Property="Background" Value="{DynamicResource SecondaryButtonPointerOverBackGround}" />
+    </Style>
+    
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->

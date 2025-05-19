@@ -1,7 +1,6 @@
-﻿using System;
-using System.Drawing;
+﻿using Avalonia.Media;
 
-namespace ByteSync.Common.Helpers;
+namespace ByteSync.Helpers;
 
 public static class ColorUtils
 {
@@ -25,7 +24,7 @@ public static class ColorUtils
         Color color;
         if (bytes.Length == 3)
         {
-            color = Color.FromArgb(bytes[0], bytes[1], bytes[2]);
+            color = Color.FromArgb(255, bytes[0], bytes[1], bytes[2]);
         }
         else if (bytes.Length == 4)
         {
@@ -44,19 +43,25 @@ public static class ColorUtils
         return "#" + color.A.ToString("X2") + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
     }
 
+    /// <summary>
+    /// Converts a hexadecimal character to its numeric value (0-15).
+    /// </summary>
+    /// <param name="hex">Hexadecimal character ('0'-'9', 'A'-'F', or 'a'-'f')</param>
+    /// <returns>
+    /// Integer value between 0-15 corresponding to the hex character:
+    /// - '0'-'9' (ASCII 48-57) → 0-9
+    /// - 'A'-'F' (ASCII 65-70) → 10-15
+    /// - 'a'-'f' (ASCII 97-102) → 10-15
+    /// </returns>
     public static int GetHexVal(char hex) 
     {
         int val = (int)hex;
-        //For uppercase A-F letters:
-        //return val - (val < 58 ? 48 : 55);
-        //For lowercase a-f letters:
-        //return val - (val < 58 ? 48 : 87);
-        //Or the two combined, but a bit slower:
+        // ASCII adjustment based on character range:
+        // - Digits: Subtract 48 from ASCII ('0' = 48 → value 0)
+        // - Uppercase: Subtract 55 from ASCII ('A' = 65 → value 10)
+        // - Lowercase: Subtract 87 from ASCII ('a' = 97 → value 10)
         return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
     }
-
-
-    // http://csharphelper.com/blog/2016/08/convert-between-rgb-and-hls-color-models-in-c/
 
     public static void RgbToHls(Color color, out double h, out double l, out double s)
     {
@@ -104,19 +109,6 @@ public static class ColorUtils
         }
     }
 
-    public static Color HlsToRgb(double h, double l, double s)
-    {
-        byte r;
-        byte g;
-        byte b;
-
-        HlsToRgb(h, l, s, out r, out g, out b);
-
-        Color color = Color.FromArgb(r, g, b);
-
-        return color;
-    }
-
     // Convert an HLS value into an RGB value.
     public static void HlsToRgb(double h, double l, double s, out byte r, out byte g, out byte b)
     {
@@ -156,69 +148,49 @@ public static class ColorUtils
         return q1;
     }
     
-    // https://stackoverflow.com/questions/3722307/is-there-an-easy-way-to-blend-two-system-drawing-color-values
-    /// <summary>Blends the specified colors together.</summary>
-    /// <param name="color">Color to blend onto the background color.</param>
-    /// <param name="backColor">Color to blend the other color onto.</param>
-    /// <param name="amount">How much of <paramref name="color"/> to keep,
-    /// “on top of” <paramref name="backColor"/>.</param>
-    /// <returns>The blended colors.</returns>
-    public static Color Blend(Color color, Color backColor, double amount)
+    public static Color BlendWithTransparency(Color baseColor, Color overlayColor, double opacity)
     {
-        byte r = (byte) (color.R * amount + backColor.R * (1 - amount));
-        byte g = (byte) (color.G * amount + backColor.G * (1 - amount));
-        byte b = (byte) (color.B * amount + backColor.B * (1 - amount));
-        return Color.FromArgb(r, g, b);
+        opacity = Math.Clamp(opacity, 0, 1);
+    
+        // Normalize RGB values between 0 and 1
+        double baseR = baseColor.R / 255.0;
+        double baseG = baseColor.G / 255.0;
+        double baseB = baseColor.B / 255.0;
+    
+        double overlayR = overlayColor.R / 255.0;
+        double overlayG = overlayColor.G / 255.0;
+        double overlayB = overlayColor.B / 255.0;
+    
+        // Apply the blending formula with transparency
+        // For each component: result = base + (overlay - base) * opacity
+        double resultR = baseR + (overlayR - baseR) * opacity;
+        double resultG = baseG + (overlayG - baseG) * opacity;
+        double resultB = baseB + (overlayB - baseB) * opacity;
+    
+        // Convert to values 0-255
+        byte r = (byte)(resultR * 255);
+        byte g = (byte)(resultG * 255);
+        byte b = (byte)(resultB * 255);
+    
+        return Color.FromArgb(baseColor.A, r, g, b);
     }
     
-    /// <summary>
-    /// Creates color with corrected brightness.
-    /// </summary>
-    /// <param name="color">Color to correct.</param>
-    /// <param name="correctionFactor">The brightness correction factor. Must be between -1 and 1. 
-    /// Negative values produce darker colors.</param>
-    /// <returns>
-    /// Corrected <see cref="Color"/> structure.
-    /// </returns>
-    public static Color ChangeColorBrightness(Color color, float correctionFactor)
-    {
-        https://stackoverflow.com/questions/801406/c-create-a-lighter-darker-color-based-on-a-system-color
-        
-        float red = (float)color.R;
-        float green = (float)color.G;
-        float blue = (float)color.B;
-
-        if (correctionFactor < 0)
-        {
-            correctionFactor = 1 + correctionFactor;
-            red *= correctionFactor;
-            green *= correctionFactor;
-            blue *= correctionFactor;
-        }
-        else
-        {
-            red = (255 - red) * correctionFactor + red;
-            green = (255 - green) * correctionFactor + green;
-            blue = (255 - blue) * correctionFactor + blue;
-        }
-
-        return Color.FromArgb(color.A, (int)red, (int)green, (int)blue);
-    }
-    
-    // Testé le 13/12/2022 : https://stackoverflow.com/questions/359612/how-to-convert-rgb-color-to-hsv
-    // Même résultat qu'avec Gimp
-    
-    public static void ColorToHSV(Color color, out double hue, out double saturation, out double value)
+    public static void ColorToHsv(Color color, out double hue, out double saturation, out double value)
     {
         int max = Math.Max(color.R, Math.Max(color.G, color.B));
         int min = Math.Min(color.R, Math.Min(color.G, color.B));
 
-        hue = color.GetHue();
+        hue = color.ToSystemColor().GetHue();
         saturation = (max == 0) ? 0 : 1d - (1d * min / max);
         value = max / 255d;
     }
 
-    public static Color ColorFromHSV(double hue, double saturation, double value)
+    public static System.Drawing.Color ToSystemColor(this Color color)
+    {
+        return System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
+    }
+
+    public static Color ColorFromHsv(double hue, double saturation, double value)
     {
         int hi = Convert.ToInt32(Math.Floor(hue / 60)) % 6;
         double f = hue / 60 - Math.Floor(hue / 60);
@@ -230,16 +202,16 @@ public static class ColorUtils
         int t = Convert.ToInt32(value * (1 - (1 - f) * saturation));
 
         if (hi == 0)
-            return Color.FromArgb(255, v, t, p);
+            return Color.FromArgb(255, (byte) v, (byte) t, (byte) p);
         else if (hi == 1)
-            return Color.FromArgb(255, q, v, p);
+            return Color.FromArgb(255, (byte) q, (byte) v, (byte) p);
         else if (hi == 2)
-            return Color.FromArgb(255, p, v, t);
+            return Color.FromArgb(255, (byte) p, (byte) v, (byte) t);
         else if (hi == 3)
-            return Color.FromArgb(255, p, q, v);
+            return Color.FromArgb(255, (byte) p, (byte) q, (byte) v);
         else if (hi == 4)
-            return Color.FromArgb(255, t, p, v);
+            return Color.FromArgb(255, (byte) t, (byte) p, (byte) v);
         else
-            return Color.FromArgb(255, v, p, q);
+            return Color.FromArgb(255, (byte) v, (byte) p, (byte) q);
     }
 }

@@ -64,7 +64,7 @@
 
                 <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 6">
                     
-                    <misc:LinearProgress Width="120" Height="100" 
+                    <misc:ActivityIndicator Width="120" Height="100" 
                                          Margin="10,20,0,0" HorizontalAlignment="Center" VerticalAlignment="Top"
                                          IsVisible="{Binding IsMainProgressRingVisible}"
                                          />
