@@ -176,9 +176,10 @@ public class TagEditor : TemplatedControl
             Interval = TimeSpan.FromMilliseconds(AutoCommitDelay) 
         };
         _commitTimer.Tick += CommitTimer_Tick;
-            
+        
         Tags.CollectionChanged += Tags_CollectionChanged;
     }
+
 
     private void Tags_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
     {
@@ -342,5 +343,17 @@ public class TagEditor : TemplatedControl
     public string GetTagsString()
     {
         return string.Join(TagSeparator.ToString(), Tags);
+    }
+    
+    public void RemoveTag(object? parameter)
+    {
+        if (parameter is string tag)
+        {
+            if (Tags.Contains(tag))
+            {
+                Tags.Remove(tag);
+                RaiseEvent(new RoutedEventArgs(TagRemovedEvent, this));
+            }
+        }
     }
 }

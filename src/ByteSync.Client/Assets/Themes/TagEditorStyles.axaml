@@ -1,11 +1,8 @@
-﻿<!-- <ResourceDictionary xmlns="https://github.com/avaloniaui" -->
-<!--                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" -->
-<!--                     xmlns:misc="clr-namespace:ByteSync.Views.Misc"> -->
-
-    <!-- Style pour TagEditor (compatible avec Avalonia 0.10.22) -->
-    <Style Selector="misc|TagEditor" xmlns="https://github.com/avaloniaui"
-           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-           xmlns:misc="clr-namespace:ByteSync.Views.Misc">
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:misc="clr-namespace:ByteSync.Views.Misc">
+    
+    <Style Selector="misc|TagEditor">
         <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -51,10 +48,12 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
-                        <!-- TextBox amélioré -->
+                        <!-- TextBox avec style optimisé -->
                         <TextBox Name="PART_TextBox" 
+                                 Classes="TagEditorTextBox"
                                  Background="Transparent"
                                  BorderThickness="0"
+                                 Padding="2,0"
                                  VerticalAlignment="Center"
                                  Text="{TemplateBinding CurrentText}"
                                  Watermark="{TemplateBinding Watermark}"
@@ -64,4 +63,31 @@
             </ControlTemplate>
         </Setter>
     </Style>
-<!-- </ResourceDictionary> -->
+    
+    <Style Selector="TextBox.TagEditorTextBox">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Padding" Value="2,0"/>
+        <Setter Property="MinWidth" Value="50"/>
+        <Setter Property="MinHeight" Value="20"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    
+    <Style Selector="TextBox.TagEditorTextBox:focus">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    
+    <Style Selector="TextBox.TagEditorTextBox /template/ Border#PART_BorderElement">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="CornerRadius" Value="0"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Padding" Value="2,0"/>
+        <Setter Property="MinHeight" Value="20"/>
+    </Style>
+    
+    <Style Selector="TextBox.TagEditorTextBox:focus /template/ Border#PART_BorderElement">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+</Styles>
