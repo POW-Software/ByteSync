@@ -1,8 +1,9 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Avalonia;
-using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Media;
+using Avalonia.Styling;
+using Avalonia.Themes.Fluent;
 using ByteSync.Business.Themes;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
@@ -13,16 +14,22 @@ namespace ByteSync.Services.Themes;
 class ThemeService : IThemeService
 {
     private readonly IApplicationSettingsRepository _applicationSettingsRepository;
+    private readonly ILogger<ThemeService> _logger;
     
     private readonly BehaviorSubject<Theme> _selectedTheme;
 
-    public ThemeService(IApplicationSettingsRepository applicationSettingsManager)
+    public ThemeService(IApplicationSettingsRepository applicationSettingsRepository, ILogger<ThemeService> logger)
     {
-        _applicationSettingsRepository = applicationSettingsManager;
+        _applicationSettingsRepository = applicationSettingsRepository;
+        _logger = logger;
 
         AvailableThemes = new List<Theme>();
         
-        _selectedTheme = new BehaviorSubject<Theme>(new Theme("undefined", ThemeModes.Light, null!));
+        _selectedTheme = new BehaviorSubject<Theme>(new Theme(
+            "undefined", 
+            ThemeModes.Light,
+            new ThemeColor("#094177"), 
+            new ThemeColor("#b88746")));
     }
     
     public IObservable<Theme> SelectedTheme => _selectedTheme.AsObservable();
@@ -32,26 +39,16 @@ class ThemeService : IThemeService
     public void OnThemesRegistred()
     {
         Theme? theme = null;
-
-        var fluentThemes = Application.Current?.Styles.Where(s => s is Avalonia.Themes.Fluent.FluentTheme).ToList();
-        if (fluentThemes != null)
-        {
-            foreach (var fluentTheme in fluentThemes)
-            {
-                Application.Current!.Styles.Remove(fluentTheme);
-            }
-        }
         
         var applicationSettings = _applicationSettingsRepository.GetCurrentApplicationSettings();
         if (applicationSettings.Theme.IsNotEmpty())
         {
             theme = AvailableThemes.FirstOrDefault(t => t.Key.Equals(applicationSettings.Theme, StringComparison.CurrentCultureIgnoreCase));
         }
-
+        
         if (theme == null)
         {
             UseDefaultTheme();
-            
             UpdateSettings();
         }
         else
@@ -63,14 +60,13 @@ class ThemeService : IThemeService
     public void SelectTheme(string? name, bool isDarkMode)
     {
         var currentTheme = _selectedTheme.Value;
-
+        
         if (!currentTheme.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) ||
             currentTheme.IsDarkMode != isDarkMode)
         {
             var theme = AvailableThemes.Single(t => t.Name.Equals(name) && t.IsDarkMode == isDarkMode);
-
-            SelectTheme(theme);
         
+            SelectTheme(theme);
             UpdateSettings();
         }
     }
@@ -82,24 +78,55 @@ class ThemeService : IThemeService
 
     private void SelectTheme(Theme theme)
     {
-        var styles = Application.Current?.Styles;
-        if (styles == null)
+        if (Application.Current?.Styles.OfType<FluentTheme>().FirstOrDefault() is FluentTheme fluentTheme)
         {
-            return;
-        }
-                    
-        if (styles.Count == 0 || styles.All(s => s is StyleInclude))
-        {
-            // We haven't added the style yet, we are adding it
-            styles.Add(theme.Style);
-        }
-        else
-        {
-            // Otherwise, we replace
-            styles[^1] = theme.Style;
+            try
+            {
+                // Apply theme colors to fluent theme resources
+                ApplyThemeColorsToFluentTheme(fluentTheme, theme);
+
+                // Apply theme variant (light/dark)
+                Application.Current.RequestedThemeVariant = theme.IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to apply theme {ThemeName}", theme.Key);
+            }
         }
         
         _selectedTheme.OnNext(theme);
+    }
+    
+    private void ApplyThemeColorsToFluentTheme(FluentTheme fluentTheme, Theme theme)
+    {
+        // Set primary accent color
+        fluentTheme.Resources["SystemAccentColor"] = theme.ThemeColor.AvaloniaColor;
+        
+        // Apply all color scheme properties to resources
+        var colorScheme = theme.ColorScheme;
+        if (colorScheme != null)
+        {
+            var properties = colorScheme.GetType().GetProperties();
+
+            foreach (var property in properties)
+            {
+                if (property.PropertyType == typeof(Color))
+                {
+                    var color = (Color)property.GetValue(colorScheme)!;
+                    fluentTheme.Resources[property.Name] = color;
+                }
+                else if (property.PropertyType == typeof(ThemeColor))
+                {
+                    var themeColorProperty = (ThemeColor)property.GetValue(colorScheme)!;
+                    fluentTheme.Resources[property.Name] = themeColorProperty.AvaloniaColor;
+                }
+                else if (property.PropertyType == typeof(SolidColorBrush))
+                {
+                    var brush = (SolidColorBrush)property.GetValue(colorScheme)!;
+                    fluentTheme.Resources[property.Name] = brush;
+                }
+            }
+        }
     }
 
     private void UseDefaultTheme()
@@ -119,8 +146,10 @@ class ThemeService : IThemeService
 
     public void GetResource<T>(string resourceName, out T? resource)
     {
+        var themeVariant = Application.Current?.RequestedThemeVariant ?? ThemeVariant.Default;
+        
         object? styleResource = null;
-        Application.Current?.Styles.TryGetResource(resourceName, out styleResource);
+        Application.Current?.Styles.TryGetResource(resourceName, themeVariant, out styleResource);
 
         if (styleResource is T)
         {
@@ -129,13 +158,16 @@ class ThemeService : IThemeService
         else
         {
             resource = default;
+            _logger.LogWarning("Resource {ResourceName} not found", resourceName);
         }
     }
     
     public IBrush? GetBrush(string resourceName)
     {
+        var themeVariant = Application.Current?.RequestedThemeVariant ?? ThemeVariant.Default;
+        
         object? styleResource = null;
-        Application.Current?.Styles.TryGetResource(resourceName, out styleResource);
+        Application.Current?.Styles.TryGetResource(resourceName, themeVariant, out styleResource);
 
         if (styleResource is IBrush brush)
         {
@@ -147,6 +179,7 @@ class ThemeService : IThemeService
         }
         else
         {
+            _logger.LogWarning("Resource {ResourceName} not found", resourceName);
             return null;
         }
     }

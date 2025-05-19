@@ -21,7 +21,7 @@
                    <Label Content="{Binding ElementType}" 
                           FontStyle="Italic" VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
                    
-                   <Border BorderBrush="{DynamicResource BlockBackColor}" BorderThickness="1,0,1,0" Margin="6 0 6,0" />
+                   <Border BorderBrush="{DynamicResource SystemAltHighColor}" BorderThickness="1,0,1,0" Margin="6 0 6,0" />
                </StackPanel>
 
                

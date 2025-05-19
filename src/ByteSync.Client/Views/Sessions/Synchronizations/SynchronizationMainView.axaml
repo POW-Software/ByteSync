@@ -32,7 +32,7 @@
                 <StackPanel MinWidth="300" MaxWidth="450" Margin="12"
                             IsVisible="{Binding ShowStartSynchronizationObservable}" 
                             HorizontalAlignment="Center" Orientation="Vertical">
-                    <Button Classes="AccentButton"
+                    <Button Classes="AccentButton" Margin="9" Height="32"
                             Command="{Binding Path=StartSynchronizationCommand}" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
                             <misc:Icon FontSize="12" Value="RegularPlay"  />
@@ -64,9 +64,9 @@
 
                 <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 6">
                     
-                    <misc:LinearProgress Width="120" Height="100" 
+                    <misc:ActivityIndicator Width="120" Height="100" 
                                          Margin="10,20,0,0" HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         IsActive="{Binding IsMainProgressRingVisible}" IsVisible="{Binding IsMainProgressRingVisible}"
+                                         IsVisible="{Binding IsMainProgressRingVisible}"
                                          />
                     
                     <!-- <misc:Icon FontSize="100" Value="SolidCheckCircle" Foreground="{DynamicResource SystemAccentColor}" Margin ="0 6" /> -->

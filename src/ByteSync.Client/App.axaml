@@ -2,86 +2,29 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:byteSync="clr-namespace:ByteSync"
              xmlns:converters="clr-namespace:ByteSync.Services.Converters"
-             x:Class="ByteSync.App" Name="ByteSync">
+             x:Class="ByteSync.App" Name="ByteSync"
+             RequestedThemeVariant="Dark">
     <Application.Resources>
-        <!-- <ResourceDictionary> -->
-        <converters:FormatKbSizeConverter x:Key="FormatKbSizeConverter" />
-        <converters:LobbyMemberStatusConverter x:Key="LobbyMemberStatusConverter" />
-        <converters:BoolToDeploymentModeConverter x:Key="BoolToDeploymentModeConverter" />
-        <converters:ProfileTypeConverter x:Key="ProfileTypeConverter" />
-        <converters:ExecutionModeConverter x:Key="ExecutionModeConverter" />
-        <converters:LocalInventoryPartStatusToIconConverter x:Key="InventoryProcessStatusToIconConverter" />
-        <converters:LocalInventoryPartStatusToTextConverter x:Key="InventoryProcessStatusToTextConverter" />
-        <converters:IntToLetterConverter x:Key="IntToLetterConverter" />
-        <!--     <ResourceDictionary.MergedDictionaries> -->
-        <!--         <ResourceInclude Source="avares://ByteSync/Assets/Themes/TagEditorStyles.axaml"/> -->
-        <!--     </ResourceDictionary.MergedDictionaries> -->
-        <!-- </ResourceDictionary> -->
-        <!-- <ResourceDictionary> -->
-        <!--     <ResourceDictionary.MergedDictionaries> -->
-        <!--         <ResourceInclude Source="avares://ByteSync/Assets/Themes/TagEditorStyles.axaml" /> -->
-        <!--     </ResourceDictionary.MergedDictionaries> -->
-        <!-- </ResourceDictionary> -->
+        <ResourceDictionary>
+            <converters:FormatKbSizeConverter x:Key="FormatKbSizeConverter" />
+            <converters:LobbyMemberStatusConverter x:Key="LobbyMemberStatusConverter" />
+            <converters:BoolToDeploymentModeConverter x:Key="BoolToDeploymentModeConverter" />
+            <converters:ProfileTypeConverter x:Key="ProfileTypeConverter" />
+            <converters:ExecutionModeConverter x:Key="ExecutionModeConverter" />
+            <converters:LocalInventoryPartStatusToIconConverter x:Key="InventoryProcessStatusToIconConverter" />
+            <converters:LocalInventoryPartStatusToTextConverter x:Key="InventoryProcessStatusToTextConverter" />
+            <converters:IntToLetterConverter x:Key="IntToLetterConverter" />
+        </ResourceDictionary>
     </Application.Resources>
     <Application.DataTemplates>
         <byteSync:ViewLocator/>
     </Application.DataTemplates>
     
-    
-    <NativeMenu.Menu>
-        <NativeMenu></NativeMenu>
-        <!--<NativeMenu>
-        
-        https://github.com/AvaloniaUI/Avalonia/issues/3541
-        avalonia macos menu "avalonia application"
-        https://www.youtube.com/watch?v=Ro_l-DAvWcY
-        
-            <NativeMenuItem Header="ByteSync">
-                <NativeMenuItem.Menu>
-                    <NativeMenu>
-                        <NativeMenuItem Header="Quit" />
-                    </NativeMenu>
-                </NativeMenuItem.Menu>
-            </NativeMenuItem>
-            <NativeMenuItem Header="File">
-                <NativeMenuItem.Menu>
-                    <NativeMenu>
-                        <NativeMenuItem Header="Open" Gesture="cmd+o" Command="{Binding OpenCommand}" />
-                        <NativeMenuItemSeperator />
-                        <NativeMenuItem Header="Quit" />
-                    </NativeMenu>
-                </NativeMenuItem.Menu>
-            </NativeMenuItem>
-        </NativeMenu>-->
-    </NativeMenu.Menu>
-
     <Application.Styles>
-
-        <!-- <styling:FluentAvaloniaTheme RequestedTheme="Dark" /> -->
-
-        <!-- <StyleInclude Source="resm:PowByteSync.Assets.Themes.GeneralStyles.axaml?assembly=PowByteSync"/> -->
-        <!-- <StyleInclude Source="avares://PowByteSync/Assets/Themes/GeneralStyles.axaml"/> -->
-        <!-- <StyleInclude Source="avares://AvaloniaProgressRing/Styles/ProgressRing.xaml"/> -->
-		<FluentTheme Mode="Light"/>
-		<StyleInclude Source="avares://ByteSync/Assets/Icons/BoxIcons.axaml"/>
-        <StyleInclude Source="avares://ByteSync/Assets/Themes/LinearProgress.axaml"/>
+        <FluentTheme />
+        <StyleInclude Source="avares://ByteSync/Assets/Icons/BoxIcons.axaml"/>
+        <StyleInclude Source="avares://ByteSync/Assets/Themes/ActivityIndicator.axaml"/>
         <StyleInclude Source="avares://ByteSync/Assets/Themes/GeneralStyles.axaml"/>
-        <StyleInclude Source="avares://ByteSync/Assets/Themes/TagEditorStyles.axaml" />
-        <!-- <StyleInclude Source="avares://ByteSync/Assets/Themes/TagEditorStyles.axaml"/> -->
-        
-        <!-- <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/> -->
-        
-       <!-- <StyleInclude Source="resm:PowByteSync.Assets.Icons.BoxIcons.axaml?assembly=PowByteSync"/> -->
-        
-        <!--  <FluentTheme Mode="Dark"/> -->
-        <!--  <StyleInclude Source="avares://PowByteSync/Assets/Themes/FluentPowBlueLight.axaml?assembly=PowByteSync"/> -->
-
-        <!-- <StyleInclude Source="resm:PowByteSync.Assets.Themes.FluentPowBlueLight.axaml?assembly=PowByteSync"/> -->
-
-        <!-- <StyleInclude Source="avares://Citrus.Avalonia/Citrus.xaml"/> -->
-        <!-- <StyleInclude Source="avares://Citrus.Avalonia/Sea.xaml"/> -->
-        <!-- <StyleInclude Source="avares://Citrus.Avalonia/Rust.xaml"/> -->
-        <!-- <StyleInclude Source="avares://Citrus.Avalonia/Candy.xaml"/> -->
-        <!-- <StyleInclude Source="avares://Citrus.Avalonia/Magma.xaml"/> -->
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
     </Application.Styles>
 </Application>

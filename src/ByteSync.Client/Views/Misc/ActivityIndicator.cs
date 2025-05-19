@@ -1,14 +1,10 @@
 ﻿using Avalonia;
 using Avalonia.Controls.Primitives;
 using Avalonia.LogicalTree;
-using Avalonia.Media;
 
 namespace ByteSync.Views.Misc;
 
-/// <summary>
-/// Basé sur https://github.com/Deadpikle/AvaloniaProgressRing/blob/master/AvaloniaProgressRing/Styles/ProgressRing.xaml
-/// </summary>
-public class LinearProgress : TemplatedControl
+public class ActivityIndicator : TemplatedControl
 {
     private const string InactiveState = ":inactive";
     private const string ActiveState = ":active";
@@ -17,13 +13,23 @@ public class LinearProgress : TemplatedControl
     private double _rectangleHeight = 10;
     private Thickness _rectangleMargin = new Thickness(1);
 
-    static LinearProgress()
+    static ActivityIndicator()
     {
-
+        IsActiveProperty.Changed.Subscribe(OnIsActiveChanged);
+        IsVisibleProperty.Changed.AddClassHandler<ActivityIndicator>((x, e) => x.OnIsVisibleChanged(e));
     }
 
-    public LinearProgress()
+    public ActivityIndicator()
     {
+        LayoutUpdated += (_, _) =>
+        {
+            // Update active state only if necessary to avoid infinite loops
+            bool shouldBeActive = IsVisible && IsEffectivelyVisible;
+            if (IsActive != shouldBeActive)
+            {
+                IsActive = shouldBeActive;
+            }
+        };
     }
 
     #region IsActive
@@ -33,18 +39,28 @@ public class LinearProgress : TemplatedControl
         get => (bool)GetValue(IsActiveProperty);
         set => SetValue(IsActiveProperty, value);
     }
-
-
+    
     public static readonly StyledProperty<bool> IsActiveProperty =
-        AvaloniaProperty.Register<LinearProgress, bool>(nameof(IsActive), defaultValue: true, notifying: OnIsActiveChanged);
-
-    private static void OnIsActiveChanged(IAvaloniaObject obj, bool arg2)
+        AvaloniaProperty.Register<ActivityIndicator, bool>(nameof(IsActive), defaultValue: false);
+    
+    private static void OnIsActiveChanged(AvaloniaPropertyChangedEventArgs e)
     {
-        ((LinearProgress)obj).UpdateVisualStates();
+        if (e.Sender is ActivityIndicator activityIndicator)
+        {
+            activityIndicator.UpdateVisualStates();
+        }
+    }
+
+    private void OnIsVisibleChanged(AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.NewValue is bool isVisible)
+        {
+            IsActive = isVisible && IsEffectivelyVisible;
+        }
     }
     
-    public static readonly DirectProperty<LinearProgress, double> RectangleWidthProperty =
-        AvaloniaProperty.RegisterDirect<LinearProgress, double>(
+    public static readonly DirectProperty<ActivityIndicator, double> RectangleWidthProperty =
+        AvaloniaProperty.RegisterDirect<ActivityIndicator, double>(
             nameof(RectangleWidth),
             o => o.RectangleWidth);
 
@@ -54,9 +70,8 @@ public class LinearProgress : TemplatedControl
         private set { SetAndRaise(RectangleWidthProperty, ref _rectangleWidth, value); }
     }
     
-    
-    public static readonly DirectProperty<LinearProgress, double> RectangleHeightProperty =
-        AvaloniaProperty.RegisterDirect<LinearProgress, double>(
+    public static readonly DirectProperty<ActivityIndicator, double> RectangleHeightProperty =
+        AvaloniaProperty.RegisterDirect<ActivityIndicator, double>(
             nameof(RectangleHeight),
             o => o.RectangleHeight);
 
@@ -66,8 +81,8 @@ public class LinearProgress : TemplatedControl
         private set { SetAndRaise(RectangleHeightProperty, ref _rectangleHeight, value); }
     }
 
-    public static readonly DirectProperty<LinearProgress, Thickness> RectangleMarginProperty =
-        AvaloniaProperty.RegisterDirect<LinearProgress, Thickness>(
+    public static readonly DirectProperty<ActivityIndicator, Thickness> RectangleMarginProperty =
+        AvaloniaProperty.RegisterDirect<ActivityIndicator, Thickness>(
             nameof(RectangleMargin),
             o => o.RectangleMargin);
 
@@ -79,6 +94,17 @@ public class LinearProgress : TemplatedControl
     
     #endregion
 
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        IsActive = IsVisible;
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        IsActive = false;
+        base.OnDetachedFromVisualTree(e);
+    }
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
@@ -88,12 +114,7 @@ public class LinearProgress : TemplatedControl
         double rectangleWidth = unitWidth * 2;
         double rightMargin = unitWidth;
         
-        // https://stackoverflow.com/questions/24764565/is-there-a-defined-value-in-the-standard-namespaces-for-the-golden-ratio
-        const double goldenRatio = 1.61803398874989484820458683436;
-        
-        // double preferredMaxheight = rectangleWidth * goldenRatio;
         double preferredMaxheight = rectangleWidth;
-
 
         RectangleWidth = rectangleWidth;
         if (preferredMaxheight < Height)
@@ -117,13 +138,6 @@ public class LinearProgress : TemplatedControl
         }
         
         base.OnDetachedFromLogicalTree(e);
-    }
-
-    public override void Render(DrawingContext context)
-    {
-        base.Render(context);
-
-        UpdateVisualStates();
     }
 
     private void UpdateVisualStates()

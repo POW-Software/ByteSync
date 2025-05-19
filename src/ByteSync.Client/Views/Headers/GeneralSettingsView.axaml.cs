@@ -7,10 +7,12 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Headers;
 
-public class GeneralSettingsView : ReactiveUserControl<GeneralSettingsViewModel>
+public partial class GeneralSettingsView : ReactiveUserControl<GeneralSettingsViewModel>
 {
     public GeneralSettingsView()
     {
+        InitializeComponent();
+        
         this.WhenActivated(disposables =>
         {
             this
@@ -20,16 +22,5 @@ public class GeneralSettingsView : ReactiveUserControl<GeneralSettingsViewModel>
                     value => $"{value} %")
                 .DisposeWith(disposables);
         });
-            
-        InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
-        
-    private TextBlock tblZoomLevel => this.FindControl<TextBlock>("tblZoomLevel");
-    
-    private ToggleSwitch tsDarkMode => this.FindControl<ToggleSwitch>("tsDarkMode");
 }

@@ -245,9 +245,9 @@
                                        FontWeight="Bold" Margin="6 0" VerticalAlignment="Center" />
                         </Grid>
 
-                        <misc:LinearProgress Width="48" Height="32"
+                        <misc:ActivityIndicator Width="48" Height="32"
                                              Margin="6,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                             IsActive="{Binding IsWaitingForOtherParty}" IsVisible="{Binding IsWaitingForOtherParty}"
+                                             IsVisible="{Binding IsWaitingForOtherParty}"
                                              />
 
                     </StackPanel>

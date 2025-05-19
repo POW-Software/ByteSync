@@ -117,7 +117,7 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             
-            <DataGrid AutoGenerateColumns="False" Margin="6" Items="{Binding Path=PathItems}" Classes="NoHeaders"
+            <DataGrid AutoGenerateColumns="False" Margin="6" ItemsSource="{Binding Path=PathItems}" Classes="NoHeaders"
                       IsReadOnly="True" x:Name="TheGrid" HeadersVisibility="None" Name="MembersDataGrid"  >
                 
                 <Interaction.Behaviors>

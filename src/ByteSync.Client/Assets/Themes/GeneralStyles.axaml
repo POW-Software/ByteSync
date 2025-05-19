@@ -27,14 +27,14 @@
 
     <!-- /template/ ContentPresenter#PART_ContentPresenter -->
 
-    <Style Selector="Button.LinkButton:pointerover /template/ ContentPresenter#PART_ContentPresenter2">
+    <Style Selector="Button.LinkButton:pointerover > ContentPresenter#PART_ContentPresenter2">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="0" />
         <!-- <Setter Property="TextDecorations" Value="Underline" /> -->
     </Style>
 
-    <Style Selector="Button.LinkButton:pressed /template/ ContentPresenter#PART_ContentPresenter2">
+    <Style Selector="Button.LinkButton:pressed > ContentPresenter#PART_ContentPresenter2">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="0" />
@@ -84,13 +84,13 @@
 	    </Setter>
     </Style>
     
-    <Style Selector="Button.LinkButtonLight:pointerover /template/ ContentPresenter#PART_ContentPresenter2">
+    <Style Selector="Button.LinkButtonLight:pointerover ContentPresenter#PART_ContentPresenter2">
 	    <Setter Property="Background" Value="Transparent" />
 	    <Setter Property="BorderThickness" Value="0" />
 	    <Setter Property="Padding" Value="0" />
     </Style>
 
-    <Style Selector="Button.LinkButtonLight:pressed /template/ ContentPresenter#PART_ContentPresenter2">
+    <Style Selector="Button.LinkButtonLight:pressed ContentPresenter#PART_ContentPresenter2">
 	    <Setter Property="Background" Value="Transparent" />
 	    <Setter Property="BorderThickness" Value="0" />
 	    <Setter Property="Padding" Value="0" />
@@ -137,14 +137,12 @@
         </Setter>
     </Style>
     
-    <Style Selector="Button.GenericButton:pointerover /template/ ContentPresenter#PART_ContentPresenter2">
+    <Style Selector="Button.GenericButton:pointerover ContentPresenter#PART_ContentPresenter2">
 	    <Setter Property="Background" Value="{DynamicResource Gray8}" />
-	    <!-- <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" /> -->
-	    <!-- <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushPointerOver}" /> -->
 	    <Setter Property="TextBlock.Foreground" Value="{DynamicResource ButtonForegroundPointerOver}" />
     </Style>
     
-    <Style Selector="Button.GenericButton:disabled /template/ ContentPresenter#PART_ContentPresenter2">
+    <Style Selector="Button.GenericButton:disabled ContentPresenter#PART_ContentPresenter2">
 	    <Setter Property="Background" Value="{DynamicResource Gray8}" />
 	    <Setter Property="TextBlock.Foreground" Value="{DynamicResource Gray2}" />
     </Style>
@@ -173,8 +171,16 @@
 	    <Setter Property="Background" Value="{DynamicResource BsAccentButtonBackGround}"/>
     </Style>
     
-    <Style Selector="Button.Accent:pointerover /template/ ContentPresenter#PART_ContentPresenter2">
+    <Style Selector="Button.Accent:pointerover > ContentPresenter#PART_ContentPresenter2">
 	    <Setter Property="Background" Value="{DynamicResource BsAccentButtonPointerOverBackGround}" />
+    </Style>
+    
+    <Style Selector="Button.Secondary">
+	    <Setter Property="Background" Value="{DynamicResource SecondaryButtonBackGround}"/>
+    </Style>
+    
+    <Style Selector="Button.Secondary:pointerover > ContentPresenter#PART_ContentPresenter2">
+	    <Setter Property="Background" Value="{DynamicResource SecondaryButtonPointerOverBackGround}" />
     </Style>
     
     <!-- SEPARATOR -->
@@ -187,9 +193,10 @@
         <Setter Property="Background" Value="{DynamicResource BsAccentButtonBackGround}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="BorderBrush" Value="{DynamicResource GenericButtonBorder}"/>
+        <Setter Property="Padding" Value="4 2"/>
         <Setter Property="TextBlock.Foreground" Value="{DynamicResource SystemBaseHighColor}" />
         <Setter Property="TextBlock.FontWeight" Value="Bold" />
-
+    
         <Setter Property="Template">
             <ControlTemplate>
                 <ContentPresenter x:Name="PART_ContentPresenter2"
@@ -207,13 +214,13 @@
         </Setter>
     </Style>
     
-    <Style Selector="Button.AccentButton:pointerover /template/ ContentPresenter#PART_ContentPresenter2">
+    <Style Selector="Button.AccentButton:pointerover ContentPresenter#PART_ContentPresenter2">
 	    <Setter Property="Background" Value="{DynamicResource BsAccentButtonPointerOverBackGround}" />
 	    <!-- <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushPointerOver}" /> -->
 	    <!-- <Setter Property="TextBlock.Foreground" Value="{DynamicResource ButtonForegroundPointerOver}" /> -->
     </Style>
     
-    <Style Selector="Button.AccentButton:disabled /template/ ContentPresenter#PART_ContentPresenter2">
+    <Style Selector="Button.AccentButton:disabled ContentPresenter#PART_ContentPresenter2">
 	    <Setter Property="Background" Value="{DynamicResource VeryLightGray}" />
 	    <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushDisabled}" />
 	    <Setter Property="TextBlock.Foreground" Value="{DynamicResource ButtonForegroundDisabled}" />
@@ -222,8 +229,8 @@
     
     <Style Selector="Button.AccentButton TextBlock">
 	    <Setter Property="VerticalAlignment" Value="Center" />
-	    <Setter Property="Margin" Value="6 2 2 2" />
-	    <Setter Property="FontSize" Value="13" />
+	    <Setter Property="Margin" Value="4 2 2 2" />
+	    <Setter Property="FontSize" Value="12" />
     </Style>
     
     <Style Selector="Button.AccentButton misc|Icon">
@@ -243,38 +250,9 @@
     <!-- SEPARATOR -->
     
     <!-- Pour masquer le séparateur lorsqu'il n'y a pas de header -->
-    <Style Selector="DataGrid.NoHeaders /template/ Rectangle#PART_ColumnHeadersAndRowsSeparator">
+    <Style Selector="DataGrid.NoHeaders Rectangle#PART_ColumnHeadersAndRowsSeparator">
 	    <Setter Property="IsVisible" Value="False" />
     </Style>
-    
-    
-    
-    
-    <!-- Ne fonctionne pas pour le moment, je suis passé par ThemeManager : style.Resources.Add("DataGridDisabledVisualElementBackground",  Color.FromArgb(0, 0, 0, 0));
-    <Style Selector="DataGrid:disabled /template/ Border#PART_DisabledVisualElement">
-	    <Setter Property="Background" Value="Transparent" />
-	    <Setter Property="CornerRadius" Value="2" />
-    </Style>
-    
-    <Style Selector="DataGrid /template/ Border#PART_DisabledVisualElement">
-	    <Setter Property="IsVisible" Value="False" />
-	    <Setter Property="Background" Value="Transparent" />
-    </Style>
-    
-    <Style Selector="Border#PART_DisabledVisualElement">
-	    <Setter Property="IsVisible" Value="False" />
-	    <Setter Property="Background" Value="Transparent" />
-    </Style>
-    
-    <Style Selector="Border#PART_DisabledVisualElement:disabled">
-	    <Setter Property="IsVisible" Value="False" />
-	    <Setter Property="Background" Value="Transparent" />
-    </Style>
-    
-    <Style Selector="DataGrid:disabled /template/ Border#PART_DisabledVisualElement:disabled">
-	    <Setter Property="IsVisible" Value="False" />
-	    <Setter Property="Background" Value="Transparent" />
-    </Style>-->
     
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
@@ -292,28 +270,16 @@
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     
-    <!-- https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Themes.Fluent/Controls/ComboBox.xaml
-         https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Themes.Fluent/Accents/FluentControlResourcesLight.xaml -->
-    
-    <Style Selector="ComboBox.PowComboBox">
+    <Style Selector="ComboBox.BsComboBox">
 	    <Setter Property="PlaceholderForeground" Value="Gray"/>
 	    <Setter Property="Background" Value="{DynamicResource BlockBackColor}"/>
     </Style>
     
-    <!--<Style Selector="ComboBox.TestComboBox /template/ Border#HighlightBackground">
-	    <Setter Property="IsVisible" Value="{TemplateBinding SelectionBoxItem, Converter={x:Static ObjectConverters.IsNull}}" />
-    </Style>-->
-    
-    <!--<Style Selector="ComboBox.TestComboBox /template/ TextBlock#PlaceholderTextBlock">
-	    ~1~ <Setter Property="Background" Value="{DynamicResource ComboBoxBackground}" /> @1@
-	    <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltMediumLowBrush}" />
-    </Style>-->
-    
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     
-    <Style Selector="TimePicker.Pow">
+    <Style Selector="TimePicker.Bs">
 	    <Setter Property="Background" Value="{DynamicResource BlockBackColor}"/>
     </Style>
     
@@ -321,11 +287,11 @@
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     
-    <Style Selector="DatePicker.Pow">
+    <Style Selector="DatePicker.Bs">
 	    <Setter Property="Background" Value="{DynamicResource BlockBackColor}"/>
     </Style>
     
-    <Style Selector="ToggleSwitch.Pow /template/ Grid#MovingKnobs">
+    <Style Selector="ToggleSwitch.Bs Grid#MovingKnobs">
 	    <Setter Property="Transitions">
 		    <Transitions>
 			    <DoubleTransition Property="Canvas.Left" Duration="0:0:0" Easing="CubicEaseOut"/>
@@ -333,7 +299,7 @@
 	    </Setter>
     </Style>
     
-    <Style Selector="TextBlock.PowDataGridHeader">
+    <Style Selector="TextBlock.BsDataGridHeader">
 	    <Setter Property="Foreground" Value="{DynamicResource AccentTextForeGround}" />
 	    <Setter Property="FontSize" Value="14" />
 	    <Setter Property="FontWeight" Value="SemiBold" />

@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Avalonia.Controls.Mixins;
 using Avalonia.Media;
 using ByteSync.Assets.Resources;
@@ -40,7 +41,11 @@ public class ConnectionStatusViewModel : ActivatableViewModelBase
         {
             _themeService.SelectedTheme
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(InitializeBrushes)
+                .Subscribe(theme =>
+                {
+                    InitializeBrushes(theme);
+                    SetBrush();
+                })
                 .DisposeWith(disposables);
             
             _connectionService.ConnectionStatus
@@ -77,8 +82,6 @@ public class ConnectionStatusViewModel : ActivatableViewModelBase
 
     private void InitializeBrushes(Theme theme)
     {
-        _connectedBrush = new SolidColorBrush();
-
         _connectedBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
         _connectingBrush = _themeService.GetBrush("SystemControlForegroundBaseHighBrush");
         _connectionFailedBrush = _themeService.GetBrush("HomeLocalSynchronizationBackGround");

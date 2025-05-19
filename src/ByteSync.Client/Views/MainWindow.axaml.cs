@@ -5,6 +5,7 @@ using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.ViewModels;
@@ -41,12 +42,32 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
             
         PointerWheelChanged += OnPointerWheelChanged;
         IsCtrlDown = false;
+
+        Deactivated += OnDeactivated;
     }
+
+    private void OnDeactivated(object? sender, EventArgs e)
+    {
+        // When the window loses focus (e.g. the user switches to another application),
+        // this handler checks if a focusable control currently has keyboard focus.
+        // If so, it redirects focus to an invisible placeholder (FocusSink) to prevent
+        // ScrollViewer from automatically scrolling to the previously focused control
+        // when the window regains focus.
+        // If Avalonia's focus behavior changes in the future, ensure that FocusSink.Focus()
+        // returns true — otherwise the focus may not be properly redirected, and the issue may reappear.
         
+        var focused = FocusManager?.GetFocusedElement();
+            
+        if (focused is InputElement inputElement && inputElement.Focusable)
+        {
+            FocusSink.Focus();
+        }
+    }
+
     private bool CanCloseApplication { get; set; }
     private bool IsCtrlDown { get; set; }
-
-    protected override void OnClosing(CancelEventArgs e)
+    
+    protected override void OnClosing(WindowClosingEventArgs e)
     {
         // CanCloseApplication indicates if the user has already authorized the end of the application
         if (!CanCloseApplication)
@@ -131,11 +152,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
                 _zoomService.ApplicationZoomOut();
             }
         }
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
     }
 
     public async Task<string[]?> ShowOpenFileDialogAsync(string title, bool allowMultiple)

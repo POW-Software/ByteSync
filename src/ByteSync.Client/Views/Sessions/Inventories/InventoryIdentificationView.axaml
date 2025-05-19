@@ -15,8 +15,7 @@
     <StackPanel Orientation="Vertical" VerticalAlignment="Center">
         <StackPanel Orientation="Vertical" Height="60"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
-            <misc:LinearProgress Width="80" Height="60"
-                                 IsActive="{Binding IsIdentificationRunning}"
+            <misc:ActivityIndicator Width="80" Height="60"
                                  IsVisible="{Binding IsIdentificationRunning}" />
 
             <misc:Icon FontSize="60"

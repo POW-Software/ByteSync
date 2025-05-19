@@ -1,6 +1,8 @@
 ﻿using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.Mixins;
 using ByteSync.Business.Arguments;
 using ByteSync.Business.Events;
@@ -10,6 +12,7 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Views;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
@@ -22,18 +25,21 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
     private readonly ISessionInterruptor _sessionInterruptor;
     private readonly INavigationEventsHub _navigationEventsHub;
     private readonly IDataInventoryStarter _dataInventoryStarter;
+    private readonly MainWindow _mainWindow;
 
     public CurrentCloudSessionViewModel() 
     {
     }
 
     public CurrentCloudSessionViewModel(ISessionService sessionService, ISessionInterruptor sessionInterruptor, INavigationEventsHub navigationEventsHub,
-        IDataInventoryStarter dataInventoryStarter, ISessionSettingsEditViewModelFactory sessionSettingsEditViewModel)
+        IDataInventoryStarter dataInventoryStarter, ISessionSettingsEditViewModelFactory sessionSettingsEditViewModel,
+        MainWindow mainWindow)
     {
         _sessionService = sessionService;
         _sessionInterruptor = sessionInterruptor;
         _navigationEventsHub = navigationEventsHub;
         _dataInventoryStarter = dataInventoryStarter;
+        _mainWindow = mainWindow;
 
         SessionSettingsEditViewModel = sessionSettingsEditViewModel.CreateSessionSettingsEditViewModel(null);
 
@@ -115,7 +121,7 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
     {
         try
         {
-            var clipboard = Application.Current?.Clipboard;
+            var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
 
             if (clipboard != null)
             {

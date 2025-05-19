@@ -20,7 +20,7 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
 
     private SolidColorBrush? _grayBrush;
     private SolidColorBrush? _lightGrayBrush;
-    private SolidColorBrush? _oppositeBackgroundBrush;
+    private SolidColorBrush? _secondaryBackgroundBrush;
     private SolidColorBrush? _mainBackgroundBrush;
     private SolidColorBrush? _mainForeColorBrush;
     private readonly IDisposable _subscription;
@@ -31,7 +31,7 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         Gray,
         MainForeColor,
         MainBackground,
-        OppositeBackground
+        SecondaryBackground
     }
 
     public ContentRepartitionViewModel()
@@ -122,16 +122,16 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         }
     }
 
-    private Brush? OppositeBackgroundBrush
+    private Brush? SecondaryBackgroundBrush
     {
         get
         {
-            if (_oppositeBackgroundBrush == null)
+            if (_secondaryBackgroundBrush == null)
             {
-                _themeService.GetResource("StatusOppositeBackGroundBrush", out _oppositeBackgroundBrush);
+                _themeService.GetResource("StatusSecondaryBackGroundBrush", out _secondaryBackgroundBrush);
             }
 
-            return _oppositeBackgroundBrush;
+            return _secondaryBackgroundBrush;
         }
     }
 
@@ -183,7 +183,7 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
     private void DoResetBrushes(bool isInit)
     {
         _mainForeColorBrush = null;
-        _oppositeBackgroundBrush = null;
+        _secondaryBackgroundBrush = null;
         _mainBackgroundBrush = null;
         _lightGrayBrush = null;
 
@@ -270,8 +270,8 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
             case BrushColors.MainBackground:
                 return MainBackgroundBrush;
                 
-            case BrushColors.OppositeBackground:
-                return OppositeBackgroundBrush;
+            case BrushColors.SecondaryBackground:
+                return SecondaryBackgroundBrush;
 
             case BrushColors.MainForeColor:
                 return MainForeColorBrush;

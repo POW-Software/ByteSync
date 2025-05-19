@@ -12,6 +12,7 @@ using ByteSync.Interfaces.Dialogs;
 using ByteSync.Services.Communications;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.TrustedNetworks;
+using ByteSync.Views;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
@@ -24,6 +25,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
     private readonly IDialogService _dialogService;
     private readonly IApplicationSettingsRepository _applicationSettingsRepository;
     private readonly IPublicKeysTruster _publicKeysTruster;
+    private readonly MainWindow _mainWindow;
 
     public AddTrustedClientViewModel()
     {
@@ -49,7 +51,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
 
     public AddTrustedClientViewModel(PublicKeyCheckData? publicKeyCheckData, TrustDataParameters trustDataParameters,
         IPublicKeysManager publicKeysManager, IDialogService dialogService, 
-        IApplicationSettingsRepository applicationSettingsManager, IPublicKeysTruster publicKeysTruster) 
+        IApplicationSettingsRepository applicationSettingsManager, IPublicKeysTruster publicKeysTruster, MainWindow mainWindow) 
     {
     #if DEBUG
         if (Design.IsDesignMode)
@@ -62,6 +64,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         _dialogService = dialogService;
         _applicationSettingsRepository = applicationSettingsManager;
         _publicKeysTruster = publicKeysTruster;
+        _mainWindow = mainWindow;
 
         if (publicKeyCheckData == null)
         {
@@ -179,7 +182,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         
         try
         {
-            var clipboard = Application.Current?.Clipboard;
+            var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
 
             if (clipboard != null)
             {
@@ -212,7 +215,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         
         try
         {
-            var clipboard = Application.Current?.Clipboard;
+            var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
 
             if (clipboard != null)
             {

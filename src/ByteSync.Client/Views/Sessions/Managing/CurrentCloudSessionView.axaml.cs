@@ -7,17 +7,12 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Sessions.Managing;
 
-public class CurrentCloudSessionView : ReactiveUserControl<CurrentCloudSessionViewModel>
+public partial class CurrentCloudSessionView : ReactiveUserControl<CurrentCloudSessionViewModel>
 {
     public CurrentCloudSessionView()
     {
-        this.WhenActivated(disposables => { });
         InitializeComponent();
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
+        this.WhenActivated(disposables => { });
     }
         
     private void MainScrollViewer_OnScrollChanged(object? sender, ScrollChangedEventArgs e)

@@ -3,7 +3,7 @@
     <OutputType>WinExe</OutputType>
     <Nullable>enable</Nullable>
     <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
-    <ApplicationIcon>Assets\POW_ByteSync.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\ByteSync.ico</ApplicationIcon>
     <TargetFramework>net8.0</TargetFramework>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
     <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
@@ -13,6 +13,10 @@
     <PackageId>ByteSync.Client</PackageId>
     <RootNamespace>ByteSync</RootNamespace>
     <AssemblyName>ByteSync</AssemblyName>
+    <UseWpf>false</UseWpf>
+    <UseWindowsForms>false</UseWindowsForms>
+    <AvaloniaUseStatic>true</AvaloniaUseStatic>
+    <AvaloniaXamlLoaderUseNameReferences>true</AvaloniaXamlLoaderUseNameReferences>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsWindows)'=='true'">
@@ -34,37 +38,39 @@
     <AvaloniaResource Remove="Assets\Resources\Resources.en.resx" />
     <AvaloniaResource Remove="Assets\Resources\Resources.fr.resx" />
     <AvaloniaResource Remove="Assets\Resources\Resources.resx" />
-    <AvaloniaResource Remove="Assets\Themes\FluentPowBlueLight.axaml" />
-    <AvaloniaResource Remove="Assets\Themes\PowBlueAccentColors.axaml" />
     <AvaloniaXaml Remove="Assets\BoxIcons.axaml" />
     <AvaloniaXaml Remove="Assets\Icons\BoxIcons.axaml" />
     <AvaloniaXaml Remove="Assets\Themes\FluentPowBlueLight.axaml" />
     <AvaloniaXaml Remove="Assets\Themes\GeneralStyles.axaml" />
     <AvaloniaXaml Remove="Assets\Themes\PowBlueAccentColors.axaml" />
     <None Remove=".gitignore" />
-    <None Remove="Assets\Logo.png" />
-    <AvaloniaXaml Remove="Assets\Themes\LinearProgress.axaml" />
+    <None Remove="Assets\ByteSyncLogo.png" />
+    <AvaloniaXaml Remove="Assets\Themes\ActivityIndicator.axaml" />
     <None Update="local.settings.template.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="8.3.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
-    <PackageReference Include="Avalonia" Version="0.10.22" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.10.22" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.22" />
-    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.22" />
-    <PackageReference Include="Avalonia.Xaml.Behaviors" Version="0.10.22" />
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.23.0" />
+    <PackageReference Include="Avalonia" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.0" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Svg.Skia" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="11.*" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.24.0" />
     <PackageReference Include="FastRsyncNet" Version="2.4.3" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0-beta.700" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.15" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.13" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.15" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
     <PackageReference Include="Polly" Version="8.4.2" />
     <PackageReference Include="Prism.Core" Version="8.1.97" />
@@ -122,8 +128,8 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="Assets\Themes\LinearProgress.xaml.cs">
-      <DependentUpon>LinearProgress.axaml</DependentUpon>
+    <Compile Update="Assets\Themes\ActivityIndicator.xaml.cs">
+      <DependentUpon>ActivityIndicator.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Sessions\Managing\CurrentCloudSessionView.axaml.cs">
       <DependentUpon>CurrentCloudSessionView.axaml</DependentUpon>

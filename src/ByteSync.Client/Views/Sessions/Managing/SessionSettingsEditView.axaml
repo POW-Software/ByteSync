@@ -17,7 +17,7 @@
             <TextBlock Margin="3"
                        Text="{localizations:Loc SessionSettings_DataType}" VerticalAlignment="Center" />
             <ComboBox Margin="3" VerticalAlignment="Center" MinWidth="110" 
-                      Items="{Binding Path=AvailableDataTypes}" SelectedItem="{Binding Path=DataType}" >
+                      ItemsSource="{Binding Path=AvailableDataTypes}" SelectedItem="{Binding Path=DataType}" >
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Description}" />
@@ -33,7 +33,7 @@
                 <TextBlock Margin="3"
                            Text="{localizations:Loc SessionSettings_LinkingKey}" VerticalAlignment="Center" />
                 <ComboBox Margin="3" VerticalAlignment="Center" MinWidth="110" 
-                          Items="{Binding Path=AvailableLinkingKeys}" SelectedItem="{Binding Path=LinkingKey}" >
+                          ItemsSource="{Binding Path=AvailableLinkingKeys}" SelectedItem="{Binding Path=LinkingKey}" >
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Description}" />
@@ -56,7 +56,7 @@
             <TextBlock Margin="3"
                        Text="{localizations:Loc SessionSettings_AnalysisMode}" VerticalAlignment="Center" />
             <ComboBox Margin="3" VerticalAlignment="Center" MinWidth="110" 
-                      Items="{Binding Path=AvailableAnalysisModes}" SelectedItem="{Binding Path=AnalysisMode}" >
+                      ItemsSource="{Binding Path=AvailableAnalysisModes}" SelectedItem="{Binding Path=AnalysisMode}" >
                  <!-- IsHitTestVisible="False" Focusable="False" //  https://stackoverflow.com/questions/921921/a-read-only-checkbox-in-c-sharp-wpf -->
                 
                 <ComboBox.ItemTemplate>

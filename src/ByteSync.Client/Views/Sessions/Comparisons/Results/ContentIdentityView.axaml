@@ -39,7 +39,7 @@
                     </StackPanel>
                 </Grid>
 
-                <ItemsControl Items="{Binding DateAndInventoryParts}" IsVisible="{Binding IsFile}">
+                <ItemsControl ItemsSource="{Binding DateAndInventoryParts}" IsVisible="{Binding IsFile}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Vertical"/>
