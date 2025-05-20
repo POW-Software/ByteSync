@@ -9,7 +9,6 @@
         <Setter Property="CornerRadius" Value="3"/>
         <Setter Property="Padding" Value="4"/>
         <Setter Property="MinHeight" Value="30"/>
-        <Setter Property="MaxWidth" Value="400"/>
         <Setter Property="Template">
             <ControlTemplate>
                 <Border Background="{TemplateBinding Background}"
@@ -21,18 +20,21 @@
                           VerticalAlignment="Center"
                           HorizontalAlignment="Stretch">
                         
-                        <ScrollViewer Grid.Column="0"
-                                      Name="PART_TagsScroll"
-                                      HorizontalScrollBarVisibility="Auto"
-                                      VerticalScrollBarVisibility="Disabled"
-                                      Margin="0,0,4,0"
-                                      HorizontalAlignment="Left"
-                                      VerticalAlignment="Center">
+                        <!-- <ScrollViewer Grid.Column="0" -->
+                        <!--               Name="PART_TagsScroll" -->
+                        <!--               HorizontalScrollBarVisibility="Auto" -->
+                        <!--               VerticalScrollBarVisibility="Disabled" -->
+                        <!--               Margin="0,0,4,0" -->
+                        <!--               HorizontalAlignment="Left" -->
+                        <!--               VerticalAlignment="Center"> -->
 
-                            <ItemsControl Name="PART_TagsPanel" ItemsSource="{TemplateBinding Tags}">
+                            <ItemsControl Grid.Column="0" Name="PART_TagsPanel" ItemsSource="{TemplateBinding Tags}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
-                                        <WrapPanel Orientation="Horizontal" />
+                                        <WrapPanel Name="PART_WrapPanel" Orientation="Horizontal" 
+                                                   ItemSpacing="4"
+                                                   VerticalAlignment="Top"/>
+                                        
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
@@ -59,7 +61,7 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                        </ScrollViewer>
+                        <!-- </ScrollViewer> -->
                         
                         <TextBox Grid.Column="1" Name="PART_TextBox" 
                                  Classes="TagEditorTextBox"

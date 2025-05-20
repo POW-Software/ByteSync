@@ -201,15 +201,16 @@ public class TagEditor : TemplatedControl
         _textBox = e.NameScope.Find<TextBox>("PART_TextBox");
         _tagsPanel = e.NameScope.Find<ItemsControl>("PART_TagsPanel");
         _tagsScroll = e.NameScope.Find<ScrollViewer>("PART_TagsScroll");
+        
 
-        if (_tagsScroll != null)
+        if (_tagsPanel != null)
         {
             // Dynamically update max width
             this.GetObservable(BoundsProperty).Subscribe(bounds =>
             {
                 var totalWidth = bounds.Width;
                 var maxTagsWidth = Math.Max(0, totalWidth - 80);
-                _tagsScroll.MaxWidth = maxTagsWidth;
+                _tagsPanel.MaxWidth = maxTagsWidth;
             });
         }
 
