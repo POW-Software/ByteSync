@@ -165,6 +165,8 @@ public class TagEditor : TemplatedControl
     // Parties du template
     private TextBox _textBox;
     private ItemsControl _tagsPanel;
+    private ScrollViewer? _tagsScroll;
+    
     private DispatcherTimer _commitTimer;
 
     // Constructeur
@@ -195,9 +197,23 @@ public class TagEditor : TemplatedControl
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
+        
+        // this.Cursor = new Cursor(StandardCursorType.Ibeam);
 
         _textBox = e.NameScope.Find<TextBox>("PART_TextBox");
         _tagsPanel = e.NameScope.Find<ItemsControl>("PART_TagsPanel");
+        _tagsScroll = e.NameScope.Find<ScrollViewer>("PART_TagsScroll");
+
+        if (_tagsScroll != null)
+        {
+            // Mettre à jour dynamiquement la largeur max
+            this.GetObservable(BoundsProperty).Subscribe(bounds =>
+            {
+                var totalWidth = bounds.Width;
+                var maxTagsWidth = Math.Max(0, totalWidth - 80);
+                _tagsScroll.MaxWidth = maxTagsWidth;
+            });
+        }
 
         if (_textBox != null)
         {
@@ -205,7 +221,28 @@ public class TagEditor : TemplatedControl
             _textBox.TextInput += TextBox_TextChanged;
             _textBox.LostFocus += TextBox_LostFocus;
         }
+        
+        // this.AddHandler(PointerPressedEvent, (sender, args) =>
+        // {
+        //     // Si le TextBox existe et n'a pas encore le focus, on le focus
+        //     if (_textBox != null && !_textBox.IsFocused)
+        //     {
+        //         _textBox.Focus();
+        //     }
+        // }, RoutingStrategies.Tunnel);
     }
+    
+    // protected override void OnPointerEntered(PointerEventArgs e)
+    // {
+    //     base.OnPointerEntered(e);
+    //     PseudoClasses.Set(":pointerover", true);
+    // }
+    //
+    // protected override void OnPointerExited(PointerEventArgs e)
+    // {
+    //     base.OnPointerExited(e);
+    //     PseudoClasses.Set(":pointerover", false);
+    // }
 
     private void TextBox_TextChanged(object sender, TextInputEventArgs e)
     {
