@@ -42,8 +42,16 @@
 
                 <WrapPanel Orientation="Horizontal" Margin="0 3 12 0">
                     <StackPanel Orientation="Vertical">
-                        <TextBox Watermark="{localizations:Loc ComparisonResult_Filter}" VerticalAlignment="Bottom" Classes="clearButton"
-                                 Text="{Binding Path=FilterText}" />
+                        <misc:TagEditor 
+                            Watermark="{localizations:Loc ComparisonResult_Filter}" 
+                            VerticalAlignment="Bottom"
+                            Tags="{Binding FilterTags}"
+                            TagFilter="{Binding TagFilterValidator}"
+                            MinWidth="220"
+                            TagBackground="{DynamicResource HomeCloudSynchronizationBackGround}"
+                            TagForeground="{DynamicResource SystemAltHighColor}"
+                            TagsChanged="TagEditor_TagsChanged"
+                        />
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" DataContext="{Binding PageParameters}">
                             <Button HorizontalAlignment="Left" Margin="3 3 3 3" VerticalAlignment="Bottom"

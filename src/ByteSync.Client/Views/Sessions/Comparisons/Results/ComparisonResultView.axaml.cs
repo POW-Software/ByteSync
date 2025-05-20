@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
@@ -39,6 +40,14 @@ public partial class ComparisonResultView : ReactiveUserControl<ComparisonResult
                     ViewModel.SelectedItems.Add(comparisonItemViewModel);
                 }
             }
+        }
+    }
+    
+    private void TagEditor_TagsChanged(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel != null)
+        {
+            ViewModel.OnTagsChanged();
         }
     }
 }
