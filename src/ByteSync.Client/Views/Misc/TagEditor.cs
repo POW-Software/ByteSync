@@ -366,11 +366,7 @@ public class TagEditor : TemplatedControl
     {
         if (parameter is string tag)
         {
-            if (Tags.Contains(tag))
-            {
-                Tags.Remove(tag);
-                RaiseEvent(new RoutedEventArgs(TagRemovedEvent, this));
-            }
+            RemoveTag(tag);
         }
     }
 }
