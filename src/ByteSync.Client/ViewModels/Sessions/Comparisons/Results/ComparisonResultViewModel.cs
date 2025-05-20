@@ -98,8 +98,8 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
                 }
                 else
                 {
-                    // Ici, c'est moins haut que la hauteur quand 20 éléments sont affichés
-                    // Quand plus d'éléments sont affichés, la hauteur revient progressivement mais cela fonctionne quand même
+                    // Here, it is shorter than the height when 20 items are displayed
+                    // When more items are displayed, the height gradually returns, but it still works
                     GridMinHeight = 805;
                 }
             });
@@ -361,26 +361,26 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     [Reactive]
     public ObservableCollection<string> FilterTags { get; set; }
 
-    // Property pour configurer le compléteur automatique de tags
+    // Property to configure the tag autocomplete
     [Reactive]
     public Func<string, bool> TagFilterValidator { get; set; }
 
-    // Méthode d'initialisation pour le support des tags
+    // Initialization method for tag support
     private void InitializeTagSupport()
     {
         FilterTags = new ObservableCollection<string>();
         
-        // Configurer la validation des tags (éviter les doublons, mots vides, etc.)
+        // Configure tag validation (avoid duplicates, empty words, etc.)
         TagFilterValidator = tag => !string.IsNullOrWhiteSpace(tag) && tag.Length >= 2;
         
-        // Observer les changements dans les tags et mettre à jour le FilterText
+        // Observe changes in tags and update the FilterText
         this.WhenAnyValue(x => x.FilterTags.Count)
             .Throttle(TimeSpan.FromMilliseconds(100))
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(_ => UpdateFilterFromTags());
     }
     
-    // Cette méthode met à jour le FilterText basé sur les tags
+    // This method updates the FilterText based on tags
     private void UpdateFilterFromTags()
     {
         if (FilterTags.Count == 0)
@@ -389,8 +389,8 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
             return;
         }
         
-        // Pour la syntaxe de filtre complexe, on peut construire des expressions comme:
-        // "tag1 AND tag2" ou "(tag1 OR tag2) AND tag3"
+        // For complex filter syntax, expressions like:
+        // "tag1 AND tag2" or "(tag1 OR tag2) AND tag3" can be constructed
         if (FilterTags.Count == 1)
         {
             FilterText = FilterTags[0];
@@ -401,13 +401,13 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         }
     }
     
-    // Méthode pour gérer les changements de tags
+    // Method to handle tag changes
     public void OnTagsChanged()
     {
         UpdateFilterFromTags();
     }
     
-    // Construit un filtre complexe basé sur les tags
+    // Builds a complex filter based on tags
     private Func<ComparisonItem, bool> BuildTagFilter(IEnumerable<string> tags)
     {
         if (tags == null || !tags.Any())
@@ -417,7 +417,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         
         return item =>
         {
-            // Chaque tag doit être présent pour que l'élément corresponde
+            // Each tag must be present for the item to match
             foreach (var tag in tagList)
             {
                 if (!_filterService.BuildFilter(tag)(item))
