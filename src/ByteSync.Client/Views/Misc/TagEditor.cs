@@ -282,7 +282,10 @@ public class TagEditor : TemplatedControl
 
     private void TextBox_KeyDown(object sender, KeyEventArgs e)
     {
-        if (_textBox == null) return;
+        if (_textBox == null)
+        {
+            return;
+        }
             
         // Si on appuie sur Backspace avec un textBox vide, supprimer le dernier tag
         if (e.Key == Key.Back && string.IsNullOrEmpty(_textBox.Text) && Tags.Count > 0)
@@ -306,7 +309,7 @@ public class TagEditor : TemplatedControl
         else if (e.Key == Key.Tab && !string.IsNullOrWhiteSpace(_textBox.Text))
         {
             CommitCurrentText();
-            // Ne pas capturer l'événement pour permettre au Tab de fonctionner normalement
+            e.Handled = true;
         }
     }
 
