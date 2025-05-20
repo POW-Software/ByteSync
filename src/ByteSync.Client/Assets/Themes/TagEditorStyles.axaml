@@ -60,8 +60,7 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
-
-                        <!-- TextBox avec style optimisé -->
+                        
                         <TextBox Grid.Column="1" Name="PART_TextBox" 
                                  Classes="TagEditorTextBox"
                                  Background="Transparent"
@@ -104,12 +103,4 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Background" Value="Transparent"/>
     </Style>
-    
-    <!-- <Style Selector="#PART_TagsScroll ScrollBar:horizontal"> -->
-    <!--     <Setter Property="Height" Value="4" /> -->
-    <!-- </Style> -->
-    
-    <!-- <Style Selector="misc|TagEditor /template/ Border.click-area:pointerover TextBox"> -->
-    <!--     <Setter Property="WatermarkBrush" Value="Gray" /> -->
-    <!-- </Style> -->
 </Styles>

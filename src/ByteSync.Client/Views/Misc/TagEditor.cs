@@ -12,73 +12,73 @@ namespace ByteSync.Views.Misc;
 
 public class TagEditor : TemplatedControl
 {
-    // Collection de tags
+    // Tags collection
     public static readonly StyledProperty<ObservableCollection<string>> TagsProperty =
         AvaloniaProperty.Register<TagEditor, ObservableCollection<string>>(
             nameof(Tags),
             defaultValue: new ObservableCollection<string>());
 
-    // Séparateur de tags (espace par défaut)
+    // Tag separator (space by default)
     public static readonly StyledProperty<char> TagSeparatorProperty =
         AvaloniaProperty.Register<TagEditor, char>(
             nameof(TagSeparator),
             defaultValue: ' ');
 
-    // Propriété pour stocker le texte en cours de saisie
+    // Property to store the text being typed
     public static readonly StyledProperty<string> CurrentTextProperty =
         AvaloniaProperty.Register<TagEditor, string>(
             nameof(CurrentText),
             defaultValue: string.Empty);
 
-    // Placeholder à afficher quand le contrôle est vide
+    // Placeholder to display when control is empty
     public static readonly StyledProperty<string> WatermarkProperty =
         AvaloniaProperty.Register<TagEditor, string>(
             nameof(Watermark),
-            defaultValue: "Entrez des tags...");
+            defaultValue: "Enter tags...");
 
-    // Couleur d'arrière-plan des tags
+    // Background color for tags
     public static readonly StyledProperty<IBrush> TagBackgroundProperty =
         AvaloniaProperty.Register<TagEditor, IBrush>(
             nameof(TagBackground),
             defaultValue: Brushes.LightBlue);
 
-    // Couleur de texte des tags
+    // Text color for tags
     public static readonly StyledProperty<IBrush> TagForegroundProperty =
         AvaloniaProperty.Register<TagEditor, IBrush>(
             nameof(TagForeground),
             defaultValue: Brushes.Black);
 
-    // Événement quand un tag est ajouté
+    // Event when a tag is added
     public static readonly RoutedEvent<RoutedEventArgs> TagAddedEvent =
         RoutedEvent.Register<TagEditor, RoutedEventArgs>(
             nameof(TagAdded),
             RoutingStrategies.Bubble);
 
-    // Événement quand un tag est supprimé
+    // Event when a tag is removed
     public static readonly RoutedEvent<RoutedEventArgs> TagRemovedEvent =
         RoutedEvent.Register<TagEditor, RoutedEventArgs>(
             nameof(TagRemoved),
             RoutingStrategies.Bubble);
                 
-    // Événement quand la collection de tags change
+    // Event when the tags collection changes
     public static readonly RoutedEvent<RoutedEventArgs> TagsChangedEvent =
         RoutedEvent.Register<TagEditor, RoutedEventArgs>(
             nameof(TagsChanged),
             RoutingStrategies.Bubble);
 
-    // Délai après lequel le texte actuel est considéré comme un tag (en ms)
+    // Delay after which current text is considered as a tag (in ms)
     public static readonly StyledProperty<int> AutoCommitDelayProperty =
         AvaloniaProperty.Register<TagEditor, int>(
             nameof(AutoCommitDelay),
             defaultValue: 800);
 
-    // Propriété pour filtrer les tags (accepter ou rejeter)
+    // Property to filter tags (accept or reject)
     public static readonly StyledProperty<Func<string, bool>> TagFilterProperty =
         AvaloniaProperty.Register<TagEditor, Func<string, bool>>(
             nameof(TagFilter),
             defaultValue: (tag) => true);
 
-    // Propriétés accessibles depuis XAML
+    // Properties accessible from XAML
     public ObservableCollection<string> Tags
     {
         get => GetValue(TagsProperty);
@@ -143,7 +143,7 @@ public class TagEditor : TemplatedControl
         set => SetValue(TagFilterProperty, value);
     }
 
-    // Événements
+    // Events
     public event EventHandler<RoutedEventArgs> TagAdded
     {
         add => AddHandler(TagAddedEvent, value);
@@ -162,14 +162,14 @@ public class TagEditor : TemplatedControl
         remove => RemoveHandler(TagsChangedEvent, value);
     }
 
-    // Parties du template
-    private TextBox _textBox;
-    private ItemsControl _tagsPanel;
+    // Template parts
+    private TextBox? _textBox;
+    private ItemsControl? _tagsPanel;
     private ScrollViewer? _tagsScroll;
     
     private DispatcherTimer _commitTimer;
 
-    // Constructeur
+    // Constructor
     public TagEditor()
     {
         Tags = new ObservableCollection<string>();
@@ -197,8 +197,6 @@ public class TagEditor : TemplatedControl
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
-        
-        // this.Cursor = new Cursor(StandardCursorType.Ibeam);
 
         _textBox = e.NameScope.Find<TextBox>("PART_TextBox");
         _tagsPanel = e.NameScope.Find<ItemsControl>("PART_TagsPanel");
@@ -206,7 +204,7 @@ public class TagEditor : TemplatedControl
 
         if (_tagsScroll != null)
         {
-            // Mettre à jour dynamiquement la largeur max
+            // Dynamically update max width
             this.GetObservable(BoundsProperty).Subscribe(bounds =>
             {
                 var totalWidth = bounds.Width;
@@ -221,28 +219,7 @@ public class TagEditor : TemplatedControl
             _textBox.TextInput += TextBox_TextChanged;
             _textBox.LostFocus += TextBox_LostFocus;
         }
-        
-        // this.AddHandler(PointerPressedEvent, (sender, args) =>
-        // {
-        //     // Si le TextBox existe et n'a pas encore le focus, on le focus
-        //     if (_textBox != null && !_textBox.IsFocused)
-        //     {
-        //         _textBox.Focus();
-        //     }
-        // }, RoutingStrategies.Tunnel);
     }
-    
-    // protected override void OnPointerEntered(PointerEventArgs e)
-    // {
-    //     base.OnPointerEntered(e);
-    //     PseudoClasses.Set(":pointerover", true);
-    // }
-    //
-    // protected override void OnPointerExited(PointerEventArgs e)
-    // {
-    //     base.OnPointerExited(e);
-    //     PseudoClasses.Set(":pointerover", false);
-    // }
 
     private void TextBox_TextChanged(object sender, TextInputEventArgs e)
     {
@@ -251,24 +228,24 @@ public class TagEditor : TemplatedControl
         string text = _textBox.Text;
         CurrentText = text;
             
-        // Si le texte contient un séparateur, on crée un tag
+        // If text contains a separator, create a tag
         if (text.Contains(TagSeparator))
         {
             string[] parts = text.Split(TagSeparator);
                 
-            // Traiter chaque partie sauf la dernière (qui sera le nouveau texte)
+            // Process each part except the last one (which will be the new text)
             for (int i = 0; i < parts.Length - 1; i++)
             {
                 AddTag(parts[i]);
             }
                 
-            // Mettre à jour le texte courant
+            // Update current text
             _textBox.Text = parts[parts.Length - 1];
             _textBox.CaretIndex = _textBox.Text.Length;
         }
         else
         {
-            // Réinitialiser le timer pour créer un tag automatiquement après le délai
+            // Reset timer to automatically create a tag after delay
             if (!string.IsNullOrWhiteSpace(text) && AutoCommitDelay > 0)
             {
                 _commitTimer.Stop();
@@ -287,25 +264,25 @@ public class TagEditor : TemplatedControl
             return;
         }
             
-        // Si on appuie sur Backspace avec un textBox vide, supprimer le dernier tag
+        // If Backspace is pressed with empty textBox, delete last tag
         if (e.Key == Key.Back && string.IsNullOrEmpty(_textBox.Text) && Tags.Count > 0)
         {
             RemoveLastTag();
             e.Handled = true;
         }
-        // Si on appuie sur Entrée, créer un tag avec le texte actuel
+        // If Enter is pressed, create a tag with current text
         else if (e.Key == Key.Enter && !string.IsNullOrWhiteSpace(_textBox.Text))
         {
             CommitCurrentText();
             e.Handled = true;
         }
-        // Si on appuie sur Virgule, créer un tag avec le texte actuel
+        // If comma is pressed, create a tag with current text
         else if ((e.Key == Key.OemComma) && !string.IsNullOrWhiteSpace(_textBox.Text))
         {
             CommitCurrentText();
             e.Handled = true;
         }
-        // Si on appuie sur Tab, essaie de créer un tag avec le texte actuel
+        // If Tab is pressed, try to create a tag with current text
         else if (e.Key == Key.Tab && !string.IsNullOrWhiteSpace(_textBox.Text))
         {
             CommitCurrentText();
@@ -356,7 +333,7 @@ public class TagEditor : TemplatedControl
         }
     }
 
-    // Méthode publique pour supprimer un tag spécifique
+    // Public method to remove a specific tag
     public void RemoveTag(string tag)
     {
         if (Tags.Contains(tag))
@@ -366,20 +343,20 @@ public class TagEditor : TemplatedControl
         }
     }
         
-    // Méthode publique pour ajouter un tag
+    // Public method to add a tag
     public bool AddTagManually(string tag)
     {
         return AddTag(tag);
     }
         
-    // Méthode publique pour effacer tous les tags
+    // Public method to clear all tags
     public void ClearTags()
     {
         Tags.Clear();
         RaiseEvent(new RoutedEventArgs(TagRemovedEvent, this));
     }
         
-    // Retourne une chaîne contenant tous les tags séparés par le séparateur
+    // Returns a string containing all tags separated by the separator
     public string GetTagsString()
     {
         return string.Join(TagSeparator.ToString(), Tags);
