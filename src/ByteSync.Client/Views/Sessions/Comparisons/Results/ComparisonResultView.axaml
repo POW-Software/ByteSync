@@ -66,7 +66,7 @@
                 
                 <StackPanel Grid.Column="2" Orientation="Vertical" Margin="24 0 0 0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" DataContext="{Binding PageParameters}">
-                        <Button HorizontalAlignment="Left" Margin="0 3 3 3" VerticalAlignment="Bottom"
+                        <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="0 3 3 3" VerticalAlignment="Bottom"
                                 Command="{Binding Path=FirstPageCommand}"
                                 Background="Transparent" MaxHeight="26">
 
@@ -76,9 +76,9 @@
                             </StackPanel>
                         </Button>
 
-                        <Button HorizontalAlignment="Left" Margin="3 3 3 3" VerticalAlignment="Bottom"
-                                Command="{Binding Path=PreviousPageCommand}"
-                                Background="Transparent" MaxHeight="26">
+                        <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="3 3 3 3" VerticalAlignment="Bottom"
+                                 Command="{Binding Path=PreviousPageCommand}"
+                                 Background="Transparent" MaxHeight="26">
 
                             <StackPanel Orientation="Horizontal">
                                 <misc:Icon FontSize="12" Value="RegularChevronLeft"
@@ -91,7 +91,7 @@
                         <Label Content="/" VerticalContentAlignment="Center" />
                         <Label Content="{Binding Path=PageCount}" VerticalContentAlignment="Center" />
 
-                        <Button HorizontalAlignment="Left" Margin="3 3 3 3" VerticalAlignment="Bottom"
+                        <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="3 3 3 3" VerticalAlignment="Bottom"
                                 Command="{Binding Path=NextPageCommand}"
                                 Background="Transparent" MaxHeight="26">
 
@@ -101,7 +101,7 @@
                             </StackPanel>
                         </Button>
 
-                        <Button HorizontalAlignment="Left" Margin="3 3 0 3" VerticalAlignment="Bottom"
+                        <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="3 3 0 3" VerticalAlignment="Bottom"
                                 Command="{Binding Path=LastPageCommand}"
                                 Background="Transparent" MaxHeight="26">
 
