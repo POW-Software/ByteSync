@@ -121,9 +121,9 @@
                         
 
                         <!-- Boutons Add/Delete Manual Actions -->
-                        <StackPanel Orientation="Vertical" Margin="6 0 0 0" IsVisible="{Binding CanManageActions}"
+                        <StackPanel Orientation="Vertical" Margin="0 0 0 0" IsVisible="{Binding CanManageActions}"
                                     IsEnabled="{Binding !IsCloudProfileSession}">
-                            <Button Classes="GenericButton" HorizontalAlignment="Stretch" Margin="3 0 3 3" VerticalAlignment="Bottom"
+                            <Button Classes="GenericButton" HorizontalAlignment="Stretch" Margin="0 0 3 3" VerticalAlignment="Bottom"
                                     Command="{Binding Path=AddManualActionCommand}"
                                     Height="26">
                                 <StackPanel Orientation="Horizontal">
@@ -132,7 +132,7 @@
                                 </StackPanel>
                             </Button>
 
-                            <Button Classes="GenericButton" HorizontalAlignment="Stretch" Margin="3 0" VerticalAlignment="Bottom"
+                            <Button Classes="GenericButton" HorizontalAlignment="Stretch" Margin="0 0 3 0" VerticalAlignment="Bottom"
                                     Command="{Binding Path=DeleteManualActionsCommand}"
                                     Height="26">
                                 <StackPanel Orientation="Horizontal">
@@ -148,7 +148,7 @@
                                     Background="{DynamicResource SystemChromeMediumColor}" />
                 </WrapPanel>
 
-                <DataGrid Name="DataGrid" AutoGenerateColumns="False" Margin="3 3 3 0" ItemsSource="{Binding Path=ComparisonItems}"
+                <DataGrid Name="DataGrid" AutoGenerateColumns="False" Margin="0 3 0 0" ItemsSource="{Binding Path=ComparisonItems}"
                           IsReadOnly="True" x:Name="TheGrid" CanUserResizeColumns="True" SelectionMode="Extended"
                           Width="{Binding Path=Width, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=Grid,AncestorLevel=1}}"
                           HeadersVisibility="Column" Background="Transparent" GridLinesVisibility="Horizontal"
