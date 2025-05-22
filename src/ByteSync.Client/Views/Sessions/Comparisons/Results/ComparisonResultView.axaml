@@ -115,28 +115,28 @@
             </Grid>
             
             <StackPanel Grid.Row="1" Orientation="Vertical" IsVisible="{Binding AreResultsLoaded}">
-                <WrapPanel Orientation="Horizontal" Margin="0 0 0 6">
+                <WrapPanel Orientation="Horizontal" Margin="0 3 0 3">
 
-                    <WrapPanel Orientation="Horizontal" Margin="0 3 12 0">
+                    <WrapPanel Orientation="Horizontal" Margin="0 3 24 3">
                         
 
                         <!-- Boutons Add/Delete Manual Actions -->
-                        <StackPanel Orientation="Vertical" Margin="0 0 0 0" IsVisible="{Binding CanManageActions}"
+                        <StackPanel Orientation="Horizontal" Margin="0 0 0 0" IsVisible="{Binding CanManageActions}"
                                     IsEnabled="{Binding !IsCloudProfileSession}">
-                            <Button Classes="GenericButton" HorizontalAlignment="Stretch" Margin="0 0 3 3" VerticalAlignment="Bottom"
+                            <Button Classes="GenericButton" HorizontalAlignment="Stretch" Margin="0 0 6 0" VerticalAlignment="Bottom"
                                     Command="{Binding Path=AddManualActionCommand}"
                                     Height="26">
                                 <StackPanel Orientation="Horizontal">
-                                    <misc:Icon Value="RegularPlus" />
+                                    <misc:Icon FontSize="12" Value="RegularPlus" />
                                     <TextBlock Text="{localizations:Loc ComparisonResult_AddTargetedAction}" />
                                 </StackPanel>
                             </Button>
 
-                            <Button Classes="GenericButton" HorizontalAlignment="Stretch" Margin="0 0 3 0" VerticalAlignment="Bottom"
+                            <Button Classes="GenericButton" HorizontalAlignment="Stretch" Margin="0 0 0 0" VerticalAlignment="Bottom"
                                     Command="{Binding Path=DeleteManualActionsCommand}"
                                     Height="26">
                                 <StackPanel Orientation="Horizontal">
-                                    <misc:Icon Value="RegularTrash" />
+                                    <misc:Icon FontSize="12" Value="RegularTrash" />
                                     <TextBlock Text="{localizations:Loc ComparisonResult_DeleteTargetedActions}" />
                                 </StackPanel>
                             </Button>
@@ -144,7 +144,7 @@
                     </WrapPanel>
      
                     <ContentControl Content="{Binding ManageSynchronizationRules}" IsVisible="{Binding CanManageActions}" IsEnabled="{Binding !IsCloudProfileSession}"
-                                    Margin="0 0 0 0 " MinWidth="200"
+                                    Margin="0 3 0 3 " MinWidth="200"
                                     Background="{DynamicResource SystemChromeMediumColor}" />
                 </WrapPanel>
 
