@@ -1,12 +1,9 @@
-using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Avalonia.ReactiveUI;
 using Avalonia.Threading;
-using Avalonia.VisualTree;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.ViewModels;
@@ -178,10 +175,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
     
     public async Task<string[]?> ShowOpenFileDialogAsync(string title, bool allowMultiple)
     {
-        // Utiliser les nouvelles APIs de stockage
         var storageProvider = TopLevel.GetTopLevel(this)?.StorageProvider;
         if (storageProvider == null)
+        {
             return null;
+        }
         
         var options = new FilePickerOpenOptions
         {
@@ -190,8 +188,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
         };
     
         var files = await storageProvider.OpenFilePickerAsync(options);
-    
-        // Convertir les IStorageFile en chemins de fichiers
+        
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (files != null && files.Count > 0)
         {
             return files.Select(file => file.Path.LocalPath).ToArray();
@@ -202,35 +200,26 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
 
     public async Task<string?> ShowOpenFolderDialogAsync(string title)
     {
-        try
+        var storageProvider = GetTopLevel(this)?.StorageProvider;
+        if (storageProvider == null)
         {
-            // Utiliser les nouvelles APIs de stockage
-            var storageProvider = TopLevel.GetTopLevel(this)?.StorageProvider;
-            if (storageProvider == null)
-                return null;
-
-            var options = new FolderPickerOpenOptions
-            {
-                Title = title,
-                AllowMultiple = false
-            };
-
-            var folders = await storageProvider.OpenFolderPickerAsync(options);
-
-            // Retourner le premier dossier sélectionné
-            if (folders != null && folders.Count > 0)
-            {
-                return folders[0].Path.LocalPath;
-            }
-
             return null;
         }
-        catch (Exception ex)
+
+        var options = new FolderPickerOpenOptions
         {
-            _logger.LogError(ex, "Erreur lors de l'ouverture de la boîte de dialogue de fichiers");
-            return null;
+            Title = title,
+            AllowMultiple = false
+        };
+
+        var folders = await storageProvider.OpenFolderPickerAsync(options);
+        
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (folders != null && folders.Count > 0)
+        {
+            return folders[0].Path.LocalPath;
         }
+
+        return null;
     }
-    
-    
 }

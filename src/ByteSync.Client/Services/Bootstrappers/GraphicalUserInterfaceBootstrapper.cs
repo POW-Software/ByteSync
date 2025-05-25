@@ -1,7 +1,5 @@
 ﻿using Autofac;
 using Avalonia;
-using Avalonia.Dialogs;
-using Avalonia.ReactiveUI;
 using ByteSync.Business.Misc;
 using ByteSync.Business.Navigations;
 using ByteSync.Interfaces;
@@ -131,24 +129,11 @@ public class GraphicalUserInterfaceBootstrapper : BaseBootstrapper
         var builder = AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .LogToTrace();
-       
-        /*
-#if LIN
-#pragma warning disable CA1416
-        builder = builder.UseManagedSystemDialogs();
-#pragma warning restore CA1416
-#endif
-        */
         
-       
-
 #if LIN
-        // Configuration spécifique pour Linux
         builder = builder.With(new X11PlatformOptions
         {
-            // EnableMultiTouch = false,
-            // UseDBusMenu = true,
-            // EnableIme = true
+            // https://github.com/AvaloniaUI/Avalonia/issues/9383
             UseDBusFilePicker = false
         });
 #endif

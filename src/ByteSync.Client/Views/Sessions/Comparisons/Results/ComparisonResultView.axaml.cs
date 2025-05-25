@@ -1,6 +1,5 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
 using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
