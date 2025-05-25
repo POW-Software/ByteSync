@@ -1,11 +1,9 @@
-using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Markup.Xaml;
+using Avalonia.Platform.Storage;
 using Avalonia.ReactiveUI;
 using Avalonia.Threading;
-using Avalonia.VisualTree;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.ViewModels;
@@ -153,25 +151,54 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
             }
         }
     }
-
+    
     public async Task<string[]?> ShowOpenFileDialogAsync(string title, bool allowMultiple)
     {
-        OpenFileDialog openFileDialog = new OpenFileDialog();
-        openFileDialog.Title = title;
-        openFileDialog.AllowMultiple = allowMultiple;
-
-        string[]? result = await openFileDialog.ShowAsync(this);
-
-        return result;
+        var storageProvider = TopLevel.GetTopLevel(this)?.StorageProvider;
+        if (storageProvider == null)
+        {
+            return null;
+        }
+        
+        var options = new FilePickerOpenOptions
+        {
+            Title = title,
+            AllowMultiple = allowMultiple
+        };
+    
+        var files = await storageProvider.OpenFilePickerAsync(options);
+        
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (files != null && files.Count > 0)
+        {
+            return files.Select(file => file.Path.LocalPath).ToArray();
+        }
+    
+        return null;
     }
 
     public async Task<string?> ShowOpenFolderDialogAsync(string title)
     {
-        OpenFolderDialog openFolderDialog = new OpenFolderDialog();
-        openFolderDialog.Title = title;
+        var storageProvider = GetTopLevel(this)?.StorageProvider;
+        if (storageProvider == null)
+        {
+            return null;
+        }
 
-        string? result = await openFolderDialog.ShowAsync(this);
+        var options = new FolderPickerOpenOptions
+        {
+            Title = title,
+            AllowMultiple = false
+        };
 
-        return result;
+        var folders = await storageProvider.OpenFolderPickerAsync(options);
+        
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (folders != null && folders.Count > 0)
+        {
+            return folders[0].Path.LocalPath;
+        }
+
+        return null;
     }
 }

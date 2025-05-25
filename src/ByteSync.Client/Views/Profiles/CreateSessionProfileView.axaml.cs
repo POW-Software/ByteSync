@@ -1,7 +1,4 @@
-﻿using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using Avalonia.ReactiveUI;
-using ByteSync.Common.Helpers;
+﻿using Avalonia.ReactiveUI;
 using ByteSync.ViewModels.Profiles;
 using ReactiveUI;
 

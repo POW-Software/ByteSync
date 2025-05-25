@@ -1,8 +1,4 @@
-﻿using System.Reactive.Disposables;
-using Avalonia;
-using Avalonia.Controls.Mixins;
-using Avalonia.Markup.Xaml;
-using Avalonia.ReactiveUI;
+﻿using Avalonia.ReactiveUI;
 using ByteSync.ViewModels.Sessions.Synchronizations;
 using ReactiveUI;
 

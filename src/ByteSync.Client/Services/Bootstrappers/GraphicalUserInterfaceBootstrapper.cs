@@ -126,8 +126,18 @@ public class GraphicalUserInterfaceBootstrapper : BaseBootstrapper
         // https://github.com/autofac/Autofac/issues/811
         autofacResolver.SetLifetimeScope(ContainerProvider.Container);
 
-        return AppBuilder.Configure<App>()
+        var builder = AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .LogToTrace();
+        
+#if LIN
+        builder = builder.With(new X11PlatformOptions
+        {
+            // https://github.com/AvaloniaUI/Avalonia/issues/9383
+            UseDBusFilePicker = false
+        });
+#endif
+        
+        return builder;
     }
 }
