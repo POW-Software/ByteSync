@@ -151,27 +151,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
             }
         }
     }
-
-    // public async Task<string[]?> ShowOpenFileDialogAsync(string title, bool allowMultiple)
-    // {
-    //     OpenFileDialog openFileDialog = new OpenFileDialog();
-    //     openFileDialog.Title = title;
-    //     openFileDialog.AllowMultiple = allowMultiple;
-    //
-    //     string[]? result = await openFileDialog.ShowAsync(this);
-    //
-    //     return result;
-    // }
-    //
-    // public async Task<string?> ShowOpenFolderDialogAsync(string title)
-    // {
-    //     OpenFolderDialog openFolderDialog = new OpenFolderDialog();
-    //     openFolderDialog.Title = title;
-    //
-    //     string? result = await openFolderDialog.ShowAsync(this);
-    //
-    //     return result;
-    // }
     
     public async Task<string[]?> ShowOpenFileDialogAsync(string title, bool allowMultiple)
     {
