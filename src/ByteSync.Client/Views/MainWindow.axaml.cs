@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform.Storage;
 using Avalonia.ReactiveUI;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -154,24 +155,82 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
         }
     }
 
+    // public async Task<string[]?> ShowOpenFileDialogAsync(string title, bool allowMultiple)
+    // {
+    //     OpenFileDialog openFileDialog = new OpenFileDialog();
+    //     openFileDialog.Title = title;
+    //     openFileDialog.AllowMultiple = allowMultiple;
+    //
+    //     string[]? result = await openFileDialog.ShowAsync(this);
+    //
+    //     return result;
+    // }
+    //
+    // public async Task<string?> ShowOpenFolderDialogAsync(string title)
+    // {
+    //     OpenFolderDialog openFolderDialog = new OpenFolderDialog();
+    //     openFolderDialog.Title = title;
+    //
+    //     string? result = await openFolderDialog.ShowAsync(this);
+    //
+    //     return result;
+    // }
+    
     public async Task<string[]?> ShowOpenFileDialogAsync(string title, bool allowMultiple)
     {
-        OpenFileDialog openFileDialog = new OpenFileDialog();
-        openFileDialog.Title = title;
-        openFileDialog.AllowMultiple = allowMultiple;
-
-        string[]? result = await openFileDialog.ShowAsync(this);
-
-        return result;
+        // Utiliser les nouvelles APIs de stockage
+        var storageProvider = TopLevel.GetTopLevel(this)?.StorageProvider;
+        if (storageProvider == null)
+            return null;
+        
+        var options = new FilePickerOpenOptions
+        {
+            Title = title,
+            AllowMultiple = allowMultiple
+        };
+    
+        var files = await storageProvider.OpenFilePickerAsync(options);
+    
+        // Convertir les IStorageFile en chemins de fichiers
+        if (files != null && files.Count > 0)
+        {
+            return files.Select(file => file.Path.LocalPath).ToArray();
+        }
+    
+        return null;
     }
 
     public async Task<string?> ShowOpenFolderDialogAsync(string title)
     {
-        OpenFolderDialog openFolderDialog = new OpenFolderDialog();
-        openFolderDialog.Title = title;
+        try
+        {
+            // Utiliser les nouvelles APIs de stockage
+            var storageProvider = TopLevel.GetTopLevel(this)?.StorageProvider;
+            if (storageProvider == null)
+                return null;
 
-        string? result = await openFolderDialog.ShowAsync(this);
+            var options = new FolderPickerOpenOptions
+            {
+                Title = title,
+                AllowMultiple = false
+            };
 
-        return result;
+            var folders = await storageProvider.OpenFolderPickerAsync(options);
+
+            // Retourner le premier dossier sélectionné
+            if (folders != null && folders.Count > 0)
+            {
+                return folders[0].Path.LocalPath;
+            }
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur lors de l'ouverture de la boîte de dialogue de fichiers");
+            return null;
+        }
     }
+    
+    
 }
