@@ -1,5 +1,4 @@
 ﻿using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using ByteSync.ViewModels.Sessions.Managing;
 using ByteSync.Views.Misc;
