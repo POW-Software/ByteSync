@@ -12,8 +12,8 @@ public class StatusItemViewModel : ViewModelBase
     public ContentRepartitionViewModel.BrushColors ForeBrushColor { get; set; }
 
     /// <summary>
-    /// Ne pas utiliser [Reactive] ici pour des raisons de performances
-    /// L'initialisation se fait par InitBrushes
+    /// Do not use [Reactive] here for performance reasons
+    /// Initialization is performed by InitBrushes
     /// </summary>
     public IBrush? ForeBrush
     {
@@ -24,8 +24,8 @@ public class StatusItemViewModel : ViewModelBase
     public ContentRepartitionViewModel.BrushColors BackBrushColor { get; set; }
 
     /// <summary>
-    /// Ne pas utiliser [Reactive] ici pour des raisons de performances
-    /// L'initialisation se fait par InitBrushes
+    /// Do not use [Reactive] here for performance reasons
+    /// Initialization is performed by InitBrushes
     /// </summary>
     public IBrush? BackBrush
     {
@@ -34,8 +34,8 @@ public class StatusItemViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Cette méthode permet d'initialiser _foreBrush et _backBrush sans appeler RaiseAndSetIfChanged, ce qui poserait des
-    /// problèmes en cas de nombre de ComparisonItemViewModels élevé
+    /// This method allows you to initialize _foreBrush and _backBrush without calling RaiseAndSetIfChanged, which would cause
+    /// problems if you have a large number of ComparisonItemViewModels.
     /// </summary>
     /// <param name="foreBrush"></param>
     /// <param name="backBrush"></param>
