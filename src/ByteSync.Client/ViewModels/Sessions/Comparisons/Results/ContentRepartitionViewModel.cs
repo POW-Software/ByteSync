@@ -18,11 +18,11 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
 {
     private IThemeService _themeService;
 
-    private SolidColorBrush? _grayBrush;
-    private SolidColorBrush? _lightGrayBrush;
-    private SolidColorBrush? _secondaryBackgroundBrush;
-    private SolidColorBrush? _mainBackgroundBrush;
-    private SolidColorBrush? _mainForeColorBrush;
+    private IBrush? _grayBrush;
+    private IBrush? _lightGrayBrush;
+    private IBrush? _secondaryBackgroundBrush;
+    private IBrush? _mainBackgroundBrush;
+    private IBrush? _mainForeColorBrush;
     private readonly IDisposable _subscription;
 
     public enum BrushColors
@@ -70,7 +70,7 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
 
     private ContentRepartitionComputeResult ComputeResult { get; set; }
 
-    private Brush GrayBrush
+    private IBrush GrayBrush
     {
         get
         {
@@ -83,52 +83,52 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         }
     }
 
-    public Brush? MainForeColorBrush
+    public IBrush? MainForeColorBrush
     {
         get
         {
             if (_mainForeColorBrush == null)
             {
-                _themeService.GetResource("SystemControlForegroundBaseHighBrush", out _mainForeColorBrush);
+                _mainForeColorBrush = _themeService.GetBrush("SystemControlForegroundBaseHighBrush");
             }
 
             return _mainForeColorBrush;
         }
     }
 
-    public Brush? LightGrayBrush
+    public IBrush? LightGrayBrush
     {
         get
         {
             if (_lightGrayBrush == null)
             {
-                _themeService.GetResource("VeryLightGrayBrush", out _lightGrayBrush);
+                _lightGrayBrush = _themeService.GetBrush("VeryLightGrayBrush");
             }
 
             return _lightGrayBrush;
         }
     }
     
-    private Brush? MainBackgroundBrush
+    private IBrush? MainBackgroundBrush
     {
         get
         {
             if (_mainBackgroundBrush == null)
             {
-                _themeService.GetResource("StatusMainBackGroundBrush", out _mainBackgroundBrush);
+                _mainBackgroundBrush = _themeService.GetBrush("StatusMainBackGroundBrush");
             }
 
             return _mainBackgroundBrush;
         }
     }
 
-    private Brush? SecondaryBackgroundBrush
+    private IBrush? SecondaryBackgroundBrush
     {
         get
         {
             if (_secondaryBackgroundBrush == null)
             {
-                _themeService.GetResource("StatusSecondaryBackGroundBrush", out _secondaryBackgroundBrush);
+                _secondaryBackgroundBrush = _themeService.GetBrush("StatusSecondaryBackGroundBrush");
             }
 
             return _secondaryBackgroundBrush;
@@ -154,13 +154,13 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
     public ObservableCollection<StatusItemViewModel>? PresenceGroups { get; set; }
     
     [Reactive]
-    public Brush? HashBackBrush { get; set; }
+    public IBrush? HashBackBrush { get; set; }
     
     [Reactive]
-    public Brush? TimeBackBrush { get; set; }
+    public IBrush? TimeBackBrush { get; set; }
     
     [Reactive]
-    public Brush? FolderBackBrush { get; set; }
+    public IBrush? FolderBackBrush { get; set; }
 
     public FileSystemTypes FileSystemType
     {
@@ -257,7 +257,7 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         }
     }
 
-    private Brush? GetBrush(BrushColors brushColor)
+    private IBrush? GetBrush(BrushColors brushColor)
     {
         switch (brushColor)
         {

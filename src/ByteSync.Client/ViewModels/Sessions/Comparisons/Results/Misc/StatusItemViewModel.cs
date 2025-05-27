@@ -5,8 +5,8 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
 
 public class StatusItemViewModel : ViewModelBase
 {
-    private Brush? _backBrush;
-    private Brush? _foreBrush;
+    private IBrush? _backBrush;
+    private IBrush? _foreBrush;
     public string? Letter { get; set; }
     
     public ContentRepartitionViewModel.BrushColors ForeBrushColor { get; set; }
@@ -15,7 +15,7 @@ public class StatusItemViewModel : ViewModelBase
     /// Ne pas utiliser [Reactive] ici pour des raisons de performances
     /// L'initialisation se fait par InitBrushes
     /// </summary>
-    public Brush? ForeBrush
+    public IBrush? ForeBrush
     {
         get => _foreBrush;
         set => this.RaiseAndSetIfChanged(ref _foreBrush, value);
@@ -27,7 +27,7 @@ public class StatusItemViewModel : ViewModelBase
     /// Ne pas utiliser [Reactive] ici pour des raisons de performances
     /// L'initialisation se fait par InitBrushes
     /// </summary>
-    public Brush? BackBrush
+    public IBrush? BackBrush
     {
         get => _backBrush;
         set => this.RaiseAndSetIfChanged(ref _backBrush, value);
@@ -39,7 +39,7 @@ public class StatusItemViewModel : ViewModelBase
     /// </summary>
     /// <param name="foreBrush"></param>
     /// <param name="backBrush"></param>
-    public void InitBrushes(Brush? foreBrush, Brush? backBrush)
+    public void InitBrushes(IBrush? foreBrush, IBrush? backBrush)
     {
         _foreBrush = foreBrush;
         _backBrush = backBrush;

@@ -9,11 +9,9 @@ public interface IThemeService
     
     IObservable<Theme> SelectedTheme { get; }
     
-    public void OnThemesRegistred();
+    public void OnThemesRegistered();
     
     void RegisterTheme(Theme theme);
-    
-    void GetResource<T>(string resourceName, out T? resource);
 
     IBrush? GetBrush(string resourceName);
     
