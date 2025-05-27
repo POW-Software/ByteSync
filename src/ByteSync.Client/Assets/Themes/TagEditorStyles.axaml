@@ -19,51 +19,40 @@
                     <Grid ColumnDefinitions="Auto,*"
                           VerticalAlignment="Center"
                           HorizontalAlignment="Stretch">
-                        
-                        <!-- <ScrollViewer Grid.Column="0" -->
-                        <!--               Name="PART_TagsScroll" -->
-                        <!--               HorizontalScrollBarVisibility="Auto" -->
-                        <!--               VerticalScrollBarVisibility="Disabled" -->
-                        <!--               Margin="0,0,4,0" -->
-                        <!--               HorizontalAlignment="Left" -->
-                        <!--               VerticalAlignment="Center"> -->
+                        <ItemsControl Grid.Column="0" Name="PART_TagsPanel" ItemsSource="{TemplateBinding Tags}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Name="PART_WrapPanel" Orientation="Horizontal"
+                                               ItemSpacing="4"
+                                               VerticalAlignment="Top" />
 
-                            <ItemsControl Grid.Column="0" Name="PART_TagsPanel" ItemsSource="{TemplateBinding Tags}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel Name="PART_WrapPanel" Orientation="Horizontal" 
-                                                   ItemSpacing="4"
-                                                   VerticalAlignment="Top"/>
-                                        
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{Binding Path=TagBackground, RelativeSource={RelativeSource AncestorType=misc:TagEditor}}"
-                                                CornerRadius="3"
-                                                Margin="0,1,3,1"
-                                                Padding="4,2">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding}" 
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{Binding Path=TagForeground, RelativeSource={RelativeSource AncestorType=misc:TagEditor}}"
-                                                           VerticalAlignment="Center"/>
-                                                <Button Content="×" 
-                                                        Padding="2,0"
-                                                        Margin="3,0,0,0"
-                                                        Background="Transparent"
-                                                        BorderThickness="0"
-                                                        Foreground="{Binding Path=TagForeground, RelativeSource={RelativeSource AncestorType=misc:TagEditor}}"
-                                                        Command="{Binding Path=RemoveTag, RelativeSource={RelativeSource AncestorType=misc:TagEditor}}"
-                                                        CommandParameter="{Binding}"/>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        <!-- </ScrollViewer> -->
-                        
-                        <TextBox Grid.Column="1" Name="PART_TextBox" 
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{Binding Path=TagBackground, RelativeSource={RelativeSource AncestorType=misc:TagEditor}}"
+                                            CornerRadius="3"
+                                            Margin="0,1,3,1"
+                                            Padding="4,2">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{Binding Path=TagForeground, RelativeSource={RelativeSource AncestorType=misc:TagEditor}}"
+                                                       VerticalAlignment="Center" />
+                                            <Button Content="×"
+                                                    Padding="2,0"
+                                                    Margin="3,0,0,0"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Foreground="{Binding Path=TagForeground, RelativeSource={RelativeSource AncestorType=misc:TagEditor}}"
+                                                    Command="{Binding Path=RemoveTag, RelativeSource={RelativeSource AncestorType=misc:TagEditor}}"
+                                                    CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBox Grid.Column="1" Name="PART_TextBox"
                                  Classes="TagEditorTextBox"
                                  Background="Transparent"
                                  BorderThickness="0"
@@ -72,7 +61,7 @@
                                  HorizontalAlignment="Stretch"
                                  Text="{TemplateBinding CurrentText}"
                                  Watermark="{TemplateBinding Watermark}"
-                                 Margin="3,0"/>
+                                 Margin="3,0" />
                     </Grid>
                 </Border>
             </ControlTemplate>
