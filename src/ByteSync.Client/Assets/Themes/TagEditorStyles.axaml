@@ -72,7 +72,7 @@
 
                                         
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding}"
+                                            <TextBlock Text="{Binding Text}"
                                                        FontWeight="SemiBold"
                                                        Foreground="{Binding Path=TagForeground, RelativeSource={RelativeSource AncestorType=misc:TagEditor}}"
                                                        VerticalAlignment="Center" />

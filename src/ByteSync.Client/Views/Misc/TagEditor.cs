@@ -13,10 +13,10 @@ namespace ByteSync.Views.Misc;
 public class TagEditor : TemplatedControl
 {
     // Tags collection
-    public static readonly StyledProperty<ObservableCollection<string>> TagsProperty =
-        AvaloniaProperty.Register<TagEditor, ObservableCollection<string>>(
+    public static readonly StyledProperty<ObservableCollection<TagItem>> TagsProperty =
+        AvaloniaProperty.Register<TagEditor, ObservableCollection<TagItem>>(
             nameof(Tags),
-            defaultValue: new ObservableCollection<string>());
+            defaultValue: new ObservableCollection<TagItem>());
 
     // Tag separator (space by default)
     public static readonly StyledProperty<char> TagSeparatorProperty =
@@ -79,14 +79,14 @@ public class TagEditor : TemplatedControl
             defaultValue: (tag) => true);
 
     // Properties accessible from XAML
-    public ObservableCollection<string> Tags
+    public ObservableCollection<TagItem> Tags
     {
         get => GetValue(TagsProperty);
         set
         {
             if (GetValue(TagsProperty) != value)
             {
-                if (GetValue(TagsProperty) is ObservableCollection<string> oldCollection)
+                if (GetValue(TagsProperty) is ObservableCollection<TagItem> oldCollection)
                 {
                     oldCollection.CollectionChanged -= Tags_CollectionChanged;
                 }
@@ -168,11 +168,19 @@ public class TagEditor : TemplatedControl
     private ScrollViewer? _tagsScroll;
     
     private DispatcherTimer _commitTimer;
+    private readonly ITagItemFactory _tagItemFactory;
 
-    // Constructor
-    public TagEditor()
+    public TagEditor() : this(new TagItemFactory())
     {
-        Tags = new ObservableCollection<string>();
+        // Default constructor initializes with a factory
+    }
+    
+    // Constructor
+    public TagEditor(ITagItemFactory tagItemFactory)
+    {
+        _tagItemFactory = tagItemFactory;
+        
+        Tags = new ObservableCollection<TagItem>();
         _commitTimer = new DispatcherTimer 
         { 
             Interval = TimeSpan.FromMilliseconds(AutoCommitDelay) 
@@ -308,16 +316,23 @@ public class TagEditor : TemplatedControl
     private bool AddTag(string tagText)
     {
         tagText = tagText.Trim();
-            
+
         if (string.IsNullOrWhiteSpace(tagText))
-            return false;
-                
-        if (!TagFilter(tagText))
-            return false;
-                
-        if (!Tags.Contains(tagText))
         {
-            Tags.Add(tagText);
+            return false;
+        }
+
+        if (!TagFilter(tagText))
+        {
+            return false;
+        }
+                
+        if (!Tags.Any(t => t.Text.Equals(tagText, StringComparison.InvariantCultureIgnoreCase)))
+        {
+            var tagItem = _tagItemFactory.CreateTagItem(tagText);
+            
+            Tags.Add(tagItem);
+            
             RaiseEvent(new RoutedEventArgs(TagAddedEvent, this));
             return true;
         }
@@ -335,13 +350,25 @@ public class TagEditor : TemplatedControl
     }
 
     // Public method to remove a specific tag
-    public void RemoveTag(string tag)
+    public void RemoveTag(string tagText)
     {
-        if (Tags.Contains(tag))
+        var tagItems = Tags.Where(t => t.Text.Equals(tagText, StringComparison.InvariantCultureIgnoreCase)).ToList();
+
+        if (tagItems.Any())
         {
-            Tags.Remove(tag);
+            foreach (var tagItem in tagItems)
+            {
+                Tags.Remove(tagItem);
+            }
+            
             RaiseEvent(new RoutedEventArgs(TagRemovedEvent, this));
         }
+        
+        // if (Tags.Contains(tag))
+        // {
+        //     Tags.Remove(tag);
+        //     RaiseEvent(new RoutedEventArgs(TagRemovedEvent, this));
+        // }
     }
         
     // Public method to add a tag

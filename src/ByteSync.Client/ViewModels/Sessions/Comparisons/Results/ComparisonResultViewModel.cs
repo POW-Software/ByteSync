@@ -17,6 +17,7 @@ using ByteSync.Interfaces.Services.Filtering;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
+using ByteSync.Views.Misc;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
@@ -359,7 +360,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     }
     
     [Reactive]
-    public ObservableCollection<string> FilterTags { get; set; }
+    public ObservableCollection<TagItem> FilterTags { get; set; }
 
     // Property to configure the tag autocomplete
     [Reactive]
@@ -368,7 +369,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     // Initialization method for tag support
     private void InitializeTagSupport()
     {
-        FilterTags = new ObservableCollection<string>();
+        FilterTags = new ObservableCollection<TagItem>();
         
         // Configure tag validation (avoid duplicates, empty words, etc.)
         TagFilterValidator = tag => !string.IsNullOrWhiteSpace(tag) && tag.Length >= 2;
@@ -393,11 +394,11 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         // "tag1 AND tag2" or "(tag1 OR tag2) AND tag3" can be constructed
         if (FilterTags.Count == 1)
         {
-            FilterText = FilterTags[0];
+            FilterText = FilterTags[0].Text;
         }
         else
         {
-            FilterText = string.Join(" AND ", FilterTags);
+            FilterText = string.Join(" AND ", FilterTags.Select(t => t.Text).Where(t => !string.IsNullOrWhiteSpace(t)));
         }
     }
     
