@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Services.Filtering;
 using ByteSync.Services;
 
@@ -16,8 +17,9 @@ public class TagItemFactory : ITagItemFactory
     public TagItem CreateTagItem(string tagText)
     {
         var filterParser = _context.Resolve<IFilterParser>();
+        var themeService = _context.Resolve<IThemeService>();
 
-        var tagItem = new TagItem(filterParser, tagText);
+        var tagItem = new TagItem(filterParser, themeService, tagText);
         
         return tagItem;
     }

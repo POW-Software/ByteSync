@@ -13,7 +13,10 @@ public partial class ComparisonResultView : ReactiveUserControl<ComparisonResult
     public ComparisonResultView()
     {
         InitializeComponent();
-        this.WhenActivated(disposables => { });
+        this.WhenActivated(disposables =>
+        {
+            disposables.Add(TheTagEditor);
+        });
     }
 
     private void TheGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)

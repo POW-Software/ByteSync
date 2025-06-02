@@ -43,14 +43,12 @@
                     <Grid ColumnDefinitions="Auto, *" VerticalAlignment="Center">
                         <misc:Icon Grid.Column="0" FontSize="16" Value="RegularSearch" Margin="6 0 "  />
                 
-                        <misc:TagEditor Grid.Column="1"
+                        <misc:TagEditor Grid.Column="1" x:Name="TheTagEditor"
                                         Watermark="{localizations:Loc ComparisonResult_Filter}" 
                                         VerticalAlignment="Bottom"
                                         Tags="{Binding FilterTags}"
                                         TagFilter="{Binding TagFilterValidator}"
                                         MinWidth="220"
-                                        TagBackground="{DynamicResource HomeCloudSynchronizationBackGround}"
-                                        TagForeground="{DynamicResource SystemAltHighColor}"
                                         TagsChanged="TagEditor_TagsChanged"
                         />
                     </Grid>
