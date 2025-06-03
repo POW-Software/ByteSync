@@ -412,18 +412,21 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     private Func<ComparisonItem, bool> BuildTagFilter(IEnumerable<string> tags)
     {
         if (tags == null || !tags.Any())
+        {
             return _ => true;
-        
+        }
+
         var tagList = tags.Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
-        
+
         return item =>
         {
             // Each tag must be present for the item to match
             foreach (var tag in tagList)
-            {
                 if (!_filterService.BuildFilter(tag)(item))
+                {
                     return false;
-            }
+                }
+
             return true;
         };
     }

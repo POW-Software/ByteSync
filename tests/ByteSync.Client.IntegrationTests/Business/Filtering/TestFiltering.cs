@@ -130,6 +130,23 @@ public class TestFiltering : BaseTestFiltering
     }
     
     [Test]
+    public void TestParse_Incomplete_WithAndOperator()
+    {
+        // Arrange
+        var filterText = "A1.content==B1.content AND on:";
+        
+        ConfigureDataPartIndexer();
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeFalse();
+        parseResult.ErrorMessage.Should().NotBeNull();
+        parseResult.ErrorMessage.Should().Contain("Incomplete right operand for AND expression: Expected data source identifier after 'on:'");
+    }
+    
+    [Test]
     public void TestFilterService_HandlesIncompleteExpression_WithoutException()
     {
         // Arrange
