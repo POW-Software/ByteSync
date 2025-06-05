@@ -38,9 +38,9 @@
         </StackPanel>
         
         <Grid IsVisible="{Binding AreResultsLoaded}" RowDefinitions="Auto,*">
-            <Grid Grid.Row="0" ColumnDefinitions="*, Auto, Auto" VerticalAlignment="Center" Margin="0 0 0 6">
+            <Grid Grid.Row="0" ColumnDefinitions="*, Auto" VerticalAlignment="Center" Margin="0 0 0 6">
                 <Border Grid.Column="0" CornerRadius="4" Background="{DynamicResource SettingsHeaderColor}">
-                    <Grid ColumnDefinitions="Auto, *" VerticalAlignment="Center">
+                    <Grid ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
                         <misc:Icon Grid.Column="0" FontSize="16" Value="RegularSearch" Margin="6 0 "  />
                 
                         <misc:TagEditor Grid.Column="1" x:Name="TheTagEditor"
@@ -51,18 +51,17 @@
                                         MinWidth="220"
                                         TagsChanged="TagEditor_TagsChanged"
                         />
+                        
+                        <Button Grid.Column="2" Classes="LinkButtonLight"
+                                Command="{Binding OpenSyntaxDocumentationCommand}"
+                                VerticalAlignment="Center" Margin="9 0">
+                            <TextBlock Text="{localizations:Loc UpdateDetails_AvailableUpdate_ReleaseNotes}" TextDecorations="Underline" />
+                        </Button>
                     </Grid>
 
                 </Border>
                 
-                <Button Grid.Column="1" Classes="LinkButtonLight"
-                         Command="{Binding OpenSyntaxDocumentation}"
-                         CommandParameter="{Binding}"
-                         VerticalAlignment="Center" Margin="6 0">
-                    <TextBlock Text="{localizations:Loc UpdateDetails_AvailableUpdate_ReleaseNotes}" TextDecorations="Underline" />
-                </Button>
-                
-                <StackPanel Grid.Column="2" Orientation="Vertical" Margin="24 0 0 0">
+                <StackPanel Grid.Column="1" Orientation="Vertical" Margin="24 0 0 0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" DataContext="{Binding PageParameters}">
                         <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="0 3 3 3" VerticalAlignment="Bottom"
                                 Command="{Binding Path=FirstPageCommand}"

@@ -8,6 +8,7 @@ using ByteSync.Business.Arguments;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Dialogs;
@@ -37,6 +38,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     private readonly IFlyoutElementViewModelFactory _flyoutElementViewModelFactory;
     private readonly IComparisonItemRepository _comparisonItemRepository;
     private readonly IFilterService _filterService;
+    private readonly IWebAccessor _webAccessor;
     private readonly ILogger<ComparisonResultViewModel> _logger;
 
     private const int PAGE_SIZE = 10;
@@ -50,7 +52,8 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         IDialogService dialogService, IInventoryService inventoriesService, IComparisonItemsService comparisonItemsService,  
         IComparisonItemViewModelFactory comparisonItemViewModelFactory, ISessionMemberRepository sessionMemberRepository, 
         IFlyoutElementViewModelFactory flyoutElementViewModelFactory, ManageSynchronizationRulesViewModel manageSynchronizationRulesViewModel,
-        IComparisonItemRepository comparisonItemRepository, IFilterService filterService, ILogger<ComparisonResultViewModel> logger)
+        IComparisonItemRepository comparisonItemRepository, IFilterService filterService, IWebAccessor webAccessor, 
+        ILogger<ComparisonResultViewModel> logger)
     {
         _sessionService = sessionService;
         _localizationService = localizationService;
@@ -62,6 +65,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         _flyoutElementViewModelFactory = flyoutElementViewModelFactory;
         _comparisonItemRepository = comparisonItemRepository;
         _filterService = filterService;
+        _webAccessor = webAccessor;
         _logger = logger;
         
         ManageSynchronizationRules = manageSynchronizationRulesViewModel;
@@ -85,6 +89,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
 
         AddManualActionCommand = ReactiveCommand.Create(AddManualAction, canAddOrDeleteManualAction);
         DeleteManualActionsCommand = ReactiveCommand.Create(DeleteManualActions, canAddOrDeleteManualAction);
+        OpenSyntaxDocumentationCommand = ReactiveCommand.CreateFromTask(OpenSyntaxDocumentation);
         
         FilterTags = new ObservableCollection<TagItem>();
         
@@ -183,6 +188,8 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     public ReactiveCommand<Unit, Unit> AddManualActionCommand { get; set; }
 
     public ReactiveCommand<Unit, Unit> DeleteManualActionsCommand { get; set; }
+    
+    public ReactiveCommand<Unit, Unit> OpenSyntaxDocumentationCommand { get; }
     
     // [Reactive]
     // public string? FilterText { get; set; }
@@ -349,6 +356,11 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         {
             comparisonItemView.ClearTargetedActions();
         }
+    }
+    
+    private async Task OpenSyntaxDocumentation()
+    {
+        await _webAccessor.OpenDocumentationUrl();
     }
     
     private void OnSessionReset()
