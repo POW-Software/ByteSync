@@ -49,7 +49,6 @@
                                         Tags="{Binding FilterTags}"
                                         TagFilter="{Binding TagFilterValidator}"
                                         MinWidth="220"
-                                        TagsChanged="TagEditor_TagsChanged"
                         />
                         
                         <Button Grid.Column="2" Classes="LinkButtonLight"

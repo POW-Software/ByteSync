@@ -28,7 +28,7 @@ public class TagItem : ReactiveObject, IDisposable
         
         _themeService.SelectedTheme
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(theme =>
+            .Subscribe(_ =>
             {
                 InitializeBrush();
             })
@@ -40,7 +40,7 @@ public class TagItem : ReactiveObject, IDisposable
     public string Text
     {
         get => _text;
-        set
+        init
         {
             this.RaiseAndSetIfChanged(ref _text, value);
             UpdateParseResult();
