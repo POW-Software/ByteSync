@@ -86,9 +86,20 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         AddManualActionCommand = ReactiveCommand.Create(AddManualAction, canAddOrDeleteManualAction);
         DeleteManualActionsCommand = ReactiveCommand.Create(DeleteManualActions, canAddOrDeleteManualAction);
         
-        var filter = this.WhenAnyValue(x => x.FilterText)
-            .Throttle(TimeSpan.FromMilliseconds(250))
-            .Select(BuildFilter);
+        FilterTags = new ObservableCollection<TagItem>();
+        
+        // Configure tag validation (avoid duplicates, empty words, etc.)
+        TagFilterValidator = tag => !string.IsNullOrWhiteSpace(tag) && tag.Length >= 2;
+        
+        // Observe changes in tags and update the FilterText
+        var filter = this.WhenAnyValue(x => x.FilterTags.Count)
+            .Throttle(TimeSpan.FromMilliseconds(100))
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Select(_ => BuildFilter());
+        
+        // var filter = this.WhenAnyValue(x => x.FilterText)
+        //     .Throttle(TimeSpan.FromMilliseconds(250))
+        //     .Select(BuildFilter);
 
         PageParameters.WhenAnyValue(vm => vm.PageCount)
             .Subscribe(pageCount =>
@@ -126,7 +137,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
             .Subscribe();
             // .DisposeWith(disposables);
 
-        InitializeTagSupport();
+        // InitializeTagSupport();
         
         this.WhenActivated(disposables =>
         {
@@ -173,8 +184,8 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
 
     public ReactiveCommand<Unit, Unit> DeleteManualActionsCommand { get; set; }
     
-    [Reactive]
-    public string? FilterText { get; set; }
+    // [Reactive]
+    // public string? FilterText { get; set; }
     
     [Reactive]
     public string? PathHeader { get; set; }
@@ -349,14 +360,26 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         IsEditionEnabled = true;
     }
 
-    private Func<ComparisonItem, bool> BuildFilter(string? filterText)
+    private Func<ComparisonItem, bool> BuildFilter()
     {
-        if (string.IsNullOrWhiteSpace(filterText))
+        if (FilterTags.Count == 0)
         {
             return _ => true;
         }
-
-        return _filterService.BuildFilter(filterText);
+        
+        List<string> tags = FilterTags
+            .Select(t => t.Text)
+            .Where(t => !string.IsNullOrWhiteSpace(t))
+            .ToList();
+        
+        return _filterService.BuildFilter(tags);
+        
+        // if (string.IsNullOrWhiteSpace(filterText))
+        // {
+        //     return _ => true;
+        // }
+        //
+        // return _filterService.BuildFilter(filterText);
     }
     
     [Reactive]
@@ -366,68 +389,68 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     [Reactive]
     public Func<string, bool> TagFilterValidator { get; set; }
 
-    // Initialization method for tag support
-    private void InitializeTagSupport()
-    {
-        FilterTags = new ObservableCollection<TagItem>();
-        
-        // Configure tag validation (avoid duplicates, empty words, etc.)
-        TagFilterValidator = tag => !string.IsNullOrWhiteSpace(tag) && tag.Length >= 2;
-        
-        // Observe changes in tags and update the FilterText
-        this.WhenAnyValue(x => x.FilterTags.Count)
-            .Throttle(TimeSpan.FromMilliseconds(100))
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(_ => UpdateFilterFromTags());
-    }
+    // // Initialization method for tag support
+    // private void InitializeTagSupport()
+    // {
+    //     FilterTags = new ObservableCollection<TagItem>();
+    //     
+    //     // Configure tag validation (avoid duplicates, empty words, etc.)
+    //     TagFilterValidator = tag => !string.IsNullOrWhiteSpace(tag) && tag.Length >= 2;
+    //     
+    //     // Observe changes in tags and update the FilterText
+    //     this.WhenAnyValue(x => x.FilterTags.Count)
+    //         .Throttle(TimeSpan.FromMilliseconds(100))
+    //         .ObserveOn(RxApp.MainThreadScheduler)
+    //         .Subscribe(_ => UpdateFilterFromTags());
+    // }
     
-    // This method updates the FilterText based on tags
-    private void UpdateFilterFromTags()
-    {
-        if (FilterTags.Count == 0)
-        {
-            FilterText = string.Empty;
-            return;
-        }
-        
-        // For complex filter syntax, expressions like:
-        // "tag1 AND tag2" or "(tag1 OR tag2) AND tag3" can be constructed
-        if (FilterTags.Count == 1)
-        {
-            FilterText = FilterTags[0].Text;
-        }
-        else
-        {
-            FilterText = string.Join(" AND ", FilterTags.Select(t => t.Text).Where(t => !string.IsNullOrWhiteSpace(t)));
-        }
-    }
+    // // This method updates the FilterText based on tags
+    // private void UpdateFilterFromTags()
+    // {
+    //     if (FilterTags.Count == 0)
+    //     {
+    //         FilterText = string.Empty;
+    //         return;
+    //     }
+    //     
+    //     // For complex filter syntax, expressions like:
+    //     // "tag1 AND tag2" or "(tag1 OR tag2) AND tag3" can be constructed
+    //     if (FilterTags.Count == 1)
+    //     {
+    //         FilterText = FilterTags[0].Text;
+    //     }
+    //     else
+    //     {
+    //         FilterText = string.Join(" AND ", FilterTags.Select(t => t.Text).Where(t => !string.IsNullOrWhiteSpace(t)));
+    //     }
+    // }
     
     // Method to handle tag changes
-    public void OnTagsChanged()
-    {
-        UpdateFilterFromTags();
-    }
+    // public void OnTagsChanged()
+    // {
+    //     UpdateFilterFromTags();
+    // }
     
-    // Builds a complex filter based on tags
-    private Func<ComparisonItem, bool> BuildTagFilter(IEnumerable<string> tags)
-    {
-        if (tags == null || !tags.Any())
-        {
-            return _ => true;
-        }
-
-        var tagList = tags.Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
-
-        return item =>
-        {
-            // Each tag must be present for the item to match
-            foreach (var tag in tagList)
-                if (!_filterService.BuildFilter(tag)(item))
-                {
-                    return false;
-                }
-
-            return true;
-        };
-    }
+    // // Builds a complex filter based on tags
+    // private Func<ComparisonItem, bool> BuildTagFilter(IEnumerable<string> tags)
+    // {
+    //     if (tags == null || !tags.Any())
+    //     {
+    //         return _ => true;
+    //     }
+    //
+    //     var tagList = tags.Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
+    //
+    //     return item =>
+    //     {
+    //         // Each tag must be present for the item to match
+    //         foreach (var tag in tagList)
+    //             if (!_filterService.BuildFilter(tag)(item))
+    //             {
+    //                 return false;
+    //             }
+    //
+    //         return true;
+    //     };
+    // }
 }

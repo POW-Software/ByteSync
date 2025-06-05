@@ -47,9 +47,9 @@ public partial class ComparisonResultView : ReactiveUserControl<ComparisonResult
     
     private void TagEditor_TagsChanged(object sender, RoutedEventArgs e)
     {
-        if (ViewModel != null)
-        {
-            ViewModel.OnTagsChanged();
-        }
+        // if (ViewModel != null)
+        // {
+        //     ViewModel.OnTagsChanged();
+        // }
     }
 }

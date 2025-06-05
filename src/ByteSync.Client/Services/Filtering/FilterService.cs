@@ -1,4 +1,5 @@
-﻿using ByteSync.Common.Business.Inventories;
+﻿using ByteSync.Business.Filtering.Expressions;
+using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Services.Filtering;
 using ByteSync.Models.Comparisons.Result;
 
@@ -30,5 +31,24 @@ public class FilterService : IFilterService
         var evaluator = _expressionEvaluatorFactory.GetEvaluator(expression);
         
         return item => evaluator.Evaluate(expression, item);
+    }
+
+    public Func<ComparisonItem, bool> BuildFilter(List<string> filterTexts)
+    {
+        FilterExpression compositeExpression = new TrueExpression();
+        
+        foreach (var filterText in filterTexts)
+        {
+            var parseResult = _filterParser.TryParse(filterText);
+
+            if (parseResult.IsComplete)
+            {
+                compositeExpression = new AndExpression(compositeExpression, parseResult.Expression!);
+            }
+        }
+        
+        var evaluator = _expressionEvaluatorFactory.GetEvaluator(compositeExpression);
+        
+        return item => evaluator.Evaluate(compositeExpression, item);
     }
 }
