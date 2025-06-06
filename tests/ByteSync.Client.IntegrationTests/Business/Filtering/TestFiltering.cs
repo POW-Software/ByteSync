@@ -160,6 +160,39 @@ public class TestFiltering : BaseTestFiltering
         filter(comparisonItem).Should().BeTrue();
     }
     
+    [Test]
+    public void TestFilterService_BuildFilter_ListWithIncompleteExpressions()
+    {
+        // Arrange
+        var filterService = new FilterService(_filterParser, _evaluatorFactory);
+        var comparisonItem = CreateBasicComparisonItem();
+
+        // A complete expression and an incomplete one
+        var filterTexts = new List<string>
+        {
+            "A1.content==B1.content", // complete
+            "A1.content=="           // incomplete
+        };
+
+        ConfigureDataPartIndexer();
+
+        // Act
+        var filter = filterService.BuildFilter(filterTexts);
+
+        // Assert
+        // The filter should apply the complete expression and ignore the incomplete one
+        // Here, we assume that CreateBasicComparisonItem() does not check content equality,
+        // so the result depends on the item's configuration.
+        // For the example, we simply verify that the filter does not throw an exception.
+        filter.Should().NotBeNull();
+        filter(comparisonItem); // Should not throw an exception
+
+        // If no complete expression, the filter should accept everything
+        var onlyIncomplete = new List<string> { "A1.content==" };
+        var filter2 = filterService.BuildFilter(onlyIncomplete);
+        filter2(comparisonItem).Should().BeTrue();
+    }
+    
     private void ConfigureDataPartIndexer()
     {
         var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
