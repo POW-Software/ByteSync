@@ -297,9 +297,9 @@
 	<data name="ComparisonResult_DeleteTargetedActions" xml:space="preserve">
 		<value>SUPPRIMER ACTIONS CIBLÉES</value>
 	</data>
-  <data name="ComparisonResult_Filter" xml:space="preserve">
-	  <value>Filtre</value>
-  </data>
+	<data name="ComparisonResult_Filter" xml:space="preserve">
+		<value>Filtrer les éléments affichés</value>
+	</data>
   <data name="SessionMachine_AddDirectory" xml:space="preserve">
 	  <value>Ajouter Répertoire</value>
   </data>
@@ -1558,5 +1558,8 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	</data>
 	<data name="ComparisonResult_SynchronizationStatus" xml:space="preserve">
 		<value>SYNCHRONISATION</value>
+	</data>
+	<data name="ComparisonResult_Filter_SyntaxDocumentation" xml:space="preserve">
+		<value>Documentation sur la syntaxe</value>
 	</data>
 </root>

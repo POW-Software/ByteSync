@@ -406,7 +406,7 @@
     <value>DELETE TARGETED ACTIONS</value>
   </data>
   <data name="ComparisonResult_Filter" xml:space="preserve">
-    <value>Filter</value>
+    <value>Filter displayed items</value>
   </data>
   <data name="SessionMachine_AddDirectory" xml:space="preserve">
     <value>Add Directory</value>
@@ -1693,5 +1693,8 @@ Do you want to save this new Session Profile with this name?</value>
   </data>
   <data name="ComparisonResult_SynchronizationStatus" xml:space="preserve">
     <value>SYNCHRONIZATION</value>
+  </data>
+  <data name="ComparisonResult_Filter_SyntaxDocumentation" xml:space="preserve">
+    <value>Syntax Documentation</value>
   </data>
 </root>

@@ -53,15 +53,15 @@
                         
                         <Button Grid.Column="2" Classes="LinkButtonLight"
                                 Command="{Binding OpenSyntaxDocumentationCommand}"
-                                VerticalAlignment="Center" Margin="9 0">
-                            <TextBlock Text="{localizations:Loc UpdateDetails_AvailableUpdate_ReleaseNotes}" TextDecorations="Underline" />
+                                VerticalAlignment="Center" Margin="6 0 9 0">
+                            <TextBlock Text="{localizations:Loc ComparisonResult_Filter_SyntaxDocumentation}" TextDecorations="Underline" />
                         </Button>
                     </Grid>
 
                 </Border>
                 
-                <StackPanel Grid.Column="1" Orientation="Vertical" Margin="24 0 0 0">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" DataContext="{Binding PageParameters}">
+                <Border Grid.Column="1" CornerRadius="4" Background="{DynamicResource SettingsHeaderColor}" Margin="24 0 0 0">
+                    <StackPanel Orientation="Horizontal" Margin="6 0 6 0" HorizontalAlignment="Center" DataContext="{Binding PageParameters}">
                         <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="0 3 3 3" VerticalAlignment="Bottom"
                                 Command="{Binding Path=FirstPageCommand}"
                                 Background="Transparent" MaxHeight="26">
@@ -107,7 +107,7 @@
                             </StackPanel>
                         </Button>
                     </StackPanel>
-                </StackPanel>
+                </Border>
             </Grid>
             
             <StackPanel Grid.Row="1" Orientation="Vertical" IsVisible="{Binding AreResultsLoaded}">
