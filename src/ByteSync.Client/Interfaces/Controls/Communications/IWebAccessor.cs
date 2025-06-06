@@ -5,6 +5,8 @@ namespace ByteSync.Interfaces.Controls.Communications;
 public interface IWebAccessor
 {
     Task OpenDocumentationUrl();
+    
+    Task OpenDocumentationUrl(Dictionary<string, string> pathPerLanguage);
 
     Task OpenByteSyncWebSite();
         

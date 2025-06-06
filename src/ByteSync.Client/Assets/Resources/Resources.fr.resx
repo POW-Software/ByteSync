@@ -1560,6 +1560,6 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 		<value>SYNCHRONISATION</value>
 	</data>
 	<data name="ComparisonResult_Filter_SyntaxDocumentation" xml:space="preserve">
-		<value>Documentation sur la syntaxe</value>
+		<value>Syntaxe de filtrage</value>
 	</data>
 </root>

@@ -40,4 +40,26 @@ public class TestFiltering_TextSearch : BaseTestFiltering
         // Assert
         result.Should().Be(expectedResult);
     }
+
+    [Test]
+    [TestCase("test 2025", true)]
+    [TestCase("2025 test", true)]
+    [TestCase("test missing", false)]
+    [TestCase("missing 2025", false)]
+    public void Parse_MultiWordTextSearch_ReturnsCorrectExpression(string filterText, bool expectedResult)
+    {
+        // Arrange
+        var pathIdentity = new PathIdentity(FileSystemTypes.File, "/test2025.txt", "test2025.txt", "/test2025.txt");
+        var comparisonItem = new ComparisonItem(pathIdentity);
+        
+        var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
+        mockDataPartIndexer.Setup(m => m.GetDataPart(It.IsAny<string>()))
+            .Returns((DataPart)null);
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().Be(expectedResult);
+    }
 }

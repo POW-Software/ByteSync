@@ -350,7 +350,13 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     
     private async Task OpenSyntaxDocumentation()
     {
-        await _webAccessor.OpenDocumentationUrl();
+        Dictionary<string, string> pathPerLanguage = new()
+        {
+            { "en", "/synchronization/filtering-syntax/" },
+            { "fr", "/synchronisation/syntaxe-de-filtrage/" }
+        };
+        
+        await _webAccessor.OpenDocumentationUrl(pathPerLanguage);
     }
     
     private void OnSessionReset()
