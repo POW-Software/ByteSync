@@ -36,12 +36,6 @@ public class TagEditor : TemplatedControl, IDisposable
             nameof(Watermark),
             defaultValue: "Enter tags...");
 
-    // // Background color for tags
-    // public static readonly StyledProperty<IBrush> TagBackgroundProperty =
-    //     AvaloniaProperty.Register<TagEditor, IBrush>(
-    //         nameof(TagBackground),
-    //         defaultValue: Brushes.LightBlue);
-
     // Text color for tags
     public static readonly StyledProperty<IBrush> TagForegroundProperty =
         AvaloniaProperty.Register<TagEditor, IBrush>(
