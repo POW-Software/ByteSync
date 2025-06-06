@@ -14,17 +14,17 @@
     </Design.DataContext>
     
     
-    <Grid Margin="3 0">
+    <Grid Margin="0 ">
         <StackPanel Orientation="Vertical">
             <!-- Upper line -->
             <StackPanel Orientation="Horizontal">
                 <!-- Add Button -->
-                <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="3" 
+                <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="0 0 6 0" 
                         Command="{Binding Path=AddSynchronizationRuleCommand}" 
                         MaxHeight="26">
 
                     <StackPanel Orientation="Horizontal">
-                        <misc:Icon Value="RegularPlus" />
+                        <misc:Icon FontSize="12" Value="RegularPlus" />
                         <TextBlock Text="{localizations:Loc ManageSynchronizationRulesView_AddSynchronizationRule}"/>
                     </StackPanel>
                 </Button>
@@ -41,12 +41,12 @@
                 <!-- </Button> -->
 
                 <!-- Clear Button -->
-                <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="3" 
+                <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="0 0 0 0" 
                         Command="{Binding Path=ClearSynchronizationRulesCommand}" 
                         MaxHeight="26">
 
                     <StackPanel Orientation="Horizontal">
-                        <misc:Icon Value="RegularTrash" />
+                        <misc:Icon FontSize="12" Value="RegularTrash" />
                         <TextBlock Text="{localizations:Loc ManageSynchronizationRulesView_ClearSynchronizationRules}" />
                     </StackPanel>
                 </Button>

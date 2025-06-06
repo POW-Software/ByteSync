@@ -1,5 +1,4 @@
 ﻿using Avalonia.Controls;
-using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
 using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
@@ -13,7 +12,10 @@ public partial class ComparisonResultView : ReactiveUserControl<ComparisonResult
     public ComparisonResultView()
     {
         InitializeComponent();
-        this.WhenActivated(disposables => { });
+        this.WhenActivated(disposables =>
+        {
+            disposables.Add(TheTagEditor);
+        });
     }
 
     private void TheGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -39,14 +41,6 @@ public partial class ComparisonResultView : ReactiveUserControl<ComparisonResult
                     ViewModel.SelectedItems.Add(comparisonItemViewModel);
                 }
             }
-        }
-    }
-    
-    private void TagEditor_TagsChanged(object sender, RoutedEventArgs e)
-    {
-        if (ViewModel != null)
-        {
-            ViewModel.OnTagsChanged();
         }
     }
 }

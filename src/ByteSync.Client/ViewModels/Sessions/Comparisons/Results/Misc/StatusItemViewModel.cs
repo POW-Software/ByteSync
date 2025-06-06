@@ -5,17 +5,17 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
 
 public class StatusItemViewModel : ViewModelBase
 {
-    private Brush? _backBrush;
-    private Brush? _foreBrush;
+    private IBrush? _backBrush;
+    private IBrush? _foreBrush;
     public string? Letter { get; set; }
     
     public ContentRepartitionViewModel.BrushColors ForeBrushColor { get; set; }
 
     /// <summary>
-    /// Ne pas utiliser [Reactive] ici pour des raisons de performances
-    /// L'initialisation se fait par InitBrushes
+    /// Do not use [Reactive] here for performance reasons
+    /// Initialization is performed by InitBrushes
     /// </summary>
-    public Brush? ForeBrush
+    public IBrush? ForeBrush
     {
         get => _foreBrush;
         set => this.RaiseAndSetIfChanged(ref _foreBrush, value);
@@ -24,22 +24,22 @@ public class StatusItemViewModel : ViewModelBase
     public ContentRepartitionViewModel.BrushColors BackBrushColor { get; set; }
 
     /// <summary>
-    /// Ne pas utiliser [Reactive] ici pour des raisons de performances
-    /// L'initialisation se fait par InitBrushes
+    /// Do not use [Reactive] here for performance reasons
+    /// Initialization is performed by InitBrushes
     /// </summary>
-    public Brush? BackBrush
+    public IBrush? BackBrush
     {
         get => _backBrush;
         set => this.RaiseAndSetIfChanged(ref _backBrush, value);
     }
 
     /// <summary>
-    /// Cette méthode permet d'initialiser _foreBrush et _backBrush sans appeler RaiseAndSetIfChanged, ce qui poserait des
-    /// problèmes en cas de nombre de ComparisonItemViewModels élevé
+    /// This method allows you to initialize _foreBrush and _backBrush without calling RaiseAndSetIfChanged, which would cause
+    /// problems if you have a large number of ComparisonItemViewModels.
     /// </summary>
     /// <param name="foreBrush"></param>
     /// <param name="backBrush"></param>
-    public void InitBrushes(Brush? foreBrush, Brush? backBrush)
+    public void InitBrushes(IBrush? foreBrush, IBrush? backBrush)
     {
         _foreBrush = foreBrush;
         _backBrush = backBrush;

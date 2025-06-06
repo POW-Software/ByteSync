@@ -10,13 +10,13 @@ using Avalonia.Threading;
 
 namespace ByteSync.Views.Misc;
 
-public class TagEditor : TemplatedControl
+public class TagEditor : TemplatedControl, IDisposable
 {
     // Tags collection
-    public static readonly StyledProperty<ObservableCollection<string>> TagsProperty =
-        AvaloniaProperty.Register<TagEditor, ObservableCollection<string>>(
+    public static readonly StyledProperty<ObservableCollection<TagItem>> TagsProperty =
+        AvaloniaProperty.Register<TagEditor, ObservableCollection<TagItem>>(
             nameof(Tags),
-            defaultValue: new ObservableCollection<string>());
+            defaultValue: new ObservableCollection<TagItem>());
 
     // Tag separator (space by default)
     public static readonly StyledProperty<char> TagSeparatorProperty =
@@ -35,12 +35,6 @@ public class TagEditor : TemplatedControl
         AvaloniaProperty.Register<TagEditor, string>(
             nameof(Watermark),
             defaultValue: "Enter tags...");
-
-    // Background color for tags
-    public static readonly StyledProperty<IBrush> TagBackgroundProperty =
-        AvaloniaProperty.Register<TagEditor, IBrush>(
-            nameof(TagBackground),
-            defaultValue: Brushes.LightBlue);
 
     // Text color for tags
     public static readonly StyledProperty<IBrush> TagForegroundProperty =
@@ -79,14 +73,14 @@ public class TagEditor : TemplatedControl
             defaultValue: (tag) => true);
 
     // Properties accessible from XAML
-    public ObservableCollection<string> Tags
+    public ObservableCollection<TagItem> Tags
     {
         get => GetValue(TagsProperty);
         set
         {
             if (GetValue(TagsProperty) != value)
             {
-                if (GetValue(TagsProperty) is ObservableCollection<string> oldCollection)
+                if (GetValue(TagsProperty) is ObservableCollection<TagItem> oldCollection)
                 {
                     oldCollection.CollectionChanged -= Tags_CollectionChanged;
                 }
@@ -117,12 +111,6 @@ public class TagEditor : TemplatedControl
     {
         get => GetValue(WatermarkProperty);
         set => SetValue(WatermarkProperty, value);
-    }
-
-    public IBrush TagBackground
-    {
-        get => GetValue(TagBackgroundProperty);
-        set => SetValue(TagBackgroundProperty, value);
     }
 
     public IBrush TagForeground
@@ -166,13 +154,22 @@ public class TagEditor : TemplatedControl
     private TextBox? _textBox;
     private ItemsControl? _tagsPanel;
     private ScrollViewer? _tagsScroll;
+    private bool _disposed;
     
     private DispatcherTimer _commitTimer;
+    private readonly ITagItemFactory _tagItemFactory;
 
-    // Constructor
-    public TagEditor()
+    public TagEditor() : this(new TagItemFactory())
     {
-        Tags = new ObservableCollection<string>();
+        // Default constructor initializes with a factory
+    }
+    
+    // Constructor
+    public TagEditor(ITagItemFactory tagItemFactory)
+    {
+        _tagItemFactory = tagItemFactory;
+        
+        Tags = new ObservableCollection<TagItem>();
         _commitTimer = new DispatcherTimer 
         { 
             Interval = TimeSpan.FromMilliseconds(AutoCommitDelay) 
@@ -183,12 +180,12 @@ public class TagEditor : TemplatedControl
     }
 
 
-    private void Tags_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+    private void Tags_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         RaiseEvent(new RoutedEventArgs(TagsChangedEvent, this));
     }
 
-    private void CommitTimer_Tick(object sender, EventArgs e)
+    private void CommitTimer_Tick(object? sender, EventArgs e)
     {
         _commitTimer.Stop();
         CommitCurrentText();
@@ -201,15 +198,16 @@ public class TagEditor : TemplatedControl
         _textBox = e.NameScope.Find<TextBox>("PART_TextBox");
         _tagsPanel = e.NameScope.Find<ItemsControl>("PART_TagsPanel");
         _tagsScroll = e.NameScope.Find<ScrollViewer>("PART_TagsScroll");
+        
 
-        if (_tagsScroll != null)
+        if (_tagsPanel != null)
         {
             // Dynamically update max width
             this.GetObservable(BoundsProperty).Subscribe(bounds =>
             {
                 var totalWidth = bounds.Width;
                 var maxTagsWidth = Math.Max(0, totalWidth - 80);
-                _tagsScroll.MaxWidth = maxTagsWidth;
+                _tagsPanel.MaxWidth = maxTagsWidth;
             });
         }
 
@@ -221,7 +219,7 @@ public class TagEditor : TemplatedControl
         }
     }
 
-    private void TextBox_TextChanged(object sender, TextInputEventArgs e)
+    private void TextBox_TextChanged(object? sender, TextInputEventArgs e)
     {
         if (_textBox == null) return;
             
@@ -257,7 +255,7 @@ public class TagEditor : TemplatedControl
         CurrentText = _textBox.Text;
     }
 
-    private void TextBox_KeyDown(object sender, KeyEventArgs e)
+    private void TextBox_KeyDown(object? sender, KeyEventArgs e)
     {
         if (_textBox == null)
         {
@@ -290,7 +288,7 @@ public class TagEditor : TemplatedControl
         }
     }
 
-    private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+    private void TextBox_LostFocus(object? sender, RoutedEventArgs e)
     {
         CommitCurrentText();
     }
@@ -307,16 +305,23 @@ public class TagEditor : TemplatedControl
     private bool AddTag(string tagText)
     {
         tagText = tagText.Trim();
-            
+
         if (string.IsNullOrWhiteSpace(tagText))
-            return false;
-                
-        if (!TagFilter(tagText))
-            return false;
-                
-        if (!Tags.Contains(tagText))
         {
-            Tags.Add(tagText);
+            return false;
+        }
+
+        if (!TagFilter(tagText))
+        {
+            return false;
+        }
+                
+        if (!Tags.Any(t => t.Text.Equals(tagText, StringComparison.InvariantCultureIgnoreCase)))
+        {
+            var tagItem = _tagItemFactory.CreateTagItem(tagText);
+            
+            Tags.Add(tagItem);
+            
             RaiseEvent(new RoutedEventArgs(TagAddedEvent, this));
             return true;
         }
@@ -334,43 +339,66 @@ public class TagEditor : TemplatedControl
     }
 
     // Public method to remove a specific tag
-    public void RemoveTag(string tag)
+    public void RemoveTag(string tagText)
     {
-        if (Tags.Contains(tag))
+        var tagItems = Tags.Where(t => t.Text.Equals(tagText, StringComparison.InvariantCultureIgnoreCase)).ToList();
+
+        if (tagItems.Any())
         {
-            Tags.Remove(tag);
+            foreach (var tagItem in tagItems)
+            {
+                Tags.Remove(tagItem);
+            }
+            
             RaiseEvent(new RoutedEventArgs(TagRemovedEvent, this));
         }
     }
-        
-    // Public method to add a tag
-    public bool AddTagManually(string tag)
+    
+    public void RemoveTag(TagItem tagItem)
     {
-        return AddTag(tag);
-    }
-        
-    // Public method to clear all tags
-    public void ClearTags()
-    {
-        Tags.Clear();
-        RaiseEvent(new RoutedEventArgs(TagRemovedEvent, this));
-    }
-        
-    // Returns a string containing all tags separated by the separator
-    public string GetTagsString()
-    {
-        return string.Join(TagSeparator.ToString(), Tags);
+        if (Tags.Contains(tagItem))
+        {
+            tagItem.Dispose();
+            Tags.Remove(tagItem);
+            RaiseEvent(new RoutedEventArgs(TagRemovedEvent, this));
+        }
     }
     
     public void RemoveTag(object? parameter)
     {
         if (parameter is string tag)
         {
-            if (Tags.Contains(tag))
-            {
-                Tags.Remove(tag);
-                RaiseEvent(new RoutedEventArgs(TagRemovedEvent, this));
-            }
+            RemoveTag(tag);
+        }
+        else if (parameter is TagItem tagItem)
+        {
+            RemoveTag(tagItem);
+        }
+    }
+    
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+        _disposed = true;
+        
+        _commitTimer.Stop();
+        _commitTimer.Tick -= CommitTimer_Tick;
+        
+        Tags.CollectionChanged -= Tags_CollectionChanged;
+        
+        if (_textBox != null)
+        {
+            _textBox.KeyDown -= TextBox_KeyDown;
+            _textBox.TextInput -= TextBox_TextChanged;
+            _textBox.LostFocus -= TextBox_LostFocus;
+        }
+
+        foreach (var tag in Tags)
+        {
+            tag.Dispose();
         }
     }
 }

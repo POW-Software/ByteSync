@@ -82,4 +82,6 @@ public class ColorScheme
     
     public Color MainWindowTopColor { get; set; }
     public Color MainWindowBottomColor { get; set; }
+    
+    public Color TextControlSelectionHighlightColor { get; set; }
 }

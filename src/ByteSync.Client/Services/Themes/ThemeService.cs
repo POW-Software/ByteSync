@@ -1,6 +1,7 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
@@ -17,6 +18,7 @@ class ThemeService : IThemeService
     private readonly ILogger<ThemeService> _logger;
     
     private readonly BehaviorSubject<Theme> _selectedTheme;
+    private ResourceDictionary? _customThemeResources;
 
     public ThemeService(IApplicationSettingsRepository applicationSettingsRepository, ILogger<ThemeService> logger)
     {
@@ -36,7 +38,7 @@ class ThemeService : IThemeService
 
     public List<Theme> AvailableThemes { get; }
 
-    public void OnThemesRegistred()
+    public void OnThemesRegistered()
     {
         Theme? theme = null;
         
@@ -78,57 +80,68 @@ class ThemeService : IThemeService
 
     private void SelectTheme(Theme theme)
     {
-        if (Application.Current?.Styles.OfType<FluentTheme>().FirstOrDefault() is FluentTheme fluentTheme)
+        if (_customThemeResources == null)
         {
-            try
-            {
-                // Apply theme colors to fluent theme resources
-                ApplyThemeColorsToFluentTheme(fluentTheme, theme);
-
-                // Apply theme variant (light/dark)
-                Application.Current.RequestedThemeVariant = theme.IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to apply theme {ThemeName}", theme.Key);
-            }
+            _customThemeResources = new ResourceDictionary();
+            Application.Current!.Resources.MergedDictionaries.Add(_customThemeResources);
+        }
+        
+        try
+        {
+            Application.Current!.RequestedThemeVariant = theme.IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
+                
+            ApplyThemeColorsToCustomResources(theme);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to apply theme {ThemeName}", theme.Key);
         }
         
         _selectedTheme.OnNext(theme);
     }
     
-    private void ApplyThemeColorsToFluentTheme(FluentTheme fluentTheme, Theme theme)
+    private void ApplyThemeColorsToCustomResources(Theme theme)
     {
-        // Set primary accent color
-        fluentTheme.Resources["SystemAccentColor"] = theme.ThemeColor.AvaloniaColor;
+        _customThemeResources!.Clear();
         
-        // Apply all color scheme properties to resources
-        var colorScheme = theme.ColorScheme;
-        if (colorScheme != null)
-        {
-            var properties = colorScheme.GetType().GetProperties();
+        _customThemeResources["SystemAccentColor"] = theme.ThemeColor.AvaloniaColor;
+        
+        ApplyColorSchemeProperties(theme.ColorScheme);
+    }
+    
+    private void ApplyColorSchemeProperties(object colorScheme)
+    {
+        var properties = colorScheme.GetType().GetProperties();
 
-            foreach (var property in properties)
+        foreach (var property in properties)
+        {
+            try
             {
+                var value = property.GetValue(colorScheme);
+                if (value == null) continue;
+
                 if (property.PropertyType == typeof(Color))
                 {
-                    var color = (Color)property.GetValue(colorScheme)!;
-                    fluentTheme.Resources[property.Name] = color;
+                    var color = (Color)value;
+                    _customThemeResources![property.Name] = color;
                 }
                 else if (property.PropertyType == typeof(ThemeColor))
                 {
-                    var themeColorProperty = (ThemeColor)property.GetValue(colorScheme)!;
-                    fluentTheme.Resources[property.Name] = themeColorProperty.AvaloniaColor;
+                    var themeColorProperty = (ThemeColor)value;
+                    _customThemeResources![property.Name] = themeColorProperty.AvaloniaColor;
                 }
                 else if (property.PropertyType == typeof(SolidColorBrush))
                 {
-                    var brush = (SolidColorBrush)property.GetValue(colorScheme)!;
-                    fluentTheme.Resources[property.Name] = brush;
+                    var brush = (SolidColorBrush)value;
+                    _customThemeResources![property.Name] = brush;
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to apply color scheme property: {PropertyName}", property.Name);
             }
         }
     }
-
     private void UseDefaultTheme()
     {
         var defaultTheme = AvailableThemes.Single(t => 
@@ -143,24 +156,6 @@ class ThemeService : IThemeService
         _applicationSettingsRepository.UpdateCurrentApplicationSettings(
             settings => settings.Theme = _selectedTheme.Value.Key);
     }
-
-    public void GetResource<T>(string resourceName, out T? resource)
-    {
-        var themeVariant = Application.Current?.RequestedThemeVariant ?? ThemeVariant.Default;
-        
-        object? styleResource = null;
-        Application.Current?.Styles.TryGetResource(resourceName, themeVariant, out styleResource);
-
-        if (styleResource is T)
-        {
-            resource = (T) styleResource;
-        }
-        else
-        {
-            resource = default;
-            _logger.LogWarning("Resource {ResourceName} not found", resourceName);
-        }
-    }
     
     public IBrush? GetBrush(string resourceName)
     {
@@ -168,6 +163,16 @@ class ThemeService : IThemeService
         
         object? styleResource = null;
         Application.Current?.Styles.TryGetResource(resourceName, themeVariant, out styleResource);
+
+        if (styleResource == null)
+        {
+            Application.Current?.Styles.TryGetResource(resourceName, ThemeVariant.Default, out styleResource);
+        }
+
+        if (styleResource == null)
+        {
+            _customThemeResources?.TryGetResource(resourceName, ThemeVariant.Default, out styleResource);
+        }
 
         if (styleResource is IBrush brush)
         {

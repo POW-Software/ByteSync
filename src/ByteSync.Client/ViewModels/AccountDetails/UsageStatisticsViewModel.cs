@@ -176,11 +176,10 @@ public class UsageStatisticsViewModel : FlyoutElementViewModel
         axis.MinLimit = -1;
         axis.MaxLimit = 12;
         
-        SolidColorBrush? mainForeColorBrush;
-        _themeService.GetResource("SystemControlForegroundBaseHighBrush", out mainForeColorBrush);
-        if (mainForeColorBrush != null)
+        IBrush? mainForeColorBrush = _themeService.GetBrush("SystemControlForegroundBaseHighBrush");
+        if (mainForeColorBrush is SolidColorBrush solidColorBrush)
         {
-            axis.LabelsPaint = new SolidColorPaint(new SKColor(mainForeColorBrush.Color.R, mainForeColorBrush.Color.G, mainForeColorBrush.Color.B));
+            axis.LabelsPaint = new SolidColorPaint(new SKColor(solidColorBrush.Color.R, solidColorBrush.Color.G, solidColorBrush.Color.B));
         }
         axis.TextSize = 14;
         
@@ -236,11 +235,10 @@ public class UsageStatisticsViewModel : FlyoutElementViewModel
         yAxis.ForceStepToMin = true;
         yAxis.MaxLimit = applicableMaxValue * 1.1;
 
-        SolidColorBrush? mainForeColorBrush;
-        _themeService.GetResource("SystemControlForegroundBaseHighBrush", out mainForeColorBrush);
-        if (mainForeColorBrush != null)
+        IBrush? mainForeColorBrush = _themeService.GetBrush("SystemControlForegroundBaseHighBrush");
+        if (mainForeColorBrush is SolidColorBrush solidColorBrush)
         {
-            yAxis.LabelsPaint = new SolidColorPaint(new SKColor(mainForeColorBrush.Color.R, mainForeColorBrush.Color.G, mainForeColorBrush.Color.B));
+            yAxis.LabelsPaint = new SolidColorPaint(new SKColor(solidColorBrush.Color.R, solidColorBrush.Color.G, solidColorBrush.Color.B));
         }
         yAxis.TextSize = 14;
 
@@ -298,11 +296,10 @@ public class UsageStatisticsViewModel : FlyoutElementViewModel
 
     private ColumnSeries<LogarithmicPoint> BuildCurrentPeriodSerie()
     {
-        Color chartsMainBarColor;
-        _themeService.GetResource("ChartsMainBarColor", out chartsMainBarColor);
+        var chartsMainBarColor = (_themeService.GetBrush("ChartsMainBarColor") as SolidColorBrush)!.Color;
         
-        Color chartsAlternateBarColor;
-        _themeService.GetResource("ChartsAlternateBarColor", out chartsAlternateBarColor);
+        // Color chartsAlternateBarColor;
+        // _themeService.GetResource("ChartsAlternateBarColor", out chartsAlternateBarColor);
 
         var mainColumnSerie = new ColumnSeries<LogarithmicPoint>
         {
@@ -328,8 +325,7 @@ public class UsageStatisticsViewModel : FlyoutElementViewModel
 
     private ISeries BuildPreviousPeriodSerie()
     {
-        Color chartsMainLineColor;
-        _themeService.GetResource("ChartsMainLineColor", out chartsMainLineColor);
+        Color chartsMainLineColor = (_themeService.GetBrush("ChartsMainLineColor") as SolidColorBrush)!.Color;
 
         var lineSeries = new LineSeries<LogarithmicPoint>
         {

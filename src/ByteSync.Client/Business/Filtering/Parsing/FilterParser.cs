@@ -58,7 +58,9 @@ public class FilterParser : IFilterParser
     {
         var leftResult = TryParseTerm();
         if (!leftResult.IsComplete)
+        {
             return leftResult;
+        }
 
         var left = leftResult.Expression!;
 
@@ -69,8 +71,10 @@ public class FilterParser : IFilterParser
             NextToken();
             var rightResult = TryParseTerm();
             if (!rightResult.IsComplete)
+            {
                 return ParseResult.Incomplete($"Incomplete right operand for OR expression: {rightResult.ErrorMessage}");
-                
+            }
+
             left = new OrExpression(left, rightResult.Expression!);
         }
 
@@ -81,7 +85,9 @@ public class FilterParser : IFilterParser
     {
         var leftResult = TryParseFactor();
         if (!leftResult.IsComplete)
+        {
             return leftResult;
+        }
 
         var left = leftResult.Expression!;
 
@@ -93,7 +99,7 @@ public class FilterParser : IFilterParser
             var rightResult = TryParseFactor();
             if (!rightResult.IsComplete)
                 return ParseResult.Incomplete($"Incomplete right operand for AND expression: {rightResult.ErrorMessage}");
-                
+
             left = new AndExpression(left, rightResult.Expression!);
         }
 
@@ -296,13 +302,14 @@ public class FilterParser : IFilterParser
 
                 var op = CurrentToken?.Token;
                 NextToken();
-                
-                try {
+
+                try
+                {
                     var filterOperator = _operatorParser.Parse(op);
-                    
+
                     var leftDataPart = _dataPartIndexer.GetDataPart(identifier);
                     if (leftDataPart == null)
-                    { 
+                    {
                         return ParseResult.Incomplete($"Unknown data part: {identifier}");
                     }
 
@@ -317,8 +324,10 @@ public class FilterParser : IFilterParser
                             // This is a comparison between two properties
                             NextToken();
                             if (CurrentToken?.Type != FilterTokenType.Identifier)
+                            {
                                 return ParseResult.Incomplete("Expected property name after dot");
-                            
+                            }
+
                             var rightDataPart = _dataPartIndexer.GetDataPart(rightIdentifier);
                             if (rightDataPart == null)
                             {

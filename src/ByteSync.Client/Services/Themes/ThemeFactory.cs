@@ -24,7 +24,7 @@ public class ThemeFactory : IThemeFactory
         BuildThemes("Pink", "#F472D0"); 
         BuildThemes("Purple", "#763dc2");
         
-        _themeService.OnThemesRegistred();
+        _themeService.OnThemesRegistered();
     }
     
     private void BuildThemes(string themeName, string primaryColorHex)
@@ -32,8 +32,8 @@ public class ThemeFactory : IThemeFactory
         ThemeColor themeColor = new ThemeColor(primaryColorHex);
 
         // Create two variants with different secondary colors
-        BuildAndRegisterThemes(themeName + "1", themeColor, themeColor.Hue - 40, primaryColorHex);
-        BuildAndRegisterThemes(themeName + "2", themeColor, themeColor.Hue + 40, primaryColorHex);
+        BuildAndRegisterThemes(themeName + "1", themeColor, themeColor.Hue - 60, primaryColorHex);
+        BuildAndRegisterThemes(themeName + "2", themeColor, themeColor.Hue + 60, primaryColorHex);
     }
 
     private void BuildAndRegisterThemes(string themeName, ThemeColor themeColor, double secondaryColorHue, string primaryColorHex)
@@ -140,6 +140,8 @@ public class ThemeFactory : IThemeFactory
             colorScheme.StatusMainBackGroundBrush = new SolidColorBrush(colorScheme.StatusMainBackGround.AvaloniaColor);
             colorScheme.StatusSecondaryBackGroundBrush = new SolidColorBrush(colorScheme.StatusSecondaryBackGround.AvaloniaColor);
             colorScheme.VeryLightGrayBrush = new SolidColorBrush(colorScheme.VeryLightGray);
+            
+            colorScheme.TextControlSelectionHighlightColor = colorScheme.BsAccentButtonBackGround;
         }
         else
         {
@@ -224,6 +226,8 @@ public class ThemeFactory : IThemeFactory
             colorScheme.StatusMainBackGroundBrush = new SolidColorBrush(colorScheme.StatusMainBackGround.AvaloniaColor);
             colorScheme.StatusSecondaryBackGroundBrush = new SolidColorBrush(colorScheme.StatusSecondaryBackGround.AvaloniaColor);
             colorScheme.VeryLightGrayBrush = new SolidColorBrush(colorScheme.VeryLightGray);
+            
+            colorScheme.TextControlSelectionHighlightColor = colorScheme.BsAccentButtonBackGround;
         }
         
         theme.ColorScheme = colorScheme;
