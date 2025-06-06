@@ -113,12 +113,6 @@ public class TagEditor : TemplatedControl, IDisposable
         set => SetValue(WatermarkProperty, value);
     }
 
-    // public IBrush TagBackground
-    // {
-    //     get => GetValue(TagBackgroundProperty);
-    //     set => SetValue(TagBackgroundProperty, value);
-    // }
-
     public IBrush TagForeground
     {
         get => GetValue(TagForegroundProperty);
