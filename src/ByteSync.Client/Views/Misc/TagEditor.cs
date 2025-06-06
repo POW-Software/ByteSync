@@ -364,28 +364,10 @@ public class TagEditor : TemplatedControl, IDisposable
             
             RaiseEvent(new RoutedEventArgs(TagRemovedEvent, this));
         }
-        
-        // if (Tags.Contains(tag))
-        // {
-        //     Tags.Remove(tag);
-        //     RaiseEvent(new RoutedEventArgs(TagRemovedEvent, this));
-        // }
     }
     
     public void RemoveTag(TagItem tagItem)
     {
-        // var tagItems = Tags.Where(t => t.Text.Equals(tagText, StringComparison.InvariantCultureIgnoreCase)).ToList();
-        //
-        // if (tagItems.Any())
-        // {
-        //     foreach (var tagItem in tagItems)
-        //     {
-        //         Tags.Remove(tagItem);
-        //     }
-        //     
-        //     RaiseEvent(new RoutedEventArgs(TagRemovedEvent, this));
-        // }
-        
         if (Tags.Contains(tagItem))
         {
             tagItem.Dispose();
@@ -393,25 +375,6 @@ public class TagEditor : TemplatedControl, IDisposable
             RaiseEvent(new RoutedEventArgs(TagRemovedEvent, this));
         }
     }
-        
-    // // Public method to add a tag
-    // public bool AddTagManually(string tag)
-    // {
-    //     return AddTag(tag);
-    // }
-    //     
-    // // Public method to clear all tags
-    // public void ClearTags()
-    // {
-    //     Tags.Clear();
-    //     RaiseEvent(new RoutedEventArgs(TagRemovedEvent, this));
-    // }
-    //     
-    // // Returns a string containing all tags separated by the separator
-    // public string GetTagsString()
-    // {
-    //     return string.Join(TagSeparator.ToString(), Tags);
-    // }
     
     public void RemoveTag(object? parameter)
     {
