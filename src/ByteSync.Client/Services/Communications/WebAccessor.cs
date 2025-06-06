@@ -16,6 +16,25 @@ class WebAccessor : IWebAccessor
 
     public async Task OpenDocumentationUrl()
     {
+        var url = GetDocumentationUrl();
+
+        await DoOpenUrlAsync(url);
+    }
+
+    public async Task OpenDocumentationUrl(Dictionary<string, string> pathPerLanguage)
+    {
+        var url = GetDocumentationUrl();
+        
+        if (pathPerLanguage.TryGetValue(_localizationService.CurrentCultureDefinition?.Code ?? "en", out var path))
+        {
+            url += path.TrimStart('/');
+        }
+
+        await DoOpenUrlAsync(url);
+    }
+    
+    private string GetDocumentationUrl()
+    {
         var languageCode = "";
 
         if (Equals(_localizationService.CurrentCultureDefinition?.Code, "fr"))
@@ -24,8 +43,7 @@ class WebAccessor : IWebAccessor
         }
 
         var url = $"https://www.bytesyncapp.com/{languageCode}documentation/";
-
-        await DoOpenUrlAsync(url);
+        return url;
     }
 
     public async Task OpenByteSyncWebSite()
