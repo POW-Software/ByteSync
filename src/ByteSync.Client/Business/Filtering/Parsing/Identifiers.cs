@@ -21,6 +21,8 @@ public class Identifiers
     public const string PROPERTY_LAST_WRITE_TIME = "lastwritetime";
     public const string PROPERTY_SIZE = "size";
     
+    public const string PROPERTY_NAME = "name";
+    
     public const string PROPERTY_FILE = "file";
     public const string PROPERTY_DIRECTORY = "directory";
     public const string PROPERTY_DIR = "dir";

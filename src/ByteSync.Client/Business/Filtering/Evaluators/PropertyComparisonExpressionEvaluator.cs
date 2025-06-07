@@ -67,7 +67,7 @@ public class PropertyComparisonExpressionEvaluator : ExpressionEvaluator<Propert
             var targetValues = new PropertyValueCollection();
             
             // Parse size with units
-            if (targetValue.IndexOfAny(new[] { 'k', 'K', 'm', 'M', 'g', 'G', 't', 'T' }) >= 0)
+            if (targetValue.IndexOfAny(new[] { 'k', 'K', 'm', 'M', 'g', 'G', 't', 'T', 'b' }) >= 0)
             {
                 try
                 {
@@ -88,6 +88,25 @@ public class PropertyComparisonExpressionEvaluator : ExpressionEvaluator<Propert
                 }
             }
             
+            return _propertyComparer.CompareValues(sourceValues, targetValues, op);
+        }
+        else if (propertyLower == "lastwritetime")
+        {
+            var targetValues = new PropertyValueCollection();
+
+            // Parse DateTime value
+            if (DateTime.TryParseExact(targetValue, new[] { "yyyy-MM-dd", "yyyy-MM-dd-HH-mm-ss" }, 
+                    System.Globalization.CultureInfo.InvariantCulture, 
+                    System.Globalization.DateTimeStyles.None, out DateTime targetDateTime))
+            {
+                targetValues.Add(new PropertyValue(targetDateTime));
+            }
+            else
+            {
+                // Invalid DateTime format
+                return false;
+            }
+
             return _propertyComparer.CompareValues(sourceValues, targetValues, op);
         }
         

@@ -34,12 +34,12 @@ public abstract class FileSystemDescription
     {
         get
         {
-            // On utilise '/' comme séparateur, que ce soit sur Windows, Linux ou Mac
-            // Car
-            //  - '/' est le séparateur sur Linux et Mac
-            //  ' "\" est le séparateu sur Windows
-            // Et que '/' est interdit sur Windows dans les noms de fichiers
-            // Alors que "\" est autorisé au moins sur Linux
+            // We use '/' as a separator, whether on Windows, Linux or Mac
+            // Because
+            // - '/' is the separator on Linux and Mac
+            // ' "\" is the separator on Windows
+            // And that '/' is forbidden on Windows in file names
+            // While "\" is allowed at least on Linux
             return RelativePath.Substring(RelativePath.LastIndexOf("/", StringComparison.Ordinal) + 1);
         }
     }

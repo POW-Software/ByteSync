@@ -13,7 +13,9 @@ using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 using ByteSync.Repositories;
+using ByteSync.Services.Filtering;
 using ByteSync.TestsCommon;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace ByteSync.Client.IntegrationTests.Business.Filtering;
@@ -22,6 +24,7 @@ public abstract class BaseTestFiltering : IntegrationTest
 {
     protected FilterParser _filterParser = null!;
     protected ExpressionEvaluatorFactory _evaluatorFactory = null!;
+    protected ILogger<FilterService> _logger = null!;
 
     // [SetUp]
     protected void SetupBase()
@@ -52,6 +55,7 @@ public abstract class BaseTestFiltering : IntegrationTest
         
         _filterParser = Container.Resolve<FilterParser>();
         _evaluatorFactory = Container.Resolve<ExpressionEvaluatorFactory>();
+        _logger = Container.Resolve<ILogger<FilterService>>();
     }
 
     protected ComparisonItem CreateBasicComparisonItem(FileSystemTypes fileSystemType = FileSystemTypes.File,
@@ -66,7 +70,8 @@ public abstract class BaseTestFiltering : IntegrationTest
         string rootPath,
         DateTime lastWriteTime,
         string hash,
-        long size = 100)
+        long size = 100,
+        string relativePath = "/unset")
     {
         string letter = inventoryId.Replace("Id_", "");
         var inventory = new Inventory { InventoryId = inventoryId, Letter = letter };
@@ -82,7 +87,8 @@ public abstract class BaseTestFiltering : IntegrationTest
             Size = size,
             FingerprintMode = FingerprintModes.Sha256,
             SignatureGuid = null,
-            Sha256 = hash
+            Sha256 = hash,
+            RelativePath = relativePath
         };
 
         return (fileDescription, inventoryPart);
@@ -221,7 +227,8 @@ public abstract class BaseTestFiltering : IntegrationTest
         string dataPartId,
         string leftHash,
         DateTime leftDateTime,
-        long leftSize)
+        long leftSize,
+        string relativePath = "/unset")
     {
         var comparisonItem = CreateBasicComparisonItem();
 
@@ -232,7 +239,8 @@ public abstract class BaseTestFiltering : IntegrationTest
             $"/testRoot{letter}",
             leftDateTime,
             leftHash,
-            leftSize);
+            leftSize,
+            relativePath);
         
         var contentIdCore = new ContentIdentityCore
         {

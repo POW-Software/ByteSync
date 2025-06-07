@@ -36,6 +36,40 @@ public class TestFiltering : BaseTestFiltering
     }
     
     [Test]
+    public void TestParse_CompleteWithSpaces1_Expression()
+    {
+        // Arrange
+        var filterText = "A1.content == B1.content";
+        
+        ConfigureDataPartIndexer();
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeTrue();
+        parseResult.Expression.Should().NotBeNull();
+        parseResult.Expression.Should().BeOfType<PropertyComparisonExpression>();
+    }
+    
+    [Test]
+    public void TestParse_CompleteWithSpaces2_Expression()
+    {
+        // Arrange
+        var filterText = "A1.lastwritetime >= 2024-01-01";
+        
+        ConfigureDataPartIndexer();
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeTrue();
+        parseResult.Expression.Should().NotBeNull();
+        parseResult.Expression.Should().BeOfType<PropertyComparisonExpression>();
+    }
+    
+    [Test]
     public void TestParse_Incomplete_Expression()
     {
         // Arrange
@@ -150,7 +184,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestFilterService_HandlesIncompleteExpression_WithoutException()
     {
         // Arrange
-        var filterService = new FilterService(_filterParser, _evaluatorFactory);
+        var filterService = new FilterService(_filterParser, _evaluatorFactory, _logger);
         var comparisonItem = CreateBasicComparisonItem();
         
         // Act & Assert - Should not throw
@@ -164,7 +198,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestFilterService_BuildFilter_ListWithIncompleteExpressions()
     {
         // Arrange
-        var filterService = new FilterService(_filterParser, _evaluatorFactory);
+        var filterService = new FilterService(_filterParser, _evaluatorFactory, _logger);
         var comparisonItem = CreateBasicComparisonItem();
 
         // A complete expression and an incomplete one
