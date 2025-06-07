@@ -70,7 +70,8 @@ public abstract class BaseTestFiltering : IntegrationTest
         string rootPath,
         DateTime lastWriteTime,
         string hash,
-        long size = 100)
+        long size = 100,
+        string relativePath = "/unset")
     {
         string letter = inventoryId.Replace("Id_", "");
         var inventory = new Inventory { InventoryId = inventoryId, Letter = letter };
@@ -86,7 +87,8 @@ public abstract class BaseTestFiltering : IntegrationTest
             Size = size,
             FingerprintMode = FingerprintModes.Sha256,
             SignatureGuid = null,
-            Sha256 = hash
+            Sha256 = hash,
+            RelativePath = relativePath
         };
 
         return (fileDescription, inventoryPart);
@@ -225,7 +227,8 @@ public abstract class BaseTestFiltering : IntegrationTest
         string dataPartId,
         string leftHash,
         DateTime leftDateTime,
-        long leftSize)
+        long leftSize,
+        string relativePath = "/unset")
     {
         var comparisonItem = CreateBasicComparisonItem();
 
@@ -236,7 +239,8 @@ public abstract class BaseTestFiltering : IntegrationTest
             $"/testRoot{letter}",
             leftDateTime,
             leftHash,
-            leftSize);
+            leftSize,
+            relativePath);
         
         var contentIdCore = new ContentIdentityCore
         {
