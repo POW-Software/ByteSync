@@ -184,7 +184,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestFilterService_HandlesIncompleteExpression_WithoutException()
     {
         // Arrange
-        var filterService = new FilterService(_filterParser, _evaluatorFactory);
+        var filterService = new FilterService(_filterParser, _evaluatorFactory, _logger);
         var comparisonItem = CreateBasicComparisonItem();
         
         // Act & Assert - Should not throw
@@ -198,7 +198,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestFilterService_BuildFilter_ListWithIncompleteExpressions()
     {
         // Arrange
-        var filterService = new FilterService(_filterParser, _evaluatorFactory);
+        var filterService = new FilterService(_filterParser, _evaluatorFactory, _logger);
         var comparisonItem = CreateBasicComparisonItem();
 
         // A complete expression and an incomplete one

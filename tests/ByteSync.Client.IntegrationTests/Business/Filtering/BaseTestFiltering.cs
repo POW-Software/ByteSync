@@ -13,7 +13,9 @@ using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 using ByteSync.Repositories;
+using ByteSync.Services.Filtering;
 using ByteSync.TestsCommon;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace ByteSync.Client.IntegrationTests.Business.Filtering;
@@ -22,6 +24,7 @@ public abstract class BaseTestFiltering : IntegrationTest
 {
     protected FilterParser _filterParser = null!;
     protected ExpressionEvaluatorFactory _evaluatorFactory = null!;
+    protected ILogger<FilterService> _logger = null!;
 
     // [SetUp]
     protected void SetupBase()
@@ -52,6 +55,7 @@ public abstract class BaseTestFiltering : IntegrationTest
         
         _filterParser = Container.Resolve<FilterParser>();
         _evaluatorFactory = Container.Resolve<ExpressionEvaluatorFactory>();
+        _logger = Container.Resolve<ILogger<FilterService>>();
     }
 
     protected ComparisonItem CreateBasicComparisonItem(FileSystemTypes fileSystemType = FileSystemTypes.File,
