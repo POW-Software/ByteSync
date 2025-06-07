@@ -259,9 +259,9 @@ public class FilterParser : IFilterParser
             try {
                 var comparisonOperator = _operatorParser.Parse(op);
         
-                if (CurrentToken?.Type != FilterTokenType.Number)
+                if (CurrentToken?.Type != FilterTokenType.Number && CurrentToken?.Type != FilterTokenType.DateTime)
                 {
-                    return ParseResult.Incomplete("Expected numeric value after operator in action comparison");
+                    return ParseResult.Incomplete("Expected numeric value / dateTime after operator in action comparison");
                 }
         
                 if (!int.TryParse(CurrentToken?.Token, out int value))
@@ -345,7 +345,8 @@ public class FilterParser : IFilterParser
                             return ParseResult.Success(new PropertyComparisonExpression(leftDataPart, property, filterOperator, null, rightIdentifier));
                         }
                     }
-                    else if (CurrentToken?.Type == FilterTokenType.String || CurrentToken?.Type == FilterTokenType.Number)
+                    else if (CurrentToken?.Type == FilterTokenType.String || CurrentToken?.Type == FilterTokenType.Number 
+                                                                          || CurrentToken?.Type == FilterTokenType.DateTime)
                     {
                         var value = CurrentToken?.Token;
                         NextToken();

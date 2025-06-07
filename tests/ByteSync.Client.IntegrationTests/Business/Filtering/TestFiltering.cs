@@ -36,6 +36,40 @@ public class TestFiltering : BaseTestFiltering
     }
     
     [Test]
+    public void TestParse_CompleteWithSpaces1_Expression()
+    {
+        // Arrange
+        var filterText = "A1.content == B1.content";
+        
+        ConfigureDataPartIndexer();
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeTrue();
+        parseResult.Expression.Should().NotBeNull();
+        parseResult.Expression.Should().BeOfType<PropertyComparisonExpression>();
+    }
+    
+    [Test]
+    public void TestParse_CompleteWithSpaces2_Expression()
+    {
+        // Arrange
+        var filterText = "A1.lastwritetime >= 2024-01-01";
+        
+        ConfigureDataPartIndexer();
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeTrue();
+        parseResult.Expression.Should().NotBeNull();
+        parseResult.Expression.Should().BeOfType<PropertyComparisonExpression>();
+    }
+    
+    [Test]
     public void TestParse_Incomplete_Expression()
     {
         // Arrange
