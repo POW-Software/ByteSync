@@ -122,7 +122,9 @@ public class FilterParser : IFilterParser
     
             var expressionResult = TryParseFactor();
             if (!expressionResult.IsComplete)
+            {
                 return ParseResult.Incomplete($"Incomplete expression after NOT: {expressionResult.ErrorMessage}");
+            }
     
             return ParseResult.Success(new NotExpression(expressionResult.Expression!));
         }
@@ -132,7 +134,9 @@ public class FilterParser : IFilterParser
             NextToken();
             var expressionResult = TryParseExpression();
             if (!expressionResult.IsComplete)
+            {
                 return ParseResult.Incomplete($"Incomplete expression in parentheses: {expressionResult.ErrorMessage}");
+            }
 
             if (CurrentToken?.Type != FilterTokenType.CloseParenthesis)
             {
