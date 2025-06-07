@@ -67,7 +67,7 @@ public class PropertyComparisonExpressionEvaluator : ExpressionEvaluator<Propert
             var targetValues = new PropertyValueCollection();
             
             // Parse size with units
-            if (targetValue.IndexOfAny(new[] { 'k', 'K', 'm', 'M', 'g', 'G', 't', 'T' }) >= 0)
+            if (targetValue.IndexOfAny(new[] { 'k', 'K', 'm', 'M', 'g', 'G', 't', 'T', 'b' }) >= 0)
             {
                 try
                 {
