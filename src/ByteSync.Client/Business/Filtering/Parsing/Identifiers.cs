@@ -2,9 +2,9 @@
 
 public class Identifiers
 {
-    public const string ACTION_SYNCHRONIZE_CONTENT = "synchronizecontent";
-    public const string ACTION_SYNCHRONIZE_CONTENT_AND_DATE = "synchronizecontentanddate";
-    public const string ACTION_SYNCHRONIZE_DATE = "synchronizecontentdate";
+    public const string ACTION_COPY = "copy";
+    public const string ACTION_COPY_CONTENTS = "copycontents";
+    public const string ACTION_COPY_DATES = "copydates";
     public const string ACTION_SYNCHRONIZE_CREATE = "create";
     public const string ACTION_SYNCHRONIZE_DELETE = "delete";
     public const string ACTION_DO_NOTHING = "do_nothing";
@@ -16,10 +16,12 @@ public class Identifiers
     public const string OPERATOR_IS = "is";
     public const string OPERATOR_ACTIONS = "actions";
     
-    public const string PROPERTY_CONTENT = "content";
-    public const string PROPERTY_CONTENT_AND_DATE = "contentanddate";
+    public const string PROPERTY_CONTENTS = "contents";
+    public const string PROPERTY_CONTENTS_AND_DATE = "contentsanddate";
     public const string PROPERTY_LAST_WRITE_TIME = "lastwritetime";
     public const string PROPERTY_SIZE = "size";
+    
+    public const string PROPERTY_NAME = "name";
     
     public const string PROPERTY_FILE = "file";
     public const string PROPERTY_DIRECTORY = "directory";

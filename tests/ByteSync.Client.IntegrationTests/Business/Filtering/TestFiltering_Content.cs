@@ -24,7 +24,7 @@ public class TestFiltering_Content : BaseTestFiltering
     public void Test_Content()
     {
         // Arrange
-        var filterText = "A1.content==B1.content";
+        var filterText = "A1.contents==B1.contents";
         
         var pathIdentity = new PathIdentity(FileSystemTypes.File, "/file1.txt", "file1.txt", "/file1.txt");
         var comparisonItem = new ComparisonItem(pathIdentity);

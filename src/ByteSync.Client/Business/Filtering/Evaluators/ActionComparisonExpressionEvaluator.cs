@@ -91,9 +91,9 @@ public class ActionComparisonExpressionEvaluator : ExpressionEvaluator<ActionCom
         
         return normalizedActionType switch
         {
-            Identifiers.ACTION_SYNCHRONIZE_CONTENT => actions.Count(a => a.IsSynchronizeContent),
-            Identifiers.ACTION_SYNCHRONIZE_CONTENT_AND_DATE => actions.Count(a => a.IsSynchronizeContentAndDate),
-            Identifiers.ACTION_SYNCHRONIZE_DATE => actions.Count(a => a.IsSynchronizeDate),
+            Identifiers.ACTION_COPY_CONTENTS => actions.Count(a => a.IsSynchronizeContent),
+            Identifiers.ACTION_COPY => actions.Count(a => a.IsSynchronizeContentAndDate),
+            Identifiers.ACTION_COPY_DATES => actions.Count(a => a.IsSynchronizeDate),
             Identifiers.ACTION_SYNCHRONIZE_DELETE => actions.Count(a => a.IsDelete),
             Identifiers.ACTION_SYNCHRONIZE_CREATE => actions.Count(a => a.IsCreate),
             Identifiers.ACTION_DO_NOTHING => actions.Count(a => a.IsDoNothing),

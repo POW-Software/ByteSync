@@ -23,7 +23,7 @@ public class TestFiltering_ContentAndDate : BaseTestFiltering
         string @operator, bool expectedResult)
     {
         // Arrange
-        var filterText = $"A1.contentanddate{@operator}B1.contentanddate";
+        var filterText = $"A1.contentsanddate{@operator}B1.contentsanddate";
         
         DateTime leftDateTime = DateTime.Parse(leftDateTimeStr, System.Globalization.CultureInfo.InvariantCulture);
         DateTime rightDateTime = DateTime.Parse(rightDateTimeStr, System.Globalization.CultureInfo.InvariantCulture);

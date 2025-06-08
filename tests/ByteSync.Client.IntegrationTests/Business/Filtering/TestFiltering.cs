@@ -22,7 +22,41 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_Complete_Expression()
     {
         // Arrange
-        var filterText = "A1.content==B1.content";
+        var filterText = "A1.contents==B1.contents";
+        
+        ConfigureDataPartIndexer();
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeTrue();
+        parseResult.Expression.Should().NotBeNull();
+        parseResult.Expression.Should().BeOfType<PropertyComparisonExpression>();
+    }
+    
+    [Test]
+    public void TestParse_CompleteWithSpaces1_Expression()
+    {
+        // Arrange
+        var filterText = "A1.contents == B1.contents";
+        
+        ConfigureDataPartIndexer();
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeTrue();
+        parseResult.Expression.Should().NotBeNull();
+        parseResult.Expression.Should().BeOfType<PropertyComparisonExpression>();
+    }
+    
+    [Test]
+    public void TestParse_CompleteWithSpaces2_Expression()
+    {
+        // Arrange
+        var filterText = "A1.lastwritetime >= 2024-01-01";
         
         ConfigureDataPartIndexer();
         
@@ -39,7 +73,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_Incomplete_Expression()
     {
         // Arrange
-        var filterText = "A1.content==";
+        var filterText = "A1.contents==";
         
         ConfigureDataPartIndexer();
 
@@ -50,6 +84,23 @@ public class TestFiltering : BaseTestFiltering
         parseResult.IsComplete.Should().BeFalse();
         parseResult.ErrorMessage.Should().NotBeNull();
         parseResult.ErrorMessage.Should().Contain("Expected value after operator");
+    }
+    
+    [Test]
+    public void TestParse_UnknownIdentifier_Expression()
+    {
+        // Arrange
+        var filterText = "A1.unknown==";
+        
+        ConfigureDataPartIndexer();
+
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeFalse();
+        parseResult.ErrorMessage.Should().NotBeNull();
+        parseResult.ErrorMessage.Should().Contain("Expected property name after dot");
     }
 
     [Test]
@@ -71,7 +122,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_Incomplete_Operator()
     {
         // Arrange
-        var filterText = "A1.content";
+        var filterText = "A1.contents";
         
         // Act
         var parseResult = _filterParser.TryParse(filterText);
@@ -116,7 +167,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_Incomplete_ParenthesesExpression()
     {
         // Arrange
-        var filterText = "(A1.content==B1.content";
+        var filterText = "(A1.contents==B1.contents";
         
         ConfigureDataPartIndexer();
         
@@ -133,7 +184,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_Incomplete_WithAndOperator()
     {
         // Arrange
-        var filterText = "A1.content==B1.content AND on:";
+        var filterText = "A1.contents==B1.contents AND on:";
         
         ConfigureDataPartIndexer();
         
@@ -150,7 +201,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestFilterService_HandlesIncompleteExpression_WithoutException()
     {
         // Arrange
-        var filterService = new FilterService(_filterParser, _evaluatorFactory);
+        var filterService = new FilterService(_filterParser, _evaluatorFactory, _logger);
         var comparisonItem = CreateBasicComparisonItem();
         
         // Act & Assert - Should not throw
@@ -164,7 +215,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestFilterService_BuildFilter_ListWithIncompleteExpressions()
     {
         // Arrange
-        var filterService = new FilterService(_filterParser, _evaluatorFactory);
+        var filterService = new FilterService(_filterParser, _evaluatorFactory, _logger);
         var comparisonItem = CreateBasicComparisonItem();
 
         // A complete expression and an incomplete one

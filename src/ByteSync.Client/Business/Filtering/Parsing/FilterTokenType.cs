@@ -7,6 +7,7 @@ public enum FilterTokenType
     Operator,
     String,
     Number,
+    DateTime,
     OpenParenthesis,
     CloseParenthesis,
     LogicalOperator,

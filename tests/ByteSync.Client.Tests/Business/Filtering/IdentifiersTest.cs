@@ -27,7 +27,7 @@ public class IdentifiersTest
     public void All_ShouldContain_ACTION_SYNCHRONIZE_CONTENT()
     {
         // Arrange
-        var expectedConstant = Identifiers.ACTION_SYNCHRONIZE_CONTENT;
+        var expectedConstant = Identifiers.ACTION_COPY_CONTENTS;
 
         // Act
         var actualConstants = Identifiers.All();
