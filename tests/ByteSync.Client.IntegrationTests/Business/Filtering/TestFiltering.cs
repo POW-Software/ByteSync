@@ -85,6 +85,23 @@ public class TestFiltering : BaseTestFiltering
         parseResult.ErrorMessage.Should().NotBeNull();
         parseResult.ErrorMessage.Should().Contain("Expected value after operator");
     }
+    
+    [Test]
+    public void TestParse_UnknownIdentifier_Expression()
+    {
+        // Arrange
+        var filterText = "A1.unknown==";
+        
+        ConfigureDataPartIndexer();
+
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeFalse();
+        parseResult.ErrorMessage.Should().NotBeNull();
+        parseResult.ErrorMessage.Should().Contain("Expected property name after dot");
+    }
 
     [Test]
     public void TestParse_Incomplete_DotExpression()
