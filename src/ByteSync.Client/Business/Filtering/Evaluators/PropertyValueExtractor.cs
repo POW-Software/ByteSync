@@ -23,8 +23,8 @@ public class PropertyValueExtractor : IPropertyValueExtractor
         
         var propertyActions = new Dictionary<string, Func<PropertyValueCollection>>
         {
-            { Identifiers.PROPERTY_CONTENT, () => ExtractContent(contentIdentities) },
-            { Identifiers.PROPERTY_CONTENT_AND_DATE, () => ExtractContentAndDate(contentIdentities, dataPart) },
+            { Identifiers.PROPERTY_CONTENTS, () => ExtractContent(contentIdentities) },
+            { Identifiers.PROPERTY_CONTENTS_AND_DATE, () => ExtractContentAndDate(contentIdentities, dataPart) },
             { Identifiers.PROPERTY_SIZE, () => ExtractSize(contentIdentities, dataPart) },
             { Identifiers.PROPERTY_LAST_WRITE_TIME, () => ExtractLastWriteTime(contentIdentities, dataPart) },
             { Identifiers.PROPERTY_NAME, () => ExtractName(contentIdentities, dataPart) }

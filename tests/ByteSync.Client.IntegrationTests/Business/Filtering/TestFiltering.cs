@@ -22,7 +22,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_Complete_Expression()
     {
         // Arrange
-        var filterText = "A1.content==B1.content";
+        var filterText = "A1.contents==B1.contents";
         
         ConfigureDataPartIndexer();
         
@@ -39,7 +39,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_CompleteWithSpaces1_Expression()
     {
         // Arrange
-        var filterText = "A1.content == B1.content";
+        var filterText = "A1.contents == B1.contents";
         
         ConfigureDataPartIndexer();
         
@@ -73,7 +73,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_Incomplete_Expression()
     {
         // Arrange
-        var filterText = "A1.content==";
+        var filterText = "A1.contents==";
         
         ConfigureDataPartIndexer();
 
@@ -105,7 +105,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_Incomplete_Operator()
     {
         // Arrange
-        var filterText = "A1.content";
+        var filterText = "A1.contents";
         
         // Act
         var parseResult = _filterParser.TryParse(filterText);
@@ -150,7 +150,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_Incomplete_ParenthesesExpression()
     {
         // Arrange
-        var filterText = "(A1.content==B1.content";
+        var filterText = "(A1.contents==B1.contents";
         
         ConfigureDataPartIndexer();
         
@@ -167,7 +167,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_Incomplete_WithAndOperator()
     {
         // Arrange
-        var filterText = "A1.content==B1.content AND on:";
+        var filterText = "A1.contents==B1.contents AND on:";
         
         ConfigureDataPartIndexer();
         
