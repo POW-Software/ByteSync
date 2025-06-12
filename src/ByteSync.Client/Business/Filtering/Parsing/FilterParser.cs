@@ -1,4 +1,5 @@
-﻿using ByteSync.Business.Filtering.Expressions;
+﻿using System.Text;
+using ByteSync.Business.Filtering.Expressions;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Services.Filtering;
 using ByteSync.Interfaces.Services.Sessions;
@@ -233,6 +234,29 @@ public class FilterParser : IFilterParser
             {
                 return ParseResult.Incomplete($"Unknown file type: {typeIdentifier}");
             }
+        }
+        
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(Identifiers.OPERATOR_NAME, StringComparison.OrdinalIgnoreCase))
+        {
+            NextToken();
+            if (CurrentToken?.Type != FilterTokenType.Operator)
+            {
+                return ParseResult.Incomplete($"Expected operator after '{Identifiers.OPERATOR_NAME}'");
+            }
+            var comparisonOperator = _operatorParser.Parse(CurrentToken.Token);
+
+            StringBuilder searchText = new();
+            NextToken();
+            
+            while (CurrentToken?.Type == FilterTokenType.String || CurrentToken?.Type == FilterTokenType.Dot || CurrentToken?.Type == FilterTokenType.Identifier)
+            {
+                searchText.Append(CurrentToken?.Token);
+                NextToken();
+            }
+            
+            var nameExpression = new NameExpression(searchText.ToString(), comparisonOperator);
+            
+            return ParseResult.Success(nameExpression); 
         }
         
         if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(Identifiers.OPERATOR_ACTIONS, StringComparison.OrdinalIgnoreCase))
