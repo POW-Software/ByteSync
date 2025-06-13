@@ -168,7 +168,7 @@ public class TestFiltering_Actions : BaseTestFiltering
 
         _mockActionRepository.AddOrUpdate(actions);
 
-        var filterText = "actions.rules.copycontents>0";
+        var filterText = "actions.rules.copy-contents>0";
 
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);

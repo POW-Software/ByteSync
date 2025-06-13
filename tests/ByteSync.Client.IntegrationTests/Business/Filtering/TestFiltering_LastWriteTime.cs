@@ -34,7 +34,7 @@ public class TestFiltering_LastWriteTime : BaseTestFiltering
             "A1", "sameHash", DateTime.Parse(leftDateTime, System.Globalization.CultureInfo.InvariantCulture),
             "B1", "sameHash", DateTime.Parse(rightDateTime, System.Globalization.CultureInfo.InvariantCulture));
     
-        var filterText = $"A1.lastwritetime{@operator}B1.lastwritetime";
+        var filterText = $"A1.last-write-time{@operator}B1.last-write-time";
     
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
@@ -66,7 +66,7 @@ public class TestFiltering_LastWriteTime : BaseTestFiltering
         var comparisonItem = PrepareComparisonWithOneContent(
             "A1", "hash", DateTime.Parse(leftDateTime, System.Globalization.CultureInfo.InvariantCulture), 24);
     
-        var filterText = $"A1.lastwritetime{@operator}{rightDateTime}";
+        var filterText = $"A1.last-write-time{@operator}{rightDateTime}";
     
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
