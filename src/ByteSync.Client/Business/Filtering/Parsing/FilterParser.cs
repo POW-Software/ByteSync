@@ -180,7 +180,7 @@ public class FilterParser : IFilterParser
                 return ParseResult.Incomplete($"Expected data source identifier after '{Identifiers.OPERATOR_ON}:'");
             }
 
-            var dataSource = CurrentToken?.Token;
+            var dataSource = CurrentToken.Token;
             NextToken();
             
             return ParseResult.Success(new ExistsExpression(dataSource));
@@ -200,7 +200,7 @@ public class FilterParser : IFilterParser
                 return ParseResult.Incomplete($"Expected data source identifier after '{Identifiers.OPERATOR_ONLY}:'");
             }
 
-            var dataSource = CurrentToken?.Token;
+            var dataSource = CurrentToken.Token;
             NextToken();
             
             return ParseResult.Success(new OnlyExpression(dataSource));
@@ -265,7 +265,7 @@ public class FilterParser : IFilterParser
         
         if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(Identifiers.OPERATOR_ACTIONS, StringComparison.OrdinalIgnoreCase))
         {
-            string actionPath = CurrentToken?.Token.ToLowerInvariant();
+            string actionPath = CurrentToken.Token.ToLowerInvariant();
             NextToken();
             
             while (CurrentToken?.Type == FilterTokenType.Dot)
@@ -291,7 +291,7 @@ public class FilterParser : IFilterParser
                     return ParseResult.Incomplete("Expected operator after action path");
                 }
     
-                var op = CurrentToken?.Token;
+                var op = CurrentToken.Token;
                 NextToken();
     
                 try {
@@ -339,7 +339,7 @@ public class FilterParser : IFilterParser
                     return ParseResult.Incomplete("Expected operator after property name");
                 }
 
-                var op = CurrentToken?.Token;
+                var op = CurrentToken.Token;
                 NextToken();
 
                 try
@@ -428,7 +428,7 @@ public class FilterParser : IFilterParser
         }
 
         // Simple text search as fallback
-        var textSearchExpression = new TextSearchExpression(CurrentToken?.Token);
+        var textSearchExpression = new TextSearchExpression(CurrentToken?.Token ?? "");
         NextToken();
         return ParseResult.Success(textSearchExpression);
     }
