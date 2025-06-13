@@ -11,6 +11,22 @@ public class TestFiltering_Name : BaseTestFiltering
     }
     
     [Test]
+    public void TestEquals_WhenNameMatchesWithColon_ShouldBeTrue()
+    {
+        // Arrange
+        var comparisonItem = PrepareComparisonWithOneContent(
+            "A1", "sameHash", DateTime.Now, 50, "file1.txt");
+
+        var filterText = "name:file1.txt";
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+    
+    [Test]
     public void TestEquals_WhenNameMatches_ShouldBeTrue()
     {
         // Arrange
@@ -66,6 +82,22 @@ public class TestFiltering_Name : BaseTestFiltering
             "A1", "sameHash", DateTime.Now, 50, "file2.txt");
 
         var filterText = "name!=file1.txt";
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+    
+    [Test]
+    public void TestWildcardMatch_WhenNameMatchesFile1StarWithColon_ShouldBeTrue()
+    {
+        // Arrange
+        var comparisonItem = PrepareComparisonWithOneContent(
+            "A1", "sameHash", DateTime.Now, 50, "file123.txt");
+
+        var filterText = "name:file1*";
 
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);

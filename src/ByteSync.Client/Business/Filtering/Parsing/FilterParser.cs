@@ -240,11 +240,14 @@ public class FilterParser : IFilterParser
         if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(Identifiers.OPERATOR_NAME, StringComparison.OrdinalIgnoreCase))
         {
             NextToken();
-            if (CurrentToken?.Type != FilterTokenType.Operator)
+            if (CurrentToken?.Type != FilterTokenType.Operator && CurrentToken?.Type != FilterTokenType.Colon)
             {
                 return ParseResult.Incomplete($"Expected operator after '{Identifiers.OPERATOR_NAME}'");
             }
-            var comparisonOperator = _operatorParser.Parse(CurrentToken.Token);
+            var comparisonOperator = 
+                CurrentToken.Type == FilterTokenType.Colon 
+                    ? ComparisonOperator.Equals
+                    : _operatorParser.Parse(CurrentToken.Token);
 
             StringBuilder searchText = new();
             NextToken();
