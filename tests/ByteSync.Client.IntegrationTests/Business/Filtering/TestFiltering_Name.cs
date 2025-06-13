@@ -234,4 +234,54 @@ public class TestFiltering_Name : BaseTestFiltering
         // Assert
         result.Should().BeFalse();
     }
+    
+    [Test]
+    public void TestEquals_WhenNameMatchesWithQuotes_ShouldBeTrue()
+    {
+        // Arrange
+        var comparisonItem = PrepareComparisonWithOneContent(
+            "A1", "sameHash", DateTime.Now, 50, "file1.txt");
+
+        var filterText = "name==\"file1.txt\"";
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+    
+    [Test]
+    public void TestEquals_WhenNameMatchesWithQuotesWithSpaces_ShouldBeTrue()
+    {
+        // Arrange
+        var comparisonItem = PrepareComparisonWithOneContent(
+            "A1", "sameHash", DateTime.Now, 50, "file 1.txt");
+
+        var filterText = "name==\"file 1.txt\"";
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Theory]
+    [TestCase("file2.txt", "\"file1.txt\"")]
+    [TestCase("file1.txt", "\"file 1.txt\"")]
+    public void TestEquals_WhenNameDoesNotMatchWithQuotes_ShouldBeFalse(string fileName, string filterValue)
+    {
+        // Arrange
+        var comparisonItem = PrepareComparisonWithOneContent(
+            "A1", "sameHash", DateTime.Now, 50, fileName);
+
+        var filterText = $"name=={filterValue}";
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().BeFalse();
+    }
 }
