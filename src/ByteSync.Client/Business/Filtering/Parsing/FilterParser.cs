@@ -275,35 +275,42 @@ public class FilterParser : IFilterParser
                 actionPath += "." + CurrentToken?.Token.ToLowerInvariant();
                 NextToken();
             }
-    
-            if (CurrentToken?.Type != FilterTokenType.Operator)
+            
+            if (CurrentToken?.Type == FilterTokenType.End || CurrentToken?.Type == FilterTokenType.LogicalOperator)
             {
-                return ParseResult.Incomplete("Expected operator after action path");
+                return ParseResult.Success(new ActionComparisonExpression(actionPath, ComparisonOperator.GreaterThan, 0));
             }
-    
-            var op = CurrentToken?.Token;
-            NextToken();
-    
-            try {
-                var comparisonOperator = _operatorParser.Parse(op);
-        
-                if (CurrentToken?.Type != FilterTokenType.Number && CurrentToken?.Type != FilterTokenType.DateTime)
+            else
+            {
+                if (CurrentToken?.Type != FilterTokenType.Operator)
                 {
-                    return ParseResult.Incomplete("Expected numeric value / dateTime after operator in action comparison");
+                    return ParseResult.Incomplete("Expected operator after action path");
                 }
-        
-                if (!int.TryParse(CurrentToken?.Token, out int value))
-                {
-                    return ParseResult.Incomplete("Invalid numeric value in action comparison");
-                }
-        
+    
+                var op = CurrentToken?.Token;
                 NextToken();
+    
+                try {
+                    var comparisonOperator = _operatorParser.Parse(op);
         
-                return ParseResult.Success(new ActionComparisonExpression(actionPath, comparisonOperator, value));
-            }
-            catch (ArgumentException ex)
-            {
-                return ParseResult.Incomplete(ex.Message);
+                    if (CurrentToken?.Type != FilterTokenType.Number && CurrentToken?.Type != FilterTokenType.DateTime)
+                    {
+                        return ParseResult.Incomplete("Expected numeric value / dateTime after operator in action comparison");
+                    }
+        
+                    if (!int.TryParse(CurrentToken?.Token, out int value))
+                    {
+                        return ParseResult.Incomplete("Invalid numeric value in action comparison");
+                    }
+        
+                    NextToken();
+        
+                    return ParseResult.Success(new ActionComparisonExpression(actionPath, comparisonOperator, value));
+                }
+                catch (ArgumentException ex)
+                {
+                    return ParseResult.Incomplete(ex.Message);
+                }
             }
         }
 
