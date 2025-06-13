@@ -327,7 +327,7 @@ public class FilterParser : IFilterParser
                     return ParseResult.Incomplete("Expected property name after dot");
                 }
 
-                var property = CurrentToken?.Token;
+                var property = CurrentToken?.Token!;
                 NextToken();
 
                 if (CurrentToken?.Type != FilterTokenType.Operator)
@@ -356,20 +356,25 @@ public class FilterParser : IFilterParser
 
                         if (CurrentToken?.Type == FilterTokenType.Dot)
                         {
-                            // This is a comparison between two properties
-                            NextToken();
-                            if (CurrentToken?.Type != FilterTokenType.Identifier)
-                            {
-                                return ParseResult.Incomplete("Expected property name after dot");
-                            }
-
                             var rightDataPart = _dataPartIndexer.GetDataPart(rightIdentifier);
                             if (rightDataPart == null)
                             {
                                 return ParseResult.Incomplete($"Unknown data part: {rightIdentifier}");
                             }
+                            
+                            // This is a comparison between two properties
+                            NextToken();
+                            if (CurrentToken?.Type != FilterTokenType.Identifier && CurrentToken?.Token != "_")
+                            {
+                                return ParseResult.Incomplete("Expected property name after dot");
+                            }
 
                             var rightProperty = CurrentToken?.Token;
+                            if (rightProperty == "_")
+                            {
+                                rightProperty = property;
+                            }
+                            
                             NextToken();
 
                             return ParseResult.Success(new PropertyComparisonExpression(leftDataPart, property, filterOperator, rightDataPart, rightProperty));
