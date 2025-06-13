@@ -25,6 +25,8 @@ public class Identifiers
     public const string PROPERTY_FILE = "file";
     public const string PROPERTY_DIRECTORY = "directory";
     public const string PROPERTY_DIR = "dir";
+    
+    public const string PROPERTY_PLACEHOLDER = "_";
 
     private static List<string>? _cachedAll;
 

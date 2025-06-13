@@ -368,13 +368,13 @@ public class FilterParser : IFilterParser
                             
                             // This is a comparison between two properties
                             NextToken();
-                            if (CurrentToken?.Type != FilterTokenType.Identifier && CurrentToken?.Token != "_")
+                            if (CurrentToken?.Type != FilterTokenType.Identifier && CurrentToken?.Token != Identifiers.PROPERTY_PLACEHOLDER)
                             {
                                 return ParseResult.Incomplete("Expected property name after dot");
                             }
 
                             var rightProperty = CurrentToken?.Token;
-                            if (rightProperty == "_")
+                            if (rightProperty == Identifiers.PROPERTY_PLACEHOLDER)
                             {
                                 rightProperty = property;
                             }
