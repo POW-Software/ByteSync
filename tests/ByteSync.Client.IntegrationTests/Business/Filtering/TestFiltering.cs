@@ -36,6 +36,23 @@ public class TestFiltering : BaseTestFiltering
     }
     
     [Test]
+    public void TestParse_CompleteLowerCase_Expression()
+    {
+        // Arrange
+        var filterText = "a1.contents==b1.contents";
+        
+        ConfigureDataPartIndexer();
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeTrue();
+        parseResult.Expression.Should().NotBeNull();
+        parseResult.Expression.Should().BeOfType<PropertyComparisonExpression>();
+    }
+    
+    [Test]
     public void TestParse_CompleteWithSpaces1_Expression()
     {
         // Arrange
@@ -56,7 +73,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_CompleteWithSpaces2_Expression()
     {
         // Arrange
-        var filterText = "A1.lastwritetime >= 2024-01-01";
+        var filterText = "A1.last-write-time >= 2024-01-01";
         
         ConfigureDataPartIndexer();
         
@@ -195,6 +212,21 @@ public class TestFiltering : BaseTestFiltering
         parseResult.IsComplete.Should().BeFalse();
         parseResult.ErrorMessage.Should().NotBeNull();
         parseResult.ErrorMessage.Should().Contain("Incomplete right operand for AND expression: Expected data source identifier after 'on:'");
+    }
+    
+    [Test]
+    public void TestParse_Complete_FullExpression()
+    {
+        // Arrange
+        var filterText = "is:file AND name==\"report\" AND A1.size>1MB AND NOT on:B1";
+        
+        ConfigureDataPartIndexer();
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeTrue();
     }
     
     [Test]

@@ -42,6 +42,7 @@ public abstract class BaseTestFiltering : IntegrationTest
         RegisterType<NotExpressionEvaluator, IExpressionEvaluator>();
         RegisterType<TrueExpressionEvaluator, IExpressionEvaluator>();
         RegisterType<ExistsExpressionEvaluator, IExpressionEvaluator>();
+        RegisterType<NameExpressionEvaluator, IExpressionEvaluator>();
         RegisterType<FileSystemTypeExpressionEvaluator, IExpressionEvaluator>();
         RegisterType<FutureStateExpressionEvaluator, IExpressionEvaluator>();
         RegisterType<OnlyExpressionEvaluator, IExpressionEvaluator>();
@@ -228,9 +229,9 @@ public abstract class BaseTestFiltering : IntegrationTest
         string leftHash,
         DateTime leftDateTime,
         long leftSize,
-        string relativePath = "/unset")
+        string fileName = "file1.txt")
     {
-        var comparisonItem = CreateBasicComparisonItem();
+        var comparisonItem = CreateBasicComparisonItem(FileSystemTypes.File, "/" + fileName, fileName);
 
         string letter = dataPartId[0].ToString();
 
@@ -240,7 +241,7 @@ public abstract class BaseTestFiltering : IntegrationTest
             leftDateTime,
             leftHash,
             leftSize,
-            relativePath);
+            "/" + fileName);
         
         var contentIdCore = new ContentIdentityCore
         {

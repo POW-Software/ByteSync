@@ -184,7 +184,12 @@ public class FilterTokenizer : IFilterTokenizer
             var start = _position;
 
             while (_position < _filterText.Length &&
-                   (char.IsLetterOrDigit(_filterText[_position]) || _filterText[_position] == '-' || _filterText[_position] == '_'))
+                   (char.IsLetterOrDigit(_filterText[_position]) 
+                    || _filterText[_position] == '-' || _filterText[_position] == '_' || _filterText[_position] == '\\'
+                    || _filterText[_position] == '*' || _filterText[_position] == '+'
+                    || _filterText[_position] == '^' || _filterText[_position] == '$'
+                    || _filterText[_position] == '[' || _filterText[_position] == ']'
+                    || _filterText[_position] == '{' || _filterText[_position] == '}'))
             {
                 _position++;
             }

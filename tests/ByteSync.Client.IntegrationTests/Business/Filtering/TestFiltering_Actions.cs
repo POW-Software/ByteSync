@@ -44,6 +44,29 @@ public class TestFiltering_Actions : BaseTestFiltering
     }
     
     [Test]
+    public void TestFiltering_Actions_CountGreaterThanZer_Simplified()
+    {
+        // Arrange
+        var comparisonItem = CreateBasicComparisonItem();
+        
+        var actions = new List<AtomicAction>
+        {
+            CreateAtomicAction(comparisonItem, ActionOperatorTypes.SynchronizeContentOnly, false),
+            CreateAtomicAction(comparisonItem, ActionOperatorTypes.Delete, true)
+        };
+        
+        _mockActionRepository.AddOrUpdate(actions);
+        
+        var filterText = "actions";
+        
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+        
+        // Assert
+        result.Should().BeTrue();
+    }
+    
+    [Test]
     public void TestFiltering_Actions_CountEqualsZero()
     {
         // Arrange
@@ -52,6 +75,23 @@ public class TestFiltering_Actions : BaseTestFiltering
         _mockActionRepository.AddOrUpdate(new List<AtomicAction>());
         
         var filterText = "actions==0";
+        
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+        
+        // Assert
+        result.Should().BeTrue();
+    }
+    
+    [Test]
+    public void TestFiltering_Actions_CountEqualsZero_Simplified()
+    {
+        // Arrange
+        var comparisonItem = CreateBasicComparisonItem();
+        
+        _mockActionRepository.AddOrUpdate(new List<AtomicAction>());
+        
+        var filterText = "NOT actions";
         
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
@@ -153,6 +193,28 @@ public class TestFiltering_Actions : BaseTestFiltering
         result.Should().BeTrue();
     }
 
+    [Test]
+    public void TestFiltering_TargetedActionsByType_Delete_Simplified()
+    {
+        // Arrange
+        var comparisonItem = CreateBasicComparisonItem();
+
+        var actions = new List<AtomicAction>
+        {
+            CreateAtomicAction(comparisonItem, ActionOperatorTypes.SynchronizeContentOnly, false),
+            CreateAtomicAction(comparisonItem, ActionOperatorTypes.Delete, true)
+        };
+
+        _mockActionRepository.AddOrUpdate(actions);
+
+        var filterText = "actions.targeted.delete";
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().BeTrue();
+    }
 
     [Test]
     public void TestFiltering_RuleActionsByType_SynchronizeContent()
@@ -168,7 +230,30 @@ public class TestFiltering_Actions : BaseTestFiltering
 
         _mockActionRepository.AddOrUpdate(actions);
 
-        var filterText = "actions.rules.copycontents>0";
+        var filterText = "actions.rules.copy-contents>0";
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+    
+    [Test]
+    public void TestFiltering_RuleActionsByType_SynchronizeContent_Simplified()
+    {
+        // Arrange
+        var comparisonItem = CreateBasicComparisonItem();
+
+        var actions = new List<AtomicAction>
+        {
+            CreateAtomicAction(comparisonItem, ActionOperatorTypes.SynchronizeContentOnly, false),
+            CreateAtomicAction(comparisonItem, ActionOperatorTypes.Delete, true)
+        };
+
+        _mockActionRepository.AddOrUpdate(actions);
+
+        var filterText = "actions.rules.copy-contents";
 
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
@@ -223,6 +308,29 @@ public class TestFiltering_Actions : BaseTestFiltering
         result.Should().BeTrue();
     }
 
+    
+    [Test]
+    public void TestFiltering_ComplexCondition_Simplified()
+    {
+        // Arrange
+        var comparisonItem = CreateBasicComparisonItem();
+
+        var actions = new List<AtomicAction>
+        {
+            CreateAtomicAction(comparisonItem, ActionOperatorTypes.SynchronizeContentOnly, false),
+            CreateAtomicAction(comparisonItem, ActionOperatorTypes.Delete, true)
+        };
+
+        _mockActionRepository.AddOrUpdate(actions);
+
+        var filterText = "actions.delete AND NOT actions.create";
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().BeTrue();
+    }
 
     private AtomicAction CreateAtomicAction(ComparisonItem comparisonItem, ActionOperatorTypes operatorType, bool isTargeted)
     {

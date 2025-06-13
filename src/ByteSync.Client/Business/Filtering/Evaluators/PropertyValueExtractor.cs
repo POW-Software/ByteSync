@@ -27,7 +27,6 @@ public class PropertyValueExtractor : IPropertyValueExtractor
             { Identifiers.PROPERTY_CONTENTS_AND_DATE, () => ExtractContentAndDate(contentIdentities, dataPart) },
             { Identifiers.PROPERTY_SIZE, () => ExtractSize(contentIdentities, dataPart) },
             { Identifiers.PROPERTY_LAST_WRITE_TIME, () => ExtractLastWriteTime(contentIdentities, dataPart) },
-            { Identifiers.PROPERTY_NAME, () => ExtractName(contentIdentities, dataPart) }
         };
 
         if (propertyActions.TryGetValue(propertyLower, out var action))
@@ -120,30 +119,6 @@ public class PropertyValueExtractor : IPropertyValueExtractor
         foreach (var content in contents)
         {
             result.Add(new PropertyValue(content));
-        }
-
-        return result;
-    }
-    
-    private PropertyValueCollection ExtractName(List<ContentIdentity> contentIdentities, DataPart dataPart)
-    {
-        var names = new HashSet<string>();
-
-        foreach (var contentIdentity in contentIdentities)
-        {
-            foreach (var fileSystemDescription in contentIdentity.GetFileSystemDescriptions(dataPart.GetApplicableInventoryPart()))
-            {
-                if (fileSystemDescription is FileDescription fileDescription)
-                {
-                    names.Add(fileDescription.Name);
-                }
-            }
-        }
-
-        var result = new PropertyValueCollection();
-        foreach (var name in names)
-        {
-            result.Add(new PropertyValue(name));
         }
 
         return result;

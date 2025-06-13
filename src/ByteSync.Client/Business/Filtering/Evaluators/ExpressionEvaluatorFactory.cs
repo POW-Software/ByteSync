@@ -20,6 +20,7 @@ public class ExpressionEvaluatorFactory : IExpressionEvaluatorFactory
             { typeof(NotExpression), typeof(NotExpressionEvaluator) },
             { typeof(TrueExpression), typeof(TrueExpressionEvaluator) },
             { typeof(ExistsExpression), typeof(ExistsExpressionEvaluator) },
+            { typeof(NameExpression), typeof(NameExpressionEvaluator) },
             { typeof(FileSystemTypeExpression), typeof(FileSystemTypeExpressionEvaluator) },
             { typeof(FutureStateExpression), typeof(FutureStateExpressionEvaluator) },
             { typeof(OnlyExpression), typeof(OnlyExpressionEvaluator) },

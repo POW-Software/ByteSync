@@ -62,7 +62,7 @@ public class PropertyComparisonExpressionEvaluator : ExpressionEvaluator<Propert
         // Handle special cases by property type
         var propertyLower = property.ToLowerInvariant();
 
-        if (propertyLower == "size")
+        if (propertyLower == Identifiers.PROPERTY_SIZE)
         {
             var targetValues = new PropertyValueCollection();
             
@@ -90,7 +90,7 @@ public class PropertyComparisonExpressionEvaluator : ExpressionEvaluator<Propert
             
             return _propertyComparer.CompareValues(sourceValues, targetValues, op);
         }
-        else if (propertyLower == "lastwritetime")
+        else if (propertyLower == Identifiers.PROPERTY_LAST_WRITE_TIME)
         {
             var targetValues = new PropertyValueCollection();
 

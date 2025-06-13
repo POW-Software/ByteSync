@@ -12,7 +12,7 @@ using Moq;
 
 namespace ByteSync.Client.IntegrationTests.Business.Filtering;
 
-public class TestFiltering_Content : BaseTestFiltering
+public class TestFiltering_Contents : BaseTestFiltering
 {
     [SetUp]
     public void Setup()
@@ -21,7 +21,7 @@ public class TestFiltering_Content : BaseTestFiltering
     }
 
     [Test]
-    public void Test_Content()
+    public void Test_Contents()
     {
         // Arrange
         var filterText = "A1.contents==B1.contents";
@@ -75,5 +75,34 @@ public class TestFiltering_Content : BaseTestFiltering
 
         // Assert
         result.Should().BeTrue();
+    }
+    
+    [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-01", "==", true)]
+    [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-01", "<>", false)]
+    [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-01", "!=", false)]
+    [TestCase("hashLeft", "2023-10-01", "hashRight", "2023-10-01", "==", false)]
+    [TestCase("hashLeft", "2023-10-01", "hashRight", "2023-10-01", "<>", true)]
+    [TestCase("hashLeft", "2023-10-01", "hashRight", "2023-10-01", "!=", true)]
+    [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-02", "==", true)]
+    [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-02", "<>", false)]
+    [TestCase("sameHash", "2023-10-01", "sameHash", "2023-10-02", "!=", false)]
+    public void Test_Contents_Simplified(string leftHash, string leftDateTimeStr, string rightHash, string rightDateTimeStr,
+        string @operator, bool expectedResult)
+    {
+        // Arrange
+        var filterText = $"A1.contents{@operator}B1._";
+        
+        DateTime leftDateTime = DateTime.Parse(leftDateTimeStr, System.Globalization.CultureInfo.InvariantCulture);
+        DateTime rightDateTime = DateTime.Parse(rightDateTimeStr, System.Globalization.CultureInfo.InvariantCulture);
+        
+        var comparisonItem = PrepareComparisonWithTwoContents(
+            "A1", leftHash, leftDateTime,
+            "B1", rightHash, rightDateTime);
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().Be(expectedResult);
     }
 }

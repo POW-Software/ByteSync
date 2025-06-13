@@ -1,4 +1,5 @@
-﻿using ByteSync.Business.Filtering.Expressions;
+﻿using System.Text;
+using ByteSync.Business.Filtering.Expressions;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Services.Filtering;
 using ByteSync.Interfaces.Services.Sessions;
@@ -35,6 +36,7 @@ public class FilterParser : IFilterParser
         // Check if there are any special expressions
         if (!terms.Any(t => t.Contains(":") || t.Contains(".") || t.Contains("(") ||
                             t.StartsWith(Identifiers.OPERATOR_ACTIONS, StringComparison.OrdinalIgnoreCase) ||
+                            t.StartsWith(Identifiers.OPERATOR_NAME, StringComparison.OrdinalIgnoreCase) ||
                             t.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
                             t.Equals("OR", StringComparison.OrdinalIgnoreCase) ||
                             t.Equals("NOT", StringComparison.OrdinalIgnoreCase)))
@@ -178,7 +180,7 @@ public class FilterParser : IFilterParser
                 return ParseResult.Incomplete($"Expected data source identifier after '{Identifiers.OPERATOR_ON}:'");
             }
 
-            var dataSource = CurrentToken?.Token;
+            var dataSource = CurrentToken.Token;
             NextToken();
             
             return ParseResult.Success(new ExistsExpression(dataSource));
@@ -198,7 +200,7 @@ public class FilterParser : IFilterParser
                 return ParseResult.Incomplete($"Expected data source identifier after '{Identifiers.OPERATOR_ONLY}:'");
             }
 
-            var dataSource = CurrentToken?.Token;
+            var dataSource = CurrentToken.Token;
             NextToken();
             
             return ParseResult.Success(new OnlyExpression(dataSource));
@@ -235,9 +237,35 @@ public class FilterParser : IFilterParser
             }
         }
         
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(Identifiers.OPERATOR_NAME, StringComparison.OrdinalIgnoreCase))
+        {
+            NextToken();
+            if (CurrentToken?.Type != FilterTokenType.Operator && CurrentToken?.Type != FilterTokenType.Colon)
+            {
+                return ParseResult.Incomplete($"Expected operator after '{Identifiers.OPERATOR_NAME}'");
+            }
+            var comparisonOperator = 
+                CurrentToken.Type == FilterTokenType.Colon 
+                    ? ComparisonOperator.Equals
+                    : _operatorParser.Parse(CurrentToken.Token);
+
+            StringBuilder searchText = new();
+            NextToken();
+            
+            while (CurrentToken?.Type == FilterTokenType.String || CurrentToken?.Type == FilterTokenType.Dot || CurrentToken?.Type == FilterTokenType.Identifier)
+            {
+                searchText.Append(CurrentToken?.Token);
+                NextToken();
+            }
+            
+            var nameExpression = new NameExpression(searchText.ToString(), comparisonOperator);
+            
+            return ParseResult.Success(nameExpression); 
+        }
+        
         if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(Identifiers.OPERATOR_ACTIONS, StringComparison.OrdinalIgnoreCase))
         {
-            string actionPath = CurrentToken?.Token.ToLowerInvariant();
+            string actionPath = CurrentToken.Token.ToLowerInvariant();
             NextToken();
             
             while (CurrentToken?.Type == FilterTokenType.Dot)
@@ -251,41 +279,48 @@ public class FilterParser : IFilterParser
                 actionPath += "." + CurrentToken?.Token.ToLowerInvariant();
                 NextToken();
             }
-    
-            if (CurrentToken?.Type != FilterTokenType.Operator)
+            
+            if (CurrentToken?.Type == FilterTokenType.End || CurrentToken?.Type == FilterTokenType.LogicalOperator)
             {
-                return ParseResult.Incomplete("Expected operator after action path");
+                return ParseResult.Success(new ActionComparisonExpression(actionPath, ComparisonOperator.GreaterThan, 0));
             }
-    
-            var op = CurrentToken?.Token;
-            NextToken();
-    
-            try {
-                var comparisonOperator = _operatorParser.Parse(op);
-        
-                if (CurrentToken?.Type != FilterTokenType.Number && CurrentToken?.Type != FilterTokenType.DateTime)
+            else
+            {
+                if (CurrentToken?.Type != FilterTokenType.Operator)
                 {
-                    return ParseResult.Incomplete("Expected numeric value / dateTime after operator in action comparison");
+                    return ParseResult.Incomplete("Expected operator after action path");
                 }
-        
-                if (!int.TryParse(CurrentToken?.Token, out int value))
-                {
-                    return ParseResult.Incomplete("Invalid numeric value in action comparison");
-                }
-        
+    
+                var op = CurrentToken.Token;
                 NextToken();
+    
+                try {
+                    var comparisonOperator = _operatorParser.Parse(op);
         
-                return ParseResult.Success(new ActionComparisonExpression(actionPath, comparisonOperator, value));
-            }
-            catch (ArgumentException ex)
-            {
-                return ParseResult.Incomplete(ex.Message);
+                    if (CurrentToken?.Type != FilterTokenType.Number && CurrentToken?.Type != FilterTokenType.DateTime)
+                    {
+                        return ParseResult.Incomplete("Expected numeric value / dateTime after operator in action comparison");
+                    }
+        
+                    if (!int.TryParse(CurrentToken?.Token, out int value))
+                    {
+                        return ParseResult.Incomplete("Invalid numeric value in action comparison");
+                    }
+        
+                    NextToken();
+        
+                    return ParseResult.Success(new ActionComparisonExpression(actionPath, comparisonOperator, value));
+                }
+                catch (ArgumentException ex)
+                {
+                    return ParseResult.Incomplete(ex.Message);
+                }
             }
         }
 
         if (CurrentToken?.Type == FilterTokenType.Identifier)
         {
-            var identifier = CurrentToken?.Token;
+            var identifier = CurrentToken.Token;
             NextToken();
 
             if (CurrentToken?.Type == FilterTokenType.Dot)
@@ -296,7 +331,7 @@ public class FilterParser : IFilterParser
                     return ParseResult.Incomplete("Expected property name after dot");
                 }
 
-                var property = CurrentToken?.Token;
+                var property = CurrentToken?.Token!;
                 NextToken();
 
                 if (CurrentToken?.Type != FilterTokenType.Operator)
@@ -304,14 +339,14 @@ public class FilterParser : IFilterParser
                     return ParseResult.Incomplete("Expected operator after property name");
                 }
 
-                var op = CurrentToken?.Token;
+                var op = CurrentToken.Token;
                 NextToken();
 
                 try
                 {
                     var filterOperator = _operatorParser.Parse(op);
 
-                    var leftDataPart = _dataPartIndexer.GetDataPart(identifier);
+                    var leftDataPart = _dataPartIndexer.GetDataPart(identifier.ToUpper());
                     if (leftDataPart == null)
                     {
                         return ParseResult.Incomplete($"Unknown data part: {identifier}");
@@ -320,25 +355,30 @@ public class FilterParser : IFilterParser
                     // Check if the right side is a data source or a value
                     if (CurrentToken?.Type == FilterTokenType.Identifier)
                     {
-                        var rightIdentifier = CurrentToken?.Token;
+                        var rightIdentifier = CurrentToken.Token;
                         NextToken();
 
                         if (CurrentToken?.Type == FilterTokenType.Dot)
                         {
-                            // This is a comparison between two properties
-                            NextToken();
-                            if (CurrentToken?.Type != FilterTokenType.Identifier)
-                            {
-                                return ParseResult.Incomplete("Expected property name after dot");
-                            }
-
-                            var rightDataPart = _dataPartIndexer.GetDataPart(rightIdentifier);
+                            var rightDataPart = _dataPartIndexer.GetDataPart(rightIdentifier.ToUpper());
                             if (rightDataPart == null)
                             {
                                 return ParseResult.Incomplete($"Unknown data part: {rightIdentifier}");
                             }
+                            
+                            // This is a comparison between two properties
+                            NextToken();
+                            if (CurrentToken?.Type != FilterTokenType.Identifier && CurrentToken?.Token != Identifiers.PROPERTY_PLACEHOLDER)
+                            {
+                                return ParseResult.Incomplete("Expected property name after dot");
+                            }
 
                             var rightProperty = CurrentToken?.Token;
+                            if (rightProperty == Identifiers.PROPERTY_PLACEHOLDER)
+                            {
+                                rightProperty = property;
+                            }
+                            
                             NextToken();
 
                             return ParseResult.Success(new PropertyComparisonExpression(leftDataPart, property, filterOperator, rightDataPart, rightProperty));
@@ -388,7 +428,7 @@ public class FilterParser : IFilterParser
         }
 
         // Simple text search as fallback
-        var textSearchExpression = new TextSearchExpression(CurrentToken?.Token);
+        var textSearchExpression = new TextSearchExpression(CurrentToken?.Token ?? "");
         NextToken();
         return ParseResult.Success(textSearchExpression);
     }
