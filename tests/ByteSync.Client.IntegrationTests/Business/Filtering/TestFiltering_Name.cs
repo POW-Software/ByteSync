@@ -25,6 +25,22 @@ public class TestFiltering_Name : BaseTestFiltering
         // Assert
         result.Should().BeTrue();
     }
+    
+    [Test]
+    public void TestEquals_WhenNameMatches_ShouldBeFalse()
+    {
+        // Arrange
+        var comparisonItem = PrepareComparisonWithOneContent(
+            "A1", "sameHash", DateTime.Now, 50, "file1.txt");
+
+        var filterText = "name!=file1.txt";
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().BeFalse();
+    }
 
     [Test]
     public void TestEquals_WhenNameDoesNotMatch_ShouldBeFalse()
@@ -56,6 +72,70 @@ public class TestFiltering_Name : BaseTestFiltering
 
         // Assert
         result.Should().BeTrue();
+    }
+    
+    [Test]
+    public void TestWildcardMatch_WhenNameMatchesFile1Star_ShouldBeTrue()
+    {
+        // Arrange
+        var comparisonItem = PrepareComparisonWithOneContent(
+            "A1", "sameHash", DateTime.Now, 50, "file123.txt");
+
+        var filterText = "name==file1*";
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Test]
+    public void TestWildcardMatch_WhenNameDoesNotMatchFile1Star_ShouldBeFalse()
+    {
+        // Arrange
+        var comparisonItem = PrepareComparisonWithOneContent(
+            "A1", "sameHash", DateTime.Now, 50, "file2.txt");
+
+        var filterText = "name==file1*";
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Test]
+    public void TestWildcardMatch_WhenNameMatchesTxtExtension_ShouldBeTrue()
+    {
+        // Arrange
+        var comparisonItem = PrepareComparisonWithOneContent(
+            "A1", "sameHash", DateTime.Now, 50, "file123.txt");
+
+        var filterText = "name==*.txt";
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Test]
+    public void TestWildcardMatch_WhenNameDoesNotMatchTxtExtension_ShouldBeFalse()
+    {
+        // Arrange
+        var comparisonItem = PrepareComparisonWithOneContent(
+            "A1", "sameHash", DateTime.Now, 50, "file123.doc");
+
+        var filterText = "name==*.txt";
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().BeFalse();
     }
 
     [Test]

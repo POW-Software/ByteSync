@@ -15,28 +15,22 @@ public class NameExpressionEvaluator : ExpressionEvaluator<NameExpression>
         {
             return false;
         }
+        
+        var comparisonOperator = expression.ComparisonOperator;
+        var searchText = expression.SearchText;
 
-        return expression.ComparisonOperator switch
+        if (searchText.Contains("*") && comparisonOperator.In(ComparisonOperator.Equals, ComparisonOperator.NotEquals))
         {
-            ComparisonOperator.Equals => string.Equals(name!, expression.SearchText, StringComparison.OrdinalIgnoreCase),
-            ComparisonOperator.NotEquals => !string.Equals(name!, expression.SearchText, StringComparison.OrdinalIgnoreCase),
-            ComparisonOperator.RegexMatch => Regex.IsMatch(name!, expression.SearchText, RegexOptions.IgnoreCase),
+            comparisonOperator = ComparisonOperator.RegexMatch;
+            searchText = "^" + Regex.Escape(expression.SearchText).Replace("\\*", ".*") + "$";
+        }
+
+        return comparisonOperator switch
+        {
+            ComparisonOperator.Equals => string.Equals(name!, searchText, StringComparison.OrdinalIgnoreCase),
+            ComparisonOperator.NotEquals => !string.Equals(name!, searchText, StringComparison.OrdinalIgnoreCase),
+            ComparisonOperator.RegexMatch => Regex.IsMatch(name!, searchText, RegexOptions.IgnoreCase),
             _ => false
         };
-        
-        // var inventories = item.ContentIdentities
-        //     .SelectMany(ci => ci.GetInventories())
-        //     .ToHashSet();
-        //
-        // var inventoryParts = item.ContentIdentities
-        //     .SelectMany(ci => ci.GetInventoryParts())
-        //     .ToHashSet();
-        //
-        // List<string> codes = inventories
-        //     .Select(i => i.Letter)
-        //     .Union(inventoryParts.Select(i => i.Code))
-        //     .ToList();
-        //
-        // return codes.Any(c => c.Equals(expression.DataSource, StringComparison.OrdinalIgnoreCase));
     }
 }
