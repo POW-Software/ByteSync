@@ -36,6 +36,23 @@ public class TestFiltering : BaseTestFiltering
     }
     
     [Test]
+    public void TestParse_CompleteLowerCase_Expression()
+    {
+        // Arrange
+        var filterText = "a1.contents==b1.contents";
+        
+        ConfigureDataPartIndexer();
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeTrue();
+        parseResult.Expression.Should().NotBeNull();
+        parseResult.Expression.Should().BeOfType<PropertyComparisonExpression>();
+    }
+    
+    [Test]
     public void TestParse_CompleteWithSpaces1_Expression()
     {
         // Arrange

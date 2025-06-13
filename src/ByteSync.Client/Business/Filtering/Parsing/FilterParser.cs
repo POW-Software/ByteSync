@@ -320,7 +320,7 @@ public class FilterParser : IFilterParser
 
         if (CurrentToken?.Type == FilterTokenType.Identifier)
         {
-            var identifier = CurrentToken?.Token;
+            var identifier = CurrentToken.Token;
             NextToken();
 
             if (CurrentToken?.Type == FilterTokenType.Dot)
@@ -346,7 +346,7 @@ public class FilterParser : IFilterParser
                 {
                     var filterOperator = _operatorParser.Parse(op);
 
-                    var leftDataPart = _dataPartIndexer.GetDataPart(identifier);
+                    var leftDataPart = _dataPartIndexer.GetDataPart(identifier.ToUpper());
                     if (leftDataPart == null)
                     {
                         return ParseResult.Incomplete($"Unknown data part: {identifier}");
@@ -355,12 +355,12 @@ public class FilterParser : IFilterParser
                     // Check if the right side is a data source or a value
                     if (CurrentToken?.Type == FilterTokenType.Identifier)
                     {
-                        var rightIdentifier = CurrentToken?.Token;
+                        var rightIdentifier = CurrentToken.Token;
                         NextToken();
 
                         if (CurrentToken?.Type == FilterTokenType.Dot)
                         {
-                            var rightDataPart = _dataPartIndexer.GetDataPart(rightIdentifier);
+                            var rightDataPart = _dataPartIndexer.GetDataPart(rightIdentifier.ToUpper());
                             if (rightDataPart == null)
                             {
                                 return ParseResult.Incomplete($"Unknown data part: {rightIdentifier}");
