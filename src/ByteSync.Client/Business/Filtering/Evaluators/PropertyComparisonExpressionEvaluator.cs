@@ -93,11 +93,41 @@ public class PropertyComparisonExpressionEvaluator : ExpressionEvaluator<Propert
         else if (propertyLower == Identifiers.PROPERTY_LAST_WRITE_TIME)
         {
             var targetValues = new PropertyValueCollection();
+            DateTime targetDateTime;
 
-            // Parse DateTime value
-            if (DateTime.TryParseExact(targetValue, new[] { "yyyy-MM-dd", "yyyy-MM-dd-HH-mm-ss" }, 
+            if (targetValue.StartsWith("now-", StringComparison.InvariantCultureIgnoreCase))
+            {
+                try
+                {
+                    var duration = targetValue.Substring(4); // Extract the part after “now-”
+                    var now = DateTime.UtcNow;
+
+                    // Identify unit and calculate target date
+                    var unit = duration.Last();
+                    var value = int.Parse(duration[..^1]); // Retrieve numeric value
+
+                    targetDateTime = unit switch
+                    {
+                        'm' => now.AddMinutes(-value),
+                        'h' => now.AddHours(-value),
+                        'd' => now.AddDays(-value),
+                        'w' => now.AddDays(-value * 7),
+                        'M' => now.AddMonths(-value),
+                        'y' => now.AddYears(-value),
+                        _ => throw new FormatException("Unité non reconnue.")
+                    };
+
+                    targetValues.Add(new PropertyValue(targetDateTime));
+                }
+                catch
+                {
+                    // Invalid Format
+                    return false;
+                }
+            }
+            else if (DateTime.TryParseExact(targetValue, new[] { "yyyy-MM-dd", "yyyy-MM-dd-HH-mm-ss" }, 
                     System.Globalization.CultureInfo.InvariantCulture, 
-                    System.Globalization.DateTimeStyles.None, out DateTime targetDateTime))
+                    System.Globalization.DateTimeStyles.None, out  targetDateTime))
             {
                 targetValues.Add(new PropertyValue(targetDateTime));
             }
