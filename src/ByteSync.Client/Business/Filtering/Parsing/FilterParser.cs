@@ -37,6 +37,7 @@ public class FilterParser : IFilterParser
         if (!terms.Any(t => t.Contains(":") || t.Contains(".") || t.Contains("(") ||
                             t.StartsWith(Identifiers.OPERATOR_ACTIONS, StringComparison.OrdinalIgnoreCase) ||
                             t.StartsWith(Identifiers.OPERATOR_NAME, StringComparison.OrdinalIgnoreCase) ||
+                            t.StartsWith(Identifiers.OPERATOR_PATH, StringComparison.OrdinalIgnoreCase) ||
                             t.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
                             t.Equals("OR", StringComparison.OrdinalIgnoreCase) ||
                             t.Equals("NOT", StringComparison.OrdinalIgnoreCase)))
@@ -261,6 +262,32 @@ public class FilterParser : IFilterParser
             var nameExpression = new NameExpression(searchText.ToString(), comparisonOperator);
             
             return ParseResult.Success(nameExpression); 
+        }
+        
+        if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(Identifiers.OPERATOR_PATH, StringComparison.OrdinalIgnoreCase))
+        {
+            NextToken();
+            if (CurrentToken?.Type != FilterTokenType.Operator && CurrentToken?.Type != FilterTokenType.Colon)
+            {
+                return ParseResult.Incomplete($"Expected operator after '{Identifiers.OPERATOR_PATH}'");
+            }
+            var comparisonOperator = 
+                CurrentToken.Type == FilterTokenType.Colon 
+                    ? ComparisonOperator.Equals
+                    : _operatorParser.Parse(CurrentToken.Token);
+
+            StringBuilder searchText = new();
+            NextToken();
+            
+            while (CurrentToken?.Type == FilterTokenType.String || CurrentToken?.Type == FilterTokenType.Dot || CurrentToken?.Type == FilterTokenType.Identifier)
+            {
+                searchText.Append(CurrentToken?.Token);
+                NextToken();
+            }
+            
+            var pathExpression = new PathExpression(searchText.ToString(), comparisonOperator);
+            
+            return ParseResult.Success(pathExpression); 
         }
         
         if (CurrentToken?.Type == FilterTokenType.Identifier && CurrentToken.Token.Equals(Identifiers.OPERATOR_ACTIONS, StringComparison.OrdinalIgnoreCase))
