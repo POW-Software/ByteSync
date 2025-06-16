@@ -2,15 +2,10 @@
 
 namespace ByteSync.Business.Filtering.Expressions;
 
-public class NameExpression : FilterExpression
+public class NameExpression : BaseElementPathExpression
 {
-    public string SearchText { get; }
-    
-    public ComparisonOperator ComparisonOperator { get; }
-
     public NameExpression(string searchText, ComparisonOperator comparisonOperator)
+        : base(searchText, comparisonOperator)
     {
-        SearchText = searchText;
-        ComparisonOperator = comparisonOperator;
     }
 }

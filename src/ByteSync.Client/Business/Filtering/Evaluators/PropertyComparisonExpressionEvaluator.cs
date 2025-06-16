@@ -114,7 +114,7 @@ public class PropertyComparisonExpressionEvaluator : ExpressionEvaluator<Propert
                         'w' => now.AddDays(-value * 7),
                         'M' => now.AddMonths(-value),
                         'y' => now.AddYears(-value),
-                        _ => throw new FormatException("Unité non reconnue.")
+                        _ => throw new FormatException("Unrecognized unit")
                     };
 
                     targetValues.Add(new PropertyValue(targetDateTime));
