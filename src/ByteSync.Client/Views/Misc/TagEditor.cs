@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -83,12 +84,20 @@ public class TagEditor : TemplatedControl, IDisposable
                 if (GetValue(TagsProperty) is ObservableCollection<TagItem> oldCollection)
                 {
                     oldCollection.CollectionChanged -= Tags_CollectionChanged;
+                    foreach (var tag in oldCollection)
+                    {
+                        UnsubscribeTagItem(tag);
+                    }
                 }
 
                 SetValue(TagsProperty, value);
 
                 if (value != null)
                 {
+                    foreach (var tag in value)
+                    {
+                        SubscribeTagItem(tag);
+                    }
                     value.CollectionChanged += Tags_CollectionChanged;
                 }
             }
@@ -177,11 +186,32 @@ public class TagEditor : TemplatedControl, IDisposable
         _commitTimer.Tick += CommitTimer_Tick;
         
         Tags.CollectionChanged += Tags_CollectionChanged;
+        foreach (var tag in Tags)
+        {
+            SubscribeTagItem(tag);
+        }
     }
 
 
     private void Tags_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
+        if (e.NewItems != null)
+        {
+            foreach (var item in e.NewItems.OfType<TagItem>())
+            {
+                SubscribeTagItem(item);
+            }
+        }
+
+        if (e.OldItems != null)
+        {
+            foreach (var item in e.OldItems.OfType<TagItem>())
+            {
+                UnsubscribeTagItem(item);
+            }
+        }
+
+        
         RaiseEvent(new RoutedEventArgs(TagsChangedEvent, this));
     }
 
@@ -358,6 +388,7 @@ public class TagEditor : TemplatedControl, IDisposable
     {
         if (Tags.Contains(tagItem))
         {
+            UnsubscribeTagItem(tagItem);
             tagItem.Dispose();
             Tags.Remove(tagItem);
             RaiseEvent(new RoutedEventArgs(TagRemovedEvent, this));
@@ -373,6 +404,24 @@ public class TagEditor : TemplatedControl, IDisposable
         else if (parameter is TagItem tagItem)
         {
             RemoveTag(tagItem);
+        }
+    }
+    
+    private void SubscribeTagItem(TagItem tagItem)
+    {
+        tagItem.PropertyChanged += TagItemOnPropertyChanged;
+    }
+
+    private void UnsubscribeTagItem(TagItem tagItem)
+    {
+        tagItem.PropertyChanged -= TagItemOnPropertyChanged;
+    }
+
+    private void TagItemOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(TagItem.Text))
+        {
+            RaiseEvent(new RoutedEventArgs(TagsChangedEvent, this));
         }
     }
     

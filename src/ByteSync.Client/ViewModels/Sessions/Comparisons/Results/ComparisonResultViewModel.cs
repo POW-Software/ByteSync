@@ -97,7 +97,10 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         TagFilterValidator = tag => !string.IsNullOrWhiteSpace(tag) && tag.Length >= 2;
         
         // Observe changes in tags and update the FilterText
-        var filter = this.WhenAnyValue(x => x.FilterTags.Count)
+        var filter = FilterTags
+            .ToObservableChangeSet()
+            .AutoRefresh(t => t.Text)
+            .StartWithEmpty()
             .Throttle(TimeSpan.FromMilliseconds(100))
             .ObserveOn(RxApp.MainThreadScheduler)
             .Select(_ => BuildFilter());

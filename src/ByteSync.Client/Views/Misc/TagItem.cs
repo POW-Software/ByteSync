@@ -40,12 +40,12 @@ public class TagItem : ReactiveObject, IDisposable
     public string Text
     {
         get => _text;
-        init
+        set
         {
             this.RaiseAndSetIfChanged(ref _text, value);
             UpdateParseResult();
         }
-    }
+    }   
 
     public ParseResult? ParseResult
     {

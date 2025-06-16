@@ -36,9 +36,12 @@
                                             Padding="4,2">
 
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding Text}"
-                                                       FontWeight="SemiBold"
-                                                       VerticalAlignment="Center" />
+                                            <TextBox Text="{Binding Text, Mode=TwoWay}"
+                                                     BorderThickness="0"
+                                                     Background="Transparent"
+                                                     Padding="0"
+                                                     MinWidth="60"
+                                                     VerticalAlignment="Center" />
                                             <Button Content="×"
                                                     Padding="2,0"
                                                     Margin="3,0,0,0"
