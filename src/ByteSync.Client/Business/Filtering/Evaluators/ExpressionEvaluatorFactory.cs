@@ -21,6 +21,7 @@ public class ExpressionEvaluatorFactory : IExpressionEvaluatorFactory
             { typeof(TrueExpression), typeof(TrueExpressionEvaluator) },
             { typeof(ExistsExpression), typeof(ExistsExpressionEvaluator) },
             { typeof(NameExpression), typeof(NameExpressionEvaluator) },
+            { typeof(PathExpression), typeof(PathExpressionEvaluator) },
             { typeof(FileSystemTypeExpression), typeof(FileSystemTypeExpressionEvaluator) },
             { typeof(FutureStateExpression), typeof(FutureStateExpressionEvaluator) },
             { typeof(OnlyExpression), typeof(OnlyExpressionEvaluator) },

@@ -16,6 +16,7 @@ public class Identifiers
     public const string OPERATOR_IS = "is";
     public const string OPERATOR_ACTIONS = "actions";
     public const string OPERATOR_NAME = "name";
+    public const string OPERATOR_PATH = "path";
     
     public const string PROPERTY_CONTENTS = "contents";
     public const string PROPERTY_CONTENTS_AND_DATE = "contents-and-date";

@@ -61,7 +61,9 @@
                 </Border>
                 
                 <Border Grid.Column="1" CornerRadius="4" Background="{DynamicResource SettingsHeaderColor}" Margin="24 0 0 0">
-                    <StackPanel Orientation="Horizontal" Margin="6 0 6 0" HorizontalAlignment="Center" DataContext="{Binding PageParameters}">
+                    <StackPanel Orientation="Horizontal" Margin="6 0 6 0" 
+                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                DataContext="{Binding PageParameters}">
                         <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="0 3 3 3" VerticalAlignment="Bottom"
                                 Command="{Binding Path=FirstPageCommand}"
                                 Background="Transparent" MaxHeight="26">
@@ -164,7 +166,7 @@
                                 <DataTemplate>
                                     <Border BorderThickness="0" CornerRadius="4" Margin="4" VerticalAlignment="Center">
                                         <StackPanel Orientation="Horizontal">
-                                            <Label Content="{Binding PathIdentity.LinkingKeyValue}" />
+                                            <TextBlock Text="{Binding PathIdentity.LinkingKeyValue}" />
                                         </StackPanel>
                                     </Border>
 

@@ -2,9 +2,9 @@
 
 namespace ByteSync.Business.Filtering.Expressions;
 
-public class NameExpression : BaseElementPathExpression
+public class PathExpression : BaseElementPathExpression
 {
-    public NameExpression(string searchText, ComparisonOperator comparisonOperator)
+    public PathExpression(string searchText, ComparisonOperator comparisonOperator)
         : base(searchText, comparisonOperator)
     {
     }

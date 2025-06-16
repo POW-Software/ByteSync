@@ -8,5 +8,6 @@ public enum ComparisonOperator
     LessThan,
     GreaterThanOrEqual,
     LessThanOrEqual,
-    RegexMatch
+    RegexMatch,
+    RegexNotMatch,
 }
