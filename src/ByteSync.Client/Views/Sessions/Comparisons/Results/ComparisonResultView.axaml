@@ -166,7 +166,7 @@
                                 <DataTemplate>
                                     <Border BorderThickness="0" CornerRadius="4" Margin="4" VerticalAlignment="Center">
                                         <StackPanel Orientation="Horizontal">
-                                            <Label Content="{Binding PathIdentity.LinkingKeyValue}" />
+                                            <TextBlock Text="{Binding PathIdentity.LinkingKeyValue}" />
                                         </StackPanel>
                                     </Border>
 
