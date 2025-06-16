@@ -8,7 +8,7 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="3"/>
         <Setter Property="Padding" Value="4"/>
-        <Setter Property="MinHeight" Value="30"/>
+        <Setter Property="MinHeight" Value="34"/>
         <Setter Property="Template">
             <ControlTemplate>
                 <Border Background="{TemplateBinding Background}"
@@ -31,22 +31,22 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border Background="{Binding Path=TagBackground}"
-                                            CornerRadius="3"
-                                            Margin="0,1,3,1"
+                                            CornerRadius="2"
+                                            Margin="0,0,3,0"
                                             Padding="4,2">
 
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBox Text="{Binding Text, Mode=TwoWay}"
+                                            <TextBox Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                     Classes="ExistingTagItemTextBox"
                                                      BorderThickness="0"
                                                      Background="Transparent"
-                                                     Padding="0"
-                                                     MinWidth="60"
                                                      VerticalAlignment="Center" />
                                             <Button Content="×"
                                                     Padding="2,0"
                                                     Margin="3,0,0,0"
                                                     Background="Transparent"
                                                     BorderThickness="0"
+                                                    Focusable="False"
                                                     Command="{Binding Path=RemoveTag, RelativeSource={RelativeSource AncestorType=misc:TagEditor}}"
                                                     CommandParameter="{Binding}" />
                                         </StackPanel>
@@ -55,7 +55,7 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                         <TextBox Grid.Column="1" Name="PART_TextBox"
-                                 Classes="TagEditorTextBox"
+                                 Classes="NewTagItemTextBox"
                                  Background="Transparent"
                                  BorderThickness="0"
                                  Padding="2,0"
@@ -70,7 +70,7 @@
         </Setter>
     </Style>
     
-    <Style Selector="TextBox.TagEditorTextBox">
+    <Style Selector="TextBox.NewTagItemTextBox">
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Padding" Value="2,0"/>
@@ -79,12 +79,12 @@
         <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
     
-    <Style Selector="TextBox.TagEditorTextBox:focus">
+    <Style Selector="TextBox.NewTagItemTextBox:focus">
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Background" Value="Transparent"/>
     </Style>
     
-    <Style Selector="TextBox.TagEditorTextBox /template/ Border#PART_BorderElement">
+    <Style Selector="TextBox.NewTagItemTextBox /template/ Border#PART_BorderElement">
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="CornerRadius" Value="0"/>
         <Setter Property="Background" Value="Transparent"/>
@@ -92,7 +92,36 @@
         <Setter Property="MinHeight" Value="20"/>
     </Style>
     
-    <Style Selector="TextBox.TagEditorTextBox:focus /template/ Border#PART_BorderElement">
+    <Style Selector="TextBox.NewTagItemTextBox:focus /template/ Border#PART_BorderElement">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    
+    
+    <Style Selector="TextBox.ExistingTagItemTextBox">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Padding" Value="2,0"/>
+        <Setter Property="MinWidth" Value="10"/>
+        <Setter Property="MinHeight" Value="20"/>
+        <Setter Property="MaxHeight" Value="20"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    
+    <Style Selector="TextBox.ExistingTagItemTextBox:focus">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    
+    <Style Selector="TextBox.ExistingTagItemTextBox /template/ Border#PART_BorderElement">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="CornerRadius" Value="0"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Padding" Value="2,0"/>
+        <Setter Property="MinHeight" Value="20"/>
+    </Style>
+    
+    <Style Selector="TextBox.ExistingTagItemTextBox:focus /template/ Border#PART_BorderElement">
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Background" Value="Transparent"/>
     </Style>
