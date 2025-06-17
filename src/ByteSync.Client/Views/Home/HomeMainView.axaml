@@ -12,7 +12,7 @@
     
     <Grid> 
         
-        <Border BorderBrush="{DynamicResource BlockBackColor}" CornerRadius="4" BorderThickness="5" 
+        <Border BorderBrush="{DynamicResource Gray8}" CornerRadius="4" BorderThickness="1" 
                 HorizontalAlignment="Center" VerticalAlignment="Center">
             
             <Border.Background>
