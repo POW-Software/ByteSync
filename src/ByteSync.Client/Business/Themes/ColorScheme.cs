@@ -31,10 +31,10 @@ public class ColorScheme
     public ThemeColor DisabledMemberBackGround { get; set; }
     public ThemeColor OtherMemberBackGround { get; set; }
     
-    public Color ConnectedMemberLetterBackGround { get; set; }
-    public Color DisabledMemberLetterBackGround { get; set; }
-    public Color ConnectedMemberLetterBorder { get; set; }
-    public Color DisabledMemberLetterBorder { get; set; }
+    public ThemeColor ConnectedMemberLetterBackGround { get; set; }
+    public ThemeColor DisabledMemberLetterBackGround { get; set; }
+    public ThemeColor ConnectedMemberLetterBorder { get; set; }
+    public ThemeColor DisabledMemberLetterBorder { get; set; }
     
     public Color BsAccentButtonBackGround { get; set; }
     public Color BsAccentButtonPointerOverBackGround { get; set; }

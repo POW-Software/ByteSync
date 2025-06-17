@@ -47,6 +47,10 @@ public class SessionMachineViewModel : ActivatableViewModelBase
     private IBrush? _currentMemberBackGround;
     private IBrush? _otherMemberBackGround;
     private IBrush? _unknownBadgeBrush;
+    private IBrush? _currentMemberLetterBackGround;
+    private IBrush? _otherMemberLetterBackGround;
+    private IBrush? _currentMemberLetterBorder;
+    private IBrush? _otherMemberLetterBorder;
 
     public SessionMachineViewModel()
     {
@@ -150,6 +154,18 @@ public class SessionMachineViewModel : ActivatableViewModelBase
             true => CurrentMemberBackGround,
             false => OtherMemberBackGround,
         };
+        
+        LetterBackBrush = IsLocalMachine switch
+        {
+            true => CurrentMemberLetterBackGround,
+            false => OtherMemberLetterBackGround,
+        };
+        
+        LetterBorderBrush = IsLocalMachine switch
+        {
+            true => CurrentMemberLetterBorder,
+            false => OtherMemberLetterBorder,
+        };
     }
     
     private void InitializeBrushes()
@@ -157,6 +173,12 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         _currentMemberBackGround = _themeService.GetBrush("CurrentMemberBackGround");
         _otherMemberBackGround = _themeService.GetBrush("OtherMemberBackGround");
         _unknownBadgeBrush = _themeService.GetBrush("OtherMemberBackGround");
+        
+        _currentMemberLetterBackGround = _themeService.GetBrush("ConnectedMemberLetterBackGround");
+        _otherMemberLetterBackGround = _themeService.GetBrush("DisabledMemberLetterBackGround");
+        
+        _currentMemberLetterBorder = _themeService.GetBrush("ConnectedMemberLetterBorder");
+        _otherMemberLetterBorder = _themeService.GetBrush("DisabledMemberLetterBorder");
     }
 
     private IBrush CurrentMemberBackGround => _currentMemberBackGround;
@@ -164,6 +186,14 @@ public class SessionMachineViewModel : ActivatableViewModelBase
     private IBrush OtherMemberBackGround => _otherMemberBackGround;
     
     private IBrush UnknownBadgeBrush => _unknownBadgeBrush;
+    
+    private IBrush CurrentMemberLetterBackGround => _currentMemberLetterBackGround;
+    
+    private IBrush OtherMemberLetterBackGround => _otherMemberLetterBackGround;
+    
+    private IBrush CurrentMemberLetterBorder => _currentMemberLetterBorder;
+    
+    private IBrush OtherMemberLetterBorder => _otherMemberLetterBorder;
 
     private void OnLocaleChanged(PropertyChangedEventArgs _)
     {
@@ -191,6 +221,12 @@ public class SessionMachineViewModel : ActivatableViewModelBase
     
     [Reactive]
     public IBrush MainGridBrush { get; set; }
+    
+    [Reactive]
+    public IBrush LetterBackBrush { get; set; }
+        
+    [Reactive]
+    public IBrush LetterBorderBrush { get; set; }
     
     [Reactive]
     public DateTimeOffset JoinedSessionOn { get; set; } 

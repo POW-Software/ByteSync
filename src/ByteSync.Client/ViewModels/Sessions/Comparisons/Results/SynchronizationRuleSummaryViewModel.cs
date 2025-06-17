@@ -147,7 +147,7 @@ public class SynchronizationRuleSummaryViewModel : ViewModelBase, IDisposable
 
     private void Edit(Avalonia.Input.PointerPressedEventArgs _)
     {
-        _dialogService.ShowFlyout(nameof(Resources.Shell_DuplicateSynchronizationRule), false,
+        _dialogService.ShowFlyout(nameof(Resources.Shell_EditSynchronizationRule), false,
             _flyoutElementViewModelFactory.BuilSynchronizationRuleGlobalViewModel(SynchronizationRule, false));
     }
 

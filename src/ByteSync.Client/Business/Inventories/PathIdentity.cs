@@ -25,8 +25,7 @@ public class PathIdentity
     public string FileName { get; set; }
         
     public string LinkingData { get; set; }
-
-    public FileSystemTypes InventorySourceType { get; set; }
+    
 
     protected bool Equals(PathIdentity other)
     {
