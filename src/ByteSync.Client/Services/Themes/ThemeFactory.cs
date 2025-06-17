@@ -176,7 +176,7 @@ public class ThemeFactory : IThemeFactory
                 
             colorScheme.ConnectedMemberLetterBorder = themeColor
                 .WithSaturationValue(0.20, 0.78);
-            colorScheme.DisabledMemberLetterBorder = new ThemeColor(Color.FromArgb(0xFF, 0xE0, 0xE0, 0xE0)); // new ThemeColor(Color.FromArgb(0xFF, 0xDD, 0xDD, 0xDD));
+            colorScheme.DisabledMemberLetterBorder = new ThemeColor(Color.FromArgb(0xFF, 0xE0, 0xE0, 0xE0));
             
             // AccentButton
             colorScheme.BsAccentButtonBackGround = themeColor
