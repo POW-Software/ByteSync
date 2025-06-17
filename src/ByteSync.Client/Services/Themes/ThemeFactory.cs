@@ -85,16 +85,16 @@ public class ThemeFactory : IThemeFactory
             // SessionMember / LobbyMember
             colorScheme.CurrentMemberBackGround = themeColor
                 .WithSaturationValue(0.35, 0.22);
-            colorScheme.DisabledMemberBackGround = new ThemeColor(Color.FromArgb(0xFF, 0x28, 0x28, 0x28));
-            colorScheme.OtherMemberBackGround = new ThemeColor(Color.FromArgb(0xFF, 0x28, 0x28, 0x28));
+            colorScheme.DisabledMemberBackGround = new ThemeColor(Color.FromArgb(0xFF, 0x30, 0x30, 0x30));
+            colorScheme.OtherMemberBackGround = new ThemeColor(Color.FromArgb(0xFF, 0x30, 0x30, 0x30));
 
             colorScheme.ConnectedMemberLetterBackGround = themeColor
                 .WithSaturationValue(0.35, 0.28);
-            colorScheme.DisabledMemberLetterBackGround = new ThemeColor(Color.FromArgb(0xFF, 0x35, 0x35, 0x35));
+            colorScheme.DisabledMemberLetterBackGround = new ThemeColor(Color.FromArgb(0xFF, 0x37, 0x37, 0x37));
             
             colorScheme.ConnectedMemberLetterBorder = themeColor
                 .WithSaturationValue(0.35, 0.34);
-            colorScheme.DisabledMemberLetterBorder = new ThemeColor(Color.FromArgb(0xFF, 0x3C, 0x3C, 0x3C));
+            colorScheme.DisabledMemberLetterBorder = new ThemeColor(Color.FromArgb(0xFF, 0x3D, 0x3D, 0x3D));
             
             // AccentButton
             colorScheme.BsAccentButtonBackGround = themeColor
@@ -167,16 +167,16 @@ public class ThemeFactory : IThemeFactory
             // SessionMember / LobbyMember
             colorScheme.CurrentMemberBackGround = themeColor
                 .WithSaturationValue(0.20, 0.92);
-            colorScheme.DisabledMemberBackGround = new ThemeColor(Color.FromArgb(0xFF, 0xF0, 0xF0, 0xF0));
-            colorScheme.OtherMemberBackGround = new ThemeColor(Color.FromArgb(0xFF, 0xF0, 0xF0, 0xF0));
+            colorScheme.DisabledMemberBackGround = new ThemeColor(Color.FromArgb(0xFF, 0xEC, 0xEC, 0xEC));
+            colorScheme.OtherMemberBackGround = new ThemeColor(Color.FromArgb(0xFF, 0xEC, 0xEC, 0xEC));
             
             colorScheme.ConnectedMemberLetterBackGround = themeColor
                 .WithSaturationValue(0.20, 0.84);
-            colorScheme.DisabledMemberLetterBackGround = new ThemeColor(Color.FromArgb(0xFF, 0xE7, 0xE7, 0xE7));
+            colorScheme.DisabledMemberLetterBackGround = new ThemeColor(Color.FromArgb(0xFF, 0xE6, 0xE6, 0xE6));
                 
             colorScheme.ConnectedMemberLetterBorder = themeColor
                 .WithSaturationValue(0.20, 0.78);
-            colorScheme.DisabledMemberLetterBorder =  new ThemeColor(Color.FromArgb(0xFF, 0xE0, 0xE0, 0xE0));
+            colorScheme.DisabledMemberLetterBorder = new ThemeColor(Color.FromArgb(0xFF, 0xE0, 0xE0, 0xE0)); // new ThemeColor(Color.FromArgb(0xFF, 0xDD, 0xDD, 0xDD));
             
             // AccentButton
             colorScheme.BsAccentButtonBackGround = themeColor
@@ -207,7 +207,7 @@ public class ThemeFactory : IThemeFactory
             colorScheme.Gray2 = Color.FromArgb(0xFF, 0x7F, 0x7F, 0x7F);
             colorScheme.Gray5 = Color.FromArgb(0xFF, 0xB9, 0xB9, 0xB9);
             colorScheme.Gray8 = Color.FromArgb(0xFF, 0xE0, 0xE0, 0xE0);
-            colorScheme.SettingsHeaderColor = Color.FromArgb(0xFF, 0xE6, 0xE6, 0xE6);
+            colorScheme.SettingsHeaderColor = Color.FromArgb(0xFF, 0xEC, 0xEC, 0xEC);
             colorScheme.BlockBackColor = Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF);
 
             colorScheme.MainWindowTopColor = Color.FromArgb(0xFF, 0xFA, 0xFA, 0xFA); // ColorUtils.BlendWithTransparency(colorScheme.VeryLightGray, colorScheme.MainAccentColor.AvaloniaColor, 0.05);

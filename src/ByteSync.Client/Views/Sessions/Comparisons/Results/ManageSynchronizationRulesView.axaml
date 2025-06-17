@@ -16,7 +16,7 @@
     
     <Grid Margin="0 ">
         <StackPanel Orientation="Vertical">
-            <!-- Upper line -->
+            <!-- 1st line -->
             <StackPanel Orientation="Horizontal">
                 <!-- Add Button -->
                 <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="0 0 6 0" 
@@ -52,7 +52,8 @@
                 </Button>
             </StackPanel>
             
-            <ItemsControl ItemsSource="{Binding SynchronizationRules}">
+            <!-- 2nd line -->
+            <ItemsControl ItemsSource="{Binding SynchronizationRules}" IsVisible="{Binding SynchronizationRules.Count}" >
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Vertical" Margin="3 3" />

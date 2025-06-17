@@ -115,35 +115,38 @@
             <StackPanel Grid.Row="1" Orientation="Vertical" IsVisible="{Binding AreResultsLoaded}">
                 <WrapPanel Orientation="Horizontal" Margin="0 3 0 3">
 
-                    <WrapPanel Orientation="Horizontal" Margin="0 3 24 3">
+                    <Border  Margin="0 3 24 3" CornerRadius="4" Background="{DynamicResource SettingsHeaderColor}">
                         
+                        <WrapPanel Orientation="Horizontal">
+                            <!-- Boutons Add/Delete Manual Actions -->
+                            <StackPanel Orientation="Horizontal" Margin="0 0 0 0" IsVisible="{Binding CanManageActions}"
+                                        IsEnabled="{Binding !IsCloudProfileSession}">
+                                <Button Classes="GenericButton" HorizontalAlignment="Stretch" Margin="0 0 6 0" VerticalAlignment="Bottom"
+                                        Command="{Binding Path=AddManualActionCommand}"
+                                        Height="26">
+                                    <StackPanel Orientation="Horizontal">
+                                        <misc:Icon FontSize="12" Value="RegularPlus" />
+                                        <TextBlock Text="{localizations:Loc ComparisonResult_AddTargetedAction}" />
+                                    </StackPanel>
+                                </Button>
 
-                        <!-- Boutons Add/Delete Manual Actions -->
-                        <StackPanel Orientation="Horizontal" Margin="0 0 0 0" IsVisible="{Binding CanManageActions}"
-                                    IsEnabled="{Binding !IsCloudProfileSession}">
-                            <Button Classes="GenericButton" HorizontalAlignment="Stretch" Margin="0 0 6 0" VerticalAlignment="Bottom"
-                                    Command="{Binding Path=AddManualActionCommand}"
-                                    Height="26">
-                                <StackPanel Orientation="Horizontal">
-                                    <misc:Icon FontSize="12" Value="RegularPlus" />
-                                    <TextBlock Text="{localizations:Loc ComparisonResult_AddTargetedAction}" />
-                                </StackPanel>
-                            </Button>
-
-                            <Button Classes="GenericButton" HorizontalAlignment="Stretch" Margin="0 0 0 0" VerticalAlignment="Bottom"
-                                    Command="{Binding Path=DeleteManualActionsCommand}"
-                                    Height="26">
-                                <StackPanel Orientation="Horizontal">
-                                    <misc:Icon FontSize="12" Value="RegularTrash" />
-                                    <TextBlock Text="{localizations:Loc ComparisonResult_DeleteTargetedActions}" />
-                                </StackPanel>
-                            </Button>
-                        </StackPanel>
-                    </WrapPanel>
+                                <Button Classes="GenericButton" HorizontalAlignment="Stretch" Margin="0 0 0 0" VerticalAlignment="Bottom"
+                                        Command="{Binding Path=DeleteManualActionsCommand}"
+                                        Height="26">
+                                    <StackPanel Orientation="Horizontal">
+                                        <misc:Icon FontSize="12" Value="RegularTrash" />
+                                        <TextBlock Text="{localizations:Loc ComparisonResult_DeleteTargetedActions}" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </WrapPanel>
+                        
+                    </Border>
      
-                    <ContentControl Content="{Binding ManageSynchronizationRules}" IsVisible="{Binding CanManageActions}" IsEnabled="{Binding !IsCloudProfileSession}"
-                                    Margin="0 3 0 3 " MinWidth="200"
-                                    Background="{DynamicResource SystemChromeMediumColor}" />
+                    <Border Margin="0 3 0 3" CornerRadius="4" Background="{DynamicResource SettingsHeaderColor}">
+                        <ContentControl Content="{Binding ManageSynchronizationRules}" IsVisible="{Binding CanManageActions}" IsEnabled="{Binding !IsCloudProfileSession}"
+                                         MinWidth="200"/>
+                    </Border>
                 </WrapPanel>
 
                 <DataGrid Name="DataGrid" AutoGenerateColumns="False" Margin="0 3 0 0" ItemsSource="{Binding Path=ComparisonItems}"
