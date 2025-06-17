@@ -128,8 +128,8 @@ public class ThemeFactory : IThemeFactory
             colorScheme.SettingsHeaderColor = Color.FromArgb(0xFF, 0x30, 0x30, 0x30);
             colorScheme.BlockBackColor = Color.FromArgb(0xFF, 0x1F, 0x1F, 0x1F);
 
-            colorScheme.MainWindowTopColor = colorScheme.VeryLightGray; // ColorUtils.BlendWithTransparency(colorScheme.VeryLightGray, colorScheme.MainAccentColor.AvaloniaColor, 0.05);
-            colorScheme.MainWindowBottomColor = Color.FromArgb(0xFF, 0x04, 0x04, 0x04); //ColorUtils.BlendWithTransparency(Color.FromArgb(0xFF, 0x04, 0x04, 0x04), colorScheme.MainAccentColor.AvaloniaColor, 0.05);
+            colorScheme.MainWindowTopColor = colorScheme.VeryLightGray;
+            colorScheme.MainWindowBottomColor = Color.FromArgb(0xFF, 0x04, 0x04, 0x04);
             
             ComputeSecondaryColors(colorScheme, secondaryColorHue);
             
@@ -210,8 +210,8 @@ public class ThemeFactory : IThemeFactory
             colorScheme.SettingsHeaderColor = Color.FromArgb(0xFF, 0xEC, 0xEC, 0xEC);
             colorScheme.BlockBackColor = Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF);
 
-            colorScheme.MainWindowTopColor = Color.FromArgb(0xFF, 0xFA, 0xFA, 0xFA); // ColorUtils.BlendWithTransparency(colorScheme.VeryLightGray, colorScheme.MainAccentColor.AvaloniaColor, 0.05);
-            colorScheme.MainWindowBottomColor = Color.FromArgb(0xFF, 0xEF, 0xEF, 0xEF); // ColorUtils.BlendWithTransparency(Color.FromArgb(0xFF, 0xEF, 0xEF, 0xEF), colorScheme.MainAccentColor.AvaloniaColor, 0.05);
+            colorScheme.MainWindowTopColor = Color.FromArgb(0xFF, 0xFA, 0xFA, 0xFA);
+            colorScheme.MainWindowBottomColor = Color.FromArgb(0xFF, 0xEF, 0xEF, 0xEF);
             
             ComputeSecondaryColors(colorScheme, secondaryColorHue);
             
