@@ -40,9 +40,6 @@
                     <TextBlock Name="MachineDescriptionTextBlock" FontWeight="Bold" Text="{Binding MachineDescription}" Margin="3" />
                     <TextBlock Name="ClientInstanceIdTextBlock" FontStyle="Italic" Text="{Binding ClientInstanceId}" Margin="3"
                                IsVisible="{Binding ClientInstanceId, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                    <!--  Foreground="{StaticResource SystemBaseHighColor}" -->
-                    <TextBlock Name="EmailAddressTextBlock" Text="{Binding EmailAddress}" Margin="3"
-                               Foreground="{StaticResource SystemBaseHighColor}" />
                 </StackPanel>
             </Grid>
 

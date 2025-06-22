@@ -73,8 +73,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         _logger = logger;
 
         SessionMemberInfo = sessionMemberInfo;
-
-        EmailAddress = "";
+        
         IsLocalMachine = sessionMemberInfo.ClientInstanceId.Equals(environmentService.ClientInstanceId);
         JoinedSessionOn = sessionMemberInfo.JoinedSessionOn;
         
@@ -212,9 +211,6 @@ public class SessionMachineViewModel : ActivatableViewModelBase
 
     [Reactive]
     public string MachineDescription { get; set; }
-
-    [Reactive]
-    public string EmailAddress { get; set; }
         
     [Reactive]
     public bool IsLocalMachine { get; set; }
