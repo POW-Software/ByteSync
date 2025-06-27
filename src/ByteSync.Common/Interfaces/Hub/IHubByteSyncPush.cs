@@ -37,6 +37,10 @@ public interface IHubByteSyncPush
 
     Task InventoryStarted(InventoryStartedDTO inventoryStartedDto);
 
+    Task DataNodeAdded(DataNodeDTO dataNodeDto);
+
+    Task DataNodeRemoved(DataNodeDTO dataNodeDto);
+
     Task DataSourceAdded(DataSourceDTO dataSourceDto);
 
     Task DataSourceRemoved(DataSourceDTO dataSourceDto);
