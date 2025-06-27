@@ -47,7 +47,7 @@ public class DataSourceChecker : IDataSourceChecker
     private async Task ShowError()
     {
         var messageBoxViewModel = _dialogService.CreateMessageBoxViewModel(
-            nameof(Resources.PathItemChecker_SubPathError_Title), nameof(Resources.PathItemChecker_SubPathError_Message));
+            nameof(Resources.DataSourceChecker_SubPathError_Title), nameof(Resources.DataSourceChecker_SubPathError_Message));
         messageBoxViewModel.ShowOK = true;
         await _dialogService.ShowMessageBoxAsync(messageBoxViewModel);
     }

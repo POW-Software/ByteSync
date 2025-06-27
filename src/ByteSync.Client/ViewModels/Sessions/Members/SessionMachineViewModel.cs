@@ -94,10 +94,10 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         Observable.Merge(AddDirectoryCommand.IsExecuting, AddFileCommand.IsExecuting)
             .Select(executing => !executing).Subscribe(canRun);
 
-        var pathItemsObservable = _dataSourceRepository.ObservableCache.Connect()
-            .Filter(pathItem => pathItem.BelongsTo(sessionMemberInfo))
+        var dataSourcesObservable = _dataSourceRepository.ObservableCache.Connect()
+            .Filter(dataSource => dataSource.BelongsTo(sessionMemberInfo))
             .Sort(SortExpressionComparer<DataSource>.Ascending(p => p.Code))
-            .Transform(pathItem => _dataSourceProxyFactory.CreateDataSourceProxy(pathItem))
+            .Transform(dataSource => _dataSourceProxyFactory.CreateDataSourceProxy(dataSource))
             .DisposeMany() // dispose when no longer required
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _data)
@@ -105,7 +105,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         
         this.WhenActivated(disposables =>
         {
-            pathItemsObservable.DisposeWith(disposables);
+            dataSourcesObservable.DisposeWith(disposables);
 
             _sessionService.SessionStatusObservable.CombineLatest(_sessionService.RunSessionProfileInfoObservable)
                 .DistinctUntilChanged()

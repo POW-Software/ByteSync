@@ -26,7 +26,7 @@ public class GetDataSourcesCommandHandler : IRequestHandler<GetDataSourcesReques
         var inventoryData = await _inventoryRepository.Get(sessionId);
         if (inventoryData == null)
         {
-            _logger.LogInformation("GetPathItems: session {sessionId}: not found", sessionId);
+            _logger.LogInformation("GetDataSources: session {sessionId}: not found", sessionId);
             return new List<EncryptedDataSource>();
         }
 
@@ -35,7 +35,7 @@ public class GetDataSourcesCommandHandler : IRequestHandler<GetDataSourcesReques
 
         if (inventoryMember == null)
         {
-            _logger.LogInformation("GetPathItems: clientInstanceId {clientInstanceId} not found in session {sessionId}", clientInstanceId, sessionId);
+            _logger.LogInformation("GetDataSources: clientInstanceId {clientInstanceId} not found in session {sessionId}", clientInstanceId, sessionId);
             return new List<EncryptedDataSource>();
         }
 

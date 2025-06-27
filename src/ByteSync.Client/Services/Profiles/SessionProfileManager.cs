@@ -357,7 +357,7 @@ public class SessionProfileManager : ISessionProfileManager
         // RestrictionIP
         cloudSessionProfileDetails.Options = cloudSessionProfileOptions;
 
-        var allPathItems = _dataSourceRepository.Elements.ToList();
+        var allDataSources = _dataSourceRepository.Elements.ToList();
         foreach (var sessionMemberInfo in _sessionMemberRepository.Elements)
         {
             var cloudSessionProfileMember = new CloudSessionProfileMember();
@@ -369,7 +369,7 @@ public class SessionProfileManager : ISessionProfileManager
                 data.Slots
                     .Single(t => t.ClientId.Equals(sessionMemberInfo.Endpoint.ClientId)).ProfileClientId;
             cloudSessionProfileMember.ProfileClientPassword = $"CSPCP_{Guid.NewGuid()}";
-            cloudSessionProfileMember.DataSources = allPathItems
+            cloudSessionProfileMember.DataSources = allDataSources
                 .Where(pi => pi.BelongsTo(sessionMemberInfo))
                 .OrderBy(pivm => pivm.Code)
                 .Select(pi => new SessionProfileDataSource(pi))
@@ -395,7 +395,7 @@ public class SessionProfileManager : ISessionProfileManager
         localSessionProfileDetails.CreationDatetime = DateTime.Now;
         localSessionProfileDetails.CreatedWithVersion = _connectionService.CurrentEndPoint!.Version;
         localSessionProfileDetails.Options = localSessionProfileOptions;
-        localSessionProfileDetails.PathItems = _dataSourceRepository.SortedCurrentMemberPathItems;
+        localSessionProfileDetails.DataSources = _dataSourceRepository.SortedCurrentMemberDataSources;
         
         var synchronizationRules = _synchronizationRulesConverter.ConvertLooseSynchronizationRules(
             _synchronizationRuleRepository.Elements.ToList());

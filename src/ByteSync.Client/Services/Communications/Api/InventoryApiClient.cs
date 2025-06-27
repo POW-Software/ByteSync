@@ -37,13 +37,13 @@ public class InventoryApiClient : IInventoryApiClient
     {
         try
         {
-            var result = await _apiInvoker.GetAsync<List<EncryptedDataSource>?>($"session/{sessionId}/inventory/pathItem/{clientInstanceId}");
+            var result = await _apiInvoker.GetAsync<List<EncryptedDataSource>?>($"session/{sessionId}/inventory/dataSource/{clientInstanceId}");
 
             return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error while getting pathItems from an inventory with sessionId: {sessionId}", sessionId);
+            _logger.LogError(ex, "Error while getting dataSources from an inventory with sessionId: {sessionId}", sessionId);
                 
             throw;
         }
@@ -53,13 +53,13 @@ public class InventoryApiClient : IInventoryApiClient
     {
         try
         {
-            var result = await _apiInvoker.PostAsync<bool>($"session/{sessionId}/inventory/pathItem", encryptedDataSource);
+            var result = await _apiInvoker.PostAsync<bool>($"session/{sessionId}/inventory/dataSource", encryptedDataSource);
 
             return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error while adding pathItem to an inventory with sessionId: {sessionId}", sessionId);
+            _logger.LogError(ex, "Error while adding dataSource to an inventory with sessionId: {sessionId}", sessionId);
                 
             throw;
         }
@@ -69,13 +69,13 @@ public class InventoryApiClient : IInventoryApiClient
     {
         try
         {
-            var result = await _apiInvoker.DeleteAsync<bool>($"session/{sessionId}/inventory/pathItem", encryptedDataSource);
+            var result = await _apiInvoker.DeleteAsync<bool>($"session/{sessionId}/inventory/dataSource", encryptedDataSource);
 
             return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error while removing pathItem from an inventory with sessionId: {sessionId}", sessionId);
+            _logger.LogError(ex, "Error while removing dataSource from an inventory with sessionId: {sessionId}", sessionId);
                 
             throw;
         }

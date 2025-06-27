@@ -34,7 +34,7 @@ public class GetDataSourcesCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedDataSource = new EncryptedDataSource { Code = "pathItem1" };
+        var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.InventoryMembers.Add(new InventoryMemberData
             { ClientInstanceId = client.ClientInstanceId, SharedDataSources = new List<EncryptedDataSource> { encryptedDataSource } });
@@ -48,10 +48,10 @@ public class GetDataSourcesCommandHandlerTests
         var request = new GetDataSourcesRequest(sessionId, client.ClientInstanceId);
         
         // Act
-        var pathItems = await _getDataSourcesCommandHandler.Handle(request, CancellationToken.None);
+        var dataSources = await _getDataSourcesCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        pathItems!.Count.Should().Be(1);
+        dataSources!.Count.Should().Be(1);
         A.CallTo(() => _mockInventoryRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
     }
     
@@ -69,10 +69,10 @@ public class GetDataSourcesCommandHandlerTests
         var request = new GetDataSourcesRequest(sessionId, client.ClientInstanceId);
         
         // Act
-        var pathItems = await _getDataSourcesCommandHandler.Handle(request, CancellationToken.None);
+        var dataSources = await _getDataSourcesCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        pathItems.Should().BeEmpty();
+        dataSources.Should().BeEmpty();
         A.CallTo(() => _mockInventoryRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
     }
     
@@ -82,9 +82,9 @@ public class GetDataSourcesCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var pathItem = new EncryptedDataSource { Code = "pathItem1" };
+        var dataSource = new EncryptedDataSource { Code = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
-        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId, SharedDataSources = new List<EncryptedDataSource> { pathItem } });
+        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId, SharedDataSources = new List<EncryptedDataSource> { dataSource } });
 
         A.CallTo(() => _mockInventoryRepository.Get(sessionId))
             .Returns(inventoryData);
@@ -92,11 +92,11 @@ public class GetDataSourcesCommandHandlerTests
         var request = new GetDataSourcesRequest(sessionId, client.ClientInstanceId);
         
         // Act
-        var pathItems = await _getDataSourcesCommandHandler.Handle(request, CancellationToken.None);
+        var dataSources = await _getDataSourcesCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        pathItems.Should().NotBeNull();
-        pathItems!.Count.Should().Be(1);
+        dataSources.Should().NotBeNull();
+        dataSources!.Count.Should().Be(1);
         A.CallTo(() => _mockInventoryRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
     }
 }

@@ -35,7 +35,7 @@ public class RemoveDataSourceCommandHandler : IRequestHandler<RemoveDataSourceRe
         var cloudSessionData = await _cloudSessionsRepository.Get(request.SessionId);
         if (cloudSessionData == null)
         {
-            _logger.LogInformation("RemovePathItem: session {sessionId}: not found", request.SessionId);
+            _logger.LogInformation("RemoveDataSource: session {sessionId}: not found", request.SessionId);
             return false;
         }
 

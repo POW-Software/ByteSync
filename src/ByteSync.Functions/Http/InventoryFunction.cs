@@ -55,9 +55,9 @@ public class InventoryFunction
         return response;
     }
     
-    [Function("InventoryAddPathItemFunction")]
-    public async Task<HttpResponseData> AddPathItem(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/inventory/pathItem")] 
+    [Function("InventoryAddDataSourceFunction")]
+    public async Task<HttpResponseData> AddDataSource(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/inventory/dataSource")] 
         HttpRequestData req,
         FunctionContext executionContext,
         string sessionId)
@@ -74,9 +74,9 @@ public class InventoryFunction
         return response;
     }
     
-    [Function("InventoryRemovePathItemFunction")]
-    public async Task<HttpResponseData> RemovePathItem(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "session/{sessionId}/inventory/pathItem")] 
+    [Function("InventoryRemoveDataSourceFunction")]
+    public async Task<HttpResponseData> RemoveDataSource(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "session/{sessionId}/inventory/dataSource")] 
         HttpRequestData req,
         FunctionContext executionContext,
         string sessionId)
@@ -93,9 +93,9 @@ public class InventoryFunction
         return response;
     }
     
-    [Function("InventoryGetPathItemsFunction")]
+    [Function("InventoryGetDataSourcesFunction")]
     public async Task<HttpResponseData> GetDataSources(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/inventory/pathItem/{clientInstanceId}")] 
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/inventory/dataSource/{clientInstanceId}")] 
         HttpRequestData req,
         FunctionContext executionContext,
         string sessionId,

@@ -94,21 +94,21 @@ public class IdentityBuilderTests : AbstractTester
         fileDescription.RelativePath.Should().Be(directoryRelativePath);
     }
 
-    private static InventoryBuilder GetInventoryBuilder(FileSystemInfo pathItemRoot)
+    private static InventoryBuilder GetInventoryBuilder(FileSystemInfo dataSourceRoot)
     {
         DataSource dataSource = new DataSource();
-        dataSource.Path = pathItemRoot.FullName;
-        if (pathItemRoot is DirectoryInfo)
+        dataSource.Path = dataSourceRoot.FullName;
+        if (dataSourceRoot is DirectoryInfo)
         {
             dataSource.Type = FileSystemTypes.Directory;
         }
-        else if (pathItemRoot is FileInfo)
+        else if (dataSourceRoot is FileInfo)
         {
             dataSource.Type = FileSystemTypes.File;
         }
         else
         {
-            Assert.Fail("unknown type " + pathItemRoot.GetType().Name);
+            Assert.Fail("unknown type " + dataSourceRoot.GetType().Name);
         }
         
         Mock<ILogger<InventoryBuilder>> loggerMock = new Mock<ILogger<InventoryBuilder>>();

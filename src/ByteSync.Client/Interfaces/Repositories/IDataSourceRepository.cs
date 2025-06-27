@@ -5,7 +5,7 @@ namespace ByteSync.Interfaces.Repositories;
 
 public interface IDataSourceRepository : IBaseSourceCacheRepository<DataSource, string>
 {
-    public IObservableCache<DataSource, string> CurrentMemberPathItems { get; }
+    public IObservableCache<DataSource, string> CurrentMemberDataSources { get; }
     
-    public IList<DataSource> SortedCurrentMemberPathItems { get; }
+    public IList<DataSource> SortedCurrentMemberDataSources { get; }
 }

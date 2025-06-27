@@ -8,5 +8,5 @@ public interface IFileSystemAccessor
         
     Task OpenDirectory(string path);
         
-    Task OpenDirectoryAndSelectFile(string pathItemPath);
+    Task OpenDirectoryAndSelectFile(string dataSourcePath);
 }

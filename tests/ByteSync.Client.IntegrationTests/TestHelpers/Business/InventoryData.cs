@@ -87,12 +87,12 @@ public class InventoryData
         Letter = letter;
 
         int cpt = 0;
-        foreach (var pathItem in DataSources)
+        foreach (var dataSource in DataSources)
         {
             cpt += 1;
             
             string code = letter + cpt;
-            pathItem.Code = code;
+            dataSource.Code = code;
         }
     }
 }

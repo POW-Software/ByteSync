@@ -39,7 +39,7 @@ public class AddDataSourceCommandHandler : IRequestHandler<AddDataSourceRequest,
         var cloudSessionData = await _cloudSessionsRepository.Get(sessionId);
         if (cloudSessionData == null)
         {
-            _logger.LogInformation("AddPathItem: session {@sessionId}: not found", sessionId);
+            _logger.LogInformation("AddDataSource: session {@sessionId}: not found", sessionId);
             return false;
         }
         
@@ -60,7 +60,7 @@ public class AddDataSourceCommandHandler : IRequestHandler<AddDataSourceRequest,
             }
             else
             {
-                _logger.LogWarning("AddPathItem: session {session} is already activated", sessionId);
+                _logger.LogWarning("AddDataSource: session {session} is already activated", sessionId);
                 return null;
             }
         });

@@ -859,10 +859,10 @@ Vous devez sélectionner au maximum 5 sources de données.</value>
 	<data name="General_MessageBox_UnknownError_Message" xml:space="preserve">
 		<value>Une erreur inconnue est survenue.</value>
 	</data>
-	<data name="PathItemChecker_SubPathError_Title" xml:space="preserve">
+	<data name="DataSourceChecker_SubPathError_Title" xml:space="preserve">
 		<value>Impossible d'ajouter l'élément</value>
 	</data>
-	<data name="PathItemChecker_SubPathError_Message" xml:space="preserve">
+	<data name="DataSourceChecker_SubPathError_Message" xml:space="preserve">
 		<value>Il n'est pas possible d'ajouter cet élément pour la raison suivante : 
 Soit cet élément, soit un parent, soit un descendant est déjà présent.</value>
 	</data>

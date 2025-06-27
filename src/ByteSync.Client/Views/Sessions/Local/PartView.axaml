@@ -37,7 +37,7 @@
                 <Label Content="{Binding Path}" Margin="6 0"
                        VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
                 
-                <Button Command="{Binding $parent[local1:LocalSessionPartsView].ViewModel.RemovePathItemCommand}" 
+                <Button Command="{Binding $parent[local1:LocalSessionPartsView].ViewModel.RemoveDataSourceCommand}" 
                         CommandParameter="{Binding}"
                         HorizontalAlignment="Left" VerticalAlignment="Stretch"
                         Margin="0" BorderThickness="0" 

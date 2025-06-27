@@ -36,12 +36,12 @@ public class RemoveDataSourceCommandHandlerTests
     }
     
     [Test]
-    public async Task RemovePathItem_InventoryNotStarted_DoesNothingWhenNoSharedPathItem()
+    public async Task RemoveDataSource_InventoryNotStarted_DoesNothingWhenNoSharedDataSource()
     {
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedPathItem = new EncryptedDataSource { Code = "pathItem1" };
+        var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
@@ -54,7 +54,7 @@ public class RemoveDataSourceCommandHandlerTests
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client))
             .Returns(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId });
 
-        var request = new RemoveDataSourceRequest(sessionId, client, encryptedPathItem);
+        var request = new RemoveDataSourceRequest(sessionId, client, encryptedDataSource);
 
         // Act
         await _removeDataSourceCommandHandler.Handle(request, CancellationToken.None);
@@ -65,15 +65,15 @@ public class RemoveDataSourceCommandHandlerTests
     }
 
     [Test]
-    public async Task RemovePathItem_InventoryNotStarted_RemovesPathItemCorrectly()
+    public async Task RemoveDataSource_InventoryNotStarted_RemovesDataSourceCorrectly()
     {
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedPathItem = new EncryptedDataSource { Code = "pathItem1" };
+        var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = client.ClientInstanceId, SharedDataSources = new List<EncryptedDataSource> { encryptedPathItem } });
+            { ClientInstanceId = client.ClientInstanceId, SharedDataSources = new List<EncryptedDataSource> { encryptedDataSource } });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));
@@ -85,7 +85,7 @@ public class RemoveDataSourceCommandHandlerTests
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client))
             .Returns(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId });
 
-        var request = new RemoveDataSourceRequest(sessionId, client, encryptedPathItem);
+        var request = new RemoveDataSourceRequest(sessionId, client, encryptedDataSource);
 
         // Act
         await _removeDataSourceCommandHandler.Handle(request, CancellationToken.None);

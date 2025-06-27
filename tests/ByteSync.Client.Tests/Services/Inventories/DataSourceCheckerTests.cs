@@ -36,14 +36,14 @@ public class DataSourceCheckerTests
     [Test]
     public async Task CheckDataSource_File_Unique_ReturnsTrue()
     {
-        var pathItem = new DataSource
+        var dataSource = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.File,
             Path = "file.txt"
         };
 
-        var result = await _dataSourceChecker.CheckDataSource(pathItem, _existingDataSources);
+        var result = await _dataSourceChecker.CheckDataSource(dataSource, _existingDataSources);
 
         result.Should().BeTrue();
         _mockDialogService.Verify(x => x.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()), Times.Never);

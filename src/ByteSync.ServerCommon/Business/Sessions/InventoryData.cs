@@ -27,9 +27,9 @@ public class InventoryData
             string letter = ((char)('A' + position)).ToString();
 
             int cpt = 1;
-            foreach (var pathItem in inventoryMemberData.SharedDataSources)
+            foreach (var dataSource in inventoryMemberData.SharedDataSources)
             {
-                pathItem.Code = letter + cpt;
+                dataSource.Code = letter + cpt;
 
                 cpt += 1;
             }

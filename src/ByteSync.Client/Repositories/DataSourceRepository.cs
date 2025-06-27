@@ -11,9 +11,9 @@ public class DataSourceRepository : BaseSourceCacheRepository<DataSource, string
 
     public DataSourceRepository(IEnvironmentService environmentService, ISessionInvalidationCachePolicy<DataSource, string> sessionInvalidationCachePolicy)
     {
-        CurrentMemberPathItems = SourceCache
+        CurrentMemberDataSources = SourceCache
             .Connect()
-            .Filter(pathItem => Equals(pathItem.ClientInstanceId, environmentService.ClientInstanceId!))
+            .Filter(dataSource => Equals(dataSource.ClientInstanceId, environmentService.ClientInstanceId!))
             .AsObservableCache();
         
         _sessionInvalidationCachePolicy = sessionInvalidationCachePolicy;
@@ -22,13 +22,13 @@ public class DataSourceRepository : BaseSourceCacheRepository<DataSource, string
 
     protected override string KeySelector(DataSource dataSource) => dataSource.Key;
     
-    public IObservableCache<DataSource, string> CurrentMemberPathItems { get; }
+    public IObservableCache<DataSource, string> CurrentMemberDataSources { get; }
     
-    public IList<DataSource> SortedCurrentMemberPathItems
+    public IList<DataSource> SortedCurrentMemberDataSources
     {
         get
         {
-            return CurrentMemberPathItems.Items.OrderBy(pi => pi.Code).ToList();
+            return CurrentMemberDataSources.Items.OrderBy(pi => pi.Code).ToList();
         }
     }
 }

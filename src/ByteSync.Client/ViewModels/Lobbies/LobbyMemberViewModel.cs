@@ -49,14 +49,14 @@ public class LobbyMemberViewModel : ActivatableViewModelBase
         DataSources = new ObservableCollection<DataSourceProxy>();
         foreach (var sessionProfileDataSource in lobbyMember.CloudSessionProfileMember.DataSources.OrderBy(pi => pi.Code))
         {
-            var pathItem = new DataSource
+            var dataSource = new DataSource
             {
                 Code = sessionProfileDataSource.Code,
                 Type = sessionProfileDataSource.Type,
                 Path = sessionProfileDataSource.Path,
             };
             
-            var dataSourceProxy = _dataSourceProxyFactory.CreateDataSourceProxy(pathItem);
+            var dataSourceProxy = _dataSourceProxyFactory.CreateDataSourceProxy(dataSource);
             
             DataSources.Add(dataSourceProxy);
         }

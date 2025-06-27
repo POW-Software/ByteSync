@@ -59,7 +59,7 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
             return quitter != null;
         }, transaction);
 
-        List<EncryptedDataSource>? pathItems = null;
+        List<EncryptedDataSource>? dataSources = null;
         if (updateSessionResult.IsWaitingForTransaction)
         {
             await _inventoryRepository.UpdateIfExists(request.SessionId, inventoryData =>
@@ -67,7 +67,7 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
                 var inventoryMember = inventoryData.InventoryMembers.SingleOrDefault(m => m.ClientInstanceId.Equals(request.ClientInstanceId));
                 if (inventoryMember != null)
                 {
-                    pathItems = inventoryMember.SharedDataSources;
+                    dataSources = inventoryMember.SharedDataSources;
                     inventoryData.InventoryMembers.Remove(inventoryMember);
                 }
 
@@ -105,9 +105,9 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
             var sessionMemberInfo = await _sessionMemberMapper.Convert(innerQuitter!);
             await _invokeClientsService.SessionGroup(request.SessionId).MemberQuittedSession(sessionMemberInfo);
             
-            if (pathItems != null)
+            if (dataSources != null)
             {
-                foreach (var dataSource in pathItems)
+                foreach (var dataSource in dataSources)
                 {            
                     var dataSourceDto = new DataSourceDTO(request.SessionId, request.ClientInstanceId, dataSource);
                     await _invokeClientsService.SessionGroup(request.SessionId).DataSourceRemoved(dataSourceDto);

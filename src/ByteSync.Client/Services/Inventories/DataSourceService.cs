@@ -96,17 +96,17 @@ public class DataSourceService : IDataSourceService
 
     public Task CreateAndTryAddDataSource(string path, FileSystemTypes fileSystemType)
     {
-        var pathItem = new DataSource();
+        var dataSource = new DataSource();
 
-        pathItem.Path = path;
-        pathItem.Type = fileSystemType;
-        pathItem.ClientInstanceId = _connectionService.ClientInstanceId!;
+        dataSource.Path = path;
+        dataSource.Type = fileSystemType;
+        dataSource.ClientInstanceId = _connectionService.ClientInstanceId!;
 
         var sessionMemberInfo = _sessionMemberRepository.GetCurrentSessionMember();
-        pathItem.Code = sessionMemberInfo.GetLetter() +
+        dataSource.Code = sessionMemberInfo.GetLetter() +
                         (_dataSourceRepository.Elements.Count(pi => pi.BelongsTo(sessionMemberInfo)) + 1);
 
-        return TryAddDataSource(pathItem);
+        return TryAddDataSource(dataSource);
     }
 
     public async Task<bool> TryRemoveDataSource(DataSource dataSource)

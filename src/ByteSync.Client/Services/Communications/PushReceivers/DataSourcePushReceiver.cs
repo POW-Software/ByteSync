@@ -27,16 +27,16 @@ public class DataSourcePushReceiver : IPushReceiver
             .Where(dto => _sessionService.CheckSession(dto.SessionId))
             .Subscribe(dto =>
             {
-                var pathItem = _dataEncrypter.DecryptDataSource(dto.EncryptedDataSource);
-                _dataSourceService.ApplyAddDataSourceLocally(pathItem);
+                var dataSource = _dataEncrypter.DecryptDataSource(dto.EncryptedDataSource);
+                _dataSourceService.ApplyAddDataSourceLocally(dataSource);
             });
         
         _hubPushHandler2.DataSourceRemoved
             .Where(dto => _sessionService.CheckSession(dto.SessionId))
             .Subscribe(dto =>
             {
-                var pathItem = _dataEncrypter.DecryptDataSource(dto.EncryptedDataSource);
-                _dataSourceService.ApplyRemoveDataSourceLocally(pathItem);
+                var dataSource = _dataEncrypter.DecryptDataSource(dto.EncryptedDataSource);
+                _dataSourceService.ApplyRemoveDataSourceLocally(dataSource);
             });
     }
 }

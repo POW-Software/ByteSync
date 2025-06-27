@@ -73,7 +73,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         
         _sessionMemberService.AddOrUpdate(sessionMemberInfoDtos);
         
-        await FillPathItems(request, sessionMemberInfoDtos);
+        await FillDataSources(request, sessionMemberInfoDtos);
     }
 
     private async Task CheckOtherMembersAreTrustedAndChecked(AfterJoinSessionRequest request, List<SessionMemberInfoDTO> sessionMemberInfoDtos)
@@ -118,7 +118,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         return password;
     }
     
-    private async Task FillPathItems(AfterJoinSessionRequest request, List<SessionMemberInfoDTO> sessionMemberInfoDtos)
+    private async Task FillDataSources(AfterJoinSessionRequest request, List<SessionMemberInfoDTO> sessionMemberInfoDtos)
     {
         if (request.RunCloudSessionProfileInfo != null)
         {

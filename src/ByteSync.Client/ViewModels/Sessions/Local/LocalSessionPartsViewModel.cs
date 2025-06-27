@@ -64,7 +64,7 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
         // https://stackoverflow.com/questions/58479606/how-do-you-update-the-canexecute-value-after-the-reactivecommand-has-been-declar
         // https://www.reactiveui.net/docs/handbook/commands/
         
-        RemovePathItemCommand = ReactiveCommand.CreateFromTask<DataSourceProxy>(RemovePathItem);
+        RemoveDataSourceCommand = ReactiveCommand.CreateFromTask<DataSourceProxy>(RemoveDataSource);
 
         // var isCountNotOK = this.WhenAnyValue(x => x.Parts.Count, count => count <= 2 );
         // var isCountOK = this.WhenAnyValue(x => x.Parts, parts => parts.Count < 5 );
@@ -84,7 +84,7 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
         this.WhenActivated(disposables =>
         {
             var countChanged = _dataSourceRepository
-                .CurrentMemberPathItems
+                .CurrentMemberDataSources
                 .CountChanged
                 .StartWith(0)
                 .Select(count => count >= 5);
@@ -93,9 +93,9 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
                     countChanged)
                 .Select(executing => !executing).Subscribe(canRun);
             
-            _dataSourceRepository.CurrentMemberPathItems.Connect()
+            _dataSourceRepository.CurrentMemberDataSources.Connect()
                 .Sort(SortExpressionComparer<DataSource>.Ascending(p => p.Code))
-                .Transform(pathItem => _dataSourceProxyFactory.CreateDataSourceProxy(pathItem))
+                .Transform(dataSource => _dataSourceProxyFactory.CreateDataSourceProxy(dataSource))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Bind(out _data)
                 .DisposeMany() // dispose when no longer required
@@ -172,7 +172,7 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
     
     public ReadOnlyObservableCollection<DataSourceProxy> DataSources => _data;
     
-    public ReactiveCommand<DataSourceProxy, Unit> RemovePathItemCommand { get; set; }
+    public ReactiveCommand<DataSourceProxy, Unit> RemoveDataSourceCommand { get; set; }
 
     private void OnLocalInventoryStarted()
     {
@@ -202,7 +202,7 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
             if (result != null && Directory.Exists(result))
             {
                 await _dataSourceService.CreateAndTryAddDataSource(result, FileSystemTypes.Directory);
-                //await HandleNewPathItem(result, FileSystemTypes.Directory);
+                //await HandleNewDataSource(result, FileSystemTypes.Directory);
             }
         }
         catch (Exception ex)
@@ -224,7 +224,7 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
                 foreach (var result in results)
                 {
                     await _dataSourceService.CreateAndTryAddDataSource(result, FileSystemTypes.File);
-                    //await HandleNewPathItem(result, FileSystemTypes.File);
+                    //await HandleNewDataSource(result, FileSystemTypes.File);
                 }
             }
         }
@@ -234,7 +234,7 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
         }
     }
 
-    private async Task RemovePathItem(DataSourceProxy dataSourceProxy)
+    private async Task RemoveDataSource(DataSourceProxy dataSourceProxy)
     {
         await _dataSourceService.TryRemoveDataSource(dataSourceProxy.DataSource);
     }

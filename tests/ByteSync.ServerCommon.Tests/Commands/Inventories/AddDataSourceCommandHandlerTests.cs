@@ -39,12 +39,12 @@ public class AddDataSourceCommandHandlerTests
     }
     
     [Test]
-    public async Task AddPathItem_InventoryNotStarted_AddsPathItemCorrectly()
+    public async Task AddDataSource_InventoryNotStarted_AddsDataSourceCorrectly()
     {
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedPathItem = new EncryptedDataSource { Code = "pathItem1" };
+        var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
@@ -61,7 +61,7 @@ public class AddDataSourceCommandHandlerTests
 
         A.CallTo(() => _mockByteSyncPush.DataSourceAdded(A<DataSourceDTO>.Ignored)).Returns(Task.CompletedTask);
 
-        var request = new AddDataSourceRequest(sessionId, client, encryptedPathItem);
+        var request = new AddDataSourceRequest(sessionId, client, encryptedDataSource);
         
         // Act
         await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);
@@ -76,12 +76,12 @@ public class AddDataSourceCommandHandlerTests
     }
 
     [Test]
-    public async Task AddPathItem_InventoryStarted_AddsPathItemCorrectly()
+    public async Task AddDataSource_InventoryStarted_AddsDataSourceCorrectly()
     {
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedPathItem = new EncryptedDataSource { Code = "pathItem1" };
+        var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.IsInventoryStarted = true;
 
@@ -95,7 +95,7 @@ public class AddDataSourceCommandHandlerTests
 
         A.CallTo(() => _mockByteSyncPush.DataSourceAdded(A<DataSourceDTO>.Ignored)).Returns(Task.CompletedTask);
 
-        var request = new AddDataSourceRequest(sessionId, client, encryptedPathItem);
+        var request = new AddDataSourceRequest(sessionId, client, encryptedDataSource);
         
         // Act
         await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);
@@ -106,15 +106,15 @@ public class AddDataSourceCommandHandlerTests
     }
 
     [Test]
-    public async Task AddPathItem_InventoryNotStartedAndPathItemAlreadyExists_DoesNotAddPathItem()
+    public async Task AddDataSource_InventoryNotStartedAndDataSourceAlreadyExists_DoesNotAddDataSource()
     {
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedPathItem = new EncryptedDataSource { Code = "pathItem1" };
+        var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = client.ClientInstanceId, SharedDataSources = new List<EncryptedDataSource> { encryptedPathItem } });
+            { ClientInstanceId = client.ClientInstanceId, SharedDataSources = new List<EncryptedDataSource> { encryptedDataSource } });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));
@@ -122,7 +122,7 @@ public class AddDataSourceCommandHandlerTests
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
             .Invokes((string _, Func<InventoryData, InventoryData> func) => func(inventoryData));
 
-        var request = new AddDataSourceRequest(sessionId, client, encryptedPathItem);
+        var request = new AddDataSourceRequest(sessionId, client, encryptedDataSource);
         
         // Act
         await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);

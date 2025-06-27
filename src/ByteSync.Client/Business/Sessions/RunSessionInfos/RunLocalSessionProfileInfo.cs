@@ -19,9 +19,9 @@ public class RunLocalSessionProfileInfo : AbstractRunSessionProfileInfo
     
     public LocalSessionProfileDetails ProfileDetails { get; set; }
 
-    public IList<DataSource> GetMyPathItems()
+    public IList<DataSource> GetMyDataSources()
     {
-        return ProfileDetails.PathItems;
+        return ProfileDetails.DataSources;
     }
 
     public override AbstrastSessionProfileDetails GetProfileDetails()
