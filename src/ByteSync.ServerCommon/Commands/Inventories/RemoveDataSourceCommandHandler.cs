@@ -5,6 +5,7 @@ using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
@@ -47,7 +48,10 @@ public class RemoveDataSourceCommandHandler : IRequestHandler<RemoveDataSourceRe
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, request.SessionId, request.Client);
 
-                inventoryMember.SharedDataSources.RemoveAll(p => p.Code == request.EncryptedDataSource.Code);
+                foreach (var node in inventoryMember.DataNodes)
+                {
+                    node.DataSources.RemoveAll(p => p.Code == request.EncryptedDataSource.Code);
+                }
 
                 inventoryData.RecodeDataSources(cloudSessionData);
 

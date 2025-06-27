@@ -6,6 +6,7 @@ using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
+using System.Linq;
 
 namespace ByteSync.ServerCommon.Commands.CloudSessions;
 
@@ -67,7 +68,7 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
                 var inventoryMember = inventoryData.InventoryMembers.SingleOrDefault(m => m.ClientInstanceId.Equals(request.ClientInstanceId));
                 if (inventoryMember != null)
                 {
-                    dataSources = inventoryMember.SharedDataSources;
+                    dataSources = inventoryMember.DataNodes.SelectMany(n => n.DataSources).ToList();
                     inventoryData.InventoryMembers.Remove(inventoryMember);
                 }
 

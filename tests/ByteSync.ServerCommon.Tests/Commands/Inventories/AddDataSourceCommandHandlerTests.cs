@@ -8,6 +8,7 @@ using ByteSync.ServerCommon.Commands.Inventories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
+using System.Linq;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -114,7 +115,7 @@ public class AddDataSourceCommandHandlerTests
         var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = client.ClientInstanceId, SharedDataSources = new List<EncryptedDataSource> { encryptedDataSource } });
+            { ClientInstanceId = client.ClientInstanceId, DataNodes = [ new DataNodeData { NodeId = client.ClientInstanceId, DataSources = new List<EncryptedDataSource> { encryptedDataSource } } ] });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));
@@ -129,7 +130,7 @@ public class AddDataSourceCommandHandlerTests
 
         // Assert
         inventoryData.InventoryMembers.Count.Should().Be(1);
-        inventoryData.InventoryMembers[0].SharedDataSources.Count.Should().Be(1);
+        inventoryData.InventoryMembers[0].DataNodes.Single().DataSources.Count.Should().Be(1);
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
     }
 }
