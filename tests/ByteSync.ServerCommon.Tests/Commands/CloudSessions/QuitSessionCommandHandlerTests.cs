@@ -242,11 +242,11 @@ public async Task QuitSession_WithDataSources_NotifiesDataSourceRemoved()
 
     // Create inventory data with path items
     var inventoryData = new InventoryData(sessionId);
-    var inventoryMember = new InventoryMemberData { ClientInstanceId = "clientInstance1" };
+    var inventoryMember = new InventoryMemberData { ClientInstanceId = "clientInstance1", DataNodes = [ new DataNodeData { NodeId = "clientInstance1" } ] };
     var dataSource1 = new EncryptedDataSource { Code = "path1", Data = new byte[] { 1, 2, 3 }, IV = new byte[] { 4, 5, 6 } };
     var dataSource2 = new EncryptedDataSource { Code = "path2", Data = new byte[] { 7, 8, 9 }, IV = new byte[] { 10, 11, 12 } };
-    inventoryMember.SharedDataSources.Add(dataSource1);
-    inventoryMember.SharedDataSources.Add(dataSource2);
+    inventoryMember.DataNodes[0].DataSources.Add(dataSource1);
+    inventoryMember.DataNodes[0].DataSources.Add(dataSource2);
     inventoryData.InventoryMembers.Add(inventoryMember);
     
     var synchronizationEntity = new SynchronizationEntity

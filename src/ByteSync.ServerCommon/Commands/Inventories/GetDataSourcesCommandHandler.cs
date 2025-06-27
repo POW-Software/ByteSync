@@ -2,6 +2,7 @@
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
@@ -39,6 +40,6 @@ public class GetDataSourcesCommandHandler : IRequestHandler<GetDataSourcesReques
             return new List<EncryptedDataSource>();
         }
 
-        return inventoryMember.SharedDataSources;
+        return inventoryMember.DataNodes.SelectMany(n => n.DataSources).ToList();
     }
 }

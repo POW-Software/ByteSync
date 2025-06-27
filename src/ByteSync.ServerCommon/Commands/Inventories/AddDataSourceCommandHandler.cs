@@ -3,6 +3,7 @@ using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
+using System.Linq;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -51,8 +52,15 @@ public class AddDataSourceCommandHandler : IRequestHandler<AddDataSourceRequest,
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
 
-                inventoryMember.SharedDataSources.RemoveAll(p => p.Code == encryptedDataSource.Code);
-                inventoryMember.SharedDataSources.Add(encryptedDataSource);
+                var dataNode = inventoryMember.DataNodes.FirstOrDefault();
+                if (dataNode == null)
+                {
+                    dataNode = new DataNodeData { NodeId = client.ClientInstanceId };
+                    inventoryMember.DataNodes.Add(dataNode);
+                }
+
+                dataNode.DataSources.RemoveAll(p => p.Code == encryptedDataSource.Code);
+                dataNode.DataSources.Add(encryptedDataSource);
 
                 inventoryData.RecodeDataSources(cloudSessionData);
                 

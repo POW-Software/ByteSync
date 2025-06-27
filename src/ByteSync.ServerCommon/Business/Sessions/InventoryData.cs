@@ -27,7 +27,7 @@ public class InventoryData
             string letter = ((char)('A' + position)).ToString();
 
             int cpt = 1;
-            foreach (var dataSource in inventoryMemberData.SharedDataSources)
+            foreach (var dataSource in inventoryMemberData.DataNodes.SelectMany(n => n.DataSources))
             {
                 dataSource.Code = letter + cpt;
 
