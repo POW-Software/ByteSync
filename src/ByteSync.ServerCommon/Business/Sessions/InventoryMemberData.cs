@@ -7,7 +7,7 @@ public class InventoryMemberData
 {
     public InventoryMemberData()
     {
-        SharedPathItems = new List<EncryptedPathItem>();
+        SharedPathItems = new List<EncryptedDataSource>();
     }
     
     public string SessionId { get; set; } = null!;
@@ -18,5 +18,5 @@ public class InventoryMemberData
         
     public DateTimeOffset? LastLocalInventoryStatusUpdate { get; set; }
     
-    public List<EncryptedPathItem> SharedPathItems { get; set; }
+    public List<EncryptedDataSource> SharedPathItems { get; set; }
 }

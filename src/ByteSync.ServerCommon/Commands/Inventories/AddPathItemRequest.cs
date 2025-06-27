@@ -6,16 +6,16 @@ namespace ByteSync.ServerCommon.Commands.Inventories;
 
 public class AddPathItemRequest : IRequest<bool>
 {
-    public AddPathItemRequest(string sessionId, Client client, EncryptedPathItem encryptedPathItem)
+    public AddPathItemRequest(string sessionId, Client client, EncryptedDataSource encryptedDataSource)
     {
         SessionId = sessionId;
         Client = client;
-        EncryptedPathItem = encryptedPathItem;
+        EncryptedDataSource = encryptedDataSource;
     }
     
     public string SessionId { get; }
     
     public Client Client { get; }
     
-    public EncryptedPathItem EncryptedPathItem { get; }
+    public EncryptedDataSource EncryptedDataSource { get; }
 }

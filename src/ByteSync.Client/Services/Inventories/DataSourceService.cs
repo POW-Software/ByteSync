@@ -53,13 +53,13 @@ public class DataSourceService : IDataSourceService
     {
         if (!sessionMemberInfo.HasClientInstanceId(_connectionService.ClientInstanceId!))
         {
-            var encryptedPathItems = await _inventoryApiClient.GetPathItems(sessionMemberInfo.SessionId, sessionMemberInfo.ClientInstanceId);
+            var encryptedDataSources = await _inventoryApiClient.GetPathItems(sessionMemberInfo.SessionId, sessionMemberInfo.ClientInstanceId);
 
-            if (encryptedPathItems != null)
+            if (encryptedDataSources != null)
             {
-                foreach (var encryptedPathItem in encryptedPathItems)
+                foreach (var encryptedPathItem in encryptedDataSources)
                 {
-                    var pathItem = _dataEncrypter.DecryptPathItem(encryptedPathItem);
+                    var pathItem = _dataEncrypter.DecryptDataSource(encryptedPathItem);
                     await TryAddDataSource(pathItem);
                 }
             }
@@ -74,8 +74,8 @@ public class DataSourceService : IDataSourceService
             if (_sessionService.CurrentSession is CloudSession cloudSession
                 && dataSource.ClientInstanceId == _connectionService.ClientInstanceId)
             {
-                var encryptedPathItem = _dataEncrypter.EncryptPathItem(dataSource);
-                isAddOK = await _inventoryApiClient.AddPathItem(cloudSession.SessionId, encryptedPathItem);
+                var encryptedPathItem = _dataEncrypter.EncryptDataSource(dataSource);
+                isAddOK = await _inventoryApiClient.AddDataSource(cloudSession.SessionId, encryptedPathItem);
             }
 
             if (isAddOK)
@@ -111,8 +111,8 @@ public class DataSourceService : IDataSourceService
 
     public async Task<bool> TryRemoveDataSource(DataSource dataSource)
     {
-        var encryptedPathItem = _dataEncrypter.EncryptPathItem(dataSource);
-        var isRemoveOK = await _inventoryApiClient.RemovePathItem(_sessionService.SessionId!, encryptedPathItem);
+        var encryptedPathItem = _dataEncrypter.EncryptDataSource(dataSource);
+        var isRemoveOK = await _inventoryApiClient.RemoveDataSource(_sessionService.SessionId!, encryptedPathItem);
         
         if (isRemoveOK)
         {

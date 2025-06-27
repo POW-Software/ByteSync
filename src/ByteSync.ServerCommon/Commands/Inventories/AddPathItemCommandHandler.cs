@@ -34,7 +34,7 @@ public class AddPathItemCommandHandler : IRequestHandler<AddPathItemRequest, boo
     {
         var sessionId = request.SessionId;
         var client = request.Client;
-        var encryptedPathItem = request.EncryptedPathItem;
+        var encryptedPathItem = request.EncryptedDataSource;
         
         var cloudSessionData = await _cloudSessionsRepository.Get(sessionId);
         if (cloudSessionData == null)

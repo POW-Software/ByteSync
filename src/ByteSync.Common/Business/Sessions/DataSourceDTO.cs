@@ -9,11 +9,11 @@ public class DataSourceDTO : BaseSessionDto
         
     }
     
-    public DataSourceDTO(string sessionId, string clientInstanceId, EncryptedPathItem encryptedPathItem)
+    public DataSourceDTO(string sessionId, string clientInstanceId, EncryptedDataSource encryptedDataSource)
         : base(sessionId, clientInstanceId)
     {
-        EncryptedPathItem = encryptedPathItem;
+        EncryptedDataSource = encryptedDataSource;
     }
     
-    public EncryptedPathItem EncryptedPathItem { get; set; } = null!;
+    public EncryptedDataSource EncryptedDataSource { get; set; } = null!;
 }

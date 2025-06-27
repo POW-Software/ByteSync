@@ -243,8 +243,8 @@ public async Task QuitSession_WithPathItems_NotifiesPathItemRemoved()
     // Create inventory data with path items
     var inventoryData = new InventoryData(sessionId);
     var inventoryMember = new InventoryMemberData { ClientInstanceId = "clientInstance1" };
-    var pathItem1 = new EncryptedPathItem { Code = "path1", Data = new byte[] { 1, 2, 3 }, IV = new byte[] { 4, 5, 6 } };
-    var pathItem2 = new EncryptedPathItem { Code = "path2", Data = new byte[] { 7, 8, 9 }, IV = new byte[] { 10, 11, 12 } };
+    var pathItem1 = new EncryptedDataSource { Code = "path1", Data = new byte[] { 1, 2, 3 }, IV = new byte[] { 4, 5, 6 } };
+    var pathItem2 = new EncryptedDataSource { Code = "path2", Data = new byte[] { 7, 8, 9 }, IV = new byte[] { 10, 11, 12 } };
     inventoryMember.SharedPathItems.Add(pathItem1);
     inventoryMember.SharedPathItems.Add(pathItem2);
     inventoryData.InventoryMembers.Add(inventoryMember);
@@ -299,7 +299,7 @@ public async Task QuitSession_WithPathItems_NotifiesPathItemRemoved()
     A.CallTo(() => mockGroup.DataSourceRemoved(A<DataSourceDTO>.That.Matches(dto => 
         dto.SessionId == sessionId && 
         dto.ClientInstanceId == client.ClientInstanceId && 
-        (dto.EncryptedPathItem.Code == "path1" || dto.EncryptedPathItem.Code == "path2"))))
+        (dto.EncryptedDataSource.Code == "path1" || dto.EncryptedDataSource.Code == "path2"))))
         .MustHaveHappened(2, Times.Exactly);
 }
 }

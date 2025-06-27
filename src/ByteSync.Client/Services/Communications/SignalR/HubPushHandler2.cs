@@ -94,10 +94,10 @@ public class HubPushHandler2 : IHubPushHandler2
     public Subject<InventoryStartedDTO> InventoryStarted => 
         GetSubject<InventoryStartedDTO>(nameof(IHubByteSyncPush.InventoryStarted));
     
-    public Subject<DataSourceDTO> PathItemAdded => 
+    public Subject<DataSourceDTO> DataSourceAdded => 
         GetSubject<DataSourceDTO>(nameof(IHubByteSyncPush.DataSourceAdded));
     
-    public Subject<DataSourceDTO> PathItemRemoved => 
+    public Subject<DataSourceDTO> DataSourceRemoved => 
         GetSubject<DataSourceDTO>(nameof(IHubByteSyncPush.DataSourceRemoved));
     
     public Subject<FileTransferPush> FilePartUploaded => 

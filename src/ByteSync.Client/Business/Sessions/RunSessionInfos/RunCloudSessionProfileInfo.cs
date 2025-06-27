@@ -30,7 +30,7 @@ public class RunCloudSessionProfileInfo : AbstractRunSessionProfileInfo
         }
     }
 
-    public List<SessionProfilePathItem> GetMyPathItems()
+    public List<SessionProfileDataSource> GetMyPathItems()
     {
         var myProfileMember = ProfileDetails.Members.Single(m => m.ProfileClientId.Equals(LocalProfileClientId));
 

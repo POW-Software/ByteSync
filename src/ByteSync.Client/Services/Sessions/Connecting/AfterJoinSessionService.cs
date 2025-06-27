@@ -140,7 +140,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
                 {
                     foreach (var encryptedPathItem in encryptedPathItems)
                     {
-                        var pathItem = _dataEncrypter.DecryptPathItem(encryptedPathItem);
+                        var pathItem = _dataEncrypter.DecryptDataSource(encryptedPathItem);
                         await _dataSourceService.TryAddDataSource(pathItem);
                     }
                 }

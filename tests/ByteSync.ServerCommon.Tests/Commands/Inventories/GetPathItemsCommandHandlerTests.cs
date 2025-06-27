@@ -34,10 +34,10 @@ public class GetPathItemsCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedPathItem = new EncryptedPathItem { Code = "pathItem1" };
+        var encryptedPathItem = new EncryptedDataSource { Code = "pathItem1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = client.ClientInstanceId, SharedPathItems = new List<EncryptedPathItem> { encryptedPathItem } });
+            { ClientInstanceId = client.ClientInstanceId, SharedPathItems = new List<EncryptedDataSource> { encryptedPathItem } });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));
@@ -82,9 +82,9 @@ public class GetPathItemsCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var pathItem = new EncryptedPathItem { Code = "pathItem1" };
+        var pathItem = new EncryptedDataSource { Code = "pathItem1" };
         var inventoryData = new InventoryData(sessionId);
-        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId, SharedPathItems = new List<EncryptedPathItem> { pathItem } });
+        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId, SharedPathItems = new List<EncryptedDataSource> { pathItem } });
 
         A.CallTo(() => _mockInventoryRepository.Get(sessionId))
             .Returns(inventoryData);

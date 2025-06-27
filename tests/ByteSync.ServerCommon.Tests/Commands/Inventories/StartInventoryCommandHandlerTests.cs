@@ -210,7 +210,7 @@ public class StartInventoryCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var inventoryData = new InventoryData(sessionId);
-        var encryptedPathItem = new EncryptedPathItem { Code = "pathItem1" };
+        var encryptedPathItem = new EncryptedDataSource { Code = "pathItem1" };
         var cloudSessionData = new CloudSessionData(null, new EncryptedSessionSettings(),
             new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" });
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null, cloudSessionData));

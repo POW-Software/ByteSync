@@ -31,18 +31,18 @@ public class DataEncrypter : IDataEncrypter
         return Decrypt<SessionSettings>(encryptedSessionSettings);
     }
 
-    public EncryptedPathItem EncryptPathItem(DataSource dataSource)
+    public EncryptedDataSource EncryptDataSource(DataSource dataSource)
     {
-        var encryptedPathItem = Encrypt<EncryptedPathItem>(dataSource);
+        var encryptedPathItem = Encrypt<EncryptedDataSource>(dataSource);
         encryptedPathItem.Code = dataSource.Code;
         
         return encryptedPathItem;
     }
 
-    public DataSource DecryptPathItem(EncryptedPathItem encryptedPathItem)
+    public DataSource DecryptDataSource(EncryptedDataSource encryptedDataSource)
     {
-        var pathItem = Decrypt<DataSource>(encryptedPathItem);
-        pathItem.Code = encryptedPathItem.Code;
+        var pathItem = Decrypt<DataSource>(encryptedDataSource);
+        pathItem.Code = encryptedDataSource.Code;
 
         return pathItem;
     }

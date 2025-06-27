@@ -89,16 +89,16 @@ public static class LogHelper
         };
     }
 
-    public static object BuildLog(this EncryptedPathItem sharedPathItem)
+    public static object BuildLog(this EncryptedDataSource sharedDataSource)
     {
-        if (sharedPathItem == null)
+        if (sharedDataSource == null)
         {
             return null;
         }
 
         return new
         {
-            Code = sharedPathItem.Code,
+            Code = sharedDataSource.Code,
         };
     }
 

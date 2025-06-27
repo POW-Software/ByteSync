@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
-public class GetPathItemsCommandHandler : IRequestHandler<GetPathItemsRequest, List<EncryptedPathItem>>
+public class GetPathItemsCommandHandler : IRequestHandler<GetPathItemsRequest, List<EncryptedDataSource>>
 {
     private readonly IInventoryRepository _inventoryRepository;
     private readonly ILogger<GetPathItemsCommandHandler> _logger;
@@ -18,7 +18,7 @@ public class GetPathItemsCommandHandler : IRequestHandler<GetPathItemsRequest, L
         _logger = logger;
     }
 
-    public async Task<List<EncryptedPathItem>> Handle(GetPathItemsRequest request, CancellationToken cancellationToken)
+    public async Task<List<EncryptedDataSource>> Handle(GetPathItemsRequest request, CancellationToken cancellationToken)
     {
         var sessionId = request.SessionId;
         var clientInstanceId = request.ClientInstanceId;
@@ -27,7 +27,7 @@ public class GetPathItemsCommandHandler : IRequestHandler<GetPathItemsRequest, L
         if (inventoryData == null)
         {
             _logger.LogInformation("GetPathItems: session {sessionId}: not found", sessionId);
-            return new List<EncryptedPathItem>();
+            return new List<EncryptedDataSource>();
         }
 
         var inventoryMember = inventoryData.InventoryMembers
@@ -36,7 +36,7 @@ public class GetPathItemsCommandHandler : IRequestHandler<GetPathItemsRequest, L
         if (inventoryMember == null)
         {
             _logger.LogInformation("GetPathItems: clientInstanceId {clientInstanceId} not found in session {sessionId}", clientInstanceId, sessionId);
-            return new List<EncryptedPathItem>();
+            return new List<EncryptedDataSource>();
         }
 
         return inventoryMember.SharedPathItems;

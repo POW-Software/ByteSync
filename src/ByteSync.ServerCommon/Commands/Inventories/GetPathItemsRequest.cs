@@ -3,7 +3,7 @@ using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
-public class GetPathItemsRequest : IRequest<List<EncryptedPathItem>>
+public class GetPathItemsRequest : IRequest<List<EncryptedDataSource>>
 {
     public GetPathItemsRequest(string sessionId, string clientInstanceId)
     {

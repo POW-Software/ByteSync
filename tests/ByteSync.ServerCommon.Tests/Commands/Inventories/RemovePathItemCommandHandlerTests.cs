@@ -41,7 +41,7 @@ public class RemovePathItemCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedPathItem = new EncryptedPathItem { Code = "pathItem1" };
+        var encryptedPathItem = new EncryptedDataSource { Code = "pathItem1" };
         var inventoryData = new InventoryData(sessionId);
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
@@ -70,10 +70,10 @@ public class RemovePathItemCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedPathItem = new EncryptedPathItem { Code = "pathItem1" };
+        var encryptedPathItem = new EncryptedDataSource { Code = "pathItem1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = client.ClientInstanceId, SharedPathItems = new List<EncryptedPathItem> { encryptedPathItem } });
+            { ClientInstanceId = client.ClientInstanceId, SharedPathItems = new List<EncryptedDataSource> { encryptedPathItem } });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));

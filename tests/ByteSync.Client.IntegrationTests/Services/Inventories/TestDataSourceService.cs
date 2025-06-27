@@ -50,7 +50,7 @@ public class TestDataSourceService : IntegrationTest
             .Setup(x => x.CheckPathItem(It.IsAny<DataSource>(), It.IsAny<IEnumerable<DataSource>>()))
             .ReturnsAsync(true);
         
-        inventoryApiClient.Setup(x => x.AddPathItem(_sessionId, It.IsAny<EncryptedPathItem>()))
+        inventoryApiClient.Setup(x => x.AddDataSource(_sessionId, It.IsAny<EncryptedDataSource>()))
             .ReturnsAsync(true);
 
         var pathItem = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId };
@@ -61,7 +61,7 @@ public class TestDataSourceService : IntegrationTest
         // Assert
         result.Should().BeTrue();
         pathItemRepository.Elements.Should().Contain(pathItem);
-        inventoryApiClient.Verify(x => x.AddPathItem(_sessionId, It.IsAny<EncryptedPathItem>()), Times.Once);
+        inventoryApiClient.Verify(x => x.AddDataSource(_sessionId, It.IsAny<EncryptedDataSource>()), Times.Once);
     }
     
     [Test]
@@ -76,7 +76,7 @@ public class TestDataSourceService : IntegrationTest
             .Setup(x => x.CheckPathItem(It.IsAny<DataSource>(), It.IsAny<IEnumerable<DataSource>>()))
             .ReturnsAsync(true);
         
-        inventoryApiClient.Setup(x => x.AddPathItem(_sessionId, It.IsAny<EncryptedPathItem>()))
+        inventoryApiClient.Setup(x => x.AddDataSource(_sessionId, It.IsAny<EncryptedDataSource>()))
             .ReturnsAsync(true);
 
         var pathItem = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId + "_FAKE" };
@@ -87,7 +87,7 @@ public class TestDataSourceService : IntegrationTest
         // Assert
         result.Should().BeTrue();
         pathItemRepository.Elements.Should().Contain(pathItem);
-        inventoryApiClient.Verify(x => x.AddPathItem(_sessionId, It.IsAny<EncryptedPathItem>()), Times.Never);
+        inventoryApiClient.Verify(x => x.AddDataSource(_sessionId, It.IsAny<EncryptedDataSource>()), Times.Never);
     }
     
     [Test]
@@ -123,7 +123,7 @@ public class TestDataSourceService : IntegrationTest
             .Setup(x => x.CheckPathItem(It.IsAny<DataSource>(), It.IsAny<IEnumerable<DataSource>>()))
             .ReturnsAsync(true);
         
-        inventoryApiClient.Setup(x => x.AddPathItem(_sessionId, It.IsAny<EncryptedPathItem>()))
+        inventoryApiClient.Setup(x => x.AddDataSource(_sessionId, It.IsAny<EncryptedDataSource>()))
             .ReturnsAsync(false);
 
         var pathItem = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId };
@@ -146,9 +146,9 @@ public class TestDataSourceService : IntegrationTest
         var pathItemRepository = Container.Resolve<IDataSourceRepository>();
         
         var pathItem = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId };
-        dataEncrypter.Setup(x => x.EncryptPathItem(pathItem)).Returns(new EncryptedPathItem());
+        dataEncrypter.Setup(x => x.EncryptDataSource(pathItem)).Returns(new EncryptedDataSource());
         
-        inventoryApiClient.Setup(x => x.RemovePathItem(_sessionId, It.IsAny<EncryptedPathItem>()))
+        inventoryApiClient.Setup(x => x.RemoveDataSource(_sessionId, It.IsAny<EncryptedDataSource>()))
             .ReturnsAsync(true);
         
         pathItemRepository.AddOrUpdate(pathItem);
@@ -170,9 +170,9 @@ public class TestDataSourceService : IntegrationTest
         var pathItemRepository = Container.Resolve<IDataSourceRepository>();
         
         var pathItem = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId };
-        dataEncrypter.Setup(x => x.EncryptPathItem(pathItem)).Returns(new EncryptedPathItem());
+        dataEncrypter.Setup(x => x.EncryptDataSource(pathItem)).Returns(new EncryptedDataSource());
         
-        inventoryApiClient.Setup(x => x.RemovePathItem(_sessionId, It.IsAny<EncryptedPathItem>()))
+        inventoryApiClient.Setup(x => x.RemoveDataSource(_sessionId, It.IsAny<EncryptedDataSource>()))
             .ReturnsAsync(false);
         
         pathItemRepository.AddOrUpdate(pathItem);
@@ -205,7 +205,7 @@ public class TestDataSourceService : IntegrationTest
             .Setup(x => x.CheckPathItem(It.IsAny<DataSource>(), It.IsAny<IEnumerable<DataSource>>()))
             .ReturnsAsync(true);
         
-        inventoryApiClient.Setup(x => x.AddPathItem(_sessionId, It.IsAny<EncryptedPathItem>()))
+        inventoryApiClient.Setup(x => x.AddDataSource(_sessionId, It.IsAny<EncryptedDataSource>()))
             .ReturnsAsync(true);
         
         sessionMemberRepository.AddOrUpdate(sessionMemberInfo);

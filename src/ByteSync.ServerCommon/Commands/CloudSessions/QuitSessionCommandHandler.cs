@@ -59,7 +59,7 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
             return quitter != null;
         }, transaction);
 
-        List<EncryptedPathItem>? pathItems = null;
+        List<EncryptedDataSource>? pathItems = null;
         if (updateSessionResult.IsWaitingForTransaction)
         {
             await _inventoryRepository.UpdateIfExists(request.SessionId, inventoryData =>

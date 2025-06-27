@@ -93,13 +93,13 @@ public class DataInventoryStarter : IDataInventoryStarter
 
             if (pathItems.Count == expectedPathItems.Count)
             {
-                var sessionProfilesPathItems = new List<SessionProfilePathItem>();
+                var sessionProfileDataSources = new List<SessionProfileDataSource>();
                 foreach (var pathItem in pathItems)
                 {
-                    sessionProfilesPathItems.Add(new SessionProfilePathItem(pathItem));
+                    sessionProfileDataSources.Add(new SessionProfileDataSource(pathItem));
                 }
                 
-                if (!sessionProfilesPathItems.HaveSameContent(expectedPathItems))
+                if (!sessionProfileDataSources.HaveSameContent(expectedPathItems))
                 {
                     allOK = false;
                 }

@@ -12,9 +12,9 @@ public interface IDataEncrypter
     
     public SessionSettings DecryptSessionSettings(EncryptedSessionSettings encryptedSessionSettings);
     
-    public EncryptedPathItem EncryptPathItem(DataSource dataSource);
+    public EncryptedDataSource EncryptDataSource(DataSource dataSource);
     
-    public DataSource DecryptPathItem(EncryptedPathItem encryptedPathItem);
+    public DataSource DecryptDataSource(EncryptedDataSource encryptedDataSource);
     
     public EncryptedSessionMemberPrivateData EncryptSessionMemberPrivateData(SessionMemberPrivateData sessionMemberPrivateData);
     

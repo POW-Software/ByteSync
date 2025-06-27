@@ -3,14 +3,14 @@ using ByteSync.Common.Business.Inventories;
 
 namespace ByteSync.Business.Profiles;
 
-public class SessionProfilePathItem
+public class SessionProfileDataSource
 {
-    public SessionProfilePathItem()
+    public SessionProfileDataSource()
     {
         
     }
     
-    public SessionProfilePathItem(DataSource dataSource)
+    public SessionProfileDataSource(DataSource dataSource)
     {
         Type = dataSource.Type;
         Path = dataSource.Path;

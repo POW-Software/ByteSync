@@ -372,7 +372,7 @@ public class SessionProfileManager : ISessionProfileManager
             cloudSessionProfileMember.PathItems = allPathItems
                 .Where(pi => pi.BelongsTo(sessionMemberInfo))
                 .OrderBy(pivm => pivm.Code)
-                .Select(pi => new SessionProfilePathItem(pi))
+                .Select(pi => new SessionProfileDataSource(pi))
                 .ToList();
 
             cloudSessionProfileDetails.Members.Add(cloudSessionProfileMember);

@@ -47,7 +47,7 @@ public class RemovePathItemCommandHandler : IRequestHandler<RemovePathItemReques
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, request.SessionId, request.Client);
 
-                inventoryMember.SharedPathItems.RemoveAll(p => p.Code == request.EncryptedPathItem.Code);
+                inventoryMember.SharedPathItems.RemoveAll(p => p.Code == request.EncryptedDataSource.Code);
 
                 inventoryData.RecodePathItems(cloudSessionData);
 
@@ -62,7 +62,7 @@ public class RemovePathItemCommandHandler : IRequestHandler<RemovePathItemReques
 
         if (updateEntityResult.IsSaved)
         {
-            var pathItemDto = new DataSourceDTO(request.SessionId, request.Client.ClientInstanceId, request.EncryptedPathItem);
+            var pathItemDto = new DataSourceDTO(request.SessionId, request.Client.ClientInstanceId, request.EncryptedDataSource);
             await _invokeClientsService.SessionGroupExcept(request.SessionId, request.Client).DataSourceRemoved(pathItemDto);
         }
 
