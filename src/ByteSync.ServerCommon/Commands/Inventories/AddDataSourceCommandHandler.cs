@@ -52,6 +52,7 @@ public class AddDataSourceCommandHandler : IRequestHandler<AddDataSourceRequest,
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
 
+                // TODO data-nodes-and-local-sync : to rework
                 var dataNode = inventoryMember.DataNodes.FirstOrDefault();
                 if (dataNode == null)
                 {
