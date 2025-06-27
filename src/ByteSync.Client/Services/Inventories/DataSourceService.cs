@@ -60,13 +60,14 @@ public class DataSourceService : IDataSourceService
                 foreach (var encryptedDataSource in encryptedDataSources)
                 {
                     var dataSource = _dataEncrypter.DecryptDataSource(encryptedDataSource);
-                    await TryAddDataSource(dataSource);
+                    await TryAddDataSource(dataSource, sessionMemberInfo.ClientInstanceId);
                 }
             }
         }
     }
 
-    public async Task<bool> TryAddDataSource(DataSource dataSource)
+    // TODO data-nodes-and-local-sync
+    public async Task<bool> TryAddDataSource(DataSource dataSource, string? nodeId = null)
     {
         if (await _dataSourceChecker.CheckDataSource(dataSource, _dataSourceRepository.Elements))
         {
@@ -94,7 +95,7 @@ public class DataSourceService : IDataSourceService
         _dataSourceRepository.AddOrUpdate(dataSource);
     }
 
-    public Task CreateAndTryAddDataSource(string path, FileSystemTypes fileSystemType)
+    public Task CreateAndTryAddDataSource(string path, FileSystemTypes fileSystemType, string? nodeId = null)
     {
         var dataSource = new DataSource();
 
@@ -106,10 +107,10 @@ public class DataSourceService : IDataSourceService
         dataSource.Code = sessionMemberInfo.GetLetter() +
                         (_dataSourceRepository.Elements.Count(ds => ds.BelongsTo(sessionMemberInfo)) + 1);
 
-        return TryAddDataSource(dataSource);
+        return TryAddDataSource(dataSource, nodeId);
     }
 
-    public async Task<bool> TryRemoveDataSource(DataSource dataSource)
+    public async Task<bool> TryRemoveDataSource(DataSource dataSource, string? nodeId = null)
     {
         var encryptedDataSource = _dataEncrypter.EncryptDataSource(dataSource);
         var isRemoveOK = await _inventoryApiClient.RemoveDataSource(_sessionService.SessionId!, encryptedDataSource);

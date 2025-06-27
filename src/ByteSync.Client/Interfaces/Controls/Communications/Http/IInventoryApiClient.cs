@@ -12,6 +12,10 @@ public interface IInventoryApiClient
     Task<List<EncryptedDataSource>?> GetDataSources(string sessionId, string clientInstanceId);
     
     Task<bool> AddDataSource(string sessionId, EncryptedDataSource encryptedDataSource);
-    
+
     Task<bool> RemoveDataSource(string sessionId, EncryptedDataSource encryptedDataSource);
+
+    Task<bool> AddDataNode(string sessionId, string nodeId);
+
+    Task<bool> RemoveDataNode(string sessionId, string nodeId);
 }

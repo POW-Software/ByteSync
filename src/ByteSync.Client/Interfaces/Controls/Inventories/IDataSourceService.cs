@@ -5,13 +5,13 @@ namespace ByteSync.Interfaces.Controls.Inventories;
 
 public interface IDataSourceService
 {
-    Task<bool> TryAddDataSource(DataSource dataSource);
-    
-    Task CreateAndTryAddDataSource(string path, FileSystemTypes fileSystemType);
+    Task<bool> TryAddDataSource(DataSource dataSource, string? nodeId = null);
 
-    public void ApplyAddDataSourceLocally(DataSource dataSource);
-    
-    Task<bool> TryRemoveDataSource(DataSource dataSource);
+    Task CreateAndTryAddDataSource(string path, FileSystemTypes fileSystemType, string? nodeId = null);
 
-    public void ApplyRemoveDataSourceLocally(DataSource dataSource);
+    void ApplyAddDataSourceLocally(DataSource dataSource);
+
+    Task<bool> TryRemoveDataSource(DataSource dataSource, string? nodeId = null);
+
+    void ApplyRemoveDataSourceLocally(DataSource dataSource);
 }
