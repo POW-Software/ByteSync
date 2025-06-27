@@ -48,6 +48,8 @@ public class HubPushHandler2 : IHubPushHandler2
         new SubjectInfo<SessionSettingsUpdatedDTO>(nameof(IHubByteSyncPush.SessionSettingsUpdated)),
         new SubjectInfo<CloudSessionFatalError>(nameof(IHubByteSyncPush.SessionOnFatalError)),
         new SubjectInfo<InventoryStartedDTO>(nameof(IHubByteSyncPush.InventoryStarted)),
+        new SubjectInfo<DataNodeDTO>(nameof(IHubByteSyncPush.DataNodeAdded)),
+        new SubjectInfo<DataNodeDTO>(nameof(IHubByteSyncPush.DataNodeRemoved)),
         new SubjectInfo<DataSourceDTO>(nameof(IHubByteSyncPush.DataSourceAdded)),
         new SubjectInfo<DataSourceDTO>(nameof(IHubByteSyncPush.DataSourceRemoved)),
         new SubjectInfo<FileTransferPush>(nameof(IHubByteSyncPush.FilePartUploaded)),
@@ -91,10 +93,16 @@ public class HubPushHandler2 : IHubPushHandler2
     public Subject<CloudSessionFatalError> SessionOnFatalError => 
         GetSubject<CloudSessionFatalError>(nameof(IHubByteSyncPush.SessionOnFatalError));
     
-    public Subject<InventoryStartedDTO> InventoryStarted => 
+    public Subject<InventoryStartedDTO> InventoryStarted =>
         GetSubject<InventoryStartedDTO>(nameof(IHubByteSyncPush.InventoryStarted));
-    
-    public Subject<DataSourceDTO> DataSourceAdded => 
+
+    public Subject<DataNodeDTO> DataNodeAdded =>
+        GetSubject<DataNodeDTO>(nameof(IHubByteSyncPush.DataNodeAdded));
+
+    public Subject<DataNodeDTO> DataNodeRemoved =>
+        GetSubject<DataNodeDTO>(nameof(IHubByteSyncPush.DataNodeRemoved));
+
+    public Subject<DataSourceDTO> DataSourceAdded =>
         GetSubject<DataSourceDTO>(nameof(IHubByteSyncPush.DataSourceAdded));
     
     public Subject<DataSourceDTO> DataSourceRemoved => 

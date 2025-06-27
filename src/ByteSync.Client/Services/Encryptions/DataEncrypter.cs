@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using ByteSync.Business.DataSources;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
+using ByteSync.Business.DataNodes;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Controls.Json;
@@ -35,8 +36,13 @@ public class DataEncrypter : IDataEncrypter
     {
         var encryptedDataSource = Encrypt<EncryptedDataSource>(dataSource);
         encryptedDataSource.Code = dataSource.Code;
-        
+
         return encryptedDataSource;
+    }
+
+    public EncryptedDataNode EncryptDataNode(DataNode dataNode)
+    {
+        return Encrypt<EncryptedDataNode>(dataNode);
     }
 
     public DataSource DecryptDataSource(EncryptedDataSource encryptedDataSource)
@@ -45,6 +51,11 @@ public class DataEncrypter : IDataEncrypter
         dataSource.Code = encryptedDataSource.Code;
 
         return dataSource;
+    }
+
+    public DataNode DecryptDataNode(EncryptedDataNode encryptedDataNode)
+    {
+        return Decrypt<DataNode>(encryptedDataNode);
     }
     
     public EncryptedSessionMemberPrivateData EncryptSessionMemberPrivateData(SessionMemberPrivateData sessionMemberPrivateData)
