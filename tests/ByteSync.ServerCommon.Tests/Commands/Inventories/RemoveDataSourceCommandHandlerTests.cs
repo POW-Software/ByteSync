@@ -54,7 +54,7 @@ public class RemoveDataSourceCommandHandlerTests
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client))
             .Returns(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId });
 
-        var request = new RemoveDataSourceRequest(sessionId, client, encryptedDataSource);
+        var request = new RemoveDataSourceRequest(sessionId, client, client.ClientInstanceId, encryptedDataSource);
 
         // Act
         await _removeDataSourceCommandHandler.Handle(request, CancellationToken.None);
@@ -85,7 +85,7 @@ public class RemoveDataSourceCommandHandlerTests
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client))
             .Returns(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId });
 
-        var request = new RemoveDataSourceRequest(sessionId, client, encryptedDataSource);
+        var request = new RemoveDataSourceRequest(sessionId, client, client.ClientInstanceId, encryptedDataSource);
 
         // Act
         await _removeDataSourceCommandHandler.Handle(request, CancellationToken.None);
