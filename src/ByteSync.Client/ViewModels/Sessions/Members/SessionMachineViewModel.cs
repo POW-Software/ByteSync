@@ -13,6 +13,7 @@ using ByteSync.Business.DataSources;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
+using ByteSync.Business.DataNodes;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
@@ -34,13 +35,15 @@ public class SessionMachineViewModel : ActivatableViewModelBase
     private readonly ILocalizationService _localizationService;
     private readonly IDataSourceService _dataSourceService;
     private readonly IDataSourceProxyFactory _dataSourceProxyFactory;
+    private readonly IDataNodeProxyFactory _dataNodeProxyFactory;
     private readonly IDataSourceRepository _dataSourceRepository;
+    private readonly IDataNodeRepository _dataNodeRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly IFileDialogService _fileDialogService;
     private readonly IThemeService _themeService;
     private readonly ILogger<SessionMachineViewModel> _logger;
     
-    private ReadOnlyObservableCollection<DataSourceProxy> _data;
+    private ReadOnlyObservableCollection<DataNodeProxy> _nodes;
     
     private IBrush? _currentMemberBackGround;
     private IBrush? _otherMemberBackGround;
@@ -55,16 +58,19 @@ public class SessionMachineViewModel : ActivatableViewModelBase
 
     }
 
-    public SessionMachineViewModel(SessionMemberInfo sessionMemberInfo, ISessionService sessionService, IDataSourceService dataSourceService, 
+    public SessionMachineViewModel(SessionMemberInfo sessionMemberInfo, ISessionService sessionService, IDataSourceService dataSourceService,
         ILocalizationService localizationService, IEnvironmentService environmentService, IDataSourceProxyFactory dataSourceProxyFactory,
-        IDataSourceRepository dataSourceRepository, ISessionMemberRepository sessionMemberRepository, IFileDialogService fileDialogService,
+        IDataNodeProxyFactory dataNodeProxyFactory, IDataSourceRepository dataSourceRepository, IDataNodeRepository dataNodeRepository,
+        ISessionMemberRepository sessionMemberRepository, IFileDialogService fileDialogService,
         IThemeService themeService, ILogger<SessionMachineViewModel> logger)
     {
         _sessionService = sessionService;
         _dataSourceService = dataSourceService;
         _localizationService = localizationService;
         _dataSourceProxyFactory = dataSourceProxyFactory;
+        _dataNodeProxyFactory = dataNodeProxyFactory;
         _dataSourceRepository = dataSourceRepository;
+        _dataNodeRepository = dataNodeRepository;
         _sessionMemberRepository = sessionMemberRepository;
         _fileDialogService = fileDialogService;
         _themeService = themeService;
@@ -94,18 +100,18 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         Observable.Merge(AddDirectoryCommand.IsExecuting, AddFileCommand.IsExecuting)
             .Select(executing => !executing).Subscribe(canRun);
 
-        var dataSourcesObservable = _dataSourceRepository.ObservableCache.Connect()
-            .Filter(dataSource => dataSource.BelongsTo(sessionMemberInfo))
-            .Sort(SortExpressionComparer<DataSource>.Ascending(p => p.Code))
-            .Transform(dataSource => _dataSourceProxyFactory.CreateDataSourceProxy(dataSource))
-            .DisposeMany() // dispose when no longer required
+        var dataNodesObservable = _dataNodeRepository.ObservableCache.Connect()
+            .Filter(node => node.ClientInstanceId == sessionMemberInfo.ClientInstanceId)
+            .Sort(SortExpressionComparer<DataNode>.Ascending(n => n.NodeId))
+            .Transform(node => _dataNodeProxyFactory.CreateDataNodeProxy(node))
+            .DisposeMany()
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Bind(out _data)
+            .Bind(out _nodes)
             .Subscribe();
         
         this.WhenActivated(disposables =>
         {
-            dataSourcesObservable.DisposeWith(disposables);
+            dataNodesObservable.DisposeWith(disposables);
 
             _sessionService.SessionStatusObservable.CombineLatest(_sessionService.RunSessionProfileInfoObservable)
                 .DistinctUntilChanged()
@@ -236,13 +242,16 @@ public class SessionMachineViewModel : ActivatableViewModelBase
     [Reactive]
     public int PositionInList { get; set; }
 
-    public ReadOnlyObservableCollection<DataSourceProxy> DataSources => _data;
+    [Reactive]
+    public DataNodeProxy? SelectedNode { get; set; }
+
+    public ReadOnlyObservableCollection<DataNodeProxy> DataNodes => _nodes;
     
     internal SessionMemberInfo SessionMemberInfo { get; private set; }
 
     private async Task RemoveDataSource(DataSourceProxy dataSource)
     {
-        await _dataSourceService.TryRemoveDataSource(dataSource.DataSource);
+        await _dataSourceService.TryRemoveDataSource(dataSource.DataSource, SelectedNode?.NodeId);
     }
 
     private async Task AddDirectory()
@@ -253,7 +262,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
 
             if (result != null && Directory.Exists(result))
             {
-                await _dataSourceService.CreateAndTryAddDataSource(result, FileSystemTypes.Directory);
+                await _dataSourceService.CreateAndTryAddDataSource(result, FileSystemTypes.Directory, SelectedNode?.NodeId);
             }
         }
         catch (Exception ex)
@@ -270,7 +279,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         {
             foreach (var fileName in result)
             {
-                await _dataSourceService.CreateAndTryAddDataSource(fileName, FileSystemTypes.File);
+                await _dataSourceService.CreateAndTryAddDataSource(fileName, FileSystemTypes.File, SelectedNode?.NodeId);
             }
         }
     }
