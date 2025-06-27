@@ -3,6 +3,7 @@ using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Communications.Http;
+using Microsoft.Extensions.Logging;
 
 namespace ByteSync.Services.Communications.Api;
 
@@ -77,6 +78,38 @@ public class InventoryApiClient : IInventoryApiClient
         {
             _logger.LogError(ex, "Error while removing dataSource from an inventory with sessionId: {sessionId}", sessionId);
                 
+            throw;
+        }
+    }
+
+    public async Task<bool> AddDataNode(string sessionId, string nodeId)
+    {
+        try
+        {
+            var result = await _apiInvoker.PostAsync<bool>($"session/{sessionId}/inventory/dataNode/{nodeId}", null);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error while adding dataNode to an inventory with sessionId: {sessionId}", sessionId);
+
+            throw;
+        }
+    }
+
+    public async Task<bool> RemoveDataNode(string sessionId, string nodeId)
+    {
+        try
+        {
+            var result = await _apiInvoker.DeleteAsync<bool>($"session/{sessionId}/inventory/dataNode/{nodeId}", null);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error while removing dataNode from an inventory with sessionId: {sessionId}", sessionId);
+
             throw;
         }
     }
