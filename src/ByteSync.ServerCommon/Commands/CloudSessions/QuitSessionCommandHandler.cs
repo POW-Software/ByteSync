@@ -109,8 +109,8 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
             {
                 foreach (var pathItem in pathItems)
                 {            
-                    var pathItemDto = new PathItemDTO(request.SessionId, request.ClientInstanceId, pathItem);
-                    await _invokeClientsService.SessionGroup(request.SessionId).PathItemRemoved(pathItemDto);
+                    var pathItemDto = new DataSourceDTO(request.SessionId, request.ClientInstanceId, pathItem);
+                    await _invokeClientsService.SessionGroup(request.SessionId).DataSourceRemoved(pathItemDto);
                 }
             }
         }

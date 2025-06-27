@@ -19,7 +19,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
     private readonly ICloudSessionApiClient _cloudSessionApiClient;
     private readonly ISessionService _sessionService;
     private readonly ISessionMemberService _sessionMemberService;
-    private readonly IPathItemsService _pathItemsService;
+    private readonly IDataSourceService _dataSourceService;
     private readonly IDataEncrypter _dataEncrypter;
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
     private readonly IInventoryApiClient _inventoryApiClient;
@@ -27,14 +27,14 @@ public class AfterJoinSessionService : IAfterJoinSessionService
     private readonly IEnvironmentService _environmentService;
     private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
     private readonly IQuitSessionService _quitSessionService;
-    private readonly IPathItemRepository _pathItemRepository;
+    private readonly IDataSourceRepository _dataSourceRepository;
     private readonly ILogger<AfterJoinSessionService> _logger;
 
     public AfterJoinSessionService(
         ICloudSessionApiClient cloudSessionApiClient,
         ISessionService sessionService,
         ISessionMemberService sessionMemberService,
-        IPathItemsService pathItemsService,
+        IDataSourceService dataSourceService,
         IDataEncrypter dataEncrypter,
         ICloudSessionConnectionRepository cloudSessionConnectionRepository,
         IInventoryApiClient inventoryApiClient,
@@ -42,13 +42,13 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         IEnvironmentService environmentService,
         ICloudSessionConnectionService cloudSessionConnectionService,
         IQuitSessionService quitSessionService,
-        IPathItemRepository pathItemRepository,
+        IDataSourceRepository dataSourceRepository,
         ILogger<AfterJoinSessionService> logger)
     {
         _cloudSessionApiClient = cloudSessionApiClient;
         _sessionService = sessionService;
         _sessionMemberService = sessionMemberService;
-        _pathItemsService = pathItemsService;
+        _dataSourceService = dataSourceService;
         _dataEncrypter = dataEncrypter;
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         _inventoryApiClient = inventoryApiClient;
@@ -56,7 +56,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         _environmentService = environmentService;
         _cloudSessionConnectionService = cloudSessionConnectionService;
         _quitSessionService = quitSessionService;
-        _pathItemRepository = pathItemRepository;
+        _dataSourceRepository = dataSourceRepository;
         _logger = logger;
     }
     
@@ -126,7 +126,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
             
             foreach (var pathItem in myPathItems)
             {
-                await _pathItemsService.CreateAndTryAddPathItem(pathItem.Path, pathItem.Type);
+                await _dataSourceService.CreateAndTryAddDataSource(pathItem.Path, pathItem.Type);
             }
         }
 
@@ -141,7 +141,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
                     foreach (var encryptedPathItem in encryptedPathItems)
                     {
                         var pathItem = _dataEncrypter.DecryptPathItem(encryptedPathItem);
-                        await _pathItemsService.TryAddPathItem(pathItem);
+                        await _dataSourceService.TryAddDataSource(pathItem);
                     }
                 }
             }
@@ -205,7 +205,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
     
     private void DebugAddDesktopPathItem(string folderName)
     {
-        var myPathItems = _pathItemRepository.Elements.Where(pi => pi.ClientInstanceId == _environmentService.ClientInstanceId).ToList();
+        var myPathItems = _dataSourceRepository.Elements.Where(pi => pi.ClientInstanceId == _environmentService.ClientInstanceId).ToList();
                 
         if (myPathItems.Any(pi => pi.Path.Equals(IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
                 StringComparison.InvariantCultureIgnoreCase)))
@@ -213,7 +213,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
             return;
         }
 
-        _pathItemsService.CreateAndTryAddPathItem(
+        _dataSourceService.CreateAndTryAddDataSource(
             IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
             FileSystemTypes.Directory);
     }

@@ -1,5 +1,4 @@
-﻿using ByteSync.Business.PathItems;
-using ByteSync.Interfaces.Controls.Inventories;
+﻿using ByteSync.Interfaces.Controls.Inventories;
 
 namespace ByteSync.Interfaces.Factories;
 

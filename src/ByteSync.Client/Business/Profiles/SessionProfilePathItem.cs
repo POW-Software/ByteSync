@@ -1,4 +1,4 @@
-﻿using ByteSync.Business.PathItems;
+﻿using ByteSync.Business.DataSources;
 using ByteSync.Common.Business.Inventories;
 
 namespace ByteSync.Business.Profiles;
@@ -10,11 +10,11 @@ public class SessionProfilePathItem
         
     }
     
-    public SessionProfilePathItem(PathItem pathItem)
+    public SessionProfilePathItem(DataSource dataSource)
     {
-        Type = pathItem.Type;
-        Path = pathItem.Path;
-        Code = pathItem.Code;
+        Type = dataSource.Type;
+        Path = dataSource.Path;
+        Code = dataSource.Code;
     }
 
     public FileSystemTypes Type { get; set; }

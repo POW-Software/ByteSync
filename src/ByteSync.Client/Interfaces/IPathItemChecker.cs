@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
-using ByteSync.Business.PathItems;
+using ByteSync.Business.DataSources;
 
 namespace ByteSync.Interfaces;
 
 public interface IPathItemChecker
 {
-    Task<bool> CheckPathItem(PathItem pathItem, IEnumerable<PathItem> existingPathItems);
+    Task<bool> CheckPathItem(DataSource dataSource, IEnumerable<DataSource> existingDataSources);
 }

@@ -4,8 +4,8 @@ using System.Reactive.Linq;
 using Avalonia.Controls;
 using Avalonia.Controls.Mixins;
 using ByteSync.Assets.Resources;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.Lobbies;
-using ByteSync.Business.PathItems;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Factories;
@@ -22,17 +22,17 @@ public class LobbyMemberViewModel : ActivatableViewModelBase
     private readonly ILobbyRepository _lobbyRepository;
     private readonly ILocalizationService _localizationService;
     private readonly IEnvironmentService _environmentService;
-    private readonly IPathItemProxyFactory _pathItemProxyFactory;
+    private readonly IDataSourceProxyFactory _dataSourceProxyFactory;
 
     public LobbyMemberViewModel(LobbyMember lobbyMember, ILobbyRepository lobbyRepository, 
         ILocalizationService localizationService,
         IEnvironmentService environmentService, 
-        IPathItemProxyFactory pathItemProxyFactory)
+        IDataSourceProxyFactory dataSourceProxyFactory)
     {
         _lobbyRepository = lobbyRepository;
         _localizationService = localizationService;
         _environmentService = environmentService;
-        _pathItemProxyFactory = pathItemProxyFactory;
+        _dataSourceProxyFactory = dataSourceProxyFactory;
         
         MemberLetter = lobbyMember.MemberLetter;
         LobbyMember = lobbyMember;
@@ -46,17 +46,17 @@ public class LobbyMemberViewModel : ActivatableViewModelBase
 
         LobbyId = _lobbyRepository.GetData()!.LobbyId;
 
-        PathItems = new ObservableCollection<PathItemProxy>();
+        PathItems = new ObservableCollection<DataSourceProxy>();
         foreach (var sessionProfilePathItem in lobbyMember.CloudSessionProfileMember.PathItems.OrderBy(pi => pi.Code))
         {
-            var pathItem = new PathItem
+            var pathItem = new DataSource
             {
                 Code = sessionProfilePathItem.Code,
                 Type = sessionProfilePathItem.Type,
                 Path = sessionProfilePathItem.Path,
             };
             
-            var pathItemViewModel = _pathItemProxyFactory.CreatePathItemProxy(pathItem);
+            var pathItemViewModel = _dataSourceProxyFactory.CreatePathItemProxy(pathItem);
             
             PathItems.Add(pathItemViewModel);
         }
@@ -133,7 +133,7 @@ public class LobbyMemberViewModel : ActivatableViewModelBase
     [Reactive]
     public bool IsNonLobbyOtherMachine { get; set; }
     
-    public ObservableCollection<PathItemProxy> PathItems { get; }
+    public ObservableCollection<DataSourceProxy> PathItems { get; }
 
     private void UpdateMachineDescription()
     {

@@ -1,5 +1,5 @@
 ﻿using Autofac;
-using ByteSync.Business.PathItems;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Client.IntegrationTests.TestHelpers;
 using ByteSync.Common.Business.EndPoints;
@@ -16,26 +16,26 @@ using Moq;
 
 namespace ByteSync.Client.IntegrationTests.Services.Inventories;
 
-public class TestPathItemsService : IntegrationTest
+public class TestDataSourceService : IntegrationTest
 {
     private string _sessionId;
     private ByteSyncEndpoint _currentEndPoint;
     
-    private PathItemsService _pathItemsService;
+    private DataSourceService _dataSourceService;
 
     [SetUp]
     public void SetUp()
     {
-        RegisterType<PathItemRepository, IPathItemRepository>();
+        RegisterType<DataSourceRepository, IDataSourceRepository>();
         RegisterType<SessionMemberRepository, ISessionMemberRepository>();
-        RegisterType<PathItemsService>();
+        RegisterType<DataSourceService>();
         BuildMoqContainer();
 
         var contextHelper = new TestContextGenerator(Container);
         _sessionId = contextHelper.GenerateSession();
         _currentEndPoint = contextHelper.GenerateCurrentEndpoint();
 
-        _pathItemsService = Container.Resolve<PathItemsService>();
+        _dataSourceService = Container.Resolve<DataSourceService>();
     }
     
     [Test]
@@ -43,20 +43,20 @@ public class TestPathItemsService : IntegrationTest
     {
         // Arrange
         var pathItemChecker = Container.Resolve<Mock<IPathItemChecker>>();
-        var pathItemRepository = Container.Resolve<IPathItemRepository>();
+        var pathItemRepository = Container.Resolve<IDataSourceRepository>();
         var inventoryApiClient = Container.Resolve<Mock<IInventoryApiClient>>();
         
         pathItemChecker
-            .Setup(x => x.CheckPathItem(It.IsAny<PathItem>(), It.IsAny<IEnumerable<PathItem>>()))
+            .Setup(x => x.CheckPathItem(It.IsAny<DataSource>(), It.IsAny<IEnumerable<DataSource>>()))
             .ReturnsAsync(true);
         
         inventoryApiClient.Setup(x => x.AddPathItem(_sessionId, It.IsAny<EncryptedPathItem>()))
             .ReturnsAsync(true);
 
-        var pathItem = new PathItem { ClientInstanceId = _currentEndPoint.ClientInstanceId };
+        var pathItem = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId };
         
         // Act
-        var result = await _pathItemsService.TryAddPathItem(pathItem);
+        var result = await _dataSourceService.TryAddDataSource(pathItem);
         
         // Assert
         result.Should().BeTrue();
@@ -69,20 +69,20 @@ public class TestPathItemsService : IntegrationTest
     {
         // Arrange
         var pathItemChecker = Container.Resolve<Mock<IPathItemChecker>>();
-        var pathItemRepository = Container.Resolve<IPathItemRepository>();
+        var pathItemRepository = Container.Resolve<IDataSourceRepository>();
         var inventoryApiClient = Container.Resolve<Mock<IInventoryApiClient>>();
         
         pathItemChecker
-            .Setup(x => x.CheckPathItem(It.IsAny<PathItem>(), It.IsAny<IEnumerable<PathItem>>()))
+            .Setup(x => x.CheckPathItem(It.IsAny<DataSource>(), It.IsAny<IEnumerable<DataSource>>()))
             .ReturnsAsync(true);
         
         inventoryApiClient.Setup(x => x.AddPathItem(_sessionId, It.IsAny<EncryptedPathItem>()))
             .ReturnsAsync(true);
 
-        var pathItem = new PathItem { ClientInstanceId = _currentEndPoint.ClientInstanceId + "_FAKE" };
+        var pathItem = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId + "_FAKE" };
         
         // Act
-        var result = await _pathItemsService.TryAddPathItem(pathItem);
+        var result = await _dataSourceService.TryAddDataSource(pathItem);
         
         // Assert
         result.Should().BeTrue();
@@ -95,16 +95,16 @@ public class TestPathItemsService : IntegrationTest
     {
         // Arrange
         var pathItemChecker = Container.Resolve<Mock<IPathItemChecker>>();
-        var pathItemRepository = Container.Resolve<IPathItemRepository>();
+        var pathItemRepository = Container.Resolve<IDataSourceRepository>();
         
         pathItemChecker
-            .Setup(x => x.CheckPathItem(It.IsAny<PathItem>(), It.IsAny<IEnumerable<PathItem>>()))
+            .Setup(x => x.CheckPathItem(It.IsAny<DataSource>(), It.IsAny<IEnumerable<DataSource>>()))
             .ReturnsAsync(false);
 
-        var pathItem = new PathItem { ClientInstanceId = _currentEndPoint.ClientInstanceId };
+        var pathItem = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId };
         
         // Act
-        var result = await _pathItemsService.TryAddPathItem(pathItem);
+        var result = await _dataSourceService.TryAddDataSource(pathItem);
         
         // Assert
         result.Should().BeFalse();
@@ -116,20 +116,20 @@ public class TestPathItemsService : IntegrationTest
     {
         // Arrange
         var pathItemChecker = Container.Resolve<Mock<IPathItemChecker>>();
-        var pathItemRepository = Container.Resolve<IPathItemRepository>();
+        var pathItemRepository = Container.Resolve<IDataSourceRepository>();
         var inventoryApiClient = Container.Resolve<Mock<IInventoryApiClient>>();
         
         pathItemChecker
-            .Setup(x => x.CheckPathItem(It.IsAny<PathItem>(), It.IsAny<IEnumerable<PathItem>>()))
+            .Setup(x => x.CheckPathItem(It.IsAny<DataSource>(), It.IsAny<IEnumerable<DataSource>>()))
             .ReturnsAsync(true);
         
         inventoryApiClient.Setup(x => x.AddPathItem(_sessionId, It.IsAny<EncryptedPathItem>()))
             .ReturnsAsync(false);
 
-        var pathItem = new PathItem { ClientInstanceId = _currentEndPoint.ClientInstanceId };
+        var pathItem = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId };
         
         // Act
-        var result = await _pathItemsService.TryAddPathItem(pathItem);
+        var result = await _dataSourceService.TryAddDataSource(pathItem);
         
         // Assert
         result.Should().BeFalse();
@@ -143,9 +143,9 @@ public class TestPathItemsService : IntegrationTest
         // Arrange
         var dataEncrypter = Container.Resolve<Mock<IDataEncrypter>>();
         var inventoryApiClient = Container.Resolve<Mock<IInventoryApiClient>>();
-        var pathItemRepository = Container.Resolve<IPathItemRepository>();
+        var pathItemRepository = Container.Resolve<IDataSourceRepository>();
         
-        var pathItem = new PathItem { ClientInstanceId = _currentEndPoint.ClientInstanceId };
+        var pathItem = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId };
         dataEncrypter.Setup(x => x.EncryptPathItem(pathItem)).Returns(new EncryptedPathItem());
         
         inventoryApiClient.Setup(x => x.RemovePathItem(_sessionId, It.IsAny<EncryptedPathItem>()))
@@ -154,7 +154,7 @@ public class TestPathItemsService : IntegrationTest
         pathItemRepository.AddOrUpdate(pathItem);
 
         // Act
-        var result = await _pathItemsService.TryRemovePathItem(pathItem);
+        var result = await _dataSourceService.TryRemoveDataSource(pathItem);
         
         // Assert
         result.Should().BeTrue();
@@ -167,9 +167,9 @@ public class TestPathItemsService : IntegrationTest
         // Arrange
         var dataEncrypter = Container.Resolve<Mock<IDataEncrypter>>();
         var inventoryApiClient = Container.Resolve<Mock<IInventoryApiClient>>();
-        var pathItemRepository = Container.Resolve<IPathItemRepository>();
+        var pathItemRepository = Container.Resolve<IDataSourceRepository>();
         
-        var pathItem = new PathItem { ClientInstanceId = _currentEndPoint.ClientInstanceId };
+        var pathItem = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId };
         dataEncrypter.Setup(x => x.EncryptPathItem(pathItem)).Returns(new EncryptedPathItem());
         
         inventoryApiClient.Setup(x => x.RemovePathItem(_sessionId, It.IsAny<EncryptedPathItem>()))
@@ -178,7 +178,7 @@ public class TestPathItemsService : IntegrationTest
         pathItemRepository.AddOrUpdate(pathItem);
 
         // Act
-        var result = await _pathItemsService.TryRemovePathItem(pathItem);
+        var result = await _dataSourceService.TryRemoveDataSource(pathItem);
         
         // Assert
         result.Should().BeFalse();
@@ -191,7 +191,7 @@ public class TestPathItemsService : IntegrationTest
         // Arrange
         var path = "test/path";
         var fileSystemType = FileSystemTypes.File;
-        var pathItemRepository = Container.Resolve<IPathItemRepository>();
+        var pathItemRepository = Container.Resolve<IDataSourceRepository>();
         var sessionMemberRepository = Container.Resolve<ISessionMemberRepository>();
         var sessionMemberInfo = new SessionMemberInfo
         {
@@ -202,7 +202,7 @@ public class TestPathItemsService : IntegrationTest
         var inventoryApiClient = Container.Resolve<Mock<IInventoryApiClient>>();
         
         pathItemChecker
-            .Setup(x => x.CheckPathItem(It.IsAny<PathItem>(), It.IsAny<IEnumerable<PathItem>>()))
+            .Setup(x => x.CheckPathItem(It.IsAny<DataSource>(), It.IsAny<IEnumerable<DataSource>>()))
             .ReturnsAsync(true);
         
         inventoryApiClient.Setup(x => x.AddPathItem(_sessionId, It.IsAny<EncryptedPathItem>()))
@@ -211,7 +211,7 @@ public class TestPathItemsService : IntegrationTest
         sessionMemberRepository.AddOrUpdate(sessionMemberInfo);
         
         // Act
-        await _pathItemsService.CreateAndTryAddPathItem(path, fileSystemType);
+        await _dataSourceService.CreateAndTryAddDataSource(path, fileSystemType);
 
         // Assert
         pathItemRepository.Elements.Should().ContainSingle(pi => pi.Path == path && pi.Type == fileSystemType);
@@ -221,11 +221,11 @@ public class TestPathItemsService : IntegrationTest
     public void ApplyAddPathItemLocally_ShouldAddPathItemToRepository()
     {
         // Arrange
-        var pathItem = new PathItem { ClientInstanceId = _currentEndPoint.ClientInstanceId };
-        var pathItemRepository = Container.Resolve<IPathItemRepository>();
+        var pathItem = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId };
+        var pathItemRepository = Container.Resolve<IDataSourceRepository>();
 
         // Act
-        _pathItemsService.ApplyAddPathItemLocally(pathItem);
+        _dataSourceService.ApplyAddDataSourceLocally(pathItem);
 
         // Assert
         pathItemRepository.Elements.Should().Contain(pathItem);
@@ -235,8 +235,8 @@ public class TestPathItemsService : IntegrationTest
     public void ApplyRemovePathItemLocally_ShouldRemovePathItemFromRepository()
     {
         // Arrange
-        var pathItem = new PathItem { ClientInstanceId = _currentEndPoint.ClientInstanceId };
-        var pathItemRepository = Container.Resolve<IPathItemRepository>();
+        var pathItem = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId };
+        var pathItemRepository = Container.Resolve<IDataSourceRepository>();
         var sessionMemberRepository = Container.Resolve<Mock<ISessionMemberRepository>>();
         var sessionMemberInfo = new SessionMemberInfo
         {
@@ -247,7 +247,7 @@ public class TestPathItemsService : IntegrationTest
         sessionMemberRepository.Setup(x => x.GetElement(It.IsAny<string>())).Returns(sessionMemberInfo);
 
         // Act
-        _pathItemsService.ApplyRemovePathItemLocally(pathItem);
+        _dataSourceService.ApplyRemoveDataSourceLocally(pathItem);
 
         // Assert
         pathItemRepository.Elements.Should().NotContain(pathItem);

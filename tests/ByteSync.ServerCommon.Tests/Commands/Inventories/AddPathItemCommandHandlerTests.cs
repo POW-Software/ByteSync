@@ -59,7 +59,7 @@ public class AddPathItemCommandHandlerTests
 
         A.CallTo(() => _mockInvokeClientsService.SessionGroupExcept(sessionId, client)).Returns(_mockByteSyncPush);
 
-        A.CallTo(() => _mockByteSyncPush.PathItemAdded(A<PathItemDTO>.Ignored)).Returns(Task.CompletedTask);
+        A.CallTo(() => _mockByteSyncPush.DataSourceAdded(A<DataSourceDTO>.Ignored)).Returns(Task.CompletedTask);
 
         var request = new AddPathItemRequest(sessionId, client, encryptedPathItem);
         
@@ -70,8 +70,8 @@ public class AddPathItemCommandHandlerTests
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInvokeClientsService.SessionGroupExcept(A<string>.Ignored, A<Client>.Ignored)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _mockByteSyncPush.PathItemAdded(A<PathItemDTO>.Ignored)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _mockByteSyncPush.PathItemAdded(A<PathItemDTO>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockByteSyncPush.DataSourceAdded(A<DataSourceDTO>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockByteSyncPush.DataSourceAdded(A<DataSourceDTO>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client)).MustHaveHappenedOnceExactly();
     }
 
@@ -93,7 +93,7 @@ public class AddPathItemCommandHandlerTests
 
         A.CallTo(() => _mockInvokeClientsService.SessionGroupExcept(sessionId, client)).Returns(_mockByteSyncPush);
 
-        A.CallTo(() => _mockByteSyncPush.PathItemAdded(A<PathItemDTO>.Ignored)).Returns(Task.CompletedTask);
+        A.CallTo(() => _mockByteSyncPush.DataSourceAdded(A<DataSourceDTO>.Ignored)).Returns(Task.CompletedTask);
 
         var request = new AddPathItemRequest(sessionId, client, encryptedPathItem);
         

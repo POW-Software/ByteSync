@@ -2,14 +2,14 @@
 
 namespace ByteSync.Common.Business.Sessions;
 
-public class PathItemDTO : BaseSessionDto
+public class DataSourceDTO : BaseSessionDto
 {
-    public PathItemDTO()
+    public DataSourceDTO()
     {
         
     }
     
-    public PathItemDTO(string sessionId, string clientInstanceId, EncryptedPathItem encryptedPathItem)
+    public DataSourceDTO(string sessionId, string clientInstanceId, EncryptedPathItem encryptedPathItem)
         : base(sessionId, clientInstanceId)
     {
         EncryptedPathItem = encryptedPathItem;

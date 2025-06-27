@@ -62,8 +62,8 @@ public class RemovePathItemCommandHandler : IRequestHandler<RemovePathItemReques
 
         if (updateEntityResult.IsSaved)
         {
-            var pathItemDto = new PathItemDTO(request.SessionId, request.Client.ClientInstanceId, request.EncryptedPathItem);
-            await _invokeClientsService.SessionGroupExcept(request.SessionId, request.Client).PathItemRemoved(pathItemDto);
+            var pathItemDto = new DataSourceDTO(request.SessionId, request.Client.ClientInstanceId, request.EncryptedPathItem);
+            await _invokeClientsService.SessionGroupExcept(request.SessionId, request.Client).DataSourceRemoved(pathItemDto);
         }
 
         return updateEntityResult.IsSaved;

@@ -1,15 +1,15 @@
-﻿using ByteSync.Business.PathItems;
+﻿using ByteSync.Business.DataSources;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Repositories;
 using DynamicData;
 
 namespace ByteSync.Repositories;
 
-public class PathItemRepository : BaseSourceCacheRepository<PathItem, string>, IPathItemRepository
+public class DataSourceRepository : BaseSourceCacheRepository<DataSource, string>, IDataSourceRepository
 {
-    private readonly ISessionInvalidationCachePolicy<PathItem, string> _sessionInvalidationCachePolicy;
+    private readonly ISessionInvalidationCachePolicy<DataSource, string> _sessionInvalidationCachePolicy;
 
-    public PathItemRepository(IEnvironmentService environmentService, ISessionInvalidationCachePolicy<PathItem, string> sessionInvalidationCachePolicy)
+    public DataSourceRepository(IEnvironmentService environmentService, ISessionInvalidationCachePolicy<DataSource, string> sessionInvalidationCachePolicy)
     {
         CurrentMemberPathItems = SourceCache
             .Connect()
@@ -20,11 +20,11 @@ public class PathItemRepository : BaseSourceCacheRepository<PathItem, string>, I
         _sessionInvalidationCachePolicy.Initialize(SourceCache, true, false);
     }
 
-    protected override string KeySelector(PathItem pathItem) => pathItem.Key;
+    protected override string KeySelector(DataSource dataSource) => dataSource.Key;
     
-    public IObservableCache<PathItem, string> CurrentMemberPathItems { get; }
+    public IObservableCache<DataSource, string> CurrentMemberPathItems { get; }
     
-    public IList<PathItem> SortedCurrentMemberPathItems
+    public IList<DataSource> SortedCurrentMemberPathItems
     {
         get
         {

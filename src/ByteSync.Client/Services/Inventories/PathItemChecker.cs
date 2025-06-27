@@ -1,5 +1,5 @@
 ﻿using ByteSync.Assets.Resources;
-using ByteSync.Business.PathItems;
+using ByteSync.Business.DataSources;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Dialogs;
@@ -15,12 +15,12 @@ public class PathItemChecker : IPathItemChecker
         _dialogService = dialogService;
     }
     
-    public async Task<bool> CheckPathItem(PathItem pathItem, IEnumerable<PathItem> existingPathItems)
+    public async Task<bool> CheckPathItem(DataSource dataSource, IEnumerable<DataSource> existingDataSources)
     {
-        if (pathItem.Type == FileSystemTypes.File)
+        if (dataSource.Type == FileSystemTypes.File)
         {
-            if (existingPathItems.Any(pi => pi.ClientInstanceId.Equals(pathItem.ClientInstanceId) && pi.Type == FileSystemTypes.File
-                      && pi.Path.Equals(pathItem.Path, StringComparison.InvariantCultureIgnoreCase)))
+            if (existingDataSources.Any(pi => pi.ClientInstanceId.Equals(dataSource.ClientInstanceId) && pi.Type == FileSystemTypes.File
+                      && pi.Path.Equals(dataSource.Path, StringComparison.InvariantCultureIgnoreCase)))
             {
                 await ShowError();
 
@@ -30,10 +30,10 @@ public class PathItemChecker : IPathItemChecker
         else
         {
             // We can neither be equal, nor be, nor be a parent of an already selected path
-            if (existingPathItems.Any(pi => pi.ClientInstanceId.Equals(pathItem.ClientInstanceId) && pi.Type == FileSystemTypes.Directory
-                        && (pi.Path.Equals(pathItem.Path, StringComparison.InvariantCultureIgnoreCase) || 
-                            IOUtils.IsSubPathOf(pi.Path, pathItem.Path) || 
-                            IOUtils.IsSubPathOf(pathItem.Path, pi.Path))))
+            if (existingDataSources.Any(pi => pi.ClientInstanceId.Equals(dataSource.ClientInstanceId) && pi.Type == FileSystemTypes.Directory
+                        && (pi.Path.Equals(dataSource.Path, StringComparison.InvariantCultureIgnoreCase) || 
+                            IOUtils.IsSubPathOf(pi.Path, dataSource.Path) || 
+                            IOUtils.IsSubPathOf(dataSource.Path, pi.Path))))
             {
                 await ShowError();
 

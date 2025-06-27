@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Security.Cryptography;
-using ByteSync.Business.PathItems;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
@@ -31,17 +31,17 @@ public class DataEncrypter : IDataEncrypter
         return Decrypt<SessionSettings>(encryptedSessionSettings);
     }
 
-    public EncryptedPathItem EncryptPathItem(PathItem pathItem)
+    public EncryptedPathItem EncryptPathItem(DataSource dataSource)
     {
-        var encryptedPathItem = Encrypt<EncryptedPathItem>(pathItem);
-        encryptedPathItem.Code = pathItem.Code;
+        var encryptedPathItem = Encrypt<EncryptedPathItem>(dataSource);
+        encryptedPathItem.Code = dataSource.Code;
         
         return encryptedPathItem;
     }
 
-    public PathItem DecryptPathItem(EncryptedPathItem encryptedPathItem)
+    public DataSource DecryptPathItem(EncryptedPathItem encryptedPathItem)
     {
-        var pathItem = Decrypt<PathItem>(encryptedPathItem);
+        var pathItem = Decrypt<DataSource>(encryptedPathItem);
         pathItem.Code = encryptedPathItem.Code;
 
         return pathItem;

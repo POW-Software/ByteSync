@@ -1,6 +1,6 @@
 ﻿using Autofac;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.Inventories;
-using ByteSync.Business.PathItems;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Misc;
@@ -36,13 +36,13 @@ public class TestInventoryBuilderFactory : IntegrationTest
         var mockSessionService = Container.Resolve<Mock<ISessionService>>();
         var mockInventoryService = Container.Resolve<Mock<IInventoryService>>();
         var mockEnvironmentService = Container.Resolve<Mock<IEnvironmentService>>();
-        var mockPathItemRepository = Container.Resolve<Mock<IPathItemRepository>>();
+        var mockPathItemRepository = Container.Resolve<Mock<IDataSourceRepository>>();
         
         var fakeSessionMember = new SessionMemberInfo();
         var fakeSessionSettings = new SessionSettings();
         var fakeProcessData = new InventoryProcessData();
         var fakePlatform = OSPlatforms.Windows;
-        var fakePathItems = new List<PathItem> { Mock.Of<PathItem>(), Mock.Of<PathItem>() };
+        var fakePathItems = new List<DataSource> { Mock.Of<DataSource>(), Mock.Of<DataSource>() };
         
         mockSessionMemberRepo.Setup(r => r.GetCurrentSessionMember()).Returns(fakeSessionMember).Verifiable();
         mockSessionService.SetupGet(s => s.CurrentSessionSettings).Returns(fakeSessionSettings).Verifiable();

@@ -27,7 +27,7 @@ public class InventoryBuilderFactory : IInventoryBuilderFactory
         var sessionService = _context.Resolve<ISessionService>();
         var inventoryService = _context.Resolve<IInventoryService>();
         var environmentService = _context.Resolve<IEnvironmentService>();
-        var pathItemRepository = _context.Resolve<IPathItemRepository>();
+        var pathItemRepository = _context.Resolve<IDataSourceRepository>();
         
         var sessionMember = sessionMemberRepository.GetCurrentSessionMember();
         var cloudSessionSettings = sessionService.CurrentSessionSettings!;

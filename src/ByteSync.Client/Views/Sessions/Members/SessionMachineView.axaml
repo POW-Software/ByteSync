@@ -129,7 +129,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Classes="GenericButton"
-                                            Command="{Binding Path=DataContext.RemovePathItemCommand,RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
+                                            Command="{Binding Path=DataContext.RemoveDataSourceCommand,RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
                                             CommandParameter="{Binding}"
                                             Width="32" BorderThickness="0">
 

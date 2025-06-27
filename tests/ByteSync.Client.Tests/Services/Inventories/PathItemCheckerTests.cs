@@ -1,5 +1,5 @@
 ﻿using ByteSync.Business;
-using ByteSync.Business.PathItems;
+using ByteSync.Business.DataSources;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Services.Inventories;
@@ -13,7 +13,7 @@ namespace ByteSync.Tests.Services.Inventories;
 public class PathItemCheckerTests
 {
     private Mock<IDialogService> _mockDialogService;
-    private List<PathItem> _existingPathItems;
+    private List<DataSource> _existingPathItems;
     
     private PathItemChecker _pathItemChecker;
 
@@ -30,13 +30,13 @@ public class PathItemCheckerTests
             .Returns((string title, string message, string[] parameters) => new MessageBoxViewModel { ShowOK = true });
 
         _pathItemChecker = new PathItemChecker(_mockDialogService.Object);
-        _existingPathItems = new List<PathItem>();
+        _existingPathItems = new List<DataSource>();
     }
 
     [Test]
     public async Task CheckPathItem_File_Unique_ReturnsTrue()
     {
-        var pathItem = new PathItem
+        var pathItem = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.File,
@@ -52,7 +52,7 @@ public class PathItemCheckerTests
     [Test]
     public async Task CheckPathItem_File_Duplicate_ReturnsFalse()
     {
-        var existing = new PathItem
+        var existing = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.File,
@@ -60,7 +60,7 @@ public class PathItemCheckerTests
         };
         _existingPathItems.Add(existing);
 
-        var pathItem = new PathItem
+        var pathItem = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.File,
@@ -76,7 +76,7 @@ public class PathItemCheckerTests
     [Test]
     public async Task CheckPathItem_Directory_Unique_ReturnsTrue()
     {
-        var pathItem = new PathItem
+        var pathItem = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.Directory,
@@ -92,7 +92,7 @@ public class PathItemCheckerTests
     [Test]
     public async Task CheckPathItem_Directory_Duplicate_ReturnsFalse()
     {
-        var existing = new PathItem
+        var existing = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.Directory,
@@ -100,7 +100,7 @@ public class PathItemCheckerTests
         };
         _existingPathItems.Add(existing);
 
-        var pathItem = new PathItem
+        var pathItem = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.Directory,
@@ -116,7 +116,7 @@ public class PathItemCheckerTests
     [Test]
     public async Task CheckPathItem_Directory_SubPath_ReturnsFalse()
     {
-        var existing = new PathItem
+        var existing = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.Directory,
@@ -124,7 +124,7 @@ public class PathItemCheckerTests
         };
         _existingPathItems.Add(existing);
 
-        var pathItem = new PathItem
+        var pathItem = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.Directory,
@@ -140,7 +140,7 @@ public class PathItemCheckerTests
     [Test]
     public async Task CheckPathItem_Directory_ParentOfExisting_ReturnsFalse()
     {
-        var existing = new PathItem
+        var existing = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.Directory,
@@ -148,7 +148,7 @@ public class PathItemCheckerTests
         };
         _existingPathItems.Add(existing);
 
-        var pathItem = new PathItem
+        var pathItem = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.Directory,

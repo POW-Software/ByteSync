@@ -67,9 +67,9 @@ public class AddPathItemCommandHandler : IRequestHandler<AddPathItemRequest, boo
 
         if (updateEntityResult.IsSaved)
         {
-            var pathItemDto = new PathItemDTO(sessionId, client.ClientInstanceId, encryptedPathItem);
+            var pathItemDto = new DataSourceDTO(sessionId, client.ClientInstanceId, encryptedPathItem);
             
-            await _invokeClientsService.SessionGroupExcept(sessionId, client).PathItemAdded(pathItemDto);
+            await _invokeClientsService.SessionGroupExcept(sessionId, client).DataSourceAdded(pathItemDto);
         }
 
         return updateEntityResult.IsSaved;

@@ -1,6 +1,6 @@
 ﻿using ByteSync.Business;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.Inventories;
-using ByteSync.Business.PathItems;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.EndPoints;
@@ -96,15 +96,15 @@ public class IdentityBuilderTests : AbstractTester
 
     private static InventoryBuilder GetInventoryBuilder(FileSystemInfo pathItemRoot)
     {
-        PathItem pathItem = new PathItem();
-        pathItem.Path = pathItemRoot.FullName;
+        DataSource dataSource = new DataSource();
+        dataSource.Path = pathItemRoot.FullName;
         if (pathItemRoot is DirectoryInfo)
         {
-            pathItem.Type = FileSystemTypes.Directory;
+            dataSource.Type = FileSystemTypes.Directory;
         }
         else if (pathItemRoot is FileInfo)
         {
-            pathItem.Type = FileSystemTypes.File;
+            dataSource.Type = FileSystemTypes.File;
         }
         else
         {
@@ -132,7 +132,7 @@ public class IdentityBuilderTests : AbstractTester
             SessionSettingsHelper.BuildDefaultSessionSettings(DataTypes.FilesDirectories, LinkingKeys.RelativePath), 
             new InventoryProcessData(), OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object);
 
-        inventoryBuilder.AddInventoryPart(pathItem);
+        inventoryBuilder.AddInventoryPart(dataSource);
             
         inventoryBuilder.Inventory.Should().NotBeNull();
         inventoryBuilder.Inventory.InventoryParts.Count.Should().Be(1);

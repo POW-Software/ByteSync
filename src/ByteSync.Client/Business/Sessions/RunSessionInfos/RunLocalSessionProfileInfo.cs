@@ -1,4 +1,4 @@
-﻿using ByteSync.Business.PathItems;
+﻿using ByteSync.Business.DataSources;
 using ByteSync.Business.Profiles;
 using ByteSync.Common.Business.Lobbies;
 
@@ -19,7 +19,7 @@ public class RunLocalSessionProfileInfo : AbstractRunSessionProfileInfo
     
     public LocalSessionProfileDetails ProfileDetails { get; set; }
 
-    public IList<PathItem> GetMyPathItems()
+    public IList<DataSource> GetMyPathItems()
     {
         return ProfileDetails.PathItems;
     }

@@ -1,5 +1,5 @@
 ﻿using System.Reactive.Linq;
-using ByteSync.Business.PathItems;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions.Cloud;
@@ -15,26 +15,26 @@ using DynamicData;
 
 namespace ByteSync.Services.Inventories;
 
-public class PathItemsService : IPathItemsService
+public class DataSourceService : IDataSourceService
 {
     private readonly ISessionService _sessionService;
     private readonly IPathItemChecker _pathItemChecker;
     private readonly IDataEncrypter _dataEncrypter;
     private readonly IConnectionService _connectionService;
     private readonly IInventoryApiClient _inventoryApiClient;
-    private readonly IPathItemRepository _pathItemRepository;
+    private readonly IDataSourceRepository _dataSourceRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
 
-    public PathItemsService(ISessionService sessionService, IPathItemChecker pathItemChecker, IDataEncrypter dataEncrypter,
+    public DataSourceService(ISessionService sessionService, IPathItemChecker pathItemChecker, IDataEncrypter dataEncrypter,
         IConnectionService connectionService, IInventoryApiClient inventoryApiClient,
-        IPathItemRepository pathItemRepository, ISessionMemberRepository sessionMemberRepository)
+        IDataSourceRepository dataSourceRepository, ISessionMemberRepository sessionMemberRepository)
     {
         _sessionService = sessionService;
         _pathItemChecker = pathItemChecker;
         _dataEncrypter = dataEncrypter;
         _connectionService = connectionService;
         _inventoryApiClient = inventoryApiClient;
-        _pathItemRepository = pathItemRepository;
+        _dataSourceRepository = dataSourceRepository;
         _sessionMemberRepository = sessionMemberRepository;
 
         _sessionMemberRepository.SortedSessionMembersObservable
@@ -60,27 +60,27 @@ public class PathItemsService : IPathItemsService
                 foreach (var encryptedPathItem in encryptedPathItems)
                 {
                     var pathItem = _dataEncrypter.DecryptPathItem(encryptedPathItem);
-                    await TryAddPathItem(pathItem);
+                    await TryAddDataSource(pathItem);
                 }
             }
         }
     }
 
-    public async Task<bool> TryAddPathItem(PathItem pathItem)
+    public async Task<bool> TryAddDataSource(DataSource dataSource)
     {
-        if (await _pathItemChecker.CheckPathItem(pathItem, _pathItemRepository.Elements))
+        if (await _pathItemChecker.CheckPathItem(dataSource, _dataSourceRepository.Elements))
         {
             var isAddOK = true;
             if (_sessionService.CurrentSession is CloudSession cloudSession
-                && pathItem.ClientInstanceId == _connectionService.ClientInstanceId)
+                && dataSource.ClientInstanceId == _connectionService.ClientInstanceId)
             {
-                var encryptedPathItem = _dataEncrypter.EncryptPathItem(pathItem);
+                var encryptedPathItem = _dataEncrypter.EncryptPathItem(dataSource);
                 isAddOK = await _inventoryApiClient.AddPathItem(cloudSession.SessionId, encryptedPathItem);
             }
 
             if (isAddOK)
             {
-                ApplyAddPathItemLocally(pathItem);
+                ApplyAddDataSourceLocally(dataSource);
             }
             
             return isAddOK;
@@ -89,14 +89,14 @@ public class PathItemsService : IPathItemsService
         return false;
     }
 
-    public void ApplyAddPathItemLocally(PathItem pathItem)
+    public void ApplyAddDataSourceLocally(DataSource dataSource)
     {
-        _pathItemRepository.AddOrUpdate(pathItem);
+        _dataSourceRepository.AddOrUpdate(dataSource);
     }
 
-    public Task CreateAndTryAddPathItem(string path, FileSystemTypes fileSystemType)
+    public Task CreateAndTryAddDataSource(string path, FileSystemTypes fileSystemType)
     {
-        var pathItem = new PathItem();
+        var pathItem = new DataSource();
 
         pathItem.Path = path;
         pathItem.Type = fileSystemType;
@@ -104,29 +104,29 @@ public class PathItemsService : IPathItemsService
 
         var sessionMemberInfo = _sessionMemberRepository.GetCurrentSessionMember();
         pathItem.Code = sessionMemberInfo.GetLetter() +
-                        (_pathItemRepository.Elements.Count(pi => pi.BelongsTo(sessionMemberInfo)) + 1);
+                        (_dataSourceRepository.Elements.Count(pi => pi.BelongsTo(sessionMemberInfo)) + 1);
 
-        return TryAddPathItem(pathItem);
+        return TryAddDataSource(pathItem);
     }
 
-    public async Task<bool> TryRemovePathItem(PathItem pathItem)
+    public async Task<bool> TryRemoveDataSource(DataSource dataSource)
     {
-        var encryptedPathItem = _dataEncrypter.EncryptPathItem(pathItem);
+        var encryptedPathItem = _dataEncrypter.EncryptPathItem(dataSource);
         var isRemoveOK = await _inventoryApiClient.RemovePathItem(_sessionService.SessionId!, encryptedPathItem);
         
         if (isRemoveOK)
         {
-            ApplyRemovePathItemLocally(pathItem);
+            ApplyRemoveDataSourceLocally(dataSource);
         }
         
         return isRemoveOK;
     }
 
-    public void ApplyRemovePathItemLocally(PathItem pathItem)
+    public void ApplyRemoveDataSourceLocally(DataSource dataSource)
     {
-        _pathItemRepository.Remove(pathItem);
+        _dataSourceRepository.Remove(dataSource);
         
-        var sessionMemberInfo = _sessionMemberRepository.GetElement(pathItem.ClientInstanceId);
+        var sessionMemberInfo = _sessionMemberRepository.GetElement(dataSource.ClientInstanceId);
 
         if (sessionMemberInfo != null)
         {
@@ -144,7 +144,7 @@ public class PathItemsService : IPathItemsService
 
     private void UpdateCodesForMember(SessionMemberInfo sessionMemberInfo)
     {
-        var pathItems = _pathItemRepository.Elements
+        var pathItems = _dataSourceRepository.Elements
             .Where(pi => pi.BelongsTo(sessionMemberInfo))
             .OrderBy(pi => pi.Code);
 

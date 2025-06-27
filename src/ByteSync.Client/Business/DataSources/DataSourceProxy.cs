@@ -8,32 +8,32 @@ using ByteSync.Interfaces;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-namespace ByteSync.Business.PathItems;
+namespace ByteSync.Business.DataSources;
 
-public class PathItemProxy : ReactiveObject, IDisposable
+public class DataSourceProxy : ReactiveObject, IDisposable
 {
     private readonly ILocalizationService _localizationService;
     private readonly IFileSystemAccessor _fileSystemAccessor;
-    private readonly ILogger<PathItemProxy> _logger;
+    private readonly ILogger<DataSourceProxy> _logger;
     
     private readonly CompositeDisposable _disposables = new();
 
-    public PathItemProxy()
+    public DataSourceProxy()
     {
 
     }
     
-    public PathItemProxy(PathItem pathItem, ILocalizationService localizationService, IFileSystemAccessor fileSystemAccessor,
-        ILogger<PathItemProxy> logger)
+    public DataSourceProxy(DataSource dataSource, ILocalizationService localizationService, IFileSystemAccessor fileSystemAccessor,
+        ILogger<DataSourceProxy> logger)
     {
         _localizationService = localizationService;
         _fileSystemAccessor = fileSystemAccessor;
         _logger = logger;
 
-        PathItem = pathItem;
-        Code = PathItem.Code;
-        Path = PathItem.Path;
-        FileSystemType = PathItem.Type;
+        DataSource = dataSource;
+        Code = DataSource.Code;
+        Path = DataSource.Path;
+        FileSystemType = DataSource.Type;
 
         UpdateElementType();
 
@@ -44,14 +44,14 @@ public class PathItemProxy : ReactiveObject, IDisposable
             .Subscribe(_ => UpdateElementType());
         _disposables.Add(localizationSubscription);
         
-        var codeSubscription = PathItem
+        var codeSubscription = DataSource
             .WhenAnyValue(x => x.Code)
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(newCode => Code = newCode);
         _disposables.Add(codeSubscription);
     }
     
-    public PathItem PathItem { get; } = null!;
+    public DataSource DataSource { get; } = null!;
     
     [Reactive]
     public string Code { get; set; } = null!;
@@ -85,11 +85,11 @@ public class PathItemProxy : ReactiveObject, IDisposable
         {
             if (FileSystemType == FileSystemTypes.Directory)
             {
-                _fileSystemAccessor.OpenDirectory(PathItem.Path);
+                _fileSystemAccessor.OpenDirectory(DataSource.Path);
             }
             else
             {
-                _fileSystemAccessor.OpenDirectoryAndSelectFile(PathItem.Path);
+                _fileSystemAccessor.OpenDirectoryAndSelectFile(DataSource.Path);
             }
         }
         catch (Exception ex)

@@ -296,7 +296,7 @@ public async Task QuitSession_WithPathItems_NotifiesPathItemRemoved()
     await _quitSessionCommandHandler.Handle(request, CancellationToken.None);
     
     // Assert
-    A.CallTo(() => mockGroup.PathItemRemoved(A<PathItemDTO>.That.Matches(dto => 
+    A.CallTo(() => mockGroup.DataSourceRemoved(A<DataSourceDTO>.That.Matches(dto => 
         dto.SessionId == sessionId && 
         dto.ClientInstanceId == client.ClientInstanceId && 
         (dto.EncryptedPathItem.Code == "path1" || dto.EncryptedPathItem.Code == "path2"))))
