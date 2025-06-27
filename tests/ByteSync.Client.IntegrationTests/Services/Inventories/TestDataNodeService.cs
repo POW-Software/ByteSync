@@ -1,0 +1,109 @@
+using Autofac;
+using ByteSync.Business.DataNodes;
+using ByteSync.Client.IntegrationTests.TestHelpers;
+using ByteSync.Common.Business.EndPoints;
+using ByteSync.Interfaces.Controls.Communications.Http;
+using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Communications;
+using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Repositories;
+using ByteSync.Services.Inventories;
+using ByteSync.TestsCommon;
+using FluentAssertions;
+using Moq;
+using NUnit.Framework;
+
+namespace ByteSync.Client.IntegrationTests.Services.Inventories;
+
+public class TestDataNodeService : IntegrationTest
+{
+    private string _sessionId = null!;
+    private ByteSyncEndpoint _currentEndPoint = null!;
+    private DataNodeService _service = null!;
+
+    [SetUp]
+    public void SetUp()
+    {
+        RegisterType<DataNodeRepository, IDataNodeRepository>();
+        RegisterType<DataNodeService>();
+        BuildMoqContainer();
+
+        var contextHelper = new TestContextGenerator(Container);
+        _sessionId = contextHelper.GenerateSession();
+        _currentEndPoint = contextHelper.GenerateCurrentEndpoint();
+
+        _service = Container.Resolve<DataNodeService>();
+    }
+
+    [Test]
+    public async Task TryAddDataNode_ShouldAddToRepository_WhenApiSucceeds()
+    {
+        var repository = Container.Resolve<IDataNodeRepository>();
+        var apiClient = Container.Resolve<Mock<IInventoryApiClient>>();
+        apiClient.Setup(a => a.AddDataNode(_sessionId, "NODE")).ReturnsAsync(true);
+        var node = new DataNode { NodeId = "NODE", ClientInstanceId = _currentEndPoint.ClientInstanceId };
+
+        var result = await _service.TryAddDataNode(node);
+
+        result.Should().BeTrue();
+        repository.Elements.Should().Contain(node);
+        apiClient.Verify(a => a.AddDataNode(_sessionId, "NODE"), Times.Once);
+    }
+
+    [Test]
+    public async Task TryAddDataNode_ShouldSkipApi_WhenClientDiffers()
+    {
+        var repository = Container.Resolve<IDataNodeRepository>();
+        var apiClient = Container.Resolve<Mock<IInventoryApiClient>>();
+        apiClient.Setup(a => a.AddDataNode(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
+        var node = new DataNode { NodeId = "NODE", ClientInstanceId = "OTHER" };
+
+        var result = await _service.TryAddDataNode(node);
+
+        result.Should().BeTrue();
+        repository.Elements.Should().Contain(node);
+        apiClient.Verify(a => a.AddDataNode(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Test]
+    public async Task TryAddDataNode_ShouldNotAdd_WhenApiFails()
+    {
+        var repository = Container.Resolve<IDataNodeRepository>();
+        var apiClient = Container.Resolve<Mock<IInventoryApiClient>>();
+        apiClient.Setup(a => a.AddDataNode(_sessionId, "NODE")).ReturnsAsync(false);
+        var node = new DataNode { NodeId = "NODE", ClientInstanceId = _currentEndPoint.ClientInstanceId };
+
+        var result = await _service.TryAddDataNode(node);
+
+        result.Should().BeFalse();
+        repository.Elements.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task TryRemoveDataNode_ShouldRemoveFromRepository_WhenApiSucceeds()
+    {
+        var repository = Container.Resolve<IDataNodeRepository>();
+        var apiClient = Container.Resolve<Mock<IInventoryApiClient>>();
+        var node = new DataNode { NodeId = "NODE", ClientInstanceId = _currentEndPoint.ClientInstanceId };
+        repository.AddOrUpdate(node);
+        apiClient.Setup(a => a.RemoveDataNode(_sessionId, node.NodeId)).ReturnsAsync(true);
+
+        var result = await _service.TryRemoveDataNode(node);
+
+        result.Should().BeTrue();
+        repository.Elements.Should().BeEmpty();
+        apiClient.Verify(a => a.RemoveDataNode(_sessionId, node.NodeId), Times.Once);
+    }
+
+    [Test]
+    public async Task CreateAndTryAddDataNode_ShouldAddDataNodeToRepository()
+    {
+        var repository = Container.Resolve<IDataNodeRepository>();
+        var apiClient = Container.Resolve<Mock<IInventoryApiClient>>();
+        apiClient.Setup(a => a.AddDataNode(_sessionId, "NODE")).ReturnsAsync(true);
+
+        await _service.CreateAndTryAddDataNode("NODE");
+
+        repository.Elements.Should().ContainSingle(n => n.NodeId == "NODE" && n.ClientInstanceId == _currentEndPoint.ClientInstanceId);
+    }
+}
