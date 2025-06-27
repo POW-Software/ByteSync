@@ -33,49 +33,49 @@ public class InventoryApiClient : IInventoryApiClient
         }
     }
 
-    public async Task<List<EncryptedPathItem>?> GetPathItems(string sessionId, string clientInstanceId)
+    public async Task<List<EncryptedDataSource>?> GetDataSources(string sessionId, string clientInstanceId)
     {
         try
         {
-            var result = await _apiInvoker.GetAsync<List<EncryptedPathItem>?>($"session/{sessionId}/inventory/pathItem/{clientInstanceId}");
+            var result = await _apiInvoker.GetAsync<List<EncryptedDataSource>?>($"session/{sessionId}/inventory/dataSource/{clientInstanceId}");
 
             return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error while getting pathItems from an inventory with sessionId: {sessionId}", sessionId);
+            _logger.LogError(ex, "Error while getting dataSources from an inventory with sessionId: {sessionId}", sessionId);
                 
             throw;
         }
     }
     
-    public async Task<bool> AddPathItem(string sessionId, EncryptedPathItem encryptedPathItem)
+    public async Task<bool> AddDataSource(string sessionId, EncryptedDataSource encryptedDataSource)
     {
         try
         {
-            var result = await _apiInvoker.PostAsync<bool>($"session/{sessionId}/inventory/pathItem", encryptedPathItem);
+            var result = await _apiInvoker.PostAsync<bool>($"session/{sessionId}/inventory/dataSource", encryptedDataSource);
 
             return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error while adding pathItem to an inventory with sessionId: {sessionId}", sessionId);
+            _logger.LogError(ex, "Error while adding dataSource to an inventory with sessionId: {sessionId}", sessionId);
                 
             throw;
         }
     }
     
-    public async Task<bool> RemovePathItem(string sessionId, EncryptedPathItem encryptedPathItem)
+    public async Task<bool> RemoveDataSource(string sessionId, EncryptedDataSource encryptedDataSource)
     {
         try
         {
-            var result = await _apiInvoker.DeleteAsync<bool>($"session/{sessionId}/inventory/pathItem", encryptedPathItem);
+            var result = await _apiInvoker.DeleteAsync<bool>($"session/{sessionId}/inventory/dataSource", encryptedDataSource);
 
             return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error while removing pathItem from an inventory with sessionId: {sessionId}", sessionId);
+            _logger.LogError(ex, "Error while removing dataSource from an inventory with sessionId: {sessionId}", sessionId);
                 
             throw;
         }

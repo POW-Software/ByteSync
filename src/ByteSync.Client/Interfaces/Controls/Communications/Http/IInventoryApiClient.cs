@@ -9,9 +9,9 @@ public interface IInventoryApiClient
 {
     Task<StartInventoryResult> StartInventory(string sessionId, EncryptedSessionSettings encryptedSessionSettings);
     
-    Task<List<EncryptedPathItem>?> GetPathItems(string sessionId, string clientInstanceId);
+    Task<List<EncryptedDataSource>?> GetDataSources(string sessionId, string clientInstanceId);
     
-    Task<bool> AddPathItem(string sessionId, EncryptedPathItem encryptedPathItem);
+    Task<bool> AddDataSource(string sessionId, EncryptedDataSource encryptedDataSource);
     
-    Task<bool> RemovePathItem(string sessionId, EncryptedPathItem encryptedPathItem);
+    Task<bool> RemoveDataSource(string sessionId, EncryptedDataSource encryptedDataSource);
 }

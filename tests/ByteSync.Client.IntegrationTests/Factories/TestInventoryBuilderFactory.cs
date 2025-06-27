@@ -1,6 +1,6 @@
 ﻿using Autofac;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.Inventories;
-using ByteSync.Business.PathItems;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Misc;
@@ -36,19 +36,19 @@ public class TestInventoryBuilderFactory : IntegrationTest
         var mockSessionService = Container.Resolve<Mock<ISessionService>>();
         var mockInventoryService = Container.Resolve<Mock<IInventoryService>>();
         var mockEnvironmentService = Container.Resolve<Mock<IEnvironmentService>>();
-        var mockPathItemRepository = Container.Resolve<Mock<IPathItemRepository>>();
+        var mockDataSourceRepository = Container.Resolve<Mock<IDataSourceRepository>>();
         
         var fakeSessionMember = new SessionMemberInfo();
         var fakeSessionSettings = new SessionSettings();
         var fakeProcessData = new InventoryProcessData();
         var fakePlatform = OSPlatforms.Windows;
-        var fakePathItems = new List<PathItem> { Mock.Of<PathItem>(), Mock.Of<PathItem>() };
+        var fakeDataSources = new List<DataSource> { Mock.Of<DataSource>(), Mock.Of<DataSource>() };
         
         mockSessionMemberRepo.Setup(r => r.GetCurrentSessionMember()).Returns(fakeSessionMember).Verifiable();
         mockSessionService.SetupGet(s => s.CurrentSessionSettings).Returns(fakeSessionSettings).Verifiable();
         mockInventoryService.SetupGet(s => s.InventoryProcessData).Returns(fakeProcessData).Verifiable();
         mockEnvironmentService.SetupGet(e => e.OSPlatform).Returns(fakePlatform).Verifiable();
-        mockPathItemRepository.SetupGet(r => r.SortedCurrentMemberPathItems).Returns(fakePathItems).Verifiable();
+        mockDataSourceRepository.SetupGet(r => r.SortedCurrentMemberDataSources).Returns(fakeDataSources).Verifiable();
 
         // Act
         var inventoryBuilder = _inventoryBuilderFactor.CreateInventoryBuilder();
@@ -60,6 +60,6 @@ public class TestInventoryBuilderFactory : IntegrationTest
         mockSessionService.Verify();
         mockInventoryService.Verify();
         mockEnvironmentService.Verify();
-        mockPathItemRepository.Verify();
+        mockDataSourceRepository.Verify();
     }
 }

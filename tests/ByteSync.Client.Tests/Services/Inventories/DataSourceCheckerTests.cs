@@ -1,5 +1,5 @@
 ﻿using ByteSync.Business;
-using ByteSync.Business.PathItems;
+using ByteSync.Business.DataSources;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Services.Inventories;
@@ -10,12 +10,12 @@ using NUnit.Framework;
 
 namespace ByteSync.Tests.Services.Inventories;
 
-public class PathItemCheckerTests
+public class DataSourceCheckerTests
 {
     private Mock<IDialogService> _mockDialogService;
-    private List<PathItem> _existingPathItems;
+    private List<DataSource> _existingDataSources;
     
-    private PathItemChecker _pathItemChecker;
+    private DataSourceChecker _dataSourceChecker;
 
     [SetUp]
     public void Setup()
@@ -29,133 +29,133 @@ public class PathItemCheckerTests
             .Setup(x => x.CreateMessageBoxViewModel(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string[]>()))
             .Returns((string title, string message, string[] parameters) => new MessageBoxViewModel { ShowOK = true });
 
-        _pathItemChecker = new PathItemChecker(_mockDialogService.Object);
-        _existingPathItems = new List<PathItem>();
+        _dataSourceChecker = new DataSourceChecker(_mockDialogService.Object);
+        _existingDataSources = new List<DataSource>();
     }
 
     [Test]
-    public async Task CheckPathItem_File_Unique_ReturnsTrue()
+    public async Task CheckDataSource_File_Unique_ReturnsTrue()
     {
-        var pathItem = new PathItem
+        var dataSource = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.File,
             Path = "file.txt"
         };
 
-        var result = await _pathItemChecker.CheckPathItem(pathItem, _existingPathItems);
+        var result = await _dataSourceChecker.CheckDataSource(dataSource, _existingDataSources);
 
         result.Should().BeTrue();
         _mockDialogService.Verify(x => x.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()), Times.Never);
     }
 
     [Test]
-    public async Task CheckPathItem_File_Duplicate_ReturnsFalse()
+    public async Task CheckDataSource_File_Duplicate_ReturnsFalse()
     {
-        var existing = new PathItem
+        var existing = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.File,
             Path = "FILE.txt"
         };
-        _existingPathItems.Add(existing);
+        _existingDataSources.Add(existing);
 
-        var pathItem = new PathItem
+        var source = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.File,
             Path = "file.txt"
         };
 
-        var result = await _pathItemChecker.CheckPathItem(pathItem, _existingPathItems);
+        var result = await _dataSourceChecker.CheckDataSource(source, _existingDataSources);
 
         result.Should().BeFalse();
         _mockDialogService.Verify(x => x.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()), Times.Once);
     }
 
     [Test]
-    public async Task CheckPathItem_Directory_Unique_ReturnsTrue()
+    public async Task CheckDataSource_Directory_Unique_ReturnsTrue()
     {
-        var pathItem = new PathItem
+        var dataSource = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.Directory,
             Path = "/dirA"
         };
 
-        var result = await _pathItemChecker.CheckPathItem(pathItem, _existingPathItems);
+        var result = await _dataSourceChecker.CheckDataSource(dataSource, _existingDataSources);
 
         result.Should().BeTrue();
         _mockDialogService.Verify(x => x.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()), Times.Never);
     }
 
     [Test]
-    public async Task CheckPathItem_Directory_Duplicate_ReturnsFalse()
+    public async Task CheckDataSource_Directory_Duplicate_ReturnsFalse()
     {
-        var existing = new PathItem
+        var existing = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.Directory,
             Path = "/dirA"
         };
-        _existingPathItems.Add(existing);
+        _existingDataSources.Add(existing);
 
-        var pathItem = new PathItem
+        var dataSource = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.Directory,
             Path = "/dirA"
         };
 
-        var result = await _pathItemChecker.CheckPathItem(pathItem, _existingPathItems);
+        var result = await _dataSourceChecker.CheckDataSource(dataSource, _existingDataSources);
 
         result.Should().BeFalse();
         _mockDialogService.Verify(x => x.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()), Times.Once);
     }
 
     [Test]
-    public async Task CheckPathItem_Directory_SubPath_ReturnsFalse()
+    public async Task CheckDataSourceDirectory_SubPath_ReturnsFalse()
     {
-        var existing = new PathItem
+        var existing = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.Directory,
             Path = "/dirA"
         };
-        _existingPathItems.Add(existing);
+        _existingDataSources.Add(existing);
 
-        var pathItem = new PathItem
+        var dataSource = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.Directory,
             Path = "/dirA/subDir"
         };
 
-        var result = await _pathItemChecker.CheckPathItem(pathItem, _existingPathItems);
+        var result = await _dataSourceChecker.CheckDataSource(dataSource, _existingDataSources);
 
         result.Should().BeFalse();
         _mockDialogService.Verify(x => x.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()), Times.Once);
     }
 
     [Test]
-    public async Task CheckPathItem_Directory_ParentOfExisting_ReturnsFalse()
+    public async Task CheckDataSource_Directory_ParentOfExisting_ReturnsFalse()
     {
-        var existing = new PathItem
+        var existing = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.Directory,
             Path = "/dirA/subDir"
         };
-        _existingPathItems.Add(existing);
+        _existingDataSources.Add(existing);
 
-        var pathItem = new PathItem
+        var dataSource = new DataSource
         {
             ClientInstanceId = "client1",
             Type = FileSystemTypes.Directory,
             Path = "/dirA"
         };
 
-        var result = await _pathItemChecker.CheckPathItem(pathItem, _existingPathItems);
+        var result = await _dataSourceChecker.CheckDataSource(dataSource, _existingDataSources);
 
         result.Should().BeFalse();
         _mockDialogService.Verify(x => x.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()), Times.Once);

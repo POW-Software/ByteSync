@@ -1,5 +1,5 @@
 ﻿using System.Threading;
-using ByteSync.Business.PathItems;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.Sessions;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Inventories;
@@ -16,7 +16,7 @@ public interface IInventoryBuilder
     
     public SessionSettings? SessionSettings { get; }
     
-    InventoryPart AddInventoryPart(PathItem pathItem);
+    InventoryPart AddInventoryPart(DataSource dataSource);
 
     InventoryPart AddInventoryPart(string fullName);
     

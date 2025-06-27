@@ -18,7 +18,7 @@ public class InventoryData
     
     public bool IsInventoryStarted { get; set; }
     
-    public void RecodePathItems(CloudSessionData cloudSessionData)
+    public void RecodeDataSources(CloudSessionData cloudSessionData)
     {
         foreach (var inventoryMemberData in InventoryMembers)
         {
@@ -27,9 +27,9 @@ public class InventoryData
             string letter = ((char)('A' + position)).ToString();
 
             int cpt = 1;
-            foreach (var pathItem in inventoryMemberData.SharedPathItems)
+            foreach (var dataSource in inventoryMemberData.SharedDataSources)
             {
-                pathItem.Code = letter + cpt;
+                dataSource.Code = letter + cpt;
 
                 cpt += 1;
             }

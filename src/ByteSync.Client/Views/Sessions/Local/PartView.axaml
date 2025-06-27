@@ -2,16 +2,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="clr-namespace:ByteSync.ViewModels.Sessions.Local"
              xmlns:misc="clr-namespace:ByteSync.Views.Misc"
              xmlns:local1="clr-namespace:ByteSync.Views.Sessions.Local"
-             xmlns:inventories="clr-namespace:ByteSync.ViewModels.Sessions.Inventories"
-             xmlns:pathItems="clr-namespace:ByteSync.Business.PathItems"
+             xmlns:dataSources="clr-namespace:ByteSync.Business.DataSources"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ByteSync.Views.Sessions.Local.PartView">
     
     <Design.DataContext>
-        <pathItems:PathItemProxy />
+        <dataSources:DataSourceProxy />
     </Design.DataContext>
     
     <Grid>
@@ -39,7 +37,7 @@
                 <Label Content="{Binding Path}" Margin="6 0"
                        VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
                 
-                <Button Command="{Binding $parent[local1:LocalSessionPartsView].ViewModel.RemovePathItemCommand}" 
+                <Button Command="{Binding $parent[local1:LocalSessionPartsView].ViewModel.RemoveDataSourceCommand}" 
                         CommandParameter="{Binding}"
                         HorizontalAlignment="Left" VerticalAlignment="Stretch"
                         Margin="0" BorderThickness="0" 

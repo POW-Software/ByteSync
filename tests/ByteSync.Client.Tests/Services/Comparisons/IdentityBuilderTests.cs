@@ -1,6 +1,6 @@
 ﻿using ByteSync.Business;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.Inventories;
-using ByteSync.Business.PathItems;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.EndPoints;
@@ -94,21 +94,21 @@ public class IdentityBuilderTests : AbstractTester
         fileDescription.RelativePath.Should().Be(directoryRelativePath);
     }
 
-    private static InventoryBuilder GetInventoryBuilder(FileSystemInfo pathItemRoot)
+    private static InventoryBuilder GetInventoryBuilder(FileSystemInfo dataSourceRoot)
     {
-        PathItem pathItem = new PathItem();
-        pathItem.Path = pathItemRoot.FullName;
-        if (pathItemRoot is DirectoryInfo)
+        DataSource dataSource = new DataSource();
+        dataSource.Path = dataSourceRoot.FullName;
+        if (dataSourceRoot is DirectoryInfo)
         {
-            pathItem.Type = FileSystemTypes.Directory;
+            dataSource.Type = FileSystemTypes.Directory;
         }
-        else if (pathItemRoot is FileInfo)
+        else if (dataSourceRoot is FileInfo)
         {
-            pathItem.Type = FileSystemTypes.File;
+            dataSource.Type = FileSystemTypes.File;
         }
         else
         {
-            Assert.Fail("unknown type " + pathItemRoot.GetType().Name);
+            Assert.Fail("unknown type " + dataSourceRoot.GetType().Name);
         }
         
         Mock<ILogger<InventoryBuilder>> loggerMock = new Mock<ILogger<InventoryBuilder>>();
@@ -132,7 +132,7 @@ public class IdentityBuilderTests : AbstractTester
             SessionSettingsHelper.BuildDefaultSessionSettings(DataTypes.FilesDirectories, LinkingKeys.RelativePath), 
             new InventoryProcessData(), OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object);
 
-        inventoryBuilder.AddInventoryPart(pathItem);
+        inventoryBuilder.AddInventoryPart(dataSource);
             
         inventoryBuilder.Inventory.Should().NotBeNull();
         inventoryBuilder.Inventory.InventoryParts.Count.Should().Be(1);

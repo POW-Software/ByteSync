@@ -8,35 +8,35 @@ using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Communications.PushReceivers;
 
-public class PathItemPushReceiver : IPushReceiver
+public class DataSourcePushReceiver : IPushReceiver
 {
     private readonly ISessionService _sessionService;
     private readonly IDataEncrypter _dataEncrypter;
     private readonly IHubPushHandler2 _hubPushHandler2;
-    private readonly IPathItemsService _pathItemsService;
+    private readonly IDataSourceService _dataSourceService;
 
-    public PathItemPushReceiver(ISessionService sessionService, IDataEncrypter dataEncrypter,
-        IHubPushHandler2 hubPushHandler2, IPathItemsService pathItemsService)
+    public DataSourcePushReceiver(ISessionService sessionService, IDataEncrypter dataEncrypter,
+        IHubPushHandler2 hubPushHandler2, IDataSourceService dataSourceService)
     {
         _sessionService = sessionService;
         _dataEncrypter = dataEncrypter;
         _hubPushHandler2 = hubPushHandler2;
-        _pathItemsService = pathItemsService;
+        _dataSourceService = dataSourceService;
         
-        _hubPushHandler2.PathItemAdded
+        _hubPushHandler2.DataSourceAdded
             .Where(dto => _sessionService.CheckSession(dto.SessionId))
             .Subscribe(dto =>
             {
-                var pathItem = _dataEncrypter.DecryptPathItem(dto.EncryptedPathItem);
-                _pathItemsService.ApplyAddPathItemLocally(pathItem);
+                var dataSource = _dataEncrypter.DecryptDataSource(dto.EncryptedDataSource);
+                _dataSourceService.ApplyAddDataSourceLocally(dataSource);
             });
         
-        _hubPushHandler2.PathItemRemoved
+        _hubPushHandler2.DataSourceRemoved
             .Where(dto => _sessionService.CheckSession(dto.SessionId))
             .Subscribe(dto =>
             {
-                var pathItem = _dataEncrypter.DecryptPathItem(dto.EncryptedPathItem);
-                _pathItemsService.ApplyRemovePathItemLocally(pathItem);
+                var dataSource = _dataEncrypter.DecryptDataSource(dto.EncryptedDataSource);
+                _dataSourceService.ApplyRemoveDataSourceLocally(dataSource);
             });
     }
 }

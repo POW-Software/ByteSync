@@ -1,7 +1,6 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Avalonia;
 using Avalonia.Controls;
 using ByteSync.Business;
 using ByteSync.Business.Communications;

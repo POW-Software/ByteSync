@@ -18,8 +18,8 @@ public interface IHubPushHandler2
     Subject<SessionSettingsUpdatedDTO> SessionSettingsUpdated { get; }
     Subject<CloudSessionFatalError> SessionOnFatalError { get; }
     Subject<InventoryStartedDTO> InventoryStarted { get; }
-    Subject<PathItemDTO> PathItemAdded { get; }
-    Subject<PathItemDTO> PathItemRemoved { get; }
+    Subject<DataSourceDTO> DataSourceAdded { get; }
+    Subject<DataSourceDTO> DataSourceRemoved { get; }
     Subject<FileTransferPush> FilePartUploaded { get; }
     Subject<FileTransferPush> UploadFinished { get; }
     Subject<string> OnReconnected { get; }

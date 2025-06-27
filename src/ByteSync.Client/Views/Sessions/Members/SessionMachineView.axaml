@@ -74,7 +74,7 @@
                         </Button>
 
                         <Label FontWeight="Bold" Content="{localizations:Loc SessionMachine_NoDataSelected}" Margin="12 0 0 2 "
-                               IsVisible="{Binding !PathItems.Count}"
+                               IsVisible="{Binding !DataSources.Count}"
                                VerticalAlignment="Center">
                         </Label>
                     </StackPanel>
@@ -88,7 +88,7 @@
                     <ColumnDefinition Width="*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
 
-                <DataGrid AutoGenerateColumns="False" Margin="6" ItemsSource="{Binding Path=PathItems}" Classes="NoHeaders"
+                <DataGrid AutoGenerateColumns="False" Margin="6" ItemsSource="{Binding Path=DataSources}" Classes="NoHeaders"
                           IsReadOnly="True" x:Name="TheGrid" IsEnabled="{Binding Path=IsFileSystemSelectionEnabled}"
                           HeadersVisibility="None" Foreground="{DynamicResource SystemBaseHighColor}">
 
@@ -129,7 +129,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Classes="GenericButton"
-                                            Command="{Binding Path=DataContext.RemovePathItemCommand,RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
+                                            Command="{Binding Path=DataContext.RemoveDataSourceCommand,RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
                                             CommandParameter="{Binding}"
                                             Width="32" BorderThickness="0">
 

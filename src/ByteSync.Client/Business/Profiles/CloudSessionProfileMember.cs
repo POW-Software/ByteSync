@@ -4,7 +4,7 @@ public class CloudSessionProfileMember
 {
     public CloudSessionProfileMember()
     {
-        PathItems = new List<SessionProfilePathItem>();
+        DataSources = new List<SessionProfileDataSource>();
     }
     
     public string MachineName { get; set; }
@@ -15,7 +15,7 @@ public class CloudSessionProfileMember
     
     public string ProfileClientPassword { get; set; }
     
-    public List<SessionProfilePathItem> PathItems { get; set; }
+    public List<SessionProfileDataSource> DataSources { get; set; }
     
     public string Letter { get; set; }
 }

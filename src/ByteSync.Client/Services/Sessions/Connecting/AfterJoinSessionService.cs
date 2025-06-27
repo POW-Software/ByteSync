@@ -19,7 +19,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
     private readonly ICloudSessionApiClient _cloudSessionApiClient;
     private readonly ISessionService _sessionService;
     private readonly ISessionMemberService _sessionMemberService;
-    private readonly IPathItemsService _pathItemsService;
+    private readonly IDataSourceService _dataSourceService;
     private readonly IDataEncrypter _dataEncrypter;
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
     private readonly IInventoryApiClient _inventoryApiClient;
@@ -27,14 +27,14 @@ public class AfterJoinSessionService : IAfterJoinSessionService
     private readonly IEnvironmentService _environmentService;
     private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
     private readonly IQuitSessionService _quitSessionService;
-    private readonly IPathItemRepository _pathItemRepository;
+    private readonly IDataSourceRepository _dataSourceRepository;
     private readonly ILogger<AfterJoinSessionService> _logger;
 
     public AfterJoinSessionService(
         ICloudSessionApiClient cloudSessionApiClient,
         ISessionService sessionService,
         ISessionMemberService sessionMemberService,
-        IPathItemsService pathItemsService,
+        IDataSourceService dataSourceService,
         IDataEncrypter dataEncrypter,
         ICloudSessionConnectionRepository cloudSessionConnectionRepository,
         IInventoryApiClient inventoryApiClient,
@@ -42,13 +42,13 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         IEnvironmentService environmentService,
         ICloudSessionConnectionService cloudSessionConnectionService,
         IQuitSessionService quitSessionService,
-        IPathItemRepository pathItemRepository,
+        IDataSourceRepository dataSourceRepository,
         ILogger<AfterJoinSessionService> logger)
     {
         _cloudSessionApiClient = cloudSessionApiClient;
         _sessionService = sessionService;
         _sessionMemberService = sessionMemberService;
-        _pathItemsService = pathItemsService;
+        _dataSourceService = dataSourceService;
         _dataEncrypter = dataEncrypter;
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         _inventoryApiClient = inventoryApiClient;
@@ -56,7 +56,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         _environmentService = environmentService;
         _cloudSessionConnectionService = cloudSessionConnectionService;
         _quitSessionService = quitSessionService;
-        _pathItemRepository = pathItemRepository;
+        _dataSourceRepository = dataSourceRepository;
         _logger = logger;
     }
     
@@ -73,7 +73,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         
         _sessionMemberService.AddOrUpdate(sessionMemberInfoDtos);
         
-        await FillPathItems(request, sessionMemberInfoDtos);
+        await FillDataSources(request, sessionMemberInfoDtos);
     }
 
     private async Task CheckOtherMembersAreTrustedAndChecked(AfterJoinSessionRequest request, List<SessionMemberInfoDTO> sessionMemberInfoDtos)
@@ -118,15 +118,15 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         return password;
     }
     
-    private async Task FillPathItems(AfterJoinSessionRequest request, List<SessionMemberInfoDTO> sessionMemberInfoDtos)
+    private async Task FillDataSources(AfterJoinSessionRequest request, List<SessionMemberInfoDTO> sessionMemberInfoDtos)
     {
         if (request.RunCloudSessionProfileInfo != null)
         {
-            var myPathItems = request.RunCloudSessionProfileInfo.GetMyPathItems();
+            var myDataSources = request.RunCloudSessionProfileInfo.GetMyDataSources();
             
-            foreach (var pathItem in myPathItems)
+            foreach (var dataSource in myDataSources)
             {
-                await _pathItemsService.CreateAndTryAddPathItem(pathItem.Path, pathItem.Type);
+                await _dataSourceService.CreateAndTryAddDataSource(dataSource.Path, dataSource.Type);
             }
         }
 
@@ -134,86 +134,86 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         {
             if (!sessionMemberInfo.HasClientInstanceId(_environmentService.ClientInstanceId))
             {
-                var encryptedPathItems = await _inventoryApiClient.GetPathItems(request.CloudSessionResult.SessionId, sessionMemberInfo.ClientInstanceId);
+                var encryptedDataSources = await _inventoryApiClient.GetDataSources(request.CloudSessionResult.SessionId, sessionMemberInfo.ClientInstanceId);
 
-                if (encryptedPathItems != null)
+                if (encryptedDataSources != null)
                 {
-                    foreach (var encryptedPathItem in encryptedPathItems)
+                    foreach (var encryptedDataSource in encryptedDataSources)
                     {
-                        var pathItem = _dataEncrypter.DecryptPathItem(encryptedPathItem);
-                        await _pathItemsService.TryAddPathItem(pathItem);
+                        var dataSource = _dataEncrypter.DecryptDataSource(encryptedDataSource);
+                        await _dataSourceService.TryAddDataSource(dataSource);
                     }
                 }
             }
         }
 
-        AddDebugPathItems();
+        AddDebugDataSources();
     }
 
-    private void AddDebugPathItems()
+    private void AddDebugDataSources()
     {
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTA))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTA))
         {
-            DebugAddDesktopPathItem("testA");
+            DebugAddDesktopDataSource("testA");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTA1))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTA1))
         {
-            DebugAddDesktopPathItem("testA1");
+            DebugAddDesktopDataSource("testA1");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTB))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTB))
         {
-            DebugAddDesktopPathItem("testB");
+            DebugAddDesktopDataSource("testB");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTB1))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTB1))
         {
-            DebugAddDesktopPathItem("testB1");
+            DebugAddDesktopDataSource("testB1");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTC))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTC))
         {
-            DebugAddDesktopPathItem("testC");
+            DebugAddDesktopDataSource("testC");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTC1))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTC1))
         {
-            DebugAddDesktopPathItem("testC1");
+            DebugAddDesktopDataSource("testC1");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTD))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTD))
         {
-            DebugAddDesktopPathItem("testD");
+            DebugAddDesktopDataSource("testD");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTD1))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTD1))
         {
-            DebugAddDesktopPathItem("testD1");
+            DebugAddDesktopDataSource("testD1");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTE))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTE))
         {
-            DebugAddDesktopPathItem("testE");
+            DebugAddDesktopDataSource("testE");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTE1))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTE1))
         {
-            DebugAddDesktopPathItem("testE1");
+            DebugAddDesktopDataSource("testE1");
         }
     }
     
-    private void DebugAddDesktopPathItem(string folderName)
+    private void DebugAddDesktopDataSource(string folderName)
     {
-        var myPathItems = _pathItemRepository.Elements.Where(pi => pi.ClientInstanceId == _environmentService.ClientInstanceId).ToList();
+        var myDataSources = _dataSourceRepository.Elements.Where(ds => ds.ClientInstanceId == _environmentService.ClientInstanceId).ToList();
                 
-        if (myPathItems.Any(pi => pi.Path.Equals(IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
+        if (myDataSources.Any(ds => ds.Path.Equals(IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
                 StringComparison.InvariantCultureIgnoreCase)))
         {
             return;
         }
 
-        _pathItemsService.CreateAndTryAddPathItem(
+        _dataSourceService.CreateAndTryAddDataSource(
             IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
             FileSystemTypes.Directory);
     }

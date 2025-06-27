@@ -19,9 +19,9 @@ internal class OnServerSessionOnFatalError : PubSubEvent<CloudSessionFatalError>
     
 // internal class OnServerStartInventory : PubSubEvent<(string, string, EncryptedSessionSettings)> { }
     
-// internal class OnServerPathItemAdded : PubSubEvent<(string, string, EncryptedPathItem)> { }
+// internal class OnServerDataSourceAdded : PubSubEvent<(string, string, EncryptedDataSource)> { }
 //
-// internal class OnServerPathItemRemoved : PubSubEvent<(string, string, EncryptedPathItem)> { }
+// internal class OnServerDataSourceRemoved : PubSubEvent<(string, string, EncryptedDataSource)> { }
 
 // internal class OnServerAskPublicKeyCheckData : PubSubEvent<(string sessionId, string clientInstanceId, PublicKeyInfo publicKeyInfo)> { }
 //

@@ -2427,15 +2427,15 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
-        public static string PathItemChecker_SubPathError_Title {
+        public static string DataSourceChecker_SubPathError_Title {
             get {
-                return ResourceManager.GetString("PathItemChecker_SubPathError_Title", resourceCulture);
+                return ResourceManager.GetString("DataSourceChecker_SubPathError_Title", resourceCulture);
             }
         }
         
-        public static string PathItemChecker_SubPathError_Message {
+        public static string DataSourceChecker_SubPathError_Message {
             get {
-                return ResourceManager.GetString("PathItemChecker_SubPathError_Message", resourceCulture);
+                return ResourceManager.GetString("DataSourceChecker_SubPathError_Message", resourceCulture);
             }
         }
         

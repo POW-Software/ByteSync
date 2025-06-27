@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 using Avalonia.Controls.Mixins;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Arguments;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.Events;
 using ByteSync.Business.Inventories;
-using ByteSync.Business.PathItems;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Helpers;
@@ -35,11 +35,11 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;
     private readonly IInventoryService _inventoryService;
-    private readonly IPathItemsService _pathItemsService;
-    private readonly IPathItemProxyFactory _pathItemProxyFactory;
+    private readonly IDataSourceService _dataSourceService;
+    private readonly IDataSourceProxyFactory _dataSourceProxyFactory;
     
-    private ReadOnlyObservableCollection<PathItemProxy> _data;
-    private readonly IPathItemRepository _pathItemRepository;
+    private ReadOnlyObservableCollection<DataSourceProxy> _data;
+    private readonly IDataSourceRepository _dataSourceRepository;
     private readonly ILogger<LocalSessionPartsViewModel> _logger;
 
     public LocalSessionPartsViewModel() 
@@ -48,15 +48,15 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
     }
     
     public LocalSessionPartsViewModel(ISessionService sessionService,
-        ILocalizationService localizationService, IInventoryService inventoriesService, IPathItemsService pathItemsService,
-        IPathItemProxyFactory pathItemProxyFactory, IPathItemRepository pathItemRepository, ILogger<LocalSessionPartsViewModel> logger)
+        ILocalizationService localizationService, IInventoryService inventoriesService, IDataSourceService dataSourceService,
+        IDataSourceProxyFactory dataSourceProxyFactory, IDataSourceRepository dataSourceRepository, ILogger<LocalSessionPartsViewModel> logger)
     {
         _sessionService = sessionService;
         _localizationService = localizationService;
         _inventoryService = inventoriesService;
-        _pathItemsService = pathItemsService;
-        _pathItemProxyFactory = pathItemProxyFactory;
-        _pathItemRepository = pathItemRepository;
+        _dataSourceService = dataSourceService;
+        _dataSourceProxyFactory = dataSourceProxyFactory;
+        _dataSourceRepository = dataSourceRepository;
         _logger = logger;
 
         IsFileSystemSelectionEnabled = true;
@@ -64,7 +64,7 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
         // https://stackoverflow.com/questions/58479606/how-do-you-update-the-canexecute-value-after-the-reactivecommand-has-been-declar
         // https://www.reactiveui.net/docs/handbook/commands/
         
-        RemovePathItemCommand = ReactiveCommand.CreateFromTask<PathItemProxy>(RemovePathItem);
+        RemoveDataSourceCommand = ReactiveCommand.CreateFromTask<DataSourceProxy>(RemoveDataSource);
 
         // var isCountNotOK = this.WhenAnyValue(x => x.Parts.Count, count => count <= 2 );
         // var isCountOK = this.WhenAnyValue(x => x.Parts, parts => parts.Count < 5 );
@@ -83,8 +83,8 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
         
         this.WhenActivated(disposables =>
         {
-            var countChanged = _pathItemRepository
-                .CurrentMemberPathItems
+            var countChanged = _dataSourceRepository
+                .CurrentMemberDataSources
                 .CountChanged
                 .StartWith(0)
                 .Select(count => count >= 5);
@@ -93,9 +93,9 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
                     countChanged)
                 .Select(executing => !executing).Subscribe(canRun);
             
-            _pathItemRepository.CurrentMemberPathItems.Connect()
-                .Sort(SortExpressionComparer<PathItem>.Ascending(p => p.Code))
-                .Transform(pathItem => _pathItemProxyFactory.CreatePathItemProxy(pathItem))
+            _dataSourceRepository.CurrentMemberDataSources.Connect()
+                .Sort(SortExpressionComparer<DataSource>.Ascending(p => p.Code))
+                .Transform(dataSource => _dataSourceProxyFactory.CreateDataSourceProxy(dataSource))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Bind(out _data)
                 .DisposeMany() // dispose when no longer required
@@ -121,58 +121,58 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
     #if DEBUG
         if (_sessionService.CurrentRunSessionProfileInfo == null)
         {
-            void DebugAddDesktopPathItem(string folderName)
+            void DebugAddDesktopDataSource(string folderName)
             {
-                var newPathItem = new PathItem();
-                newPathItem.Path = IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName);
-                newPathItem.Type = FileSystemTypes.Directory;
+                var newDataSource = new DataSource();
+                newDataSource.Path = IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName);
+                newDataSource.Type = FileSystemTypes.Directory;
 
-                //newPathItem.Code = ((char)('A' + Parts.Count)).ToString();
+                //newDataSource.Code = ((char)('A' + Parts.Count)).ToString();
 
-                //PathItemViewModel partViewModel = new PathItemViewModel(newPathItem, _localizationService);
+                //DataSourceViewModel partViewModel = new DataSourceViewModel(newDataSource, _localizationService);
 
                 //Parts.Add(partViewModel);
 
-                _pathItemsService.TryAddPathItem(newPathItem);
-                // _sessionDataHolder.PathItems!.Add(newPathItem);
+                _dataSourceService.TryAddDataSource(newDataSource);
+                // _sessionDataHolder.DataSource!.Add(newDataSource);
             }
 
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTA))
+            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTA))
             {
-                DebugAddDesktopPathItem("testA");
+                DebugAddDesktopDataSource("testA");
             }
 
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTA1))
+            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTA1))
             {
-                DebugAddDesktopPathItem("testA1");
+                DebugAddDesktopDataSource("testA1");
             }
 
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTB))
+            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTB))
             {
-                DebugAddDesktopPathItem("testB");
+                DebugAddDesktopDataSource("testB");
             }
 
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTB1))
+            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTB1))
             {
-                DebugAddDesktopPathItem("testB1");
+                DebugAddDesktopDataSource("testB1");
             }
 
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTC))
+            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTC))
             {
-                DebugAddDesktopPathItem("testC");
+                DebugAddDesktopDataSource("testC");
             }
 
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTC1))
+            if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTC1))
             {
-                DebugAddDesktopPathItem("testC1");
+                DebugAddDesktopDataSource("testC1");
             }
         }
     #endif
     }
     
-    public ReadOnlyObservableCollection<PathItemProxy> PathItems => _data;
+    public ReadOnlyObservableCollection<DataSourceProxy> DataSources => _data;
     
-    public ReactiveCommand<PathItemProxy, Unit> RemovePathItemCommand { get; set; }
+    public ReactiveCommand<DataSourceProxy, Unit> RemoveDataSourceCommand { get; set; }
 
     private void OnLocalInventoryStarted()
     {
@@ -201,8 +201,8 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
 
             if (result != null && Directory.Exists(result))
             {
-                await _pathItemsService.CreateAndTryAddPathItem(result, FileSystemTypes.Directory);
-                //await HandleNewPathItem(result, FileSystemTypes.Directory);
+                await _dataSourceService.CreateAndTryAddDataSource(result, FileSystemTypes.Directory);
+                //await HandleNewDataSource(result, FileSystemTypes.Directory);
             }
         }
         catch (Exception ex)
@@ -223,8 +223,8 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
             {
                 foreach (var result in results)
                 {
-                    await _pathItemsService.CreateAndTryAddPathItem(result, FileSystemTypes.File);
-                    //await HandleNewPathItem(result, FileSystemTypes.File);
+                    await _dataSourceService.CreateAndTryAddDataSource(result, FileSystemTypes.File);
+                    //await HandleNewDataSource(result, FileSystemTypes.File);
                 }
             }
         }
@@ -234,8 +234,8 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
         }
     }
 
-    private async Task RemovePathItem(PathItemProxy pathItemProxy)
+    private async Task RemoveDataSource(DataSourceProxy dataSourceProxy)
     {
-        await _pathItemsService.TryRemovePathItem(pathItemProxy.PathItem);
+        await _dataSourceService.TryRemoveDataSource(dataSourceProxy.DataSource);
     }
 }

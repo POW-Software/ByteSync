@@ -6,14 +6,12 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Avalonia.Controls.Mixins;
 using Avalonia.Media;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Arguments;
-using ByteSync.Business.PathItems;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
-using ByteSync.Business.Themes;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces;
@@ -34,15 +32,15 @@ public class SessionMachineViewModel : ActivatableViewModelBase
 {
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;
-    private readonly IPathItemsService _pathItemsService;
-    private readonly IPathItemProxyFactory _pathItemProxyFactory;
-    private readonly IPathItemRepository _pathItemRepository;
+    private readonly IDataSourceService _dataSourceService;
+    private readonly IDataSourceProxyFactory _dataSourceProxyFactory;
+    private readonly IDataSourceRepository _dataSourceRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly IFileDialogService _fileDialogService;
     private readonly IThemeService _themeService;
     private readonly ILogger<SessionMachineViewModel> _logger;
     
-    private ReadOnlyObservableCollection<PathItemProxy> _data;
+    private ReadOnlyObservableCollection<DataSourceProxy> _data;
     
     private IBrush? _currentMemberBackGround;
     private IBrush? _otherMemberBackGround;
@@ -57,16 +55,16 @@ public class SessionMachineViewModel : ActivatableViewModelBase
 
     }
 
-    public SessionMachineViewModel(SessionMemberInfo sessionMemberInfo, ISessionService sessionService, IPathItemsService pathItemsService, 
-        ILocalizationService localizationService, IEnvironmentService environmentService, IPathItemProxyFactory pathItemProxyFactory,
-        IPathItemRepository pathItemRepository, ISessionMemberRepository sessionMemberRepository, IFileDialogService fileDialogService,
+    public SessionMachineViewModel(SessionMemberInfo sessionMemberInfo, ISessionService sessionService, IDataSourceService dataSourceService, 
+        ILocalizationService localizationService, IEnvironmentService environmentService, IDataSourceProxyFactory dataSourceProxyFactory,
+        IDataSourceRepository dataSourceRepository, ISessionMemberRepository sessionMemberRepository, IFileDialogService fileDialogService,
         IThemeService themeService, ILogger<SessionMachineViewModel> logger)
     {
         _sessionService = sessionService;
-        _pathItemsService = pathItemsService;
+        _dataSourceService = dataSourceService;
         _localizationService = localizationService;
-        _pathItemProxyFactory = pathItemProxyFactory;
-        _pathItemRepository = pathItemRepository;
+        _dataSourceProxyFactory = dataSourceProxyFactory;
+        _dataSourceRepository = dataSourceRepository;
         _sessionMemberRepository = sessionMemberRepository;
         _fileDialogService = fileDialogService;
         _themeService = themeService;
@@ -86,7 +84,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
 
         ClientInstanceId = sessionMemberInfo.ClientInstanceId;
 
-        RemovePathItemCommand = ReactiveCommand.CreateFromTask<PathItemProxy>(RemovePathItem);
+        RemoveDataSourceCommand = ReactiveCommand.CreateFromTask<DataSourceProxy>(RemoveDataSource);
 
         // https://stackoverflow.com/questions/58479606/how-do-you-update-the-canexecute-value-after-the-reactivecommand-has-been-declar
         // https://www.reactiveui.net/docs/handbook/commands/
@@ -96,10 +94,10 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         Observable.Merge(AddDirectoryCommand.IsExecuting, AddFileCommand.IsExecuting)
             .Select(executing => !executing).Subscribe(canRun);
 
-        var pathItemsObservable = _pathItemRepository.ObservableCache.Connect()
-            .Filter(pathItem => pathItem.BelongsTo(sessionMemberInfo))
-            .Sort(SortExpressionComparer<PathItem>.Ascending(p => p.Code))
-            .Transform(pathItem => _pathItemProxyFactory.CreatePathItemProxy(pathItem))
+        var dataSourcesObservable = _dataSourceRepository.ObservableCache.Connect()
+            .Filter(dataSource => dataSource.BelongsTo(sessionMemberInfo))
+            .Sort(SortExpressionComparer<DataSource>.Ascending(p => p.Code))
+            .Transform(dataSource => _dataSourceProxyFactory.CreateDataSourceProxy(dataSource))
             .DisposeMany() // dispose when no longer required
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _data)
@@ -107,7 +105,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         
         this.WhenActivated(disposables =>
         {
-            pathItemsObservable.DisposeWith(disposables);
+            dataSourcesObservable.DisposeWith(disposables);
 
             _sessionService.SessionStatusObservable.CombineLatest(_sessionService.RunSessionProfileInfoObservable)
                 .DistinctUntilChanged()
@@ -200,7 +198,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         UpdateStatus(SessionMemberInfo.SessionMemberGeneralStatus);
     }
 
-    public ReactiveCommand<PathItemProxy, Unit> RemovePathItemCommand { get; set; }
+    public ReactiveCommand<DataSourceProxy, Unit> RemoveDataSourceCommand { get; set; }
 
     public ReactiveCommand<Unit, Unit> AddDirectoryCommand { get; set; }
         
@@ -238,13 +236,13 @@ public class SessionMachineViewModel : ActivatableViewModelBase
     [Reactive]
     public int PositionInList { get; set; }
 
-    public ReadOnlyObservableCollection<PathItemProxy> PathItems => _data;
+    public ReadOnlyObservableCollection<DataSourceProxy> DataSources => _data;
     
     internal SessionMemberInfo SessionMemberInfo { get; private set; }
 
-    private async Task RemovePathItem(PathItemProxy pathItem)
+    private async Task RemoveDataSource(DataSourceProxy dataSource)
     {
-        await _pathItemsService.TryRemovePathItem(pathItem.PathItem);
+        await _dataSourceService.TryRemoveDataSource(dataSource.DataSource);
     }
 
     private async Task AddDirectory()
@@ -255,7 +253,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
 
             if (result != null && Directory.Exists(result))
             {
-                await _pathItemsService.CreateAndTryAddPathItem(result, FileSystemTypes.Directory);
+                await _dataSourceService.CreateAndTryAddDataSource(result, FileSystemTypes.Directory);
             }
         }
         catch (Exception ex)
@@ -272,7 +270,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         {
             foreach (var fileName in result)
             {
-                await _pathItemsService.CreateAndTryAddPathItem(fileName, FileSystemTypes.File);
+                await _dataSourceService.CreateAndTryAddDataSource(fileName, FileSystemTypes.File);
             }
         }
     }

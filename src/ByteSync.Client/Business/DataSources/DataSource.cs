@@ -3,11 +3,11 @@ using ByteSync.Common.Business.Inventories;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-namespace ByteSync.Business.PathItems;
+namespace ByteSync.Business.DataSources;
 
-public class PathItem : ReactiveObject
+public class DataSource : ReactiveObject
 {
-    public PathItem()
+    public DataSource()
     {
 
     }
@@ -29,7 +29,7 @@ public class PathItem : ReactiveObject
         }
     }
 
-    protected bool Equals(PathItem other)
+    protected bool Equals(DataSource other)
     {
         return Type == other.Type && Path == other.Path && ClientInstanceId == other.ClientInstanceId;
     }
@@ -39,7 +39,7 @@ public class PathItem : ReactiveObject
         if (ReferenceEquals(null, obj)) return false;
         if (ReferenceEquals(this, obj)) return true;
         if (obj.GetType() != this.GetType()) return false;
-        return Equals((PathItem)obj);
+        return Equals((DataSource)obj);
     }
 
     public override int GetHashCode()

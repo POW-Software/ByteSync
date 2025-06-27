@@ -229,7 +229,7 @@ public class QuitSessionCommandHandlerTests
     }
     
     [Test]
-public async Task QuitSession_WithPathItems_NotifiesPathItemRemoved()
+public async Task QuitSession_WithDataSources_NotifiesDataSourceRemoved()
 {
     // Arrange
     var sessionId = "testSession";
@@ -243,10 +243,10 @@ public async Task QuitSession_WithPathItems_NotifiesPathItemRemoved()
     // Create inventory data with path items
     var inventoryData = new InventoryData(sessionId);
     var inventoryMember = new InventoryMemberData { ClientInstanceId = "clientInstance1" };
-    var pathItem1 = new EncryptedPathItem { Code = "path1", Data = new byte[] { 1, 2, 3 }, IV = new byte[] { 4, 5, 6 } };
-    var pathItem2 = new EncryptedPathItem { Code = "path2", Data = new byte[] { 7, 8, 9 }, IV = new byte[] { 10, 11, 12 } };
-    inventoryMember.SharedPathItems.Add(pathItem1);
-    inventoryMember.SharedPathItems.Add(pathItem2);
+    var dataSource1 = new EncryptedDataSource { Code = "path1", Data = new byte[] { 1, 2, 3 }, IV = new byte[] { 4, 5, 6 } };
+    var dataSource2 = new EncryptedDataSource { Code = "path2", Data = new byte[] { 7, 8, 9 }, IV = new byte[] { 10, 11, 12 } };
+    inventoryMember.SharedDataSources.Add(dataSource1);
+    inventoryMember.SharedDataSources.Add(dataSource2);
     inventoryData.InventoryMembers.Add(inventoryMember);
     
     var synchronizationEntity = new SynchronizationEntity
@@ -296,10 +296,10 @@ public async Task QuitSession_WithPathItems_NotifiesPathItemRemoved()
     await _quitSessionCommandHandler.Handle(request, CancellationToken.None);
     
     // Assert
-    A.CallTo(() => mockGroup.PathItemRemoved(A<PathItemDTO>.That.Matches(dto => 
+    A.CallTo(() => mockGroup.DataSourceRemoved(A<DataSourceDTO>.That.Matches(dto => 
         dto.SessionId == sessionId && 
         dto.ClientInstanceId == client.ClientInstanceId && 
-        (dto.EncryptedPathItem.Code == "path1" || dto.EncryptedPathItem.Code == "path2"))))
+        (dto.EncryptedDataSource.Code == "path1" || dto.EncryptedDataSource.Code == "path2"))))
         .MustHaveHappened(2, Times.Exactly);
 }
 }

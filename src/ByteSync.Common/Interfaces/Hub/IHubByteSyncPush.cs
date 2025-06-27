@@ -37,9 +37,9 @@ public interface IHubByteSyncPush
 
     Task InventoryStarted(InventoryStartedDTO inventoryStartedDto);
 
-    Task PathItemAdded(PathItemDTO pathItemDto);
+    Task DataSourceAdded(DataSourceDTO dataSourceDto);
 
-    Task PathItemRemoved(PathItemDTO pathItemDto);
+    Task DataSourceRemoved(DataSourceDTO dataSourceDto);
 
     Task FilePartUploaded(FileTransferPush fileTransferPush);
 

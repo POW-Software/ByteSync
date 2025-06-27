@@ -29,8 +29,8 @@ class HubConnectionPushHandler
         // connection.BindOnInterface<SessionSettingsUpdatedDTO>(push => push.SessionSettingsUpdated, OnSessionSettingsUpdated);
         connection.BindOnInterface<CloudSessionFatalError>(push => push.SessionOnFatalError, OnSessionOnFatalError);
         // connection.BindOnInterface<string, string, EncryptedSessionSettings>(push => push.InventoryStarted, OnStartInventory);
-        // connection.BindOnInterface<string, string, EncryptedPathItem>(push => push.PathItemAdded, OnPathItemAdded);
-        // connection.BindOnInterface<string, string, EncryptedPathItem>(push => push.PathItemRemoved, OnPathItemRemoved);
+        // connection.BindOnInterface<string, string, EncryptedDataSource>(push => push.DataSourceAdded, OnDataSourceAdded);
+        // connection.BindOnInterface<string, string, EncryptedDataSource>(push => push.DataSourceRemoved, OnDataSourceRemoved);
         // connection.BindOnInterface<string, SharedFileDefinition, int>(push => push.FilePartUploaded, OnFilePartUploaded);
         // connection.BindOnInterface<string, SharedFileDefinition, int>(push => push.UploadFinished, OnUploadFinished);
         // connection.BindOnInterface<string>(push => push.OnReconnected, OnReconnected);
@@ -177,18 +177,18 @@ class HubConnectionPushHandler
     //     _eventAggregator.GetEvent<OnServerStartInventory>().Publish((sessionId, clientInstanceId, sessionSettings));
     // }
 
-    // private void OnPathItemAdded(string sessionId, string clientInstanceId, EncryptedPathItem sharedPathItem)
+    // private void OnDataSourceAdded(string sessionId, string clientInstanceId, EncryptedDataSource sharedDataSource)
     // {
     //     LogDebug();
     //
-    //     _eventAggregator.GetEvent<OnServerPathItemAdded>().Publish((sessionId, clientInstanceId, sharedPathItem));
+    //     _eventAggregator.GetEvent<OnServerDataSourceAdded>().Publish((sessionId, clientInstanceId, sharedDataSource));
     // }
     //
-    // private void OnPathItemRemoved(string sessionId, string clientInstanceId, EncryptedPathItem sharedPathItem)
+    // private void OnDataSourceRemoved(string sessionId, string clientInstanceId, EncryptedDataSource sharedDataSource)
     // {
     //     LogDebug();
     //
-    //     _eventAggregator.GetEvent<OnServerPathItemRemoved>().Publish((sessionId, clientInstanceId, sharedPathItem));
+    //     _eventAggregator.GetEvent<OnServerDataSourceRemoved>().Publish((sessionId, clientInstanceId, sharedDataSource));
     // }
 
     // private void OnFilePartUploaded(string sessionId, SharedFileDefinition sharedFileDefinition, int partNumber)

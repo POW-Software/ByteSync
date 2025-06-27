@@ -27,11 +27,11 @@ public class InventoryBuilderFactory : IInventoryBuilderFactory
         var sessionService = _context.Resolve<ISessionService>();
         var inventoryService = _context.Resolve<IInventoryService>();
         var environmentService = _context.Resolve<IEnvironmentService>();
-        var pathItemRepository = _context.Resolve<IPathItemRepository>();
+        var dataSourceRepository = _context.Resolve<IDataSourceRepository>();
         
         var sessionMember = sessionMemberRepository.GetCurrentSessionMember();
         var cloudSessionSettings = sessionService.CurrentSessionSettings!;
-        var myPathItems = pathItemRepository.SortedCurrentMemberPathItems;
+        var myDataSources = dataSourceRepository.SortedCurrentMemberDataSources;
         
         var inventoryBuilder = _context.Resolve<IInventoryBuilder>(
             new TypedParameter(typeof(SessionMemberInfo), sessionMember),
@@ -40,9 +40,9 @@ public class InventoryBuilderFactory : IInventoryBuilderFactory
             new TypedParameter(typeof(OSPlatforms), environmentService.OSPlatform),
             new TypedParameter(typeof(FingerprintModes), FingerprintModes.Rsync));
 
-        foreach (var pathItem in myPathItems)
+        foreach (var dataSource in myDataSources)
         {
-            inventoryBuilder.AddInventoryPart(pathItem);
+            inventoryBuilder.AddInventoryPart(dataSource);
         }
         
         return inventoryBuilder;

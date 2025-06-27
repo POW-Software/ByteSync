@@ -2,7 +2,7 @@
 
 namespace ByteSync.Common.Business.Inventories;
 
-public class EncryptedPathItem : IEncryptedSessionData
+public class EncryptedDataSource : IEncryptedSessionData
 {
     public byte[] Data { get; set; }
     

@@ -976,10 +976,10 @@ You must select a maximum of 5 data sources.</value>
   <data name="General_MessageBox_UnknownError_Message" xml:space="preserve">
     <value>An unknown error has occurred.</value>
   </data>
-  <data name="PathItemChecker_SubPathError_Title" xml:space="preserve">
+  <data name="DataSourceChecker_SubPathError_Title" xml:space="preserve">
     <value>Unable to add the element</value>
   </data>
-  <data name="PathItemChecker_SubPathError_Message" xml:space="preserve">
+  <data name="DataSourceChecker_SubPathError_Message" xml:space="preserve">
     <value>It is not possible to add this element for the following reason: 
 Either this element, or a parent, or a descendant is already present.</value>
   </data>

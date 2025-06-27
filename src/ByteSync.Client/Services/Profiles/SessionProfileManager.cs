@@ -31,34 +31,34 @@ public class SessionProfileManager : ISessionProfileManager
     private readonly IDialogService _dialogService;
     private readonly IApplicationSettingsRepository _applicationSettingsRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
-    private readonly IPathItemsService _pathItemsService;
+    private readonly IDataSourceService _dataSourceService;
     private readonly ISynchronizationRuleRepository _synchronizationRuleRepository;
     private readonly IEnvironmentService _environmentService;
     private readonly IConnectionService _connectionService;
     private readonly ICloudSessionProfileApiClient _cloudSessionProfileApiClient;
     private readonly IFileUploaderFactory _fileUploaderFactory;
     private readonly ISynchronizationRulesConverter _synchronizationRulesConverter;
-    private readonly IPathItemRepository _pathItemRepository;
+    private readonly IDataSourceRepository _dataSourceRepository;
 
     public SessionProfileManager(ISessionProfileLocalDataManager sessionProfileLocalDataManager, IDialogService dialogService, 
         IApplicationSettingsRepository applicationSettingsManager, ISessionMemberRepository sessionMemberRepository, 
-        IPathItemsService pathItemsService, ISynchronizationRuleRepository synchronizationRuleRepository, 
+        IDataSourceService dataSourceService, ISynchronizationRuleRepository synchronizationRuleRepository, 
         IEnvironmentService environmentService, IConnectionService connectionService, ICloudSessionProfileApiClient cloudSessionProfileApiClient,
         IFileUploaderFactory fileUploaderFactory, ISynchronizationRulesConverter synchronizationRulesConverter,
-        IPathItemRepository pathItemRepository)
+        IDataSourceRepository dataSourceRepository)
     {
         _sessionProfileLocalDataManager = sessionProfileLocalDataManager;
         _dialogService = dialogService;
         _applicationSettingsRepository = applicationSettingsManager;
         _sessionMemberRepository = sessionMemberRepository;
-        _pathItemsService = pathItemsService;
+        _dataSourceService = dataSourceService;
         _synchronizationRuleRepository = synchronizationRuleRepository;
         _environmentService = environmentService;
         _connectionService = connectionService;
         _cloudSessionProfileApiClient = cloudSessionProfileApiClient;
         _fileUploaderFactory = fileUploaderFactory;
         _synchronizationRulesConverter = synchronizationRulesConverter;
-        _pathItemRepository = pathItemRepository;
+        _dataSourceRepository = dataSourceRepository;
     }
     
     public async Task CreateCloudSessionProfile(string sessionId, string profileName, CloudSessionProfileOptions cloudSessionProfileOptions)
@@ -357,7 +357,7 @@ public class SessionProfileManager : ISessionProfileManager
         // RestrictionIP
         cloudSessionProfileDetails.Options = cloudSessionProfileOptions;
 
-        var allPathItems = _pathItemRepository.Elements.ToList();
+        var allDataSources = _dataSourceRepository.Elements.ToList();
         foreach (var sessionMemberInfo in _sessionMemberRepository.Elements)
         {
             var cloudSessionProfileMember = new CloudSessionProfileMember();
@@ -369,10 +369,10 @@ public class SessionProfileManager : ISessionProfileManager
                 data.Slots
                     .Single(t => t.ClientId.Equals(sessionMemberInfo.Endpoint.ClientId)).ProfileClientId;
             cloudSessionProfileMember.ProfileClientPassword = $"CSPCP_{Guid.NewGuid()}";
-            cloudSessionProfileMember.PathItems = allPathItems
-                .Where(pi => pi.BelongsTo(sessionMemberInfo))
+            cloudSessionProfileMember.DataSources = allDataSources
+                .Where(ds => ds.BelongsTo(sessionMemberInfo))
                 .OrderBy(pivm => pivm.Code)
-                .Select(pi => new SessionProfilePathItem(pi))
+                .Select(ds => new SessionProfileDataSource(ds))
                 .ToList();
 
             cloudSessionProfileDetails.Members.Add(cloudSessionProfileMember);
@@ -395,7 +395,7 @@ public class SessionProfileManager : ISessionProfileManager
         localSessionProfileDetails.CreationDatetime = DateTime.Now;
         localSessionProfileDetails.CreatedWithVersion = _connectionService.CurrentEndPoint!.Version;
         localSessionProfileDetails.Options = localSessionProfileOptions;
-        localSessionProfileDetails.PathItems = _pathItemRepository.SortedCurrentMemberPathItems;
+        localSessionProfileDetails.DataSources = _dataSourceRepository.SortedCurrentMemberDataSources;
         
         var synchronizationRules = _synchronizationRulesConverter.ConvertLooseSynchronizationRules(
             _synchronizationRuleRepository.Elements.ToList());

@@ -94,9 +94,9 @@ public class ComparisonResultPreparer
             InventoryBuilder inventoryBuilder = new InventoryBuilder(sessionMemberInfo, SessionSettings, new InventoryProcessData(), 
                 OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object);
             
-            foreach (var pathItem in inventoryData.PathItems)
+            foreach (var dataSource in inventoryData.DataSources)
             {
-                inventoryBuilder.AddInventoryPart(pathItem);
+                inventoryBuilder.AddInventoryPart(dataSource);
             }
             
             inventoryData.InventoryBuilder = inventoryBuilder;

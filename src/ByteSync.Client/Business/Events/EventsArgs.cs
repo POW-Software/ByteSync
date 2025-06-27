@@ -27,17 +27,17 @@ public class CloudSessionResultEventArgs : EventArgs
     public CloudSessionResult CloudSessionResult { get; private set; }
 }
 
-// public class PathItemEventArgs : EventArgs
+// public class DataSourceEventArgs : EventArgs
 // {
-//     public PathItemEventArgs(SessionMemberInfo sessionMemberInfo, PathItem pathItem)
+//     public DataSourceEventArgs(SessionMemberInfo sessionMemberInfo, DataSource dataSource)
 //     {
 //         SessionMemberInfo = sessionMemberInfo;
-//         PathItem = pathItem;
+//         DataSource = dataSource;
 //     }
 //
 //     public SessionMemberInfo SessionMemberInfo { get; private set; }
 //     
-//     public PathItem PathItem { get; private set; }
+//     public DataSource DataSource { get; private set; }
 // }
     
 public class InventoryReadyEventArgs : EventArgs

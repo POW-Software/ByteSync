@@ -59,7 +59,7 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
             return quitter != null;
         }, transaction);
 
-        List<EncryptedPathItem>? pathItems = null;
+        List<EncryptedDataSource>? dataSources = null;
         if (updateSessionResult.IsWaitingForTransaction)
         {
             await _inventoryRepository.UpdateIfExists(request.SessionId, inventoryData =>
@@ -67,11 +67,11 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
                 var inventoryMember = inventoryData.InventoryMembers.SingleOrDefault(m => m.ClientInstanceId.Equals(request.ClientInstanceId));
                 if (inventoryMember != null)
                 {
-                    pathItems = inventoryMember.SharedPathItems;
+                    dataSources = inventoryMember.SharedDataSources;
                     inventoryData.InventoryMembers.Remove(inventoryMember);
                 }
 
-                inventoryData.RecodePathItems(innerCloudSessionData!);
+                inventoryData.RecodeDataSources(innerCloudSessionData!);
 
                 return true;
             }, transaction);
@@ -105,12 +105,12 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
             var sessionMemberInfo = await _sessionMemberMapper.Convert(innerQuitter!);
             await _invokeClientsService.SessionGroup(request.SessionId).MemberQuittedSession(sessionMemberInfo);
             
-            if (pathItems != null)
+            if (dataSources != null)
             {
-                foreach (var pathItem in pathItems)
+                foreach (var dataSource in dataSources)
                 {            
-                    var pathItemDto = new PathItemDTO(request.SessionId, request.ClientInstanceId, pathItem);
-                    await _invokeClientsService.SessionGroup(request.SessionId).PathItemRemoved(pathItemDto);
+                    var dataSourceDto = new DataSourceDTO(request.SessionId, request.ClientInstanceId, dataSource);
+                    await _invokeClientsService.SessionGroup(request.SessionId).DataSourceRemoved(dataSourceDto);
                 }
             }
         }

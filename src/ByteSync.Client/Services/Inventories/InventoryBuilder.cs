@@ -2,8 +2,8 @@
 using System.Threading;
 using ByteSync.Business;
 using ByteSync.Business.Arguments;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.Inventories;
-using ByteSync.Business.PathItems;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
@@ -92,11 +92,11 @@ public class InventoryBuilder : IInventoryBuilder
         }
     }
 
-    public InventoryPart AddInventoryPart(PathItem pathItem)
+    public InventoryPart AddInventoryPart(DataSource dataSource)
     {
-        var inventoryPart = AddInventoryPart(pathItem.Path);
+        var inventoryPart = AddInventoryPart(dataSource.Path);
 
-        inventoryPart.Code = pathItem.Code;
+        inventoryPart.Code = dataSource.Code;
 
         return inventoryPart;
     }

@@ -1,4 +1,4 @@
-﻿using ByteSync.Business.PathItems;
+﻿using ByteSync.Business.DataSources;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
@@ -12,9 +12,9 @@ public interface IDataEncrypter
     
     public SessionSettings DecryptSessionSettings(EncryptedSessionSettings encryptedSessionSettings);
     
-    public EncryptedPathItem EncryptPathItem(PathItem pathItem);
+    public EncryptedDataSource EncryptDataSource(DataSource dataSource);
     
-    public PathItem DecryptPathItem(EncryptedPathItem encryptedPathItem);
+    public DataSource DecryptDataSource(EncryptedDataSource encryptedDataSource);
     
     public EncryptedSessionMemberPrivateData EncryptSessionMemberPrivateData(SessionMemberPrivateData sessionMemberPrivateData);
     
