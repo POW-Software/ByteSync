@@ -67,11 +67,11 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
                 var inventoryMember = inventoryData.InventoryMembers.SingleOrDefault(m => m.ClientInstanceId.Equals(request.ClientInstanceId));
                 if (inventoryMember != null)
                 {
-                    pathItems = inventoryMember.SharedPathItems;
+                    pathItems = inventoryMember.SharedDataSources;
                     inventoryData.InventoryMembers.Remove(inventoryMember);
                 }
 
-                inventoryData.RecodePathItems(innerCloudSessionData!);
+                inventoryData.RecodeDataSources(innerCloudSessionData!);
 
                 return true;
             }, transaction);
@@ -107,10 +107,10 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
             
             if (pathItems != null)
             {
-                foreach (var pathItem in pathItems)
+                foreach (var dataSource in pathItems)
                 {            
-                    var pathItemDto = new DataSourceDTO(request.SessionId, request.ClientInstanceId, pathItem);
-                    await _invokeClientsService.SessionGroup(request.SessionId).DataSourceRemoved(pathItemDto);
+                    var dataSourceDto = new DataSourceDTO(request.SessionId, request.ClientInstanceId, dataSource);
+                    await _invokeClientsService.SessionGroup(request.SessionId).DataSourceRemoved(dataSourceDto);
                 }
             }
         }

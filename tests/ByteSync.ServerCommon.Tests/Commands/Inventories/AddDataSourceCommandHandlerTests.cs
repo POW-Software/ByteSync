@@ -15,26 +15,26 @@ using Microsoft.Extensions.Logging;
 namespace ByteSync.ServerCommon.Tests.Commands.Inventories;
 
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
-public class AddPathItemCommandHandlerTests
+public class AddDataSourceCommandHandlerTests
 {
     private readonly IInventoryMemberService _mockInventoryMemberService;
     private readonly ICloudSessionsRepository _mockCloudSessionsRepository;
     private readonly IInventoryRepository _mockInventoryRepository;
     private readonly IInvokeClientsService _mockInvokeClientsService;
-    private readonly ILogger<AddPathItemCommandHandler> _mockLogger;
+    private readonly ILogger<AddDataSourceCommandHandler> _mockLogger;
     private readonly IHubByteSyncPush _mockByteSyncPush = A.Fake<IHubByteSyncPush>(x => x.Strict());
     
-    private readonly AddPathItemCommandHandler _addPathItemCommandHandler;
+    private readonly AddDataSourceCommandHandler _addDataSourceCommandHandler;
 
-    public AddPathItemCommandHandlerTests()
+    public AddDataSourceCommandHandlerTests()
     {
         _mockInventoryMemberService = A.Fake<IInventoryMemberService>();
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
         _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
-        _mockLogger = A.Fake<ILogger<AddPathItemCommandHandler>>();
+        _mockLogger = A.Fake<ILogger<AddDataSourceCommandHandler>>();
         
-        _addPathItemCommandHandler = new AddPathItemCommandHandler(_mockInventoryMemberService, _mockInventoryRepository, _mockCloudSessionsRepository, 
+        _addDataSourceCommandHandler = new AddDataSourceCommandHandler(_mockInventoryMemberService, _mockInventoryRepository, _mockCloudSessionsRepository, 
             _mockInvokeClientsService, _mockLogger);
     }
     
@@ -61,10 +61,10 @@ public class AddPathItemCommandHandlerTests
 
         A.CallTo(() => _mockByteSyncPush.DataSourceAdded(A<DataSourceDTO>.Ignored)).Returns(Task.CompletedTask);
 
-        var request = new AddPathItemRequest(sessionId, client, encryptedPathItem);
+        var request = new AddDataSourceRequest(sessionId, client, encryptedPathItem);
         
         // Act
-        await _addPathItemCommandHandler.Handle(request, CancellationToken.None);
+        await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
@@ -95,10 +95,10 @@ public class AddPathItemCommandHandlerTests
 
         A.CallTo(() => _mockByteSyncPush.DataSourceAdded(A<DataSourceDTO>.Ignored)).Returns(Task.CompletedTask);
 
-        var request = new AddPathItemRequest(sessionId, client, encryptedPathItem);
+        var request = new AddDataSourceRequest(sessionId, client, encryptedPathItem);
         
         // Act
-        await _addPathItemCommandHandler.Handle(request, CancellationToken.None);
+        await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         inventoryData.InventoryMembers.Count.Should().Be(0);
@@ -114,7 +114,7 @@ public class AddPathItemCommandHandlerTests
         var encryptedPathItem = new EncryptedDataSource { Code = "pathItem1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = client.ClientInstanceId, SharedPathItems = new List<EncryptedDataSource> { encryptedPathItem } });
+            { ClientInstanceId = client.ClientInstanceId, SharedDataSources = new List<EncryptedDataSource> { encryptedPathItem } });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));
@@ -122,14 +122,14 @@ public class AddPathItemCommandHandlerTests
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
             .Invokes((string _, Func<InventoryData, InventoryData> func) => func(inventoryData));
 
-        var request = new AddPathItemRequest(sessionId, client, encryptedPathItem);
+        var request = new AddDataSourceRequest(sessionId, client, encryptedPathItem);
         
         // Act
-        await _addPathItemCommandHandler.Handle(request, CancellationToken.None);
+        await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         inventoryData.InventoryMembers.Count.Should().Be(1);
-        inventoryData.InventoryMembers[0].SharedPathItems.Count.Should().Be(1);
+        inventoryData.InventoryMembers[0].SharedDataSources.Count.Should().Be(1);
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
     }
 }

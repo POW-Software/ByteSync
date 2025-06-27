@@ -4,5 +4,5 @@ namespace ByteSync.Interfaces.Factories.Proxies;
 
 public interface IDataSourceProxyFactory
 {
-    DataSourceProxy CreatePathItemProxy(DataSource dataSource);
+    DataSourceProxy CreateDataSourceProxy(DataSource dataSource);
 }

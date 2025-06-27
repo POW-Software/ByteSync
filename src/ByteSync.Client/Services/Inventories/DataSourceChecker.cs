@@ -6,16 +6,16 @@ using ByteSync.Interfaces.Dialogs;
 
 namespace ByteSync.Services.Inventories;
 
-public class PathItemChecker : IPathItemChecker
+public class DataSourceChecker : IDataSourceChecker
 {
     private readonly IDialogService _dialogService;
     
-    public PathItemChecker(IDialogService dialogService)
+    public DataSourceChecker(IDialogService dialogService)
     {
         _dialogService = dialogService;
     }
     
-    public async Task<bool> CheckPathItem(DataSource dataSource, IEnumerable<DataSource> existingDataSources)
+    public async Task<bool> CheckDataSource(DataSource dataSource, IEnumerable<DataSource> existingDataSources)
     {
         if (dataSource.Type == FileSystemTypes.File)
         {

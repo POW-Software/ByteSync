@@ -8,20 +8,20 @@ using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
-public class AddPathItemCommandHandler : IRequestHandler<AddPathItemRequest, bool>
+public class AddDataSourceCommandHandler : IRequestHandler<AddDataSourceRequest, bool>
 {
     private readonly IInventoryMemberService _inventoryMemberService;
     private readonly IInventoryRepository _inventoryRepository;
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly IInvokeClientsService _invokeClientsService;
-    private readonly ILogger<AddPathItemCommandHandler> _logger;
+    private readonly ILogger<AddDataSourceCommandHandler> _logger;
     
-    public AddPathItemCommandHandler(
+    public AddDataSourceCommandHandler(
         IInventoryMemberService inventoryMemberService,
         IInventoryRepository inventoryRepository,
         ICloudSessionsRepository cloudSessionsRepository,
         IInvokeClientsService invokeClientsService,
-        ILogger<AddPathItemCommandHandler> logger)
+        ILogger<AddDataSourceCommandHandler> logger)
     {
         _inventoryMemberService = inventoryMemberService;
         _inventoryRepository = inventoryRepository;
@@ -30,11 +30,11 @@ public class AddPathItemCommandHandler : IRequestHandler<AddPathItemRequest, boo
         _logger = logger;
     }
 
-    public async Task<bool> Handle(AddPathItemRequest request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(AddDataSourceRequest request, CancellationToken cancellationToken)
     {
         var sessionId = request.SessionId;
         var client = request.Client;
-        var encryptedPathItem = request.EncryptedDataSource;
+        var encryptedDataSource = request.EncryptedDataSource;
         
         var cloudSessionData = await _cloudSessionsRepository.Get(sessionId);
         if (cloudSessionData == null)
@@ -51,10 +51,10 @@ public class AddPathItemCommandHandler : IRequestHandler<AddPathItemRequest, boo
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
 
-                inventoryMember.SharedPathItems.RemoveAll(p => p.Code == encryptedPathItem.Code);
-                inventoryMember.SharedPathItems.Add(encryptedPathItem);
+                inventoryMember.SharedDataSources.RemoveAll(p => p.Code == encryptedDataSource.Code);
+                inventoryMember.SharedDataSources.Add(encryptedDataSource);
 
-                inventoryData.RecodePathItems(cloudSessionData);
+                inventoryData.RecodeDataSources(cloudSessionData);
                 
                 return inventoryData;
             }
@@ -67,9 +67,9 @@ public class AddPathItemCommandHandler : IRequestHandler<AddPathItemRequest, boo
 
         if (updateEntityResult.IsSaved)
         {
-            var pathItemDto = new DataSourceDTO(sessionId, client.ClientInstanceId, encryptedPathItem);
+            var dataSourceDto = new DataSourceDTO(sessionId, client.ClientInstanceId, encryptedDataSource);
             
-            await _invokeClientsService.SessionGroupExcept(sessionId, client).DataSourceAdded(pathItemDto);
+            await _invokeClientsService.SessionGroupExcept(sessionId, client).DataSourceAdded(dataSourceDto);
         }
 
         return updateEntityResult.IsSaved;

@@ -13,7 +13,7 @@ public class DataSourceProxyFactory : IDataSourceProxyFactory
         _context = context;
     }
     
-    public DataSourceProxy CreatePathItemProxy(DataSource dataSource)
+    public DataSourceProxy CreateDataSourceProxy(DataSource dataSource)
     {
         var result = _context.Resolve<DataSourceProxy>(
             new TypedParameter(typeof(DataSource), dataSource));

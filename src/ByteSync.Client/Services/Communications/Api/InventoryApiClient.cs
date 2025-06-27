@@ -33,7 +33,7 @@ public class InventoryApiClient : IInventoryApiClient
         }
     }
 
-    public async Task<List<EncryptedDataSource>?> GetPathItems(string sessionId, string clientInstanceId)
+    public async Task<List<EncryptedDataSource>?> GetDataSources(string sessionId, string clientInstanceId)
     {
         try
         {

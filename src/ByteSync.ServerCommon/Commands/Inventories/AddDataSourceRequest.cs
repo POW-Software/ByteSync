@@ -4,9 +4,9 @@ using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
-public class RemovePathItemRequest : IRequest<bool>
+public class AddDataSourceRequest : IRequest<bool>
 {
-    public RemovePathItemRequest(string sessionId, Client client, EncryptedDataSource encryptedDataSource)
+    public AddDataSourceRequest(string sessionId, Client client, EncryptedDataSource encryptedDataSource)
     {
         SessionId = sessionId;
         Client = client;

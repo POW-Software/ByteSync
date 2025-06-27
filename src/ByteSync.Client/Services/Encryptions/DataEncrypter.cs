@@ -33,18 +33,18 @@ public class DataEncrypter : IDataEncrypter
 
     public EncryptedDataSource EncryptDataSource(DataSource dataSource)
     {
-        var encryptedPathItem = Encrypt<EncryptedDataSource>(dataSource);
-        encryptedPathItem.Code = dataSource.Code;
+        var encryptedDataSource = Encrypt<EncryptedDataSource>(dataSource);
+        encryptedDataSource.Code = dataSource.Code;
         
-        return encryptedPathItem;
+        return encryptedDataSource;
     }
 
     public DataSource DecryptDataSource(EncryptedDataSource encryptedDataSource)
     {
-        var pathItem = Decrypt<DataSource>(encryptedDataSource);
-        pathItem.Code = encryptedDataSource.Code;
+        var dataSource = Decrypt<DataSource>(encryptedDataSource);
+        dataSource.Code = encryptedDataSource.Code;
 
-        return pathItem;
+        return dataSource;
     }
     
     public EncryptedSessionMemberPrivateData EncryptSessionMemberPrivateData(SessionMemberPrivateData sessionMemberPrivateData)

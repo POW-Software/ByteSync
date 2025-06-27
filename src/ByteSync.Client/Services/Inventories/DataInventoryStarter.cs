@@ -77,29 +77,29 @@ public class DataInventoryStarter : IDataInventoryStarter
         var runCloudSessionProfileInfo = (RunCloudSessionProfileInfo)tuple.First!;
         var cloudSessionProfileDetails = runCloudSessionProfileInfo.ProfileDetails;
         var allSessionMembers = tuple.Second.Items;
-        var allPathItems = tuple.Third.Items.ToList();
+        var allDataSources = tuple.Third.Items.ToList();
 
         var allOK = true;
         foreach (var sessionMemberInfo in allSessionMembers)
         {
-            var pathItems = allPathItems
+            var dataSources = allDataSources
                 .Where(pi => pi.BelongsTo(sessionMemberInfo))
                 .ToList();
                             
-            var expectedPathItems = cloudSessionProfileDetails
+            var expectedDataSources = cloudSessionProfileDetails
                 .Members.Single(m => m.ProfileClientId.Equals(sessionMemberInfo.ProfileClientId))
-                .PathItems.OrderBy(pi => pi.Code)
+                .DataSources.OrderBy(pi => pi.Code)
                 .ToList();
 
-            if (pathItems.Count == expectedPathItems.Count)
+            if (dataSources.Count == expectedDataSources.Count)
             {
                 var sessionProfileDataSources = new List<SessionProfileDataSource>();
-                foreach (var pathItem in pathItems)
+                foreach (var dataSource in dataSources)
                 {
-                    sessionProfileDataSources.Add(new SessionProfileDataSource(pathItem));
+                    sessionProfileDataSources.Add(new SessionProfileDataSource(dataSource));
                 }
                 
-                if (!sessionProfileDataSources.HaveSameContent(expectedPathItems))
+                if (!sessionProfileDataSources.HaveSameContent(expectedDataSources))
                 {
                     allOK = false;
                 }
@@ -144,7 +144,7 @@ public class DataInventoryStarter : IDataInventoryStarter
         
         FinalizeSessionSettings(sessionSettings);
 
-        var result = CheckPathItems(session);
+        var result = CheckDataSources(session);
         if (result != null)
         {
             return result;
@@ -246,7 +246,7 @@ public class DataInventoryStarter : IDataInventoryStarter
         }
     }
 
-    private StartInventoryResult? CheckPathItems(AbstractSession session)
+    private StartInventoryResult? CheckDataSources(AbstractSession session)
     {
         if (session is LocalSession)
         {

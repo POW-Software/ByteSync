@@ -5,20 +5,20 @@ using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
-public class GetPathItemsCommandHandler : IRequestHandler<GetPathItemsRequest, List<EncryptedDataSource>>
+public class GetDataSourcesCommandHandler : IRequestHandler<GetDataSourcesRequest, List<EncryptedDataSource>>
 {
     private readonly IInventoryRepository _inventoryRepository;
-    private readonly ILogger<GetPathItemsCommandHandler> _logger;
+    private readonly ILogger<GetDataSourcesCommandHandler> _logger;
 
-    public GetPathItemsCommandHandler(
+    public GetDataSourcesCommandHandler(
         IInventoryRepository inventoryRepository,
-        ILogger<GetPathItemsCommandHandler> logger)
+        ILogger<GetDataSourcesCommandHandler> logger)
     {
         _inventoryRepository = inventoryRepository;
         _logger = logger;
     }
 
-    public async Task<List<EncryptedDataSource>> Handle(GetPathItemsRequest request, CancellationToken cancellationToken)
+    public async Task<List<EncryptedDataSource>> Handle(GetDataSourcesRequest request, CancellationToken cancellationToken)
     {
         var sessionId = request.SessionId;
         var clientInstanceId = request.ClientInstanceId;
@@ -39,6 +39,6 @@ public class GetPathItemsCommandHandler : IRequestHandler<GetPathItemsRequest, L
             return new List<EncryptedDataSource>();
         }
 
-        return inventoryMember.SharedPathItems;
+        return inventoryMember.SharedDataSources;
     }
 }

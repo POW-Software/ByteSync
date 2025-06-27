@@ -63,9 +63,9 @@ public class InventoryFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        var encryptedPathItem = await FunctionHelper.DeserializeRequestBody<EncryptedDataSource>(req);
+        var encryptedDataSource = await FunctionHelper.DeserializeRequestBody<EncryptedDataSource>(req);
 
-        var request = new AddPathItemRequest(sessionId, client, encryptedPathItem);
+        var request = new AddDataSourceRequest(sessionId, client, encryptedDataSource);
         var result = await _mediator.Send(request);
 
         var response = req.CreateResponse();
@@ -82,9 +82,9 @@ public class InventoryFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        var encryptedPathItem = await FunctionHelper.DeserializeRequestBody<EncryptedDataSource>(req);
+        var encryptedDataSource = await FunctionHelper.DeserializeRequestBody<EncryptedDataSource>(req);
 
-        var request = new RemovePathItemRequest(sessionId, client, encryptedPathItem);
+        var request = new RemoveDataSourceRequest(sessionId, client, encryptedDataSource);
         var result = await _mediator.Send(request);
         
         var response = req.CreateResponse();
@@ -94,14 +94,14 @@ public class InventoryFunction
     }
     
     [Function("InventoryGetPathItemsFunction")]
-    public async Task<HttpResponseData> GetPathItems(
+    public async Task<HttpResponseData> GetDataSources(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/inventory/pathItem/{clientInstanceId}")] 
         HttpRequestData req,
         FunctionContext executionContext,
         string sessionId,
         string clientInstanceId)
     {
-        var request = new GetPathItemsRequest(sessionId, clientInstanceId);
+        var request = new GetDataSourcesRequest(sessionId, clientInstanceId);
         var result = await _mediator.Send(request);
           
         var response = req.CreateResponse();

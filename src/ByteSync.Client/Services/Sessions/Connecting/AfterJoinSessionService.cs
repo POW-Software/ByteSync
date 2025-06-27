@@ -122,11 +122,11 @@ public class AfterJoinSessionService : IAfterJoinSessionService
     {
         if (request.RunCloudSessionProfileInfo != null)
         {
-            var myPathItems = request.RunCloudSessionProfileInfo.GetMyPathItems();
+            var myDataSources = request.RunCloudSessionProfileInfo.GetMyDataSources();
             
-            foreach (var pathItem in myPathItems)
+            foreach (var dataSource in myDataSources)
             {
-                await _dataSourceService.CreateAndTryAddDataSource(pathItem.Path, pathItem.Type);
+                await _dataSourceService.CreateAndTryAddDataSource(dataSource.Path, dataSource.Type);
             }
         }
 
@@ -134,80 +134,80 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         {
             if (!sessionMemberInfo.HasClientInstanceId(_environmentService.ClientInstanceId))
             {
-                var encryptedPathItems = await _inventoryApiClient.GetPathItems(request.CloudSessionResult.SessionId, sessionMemberInfo.ClientInstanceId);
+                var encryptedDataSources = await _inventoryApiClient.GetDataSources(request.CloudSessionResult.SessionId, sessionMemberInfo.ClientInstanceId);
 
-                if (encryptedPathItems != null)
+                if (encryptedDataSources != null)
                 {
-                    foreach (var encryptedPathItem in encryptedPathItems)
+                    foreach (var encryptedDataSource in encryptedDataSources)
                     {
-                        var pathItem = _dataEncrypter.DecryptDataSource(encryptedPathItem);
-                        await _dataSourceService.TryAddDataSource(pathItem);
+                        var dataSource = _dataEncrypter.DecryptDataSource(encryptedDataSource);
+                        await _dataSourceService.TryAddDataSource(dataSource);
                     }
                 }
             }
         }
 
-        AddDebugPathItems();
+        AddDebugDataSources();
     }
 
-    private void AddDebugPathItems()
+    private void AddDebugDataSources()
     {
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTA))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTA))
         {
-            DebugAddDesktopPathItem("testA");
+            DebugAddDesktopDataSource("testA");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTA1))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTA1))
         {
-            DebugAddDesktopPathItem("testA1");
+            DebugAddDesktopDataSource("testA1");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTB))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTB))
         {
-            DebugAddDesktopPathItem("testB");
+            DebugAddDesktopDataSource("testB");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTB1))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTB1))
         {
-            DebugAddDesktopPathItem("testB1");
+            DebugAddDesktopDataSource("testB1");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTC))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTC))
         {
-            DebugAddDesktopPathItem("testC");
+            DebugAddDesktopDataSource("testC");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTC1))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTC1))
         {
-            DebugAddDesktopPathItem("testC1");
+            DebugAddDesktopDataSource("testC1");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTD))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTD))
         {
-            DebugAddDesktopPathItem("testD");
+            DebugAddDesktopDataSource("testD");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTD1))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTD1))
         {
-            DebugAddDesktopPathItem("testD1");
+            DebugAddDesktopDataSource("testD1");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTE))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTE))
         {
-            DebugAddDesktopPathItem("testE");
+            DebugAddDesktopDataSource("testE");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTE1))
+        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTE1))
         {
-            DebugAddDesktopPathItem("testE1");
+            DebugAddDesktopDataSource("testE1");
         }
     }
     
-    private void DebugAddDesktopPathItem(string folderName)
+    private void DebugAddDesktopDataSource(string folderName)
     {
-        var myPathItems = _dataSourceRepository.Elements.Where(pi => pi.ClientInstanceId == _environmentService.ClientInstanceId).ToList();
+        var myDataSources = _dataSourceRepository.Elements.Where(pi => pi.ClientInstanceId == _environmentService.ClientInstanceId).ToList();
                 
-        if (myPathItems.Any(pi => pi.Path.Equals(IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
+        if (myDataSources.Any(ds => ds.Path.Equals(IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
                 StringComparison.InvariantCultureIgnoreCase)))
         {
             return;

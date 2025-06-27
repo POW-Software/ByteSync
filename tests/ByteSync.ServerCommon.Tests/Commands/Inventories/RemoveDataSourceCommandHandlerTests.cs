@@ -13,25 +13,25 @@ using Microsoft.Extensions.Logging;
 namespace ByteSync.ServerCommon.Tests.Commands.Inventories;
 
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
-public class RemovePathItemCommandHandlerTests
+public class RemoveDataSourceCommandHandlerTests
 {
     private readonly IInventoryMemberService _mockInventoryMemberService;
     private readonly ICloudSessionsRepository _mockCloudSessionsRepository;
     private readonly IInventoryRepository _mockInventoryRepository;
     private readonly IInvokeClientsService _mockInvokeClientsService;
-    private readonly ILogger<RemovePathItemCommandHandler> _mockLogger;
+    private readonly ILogger<RemoveDataSourceCommandHandler> _mockLogger;
     
-    private readonly RemovePathItemCommandHandler _removePathItemCommandHandler;
+    private readonly RemoveDataSourceCommandHandler _removeDataSourceCommandHandler;
 
-    public RemovePathItemCommandHandlerTests()
+    public RemoveDataSourceCommandHandlerTests()
     {
         _mockInventoryMemberService = A.Fake<IInventoryMemberService>();
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
         _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
-        _mockLogger = A.Fake<ILogger<RemovePathItemCommandHandler>>();
+        _mockLogger = A.Fake<ILogger<RemoveDataSourceCommandHandler>>();
         
-        _removePathItemCommandHandler = new RemovePathItemCommandHandler(_mockInventoryMemberService, _mockInventoryRepository, _mockCloudSessionsRepository, 
+        _removeDataSourceCommandHandler = new RemoveDataSourceCommandHandler(_mockInventoryMemberService, _mockInventoryRepository, _mockCloudSessionsRepository, 
             _mockInvokeClientsService, _mockLogger);
     }
     
@@ -54,10 +54,10 @@ public class RemovePathItemCommandHandlerTests
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client))
             .Returns(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId });
 
-        var request = new RemovePathItemRequest(sessionId, client, encryptedPathItem);
+        var request = new RemoveDataSourceRequest(sessionId, client, encryptedPathItem);
 
         // Act
-        await _removePathItemCommandHandler.Handle(request, CancellationToken.None);
+        await _removeDataSourceCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
@@ -73,7 +73,7 @@ public class RemovePathItemCommandHandlerTests
         var encryptedPathItem = new EncryptedDataSource { Code = "pathItem1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = client.ClientInstanceId, SharedPathItems = new List<EncryptedDataSource> { encryptedPathItem } });
+            { ClientInstanceId = client.ClientInstanceId, SharedDataSources = new List<EncryptedDataSource> { encryptedPathItem } });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));
@@ -85,10 +85,10 @@ public class RemovePathItemCommandHandlerTests
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client))
             .Returns(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId });
 
-        var request = new RemovePathItemRequest(sessionId, client, encryptedPathItem);
+        var request = new RemoveDataSourceRequest(sessionId, client, encryptedPathItem);
 
         // Act
-        await _removePathItemCommandHandler.Handle(request, CancellationToken.None);
+        await _removeDataSourceCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();

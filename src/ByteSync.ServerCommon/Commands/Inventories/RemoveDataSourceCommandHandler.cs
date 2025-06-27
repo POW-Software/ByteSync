@@ -8,20 +8,20 @@ using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
-public class RemovePathItemCommandHandler : IRequestHandler<RemovePathItemRequest, bool>
+public class RemoveDataSourceCommandHandler : IRequestHandler<RemoveDataSourceRequest, bool>
 {
     private readonly IInventoryMemberService _inventoryMemberService;
     private readonly IInventoryRepository _inventoryRepository;
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly IInvokeClientsService _invokeClientsService;
-    private readonly ILogger<RemovePathItemCommandHandler> _logger;
+    private readonly ILogger<RemoveDataSourceCommandHandler> _logger;
     
-    public RemovePathItemCommandHandler(
+    public RemoveDataSourceCommandHandler(
         IInventoryMemberService inventoryMemberService,
         IInventoryRepository inventoryRepository,
         ICloudSessionsRepository cloudSessionsRepository,
         IInvokeClientsService invokeClientsService,
-        ILogger<RemovePathItemCommandHandler> logger)
+        ILogger<RemoveDataSourceCommandHandler> logger)
     {
         _inventoryMemberService = inventoryMemberService;
         _inventoryRepository = inventoryRepository;
@@ -30,7 +30,7 @@ public class RemovePathItemCommandHandler : IRequestHandler<RemovePathItemReques
         _logger = logger;
     }
 
-    public async Task<bool> Handle(RemovePathItemRequest request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(RemoveDataSourceRequest request, CancellationToken cancellationToken)
     {
         var cloudSessionData = await _cloudSessionsRepository.Get(request.SessionId);
         if (cloudSessionData == null)
@@ -47,23 +47,23 @@ public class RemovePathItemCommandHandler : IRequestHandler<RemovePathItemReques
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, request.SessionId, request.Client);
 
-                inventoryMember.SharedPathItems.RemoveAll(p => p.Code == request.EncryptedDataSource.Code);
+                inventoryMember.SharedDataSources.RemoveAll(p => p.Code == request.EncryptedDataSource.Code);
 
-                inventoryData.RecodePathItems(cloudSessionData);
+                inventoryData.RecodeDataSources(cloudSessionData);
 
                 return inventoryData;
             }
             else
             {
-                _logger.LogWarning("RemovePathItem: session {sessionId} is already activated", request.SessionId);
+                _logger.LogWarning("RemoveDataSource: session {sessionId} is already activated", request.SessionId);
                 return null;
             }
         });
 
         if (updateEntityResult.IsSaved)
         {
-            var pathItemDto = new DataSourceDTO(request.SessionId, request.Client.ClientInstanceId, request.EncryptedDataSource);
-            await _invokeClientsService.SessionGroupExcept(request.SessionId, request.Client).DataSourceRemoved(pathItemDto);
+            var dataSourceDto = new DataSourceDTO(request.SessionId, request.Client.ClientInstanceId, request.EncryptedDataSource);
+            await _invokeClientsService.SessionGroupExcept(request.SessionId, request.Client).DataSourceRemoved(dataSourceDto);
         }
 
         return updateEntityResult.IsSaved;

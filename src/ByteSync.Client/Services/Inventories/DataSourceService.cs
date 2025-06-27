@@ -18,19 +18,19 @@ namespace ByteSync.Services.Inventories;
 public class DataSourceService : IDataSourceService
 {
     private readonly ISessionService _sessionService;
-    private readonly IPathItemChecker _pathItemChecker;
+    private readonly IDataSourceChecker _dataSourceChecker;
     private readonly IDataEncrypter _dataEncrypter;
     private readonly IConnectionService _connectionService;
     private readonly IInventoryApiClient _inventoryApiClient;
     private readonly IDataSourceRepository _dataSourceRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
 
-    public DataSourceService(ISessionService sessionService, IPathItemChecker pathItemChecker, IDataEncrypter dataEncrypter,
+    public DataSourceService(ISessionService sessionService, IDataSourceChecker dataSourceChecker, IDataEncrypter dataEncrypter,
         IConnectionService connectionService, IInventoryApiClient inventoryApiClient,
         IDataSourceRepository dataSourceRepository, ISessionMemberRepository sessionMemberRepository)
     {
         _sessionService = sessionService;
-        _pathItemChecker = pathItemChecker;
+        _dataSourceChecker = dataSourceChecker;
         _dataEncrypter = dataEncrypter;
         _connectionService = connectionService;
         _inventoryApiClient = inventoryApiClient;
@@ -45,22 +45,22 @@ public class DataSourceService : IDataSourceService
             .Subscribe();
 
         _sessionMemberRepository.SortedSessionMembersObservable
-            .OnItemAdded(sessionMemberInfo => Observable.FromAsync(() => GetSessionMemberPathItems(sessionMemberInfo))) // Task.Run(() => NewMethod(sessionMemberInfo)))
+            .OnItemAdded(sessionMemberInfo => Observable.FromAsync(() => GetSessionMemberDataSources(sessionMemberInfo))) // Task.Run(() => NewMethod(sessionMemberInfo)))
             .Subscribe();
     }
 
-    private async Task GetSessionMemberPathItems(SessionMemberInfo sessionMemberInfo)
+    private async Task GetSessionMemberDataSources(SessionMemberInfo sessionMemberInfo)
     {
         if (!sessionMemberInfo.HasClientInstanceId(_connectionService.ClientInstanceId!))
         {
-            var encryptedDataSources = await _inventoryApiClient.GetPathItems(sessionMemberInfo.SessionId, sessionMemberInfo.ClientInstanceId);
+            var encryptedDataSources = await _inventoryApiClient.GetDataSources(sessionMemberInfo.SessionId, sessionMemberInfo.ClientInstanceId);
 
             if (encryptedDataSources != null)
             {
-                foreach (var encryptedPathItem in encryptedDataSources)
+                foreach (var encryptedDataSource in encryptedDataSources)
                 {
-                    var pathItem = _dataEncrypter.DecryptDataSource(encryptedPathItem);
-                    await TryAddDataSource(pathItem);
+                    var dataSource = _dataEncrypter.DecryptDataSource(encryptedDataSource);
+                    await TryAddDataSource(dataSource);
                 }
             }
         }
@@ -68,14 +68,14 @@ public class DataSourceService : IDataSourceService
 
     public async Task<bool> TryAddDataSource(DataSource dataSource)
     {
-        if (await _pathItemChecker.CheckPathItem(dataSource, _dataSourceRepository.Elements))
+        if (await _dataSourceChecker.CheckDataSource(dataSource, _dataSourceRepository.Elements))
         {
             var isAddOK = true;
             if (_sessionService.CurrentSession is CloudSession cloudSession
                 && dataSource.ClientInstanceId == _connectionService.ClientInstanceId)
             {
-                var encryptedPathItem = _dataEncrypter.EncryptDataSource(dataSource);
-                isAddOK = await _inventoryApiClient.AddDataSource(cloudSession.SessionId, encryptedPathItem);
+                var encryptedDataSource = _dataEncrypter.EncryptDataSource(dataSource);
+                isAddOK = await _inventoryApiClient.AddDataSource(cloudSession.SessionId, encryptedDataSource);
             }
 
             if (isAddOK)
@@ -111,8 +111,8 @@ public class DataSourceService : IDataSourceService
 
     public async Task<bool> TryRemoveDataSource(DataSource dataSource)
     {
-        var encryptedPathItem = _dataEncrypter.EncryptDataSource(dataSource);
-        var isRemoveOK = await _inventoryApiClient.RemoveDataSource(_sessionService.SessionId!, encryptedPathItem);
+        var encryptedDataSource = _dataEncrypter.EncryptDataSource(dataSource);
+        var isRemoveOK = await _inventoryApiClient.RemoveDataSource(_sessionService.SessionId!, encryptedDataSource);
         
         if (isRemoveOK)
         {
@@ -144,14 +144,14 @@ public class DataSourceService : IDataSourceService
 
     private void UpdateCodesForMember(SessionMemberInfo sessionMemberInfo)
     {
-        var pathItems = _dataSourceRepository.Elements
-            .Where(pi => pi.BelongsTo(sessionMemberInfo))
-            .OrderBy(pi => pi.Code);
+        var dataSources = _dataSourceRepository.Elements
+            .Where(ds => ds.BelongsTo(sessionMemberInfo))
+            .OrderBy(ds => ds.Code);
 
         var i = 1;
-        foreach (var remainingPathItem in pathItems)
+        foreach (var remainingDataSource in dataSources)
         {
-            remainingPathItem.Code = sessionMemberInfo.GetLetter() + i;
+            remainingDataSource.Code = sessionMemberInfo.GetLetter() + i;
             i += 1;
         }
     }

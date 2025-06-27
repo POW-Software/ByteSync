@@ -9,7 +9,7 @@ public interface IInventoryApiClient
 {
     Task<StartInventoryResult> StartInventory(string sessionId, EncryptedSessionSettings encryptedSessionSettings);
     
-    Task<List<EncryptedDataSource>?> GetPathItems(string sessionId, string clientInstanceId);
+    Task<List<EncryptedDataSource>?> GetDataSources(string sessionId, string clientInstanceId);
     
     Task<bool> AddDataSource(string sessionId, EncryptedDataSource encryptedDataSource);
     

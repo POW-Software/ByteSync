@@ -93,7 +93,7 @@ var host = new HostBuilder()
         services.AddClaimAuthorization();
         services.AddJwtAuthentication(appSettings!.Secret);
         
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(AddPathItemRequest).Assembly));
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(AddDataSourceRequest).Assembly));
     })
     .Build();
 

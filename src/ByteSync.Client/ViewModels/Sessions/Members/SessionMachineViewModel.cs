@@ -97,7 +97,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         var pathItemsObservable = _dataSourceRepository.ObservableCache.Connect()
             .Filter(pathItem => pathItem.BelongsTo(sessionMemberInfo))
             .Sort(SortExpressionComparer<DataSource>.Ascending(p => p.Code))
-            .Transform(pathItem => _dataSourceProxyFactory.CreatePathItemProxy(pathItem))
+            .Transform(pathItem => _dataSourceProxyFactory.CreateDataSourceProxy(pathItem))
             .DisposeMany() // dispose when no longer required
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _data)
@@ -236,7 +236,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
     [Reactive]
     public int PositionInList { get; set; }
 
-    public ReadOnlyObservableCollection<DataSourceProxy> PathItems => _data;
+    public ReadOnlyObservableCollection<DataSourceProxy> DataSources => _data;
     
     internal SessionMemberInfo SessionMemberInfo { get; private set; }
 

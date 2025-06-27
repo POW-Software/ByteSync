@@ -178,9 +178,9 @@ public class StartInventoryCommandHandlerTests
             new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" });
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null, cloudSessionData));
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client2", "client2", new PublicKeyInfo(), null, cloudSessionData));
-        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = "client1", SharedPathItems = [] });
-        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = "client2", SharedPathItems = [] });
-        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = "client3", SharedPathItems = [] });
+        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = "client1", SharedDataSources = [] });
+        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = "client2", SharedDataSources = [] });
+        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = "client3", SharedDataSources = [] });
 
         A.CallTo(() => _mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
@@ -215,8 +215,8 @@ public class StartInventoryCommandHandlerTests
             new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" });
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null, cloudSessionData));
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client2", "client2", new PublicKeyInfo(), null, cloudSessionData));
-        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = "client1", SharedPathItems = [encryptedPathItem] });
-        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = "client2", SharedPathItems = [] });
+        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = "client1", SharedDataSources = [encryptedPathItem] });
+        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = "client2", SharedDataSources = [] });
         
         A.CallTo(() => _mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
@@ -251,9 +251,9 @@ public class StartInventoryCommandHandlerTests
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null, cloudSessionData));
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client2", "client2", new PublicKeyInfo(), null, cloudSessionData));
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = "client1", SharedPathItems = [new() { Code = "pathItem1" }] });
+            { ClientInstanceId = "client1", SharedDataSources = [new() { Code = "pathItem1" }] });
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = "client2", SharedPathItems = [new() { Code = "pathItem2" }] });
+            { ClientInstanceId = "client2", SharedDataSources = [new() { Code = "pathItem2" }] });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSessionData);
@@ -325,7 +325,7 @@ public class StartInventoryCommandHandlerTests
             new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" });
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null, cloudSessionData));
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = "client1", SharedPathItems = [new() { Code = "pathItem1" }] });
+            { ClientInstanceId = "client1", SharedDataSources = [new() { Code = "pathItem1" }] });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSessionData);
@@ -362,9 +362,9 @@ public class StartInventoryCommandHandlerTests
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null, cloudSessionData));
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client2", "client2", new PublicKeyInfo(), null, cloudSessionData));
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = "client1", SharedPathItems = [new() { Code = "pathItem1" }] });
+            { ClientInstanceId = "client1", SharedDataSources = [new() { Code = "pathItem1" }] });
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = "client2", SharedPathItems = [new() { Code = "pathItem2" }] });
+            { ClientInstanceId = "client2", SharedDataSources = [new() { Code = "pathItem2" }] });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSessionData);
