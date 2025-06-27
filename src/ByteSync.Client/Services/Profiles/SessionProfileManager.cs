@@ -370,9 +370,9 @@ public class SessionProfileManager : ISessionProfileManager
                     .Single(t => t.ClientId.Equals(sessionMemberInfo.Endpoint.ClientId)).ProfileClientId;
             cloudSessionProfileMember.ProfileClientPassword = $"CSPCP_{Guid.NewGuid()}";
             cloudSessionProfileMember.DataSources = allDataSources
-                .Where(pi => pi.BelongsTo(sessionMemberInfo))
+                .Where(ds => ds.BelongsTo(sessionMemberInfo))
                 .OrderBy(pivm => pivm.Code)
-                .Select(pi => new SessionProfileDataSource(pi))
+                .Select(ds => new SessionProfileDataSource(ds))
                 .ToList();
 
             cloudSessionProfileDetails.Members.Add(cloudSessionProfileMember);

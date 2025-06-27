@@ -19,8 +19,8 @@ public class DataSourceChecker : IDataSourceChecker
     {
         if (dataSource.Type == FileSystemTypes.File)
         {
-            if (existingDataSources.Any(pi => pi.ClientInstanceId.Equals(dataSource.ClientInstanceId) && pi.Type == FileSystemTypes.File
-                      && pi.Path.Equals(dataSource.Path, StringComparison.InvariantCultureIgnoreCase)))
+            if (existingDataSources.Any(ds => ds.ClientInstanceId.Equals(dataSource.ClientInstanceId) && ds.Type == FileSystemTypes.File
+                      && ds.Path.Equals(dataSource.Path, StringComparison.InvariantCultureIgnoreCase)))
             {
                 await ShowError();
 
@@ -30,10 +30,10 @@ public class DataSourceChecker : IDataSourceChecker
         else
         {
             // We can neither be equal, nor be, nor be a parent of an already selected path
-            if (existingDataSources.Any(pi => pi.ClientInstanceId.Equals(dataSource.ClientInstanceId) && pi.Type == FileSystemTypes.Directory
-                        && (pi.Path.Equals(dataSource.Path, StringComparison.InvariantCultureIgnoreCase) || 
-                            IOUtils.IsSubPathOf(pi.Path, dataSource.Path) || 
-                            IOUtils.IsSubPathOf(dataSource.Path, pi.Path))))
+            if (existingDataSources.Any(ds => ds.ClientInstanceId.Equals(dataSource.ClientInstanceId) && ds.Type == FileSystemTypes.Directory
+                        && (ds.Path.Equals(dataSource.Path, StringComparison.InvariantCultureIgnoreCase) || 
+                            IOUtils.IsSubPathOf(ds.Path, dataSource.Path) || 
+                            IOUtils.IsSubPathOf(dataSource.Path, ds.Path))))
             {
                 await ShowError();
 

@@ -205,7 +205,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
     
     private void DebugAddDesktopDataSource(string folderName)
     {
-        var myDataSources = _dataSourceRepository.Elements.Where(pi => pi.ClientInstanceId == _environmentService.ClientInstanceId).ToList();
+        var myDataSources = _dataSourceRepository.Elements.Where(ds => ds.ClientInstanceId == _environmentService.ClientInstanceId).ToList();
                 
         if (myDataSources.Any(ds => ds.Path.Equals(IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
                 StringComparison.InvariantCultureIgnoreCase)))

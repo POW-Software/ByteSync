@@ -28,7 +28,7 @@ public class DataSourceRepository : BaseSourceCacheRepository<DataSource, string
     {
         get
         {
-            return CurrentMemberDataSources.Items.OrderBy(pi => pi.Code).ToList();
+            return CurrentMemberDataSources.Items.OrderBy(ds => ds.Code).ToList();
         }
     }
 }

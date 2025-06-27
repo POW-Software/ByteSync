@@ -104,7 +104,7 @@ public class DataSourceService : IDataSourceService
 
         var sessionMemberInfo = _sessionMemberRepository.GetCurrentSessionMember();
         dataSource.Code = sessionMemberInfo.GetLetter() +
-                        (_dataSourceRepository.Elements.Count(pi => pi.BelongsTo(sessionMemberInfo)) + 1);
+                        (_dataSourceRepository.Elements.Count(ds => ds.BelongsTo(sessionMemberInfo)) + 1);
 
         return TryAddDataSource(dataSource);
     }

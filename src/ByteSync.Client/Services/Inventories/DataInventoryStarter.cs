@@ -83,12 +83,12 @@ public class DataInventoryStarter : IDataInventoryStarter
         foreach (var sessionMemberInfo in allSessionMembers)
         {
             var dataSources = allDataSources
-                .Where(pi => pi.BelongsTo(sessionMemberInfo))
+                .Where(ds => ds.BelongsTo(sessionMemberInfo))
                 .ToList();
                             
             var expectedDataSources = cloudSessionProfileDetails
                 .Members.Single(m => m.ProfileClientId.Equals(sessionMemberInfo.ProfileClientId))
-                .DataSources.OrderBy(pi => pi.Code)
+                .DataSources.OrderBy(ds => ds.Code)
                 .ToList();
 
             if (dataSources.Count == expectedDataSources.Count)

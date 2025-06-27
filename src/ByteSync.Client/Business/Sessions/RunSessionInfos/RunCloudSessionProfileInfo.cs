@@ -34,7 +34,7 @@ public class RunCloudSessionProfileInfo : AbstractRunSessionProfileInfo
     {
         var myProfileMember = ProfileDetails.Members.Single(m => m.ProfileClientId.Equals(LocalProfileClientId));
 
-        return myProfileMember.DataSources.OrderBy(pi => pi.Code).ToList();
+        return myProfileMember.DataSources.OrderBy(ds => ds.Code).ToList();
     }
 
     public override AbstrastSessionProfileDetails GetProfileDetails()

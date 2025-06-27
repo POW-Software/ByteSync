@@ -214,7 +214,7 @@ public class TestDataSourceService : IntegrationTest
         await _dataSourceService.CreateAndTryAddDataSource(path, fileSystemType);
 
         // Assert
-        dataSourceRepository.Elements.Should().ContainSingle(pi => pi.Path == path && pi.Type == fileSystemType);
+        dataSourceRepository.Elements.Should().ContainSingle(ds => ds.Path == path && ds.Type == fileSystemType);
     }
 
     [Test]
