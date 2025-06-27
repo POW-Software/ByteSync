@@ -22,16 +22,19 @@ public class InventoryData
     {
         foreach (var inventoryMemberData in InventoryMembers)
         {
-            int position = cloudSessionData.SessionMembers.FindIndex(m => m.ClientInstanceId == inventoryMemberData.ClientInstanceId);
-            
-            string letter = ((char)('A' + position)).ToString();
-
-            int cpt = 1;
-            foreach (var dataSource in inventoryMemberData.DataNodes.SelectMany(n => n.DataSources))
+            foreach (var dataNode in inventoryMemberData.DataNodes)
             {
-                dataSource.Code = letter + cpt;
+                int position = cloudSessionData.SessionMembers.FindIndex(m => m.ClientInstanceId == inventoryMemberData.ClientInstanceId);
+            
+                string letter = ((char)('A' + position)).ToString();
 
-                cpt += 1;
+                int cpt = 1;
+                foreach (var dataSource in dataNode.DataSources)
+                {
+                    dataSource.Code = letter + cpt;
+
+                    cpt += 1;
+                }
             }
         }
     }
