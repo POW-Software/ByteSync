@@ -29,20 +29,20 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
     
     private readonly ISessionService _sessionService;
     
-    private ReadOnlyObservableCollection<SessionMachineViewModel> _data;
-    private readonly ISessionMachineViewModelFactory _sessionMachineViewModelFactory;
+    private ReadOnlyObservableCollection<DataNodeViewModel> _data;
+    private readonly IDataNodeViewModelFactory _dataNodeViewModelFactory;
     private readonly ISessionMemberRepository _sessionMemberRepository;
 
     public SessionMainViewModel(IScreen screen, ISessionService sessionService, InventoryProcessViewModel inventoryProcessViewModel, 
         ComparisonResultViewModel comparisonResultViewModel, CurrentCloudSessionViewModel currentCloudSessionViewModel, 
-        SynchronizationMainViewModel synchronizationMainViewModel, ISessionMachineViewModelFactory sessionMachineViewModelFactory, 
+        SynchronizationMainViewModel synchronizationMainViewModel, IDataNodeViewModelFactory dataNodeViewModelFactory, 
         ISessionMemberRepository sessionMemberRepository)
     {
         HostScreen = screen;
         Activator = new ViewModelActivator();
 
         _sessionService = sessionService;
-        _sessionMachineViewModelFactory = sessionMachineViewModelFactory;
+        _dataNodeViewModelFactory = dataNodeViewModelFactory;
         _sessionMemberRepository = sessionMemberRepository;
         
         CloudSessionManagement = currentCloudSessionViewModel;
@@ -52,9 +52,9 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
         
         var sessionMemberCache = _sessionMemberRepository.ObservableCache.Connect()
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Transform(smi => _sessionMachineViewModelFactory.CreateSessionMachineViewModel(smi))
+            .Transform(smi => _dataNodeViewModelFactory.CreateDataNodeViewModel(smi))
             .AutoRefresh(vm => vm.JoinedSessionOn)
-            .Sort(SortExpressionComparer<SessionMachineViewModel>.Ascending(vm => vm.JoinedSessionOn))
+            .Sort(SortExpressionComparer<DataNodeViewModel>.Ascending(vm => vm.JoinedSessionOn))
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _data)
             .DisposeMany()
@@ -100,7 +100,7 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
         });
     }
     
-    public ReadOnlyObservableCollection<SessionMachineViewModel> Machines => _data;
+    public ReadOnlyObservableCollection<DataNodeViewModel> Machines => _data;
 
     [Reactive]
     public ViewModelBase? CloudSessionManagement { get; set; }

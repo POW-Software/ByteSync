@@ -5,18 +5,18 @@ using ByteSync.ViewModels.Sessions.Members;
 
 namespace ByteSync.Factories.ViewModels;
 
-public class SessionMachineViewModelFactory : ISessionMachineViewModelFactory
+public class DataNodeViewModelFactory : IDataNodeViewModelFactory
 {
     private readonly IComponentContext _context;
 
-    public SessionMachineViewModelFactory(IComponentContext context)
+    public DataNodeViewModelFactory(IComponentContext context)
     {
         _context = context;
     }
     
-    public SessionMachineViewModel CreateSessionMachineViewModel(SessionMemberInfo sessionMemberInfo)
+    public DataNodeViewModel CreateDataNodeViewModel(SessionMemberInfo sessionMemberInfo)
     {
-        var result = _context.Resolve<SessionMachineViewModel>(
+        var result = _context.Resolve<DataNodeViewModel>(
             new TypedParameter(typeof(SessionMemberInfo), sessionMemberInfo));
 
         return result;

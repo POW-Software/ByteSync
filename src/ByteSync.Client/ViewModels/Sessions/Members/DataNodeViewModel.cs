@@ -29,19 +29,17 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Members;
 
-public class SessionMachineViewModel : ActivatableViewModelBase
+public class DataNodeViewModel : ActivatableViewModelBase
 {
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;
     private readonly IDataSourceService _dataSourceService;
-    private readonly IDataSourceProxyFactory _dataSourceProxyFactory;
     private readonly IDataNodeProxyFactory _dataNodeProxyFactory;
-    private readonly IDataSourceRepository _dataSourceRepository;
     private readonly IDataNodeRepository _dataNodeRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly IFileDialogService _fileDialogService;
     private readonly IThemeService _themeService;
-    private readonly ILogger<SessionMachineViewModel> _logger;
+    private readonly ILogger<DataNodeViewModel> _logger;
     
     private ReadOnlyObservableCollection<DataNodeProxy> _nodes;
     
@@ -53,23 +51,20 @@ public class SessionMachineViewModel : ActivatableViewModelBase
     private IBrush? _currentMemberLetterBorder;
     private IBrush? _otherMemberLetterBorder;
 
-    public SessionMachineViewModel()
+    public DataNodeViewModel()
     {
 
     }
 
-    public SessionMachineViewModel(SessionMemberInfo sessionMemberInfo, ISessionService sessionService, IDataSourceService dataSourceService,
-        ILocalizationService localizationService, IEnvironmentService environmentService, IDataSourceProxyFactory dataSourceProxyFactory,
-        IDataNodeProxyFactory dataNodeProxyFactory, IDataSourceRepository dataSourceRepository, IDataNodeRepository dataNodeRepository,
-        ISessionMemberRepository sessionMemberRepository, IFileDialogService fileDialogService,
-        IThemeService themeService, ILogger<SessionMachineViewModel> logger)
+    public DataNodeViewModel(SessionMemberInfo sessionMemberInfo, ISessionService sessionService, IDataSourceService dataSourceService,
+        ILocalizationService localizationService, IEnvironmentService environmentService, IDataNodeProxyFactory dataNodeProxyFactory, 
+        IDataNodeRepository dataNodeRepository, ISessionMemberRepository sessionMemberRepository, IFileDialogService fileDialogService,
+        IThemeService themeService, ILogger<DataNodeViewModel> logger)
     {
         _sessionService = sessionService;
         _dataSourceService = dataSourceService;
         _localizationService = localizationService;
-        _dataSourceProxyFactory = dataSourceProxyFactory;
         _dataNodeProxyFactory = dataNodeProxyFactory;
-        _dataSourceRepository = dataSourceRepository;
         _dataNodeRepository = dataNodeRepository;
         _sessionMemberRepository = sessionMemberRepository;
         _fileDialogService = fileDialogService;
