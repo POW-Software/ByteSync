@@ -4,6 +4,7 @@ using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Services.Inventories;
 using FluentAssertions;
 using Moq;
@@ -18,6 +19,7 @@ public class DataNodeServiceTests
     private Mock<IConnectionService> _connectionServiceMock = null!;
     private Mock<IInventoryApiClient> _inventoryApiClientMock = null!;
     private Mock<IDataNodeRepository> _dataNodeRepositoryMock = null!;
+    private Mock<IDataNodeCodeGenerator> _codeGeneratorMock = null!;
     private DataNodeService _service = null!;
 
     [SetUp]
@@ -27,11 +29,13 @@ public class DataNodeServiceTests
         _connectionServiceMock = new Mock<IConnectionService>();
         _inventoryApiClientMock = new Mock<IInventoryApiClient>();
         _dataNodeRepositoryMock = new Mock<IDataNodeRepository>();
+        _codeGeneratorMock = new Mock<IDataNodeCodeGenerator>();
 
         _service = new DataNodeService(_sessionServiceMock.Object,
             _connectionServiceMock.Object,
             _inventoryApiClientMock.Object,
-            _dataNodeRepositoryMock.Object);
+            _dataNodeRepositoryMock.Object,
+            _codeGeneratorMock.Object);
     }
 
     [Test]
@@ -50,6 +54,7 @@ public class DataNodeServiceTests
         result.Should().BeTrue();
         _inventoryApiClientMock.Verify(a => a.AddDataNode(sessionId, node.NodeId), Times.Once);
         _dataNodeRepositoryMock.Verify(r => r.AddOrUpdate(node), Times.Once);
+        _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
 
     [Test]
@@ -66,6 +71,7 @@ public class DataNodeServiceTests
         result.Should().BeTrue();
         _inventoryApiClientMock.Verify(a => a.AddDataNode(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         _dataNodeRepositoryMock.Verify(r => r.AddOrUpdate(node), Times.Once);
+        _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
 
     [Test]
@@ -83,6 +89,7 @@ public class DataNodeServiceTests
 
         result.Should().BeFalse();
         _dataNodeRepositoryMock.Verify(r => r.AddOrUpdate(It.IsAny<DataNode>()), Times.Never);
+        _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Never);
     }
 
     [Test]
@@ -101,6 +108,7 @@ public class DataNodeServiceTests
         result.Should().BeTrue();
         _inventoryApiClientMock.Verify(a => a.RemoveDataNode(sessionId, node.NodeId), Times.Once);
         _dataNodeRepositoryMock.Verify(r => r.Remove(node), Times.Once);
+        _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
 
     [Test]
@@ -117,6 +125,7 @@ public class DataNodeServiceTests
         result.Should().BeTrue();
         _inventoryApiClientMock.Verify(a => a.RemoveDataNode(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         _dataNodeRepositoryMock.Verify(r => r.Remove(node), Times.Once);
+        _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
 
     [Test]
@@ -134,6 +143,7 @@ public class DataNodeServiceTests
 
         result.Should().BeFalse();
         _dataNodeRepositoryMock.Verify(r => r.Remove(It.IsAny<DataNode>()), Times.Never);
+        _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Never);
     }
 
     [Test]
@@ -149,5 +159,6 @@ public class DataNodeServiceTests
         await _service.CreateAndTryAddDataNode("NODE");
 
         _dataNodeRepositoryMock.Verify(r => r.AddOrUpdate(It.Is<DataNode>(n => n.NodeId == "NODE" && n.ClientInstanceId == "CID")), Times.Once);
+        _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
 }
