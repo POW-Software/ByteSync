@@ -17,6 +17,9 @@ public class DataNodeCodeGenerator : IDataNodeCodeGenerator, IDisposable
         _dataNodeRepository = dataNodeRepository;
         _sessionMemberRepository = sessionMemberRepository;
 
+        // Note: This subscription explicitly filters for ChangeReason.Add and ChangeReason.Remove.
+        // Repository updates invoked via AddOrUpdate (which trigger ChangeReason.Update) are not handled here,
+        // ensuring that RecomputeCodes does not result in an infinite update loop.
         _subscription = _dataNodeRepository.ObservableCache.Connect()
             .WhereReasonsAre(ChangeReason.Add, ChangeReason.Remove)
             .Subscribe(_ => RecomputeCodes());
