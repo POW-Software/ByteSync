@@ -14,14 +14,17 @@ public class DataNodeService : IDataNodeService
     private readonly IConnectionService _connectionService;
     private readonly IInventoryApiClient _inventoryApiClient;
     private readonly IDataNodeRepository _dataNodeRepository;
+    private readonly IDataNodeCodeGenerator _codeGenerator;
 
     public DataNodeService(ISessionService sessionService, IConnectionService connectionService,
-        IInventoryApiClient inventoryApiClient, IDataNodeRepository dataNodeRepository)
+        IInventoryApiClient inventoryApiClient, IDataNodeRepository dataNodeRepository,
+        IDataNodeCodeGenerator codeGenerator)
     {
         _sessionService = sessionService;
         _connectionService = connectionService;
         _inventoryApiClient = inventoryApiClient;
         _dataNodeRepository = dataNodeRepository;
+        _codeGenerator = codeGenerator;
     }
 
     public async Task<bool> TryAddDataNode(DataNode dataNode)
@@ -72,10 +75,12 @@ public class DataNodeService : IDataNodeService
     public void ApplyAddDataNodeLocally(DataNode dataNode)
     {
         _dataNodeRepository.AddOrUpdate(dataNode);
+        _codeGenerator.RecomputeCodes();
     }
 
     public void ApplyRemoveDataNodeLocally(DataNode dataNode)
     {
         _dataNodeRepository.Remove(dataNode);
+        _codeGenerator.RecomputeCodes();
     }
 }
