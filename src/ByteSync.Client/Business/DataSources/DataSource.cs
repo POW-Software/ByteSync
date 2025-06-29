@@ -32,6 +32,8 @@ public class DataSource : ReactiveObject
         }
     }
 
+    public DateTime InitialTimestamp { get; set; }
+
     protected bool Equals(DataSource other)
     {
         return Type == other.Type && Path == other.Path && DataNodeId == other.DataNodeId;

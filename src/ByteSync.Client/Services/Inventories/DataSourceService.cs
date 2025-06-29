@@ -25,10 +25,12 @@ public class DataSourceService : IDataSourceService
     private readonly IInventoryApiClient _inventoryApiClient;
     private readonly IDataSourceRepository _dataSourceRepository;
     private readonly IDataNodeRepository _dataNodeRepository;
+    private readonly IDataSourceCodeGenerator _codeGenerator;
 
     public DataSourceService(ISessionService sessionService, IDataSourceChecker dataSourceChecker, IDataEncrypter dataEncrypter,
         IConnectionService connectionService, IInventoryApiClient inventoryApiClient,
-        IDataSourceRepository dataSourceRepository, IDataNodeRepository dataNodeRepository)
+        IDataSourceRepository dataSourceRepository, IDataNodeRepository dataNodeRepository,
+        IDataSourceCodeGenerator codeGenerator)
     {
         _sessionService = sessionService;
         _dataSourceChecker = dataSourceChecker;
@@ -37,6 +39,7 @@ public class DataSourceService : IDataSourceService
         _inventoryApiClient = inventoryApiClient;
         _dataSourceRepository = dataSourceRepository;
         _dataNodeRepository = dataNodeRepository;
+        _codeGenerator = codeGenerator;
 
         // _dataNodeRepository.SortedSessionMembersObservable
         //     .OnItemRemoved(_ =>
@@ -94,6 +97,7 @@ public class DataSourceService : IDataSourceService
     public void ApplyAddDataSourceLocally(DataSource dataSource)
     {
         _dataSourceRepository.AddOrUpdate(dataSource);
+        _codeGenerator.RecomputeCodesForNode(dataSource.DataNodeId);
     }
 
     public Task CreateAndTryAddDataSource(string path, FileSystemTypes fileSystemType, DataNode dataNode)
@@ -104,6 +108,7 @@ public class DataSourceService : IDataSourceService
         dataSource.Type = fileSystemType;
         dataSource.ClientInstanceId = _connectionService.ClientInstanceId!;
         dataSource.DataNodeId = dataNode.NodeId;
+        dataSource.InitialTimestamp = DateTime.UtcNow;
 
         // var sessionMemberInfo = _dataNodeRepository.GetCurrentSessionMember();
         // dataSource.Code = sessionMemberInfo.GetLetter() +
@@ -128,34 +133,7 @@ public class DataSourceService : IDataSourceService
     public void ApplyRemoveDataSourceLocally(DataSource dataSource)
     {
         _dataSourceRepository.Remove(dataSource);
-        
-        // var sessionMemberInfo = _dataNodeRepository.GetElement(dataSource.ClientInstanceId);
-        //
-        // if (sessionMemberInfo != null)
-        // {
-        //     UpdateCodesForMember(sessionMemberInfo);
-        // }
+        _codeGenerator.RecomputeCodesForNode(dataSource.DataNodeId);
     }
 
-    // private void UpdateCodesForAllMembers(IEnumerable<DataNode> allSessionMembersInfos)
-    // {
-    //     foreach (var sessionMemberInfo in allSessionMembersInfos)
-    //     {
-    //         UpdateCodesForMember(sessionMemberInfo);
-    //     }
-    // }
-    //
-    // private void UpdateCodesForMember(SessionMember sessionMember)
-    // {
-    //     var dataSources = _dataSourceRepository.Elements
-    //         .Where(ds => ds.BelongsTo(sessionMember))
-    //         .OrderBy(ds => ds.Code);
-    //
-    //     var i = 1;
-    //     foreach (var remainingDataSource in dataSources)
-    //     {
-    //         remainingDataSource.Code = sessionMember.GetLetter() + i;
-    //         i += 1;
-    //     }
-    // }
 }
