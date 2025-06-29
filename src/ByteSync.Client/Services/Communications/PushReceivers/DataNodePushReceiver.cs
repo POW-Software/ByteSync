@@ -14,14 +14,16 @@ public class DataNodePushReceiver : IPushReceiver
     private readonly IDataEncrypter _dataEncrypter;
     private readonly IHubPushHandler2 _hubPushHandler2;
     private readonly IDataNodeService _dataNodeService;
+    private readonly IDataNodeCodeGenerator _codeGenerator;
 
     public DataNodePushReceiver(ISessionService sessionService, IDataEncrypter dataEncrypter,
-        IHubPushHandler2 hubPushHandler2, IDataNodeService dataNodeService)
+        IHubPushHandler2 hubPushHandler2, IDataNodeService dataNodeService, IDataNodeCodeGenerator codeGenerator)
     {
         _sessionService = sessionService;
         _dataEncrypter = dataEncrypter;
         _hubPushHandler2 = hubPushHandler2;
         _dataNodeService = dataNodeService;
+        _codeGenerator = codeGenerator;
 
         _hubPushHandler2.DataNodeAdded
             .Where(dto => _sessionService.CheckSession(dto.SessionId))
@@ -30,6 +32,7 @@ public class DataNodePushReceiver : IPushReceiver
                 var dataNode = _dataEncrypter.DecryptDataNode(dto.EncryptedDataNode);
                 dataNode.ClientInstanceId = dto.ClientInstanceId;
                 _dataNodeService.ApplyAddDataNodeLocally(dataNode);
+                _codeGenerator.RecomputeCodes();
             });
 
         _hubPushHandler2.DataNodeRemoved
@@ -39,6 +42,7 @@ public class DataNodePushReceiver : IPushReceiver
                 var dataNode = _dataEncrypter.DecryptDataNode(dto.EncryptedDataNode);
                 dataNode.ClientInstanceId = dto.ClientInstanceId;
                 _dataNodeService.ApplyRemoveDataNodeLocally(dataNode);
+                _codeGenerator.RecomputeCodes();
             });
     }
 }
