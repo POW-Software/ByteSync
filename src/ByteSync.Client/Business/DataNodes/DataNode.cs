@@ -1,4 +1,5 @@
 using ByteSync.Business.DataSources;
+using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.Business.DataNodes;
 
@@ -14,4 +15,7 @@ public class DataNode
     public string ClientInstanceId { get; set; } = null!;
 
     public List<DataSource> DataSources { get; set; }
+    
+    [Reactive]
+    public string Code { get; set; }
 }
