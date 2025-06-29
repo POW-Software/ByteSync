@@ -21,7 +21,7 @@ public class InitialStatusBuilder : IInitialStatusBuilder
         NonFoundInventories = new HashSet<Inventory>();
         NonFoundInventoryParts = new HashSet<InventoryPart>();
         
-        foreach (var inventory in inventories.OrderBy(i => i.Letter))
+        foreach (var inventory in inventories.OrderBy(i => i.Code))
         {
             NonFoundInventories.Add(inventory);
             foreach (var inventoryPart in inventory.InventoryParts)

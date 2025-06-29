@@ -295,29 +295,7 @@ public class DataNodeViewModel : ActivatableViewModelBase
         {
             machineDescription = $"{SessionMember.MachineName}, {SessionMember.IpAddress}";
         }
-
-    #if DEBUG
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.SHOW_DEMO_DATA))
-        {
-            if (IsLocalMachine)
-            {
-                machineDescription = $"{_localizationService[nameof(Resources.SessionMachineView_ThisComputer)]} " +
-                                     "(MACHINE_NAME_1, 123.123.123.123)";
-            }
-            else
-            {
-                if (SessionMember.PositionInList == 1)
-                {
-                    machineDescription = "MACHINE_NAME_2, 234.234.234.234";
-                }
-                else
-                {
-                    machineDescription = "MACHINE_NAME_3, 235.235.235.235";
-                }
-
-            }
-        }
-#endif
+        
         if (HasQuittedSessionAfterActivation)
         {
             machineDescription += " - " + _localizationService[nameof(Resources.SessionMachineView_LeftSession)];

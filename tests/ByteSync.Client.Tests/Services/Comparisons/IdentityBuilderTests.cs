@@ -1,4 +1,5 @@
 ﻿using ByteSync.Business;
+using ByteSync.Business.DataNodes;
 using ByteSync.Business.DataSources;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.SessionMembers;
@@ -128,7 +129,14 @@ public class IdentityBuilderTests : AbstractTester
             }
         };
         
-        InventoryBuilder inventoryBuilder = new InventoryBuilder(sessionMemberInfo, 
+        var dataNode = new DataNode
+        {
+            NodeId = "NodeA",
+            Code = "NodeA",
+            ClientInstanceId = endpoint.ClientInstanceId
+        };
+        
+        InventoryBuilder inventoryBuilder = new InventoryBuilder(sessionMemberInfo, dataNode,
             SessionSettingsHelper.BuildDefaultSessionSettings(DataTypes.FilesDirectories, LinkingKeys.RelativePath), 
             new InventoryProcessData(), OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object);
 

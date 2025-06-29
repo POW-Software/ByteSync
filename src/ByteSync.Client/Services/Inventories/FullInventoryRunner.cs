@@ -58,7 +58,7 @@ public class FullInventoryRunner : IFullInventoryRunner
                 var inventoryBuilder = tuple.Item1;
                 var items = tuple.Item2;
 
-                var fullInventoryFullName = _cloudSessionLocalDataManager.GetCurrentMachineInventoryPath(inventoryBuilder.InventoryLetter, LocalInventoryModes.Full);
+                var fullInventoryFullName = _cloudSessionLocalDataManager.GetCurrentMachineInventoryPath(inventoryBuilder.InventoryCode, LocalInventoryModes.Full);
                 await inventoryBuilder.RunAnalysisAsync(fullInventoryFullName, items, InventoryProcessData.CancellationTokenSource.Token);
             }
             

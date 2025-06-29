@@ -363,7 +363,7 @@ public class SessionProfileManager : ISessionProfileManager
             var cloudSessionProfileMember = new CloudSessionProfileMember();
 
             cloudSessionProfileMember.MachineName = sessionMemberInfo.MachineName;
-            cloudSessionProfileMember.Letter = sessionMemberInfo.GetLetter();
+            // cloudSessionProfileMember.Letter = sessionMemberInfo.GetLetter();
             cloudSessionProfileMember.IpAddress = sessionMemberInfo.IpAddress;
             cloudSessionProfileMember.ProfileClientId =
                 data.Slots
