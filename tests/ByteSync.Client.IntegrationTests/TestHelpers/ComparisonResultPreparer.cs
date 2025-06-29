@@ -79,7 +79,7 @@ public class ComparisonResultPreparer
                 OSPlatform = OSPlatforms.Windows
             };
             
-            var sessionMemberInfo = new SessionMemberInfo
+            var sessionMemberInfo = new SessionMember
             {
                 Endpoint = endpoint,
                 PositionInList = inventoryData.Letter[0] - 'A',

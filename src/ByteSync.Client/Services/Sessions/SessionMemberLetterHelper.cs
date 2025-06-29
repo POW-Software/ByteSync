@@ -4,8 +4,8 @@ namespace ByteSync.Services.Sessions;
 
 public static class SessionMemberLetterHelper
 {
-    public static string GetLetter(this SessionMemberInfo sessionMemberInfo)
+    public static string GetLetter(this SessionMember sessionMember)
     {
-        return ((char) ('A' + sessionMemberInfo.PositionInList)).ToString();
+        return ((char) ('A' + sessionMember.PositionInList)).ToString();
     }
 }

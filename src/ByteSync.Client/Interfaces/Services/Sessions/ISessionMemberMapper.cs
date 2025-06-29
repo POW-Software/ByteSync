@@ -5,5 +5,5 @@ namespace ByteSync.Interfaces.Services.Sessions;
 
 public interface ISessionMemberMapper
 {
-    SessionMemberInfo Map(SessionMemberInfoDTO sessionMemberInfoDto);
+    SessionMember Map(SessionMemberInfoDTO sessionMemberInfoDto);
 }

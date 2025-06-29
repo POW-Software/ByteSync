@@ -1,4 +1,5 @@
-﻿using ByteSync.Business.SessionMembers;
+﻿using ByteSync.Business.DataNodes;
+using ByteSync.Business.SessionMembers;
 using ByteSync.Common.Business.Inventories;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -20,18 +21,20 @@ public class DataSource : ReactiveObject
     public string Code { get; set; }
 
     public string ClientInstanceId { get; set; }
+    
+    public string DataNodeId { get; set; }
 
     public string Key
     {
         get
         {
-            return ClientInstanceId + "_" + Type + "_" + Path;
+            return DataNodeId + "_" + Type + "_" + Path;
         }
     }
 
     protected bool Equals(DataSource other)
     {
-        return Type == other.Type && Path == other.Path && ClientInstanceId == other.ClientInstanceId;
+        return Type == other.Type && Path == other.Path && DataNodeId == other.DataNodeId;
     }
 
     public override bool Equals(object? obj)
@@ -44,11 +47,16 @@ public class DataSource : ReactiveObject
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Type, Path, ClientInstanceId);
+        return HashCode.Combine(Type, Path, DataNodeId);
     }
 
-    public bool BelongsTo(SessionMemberInfo sessionMemberInfo)
+    public bool BelongsTo(SessionMember sessionMember)
     {
-        return ClientInstanceId.IsNotEmpty() && ClientInstanceId.Equals(sessionMemberInfo.ClientInstanceId);
+        return ClientInstanceId.IsNotEmpty() && ClientInstanceId.Equals(sessionMember.ClientInstanceId);
+    }
+    
+    public bool BelongsTo(DataNode dataNode)
+    {
+        return DataNodeId.IsNotEmpty() && DataNodeId.Equals(dataNode.NodeId);
     }
 }

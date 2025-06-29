@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using ByteSync.Business.DataNodes;
 using ByteSync.Business.DataSources;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Client.IntegrationTests.TestHelpers;
@@ -193,9 +194,14 @@ public class TestDataSourceService : IntegrationTest
         var fileSystemType = FileSystemTypes.File;
         var dataSourceRepository = Container.Resolve<IDataSourceRepository>();
         var sessionMemberRepository = Container.Resolve<ISessionMemberRepository>();
-        var sessionMemberInfo = new SessionMemberInfo
+        var sessionMemberInfo = new SessionMember
         {
             Endpoint = _currentEndPoint,
+        };
+        var dataNode = new DataNode
+        {
+            NodeId = "test-node-id",
+            ClientInstanceId = _currentEndPoint.ClientInstanceId
         };
         
         var dataSourceChecker = Container.Resolve<Mock<IDataSourceChecker>>();
@@ -211,7 +217,7 @@ public class TestDataSourceService : IntegrationTest
         sessionMemberRepository.AddOrUpdate(sessionMemberInfo);
         
         // Act
-        await _dataSourceService.CreateAndTryAddDataSource(path, fileSystemType);
+        await _dataSourceService.CreateAndTryAddDataSource(path, fileSystemType, dataNode);
 
         // Assert
         dataSourceRepository.Elements.Should().ContainSingle(ds => ds.Path == path && ds.Type == fileSystemType);
@@ -238,7 +244,7 @@ public class TestDataSourceService : IntegrationTest
         var dataSource = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId };
         var dataSourceRepository = Container.Resolve<IDataSourceRepository>();
         var sessionMemberRepository = Container.Resolve<Mock<ISessionMemberRepository>>();
-        var sessionMemberInfo = new SessionMemberInfo
+        var sessionMemberInfo = new SessionMember
         {
             Endpoint = _currentEndPoint,
         };

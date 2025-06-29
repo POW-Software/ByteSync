@@ -1,4 +1,5 @@
 ﻿using System.Reactive.Linq;
+using ByteSync.Business.DataNodes;
 using ByteSync.Business.DataSources;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Common.Business.Inventories;
@@ -23,11 +24,11 @@ public class DataSourceService : IDataSourceService
     private readonly IConnectionService _connectionService;
     private readonly IInventoryApiClient _inventoryApiClient;
     private readonly IDataSourceRepository _dataSourceRepository;
-    private readonly ISessionMemberRepository _sessionMemberRepository;
+    private readonly IDataNodeRepository _dataNodeRepository;
 
     public DataSourceService(ISessionService sessionService, IDataSourceChecker dataSourceChecker, IDataEncrypter dataEncrypter,
         IConnectionService connectionService, IInventoryApiClient inventoryApiClient,
-        IDataSourceRepository dataSourceRepository, ISessionMemberRepository sessionMemberRepository)
+        IDataSourceRepository dataSourceRepository, IDataNodeRepository dataNodeRepository)
     {
         _sessionService = sessionService;
         _dataSourceChecker = dataSourceChecker;
@@ -35,39 +36,39 @@ public class DataSourceService : IDataSourceService
         _connectionService = connectionService;
         _inventoryApiClient = inventoryApiClient;
         _dataSourceRepository = dataSourceRepository;
-        _sessionMemberRepository = sessionMemberRepository;
+        _dataNodeRepository = dataNodeRepository;
 
-        _sessionMemberRepository.SortedSessionMembersObservable
-            .OnItemRemoved(_ =>
-            {
-                UpdateCodesForAllMembers(_sessionMemberRepository.Elements);
-            })
-            .Subscribe();
-
-        _sessionMemberRepository.SortedSessionMembersObservable
-            .OnItemAdded(sessionMemberInfo => Observable.FromAsync(() => GetSessionMemberDataSources(sessionMemberInfo))) // Task.Run(() => NewMethod(sessionMemberInfo)))
-            .Subscribe();
+        // _dataNodeRepository.SortedSessionMembersObservable
+        //     .OnItemRemoved(_ =>
+        //     {
+        //         UpdateCodesForAllMembers(_dataNodeRepository.Elements);
+        //     })
+        //     .Subscribe();
+        //
+        // _dataNodeRepository.SortedSessionMembersObservable
+        //     .OnItemAdded(sessionMemberInfo => Observable.FromAsync(() => GetSessionMemberDataSources(sessionMemberInfo))) // Task.Run(() => NewMethod(sessionMemberInfo)))
+        //     .Subscribe();
     }
 
-    private async Task GetSessionMemberDataSources(SessionMemberInfo sessionMemberInfo)
+    private async Task GetSessionMemberDataSources(SessionMember sessionMember)
     {
-        if (!sessionMemberInfo.HasClientInstanceId(_connectionService.ClientInstanceId!))
+        if (!sessionMember.HasClientInstanceId(_connectionService.ClientInstanceId!))
         {
-            var encryptedDataSources = await _inventoryApiClient.GetDataSources(sessionMemberInfo.SessionId, sessionMemberInfo.ClientInstanceId);
+            var encryptedDataSources = await _inventoryApiClient.GetDataSources(sessionMember.SessionId, sessionMember.ClientInstanceId);
 
             if (encryptedDataSources != null)
             {
                 foreach (var encryptedDataSource in encryptedDataSources)
                 {
                     var dataSource = _dataEncrypter.DecryptDataSource(encryptedDataSource);
-                    await TryAddDataSource(dataSource, sessionMemberInfo.ClientInstanceId);
+                    await TryAddDataSource(dataSource);
                 }
             }
         }
     }
 
     // TODO data-nodes-and-local-sync
-    public async Task<bool> TryAddDataSource(DataSource dataSource, string? nodeId = null)
+    public async Task<bool> TryAddDataSource(DataSource dataSource)
     {
         if (await _dataSourceChecker.CheckDataSource(dataSource, _dataSourceRepository.Elements))
         {
@@ -95,22 +96,23 @@ public class DataSourceService : IDataSourceService
         _dataSourceRepository.AddOrUpdate(dataSource);
     }
 
-    public Task CreateAndTryAddDataSource(string path, FileSystemTypes fileSystemType, string? nodeId = null)
+    public Task CreateAndTryAddDataSource(string path, FileSystemTypes fileSystemType, DataNode dataNode)
     {
         var dataSource = new DataSource();
 
         dataSource.Path = path;
         dataSource.Type = fileSystemType;
         dataSource.ClientInstanceId = _connectionService.ClientInstanceId!;
+        dataSource.DataNodeId = dataNode.NodeId;
 
-        var sessionMemberInfo = _sessionMemberRepository.GetCurrentSessionMember();
-        dataSource.Code = sessionMemberInfo.GetLetter() +
-                        (_dataSourceRepository.Elements.Count(ds => ds.BelongsTo(sessionMemberInfo)) + 1);
+        // var sessionMemberInfo = _dataNodeRepository.GetCurrentSessionMember();
+        // dataSource.Code = sessionMemberInfo.GetLetter() +
+        //                 (_dataSourceRepository.Elements.Count(ds => ds.BelongsTo(sessionMemberInfo)) + 1);
 
-        return TryAddDataSource(dataSource, nodeId);
+        return TryAddDataSource(dataSource);
     }
 
-    public async Task<bool> TryRemoveDataSource(DataSource dataSource, string? nodeId = null)
+    public async Task<bool> TryRemoveDataSource(DataSource dataSource)
     {
         var encryptedDataSource = _dataEncrypter.EncryptDataSource(dataSource);
         var isRemoveOK = await _inventoryApiClient.RemoveDataSource(_sessionService.SessionId!, encryptedDataSource);
@@ -127,33 +129,33 @@ public class DataSourceService : IDataSourceService
     {
         _dataSourceRepository.Remove(dataSource);
         
-        var sessionMemberInfo = _sessionMemberRepository.GetElement(dataSource.ClientInstanceId);
-
-        if (sessionMemberInfo != null)
-        {
-            UpdateCodesForMember(sessionMemberInfo);
-        }
+        // var sessionMemberInfo = _dataNodeRepository.GetElement(dataSource.ClientInstanceId);
+        //
+        // if (sessionMemberInfo != null)
+        // {
+        //     UpdateCodesForMember(sessionMemberInfo);
+        // }
     }
 
-    private void UpdateCodesForAllMembers(IEnumerable<SessionMemberInfo> allSessionMembersInfos)
-    {
-        foreach (var sessionMemberInfo in allSessionMembersInfos)
-        {
-            UpdateCodesForMember(sessionMemberInfo);
-        }
-    }
-
-    private void UpdateCodesForMember(SessionMemberInfo sessionMemberInfo)
-    {
-        var dataSources = _dataSourceRepository.Elements
-            .Where(ds => ds.BelongsTo(sessionMemberInfo))
-            .OrderBy(ds => ds.Code);
-
-        var i = 1;
-        foreach (var remainingDataSource in dataSources)
-        {
-            remainingDataSource.Code = sessionMemberInfo.GetLetter() + i;
-            i += 1;
-        }
-    }
+    // private void UpdateCodesForAllMembers(IEnumerable<DataNode> allSessionMembersInfos)
+    // {
+    //     foreach (var sessionMemberInfo in allSessionMembersInfos)
+    //     {
+    //         UpdateCodesForMember(sessionMemberInfo);
+    //     }
+    // }
+    //
+    // private void UpdateCodesForMember(SessionMember sessionMember)
+    // {
+    //     var dataSources = _dataSourceRepository.Elements
+    //         .Where(ds => ds.BelongsTo(sessionMember))
+    //         .OrderBy(ds => ds.Code);
+    //
+    //     var i = 1;
+    //     foreach (var remainingDataSource in dataSources)
+    //     {
+    //         remainingDataSource.Code = sessionMember.GetLetter() + i;
+    //         i += 1;
+    //     }
+    // }
 }

@@ -4,21 +4,21 @@ using DynamicData;
 
 namespace ByteSync.Interfaces.Repositories;
 
-public interface ISessionMemberRepository : IBaseSourceCacheRepository<SessionMemberInfo, string>
+public interface ISessionMemberRepository : IBaseSourceCacheRepository<SessionMember, string>
 {
-    IObservable<ISortedChangeSet<SessionMemberInfo, string>> SortedSessionMembersObservable { get; }
+    IObservable<ISortedChangeSet<SessionMember, string>> SortedSessionMembersObservable { get; }
 
-    IObservable<ISortedChangeSet<SessionMemberInfo, string>> SortedOtherSessionMembersObservable { get; }
+    IObservable<ISortedChangeSet<SessionMember, string>> SortedOtherSessionMembersObservable { get; }
     
-    IEnumerable<SessionMemberInfo> SortedSessionMembers { get;  }
+    IEnumerable<SessionMember> SortedSessionMembers { get;  }
     
-    IEnumerable<SessionMemberInfo> SortedOtherSessionMembers { get;  }
+    IEnumerable<SessionMember> SortedOtherSessionMembers { get;  }
     
     IObservable<bool> IsCurrentUserFirstSessionMemberObservable { get;  }
     
     bool IsCurrentUserFirstSessionMemberCurrentValue { get; }
     
-    SessionMemberInfo GetCurrentSessionMember();
+    SessionMember GetCurrentSessionMember();
     
     void Remove(SessionMemberInfoDTO sessionMemberInfoDto);
 }

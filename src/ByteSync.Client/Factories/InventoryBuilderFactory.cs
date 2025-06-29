@@ -34,7 +34,7 @@ public class InventoryBuilderFactory : IInventoryBuilderFactory
         var myDataSources = dataSourceRepository.SortedCurrentMemberDataSources;
         
         var inventoryBuilder = _context.Resolve<IInventoryBuilder>(
-            new TypedParameter(typeof(SessionMemberInfo), sessionMember),
+            new TypedParameter(typeof(SessionMember), sessionMember),
             new TypedParameter(typeof(SessionSettings), cloudSessionSettings),
             new TypedParameter(typeof(InventoryProcessData), inventoryService.InventoryProcessData),
             new TypedParameter(typeof(OSPlatforms), environmentService.OSPlatform),

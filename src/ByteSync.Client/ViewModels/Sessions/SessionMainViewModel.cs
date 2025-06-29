@@ -31,18 +31,20 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
     
     private ReadOnlyObservableCollection<DataNodeViewModel> _data;
     private readonly IDataNodeViewModelFactory _dataNodeViewModelFactory;
+    private readonly IDataNodeRepository _dataNodeRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
 
     public SessionMainViewModel(IScreen screen, ISessionService sessionService, InventoryProcessViewModel inventoryProcessViewModel, 
         ComparisonResultViewModel comparisonResultViewModel, CurrentCloudSessionViewModel currentCloudSessionViewModel, 
         SynchronizationMainViewModel synchronizationMainViewModel, IDataNodeViewModelFactory dataNodeViewModelFactory, 
-        ISessionMemberRepository sessionMemberRepository)
+        IDataNodeRepository dataNodeRepository, ISessionMemberRepository sessionMemberRepository)
     {
         HostScreen = screen;
         Activator = new ViewModelActivator();
 
         _sessionService = sessionService;
         _dataNodeViewModelFactory = dataNodeViewModelFactory;
+        _dataNodeRepository = dataNodeRepository;
         _sessionMemberRepository = sessionMemberRepository;
         
         CloudSessionManagement = currentCloudSessionViewModel;
@@ -50,7 +52,7 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
         ComparisonResult = comparisonResultViewModel;
         SynchronizationProcess = synchronizationMainViewModel;
         
-        var sessionMemberCache = _sessionMemberRepository.ObservableCache.Connect()
+        var sessionMemberCache = _dataNodeRepository.ObservableCache.Connect()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Transform(smi => _dataNodeViewModelFactory.CreateDataNodeViewModel(smi))
             .AutoRefresh(vm => vm.JoinedSessionOn)

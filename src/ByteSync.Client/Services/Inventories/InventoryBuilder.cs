@@ -22,12 +22,12 @@ public class InventoryBuilder : IInventoryBuilder
     
     private const int FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 4194304; 
         
-    public InventoryBuilder(SessionMemberInfo sessionMemberInfo, SessionSettings sessionSettings, InventoryProcessData inventoryProcessData, 
+    public InventoryBuilder(SessionMember sessionMember, SessionSettings sessionSettings, InventoryProcessData inventoryProcessData, 
         OSPlatforms osPlatform, FingerprintModes fingerprintMode, ILogger<InventoryBuilder> logger)
     {
         _logger = logger;
         
-        SessionMemberInfo = sessionMemberInfo;
+        SessionMember = sessionMember;
         SessionSettings = sessionSettings;
         InventoryProcessData = inventoryProcessData;
         FingerprintMode = fingerprintMode;
@@ -49,14 +49,14 @@ public class InventoryBuilder : IInventoryBuilder
                     
         _logger.LogDebug("InventoryBuilder.AddInventoryPart: Creating inventory {InventoryId}", id);
             
-        inventory.Endpoint = SessionMemberInfo.Endpoint;
-        inventory.MachineName = SessionMemberInfo.MachineName;
+        inventory.Endpoint = SessionMember.Endpoint;
+        inventory.MachineName = SessionMember.MachineName;
         inventory.Letter = InventoryLetter!;
 
         return inventory;
     }
     
-    private SessionMemberInfo SessionMemberInfo { get; }
+    private SessionMember SessionMember { get; }
 
     public Inventory Inventory { get; }
         
@@ -66,7 +66,7 @@ public class InventoryBuilder : IInventoryBuilder
         
     public SessionSettings? SessionSettings { get; }
 
-    public string InventoryLetter => SessionMemberInfo.GetLetter();
+    public string InventoryLetter => SessionMember.GetLetter();
 
     private InventoryFileAnalyzer InventoryFileAnalyzer { get; }
 

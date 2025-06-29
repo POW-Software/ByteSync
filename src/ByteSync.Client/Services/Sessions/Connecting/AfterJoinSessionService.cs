@@ -28,6 +28,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
     private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
     private readonly IQuitSessionService _quitSessionService;
     private readonly IDataSourceRepository _dataSourceRepository;
+    private readonly IDataNodeRepository _dataNodeRepository;
     private readonly ILogger<AfterJoinSessionService> _logger;
 
     public AfterJoinSessionService(
@@ -43,6 +44,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         ICloudSessionConnectionService cloudSessionConnectionService,
         IQuitSessionService quitSessionService,
         IDataSourceRepository dataSourceRepository,
+        IDataNodeRepository dataNodeRepository,
         ILogger<AfterJoinSessionService> logger)
     {
         _cloudSessionApiClient = cloudSessionApiClient;
@@ -57,6 +59,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         _cloudSessionConnectionService = cloudSessionConnectionService;
         _quitSessionService = quitSessionService;
         _dataSourceRepository = dataSourceRepository;
+        _dataNodeRepository = dataNodeRepository;
         _logger = logger;
     }
     
@@ -126,7 +129,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
             
             foreach (var dataSource in myDataSources)
             {
-                await _dataSourceService.CreateAndTryAddDataSource(dataSource.Path, dataSource.Type);
+                // await _dataSourceService.CreateAndTryAddDataSource(dataSource.Path, dataSource.Type);
             }
         }
 
@@ -213,9 +216,15 @@ public class AfterJoinSessionService : IAfterJoinSessionService
             return;
         }
 
+        var dataNode = _dataNodeRepository.CurrentMemberDataNodes.Items.FirstOrDefault();
+        if (dataNode == null)
+        {
+            return;
+        }
+
         _dataSourceService.CreateAndTryAddDataSource(
             IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
-            FileSystemTypes.Directory);
+            FileSystemTypes.Directory, dataNode);
     }
 
     private string GeneratePassword()

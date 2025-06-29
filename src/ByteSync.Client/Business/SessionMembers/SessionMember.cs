@@ -4,7 +4,7 @@ using ByteSync.Common.Business.Sessions.Cloud;
 
 namespace ByteSync.Business.SessionMembers;
 
-public class SessionMemberInfo
+public class SessionMember
 {
     public ByteSyncEndpoint Endpoint { get; set; }
     

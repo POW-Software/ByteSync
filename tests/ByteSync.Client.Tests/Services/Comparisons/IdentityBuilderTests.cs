@@ -118,7 +118,7 @@ public class IdentityBuilderTests : AbstractTester
             ClientInstanceId = $"CII_A"
         };
 
-        var sessionMemberInfo = new SessionMemberInfo
+        var sessionMemberInfo = new SessionMember
         {
             Endpoint = endpoint,
             PositionInList = 0,

@@ -741,7 +741,7 @@ public class TestInventoryBuilder : IntegrationTest
             byteSyncEndpoint = new ByteSyncEndpoint();
         }
         
-        var sessionMemberInfo = new SessionMemberInfo
+        var sessionMemberInfo = new SessionMember
         {
             Endpoint = byteSyncEndpoint,
             PositionInList = 0,
