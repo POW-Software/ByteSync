@@ -49,7 +49,7 @@ public class DataSourceCodeGenerator : IDataSourceCodeGenerator, IDisposable
 
         var sources = _dataSourceRepository.Elements
             .Where(ds => ds.DataNodeId == dataNodeId)
-            .OrderBy(ds => ds.Code)
+            .OrderBy(ds => ds.InitialTimestamp)
             .ToList();
 
         var updates = new List<DataSource>();

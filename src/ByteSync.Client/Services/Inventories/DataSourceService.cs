@@ -108,6 +108,7 @@ public class DataSourceService : IDataSourceService
         dataSource.Type = fileSystemType;
         dataSource.ClientInstanceId = _connectionService.ClientInstanceId!;
         dataSource.DataNodeId = dataNode.NodeId;
+        dataSource.InitialTimestamp = DateTime.UtcNow;
 
         // var sessionMemberInfo = _dataNodeRepository.GetCurrentSessionMember();
         // dataSource.Code = sessionMemberInfo.GetLetter() +
