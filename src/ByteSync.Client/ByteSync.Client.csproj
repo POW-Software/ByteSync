@@ -63,6 +63,7 @@
     <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.3.0" />
     <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="11.3.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.24.0" />
+    <PackageReference Include="DynamicData" Version="9.4.1" />
     <PackageReference Include="FastRsyncNet" Version="2.4.3" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0-beta.700" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.15" />
