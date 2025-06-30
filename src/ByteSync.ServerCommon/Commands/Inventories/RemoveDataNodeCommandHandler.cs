@@ -1,6 +1,8 @@
+using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Linq;
@@ -12,17 +14,20 @@ public class RemoveDataNodeCommandHandler : IRequestHandler<RemoveDataNodeReques
     private readonly IInventoryMemberService _inventoryMemberService;
     private readonly IInventoryRepository _inventoryRepository;
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
+    private readonly IInvokeClientsService _invokeClientsService;
     private readonly ILogger<RemoveDataNodeCommandHandler> _logger;
 
     public RemoveDataNodeCommandHandler(
         IInventoryMemberService inventoryMemberService,
         IInventoryRepository inventoryRepository,
         ICloudSessionsRepository cloudSessionsRepository,
+        IInvokeClientsService invokeClientsService,
         ILogger<RemoveDataNodeCommandHandler> logger)
     {
         _inventoryMemberService = inventoryMemberService;
         _inventoryRepository = inventoryRepository;
         _cloudSessionsRepository = cloudSessionsRepository;
+        _invokeClientsService = invokeClientsService;
         _logger = logger;
     }
 
@@ -37,6 +42,7 @@ public class RemoveDataNodeCommandHandler : IRequestHandler<RemoveDataNodeReques
             return false;
         }
 
+        EncryptedDataNode? removedDataNode = null;
         var updateEntityResult = await _inventoryRepository.AddOrUpdate(sessionId, inventoryData =>
         {
             inventoryData ??= new InventoryData(sessionId);
@@ -47,7 +53,9 @@ public class RemoveDataNodeCommandHandler : IRequestHandler<RemoveDataNodeReques
 
                 if (inventoryMember.DataNodes.Any())
                 {
+                    removedDataNode = inventoryMember.DataNodes.First();
                     inventoryMember.DataNodes.Clear();
+                    inventoryMember.DataSources.Clear();
                 }
 
                 return inventoryData;
@@ -58,6 +66,12 @@ public class RemoveDataNodeCommandHandler : IRequestHandler<RemoveDataNodeReques
                 return null;
             }
         });
+
+        if (updateEntityResult.IsSaved && removedDataNode != null)
+        {
+            var dto = new DataNodeDTO(sessionId, client.ClientInstanceId, removedDataNode);
+            await _invokeClientsService.SessionGroupExcept(sessionId, client).DataNodeRemoved(dto);
+        }
 
         return updateEntityResult.IsSaved;
     }
