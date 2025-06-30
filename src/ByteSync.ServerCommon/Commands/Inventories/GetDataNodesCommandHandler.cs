@@ -27,7 +27,7 @@ public class GetDataNodesCommandHandler : IRequestHandler<GetDataNodesRequest, L
         var inventoryData = await _inventoryRepository.Get(sessionId);
         if (inventoryData == null)
         {
-            _logger.LogInformation("GetDataSources: session {sessionId}: not found", sessionId);
+            _logger.LogInformation("GetDataNodes: session {sessionId}: not found", sessionId);
             return new List<EncryptedDataNode>();
         }
 
@@ -36,11 +36,10 @@ public class GetDataNodesCommandHandler : IRequestHandler<GetDataNodesRequest, L
 
         if (inventoryMember == null)
         {
-            _logger.LogInformation("GetDataSources: clientInstanceId {clientInstanceId} not found in session {sessionId}", clientInstanceId, sessionId);
+            _logger.LogInformation("GetDataNodes: clientInstanceId {clientInstanceId} not found in session {sessionId}", clientInstanceId, sessionId);
             return new List<EncryptedDataNode>();
         }
 
-        // TBD
-        return new List<EncryptedDataNode>(); //inventoryMember.DataNodes.SelectMany(n => n.DataSources).ToList();
+        return inventoryMember.DataNodes;
     }
 }
