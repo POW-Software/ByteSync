@@ -44,8 +44,10 @@ public class DataNodeService : IDataNodeService
         return isAddOK;
     }
 
-    public Task CreateAndTryAddDataNode(string nodeId)
+    public Task CreateAndTryAddDataNode(string? nodeId = null)
     {
+        nodeId ??= $"NID_{Guid.NewGuid()}";
+        
         var dataNode = new DataNode
         {
             NodeId = nodeId,

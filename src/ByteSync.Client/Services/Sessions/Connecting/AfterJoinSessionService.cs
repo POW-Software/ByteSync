@@ -19,6 +19,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
     private readonly ICloudSessionApiClient _cloudSessionApiClient;
     private readonly ISessionService _sessionService;
     private readonly ISessionMemberService _sessionMemberService;
+    private readonly IDataNodeService _dataNodeService;
     private readonly IDataSourceService _dataSourceService;
     private readonly IDataEncrypter _dataEncrypter;
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
@@ -35,6 +36,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         ICloudSessionApiClient cloudSessionApiClient,
         ISessionService sessionService,
         ISessionMemberService sessionMemberService,
+        IDataNodeService dataNodeService,  
         IDataSourceService dataSourceService,
         IDataEncrypter dataEncrypter,
         ICloudSessionConnectionRepository cloudSessionConnectionRepository,
@@ -50,6 +52,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         _cloudSessionApiClient = cloudSessionApiClient;
         _sessionService = sessionService;
         _sessionMemberService = sessionMemberService;
+        _dataNodeService = dataNodeService;
         _dataSourceService = dataSourceService;
         _dataEncrypter = dataEncrypter;
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
@@ -75,6 +78,8 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         await _sessionService.SetCloudSession(request.CloudSessionResult.CloudSession, request.RunCloudSessionProfileInfo, sessionSettings, password);
         
         _sessionMemberService.AddOrUpdate(sessionMemberInfoDtos);
+
+        await FillDataNodes(request, sessionMemberInfoDtos);
         
         await FillDataSources(request, sessionMemberInfoDtos);
     }
@@ -119,6 +124,28 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         }
 
         return password;
+    }
+    
+    private async Task FillDataNodes(AfterJoinSessionRequest request, List<SessionMemberInfoDTO> sessionMemberInfoDtos)
+    {
+        await _dataNodeService.CreateAndTryAddDataNode();
+        
+        foreach (var sessionMemberInfo in sessionMemberInfoDtos)
+        {
+            if (!sessionMemberInfo.HasClientInstanceId(_environmentService.ClientInstanceId))
+            {
+                var encryptedDataNodes = await _inventoryApiClient.GetDataNodes(request.CloudSessionResult.SessionId, sessionMemberInfo.ClientInstanceId);
+
+                if (encryptedDataNodes != null)
+                {
+                    foreach (var encryptedDataNode in encryptedDataNodes)
+                    {
+                        var dataNode = _dataEncrypter.DecryptDataNode(encryptedDataNode);
+                        await _dataNodeService.TryAddDataNode(dataNode);
+                    }
+                }
+            }
+        }
     }
     
     private async Task FillDataSources(AfterJoinSessionRequest request, List<SessionMemberInfoDTO> sessionMemberInfoDtos)

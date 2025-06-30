@@ -147,4 +147,21 @@ public class InventoryFunction
 
         return response;
     }
+    
+    [Function("InventoryGetDataNodesFunction")]
+    public async Task<HttpResponseData> GetDataNodes(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/inventory/dataNode/{clientInstanceId}")]
+        HttpRequestData req,
+        FunctionContext executionContext,
+        string sessionId,
+        string clientInstanceId)
+    {
+        var request = new GetDataNodesRequest(sessionId, clientInstanceId);
+        var result = await _mediator.Send(request);
+
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+
+        return response;
+    }
 }

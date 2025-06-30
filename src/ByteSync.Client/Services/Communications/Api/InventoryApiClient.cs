@@ -82,6 +82,22 @@ public class InventoryApiClient : IInventoryApiClient
         }
     }
 
+    public async Task<List<EncryptedDataNode>?> GetDataNodes(string sessionId, string clientInstanceId)
+    {
+        try
+        {
+            var result = await _apiInvoker.GetAsync<List<EncryptedDataNode>?>($"session/{sessionId}/inventory/dataNode/{clientInstanceId}");
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error while getting dataNodes from an inventory with sessionId: {sessionId}", sessionId);
+                
+            throw;
+        }
+    }
+
     public async Task<bool> AddDataNode(string sessionId, string nodeId)
     {
         try
