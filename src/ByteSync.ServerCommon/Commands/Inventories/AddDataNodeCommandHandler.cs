@@ -1,6 +1,8 @@
+using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -11,17 +13,20 @@ public class AddDataNodeCommandHandler : IRequestHandler<AddDataNodeRequest, boo
     private readonly IInventoryMemberService _inventoryMemberService;
     private readonly IInventoryRepository _inventoryRepository;
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
+    private readonly IInvokeClientsService _invokeClientsService;
     private readonly ILogger<AddDataNodeCommandHandler> _logger;
 
     public AddDataNodeCommandHandler(
         IInventoryMemberService inventoryMemberService,
         IInventoryRepository inventoryRepository,
         ICloudSessionsRepository cloudSessionsRepository,
+        IInvokeClientsService invokeClientsService,
         ILogger<AddDataNodeCommandHandler> logger)
     {
         _inventoryMemberService = inventoryMemberService;
         _inventoryRepository = inventoryRepository;
         _cloudSessionsRepository = cloudSessionsRepository;
+        _invokeClientsService = invokeClientsService;
         _logger = logger;
     }
 
@@ -55,6 +60,12 @@ public class AddDataNodeCommandHandler : IRequestHandler<AddDataNodeRequest, boo
                 return null;
             }
         });
+
+        if (updateEntityResult.IsSaved)
+        {
+            var dto = new DataNodeDTO(sessionId, client.ClientInstanceId, encryptedDataNode);
+            await _invokeClientsService.SessionGroupExcept(sessionId, client).DataNodeAdded(dto);
+        }
 
         return updateEntityResult.IsSaved;
     }
