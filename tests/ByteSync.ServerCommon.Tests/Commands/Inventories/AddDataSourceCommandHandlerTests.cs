@@ -62,7 +62,7 @@ public class AddDataSourceCommandHandlerTests
 
         A.CallTo(() => _mockByteSyncPush.DataSourceAdded(A<DataSourceDTO>.Ignored)).Returns(Task.CompletedTask);
 
-        var request = new AddDataSourceRequest(sessionId, client, client.ClientInstanceId, encryptedDataSource);
+        var request = new AddDataSourceRequest(sessionId, client, encryptedDataSource);
         
         // Act
         await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);
@@ -96,7 +96,7 @@ public class AddDataSourceCommandHandlerTests
 
         A.CallTo(() => _mockByteSyncPush.DataSourceAdded(A<DataSourceDTO>.Ignored)).Returns(Task.CompletedTask);
 
-        var request = new AddDataSourceRequest(sessionId, client, client.ClientInstanceId, encryptedDataSource);
+        var request = new AddDataSourceRequest(sessionId, client, encryptedDataSource);
         
         // Act
         await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);
@@ -123,7 +123,7 @@ public class AddDataSourceCommandHandlerTests
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
             .Invokes((string _, Func<InventoryData, InventoryData> func) => func(inventoryData));
 
-        var request = new AddDataSourceRequest(sessionId, client, client.ClientInstanceId, encryptedDataSource);
+        var request = new AddDataSourceRequest(sessionId, client, encryptedDataSource);
         
         // Act
         await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);

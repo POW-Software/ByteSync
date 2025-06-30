@@ -98,11 +98,11 @@ public class InventoryApiClient : IInventoryApiClient
         }
     }
 
-    public async Task<bool> AddDataNode(string sessionId, string nodeId)
+    public async Task<bool> AddDataNode(string sessionId, EncryptedDataNode encryptedDataNode)
     {
         try
         {
-            var result = await _apiInvoker.PostAsync<bool>($"session/{sessionId}/inventory/dataNode/{nodeId}", null);
+            var result = await _apiInvoker.PostAsync<bool>($"session/{sessionId}/inventory/dataNode", encryptedDataNode);
 
             return result;
         }

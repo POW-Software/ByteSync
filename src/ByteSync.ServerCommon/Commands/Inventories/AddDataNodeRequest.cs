@@ -1,20 +1,21 @@
 using ByteSync.ServerCommon.Business.Auth;
+using ByteSync.Common.Business.Inventories;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
 public class AddDataNodeRequest : IRequest<bool>
 {
-    public AddDataNodeRequest(string sessionId, Client client, string nodeId)
+    public AddDataNodeRequest(string sessionId, Client client, EncryptedDataNode encryptedDataNode)
     {
         SessionId = sessionId;
         Client = client;
-        NodeId = nodeId;
+        EncryptedDataNode = encryptedDataNode;
     }
 
     public string SessionId { get; }
 
     public Client Client { get; }
 
-    public string NodeId { get; }
+    public EncryptedDataNode EncryptedDataNode { get; }
 }

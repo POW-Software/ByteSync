@@ -30,6 +30,7 @@ public class AddDataNodeCommandHandler : IRequestHandler<AddDataNodeRequest, boo
     {
         var sessionId = request.SessionId;
         var client = request.Client;
+        var encryptedDataNode = request.EncryptedDataNode;
         var cloudSessionData = await _cloudSessionsRepository.Get(sessionId);
         if (cloudSessionData == null)
         {
@@ -45,10 +46,7 @@ public class AddDataNodeCommandHandler : IRequestHandler<AddDataNodeRequest, boo
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
 
-                if (!inventoryMember.DataNodes.Any())
-                {
-                    inventoryMember.DataNodes.Add(new EncryptedDataNode());
-                }
+                inventoryMember.DataNodes.Add(encryptedDataNode);
 
                 return inventoryData;
             }

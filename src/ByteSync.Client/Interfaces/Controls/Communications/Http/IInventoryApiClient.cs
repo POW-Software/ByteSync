@@ -17,7 +17,7 @@ public interface IInventoryApiClient
     
     Task<List<EncryptedDataNode>?> GetDataNodes(string sessionId, string clientInstanceId);
 
-    Task<bool> AddDataNode(string sessionId, string nodeId);
+    Task<bool> AddDataNode(string sessionId, EncryptedDataNode encryptedDataNode);
 
     Task<bool> RemoveDataNode(string sessionId, string nodeId);
 }

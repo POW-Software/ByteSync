@@ -6,11 +6,10 @@ namespace ByteSync.ServerCommon.Commands.Inventories;
 
 public class AddDataSourceRequest : IRequest<bool>
 {
-    public AddDataSourceRequest(string sessionId, Client client, string nodeId, EncryptedDataSource encryptedDataSource)
+    public AddDataSourceRequest(string sessionId, Client client, EncryptedDataSource encryptedDataSource)
     {
         SessionId = sessionId;
         Client = client;
-        NodeId = nodeId;
         EncryptedDataSource = encryptedDataSource;
     }
     
@@ -18,7 +17,5 @@ public class AddDataSourceRequest : IRequest<bool>
     
     public Client Client { get; }
 
-    public string NodeId { get; }
-    
     public EncryptedDataSource EncryptedDataSource { get; }
 }

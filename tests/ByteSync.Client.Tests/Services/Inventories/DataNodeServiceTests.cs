@@ -1,10 +1,12 @@
 using ByteSync.Business.DataNodes;
+using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Services.Inventories;
 using FluentAssertions;
 using Moq;
@@ -18,6 +20,7 @@ public class DataNodeServiceTests
     private Mock<ISessionService> _sessionServiceMock = null!;
     private Mock<IConnectionService> _connectionServiceMock = null!;
     private Mock<IInventoryApiClient> _inventoryApiClientMock = null!;
+    private Mock<IDataEncrypter> _dataEncrypterMock = null!;
     private Mock<IDataNodeRepository> _dataNodeRepositoryMock = null!;
     private Mock<IDataNodeCodeGenerator> _codeGeneratorMock = null!;
     private DataNodeService _service = null!;
@@ -28,11 +31,13 @@ public class DataNodeServiceTests
         _sessionServiceMock = new Mock<ISessionService>();
         _connectionServiceMock = new Mock<IConnectionService>();
         _inventoryApiClientMock = new Mock<IInventoryApiClient>();
+        _dataEncrypterMock = new Mock<IDataEncrypter>();
         _dataNodeRepositoryMock = new Mock<IDataNodeRepository>();
         _codeGeneratorMock = new Mock<IDataNodeCodeGenerator>();
 
         _service = new DataNodeService(_sessionServiceMock.Object,
             _connectionServiceMock.Object,
+            _dataEncrypterMock.Object,
             _inventoryApiClientMock.Object,
             _dataNodeRepositoryMock.Object,
             _codeGeneratorMock.Object);
@@ -46,13 +51,15 @@ public class DataNodeServiceTests
             .Returns(new CloudSession { SessionId = sessionId });
         _connectionServiceMock.SetupGet(c => c.ClientInstanceId).Returns("CID");
         var node = new DataNode { NodeId = "N1", ClientInstanceId = "CID" };
-        _inventoryApiClientMock.Setup(a => a.AddDataNode(sessionId, node.NodeId))
+        var encrypted = new EncryptedDataNode();
+        _dataEncrypterMock.Setup(e => e.EncryptDataNode(node)).Returns(encrypted);
+        _inventoryApiClientMock.Setup(a => a.AddDataNode(sessionId, encrypted))
             .ReturnsAsync(true);
 
         var result = await _service.TryAddDataNode(node);
 
         result.Should().BeTrue();
-        _inventoryApiClientMock.Verify(a => a.AddDataNode(sessionId, node.NodeId), Times.Once);
+        _inventoryApiClientMock.Verify(a => a.AddDataNode(sessionId, encrypted), Times.Once);
         _dataNodeRepositoryMock.Verify(r => r.AddOrUpdate(node), Times.Once);
         _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
@@ -69,7 +76,7 @@ public class DataNodeServiceTests
         var result = await _service.TryAddDataNode(node);
 
         result.Should().BeTrue();
-        _inventoryApiClientMock.Verify(a => a.AddDataNode(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _inventoryApiClientMock.Verify(a => a.AddDataNode(It.IsAny<string>(), It.IsAny<EncryptedDataNode>()), Times.Never);
         _dataNodeRepositoryMock.Verify(r => r.AddOrUpdate(node), Times.Once);
         _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
@@ -82,7 +89,9 @@ public class DataNodeServiceTests
             .Returns(new CloudSession { SessionId = sessionId });
         _connectionServiceMock.SetupGet(c => c.ClientInstanceId).Returns("CID");
         var node = new DataNode { NodeId = "N1", ClientInstanceId = "CID" };
-        _inventoryApiClientMock.Setup(a => a.AddDataNode(sessionId, node.NodeId))
+        var encrypted = new EncryptedDataNode();
+        _dataEncrypterMock.Setup(e => e.EncryptDataNode(node)).Returns(encrypted);
+        _inventoryApiClientMock.Setup(a => a.AddDataNode(sessionId, encrypted))
             .ReturnsAsync(false);
 
         var result = await _service.TryAddDataNode(node);
@@ -153,11 +162,15 @@ public class DataNodeServiceTests
         _sessionServiceMock.SetupGet(s => s.CurrentSession)
             .Returns(new CloudSession { SessionId = sessionId });
         _connectionServiceMock.SetupGet(c => c.ClientInstanceId).Returns("CID");
-        _inventoryApiClientMock.Setup(a => a.AddDataNode(sessionId, "NODE"))
+        var encrypted = new EncryptedDataNode();
+        _dataEncrypterMock.Setup(e => e.EncryptDataNode(It.Is<DataNode>(n => n.NodeId == "NODE" && n.ClientInstanceId == "CID")))
+            .Returns(encrypted);
+        _inventoryApiClientMock.Setup(a => a.AddDataNode(sessionId, encrypted))
             .ReturnsAsync(true);
 
         await _service.CreateAndTryAddDataNode("NODE");
 
+        _inventoryApiClientMock.Verify(a => a.AddDataNode(sessionId, encrypted), Times.Once);
         _dataNodeRepositoryMock.Verify(r => r.AddOrUpdate(It.Is<DataNode>(n => n.NodeId == "NODE" && n.ClientInstanceId == "CID")), Times.Once);
         _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
