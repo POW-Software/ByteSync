@@ -3,7 +3,6 @@ using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System.Linq;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 

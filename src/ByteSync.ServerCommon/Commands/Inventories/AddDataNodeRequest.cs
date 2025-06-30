@@ -1,5 +1,5 @@
 using ByteSync.ServerCommon.Business.Auth;
-using ByteSync.Common.Business.Inventories;
+using ByteSync.Common.Business.Sessions;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
