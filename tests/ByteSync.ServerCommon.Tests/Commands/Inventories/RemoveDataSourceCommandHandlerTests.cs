@@ -73,7 +73,7 @@ public class RemoveDataSourceCommandHandlerTests
         var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = client.ClientInstanceId, DataNodes = [ new DataNodeData { NodeId = client.ClientInstanceId, DataSources = new List<EncryptedDataSource> { encryptedDataSource } } ] });
+            { ClientInstanceId = client.ClientInstanceId, DataSources = [ encryptedDataSource ] });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));

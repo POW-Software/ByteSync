@@ -35,7 +35,6 @@ public class AddDataSourceCommandHandler : IRequestHandler<AddDataSourceRequest,
     {
         var sessionId = request.SessionId;
         var client = request.Client;
-        var nodeId = request.NodeId;
         var encryptedDataSource = request.EncryptedDataSource;
         
         var cloudSessionData = await _cloudSessionsRepository.Get(sessionId);
@@ -53,15 +52,8 @@ public class AddDataSourceCommandHandler : IRequestHandler<AddDataSourceRequest,
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
 
-                var dataNode = inventoryMember.DataNodes.FirstOrDefault(n => n.NodeId == nodeId);
-                if (dataNode == null)
-                {
-                    dataNode = new DataNodeData { NodeId = nodeId };
-                    inventoryMember.DataNodes.Add(dataNode);
-                }
-
-                dataNode.DataSources.RemoveAll(p => p.Code == encryptedDataSource.Code);
-                dataNode.DataSources.Add(encryptedDataSource);
+                inventoryMember.DataSources.RemoveAll(p => p.Code == encryptedDataSource.Code);
+                inventoryMember.DataSources.Add(encryptedDataSource);
 
                 inventoryData.RecodeDataSources(cloudSessionData);
                 

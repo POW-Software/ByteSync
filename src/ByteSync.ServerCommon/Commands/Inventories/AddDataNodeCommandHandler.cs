@@ -3,7 +3,6 @@ using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System.Linq;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
@@ -30,8 +29,7 @@ public class AddDataNodeCommandHandler : IRequestHandler<AddDataNodeRequest, boo
     {
         var sessionId = request.SessionId;
         var client = request.Client;
-        var nodeId = request.NodeId;
-
+        var encryptedDataNode = request.EncryptedDataNode;
         var cloudSessionData = await _cloudSessionsRepository.Get(sessionId);
         if (cloudSessionData == null)
         {
@@ -47,11 +45,7 @@ public class AddDataNodeCommandHandler : IRequestHandler<AddDataNodeRequest, boo
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
 
-                var dataNode = inventoryMember.DataNodes.FirstOrDefault(n => n.NodeId == nodeId);
-                if (dataNode == null)
-                {
-                    inventoryMember.DataNodes.Add(new DataNodeData { NodeId = nodeId });
-                }
+                inventoryMember.DataNodes.Add(encryptedDataNode);
 
                 return inventoryData;
             }

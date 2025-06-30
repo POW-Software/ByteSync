@@ -40,6 +40,6 @@ public class GetDataSourcesCommandHandler : IRequestHandler<GetDataSourcesReques
             return new List<EncryptedDataSource>();
         }
 
-        return inventoryMember.DataNodes.SelectMany(n => n.DataSources).ToList();
+        return inventoryMember.DataSources.ToList();
     }
 }

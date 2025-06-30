@@ -3,6 +3,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions.Cloud;
+using ByteSync.Common.Business.Sessions;
 using ByteSync.Functions.Helpers.Misc;
 using ByteSync.ServerCommon.Commands.Inventories;
 using MediatR;
@@ -65,7 +66,7 @@ public class InventoryFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var encryptedDataSource = await FunctionHelper.DeserializeRequestBody<EncryptedDataSource>(req);
 
-        var request = new AddDataSourceRequest(sessionId, client, client.ClientInstanceId, encryptedDataSource);
+        var request = new AddDataSourceRequest(sessionId, client, encryptedDataSource);
         var result = await _mediator.Send(request);
 
         var response = req.CreateResponse();
@@ -112,15 +113,15 @@ public class InventoryFunction
 
     [Function("InventoryAddDataNodeFunction")]
     public async Task<HttpResponseData> AddDataNode(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/inventory/dataNode/{nodeId}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/inventory/dataNode")]
         HttpRequestData req,
         FunctionContext executionContext,
-        string sessionId,
-        string nodeId)
+        string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
+        var encryptedDataNode = await FunctionHelper.DeserializeRequestBody<EncryptedDataNode>(req);
 
-        var request = new AddDataNodeRequest(sessionId, client, nodeId);
+        var request = new AddDataNodeRequest(sessionId, client, encryptedDataNode);
         var result = await _mediator.Send(request);
 
         var response = req.CreateResponse();

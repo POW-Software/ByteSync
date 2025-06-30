@@ -1,7 +1,5 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Common.Business.Inventories;
+﻿using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions;
-using ByteSync.Common.Business.Sessions.Cloud;
 
 namespace ByteSync.Interfaces.Controls.Communications.Http;
 
@@ -17,7 +15,7 @@ public interface IInventoryApiClient
     
     Task<List<EncryptedDataNode>?> GetDataNodes(string sessionId, string clientInstanceId);
 
-    Task<bool> AddDataNode(string sessionId, string nodeId);
+    Task<bool> AddDataNode(string sessionId, EncryptedDataNode encryptedDataNode);
 
     Task<bool> RemoveDataNode(string sessionId, string nodeId);
 }

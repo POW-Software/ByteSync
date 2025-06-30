@@ -1,6 +1,7 @@
 using ByteSync.Business.DataNodes;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Communications.Http;
+using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
@@ -12,16 +13,19 @@ public class DataNodeService : IDataNodeService
 {
     private readonly ISessionService _sessionService;
     private readonly IConnectionService _connectionService;
+    private readonly IDataEncrypter _dataEncrypter;
     private readonly IInventoryApiClient _inventoryApiClient;
     private readonly IDataNodeRepository _dataNodeRepository;
     private readonly IDataNodeCodeGenerator _codeGenerator;
 
     public DataNodeService(ISessionService sessionService, IConnectionService connectionService,
+        IDataEncrypter dataEncrypter,
         IInventoryApiClient inventoryApiClient, IDataNodeRepository dataNodeRepository,
         IDataNodeCodeGenerator codeGenerator)
     {
         _sessionService = sessionService;
         _connectionService = connectionService;
+        _dataEncrypter = dataEncrypter;
         _inventoryApiClient = inventoryApiClient;
         _dataNodeRepository = dataNodeRepository;
         _codeGenerator = codeGenerator;
@@ -33,7 +37,8 @@ public class DataNodeService : IDataNodeService
         if (_sessionService.CurrentSession is CloudSession cloudSession
             && dataNode.ClientInstanceId == _connectionService.ClientInstanceId)
         {
-            isAddOK = await _inventoryApiClient.AddDataNode(cloudSession.SessionId, dataNode.NodeId);
+            var encryptedDataNode = _dataEncrypter.EncryptDataNode(dataNode);
+            isAddOK = await _inventoryApiClient.AddDataNode(cloudSession.SessionId, encryptedDataNode);
         }
 
         if (isAddOK)

@@ -30,8 +30,6 @@ public class RemoveDataNodeCommandHandler : IRequestHandler<RemoveDataNodeReques
     {
         var sessionId = request.SessionId;
         var client = request.Client;
-        var nodeId = request.NodeId;
-
         var cloudSessionData = await _cloudSessionsRepository.Get(sessionId);
         if (cloudSessionData == null)
         {
@@ -47,10 +45,9 @@ public class RemoveDataNodeCommandHandler : IRequestHandler<RemoveDataNodeReques
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
 
-                var dataNode = inventoryMember.DataNodes.FirstOrDefault(n => n.NodeId == nodeId);
-                if (dataNode != null)
+                if (inventoryMember.DataNodes.Any())
                 {
-                    inventoryMember.DataNodes.Remove(dataNode);
+                    inventoryMember.DataNodes.Clear();
                 }
 
                 return inventoryData;
