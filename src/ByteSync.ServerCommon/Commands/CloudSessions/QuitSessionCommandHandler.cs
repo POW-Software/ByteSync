@@ -68,7 +68,7 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
                 var inventoryMember = inventoryData.InventoryMembers.SingleOrDefault(m => m.ClientInstanceId.Equals(request.ClientInstanceId));
                 if (inventoryMember != null)
                 {
-                    dataSources = inventoryMember.DataNodes.SelectMany(n => n.DataSources).ToList();
+                    dataSources = inventoryMember.DataSources.ToList();
                     inventoryData.InventoryMembers.Remove(inventoryMember);
                 }
 
