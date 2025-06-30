@@ -68,6 +68,8 @@ public class AddDataSourceCommandHandlerTests
         await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
+        inventoryData.InventoryMembers.Should().ContainSingle();
+        inventoryData.InventoryMembers[0].DataSources.Should().Contain(encryptedDataSource);
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInvokeClientsService.SessionGroupExcept(A<string>.Ignored, A<Client>.Ignored)).MustHaveHappenedOnceExactly();

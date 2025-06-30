@@ -88,6 +88,8 @@ public class RemoveDataNodeCommandHandlerTests
         await _removeDataNodeCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
+        inventoryData.InventoryMembers.Should().ContainSingle();
+        inventoryData.InventoryMembers[0].DataNodes.Should().BeEmpty();
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, sessionId, client)).MustHaveHappenedOnceExactly();
     }

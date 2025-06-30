@@ -91,6 +91,8 @@ public class RemoveDataSourceCommandHandlerTests
         await _removeDataSourceCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
+        inventoryData.InventoryMembers.Should().ContainSingle();
+        inventoryData.InventoryMembers[0].DataSources.Should().BeEmpty();
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client)).MustHaveHappenedOnceExactly();
     }
