@@ -51,12 +51,7 @@ public class RemoveDataNodeCommandHandler : IRequestHandler<RemoveDataNodeReques
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
 
-                if (inventoryMember.DataNodes.Any())
-                {
-                    removedDataNode = inventoryMember.DataNodes.First();
-                    inventoryMember.DataNodes.Clear();
-                    inventoryMember.DataSources.Clear();
-                }
+                inventoryMember.DataNodes.RemoveAll(p => p.Id == request.EncryptedDataNode.Id);
 
                 return inventoryData;
             }

@@ -52,10 +52,8 @@ public class AddDataSourceCommandHandler : IRequestHandler<AddDataSourceRequest,
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
 
-                inventoryMember.DataSources.RemoveAll(p => p.Code == encryptedDataSource.Code);
+                inventoryMember.DataSources.RemoveAll(p => p.Id == encryptedDataSource.Id);
                 inventoryMember.DataSources.Add(encryptedDataSource);
-
-                inventoryData.RecodeDataSources(cloudSessionData);
                 
                 return inventoryData;
             }

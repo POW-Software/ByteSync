@@ -109,13 +109,13 @@ public class DataNodeServiceTests
             .Returns(new CloudSession { SessionId = sessionId });
         _connectionServiceMock.SetupGet(c => c.ClientInstanceId).Returns("CID");
         var node = new DataNode { NodeId = "N1", ClientInstanceId = "CID" };
-        _inventoryApiClientMock.Setup(a => a.RemoveDataNode(sessionId, node.NodeId))
+        _inventoryApiClientMock.Setup(a => a.RemoveDataNode(sessionId, It.IsAny<EncryptedDataNode>()))
             .ReturnsAsync(true);
 
         var result = await _service.TryRemoveDataNode(node);
 
         result.Should().BeTrue();
-        _inventoryApiClientMock.Verify(a => a.RemoveDataNode(sessionId, node.NodeId), Times.Once);
+        _inventoryApiClientMock.Verify(a => a.RemoveDataNode(sessionId, It.IsAny<EncryptedDataNode>()), Times.Once);
         _dataNodeRepositoryMock.Verify(r => r.Remove(node), Times.Once);
         _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
@@ -132,7 +132,7 @@ public class DataNodeServiceTests
         var result = await _service.TryRemoveDataNode(node);
 
         result.Should().BeTrue();
-        _inventoryApiClientMock.Verify(a => a.RemoveDataNode(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _inventoryApiClientMock.Verify(a => a.RemoveDataNode(It.IsAny<string>(), It.IsAny<EncryptedDataNode>()), Times.Never);
         _dataNodeRepositoryMock.Verify(r => r.Remove(node), Times.Once);
         _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
@@ -145,7 +145,7 @@ public class DataNodeServiceTests
             .Returns(new CloudSession { SessionId = sessionId });
         _connectionServiceMock.SetupGet(c => c.ClientInstanceId).Returns("CID");
         var node = new DataNode { NodeId = "N1", ClientInstanceId = "CID" };
-        _inventoryApiClientMock.Setup(a => a.RemoveDataNode(sessionId, node.NodeId))
+        _inventoryApiClientMock.Setup(a => a.RemoveDataNode(sessionId, It.IsAny<EncryptedDataNode>()))
             .ReturnsAsync(false);
 
         var result = await _service.TryRemoveDataNode(node);

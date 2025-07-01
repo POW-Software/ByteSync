@@ -85,7 +85,7 @@ public class InventoryFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var encryptedDataSource = await FunctionHelper.DeserializeRequestBody<EncryptedDataSource>(req);
 
-        var request = new RemoveDataSourceRequest(sessionId, client, client.ClientInstanceId, encryptedDataSource);
+        var request = new RemoveDataSourceRequest(sessionId, client, encryptedDataSource);
         var result = await _mediator.Send(request);
         
         var response = req.CreateResponse();
@@ -132,15 +132,15 @@ public class InventoryFunction
 
     [Function("InventoryRemoveDataNodeFunction")]
     public async Task<HttpResponseData> RemoveDataNode(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "session/{sessionId}/inventory/dataNode/{nodeId}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "session/{sessionId}/inventory/dataNode")]
         HttpRequestData req,
         FunctionContext executionContext,
-        string sessionId,
-        string nodeId)
+        string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
+        var encryptedDataNode = await FunctionHelper.DeserializeRequestBody<EncryptedDataNode>(req);
 
-        var request = new RemoveDataNodeRequest(sessionId, client, nodeId);
+        var request = new RemoveDataNodeRequest(sessionId, client, encryptedDataNode);
         var result = await _mediator.Send(request);
 
         var response = req.CreateResponse();

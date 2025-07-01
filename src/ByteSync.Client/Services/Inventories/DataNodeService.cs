@@ -68,7 +68,8 @@ public class DataNodeService : IDataNodeService
         if (_sessionService.CurrentSession is CloudSession cloudSession
             && dataNode.ClientInstanceId == _connectionService.ClientInstanceId)
         {
-            isRemoveOK = await _inventoryApiClient.RemoveDataNode(cloudSession.SessionId, dataNode.NodeId);
+            var encryptedDataNode = _dataEncrypter.EncryptDataNode(dataNode);
+            isRemoveOK = await _inventoryApiClient.RemoveDataNode(cloudSession.SessionId, encryptedDataNode);
         }
 
         if (isRemoveOK)

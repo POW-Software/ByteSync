@@ -45,7 +45,7 @@ public class AddDataSourceCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
+        var encryptedDataSource = new EncryptedDataSource { Id = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
@@ -82,7 +82,7 @@ public class AddDataSourceCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
+        var encryptedDataSource = new EncryptedDataSource { Id = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.IsInventoryStarted = true;
 
@@ -112,7 +112,7 @@ public class AddDataSourceCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
+        var encryptedDataSource = new EncryptedDataSource { Id = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.InventoryMembers.Add(new InventoryMemberData
             { ClientInstanceId = client.ClientInstanceId, DataSources = [ encryptedDataSource ] });
