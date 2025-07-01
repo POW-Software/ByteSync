@@ -35,10 +35,7 @@ public class DataEncrypter : IDataEncrypter
 
     public EncryptedDataSource EncryptDataSource(DataSource dataSource)
     {
-        var encryptedDataSource = Encrypt<EncryptedDataSource>(dataSource);
-        encryptedDataSource.Code = dataSource.Code;
-
-        return encryptedDataSource;
+        return Encrypt<EncryptedDataSource>(dataSource);
     }
 
     public EncryptedDataNode EncryptDataNode(DataNode dataNode)
@@ -48,10 +45,7 @@ public class DataEncrypter : IDataEncrypter
 
     public DataSource DecryptDataSource(EncryptedDataSource encryptedDataSource)
     {
-        var dataSource = Decrypt<DataSource>(encryptedDataSource);
-        dataSource.Code = encryptedDataSource.Code;
-
-        return dataSource;
+       return Decrypt<DataSource>(encryptedDataSource);
     }
 
     public DataNode DecryptDataNode(EncryptedDataNode encryptedDataNode)

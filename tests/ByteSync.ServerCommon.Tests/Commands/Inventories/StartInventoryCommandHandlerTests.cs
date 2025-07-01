@@ -210,7 +210,7 @@ public class StartInventoryCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var inventoryData = new InventoryData(sessionId);
-        var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
+        var encryptedDataSource = new EncryptedDataSource { Id = "dataSource1" };
         var cloudSessionData = new CloudSessionData(null, new EncryptedSessionSettings(),
             new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" });
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null, cloudSessionData));
@@ -251,9 +251,9 @@ public class StartInventoryCommandHandlerTests
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null, cloudSessionData));
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client2", "client2", new PublicKeyInfo(), null, cloudSessionData));
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = "client1", DataSources = [ new() { Code = "dataSource1" } ] });
+            { ClientInstanceId = "client1", DataSources = [ new() { Id = "dataSource1" } ] });
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = "client2", DataSources = [ new() { Code = "dataSource2" } ] });
+            { ClientInstanceId = "client2", DataSources = [ new() { Id = "dataSource2" } ] });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSessionData);
@@ -325,7 +325,7 @@ public class StartInventoryCommandHandlerTests
             new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" });
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null, cloudSessionData));
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = "client1", DataSources = [ new() { Code = "dataSource1" } ] });
+            { ClientInstanceId = "client1", DataSources = [ new() { Id = "dataSource1" } ] });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSessionData);
@@ -362,9 +362,9 @@ public class StartInventoryCommandHandlerTests
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null, cloudSessionData));
         cloudSessionData.SessionMembers.Add(new SessionMemberData("client2", "client2", new PublicKeyInfo(), null, cloudSessionData));
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = "client1", DataSources = [ new() { Code = "dataSource1" } ] });
+            { ClientInstanceId = "client1", DataSources = [ new() { Id = "dataSource1" } ] });
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = "client2", DataSources = [ new() { Code = "dataSource2" } ] });
+            { ClientInstanceId = "client2", DataSources = [ new() { Id = "dataSource2" } ] });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSessionData);

@@ -34,7 +34,7 @@ public class GetDataSourcesCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
+        var encryptedDataSource = new EncryptedDataSource { Id = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.InventoryMembers.Add(new InventoryMemberData
             { ClientInstanceId = client.ClientInstanceId, DataSources = [ encryptedDataSource ] });
@@ -82,7 +82,7 @@ public class GetDataSourcesCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var dataSource = new EncryptedDataSource { Code = "dataSource1" };
+        var dataSource = new EncryptedDataSource { Id = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId, DataSources = [ dataSource ] });
 

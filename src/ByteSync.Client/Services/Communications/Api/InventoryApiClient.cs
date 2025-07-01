@@ -111,11 +111,11 @@ public class InventoryApiClient : IInventoryApiClient
         }
     }
 
-    public async Task<bool> RemoveDataNode(string sessionId, string nodeId)
+    public async Task<bool> RemoveDataNode(string sessionId, EncryptedDataNode encryptedDataNode)
     {
         try
         {
-            var result = await _apiInvoker.DeleteAsync<bool>($"session/{sessionId}/inventory/dataNode/{nodeId}", null);
+            var result = await _apiInvoker.DeleteAsync<bool>($"session/{sessionId}/inventory/dataNode", encryptedDataNode);
 
             return result;
         }

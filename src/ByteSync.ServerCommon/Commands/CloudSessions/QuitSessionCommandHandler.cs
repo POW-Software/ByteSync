@@ -72,8 +72,6 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
                     inventoryData.InventoryMembers.Remove(inventoryMember);
                 }
 
-                inventoryData.RecodeDataSources(innerCloudSessionData!);
-
                 return true;
             }, transaction);
         }

@@ -89,18 +89,18 @@ public static class LogHelper
         };
     }
 
-    public static object BuildLog(this EncryptedDataSource sharedDataSource)
-    {
-        if (sharedDataSource == null)
-        {
-            return null;
-        }
-
-        return new
-        {
-            Code = sharedDataSource.Code,
-        };
-    }
+    // public static object BuildLog(this EncryptedDataSource sharedDataSource)
+    // {
+    //     if (sharedDataSource == null)
+    //     {
+    //         return null;
+    //     }
+    //
+    //     return new
+    //     {
+    //         Code = sharedDataSource.Code,
+    //     };
+    // }
 
     // public static object BuildLog(this ProductSerial productSerial)
     // {

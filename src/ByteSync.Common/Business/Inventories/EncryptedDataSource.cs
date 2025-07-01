@@ -9,10 +9,4 @@ public class EncryptedDataSource : IEncryptedSessionData
     public byte[] Data { get; set; }
     
     public byte[] IV { get; set; }
-    
-    public string Code
-    {
-        get;
-        set;
-    }
 }

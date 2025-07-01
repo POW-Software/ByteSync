@@ -96,13 +96,13 @@ public class TestDataNodeService : IntegrationTest
         var apiClient = Container.Resolve<Mock<IInventoryApiClient>>();
         var node = new DataNode { NodeId = "NODE", ClientInstanceId = _currentEndPoint.ClientInstanceId };
         repository.AddOrUpdate(node);
-        apiClient.Setup(a => a.RemoveDataNode(_sessionId, node.NodeId)).ReturnsAsync(true);
+        apiClient.Setup(a => a.RemoveDataNode(_sessionId, It.IsAny<EncryptedDataNode>())).ReturnsAsync(true);
 
         var result = await _service.TryRemoveDataNode(node);
 
         result.Should().BeTrue();
         repository.Elements.Should().BeEmpty();
-        apiClient.Verify(a => a.RemoveDataNode(_sessionId, node.NodeId), Times.Once);
+        apiClient.Verify(a => a.RemoveDataNode(_sessionId, It.IsAny<EncryptedDataNode>()), Times.Once);
     }
 
     [Test]

@@ -40,6 +40,7 @@ public class RemoveDataNodeCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
+        var encryptedDataNode = new EncryptedDataNode{ Id = "dataNode1" };
         var inventoryData = new InventoryData(sessionId);
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
@@ -52,7 +53,7 @@ public class RemoveDataNodeCommandHandlerTests
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, sessionId, client))
             .Returns(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId });
 
-        var request = new RemoveDataNodeRequest(sessionId, client, "NID_1");
+        var request = new RemoveDataNodeRequest(sessionId, client, encryptedDataNode);
 
         // Act
         await _removeDataNodeCommandHandler.Handle(request, CancellationToken.None);
@@ -68,7 +69,7 @@ public class RemoveDataNodeCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedDataNode = new EncryptedDataNode();
+        var encryptedDataNode = new EncryptedDataNode{ Id = "dataNode1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId, DataNodes = [ encryptedDataNode ], DataSources = [] });
 
@@ -82,7 +83,7 @@ public class RemoveDataNodeCommandHandlerTests
         A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, sessionId, client))
             .Returns(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId });
 
-        var request = new RemoveDataNodeRequest(sessionId, client, "NID_1");
+        var request = new RemoveDataNodeRequest(sessionId, client, encryptedDataNode);
 
         // Act
         await _removeDataNodeCommandHandler.Handle(request, CancellationToken.None);

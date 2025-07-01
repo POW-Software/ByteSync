@@ -110,10 +110,6 @@ public class DataSourceService : IDataSourceService
         dataSource.DataNodeId = dataNode.NodeId;
         dataSource.InitialTimestamp = DateTime.UtcNow;
 
-        // var sessionMemberInfo = _dataNodeRepository.GetCurrentSessionMember();
-        // dataSource.Code = sessionMemberInfo.GetLetter() +
-        //                 (_dataSourceRepository.Elements.Count(ds => ds.BelongsTo(sessionMemberInfo)) + 1);
-
         return TryAddDataSource(dataSource);
     }
 
@@ -135,5 +131,4 @@ public class DataSourceService : IDataSourceService
         _dataSourceRepository.Remove(dataSource);
         _codeGenerator.RecomputeCodesForNode(dataSource.DataNodeId);
     }
-
 }
