@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Security.Cryptography;
 using ByteSync.Business.DataSources;
 using ByteSync.Business.SessionMembers;
@@ -85,6 +86,7 @@ public class DataEncrypter : IDataEncrypter
         }
         
         var encryptedData = new T();
+        encryptedData.Id = Guid.NewGuid().ToString();
         encryptedData.IV = aes.IV;
         encryptedData.Data = ms.ToArray();
 

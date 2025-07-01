@@ -48,7 +48,7 @@ public class RemoveDataSourceCommandHandler : IRequestHandler<RemoveDataSourceRe
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, request.SessionId, request.Client);
 
-                inventoryMember.DataSources.RemoveAll(p => p.Code == request.EncryptedDataSource.Code);
+                inventoryMember.DataSources.RemoveAll(p => p.Id == request.EncryptedDataSource.Id);
 
                 inventoryData.RecodeDataSources(cloudSessionData);
 
