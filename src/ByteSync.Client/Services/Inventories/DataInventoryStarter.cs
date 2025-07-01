@@ -71,7 +71,7 @@ public class DataInventoryStarter : IDataInventoryStarter
             .Subscribe();
     }
 
-    private async Task CheckInventoryAutoStart((AbstractRunSessionProfileInfo? First, IQuery<SessionMemberInfo, string> Second, 
+    private async Task CheckInventoryAutoStart((AbstractRunSessionProfileInfo? First, IQuery<SessionMember, string> Second, 
         IQuery<DataSource, string> Third) tuple)
     {
         var runCloudSessionProfileInfo = (RunCloudSessionProfileInfo)tuple.First!;

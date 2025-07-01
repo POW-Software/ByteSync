@@ -51,7 +51,7 @@ public class TestContextGenerator
         mockEnvironmentService.Setup(m => m.ClientInstanceId).Returns(currentEndPoint.ClientInstanceId);
         
         var mockSessionMemberRepository = _container.Resolve<Mock<ISessionMemberRepository>>();
-        mockSessionMemberRepository.Setup(m => m.GetElement("CII_A")).Returns(new SessionMemberInfo
+        mockSessionMemberRepository.Setup(m => m.GetElement("CII_A")).Returns(new SessionMember
         {
             PrivateData = new SessionMemberPrivateData
             {

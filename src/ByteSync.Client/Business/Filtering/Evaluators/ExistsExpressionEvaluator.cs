@@ -16,7 +16,7 @@ public class ExistsExpressionEvaluator : ExpressionEvaluator<ExistsExpression>
             .ToHashSet();
         
         List<string> codes = inventories
-            .Select(i => i.Letter)
+            .Select(i => i.Code)
             .Union(inventoryParts.Select(i => i.Code))
             .ToList();
 

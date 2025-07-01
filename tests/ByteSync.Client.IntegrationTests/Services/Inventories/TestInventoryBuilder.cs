@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using ByteSync.Business;
+using ByteSync.Business.DataNodes;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
@@ -741,7 +742,7 @@ public class TestInventoryBuilder : IntegrationTest
             byteSyncEndpoint = new ByteSyncEndpoint();
         }
         
-        var sessionMemberInfo = new SessionMemberInfo
+        var sessionMemberInfo = new SessionMember
         {
             Endpoint = byteSyncEndpoint,
             PositionInList = 0,
@@ -751,9 +752,16 @@ public class TestInventoryBuilder : IntegrationTest
             }
         };
         
+        var dataNode = new DataNode
+        {
+            NodeId = Guid.NewGuid().ToString(),
+            ClientInstanceId = sessionMemberInfo.ClientInstanceId,
+            Code = "Code"
+        };
+        
         Mock<ILogger<InventoryBuilder>> loggerMock = new Mock<ILogger<InventoryBuilder>>();
 
-        return new InventoryBuilder(sessionMemberInfo, sessionSettings, inventoryProcessData,
+        return new InventoryBuilder(sessionMemberInfo, dataNode, sessionSettings, inventoryProcessData,
             osPlatform, FingerprintModes.Rsync, loggerMock.Object);
     }
 }

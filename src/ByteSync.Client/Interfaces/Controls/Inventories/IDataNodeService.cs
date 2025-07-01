@@ -6,7 +6,7 @@ public interface IDataNodeService
 {
     Task<bool> TryAddDataNode(DataNode dataNode);
 
-    Task CreateAndTryAddDataNode(string nodeId);
+    Task CreateAndTryAddDataNode(string? nodeId = null);
 
     void ApplyAddDataNodeLocally(DataNode dataNode);
 

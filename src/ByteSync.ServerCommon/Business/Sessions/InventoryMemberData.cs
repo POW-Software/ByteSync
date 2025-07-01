@@ -7,7 +7,8 @@ public class InventoryMemberData
 {
     public InventoryMemberData()
     {
-        DataNodes = new List<DataNodeData>();
+        DataNodes = new List<EncryptedDataNode>();
+        DataSources = new List<EncryptedDataSource>();
     }
     
     public string SessionId { get; set; } = null!;
@@ -18,5 +19,7 @@ public class InventoryMemberData
         
     public DateTimeOffset? LastLocalInventoryStatusUpdate { get; set; }
     
-    public List<DataNodeData> DataNodes { get; set; }
+    public List<EncryptedDataNode> DataNodes { get; set; }
+
+    public List<EncryptedDataSource> DataSources { get; set; }
 }

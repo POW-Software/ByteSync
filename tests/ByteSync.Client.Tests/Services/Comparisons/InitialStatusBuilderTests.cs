@@ -33,7 +33,7 @@ public class InitialStatusBuilderTests : AbstractTester
         var id = $"IID_{Guid.NewGuid()}";
         var inventory = new Inventory
         {
-            Letter = "A",
+            Code = "A",
             InventoryId = id
         };
         var inventoryPart = new InventoryPart(inventory, "rootpath", FileSystemTypes.File);
@@ -80,7 +80,7 @@ public class InitialStatusBuilderTests : AbstractTester
         var id = $"IID_{Guid.NewGuid()}";
         var inventory = new Inventory
         {
-            Letter = "A",
+            Code = "A",
             InventoryId = id
         };
         var inventoryPart = new InventoryPart(inventory, "rootpath", FileSystemTypes.File);
@@ -115,7 +115,7 @@ public class InitialStatusBuilderTests : AbstractTester
         var id = $"IID_{Guid.NewGuid()}";
         var inventory = new Inventory
         {
-            Letter = "A",
+            Code = "A",
             InventoryId = id
         };
         var inventoryPart = new InventoryPart(inventory, "rootpath", FileSystemTypes.Directory);
@@ -157,7 +157,7 @@ public class InitialStatusBuilderTests : AbstractTester
         var id = $"IID_{Guid.NewGuid()}";
         var inventory = new Inventory
         {
-            Letter = "A",
+            Code = "A",
             InventoryId = id
         };
         var inventoryPart = new InventoryPart(inventory, "rootpath", FileSystemTypes.Directory);
@@ -202,7 +202,7 @@ public class InitialStatusBuilderTests : AbstractTester
         var id = $"IID_{Guid.NewGuid()}";
         var inventory = new Inventory
         {
-            Letter = "A",
+            Code = "A",
             InventoryId = id
         };
         
@@ -270,7 +270,7 @@ public class InitialStatusBuilderTests : AbstractTester
         var id = $"IID_{Guid.NewGuid()}";
         var inventory = new Inventory
         {
-            Letter = "A",
+            Code = "A",
             InventoryId = id
         };
         
@@ -341,7 +341,7 @@ public class InitialStatusBuilderTests : AbstractTester
         var id1 = $"IID_{Guid.NewGuid()}";
         var inventory1 = new Inventory
         {
-            Letter = "A",
+            Code = "A",
             InventoryId = id1
         };
         var inventoryPart1 = new InventoryPart(inventory1, "rootpath1", FileSystemTypes.File);
@@ -363,7 +363,7 @@ public class InitialStatusBuilderTests : AbstractTester
         var id2 = $"IID_{Guid.NewGuid()}";
         var inventory2 = new Inventory
         {
-            Letter = "B",
+            Code = "B",
             InventoryId = id2
         };
         var inventoryPart2 = new InventoryPart(inventory2, "rootpath2", FileSystemTypes.File);

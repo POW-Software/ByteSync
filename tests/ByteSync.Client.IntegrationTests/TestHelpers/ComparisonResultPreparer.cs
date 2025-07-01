@@ -1,4 +1,5 @@
 ﻿using ByteSync.Business;
+using ByteSync.Business.DataNodes;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
@@ -79,7 +80,7 @@ public class ComparisonResultPreparer
                 OSPlatform = OSPlatforms.Windows
             };
             
-            var sessionMemberInfo = new SessionMemberInfo
+            var sessionMemberInfo = new SessionMember
             {
                 Endpoint = endpoint,
                 PositionInList = inventoryData.Letter[0] - 'A',
@@ -89,9 +90,16 @@ public class ComparisonResultPreparer
                 }
             };
             
+            var dataNode = new DataNode
+            {
+                NodeId = Guid.NewGuid().ToString(),
+                ClientInstanceId = sessionMemberInfo.ClientInstanceId,
+                Code = inventoryData.Letter + "1"
+            };
+            
             Mock<ILogger<InventoryBuilder>> loggerMock = new Mock<ILogger<InventoryBuilder>>();
             
-            InventoryBuilder inventoryBuilder = new InventoryBuilder(sessionMemberInfo, SessionSettings, new InventoryProcessData(), 
+            InventoryBuilder inventoryBuilder = new InventoryBuilder(sessionMemberInfo, dataNode, SessionSettings, new InventoryProcessData(), 
                 OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object);
             
             foreach (var dataSource in inventoryData.DataSources)

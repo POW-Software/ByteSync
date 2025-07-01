@@ -1,6 +1,7 @@
 using ByteSync.Business.DataNodes;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Communications.Http;
+using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
@@ -12,16 +13,22 @@ public class DataNodeService : IDataNodeService
 {
     private readonly ISessionService _sessionService;
     private readonly IConnectionService _connectionService;
+    private readonly IDataEncrypter _dataEncrypter;
     private readonly IInventoryApiClient _inventoryApiClient;
     private readonly IDataNodeRepository _dataNodeRepository;
+    private readonly IDataNodeCodeGenerator _codeGenerator;
 
     public DataNodeService(ISessionService sessionService, IConnectionService connectionService,
-        IInventoryApiClient inventoryApiClient, IDataNodeRepository dataNodeRepository)
+        IDataEncrypter dataEncrypter,
+        IInventoryApiClient inventoryApiClient, IDataNodeRepository dataNodeRepository,
+        IDataNodeCodeGenerator codeGenerator)
     {
         _sessionService = sessionService;
         _connectionService = connectionService;
+        _dataEncrypter = dataEncrypter;
         _inventoryApiClient = inventoryApiClient;
         _dataNodeRepository = dataNodeRepository;
+        _codeGenerator = codeGenerator;
     }
 
     public async Task<bool> TryAddDataNode(DataNode dataNode)
@@ -30,7 +37,8 @@ public class DataNodeService : IDataNodeService
         if (_sessionService.CurrentSession is CloudSession cloudSession
             && dataNode.ClientInstanceId == _connectionService.ClientInstanceId)
         {
-            isAddOK = await _inventoryApiClient.AddDataNode(cloudSession.SessionId, dataNode.NodeId);
+            var encryptedDataNode = _dataEncrypter.EncryptDataNode(dataNode);
+            isAddOK = await _inventoryApiClient.AddDataNode(cloudSession.SessionId, encryptedDataNode);
         }
 
         if (isAddOK)
@@ -41,8 +49,10 @@ public class DataNodeService : IDataNodeService
         return isAddOK;
     }
 
-    public Task CreateAndTryAddDataNode(string nodeId)
+    public Task CreateAndTryAddDataNode(string? nodeId = null)
     {
+        nodeId ??= $"NID_{Guid.NewGuid()}";
+        
         var dataNode = new DataNode
         {
             NodeId = nodeId,
@@ -58,7 +68,8 @@ public class DataNodeService : IDataNodeService
         if (_sessionService.CurrentSession is CloudSession cloudSession
             && dataNode.ClientInstanceId == _connectionService.ClientInstanceId)
         {
-            isRemoveOK = await _inventoryApiClient.RemoveDataNode(cloudSession.SessionId, dataNode.NodeId);
+            var encryptedDataNode = _dataEncrypter.EncryptDataNode(dataNode);
+            isRemoveOK = await _inventoryApiClient.RemoveDataNode(cloudSession.SessionId, encryptedDataNode);
         }
 
         if (isRemoveOK)
@@ -72,10 +83,12 @@ public class DataNodeService : IDataNodeService
     public void ApplyAddDataNodeLocally(DataNode dataNode)
     {
         _dataNodeRepository.AddOrUpdate(dataNode);
+        _codeGenerator.RecomputeCodes();
     }
 
     public void ApplyRemoveDataNodeLocally(DataNode dataNode)
     {
         _dataNodeRepository.Remove(dataNode);
+        _codeGenerator.RecomputeCodes();
     }
 }
