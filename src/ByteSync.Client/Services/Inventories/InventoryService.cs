@@ -109,12 +109,12 @@ public class InventoryService : IInventoryService
         });
     }
 
-    public Task SetSessionOnFatalError(CloudSessionFatalError cloudSessionFatalError)
-    {
-        InventoryProcessData.RequestInventoryAbort();
-
-        return Task.CompletedTask;
-    }
+    // public Task SetSessionOnFatalError(CloudSessionFatalError cloudSessionFatalError)
+    // {
+    //     InventoryProcessData.RequestInventoryAbort();
+    //
+    //     return Task.CompletedTask;
+    // }
     
     public Task AbortInventory()
     {

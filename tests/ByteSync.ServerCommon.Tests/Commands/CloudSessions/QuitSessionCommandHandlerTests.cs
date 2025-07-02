@@ -122,7 +122,6 @@ public class QuitSessionCommandHandlerTests
         // Assert
         cloudSessionData.SessionMembers.Should().BeEmpty();
         cloudSessionData.IsSessionRemoved.Should().BeTrue();
-        cloudSessionData.IsSessionOnError.Should().BeFalse();
         inventoryData.InventoryMembers.Should().BeEmpty();
         synchronizationEntity.IsFatalError.Should().BeFalse();
         
@@ -206,7 +205,6 @@ public class QuitSessionCommandHandlerTests
         // Assert
         cloudSessionData.SessionMembers.Should().BeEmpty();
         cloudSessionData.IsSessionRemoved.Should().BeFalse();
-        cloudSessionData.IsSessionOnError.Should().BeFalse();
         inventoryData.InventoryMembers.Should().NotBeEmpty();
         synchronizationEntity.IsFatalError.Should().BeFalse();
         

@@ -33,7 +33,7 @@ public interface IHubByteSyncPush
 
     Task SessionSettingsUpdated(SessionSettingsUpdatedDTO sessionSettingsUpdatedDto);
 
-    Task SessionOnFatalError(CloudSessionFatalError cloudSessionFatalError);
+    // Task SessionOnFatalError(CloudSessionFatalError cloudSessionFatalError);
 
     Task InventoryStarted(InventoryStartedDTO inventoryStartedDto);
 

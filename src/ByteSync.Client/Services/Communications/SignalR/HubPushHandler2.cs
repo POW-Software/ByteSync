@@ -46,7 +46,6 @@ public class HubPushHandler2 : IHubPushHandler2
         new SubjectInfo<SessionMemberInfoDTO>(nameof(IHubByteSyncPush.MemberJoinedSession)),
         new SubjectInfo<SessionMemberInfoDTO>(nameof(IHubByteSyncPush.MemberQuittedSession)),
         new SubjectInfo<SessionSettingsUpdatedDTO>(nameof(IHubByteSyncPush.SessionSettingsUpdated)),
-        new SubjectInfo<CloudSessionFatalError>(nameof(IHubByteSyncPush.SessionOnFatalError)),
         new SubjectInfo<InventoryStartedDTO>(nameof(IHubByteSyncPush.InventoryStarted)),
         new SubjectInfo<DataNodeDTO>(nameof(IHubByteSyncPush.DataNodeAdded)),
         new SubjectInfo<DataNodeDTO>(nameof(IHubByteSyncPush.DataNodeRemoved)),
@@ -89,9 +88,6 @@ public class HubPushHandler2 : IHubPushHandler2
     
     public Subject<SessionSettingsUpdatedDTO> SessionSettingsUpdated => 
         GetSubject<SessionSettingsUpdatedDTO>(nameof(IHubByteSyncPush.SessionSettingsUpdated));
-    
-    public Subject<CloudSessionFatalError> SessionOnFatalError => 
-        GetSubject<CloudSessionFatalError>(nameof(IHubByteSyncPush.SessionOnFatalError));
     
     public Subject<InventoryStartedDTO> InventoryStarted =>
         GetSubject<InventoryStartedDTO>(nameof(IHubByteSyncPush.InventoryStarted));
@@ -249,6 +245,7 @@ public class HubPushHandler2 : IHubPushHandler2
             subjectInfo.SetupOnCall(connection);
         }
     }
+    
 }
 
 public interface ISubjectInfo
@@ -337,3 +334,4 @@ internal static class SubjectInfoHelper
         HubPushHandler2.Logger.LogDebug("HubPushHandler2.{methodName}", methodName);
     }
 }
+

@@ -1,9 +1,8 @@
 ﻿using ByteSync.Business.Comparisons;
-using Prism.Mvvm;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Actions.Misc;
 
-class ConditionOperatorViewModel : BindableBase
+class ConditionOperatorViewModel : ViewModelBase
 {
     private string _description;
 

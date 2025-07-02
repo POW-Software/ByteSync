@@ -25,7 +25,7 @@ public interface IInventoryService
     
 
     
-    Task SetSessionOnFatalError(CloudSessionFatalError cloudSessionFatalError);
+
     
     // bool HandleLocalInventoryGlobalStatusChanged(UpdateSessionMemberGeneralStatusParameters parameters);
     

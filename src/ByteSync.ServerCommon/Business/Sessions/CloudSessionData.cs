@@ -29,17 +29,8 @@ public class CloudSessionData
         
     public EncryptedSessionSettings SessionSettings { get; set; } = null!;
 
-    public CloudSessionFatalError? CloudSessionFatalError { get;  private set; }
 
     public bool IsSessionActivated { get; set; }
-
-    public bool IsSessionOnError
-    {
-        get
-        {
-            return CloudSessionFatalError != null;
-        }
-    }
 
     public List<SessionMemberData> SessionMembers { get; set; }
 
@@ -64,24 +55,12 @@ public class CloudSessionData
     {
         SessionSettings = cloudSessionSettings;
     }
+    
 
-    public CloudSessionFatalError SetSessionOnFatalError(CloudSessionFatalErrors fatalError)
-    {
-        var cloudSessionFatalError = new CloudSessionFatalError();
-        cloudSessionFatalError.SessionId = SessionId;
-        cloudSessionFatalError.HappenedOn = DateTimeOffset.UtcNow;
-        cloudSessionFatalError.SessionFatalError = fatalError;
-
-        CloudSessionFatalError = cloudSessionFatalError;
-
-        return cloudSessionFatalError;
-    }
-
-    public void ResetSession()
-    {
-        IsSessionActivated = false;
-        CloudSessionFatalError = null;
-    }
+     public void ResetSession()
+     {
+         IsSessionActivated = false;
+     }
 
     public CloudSession GetCloudSession()
     {

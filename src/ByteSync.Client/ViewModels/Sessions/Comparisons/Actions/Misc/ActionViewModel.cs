@@ -1,9 +1,8 @@
 ﻿using ByteSync.Common.Business.Actions;
-using Prism.Mvvm;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Actions.Misc;
 
-class ActionViewModel : BindableBase
+class ActionViewModel : ViewModelBase
 {
     public ActionOperatorTypes ActionOperatorType { get; }
 

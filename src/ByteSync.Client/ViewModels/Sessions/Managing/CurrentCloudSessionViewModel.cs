@@ -172,8 +172,8 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
         }
     }
     
-    private void OnCloudSessionOnFatalError(CloudSessionFatalError cloudSessionFatalError)
-    {
-        IsCloudSessionFatalError = true;
-    }
+    // private void OnCloudSessionOnFatalError(CloudSessionFatalError cloudSessionFatalError)
+    // {
+    //     IsCloudSessionFatalError = true;
+    // }
 }
