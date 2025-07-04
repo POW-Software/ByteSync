@@ -48,23 +48,7 @@ public class CloudSessionDataTests
         sessionData.SessionMembers.Should().NotBeNull().And.BeEmpty();
         sessionData.PreSessionMembers.Should().NotBeNull().And.BeEmpty();
     }
-
-    // [Test]
-    // public void IsSessionOnError_WhenCloudSessionFatalErrorIsNull_ShouldReturnFalse()
-    // {
-    //     // Act & Assert
-    //     _cloudSessionData.IsSessionOnError.Should().BeFalse();
-    // }
-
-    // [Test]
-    // public void IsSessionOnError_WhenCloudSessionFatalErrorIsNotNull_ShouldReturnTrue()
-    // {
-    //     // Arrange
-    //     _cloudSessionData.SetSessionOnFatalError(CloudSessionFatalErrors.MemberQuittedAfterActivation);
-    //
-    //     // Act & Assert
-    //     _cloudSessionData.IsSessionOnError.Should().BeTrue();
-    // }
+    
 
     [Test]
     public void Contains_WithExistingEndpoint_ShouldReturnTrue()
@@ -121,38 +105,7 @@ public class CloudSessionDataTests
         _cloudSessionData.SessionSettings.Should().BeSameAs(newSessionSettings);
     }
 
-    /*[Test]
-    public void SetSessionOnFatalError_ShouldSetErrorAndReturnIt()
-    {
-        // Arrange
-        _cloudSessionData.SessionId = "session-123";
-        var fatalError = CloudSessionFatalErrors.MemberQuittedAfterActivation;
 
-        // Act
-        var result = _cloudSessionData.SetSessionOnFatalError(fatalError);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.SessionId.Should().Be(_cloudSessionData.SessionId);
-        result.SessionFatalError.Should().Be(fatalError);
-        result.HappenedOn.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(1));
-        _cloudSessionData.CloudSessionFatalError.Should().BeSameAs(result);
-    }*/
-
-    /*[Test]
-    public void ResetSession_ShouldClearActivatedStatusAndError()
-    {
-        // Arrange
-        _cloudSessionData.IsSessionActivated = true;
-        _cloudSessionData.SetSessionOnFatalError(CloudSessionFatalErrors.MemberQuittedAfterActivation);
-
-        // Act
-        _cloudSessionData.ResetSession();
-
-        // Assert
-        _cloudSessionData.IsSessionActivated.Should().BeFalse();
-        _cloudSessionData.CloudSessionFatalError.Should().BeNull();
-    }*/
 
     [Test]
     public void GetCloudSession_ShouldReturnCloudSessionWithCorrectProperties()

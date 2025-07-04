@@ -93,27 +93,4 @@ Global
 		{C12FDC18-5AC6-48F8-89B0-A82847D505D0} = {806594C2-8A09-4533-A3B4-3E9924C94295}
 		{A328B6ED-2A84-4A3A-A362-C90A1A72F7C4} = {806594C2-8A09-4533-A3B4-3E9924C94295}
 	EndGlobalSection
-	GlobalSection(RiderSharedRunConfigurations) = postSolution
-		File = src\ByteSync.Client\.run\Client Dev - EmptyA.run.xml
-		File = src\ByteSync.Client\.run\Client Dev - EmptyB.run.xml
-		File = src\ByteSync.Client\.run\Client Dev - EmptyC.run.xml
-		File = src\ByteSync.Client\.run\Client Dev A.run.xml
-		File = src\ByteSync.Client\.run\Client Dev B.run.xml
-		File = src\ByteSync.Client\.run\Client Dev C.run.xml
-		File = src\ByteSync.Client\.run\Client Dev D.run.xml
-		File = src\ByteSync.Client\.run\Client Dev E.run.xml
-		File = src\ByteSync.Client\.run\Client Local - EmptyA.run.xml
-		File = src\ByteSync.Client\.run\Client Local - EmptyB.run.xml
-		File = src\ByteSync.Client\.run\Client Local - EmptyC.run.xml
-		File = src\ByteSync.Client\.run\Client Local A.run.xml
-		File = src\ByteSync.Client\.run\Client Local B.run.xml
-		File = src\ByteSync.Client\.run\Client Local C.run.xml
-		File = src\ByteSync.Client\.run\Client Production - Empty.run.xml
-		File = src\ByteSync.Client\.run\Client Production A.run.xml
-		File = src\ByteSync.Client\.run\Client Production B.run.xml
-		File = src\ByteSync.Client\.run\Client Production C.run.xml
-		File = src\ByteSync.Client\.run\Client Staging A.run.xml
-		File = src\ByteSync.Client\.run\Client Staging B.run.xml
-		File = src\ByteSync.Client\.run\Client Staging C.run.xml
-	EndGlobalSection
 EndGlobal

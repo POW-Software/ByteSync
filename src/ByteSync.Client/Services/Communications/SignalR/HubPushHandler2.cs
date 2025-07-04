@@ -245,7 +245,6 @@ public class HubPushHandler2 : IHubPushHandler2
             subjectInfo.SetupOnCall(connection);
         }
     }
-    
 }
 
 public interface ISubjectInfo
@@ -332,6 +331,4 @@ internal static class SubjectInfoHelper
     internal static void LogDebug(this ISubjectInfo subjectInfo, string methodName)
     {
         HubPushHandler2.Logger.LogDebug("HubPushHandler2.{methodName}", methodName);
-    }
-}
-
+    } }
