@@ -13,14 +13,12 @@ using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Lobbies;
 using ByteSync.ViewModels.Lobbies;
-using Prism.Events;
 using Splat;
 
 namespace ByteSync.Services.Lobbies;
 
 public class LobbyRepository : BaseRepository<LobbyDetails>, ILobbyRepository
 {
-    private readonly IEventAggregator _eventAggregator;
     private readonly ICloudProxy _connectionManager;
     private readonly IPublicKeysManager _publicKeysManager;
     private readonly ILobbyMemberViewModelFactory _lobbyMemberViewModelFactory;
@@ -28,22 +26,22 @@ public class LobbyRepository : BaseRepository<LobbyDetails>, ILobbyRepository
 
     internal const string LOCAL_LOBBY_PREFIX = "Local_Lobby_";
     
-    public LobbyRepository(ILobbyMemberViewModelFactory lobbyMemberViewModelFactory, IEventAggregator eventAggregator, ICloudProxy connectionManager, 
+    public LobbyRepository(ILobbyMemberViewModelFactory lobbyMemberViewModelFactory, ICloudProxy connectionManager, 
         IPublicKeysManager publicKeysManager, ILobbyApiClient lobbyApiClient, ILogger<LobbyRepository> logger) :
             base(logger)
     {
         _lobbyMemberViewModelFactory = lobbyMemberViewModelFactory;
 
-        _eventAggregator = eventAggregator;
+//      _eventAggregator = eventAggregator;
         _connectionManager = connectionManager;
         _publicKeysManager = publicKeysManager;
         _lobbyApiClient = lobbyApiClient;
 
-        _eventAggregator.GetEvent<OnServerMemberJoinedLobby>().Subscribe(OnMemberJoinedLobby);
-        _eventAggregator.GetEvent<OnServerMemberQuittedLobby>().Subscribe(OnMemberQuittedLobby);
-        _eventAggregator.GetEvent<OnServerLobbyCheckInfosSent>().Subscribe(OnLobbyCheckInfosSent);
-        _eventAggregator.GetEvent<OnServerLobbyMemberStatusUpdated>().Subscribe(OnLobbyMemberStatusUpdated);
-        _eventAggregator.GetEvent<OnServerLobbyCloudSessionCredentialsSent>().Subscribe(OnLobbyCloudSessionCredentialsSent);
+//        _eventAggregator.GetEvent<OnServerMemberJoinedLobby>().Subscribe(OnMemberJoinedLobby);
+//        _eventAggregator.GetEvent<OnServerMemberQuittedLobby>().Subscribe(OnMemberQuittedLobby);
+//        _eventAggregator.GetEvent<OnServerLobbyCheckInfosSent>().Subscribe(OnLobbyCheckInfosSent);
+//        _eventAggregator.GetEvent<OnServerLobbyMemberStatusUpdated>().Subscribe(OnLobbyMemberStatusUpdated);
+//        _eventAggregator.GetEvent<OnServerLobbyCloudSessionCredentialsSent>().Subscribe(OnLobbyCloudSessionCredentialsSent);
 
         _connectionManager.HubPushHandler2.MemberJoinedSession
             .Subscribe(OnMemberJoinedSession);

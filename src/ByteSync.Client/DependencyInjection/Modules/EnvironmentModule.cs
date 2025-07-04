@@ -4,7 +4,6 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Services.Applications;
 using ByteSync.Services.Configurations;
-using Prism.Events;
 using Serilog.Extensions.Autofac.DependencyInjection;
 
 namespace ByteSync.DependencyInjection.Modules;
