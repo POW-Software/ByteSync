@@ -25,11 +25,12 @@ These projects are written in **C#** and target a specific version of **.NET**. 
    {
      "LocalDebugUrl": "",
      "DevelopmentUrl": "",
-     "StagingUrl": "",
-     "ProductionUrl": "",
-     "UpdatesDefinitionUrl": ""
-   }
-   ```
+  "StagingUrl": "",
+  "ProductionUrl": "",
+  "UpdatesDefinitionUrl": "",
+  "MessagesDefinitionsUrl": ""
+  }
+  ```
 
    Fill in any relevant URLs or other settings your environment requires.
 
