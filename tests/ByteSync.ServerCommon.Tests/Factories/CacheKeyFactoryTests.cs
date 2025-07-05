@@ -33,6 +33,7 @@ public class CacheKeyFactoryTests
     [TestCase(EntityType.ClientSoftwareVersionSettings, "version123", "ClientSoftwareVersionSettings")]
     [TestCase(EntityType.CloudSessionProfile, "profile123", "CloudSessionProfile")]
     [TestCase(EntityType.Lobby, "lobby123", "Lobby")]
+    [TestCase(EntityType.MessageDefinition, "msg123", "MessageDefinition")]
     public void Create_ShouldGenerateCacheKey_WithCorrectFormat(EntityType entityType, string entityId, string expectedEntityTypeName)
     {
         // Arrange
