@@ -27,8 +27,8 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
     public JwtMiddleware(IOptions<AppSettings> appSettings, IClientsRepository clientsRepository, ILogger<JwtMiddleware> logger)
     {
         var loginFunctionEntryPoint = GetEntryPoint<AuthFunction>(nameof(AuthFunction.Login));
-        var getMessagesFunctionEntryPoint = GetEntryPoint<MessageDefinitionFunction>(nameof(MessageDefinitionFunction.GetMessages));
-        _allowedAnonymousFunctionEntryPoints = [loginFunctionEntryPoint, getMessagesFunctionEntryPoint];
+        var getAnnouncementsFunctionEntryPoint = GetEntryPoint<AnnouncementFunction>(nameof(AnnouncementFunction.GetAnnouncements));
+        _allowedAnonymousFunctionEntryPoints = [loginFunctionEntryPoint, getAnnouncementsFunctionEntryPoint];
         
         _secret = appSettings.Value.Secret;
         _clientsRepository = clientsRepository;

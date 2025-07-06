@@ -10,5 +10,5 @@ public class AppSettings
 
     public string UpdatesDefinitionUrl { get; set; } = "";
 
-    public string MessagesDefinitionsUrl { get; set; } = "";
+    public string AnnouncementsUrl { get; set; } = "";
 }

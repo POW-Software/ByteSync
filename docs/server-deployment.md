@@ -72,7 +72,7 @@ Below is the JSON structure indicating which properties must be set. In particul
   },
   "AppSettings": {
     "Secret": "YOUR_UNIQUE_RANDOM_SEED",
-    "MessagesDefinitionsUrl": ""
+    "AnnouncementsUrl": ""
   }
 }
 ```
@@ -99,7 +99,7 @@ Below is the JSON structure indicating which properties must be set. In particul
     "CosmosDb:ConnectionString": "<your-cosmosdb-connection-string>",
     "CosmosDb:DatabaseName": "<your-database-name>",
     "AppSettings:Secret": "YOUR_UNIQUE_RANDOM_SEED",
-    "AppSettings:MessagesDefinitionsUrl": ""
+    "AppSettings:AnnouncementsUrl": ""
   }
 }
 ```
@@ -138,7 +138,7 @@ cd ByteSync.Functions
 
 # App Settings
   dotnet user-secrets set "AppSettings:Secret" "YOUR_UNIQUE_RANDOM_SEED"
-  dotnet user-secrets set "AppSettings:MessagesDefinitionsUrl" ""
+  dotnet user-secrets set "AppSettings:AnnouncementsUrl" ""
 ```
 
 Repeat these steps for **ByteSync.Functions.IntegrationTests** and **ByteSync.ServerCommon.Tests**, navigating to each project's directory and setting the same secrets.
