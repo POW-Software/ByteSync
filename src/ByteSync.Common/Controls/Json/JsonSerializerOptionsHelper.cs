@@ -21,6 +21,8 @@ public static class JsonSerializerOptionsHelper
         options.Converters.Add(new JsonStringEnumConverter());
         options.Converters.Add(new UtcDateTimeConverter());
         
+        options.PropertyNameCaseInsensitive = true;
+        
         options.IgnoreReadOnlyProperties = true;
         options.IgnoreReadOnlyFields = true;
     }
