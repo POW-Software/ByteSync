@@ -1,6 +1,6 @@
-namespace ByteSync.ServerCommon.Business.Messages;
+namespace ByteSync.ServerCommon.Business.Announcements;
 
-public class MessageDefinition
+public class Announcement
 {
     public string Id { get; set; }
     
