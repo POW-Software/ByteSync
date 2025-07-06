@@ -21,7 +21,7 @@ public class MessageDefinitionsLoader : IMessageDefinitionsLoader
 
     public async Task<List<MessageDefinition>> Load()
     {
-        List<MessageDefinition>? definitions = null;
+        List<MessageDefinition>? messageDefinitions = null;
 
         var policy = Policy
             .Handle<Exception>()
@@ -34,14 +34,14 @@ public class MessageDefinitionsLoader : IMessageDefinitionsLoader
             _logger.LogInformation("Loading messages from {url}", _appSettings.MessagesDefinitionsUrl);
             contents = await httpClient.GetStringAsync(_appSettings.MessagesDefinitionsUrl);
 
-            definitions = JsonHelper.Deserialize<List<MessageDefinition>>(contents);
+            messageDefinitions = JsonHelper.Deserialize<List<MessageDefinition>>(contents);
         });
 
-        if (definitions == null)
+        if (messageDefinitions == null)
         {
             throw new Exception("Failed to load messages");
         }
 
-        return definitions!;
+        return messageDefinitions!;
     }
 }

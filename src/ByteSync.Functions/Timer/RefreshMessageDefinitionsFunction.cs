@@ -29,11 +29,11 @@ public class RefreshMessageDefinitionsFunction
     {
         _logger.LogInformation("Refreshing message definitions at: {Now}", DateTime.UtcNow);
 
-        var definitions = await _loader.Load();
-        var valid = definitions.Where(d => d.EndDate > DateTime.UtcNow).ToList();
+        var messageDefinitions = await _loader.Load();
+        var validMessageDefinitions = messageDefinitions.Where(d => d.EndDate > DateTime.UtcNow).ToList();
 
-        await _repository.SaveAll(valid);
+        await _repository.SaveAll(validMessageDefinitions);
 
-        return valid.Count;
+        return validMessageDefinitions.Count;
     }
 }
