@@ -154,13 +154,6 @@ Repeat these steps for **ByteSync.Functions.IntegrationTests** and **ByteSync.Se
 
 ---
 
-### Messages API
-
-The function app exposes a `GET /api/messages` endpoint that returns the currently active messages.
-Each item includes `id`, `startDate`, `endDate` and a language dictionary `message`.
-
----
-
 ## Final Steps
 
 1. **Deploy** your Azure Function (Windows) to Azure.
