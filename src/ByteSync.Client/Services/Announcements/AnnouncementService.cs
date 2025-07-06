@@ -75,7 +75,7 @@ public class AnnouncementService : IAnnouncementService, IDisposable
         {
             _refreshCancellationTokenSource.Cancel();
             _refreshCancellationTokenSource.Dispose();
-            _refreshCancellationTokenSource = null; // Assurez-vous de le réinitialiser à null
+            _refreshCancellationTokenSource = null;
         }
     }
 }
