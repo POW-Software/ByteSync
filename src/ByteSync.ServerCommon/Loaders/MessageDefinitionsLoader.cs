@@ -12,11 +12,16 @@ public class MessageDefinitionsLoader : IMessageDefinitionsLoader
 {
     private readonly AppSettings _appSettings;
     private readonly ILogger<MessageDefinitionsLoader> _logger;
+    private readonly HttpClient _httpClient;
 
-    public MessageDefinitionsLoader(IOptions<AppSettings> appSettings, ILogger<MessageDefinitionsLoader> logger)
+    public MessageDefinitionsLoader(
+        IOptions<AppSettings> appSettings, 
+        ILogger<MessageDefinitionsLoader> logger,
+        HttpClient httpClient)
     {
         _appSettings = appSettings.Value;
         _logger = logger;
+        _httpClient = httpClient;
     }
 
     public async Task<List<MessageDefinition>> Load()
@@ -29,10 +34,8 @@ public class MessageDefinitionsLoader : IMessageDefinitionsLoader
 
         await policy.Execute(async () =>
         {
-            string contents;
-            using var httpClient = new HttpClient();
             _logger.LogInformation("Loading messages from {url}", _appSettings.MessagesDefinitionsUrl);
-            contents = await httpClient.GetStringAsync(_appSettings.MessagesDefinitionsUrl);
+            var contents = await _httpClient.GetStringAsync(_appSettings.MessagesDefinitionsUrl);
 
             messageDefinitions = JsonHelper.Deserialize<List<MessageDefinition>>(contents);
         });
