@@ -1,4 +1,4 @@
-using ByteSync.ServerCommon.Business.Announcements;
+using ByteSync.Common.Business.Announcements;
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;

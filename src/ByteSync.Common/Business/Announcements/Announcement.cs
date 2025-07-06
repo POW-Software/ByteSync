@@ -1,4 +1,4 @@
-namespace ByteSync.ServerCommon.Business.Announcements;
+namespace ByteSync.Common.Business.Announcements;
 
 public class Announcement
 {

@@ -1,4 +1,4 @@
-using ByteSync.ServerCommon.Business.Announcements;
+using ByteSync.Common.Business.Announcements;
 using ByteSync.ServerCommon.Commands.Announcements;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using FakeItEasy;
