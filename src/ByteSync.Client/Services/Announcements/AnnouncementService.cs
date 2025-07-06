@@ -71,11 +71,11 @@ public class AnnouncementService : IAnnouncementService, IDisposable
 
     public void Dispose()
     {
-        var cts = _refreshCancellationTokenSource;
-        if (cts != null)
+        if (_refreshCancellationTokenSource != null)
         {
-            cts.Cancel();
-            cts.Dispose();
+            _refreshCancellationTokenSource.Cancel();
+            _refreshCancellationTokenSource.Dispose();
+            _refreshCancellationTokenSource = null; // Assurez-vous de le réinitialiser à null
         }
     }
 }
