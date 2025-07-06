@@ -28,7 +28,7 @@ These projects are written in **C#** and target a specific version of **.NET**. 
   "StagingUrl": "",
   "ProductionUrl": "",
   "UpdatesDefinitionUrl": "",
-  "MessagesDefinitionsUrl": ""
+  "AnnouncementsUrl": ""
   }
   ```
 
