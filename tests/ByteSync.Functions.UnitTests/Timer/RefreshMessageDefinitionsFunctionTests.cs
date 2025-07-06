@@ -30,8 +30,8 @@ public class RefreshMessageDefinitionsFunctionTests
         var now = DateTime.UtcNow;
         var messages = new List<MessageDefinition>
         {
-            new MessageDefinition { StartDate = now.AddHours(-1), EndDate = now.AddHours(1), Message = new Dictionary<string,string>{{"en","valid"}} },
-            new MessageDefinition { StartDate = now.AddHours(-2), EndDate = now.AddHours(-1), Message = new Dictionary<string,string>{{"en","expired"}} }
+            new MessageDefinition { Id = Guid.NewGuid().ToString("D"), StartDate = now.AddHours(-1), EndDate = now.AddHours(1), Message = new Dictionary<string,string>{{"en","valid"}} },
+            new MessageDefinition { Id = Guid.NewGuid().ToString("D"), StartDate = now.AddHours(-2), EndDate = now.AddHours(-1), Message = new Dictionary<string,string>{{"en","expired"}} }
         };
         _loader.Setup(l => l.Load()).ReturnsAsync(messages);
         var function = new RefreshMessageDefinitionsFunction(_loader.Object, _repository.Object, _logger.Object);
