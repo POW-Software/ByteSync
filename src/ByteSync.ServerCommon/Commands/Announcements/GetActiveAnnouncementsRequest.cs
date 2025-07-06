@@ -1,4 +1,4 @@
-using ByteSync.ServerCommon.Business.Announcements;
+using ByteSync.Common.Business.Announcements;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Announcements;

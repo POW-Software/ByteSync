@@ -1,5 +1,5 @@
 using ByteSync.Functions.Timer;
-using ByteSync.ServerCommon.Business.Announcements;
+using ByteSync.Common.Business.Announcements;
 using ByteSync.ServerCommon.Interfaces.Loaders;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using Microsoft.Azure.Functions.Worker;

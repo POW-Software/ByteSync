@@ -1,5 +1,5 @@
 using ByteSync.Common.Controls.Json;
-using ByteSync.ServerCommon.Business.Announcements;
+using ByteSync.Common.Business.Announcements;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Loaders;
 using FakeItEasy;
