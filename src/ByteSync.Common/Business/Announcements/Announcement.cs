@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace ByteSync.Common.Business.Announcements;
 
 public class Announcement
