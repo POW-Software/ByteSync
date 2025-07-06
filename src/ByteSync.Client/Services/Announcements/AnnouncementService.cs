@@ -13,6 +13,8 @@ public class AnnouncementService : IAnnouncementService, IDisposable
     private readonly ILogger<AnnouncementService> _logger;
     private CancellationTokenSource? _refreshCancellationTokenSource;
 
+    protected virtual TimeSpan RefreshDelay => TimeSpan.FromHours(2);
+
     public AnnouncementService(IAnnouncementApiClient apiClient, IAnnouncementRepository repository,
         ILogger<AnnouncementService> logger)
     {
@@ -34,7 +36,7 @@ public class AnnouncementService : IAnnouncementService, IDisposable
             {
                 try
                 {
-                    await Task.Delay(TimeSpan.FromHours(2), token);
+                    await Task.Delay(RefreshDelay, token);
                     if (token.IsCancellationRequested)
                     {
                         break;
