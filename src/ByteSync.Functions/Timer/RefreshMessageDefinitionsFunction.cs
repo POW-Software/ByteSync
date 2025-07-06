@@ -27,10 +27,11 @@ public class RefreshMessageDefinitionsFunction
 #endif
         )] TimerInfo timerInfo)
     {
-        _logger.LogInformation("Refreshing message definitions at: {Now}", DateTime.UtcNow);
+        var currentUtcTime = DateTime.UtcNow;
+        _logger.LogInformation("Refreshing message definitions at: {Now}", currentUtcTime);
 
         var messageDefinitions = await _loader.Load();
-        var validMessageDefinitions = messageDefinitions.Where(d => d.EndDate > DateTime.UtcNow).ToList();
+        var validMessageDefinitions = messageDefinitions.Where(d => d.EndDate > currentUtcTime).ToList();
 
         await _repository.SaveAll(validMessageDefinitions);
 
