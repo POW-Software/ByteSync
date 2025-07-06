@@ -1,7 +1,6 @@
 using ByteSync.Common.Controls.Json;
 using ByteSync.ServerCommon.Business.Messages;
 using ByteSync.ServerCommon.Business.Settings;
-using ByteSync.ServerCommon.Interfaces.Loaders;
 using ByteSync.ServerCommon.Loaders;
 using FakeItEasy;
 using FluentAssertions;
@@ -9,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net;
 using System.Text;
-using Moq;
+using ByteSync.ServerCommon.Tests.Helpers;
 
 namespace ByteSync.ServerCommon.Tests.Loaders;
 
@@ -184,25 +183,3 @@ public class MessageDefinitionsLoaderTests
         result[0].Id.Should().Be("msg1");
     }
 }
-
-public class MockHttpMessageHandler : HttpMessageHandler
-{
-    private readonly string _responseContent;
-    private readonly HttpStatusCode _statusCode;
-
-    public MockHttpMessageHandler(string responseContent, HttpStatusCode statusCode = HttpStatusCode.OK)
-    {
-        _responseContent = responseContent;
-        _statusCode = statusCode;
-    }
-
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-    {
-        var response = new HttpResponseMessage(_statusCode)
-        {
-            Content = new StringContent(_responseContent, Encoding.UTF8, "application/json")
-        };
-
-        return Task.FromResult(response);
-    }
-} 
