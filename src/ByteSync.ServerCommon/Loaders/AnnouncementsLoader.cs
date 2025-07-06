@@ -1,5 +1,5 @@
 using ByteSync.Common.Controls.Json;
-using ByteSync.ServerCommon.Business.Messages;
+using ByteSync.ServerCommon.Business.Announcements;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Loaders;
 using Microsoft.Extensions.Logging;
@@ -8,15 +8,15 @@ using Polly;
 
 namespace ByteSync.ServerCommon.Loaders;
 
-public class MessageDefinitionsLoader : IMessageDefinitionsLoader
+public class AnnouncementsLoader : IAnnouncementsLoader
 {
     private readonly AppSettings _appSettings;
-    private readonly ILogger<MessageDefinitionsLoader> _logger;
+    private readonly ILogger<AnnouncementsLoader> _logger;
     private readonly HttpClient _httpClient;
 
-    public MessageDefinitionsLoader(
-        IOptions<AppSettings> appSettings, 
-        ILogger<MessageDefinitionsLoader> logger,
+    public AnnouncementsLoader(
+        IOptions<AppSettings> appSettings,
+        ILogger<AnnouncementsLoader> logger,
         HttpClient httpClient)
     {
         _appSettings = appSettings.Value;
@@ -24,9 +24,9 @@ public class MessageDefinitionsLoader : IMessageDefinitionsLoader
         _httpClient = httpClient;
     }
 
-    public async Task<List<MessageDefinition>> Load()
+    public async Task<List<Announcement>> Load()
     {
-        List<MessageDefinition>? messageDefinitions = null;
+        List<Announcement>? announcements = null;
 
         var policy = Policy
             .Handle<Exception>()
@@ -34,17 +34,17 @@ public class MessageDefinitionsLoader : IMessageDefinitionsLoader
 
         await policy.Execute(async () =>
         {
-            _logger.LogInformation("Loading messages from {url}", _appSettings.MessagesDefinitionsUrl);
-            var contents = await _httpClient.GetStringAsync(_appSettings.MessagesDefinitionsUrl);
+            _logger.LogInformation("Loading announcements from {url}", _appSettings.AnnouncementsDefinitionUrl);
+            var contents = await _httpClient.GetStringAsync(_appSettings.AnnouncementsDefinitionUrl);
 
-            messageDefinitions = JsonHelper.Deserialize<List<MessageDefinition>>(contents);
+            announcements = JsonHelper.Deserialize<List<Announcement>>(contents);
         });
 
-        if (messageDefinitions == null)
+        if (announcements == null)
         {
             throw new Exception("Failed to load messages");
         }
 
-        return messageDefinitions!;
+        return announcements!;
     }
 }

@@ -1,5 +1,5 @@
 using ByteSync.Common.Controls.Json;
-using ByteSync.ServerCommon.Business.Messages;
+using ByteSync.ServerCommon.Business.Announcements;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Loaders;
 using FakeItEasy;
@@ -13,23 +13,23 @@ using ByteSync.ServerCommon.Tests.Helpers;
 namespace ByteSync.ServerCommon.Tests.Loaders;
 
 [TestFixture]
-public class MessageDefinitionsLoaderTests
+public class AnnouncementsLoaderTests
 {
-    private ILogger<MessageDefinitionsLoader> _mockLogger;
+    private ILogger<AnnouncementsLoader> _mockLogger;
     private IOptions<AppSettings> _mockAppSettings;
     private HttpClient _httpClient;
-    private MessageDefinitionsLoader _loader;
+    private AnnouncementsLoader _loader;
 
     [SetUp]
     public void SetUp()
     {
-        _mockLogger = A.Fake<ILogger<MessageDefinitionsLoader>>();
-        _mockAppSettings = Options.Create(new AppSettings 
-        { 
-            MessagesDefinitionsUrl = "https://test.example.com/messages.json" 
+        _mockLogger = A.Fake<ILogger<AnnouncementsLoader>>();
+        _mockAppSettings = Options.Create(new AppSettings
+        {
+            AnnouncementsDefinitionUrl = "https://test.example.com/messages.json"
         });
         _httpClient = new HttpClient(new MockHttpMessageHandler(""));
-        _loader = new MessageDefinitionsLoader(_mockAppSettings, _mockLogger, _httpClient);
+        _loader = new AnnouncementsLoader(_mockAppSettings, _mockLogger, _httpClient);
     }
 
     [TearDown]
@@ -39,12 +39,12 @@ public class MessageDefinitionsLoaderTests
     }
 
     [Test]
-    public async Task Load_ShouldReturnMessageDefinitions_WhenValidDataIsRetrieved()
+    public async Task Load_ShouldReturnAnnouncements_WhenValidDataIsRetrieved()
     {
         // Arrange
-        var messageDefinitions = new List<MessageDefinition>
+        var messageDefinitions = new List<Announcement>
         {
-            new MessageDefinition
+            new Announcement
             {
                 Id = "msg1",
                 StartDate = DateTime.UtcNow.AddDays(-1),
@@ -55,7 +55,7 @@ public class MessageDefinitionsLoaderTests
                     { "fr", "Message de test en français" }
                 }
             },
-            new MessageDefinition
+            new Announcement
             {
                 Id = "msg2",
                 StartDate = DateTime.UtcNow,
@@ -70,7 +70,7 @@ public class MessageDefinitionsLoaderTests
 
         var jsonContent = JsonHelper.Serialize(messageDefinitions);
         _httpClient = new HttpClient(new MockHttpMessageHandler(jsonContent));
-        _loader = new MessageDefinitionsLoader(_mockAppSettings, _mockLogger, _httpClient);
+        _loader = new AnnouncementsLoader(_mockAppSettings, _mockLogger, _httpClient);
 
         // Act
         var result = await _loader.Load();
@@ -89,7 +89,7 @@ public class MessageDefinitionsLoaderTests
     {
         // Arrange
         _httpClient = new HttpClient(new MockHttpMessageHandler("", HttpStatusCode.NotFound));
-        _loader = new MessageDefinitionsLoader(_mockAppSettings, _mockLogger, _httpClient);
+        _loader = new AnnouncementsLoader(_mockAppSettings, _mockLogger, _httpClient);
 
         // Act & Assert
         await FluentActions.Awaiting(() => _loader.Load())
@@ -100,10 +100,10 @@ public class MessageDefinitionsLoaderTests
     public async Task Load_ShouldHandleEmptyList_AndReturnEmptyList()
     {
         // Arrange
-        var messageDefinitions = new List<MessageDefinition>();
+        var messageDefinitions = new List<Announcement>();
         var jsonContent = JsonHelper.Serialize(messageDefinitions);
         _httpClient = new HttpClient(new MockHttpMessageHandler(jsonContent));
-        _loader = new MessageDefinitionsLoader(_mockAppSettings, _mockLogger, _httpClient);
+        _loader = new AnnouncementsLoader(_mockAppSettings, _mockLogger, _httpClient);
 
         // Act
         var result = await _loader.Load();
@@ -119,7 +119,7 @@ public class MessageDefinitionsLoaderTests
         // Arrange
         var malformedJson = "{ invalid json }";
         _httpClient = new HttpClient(new MockHttpMessageHandler(malformedJson));
-        _loader = new MessageDefinitionsLoader(_mockAppSettings, _mockLogger, _httpClient);
+        _loader = new AnnouncementsLoader(_mockAppSettings, _mockLogger, _httpClient);
 
         // Act & Assert
         await FluentActions.Awaiting(() => _loader.Load())
@@ -127,12 +127,12 @@ public class MessageDefinitionsLoaderTests
     }
 
     [Test]
-    public async Task Load_ShouldHandleMessageDefinitionsWithEmptyMessages()
+    public async Task Load_ShouldHandleAnnouncementsWithEmptyMessages()
     {
         // Arrange
-        var messageDefinitions = new List<MessageDefinition>
+        var messageDefinitions = new List<Announcement>
         {
-            new MessageDefinition
+            new Announcement
             {
                 Id = "msg1",
                 StartDate = DateTime.UtcNow.AddDays(-1),
@@ -143,7 +143,7 @@ public class MessageDefinitionsLoaderTests
 
         var jsonContent = JsonHelper.Serialize(messageDefinitions);
         _httpClient = new HttpClient(new MockHttpMessageHandler(jsonContent));
-        _loader = new MessageDefinitionsLoader(_mockAppSettings, _mockLogger, _httpClient);
+        _loader = new AnnouncementsLoader(_mockAppSettings, _mockLogger, _httpClient);
 
         // Act
         var result = await _loader.Load();
@@ -156,12 +156,12 @@ public class MessageDefinitionsLoaderTests
     }
 
     [Test]
-    public async Task Load_ShouldHandleMessageDefinitionsWithNullMessages()
+    public async Task Load_ShouldHandleAnnouncementsWithNullMessages()
     {
         // Arrange
-        var messageDefinitions = new List<MessageDefinition>
+        var messageDefinitions = new List<Announcement>
         {
-            new MessageDefinition
+            new Announcement
             {
                 Id = "msg1",
                 StartDate = DateTime.UtcNow.AddDays(-1),
@@ -172,7 +172,7 @@ public class MessageDefinitionsLoaderTests
 
         var jsonContent = JsonHelper.Serialize(messageDefinitions);
         _httpClient = new HttpClient(new MockHttpMessageHandler(jsonContent));
-        _loader = new MessageDefinitionsLoader(_mockAppSettings, _mockLogger, _httpClient);
+        _loader = new AnnouncementsLoader(_mockAppSettings, _mockLogger, _httpClient);
 
         // Act
         var result = await _loader.Load();

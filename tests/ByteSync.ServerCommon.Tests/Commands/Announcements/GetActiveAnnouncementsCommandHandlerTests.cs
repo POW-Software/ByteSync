@@ -1,22 +1,22 @@
-using ByteSync.ServerCommon.Business.Messages;
-using ByteSync.ServerCommon.Commands.Messages;
+using ByteSync.ServerCommon.Business.Announcements;
+using ByteSync.ServerCommon.Commands.Announcements;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using FakeItEasy;
 using FluentAssertions;
 
-namespace ByteSync.ServerCommon.Tests.Commands.Messages;
+namespace ByteSync.ServerCommon.Tests.Commands.Announcements;
 
 [TestFixture]
-public class GetActiveMessagesCommandHandlerTests
+public class GetActiveAnnouncementsCommandHandlerTests
 {
-    private IMessageDefinitionRepository _repository = null!;
-    private GetActiveMessagesCommandHandler _handler = null!;
+    private IAnnouncementRepository _repository = null!;
+    private GetActiveAnnouncementsCommandHandler _handler = null!;
 
     [SetUp]
     public void Setup()
     {
-        _repository = A.Fake<IMessageDefinitionRepository>();
-        _handler = new GetActiveMessagesCommandHandler(_repository);
+        _repository = A.Fake<IAnnouncementRepository>();
+        _handler = new GetActiveAnnouncementsCommandHandler(_repository);
     }
 
     [Test]
@@ -24,7 +24,7 @@ public class GetActiveMessagesCommandHandlerTests
     {
         // Arrange
         var now = DateTime.UtcNow;
-        var messages = new List<MessageDefinition>
+        var messages = new List<Announcement>
         {
             new() { Id = "1", StartDate = now.AddHours(-1), EndDate = now.AddHours(1) },
             new() { Id = "2", StartDate = now.AddHours(-2), EndDate = now.AddHours(-1) },
@@ -33,7 +33,7 @@ public class GetActiveMessagesCommandHandlerTests
         A.CallTo(() => _repository.GetAll()).Returns(messages);
 
         // Act
-        var result = await _handler.Handle(new GetActiveMessagesRequest(), CancellationToken.None);
+        var result = await _handler.Handle(new GetActiveAnnouncementsRequest(), CancellationToken.None);
 
         // Assert
         result.Should().HaveCount(1);
