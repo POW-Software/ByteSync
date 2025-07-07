@@ -4,11 +4,11 @@ using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Authentication;
 
-public class AuthenticateComamndHandler : IRequestHandler<AuthenticateCommand, InitialAuthenticationResponse>
+public class AuthenticateCommandHandler : IRequestHandler<AuthenticateCommand, InitialAuthenticationResponse>
 {
     private readonly IAuthService _authService;
 
-    public AuthenticateComamndHandler(IAuthService authService)
+    public AuthenticateCommandHandler(IAuthService authService)
     {
         _authService = authService;
     }

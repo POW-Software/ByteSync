@@ -9,16 +9,16 @@ using FluentAssertions;
 
 namespace ByteSync.ServerCommon.Tests.Commands.Authentication;
 
-public class AuthenticateComamndHandlerTests
+public class AuthenticateCommandHandlerTests
 {
     private IAuthService _mockAuthService;
-    private AuthenticateComamndHandler _authenticateCommandHandler;
+    private AuthenticateCommandHandler _authenticateCommandHandler;
 
     [SetUp]
     public void Setup()
     {
         _mockAuthService = A.Fake<IAuthService>();
-        _authenticateCommandHandler = new AuthenticateComamndHandler(_mockAuthService);
+        _authenticateCommandHandler = new AuthenticateCommandHandler(_mockAuthService);
     }
 
     [Test]

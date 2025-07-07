@@ -5,7 +5,6 @@ namespace ByteSync.ServerCommon.Commands.Authentication;
 
 public class AuthenticateCommand : IRequest<InitialAuthenticationResponse>
 {
-
     public AuthenticateCommand(LoginData loginData, String ipAddress)
     {
         LoginData = loginData;
@@ -15,5 +14,4 @@ public class AuthenticateCommand : IRequest<InitialAuthenticationResponse>
     public LoginData LoginData { get; set; }
 
     public String ipAddress { get; set; }
-    
 }

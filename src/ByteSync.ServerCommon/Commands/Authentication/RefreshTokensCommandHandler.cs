@@ -17,6 +17,4 @@ public class RefreshTokensCommandHandler: IRequestHandler<RefreshTokensCommand, 
     {
         return await _authService.RefreshTokens(req.RefreshTokensData, req.ipAddress);
     }  
-
-
 }
