@@ -356,3 +356,6 @@ healthchecksdb
 
 # Jetbrains Rider run folder
 .run/
+
+# Visual Studio Code
+.vscode/
