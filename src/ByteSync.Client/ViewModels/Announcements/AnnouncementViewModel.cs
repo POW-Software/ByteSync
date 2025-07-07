@@ -24,10 +24,10 @@ public class AnnouncementViewModel : ActivatableViewModelBase
         _announcementRepository = announcementRepository;
         _localizationService = localizationService;
 
+        Refresh();
+        
         this.WhenActivated(disposables =>
         {
-            Refresh();
-
             _announcementRepository.ObservableCache
                 .Connect()
                 .Subscribe(_ => Refresh())
@@ -46,11 +46,6 @@ public class AnnouncementViewModel : ActivatableViewModelBase
 
     private void Refresh()
     {
-        if (_announcementRepository == null || _localizationService == null)
-        {
-            return;
-        }
-
         var cultureCode = _localizationService.CurrentCultureDefinition.Code;
         var messages = _announcementRepository.Elements
             .Select(a => a.Message.TryGetValue(cultureCode, out var msg)
