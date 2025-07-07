@@ -12,6 +12,7 @@ using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
+using ByteSync.ViewModels.Announcements;
 using ByteSync.ViewModels.Headers;
 using ByteSync.ViewModels.Misc;
 using ReactiveUI;
@@ -38,8 +39,9 @@ public class MainWindowViewModel : ActivatableViewModelBase, IScreen
 
     }
 
-    public MainWindowViewModel(ISessionService sessionService, ICloudSessionConnectionService cloudSessionConnectionService, INavigationService navigationService, 
-        IZoomService zoomService, FlyoutContainerViewModel? flyoutContainerViewModel, HeaderViewModel headerViewModel, 
+    public MainWindowViewModel(ISessionService sessionService, ICloudSessionConnectionService cloudSessionConnectionService, INavigationService navigationService,
+        IZoomService zoomService, FlyoutContainerViewModel? flyoutContainerViewModel, HeaderViewModel headerViewModel,
+        AnnouncementViewModel announcementViewModel,
         IIndex<NavigationPanel, IRoutableViewModel> navigationPanelViewModels, IMessageBoxViewModelFactory messageBoxViewModelFactory,
         IQuitSessionService quitSessionService, ICloudSessionConnectionRepository cloudSessionConnectionRepository,
         ILogger<MainWindowViewModel> logger)
@@ -58,6 +60,7 @@ public class MainWindowViewModel : ActivatableViewModelBase, IScreen
         
         FlyoutContainer = flyoutContainerViewModel!;
         Header = headerViewModel;
+        Announcement = announcementViewModel;
 
         this.WhenActivated(disposables =>
         {
@@ -97,6 +100,9 @@ public class MainWindowViewModel : ActivatableViewModelBase, IScreen
 
     [Reactive]
     public ViewModelBase Header { get; set; }
+
+    [Reactive]
+    public AnnouncementViewModel Announcement { get; set; }
 
     [Reactive]
     public FlyoutContainerViewModel FlyoutContainer { get; set; }

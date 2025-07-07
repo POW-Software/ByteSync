@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:announcements="clr-namespace:ByteSync.ViewModels.Announcements"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="100"
+             x:Class="ByteSync.Views.Announcements.AnnouncementView">
+    <Design.DataContext>
+        <announcements:AnnouncementViewModel />
+    </Design.DataContext>
+
+    <Border Background="{DynamicResource BlockBackColor}" IsVisible="{Binding IsVisible}" Padding="6">
+        <ItemsControl ItemsSource="{Binding Announcements}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" Margin="0 2" TextWrapping="Wrap"/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Border>
+</UserControl>
