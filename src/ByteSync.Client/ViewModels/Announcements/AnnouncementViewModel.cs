@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using ByteSync.Common.Business.Announcements;
 using ByteSync.Interfaces;
@@ -13,16 +14,22 @@ public class AnnouncementViewModel : ActivatableViewModelBase
 {
     private readonly IAnnouncementRepository _announcementRepository;
     private readonly ILocalizationService _localizationService;
+    private readonly IApplicationSettingsRepository _applicationSettingsRepository;
 
     public AnnouncementViewModel()
     {
-        Announcements = new ObservableCollection<string>();
+        Announcements = new ObservableCollection<AnnouncementItemViewModel>();
     }
 
-    public AnnouncementViewModel(IAnnouncementRepository announcementRepository, ILocalizationService localizationService) : this()
+    public AnnouncementViewModel(IAnnouncementRepository announcementRepository, 
+        ILocalizationService localizationService, 
+        IApplicationSettingsRepository applicationSettingsRepository) : this()
     {
         _announcementRepository = announcementRepository;
         _localizationService = localizationService;
+        _applicationSettingsRepository = applicationSettingsRepository;
+
+        AcknowledgeAnnouncementCommand = ReactiveCommand.Create<string>(AcknowledgeAnnouncement);
 
         Refresh();
         
@@ -39,7 +46,9 @@ public class AnnouncementViewModel : ActivatableViewModelBase
         });
     }
 
-    public ObservableCollection<string> Announcements { get; }
+    public ObservableCollection<AnnouncementItemViewModel> Announcements { get; }
+
+    public ReactiveCommand<string, Unit> AcknowledgeAnnouncementCommand { get; }
 
     [Reactive]
     public bool IsVisible { get; private set; }
@@ -47,18 +56,42 @@ public class AnnouncementViewModel : ActivatableViewModelBase
     private void Refresh()
     {
         var cultureCode = _localizationService.CurrentCultureDefinition.Code;
-        var messages = _announcementRepository.Elements
-            .Select(a => a.Message.TryGetValue(cultureCode, out var msg)
-                ? msg
-                : a.Message.Values.FirstOrDefault() ?? string.Empty)
+        var applicationSettings = _applicationSettingsRepository.GetCurrentApplicationSettings();
+        var acknowledgedIds = applicationSettings.DecodedAcknowledgedAnnouncementIds;
+        
+        var unacknowledgedAnnouncements = _announcementRepository.Elements
+            .Where(a => !acknowledgedIds.Contains(a.Id))
+            .Select(a => new AnnouncementItemViewModel
+            {
+                Id = a.Id,
+                Message = a.Message.TryGetValue(cultureCode, out var msg)
+                    ? msg
+                    : a.Message.Values.FirstOrDefault() ?? string.Empty
+            })
             .ToList();
 
         Announcements.Clear();
-        foreach (var message in messages)
+        foreach (var announcement in unacknowledgedAnnouncements)
         {
-            Announcements.Add(message);
+            Announcements.Add(announcement);
         }
 
         IsVisible = Announcements.Count > 0;
     }
+
+    private void AcknowledgeAnnouncement(string announcementId)
+    {
+        _applicationSettingsRepository.UpdateCurrentApplicationSettings(settings =>
+        {
+            settings.AddAcknowledgedAnnouncementId(announcementId);
+        }, true);
+        
+        Refresh();
+    }
+}
+
+public class AnnouncementItemViewModel
+{
+    public string Id { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
 }

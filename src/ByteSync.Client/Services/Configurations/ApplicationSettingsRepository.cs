@@ -18,7 +18,7 @@ class ApplicationSettingsRepository : IApplicationSettingsRepository
     private ProductSerialDescription? _productSerialDescription;
     private string? _encryptionPassword;
     
-    public const string APPLICATION_SETTINGS_LAST_FORMAT_VERSION = "1.5";
+    public const string APPLICATION_SETTINGS_LAST_FORMAT_VERSION = "1.6";
 
 
     public ApplicationSettingsRepository(ILocalApplicationDataManager localApplicationDataManager, 
@@ -173,6 +173,12 @@ class ApplicationSettingsRepository : IApplicationSettingsRepository
                 applicationSettings.InitializeTrustedPublicKeys();
             }
 
+            // Initialize acknowledged announcement IDs if not present
+            if (applicationSettings.DecodedAcknowledgedAnnouncementIds == null)
+            {
+                applicationSettings.InitializeAcknowledgedAnnouncementIds();
+            }
+
             applicationSettings.SettingsVersion = APPLICATION_SETTINGS_LAST_FORMAT_VERSION;
 
             needUpdate = true;
@@ -245,6 +251,7 @@ class ApplicationSettingsRepository : IApplicationSettingsRepository
         
         applicationSettings.InitializeRsa();
         applicationSettings.InitializeTrustedPublicKeys();
+        applicationSettings.InitializeAcknowledgedAnnouncementIds();
             
         CheckRsa(applicationSettings);
 

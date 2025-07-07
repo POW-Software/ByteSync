@@ -24,6 +24,7 @@ public class ApplicationSettings : ICloneable
         AgreesBetaWarning0 = false;
         TrustedPublicKeys = null;
         SettingsVersion = null;
+        AcknowledgedAnnouncementIds = null;
     }
 
     public string InstallationId { get; set; } = null!;
@@ -186,11 +187,40 @@ public class ApplicationSettings : ICloneable
     }
 
     public string? SettingsVersion { get; set; }
+    
+    public string? AcknowledgedAnnouncementIds { get; set; }
         
     private string EncryptionPassword { get; set; } = null!;
 
     [XmlIgnore]
     public RSA PrivateRsa { get; private set; } = null!;
+
+    [XmlIgnore]
+    public List<string> DecodedAcknowledgedAnnouncementIds
+    {
+        get
+        {
+            if (AcknowledgedAnnouncementIds.IsNullOrEmpty())
+            {
+                return new List<string>();
+            }
+                
+            string json = CryptographyUtils.Decrypt(AcknowledgedAnnouncementIds!, EncryptionPassword);
+            return JsonHelper.Deserialize<List<string>>(json) ?? new List<string>();
+        }
+        set
+        {
+            if (value == null || value.Count == 0)
+            {
+                AcknowledgedAnnouncementIds = null;
+            }
+            else
+            {
+                string json = JsonHelper.Serialize(value);
+                AcknowledgedAnnouncementIds = CryptographyUtils.Encrypt(json, EncryptionPassword);
+            }
+        }
+    }
 
     public object Clone()
     {
@@ -236,6 +266,28 @@ public class ApplicationSettings : ICloneable
 
         string json = JsonHelper.Serialize(trustedKeys);
         TrustedPublicKeys = CryptographyUtils.Encrypt(json, EncryptionPassword);
+    }
+
+    public void InitializeAcknowledgedAnnouncementIds()
+    {
+        string json = JsonHelper.Serialize(new List<string>());
+        AcknowledgedAnnouncementIds = CryptographyUtils.Encrypt(json, EncryptionPassword);
+    }
+
+    public void AddAcknowledgedAnnouncementId(string announcementId)
+    {
+        var acknowledgedIds = DecodedAcknowledgedAnnouncementIds;
+        
+        if (!acknowledgedIds.Contains(announcementId))
+        {
+            acknowledgedIds.Add(announcementId);
+            DecodedAcknowledgedAnnouncementIds = acknowledgedIds;
+        }
+    }
+
+    public bool IsAnnouncementAcknowledged(string announcementId)
+    {
+        return DecodedAcknowledgedAnnouncementIds.Contains(announcementId);
     }
 
     public void InitializeRsa()
