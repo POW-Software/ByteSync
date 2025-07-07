@@ -171,9 +171,4 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
             await _navigationEventsHub.RaiseCreateCloudSessionProfileRequested();
         }
     }
-    
-    private void OnCloudSessionOnFatalError(CloudSessionFatalError cloudSessionFatalError)
-    {
-        IsCloudSessionFatalError = true;
-    }
 }
