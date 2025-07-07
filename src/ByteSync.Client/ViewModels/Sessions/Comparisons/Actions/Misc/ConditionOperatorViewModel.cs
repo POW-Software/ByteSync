@@ -1,4 +1,5 @@
 ﻿using ByteSync.Business.Comparisons;
+using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Actions.Misc;
 
@@ -18,15 +19,9 @@ class ConditionOperatorViewModel : ViewModelBase
     }
 
     public ConditionOperatorTypes ConditionOperator { get; set; }
-
-    public string Description
-    {
-        get => _description;
-        set
-        {
-            SetProperty(ref _description, value);
-        }
-    }
+    
+    [Reactive]
+    public string Description { get; set; }
 
     protected bool Equals(ConditionOperatorViewModel other)
     {

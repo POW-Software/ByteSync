@@ -331,4 +331,5 @@ internal static class SubjectInfoHelper
     internal static void LogDebug(this ISubjectInfo subjectInfo, string methodName)
     {
         HubPushHandler2.Logger.LogDebug("HubPushHandler2.{methodName}", methodName);
-    } }
+    } 
+}

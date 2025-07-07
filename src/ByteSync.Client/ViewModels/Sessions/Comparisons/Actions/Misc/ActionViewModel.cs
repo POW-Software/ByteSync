@@ -1,4 +1,5 @@
 ﻿using ByteSync.Common.Business.Actions;
+using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Actions.Misc;
 
@@ -14,9 +15,6 @@ class ActionViewModel : ViewModelBase
 
     private string _description;
 
-    public string Description
-    {
-        get { return _description; }
-        set { SetProperty(ref _description, value); }
-    }
+    [Reactive]
+    public string Description { get; set; }
 }

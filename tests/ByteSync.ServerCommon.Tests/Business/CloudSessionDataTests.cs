@@ -48,7 +48,6 @@ public class CloudSessionDataTests
         sessionData.SessionMembers.Should().NotBeNull().And.BeEmpty();
         sessionData.PreSessionMembers.Should().NotBeNull().And.BeEmpty();
     }
-    
 
     [Test]
     public void Contains_WithExistingEndpoint_ShouldReturnTrue()

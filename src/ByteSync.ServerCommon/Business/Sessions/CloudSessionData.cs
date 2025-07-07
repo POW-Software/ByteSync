@@ -29,7 +29,6 @@ public class CloudSessionData
         
     public EncryptedSessionSettings SessionSettings { get; set; } = null!;
 
-
     public bool IsSessionActivated { get; set; }
 
     public List<SessionMemberData> SessionMembers { get; set; }
@@ -55,7 +54,6 @@ public class CloudSessionData
     {
         SessionSettings = cloudSessionSettings;
     }
-    
 
      public void ResetSession()
      {
