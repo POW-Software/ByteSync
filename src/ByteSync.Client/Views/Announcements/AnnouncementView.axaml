@@ -9,7 +9,9 @@
         <announcements:AnnouncementViewModel />
     </Design.DataContext>
 
-    <Border Background="{DynamicResource BlockBackColor}" IsVisible="{Binding IsVisible}" Padding="6">
+    <Border Background="{DynamicResource OtherMemberBackGround}" 
+            BorderThickness="0 0 0 1" BorderBrush="{DynamicResource SystemBaseMediumLowColor}"
+            IsVisible="{Binding IsVisible}" Padding="6">
         <ItemsControl ItemsSource="{Binding Announcements}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
