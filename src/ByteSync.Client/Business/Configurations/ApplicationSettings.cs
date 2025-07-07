@@ -205,8 +205,7 @@ public class ApplicationSettings : ICloneable
                 return new List<string>();
             }
                 
-            string json = CryptographyUtils.Decrypt(AcknowledgedAnnouncementIds!, EncryptionPassword);
-            return JsonHelper.Deserialize<List<string>>(json) ?? new List<string>();
+            return AcknowledgedAnnouncementIds!.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList();
         }
         set
         {
@@ -216,8 +215,7 @@ public class ApplicationSettings : ICloneable
             }
             else
             {
-                string json = JsonHelper.Serialize(value);
-                AcknowledgedAnnouncementIds = CryptographyUtils.Encrypt(json, EncryptionPassword);
+                AcknowledgedAnnouncementIds = string.Join(";", value);
             }
         }
     }
@@ -270,8 +268,7 @@ public class ApplicationSettings : ICloneable
 
     public void InitializeAcknowledgedAnnouncementIds()
     {
-        string json = JsonHelper.Serialize(new List<string>());
-        AcknowledgedAnnouncementIds = CryptographyUtils.Encrypt(json, EncryptionPassword);
+        AcknowledgedAnnouncementIds = null;
     }
 
     public void AddAcknowledgedAnnouncementId(string announcementId)
