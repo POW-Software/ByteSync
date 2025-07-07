@@ -103,9 +103,7 @@ public class CloudSessionDataTests
         // Assert
         _cloudSessionData.SessionSettings.Should().BeSameAs(newSessionSettings);
     }
-
-
-
+    
     [Test]
     public void GetCloudSession_ShouldReturnCloudSessionWithCorrectProperties()
     {

@@ -171,5 +171,4 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
             await _navigationEventsHub.RaiseCreateCloudSessionProfileRequested();
         }
     }
-    
 }
