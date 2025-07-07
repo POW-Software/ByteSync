@@ -1,4 +1,8 @@
 ﻿using ByteSync.Common.Business.Auth;
+using ByteSync.Common.Helpers;
+using ByteSync.ServerCommon.Business.Auth;
+using ByteSync.ServerCommon.Interfaces.Factories;
+using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 
@@ -6,15 +10,55 @@ namespace ByteSync.ServerCommon.Commands.Authentication;
 
 public class RefreshTokensCommandHandler: IRequestHandler<RefreshTokensCommand, RefreshTokensResponse>
 {
-    private readonly IAuthService _authService;
-
-    public RefreshTokensCommandHandler(IAuthService authService)
+    private readonly ITokensFactory _tokensFactory;
+    private readonly IClientsRepository _clientsRepository;
+    public RefreshTokensCommandHandler(ITokensFactory tokensFactory, IClientsRepository clientsRepository)
     {
-        _authService = authService;
+        _tokensFactory = tokensFactory;
+        _clientsRepository = clientsRepository;
     }
 
     public async Task<RefreshTokensResponse> Handle(RefreshTokensCommand req, CancellationToken cancellationToken)
-    {
-        return await _authService.RefreshTokens(req.RefreshTokensData, req.ipAddress);
+    { 
+        RefreshTokensResponse? authenticationResponse = null;
+        if (req.RefreshTokensData.Token.IsNullOrEmpty())
+        {
+            authenticationResponse = new RefreshTokensResponse(RefreshTokensStatus.RefreshTokenNotFound);
+            return authenticationResponse;
+        }
+
+        JwtTokens? tokens = null;
+        var result = await _clientsRepository.AddOrUpdate(req.RefreshTokensData.ClientInstanceId,
+            client =>
+            {
+                if (client == null || client.RefreshToken == null || !Equals(client.RefreshToken.Token, req.RefreshTokensData.Token))
+                {
+                    authenticationResponse = new RefreshTokensResponse(RefreshTokensStatus.RefreshTokenNotFound);
+                    return null;
+                }
+
+                if (client.RefreshToken!.IsExpired)
+                {
+                    authenticationResponse = new RefreshTokensResponse(RefreshTokensStatus.RefreshTokenNotActive);
+                    return null;
+                }
+            
+                tokens = _tokensFactory.BuildTokens(client);
+                client.RefreshToken = tokens.RefreshToken;
+
+                return client;
+            });
+
+        if (result.IsSaved)
+        {
+            authenticationResponse =
+                new RefreshTokensResponse(RefreshTokensStatus.RefreshTokenOk, tokens!.BuildAuthenticationTokens());
+
+            return authenticationResponse;
+        }
+        else
+        {
+            return authenticationResponse!;
+        }
     }  
 }
