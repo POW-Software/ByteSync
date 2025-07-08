@@ -37,6 +37,12 @@ public static class DependencyInjectionLoader
                 .InstancePerLifetimeScope();
         }
     
+        builder.Register(c =>
+        {
+            var factory = c.Resolve<IHttpClientFactory>();
+            return factory.CreateClient();
+        }).As<HttpClient>().InstancePerLifetimeScope();
+        
         builder.RegisterAssemblyTypes(executingAssembly)
             .Where(t => t.Name.EndsWith("Service"))
             .InstancePerLifetimeScope()

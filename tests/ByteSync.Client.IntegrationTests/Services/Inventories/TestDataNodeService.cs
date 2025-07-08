@@ -1,10 +1,12 @@
 using Autofac;
 using ByteSync.Business.DataNodes;
+using ByteSync.Common.Business.Sessions;
 using ByteSync.Client.IntegrationTests.TestHelpers;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
+using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Repositories;
 using ByteSync.Services.Inventories;
@@ -40,14 +42,17 @@ public class TestDataNodeService : IntegrationTest
     {
         var repository = Container.Resolve<IDataNodeRepository>();
         var apiClient = Container.Resolve<Mock<IInventoryApiClient>>();
-        apiClient.Setup(a => a.AddDataNode(_sessionId, "NODE")).ReturnsAsync(true);
+        var encrypted = new EncryptedDataNode();
+        apiClient.Setup(a => a.AddDataNode(_sessionId, encrypted)).ReturnsAsync(true);
+        var encrypter = Container.Resolve<Mock<IDataEncrypter>>();
+        encrypter.Setup(e => e.EncryptDataNode(It.Is<DataNode>(n => n.NodeId == "NODE"))).Returns(encrypted);
         var node = new DataNode { NodeId = "NODE", ClientInstanceId = _currentEndPoint.ClientInstanceId };
 
         var result = await _service.TryAddDataNode(node);
 
         result.Should().BeTrue();
         repository.Elements.Should().Contain(node);
-        apiClient.Verify(a => a.AddDataNode(_sessionId, "NODE"), Times.Once);
+        apiClient.Verify(a => a.AddDataNode(_sessionId, encrypted), Times.Once);
     }
 
     [Test]
@@ -55,14 +60,16 @@ public class TestDataNodeService : IntegrationTest
     {
         var repository = Container.Resolve<IDataNodeRepository>();
         var apiClient = Container.Resolve<Mock<IInventoryApiClient>>();
-        apiClient.Setup(a => a.AddDataNode(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
+        apiClient.Setup(a => a.AddDataNode(It.IsAny<string>(), It.IsAny<EncryptedDataNode>())).ReturnsAsync(true);
+        var encrypter = Container.Resolve<Mock<IDataEncrypter>>();
+        encrypter.Setup(e => e.EncryptDataNode(It.IsAny<DataNode>())).Returns(new EncryptedDataNode());
         var node = new DataNode { NodeId = "NODE", ClientInstanceId = "OTHER" };
 
         var result = await _service.TryAddDataNode(node);
 
         result.Should().BeTrue();
         repository.Elements.Should().Contain(node);
-        apiClient.Verify(a => a.AddDataNode(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        apiClient.Verify(a => a.AddDataNode(It.IsAny<string>(), It.IsAny<EncryptedDataNode>()), Times.Never);
     }
 
     [Test]
@@ -70,7 +77,10 @@ public class TestDataNodeService : IntegrationTest
     {
         var repository = Container.Resolve<IDataNodeRepository>();
         var apiClient = Container.Resolve<Mock<IInventoryApiClient>>();
-        apiClient.Setup(a => a.AddDataNode(_sessionId, "NODE")).ReturnsAsync(false);
+        var encrypted = new EncryptedDataNode();
+        apiClient.Setup(a => a.AddDataNode(_sessionId, encrypted)).ReturnsAsync(false);
+        var encrypter = Container.Resolve<Mock<IDataEncrypter>>();
+        encrypter.Setup(e => e.EncryptDataNode(It.Is<DataNode>(n => n.NodeId == "NODE"))).Returns(encrypted);
         var node = new DataNode { NodeId = "NODE", ClientInstanceId = _currentEndPoint.ClientInstanceId };
 
         var result = await _service.TryAddDataNode(node);
@@ -86,13 +96,13 @@ public class TestDataNodeService : IntegrationTest
         var apiClient = Container.Resolve<Mock<IInventoryApiClient>>();
         var node = new DataNode { NodeId = "NODE", ClientInstanceId = _currentEndPoint.ClientInstanceId };
         repository.AddOrUpdate(node);
-        apiClient.Setup(a => a.RemoveDataNode(_sessionId, node.NodeId)).ReturnsAsync(true);
+        apiClient.Setup(a => a.RemoveDataNode(_sessionId, It.IsAny<EncryptedDataNode>())).ReturnsAsync(true);
 
         var result = await _service.TryRemoveDataNode(node);
 
         result.Should().BeTrue();
         repository.Elements.Should().BeEmpty();
-        apiClient.Verify(a => a.RemoveDataNode(_sessionId, node.NodeId), Times.Once);
+        apiClient.Verify(a => a.RemoveDataNode(_sessionId, It.IsAny<EncryptedDataNode>()), Times.Once);
     }
 
     [Test]
@@ -100,7 +110,10 @@ public class TestDataNodeService : IntegrationTest
     {
         var repository = Container.Resolve<IDataNodeRepository>();
         var apiClient = Container.Resolve<Mock<IInventoryApiClient>>();
-        apiClient.Setup(a => a.AddDataNode(_sessionId, "NODE")).ReturnsAsync(true);
+        var encrypted = new EncryptedDataNode();
+        apiClient.Setup(a => a.AddDataNode(_sessionId, encrypted)).ReturnsAsync(true);
+        var encrypter = Container.Resolve<Mock<IDataEncrypter>>();
+        encrypter.Setup(e => e.EncryptDataNode(It.Is<DataNode>(n => n.NodeId == "NODE"))).Returns(encrypted);
 
         await _service.CreateAndTryAddDataNode("NODE");
 

@@ -1,9 +1,6 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Common.Business.Inventories;
+﻿using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions;
-using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Communications.Http;
-using Microsoft.Extensions.Logging;
 
 namespace ByteSync.Services.Communications.Api;
 
@@ -82,11 +79,27 @@ public class InventoryApiClient : IInventoryApiClient
         }
     }
 
-    public async Task<bool> AddDataNode(string sessionId, string nodeId)
+    public async Task<List<EncryptedDataNode>?> GetDataNodes(string sessionId, string clientInstanceId)
     {
         try
         {
-            var result = await _apiInvoker.PostAsync<bool>($"session/{sessionId}/inventory/dataNode/{nodeId}", null);
+            var result = await _apiInvoker.GetAsync<List<EncryptedDataNode>?>($"session/{sessionId}/inventory/dataNode/{clientInstanceId}");
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error while getting dataNodes from an inventory with sessionId: {sessionId}", sessionId);
+                
+            throw;
+        }
+    }
+
+    public async Task<bool> AddDataNode(string sessionId, EncryptedDataNode encryptedDataNode)
+    {
+        try
+        {
+            var result = await _apiInvoker.PostAsync<bool>($"session/{sessionId}/inventory/dataNode", encryptedDataNode);
 
             return result;
         }
@@ -98,11 +111,11 @@ public class InventoryApiClient : IInventoryApiClient
         }
     }
 
-    public async Task<bool> RemoveDataNode(string sessionId, string nodeId)
+    public async Task<bool> RemoveDataNode(string sessionId, EncryptedDataNode encryptedDataNode)
     {
         try
         {
-            var result = await _apiInvoker.DeleteAsync<bool>($"session/{sessionId}/inventory/dataNode/{nodeId}", null);
+            var result = await _apiInvoker.DeleteAsync<bool>($"session/{sessionId}/inventory/dataNode", encryptedDataNode);
 
             return result;
         }

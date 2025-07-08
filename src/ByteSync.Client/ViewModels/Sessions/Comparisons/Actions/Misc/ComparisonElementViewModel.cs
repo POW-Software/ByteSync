@@ -1,9 +1,9 @@
 ﻿using ByteSync.Business.Comparisons;
-using Prism.Mvvm;
+using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Actions.Misc;
 
-class ComparisonElementViewModel : BindableBase
+class ComparisonElementViewModel : ViewModelBase
 {
     private string _description;
 
@@ -14,14 +14,8 @@ class ComparisonElementViewModel : BindableBase
 
     public ComparisonElement ComparisonElement { get; set; }
 
-    public string Description
-    {
-        get => _description;
-        set
-        {
-            SetProperty(ref _description, value);
-        }
-    }
+    [Reactive]
+    public string Description { get; set; }
 
     public bool IsDateOrSize
     {

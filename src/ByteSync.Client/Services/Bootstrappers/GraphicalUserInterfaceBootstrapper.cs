@@ -7,6 +7,7 @@ using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Bootstrapping;
 using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Themes;
+using ByteSync.Interfaces.Announcements;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Updates;
 using Splat.Autofac;
@@ -64,6 +65,12 @@ public class GraphicalUserInterfaceBootstrapper : BaseBootstrapper
 
         // LocalizationService
         _localizationService.Initialize();
+
+        using (var scope = ContainerProvider.Container.BeginLifetimeScope())
+        {
+            var announcementService = scope.Resolve<IAnnouncementService>();
+            _ = announcementService.Start();
+        }
 
         
         

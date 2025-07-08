@@ -11,5 +11,6 @@ public enum EntityType
     Client,
     ClientSoftwareVersionSettings,
     CloudSessionProfile,
-    Lobby
+    Lobby,
+    Announcement
 }

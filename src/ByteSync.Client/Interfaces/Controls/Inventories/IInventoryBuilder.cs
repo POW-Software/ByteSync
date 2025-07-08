@@ -10,7 +10,7 @@ public interface IInventoryBuilder
 {
     public Inventory Inventory { get; }
     
-    public string InventoryLetter { get; }
+    public string InventoryCode { get; }
     
     public InventoryIndexer Indexer { get; }
     

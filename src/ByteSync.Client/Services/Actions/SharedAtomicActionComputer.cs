@@ -190,7 +190,7 @@ public class SharedAtomicActionComputer : ISharedAtomicActionComputer
             dataPart.Name,
             dataPart.GetApplicableInventoryPart().InventoryPartType,
             inventory.Endpoint.ClientInstanceId,
-            inventory.Letter,
+            inventory.Code,
             inventoryPart.RootPath,
             relativePath,
             signatureGuid, signatureHash, hasAnalysisError);

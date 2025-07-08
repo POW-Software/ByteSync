@@ -48,17 +48,7 @@ public class RemoveDataSourceCommandHandler : IRequestHandler<RemoveDataSourceRe
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, request.SessionId, request.Client);
 
-                // TODO data-nodes-and-local-sync
-                var dataNode = inventoryMember.DataNodes.FirstOrDefault(n => n.NodeId == request.NodeId);
-                if (dataNode == null)
-                {
-                    dataNode = new DataNodeData { NodeId = request.NodeId };
-                    inventoryMember.DataNodes.Add(dataNode);
-                }
-
-                dataNode.DataSources.RemoveAll(p => p.Code == request.EncryptedDataSource.Code);
-
-                inventoryData.RecodeDataSources(cloudSessionData);
+                inventoryMember.DataSources.RemoveAll(p => p.Id == request.EncryptedDataSource.Id);
 
                 return inventoryData;
             }

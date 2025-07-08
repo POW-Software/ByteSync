@@ -3,6 +3,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions.Cloud;
+using ByteSync.Common.Business.Sessions;
 using ByteSync.Functions.Helpers.Misc;
 using ByteSync.ServerCommon.Commands.Inventories;
 using MediatR;
@@ -65,7 +66,7 @@ public class InventoryFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var encryptedDataSource = await FunctionHelper.DeserializeRequestBody<EncryptedDataSource>(req);
 
-        var request = new AddDataSourceRequest(sessionId, client, client.ClientInstanceId, encryptedDataSource);
+        var request = new AddDataSourceRequest(sessionId, client, encryptedDataSource);
         var result = await _mediator.Send(request);
 
         var response = req.CreateResponse();
@@ -84,7 +85,7 @@ public class InventoryFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var encryptedDataSource = await FunctionHelper.DeserializeRequestBody<EncryptedDataSource>(req);
 
-        var request = new RemoveDataSourceRequest(sessionId, client, client.ClientInstanceId, encryptedDataSource);
+        var request = new RemoveDataSourceRequest(sessionId, client, encryptedDataSource);
         var result = await _mediator.Send(request);
         
         var response = req.CreateResponse();
@@ -112,15 +113,15 @@ public class InventoryFunction
 
     [Function("InventoryAddDataNodeFunction")]
     public async Task<HttpResponseData> AddDataNode(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/inventory/dataNode/{nodeId}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/inventory/dataNode")]
         HttpRequestData req,
         FunctionContext executionContext,
-        string sessionId,
-        string nodeId)
+        string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
+        var encryptedDataNode = await FunctionHelper.DeserializeRequestBody<EncryptedDataNode>(req);
 
-        var request = new AddDataNodeRequest(sessionId, client, nodeId);
+        var request = new AddDataNodeRequest(sessionId, client, encryptedDataNode);
         var result = await _mediator.Send(request);
 
         var response = req.CreateResponse();
@@ -131,15 +132,32 @@ public class InventoryFunction
 
     [Function("InventoryRemoveDataNodeFunction")]
     public async Task<HttpResponseData> RemoveDataNode(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "session/{sessionId}/inventory/dataNode/{nodeId}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "session/{sessionId}/inventory/dataNode")]
+        HttpRequestData req,
+        FunctionContext executionContext,
+        string sessionId)
+    {
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var encryptedDataNode = await FunctionHelper.DeserializeRequestBody<EncryptedDataNode>(req);
+
+        var request = new RemoveDataNodeRequest(sessionId, client, encryptedDataNode);
+        var result = await _mediator.Send(request);
+
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+
+        return response;
+    }
+    
+    [Function("InventoryGetDataNodesFunction")]
+    public async Task<HttpResponseData> GetDataNodes(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/inventory/dataNode/{clientInstanceId}")]
         HttpRequestData req,
         FunctionContext executionContext,
         string sessionId,
-        string nodeId)
+        string clientInstanceId)
     {
-        var client = FunctionHelper.GetClientFromContext(executionContext);
-
-        var request = new RemoveDataNodeRequest(sessionId, client, nodeId);
+        var request = new GetDataNodesRequest(sessionId, clientInstanceId);
         var result = await _mediator.Send(request);
 
         var response = req.CreateResponse();

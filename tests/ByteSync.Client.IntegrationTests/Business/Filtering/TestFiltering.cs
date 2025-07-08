@@ -279,8 +279,8 @@ public class TestFiltering : BaseTestFiltering
     private void ConfigureDataPartIndexer()
     {
         var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
-        var inventoryA = new Inventory { InventoryId = "Id_A", Letter = "A" };
-        var inventoryB = new Inventory { InventoryId = "Id_B", Letter = "B" };
+        var inventoryA = new Inventory { InventoryId = "Id_A", Code = "A" };
+        var inventoryB = new Inventory { InventoryId = "Id_B", Code = "B" };
     
         var inventoryPartA = new InventoryPart(inventoryA, "/testRootA", FileSystemTypes.Directory);
         var inventoryPartB = new InventoryPart(inventoryB, "/testRootB", FileSystemTypes.Directory);

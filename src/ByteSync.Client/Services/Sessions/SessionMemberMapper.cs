@@ -14,9 +14,9 @@ public class SessionMemberMapper : ISessionMemberMapper
         _dataEncrypter = dataEncrypter;
     }
     
-    public SessionMemberInfo Map(SessionMemberInfoDTO sessionMemberInfoDto)
+    public SessionMember Map(SessionMemberInfoDTO sessionMemberInfoDto)
     {
-        var sessionMemberInfo = new SessionMemberInfo
+        var sessionMemberInfo = new SessionMember
         {
             Endpoint = sessionMemberInfoDto.Endpoint,
             SessionId = sessionMemberInfoDto.SessionId,

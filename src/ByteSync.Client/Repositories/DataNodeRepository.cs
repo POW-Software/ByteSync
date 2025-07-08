@@ -14,7 +14,7 @@ public class DataNodeRepository : BaseSourceCacheRepository<DataNode, string>, I
     {
         CurrentMemberDataNodes = SourceCache
             .Connect()
-            .Filter(node => Equals(node.ClientInstanceId, environmentService.ClientInstanceId!))
+            .Filter(node => Equals(node.ClientInstanceId, environmentService.ClientInstanceId))
             .AsObservableCache();
 
         _sessionInvalidationCachePolicy = sessionInvalidationCachePolicy;

@@ -55,7 +55,7 @@ public class InventoryComparer : IInventoryComparer
     {
         ComparisonResult.Clear();
 
-        foreach (var inventoryLoader in InventoryLoaders.OrderBy(il => il.Inventory.Letter))
+        foreach (var inventoryLoader in InventoryLoaders.OrderBy(il => il.Inventory.Code))
         {
             var inventory = inventoryLoader.Inventory;
             ComparisonResult.AddInventory(inventory);

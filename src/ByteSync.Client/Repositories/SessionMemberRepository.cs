@@ -9,15 +9,15 @@ using DynamicData.Binding;
 
 namespace ByteSync.Repositories;
 
-public class SessionMemberRepository : BaseSourceCacheRepository<SessionMemberInfo, string>, ISessionMemberRepository
+public class SessionMemberRepository : BaseSourceCacheRepository<SessionMember, string>, ISessionMemberRepository
 {
     private readonly IConnectionService _connectionService;
-    private readonly ReadOnlyObservableCollection<SessionMemberInfo> _sortedSessionMembersList;
-    private readonly ReadOnlyObservableCollection<SessionMemberInfo> _sortedOtherSessionMembersList;
-    private readonly ISessionInvalidationCachePolicy<SessionMemberInfo, string> _sessionInvalidationCachePolicy;
+    private readonly ReadOnlyObservableCollection<SessionMember> _sortedSessionMembersList;
+    private readonly ReadOnlyObservableCollection<SessionMember> _sortedOtherSessionMembersList;
+    private readonly ISessionInvalidationCachePolicy<SessionMember, string> _sessionInvalidationCachePolicy;
 
     public SessionMemberRepository(IConnectionService connectionService, 
-        ISessionInvalidationCachePolicy<SessionMemberInfo, string> sessionInvalidationCachePolicy)
+        ISessionInvalidationCachePolicy<SessionMember, string> sessionInvalidationCachePolicy)
     {
         _connectionService = connectionService;
         
@@ -38,13 +38,13 @@ public class SessionMemberRepository : BaseSourceCacheRepository<SessionMemberIn
         _sessionInvalidationCachePolicy.Initialize(SourceCache, true, false);
     }
 
-    protected override string KeySelector(SessionMemberInfo sessionMemberInfo) => sessionMemberInfo.ClientInstanceId;
+    protected override string KeySelector(SessionMember sessionMember) => sessionMember.ClientInstanceId;
     
-    public IEnumerable<SessionMemberInfo> SortedSessionMembers => _sortedSessionMembersList;
+    public IEnumerable<SessionMember> SortedSessionMembers => _sortedSessionMembersList;
 
-    public IEnumerable<SessionMemberInfo> SortedOtherSessionMembers => _sortedOtherSessionMembersList;
+    public IEnumerable<SessionMember> SortedOtherSessionMembers => _sortedOtherSessionMembersList;
     
-    public SessionMemberInfo GetCurrentSessionMember()
+    public SessionMember GetCurrentSessionMember()
     {
         return GetElement(_connectionService.ClientInstanceId!)!;
     }
@@ -54,23 +54,23 @@ public class SessionMemberRepository : BaseSourceCacheRepository<SessionMemberIn
         Remove(sessionMemberInfoDto.ClientInstanceId);
     }
 
-    public IObservable<ISortedChangeSet<SessionMemberInfo, string>> SortedSessionMembersObservable
+    public IObservable<ISortedChangeSet<SessionMember, string>> SortedSessionMembersObservable
     {
         get
         {
             return SourceCache.Connect()
-                .Sort(SortExpressionComparer<SessionMemberInfo>.Ascending(smi => smi.JoinedSessionOn),
+                .Sort(SortExpressionComparer<SessionMember>.Ascending(smi => smi.JoinedSessionOn),
                     SortOptimisations.ComparesImmutableValuesOnly);
         }
     }
     
-    public IObservable<ISortedChangeSet<SessionMemberInfo, string>> SortedOtherSessionMembersObservable
+    public IObservable<ISortedChangeSet<SessionMember, string>> SortedOtherSessionMembersObservable
     {
         get
         {
             return SourceCache.Connect()
                 .Filter(smi => smi.ClientInstanceId != _connectionService.ClientInstanceId!)
-                .Sort(SortExpressionComparer<SessionMemberInfo>.Ascending(smi => smi.JoinedSessionOn),
+                .Sort(SortExpressionComparer<SessionMember>.Ascending(smi => smi.JoinedSessionOn),
                     SortOptimisations.ComparesImmutableValuesOnly);
         }
     }
