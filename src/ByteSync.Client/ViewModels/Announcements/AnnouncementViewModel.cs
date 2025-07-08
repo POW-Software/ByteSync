@@ -28,8 +28,6 @@ public class AnnouncementViewModel : ActivatableViewModelBase
         _applicationSettingsRepository = applicationSettingsRepository;
 
         AcknowledgeAnnouncementCommand = ReactiveCommand.Create<string>(AcknowledgeAnnouncement);
-
-        Refresh();
         
         this.WhenActivated(disposables =>
         {

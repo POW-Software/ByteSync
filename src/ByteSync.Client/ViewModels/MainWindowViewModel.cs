@@ -64,6 +64,8 @@ public class MainWindowViewModel : ActivatableViewModelBase, IScreen
 
         this.WhenActivated(disposables =>
         {
+            announcementViewModel.Activator.Activate();
+            
             _zoomService.ZoomLevel  
                 .Select(zoomLevel => (1d / 100) * zoomLevel)
                 .ToPropertyEx(this, x => x.ZoomLevel)
