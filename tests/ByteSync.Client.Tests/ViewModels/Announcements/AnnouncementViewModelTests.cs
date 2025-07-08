@@ -17,12 +17,12 @@ namespace ByteSync.Tests.ViewModels.Announcements;
 [TestFixture]
 public class AnnouncementViewModelTests : AbstractTester
 {
-    private Mock<IAnnouncementRepository> _mockAnnouncementRepository;
-    private Mock<ILocalizationService> _mockLocalizationService;
-    private Mock<IApplicationSettingsRepository> _mockApplicationSettingsRepository;
-    private AnnouncementViewModel _announcementViewModel;
-    private Subject<CultureDefinition> _cultureSubject;
-    private ApplicationSettings _applicationSettings;
+    private Mock<IAnnouncementRepository> _mockAnnouncementRepository = null!;
+    private Mock<ILocalizationService> _mockLocalizationService = null!;
+    private Mock<IApplicationSettingsRepository> _mockApplicationSettingsRepository = null!;
+    private AnnouncementViewModel _announcementViewModel = null!;
+    private Subject<CultureDefinition> _cultureSubject = null!;
+    private ApplicationSettings _applicationSettings = null!;
 
     [SetUp]
     public void SetUp()
@@ -86,12 +86,12 @@ public class AnnouncementViewModelTests : AbstractTester
         // Arrange
         var announcements = new List<Announcement>
         {
-            new Announcement
+            new()
             {
                 Id = "1",
                 Message = new Dictionary<string, string> { { "en", "Test message" } }
             },
-            new Announcement
+            new()
             {
                 Id = "2",
                 Message = new Dictionary<string, string> { { "en", "Test message 2" } }
@@ -115,7 +115,7 @@ public class AnnouncementViewModelTests : AbstractTester
         _mockAnnouncementRepository.Setup(x => x.Elements)
             .Returns(announcements);
 
-        _applicationSettings.DecodedAcknowledgedAnnouncementIds = new List<string>();
+        _applicationSettings.DecodedAcknowledgedAnnouncementIds = [];
 
         // Act
         _announcementViewModel.Activator.Activate();
@@ -135,12 +135,12 @@ public class AnnouncementViewModelTests : AbstractTester
         // Arrange
         var announcements = new List<Announcement>
         {
-            new Announcement
+            new()
             {
                 Id = "1",
                 Message = new Dictionary<string, string> { { "en", "Test message" } }
             },
-            new Announcement
+            new()
             {
                 Id = "2",
                 Message = new Dictionary<string, string> { { "en", "Test message 2" } }
@@ -164,7 +164,7 @@ public class AnnouncementViewModelTests : AbstractTester
         _mockAnnouncementRepository.Setup(x => x.Elements)
             .Returns(announcements);
 
-        _applicationSettings.DecodedAcknowledgedAnnouncementIds = new List<string> { "1", "2" };
+        _applicationSettings.DecodedAcknowledgedAnnouncementIds = ["1", "2"];
 
         // Act
         _announcementViewModel.Activator.Activate();
@@ -180,17 +180,17 @@ public class AnnouncementViewModelTests : AbstractTester
         // Arrange
         var announcements = new List<Announcement>
         {
-            new Announcement
+            new()
             {
                 Id = "1",
                 Message = new Dictionary<string, string> { { "en", "Test message 1" } }
             },
-            new Announcement
+            new()
             {
                 Id = "2",
                 Message = new Dictionary<string, string> { { "en", "Test message 2" } }
             },
-            new Announcement
+            new()
             {
                 Id = "3",
                 Message = new Dictionary<string, string> { { "en", "Test message 3" } }
@@ -215,7 +215,7 @@ public class AnnouncementViewModelTests : AbstractTester
         _mockAnnouncementRepository.Setup(x => x.Elements)
             .Returns(announcements);
 
-        _applicationSettings.DecodedAcknowledgedAnnouncementIds = new List<string> { "2" };
+        _applicationSettings.DecodedAcknowledgedAnnouncementIds = ["2"];
 
         // Act
         _announcementViewModel.Activator.Activate();
@@ -235,7 +235,7 @@ public class AnnouncementViewModelTests : AbstractTester
         // Arrange
         var announcements = new List<Announcement>
         {
-            new Announcement
+            new()
             {
                 Id = "1",
                 Message = new Dictionary<string, string> 
@@ -263,7 +263,7 @@ public class AnnouncementViewModelTests : AbstractTester
             .Returns(announcements);
 
         // Ensure the announcement is not acknowledged
-        _applicationSettings.DecodedAcknowledgedAnnouncementIds = new List<string>();
+        _applicationSettings.DecodedAcknowledgedAnnouncementIds = [];
 
         _mockLocalizationService.Setup(x => x.CurrentCultureDefinition)
             .Returns(new CultureDefinition { Code = "fr" });
@@ -282,7 +282,7 @@ public class AnnouncementViewModelTests : AbstractTester
         // Arrange
         var announcements = new List<Announcement>
         {
-            new Announcement
+            new()
             {
                 Id = "1",
                 Message = new Dictionary<string, string> 
@@ -310,7 +310,7 @@ public class AnnouncementViewModelTests : AbstractTester
             .Returns(announcements);
 
         // Ensure the announcement is not acknowledged
-        _applicationSettings.DecodedAcknowledgedAnnouncementIds = new List<string>();
+        _applicationSettings.DecodedAcknowledgedAnnouncementIds = [];
 
         _mockLocalizationService.Setup(x => x.CurrentCultureDefinition)
             .Returns(new CultureDefinition { Code = "fr" }); // French not available
@@ -329,7 +329,7 @@ public class AnnouncementViewModelTests : AbstractTester
         // Arrange
         var announcements = new List<Announcement>
         {
-            new Announcement
+            new()
             {
                 Id = "1",
                 Message = new Dictionary<string, string> 
@@ -357,7 +357,7 @@ public class AnnouncementViewModelTests : AbstractTester
             .Returns(announcements);
 
         // Ensure the announcement is not acknowledged
-        _applicationSettings.DecodedAcknowledgedAnnouncementIds = new List<string>();
+        _applicationSettings.DecodedAcknowledgedAnnouncementIds = [];
 
         // Act
         _announcementViewModel.Activator.Activate();
@@ -373,7 +373,7 @@ public class AnnouncementViewModelTests : AbstractTester
         // Arrange
         var announcements = new List<Announcement>
         {
-            new Announcement
+            new()
             {
                 Id = "1",
                 Message = new Dictionary<string, string> { { "en", "Test message" } }
@@ -413,7 +413,7 @@ public class AnnouncementViewModelTests : AbstractTester
         // Arrange
         var announcements = new List<Announcement>
         {
-            new Announcement
+            new()
             {
                 Id = "1",
                 Message = new Dictionary<string, string> { { "en", "Test message" } }
@@ -498,7 +498,7 @@ public class AnnouncementViewModelTests : AbstractTester
         // Arrange
         var announcements = new List<Announcement>
         {
-            new Announcement
+            new()
             {
                 Id = "1",
                 Message = new Dictionary<string, string> { { "en", "Test message" } }
@@ -522,7 +522,7 @@ public class AnnouncementViewModelTests : AbstractTester
             .Returns(announcements);
 
         // Ensure announcements are not acknowledged
-        _applicationSettings.DecodedAcknowledgedAnnouncementIds = new List<string>();
+        _applicationSettings.DecodedAcknowledgedAnnouncementIds = [];
 
         _announcementViewModel.Activator.Activate();
         _announcementViewModel.Announcements.Should().HaveCount(1);
@@ -530,7 +530,7 @@ public class AnnouncementViewModelTests : AbstractTester
         // Act - Simulate repository cache change
         var newAnnouncements = new List<Announcement>
         {
-            new Announcement
+            new()
             {
                 Id = "2",
                 Message = new Dictionary<string, string> { { "en", "New message" } }
@@ -565,7 +565,7 @@ public class AnnouncementViewModelTests : AbstractTester
         // Arrange
         var announcements = new List<Announcement>
         {
-            new Announcement
+            new()
             {
                 Id = "1",
                 Message = new Dictionary<string, string> 
@@ -593,7 +593,7 @@ public class AnnouncementViewModelTests : AbstractTester
             .Returns(announcements);
 
         // Ensure the announcement is not acknowledged
-        _applicationSettings.DecodedAcknowledgedAnnouncementIds = new List<string>();
+        _applicationSettings.DecodedAcknowledgedAnnouncementIds = [];
 
         _announcementViewModel.Activator.Activate();
         _announcementViewModel.Announcements.Should().HaveCount(1);
@@ -613,7 +613,7 @@ public class AnnouncementViewModelTests : AbstractTester
     public void IsAnnouncementAcknowledged_ShouldReturnCorrectStatus()
     {
         // Arrange
-        _applicationSettings.DecodedAcknowledgedAnnouncementIds = new List<string> { "1", "3" };
+        _applicationSettings.DecodedAcknowledgedAnnouncementIds = ["1", "3"];
 
         // Act & Assert
         _applicationSettings.IsAnnouncementAcknowledged("1").Should().BeTrue();
@@ -625,7 +625,7 @@ public class AnnouncementViewModelTests : AbstractTester
     public void AddAcknowledgedAnnouncementId_ShouldAddToAcknowledgedList()
     {
         // Arrange
-        _applicationSettings.DecodedAcknowledgedAnnouncementIds = new List<string> { "1" };
+        _applicationSettings.DecodedAcknowledgedAnnouncementIds = ["1"];
 
         // Act
         _applicationSettings.AddAcknowledgedAnnouncementId("2");
@@ -640,7 +640,7 @@ public class AnnouncementViewModelTests : AbstractTester
     public void AddAcknowledgedAnnouncementId_ShouldNotAddDuplicate()
     {
         // Arrange
-        _applicationSettings.DecodedAcknowledgedAnnouncementIds = new List<string> { "1" };
+        _applicationSettings.DecodedAcknowledgedAnnouncementIds = ["1"];
 
         // Act
         _applicationSettings.AddAcknowledgedAnnouncementId("1");
@@ -654,7 +654,7 @@ public class AnnouncementViewModelTests : AbstractTester
     public void InitializeAcknowledgedAnnouncementIds_ShouldClearList()
     {
         // Arrange
-        _applicationSettings.DecodedAcknowledgedAnnouncementIds = new List<string> { "1", "2", "3" };
+        _applicationSettings.DecodedAcknowledgedAnnouncementIds = ["1", "2", "3"];
 
         // Act
         _applicationSettings.InitializeAcknowledgedAnnouncementIds();
@@ -702,10 +702,12 @@ public class AnnouncementViewModelTests : AbstractTester
     public void Refresh_WithNullAcknowledgedIds_ShouldHandleGracefully()
     {
         // Arrange
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         _applicationSettings.DecodedAcknowledgedAnnouncementIds = null;
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         var announcements = new List<Announcement>
         {
-            new Announcement
+            new()
             {
                 Id = "1",
                 Message = new Dictionary<string, string> { { "en", "Test message" } }
