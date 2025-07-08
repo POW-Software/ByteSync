@@ -6,7 +6,7 @@ namespace ByteSync.ServerCommon.Commands.Authentication;
 public class RefreshTokensRequest  : IRequest<RefreshTokensResponse>
 {
     
-    public RefreshTokensRequest(RefreshTokensData refreshTokensData, String ipAddress)
+    public RefreshTokensRequest(RefreshTokensData refreshTokensData, string ipAddress)
     {
         RefreshTokensData = refreshTokensData;
         IpAddress = ipAddress;
