@@ -16,7 +16,6 @@ public interface IHubPushHandler2
     Subject<SessionMemberInfoDTO> MemberJoinedSession { get; }
     Subject<SessionMemberInfoDTO> MemberQuittedSession { get; }
     Subject<SessionSettingsUpdatedDTO> SessionSettingsUpdated { get; }
-    Subject<CloudSessionFatalError> SessionOnFatalError { get; }
     Subject<InventoryStartedDTO> InventoryStarted { get; }
     Subject<DataNodeDTO> DataNodeAdded { get; }
     Subject<DataNodeDTO> DataNodeRemoved { get; }

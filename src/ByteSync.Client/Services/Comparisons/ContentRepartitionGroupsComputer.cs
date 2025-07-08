@@ -112,7 +112,7 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
         
         foreach (var inventoryPart in Status.MissingInventoryParts)
         {
-            var letter = isOnlyOnePartByInventory ? inventoryPart.Inventory.Letter : inventoryPart.Code;
+            var letter = isOnlyOnePartByInventory ? inventoryPart.Inventory.Code : inventoryPart.Code;
                 
             var member = new ContentRepartitionGroupMember
             {
@@ -128,7 +128,7 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
         {
             foreach (var inventoryPart in pair.Value)
             {
-                var letter = isOnlyOnePartByInventory ? inventoryPart.Inventory.Letter : inventoryPart.Code;
+                var letter = isOnlyOnePartByInventory ? inventoryPart.Inventory.Code : inventoryPart.Code;
                 
                 var member = new ContentRepartitionGroupMember
                 {
@@ -154,7 +154,7 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
             {
                 var member = new ContentRepartitionGroupMember
                 {
-                    Letter = inventory.Letter,
+                    Letter = inventory.Code,
                     Inventory = inventory,
                     IsMissing = false,
                     Link = "present"
@@ -168,7 +168,7 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
         {
             var member = new ContentRepartitionGroupMember
             {
-                Letter = inventory.Letter,
+                Letter = inventory.Code,
                 IsMissing = true,
                 Inventory = inventory,
             };

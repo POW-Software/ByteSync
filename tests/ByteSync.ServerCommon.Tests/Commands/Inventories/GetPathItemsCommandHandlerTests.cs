@@ -34,10 +34,10 @@ public class GetDataSourcesCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
+        var encryptedDataSource = new EncryptedDataSource { Id = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = client.ClientInstanceId, DataNodes = [ new DataNodeData { NodeId = client.ClientInstanceId, DataSources = new List<EncryptedDataSource> { encryptedDataSource } } ] });
+            { ClientInstanceId = client.ClientInstanceId, DataSources = [ encryptedDataSource ] });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));
@@ -82,9 +82,9 @@ public class GetDataSourcesCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var dataSource = new EncryptedDataSource { Code = "dataSource1" };
+        var dataSource = new EncryptedDataSource { Id = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
-        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId, DataNodes = [ new DataNodeData { NodeId = client.ClientInstanceId, DataSources = new List<EncryptedDataSource> { dataSource } } ] });
+        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId, DataSources = [ dataSource ] });
 
         A.CallTo(() => _mockInventoryRepository.Get(sessionId))
             .Returns(inventoryData);

@@ -2,6 +2,7 @@
 using System.Threading;
 using ByteSync.Business;
 using ByteSync.Business.Arguments;
+using ByteSync.Business.DataNodes;
 using ByteSync.Business.DataSources;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.SessionMembers;
@@ -22,12 +23,13 @@ public class InventoryBuilder : IInventoryBuilder
     
     private const int FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 4194304; 
         
-    public InventoryBuilder(SessionMemberInfo sessionMemberInfo, SessionSettings sessionSettings, InventoryProcessData inventoryProcessData, 
+    public InventoryBuilder(SessionMember sessionMember, DataNode dataNode, SessionSettings sessionSettings, InventoryProcessData inventoryProcessData, 
         OSPlatforms osPlatform, FingerprintModes fingerprintMode, ILogger<InventoryBuilder> logger)
     {
         _logger = logger;
         
-        SessionMemberInfo = sessionMemberInfo;
+        SessionMember = sessionMember;
+        DataNode = dataNode;
         SessionSettings = sessionSettings;
         InventoryProcessData = inventoryProcessData;
         FingerprintMode = fingerprintMode;
@@ -49,14 +51,16 @@ public class InventoryBuilder : IInventoryBuilder
                     
         _logger.LogDebug("InventoryBuilder.AddInventoryPart: Creating inventory {InventoryId}", id);
             
-        inventory.Endpoint = SessionMemberInfo.Endpoint;
-        inventory.MachineName = SessionMemberInfo.MachineName;
-        inventory.Letter = InventoryLetter!;
+        inventory.Endpoint = SessionMember.Endpoint;
+        inventory.MachineName = SessionMember.MachineName;
+        inventory.Code = InventoryCode!;
 
         return inventory;
     }
     
-    private SessionMemberInfo SessionMemberInfo { get; }
+    private SessionMember SessionMember { get; }
+    
+    private DataNode DataNode { get; }
 
     public Inventory Inventory { get; }
         
@@ -66,7 +70,7 @@ public class InventoryBuilder : IInventoryBuilder
         
     public SessionSettings? SessionSettings { get; }
 
-    public string InventoryLetter => SessionMemberInfo.GetLetter();
+    public string InventoryCode => DataNode.Code;
 
     private InventoryFileAnalyzer InventoryFileAnalyzer { get; }
 
@@ -131,7 +135,7 @@ public class InventoryBuilder : IInventoryBuilder
 
     private void BuildBaseInventory(string inventoryFullName, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory started", InventoryLetter);
+        _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory started", InventoryCode);
         
         _logger.LogInformation("Local Inventory parts:");
         foreach (var inventoryPart in Inventory.InventoryParts)
@@ -151,7 +155,7 @@ public class InventoryBuilder : IInventoryBuilder
             foreach (var inventoryPart in inventoryPartsToAnalyze)
             {
                 _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Identification started on part {Code:l} {Path}", 
-                    InventoryLetter, inventoryPart.Code, inventoryPart.RootPath);
+                    InventoryCode, inventoryPart.Code, inventoryPart.RootPath);
                     
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -170,7 +174,7 @@ public class InventoryBuilder : IInventoryBuilder
                 }
                     
                 _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Identification completed on {Code:l} {Path}", 
-                    InventoryLetter, inventoryPart.Code, inventoryPart.RootPath);
+                    InventoryCode, inventoryPart.Code, inventoryPart.RootPath);
             }
             
             Inventory.EndDateTime = DateTimeOffset.Now;
@@ -178,7 +182,7 @@ public class InventoryBuilder : IInventoryBuilder
             InventorySaver.WriteInventory();
                 
             _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Identification completed ({ItemsCount} files found)", 
-                InventoryLetter, Inventory.InventoryParts.Sum(ip => ip.FileDescriptions.Count));
+                InventoryCode, Inventory.InventoryParts.Sum(ip => ip.FileDescriptions.Count));
         }
         finally
         {
@@ -193,7 +197,7 @@ public class InventoryBuilder : IInventoryBuilder
 
     internal void RunAnalysis(string inventoryFullName, HashSet<IndexedItem> items, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Analysis started", InventoryLetter);
+        _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Analysis started", InventoryCode);
             
         try
         {
@@ -218,7 +222,7 @@ public class InventoryBuilder : IInventoryBuilder
             InventorySaver.WriteInventory();
 
             _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Analysis completed ({ItemsCount} files analyzed)",
-                InventoryLetter, items.Count);
+                InventoryCode, items.Count);
         }
         finally
         {

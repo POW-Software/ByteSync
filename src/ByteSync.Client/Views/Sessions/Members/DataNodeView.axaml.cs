@@ -3,9 +3,9 @@ using ByteSync.ViewModels.Sessions.Members;
 
 namespace ByteSync.Views.Sessions.Members;
 
-public partial class SessionMachineView : ReactiveUserControl<SessionMachineViewModel>
+public partial class DataNodeView : ReactiveUserControl<DataNodeViewModel>
 {
-    public SessionMachineView()
+    public DataNodeView()
     {
         InitializeComponent();
     }

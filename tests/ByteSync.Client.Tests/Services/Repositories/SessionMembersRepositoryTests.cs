@@ -16,7 +16,7 @@ namespace ByteSync.Tests.Services.Repositories;
 public class SessionMembersRepositoryTests
 {
     private Mock<IConnectionService> _mockConnectionService;
-    private Mock<ISessionInvalidationCachePolicy<SessionMemberInfo, string>> _mockSessionInvalidationCachePolicy;
+    private Mock<ISessionInvalidationCachePolicy<SessionMember, string>> _mockSessionInvalidationCachePolicy;
     
     private SessionMemberRepository _sessionMemberRepository;
 
@@ -27,7 +27,7 @@ public class SessionMembersRepositoryTests
     public void SetUp()
     {
         _mockConnectionService = new Mock<IConnectionService>();
-        _mockSessionInvalidationCachePolicy = new Mock<ISessionInvalidationCachePolicy<SessionMemberInfo, string>>();
+        _mockSessionInvalidationCachePolicy = new Mock<ISessionInvalidationCachePolicy<SessionMember, string>>();
 
         _sessionMemberRepository = new SessionMemberRepository(
             _mockConnectionService.Object,
@@ -39,7 +39,7 @@ public class SessionMembersRepositoryTests
     public void GetSessionMember_ReturnsCorrectSessionMemberInfo_WhenInstanceExists()
     {
         // Arrange
-        var sessionMemberInfo = new SessionMemberInfo { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1") };
+        var sessionMemberInfo = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1") };
         _sessionMemberRepository.AddOrUpdate(sessionMemberInfo);
 
         // Act
@@ -64,7 +64,7 @@ public class SessionMembersRepositoryTests
     public void SortedSessionMembers_ReturnsCorrectSessionMemberInfo_WhenInstanceExists()
     {
         // Arrange
-        var sessionMemberInfo = new SessionMemberInfo { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1") };
+        var sessionMemberInfo = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1") };
         _sessionMemberRepository.AddOrUpdate(sessionMemberInfo);
 
         // Act
@@ -82,7 +82,7 @@ public class SessionMembersRepositoryTests
     {
         // Arrange
         _mockConnectionService.SetupGet(x => x.ClientInstanceId).Returns("CID1");
-        var sessionMemberInfo = new SessionMemberInfo { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1") };
+        var sessionMemberInfo = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1") };
         _sessionMemberRepository.AddOrUpdate(sessionMemberInfo);
         
         // Act
@@ -99,7 +99,7 @@ public class SessionMembersRepositoryTests
     {
         // Arrange
         _mockConnectionService.SetupGet(x => x.ClientInstanceId).Returns("CID1");
-        var sessionMemberInfo = new SessionMemberInfo { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID2") };
+        var sessionMemberInfo = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID2") };
         _sessionMemberRepository.AddOrUpdate(sessionMemberInfo);
         
         // Act
@@ -117,7 +117,7 @@ public class SessionMembersRepositoryTests
     {
         // Arrange
         _mockConnectionService.SetupGet(x => x.ClientInstanceId).Returns("CID1");
-        var sessionMemberInfo = new SessionMemberInfo { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1") };
+        var sessionMemberInfo = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1") };
         _sessionMemberRepository.AddOrUpdate(sessionMemberInfo);
         
         // Act
@@ -160,14 +160,14 @@ public class SessionMembersRepositoryTests
     {
         // Arrange
         _mockConnectionService.SetupGet(x => x.ClientInstanceId).Returns("CID1");
-        var sessionMemberInfo = new SessionMemberInfo
+        var sessionMemberInfo = new SessionMember
         {
             Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1"), 
             JoinedSessionOn = DateTimeOffset.Now.AddSeconds(-10)
         };
         _sessionMemberRepository.AddOrUpdate(sessionMemberInfo);
         
-        sessionMemberInfo = new SessionMemberInfo
+        sessionMemberInfo = new SessionMember
         {
             Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID2"),
             JoinedSessionOn = DateTimeOffset.Now
@@ -192,14 +192,14 @@ public class SessionMembersRepositoryTests
     {
         // Arrange
         _mockConnectionService.SetupGet(x => x.ClientInstanceId).Returns("CID1");
-        var sessionMemberInfo = new SessionMemberInfo
+        var sessionMemberInfo = new SessionMember
         {
             Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1"),
             JoinedSessionOn = DateTimeOffset.Now.AddSeconds(-10)
         };
         _sessionMemberRepository.AddOrUpdate(sessionMemberInfo);
         
-        sessionMemberInfo = new SessionMemberInfo
+        sessionMemberInfo = new SessionMember
         {
             Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID2"),
             JoinedSessionOn = DateTimeOffset.Now
@@ -224,10 +224,10 @@ public class SessionMembersRepositoryTests
     {
         // Arrange
         _mockConnectionService.SetupGet(x => x.ClientInstanceId).Returns("CID1");
-        var sessionMemberInfo = new SessionMemberInfo { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID2") };
+        var sessionMemberInfo = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID2") };
         _sessionMemberRepository.AddOrUpdate(sessionMemberInfo);
         
-        sessionMemberInfo = new SessionMemberInfo { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1") };
+        sessionMemberInfo = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1") };
         _sessionMemberRepository.AddOrUpdate(sessionMemberInfo);
         
         _sessionMemberRepository.Remove("CID2");
@@ -250,7 +250,7 @@ public class SessionMembersRepositoryTests
     {
         // Arrange
         _mockConnectionService.SetupGet(x => x.ClientInstanceId).Returns("CID1");
-        var sessionMemberInfo = new SessionMemberInfo { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID2") };
+        var sessionMemberInfo = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID2") };
         _sessionMemberRepository.AddOrUpdate(sessionMemberInfo);
         
         // Act
@@ -271,14 +271,14 @@ public class SessionMembersRepositoryTests
     {
         // Arrange
         _mockConnectionService.SetupGet(x => x.ClientInstanceId).Returns("CID1");
-        var sessionMemberInfo = new SessionMemberInfo
+        var sessionMemberInfo = new SessionMember
         {
             Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID2"), 
             JoinedSessionOn = DateTimeOffset.Now.AddSeconds(-10)
         };
         _sessionMemberRepository.AddOrUpdate(sessionMemberInfo);
         
-        sessionMemberInfo = new SessionMemberInfo
+        sessionMemberInfo = new SessionMember
         {
             Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1"),
             JoinedSessionOn = DateTimeOffset.Now

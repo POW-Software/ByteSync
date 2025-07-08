@@ -1,9 +1,10 @@
+using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System.Linq;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
@@ -12,17 +13,20 @@ public class AddDataNodeCommandHandler : IRequestHandler<AddDataNodeRequest, boo
     private readonly IInventoryMemberService _inventoryMemberService;
     private readonly IInventoryRepository _inventoryRepository;
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
+    private readonly IInvokeClientsService _invokeClientsService;
     private readonly ILogger<AddDataNodeCommandHandler> _logger;
 
     public AddDataNodeCommandHandler(
         IInventoryMemberService inventoryMemberService,
         IInventoryRepository inventoryRepository,
         ICloudSessionsRepository cloudSessionsRepository,
+        IInvokeClientsService invokeClientsService,
         ILogger<AddDataNodeCommandHandler> logger)
     {
         _inventoryMemberService = inventoryMemberService;
         _inventoryRepository = inventoryRepository;
         _cloudSessionsRepository = cloudSessionsRepository;
+        _invokeClientsService = invokeClientsService;
         _logger = logger;
     }
 
@@ -30,8 +34,7 @@ public class AddDataNodeCommandHandler : IRequestHandler<AddDataNodeRequest, boo
     {
         var sessionId = request.SessionId;
         var client = request.Client;
-        var nodeId = request.NodeId;
-
+        var encryptedDataNode = request.EncryptedDataNode;
         var cloudSessionData = await _cloudSessionsRepository.Get(sessionId);
         if (cloudSessionData == null)
         {
@@ -47,11 +50,8 @@ public class AddDataNodeCommandHandler : IRequestHandler<AddDataNodeRequest, boo
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
 
-                var dataNode = inventoryMember.DataNodes.FirstOrDefault(n => n.NodeId == nodeId);
-                if (dataNode == null)
-                {
-                    inventoryMember.DataNodes.Add(new DataNodeData { NodeId = nodeId });
-                }
+                inventoryMember.DataNodes.RemoveAll(n => n.Id == encryptedDataNode.Id);
+                inventoryMember.DataNodes.Add(encryptedDataNode);
 
                 return inventoryData;
             }
@@ -61,6 +61,12 @@ public class AddDataNodeCommandHandler : IRequestHandler<AddDataNodeRequest, boo
                 return null;
             }
         });
+
+        if (updateEntityResult.IsSaved)
+        {
+            var dto = new DataNodeDTO(sessionId, client.ClientInstanceId, encryptedDataNode);
+            await _invokeClientsService.SessionGroupExcept(sessionId, client).DataNodeAdded(dto);
+        }
 
         return updateEntityResult.IsSaved;
     }

@@ -15,7 +15,7 @@ public class OnlyExpressionEvaluator : ExpressionEvaluator<OnlyExpression>
                 .SelectMany(ci => ci.GetInventories())
                 .ToHashSet();
 
-            result = inventories.Count == 1 && inventories.First().Letter.Equals(expression.DataSource, StringComparison.OrdinalIgnoreCase);
+            result = inventories.Count == 1 && inventories.First().Code.Equals(expression.DataSource, StringComparison.OrdinalIgnoreCase);
         }
         else if (expression.DataSource.Length > 1)
         {

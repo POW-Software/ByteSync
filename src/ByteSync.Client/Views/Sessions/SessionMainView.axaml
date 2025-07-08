@@ -38,7 +38,7 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <members:SessionMachineView/>
+                                <members:DataNodeView/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

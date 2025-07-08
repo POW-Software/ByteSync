@@ -29,21 +29,19 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Members;
 
-public class SessionMachineViewModel : ActivatableViewModelBase
+public class DataNodeViewModel : ActivatableViewModelBase
 {
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;
     private readonly IDataSourceService _dataSourceService;
     private readonly IDataSourceProxyFactory _dataSourceProxyFactory;
-    private readonly IDataNodeProxyFactory _dataNodeProxyFactory;
     private readonly IDataSourceRepository _dataSourceRepository;
-    private readonly IDataNodeRepository _dataNodeRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly IFileDialogService _fileDialogService;
     private readonly IThemeService _themeService;
-    private readonly ILogger<SessionMachineViewModel> _logger;
+    private readonly ILogger<DataNodeViewModel> _logger;
     
-    private ReadOnlyObservableCollection<DataNodeProxy> _nodes;
+    private ReadOnlyObservableCollection<DataSourceProxy> _dataSources;
     
     private IBrush? _currentMemberBackGround;
     private IBrush? _otherMemberBackGround;
@@ -53,33 +51,31 @@ public class SessionMachineViewModel : ActivatableViewModelBase
     private IBrush? _currentMemberLetterBorder;
     private IBrush? _otherMemberLetterBorder;
 
-    public SessionMachineViewModel()
+    public DataNodeViewModel()
     {
 
     }
 
-    public SessionMachineViewModel(SessionMemberInfo sessionMemberInfo, ISessionService sessionService, IDataSourceService dataSourceService,
-        ILocalizationService localizationService, IEnvironmentService environmentService, IDataSourceProxyFactory dataSourceProxyFactory,
-        IDataNodeProxyFactory dataNodeProxyFactory, IDataSourceRepository dataSourceRepository, IDataNodeRepository dataNodeRepository,
-        ISessionMemberRepository sessionMemberRepository, IFileDialogService fileDialogService,
-        IThemeService themeService, ILogger<SessionMachineViewModel> logger)
+    public DataNodeViewModel(SessionMember sessionMember, DataNode dataNode, ISessionService sessionService, IDataSourceService dataSourceService,
+        ILocalizationService localizationService, IEnvironmentService environmentService, IDataSourceProxyFactory dataSourceProxyFactory, 
+        IDataSourceRepository dataSourceRepository, ISessionMemberRepository sessionMemberRepository, IFileDialogService fileDialogService,
+        IThemeService themeService, ILogger<DataNodeViewModel> logger)
     {
         _sessionService = sessionService;
         _dataSourceService = dataSourceService;
         _localizationService = localizationService;
         _dataSourceProxyFactory = dataSourceProxyFactory;
-        _dataNodeProxyFactory = dataNodeProxyFactory;
         _dataSourceRepository = dataSourceRepository;
-        _dataNodeRepository = dataNodeRepository;
         _sessionMemberRepository = sessionMemberRepository;
         _fileDialogService = fileDialogService;
         _themeService = themeService;
         _logger = logger;
 
-        SessionMemberInfo = sessionMemberInfo;
+        SessionMember = sessionMember;
+        DataNode = dataNode;
         
-        IsLocalMachine = sessionMemberInfo.ClientInstanceId.Equals(environmentService.ClientInstanceId);
-        JoinedSessionOn = sessionMemberInfo.JoinedSessionOn;
+        IsLocalMachine = sessionMember.ClientInstanceId.Equals(environmentService.ClientInstanceId);
+        JoinedSessionOn = sessionMember.JoinedSessionOn;
         
         this.WhenAnyValue(x => x.IsLocalMachine)
             .Subscribe(_ => UpdateMachineDescription());
@@ -88,7 +84,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
             .Where(b => b)
             .Subscribe(_ => UpdateMachineDescription());
 
-        ClientInstanceId = sessionMemberInfo.ClientInstanceId;
+        ClientInstanceId = sessionMember.ClientInstanceId;
 
         RemoveDataSourceCommand = ReactiveCommand.CreateFromTask<DataSourceProxy>(RemoveDataSource);
 
@@ -100,13 +96,13 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         Observable.Merge(AddDirectoryCommand.IsExecuting, AddFileCommand.IsExecuting)
             .Select(executing => !executing).Subscribe(canRun);
 
-        var dataNodesObservable = _dataNodeRepository.ObservableCache.Connect()
-            .Filter(node => node.ClientInstanceId == sessionMemberInfo.ClientInstanceId)
-            .Sort(SortExpressionComparer<DataNode>.Ascending(n => n.NodeId))
-            .Transform(node => _dataNodeProxyFactory.CreateDataNodeProxy(node))
+        var dataNodesObservable = _dataSourceRepository.ObservableCache.Connect()
+            .Filter(ds => ds.DataNodeId == DataNode.NodeId)
+            .Sort(SortExpressionComparer<DataSource>.Ascending(p => p.Code))
+            .Transform(node => _dataSourceProxyFactory.CreateDataSourceProxy(node))
             .DisposeMany()
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Bind(out _nodes)
+            .Bind(out _dataSources)
             .Subscribe();
         
         this.WhenActivated(disposables =>
@@ -120,7 +116,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
                 .ToPropertyEx(this, x => x.IsFileSystemSelectionEnabled)
                 .DisposeWith(disposables);
             
-            _sessionMemberRepository.Watch(sessionMemberInfo)
+            _sessionMemberRepository.Watch(sessionMember)
                 .Subscribe(item =>
                 {
                     UpdateStatus(item.Current.SessionMemberGeneralStatus);
@@ -201,7 +197,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
     private void OnLocaleChanged(PropertyChangedEventArgs _)
     {
         UpdateMachineDescription();
-        UpdateStatus(SessionMemberInfo.SessionMemberGeneralStatus);
+        UpdateStatus(SessionMember.SessionMemberGeneralStatus);
     }
 
     public ReactiveCommand<DataSourceProxy, Unit> RemoveDataSourceCommand { get; set; }
@@ -242,16 +238,15 @@ public class SessionMachineViewModel : ActivatableViewModelBase
     [Reactive]
     public int PositionInList { get; set; }
 
-    [Reactive]
-    public DataNodeProxy? SelectedNode { get; set; }
-
-    public ReadOnlyObservableCollection<DataNodeProxy> DataNodes => _nodes;
+    public ReadOnlyObservableCollection<DataSourceProxy> DataSources => _dataSources;
     
-    internal SessionMemberInfo SessionMemberInfo { get; private set; }
+    internal SessionMember SessionMember { get; private set; }
+    
+    internal DataNode DataNode { get; private set; }
 
     private async Task RemoveDataSource(DataSourceProxy dataSource)
     {
-        await _dataSourceService.TryRemoveDataSource(dataSource.DataSource, SelectedNode?.NodeId);
+        await _dataSourceService.TryRemoveDataSource(dataSource.DataSource);
     }
 
     private async Task AddDirectory()
@@ -262,7 +257,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
 
             if (result != null && Directory.Exists(result))
             {
-                await _dataSourceService.CreateAndTryAddDataSource(result, FileSystemTypes.Directory, SelectedNode?.NodeId);
+                await _dataSourceService.CreateAndTryAddDataSource(result, FileSystemTypes.Directory, DataNode);
             }
         }
         catch (Exception ex)
@@ -279,7 +274,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         {
             foreach (var fileName in result)
             {
-                await _dataSourceService.CreateAndTryAddDataSource(fileName, FileSystemTypes.File, SelectedNode?.NodeId);
+                await _dataSourceService.CreateAndTryAddDataSource(fileName, FileSystemTypes.File, DataNode);
             }
         }
     }
@@ -290,7 +285,7 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         if (IsLocalMachine)
         {
             machineDescription = $"{_localizationService[nameof(Resources.SessionMachineView_ThisComputer)]} " +
-                                 $"({SessionMemberInfo.MachineName}, {SessionMemberInfo.IpAddress})";
+                                 $"({SessionMember.MachineName}, {SessionMember.IpAddress})";
 
 #if DEBUG
             machineDescription += " - PID:" + Process.GetCurrentProcess().Id;
@@ -298,31 +293,9 @@ public class SessionMachineViewModel : ActivatableViewModelBase
         }
         else
         {
-            machineDescription = $"{SessionMemberInfo.MachineName}, {SessionMemberInfo.IpAddress}";
+            machineDescription = $"{SessionMember.MachineName}, {SessionMember.IpAddress}";
         }
-
-    #if DEBUG
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.SHOW_DEMO_DATA))
-        {
-            if (IsLocalMachine)
-            {
-                machineDescription = $"{_localizationService[nameof(Resources.SessionMachineView_ThisComputer)]} " +
-                                     "(MACHINE_NAME_1, 123.123.123.123)";
-            }
-            else
-            {
-                if (SessionMemberInfo.PositionInList == 1)
-                {
-                    machineDescription = "MACHINE_NAME_2, 234.234.234.234";
-                }
-                else
-                {
-                    machineDescription = "MACHINE_NAME_3, 235.235.235.235";
-                }
-
-            }
-        }
-#endif
+        
         if (HasQuittedSessionAfterActivation)
         {
             machineDescription += " - " + _localizationService[nameof(Resources.SessionMachineView_LeftSession)];

@@ -51,6 +51,7 @@ public class CacheKeyFactory : ICacheKeyFactory
             EntityType.ClientSoftwareVersionSettings => "ClientSoftwareVersionSettings",
             EntityType.CloudSessionProfile => "CloudSessionProfile",
             EntityType.Lobby => "Lobby",
+            EntityType.Announcement => "Announcement",
             _ => throw new ArgumentOutOfRangeException(nameof(entityType), entityType, null)
         };
     }

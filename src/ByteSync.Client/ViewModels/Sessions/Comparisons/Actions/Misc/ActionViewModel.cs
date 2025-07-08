@@ -1,9 +1,9 @@
 ﻿using ByteSync.Common.Business.Actions;
-using Prism.Mvvm;
+using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Actions.Misc;
 
-class ActionViewModel : BindableBase
+class ActionViewModel : ViewModelBase
 {
     public ActionOperatorTypes ActionOperatorType { get; }
 
@@ -15,9 +15,6 @@ class ActionViewModel : BindableBase
 
     private string _description;
 
-    public string Description
-    {
-        get { return _description; }
-        set { SetProperty(ref _description, value); }
-    }
+    [Reactive]
+    public string Description { get; set; }
 }

@@ -12,11 +12,16 @@ public class ClientSoftwareVersionSettingsLoader : IClientSoftwareVersionSetting
 {
     private readonly AppSettings _appSettings;
     private readonly ILogger<ClientSoftwareVersionSettingsLoader> _logger;
+    private readonly HttpClient _httpClient;
 
-    public ClientSoftwareVersionSettingsLoader(IOptions<AppSettings> appSettings, ILogger<ClientSoftwareVersionSettingsLoader> logger)
+    public ClientSoftwareVersionSettingsLoader(
+        IOptions<AppSettings> appSettings, 
+        ILogger<ClientSoftwareVersionSettingsLoader> logger,
+        HttpClient httpClient)
     {
         _appSettings = appSettings.Value;
         _logger = logger;
+        _httpClient = httpClient;
     }
 
     public async Task<ClientSoftwareVersionSettings> Load()
@@ -29,12 +34,8 @@ public class ClientSoftwareVersionSettingsLoader : IClientSoftwareVersionSetting
             
         await policy.Execute(async () =>
         {
-            string contents;
-            using (var wc = new HttpClient())
-            {
-                _logger.LogInformation("Loading minimal version from {url}", _appSettings.UpdatesDefinitionUrl);
-                contents = await wc.GetStringAsync(_appSettings.UpdatesDefinitionUrl);
-            }
+            _logger.LogInformation("Loading minimal version from {url}", _appSettings.UpdatesDefinitionUrl);
+            var contents = await _httpClient.GetStringAsync(_appSettings.UpdatesDefinitionUrl);
             
             var softwareUpdates = JsonHelper.Deserialize<List<SoftwareVersion>>(contents)!;
 

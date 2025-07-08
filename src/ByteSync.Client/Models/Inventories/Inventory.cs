@@ -13,7 +13,7 @@ public class Inventory
         
     public ByteSyncEndpoint Endpoint { get; set; } = null!;
         
-    public string Letter { get; set; } = null!;
+    public string Code { get; set; } = null!;
 
     public DateTimeOffset StartDateTime { get; set; }
         

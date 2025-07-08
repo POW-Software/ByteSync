@@ -53,7 +53,7 @@ public class InventoryFinishedService : IInventoryFinishedService
         List<InventoryFile> result = new List<InventoryFile>();
         foreach (var inventory in inventories)
         {
-            var inventoryFullName = _cloudSessionLocalDataManager.GetCurrentMachineInventoryPath(inventory.Letter, localInventoryMode);
+            var inventoryFullName = _cloudSessionLocalDataManager.GetCurrentMachineInventoryPath(inventory.Code, localInventoryMode);
             
             var sharedFileDefinition = new SharedFileDefinition();
 
@@ -68,7 +68,7 @@ public class InventoryFinishedService : IInventoryFinishedService
 
             sharedFileDefinition.ClientInstanceId = inventory.Endpoint.ClientInstanceId;
             sharedFileDefinition.SessionId = session.SessionId;
-            sharedFileDefinition.AdditionalName = inventory.Letter;
+            sharedFileDefinition.AdditionalName = inventory.Code;
 
             var inventoryFile = new InventoryFile(sharedFileDefinition, inventoryFullName);
 

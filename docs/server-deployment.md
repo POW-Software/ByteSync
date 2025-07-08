@@ -71,7 +71,8 @@ Below is the JSON structure indicating which properties must be set. In particul
     "DatabaseName": ""
   },
   "AppSettings": {
-    "Secret": "YOUR_UNIQUE_RANDOM_SEED"
+    "Secret": "YOUR_UNIQUE_RANDOM_SEED",
+    "AnnouncementsUrl": ""
   }
 }
 ```
@@ -97,7 +98,8 @@ Below is the JSON structure indicating which properties must be set. In particul
     "SignalR:ConnectionString": "<your-signalr-connection-string>",
     "CosmosDb:ConnectionString": "<your-cosmosdb-connection-string>",
     "CosmosDb:DatabaseName": "<your-database-name>",
-    "AppSettings:Secret": "YOUR_UNIQUE_RANDOM_SEED"
+    "AppSettings:Secret": "YOUR_UNIQUE_RANDOM_SEED",
+    "AppSettings:AnnouncementsUrl": ""
   }
 }
 ```
@@ -136,6 +138,7 @@ cd ByteSync.Functions
 
 # App Settings
   dotnet user-secrets set "AppSettings:Secret" "YOUR_UNIQUE_RANDOM_SEED"
+  dotnet user-secrets set "AppSettings:AnnouncementsUrl" ""
 ```
 
 Repeat these steps for **ByteSync.Functions.IntegrationTests** and **ByteSync.ServerCommon.Tests**, navigating to each project's directory and setting the same secrets.

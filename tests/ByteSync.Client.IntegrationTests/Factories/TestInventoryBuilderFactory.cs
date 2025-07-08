@@ -38,7 +38,7 @@ public class TestInventoryBuilderFactory : IntegrationTest
         var mockEnvironmentService = Container.Resolve<Mock<IEnvironmentService>>();
         var mockDataSourceRepository = Container.Resolve<Mock<IDataSourceRepository>>();
         
-        var fakeSessionMember = new SessionMemberInfo();
+        var fakeSessionMember = new SessionMember();
         var fakeSessionSettings = new SessionSettings();
         var fakeProcessData = new InventoryProcessData();
         var fakePlatform = OSPlatforms.Windows;

@@ -76,7 +76,7 @@ public abstract class BaseTestFiltering : IntegrationTest
         string relativePath = "/unset")
     {
         string letter = inventoryId.Replace("Id_", "");
-        var inventory = new Inventory { InventoryId = inventoryId, Letter = letter };
+        var inventory = new Inventory { InventoryId = inventoryId, Code = letter };
         
         string code = $"{letter}1";
         var inventoryPart = new InventoryPart(inventory, rootPath, FileSystemTypes.Directory);
@@ -101,7 +101,7 @@ public abstract class BaseTestFiltering : IntegrationTest
         string rootPath)
     {
         string letter = inventoryId.Replace("Id_", "");
-        var inventory = new Inventory { InventoryId = inventoryId, Letter = letter };
+        var inventory = new Inventory { InventoryId = inventoryId, Code = letter };
         
         string code = $"{letter}1";
         var inventoryPart = new InventoryPart(inventory, rootPath, FileSystemTypes.Directory);

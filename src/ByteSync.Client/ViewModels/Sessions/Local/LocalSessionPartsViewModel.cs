@@ -201,7 +201,7 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
 
             if (result != null && Directory.Exists(result))
             {
-                await _dataSourceService.CreateAndTryAddDataSource(result, FileSystemTypes.Directory);
+                // await _dataSourceService.CreateAndTryAddDataSource(result, FileSystemTypes.Directory);
                 //await HandleNewDataSource(result, FileSystemTypes.Directory);
             }
         }
@@ -223,7 +223,7 @@ public class LocalSessionPartsViewModel : ActivatableViewModelBase
             {
                 foreach (var result in results)
                 {
-                    await _dataSourceService.CreateAndTryAddDataSource(result, FileSystemTypes.File);
+                    // await _dataSourceService.CreateAndTryAddDataSource(result, FileSystemTypes.File);
                     //await HandleNewDataSource(result, FileSystemTypes.File);
                 }
             }

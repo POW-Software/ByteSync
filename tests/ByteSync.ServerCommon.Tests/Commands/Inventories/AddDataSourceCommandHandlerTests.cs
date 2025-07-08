@@ -45,7 +45,7 @@ public class AddDataSourceCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
+        var encryptedDataSource = new EncryptedDataSource { Id = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
@@ -62,7 +62,7 @@ public class AddDataSourceCommandHandlerTests
 
         A.CallTo(() => _mockByteSyncPush.DataSourceAdded(A<DataSourceDTO>.Ignored)).Returns(Task.CompletedTask);
 
-        var request = new AddDataSourceRequest(sessionId, client, client.ClientInstanceId, encryptedDataSource);
+        var request = new AddDataSourceRequest(sessionId, client, encryptedDataSource);
         
         // Act
         await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);
@@ -82,7 +82,7 @@ public class AddDataSourceCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
+        var encryptedDataSource = new EncryptedDataSource { Id = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.IsInventoryStarted = true;
 
@@ -96,7 +96,7 @@ public class AddDataSourceCommandHandlerTests
 
         A.CallTo(() => _mockByteSyncPush.DataSourceAdded(A<DataSourceDTO>.Ignored)).Returns(Task.CompletedTask);
 
-        var request = new AddDataSourceRequest(sessionId, client, client.ClientInstanceId, encryptedDataSource);
+        var request = new AddDataSourceRequest(sessionId, client, encryptedDataSource);
         
         // Act
         await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);
@@ -112,10 +112,10 @@ public class AddDataSourceCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedDataSource = new EncryptedDataSource { Code = "dataSource1" };
+        var encryptedDataSource = new EncryptedDataSource { Id = "dataSource1" };
         var inventoryData = new InventoryData(sessionId);
         inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = client.ClientInstanceId, DataNodes = [ new DataNodeData { NodeId = client.ClientInstanceId, DataSources = new List<EncryptedDataSource> { encryptedDataSource } } ] });
+            { ClientInstanceId = client.ClientInstanceId, DataSources = [ encryptedDataSource ] });
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));
@@ -123,14 +123,14 @@ public class AddDataSourceCommandHandlerTests
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
             .Invokes((string _, Func<InventoryData, InventoryData> func) => func(inventoryData));
 
-        var request = new AddDataSourceRequest(sessionId, client, client.ClientInstanceId, encryptedDataSource);
+        var request = new AddDataSourceRequest(sessionId, client, encryptedDataSource);
         
         // Act
         await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         inventoryData.InventoryMembers.Count.Should().Be(1);
-        inventoryData.InventoryMembers[0].DataNodes.Single().DataSources.Count.Should().Be(1);
+        inventoryData.InventoryMembers[0].DataSources.Count.Should().Be(1);
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
     }
 }

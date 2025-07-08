@@ -108,14 +108,6 @@ public class InventoryService : IInventoryService
             InventoryProcessData.AreFullInventoriesComplete.OnNext(areFullInventoriesComplete);
         });
     }
-
-    public Task SetSessionOnFatalError(CloudSessionFatalError cloudSessionFatalError)
-    {
-        InventoryProcessData.RequestInventoryAbort();
-
-        return Task.CompletedTask;
-    }
-    
     public Task AbortInventory()
     {
         _logger.LogInformation("inventory aborted on user request");
