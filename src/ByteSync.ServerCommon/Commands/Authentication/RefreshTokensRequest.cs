@@ -5,7 +5,6 @@ namespace ByteSync.ServerCommon.Commands.Authentication;
 
 public class RefreshTokensRequest  : IRequest<RefreshTokensResponse>
 {
-    
     public RefreshTokensRequest(RefreshTokensData refreshTokensData, string ipAddress)
     {
         RefreshTokensData = refreshTokensData;
@@ -14,6 +13,5 @@ public class RefreshTokensRequest  : IRequest<RefreshTokensResponse>
 
     public RefreshTokensData RefreshTokensData { get; set; }
 
-    public String IpAddress { get; set; }
-    
+    public string IpAddress { get; set; }
 }
