@@ -2,7 +2,6 @@
 using ByteSync.Common.Business.Auth;
 using ByteSync.Functions.Helpers.Misc;
 using ByteSync.ServerCommon.Commands.Authentication;
-using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Azure.Functions.Worker;
@@ -26,7 +25,7 @@ public class AuthFunction
     {
         var loginData = await FunctionHelper.DeserializeRequestBody<LoginData>(req);
         var ip = req.ExtractIpAddress();
-        var authResult = await _mediator.Send(new AuthenticateCommand(loginData, ip));
+        var authResult = await _mediator.Send(new AuthenticateRequest(loginData, ip));
 
         var response = req.CreateResponse();
         if (authResult.IsSuccess)
@@ -48,7 +47,7 @@ public class AuthFunction
         var refreshTokensData = await FunctionHelper.DeserializeRequestBody<RefreshTokensData>(req);
         var ip = req.ExtractIpAddress();
         
-        var authResult = await _mediator.Send(new RefreshTokensCommand(refreshTokensData, ip));
+        var authResult = await _mediator.Send(new RefreshTokensRequest(refreshTokensData, ip));
         
         var response = req.CreateResponse();
         if (authResult.IsSuccess)

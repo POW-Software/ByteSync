@@ -11,7 +11,7 @@ using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Authentication;
 
-public class AuthenticateCommandHandler : IRequestHandler<AuthenticateCommand, InitialAuthenticationResponse>
+public class AuthenticateCommandHandler : IRequestHandler<AuthenticateRequest, InitialAuthenticationResponse>
 {
     private readonly ITokensFactory _tokensFactory;
     private readonly IByteSyncEndpointFactory _byteSyncEndpointFactory;
@@ -26,7 +26,7 @@ public class AuthenticateCommandHandler : IRequestHandler<AuthenticateCommand, I
         _clientSoftwareVersionService = clientSoftwareVersionService;
     }
     
-    public async Task<InitialAuthenticationResponse> Handle(AuthenticateCommand request, CancellationToken cancellationToken)
+    public async Task<InitialAuthenticationResponse> Handle(AuthenticateRequest request, CancellationToken cancellationToken)
     {
         InitialAuthenticationResponse authenticationResponse;
         

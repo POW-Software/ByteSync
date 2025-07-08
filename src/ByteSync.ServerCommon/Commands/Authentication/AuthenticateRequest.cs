@@ -3,12 +3,12 @@ using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Authentication;
 
-public class AuthenticateCommand : IRequest<InitialAuthenticationResponse>
+public class AuthenticateRequest : IRequest<InitialAuthenticationResponse>
 {
-    public AuthenticateCommand(LoginData loginData, String ipAddress)
+    public AuthenticateRequest(LoginData loginData, String ipAddress)
     {
         LoginData = loginData;
-        this.IpAddress = ipAddress;
+        IpAddress = ipAddress;
     }
 
     public LoginData LoginData { get; set; }

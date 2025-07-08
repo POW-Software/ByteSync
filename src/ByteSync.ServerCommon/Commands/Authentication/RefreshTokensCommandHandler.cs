@@ -3,12 +3,11 @@ using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
-using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Authentication;
 
-public class RefreshTokensCommandHandler: IRequestHandler<RefreshTokensCommand, RefreshTokensResponse>
+public class RefreshTokensCommandHandler: IRequestHandler<RefreshTokensRequest, RefreshTokensResponse>
 {
     private readonly ITokensFactory _tokensFactory;
     private readonly IClientsRepository _clientsRepository;
@@ -18,7 +17,7 @@ public class RefreshTokensCommandHandler: IRequestHandler<RefreshTokensCommand, 
         _clientsRepository = clientsRepository;
     }
 
-    public async Task<RefreshTokensResponse> Handle(RefreshTokensCommand req, CancellationToken cancellationToken)
+    public async Task<RefreshTokensResponse> Handle(RefreshTokensRequest req, CancellationToken cancellationToken)
     { 
         RefreshTokensResponse? authenticationResponse = null;
         if (req.RefreshTokensData.Token.IsNullOrEmpty())
