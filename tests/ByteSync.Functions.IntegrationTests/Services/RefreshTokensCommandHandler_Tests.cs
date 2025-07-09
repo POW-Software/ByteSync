@@ -16,6 +16,9 @@ public class RefreshTokensCommandHandler_Tests
         {
             builder.RegisterModule(new RepositoriesModule(true));
             builder.RegisterModule(new LoadersModule(false));
+            builder.RegisterType<ByteSync.ServerCommon.Commands.Authentication.RefreshTokensCommandHandler>()
+                    .AsSelf()
+                    .InstancePerLifetimeScope();
         });
     }
 
@@ -30,10 +33,10 @@ public class RefreshTokensCommandHandler_Tests
     {
         // Arrange
         var clientsRepository = _scope.Resolve<ClientsRepository>();
-        var clientInstanceId = "test-client-instance";
-        var clientId = "test-client-id";
+        var clientInstanceId = "integration-client-instance";
+        var clientId = "integration-client-id";
         var refreshToken = "valid-refresh-token";
-        var version = "1.0.0";
+        var version = "2.0.0";
         var osPlatform = ByteSync.Common.Business.Misc.OSPlatforms.Windows;
         var ipAddress = "localhost";
         var now = DateTimeOffset.UtcNow;
@@ -75,13 +78,11 @@ public class RefreshTokensCommandHandler_Tests
         Assert.That(response.RefreshTokensStatus, Is.EqualTo(ByteSync.Common.Business.Auth.RefreshTokensStatus.RefreshTokenOk));
         Assert.That(response.AuthenticationTokens, Is.Not.Null);
 
-
         // Assert that the refresh token was updated (rotated)
         var updatedClient = await clientsRepository.Get(clientInstanceId);
         Assert.That(updatedClient, Is.Not.Null);
         Assert.That(updatedClient.RefreshToken, Is.Not.Null);
         Assert.That(updatedClient.RefreshToken.Token, Is.Not.EqualTo(refreshToken), "Refresh token should be rotated and not equal to the old token.");
         Assert.That(updatedClient.RefreshToken.Expires, Is.GreaterThan(now), "New refresh token should have a later expiration.");
-
     }
 }

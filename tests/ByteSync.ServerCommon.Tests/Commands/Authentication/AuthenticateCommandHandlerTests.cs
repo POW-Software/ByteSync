@@ -101,6 +101,6 @@ public class AuthenticateCommandHandlerTests
         result.InitialConnectionStatus.Should().Be(InitialConnectionStatus.Success);
         result.EndPoint.Should().Be(expectedEndpoint);
         result.AuthenticationTokens.Should().BeEquivalentTo(expectedTokens);
-        result.BindSerialResponse.Status.Should().Be(BindSerialResponseStatus.Ignored);
+        result.BindSerialResponse.Status.Should().Be(BindSerialResponseStatus.NotSupplied);
     }
 }

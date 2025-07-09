@@ -28,10 +28,10 @@ public class RefreshTokensCommandHandlerTests
         // Arrange
         var refreshTokensData = new RefreshTokensData
         {
-            Token = "some-refresh-token",
+            Token = "refresh-token",
             ClientInstanceId = "client-123",
-            Version = "1.0.0",
-            OsPlatform = OSPlatforms.Windows 
+            Version = "2.0.0",
+            OsPlatform = ByteSync.Common.Business.Misc.OSPlatforms.Windows 
         };
 
         var ipAddress = "127.0.0.1";

@@ -1,5 +1,7 @@
 using Autofac;
 using ByteSync.Functions.IntegrationTests.TestHelpers.Autofac;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
+using FakeItEasy;
 
 namespace ByteSync.Functions.IntegrationTests.Services;
 
@@ -15,6 +17,9 @@ public class AuthenticateCommandHandler_Tests
         {
             builder.RegisterModule(new RepositoriesModule(true));
             builder.RegisterModule(new LoadersModule(false));
+            builder.RegisterType<ByteSync.ServerCommon.Commands.Authentication.AuthenticateCommandHandler>()
+            .AsSelf()
+            .InstancePerLifetimeScope();
         });
     }
 
@@ -30,7 +35,7 @@ public class AuthenticateCommandHandler_Tests
         // Arrange
         var clientId = "integration-client-id";
         var clientInstanceId = "integration-client-instance";
-        var version = "1.0.0";
+        var version = "2.0.0";
         var osPlatform = ByteSync.Common.Business.Misc.OSPlatforms.Windows;
         var ipAddress = "127.0.0.1";
 
