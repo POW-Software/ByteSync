@@ -11,5 +11,6 @@ public class ResetSessionRequest : IRequest<Unit>
         Client = client;
     }
     public string SessionId { get; }
+    
     public Client Client { get; }
 } 

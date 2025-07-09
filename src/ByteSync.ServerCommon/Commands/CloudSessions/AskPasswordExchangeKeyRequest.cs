@@ -13,5 +13,6 @@ public class AskPasswordExchangeKeyRequest : IRequest<JoinSessionResult>
     }
 
     public Client Client { get; }
+    
     public AskCloudSessionPasswordExchangeKeyParameters Parameters { get; }
 } 

@@ -8,5 +8,6 @@ public class GetMembersInstanceIdsRequest : IRequest<List<string>>
     {
         SessionId = sessionId;
     }
+    
     public string SessionId { get; }
 } 

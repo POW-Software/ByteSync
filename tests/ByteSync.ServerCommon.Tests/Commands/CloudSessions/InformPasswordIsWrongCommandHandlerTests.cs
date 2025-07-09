@@ -14,6 +14,7 @@ public class InformPasswordIsWrongCommandHandlerTests
     [Test]
     public async Task Handle_CallsService()
     {
+        // Arrange
         var mockService = new Mock<ICloudSessionsService>();
         var client = new Client();
         var sessionId = "session1";
@@ -21,7 +22,11 @@ public class InformPasswordIsWrongCommandHandlerTests
         mockService.Setup(s => s.InformPasswordIsWrong(client, sessionId, clientInstanceId)).Returns(Task.CompletedTask);
         var handler = new InformPasswordIsWrongCommandHandler(mockService.Object);
         var request = new InformPasswordIsWrongRequest(client, sessionId, clientInstanceId);
+
+        // Act
         await handler.Handle(request, CancellationToken.None);
+
+        // Assert
         mockService.Verify(s => s.InformPasswordIsWrong(client, sessionId, clientInstanceId), Times.Once);
     }
 } 

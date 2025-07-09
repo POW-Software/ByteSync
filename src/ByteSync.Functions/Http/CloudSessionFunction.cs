@@ -12,12 +12,10 @@ namespace ByteSync.Functions.Http;
 
 public class CloudSessionFunction
 {
-    private readonly ICloudSessionsService _cloudSessionsService;
     private readonly IMediator _mediator;
 
-    public CloudSessionFunction(ICloudSessionsService cloudSessionsService, IMediator mediator)
+    public CloudSessionFunction(IMediator mediator)
     {
-        _cloudSessionsService = cloudSessionsService;
         _mediator = mediator;
     }
         
@@ -44,7 +42,7 @@ public class CloudSessionFunction
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<AskCloudSessionPasswordExchangeKeyParameters>(req);
-        var result = await _mediator.Send(new AskPasswordExchangeKeyRequest(client, parameters));
+        var result = await _mediator.Send(new AskPasswordExchangeKeyRequest(client, parameters), executionContext.CancellationToken);
         var response = req.CreateResponse();
         await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         return response;

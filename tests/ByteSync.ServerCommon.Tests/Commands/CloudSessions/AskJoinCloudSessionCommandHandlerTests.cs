@@ -15,6 +15,7 @@ public class AskJoinCloudSessionCommandHandlerTests
     [Test]
     public async Task Handle_ReturnsJoinSessionResult()
     {
+        // Arrange
         var mockService = new Mock<ICloudSessionsService>();
         var expected = new JoinSessionResult();
         var client = new Client();
@@ -22,7 +23,11 @@ public class AskJoinCloudSessionCommandHandlerTests
         mockService.Setup(s => s.AskJoinCloudSession(client, parameters)).ReturnsAsync(expected);
         var handler = new AskJoinCloudSessionCommandHandler(mockService.Object);
         var request = new AskJoinCloudSessionRequest(client, parameters);
+
+        // Act
         var result = await handler.Handle(request, CancellationToken.None);
+
+        // Assert
         Assert.That(result, Is.EqualTo(expected));
     }
 } 

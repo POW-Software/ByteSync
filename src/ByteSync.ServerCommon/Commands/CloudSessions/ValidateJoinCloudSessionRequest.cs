@@ -9,5 +9,6 @@ public class ValidateJoinCloudSessionRequest : IRequest<Unit>
     {
         Parameters = parameters;
     }
+    
     public ValidateJoinCloudSessionParameters Parameters { get; }
 } 

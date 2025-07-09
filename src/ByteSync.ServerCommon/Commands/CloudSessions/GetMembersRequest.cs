@@ -9,5 +9,6 @@ public class GetMembersRequest : IRequest<List<SessionMemberInfoDTO>>
     {
         SessionId = sessionId;
     }
+    
     public string SessionId { get; }
 } 

@@ -12,5 +12,6 @@ public class AskJoinCloudSessionRequest : IRequest<JoinSessionResult>
         Parameters = parameters;
     }
     public Client Client { get; }
+
     public AskJoinCloudSessionParameters Parameters { get; }
 } 

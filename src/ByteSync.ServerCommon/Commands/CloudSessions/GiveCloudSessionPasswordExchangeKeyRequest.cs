@@ -11,6 +11,8 @@ public class GiveCloudSessionPasswordExchangeKeyRequest : IRequest<Unit>
         Client = client;
         Parameters = parameters;
     }
+
     public Client Client { get; }
+    
     public GiveCloudSessionPasswordExchangeKeyParameters Parameters { get; }
 } 
