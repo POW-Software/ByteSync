@@ -174,7 +174,7 @@ class ApplicationSettingsRepository : IApplicationSettingsRepository
             }
 
             // Initialize acknowledged announcement IDs if not present
-            if (applicationSettings.DecodedAcknowledgedAnnouncementIds == null)
+            if (string.IsNullOrEmpty(applicationSettings.AcknowledgedAnnouncementIds))
             {
                 applicationSettings.InitializeAcknowledgedAnnouncementIds();
             }
