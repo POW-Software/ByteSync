@@ -10,6 +10,7 @@ public class ResetSessionRequest : IRequest<Unit>
         SessionId = sessionId;
         Client = client;
     }
+    
     public string SessionId { get; }
     
     public Client Client { get; }

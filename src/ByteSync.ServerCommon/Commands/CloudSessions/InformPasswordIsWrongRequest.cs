@@ -11,6 +11,7 @@ public class InformPasswordIsWrongRequest : IRequest<Unit>
         SessionId = sessionId;
         ClientInstanceId = clientInstanceId;
     }
+    
     public Client Client { get; }
 
     public string SessionId { get; }
