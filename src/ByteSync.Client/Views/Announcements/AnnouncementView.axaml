@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:announcements="clr-namespace:ByteSync.ViewModels.Announcements"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="100"
+             x:Class="ByteSync.Views.Announcements.AnnouncementView">
+    <Design.DataContext>
+        <announcements:AnnouncementViewModel />
+    </Design.DataContext>
+
+    <Border Background="{DynamicResource OtherMemberBackGround}" 
+            BorderThickness="0 0 0 1" BorderBrush="{DynamicResource SystemBaseMediumLowColor}"
+            IsVisible="{Binding IsVisible}" Padding="6">
+        <ItemsControl ItemsSource="{Binding Announcements}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="0 2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" 
+                                   Text="{Binding Message}" 
+                                   TextWrapping="Wrap" 
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                        
+                        <Button Grid.Column="1" 
+                                Command="{Binding DataContext.AcknowledgeAnnouncementCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding Id}"
+                                HorizontalAlignment="Right" 
+                                VerticalAlignment="Center"
+                                Margin="6 0 0 0"
+                                BorderThickness="0" 
+                                Focusable="False" 
+                                Cursor="Hand" 
+                                Background="Transparent" 
+                                CornerRadius="0">
+                            <misc:Icon FontSize="12" Value="RegularX" VerticalAlignment="Center" Margin="0 1 0 0" />
+                        </Button>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Border>
+</UserControl>

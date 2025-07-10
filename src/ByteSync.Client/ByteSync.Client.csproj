@@ -227,5 +227,9 @@
       <DependentUpon>SessionSettingsEditView.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Announcements\AnnouncementView.axaml.cs">
+      <DependentUpon>AnnouncementView.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 </Project>
