@@ -27,7 +27,7 @@ public class SearchUpdateService : ISearchUpdateService
     {
         try
         {
-            if (IsApplicationInstalledFromStore)
+            if (_environmentService.IsInstalledFromWindowsStore())
             {
                 _logger.LogInformation("UpdateSystem: Application is installed from store, auto-update is disabled");
             }
@@ -76,9 +76,6 @@ public class SearchUpdateService : ISearchUpdateService
             _availableUpdateRepository.Clear();
         }
     }
-
-    public bool IsApplicationInstalledFromStore =>
-        _environmentService.IsInstalledFromWindowsStore();
 
     private List<SoftwareVersion> DeduplicateVersions(List<SoftwareVersion> nextAvailableVersions)
     {
