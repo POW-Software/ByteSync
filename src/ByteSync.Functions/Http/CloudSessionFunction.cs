@@ -12,12 +12,10 @@ namespace ByteSync.Functions.Http;
 
 public class CloudSessionFunction
 {
-    private readonly ICloudSessionsService _cloudSessionsService;
     private readonly IMediator _mediator;
 
-    public CloudSessionFunction(ICloudSessionsService cloudSessionsService, IMediator mediator)
+    public CloudSessionFunction(IMediator mediator)
     {
-        _cloudSessionsService = cloudSessionsService;
         _mediator = mediator;
     }
         
@@ -44,12 +42,9 @@ public class CloudSessionFunction
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<AskCloudSessionPasswordExchangeKeyParameters>(req);
-
-        var result = await _cloudSessionsService.AskCloudSessionPasswordExchangeKey(client, parameters);
-
+        var result = await _mediator.Send(new AskPasswordExchangeKeyRequest(client, parameters), executionContext.CancellationToken);
         var response = req.CreateResponse();
         await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
-
         return response;
     }
     
@@ -58,11 +53,9 @@ public class CloudSessionFunction
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/membersInstanceIds")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
-        var membersInstanceIds = await _cloudSessionsService.GetMembersInstanceIds(sessionId);
-
+        var result = await _mediator.Send(new GetMembersInstanceIdsRequest(sessionId));
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(membersInstanceIds, HttpStatusCode.OK);
-
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         return response;
     }
     
@@ -71,11 +64,9 @@ public class CloudSessionFunction
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/members")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
-        var members = await _cloudSessionsService.GetSessionMembersInfosAsync(sessionId);
-            
+        var result = await _mediator.Send(new GetMembersRequest(sessionId));
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(members, HttpStatusCode.OK);
-        
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
         return response;
     }
     
@@ -85,11 +76,8 @@ public class CloudSessionFunction
         FunctionContext executionContext, string sessionId)
     {
         var parameters = await FunctionHelper.DeserializeRequestBody<ValidateJoinCloudSessionParameters>(req);
-
-        await _cloudSessionsService.ValidateJoinCloudSession(parameters).ConfigureAwait(false);
-        
+        await _mediator.Send(new ValidateJoinCloudSessionRequest(parameters));
         var response = req.CreateResponse(HttpStatusCode.OK);
-        
         return response;
     }
     
@@ -118,12 +106,9 @@ public class CloudSessionFunction
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<AskJoinCloudSessionParameters>(req);
-
-        var result = await _cloudSessionsService.AskJoinCloudSession(client, parameters).ConfigureAwait(false);
-            
+        var result = await _mediator.Send(new AskJoinCloudSessionRequest(client, parameters));
         var response = req.CreateResponse();
         await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
-        
         return response;
     }
     
@@ -134,11 +119,8 @@ public class CloudSessionFunction
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<GiveCloudSessionPasswordExchangeKeyParameters>(req);
-
-        await _cloudSessionsService.GiveCloudSessionPasswordExchangeKey(client, parameters).ConfigureAwait(false);
-            
+        await _mediator.Send(new GiveCloudSessionPasswordExchangeKeyRequest(client, parameters));
         var response = req.CreateResponse(HttpStatusCode.OK);
-        
         return response;
     }
     
@@ -149,11 +131,8 @@ public class CloudSessionFunction
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var clientInstanceId = await FunctionHelper.DeserializeRequestBody<string>(req);
-
-        await _cloudSessionsService.InformPasswordIsWrong(client, sessionId, clientInstanceId).ConfigureAwait(false);
-            
+        await _mediator.Send(new InformPasswordIsWrongRequest(client, sessionId, clientInstanceId));
         var response = req.CreateResponse(HttpStatusCode.OK);
-        
         return response;
     }
     
@@ -202,11 +181,8 @@ public class CloudSessionFunction
         FunctionContext executionContext, string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-
-        await _cloudSessionsService.ResetSession(sessionId, client).ConfigureAwait(false);
-            
+        await _mediator.Send(new ResetSessionRequest(sessionId, client));
         var response = req.CreateResponse(HttpStatusCode.OK);
-        
         return response;
     }
 }
