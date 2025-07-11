@@ -303,14 +303,34 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
 
         ConditionDestinations.Clear();
 
-        ConditionDestinations.AddAll(ConditionSources);
+        if (SelectedComparisonElement is not { IsName: true })
+        {
+            ConditionDestinations.AddAll(ConditionSources);
+        }
 
+        bool addCustomDestination = false;
+        bool selectCustomDestination = false;
         if (SelectedComparisonElement is { IsDateOrSize: true } 
             && SelectedComparisonOperator != null 
             && !SelectedComparisonOperator.ConditionOperator.In(ConditionOperatorTypes.ExistsOn, ConditionOperatorTypes.NotExistsOn))
         {
+            addCustomDestination = true;
+        }
+        if (SelectedComparisonElement is { IsName: true })
+        {
+            addCustomDestination = true;
+            selectCustomDestination = true;
+        }
+        
+        if (addCustomDestination)
+        {
             var conditionData = new DataPart(Resources.AtomicConditionEdit_Custom);
             ConditionDestinations.Add(conditionData);
+            
+            if (selectCustomDestination)
+            {
+                selectedDestination = conditionData;
+            }
         }
 
         if (selectedDestination != null)
@@ -379,7 +399,8 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
                         && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Date };
         IsSizeVisible = SelectedDestination is { IsVirtual: true }
                         && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Size };
-        IsNameVisible = SelectedComparisonElement is { ComparisonElement: ComparisonElement.Name };
+        IsNameVisible = SelectedDestination is { IsVirtual: true }
+                        && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Name };
     }
 
     internal AtomicCondition? ExportAtomicCondition()
