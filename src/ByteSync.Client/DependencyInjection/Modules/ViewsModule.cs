@@ -4,8 +4,10 @@ using ByteSync.Interfaces;
 using ByteSync.ViewModels.Home;
 using ByteSync.ViewModels.Lobbies;
 using ByteSync.ViewModels.Sessions;
+using ByteSync.ViewModels.Announcements;
 using ByteSync.Views;
 using ByteSync.Views.Home;
+using ByteSync.Views.Announcements;
 using ByteSync.Views.Lobbies;
 using ByteSync.Views.Sessions;
 using ReactiveUI;
@@ -26,6 +28,7 @@ public class ViewsModule : Module
         builder.RegisterType<HomeMainView>().As<IViewFor<HomeMainViewModel>>();
         builder.RegisterType<SessionMainView>().As<IViewFor<SessionMainViewModel>>();
         builder.RegisterType<LobbyMainView>().As<IViewFor<LobbyMainViewModel>>();
+        builder.RegisterType<AnnouncementView>().As<IViewFor<AnnouncementViewModel>>();
         
         builder.RegisterInstance(new AvaloniaActivationForViewFetcher())
             .As<IActivationForViewFetcher>()

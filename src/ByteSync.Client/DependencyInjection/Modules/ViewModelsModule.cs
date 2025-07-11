@@ -2,6 +2,7 @@
 using ByteSync.Business.Navigations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.ViewModels;
+using ByteSync.ViewModels.Announcements;
 using ByteSync.ViewModels.Headers;
 using ByteSync.ViewModels.Home;
 using ByteSync.ViewModels.Lobbies;
@@ -28,6 +29,7 @@ public class ViewModelsModule : Module
             .AsImplementedInterfaces();
         
         builder.RegisterType<HeaderViewModel>().SingleInstance().AsSelf();
+        builder.RegisterType<AnnouncementViewModel>().SingleInstance().AsSelf();
         
         builder.RegisterType<HomeMainViewModel>().Keyed<IRoutableViewModel>(NavigationPanel.Home);
         builder.RegisterType<SessionMainViewModel>().Keyed<IRoutableViewModel>(NavigationPanel.CloudSynchronization);

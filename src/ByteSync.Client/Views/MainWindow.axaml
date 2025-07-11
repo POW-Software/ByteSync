@@ -27,7 +27,7 @@
             <ScaleTransform ScaleX="{Binding ZoomLevel}" ScaleY="{Binding ZoomLevel}"></ScaleTransform>
         </LayoutTransformControl.LayoutTransform>
         
-        <Grid RowDefinitions="Auto,Auto,*" >
+        <Grid RowDefinitions="Auto,Auto,Auto,*" >
             
             <Border Grid.Row="0" x:Name="FocusSink"
                     IsVisible="True"
@@ -35,9 +35,11 @@
             
             <ContentControl Grid.Row="1" Content="{Binding Header}"/>
 
-            <rxui:RoutedViewHost PageTransition="{Binding PageTransition}" Grid.Row="2" Router="{Binding Router}" />
+            <ContentControl Grid.Row="2" Content="{Binding Announcement}" IsVisible="{Binding Announcement.IsVisible}"/>
 
-            <ContentControl Grid.Row="2" Content="{Binding FlyoutContainer}" IsVisible="{Binding FlyoutContainer.IsFlyoutContainerVisible}"/>
+            <rxui:RoutedViewHost PageTransition="{Binding PageTransition}" Grid.Row="3" Router="{Binding Router}" />
+
+            <ContentControl Grid.Row="3" Content="{Binding FlyoutContainer}" IsVisible="{Binding FlyoutContainer.IsFlyoutContainerVisible}"/>
         </Grid>
     </LayoutTransformControl>
 </Window>
