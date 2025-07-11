@@ -3,6 +3,7 @@ using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Updates;
+using ByteSync.Helpers;
 
 namespace ByteSync.Services.Updates;
 
@@ -28,11 +29,7 @@ public class SearchUpdateService : ISearchUpdateService
         {
             if (IsApplicationInstalledFromStore)
             {
-                _availableUpdateRepository.UpdateAvailableUpdates(new List<SoftwareVersion>());
-                
-                _logger.LogInformation("UpdateSystem: Application is installed from store, update check is disabled");
-                
-                return;
+                _logger.LogInformation("UpdateSystem: Application is installed from store, auto-update is disabled");
             }
             
             var updates = await _availableUpdatesLister.GetAvailableUpdates();
@@ -80,22 +77,8 @@ public class SearchUpdateService : ISearchUpdateService
         }
     }
 
-    public bool IsApplicationInstalledFromStore
-    {
-        get
-        {
-            if (_environmentService.OSPlatform == OSPlatforms.Windows)
-            {
-                if (_environmentService.AssemblyFullName.Contains("\\Program Files\\WindowsApps\\")
-                    || _environmentService.AssemblyFullName.Contains("\\Program Files (x86)\\WindowsApps\\"))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }
+    public bool IsApplicationInstalledFromStore =>
+        _environmentService.IsInstalledFromWindowsStore();
 
     private List<SoftwareVersion> DeduplicateVersions(List<SoftwareVersion> nextAvailableVersions)
     {
