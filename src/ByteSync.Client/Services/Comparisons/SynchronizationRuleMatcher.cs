@@ -5,6 +5,7 @@ using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
+using System.Text.RegularExpressions;
 
 namespace ByteSync.Services.Comparisons;
 
@@ -123,6 +124,8 @@ class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
                 return ConditionMatchesDate(condition, comparisonItem);
             case ComparisonElement.Presence:
                 return ConditionMatchesPresence(condition, comparisonItem);
+            case ComparisonElement.Name:
+                return ConditionMatchesName(condition, comparisonItem);
             default:
                 return false;
         }
@@ -355,6 +358,41 @@ class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
         }
             
         return result.Value;
+    }
+
+    private bool ConditionMatchesName(AtomicCondition condition, ComparisonItem comparisonItem)
+    {
+        if (string.IsNullOrWhiteSpace(condition.NamePattern))
+        {
+            return false;
+        }
+
+        var name = comparisonItem.PathIdentity.FileName;
+        var pattern = condition.NamePattern!;
+
+        bool result = false;
+
+        if (pattern.Contains("*") &&
+            condition.ConditionOperator.In(ConditionOperatorTypes.Equals, ConditionOperatorTypes.NotEquals))
+        {
+            var regex = "^" + Regex.Escape(pattern).Replace("\\*", ".*") + "$";
+            var isMatch = Regex.IsMatch(name, regex, RegexOptions.IgnoreCase);
+            result = condition.ConditionOperator == ConditionOperatorTypes.Equals ? isMatch : !isMatch;
+        }
+        else
+        {
+            switch (condition.ConditionOperator)
+            {
+                case ConditionOperatorTypes.Equals:
+                    result = string.Equals(name, pattern, StringComparison.OrdinalIgnoreCase);
+                    break;
+                case ConditionOperatorTypes.NotEquals:
+                    result = !string.Equals(name, pattern, StringComparison.OrdinalIgnoreCase);
+                    break;
+            }
+        }
+
+        return result;
     }
 
     private ContentIdentity? LocalizeContentIdentity(DataPart dataPart, ComparisonItem comparisonItem)

@@ -88,6 +88,9 @@
                                 
                             </StackPanel>
                             <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                <TextBox Margin="3 4 3 0" MinWidth="140"
+                                         IsVisible="{Binding Path=IsNameVisible}"
+                                         Text="{Binding NamePattern}" />
                                 <DatePicker Classes="Bs" Margin="3 0" IsVisible="{Binding Path=IsDateVisible}"
                                             SelectedDate="{Binding Path=SelectedDateTime}" VerticalAlignment="Center"/>
 

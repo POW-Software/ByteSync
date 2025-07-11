@@ -36,6 +36,7 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
         ComparisonOperators = new ObservableCollection<ConditionOperatorViewModel>();
         ConditionDestinations = new ObservableCollection<DataPart>();
         SizeUnits = new ObservableCollection<SizeUnitViewModel>();
+        NamePattern = string.Empty;
 
         SelectedDateTime = DateTime.Now;
         SelectedTime = SelectedDateTime.Value.TimeOfDay;
@@ -121,6 +122,12 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
     internal SizeUnitViewModel SelectedSizeUnit { get; set; }
 
     [Reactive]
+    public string? NamePattern { get; set; }
+
+    [Reactive]
+    public bool IsNameVisible { get; set; }
+
+    [Reactive]
     public bool IsDateVisible { get; set; }
 
     [Reactive]
@@ -162,7 +169,14 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
                 Description = Resources.AtomicConditionEdit_Size
             };
             ComparisonElements.Add(comparisonElementView);
-        
+
+            comparisonElementView = new ComparisonElementViewModel
+            {
+                ComparisonElement = ComparisonElement.Name,
+                Description = Resources.AtomicConditionEdit_Name
+            };
+            ComparisonElements.Add(comparisonElementView);
+
             comparisonElementView = new ComparisonElementViewModel
             {
                 ComparisonElement = ComparisonElement.Presence,
@@ -176,6 +190,13 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
             {
                 ComparisonElement = ComparisonElement.Presence,
                 Description = Resources.AtomicConditionEdit_Presence
+            };
+            ComparisonElements.Add(comparisonElementView);
+
+            comparisonElementView = new ComparisonElementViewModel
+            {
+                ComparisonElement = ComparisonElement.Name,
+                Description = Resources.AtomicConditionEdit_Name
             };
             ComparisonElements.Add(comparisonElementView);
         }
@@ -226,6 +247,14 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
                 conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.IsSmallerThan);
                 ComparisonOperators.Add(conditionOperatorView);
             }
+            else if (SelectedComparisonElement.ComparisonElement == ComparisonElement.Name)
+            {
+                var conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.Equals);
+                ComparisonOperators.Add(conditionOperatorView);
+
+                conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.NotEquals);
+                ComparisonOperators.Add(conditionOperatorView);
+            }
             else if (SelectedComparisonElement.ComparisonElement == ComparisonElement.Presence)
             {
                 var conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.ExistsOn);
@@ -244,6 +273,14 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
                 ComparisonOperators.Add(conditionOperatorView);
 
                 conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.NotExistsOn);
+                ComparisonOperators.Add(conditionOperatorView);
+            }
+            else if (SelectedComparisonElement.ComparisonElement == ComparisonElement.Name)
+            {
+                var conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.Equals);
+                ComparisonOperators.Add(conditionOperatorView);
+
+                conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.NotEquals);
                 ComparisonOperators.Add(conditionOperatorView);
             }
         }
@@ -338,10 +375,11 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
 
     private void ShowHideControls()
     {
-        IsDateVisible = SelectedDestination is { IsVirtual: true } 
+        IsDateVisible = SelectedDestination is { IsVirtual: true }
                         && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Date };
-        IsSizeVisible = SelectedDestination is { IsVirtual: true } 
+        IsSizeVisible = SelectedDestination is { IsVirtual: true }
                         && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Size };
+        IsNameVisible = SelectedComparisonElement is { ComparisonElement: ComparisonElement.Name };
     }
 
     internal AtomicCondition? ExportAtomicCondition()
@@ -396,6 +434,8 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
             atomicCondition.DateTime = null;
         }
 
+        atomicCondition.NamePattern = NamePattern;
+
         return atomicCondition;
     }
 
@@ -426,8 +466,10 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
         {
             SelectedDateTime = DateTime.Now;
         }
-        
+
         SelectedTime = SelectedDateTime.Value.TimeOfDay;
+
+        NamePattern = atomicCondition.NamePattern;
     }
 
     private void Remove()

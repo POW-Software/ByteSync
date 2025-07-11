@@ -16,6 +16,8 @@ public interface IAtomicCondition
     public ConditionOperatorTypes ConditionOperator { get; set; }
     
     public DateTime? DateTime { get; set; }
-    
+
     public SizeUnits? SizeUnit { get; set; }
+
+    public string? NamePattern { get; set; }
 }
