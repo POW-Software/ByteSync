@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace ByteSync.Services.Comparisons;
 
-class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
+public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
 {
     private readonly IAtomicActionConsistencyChecker _atomicActionConsistencyChecker;
     private readonly IAtomicActionRepository _atomicActionRepository;
