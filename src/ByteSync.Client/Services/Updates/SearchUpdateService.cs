@@ -27,6 +27,9 @@ public class SearchUpdateService : ISearchUpdateService
     {
         try
         {
+            // Check if the application is installed from the Windows Store. This condition is used for logging purposes
+            // and does not affect the subsequent code execution. Auto-update is disabled for store installations, but
+            // other parts of the method will still execute to log available updates and update the repository.
             if (_environmentService.IsInstalledFromWindowsStore())
             {
                 _logger.LogInformation("UpdateSystem: Application is installed from store, auto-update is disabled");
