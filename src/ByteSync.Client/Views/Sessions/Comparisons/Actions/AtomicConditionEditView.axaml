@@ -32,24 +32,26 @@
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="3 0" VerticalAlignment="Center">
                             <ComboBox Classes="BsComboBox"  x:Name="SourceDataComboBox" Margin="0 0" MinWidth="100"
-                                  ItemsSource="{Binding Path=ConditionSources}"
+                                  ItemsSource="{Binding Path=SourceOrProperties}"
                                   PlaceholderText="{localizations:Loc AtomicConditionEdit_Source}"
-                                  SelectedItem="{Binding Path=SelectedSource}"> 
+                                  SelectedItem="{Binding Path=SelectedSourceOrProperty}"> 
                                 
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Name}"  />
+                                        <TextBlock Text="{Binding DisplayName}"  />
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                                 
                             </ComboBox>
                             
-                            <TextBlock Text="." FontWeight="ExtraBold" VerticalAlignment="Center" Margin="3 0"/>
+                            <TextBlock Text="." FontWeight="ExtraBold" VerticalAlignment="Center" Margin="3 0"
+                                       IsVisible="{Binding Path=IsDotVisible}"/>
 
                             <ComboBox Classes="BsComboBox" x:Name="SourceTypeComboBox" Margin="0 0" MinWidth="160"
                                       ItemsSource="{Binding Path=ComparisonElements}" 
                                       PlaceholderText="{localizations:Loc AtomicConditionEdit_ComparisonElement}"
-                                      SelectedItem="{Binding Path=SelectedComparisonElement}">
+                                      SelectedItem="{Binding Path=SelectedComparisonElement}"
+                                      IsVisible="{Binding Path=IsSourceTypeComboBoxVisible}">
                                 
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>

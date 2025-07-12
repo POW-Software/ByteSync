@@ -31,7 +31,7 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
         
         FileSystemType = fileSystemType;
 
-        ConditionSources = new ObservableCollection<DataPart>();
+        SourceOrProperties = new ObservableCollection<SourceOrPropertyViewModel>();
         ComparisonElements = new ObservableCollection<ComparisonElementViewModel>();
         ComparisonOperators = new ObservableCollection<ConditionOperatorViewModel>();
         ConditionDestinations = new ObservableCollection<DataPart>();
@@ -43,11 +43,11 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
         
         RemoveCommand = ReactiveCommand.Create(Remove);
 
-        var canSwapSides = this.WhenAnyValue(x => x.SelectedSource, x => x.SelectedDestination,
+        var canSwapSides = this.WhenAnyValue(x => x.SelectedSourceOrProperty, x => x.SelectedDestination,
             (source, destination) => source != null && destination != null);
         SwapSidesCommand = ReactiveCommand.Create(SwapSides, canSwapSides);
 
-        FillConditionSourcesData();
+        FillSourceOrPropertiesData();
 
         FillConditionSourceTypes();
 
@@ -57,8 +57,12 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
 
         FillSizeUnits();
 
-        this.WhenAnyValue(x => x.SelectedSource)
-            .Subscribe(_ => FillAvailableOperators());
+        this.WhenAnyValue(x => x.SelectedSourceOrProperty)
+            .Subscribe(_ => 
+            {
+                FillAvailableOperators();
+                ShowHideControls();
+            });
             
         this.WhenAnyValue(x => x.SelectedComparisonElement)
             .Subscribe(_ =>
@@ -85,7 +89,7 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
 
     public FileSystemTypes FileSystemType { get; }
 
-    internal ObservableCollection<DataPart> ConditionSources { get; set; }
+    internal ObservableCollection<SourceOrPropertyViewModel> SourceOrProperties { get; set; }
 
     internal ObservableCollection<ComparisonElementViewModel> ComparisonElements { get; set; }
 
@@ -98,7 +102,7 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
     internal ObservableCollection<SizeUnitViewModel> SizeUnits { get; set; }
 
     [Reactive]
-    internal DataPart? SelectedSource { get; set; }
+    internal SourceOrPropertyViewModel? SelectedSourceOrProperty { get; set; }
 
     [Reactive]
     internal ComparisonElementViewModel? SelectedComparisonElement { get; set; }
@@ -133,14 +137,26 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
     [Reactive]
     public bool IsSizeVisible { get; set; }
 
+    [Reactive]
+    public bool IsSourceTypeComboBoxVisible { get; set; }
+
+    [Reactive]
+    public bool IsDotVisible { get; set; }
+
     public ReactiveCommand<Unit, Unit> RemoveCommand { get; set; }
     
     public ReactiveCommand<Unit, Unit> SwapSidesCommand { get; set; }
 
-    private void FillConditionSourcesData()
+    private void FillSourceOrPropertiesData()
     {
-        ConditionSources.Clear();
-        ConditionSources.AddAll(_dataPartIndexer.GetAllDataParts());
+        SourceOrProperties.Clear();
+        
+        // Ajouter les sources (DataPart)
+        SourceOrProperties.AddAll(_dataPartIndexer.GetAllDataParts().Select(dp => new SourceOrPropertyViewModel(dp)));
+        
+        // Ajouter la propriété Name
+        var nameProperty = new SourceOrPropertyViewModel(ComparisonElement.Name, Resources.AtomicConditionEdit_Name);
+        SourceOrProperties.Add(nameProperty);
     }
 
     private void FillConditionSourceTypes()
@@ -210,8 +226,8 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
 
         if (FileSystemType == FileSystemTypes.File)
         {
-            if (SelectedSource == null || SelectedComparisonElement == null ||
-                SelectedComparisonElement.ComparisonElement == ComparisonElement.Content)
+            if (SelectedSourceOrProperty?.IsDataPart == true && (SelectedComparisonElement == null ||
+                SelectedComparisonElement.ComparisonElement == ComparisonElement.Content))
             {
                 var conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.Equals);
                 ComparisonOperators.Add(conditionOperatorView);
@@ -219,7 +235,7 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
                 conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.NotEquals);
                 ComparisonOperators.Add(conditionOperatorView);
             }
-            else if (SelectedComparisonElement.ComparisonElement == ComparisonElement.Date)
+            else if (SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement?.ComparisonElement == ComparisonElement.Date)
             {
                 var conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.Equals);
                 ComparisonOperators.Add(conditionOperatorView);
@@ -233,7 +249,7 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
                 conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.IsNewerThan);
                 ComparisonOperators.Add(conditionOperatorView);
             }
-            else if (SelectedComparisonElement.ComparisonElement == ComparisonElement.Size)
+            else if (SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement?.ComparisonElement == ComparisonElement.Size)
             {
                 var conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.Equals);
                 ComparisonOperators.Add(conditionOperatorView);
@@ -247,7 +263,7 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
                 conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.IsSmallerThan);
                 ComparisonOperators.Add(conditionOperatorView);
             }
-            else if (SelectedComparisonElement.ComparisonElement == ComparisonElement.Name)
+            else if (SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement?.ComparisonElement == ComparisonElement.Name)
             {
                 var conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.Equals);
                 ComparisonOperators.Add(conditionOperatorView);
@@ -255,19 +271,27 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
                 conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.NotEquals);
                 ComparisonOperators.Add(conditionOperatorView);
             }
-            else if (SelectedComparisonElement.ComparisonElement == ComparisonElement.Presence)
+            else if (SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement?.ComparisonElement == ComparisonElement.Presence)
             {
                 var conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.ExistsOn);
                 ComparisonOperators.Add(conditionOperatorView);
 
                 conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.NotExistsOn);
+                ComparisonOperators.Add(conditionOperatorView);
+            }
+            else if (SelectedSourceOrProperty?.IsNameProperty == true)
+            {
+                var conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.Equals);
+                ComparisonOperators.Add(conditionOperatorView);
+
+                conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.NotEquals);
                 ComparisonOperators.Add(conditionOperatorView);
             }
         }
         else if (FileSystemType == FileSystemTypes.Directory)
         {
-            if (SelectedSource == null || SelectedComparisonElement == null ||
-                SelectedComparisonElement.ComparisonElement == ComparisonElement.Presence)
+            if (SelectedSourceOrProperty?.IsDataPart == true && (SelectedComparisonElement == null ||
+                SelectedComparisonElement.ComparisonElement == ComparisonElement.Presence))
             {
                 var conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.ExistsOn);
                 ComparisonOperators.Add(conditionOperatorView);
@@ -275,7 +299,15 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
                 conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.NotExistsOn);
                 ComparisonOperators.Add(conditionOperatorView);
             }
-            else if (SelectedComparisonElement.ComparisonElement == ComparisonElement.Name)
+            else if (SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement?.ComparisonElement == ComparisonElement.Name)
+            {
+                var conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.Equals);
+                ComparisonOperators.Add(conditionOperatorView);
+
+                conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.NotEquals);
+                ComparisonOperators.Add(conditionOperatorView);
+            }
+            else if (SelectedSourceOrProperty?.IsNameProperty == true)
             {
                 var conditionOperatorView = BuildConditionOperatorView(ConditionOperatorTypes.Equals);
                 ComparisonOperators.Add(conditionOperatorView);
@@ -289,8 +321,6 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
             throw new ApplicationException("Unknown FileSystemType " + FileSystemType);
         }
 
-
-
         if (selectedOperator != null)
         {
             SelectedComparisonOperator = ComparisonOperators.FirstOrDefault(ao => ao.Equals(selectedOperator));
@@ -303,20 +333,30 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
 
         ConditionDestinations.Clear();
 
-        if (SelectedComparisonElement is not { IsName: true })
+        // Si on a sélectionné une propriété (comme Name), on ne montre pas les sources comme destinations
+        if (SelectedSourceOrProperty?.IsProperty == true)
         {
-            ConditionDestinations.AddAll(ConditionSources);
+            // Pour les propriétés, on ajoute seulement une destination "Custom"
+            var conditionData = new DataPart(Resources.AtomicConditionEdit_Custom);
+            ConditionDestinations.Add(conditionData);
+            selectedDestination = conditionData;
+        }
+        else if (SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement is not { IsName: true })
+        {
+            // Pour les sources avec des éléments de comparaison autres que Name, on montre toutes les sources
+            ConditionDestinations.AddAll(_dataPartIndexer.GetAllDataParts());
         }
 
         bool addCustomDestination = false;
         bool selectCustomDestination = false;
-        if (SelectedComparisonElement is { IsDateOrSize: true } 
+        
+        if (SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement is { IsDateOrSize: true } 
             && SelectedComparisonOperator != null 
             && !SelectedComparisonOperator.ConditionOperator.In(ConditionOperatorTypes.ExistsOn, ConditionOperatorTypes.NotExistsOn))
         {
             addCustomDestination = true;
         }
-        if (SelectedComparisonElement is { IsName: true })
+        if (SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement is { IsName: true })
         {
             addCustomDestination = true;
             selectCustomDestination = true;
@@ -395,28 +435,52 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
 
     private void ShowHideControls()
     {
+        // Contrôler la visibilité du point et du SourceTypeComboBox
+        IsSourceTypeComboBoxVisible = SelectedSourceOrProperty?.IsDataPart == true;
+        IsDotVisible = SelectedSourceOrProperty?.IsDataPart == true;
+
+        // Contrôler la visibilité des champs de saisie
         IsDateVisible = SelectedDestination is { IsVirtual: true }
-                        && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Date };
+                        && ((SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Date }) ||
+                            (SelectedSourceOrProperty?.IsNameProperty == true && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Date }));
         IsSizeVisible = SelectedDestination is { IsVirtual: true }
-                        && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Size };
+                        && ((SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Size }) ||
+                            (SelectedSourceOrProperty?.IsNameProperty == true && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Size }));
         IsNameVisible = SelectedDestination is { IsVirtual: true }
-                        && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Name };
+                        && ((SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Name }) ||
+                            (SelectedSourceOrProperty?.IsNameProperty == true));
     }
 
     internal AtomicCondition? ExportAtomicCondition()
     {
-        if (SelectedSource == null || SelectedComparisonElement == null || SelectedComparisonOperator == null)
+        if (SelectedSourceOrProperty == null || SelectedComparisonOperator == null)
         {
             return null;
         }
 
+        // Si on a sélectionné une propriété (comme Name), on utilise une source par défaut
+        DataPart source;
+        ComparisonElement comparisonElement;
+        
+        if (SelectedSourceOrProperty.IsProperty)
+        {
+            // Pour les propriétés, on utilise la première source disponible comme source par défaut
+            source = _dataPartIndexer.GetAllDataParts().First();
+            comparisonElement = SelectedSourceOrProperty.ComparisonElement!.Value;
+        }
+        else
+        {
+            source = SelectedSourceOrProperty.DataPart!;
+            comparisonElement = SelectedComparisonElement?.ComparisonElement ?? ComparisonElement.Content;
+        }
+
         if (SelectedDestination == null || SelectedDestination.IsVirtual)
         {
-            if (SelectedComparisonElement.ComparisonElement == ComparisonElement.Size && SelectedSize == null)
+            if (comparisonElement == ComparisonElement.Size && SelectedSize == null)
             {
                 return null;
             }
-            if (SelectedComparisonElement.ComparisonElement == ComparisonElement.Date && SelectedDateTime == null)
+            if (comparisonElement == ComparisonElement.Date && SelectedDateTime == null)
             {
                 return null;
             }
@@ -428,7 +492,7 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
             selectedDestination = null;
         }
 
-        var atomicCondition = new AtomicCondition(SelectedSource, SelectedComparisonElement.ComparisonElement, 
+        var atomicCondition = new AtomicCondition(source, comparisonElement, 
             SelectedComparisonOperator.ConditionOperator, selectedDestination);
 
         if (selectedDestination == null && SelectedSize != null)
@@ -462,9 +526,24 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
 
     internal void SetAtomicCondition(AtomicCondition atomicCondition)
     {
-        SelectedSource = atomicCondition.Source;
+        // Trouver la source ou propriété correspondante
+        if (atomicCondition.ComparisonElement == ComparisonElement.Name)
+        {
+            // Si c'est une condition sur le nom, on sélectionne la propriété Name
+            SelectedSourceOrProperty = SourceOrProperties.FirstOrDefault(sop => sop.IsNameProperty);
+        }
+        else
+        {
+            // Sinon, on sélectionne la source correspondante
+            SelectedSourceOrProperty = SourceOrProperties.FirstOrDefault(sop => 
+                sop.IsDataPart && sop.DataPart?.Name == atomicCondition.Source.Name);
+        }
 
-        SelectedComparisonElement = ComparisonElements.FirstOrDefault(ce => Equals(ce.ComparisonElement, atomicCondition.ComparisonElement));
+        if (SelectedSourceOrProperty?.IsDataPart == true)
+        {
+            SelectedComparisonElement = ComparisonElements.FirstOrDefault(ce => Equals(ce.ComparisonElement, atomicCondition.ComparisonElement));
+        }
+        
         SelectedComparisonOperator = ComparisonOperators.FirstOrDefault(co => Equals(co.ConditionOperator, atomicCondition.ConditionOperator));
 
         if (atomicCondition.Destination == null)
@@ -500,10 +579,15 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
     
     private void SwapSides()
     {
-        var source = SelectedSource;
+        var source = SelectedSourceOrProperty;
         var destination = SelectedDestination;
 
-        SelectedSource = destination;
-        SelectedDestination = source;
+        // Pour l'instant, on ne permet pas de swap avec les propriétés
+        // car cela nécessiterait une logique plus complexe
+        if (source?.IsDataPart == true && destination != null)
+        {
+            // On peut seulement swapper si on a une source DataPart et une destination
+            // Cette logique pourrait être étendue selon les besoins
+        }
     }
 }
