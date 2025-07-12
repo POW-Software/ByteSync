@@ -522,6 +522,12 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
+        internal static string AtomicConditionEdit_NamePlaceholder {
+            get {
+                return ResourceManager.GetString("AtomicConditionEdit_NamePlaceholder", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Equals.
         /// </summary>

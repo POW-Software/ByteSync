@@ -78,7 +78,8 @@
                                 <ComboBox Classes="BsComboBox" x:Name="DestinationComboBox" Margin="3 0"
                                           ItemsSource="{Binding Path=ConditionDestinations}"
                                           PlaceholderText="{localizations:Loc AtomicConditionEdit_Destination}"
-                                          SelectedItem="{Binding Path=SelectedDestination}">
+                                          SelectedItem="{Binding Path=SelectedDestination}"
+                                          IsVisible="{Binding Path=IsDestinationComboBoxVisible}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Name}" FontFamily="{Binding}"  />
@@ -91,7 +92,9 @@
                             <StackPanel Grid.Row="1" Orientation="Horizontal">
                                 <TextBox Margin="3 0" MinWidth="140"
                                          IsVisible="{Binding Path=IsNameVisible}"
-                                         Text="{Binding NamePattern}" />
+                                         Watermark="{localizations:Loc AtomicConditionEdit_NamePlaceholder}"
+                                         Text="{Binding NamePattern}"
+                                         />
                                 <DatePicker Classes="Bs" Margin="3 0" IsVisible="{Binding Path=IsDateVisible}"
                                             SelectedDate="{Binding Path=SelectedDateTime}" VerticalAlignment="Center"/>
 

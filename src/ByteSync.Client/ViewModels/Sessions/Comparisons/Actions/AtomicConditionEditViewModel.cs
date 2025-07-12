@@ -61,6 +61,7 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
             .Subscribe(_ => 
             {
                 FillAvailableOperators();
+                FillAvailableDestinations();
                 ShowHideControls();
             });
             
@@ -142,6 +143,9 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
 
     [Reactive]
     public bool IsDotVisible { get; set; }
+
+    [Reactive]
+    public bool IsDestinationComboBoxVisible { get; set; }
 
     public ReactiveCommand<Unit, Unit> RemoveCommand { get; set; }
     
@@ -333,17 +337,23 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
 
         ConditionDestinations.Clear();
 
-        // Si on a sélectionné une propriété (comme Name), on ne montre pas les sources comme destinations
+        // Si on a sélectionné une propriété (comme Name), on ne remplit pas les destinations
+        // car le DestinationComboBox sera masqué
         if (SelectedSourceOrProperty?.IsProperty == true)
         {
+            // Pour les propriétés, on ne remplit pas les destinations
+            // Le DestinationComboBox sera masqué par ShowHideControls
+            // return;
+            
             // Pour les propriétés, on ajoute seulement une destination "Custom"
             var conditionData = new DataPart(Resources.AtomicConditionEdit_Custom);
             ConditionDestinations.Add(conditionData);
             selectedDestination = conditionData;
         }
-        else if (SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement is not { IsName: true })
+        
+        // Pour les sources DataPart, on montre toutes les sources
+        else if (SelectedSourceOrProperty?.IsDataPart == true)
         {
-            // Pour les sources avec des éléments de comparaison autres que Name, on montre toutes les sources
             ConditionDestinations.AddAll(_dataPartIndexer.GetAllDataParts());
         }
 
@@ -439,13 +449,16 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
         IsSourceTypeComboBoxVisible = SelectedSourceOrProperty?.IsDataPart == true;
         IsDotVisible = SelectedSourceOrProperty?.IsDataPart == true;
 
+        // Contrôler la visibilité du DestinationComboBox
+        IsDestinationComboBoxVisible = SelectedSourceOrProperty?.IsNameProperty != true;
+
         // Contrôler la visibilité des champs de saisie
         IsDateVisible = SelectedDestination is { IsVirtual: true }
                         && ((SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Date }) ||
-                            (SelectedSourceOrProperty?.IsNameProperty == true && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Date }));
+                            (!SelectedSourceOrProperty?.IsNameProperty == true && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Date }));
         IsSizeVisible = SelectedDestination is { IsVirtual: true }
                         && ((SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Size }) ||
-                            (SelectedSourceOrProperty?.IsNameProperty == true && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Size }));
+                            (!SelectedSourceOrProperty?.IsNameProperty == true && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Size }));
         IsNameVisible = SelectedDestination is { IsVirtual: true }
                         && ((SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Name }) ||
                             (SelectedSourceOrProperty?.IsNameProperty == true));
