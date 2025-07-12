@@ -4,7 +4,6 @@ using ByteSync.Assets.Resources;
 using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Converters;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions.Misc;
@@ -155,10 +154,10 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
     {
         SourceOrProperties.Clear();
         
-        // Ajouter les sources (DataPart)
+        // Add sources (DataPart)
         SourceOrProperties.AddAll(_dataPartIndexer.GetAllDataParts().Select(dp => new SourceOrPropertyViewModel(dp)));
         
-        // Ajouter la propriété Name
+        // Add the Name property
         var nameProperty = new SourceOrPropertyViewModel(ComparisonElement.Name, Resources.AtomicConditionEdit_Name);
         SourceOrProperties.Add(nameProperty);
     }
@@ -337,23 +336,22 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
 
         ConditionDestinations.Clear();
 
-        // Si on a sélectionné une propriété (comme Name), on ne remplit pas les destinations
-        // car le DestinationComboBox sera masqué
+        // If a property is selected (like Name), do not populate destinations
+        // because the DestinationComboBox will be hidden
         if (SelectedSourceOrProperty?.IsProperty == true)
         {
-            // Pour les propriétés, on ne remplit pas les destinations
-            // Le DestinationComboBox sera masqué par ShowHideControls
+            // For properties, do not populate destinations
+            // The DestinationComboBox will be hidden by ShowHideControls
             // return;
             
-            // Pour les propriétés, on ajoute seulement une destination "Custom"
+            // For properties, only add a "Custom" destination
             var conditionData = new DataPart(Resources.AtomicConditionEdit_Custom);
             ConditionDestinations.Add(conditionData);
             selectedDestination = conditionData;
         }
-        
-        // Pour les sources DataPart, on montre toutes les sources
         else if (SelectedSourceOrProperty?.IsDataPart == true)
         {
+            // For DataPart sources, show all sources
             ConditionDestinations.AddAll(_dataPartIndexer.GetAllDataParts());
         }
 
@@ -445,14 +443,14 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
 
     private void ShowHideControls()
     {
-        // Contrôler la visibilité du point et du SourceTypeComboBox
+        // Control the visibility of the dot and the SourceTypeComboBox
         IsSourceTypeComboBoxVisible = SelectedSourceOrProperty?.IsDataPart == true;
         IsDotVisible = SelectedSourceOrProperty?.IsDataPart == true;
 
-        // Contrôler la visibilité du DestinationComboBox
+        // Control the visibility of the DestinationComboBox
         IsDestinationComboBoxVisible = SelectedSourceOrProperty?.IsNameProperty != true;
 
-        // Contrôler la visibilité des champs de saisie
+        // Control the visibility of input fields
         IsDateVisible = SelectedDestination is { IsVirtual: true }
                         && ((SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Date }) ||
                             (!SelectedSourceOrProperty?.IsNameProperty == true && SelectedComparisonElement is { ComparisonElement: ComparisonElement.Date }));
@@ -471,13 +469,13 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
             return null;
         }
 
-        // Si on a sélectionné une propriété (comme Name), on utilise une source par défaut
+        // If a property is selected (like Name), use a default source
         DataPart source;
         ComparisonElement comparisonElement;
         
         if (SelectedSourceOrProperty.IsProperty)
         {
-            // Pour les propriétés, on utilise la première source disponible comme source par défaut
+            // For properties, use the first available source as the default source
             source = _dataPartIndexer.GetAllDataParts().First();
             comparisonElement = SelectedSourceOrProperty.ComparisonElement!.Value;
         }
@@ -595,12 +593,12 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
         var source = SelectedSourceOrProperty;
         var destination = SelectedDestination;
 
-        // Pour l'instant, on ne permet pas de swap avec les propriétés
-        // car cela nécessiterait une logique plus complexe
+        // Currently, swapping with properties is not allowed
+        // because it would require more complex logic
         if (source?.IsDataPart == true && destination != null)
         {
-            // On peut seulement swapper si on a une source DataPart et une destination
-            // Cette logique pourrait être étendue selon les besoins
+            // Swapping is only allowed if we have a DataPart source and a destination
+            // This logic could be extended as needed
         }
     }
 }
