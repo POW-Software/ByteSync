@@ -268,7 +268,7 @@
     <value>Less than</value>
   </data>
   <data name="AtomicConditionEdit_Source" xml:space="preserve">
-    <value>Source</value>
+    <value>Source or Property</value>
   </data>
   <data name="AtomicConditionEdit_ComparisonElement" xml:space="preserve">
     <value>Element</value>
