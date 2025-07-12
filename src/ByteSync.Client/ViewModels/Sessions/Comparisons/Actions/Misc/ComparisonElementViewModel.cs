@@ -31,11 +31,11 @@ class ComparisonElementViewModel : BindableBase
         }
     }
     
-    public bool IsName
-    {
-        get
-        {
-            return ComparisonElement == ComparisonElement.Name;
-        }
-    }
+    // public bool IsName
+    // {
+    //     get
+    //     {
+    //         return ComparisonElement == ComparisonElement.Name;
+    //     }
+    // }
 }

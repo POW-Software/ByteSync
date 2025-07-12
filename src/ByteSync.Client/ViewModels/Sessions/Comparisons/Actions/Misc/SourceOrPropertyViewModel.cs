@@ -51,10 +51,10 @@ public class SourceOrPropertyViewModel : BindableBase
         get => IsProperty && ComparisonElement == Business.Comparisons.ComparisonElement.Name;
     }
 
-    public bool IsDateOrSizeProperty
-    {
-        get => IsProperty && (ComparisonElement == Business.Comparisons.ComparisonElement.Date || ComparisonElement == Business.Comparisons.ComparisonElement.Size);
-    }
+    // public bool IsDateOrSizeProperty
+    // {
+    //     get => IsProperty && (ComparisonElement == Business.Comparisons.ComparisonElement.Date || ComparisonElement == Business.Comparisons.ComparisonElement.Size);
+    // }
 
     protected bool Equals(SourceOrPropertyViewModel other)
     {
@@ -62,9 +62,13 @@ public class SourceOrPropertyViewModel : BindableBase
             return false;
 
         if (IsDataPart)
+        {
             return Equals(DataPart, other.DataPart);
+        }
         else
+        {
             return ComparisonElement == other.ComparisonElement;
+        }
     }
 
     public override bool Equals(object? obj)

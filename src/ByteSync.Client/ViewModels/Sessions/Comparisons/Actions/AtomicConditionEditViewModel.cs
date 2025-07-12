@@ -191,13 +191,6 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
 
             comparisonElementView = new ComparisonElementViewModel
             {
-                ComparisonElement = ComparisonElement.Name,
-                Description = Resources.AtomicConditionEdit_Name
-            };
-            ComparisonElements.Add(comparisonElementView);
-
-            comparisonElementView = new ComparisonElementViewModel
-            {
                 ComparisonElement = ComparisonElement.Presence,
                 Description = Resources.AtomicConditionEdit_Presence
             };
@@ -209,13 +202,6 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
             {
                 ComparisonElement = ComparisonElement.Presence,
                 Description = Resources.AtomicConditionEdit_Presence
-            };
-            ComparisonElements.Add(comparisonElementView);
-
-            comparisonElementView = new ComparisonElementViewModel
-            {
-                ComparisonElement = ComparisonElement.Name,
-                Description = Resources.AtomicConditionEdit_Name
             };
             ComparisonElements.Add(comparisonElementView);
         }
@@ -336,6 +322,9 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
 
         ConditionDestinations.Clear();
 
+        bool addCustomDestination = false;
+        bool selectCustomDestination = false;
+        
         // If a property is selected (like Name), do not populate destinations
         // because the DestinationComboBox will be hidden
         if (SelectedSourceOrProperty?.IsProperty == true)
@@ -345,30 +334,44 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
             // return;
             
             // For properties, only add a "Custom" destination
-            var conditionData = new DataPart(Resources.AtomicConditionEdit_Custom);
-            ConditionDestinations.Add(conditionData);
-            selectedDestination = conditionData;
-        }
-        else if (SelectedSourceOrProperty?.IsDataPart == true)
-        {
-            // For DataPart sources, show all sources
-            ConditionDestinations.AddAll(_dataPartIndexer.GetAllDataParts());
-        }
-
-        bool addCustomDestination = false;
-        bool selectCustomDestination = false;
-        
-        if (SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement is { IsDateOrSize: true } 
-            && SelectedComparisonOperator != null 
-            && !SelectedComparisonOperator.ConditionOperator.In(ConditionOperatorTypes.ExistsOn, ConditionOperatorTypes.NotExistsOn))
-        {
-            addCustomDestination = true;
-        }
-        if (SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement is { IsName: true })
-        {
+            // var conditionData = new DataPart(Resources.AtomicConditionEdit_Custom);
+            // ConditionDestinations.Add(conditionData);
+            // selectedDestination = conditionData;
+            
             addCustomDestination = true;
             selectCustomDestination = true;
         }
+        else
+        {
+            ConditionDestinations.AddAll(_dataPartIndexer.GetAllDataParts());
+
+            if (SelectedComparisonElement is { IsDateOrSize: true }
+                && SelectedComparisonOperator != null
+                && !SelectedComparisonOperator.ConditionOperator.In(ConditionOperatorTypes.ExistsOn, ConditionOperatorTypes.NotExistsOn))
+            {
+                addCustomDestination = true;
+            }
+        }
+
+
+
+        
+        // if (SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement is { IsDateOrSize: true } 
+        //     && SelectedComparisonOperator != null 
+        //     && !SelectedComparisonOperator.ConditionOperator.In(ConditionOperatorTypes.ExistsOn, ConditionOperatorTypes.NotExistsOn))
+        // {
+        //     addCustomDestination = true;
+        // }
+        // // else if (SelectedSourceOrProperty?.IsDataPart == false && SelectedSourceOrProperty.ComparisonElement == ComparisonElement.Name)
+        // // {
+        // //     addCustomDestination = true;
+        // //     selectCustomDestination = true;
+        // // }
+        // else if (SelectedSourceOrProperty?.IsDataPart == true)
+        // {
+        //     // For DataPart sources, show all sources
+        //     ConditionDestinations.AddAll(_dataPartIndexer.GetAllDataParts());
+        // }
         
         if (addCustomDestination)
         {
@@ -495,6 +498,10 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
             {
                 return null;
             }
+            if (comparisonElement == ComparisonElement.Name && NamePattern.IsNullOrEmpty())
+            {
+                return null;
+            }
         }
 
         var selectedDestination = SelectedDestination;
@@ -506,7 +513,7 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
         var atomicCondition = new AtomicCondition(source, comparisonElement, 
             SelectedComparisonOperator.ConditionOperator, selectedDestination);
 
-        if (selectedDestination == null && SelectedSize != null)
+        if (selectedDestination == null && comparisonElement == ComparisonElement.Size && SelectedSize != null)
         {
             atomicCondition.Size = SelectedSize;
             atomicCondition.SizeUnit = SelectedSizeUnit.SizeUnit;
@@ -517,7 +524,7 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
             atomicCondition.SizeUnit = null;
         }
         
-        if (selectedDestination == null && SelectedDateTime != null)
+        if (selectedDestination == null && comparisonElement == ComparisonElement.Presence && SelectedDateTime != null)
         {
             var localDateTime = new DateTime(
                 SelectedDateTime.Value.Year, SelectedDateTime.Value.Month, SelectedDateTime.Value.Day,
@@ -530,7 +537,14 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
             atomicCondition.DateTime = null;
         }
 
-        atomicCondition.NamePattern = NamePattern;
+        if (NamePattern.IsNotEmpty() && comparisonElement == ComparisonElement.Name)
+        {
+            atomicCondition.NamePattern = NamePattern;
+        }
+        else
+        {
+            atomicCondition.NamePattern = null;
+        }
 
         return atomicCondition;
     }

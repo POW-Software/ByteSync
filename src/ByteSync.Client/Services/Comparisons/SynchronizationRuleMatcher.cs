@@ -281,8 +281,7 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
         {
             lastWriteTimeDestination = condition.DateTime!;
             
-            if (lastWriteTimeSource != null && 
-                lastWriteTimeDestination.Value.Second == 0 && lastWriteTimeDestination.Value.Millisecond == 0)
+            if (lastWriteTimeSource is { Second: 0, Millisecond: 0 })
             {
                 lastWriteTimeSource = lastWriteTimeSource.Value.Trim(TimeSpan.TicksPerMinute);
             }
