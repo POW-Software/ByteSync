@@ -39,6 +39,7 @@ public class SynchronizationRulesConverter : ISynchronizationRulesConverter
                 looseAtomicCondition.ConditionOperator = condition.ConditionOperator;
                 looseAtomicCondition.DateTime = condition.DateTime;
                 looseAtomicCondition.SizeUnit = condition.SizeUnit;
+                looseAtomicCondition.NamePattern = condition.NamePattern;
 
                 looseSynchronizationRule.Conditions.Add(looseAtomicCondition);
             }
@@ -127,6 +128,7 @@ public class SynchronizationRulesConverter : ISynchronizationRulesConverter
                 atomicCondition.ConditionOperator = condition.ConditionOperator;
                 atomicCondition.DateTime = condition.DateTime;
                 atomicCondition.SizeUnit = condition.SizeUnit;
+                atomicCondition.NamePattern = condition.NamePattern;
 
                 synchronizationRule.Conditions.Add(atomicCondition);
             }

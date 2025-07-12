@@ -152,52 +152,52 @@ public class AfterJoinSessionService : IAfterJoinSessionService
 
     private void AddDebugPathItems()
     {
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTA))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTA))
         {
             DebugAddDesktopPathItem("testA");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTA1))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTA1))
         {
             DebugAddDesktopPathItem("testA1");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTB))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTB))
         {
             DebugAddDesktopPathItem("testB");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTB1))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTB1))
         {
             DebugAddDesktopPathItem("testB1");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTC))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTC))
         {
             DebugAddDesktopPathItem("testC");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTC1))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTC1))
         {
             DebugAddDesktopPathItem("testC1");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTD))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTD))
         {
             DebugAddDesktopPathItem("testD");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTD1))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTD1))
         {
             DebugAddDesktopPathItem("testD1");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTE))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTE))
         {
             DebugAddDesktopPathItem("testE");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_PATHITEM_TESTE1))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTE1))
         {
             DebugAddDesktopPathItem("testE1");
         }

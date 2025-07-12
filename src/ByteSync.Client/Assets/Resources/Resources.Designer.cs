@@ -173,7 +173,13 @@ namespace ByteSync.Assets.Resources {
                 return ResourceManager.GetString("AtomicConditionDescription_ComparisonElement_Size", resourceCulture);
             }
         }
-        
+
+        internal static string AtomicConditionDescription_ComparisonElement_Name {
+            get {
+                return ResourceManager.GetString("AtomicConditionDescription_ComparisonElement_Name", resourceCulture);
+            }
+        }
+
         internal static string AtomicConditionDescription_ComparisonElement_Presence {
             get {
                 return ResourceManager.GetString("AtomicConditionDescription_ComparisonElement_Presence", resourceCulture);
@@ -516,6 +522,12 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
+        internal static string AtomicConditionEdit_NamePlaceholder {
+            get {
+                return ResourceManager.GetString("AtomicConditionEdit_NamePlaceholder", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Equals.
         /// </summary>
@@ -603,6 +615,15 @@ namespace ByteSync.Assets.Resources {
         internal static string AtomicConditionEdit_Size {
             get {
                 return ResourceManager.GetString("AtomicConditionEdit_Size", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        internal static string AtomicConditionEdit_Name {
+            get {
+                return ResourceManager.GetString("AtomicConditionEdit_Name", resourceCulture);
             }
         }
         

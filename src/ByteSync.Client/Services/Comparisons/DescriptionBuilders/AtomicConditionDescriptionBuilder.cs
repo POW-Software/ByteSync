@@ -56,6 +56,9 @@ public class AtomicConditionDescriptionBuilder : AbstractDescriptionBuilder<IAto
             case ComparisonElement.Presence:
                 result = LocalizationService[nameof(Resources.AtomicConditionDescription_ComparisonElement_Presence)];
                 break;
+            case ComparisonElement.Name:
+                result = LocalizationService[nameof(Resources.AtomicConditionDescription_ComparisonElement_Name)];
+                break;
         }
             
         if (result.IsEmpty())

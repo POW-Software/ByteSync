@@ -6,4 +6,5 @@ public enum ComparisonElement
     Date = 2,
     Size = 3,
     Presence = 4,
+    Name = 5,
 }

@@ -48,4 +48,5 @@ public class AtomicCondition : IAtomicCondition
     public int? Size { get; set; }
     public SizeUnits? SizeUnit { get; set; }
     public DateTime? DateTime { get; set; }
+    public string? NamePattern { get; set; }
 }
