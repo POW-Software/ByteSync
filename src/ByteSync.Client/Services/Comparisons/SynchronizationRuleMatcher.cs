@@ -114,17 +114,17 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
 
     private bool ConditionMatches(AtomicCondition condition, ComparisonItem comparisonItem)
     {
-        switch (condition.ComparisonElement)
+        switch (condition.ComparisonProperty)
         {
-            case ComparisonElement.Content:
+            case ComparisonProperty.Content:
                 return ConditionMatchesContent(condition, comparisonItem);
-            case ComparisonElement.Size:
+            case ComparisonProperty.Size:
                 return ConditionMatchesSize(condition, comparisonItem);
-            case ComparisonElement.Date:
+            case ComparisonProperty.Date:
                 return ConditionMatchesDate(condition, comparisonItem);
-            case ComparisonElement.Presence:
+            case ComparisonProperty.Presence:
                 return ConditionMatchesPresence(condition, comparisonItem);
-            case ComparisonElement.Name:
+            case ComparisonProperty.Name:
                 return ConditionMatchesName(condition, comparisonItem);
             default:
                 return false;

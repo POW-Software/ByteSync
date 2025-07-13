@@ -1,6 +1,6 @@
 ﻿namespace ByteSync.Business.Comparisons;
 
-public enum ComparisonElement
+public enum ComparisonProperty
 {
     Content = 1,
     Date = 2,

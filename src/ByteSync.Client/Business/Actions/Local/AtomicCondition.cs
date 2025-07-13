@@ -11,16 +11,16 @@ public class AtomicCondition : IAtomicCondition
 
     }
         
-    public AtomicCondition(DataPart source, ComparisonElement comparisonElement, ConditionOperatorTypes conditionOperator, DataPart? destination)
+    public AtomicCondition(DataPart source, ComparisonProperty comparisonProperty, ConditionOperatorTypes conditionOperator, DataPart? destination)
     {
         Source = source;
-        ComparisonElement = comparisonElement;
+        ComparisonProperty = comparisonProperty;
         ConditionOperator = conditionOperator;
         Destination = destination;
     }
         
     public DataPart Source { get; set; } = null!;
-    public ComparisonElement ComparisonElement { get; set; }
+    public ComparisonProperty ComparisonProperty { get; set; }
     public ConditionOperatorTypes ConditionOperator { get; set; }
         
     /// <summary>

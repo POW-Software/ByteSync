@@ -31,7 +31,7 @@ public class SynchronizationRuleMatcherNameTests
         var condition = new AtomicCondition
         {
             Source = new DataPart("A"),
-            ComparisonElement = ComparisonElement.Name,
+            ComparisonProperty = ComparisonProperty.Name,
             ConditionOperator = op,
             NamePattern = pattern
         };

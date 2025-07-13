@@ -35,7 +35,7 @@ public class SynchronizationRulesConverter : ISynchronizationRulesConverter
                 looseAtomicCondition.SourceName = condition.Source.Name;
                 looseAtomicCondition.DestinationName = condition.Destination?.Name;
                 looseAtomicCondition.Size = condition.Size;
-                looseAtomicCondition.ComparisonElement = condition.ComparisonElement;
+                looseAtomicCondition.ComparisonProperty = condition.ComparisonProperty;
                 looseAtomicCondition.ConditionOperator = condition.ConditionOperator;
                 looseAtomicCondition.DateTime = condition.DateTime;
                 looseAtomicCondition.SizeUnit = condition.SizeUnit;
@@ -124,7 +124,7 @@ public class SynchronizationRulesConverter : ISynchronizationRulesConverter
                 atomicCondition.Source = _dataPartIndexer.GetDataPart(condition.SourceName)!;
                 atomicCondition.Destination = _dataPartIndexer.GetDataPart(condition.DestinationName);
                 atomicCondition.Size = condition.Size;
-                atomicCondition.ComparisonElement = condition.ComparisonElement;
+                atomicCondition.ComparisonProperty = condition.ComparisonProperty;
                 atomicCondition.ConditionOperator = condition.ConditionOperator;
                 atomicCondition.DateTime = condition.DateTime;
                 atomicCondition.SizeUnit = condition.SizeUnit;

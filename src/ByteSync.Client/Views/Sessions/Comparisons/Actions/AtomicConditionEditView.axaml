@@ -48,7 +48,7 @@
                                        IsVisible="{Binding Path=IsDotVisible}"/>
 
                             <ComboBox Classes="BsComboBox" x:Name="SourceTypeComboBox" Margin="0 0" MinWidth="160"
-                                      ItemsSource="{Binding Path=ComparisonElements}" 
+                                      ItemsSource="{Binding Path=ComparisonProperties}" 
                                       PlaceholderText="{localizations:Loc AtomicConditionEdit_ComparisonElement}"
                                       SelectedItem="{Binding Path=SelectedComparisonElement}"
                                       IsVisible="{Binding Path=IsSourceTypeComboBoxVisible}">

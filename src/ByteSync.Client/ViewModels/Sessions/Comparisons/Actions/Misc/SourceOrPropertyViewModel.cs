@@ -20,16 +20,16 @@ public class SourceOrPropertyViewModel : BindableBase
         Description = dataPart.Name;
     }
 
-    public SourceOrPropertyViewModel(ComparisonElement comparisonElement, string description)
+    public SourceOrPropertyViewModel(ComparisonProperty comparisonProperty, string description)
     {
-        ComparisonElement = comparisonElement;
+        ComparisonProperty = comparisonProperty;
         IsDataPart = false;
         DisplayName = description;
         Description = description;
     }
 
     public DataPart? DataPart { get; set; }
-    public ComparisonElement? ComparisonElement { get; set; }
+    public ComparisonProperty? ComparisonProperty { get; set; }
     
     public bool IsDataPart { get; set; }
     public bool IsProperty => !IsDataPart;
@@ -48,7 +48,7 @@ public class SourceOrPropertyViewModel : BindableBase
 
     public bool IsNameProperty
     {
-        get => IsProperty && ComparisonElement == Business.Comparisons.ComparisonElement.Name;
+        get => IsProperty && ComparisonProperty == Business.Comparisons.ComparisonProperty.Name;
     }
 
     protected bool Equals(SourceOrPropertyViewModel other)
@@ -62,7 +62,7 @@ public class SourceOrPropertyViewModel : BindableBase
         }
         else
         {
-            return ComparisonElement == other.ComparisonElement;
+            return ComparisonProperty == other.ComparisonProperty;
         }
     }
 
@@ -82,7 +82,7 @@ public class SourceOrPropertyViewModel : BindableBase
             if (IsDataPart)
                 hashCode = (hashCode * 397) ^ (DataPart != null ? DataPart.GetHashCode() : 0);
             else
-                hashCode = (hashCode * 397) ^ (ComparisonElement != null ? ComparisonElement.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (ComparisonProperty != null ? ComparisonProperty.GetHashCode() : 0);
             return hashCode;
         }
     }

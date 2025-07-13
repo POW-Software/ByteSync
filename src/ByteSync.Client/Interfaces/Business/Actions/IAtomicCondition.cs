@@ -11,7 +11,7 @@ public interface IAtomicCondition
     
     public int? Size { get; set; }
     
-    public ComparisonElement ComparisonElement { get; set; }
+    public ComparisonProperty ComparisonProperty { get; set; }
     
     public ConditionOperatorTypes ConditionOperator { get; set; }
     
