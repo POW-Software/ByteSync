@@ -2,7 +2,7 @@
 
 ByteSync supports creating synchronization rules to automatically trigger actions when comparison conditions are met. Rules can compare file or directory attributes using different elements and operators.
 
-## Comparison elements
+## Comparison properties
 
 - **Content**
 - **Date**
