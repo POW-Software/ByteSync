@@ -3,6 +3,7 @@ using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Updates;
+using ByteSync.Helpers;
 
 namespace ByteSync.Services.Updates;
 
@@ -26,13 +27,12 @@ public class SearchUpdateService : ISearchUpdateService
     {
         try
         {
-            if (IsApplicationInstalledFromStore)
+            // Check if the application is installed from the Windows Store. This condition is used for logging purposes
+            // and does not affect the subsequent code execution. Auto-update is disabled for store installations, but
+            // other parts of the method will still execute to log available updates and update the repository.
+            if (_environmentService.IsInstalledFromWindowsStore())
             {
-                _availableUpdateRepository.UpdateAvailableUpdates(new List<SoftwareVersion>());
-                
-                _logger.LogInformation("UpdateSystem: Application is installed from store, update check is disabled");
-                
-                return;
+                _logger.LogInformation("UpdateSystem: Application is installed from store, auto-update is disabled");
             }
             
             var updates = await _availableUpdatesLister.GetAvailableUpdates();
@@ -77,23 +77,6 @@ public class SearchUpdateService : ISearchUpdateService
             _logger.LogError(ex, "UpdateSystem");
             
             _availableUpdateRepository.Clear();
-        }
-    }
-
-    public bool IsApplicationInstalledFromStore
-    {
-        get
-        {
-            if (_environmentService.OSPlatform == OSPlatforms.Windows)
-            {
-                if (_environmentService.AssemblyFullName.Contains("\\Program Files\\WindowsApps\\")
-                    || _environmentService.AssemblyFullName.Contains("\\Program Files (x86)\\WindowsApps\\"))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 

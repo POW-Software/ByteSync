@@ -3,16 +3,16 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Actions.Misc;
 
-class ComparisonElementViewModel : ViewModelBase
+class ComparisonPropertyViewModel : ViewModelBase
 {
     private string _description;
 
-    public ComparisonElementViewModel()
+    public ComparisonPropertyViewModel()
     {
 
     }
 
-    public ComparisonElement ComparisonElement { get; set; }
+    public ComparisonProperty ComparisonProperty { get; set; }
 
     [Reactive]
     public string Description { get; set; }
@@ -21,7 +21,7 @@ class ComparisonElementViewModel : ViewModelBase
     {
         get
         {
-            return ComparisonElement == ComparisonElement.Date || ComparisonElement == ComparisonElement.Size;
+            return ComparisonProperty == ComparisonProperty.Date || ComparisonProperty == ComparisonProperty.Size;
         }
     }
 }
