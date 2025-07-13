@@ -95,10 +95,10 @@
                                          Watermark="{localizations:Loc AtomicConditionEdit_NamePlaceholder}"
                                          Text="{Binding NamePattern}"
                                          />
-                                <DatePicker Classes="Bs" Margin="3 0" IsVisible="{Binding Path=IsDateVisible}"
+                                <DatePicker Classes="Bs" Margin="3 4 3 0" IsVisible="{Binding Path=IsDateVisible}"
                                             SelectedDate="{Binding Path=SelectedDateTime}" VerticalAlignment="Center"/>
 
-                                <TimePicker Classes="Bs" Margin="3 0" IsVisible="{Binding Path=IsDateVisible}" 
+                                <TimePicker Classes="Bs" Margin="3 4 3 0" IsVisible="{Binding Path=IsDateVisible}" 
                                             SelectedTime="{Binding Path=SelectedTime}" VerticalAlignment="Center"></TimePicker>
 
                                 <!-- 10/03/2022 Top margin of 4 to compensate for the error offset in DatePicker and TimePicker!!! -->

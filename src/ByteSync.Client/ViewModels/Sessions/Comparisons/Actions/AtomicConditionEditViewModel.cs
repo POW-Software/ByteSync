@@ -43,7 +43,7 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
         RemoveCommand = ReactiveCommand.Create(Remove);
 
         var canSwapSides = this.WhenAnyValue(x => x.SelectedSourceOrProperty, x => x.SelectedDestination,
-            (source, destination) => source != null && destination != null);
+            (source, destination) => source is { IsDataPart: true } && destination is { IsVirtual: false });
         SwapSidesCommand = ReactiveCommand.Create(SwapSides, canSwapSides);
 
         FillSourceOrPropertiesData();
@@ -578,13 +578,10 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
 
         // Currently, swapping with properties is not allowed
         // because it would require more complex logic
-        if (source?.IsDataPart == true && destination != null)
+        if (source?.IsDataPart == true && destination is { IsVirtual: false })
         {
-            // Swapping is only allowed if we have a DataPart source and a destination
-            // This logic could be extended as needed
-            //
-            // SelectedSource = destination;
-            // SelectedDestination = source;
+            SelectedSourceOrProperty = new SourceOrPropertyViewModel(destination);
+            SelectedDestination = source?.DataPart;
         }
     }
 }
