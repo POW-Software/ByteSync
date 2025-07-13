@@ -325,19 +325,8 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
         bool addCustomDestination = false;
         bool selectCustomDestination = false;
         
-        // If a property is selected (like Name), do not populate destinations
-        // because the DestinationComboBox will be hidden
         if (SelectedSourceOrProperty?.IsProperty == true)
         {
-            // For properties, do not populate destinations
-            // The DestinationComboBox will be hidden by ShowHideControls
-            // return;
-            
-            // For properties, only add a "Custom" destination
-            // var conditionData = new DataPart(Resources.AtomicConditionEdit_Custom);
-            // ConditionDestinations.Add(conditionData);
-            // selectedDestination = conditionData;
-            
             addCustomDestination = true;
             selectCustomDestination = true;
         }
@@ -352,26 +341,6 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
                 addCustomDestination = true;
             }
         }
-
-
-
-        
-        // if (SelectedSourceOrProperty?.IsDataPart == true && SelectedComparisonElement is { IsDateOrSize: true } 
-        //     && SelectedComparisonOperator != null 
-        //     && !SelectedComparisonOperator.ConditionOperator.In(ConditionOperatorTypes.ExistsOn, ConditionOperatorTypes.NotExistsOn))
-        // {
-        //     addCustomDestination = true;
-        // }
-        // // else if (SelectedSourceOrProperty?.IsDataPart == false && SelectedSourceOrProperty.ComparisonElement == ComparisonElement.Name)
-        // // {
-        // //     addCustomDestination = true;
-        // //     selectCustomDestination = true;
-        // // }
-        // else if (SelectedSourceOrProperty?.IsDataPart == true)
-        // {
-        //     // For DataPart sources, show all sources
-        //     ConditionDestinations.AddAll(_dataPartIndexer.GetAllDataParts());
-        // }
         
         if (addCustomDestination)
         {
@@ -551,15 +520,15 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
 
     internal void SetAtomicCondition(AtomicCondition atomicCondition)
     {
-        // Trouver la source ou propriété correspondante
+        // Find the corresponding source or property
         if (atomicCondition.ComparisonElement == ComparisonElement.Name)
         {
-            // Si c'est une condition sur le nom, on sélectionne la propriété Name
+            // If it is a condition on the name, select the Name property
             SelectedSourceOrProperty = SourceOrProperties.FirstOrDefault(sop => sop.IsNameProperty);
         }
         else
         {
-            // Sinon, on sélectionne la source correspondante
+            // Otherwise, select the corresponding source
             SelectedSourceOrProperty = SourceOrProperties.FirstOrDefault(sop => 
                 sop.IsDataPart && sop.DataPart?.Name == atomicCondition.Source.Name);
         }
@@ -613,6 +582,9 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
         {
             // Swapping is only allowed if we have a DataPart source and a destination
             // This logic could be extended as needed
+            //
+            // SelectedSource = destination;
+            // SelectedDestination = source;
         }
     }
 }

@@ -30,12 +30,4 @@ class ComparisonElementViewModel : BindableBase
             return ComparisonElement == ComparisonElement.Date || ComparisonElement == ComparisonElement.Size;
         }
     }
-    
-    // public bool IsName
-    // {
-    //     get
-    //     {
-    //         return ComparisonElement == ComparisonElement.Name;
-    //     }
-    // }
 }

@@ -51,11 +51,6 @@ public class SourceOrPropertyViewModel : BindableBase
         get => IsProperty && ComparisonElement == Business.Comparisons.ComparisonElement.Name;
     }
 
-    // public bool IsDateOrSizeProperty
-    // {
-    //     get => IsProperty && (ComparisonElement == Business.Comparisons.ComparisonElement.Date || ComparisonElement == Business.Comparisons.ComparisonElement.Size);
-    // }
-
     protected bool Equals(SourceOrPropertyViewModel other)
     {
         if (IsDataPart != other.IsDataPart)
