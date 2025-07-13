@@ -35,6 +35,10 @@ public class AtomicConditionDescriptionBuilder : AbstractDescriptionBuilder<IAto
             {
                 stringBuilder.Append($"{atomicCondition.DateTime:g}");
             }
+            else if (atomicCondition.NamePattern != null)
+            {
+                stringBuilder.Append($"{atomicCondition.NamePattern}");
+            }
         }
     }
 

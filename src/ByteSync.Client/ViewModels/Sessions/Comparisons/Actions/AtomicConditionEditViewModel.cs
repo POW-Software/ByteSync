@@ -524,13 +524,13 @@ public class AtomicConditionEditViewModel : BaseAtomicEditViewModel
             atomicCondition.SizeUnit = null;
         }
         
-        if (selectedDestination == null && comparisonElement == ComparisonElement.Presence && SelectedDateTime != null)
+        if (selectedDestination == null && comparisonElement == ComparisonElement.Date && SelectedDateTime != null)
         {
             var localDateTime = new DateTime(
                 SelectedDateTime.Value.Year, SelectedDateTime.Value.Month, SelectedDateTime.Value.Day,
                 SelectedTime.Hours, SelectedTime.Minutes, 0, DateTimeKind.Local);
 
-            atomicCondition.DateTime = localDateTime.ToUniversalTime();
+            atomicCondition.DateTime = localDateTime;
         }
         else
         {

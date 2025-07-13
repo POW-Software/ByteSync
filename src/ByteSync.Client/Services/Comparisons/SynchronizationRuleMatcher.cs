@@ -279,7 +279,7 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
         }
         else
         {
-            lastWriteTimeDestination = condition.DateTime!;
+            lastWriteTimeDestination = condition.DateTime!.Value.ToUniversalTime();
             
             if (lastWriteTimeSource is { Second: 0, Millisecond: 0 })
             {
