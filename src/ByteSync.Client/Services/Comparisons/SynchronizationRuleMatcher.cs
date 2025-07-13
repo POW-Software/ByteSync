@@ -5,10 +5,11 @@ using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
+using System.Text.RegularExpressions;
 
 namespace ByteSync.Services.Comparisons;
 
-class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
+public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
 {
     private readonly IAtomicActionConsistencyChecker _atomicActionConsistencyChecker;
     private readonly IAtomicActionRepository _atomicActionRepository;
@@ -113,16 +114,18 @@ class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
 
     private bool ConditionMatches(AtomicCondition condition, ComparisonItem comparisonItem)
     {
-        switch (condition.ComparisonElement)
+        switch (condition.ComparisonProperty)
         {
-            case ComparisonElement.Content:
+            case ComparisonProperty.Content:
                 return ConditionMatchesContent(condition, comparisonItem);
-            case ComparisonElement.Size:
+            case ComparisonProperty.Size:
                 return ConditionMatchesSize(condition, comparisonItem);
-            case ComparisonElement.Date:
+            case ComparisonProperty.Date:
                 return ConditionMatchesDate(condition, comparisonItem);
-            case ComparisonElement.Presence:
+            case ComparisonProperty.Presence:
                 return ConditionMatchesPresence(condition, comparisonItem);
+            case ComparisonProperty.Name:
+                return ConditionMatchesName(condition, comparisonItem);
             default:
                 return false;
         }
@@ -276,10 +279,9 @@ class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
         }
         else
         {
-            lastWriteTimeDestination = condition.DateTime!;
+            lastWriteTimeDestination = condition.DateTime!.Value.ToUniversalTime();
             
-            if (lastWriteTimeSource != null && 
-                lastWriteTimeDestination.Value.Second == 0 && lastWriteTimeDestination.Value.Millisecond == 0)
+            if (lastWriteTimeSource is { Second: 0, Millisecond: 0 })
             {
                 lastWriteTimeSource = lastWriteTimeSource.Value.Trim(TimeSpan.TicksPerMinute);
             }
@@ -355,6 +357,41 @@ class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
         }
             
         return result.Value;
+    }
+
+    private bool ConditionMatchesName(AtomicCondition condition, ComparisonItem comparisonItem)
+    {
+        if (string.IsNullOrWhiteSpace(condition.NamePattern))
+        {
+            return false;
+        }
+
+        var name = comparisonItem.PathIdentity.FileName;
+        var pattern = condition.NamePattern!;
+
+        bool result = false;
+
+        if (pattern.Contains("*") &&
+            condition.ConditionOperator.In(ConditionOperatorTypes.Equals, ConditionOperatorTypes.NotEquals))
+        {
+            var regex = "^" + Regex.Escape(pattern).Replace("\\*", ".*") + "$";
+            var isMatch = Regex.IsMatch(name, regex, RegexOptions.IgnoreCase);
+            result = condition.ConditionOperator == ConditionOperatorTypes.Equals ? isMatch : !isMatch;
+        }
+        else
+        {
+            switch (condition.ConditionOperator)
+            {
+                case ConditionOperatorTypes.Equals:
+                    result = string.Equals(name, pattern, StringComparison.OrdinalIgnoreCase);
+                    break;
+                case ConditionOperatorTypes.NotEquals:
+                    result = !string.Equals(name, pattern, StringComparison.OrdinalIgnoreCase);
+                    break;
+            }
+        }
+
+        return result;
     }
 
     private ContentIdentity? LocalizeContentIdentity(DataPart dataPart, ComparisonItem comparisonItem)

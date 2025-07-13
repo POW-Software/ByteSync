@@ -237,6 +237,9 @@
   <data name="AtomicConditionEdit_Size" xml:space="preserve">
     <value>Size</value>
   </data>
+  <data name="AtomicConditionEdit_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
   <data name="AtomicConditionEdit_Equals" xml:space="preserve">
     <value>Equals</value>
   </data>
@@ -265,7 +268,7 @@
     <value>Less than</value>
   </data>
   <data name="AtomicConditionEdit_Source" xml:space="preserve">
-    <value>Source</value>
+    <value>Source or Property</value>
   </data>
   <data name="AtomicConditionEdit_ComparisonElement" xml:space="preserve">
     <value>Element</value>
@@ -275,6 +278,9 @@
   </data>
   <data name="AtomicConditionEdit_Destination" xml:space="preserve">
     <value>Destination</value>
+  </data>
+  <data name="AtomicConditionEdit_NamePlaceholder" xml:space="preserve">
+	  <value>Name</value>
   </data>
   <data name="AtomicConditionEdit_DateTime" xml:space="preserve">
     <value>Date and Time</value>
@@ -452,6 +458,9 @@ Would you like to continue ?</value>
   </data>
   <data name="AtomicConditionDescription_ComparisonElement_Size" xml:space="preserve">
     <value>Size</value>
+  </data>
+  <data name="AtomicConditionDescription_ComparisonElement_Name" xml:space="preserve">
+    <value>Name</value>
   </data>
   <data name="AtomicConditionDescription_ConditionOperator_Equals" xml:space="preserve">
     <value>Equals</value>

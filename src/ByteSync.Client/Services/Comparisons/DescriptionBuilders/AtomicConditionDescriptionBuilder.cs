@@ -35,6 +35,10 @@ public class AtomicConditionDescriptionBuilder : AbstractDescriptionBuilder<IAto
             {
                 stringBuilder.Append($"{atomicCondition.DateTime:g}");
             }
+            else if (atomicCondition.NamePattern != null)
+            {
+                stringBuilder.Append($"{atomicCondition.NamePattern}");
+            }
         }
     }
 
@@ -42,25 +46,28 @@ public class AtomicConditionDescriptionBuilder : AbstractDescriptionBuilder<IAto
     {
         var result = "";
 
-        switch (atomicCondition.ComparisonElement)
+        switch (atomicCondition.ComparisonProperty)
         {
-            case ComparisonElement.Content:
+            case ComparisonProperty.Content:
                 result = LocalizationService[nameof(Resources.AtomicConditionDescription_ComparisonElement_Content)];
                 break;
-            case ComparisonElement.Date:
+            case ComparisonProperty.Date:
                 result = LocalizationService[nameof(Resources.AtomicConditionDescription_ComparisonElement_Date)];
                 break;
-            case ComparisonElement.Size:
+            case ComparisonProperty.Size:
                 result = LocalizationService[nameof(Resources.AtomicConditionDescription_ComparisonElement_Size)];
                 break;
-            case ComparisonElement.Presence:
+            case ComparisonProperty.Presence:
                 result = LocalizationService[nameof(Resources.AtomicConditionDescription_ComparisonElement_Presence)];
+                break;
+            case ComparisonProperty.Name:
+                result = LocalizationService[nameof(Resources.AtomicConditionDescription_ComparisonElement_Name)];
                 break;
         }
             
         if (result.IsEmpty())
         {
-            throw new ApplicationException("Unknown atomicCondition.ComparisonElement " + atomicCondition.ComparisonElement);
+            throw new ApplicationException("Unknown atomicCondition.ComparisonElement " + atomicCondition.ComparisonProperty);
         }
 
 

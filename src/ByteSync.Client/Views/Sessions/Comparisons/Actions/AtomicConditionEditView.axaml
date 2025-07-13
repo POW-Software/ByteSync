@@ -32,24 +32,26 @@
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="3 0" VerticalAlignment="Center">
                             <ComboBox Classes="BsComboBox"  x:Name="SourceDataComboBox" Margin="0 0" MinWidth="100"
-                                  ItemsSource="{Binding Path=ConditionSources}"
+                                  ItemsSource="{Binding Path=SourceOrProperties}"
                                   PlaceholderText="{localizations:Loc AtomicConditionEdit_Source}"
-                                  SelectedItem="{Binding Path=SelectedSource}"> 
+                                  SelectedItem="{Binding Path=SelectedSourceOrProperty}"> 
                                 
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Name}"  />
+                                        <TextBlock Text="{Binding DisplayName}"  />
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                                 
                             </ComboBox>
                             
-                            <TextBlock Text="." FontWeight="ExtraBold" VerticalAlignment="Center" Margin="3 0"/>
+                            <TextBlock Text="." FontWeight="ExtraBold" VerticalAlignment="Center" Margin="3 0"
+                                       IsVisible="{Binding Path=IsDotVisible}"/>
 
                             <ComboBox Classes="BsComboBox" x:Name="SourceTypeComboBox" Margin="0 0" MinWidth="160"
-                                      ItemsSource="{Binding Path=ComparisonElements}" 
+                                      ItemsSource="{Binding Path=ComparisonProperties}" 
                                       PlaceholderText="{localizations:Loc AtomicConditionEdit_ComparisonElement}"
-                                      SelectedItem="{Binding Path=SelectedComparisonElement}">
+                                      SelectedItem="{Binding Path=SelectedComparisonElement}"
+                                      IsVisible="{Binding Path=IsSourceTypeComboBoxVisible}">
                                 
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
@@ -74,9 +76,10 @@
                         <Grid Grid.Column="2" RowDefinitions="Auto, Auto">
                             <StackPanel Grid.Row="0" Orientation="Horizontal">
                                 <ComboBox Classes="BsComboBox" x:Name="DestinationComboBox" Margin="3 0"
-                                          ItemsSource="{Binding Path=ConditionDestinations}" 
+                                          ItemsSource="{Binding Path=ConditionDestinations}"
                                           PlaceholderText="{localizations:Loc AtomicConditionEdit_Destination}"
-                                          SelectedItem="{Binding Path=SelectedDestination}">
+                                          SelectedItem="{Binding Path=SelectedDestination}"
+                                          IsVisible="{Binding Path=IsDestinationComboBoxVisible}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Name}" FontFamily="{Binding}"  />
@@ -84,22 +87,26 @@
                                     </ComboBox.ItemTemplate>
                             
                                 </ComboBox>
-                                
-                                
                             </StackPanel>
+                            
                             <StackPanel Grid.Row="1" Orientation="Horizontal">
-                                <DatePicker Classes="Bs" Margin="3 0" IsVisible="{Binding Path=IsDateVisible}"
+                                <TextBox Margin="3 0" MinWidth="140"
+                                         IsVisible="{Binding Path=IsNameVisible}"
+                                         Watermark="{localizations:Loc AtomicConditionEdit_NamePlaceholder}"
+                                         Text="{Binding NamePattern}"
+                                         />
+                                <DatePicker Classes="Bs" Margin="3 4 3 0" IsVisible="{Binding Path=IsDateVisible}"
                                             SelectedDate="{Binding Path=SelectedDateTime}" VerticalAlignment="Center"/>
 
-                                <TimePicker Classes="Bs" Margin="3 0" IsVisible="{Binding Path=IsDateVisible}" 
+                                <TimePicker Classes="Bs" Margin="3 4 3 0" IsVisible="{Binding Path=IsDateVisible}" 
                                             SelectedTime="{Binding Path=SelectedTime}" VerticalAlignment="Center"></TimePicker>
 
-                                <!-- 10/03/2022 Marge haut de 4 pour respecter le décalage erreur dans DatePicker et TimePicker !!! -->
+                                <!-- 10/03/2022 Top margin of 4 to compensate for the error offset in DatePicker and TimePicker!!! -->
                                 <NumericUpDown Margin="3 4 3 0" MinWidth="140"
                                                IsVisible="{Binding Path=IsSizeVisible}"
                                                Value="{Binding SelectedSize}"/>
 
-                                <!-- 10/03/2022 Marge haut de 4 pour respecter le décalage erreur dans DatePicker et TimePicker !!! -->
+                                <!-- 10/03/2022 Top margin of 4 to compensate for the error offset in DatePicker and TimePicker!!! -->
                                 <ComboBox Classes="BsComboBox" x:Name="SizeUnitComboBox" Margin="3 4 3 0" MinWidth="60"
                                           IsVisible="{Binding Path=IsSizeVisible}"
                                           ItemsSource="{Binding Path=SizeUnits}"

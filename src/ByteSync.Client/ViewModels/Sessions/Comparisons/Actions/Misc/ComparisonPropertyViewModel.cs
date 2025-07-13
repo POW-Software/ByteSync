@@ -3,16 +3,16 @@ using Prism.Mvvm;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Actions.Misc;
 
-class ComparisonElementViewModel : BindableBase
+class ComparisonPropertyViewModel : BindableBase
 {
     private string _description;
 
-    public ComparisonElementViewModel()
+    public ComparisonPropertyViewModel()
     {
 
     }
 
-    public ComparisonElement ComparisonElement { get; set; }
+    public ComparisonProperty ComparisonProperty { get; set; }
 
     public string Description
     {
@@ -27,7 +27,7 @@ class ComparisonElementViewModel : BindableBase
     {
         get
         {
-            return ComparisonElement == ComparisonElement.Date || ComparisonElement == ComparisonElement.Size;
+            return ComparisonProperty == ComparisonProperty.Date || ComparisonProperty == ComparisonProperty.Size;
         }
     }
 }
