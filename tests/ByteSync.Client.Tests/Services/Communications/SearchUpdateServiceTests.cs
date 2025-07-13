@@ -154,27 +154,30 @@ public class SearchUpdateServiceTests
     [Theory]
     [TestCase(@"C:\Program Files\WindowsApps\MyApp.exe")]
     [TestCase(@"C:\Program Files (x86)\WindowsApps\MyApp.exe")]
-    public async Task SearchNextAvailableVersionsAsync_WhenInstalledFromStore_ShouldUpdateWithEmptyList(string assemblyFullName)
+    public async Task SearchNextAvailableVersionsAsync_WhenInstalledFromStore_ShouldSearchForUpdates(string assemblyFullName)
     {
         // Arrange
-        _mockEnvironmentService.SetupGet(m => m.AssemblyFullName)
-            .Returns(@"C:\Program Files\WindowsApps\MyApp.exe");
-        _mockEnvironmentService.SetupGet(m => m.OSPlatform)
-            .Returns(OSPlatforms.Windows);
+        var currentVersion = new Version("1.0.0");
+        _mockEnvironmentService.SetupGet(m => m.ApplicationVersion).Returns(currentVersion);
+        _mockEnvironmentService.SetupGet(m => m.AssemblyFullName).Returns(assemblyFullName);
+        _mockEnvironmentService.SetupGet(m => m.OSPlatform).Returns(OSPlatforms.Windows);
+
+        var availableUpdates = new List<SoftwareVersion>
+        {
+            CreateSoftwareVersion("1.1.0", PriorityLevel.Minimal)
+        };
+
+        _mockAvailableUpdatesLister.Setup(m => m.GetAvailableUpdates())
+            .ReturnsAsync(availableUpdates);
 
         // Act
         await _searchUpdateService.SearchNextAvailableVersionsAsync();
 
         // Assert
-        _mockAvailableUpdateRepository.Verify(
-            m => m.UpdateAvailableUpdates(It.Is<List<SoftwareVersion>>(list => list.Count == 0)),
-            Times.Once
-        );
-        _mockAvailableUpdateRepository.Verify(
-            m => m.UpdateAvailableUpdates(It.IsAny<List<SoftwareVersion>>()), Times.Once);
-        _mockAvailableUpdateRepository.Verify(
-            m => m.Clear(), Times.Never);
-        _mockAvailableUpdatesLister.Verify(m => m.GetAvailableUpdates(), Times.Never);
+        _mockAvailableUpdateRepository.Verify(m => m.UpdateAvailableUpdates(It.Is<List<SoftwareVersion>>(
+            list => list.Count == 1 && list[0].Version == "1.1.0")), Times.Once);
+        _mockAvailableUpdateRepository.Verify(m => m.Clear(), Times.Never);
+        _mockAvailableUpdatesLister.Verify(m => m.GetAvailableUpdates(), Times.Once);
     }
 
     private SoftwareVersion CreateSoftwareVersion(string version, PriorityLevel level)

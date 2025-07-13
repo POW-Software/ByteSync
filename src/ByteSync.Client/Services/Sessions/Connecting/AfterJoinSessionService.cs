@@ -182,52 +182,52 @@ public class AfterJoinSessionService : IAfterJoinSessionService
 
     private void AddDebugDataSources()
     {
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTA))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTA))
         {
             DebugAddDesktopDataSource("testA");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTA1))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTA1))
         {
             DebugAddDesktopDataSource("testA1");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTB))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTB))
         {
             DebugAddDesktopDataSource("testB");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTB1))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTB1))
         {
             DebugAddDesktopDataSource("testB1");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTC))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTC))
         {
             DebugAddDesktopDataSource("testC");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTC1))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTC1))
         {
             DebugAddDesktopDataSource("testC1");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTD))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTD))
         {
             DebugAddDesktopDataSource("testD");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTD1))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTD1))
         {
             DebugAddDesktopDataSource("testD1");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTE))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTE))
         {
             DebugAddDesktopDataSource("testE");
         }
 
-        if (Environment.GetCommandLineArgs().Contains(DebugArguments.ADD_DATASOURCE_TESTE1))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTE1))
         {
             DebugAddDesktopDataSource("testE1");
         }

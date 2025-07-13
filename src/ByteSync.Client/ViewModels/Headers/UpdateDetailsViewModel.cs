@@ -20,6 +20,7 @@ using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using ByteSync.Helpers;
 
 namespace ByteSync.ViewModels.Headers;
 
@@ -115,6 +116,11 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
     {
         get
         {
+            if (_environmentService.IsInstalledFromWindowsStore())
+            {
+                return false;
+            }
+
             return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
                    (_environmentService.IsPortableApplication && RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
         }
