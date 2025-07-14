@@ -29,7 +29,7 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
     
     private readonly ISessionService _sessionService;
     
-    private ReadOnlyObservableCollection<DataNodeViewModel> _data;
+    private ReadOnlyObservableCollection<DataNodeViewModel> _dataNodes;
     private readonly IDataNodeViewModelFactory _dataNodeViewModelFactory;
     private readonly IDataNodeRepository _dataNodeRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
@@ -58,7 +58,7 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
             .AutoRefresh(vm => vm.JoinedSessionOn)
             .Sort(SortExpressionComparer<DataNodeViewModel>.Ascending(vm => vm.JoinedSessionOn))
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Bind(out _data)
+            .Bind(out _dataNodes)
             .DisposeMany()
             .Subscribe();
 
@@ -102,7 +102,7 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
         });
     }
     
-    public ReadOnlyObservableCollection<DataNodeViewModel> Machines => _data;
+    public ReadOnlyObservableCollection<DataNodeViewModel> DataNodes => _dataNodes;
 
     [Reactive]
     public ViewModelBase? CloudSessionManagement { get; set; }

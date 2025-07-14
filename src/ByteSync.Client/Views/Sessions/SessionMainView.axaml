@@ -30,7 +30,7 @@
                     </StackPanel>
                     
                     <ItemsControl IsVisible="{Binding IsCloudSession}" Margin="6" Background="{DynamicResource BlockBackColor}"
-                                  ItemsSource="{Binding Machines}">
+                                  ItemsSource="{Binding DataNodes}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel  Orientation="Horizontal"/>
