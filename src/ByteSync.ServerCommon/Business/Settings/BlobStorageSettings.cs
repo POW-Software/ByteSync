@@ -9,4 +9,6 @@ public class BlobStorageSettings
     public string Endpoint { get; set; } = null!;
     
     public string Container { get; set; } = null!;
+
+    public int RetentionDurationInDays { get; set; }
 }
