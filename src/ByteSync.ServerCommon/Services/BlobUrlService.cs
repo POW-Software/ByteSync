@@ -1,23 +1,20 @@
-﻿using Azure.Storage;
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
 using ByteSync.Common.Business.SharedFiles;
-using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace ByteSync.ServerCommon.Services;
 
 public class BlobUrlService : IBlobUrlService
 {
-    private readonly BlobStorageSettings _blobStorageSettings;
+    private readonly IBlobStorageContainerService _blobStorageContainerService;
     private readonly ILogger<BlobUrlService> _logger;
 
-    public BlobUrlService(IOptions<BlobStorageSettings> blobStorageSettings, ILogger<BlobUrlService> logger)
+    public BlobUrlService(IBlobStorageContainerService blobStorageContainerService, ILogger<BlobUrlService> logger)
     {
-        _blobStorageSettings = blobStorageSettings.Value;
+        _blobStorageContainerService = blobStorageContainerService;
         _logger = logger;
     }
 
@@ -33,8 +30,7 @@ public class BlobUrlService : IBlobUrlService
 
     private async Task<string> ComputeUrl(SharedFileDefinition sharedFileDefinition, int partNumber, BlobSasPermissions permission)
     {
-        var storageSharedKeyCredential = BuildStorageSharedKeyCredential();
-        var container = await BuildBlobContainerClient(storageSharedKeyCredential);
+        var container = await _blobStorageContainerService.BuildBlobContainerClient();
 
         string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
 
@@ -66,36 +62,10 @@ public class BlobUrlService : IBlobUrlService
         BlobUriBuilder blobUriBuilder = new BlobUriBuilder(blobClient.Uri)
         {
             // Specify the user delegation key.
-            Sas = sasBuilder.ToSasQueryParameters(storageSharedKeyCredential)
+            Sas = sasBuilder.ToSasQueryParameters(_blobStorageContainerService.StorageSharedKeyCredential)
         };
 
         return blobUriBuilder.ToUri().ToString();
-    }
-    private StorageSharedKeyCredential BuildStorageSharedKeyCredential()
-    {
-        return new StorageSharedKeyCredential(_blobStorageSettings.AccountName, _blobStorageSettings.AccountKey);
-    }
-
-    private async Task<BlobContainerClient> BuildBlobContainerClient(StorageSharedKeyCredential storageSharedKeyCredential)
-    {
-        Uri containerUri = BuildContainerUri();
-        
-        var container = new BlobContainerClient(containerUri, storageSharedKeyCredential);
-        
-        await container.CreateIfNotExistsAsync();
-
-        return container;
-    }
-
-    private Uri BuildContainerUri()
-    {
-        string endpoint = _blobStorageSettings.Endpoint.TrimEnd('/');
-        string container = _blobStorageSettings.Container.TrimStart('/').TrimEnd('/') + "/";
-
-        Uri baseUri = new Uri(endpoint);
-        Uri fullUri = new Uri(baseUri, container);
-
-        return fullUri;
     }
 
     private string GetServerFileName(SharedFileDefinition sharedFileDefinition, int partNumber)
@@ -106,8 +76,7 @@ public class BlobUrlService : IBlobUrlService
 
     public async Task DeleteBlob(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        var storageSharedKeyCredential = BuildStorageSharedKeyCredential();
-        var container = await BuildBlobContainerClient(storageSharedKeyCredential);
+        var container = await _blobStorageContainerService.BuildBlobContainerClient();
 
         string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
             
@@ -124,8 +93,7 @@ public class BlobUrlService : IBlobUrlService
 
     public async Task<long?> GetBlobSize(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        var storageSharedKeyCredential = BuildStorageSharedKeyCredential();
-        var container = await BuildBlobContainerClient(storageSharedKeyCredential);
+        var container = await _blobStorageContainerService.BuildBlobContainerClient();
             
         string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
             
