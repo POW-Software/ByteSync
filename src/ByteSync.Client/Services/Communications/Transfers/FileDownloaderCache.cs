@@ -146,7 +146,10 @@ public class FileDownloaderCache : IFileDownloaderCache
         await _semaphore.WaitAsync();
         try
         {
-            fileDownloader.Dispose();
+            if (fileDownloader is FileDownloader concreteDownloader)
+            {
+                concreteDownloader.CleanupResources();
+            }
             FileDownloadersDictionary.Remove(fileDownloader.SharedFileDefinition);
         }
         finally

@@ -4,12 +4,8 @@ using ByteSync.Common.Business.SharedFiles;
 
 namespace ByteSync.Interfaces.Controls.Communications;
 
-public interface IFileDownloader : IDisposable
+public interface IFileDownloader
 {
-    Task AddAvailablePartAsync(int partNumber);
-
-    Task SetAllAvailablePartsKnownAsync(int partsCount);
-
     Task WaitForFileFullyExtracted();
     
     DownloadTarget DownloadTarget { get; }

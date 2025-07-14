@@ -44,51 +44,54 @@ public class TestDownloadManager : AbstractTester
     {
         // Arrange
         var mockFileDownloader = new Mock<IFileDownloader>(MockBehavior.Loose);
+        var mockCoordinator = new Mock<IDownloadPartsCoordinator>(MockBehavior.Strict);
+        var sharedFileDefinition = new SharedFileDefinition();
+        var downloadTarget = new DownloadTarget(sharedFileDefinition, null, new HashSet<string>());
         
         _mockFileDownloaderCache.Setup(m => m.GetFileDownloader(It.IsAny<SharedFileDefinition>()))
             .ReturnsAsync(mockFileDownloader.Object);
-
-        var downloadTarget = new DownloadTarget(new SharedFileDefinition(), null, new HashSet<string>());
-        
-        mockFileDownloader.Setup(m => m.AddAvailablePartAsync(It.IsAny<int>()));
         mockFileDownloader.Setup(m => m.DownloadTarget).Returns(downloadTarget);
-        
+        // Setup the coordinator cache
+        var partsCoordinatorCacheField = typeof(DownloadManager).GetField("_partsCoordinatorCache", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var cache = (IDictionary<SharedFileDefinition, IDownloadPartsCoordinator>)partsCoordinatorCacheField.GetValue(_downloadManager);
+        cache[sharedFileDefinition] = mockCoordinator.Object;
+        mockCoordinator.Setup(m => m.AddAvailablePartAsync(It.IsAny<int>())).Returns(Task.CompletedTask);
         // Act
-        await _downloadManager.OnFilePartReadyToDownload(new SharedFileDefinition(), 1);
-        
+        await _downloadManager.OnFilePartReadyToDownload(sharedFileDefinition, 1);
         // Assert
         _mockFileDownloaderCache.Verify(m => m.GetFileDownloader(It.IsAny<SharedFileDefinition>()), Times.Once);
-        mockFileDownloader.Verify(m => m.AddAvailablePartAsync(It.IsAny<int>()), Times.Once);
+        mockCoordinator.Verify(m => m.AddAvailablePartAsync(It.IsAny<int>()), Times.Once);
     }
     
     [Test]
-    public async Task OnFileReadyToFinalize_ShouldCall_GetFileDownloader_And_SetAllAvailablePartsKnownAsync()
+    public async Task OnFileReadyToFinalize_ShouldCall_GetFileDownloader_And_SetAllPartsKnownAsync()
     {
         // Arrange
         var mockFileDownloader = new Mock<IFileDownloader>(MockBehavior.Loose);
+        var mockCoordinator = new Mock<IDownloadPartsCoordinator>(MockBehavior.Strict);
+        var sharedFileDefinition = new SharedFileDefinition();
+        var downloadTarget = new DownloadTarget(sharedFileDefinition, null, new HashSet<string>());
         
         _mockFileDownloaderCache.Setup(m => m.GetFileDownloader(It.IsAny<SharedFileDefinition>()))
             .ReturnsAsync(mockFileDownloader.Object);
-
-        var downloadTarget = new DownloadTarget(new SharedFileDefinition(), null, new HashSet<string>());
-        
-        mockFileDownloader.Setup(m => m.SetAllAvailablePartsKnownAsync(It.IsAny<int>()));
-        mockFileDownloader.Setup(m => m.WaitForFileFullyExtracted());
         mockFileDownloader.Setup(m => m.DownloadTarget).Returns(downloadTarget);
-
+        mockFileDownloader.Setup(m => m.WaitForFileFullyExtracted()).Returns(Task.CompletedTask);
+        // Setup the coordinator cache
+        var partsCoordinatorCacheField = typeof(DownloadManager).GetField("_partsCoordinatorCache", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var cache = (IDictionary<SharedFileDefinition, IDownloadPartsCoordinator>)partsCoordinatorCacheField.GetValue(_downloadManager);
+        cache[sharedFileDefinition] = mockCoordinator.Object;
+        mockCoordinator.Setup(m => m.SetAllPartsKnownAsync(It.IsAny<int>())).Returns(Task.CompletedTask);
         _mockFileTransferApiClient.Setup(m => m.AssertDownloadIsFinished(It.IsAny<TransferParameters>()))
             .Returns(Task.CompletedTask);
         _mockFileDownloaderCache.Setup(m => m.RemoveFileDownloader(It.IsAny<IFileDownloader>()))
             .Returns(Task.CompletedTask);
         _mockPostDownloadHandlerProxy.Setup(m => m.HandleDownloadFinished(It.IsAny<LocalSharedFile>()))
             .Returns(Task.CompletedTask);
-        
         // Act
-        await _downloadManager.OnFileReadyToFinalize(new SharedFileDefinition(), 1);
-        
+        await _downloadManager.OnFileReadyToFinalize(sharedFileDefinition, 1);
         // Assert
         _mockFileDownloaderCache.Verify(m => m.GetFileDownloader(It.IsAny<SharedFileDefinition>()), Times.Once);
-        mockFileDownloader.Verify(m => m.SetAllAvailablePartsKnownAsync(It.IsAny<int>()), Times.Once);
+        mockCoordinator.Verify(m => m.SetAllPartsKnownAsync(It.IsAny<int>()), Times.Once);
         _mockFileTransferApiClient.Verify(m => m.AssertDownloadIsFinished(It.IsAny<TransferParameters>()), Times.Once);
         _mockFileDownloaderCache.Verify(m => m.RemoveFileDownloader(It.IsAny<IFileDownloader>()), Times.Once);
         _mockPostDownloadHandlerProxy.Verify(m => m.HandleDownloadFinished(It.IsAny<LocalSharedFile>()), Times.Once);

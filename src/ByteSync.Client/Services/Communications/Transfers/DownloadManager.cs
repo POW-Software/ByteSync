@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Common.Business.SharedFiles;
-using ByteSync.Common.Helpers;
+﻿using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 
@@ -8,12 +6,13 @@ namespace ByteSync.Services.Communications.Transfers;
 
 public class DownloadManager : IDownloadManager
 {
+    
     private readonly IFileDownloaderCache _fileDownloaderCache;
     private readonly ISynchronizationDownloadFinalizer _synchronizationDownloadFinalizer;
     private readonly IPostDownloadHandlerProxy _postDownloadHandlerProxy;
     private readonly IFileTransferApiClient _fileTransferApiClient;
     private readonly ILogger<DownloadManager> _logger;
-
+    private readonly IDictionary<SharedFileDefinition, IDownloadPartsCoordinator> _partsCoordinatorCache = new Dictionary<SharedFileDefinition, IDownloadPartsCoordinator>();
 
 
     public DownloadManager(IFileDownloaderCache fileDownloaderCache, ISynchronizationDownloadFinalizer synchronizationDownloadFinalizer, 
@@ -28,27 +27,33 @@ public class DownloadManager : IDownloadManager
 
     public async Task OnFilePartReadyToDownload(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        var fileDownloader = await _fileDownloaderCache.GetFileDownloader(sharedFileDefinition); // GetOrBuild(sharedFileDefinition);
+        if (!_partsCoordinatorCache.TryGetValue(sharedFileDefinition, out var partsCoordinator))
+        {
+            throw new InvalidOperationException("No parts coordinator found for the given file definition.");
+        }
 
         if (partNumber == 1)
         {
+            var fileDownloader = await _fileDownloaderCache.GetFileDownloader(sharedFileDefinition);
             _logger.LogInformation("{Type}: {SharedFileDefinitionId} - Download started to {downloadDestinations}", sharedFileDefinition.SharedFileType, 
                 sharedFileDefinition.Id, fileDownloader.DownloadTarget.DownloadDestinations.JoinToString(", "));
         }
 
-        await fileDownloader.AddAvailablePartAsync(partNumber);
+        await partsCoordinator.AddAvailablePartAsync(partNumber);
     }
 
     public async Task OnFileReadyToFinalize(SharedFileDefinition sharedFileDefinition, int partsCount)
     {
+        if (!_partsCoordinatorCache.TryGetValue(sharedFileDefinition, out var partsCoordinator))
+        {
+            throw new InvalidOperationException("No parts coordinator found for the given file definition.");
+        }
         var fileDownloader = await _fileDownloaderCache.GetFileDownloader(sharedFileDefinition);
-            
         var downloadTarget = fileDownloader.DownloadTarget;
 
         try
         {
-            await fileDownloader.SetAllAvailablePartsKnownAsync(partsCount);
-
+            await partsCoordinator.SetAllPartsKnownAsync(partsCount);
             await fileDownloader.WaitForFileFullyExtracted();
 
             if (downloadTarget.TemporaryFileManagers != null)
@@ -90,4 +95,5 @@ public class DownloadManager : IDownloadManager
 
         await _postDownloadHandlerProxy.HandleDownloadFinished(downloadTarget.LocalSharedFile);
     }
+    
 }

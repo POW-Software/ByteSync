@@ -14,6 +14,7 @@ namespace ByteSync.Services.Communications.Transfers;
 
 public class DownloadTargetBuilder : IDownloadTargetBuilder
 {
+    
     private readonly ICloudSessionLocalDataManager _cloudSessionLocalDataManager;
     private readonly ISessionProfileLocalDataManager _sessionProfileLocalDataManager;
     private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository;
@@ -132,4 +133,5 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder
 
         return downloadTarget;
     }
+    
 }

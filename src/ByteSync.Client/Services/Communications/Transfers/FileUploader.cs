@@ -18,6 +18,7 @@ namespace ByteSync.Services.Communications.Transfers;
 
 class FileUploader : IFileUploader
 {
+    
     private readonly ISessionService _sessionService;
     private readonly ISlicerEncrypter _slicerEncrypter;
     private readonly IPolicyFactory _policyFactory;
@@ -382,4 +383,5 @@ class FileUploader : IFileUploader
             return MaxConcurrentUploads;
         }
     }
+    
 }
