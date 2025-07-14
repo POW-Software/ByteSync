@@ -9,13 +9,11 @@ namespace ByteSync.Functions.Timer;
 public class CleanupBlobStorageSnippetsFunction
 {
     private readonly ILogger<CleanupBlobStorageSnippetsFunction> _logger;
-    private readonly IConfigurationSection _configurationSection;
     private readonly IMediator _mediator;
 
     public CleanupBlobStorageSnippetsFunction(IConfiguration configuration, IMediator mediator, 
         ILogger<CleanupBlobStorageSnippetsFunction> logger)
     {
-        _configurationSection = configuration.GetSection("BlobStorage");
         _mediator = mediator;
         _logger = logger;
     }
