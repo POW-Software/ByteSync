@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using ByteSync.Business;
+using ByteSync.Business.DataNodes;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
@@ -28,13 +29,16 @@ public class InventoryBuilderFactory : IInventoryBuilderFactory
         var inventoryService = _context.Resolve<IInventoryService>();
         var environmentService = _context.Resolve<IEnvironmentService>();
         var dataSourceRepository = _context.Resolve<IDataSourceRepository>();
+        var dataNodeRepository = _context.Resolve<IDataNodeRepository>();
         
         var sessionMember = sessionMemberRepository.GetCurrentSessionMember();
         var cloudSessionSettings = sessionService.CurrentSessionSettings!;
         var myDataSources = dataSourceRepository.SortedCurrentMemberDataSources;
+        var myDataNode = dataNodeRepository.SortedCurrentMemberDataNodes.First();
         
         var inventoryBuilder = _context.Resolve<IInventoryBuilder>(
             new TypedParameter(typeof(SessionMember), sessionMember),
+            new TypedParameter(typeof(DataNode), myDataNode),
             new TypedParameter(typeof(SessionSettings), cloudSessionSettings),
             new TypedParameter(typeof(InventoryProcessData), inventoryService.InventoryProcessData),
             new TypedParameter(typeof(OSPlatforms), environmentService.OSPlatform),

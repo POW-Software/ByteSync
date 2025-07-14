@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using ByteSync.Business.DataNodes;
 using ByteSync.Business.DataSources;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.SessionMembers;
@@ -37,18 +38,21 @@ public class TestInventoryBuilderFactory : IntegrationTest
         var mockInventoryService = Container.Resolve<Mock<IInventoryService>>();
         var mockEnvironmentService = Container.Resolve<Mock<IEnvironmentService>>();
         var mockDataSourceRepository = Container.Resolve<Mock<IDataSourceRepository>>();
+        var mockDataNodeRepository = Container.Resolve<Mock<IDataNodeRepository>>();
         
         var fakeSessionMember = new SessionMember();
         var fakeSessionSettings = new SessionSettings();
         var fakeProcessData = new InventoryProcessData();
         var fakePlatform = OSPlatforms.Windows;
         var fakeDataSources = new List<DataSource> { Mock.Of<DataSource>(), Mock.Of<DataSource>() };
+        var fakeDataNdes = new List<DataNode> { Mock.Of<DataNode>() };
         
         mockSessionMemberRepo.Setup(r => r.GetCurrentSessionMember()).Returns(fakeSessionMember).Verifiable();
         mockSessionService.SetupGet(s => s.CurrentSessionSettings).Returns(fakeSessionSettings).Verifiable();
         mockInventoryService.SetupGet(s => s.InventoryProcessData).Returns(fakeProcessData).Verifiable();
         mockEnvironmentService.SetupGet(e => e.OSPlatform).Returns(fakePlatform).Verifiable();
         mockDataSourceRepository.SetupGet(r => r.SortedCurrentMemberDataSources).Returns(fakeDataSources).Verifiable();
+        mockDataNodeRepository.SetupGet(r => r.SortedCurrentMemberDataNodes).Returns(fakeDataNdes).Verifiable();
 
         // Act
         var inventoryBuilder = _inventoryBuilderFactor.CreateInventoryBuilder();
