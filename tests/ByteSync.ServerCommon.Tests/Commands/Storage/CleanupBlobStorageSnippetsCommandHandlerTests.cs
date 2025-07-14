@@ -53,7 +53,7 @@ public class CleanupBlobStorageSnippetsCommandHandlerTests
 
         var container = A.Fake<BlobContainerClient>();
         A.CallTo(() => container.ExistsAsync(A<CancellationToken>._))
-            .Returns(Task.FromResult(Response.FromValue(true, null)));
+            .Returns(Task.FromResult(Response.FromValue(true, default)));
         A.CallTo(() => container.GetBlobsAsync(A<BlobTraits>._, A<BlobStates>._, null, A<CancellationToken>._))
             .Returns(new TestAsyncPageable<BlobItem>(blobs));
         A.CallTo(() => _blobStorageContainerService.BuildBlobContainerClient())
@@ -89,7 +89,7 @@ public class CleanupBlobStorageSnippetsCommandHandlerTests
         // Arrange
         var container = A.Fake<BlobContainerClient>();
         A.CallTo(() => container.ExistsAsync(A<CancellationToken>._))
-            .Returns(Task.FromResult(Response.FromValue(false, null)));
+            .Returns(Task.FromResult(Response.FromValue(false, default)));
         A.CallTo(() => _blobStorageContainerService.BuildBlobContainerClient())
             .Returns(Task.FromResult(container));
 
@@ -113,7 +113,7 @@ public class CleanupBlobStorageSnippetsCommandHandlerTests
 
         var container = A.Fake<BlobContainerClient>();
         A.CallTo(() => container.ExistsAsync(A<CancellationToken>._))
-            .Returns(Task.FromResult(Response.FromValue(true, null)));
+            .Returns(Task.FromResult(Response.FromValue(true, default)));
         A.CallTo(() => container.GetBlobsAsync(A<BlobTraits>._, A<BlobStates>._, null, A<CancellationToken>._))
             .Returns(new TestAsyncPageable<BlobItem>(blobs));
         A.CallTo(() => _blobStorageContainerService.BuildBlobContainerClient())
