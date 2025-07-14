@@ -25,9 +25,9 @@ public class CleanupBlobStorageSnippetsFunction
 #endif
         )] TimerInfo myTimer)
     {
-        _logger.LogInformation("Cleanup function executed at: {Now}", DateTime.Now);
+        _logger.LogInformation("Cleanup BlobStorage Function started at: {Now}", DateTime.Now);
         var deletedBlobsCount = await _mediator.Send(new CleanupBlobStorageSnippetsRequest());
-        _logger.LogInformation("...Deletion complete, {Deleted} element(s)", deletedBlobsCount);
+        _logger.LogInformation("Cleanup BlobStorage Function - Deletion complete, {Deleted} element(s)", deletedBlobsCount);
         return deletedBlobsCount;
     }
 }
