@@ -52,7 +52,12 @@ public class FileTransferPushReceiver : IPushReceiver
                 {
                     await afterTransferSharedFile.OnFilePartUploaded(sharedFileDefinition);
                 }
-                
+
+                // Ensure the download is started so the coordinator is registered
+                _logger.LogInformation("Calling GetFileDownloader for file Id: {Id} (thread {ThreadId})", sharedFileDefinition.Id, System.Threading.Thread.CurrentThread.ManagedThreadId);
+                await _downloadManager.FileDownloaderCache.GetFileDownloader(sharedFileDefinition);
+                _logger.LogInformation("GetFileDownloader completed for file Id: {Id} (thread {ThreadId})", sharedFileDefinition.Id, System.Threading.Thread.CurrentThread.ManagedThreadId);
+
                 await _downloadManager.OnFilePartReadyToDownload(sharedFileDefinition, fileTransferPush.PartNumber!.Value);
             }
         }
@@ -91,7 +96,12 @@ public class FileTransferPushReceiver : IPushReceiver
                 {
                     await afterTransferSharedFile.OnUploadFinished(sharedFileDefinition);
                 }
-                
+
+                // Ensure the download is started so the coordinator is registered
+                _logger.LogInformation("Calling GetFileDownloader for file Id: {Id} (thread {ThreadId})", sharedFileDefinition.Id, System.Threading.Thread.CurrentThread.ManagedThreadId);
+                await _downloadManager.FileDownloaderCache.GetFileDownloader(sharedFileDefinition);
+                _logger.LogInformation("GetFileDownloader completed for file Id: {Id} (thread {ThreadId})", sharedFileDefinition.Id, System.Threading.Thread.CurrentThread.ManagedThreadId);
+
                 await _downloadManager.OnFileReadyToFinalize(sharedFileDefinition, fileTransferPush.TotalParts!.Value);
             }
         }

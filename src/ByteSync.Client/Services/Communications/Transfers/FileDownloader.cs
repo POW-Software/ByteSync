@@ -20,6 +20,7 @@ public class FileDownloader : IFileDownloader
     private readonly IDownloadPartsCoordinator _partsCoordinator;
     private readonly SemaphoreSlim _semaphoreSlim;
 
+    public IDownloadPartsCoordinator PartsCoordinator => _partsCoordinator;
     public SharedFileDefinition SharedFileDefinition { get; private set; }
     public DownloadTarget DownloadTarget { get; private set; }
 

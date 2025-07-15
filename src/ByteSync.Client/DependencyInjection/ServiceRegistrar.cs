@@ -41,6 +41,17 @@ public static class ServiceRegistrar
         var container = builder.Build();
         ContainerProvider.Container = container;
 
+        // Wire up the callback to break the circular dependency
+        using (var scope = container.BeginLifetimeScope())
+        {
+            var fileDownloaderCache = scope.Resolve<IFileDownloaderCache>() as ByteSync.Services.Communications.Transfers.FileDownloaderCache;
+            var downloadManager = scope.Resolve<IDownloadManager>();
+            if (fileDownloaderCache != null)
+            {
+                fileDownloaderCache.OnPartsCoordinatorCreated = downloadManager.RegisterPartsCoordinator;
+            }
+        }
+
         using (var scope = container.BeginLifetimeScope())
         {
             var environmentService = scope.Resolve<IEnvironmentService>();

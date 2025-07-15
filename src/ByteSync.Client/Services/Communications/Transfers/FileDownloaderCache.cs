@@ -1,6 +1,5 @@
 ﻿using System.Reactive.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
@@ -16,12 +15,14 @@ public class FileDownloaderCache : IFileDownloaderCache
     
     private readonly SemaphoreSlim _semaphore = new(1, 1);
 
+    public Action<SharedFileDefinition, IDownloadPartsCoordinator>? OnPartsCoordinatorCreated { get; set; }
+
     public FileDownloaderCache(ISessionService sessionService, IFileDownloaderFactory fileDownloaderFactory)
     {
         _sessionService = sessionService;
         _fileDownloaderFactory = fileDownloaderFactory;
 
-        FileDownloadersDictionary = new Dictionary<SharedFileDefinition, IFileDownloader>();
+        FileDownloadersDictionary = new Dictionary<string, IFileDownloader>();
         
         // SyncRootHandlers = new Dictionary<SharedFileDefinition, Object>();
 
@@ -43,23 +44,31 @@ public class FileDownloaderCache : IFileDownloaderCache
 
     // private object SyncRoot { get; }
 
-    private Dictionary<SharedFileDefinition, IFileDownloader> FileDownloadersDictionary { get; }
+    private Dictionary<string, IFileDownloader> FileDownloadersDictionary { get; }
     
     // private Dictionary<SharedFileDefinition, object> SyncRootHandlers { get; set; }
     
     public async Task<IFileDownloader> GetFileDownloader(SharedFileDefinition sharedFileDefinition)
     {
+        // Add logging for downloader creation/reuse
+        Console.WriteLine($"GetFileDownloader: checking for file Id: {sharedFileDefinition.Id}");
         await _semaphore.WaitAsync();
         try
         {
             // return _tokens?.Clone() as AuthenticationTokens;
             // IFileDownloader fileDownloader;
-            if (!FileDownloadersDictionary.TryGetValue(sharedFileDefinition, out var fileDownloader))
+            if (!FileDownloadersDictionary.TryGetValue(sharedFileDefinition.Id, out var fileDownloader))
             {
+                Console.WriteLine($"GetFileDownloader: creating new downloader for file Id: {sharedFileDefinition.Id}");
                 fileDownloader = _fileDownloaderFactory.Build(sharedFileDefinition);
-                FileDownloadersDictionary.Add(sharedFileDefinition, fileDownloader);
+                FileDownloadersDictionary.Add(sharedFileDefinition.Id, fileDownloader);
+                OnPartsCoordinatorCreated?.Invoke(sharedFileDefinition, fileDownloader.PartsCoordinator);
                 
                 // fileDownloader.Initialize(sharedFileDefinition, DownloadSemaphore);
+            }
+            else
+            {
+                Console.WriteLine($"GetFileDownloader: reusing existing downloader for file Id: {sharedFileDefinition.Id}");
             }
 
             return fileDownloader;
@@ -143,6 +152,7 @@ public class FileDownloaderCache : IFileDownloaderCache
 
     public async Task RemoveFileDownloader(IFileDownloader fileDownloader)
     {
+        Console.WriteLine($"RemoveFileDownloader: removing downloader for file Id: {fileDownloader.SharedFileDefinition.Id}");
         await _semaphore.WaitAsync();
         try
         {
@@ -150,7 +160,7 @@ public class FileDownloaderCache : IFileDownloaderCache
             {
                 concreteDownloader.CleanupResources();
             }
-            FileDownloadersDictionary.Remove(fileDownloader.SharedFileDefinition);
+            FileDownloadersDictionary.Remove(fileDownloader.SharedFileDefinition.Id);
         }
         finally
         {

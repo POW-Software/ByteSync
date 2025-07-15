@@ -9,11 +9,28 @@ public class InventoryLoader : IDisposable
 {
     public InventoryLoader(string fullName)
     {
+        if (!File.Exists(fullName))
+        {
+            Console.WriteLine($"[InventoryLoader] File does not exist: {fullName}");
+        }
+        else
+        {
+            var fileInfo = new FileInfo(fullName);
+            Console.WriteLine($"[InventoryLoader] File exists: {fullName}, Size: {fileInfo.Length} bytes");
+        }
+        try
+        {
         FullName = fullName;
             
         ZipArchive = ZipFile.OpenRead(FullName);
 
         Inventory = Load();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[InventoryLoader] Exception opening zip: {ex.Message}\n{ex.StackTrace}");
+            throw;
+        }
     }
 
     public string FullName { get; }

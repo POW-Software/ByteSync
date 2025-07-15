@@ -12,7 +12,7 @@ public class DownloadManager : IDownloadManager
     private readonly IPostDownloadHandlerProxy _postDownloadHandlerProxy;
     private readonly IFileTransferApiClient _fileTransferApiClient;
     private readonly ILogger<DownloadManager> _logger;
-    private readonly IDictionary<SharedFileDefinition, IDownloadPartsCoordinator> _partsCoordinatorCache = new Dictionary<SharedFileDefinition, IDownloadPartsCoordinator>();
+    private readonly IDictionary<string, IDownloadPartsCoordinator> _partsCoordinatorCache = new Dictionary<string, IDownloadPartsCoordinator>();
 
 
     public DownloadManager(IFileDownloaderCache fileDownloaderCache, ISynchronizationDownloadFinalizer synchronizationDownloadFinalizer, 
@@ -23,12 +23,18 @@ public class DownloadManager : IDownloadManager
         _postDownloadHandlerProxy = postDownloadHandlerProxy;
         _fileTransferApiClient = fileTransferApiClient;
         _logger = logger;
+        _logger.LogInformation($"DownloadManager instance created. HashCode: {this.GetHashCode()}");
     }
 
     public async Task OnFilePartReadyToDownload(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        if (!_partsCoordinatorCache.TryGetValue(sharedFileDefinition, out var partsCoordinator))
+        _logger.LogInformation("Looking up parts coordinator for file Id: {Id} (thread {ThreadId})", sharedFileDefinition.Id, System.Threading.Thread.CurrentThread.ManagedThreadId);
+        _logger.LogInformation("Current partsCoordinatorCache keys before lookup: {Keys}", string.Join(", ", _partsCoordinatorCache.Keys));
+        if (!_partsCoordinatorCache.TryGetValue(sharedFileDefinition.Id, out var partsCoordinator))
         {
+            _logger.LogError("No parts coordinator found for file Id: {Id}", sharedFileDefinition.Id);
+            _logger.LogError("Current partsCoordinatorCache keys at error: {Keys}", string.Join(", ", _partsCoordinatorCache.Keys));
+            _logger.LogError("StackTrace: {StackTrace}", Environment.StackTrace);
             throw new InvalidOperationException("No parts coordinator found for the given file definition.");
         }
 
@@ -44,7 +50,7 @@ public class DownloadManager : IDownloadManager
 
     public async Task OnFileReadyToFinalize(SharedFileDefinition sharedFileDefinition, int partsCount)
     {
-        if (!_partsCoordinatorCache.TryGetValue(sharedFileDefinition, out var partsCoordinator))
+        if (!_partsCoordinatorCache.TryGetValue(sharedFileDefinition.Id, out var partsCoordinator))
         {
             throw new InvalidOperationException("No parts coordinator found for the given file definition.");
         }
@@ -96,4 +102,13 @@ public class DownloadManager : IDownloadManager
         await _postDownloadHandlerProxy.HandleDownloadFinished(downloadTarget.LocalSharedFile);
     }
     
+    public void RegisterPartsCoordinator(SharedFileDefinition sharedFileDefinition, IDownloadPartsCoordinator coordinator)
+    {
+        _logger.LogInformation("Registering parts coordinator for file Id: {Id} (thread {ThreadId})", sharedFileDefinition.Id, System.Threading.Thread.CurrentThread.ManagedThreadId);
+        _logger.LogInformation("Current partsCoordinatorCache keys before registration: {Keys}", string.Join(", ", _partsCoordinatorCache.Keys));
+        _partsCoordinatorCache[sharedFileDefinition.Id] = coordinator;
+        _logger.LogInformation("Current partsCoordinatorCache keys after registration: {Keys}", string.Join(", ", _partsCoordinatorCache.Keys));
+    }
+
+    public IFileDownloaderCache FileDownloaderCache => _fileDownloaderCache;
 }
