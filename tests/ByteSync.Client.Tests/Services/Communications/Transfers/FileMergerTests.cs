@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using Moq;
 using ByteSync.Interfaces.Controls.Encryptions;
@@ -22,7 +19,7 @@ public class FileMergerTests
             part => merged = true,
             () => { },
             part => removed = true,
-            new object()
+            new SemaphoreSlim(1, 1)
         );
         await fileMerger.MergeAsync(42);
         decrypter1.Verify(d => d.MergeAndDecrypt(), Times.Once);
@@ -42,7 +39,7 @@ public class FileMergerTests
             part => { },
             () => errorCalled = true,
             part => { },
-            new object()
+            new SemaphoreSlim(1, 1)
         );
         Assert.That(async () => await fileMerger.MergeAsync(1), Throws.TypeOf<Exception>());
         Assert.That(errorCalled, Is.True);

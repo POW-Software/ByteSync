@@ -1,5 +1,6 @@
 using ByteSync.Interfaces.Controls.Encryptions;
 using Serilog;
+using System.Threading;
 
 namespace ByteSync.Services.Communications.Transfers;
 
@@ -10,15 +11,15 @@ public class FileMerger : IFileMerger
     private readonly Action<int> _onPartMerged;
     private readonly Action _onError;
     private readonly Action<int> _removeMemoryStream;
-    private readonly object _syncRoot;
+    private readonly SemaphoreSlim _semaphoreSlim;
 
-    public FileMerger(List<IMergerDecrypter> mergerDecrypters, Action<int> onPartMerged, Action onError, Action<int> removeMemoryStream, object syncRoot)
+    public FileMerger(List<IMergerDecrypter> mergerDecrypters, Action<int> onPartMerged, Action onError, Action<int> removeMemoryStream, SemaphoreSlim semaphoreSlim)
     {
         _mergerDecrypters = mergerDecrypters;
         _onPartMerged = onPartMerged;
         _onError = onError;
         _removeMemoryStream = removeMemoryStream;
-        _syncRoot = syncRoot;
+        _semaphoreSlim = semaphoreSlim;
     }
 
     public async Task MergeAsync(int partToMerge)
@@ -30,17 +31,27 @@ public class FileMerger : IFileMerger
                 await mergerDecrypter.MergeAndDecrypt();
             }
             _removeMemoryStream(partToMerge);
-            lock (_syncRoot)
+            await _semaphoreSlim.WaitAsync();
+            try
             {
                 _onPartMerged(partToMerge);
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
             }
         }
         catch (Exception ex)
         {
             Log.Error(ex, "MergeFile");
-            lock (_syncRoot)
+            await _semaphoreSlim.WaitAsync();
+            try
             {
                 _onError();
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
             }
             throw;
         }

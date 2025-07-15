@@ -8,14 +8,14 @@ public class ErrorManager : IErrorManager
 {
     
     private bool _isError;
-    private readonly object _syncRoot;
+    private readonly SemaphoreSlim _semaphoreSlim;
     private readonly Channel<int> _mergeChannel;
     private readonly BlockingCollection<int> _downloadQueue;
     private readonly CancellationTokenSource _cancellationTokenSource;
 
-    public ErrorManager(object syncRoot, Channel<int> mergeChannel, BlockingCollection<int> downloadQueue, CancellationTokenSource cancellationTokenSource)
+    public ErrorManager(SemaphoreSlim semaphoreSlim, Channel<int> mergeChannel, BlockingCollection<int> downloadQueue, CancellationTokenSource cancellationTokenSource)
     {
-        _syncRoot = syncRoot;
+        _semaphoreSlim = semaphoreSlim;
         _mergeChannel = mergeChannel;
         _downloadQueue = downloadQueue;
         _cancellationTokenSource = cancellationTokenSource;
@@ -23,17 +23,33 @@ public class ErrorManager : IErrorManager
 
     public bool IsError
     {
-        get { lock (_syncRoot) { return _isError; } }
+        get
+        {
+            _semaphoreSlim.Wait();
+            try
+            {
+                return _isError;
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
+        }
     }
 
     public void SetOnError()
     {
-        lock (_syncRoot)
+        _semaphoreSlim.Wait();
+        try
         {
             _isError = true;
             _mergeChannel.Writer.TryComplete();
             _downloadQueue.CompleteAdding();
             _cancellationTokenSource.Cancel();
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
         }
     }
     

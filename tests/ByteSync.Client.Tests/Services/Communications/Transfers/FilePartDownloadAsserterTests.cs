@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using Moq;
 using ByteSync.Common.Business.SharedFiles;
@@ -14,9 +12,9 @@ public class FilePartDownloadAsserterTests
     public async Task AssertAsync_CallsApiClientSuccessfully()
     {
         var apiClient = new Mock<IFileTransferApiClient>();
-        var syncRoot = new object();
+        var semaphoreSlim = new SemaphoreSlim(1, 1);
         var onErrorCalled = false;
-        var asserter = new FilePartDownloadAsserter(apiClient.Object, syncRoot, () => onErrorCalled = true);
+        var asserter = new FilePartDownloadAsserter(apiClient.Object, semaphoreSlim, () => onErrorCalled = true);
         var parameters = new TransferParameters { SharedFileDefinition = new SharedFileDefinition() };
         await asserter.AssertAsync(parameters);
         apiClient.Verify(a => a.AssertFilePartIsDownloaded(parameters), Times.Once);
@@ -28,9 +26,9 @@ public class FilePartDownloadAsserterTests
     {
         var apiClient = new Mock<IFileTransferApiClient>();
         apiClient.Setup(a => a.AssertFilePartIsDownloaded(It.IsAny<TransferParameters>())).Throws(new Exception("fail"));
-        var syncRoot = new object();
+        var semaphoreSlim = new SemaphoreSlim(1, 1);
         var onErrorCalled = false;
-        var asserter = new FilePartDownloadAsserter(apiClient.Object, syncRoot, () => onErrorCalled = true);
+        var asserter = new FilePartDownloadAsserter(apiClient.Object, semaphoreSlim, () => onErrorCalled = true);
         var parameters = new TransferParameters { SharedFileDefinition = new SharedFileDefinition() };
         await asserter.AssertAsync(parameters);
         Assert.That(onErrorCalled, Is.True);

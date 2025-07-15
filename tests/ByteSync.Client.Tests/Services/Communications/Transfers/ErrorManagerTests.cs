@@ -1,4 +1,3 @@
-using System.Threading;
 using System.Threading.Channels;
 using System.Collections.Concurrent;
 using NUnit.Framework;
@@ -11,22 +10,22 @@ public class ErrorManagerTests
     [Test]
     public void Constructor_InitializesWithNoError()
     {
-        var syncRoot = new object();
+        var semaphoreSlim = new SemaphoreSlim(1, 1);
         var mergeChannel = Channel.CreateUnbounded<int>();
         var downloadQueue = new BlockingCollection<int>();
         var cts = new CancellationTokenSource();
-        var manager = new ErrorManager(syncRoot, mergeChannel, downloadQueue, cts);
+        var manager = new ErrorManager(semaphoreSlim, mergeChannel, downloadQueue, cts);
         Assert.That(manager.IsError, Is.False);
     }
 
     [Test]
     public void SetOnError_SetsErrorAndCancels()
     {
-        var syncRoot = new object();
+        var semaphoreSlim = new SemaphoreSlim(1, 1);
         var mergeChannel = Channel.CreateUnbounded<int>();
         var downloadQueue = new BlockingCollection<int>();
         var cts = new CancellationTokenSource();
-        var manager = new ErrorManager(syncRoot, mergeChannel, downloadQueue, cts);
+        var manager = new ErrorManager(semaphoreSlim, mergeChannel, downloadQueue, cts);
         manager.SetOnError();
         Assert.That(manager.IsError, Is.True);
         Assert.That(cts.IsCancellationRequested, Is.True);

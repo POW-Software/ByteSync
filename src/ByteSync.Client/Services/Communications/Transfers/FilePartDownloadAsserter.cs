@@ -1,6 +1,7 @@
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using Serilog;
+using System.Threading;
 
 namespace ByteSync.Services.Communications.Transfers;
 
@@ -8,13 +9,13 @@ public class FilePartDownloadAsserter : IFilePartDownloadAsserter
 {
     
     private readonly IFileTransferApiClient _fileTransferApiClient;
-    private readonly object _syncRoot;
+    private readonly SemaphoreSlim _semaphoreSlim;
     private readonly Action _onError;
 
-    public FilePartDownloadAsserter(IFileTransferApiClient fileTransferApiClient, object syncRoot, Action onError)
+    public FilePartDownloadAsserter(IFileTransferApiClient fileTransferApiClient, SemaphoreSlim semaphoreSlim, Action onError)
     {
         _fileTransferApiClient = fileTransferApiClient;
-        _syncRoot = syncRoot;
+        _semaphoreSlim = semaphoreSlim;
         _onError = onError;
     }
 
@@ -28,9 +29,14 @@ public class FilePartDownloadAsserter : IFilePartDownloadAsserter
         {
             Log.Error(ex, "AssertFilePartIsDownloaded - SharedFileType:{SharedFileType} - PartNumber:{PartNumber}", 
                 parameters.SharedFileDefinition?.SharedFileType, parameters.PartNumber);
-            lock (_syncRoot)
+            await _semaphoreSlim.WaitAsync();
+            try
             {
                 _onError();
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
             }
         }
     }

@@ -31,17 +31,16 @@ public class FileDownloaderFactory : IFileDownloaderFactory
         var downloadPartsInfo = partsCoordinator.DownloadPartsInfo;
         var downloadQueue = partsCoordinator.DownloadQueue;
         var mergeChannel = partsCoordinator.MergeChannel;
-        var syncRoot = typeof(DownloadPartsCoordinator)
-            .GetField("_syncRoot", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            ?.GetValue(partsCoordinator) ?? partsCoordinator; // fallback to coordinator if private field not found
 
         var cancellationTokenSource = new System.Threading.CancellationTokenSource();
 
         // Build the download target
         var downloadTarget = _downloadTargetBuilder.BuildDownloadTarget(sharedFileDefinition);
 
+        var semaphoreSlim = new System.Threading.SemaphoreSlim(1, 1);
+
         // ErrorManager
-        var errorManager = new ErrorManager(syncRoot, mergeChannel, downloadQueue, cancellationTokenSource);
+        var errorManager = new ErrorManager(semaphoreSlim, mergeChannel, downloadQueue, cancellationTokenSource);
 
         // ResourceManager
         var resourceManager = new ResourceManager(downloadPartsInfo, downloadTarget);
@@ -69,17 +68,16 @@ public class FileDownloaderFactory : IFileDownloaderFactory
         Action<int> onPartMerged = partNumber => { /* Optionally update state here */ };
         Action onError = () => errorManager.SetOnError();
         Action<int> removeMemoryStream = partNumber => downloadTarget.RemoveMemoryStream(partNumber);
-        var fileMerger = new FileMerger(mergerDecrypters, onPartMerged, onError, removeMemoryStream, syncRoot);
+        var fileMerger = new FileMerger(mergerDecrypters, onPartMerged, onError, removeMemoryStream, semaphoreSlim);
 
         // FilePartDownloadAsserter
-        var filePartDownloadAsserter = new FilePartDownloadAsserter(_fileTransferApiClient, syncRoot, onError);
+        var filePartDownloadAsserter = new FilePartDownloadAsserter(_fileTransferApiClient, semaphoreSlim, onError);
 
         return new FileDownloader(
             sharedFileDefinition,
             _policyFactory,
             _downloadTargetBuilder,
             _fileTransferApiClient,
-            _mergerDecrypterFactory,
             filePartDownloadAsserter,
             fileMerger,
             errorManager,

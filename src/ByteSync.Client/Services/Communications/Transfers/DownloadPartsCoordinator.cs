@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Channels;
 using ByteSync.Business.Communications.Downloading;
 
@@ -11,19 +12,20 @@ public class DownloadPartsCoordinator : IDownloadPartsCoordinator
     public BlockingCollection<int> DownloadQueue { get; }
     public Channel<int> MergeChannel { get; }
     public bool AllPartsQueued { get; private set; }
-    private readonly object _syncRoot;
+    private readonly SemaphoreSlim _semaphoreSlim;
 
     public DownloadPartsCoordinator()
     {
         DownloadPartsInfo = new DownloadPartsInfo();
         DownloadQueue = new BlockingCollection<int>();
         MergeChannel = Channel.CreateUnbounded<int>();
-        _syncRoot = new object();
+        _semaphoreSlim = new SemaphoreSlim(1, 1);
     }
 
     public void AddAvailablePart(int partNumber)
     {
-        lock (_syncRoot)
+        _semaphoreSlim.Wait();
+        try
         {
             DownloadPartsInfo.AvailableParts.Add(partNumber);
             var newDownloadableParts = DownloadPartsInfo.GetDownloadableParts();
@@ -35,11 +37,16 @@ public class DownloadPartsCoordinator : IDownloadPartsCoordinator
                 AllPartsQueued = true;
             }
         }
+        finally
+        {
+            _semaphoreSlim.Release();
+        }
     }
 
     public void SetAllPartsKnown(int totalParts)
     {
-        lock (_syncRoot)
+        _semaphoreSlim.Wait();
+        try
         {
             DownloadPartsInfo.TotalPartsCount = totalParts;
             if (DownloadPartsInfo.SentToMerge.Count == DownloadPartsInfo.TotalPartsCount)
@@ -51,6 +58,10 @@ public class DownloadPartsCoordinator : IDownloadPartsCoordinator
                 DownloadQueue.CompleteAdding();
                 AllPartsQueued = true;
             }
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
         }
     }
 

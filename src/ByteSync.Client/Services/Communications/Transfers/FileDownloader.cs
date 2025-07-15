@@ -1,13 +1,10 @@
-﻿using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Channels;
+﻿using System.Threading;
 using Azure.Storage.Blobs;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
-using ByteSync.Interfaces.Factories;
 using Serilog;
 
 namespace ByteSync.Services.Communications.Transfers;
@@ -16,22 +13,17 @@ public class FileDownloader : IFileDownloader
 {
     
     private readonly IPolicyFactory _policyFactory;
-    private readonly IDownloadTargetBuilder _downloadTargetBuilder;
     private readonly IFileTransferApiClient _fileTransferApiClient;
     private readonly IFilePartDownloadAsserter _filePartDownloadAsserter;
-    private readonly IFileMerger _fileMerger;
     private readonly IErrorManager _errorManager;
     private readonly IResourceManager _resourceManager;
     private readonly IDownloadPartsCoordinator _partsCoordinator;
-    private readonly object SyncRoot;
+    private readonly SemaphoreSlim _semaphoreSlim;
 
     public SharedFileDefinition SharedFileDefinition { get; private set; }
     public DownloadTarget DownloadTarget { get; private set; }
 
     private static SemaphoreSlim DownloadSemaphore { get; } = new SemaphoreSlim(8);
-    private DownloadPartsInfo DownloadPartsInfo { get; }
-    private BlockingCollection<int> DownloadQueue { get; }
-    private Channel<int> MergeChannel { get; }
     private Task MergerTask { get; set; }
     private List<Task> DownloadTasks { get; }
     private CancellationTokenSource CancellationTokenSource { get; }
@@ -41,7 +33,6 @@ public class FileDownloader : IFileDownloader
         IPolicyFactory policyFactory,
         IDownloadTargetBuilder downloadTargetBuilder,
         IFileTransferApiClient fileTransferApiClient,
-        IMergerDecrypterFactory mergerDecrypterFactory,
         IFilePartDownloadAsserter filePartDownloadAsserter,
         IFileMerger fileMerger,
         IErrorManager errorManager,
@@ -49,16 +40,15 @@ public class FileDownloader : IFileDownloader
         IDownloadPartsCoordinator partsCoordinator)
     {
         _policyFactory = policyFactory;
-        _downloadTargetBuilder = downloadTargetBuilder;
         _fileTransferApiClient = fileTransferApiClient;
         _filePartDownloadAsserter = filePartDownloadAsserter;
-        _fileMerger = fileMerger;
         _errorManager = errorManager;
         _resourceManager = resourceManager;
         _partsCoordinator = partsCoordinator;
-        SyncRoot = new object();
+        _semaphoreSlim = new SemaphoreSlim(1, 1);
         SharedFileDefinition = sharedFileDefinition;
-        DownloadTarget = _downloadTargetBuilder.BuildDownloadTarget(sharedFileDefinition);
+        DownloadTarget = downloadTargetBuilder.BuildDownloadTarget(sharedFileDefinition);
+        CancellationTokenSource = new CancellationTokenSource();
         MergerTask = Task.Run(async () =>
         {
             while (await _partsCoordinator.MergeChannel.Reader.WaitToReadAsync())
@@ -66,7 +56,7 @@ public class FileDownloader : IFileDownloader
                 var partToMerge = await _partsCoordinator.MergeChannel.Reader.ReadAsync();
                 try
                 {
-                    await _fileMerger.MergeAsync(partToMerge);
+                    await fileMerger.MergeAsync(partToMerge);
                 }
                 finally
                 {
@@ -127,8 +117,9 @@ public class FileDownloader : IFileDownloader
                 });
                 if (response is { IsError: false })
                 {
-                    AssertFilePartIsDownloaded(partNumber);
-                    lock (SyncRoot)
+                    await AssertFilePartIsDownloaded(partNumber);
+                    await _semaphoreSlim.WaitAsync();
+                    try
                     {
                         _partsCoordinator.DownloadPartsInfo.DownloadedParts.Add(partNumber);
                         var newMergeableParts = _partsCoordinator.DownloadPartsInfo.GetMergeableParts();
@@ -141,6 +132,10 @@ public class FileDownloader : IFileDownloader
                         {
                             _partsCoordinator.MergeChannel.Writer.TryComplete();
                         }
+                    }
+                    finally
+                    {
+                        _semaphoreSlim.Release();
                     }
                     isDownloadSuccess = true;
                 }
@@ -156,7 +151,7 @@ public class FileDownloader : IFileDownloader
         }
     }
 
-    private void AssertFilePartIsDownloaded(int partNumber)
+    private async Task AssertFilePartIsDownloaded(int partNumber)
     {
         var transferParameters = new TransferParameters
         {
@@ -164,7 +159,7 @@ public class FileDownloader : IFileDownloader
             SharedFileDefinition = SharedFileDefinition,
             PartNumber = partNumber
         };
-        var task = _filePartDownloadAsserter.AssertAsync(transferParameters);
+        await _filePartDownloadAsserter.AssertAsync(transferParameters);
     }
     
     public void CleanupResources()
