@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             x:Class="ByteSync.Views.Sessions.Members.DataNodeActionsView">
+    <DockPanel IsVisible="{Binding IsLocalMachine}">
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+            <Button Command="{Binding AddDirectoryCommand}" HorizontalAlignment="Left" Margin="3"
+                    IsEnabled="{Binding IsFileSystemSelectionEnabled}"
+                    BorderThickness="0" Background="Transparent">
+                <StackPanel Orientation="Horizontal" Margin="0">
+                    <misc:Icon FontSize="20" Value="SolidFolderPlus" Foreground="{DynamicResource SystemBaseMediumHighColor}"
+                               Margin="0" VerticalAlignment="Center" />
+                    <TextBlock Text="{localizations:Loc SessionMachine_AddDirectory}" Margin="6 0 0 0" VerticalAlignment="Center" FontWeight="Bold"
+                               FontSize="12" />
+                </StackPanel>
+            </Button>
+            <Button Command="{Binding AddFileCommand}" HorizontalAlignment="Left" Margin="3"
+                    IsEnabled="{Binding IsFileSystemSelectionEnabled}"
+                    BorderThickness="0" Background="Transparent">
+                <StackPanel Orientation="Horizontal">
+                    <misc:Icon FontSize="20" Value="SolidFilePlus" Foreground="{DynamicResource SystemBaseMediumHighColor}"
+                               Margin="0" VerticalAlignment="Center" />
+                    <TextBlock Text="{localizations:Loc SessionMachine_AddFile}" Margin="6 0 0 0" VerticalAlignment="Center" FontWeight="Bold"
+                               FontSize="12" />
+                </StackPanel>
+            </Button>
+            <Label FontWeight="Bold" Content="{localizations:Loc SessionMachine_NoDataSelected}" Margin="12 0 0 2 "
+                   IsVisible="{Binding DataSourcesCount, Converter={StaticResource CountToVisibilityConverter}}"
+                   VerticalAlignment="Center" />
+        </StackPanel>
+    </DockPanel>
+</UserControl> 
