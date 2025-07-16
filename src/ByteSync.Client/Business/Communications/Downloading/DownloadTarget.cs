@@ -70,9 +70,7 @@ public class DownloadTarget
         {
             if (MemoryStreams.ContainsKey(partNumber))
             {
-                Serilog.Log.Warning("[DownloadTarget] Removing MemoryStream for part {PartNumber}. HashCode={HashCode}, SessionId={SessionId}, FileId={FileId}, AllKeysBefore={AllKeysBefore}, stack: {Stack}", partNumber, this.GetHashCode(), SharedFileDefinition.SessionId, SharedFileDefinition.Id, string.Join(",", MemoryStreams.Keys), Environment.StackTrace);
                 MemoryStreams.Remove(partNumber);
-                Serilog.Log.Warning("[DownloadTarget] Removed MemoryStream for part {PartNumber}. AllKeysAfter={AllKeysAfter}", partNumber, string.Join(",", MemoryStreams.Keys));
             }
         }
     }
@@ -103,9 +101,7 @@ public class DownloadTarget
     {
         lock (SyncRoot)
         {
-            Serilog.Log.Warning("[DownloadTarget] Clearing all MemoryStreams. HashCode={HashCode}, SessionId={SessionId}, FileId={FileId}, AllKeysBefore={AllKeysBefore}, stack: {Stack}", this.GetHashCode(), SharedFileDefinition.SessionId, SharedFileDefinition.Id, string.Join(",", MemoryStreams.Keys), Environment.StackTrace);
             MemoryStreams.Clear();
-            Serilog.Log.Warning("[DownloadTarget] Cleared all MemoryStreams. AllKeysAfter={AllKeysAfter}", string.Join(",", MemoryStreams.Keys));
         }
     }
 }

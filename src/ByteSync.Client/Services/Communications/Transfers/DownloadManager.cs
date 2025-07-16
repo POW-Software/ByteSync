@@ -23,18 +23,12 @@ public class DownloadManager : IDownloadManager
         _postDownloadHandlerProxy = postDownloadHandlerProxy;
         _fileTransferApiClient = fileTransferApiClient;
         _logger = logger;
-        _logger.LogInformation($"DownloadManager instance created. HashCode: {this.GetHashCode()}");
     }
 
     public async Task OnFilePartReadyToDownload(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        _logger.LogInformation("Looking up parts coordinator for file Id: {Id} (thread {ThreadId})", sharedFileDefinition.Id, System.Threading.Thread.CurrentThread.ManagedThreadId);
-        _logger.LogInformation("Current partsCoordinatorCache keys before lookup: {Keys}", string.Join(", ", _partsCoordinatorCache.Keys));
         if (!_partsCoordinatorCache.TryGetValue(sharedFileDefinition.Id, out var partsCoordinator))
         {
-            _logger.LogError("No parts coordinator found for file Id: {Id}", sharedFileDefinition.Id);
-            _logger.LogError("Current partsCoordinatorCache keys at error: {Keys}", string.Join(", ", _partsCoordinatorCache.Keys));
-            _logger.LogError("StackTrace: {StackTrace}", Environment.StackTrace);
             throw new InvalidOperationException("No parts coordinator found for the given file definition.");
         }
 
@@ -104,10 +98,7 @@ public class DownloadManager : IDownloadManager
     
     public void RegisterPartsCoordinator(SharedFileDefinition sharedFileDefinition, IDownloadPartsCoordinator coordinator)
     {
-        _logger.LogInformation("Registering parts coordinator for file Id: {Id} (thread {ThreadId})", sharedFileDefinition.Id, System.Threading.Thread.CurrentThread.ManagedThreadId);
-        _logger.LogInformation("Current partsCoordinatorCache keys before registration: {Keys}", string.Join(", ", _partsCoordinatorCache.Keys));
         _partsCoordinatorCache[sharedFileDefinition.Id] = coordinator;
-        _logger.LogInformation("Current partsCoordinatorCache keys after registration: {Keys}", string.Join(", ", _partsCoordinatorCache.Keys));
     }
 
     public IFileDownloaderCache FileDownloaderCache => _fileDownloaderCache;

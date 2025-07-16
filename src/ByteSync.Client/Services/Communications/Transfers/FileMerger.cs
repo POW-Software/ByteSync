@@ -43,7 +43,6 @@ public class FileMerger : IFileMerger
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "MergeFile");
             await _semaphoreSlim.WaitAsync();
             try
             {

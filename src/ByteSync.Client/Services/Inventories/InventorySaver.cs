@@ -41,7 +41,6 @@ class InventorySaver
 
         if (ZipArchive != null)
         {
-            Log.Information("[InventorySaver] Adding signature entry: {EntryName}", $"{directoryName}/{guid}.sign");
             var signatureFile = ZipArchive.CreateEntry($"{directoryName}/{guid}.sign");
 
             using (var entryStream = signatureFile.Open())
@@ -99,7 +98,6 @@ class InventorySaver
 
         if (ZipArchive != null)
         {
-            Log.Information("[InventorySaver] Writing inventory.json entry");
             var inventoryFile = ZipArchive.CreateEntry("inventory.json");
 
             using (var entryStream = inventoryFile.Open())
@@ -117,7 +115,6 @@ class InventorySaver
     {
         try
         {
-            Log.Information("[InventorySaver] Closing zip");
             ZipArchive?.Dispose();
         }
         catch (Exception ex)

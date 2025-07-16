@@ -133,7 +133,6 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder
         }
         
         downloadTarget = new DownloadTarget(sharedFileDefinition, sharedFile, downloadDestinations);
-        Serilog.Log.Warning("[DownloadTargetBuilder] Built DownloadTarget. HashCode={HashCode}, SessionId={SessionId}, FileId={FileId}, Destinations={Destinations}", downloadTarget.GetHashCode(), sharedFileDefinition.SessionId, sharedFileDefinition.Id, string.Join(",", downloadDestinations));
         downloadTarget.IsMultiFileZip = isMultiFileZip;
         downloadTarget.FinalDestinationsPerActionsGroupId = finalDestinationsPerActionsGroupId;
         downloadTarget.LastWriteTimeUtcPerActionsGroupId = datesPerActionsGroupId;

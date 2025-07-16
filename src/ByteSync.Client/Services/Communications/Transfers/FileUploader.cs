@@ -2,7 +2,6 @@
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Channels;
-using System.Threading.Tasks;
 using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
@@ -106,21 +105,17 @@ class FileUploader : IFileUploader
         int retries = 10;
         while (fileInfo.Exists && fileInfo.Length == 0 && retries-- > 0)
         {
-            _logger.LogWarning("File {File} is 0 bytes, waiting before upload...", LocalFileToUpload);
             await Task.Delay(100);
             fileInfo.Refresh();
         }
 
         if (!fileInfo.Exists || fileInfo.Length == 0)
         {
-            _logger.LogError("File {File} is missing or 0 bytes before upload, aborting!", LocalFileToUpload);
             throw new IOException($"File {LocalFileToUpload} is missing or 0 bytes before upload.");
         }
 
         PrepareUpload(SharedFileDefinition, fileInfo.Length);
         
-        _logger.LogInformation("FileUploader: Starting the E2EE upload of {SharedFileDefinitionId} from {File} ({length} KB)", 
-            SharedFileDefinition.Id, LocalFileToUpload, SharedFileDefinition.UploadedFileLength / 1024d);
 
         _slicerEncrypter.Initialize(fileInfo, SharedFileDefinition);
         
@@ -131,8 +126,6 @@ class FileUploader : IFileUploader
     {
         PrepareUpload(SharedFileDefinition, MemoryStream!.Length);
         
-        _logger.LogInformation("FileUploader: Starting the E2EE upload of {SharedFileDefinitionId} from Memory ({length} KB)", 
-            SharedFileDefinition.Id, SharedFileDefinition.UploadedFileLength / 1024d);
         
         _slicerEncrypter.Initialize(MemoryStream!, SharedFileDefinition);
         
@@ -184,7 +177,6 @@ class FileUploader : IFileUploader
 
         await AssertUploadIsFinished(sharedFileDefinition, totalCreatedSlices);
         
-        _logger.LogInformation("FileUploader: E2EE upload of {SharedFileDefinitionId} is finished", SharedFileDefinition.Id);
     }
 
     private async Task SliceAndEncrypt(SharedFileDefinition sharedFileDefinition)
@@ -332,7 +324,6 @@ class FileUploader : IFileUploader
             
             var uploadFileUrl = await _fileTransferApiClient.GetUploadFileUrl(transferParameters);
 
-            _logger.LogDebug("UploadAvailableSlice: starting sending slice {number} ({length} KB)", slice.PartNumber, slice.MemoryStream.Length / 1024d);
 
             var options = new BlobClientOptions();
             options.Retry.NetworkTimeout = TimeSpan.FromMinutes(60);
