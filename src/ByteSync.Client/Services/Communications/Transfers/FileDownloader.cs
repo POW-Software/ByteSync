@@ -6,6 +6,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using System.IO;
+using Serilog;
 
 namespace ByteSync.Services.Communications.Transfers;
 
@@ -58,11 +59,6 @@ public class FileDownloader : IFileDownloader
                 try
                 {
                     await fileMerger.MergeAsync(partToMerge);
-                    // Log file size after merging this part
-                    foreach (var destination in DownloadTarget.DownloadDestinations)
-                    {
-                        var fileInfo = new FileInfo(destination);
-                    }
                 }
                 finally
                 {
@@ -99,12 +95,14 @@ public class FileDownloader : IFileDownloader
         {
             var policy = _policyFactory.BuildFileDownloadPolicy();
             var isDownloadSuccess = false;
-
+            try
+            {
                 await DownloadSemaphore.WaitAsync();
                 if (_errorManager.IsError)
                 {
                     break;
                 }
+
                 var response = await policy.ExecuteAsync(async () =>
                 {
                     var transferParameters = new TransferParameters
@@ -125,28 +123,37 @@ public class FileDownloader : IFileDownloader
                 });
                 if (response is { IsError: false })
                 {
-                await AssertFilePartIsDownloaded(partNumber);
-                await _semaphoreSlim.WaitAsync();
-                try
-                {
-                    _partsCoordinator.DownloadPartsInfo.DownloadedParts.Add(partNumber);
-                    var newMergeableParts = _partsCoordinator.DownloadPartsInfo.GetMergeableParts();
-                    foreach (var partToGiveToMerger in newMergeableParts)
+                    await AssertFilePartIsDownloaded(partNumber);
+                    await _semaphoreSlim.WaitAsync();
+                    try
                     {
-                        _partsCoordinator.MergeChannel.Writer.WriteAsync(partToGiveToMerger).GetAwaiter().GetResult();
+                        _partsCoordinator.DownloadPartsInfo.DownloadedParts.Add(partNumber);
+                        var newMergeableParts = _partsCoordinator.DownloadPartsInfo.GetMergeableParts();
+                        foreach (var partToGiveToMerger in newMergeableParts)
+                        {
+                            _partsCoordinator.MergeChannel.Writer.WriteAsync(partToGiveToMerger).GetAwaiter()
+                                .GetResult();
+                        }
+
+                        _partsCoordinator.DownloadPartsInfo.SentToMerge.AddAll(newMergeableParts);
+                        if (_partsCoordinator.DownloadPartsInfo.SentToMerge.Count ==
+                            _partsCoordinator.DownloadPartsInfo.TotalPartsCount)
+                        {
+                            _partsCoordinator.MergeChannel.Writer.TryComplete();
+                        }
                     }
-                    _partsCoordinator.DownloadPartsInfo.SentToMerge.AddAll(newMergeableParts);
-                    if (_partsCoordinator.DownloadPartsInfo.SentToMerge.Count == _partsCoordinator.DownloadPartsInfo.TotalPartsCount)
+                    finally
                     {
-                        _partsCoordinator.MergeChannel.Writer.TryComplete();
+                        _semaphoreSlim.Release();
                     }
+
+                    isDownloadSuccess = true;
                 }
-                finally
-                {
-                    _semaphoreSlim.Release();
-                }
-                isDownloadSuccess = true;
-                
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "DownloadFile - SharedFileType:{SharedFileType} - PartNumber:{PartNumber}",
+                    SharedFileDefinition.SharedFileType, partNumber);
             }
 
             if (!isDownloadSuccess)

@@ -50,8 +50,6 @@ public class FileDownloaderCache : IFileDownloaderCache
     
     public async Task<IFileDownloader> GetFileDownloader(SharedFileDefinition sharedFileDefinition)
     {
-        // Add logging for downloader creation/reuse
-        Console.WriteLine($"GetFileDownloader: checking for file Id: {sharedFileDefinition.Id}");
         await _semaphore.WaitAsync();
         try
         {
@@ -59,16 +57,11 @@ public class FileDownloaderCache : IFileDownloaderCache
             // IFileDownloader fileDownloader;
             if (!FileDownloadersDictionary.TryGetValue(sharedFileDefinition.Id, out var fileDownloader))
             {
-                Console.WriteLine($"GetFileDownloader: creating new downloader for file Id: {sharedFileDefinition.Id}");
                 fileDownloader = _fileDownloaderFactory.Build(sharedFileDefinition);
                 FileDownloadersDictionary.Add(sharedFileDefinition.Id, fileDownloader);
                 OnPartsCoordinatorCreated?.Invoke(sharedFileDefinition, fileDownloader.PartsCoordinator);
                 
                 // fileDownloader.Initialize(sharedFileDefinition, DownloadSemaphore);
-            }
-            else
-            {
-                Console.WriteLine($"GetFileDownloader: reusing existing downloader for file Id: {sharedFileDefinition.Id}");
             }
 
             return fileDownloader;
@@ -152,7 +145,6 @@ public class FileDownloaderCache : IFileDownloaderCache
 
     public async Task RemoveFileDownloader(IFileDownloader fileDownloader)
     {
-        Console.WriteLine($"RemoveFileDownloader: removing downloader for file Id: {fileDownloader.SharedFileDefinition.Id}");
         await _semaphore.WaitAsync();
         try
         {
