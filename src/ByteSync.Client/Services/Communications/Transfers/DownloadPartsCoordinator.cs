@@ -31,7 +31,6 @@ public class DownloadPartsCoordinator : IDownloadPartsCoordinator
             var newDownloadableParts = DownloadPartsInfo.GetDownloadableParts();
             DownloadPartsInfo.SentToDownload.AddAll(newDownloadableParts);
             newDownloadableParts.ForEach(p => DownloadQueue.Add(p));
-            // Only complete adding when all parts are available and total count is known
             if (DownloadPartsInfo.TotalPartsCount > 0 &&
                 DownloadPartsInfo.AvailableParts.Count == DownloadPartsInfo.TotalPartsCount)
             {
@@ -55,7 +54,6 @@ public class DownloadPartsCoordinator : IDownloadPartsCoordinator
             {
                 MergeChannel.Writer.TryComplete();
             }
-            // If all parts are already available, complete adding now
             if (DownloadPartsInfo.TotalPartsCount > 0 &&
                 DownloadPartsInfo.AvailableParts.Count == DownloadPartsInfo.TotalPartsCount)
             {

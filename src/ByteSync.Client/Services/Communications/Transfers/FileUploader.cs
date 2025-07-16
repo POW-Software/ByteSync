@@ -101,19 +101,6 @@ class FileUploader : IFileUploader
     {
         var fileInfo = new FileInfo(LocalFileToUpload!);
 
-        // Wait for file to be nonzero size (max 1s)
-        int retries = 10;
-        while (fileInfo.Exists && fileInfo.Length == 0 && retries-- > 0)
-        {
-            await Task.Delay(100);
-            fileInfo.Refresh();
-        }
-
-        if (!fileInfo.Exists || fileInfo.Length == 0)
-        {
-            throw new IOException($"File {LocalFileToUpload} is missing or 0 bytes before upload.");
-        }
-
         PrepareUpload(SharedFileDefinition, fileInfo.Length);
         
 

@@ -74,7 +74,8 @@ public class MergerDecrypter : IMergerDecrypter
         await using var cryptoStream = new CryptoStream(outStream, cryptoTransform, CryptoStreamMode.Write);
             
         TotalReadFiles += 1;
-
+        _logger.LogDebug("MergeAndDecrypt memoryStream {Number}", TotalReadFiles);
+        
         var memoryStream = DownloadTarget.GetMemoryStream(TotalReadFiles);
 
 
