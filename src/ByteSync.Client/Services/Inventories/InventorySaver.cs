@@ -23,7 +23,6 @@ class InventorySaver
             // throw new Exception("file already exists");
         }
 
-        Log.Information("[InventorySaver] Creating zip: {FileFullName}", inventoryFullName);
         ZipArchive = ZipFile.Open(inventoryFullName, ZipArchiveMode.Create);
 
         CountByDirectory.Clear();

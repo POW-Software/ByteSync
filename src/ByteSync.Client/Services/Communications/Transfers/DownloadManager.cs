@@ -11,7 +11,6 @@ public class DownloadManager : IDownloadManager
     private readonly ISynchronizationDownloadFinalizer _synchronizationDownloadFinalizer;
     private readonly IPostDownloadHandlerProxy _postDownloadHandlerProxy;
     private readonly IFileTransferApiClient _fileTransferApiClient;
-    private readonly ILogger<DownloadManager> _logger;
     private readonly IDictionary<string, IDownloadPartsCoordinator> _partsCoordinatorCache = new Dictionary<string, IDownloadPartsCoordinator>();
 
 
@@ -22,7 +21,6 @@ public class DownloadManager : IDownloadManager
         _synchronizationDownloadFinalizer = synchronizationDownloadFinalizer;
         _postDownloadHandlerProxy = postDownloadHandlerProxy;
         _fileTransferApiClient = fileTransferApiClient;
-        _logger = logger;
     }
 
     public async Task OnFilePartReadyToDownload(SharedFileDefinition sharedFileDefinition, int partNumber)
@@ -35,8 +33,6 @@ public class DownloadManager : IDownloadManager
         if (partNumber == 1)
         {
             var fileDownloader = await _fileDownloaderCache.GetFileDownloader(sharedFileDefinition);
-            _logger.LogInformation("{Type}: {SharedFileDefinitionId} - Download started to {downloadDestinations}", sharedFileDefinition.SharedFileType, 
-                sharedFileDefinition.Id, fileDownloader.DownloadTarget.DownloadDestinations.JoinToString(", "));
         }
 
         await partsCoordinator.AddAvailablePartAsync(partNumber);
@@ -82,7 +78,6 @@ public class DownloadManager : IDownloadManager
             await _synchronizationDownloadFinalizer.FinalizeSynchronization(sharedFileDefinition, downloadTarget);
         }
 
-        _logger.LogInformation("{Type}: {SharedFileDefinitionId} - Download complete", sharedFileDefinition.SharedFileType, sharedFileDefinition.Id);
 
         var transferParameters = new TransferParameters
         {
