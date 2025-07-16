@@ -77,8 +77,16 @@ public class MergerDecrypter : IMergerDecrypter
         _logger.LogDebug("MergeAndDecrypt memoryStream {Number}", TotalReadFiles);
 
         var memoryStream = DownloadTarget.GetMemoryStream(TotalReadFiles);
+        _logger.LogInformation("[MergerDecrypter] About to write part {Number}, memoryStream.Length={Length}, HashCode={HashCode}", TotalReadFiles, memoryStream.Length, memoryStream.GetHashCode());
+
+        if (memoryStream.Length == 0)
+        {
+            _logger.LogError("[MergerDecrypter] ERROR: MemoryStream for part {Number} is empty! Stack: {Stack}", TotalReadFiles, Environment.StackTrace);
+        }
 
         memoryStream.Position = 0;
         await memoryStream.CopyToAsync(cryptoStream, CancellationTokenSource.Token);
+
+        _logger.LogInformation("[MergerDecrypter] Finished writing part {Number} to {File}", TotalReadFiles, FinalFile);
     }
 }

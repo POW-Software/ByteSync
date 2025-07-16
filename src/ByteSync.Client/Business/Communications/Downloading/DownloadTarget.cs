@@ -14,6 +14,7 @@ public class DownloadTarget
 
         SyncRoot = new object();
         MemoryStreams = new Dictionary<int, MemoryStream>();
+        Serilog.Log.Warning("[DownloadTarget] Constructed. HashCode={HashCode}, SessionId={SessionId}, FileId={FileId}, Destinations={Destinations}", this.GetHashCode(), sharedFileDefinition.SessionId, sharedFileDefinition.Id, string.Join(",", finalDestinations));
     }
 
     public SharedFileDefinition SharedFileDefinition { get; set; }
@@ -60,11 +61,16 @@ public class DownloadTarget
     {
         lock (SyncRoot)
         {
+            var threadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
             if (!MemoryStreams.ContainsKey(partNumber))
             {
-                MemoryStreams.Add(partNumber, new MemoryStream());
+                Serilog.Log.Fatal("[DownloadTarget] CRITICAL: MemoryStream for part {PartNumber} does not exist! HashCode={HashCode}, SessionId={SessionId}, FileId={FileId}, Thread={ThreadId}, AllKeys={AllKeys}, stack: {Stack}", partNumber, this.GetHashCode(), SharedFileDefinition.SessionId, SharedFileDefinition.Id, threadId, string.Join(",", MemoryStreams.Keys), Environment.StackTrace);
+                throw new InvalidOperationException($"MemoryStream for part {partNumber} does not exist in DownloadTarget!");
             }
-
+            else
+            {
+                Serilog.Log.Information("[DownloadTarget] Retrieved existing MemoryStream for part {PartNumber}, Length={Length}, HashCode={HashCode}, SessionId={SessionId}, FileId={FileId}, Thread={ThreadId}, AllKeys={AllKeys} (stack: {Stack})", partNumber, MemoryStreams[partNumber].Length, this.GetHashCode(), SharedFileDefinition.SessionId, SharedFileDefinition.Id, threadId, string.Join(",", MemoryStreams.Keys), Environment.StackTrace);
+            }
             return MemoryStreams[partNumber];
         }
     }
@@ -75,8 +81,20 @@ public class DownloadTarget
         {
             if (MemoryStreams.ContainsKey(partNumber))
             {
+                Serilog.Log.Warning("[DownloadTarget] Removing MemoryStream for part {PartNumber}. HashCode={HashCode}, SessionId={SessionId}, FileId={FileId}, AllKeysBefore={AllKeysBefore}, stack: {Stack}", partNumber, this.GetHashCode(), SharedFileDefinition.SessionId, SharedFileDefinition.Id, string.Join(",", MemoryStreams.Keys), Environment.StackTrace);
                 MemoryStreams.Remove(partNumber);
+                Serilog.Log.Warning("[DownloadTarget] Removed MemoryStream for part {PartNumber}. AllKeysAfter={AllKeysAfter}", partNumber, string.Join(",", MemoryStreams.Keys));
             }
+        }
+    }
+
+    public void AddOrReplaceMemoryStream(int partNumber, MemoryStream stream)
+    {
+        lock (SyncRoot)
+        {
+            var threadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
+            MemoryStreams[partNumber] = stream;
+            Serilog.Log.Information("[DownloadTarget] Added/Replaced MemoryStream for part {PartNumber}, Length={Length}, HashCode={HashCode}, SessionId={SessionId}, FileId={FileId}, Thread={ThreadId}, AllKeys={AllKeys} (stack: {Stack})", partNumber, stream.Length, this.GetHashCode(), SharedFileDefinition.SessionId, SharedFileDefinition.Id, threadId, string.Join(",", MemoryStreams.Keys), Environment.StackTrace);
         }
     }
 
@@ -98,7 +116,9 @@ public class DownloadTarget
     {
         lock (SyncRoot)
         {
+            Serilog.Log.Warning("[DownloadTarget] Clearing all MemoryStreams. HashCode={HashCode}, SessionId={SessionId}, FileId={FileId}, AllKeysBefore={AllKeysBefore}, stack: {Stack}", this.GetHashCode(), SharedFileDefinition.SessionId, SharedFileDefinition.Id, string.Join(",", MemoryStreams.Keys), Environment.StackTrace);
             MemoryStreams.Clear();
+            Serilog.Log.Warning("[DownloadTarget] Cleared all MemoryStreams. AllKeysAfter={AllKeysAfter}", string.Join(",", MemoryStreams.Keys));
         }
     }
 }

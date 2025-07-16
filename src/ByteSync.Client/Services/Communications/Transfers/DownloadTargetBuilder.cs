@@ -21,6 +21,9 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder
     private readonly IConnectionService _connectionService;
     private readonly ITemporaryFileManagerFactory _temporaryFileManagerFactory;
 
+    // Add a cache to ensure singleton DownloadTarget per fileId
+    private readonly Dictionary<string, DownloadTarget> _downloadTargetCache = new();
+
     public DownloadTargetBuilder(ICloudSessionLocalDataManager cloudSessionLocalDataManager, ISessionProfileLocalDataManager sessionProfileLocalDataManager,
         ISharedActionsGroupRepository sharedActionsGroupRepository, IConnectionService connectionService,
         ITemporaryFileManagerFactory temporaryFileManagerFactory)
@@ -34,6 +37,10 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder
     
     public DownloadTarget BuildDownloadTarget(SharedFileDefinition sharedFileDefinition)
     {
+        // Check cache first
+        if (_downloadTargetCache.TryGetValue(sharedFileDefinition.Id, out var existing))
+            return existing;
+
         LocalSharedFile? sharedFile = null;
         var downloadDestinations = new HashSet<string>();
         string destinationPath;
@@ -126,12 +133,22 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder
         }
         
         downloadTarget = new DownloadTarget(sharedFileDefinition, sharedFile, downloadDestinations);
+        Serilog.Log.Warning("[DownloadTargetBuilder] Built DownloadTarget. HashCode={HashCode}, SessionId={SessionId}, FileId={FileId}, Destinations={Destinations}", downloadTarget.GetHashCode(), sharedFileDefinition.SessionId, sharedFileDefinition.Id, string.Join(",", downloadDestinations));
         downloadTarget.IsMultiFileZip = isMultiFileZip;
         downloadTarget.FinalDestinationsPerActionsGroupId = finalDestinationsPerActionsGroupId;
         downloadTarget.LastWriteTimeUtcPerActionsGroupId = datesPerActionsGroupId;
         downloadTarget.TemporaryFileManagers = temporaryFileManagers;
 
+        // Store in cache
+        _downloadTargetCache[sharedFileDefinition.Id] = downloadTarget;
+
         return downloadTarget;
+    }
+
+    // Optional: method to clear the cache (e.g., on session end)
+    public void ClearCache()
+    {
+        _downloadTargetCache.Clear();
     }
     
 }

@@ -101,7 +101,22 @@ class FileUploader : IFileUploader
     private async Task UploadFile()
     {
         var fileInfo = new FileInfo(LocalFileToUpload!);
-        
+
+        // Wait for file to be nonzero size (max 1s)
+        int retries = 10;
+        while (fileInfo.Exists && fileInfo.Length == 0 && retries-- > 0)
+        {
+            _logger.LogWarning("File {File} is 0 bytes, waiting before upload...", LocalFileToUpload);
+            await Task.Delay(100);
+            fileInfo.Refresh();
+        }
+
+        if (!fileInfo.Exists || fileInfo.Length == 0)
+        {
+            _logger.LogError("File {File} is missing or 0 bytes before upload, aborting!", LocalFileToUpload);
+            throw new IOException($"File {LocalFileToUpload} is missing or 0 bytes before upload.");
+        }
+
         PrepareUpload(SharedFileDefinition, fileInfo.Length);
         
         _logger.LogInformation("FileUploader: Starting the E2EE upload of {SharedFileDefinitionId} from {File} ({length} KB)", 
