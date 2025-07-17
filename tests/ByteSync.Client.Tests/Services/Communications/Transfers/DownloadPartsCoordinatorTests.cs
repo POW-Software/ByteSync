@@ -1,8 +1,8 @@
-using System.Linq;
 using NUnit.Framework;
 using ByteSync.Services.Communications.Transfers;
+using FluentAssertions;
 
-namespace ByteSync.Client.Tests.Services.Communications.Transfers;
+namespace ByteSync.Tests.Services.Communications.Transfers;
 
 public class DownloadPartsCoordinatorTests
 {
@@ -10,10 +10,10 @@ public class DownloadPartsCoordinatorTests
     public void Constructor_InitializesProperties()
     {
         var coordinator = new DownloadPartsCoordinator();
-        Assert.That(coordinator.DownloadPartsInfo, Is.Not.Null);
-        Assert.That(coordinator.DownloadQueue, Is.Not.Null);
-        Assert.That(coordinator.MergeChannel, Is.Not.Null);
-        Assert.That(coordinator.AllPartsQueued, Is.False);
+        coordinator.DownloadPartsInfo.Should().NotBeNull();
+        coordinator.DownloadQueue.Should().NotBeNull();
+        coordinator.MergeChannel.Should().NotBeNull();
+        coordinator.AllPartsQueued.Should().BeFalse();
     }
 
     [Test]
@@ -23,9 +23,9 @@ public class DownloadPartsCoordinatorTests
         coordinator.SetAllPartsKnown(2);
         coordinator.AddAvailablePart(1);
         coordinator.AddAvailablePart(2);
-        Assert.That(coordinator.DownloadPartsInfo.AvailableParts.Contains(1), Is.True);
-        Assert.That(coordinator.DownloadPartsInfo.AvailableParts.Contains(2), Is.True);
-        Assert.That(coordinator.AllPartsQueued, Is.True);
+        coordinator.DownloadPartsInfo.AvailableParts.Should().Contain(1);
+        coordinator.DownloadPartsInfo.AvailableParts.Should().Contain(2);
+        coordinator.AllPartsQueued.Should().BeTrue();
     }
 
     [Test]
@@ -35,6 +35,6 @@ public class DownloadPartsCoordinatorTests
         coordinator.AddAvailablePart(1);
         coordinator.AddAvailablePart(2);
         coordinator.SetAllPartsKnown(2);
-        Assert.That(coordinator.AllPartsQueued, Is.True);
+        coordinator.AllPartsQueued.Should().BeTrue();
     }
 } 

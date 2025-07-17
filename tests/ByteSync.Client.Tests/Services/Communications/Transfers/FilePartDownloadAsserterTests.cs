@@ -3,8 +3,9 @@ using Moq;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Services.Communications.Transfers;
+using FluentAssertions;
 
-namespace ByteSync.Client.Tests.Services.Communications.Transfers;
+namespace ByteSync.Tests.Services.Communications.Transfers;
 
 public class FilePartDownloadAsserterTests
 {
@@ -18,7 +19,7 @@ public class FilePartDownloadAsserterTests
         var parameters = new TransferParameters { SharedFileDefinition = new SharedFileDefinition() };
         await asserter.AssertAsync(parameters);
         apiClient.Verify(a => a.AssertFilePartIsDownloaded(parameters), Times.Once);
-        Assert.That(onErrorCalled, Is.False);
+        onErrorCalled.Should().BeFalse();
     }
 
     [Test]
@@ -31,6 +32,6 @@ public class FilePartDownloadAsserterTests
         var asserter = new FilePartDownloadAsserter(apiClient.Object, semaphoreSlim, () => onErrorCalled = true);
         var parameters = new TransferParameters { SharedFileDefinition = new SharedFileDefinition() };
         await asserter.AssertAsync(parameters);
-        Assert.That(onErrorCalled, Is.True);
+        onErrorCalled.Should().BeTrue();
     }
 } 

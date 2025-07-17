@@ -1,10 +1,9 @@
-using System.Collections.Generic;
-using System.IO;
 using NUnit.Framework;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Services.Communications.Transfers;
+using FluentAssertions;
 
-namespace ByteSync.Client.Tests.Services.Communications.Transfers;
+namespace ByteSync.Tests.Services.Communications.Transfers;
 
 public class ResourceManagerTests
 {
@@ -19,8 +18,8 @@ public class ResourceManagerTests
         downloadTarget.GetMemoryStream(2);
         var manager = new ResourceManager(downloadPartsInfo, downloadTarget);
         manager.Cleanup();
-        Assert.That(downloadPartsInfo.AvailableParts, Is.Empty);
-        Assert.That(downloadPartsInfo.DownloadedParts, Is.Empty);
-        Assert.That(downloadTarget.MemoryStreams, Is.Empty);
+        downloadPartsInfo.AvailableParts.Should().BeEmpty();
+        downloadPartsInfo.DownloadedParts.Should().BeEmpty();
+        downloadTarget.MemoryStreams.Should().BeEmpty();
     }
 } 

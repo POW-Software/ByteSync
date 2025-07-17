@@ -2,8 +2,9 @@ using System.Threading.Channels;
 using System.Collections.Concurrent;
 using NUnit.Framework;
 using ByteSync.Services.Communications.Transfers;
+using FluentAssertions;
 
-namespace ByteSync.Client.Tests.Services.Communications.Transfers;
+namespace ByteSync.Tests.Services.Communications.Transfers;
 
 public class ErrorManagerTests
 {
@@ -15,7 +16,7 @@ public class ErrorManagerTests
         var downloadQueue = new BlockingCollection<int>();
         var cts = new CancellationTokenSource();
         var manager = new ErrorManager(semaphoreSlim, mergeChannel, downloadQueue, cts);
-        Assert.That(manager.IsError, Is.False);
+        manager.IsError.Should().BeFalse();
     }
 
     [Test]
@@ -27,8 +28,8 @@ public class ErrorManagerTests
         var cts = new CancellationTokenSource();
         var manager = new ErrorManager(semaphoreSlim, mergeChannel, downloadQueue, cts);
         manager.SetOnError();
-        Assert.That(manager.IsError, Is.True);
-        Assert.That(cts.IsCancellationRequested, Is.True);
-        Assert.That(() => downloadQueue.Add(1), Throws.TypeOf<InvalidOperationException>());
+        manager.IsError.Should().BeTrue();
+        cts.IsCancellationRequested.Should().BeTrue();
+        ((System.Action)(() => downloadQueue.Add(1))).Should().Throw<InvalidOperationException>();
     }
 } 

@@ -8,8 +8,9 @@ using ByteSync.Interfaces.Factories;
 using ByteSync.Services.Communications.Transfers;
 using ByteSync.Factories;
 using ByteSync.Interfaces;
+using FluentAssertions;
 
-namespace ByteSync.Client.Tests.Services.Communications.Transfers;
+namespace ByteSync.Tests.Services.Communications.Transfers;
 
 public class FileDownloaderFactoryTests
 {
@@ -27,8 +28,8 @@ public class FileDownloaderFactoryTests
             .Returns(new Mock<ByteSync.Interfaces.Controls.Encryptions.IMergerDecrypter>().Object);
         var factory = new FileDownloaderFactory(policyFactory.Object, downloadTargetBuilder.Object, fileTransferApiClient.Object, mergerDecrypterFactory.Object);
         var downloader = factory.Build(sharedFileDefinition);
-        Assert.That(downloader, Is.Not.Null);
-        Assert.That(downloader.SharedFileDefinition, Is.EqualTo(sharedFileDefinition));
-        Assert.That(downloader.DownloadTarget, Is.EqualTo(downloadTarget));
+        downloader.Should().NotBeNull();
+        downloader.SharedFileDefinition.Should().BeSameAs(sharedFileDefinition);
+        downloader.DownloadTarget.Should().BeSameAs(downloadTarget);
     }
 } 

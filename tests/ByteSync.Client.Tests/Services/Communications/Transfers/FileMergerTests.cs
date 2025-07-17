@@ -2,8 +2,9 @@ using NUnit.Framework;
 using Moq;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Services.Communications.Transfers;
+using FluentAssertions;
 
-namespace ByteSync.Client.Tests.Services.Communications.Transfers;
+namespace ByteSync.Tests.Services.Communications.Transfers;
 
 public class FileMergerTests
 {
@@ -24,8 +25,8 @@ public class FileMergerTests
         await fileMerger.MergeAsync(42);
         decrypter1.Verify(d => d.MergeAndDecrypt(), Times.Once);
         decrypter2.Verify(d => d.MergeAndDecrypt(), Times.Once);
-        Assert.That(merged, Is.True);
-        Assert.That(removed, Is.True);
+        merged.Should().BeTrue();
+        removed.Should().BeTrue();
     }
 
     [Test]
@@ -41,8 +42,8 @@ public class FileMergerTests
             part => { },
             new SemaphoreSlim(1, 1)
         );
-        Assert.That(async () => await fileMerger.MergeAsync(1), Throws.TypeOf<Exception>());
-        Assert.That(errorCalled, Is.True);
+        await FluentActions.Invoking(async () => await fileMerger.MergeAsync(1)).Should().ThrowAsync<Exception>();
+        errorCalled.Should().BeTrue();
     }
     
 } 
