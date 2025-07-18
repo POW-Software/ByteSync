@@ -25,20 +25,25 @@ public class DataNodeViewModelFactory : IDataNodeViewModelFactory
         var environmentService = _context.Resolve<IEnvironmentService>();
         bool isLocalMachine = sessionMember.ClientInstanceId.Equals(environmentService.ClientInstanceId);
         
-        var dataNodeSourcesViewModel = _context.Resolve<DataNodeSourcesViewModel>(
-            new TypedParameter(typeof(DataNode), dataNode),
-            new TypedParameter(typeof(bool), isLocalMachine));
-
         var dataNodeHeaderViewModel = _context.Resolve<DataNodeHeaderViewModel>(
             new TypedParameter(typeof(SessionMember), sessionMember),
             new TypedParameter(typeof(bool), isLocalMachine));
         
+        var dataNodeSourcesViewModel = _context.Resolve<DataNodeSourcesViewModel>(
+            new TypedParameter(typeof(DataNode), dataNode),
+            new TypedParameter(typeof(bool), isLocalMachine));
+        
+        var dataNodeStatusViewModel = _context.Resolve<DataNodeStatusViewModel>(
+            new TypedParameter(typeof(SessionMember), sessionMember),
+            new TypedParameter(typeof(bool), isLocalMachine));
+
         var result = _context.Resolve<DataNodeViewModel>(
             new TypedParameter(typeof(DataNode), dataNode),
             new TypedParameter(typeof(SessionMember), sessionMember),
             new TypedParameter(typeof(bool), isLocalMachine),
+            new TypedParameter(typeof(DataNodeHeaderViewModel), dataNodeHeaderViewModel),
             new TypedParameter(typeof(DataNodeSourcesViewModel), dataNodeSourcesViewModel),
-            new TypedParameter(typeof(DataNodeHeaderViewModel), dataNodeHeaderViewModel));
+            new TypedParameter(typeof(DataNodeStatusViewModel), dataNodeStatusViewModel));
 
         return result;
     }

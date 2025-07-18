@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             xmlns:vm="clr-namespace:ByteSync.ViewModels.Sessions.Members"
+             x:Class="ByteSync.Views.Sessions.Members.DataNodeStatusView">
+
+    <Design.DataContext>
+        <vm:DataNodeStatusViewModel />
+    </Design.DataContext>
+
+    <StackPanel Orientation="Vertical">
+        <Rectangle Height="1" Fill="{DynamicResource SystemBaseLowColor}" Margin="3,3" />
+
+        <StackPanel Orientation="Horizontal" Margin="3">
+            <Label FontWeight="Bold" Content="{Binding Status}" IsEnabled="{Binding IsLocalMachine}"
+                   Foreground="{DynamicResource SystemBaseHighColor}" />
+        </StackPanel>
+    </StackPanel>
+</UserControl> 

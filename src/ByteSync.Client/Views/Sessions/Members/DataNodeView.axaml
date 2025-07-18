@@ -34,16 +34,7 @@
             <membersViews:DataNodeSourcesView DataContext="{Binding SourcesViewModel}" Grid.Row="2" Grid.RowSpan="2" />
 
             <!--Last Row-->
-            <StackPanel Orientation="Vertical" Grid.Row="4">
-                <Rectangle Height="1" Fill="{DynamicResource SystemBaseLowColor}" Margin="3,3" />
-
-                <StackPanel Orientation="Horizontal" Margin="3">
-                    <Label Name="StatusLabel" FontWeight="Bold" Content="{Binding Status}" IsEnabled="{Binding IsLocalMachine}"
-                           Foreground="{DynamicResource SystemBaseHighColor}">
-
-                    </Label>
-                </StackPanel>
-            </StackPanel>
+            <membersViews:DataNodeStatusView DataContext="{Binding StatusViewModel}" Grid.Row="4" />
 
         </Grid>
     </Border>
