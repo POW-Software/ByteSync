@@ -28,12 +28,17 @@ public class DataNodeViewModelFactory : IDataNodeViewModelFactory
         var dataNodeSourcesViewModel = _context.Resolve<DataNodeSourcesViewModel>(
             new TypedParameter(typeof(DataNode), dataNode),
             new TypedParameter(typeof(bool), isLocalMachine));
+
+        var dataNodeHeaderViewModel = _context.Resolve<DataNodeHeaderViewModel>(
+            new TypedParameter(typeof(SessionMember), sessionMember),
+            new TypedParameter(typeof(bool), isLocalMachine));
         
         var result = _context.Resolve<DataNodeViewModel>(
             new TypedParameter(typeof(DataNode), dataNode),
             new TypedParameter(typeof(SessionMember), sessionMember),
             new TypedParameter(typeof(bool), isLocalMachine),
-            new TypedParameter(typeof(DataNodeSourcesViewModel), dataNodeSourcesViewModel));
+            new TypedParameter(typeof(DataNodeSourcesViewModel), dataNodeSourcesViewModel),
+            new TypedParameter(typeof(DataNodeHeaderViewModel), dataNodeHeaderViewModel));
 
         return result;
     }

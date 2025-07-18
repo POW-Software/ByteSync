@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
-using System.Reactive.Disposables;
+﻿using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Media;
 using ByteSync.Assets.Resources;
@@ -20,7 +18,7 @@ namespace ByteSync.ViewModels.Sessions.Members;
 public class DataNodeViewModel : ActivatableViewModelBase
 {
     private readonly ISessionService _sessionService;
-    private readonly ILocalizationService _localizationService;
+    // _localizationService removed: header view model now manages localization
     private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly IThemeService _themeService;
     private readonly ILogger<DataNodeViewModel> _logger;
@@ -28,30 +26,28 @@ public class DataNodeViewModel : ActivatableViewModelBase
     
     private IBrush _currentMemberBackGround = null!;
     private IBrush _otherMemberBackGround = null!;
-    private IBrush _currentMemberLetterBackGround = null!;
-    private IBrush _otherMemberLetterBackGround = null!;
-    private IBrush _currentMemberLetterBorder = null!;
-    private IBrush _otherMemberLetterBorder = null!;
+    // Letter brushes moved to header view model - plus utilisés ici
 
     public DataNodeSourcesViewModel SourcesViewModel { get; }
+    public DataNodeHeaderViewModel HeaderViewModel { get; }
 
     public DataNodeViewModel()
     {
 
     }
 
-    public DataNodeViewModel(SessionMember sessionMember, DataNode dataNode, bool isLocalMachine, 
-        DataNodeSourcesViewModel dataNodeSourcesViewModel, ISessionService sessionService, 
-        ILocalizationService localizationService, ISessionMemberRepository sessionMemberRepository, 
+    public DataNodeViewModel(SessionMember sessionMember, DataNode dataNode, bool isLocalMachine,
+        DataNodeSourcesViewModel dataNodeSourcesViewModel, DataNodeHeaderViewModel dataNodeHeaderViewModel,
+        ISessionService sessionService, ISessionMemberRepository sessionMemberRepository,
         IThemeService themeService, ILogger<DataNodeViewModel> logger)
     {
         _sessionService = sessionService;
-        _localizationService = localizationService;
         _sessionMemberRepository = sessionMemberRepository;
         _themeService = themeService;
         _logger = logger;
         
         SourcesViewModel = dataNodeSourcesViewModel;
+        HeaderViewModel = dataNodeHeaderViewModel;
 
         SessionMember = sessionMember;
         DataNode = dataNode;
@@ -59,18 +55,18 @@ public class DataNodeViewModel : ActivatableViewModelBase
         IsLocalMachine = isLocalMachine;
         JoinedSessionOn = sessionMember.JoinedSessionOn;
         
-        this.WhenAnyValue(x => x.IsLocalMachine)
-            .Subscribe(_ => UpdateMachineDescription());
+        // HeaderViewModel handles machine description refresh.
         
-        this.WhenAnyValue(x => x.HasQuittedSessionAfterActivation)
-            .Where(b => b)
-            .Subscribe(_ => UpdateMachineDescription());
-
-        ClientInstanceId = sessionMember.ClientInstanceId;
+        // Header properties managed by header view model.
+        
+        // Letter brushes handled by header view model.
         
         this.WhenActivated(disposables =>
         {
             SourcesViewModel.Activator.Activate()
+                .DisposeWith(disposables);
+
+            HeaderViewModel.Activator.Activate()
                 .DisposeWith(disposables);
 
             _sessionService.SessionStatusObservable.CombineLatest(_sessionService.RunSessionProfileInfoObservable)
@@ -84,14 +80,10 @@ public class DataNodeViewModel : ActivatableViewModelBase
                 .Subscribe(item =>
                 {
                     UpdateStatus(item.Current.SessionMemberGeneralStatus);
-                    PositionInList = item.Current.PositionInList;
                 })
                 .DisposeWith(disposables);
 
-            Observable.FromEventPattern<PropertyChangedEventArgs>(_localizationService, nameof(_localizationService.PropertyChanged))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(evt => OnLocaleChanged(evt.EventArgs))
-                .DisposeWith(disposables);
+            // Localization updates handled by header view model.
             
             _themeService.SelectedTheme
                 .Skip(1)
@@ -106,8 +98,7 @@ public class DataNodeViewModel : ActivatableViewModelBase
 
         InitializeBrushes();
         SetMainGridBrush();
-
-        UpdateMachineDescription();
+        // Machine description handled by header view model.
     }
 
     private void SetMainGridBrush()
@@ -118,17 +109,7 @@ public class DataNodeViewModel : ActivatableViewModelBase
             false => OtherMemberBackGround,
         };
         
-        LetterBackBrush = IsLocalMachine switch
-        {
-            true => CurrentMemberLetterBackGround,
-            false => OtherMemberLetterBackGround,
-        };
-        
-        LetterBorderBrush = IsLocalMachine switch
-        {
-            true => CurrentMemberLetterBorder,
-            false => OtherMemberLetterBorder,
-        };
+        // Letter brushes handled by header view model.
     }
     
     private void InitializeBrushes()
@@ -136,36 +117,20 @@ public class DataNodeViewModel : ActivatableViewModelBase
         _currentMemberBackGround = _themeService.GetBrush("CurrentMemberBackGround")!;
         _otherMemberBackGround = _themeService.GetBrush("OtherMemberBackGround")!;
         
-        _currentMemberLetterBackGround = _themeService.GetBrush("ConnectedMemberLetterBackGround")!;
-        _otherMemberLetterBackGround = _themeService.GetBrush("DisabledMemberLetterBackGround")!;
-        
-        _currentMemberLetterBorder = _themeService.GetBrush("ConnectedMemberLetterBorder")!;
-        _otherMemberLetterBorder = _themeService.GetBrush("DisabledMemberLetterBorder")!;
+        // Header view model handles letter brushes, donc aucune initialisation ici.
     }
 
+    // Letter brushes moved to header view model
+    
     private IBrush CurrentMemberBackGround => _currentMemberBackGround;
-    
+
     private IBrush OtherMemberBackGround => _otherMemberBackGround;
-    
-    private IBrush CurrentMemberLetterBackGround => _currentMemberLetterBackGround;
-    
-    private IBrush OtherMemberLetterBackGround => _otherMemberLetterBackGround;
-    
-    private IBrush CurrentMemberLetterBorder => _currentMemberLetterBorder;
-    
-    private IBrush OtherMemberLetterBorder => _otherMemberLetterBorder;
 
-    private void OnLocaleChanged(PropertyChangedEventArgs _)
-    {
-        UpdateMachineDescription();
-        UpdateStatus(SessionMember.SessionMemberGeneralStatus);
-    }
+    // Letter background brushes handled by header view model
+    
+    // Localization updates handled by header view model.
 
-    [Reactive]
-    public string ClientInstanceId { get; set; }
-
-    [Reactive]
-    public string MachineDescription { get; set; }
+    // Header-related reactive properties removed from this ViewModel.
         
     [Reactive]
     public bool IsLocalMachine { get; set; }
@@ -173,54 +138,25 @@ public class DataNodeViewModel : ActivatableViewModelBase
     [Reactive]
     public IBrush MainGridBrush { get; set; }
     
-    [Reactive]
-    public IBrush LetterBackBrush { get; set; }
+    // Letter brushes moved to header view model
         
-    [Reactive]
-    public IBrush LetterBorderBrush { get; set; }
-    
     [Reactive]
     public DateTimeOffset JoinedSessionOn { get; set; } 
     
-    [Reactive]
-    public bool HasQuittedSessionAfterActivation { get; set; }
+    // Property handled by HeaderViewModel
     
     public extern bool IsFileSystemSelectionEnabled { [ObservableAsProperty] get; }
 
     [Reactive]
     public string Status { get; set; }
     
-    [Reactive]
-    public int PositionInList { get; set; }
+    // Header-related reactive properties removed from this ViewModel.
     
     internal SessionMember SessionMember { get; private set; }
     
     internal DataNode DataNode { get; private set; }
 
-    private void UpdateMachineDescription()
-    {
-        string machineDescription;
-        if (IsLocalMachine)
-        {
-            machineDescription = $"{_localizationService[nameof(Resources.SessionMachineView_ThisComputer)]} " +
-                                 $"({SessionMember.MachineName}, {SessionMember.IpAddress})";
-
-#if DEBUG
-            machineDescription += " - PID:" + Process.GetCurrentProcess().Id;
-#endif
-        }
-        else
-        {
-            machineDescription = $"{SessionMember.MachineName}, {SessionMember.IpAddress}";
-        }
-        
-        if (HasQuittedSessionAfterActivation)
-        {
-            machineDescription += " - " + _localizationService[nameof(Resources.SessionMachineView_LeftSession)];
-        }
-
-        MachineDescription = machineDescription;
-    }
+    // Machine description handled by header view model.
 
     private void UpdateStatus(SessionMemberGeneralStatus localInventoryStatus)
     {
