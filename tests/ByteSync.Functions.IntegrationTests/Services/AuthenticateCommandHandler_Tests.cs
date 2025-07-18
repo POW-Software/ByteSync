@@ -1,6 +1,10 @@
 using Autofac;
+using ByteSync.Common.Business.Versions;
 using ByteSync.Functions.IntegrationTests.TestHelpers.Autofac;
+using ByteSync.ServerCommon.Business.Settings;
+using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
+using ByteSync.ServerCommon.Loaders;
 using FakeItEasy;
 
 namespace ByteSync.Functions.IntegrationTests.Services;
@@ -33,6 +37,16 @@ public class AuthenticateCommandHandler_Tests
     public async Task Authenticate_WithValidData_ReturnsSuccessResponse()
     {
         // Arrange
+        var repository = _scope.Resolve<IClientSoftwareVersionSettingsRepository>();
+        ClientSoftwareVersionSettings settings = new ClientSoftwareVersionSettings
+        {
+            MinimalVersion = new SoftwareVersion
+            {
+                Version = "1.0.0"
+            }
+        };
+        await repository.SaveUnique(settings);
+        
         var clientId = "integration-client-id";
         var clientInstanceId = "integration-client-instance";
         var version = "2.0.0";
