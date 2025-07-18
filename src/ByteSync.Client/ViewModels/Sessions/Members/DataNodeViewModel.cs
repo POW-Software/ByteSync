@@ -51,6 +51,8 @@ public class DataNodeViewModel : ActivatableViewModelBase
     private IBrush? _currentMemberLetterBorder;
     private IBrush? _otherMemberLetterBorder;
 
+    public DataNodeSourcesViewModel SourcesViewModel { get; }
+
     public DataNodeViewModel()
     {
 
@@ -71,6 +73,12 @@ public class DataNodeViewModel : ActivatableViewModelBase
         _themeService = themeService;
         _logger = logger;
 
+
+        
+        // Initialisation du sous-view model dédié aux sources
+        SourcesViewModel = new DataNodeSourcesViewModel(sessionMember, dataNode, IsLocalMachine, _sessionService, _dataSourceService,
+            _dataSourceProxyFactory, _dataSourceRepository, _fileDialogService, _localizationService, environmentService);
+
         SessionMember = sessionMember;
         DataNode = dataNode;
         
@@ -88,13 +96,13 @@ public class DataNodeViewModel : ActivatableViewModelBase
 
         RemoveDataSourceCommand = ReactiveCommand.CreateFromTask<DataSourceProxy>(RemoveDataSource);
 
-        // https://stackoverflow.com/questions/58479606/how-do-you-update-the-canexecute-value-after-the-reactivecommand-has-been-declar
-        // https://www.reactiveui.net/docs/handbook/commands/
-        var canRun = new BehaviorSubject<bool>(true);
-        AddDirectoryCommand = ReactiveCommand.CreateFromTask(AddDirectory, canRun);
-        AddFileCommand = ReactiveCommand.CreateFromTask(AddFiles, canRun);
-        Observable.Merge(AddDirectoryCommand.IsExecuting, AddFileCommand.IsExecuting)
-            .Select(executing => !executing).Subscribe(canRun);
+        // // https://stackoverflow.com/questions/58479606/how-do-you-update-the-canexecute-value-after-the-reactivecommand-has-been-declar
+        // // https://www.reactiveui.net/docs/handbook/commands/
+        // var canRun = new BehaviorSubject<bool>(true);
+        // AddDirectoryCommand = ReactiveCommand.CreateFromTask(AddDirectory, canRun);
+        // AddFileCommand = ReactiveCommand.CreateFromTask(AddFiles, canRun);
+        // Observable.Merge(AddDirectoryCommand.IsExecuting, AddFileCommand.IsExecuting)
+        //     .Select(executing => !executing).Subscribe(canRun);
 
         var dataNodesObservable = _dataSourceRepository.ObservableCache.Connect()
             .Filter(ds => ds.DataNodeId == DataNode.NodeId)
@@ -107,6 +115,9 @@ public class DataNodeViewModel : ActivatableViewModelBase
         
         this.WhenActivated(disposables =>
         {
+            SourcesViewModel.Activator.Activate()
+                .DisposeWith(disposables);
+            
             dataNodesObservable.DisposeWith(disposables);
 
             _sessionService.SessionStatusObservable.CombineLatest(_sessionService.RunSessionProfileInfoObservable)
@@ -202,9 +213,9 @@ public class DataNodeViewModel : ActivatableViewModelBase
 
     public ReactiveCommand<DataSourceProxy, Unit> RemoveDataSourceCommand { get; set; }
 
-    public ReactiveCommand<Unit, Unit> AddDirectoryCommand { get; set; }
-        
-    public ReactiveCommand<Unit, Unit> AddFileCommand { get; set; }
+    // public ReactiveCommand<Unit, Unit> AddDirectoryCommand { get; set; }
+    //     
+    // public ReactiveCommand<Unit, Unit> AddFileCommand { get; set; }
 
     [Reactive]
     public string ClientInstanceId { get; set; }

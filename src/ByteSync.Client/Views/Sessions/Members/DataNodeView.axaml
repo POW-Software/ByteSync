@@ -5,6 +5,7 @@
              xmlns:misc="clr-namespace:ByteSync.Views.Misc"
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
              xmlns:members="clr-namespace:ByteSync.ViewModels.Sessions.Members"
+             xmlns:membersViews="clr-namespace:ByteSync.Views.Sessions.Members"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ByteSync.Views.Sessions.Members.DataNodeView">
     
@@ -47,102 +48,7 @@
             <Rectangle Grid.Row="1" Height="1" Fill="{DynamicResource SystemBaseLowColor}" Margin="3,6" />
 
             <!-- Third Row -->
-            <StackPanel Orientation="Vertical" Grid.Row="2">
-                <DockPanel IsVisible="{Binding Path=IsLocalMachine}">
-                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                        <Button Command="{Binding Path=AddDirectoryCommand}" HorizontalAlignment="Left" Margin="3"
-                                IsEnabled="{Binding Path=IsFileSystemSelectionEnabled}"
-                                BorderThickness="0" Background="Transparent">
-                            <StackPanel Orientation="Horizontal" Margin="0">
-                                <misc:Icon FontSize="20" Value="SolidFolderPlus" Foreground="{DynamicResource SystemBaseMediumHighColor}"
-                                           Margin="0" VerticalAlignment="Center" />
-                                <TextBlock Text="{localizations:Loc SessionMachine_AddDirectory}" Margin="6 0 0 0" VerticalAlignment="Center" FontWeight="Bold"
-                                           FontSize="12" />
-                            </StackPanel>
-                        </Button>
-
-                        <!-- 20/04/2022: on masque la synchronisation des fichiers => IsVisible="False" -->
-                        <Button Command="{Binding Path=AddFileCommand}" HorizontalAlignment="Left" Margin="3"
-                                IsEnabled="{Binding Path=IsFileSystemSelectionEnabled}"
-                                BorderThickness="0" Background="Transparent">
-                            <StackPanel Orientation="Horizontal">
-                                <misc:Icon FontSize="20" Value="SolidFilePlus" Foreground="{DynamicResource SystemBaseMediumHighColor}"
-                                           Margin="0" VerticalAlignment="Center" />
-                                <TextBlock Text="{localizations:Loc SessionMachine_AddFile}" Margin="6 0 0 0" VerticalAlignment="Center" FontWeight="Bold"
-                                           FontSize="12" />
-                            </StackPanel>
-                        </Button>
-
-                        <Label FontWeight="Bold" Content="{localizations:Loc SessionMachine_NoDataSelected}" Margin="12 0 0 2 "
-                               IsVisible="{Binding !DataSources.Count}"
-                               VerticalAlignment="Center">
-                        </Label>
-                    </StackPanel>
-                </DockPanel>
-
-            </StackPanel>
-
-            <!-- Fourth Row -->
-            <Grid Grid.Row="3">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-
-                <DataGrid AutoGenerateColumns="False" Margin="6" ItemsSource="{Binding Path=DataSources}" Classes="NoHeaders"
-                          IsReadOnly="True" x:Name="TheGrid" IsEnabled="{Binding Path=IsFileSystemSelectionEnabled}"
-                          HeadersVisibility="None" Foreground="{DynamicResource SystemBaseHighColor}">
-
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Binding="{Binding Code}" Header="Code" Width="Auto" FontSize="14" />
-                        <DataGridTextColumn Binding="{Binding ElementType}" Header="Type" Width="Auto" FontSize="14" />
-                        <DataGridTemplateColumn Header="Path" Width="*" CanUserResize="True">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <StackPanel
-                                            IsVisible="{Binding DataContext.IsLocalMachine,RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}">
-                                            <Button Classes="LinkButtonLight" Command="{Binding OpenPathCommand}">
-                                                <!-- <TextBlock Text="{localizations:Loc LoginForm_Privacy}" ></TextBlock> -->
-                                                <TextBlock Text="{Binding Path}" FontSize="14" Margin="3" />
-                                                <ToolTip.Tip>
-                                                    <StackPanel Orientation="Vertical">
-                                                        <TextBlock Text="{Binding Path}" FontSize="14" />
-                                                        <!-- <TextBlock Text="Click Me To..." FontSize="14" /> -->
-                                                    </StackPanel>
-                                                </ToolTip.Tip>
-                                            </Button>
-                                        </StackPanel>
-
-                                        <StackPanel
-                                            IsVisible="{Binding !DataContext.IsLocalMachine,RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}">
-                                            <TextBlock Text="{Binding Path}" FontSize="14" Margin="3" />
-                                            <ToolTip.Tip>
-                                                <TextBlock Text="{Binding Path}" FontSize="14" />
-                                            </ToolTip.Tip>
-                                        </StackPanel>
-
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Width="34" IsVisible="{Binding IsLocalMachine}">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Classes="GenericButton"
-                                            Command="{Binding Path=DataContext.RemoveDataSourceCommand,RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
-                                            CommandParameter="{Binding}"
-                                            Width="32" BorderThickness="0">
-
-                                        <StackPanel>
-                                            <misc:Icon FontSize="16" Value="RegularTrash" />
-                                        </StackPanel>
-                                    </Button>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Grid>
+            <membersViews:DataNodeSourcesView DataContext="{Binding SourcesViewModel}" Grid.Row="2" Grid.RowSpan="2" />
 
             <!--Last Row-->
             <StackPanel Orientation="Vertical" Grid.Row="4">
