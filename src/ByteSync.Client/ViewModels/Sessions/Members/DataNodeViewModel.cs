@@ -1,29 +1,17 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using Avalonia.Media;
 using ByteSync.Assets.Resources;
-using ByteSync.Business.Arguments;
-using ByteSync.Business.DataSources;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
-using ByteSync.Common.Business.Inventories;
 using ByteSync.Business.DataNodes;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces;
-using ByteSync.Interfaces.Controls.Applications;
-using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Themes;
-using ByteSync.Interfaces.Factories.Proxies;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
-using DynamicData;
-using DynamicData.Binding;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -33,23 +21,17 @@ public class DataNodeViewModel : ActivatableViewModelBase
 {
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;
-    private readonly IDataSourceService _dataSourceService;
-    private readonly IDataSourceProxyFactory _dataSourceProxyFactory;
-    private readonly IDataSourceRepository _dataSourceRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
-    private readonly IFileDialogService _fileDialogService;
     private readonly IThemeService _themeService;
     private readonly ILogger<DataNodeViewModel> _logger;
     
-    private ReadOnlyObservableCollection<DataSourceProxy> _dataSources;
     
-    private IBrush? _currentMemberBackGround;
-    private IBrush? _otherMemberBackGround;
-    private IBrush? _unknownBadgeBrush;
-    private IBrush? _currentMemberLetterBackGround;
-    private IBrush? _otherMemberLetterBackGround;
-    private IBrush? _currentMemberLetterBorder;
-    private IBrush? _otherMemberLetterBorder;
+    private IBrush _currentMemberBackGround = null!;
+    private IBrush _otherMemberBackGround = null!;
+    private IBrush _currentMemberLetterBackGround = null!;
+    private IBrush _otherMemberLetterBackGround = null!;
+    private IBrush _currentMemberLetterBorder = null!;
+    private IBrush _otherMemberLetterBorder = null!;
 
     public DataNodeSourcesViewModel SourcesViewModel { get; }
 
@@ -58,31 +40,23 @@ public class DataNodeViewModel : ActivatableViewModelBase
 
     }
 
-    public DataNodeViewModel(SessionMember sessionMember, DataNode dataNode, ISessionService sessionService, IDataSourceService dataSourceService,
-        ILocalizationService localizationService, IEnvironmentService environmentService, IDataSourceProxyFactory dataSourceProxyFactory, 
-        IDataSourceRepository dataSourceRepository, ISessionMemberRepository sessionMemberRepository, IFileDialogService fileDialogService,
+    public DataNodeViewModel(SessionMember sessionMember, DataNode dataNode, bool isLocalMachine, 
+        DataNodeSourcesViewModel dataNodeSourcesViewModel, ISessionService sessionService, 
+        ILocalizationService localizationService, ISessionMemberRepository sessionMemberRepository, 
         IThemeService themeService, ILogger<DataNodeViewModel> logger)
     {
         _sessionService = sessionService;
-        _dataSourceService = dataSourceService;
         _localizationService = localizationService;
-        _dataSourceProxyFactory = dataSourceProxyFactory;
-        _dataSourceRepository = dataSourceRepository;
         _sessionMemberRepository = sessionMemberRepository;
-        _fileDialogService = fileDialogService;
         _themeService = themeService;
         _logger = logger;
-
-
         
-        // Initialisation du sous-view model dédié aux sources
-        SourcesViewModel = new DataNodeSourcesViewModel(sessionMember, dataNode, IsLocalMachine, _sessionService, _dataSourceService,
-            _dataSourceProxyFactory, _dataSourceRepository, _fileDialogService, _localizationService, environmentService);
+        SourcesViewModel = dataNodeSourcesViewModel;
 
         SessionMember = sessionMember;
         DataNode = dataNode;
-        
-        IsLocalMachine = sessionMember.ClientInstanceId.Equals(environmentService.ClientInstanceId);
+
+        IsLocalMachine = isLocalMachine;
         JoinedSessionOn = sessionMember.JoinedSessionOn;
         
         this.WhenAnyValue(x => x.IsLocalMachine)
@@ -93,32 +67,11 @@ public class DataNodeViewModel : ActivatableViewModelBase
             .Subscribe(_ => UpdateMachineDescription());
 
         ClientInstanceId = sessionMember.ClientInstanceId;
-
-        RemoveDataSourceCommand = ReactiveCommand.CreateFromTask<DataSourceProxy>(RemoveDataSource);
-
-        // // https://stackoverflow.com/questions/58479606/how-do-you-update-the-canexecute-value-after-the-reactivecommand-has-been-declar
-        // // https://www.reactiveui.net/docs/handbook/commands/
-        // var canRun = new BehaviorSubject<bool>(true);
-        // AddDirectoryCommand = ReactiveCommand.CreateFromTask(AddDirectory, canRun);
-        // AddFileCommand = ReactiveCommand.CreateFromTask(AddFiles, canRun);
-        // Observable.Merge(AddDirectoryCommand.IsExecuting, AddFileCommand.IsExecuting)
-        //     .Select(executing => !executing).Subscribe(canRun);
-
-        var dataNodesObservable = _dataSourceRepository.ObservableCache.Connect()
-            .Filter(ds => ds.DataNodeId == DataNode.NodeId)
-            .Sort(SortExpressionComparer<DataSource>.Ascending(p => p.Code))
-            .Transform(node => _dataSourceProxyFactory.CreateDataSourceProxy(node))
-            .DisposeMany()
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Bind(out _dataSources)
-            .Subscribe();
         
         this.WhenActivated(disposables =>
         {
             SourcesViewModel.Activator.Activate()
                 .DisposeWith(disposables);
-            
-            dataNodesObservable.DisposeWith(disposables);
 
             _sessionService.SessionStatusObservable.CombineLatest(_sessionService.RunSessionProfileInfoObservable)
                 .DistinctUntilChanged()
@@ -180,22 +133,19 @@ public class DataNodeViewModel : ActivatableViewModelBase
     
     private void InitializeBrushes()
     {
-        _currentMemberBackGround = _themeService.GetBrush("CurrentMemberBackGround");
-        _otherMemberBackGround = _themeService.GetBrush("OtherMemberBackGround");
-        _unknownBadgeBrush = _themeService.GetBrush("OtherMemberBackGround");
+        _currentMemberBackGround = _themeService.GetBrush("CurrentMemberBackGround")!;
+        _otherMemberBackGround = _themeService.GetBrush("OtherMemberBackGround")!;
         
-        _currentMemberLetterBackGround = _themeService.GetBrush("ConnectedMemberLetterBackGround");
-        _otherMemberLetterBackGround = _themeService.GetBrush("DisabledMemberLetterBackGround");
+        _currentMemberLetterBackGround = _themeService.GetBrush("ConnectedMemberLetterBackGround")!;
+        _otherMemberLetterBackGround = _themeService.GetBrush("DisabledMemberLetterBackGround")!;
         
-        _currentMemberLetterBorder = _themeService.GetBrush("ConnectedMemberLetterBorder");
-        _otherMemberLetterBorder = _themeService.GetBrush("DisabledMemberLetterBorder");
+        _currentMemberLetterBorder = _themeService.GetBrush("ConnectedMemberLetterBorder")!;
+        _otherMemberLetterBorder = _themeService.GetBrush("DisabledMemberLetterBorder")!;
     }
 
     private IBrush CurrentMemberBackGround => _currentMemberBackGround;
     
     private IBrush OtherMemberBackGround => _otherMemberBackGround;
-    
-    private IBrush UnknownBadgeBrush => _unknownBadgeBrush;
     
     private IBrush CurrentMemberLetterBackGround => _currentMemberLetterBackGround;
     
@@ -210,12 +160,6 @@ public class DataNodeViewModel : ActivatableViewModelBase
         UpdateMachineDescription();
         UpdateStatus(SessionMember.SessionMemberGeneralStatus);
     }
-
-    public ReactiveCommand<DataSourceProxy, Unit> RemoveDataSourceCommand { get; set; }
-
-    // public ReactiveCommand<Unit, Unit> AddDirectoryCommand { get; set; }
-    //     
-    // public ReactiveCommand<Unit, Unit> AddFileCommand { get; set; }
 
     [Reactive]
     public string ClientInstanceId { get; set; }
@@ -248,47 +192,10 @@ public class DataNodeViewModel : ActivatableViewModelBase
     
     [Reactive]
     public int PositionInList { get; set; }
-
-    public ReadOnlyObservableCollection<DataSourceProxy> DataSources => _dataSources;
     
     internal SessionMember SessionMember { get; private set; }
     
     internal DataNode DataNode { get; private set; }
-
-    private async Task RemoveDataSource(DataSourceProxy dataSource)
-    {
-        await _dataSourceService.TryRemoveDataSource(dataSource.DataSource);
-    }
-
-    private async Task AddDirectory()
-    {
-        try
-        {
-            var result = await _fileDialogService.ShowOpenFolderDialogAsync(Resources.SessionMachineView_SelectDirectory);
-
-            if (result != null && Directory.Exists(result))
-            {
-                await _dataSourceService.CreateAndTryAddDataSource(result, FileSystemTypes.Directory, DataNode);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "SessionMachineViewModel.AddDirectory");
-        }
-    }
-
-    private async Task AddFiles()
-    {
-        var result = await _fileDialogService.ShowOpenFileDialogAsync(Resources.SessionMachineView_SelectFiles, true);
-
-        if (result != null)
-        {
-            foreach (var fileName in result)
-            {
-                await _dataSourceService.CreateAndTryAddDataSource(fileName, FileSystemTypes.File, DataNode);
-            }
-        }
-    }
 
     private void UpdateMachineDescription()
     {

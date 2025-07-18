@@ -25,10 +25,6 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Members;
 
-/// <summary>
-/// ViewModel responsable de la gestion de la liste des DataSources associées à un DataNode.
-/// Il a été extrait de <see cref="DataNodeViewModel"/> afin de séparer clairement les responsabilités.
-/// </summary>
 public class DataNodeSourcesViewModel : ActivatableViewModelBase
 {
     private readonly ISessionService _sessionService;
@@ -36,20 +32,17 @@ public class DataNodeSourcesViewModel : ActivatableViewModelBase
     private readonly IDataSourceProxyFactory _dataSourceProxyFactory;
     private readonly IDataSourceRepository _dataSourceRepository;
     private readonly IFileDialogService _fileDialogService;
-    private readonly ILocalizationService _localizationService;
     private readonly DataNode _dataNode;
 
     private ReadOnlyObservableCollection<DataSourceProxy> _dataSources;
 
-    public DataNodeSourcesViewModel(SessionMember sessionMember, DataNode dataNode,
+    public DataNodeSourcesViewModel(DataNode dataNode,
         bool isLocalMachine,
         ISessionService sessionService,
         IDataSourceService dataSourceService,
         IDataSourceProxyFactory dataSourceProxyFactory,
         IDataSourceRepository dataSourceRepository,
-        IFileDialogService fileDialogService,
-        ILocalizationService localizationService,
-        IEnvironmentService environmentService)
+        IFileDialogService fileDialogService)
     {
         _dataNode = dataNode;
         _sessionService = sessionService;
@@ -57,11 +50,9 @@ public class DataNodeSourcesViewModel : ActivatableViewModelBase
         _dataSourceProxyFactory = dataSourceProxyFactory;
         _dataSourceRepository = dataSourceRepository;
         _fileDialogService = fileDialogService;
-        _localizationService = localizationService;
 
-        IsLocalMachine = sessionMember.ClientInstanceId.Equals(environmentService.ClientInstanceId);
-
-        // Commandes
+        IsLocalMachine = isLocalMachine;
+        
         var canRun = new BehaviorSubject<bool>(true);
         AddDirectoryCommand = ReactiveCommand.CreateFromTask(AddDirectory, canRun);
         AddFileCommand = ReactiveCommand.CreateFromTask(AddFiles, canRun);
@@ -70,8 +61,7 @@ public class DataNodeSourcesViewModel : ActivatableViewModelBase
         Observable.Merge(AddDirectoryCommand.IsExecuting, AddFileCommand.IsExecuting)
             .Select(executing => !executing)
             .Subscribe(canRun);
-
-        // Observables liés au repository
+        
         var dataNodesObservable = _dataSourceRepository.ObservableCache.Connect()
             .Filter(ds => ds.DataNodeId == _dataNode.NodeId)
             .Sort(SortExpressionComparer<DataSource>.Ascending(p => p.Code))
@@ -80,8 +70,7 @@ public class DataNodeSourcesViewModel : ActivatableViewModelBase
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _dataSources)
             .Subscribe();
-
-        // Activation
+        
         this.WhenActivated(disposables =>
         {
             dataNodesObservable.DisposeWith(disposables);
@@ -95,8 +84,6 @@ public class DataNodeSourcesViewModel : ActivatableViewModelBase
         });
     }
 
-    #region Public API
-
     public ReadOnlyObservableCollection<DataSourceProxy> DataSources => _dataSources;
 
     public ReactiveCommand<DataSourceProxy, Unit> RemoveDataSourceCommand { get; }
@@ -109,10 +96,6 @@ public class DataNodeSourcesViewModel : ActivatableViewModelBase
     public bool IsLocalMachine { get; set; }
 
     public extern bool IsFileSystemSelectionEnabled { [ObservableAsProperty] get; }
-
-    #endregion
-
-    #region Private helpers
 
     private async Task RemoveDataSource(DataSourceProxy dataSource)
     {
@@ -141,6 +124,4 @@ public class DataNodeSourcesViewModel : ActivatableViewModelBase
             }
         }
     }
-
-    #endregion
 } 
