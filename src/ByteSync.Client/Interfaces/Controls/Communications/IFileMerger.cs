@@ -1,4 +1,4 @@
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Interfaces.Controls.Communications;
 
 public interface IFileMerger
 {

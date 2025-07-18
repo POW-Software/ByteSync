@@ -1,7 +1,7 @@
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications.Http;
-using Serilog;
 using System.Threading;
+using ByteSync.Interfaces.Controls.Communications;
 
 namespace ByteSync.Services.Communications.Transfers;
 
@@ -10,13 +10,15 @@ public class FilePartDownloadAsserter : IFilePartDownloadAsserter
     
     private readonly IFileTransferApiClient _fileTransferApiClient;
     private readonly SemaphoreSlim _semaphoreSlim;
-    private readonly Action _onError;
-
-    public FilePartDownloadAsserter(IFileTransferApiClient fileTransferApiClient, SemaphoreSlim semaphoreSlim, Action onError)
+    private readonly IErrorManager _errorManager;
+    private readonly ILogger<FilePartDownloadAsserter> _logger;
+    
+    public FilePartDownloadAsserter(IFileTransferApiClient fileTransferApiClient, SemaphoreSlim semaphoreSlim, IErrorManager errorManager, ILogger<FilePartDownloadAsserter> logger)
     {
         _fileTransferApiClient = fileTransferApiClient;
         _semaphoreSlim = semaphoreSlim;
-        _onError = onError;
+        _errorManager = errorManager;
+        _logger = logger;
     }
 
     public async Task AssertAsync(TransferParameters parameters)
@@ -27,12 +29,12 @@ public class FilePartDownloadAsserter : IFilePartDownloadAsserter
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "AssertFilePartIsDownloaded - SharedFileType:{SharedFileType} - PartNumber:{PartNumber}", 
-                parameters.SharedFileDefinition?.SharedFileType, parameters.PartNumber);
+            _logger.LogError(ex, "AssertFilePartIsDownloaded - SharedFileType:{SharedFileType} - PartNumber:{PartNumber}", 
+                parameters.SharedFileDefinition.SharedFileType, parameters.PartNumber);
             await _semaphoreSlim.WaitAsync();
             try
             {
-                _onError();
+                await _errorManager.SetOnErrorAsync();
             }
             finally
             {

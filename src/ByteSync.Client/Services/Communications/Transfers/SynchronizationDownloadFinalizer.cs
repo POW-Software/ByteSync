@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.IO.Compression;
-using System.Threading.Tasks;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
@@ -11,7 +10,6 @@ namespace ByteSync.Services.Communications.Transfers;
 
 public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalizer
 {
-    
     private readonly IDeltaManager _deltaManager;
     private readonly ITemporaryFileManagerFactory _temporaryFileManagerFactory;
     private readonly IFileDatesSetter _fileDatesSetter;
@@ -146,5 +144,4 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
         _logger.LogInformation("Deleting temporary downloaded file {temporaryDownloadedFile}", temporaryDownloadedFile);
         File.Delete(temporaryDownloadedFile);
     }
-    
 }

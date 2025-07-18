@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Common.Business.SharedFiles;
-using ByteSync.Services.Communications.Transfers;
+﻿using ByteSync.Common.Business.SharedFiles;
 
 namespace ByteSync.Interfaces.Controls.Communications;
 

@@ -1,7 +1,8 @@
-﻿using System.IO;
+﻿﻿using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Channels;
+using System.Threading.Tasks;
 using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
@@ -17,7 +18,6 @@ namespace ByteSync.Services.Communications.Transfers;
 
 class FileUploader : IFileUploader
 {
-    
     private readonly ISessionService _sessionService;
     private readonly ISlicerEncrypter _slicerEncrypter;
     private readonly IPolicyFactory _policyFactory;
@@ -100,9 +100,11 @@ class FileUploader : IFileUploader
     private async Task UploadFile()
     {
         var fileInfo = new FileInfo(LocalFileToUpload!);
-
+        
         PrepareUpload(SharedFileDefinition, fileInfo.Length);
         
+        _logger.LogInformation("FileUploader: Starting the E2EE upload of {SharedFileDefinitionId} from {File} ({length} KB)", 
+            SharedFileDefinition.Id, LocalFileToUpload, SharedFileDefinition.UploadedFileLength / 1024d);
 
         _slicerEncrypter.Initialize(fileInfo, SharedFileDefinition);
         
@@ -113,6 +115,8 @@ class FileUploader : IFileUploader
     {
         PrepareUpload(SharedFileDefinition, MemoryStream!.Length);
         
+        _logger.LogInformation("FileUploader: Starting the E2EE upload of {SharedFileDefinitionId} from Memory ({length} KB)", 
+            SharedFileDefinition.Id, SharedFileDefinition.UploadedFileLength / 1024d);
         
         _slicerEncrypter.Initialize(MemoryStream!, SharedFileDefinition);
         
@@ -164,6 +168,7 @@ class FileUploader : IFileUploader
 
         await AssertUploadIsFinished(sharedFileDefinition, totalCreatedSlices);
         
+        _logger.LogInformation("FileUploader: E2EE upload of {SharedFileDefinitionId} is finished", SharedFileDefinition.Id);
     }
 
     private async Task SliceAndEncrypt(SharedFileDefinition sharedFileDefinition)
@@ -311,6 +316,7 @@ class FileUploader : IFileUploader
             
             var uploadFileUrl = await _fileTransferApiClient.GetUploadFileUrl(transferParameters);
 
+            _logger.LogDebug("UploadAvailableSlice: starting sending slice {number} ({length} KB)", slice.PartNumber, slice.MemoryStream.Length / 1024d);
 
             var options = new BlobClientOptions();
             options.Retry.NetworkTimeout = TimeSpan.FromMinutes(60);
@@ -376,5 +382,4 @@ class FileUploader : IFileUploader
             return MaxConcurrentUploads;
         }
     }
-    
 }

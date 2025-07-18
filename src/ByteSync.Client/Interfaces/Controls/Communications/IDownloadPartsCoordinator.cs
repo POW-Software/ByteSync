@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Threading.Channels;
 using ByteSync.Business.Communications.Downloading;
 
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Interfaces.Controls.Communications;
 
 public interface IDownloadPartsCoordinator
 {

@@ -1,6 +1,6 @@
 using ByteSync.Common.Business.SharedFiles;
 
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Interfaces.Controls.Communications;
 
 public interface IFilePartDownloadAsserter
 {

@@ -1,7 +1,7 @@
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Interfaces.Controls.Communications;
 
 public interface IErrorManager
 {
-    void SetOnError();
-    bool IsError { get; }
+    Task SetOnErrorAsync();
+    Task<bool> IsErrorAsync();
 } 

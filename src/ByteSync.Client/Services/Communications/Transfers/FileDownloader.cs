@@ -6,7 +6,6 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using System.IO;
-using Serilog;
 
 namespace ByteSync.Services.Communications.Transfers;
 
@@ -20,6 +19,7 @@ public class FileDownloader : IFileDownloader
     private readonly IResourceManager _resourceManager;
     private readonly IDownloadPartsCoordinator _partsCoordinator;
     private readonly SemaphoreSlim _semaphoreSlim;
+    private readonly ILogger<FileDownloader> _logger;
 
     public IDownloadPartsCoordinator PartsCoordinator => _partsCoordinator;
     public SharedFileDefinition SharedFileDefinition { get; private set; }
@@ -39,7 +39,8 @@ public class FileDownloader : IFileDownloader
         IFileMerger fileMerger,
         IErrorManager errorManager,
         IResourceManager resourceManager,
-        IDownloadPartsCoordinator partsCoordinator)
+        IDownloadPartsCoordinator partsCoordinator,
+        ILogger<FileDownloader> logger)
     {
         _policyFactory = policyFactory;
         _fileTransferApiClient = fileTransferApiClient;
@@ -82,7 +83,7 @@ public class FileDownloader : IFileDownloader
             await Task.WhenAll(DownloadTasks);
             await MergerTask;
 
-            if (_errorManager.IsError)
+            if (await _errorManager.IsErrorAsync())
             {
                 throw new Exception("An error occurred while downloading file " + DownloadTarget.DownloadDestinations.JoinToString(", "));
             }
@@ -98,7 +99,7 @@ public class FileDownloader : IFileDownloader
             try
             {
                 await DownloadSemaphore.WaitAsync();
-                if (_errorManager.IsError)
+                if (await _errorManager.IsErrorAsync())
                 {
                     break;
                 }
@@ -152,13 +153,13 @@ public class FileDownloader : IFileDownloader
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "DownloadFile - SharedFileType:{SharedFileType} - PartNumber:{PartNumber}",
+                _logger.LogError(ex, "DownloadFile - SharedFileType:{SharedFileType} - PartNumber:{PartNumber}",
                     SharedFileDefinition.SharedFileType, partNumber);
             }
 
             if (!isDownloadSuccess)
             {
-                _errorManager.SetOnError();
+                await _errorManager.SetOnErrorAsync();
             }
         }
     }

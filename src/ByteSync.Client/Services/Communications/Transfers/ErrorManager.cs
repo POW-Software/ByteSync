@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Channels;
+using ByteSync.Interfaces.Controls.Communications;
 
 namespace ByteSync.Services.Communications.Transfers;
 
@@ -21,25 +22,22 @@ public class ErrorManager : IErrorManager
         _cancellationTokenSource = cancellationTokenSource;
     }
 
-    public bool IsError
+    public async Task<bool> IsErrorAsync()
     {
-        get
+        await _semaphoreSlim.WaitAsync();
+        try
         {
-            _semaphoreSlim.Wait();
-            try
-            {
-                return _isError;
-            }
-            finally
-            {
-                _semaphoreSlim.Release();
-            }
+            return _isError;
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
         }
     }
 
-    public void SetOnError()
+    public async Task SetOnErrorAsync()
     {
-        _semaphoreSlim.Wait();
+        await _semaphoreSlim.WaitAsync();
         try
         {
             _isError = true;

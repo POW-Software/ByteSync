@@ -14,14 +14,18 @@ public class FileDownloaderFactory : IFileDownloaderFactory
     private readonly IDownloadTargetBuilder _downloadTargetBuilder;
     private readonly IFileTransferApiClient _fileTransferApiClient;
     private readonly IMergerDecrypterFactory _mergerDecrypterFactory;
+    private readonly ILogger<FilePartDownloadAsserter> _logger;
+    private readonly ILogger<FileDownloader> _loggerFileDownloader;
 
     public FileDownloaderFactory(IPolicyFactory policyFactory, IDownloadTargetBuilder downloadTargetBuilder,
-        IFileTransferApiClient fileTransferApiClient, IMergerDecrypterFactory mergerDecrypterFactory)
+        IFileTransferApiClient fileTransferApiClient, IMergerDecrypterFactory mergerDecrypterFactory, ILogger<FilePartDownloadAsserter> logger, ILogger<FileDownloader> loggerFileDownloader)
     {
         _policyFactory = policyFactory;
         _downloadTargetBuilder = downloadTargetBuilder;
         _fileTransferApiClient = fileTransferApiClient;
         _mergerDecrypterFactory = mergerDecrypterFactory;
+        _logger = logger;
+        _loggerFileDownloader = loggerFileDownloader;
     }
     
     public IFileDownloader Build(SharedFileDefinition sharedFileDefinition)
@@ -64,14 +68,10 @@ public class FileDownloaderFactory : IFileDownloaderFactory
                 mergerDecrypters.Add(_mergerDecrypterFactory.Build(dest, downloadTarget, cancellationTokenSource));
             }
         }
-        // else: no files to merge (should not happen)
-        Action<int> onPartMerged = partNumber => { /* Optionally update state here */ };
-        Action onError = () => errorManager.SetOnError();
-        Action<int> removeMemoryStream = partNumber => downloadTarget.RemoveMemoryStream(partNumber);
-        var fileMerger = new FileMerger(mergerDecrypters, onPartMerged, onError, removeMemoryStream, semaphoreSlim);
-
+        
+        var fileMerger = new FileMerger(mergerDecrypters, errorManager, downloadTarget, semaphoreSlim);
         // FilePartDownloadAsserter
-        var filePartDownloadAsserter = new FilePartDownloadAsserter(_fileTransferApiClient, semaphoreSlim, onError);
+        var filePartDownloadAsserter = new FilePartDownloadAsserter(_fileTransferApiClient, semaphoreSlim, errorManager, _logger);
 
         return new FileDownloader(
             sharedFileDefinition,
@@ -82,7 +82,8 @@ public class FileDownloaderFactory : IFileDownloaderFactory
             fileMerger,
             errorManager,
             resourceManager,
-            partsCoordinator
+            partsCoordinator,
+            _loggerFileDownloader
         );
     }
 }

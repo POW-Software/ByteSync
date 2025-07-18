@@ -1,4 +1,5 @@
 using ByteSync.Business.Communications.Downloading;
+using ByteSync.Interfaces.Controls.Communications;
 
 namespace ByteSync.Services.Communications.Transfers;
 

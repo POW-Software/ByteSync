@@ -9,7 +9,6 @@ namespace ByteSync.Services.Communications.Transfers;
 
 public class PostDownloadHandlerProxy : IPostDownloadHandlerProxy
 {
-    
     private readonly ISessionProfileManager _sessionProfileManager;
     private readonly ISynchronizationDataReceiver _synchronizationDataReceiver;
     private readonly IInventoryService _inventoryService;
@@ -53,5 +52,4 @@ public class PostDownloadHandlerProxy : IPostDownloadHandlerProxy
             }
         }
     }
-    
 }

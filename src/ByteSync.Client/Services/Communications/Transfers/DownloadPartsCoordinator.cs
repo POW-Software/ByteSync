@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Channels;
 using ByteSync.Business.Communications.Downloading;
+using ByteSync.Interfaces.Controls.Communications;
 
 namespace ByteSync.Services.Communications.Transfers;
 
