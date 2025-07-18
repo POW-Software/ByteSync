@@ -27,3 +27,9 @@ Examples:
 - Never propose changes directly on `master`.
 - Always create a branch using the proper prefix.
 - PR titles must follow the documented format.
+
+### Commenting Guidelines
+- All comments must be written in English.
+- Do not add comments or Javadoc/XML-style documentation in C# code.
+- Comments are only allowed when strictly necessary to explain complex or non-obvious logic.
+- Prefer clear and self-explanatory code over adding comments.
