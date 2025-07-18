@@ -20,7 +20,7 @@ public class ErrorManagerTests
     }
 
     [Test]
-    public async void SetOnError_SetsErrorAndCancels()
+    public async Task SetOnError_SetsErrorAndCancels()
     {
         var semaphoreSlim = new SemaphoreSlim(1, 1);
         var mergeChannel = Channel.CreateUnbounded<int>();

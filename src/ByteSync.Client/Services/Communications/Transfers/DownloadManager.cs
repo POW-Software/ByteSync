@@ -12,7 +12,7 @@ public class DownloadManager : IDownloadManager
     private readonly IPostDownloadHandlerProxy _postDownloadHandlerProxy;
     private readonly IFileTransferApiClient _fileTransferApiClient;
     private readonly IDictionary<string, IDownloadPartsCoordinator> _partsCoordinatorCache = new Dictionary<string, IDownloadPartsCoordinator>();
-
+    private readonly ILogger<DownloadManager> _logger;
 
     public DownloadManager(IFileDownloaderCache fileDownloaderCache, ISynchronizationDownloadFinalizer synchronizationDownloadFinalizer, 
         IPostDownloadHandlerProxy postDownloadHandlerProxy, IFileTransferApiClient fileTransferApiClient, ILogger<DownloadManager> logger)
@@ -21,6 +21,7 @@ public class DownloadManager : IDownloadManager
         _synchronizationDownloadFinalizer = synchronizationDownloadFinalizer;
         _postDownloadHandlerProxy = postDownloadHandlerProxy;
         _fileTransferApiClient = fileTransferApiClient;
+        _logger = logger;
     }
 
     public async Task OnFilePartReadyToDownload(SharedFileDefinition sharedFileDefinition, int partNumber)
@@ -33,6 +34,8 @@ public class DownloadManager : IDownloadManager
         if (partNumber == 1)
         {
             var fileDownloader = await _fileDownloaderCache.GetFileDownloader(sharedFileDefinition);
+            _logger.LogInformation("{Type}: {SharedFileDefinitionId} - Download started to {downloadDestinations}", sharedFileDefinition.SharedFileType,
+                sharedFileDefinition.Id, fileDownloader.DownloadTarget.DownloadDestinations.JoinToString(", "));
         }
 
         await partsCoordinator.AddAvailablePartAsync(partNumber);
@@ -45,11 +48,13 @@ public class DownloadManager : IDownloadManager
             throw new InvalidOperationException("No parts coordinator found for the given file definition.");
         }
         var fileDownloader = await _fileDownloaderCache.GetFileDownloader(sharedFileDefinition);
+        
         var downloadTarget = fileDownloader.DownloadTarget;
 
         try
         {
             await partsCoordinator.SetAllPartsKnownAsync(partsCount);
+            
             await fileDownloader.WaitForFileFullyExtracted();
 
             if (downloadTarget.TemporaryFileManagers != null)
@@ -78,6 +83,7 @@ public class DownloadManager : IDownloadManager
             await _synchronizationDownloadFinalizer.FinalizeSynchronization(sharedFileDefinition, downloadTarget);
         }
 
+        _logger.LogInformation("{Type}: {SharedFileDefinitionId} - Download complete", sharedFileDefinition.SharedFileType, sharedFileDefinition.Id);
 
         var transferParameters = new TransferParameters
         {

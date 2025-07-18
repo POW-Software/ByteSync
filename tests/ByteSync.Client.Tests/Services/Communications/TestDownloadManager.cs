@@ -51,10 +51,9 @@ public class TestDownloadManager : AbstractTester
         _mockFileDownloaderCache.Setup(m => m.GetFileDownloader(It.IsAny<SharedFileDefinition>()))
             .ReturnsAsync(mockFileDownloader.Object);
         mockFileDownloader.Setup(m => m.DownloadTarget).Returns(downloadTarget);
-        // Setup the coordinator cache
         var partsCoordinatorCacheField = typeof(DownloadManager).GetField("_partsCoordinatorCache", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        var cache = (IDictionary<SharedFileDefinition, IDownloadPartsCoordinator>)partsCoordinatorCacheField.GetValue(_downloadManager);
-        cache[sharedFileDefinition] = mockCoordinator.Object;
+        var cache = (IDictionary<string, IDownloadPartsCoordinator>)partsCoordinatorCacheField.GetValue(_downloadManager);
+        cache[sharedFileDefinition.Id] = mockCoordinator.Object;
         mockCoordinator.Setup(m => m.AddAvailablePartAsync(It.IsAny<int>())).Returns(Task.CompletedTask);
         // Act
         await _downloadManager.OnFilePartReadyToDownload(sharedFileDefinition, 1);
@@ -76,10 +75,9 @@ public class TestDownloadManager : AbstractTester
             .ReturnsAsync(mockFileDownloader.Object);
         mockFileDownloader.Setup(m => m.DownloadTarget).Returns(downloadTarget);
         mockFileDownloader.Setup(m => m.WaitForFileFullyExtracted()).Returns(Task.CompletedTask);
-        // Setup the coordinator cache
         var partsCoordinatorCacheField = typeof(DownloadManager).GetField("_partsCoordinatorCache", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        var cache = (IDictionary<SharedFileDefinition, IDownloadPartsCoordinator>)partsCoordinatorCacheField.GetValue(_downloadManager);
-        cache[sharedFileDefinition] = mockCoordinator.Object;
+        var cache = (IDictionary<string, IDownloadPartsCoordinator>)partsCoordinatorCacheField.GetValue(_downloadManager);
+        cache[sharedFileDefinition.Id] = mockCoordinator.Object;
         mockCoordinator.Setup(m => m.SetAllPartsKnownAsync(It.IsAny<int>())).Returns(Task.CompletedTask);
         _mockFileTransferApiClient.Setup(m => m.AssertDownloadIsFinished(It.IsAny<TransferParameters>()))
             .Returns(Task.CompletedTask);

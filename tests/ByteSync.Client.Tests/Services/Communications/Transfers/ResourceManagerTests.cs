@@ -14,8 +14,8 @@ public class ResourceManagerTests
         downloadPartsInfo.AvailableParts.Add(1);
         downloadPartsInfo.DownloadedParts.Add(2);
         var downloadTarget = new DownloadTarget(null!, null, new HashSet<string>());
-        downloadTarget.GetMemoryStream(1);
-        downloadTarget.GetMemoryStream(2);
+        downloadTarget.AddOrReplaceMemoryStream(1, new MemoryStream());
+        downloadTarget.AddOrReplaceMemoryStream(2, new MemoryStream());
         var manager = new ResourceManager(downloadPartsInfo, downloadTarget);
         manager.Cleanup();
         downloadPartsInfo.AvailableParts.Should().BeEmpty();
