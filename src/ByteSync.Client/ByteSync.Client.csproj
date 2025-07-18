@@ -231,9 +231,5 @@
       <DependentUpon>AnnouncementView.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\Sessions\Members\View\DataNodeActionsView.axaml.cs">
-      <DependentUpon>DataNodeActionsView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
 </Project>

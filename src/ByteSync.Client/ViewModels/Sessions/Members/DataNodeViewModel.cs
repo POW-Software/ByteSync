@@ -26,10 +26,6 @@ using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using ByteSync.ViewModels.Sessions.Members.Header;
-using ByteSync.ViewModels.Sessions.Members.Actions;
-using ByteSync.ViewModels.Sessions.Members.Sources;
-using ByteSync.ViewModels.Sessions.Members.Status;
 
 namespace ByteSync.ViewModels.Sessions.Members;
 
@@ -54,11 +50,6 @@ public class DataNodeViewModel : ActivatableViewModelBase
     private IBrush? _otherMemberLetterBackGround;
     private IBrush? _currentMemberLetterBorder;
     private IBrush? _otherMemberLetterBorder;
-
-    public DataNodeHeaderViewModel HeaderViewModel { get; private set; }
-    public DataNodeActionsViewModel ActionsViewModel { get; private set; }
-    public DataNodeSourcesViewModel SourcesViewModel { get; private set; }
-    public DataNodeStatusViewModel StatusViewModel { get; private set; }
 
     public DataNodeViewModel()
     {
@@ -153,73 +144,6 @@ public class DataNodeViewModel : ActivatableViewModelBase
         SetMainGridBrush();
 
         UpdateMachineDescription();
-
-        // Initialisation des sous-ViewModels
-        HeaderViewModel = new DataNodeHeaderViewModel(
-            PositionInList,
-            MachineDescription,
-            ClientInstanceId,
-            LetterBackBrush,
-            LetterBorderBrush
-        );
-        ActionsViewModel = new DataNodeActionsViewModel(
-            AddDirectoryCommand,
-            AddFileCommand,
-            IsFileSystemSelectionEnabled,
-            IsLocalMachine,
-            DataSources?.Count ?? 0
-        );
-        SourcesViewModel = new DataNodeSourcesViewModel(
-            new System.Collections.ObjectModel.ObservableCollection<ByteSync.Business.DataSources.DataSourceProxy>(DataSources),
-            RemoveDataSourceCommand,
-            IsLocalMachine,
-            IsFileSystemSelectionEnabled
-        );
-        StatusViewModel = new DataNodeStatusViewModel
-        {
-            Status = Status,
-            IsLocalMachine = IsLocalMachine
-        };
-
-        // Synchronisation dynamique des sous-ViewModels
-        this.WhenAnyValue(x => x.PositionInList)
-            .Subscribe(val => HeaderViewModel.PositionInList = val);
-        this.WhenAnyValue(x => x.MachineDescription)
-            .Subscribe(val => HeaderViewModel.MachineDescription = val);
-        this.WhenAnyValue(x => x.ClientInstanceId)
-            .Subscribe(val => HeaderViewModel.ClientInstanceId = val);
-        this.WhenAnyValue(x => x.LetterBackBrush)
-            .Subscribe(val => HeaderViewModel.LetterBackBrush = val);
-        this.WhenAnyValue(x => x.LetterBorderBrush)
-            .Subscribe(val => HeaderViewModel.LetterBorderBrush = val);
-
-        this.WhenAnyValue(x => x.AddDirectoryCommand)
-            .Subscribe(val => ActionsViewModel.AddDirectoryCommand = val);
-        this.WhenAnyValue(x => x.AddFileCommand)
-            .Subscribe(val => ActionsViewModel.AddFileCommand = val);
-        this.WhenAnyValue(x => x.IsFileSystemSelectionEnabled)
-            .Subscribe(val => {
-                ActionsViewModel.IsFileSystemSelectionEnabled = val;
-                SourcesViewModel.IsFileSystemSelectionEnabled = val;
-            });
-        this.WhenAnyValue(x => x.IsLocalMachine)
-            .Subscribe(val => {
-                HeaderViewModel.IsLocalMachine = val;
-                ActionsViewModel.IsLocalMachine = val;
-                SourcesViewModel.IsLocalMachine = val;
-                StatusViewModel.IsLocalMachine = val;
-            });
-        this.WhenAnyValue(x => x.DataSources.Count)
-            .Subscribe(val => ActionsViewModel.DataSourcesCount = val);
-        this.WhenAnyValue(x => x.Status)
-            .Subscribe(val => StatusViewModel.Status = val);
-        this.WhenAnyValue(x => x.RemoveDataSourceCommand)
-            .Subscribe(val => SourcesViewModel.RemoveDataSourceCommand = val);
-        // Pour la collection DataSources, on peut aussi synchroniser la référence si besoin
-        this.WhenAnyValue(x => x.DataSources)
-            .Subscribe(val => {
-                SourcesViewModel.DataSources = new System.Collections.ObjectModel.ObservableCollection<ByteSync.Business.DataSources.DataSourceProxy>(val);
-            });
     }
 
     private void SetMainGridBrush()

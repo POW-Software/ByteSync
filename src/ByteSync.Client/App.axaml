@@ -14,7 +14,6 @@
             <converters:LocalInventoryPartStatusToIconConverter x:Key="InventoryProcessStatusToIconConverter" />
             <converters:LocalInventoryPartStatusToTextConverter x:Key="InventoryProcessStatusToTextConverter" />
             <converters:IntToLetterConverter x:Key="IntToLetterConverter" />
-            <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>
     <Application.DataTemplates>
