@@ -2,15 +2,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
-             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
-             xmlns:members="clr-namespace:ByteSync.ViewModels.Sessions.Members"
-             xmlns:membersViews="clr-namespace:ByteSync.Views.Sessions.Members"
+             xmlns:dataNodes="clr-namespace:ByteSync.ViewModels.Sessions.DataNodes"
+             xmlns:dataNodes1="clr-namespace:ByteSync.Views.Sessions.DataNodes"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="ByteSync.Views.Sessions.Members.DataNodeView">
+             x:Class="ByteSync.Views.Sessions.DataNodes.DataNodeView">
     
     <Design.DataContext>
-        <members:DataNodeViewModel />
+        <dataNodes:DataNodeViewModel />
     </Design.DataContext>
 
     <Border Width="600" Margin="6" Height="320" Background="{Binding MainGridBrush}" 
@@ -25,16 +23,16 @@
             </Grid.RowDefinitions>
 
             <!-- First Row -->
-            <membersViews:DataNodeHeaderView DataContext="{Binding HeaderViewModel}" Grid.Row="0" />
+            <dataNodes1:DataNodeHeaderView DataContext="{Binding HeaderViewModel}" Grid.Row="0" />
 
             <!-- Second Row -->
             <Rectangle Grid.Row="1" Height="1" Fill="{DynamicResource SystemBaseLowColor}" Margin="3,6" />
 
             <!-- Third Row -->
-            <membersViews:DataNodeSourcesView DataContext="{Binding SourcesViewModel}" Grid.Row="2" Grid.RowSpan="2" />
+            <dataNodes1:DataNodeSourcesView DataContext="{Binding SourcesViewModel}" Grid.Row="2" Grid.RowSpan="2" />
 
             <!--Last Row-->
-            <membersViews:DataNodeStatusView DataContext="{Binding StatusViewModel}" Grid.Row="4" />
+            <dataNodes1:DataNodeStatusView DataContext="{Binding StatusViewModel}" Grid.Row="4" />
 
         </Grid>
     </Border>

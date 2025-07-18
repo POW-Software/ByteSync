@@ -3,13 +3,13 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.SessionMembers;
+using ByteSync.Common.Business.Sessions;
+using ByteSync.Interfaces;
 using ByteSync.Interfaces.Repositories;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using ByteSync.Interfaces;
-using ByteSync.Common.Business.Sessions;
 
-namespace ByteSync.ViewModels.Sessions.Members;
+namespace ByteSync.ViewModels.Sessions.DataNodes;
 
 public class DataNodeStatusViewModel : ActivatableViewModelBase
 {

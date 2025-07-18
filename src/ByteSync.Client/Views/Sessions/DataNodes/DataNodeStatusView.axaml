@@ -2,12 +2,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:dataNodes="clr-namespace:ByteSync.ViewModels.Sessions.DataNodes"
              mc:Ignorable="d"
-             xmlns:vm="clr-namespace:ByteSync.ViewModels.Sessions.Members"
-             x:Class="ByteSync.Views.Sessions.Members.DataNodeStatusView">
+             x:Class="ByteSync.Views.Sessions.DataNodes.DataNodeStatusView">
 
     <Design.DataContext>
-        <vm:DataNodeStatusViewModel />
+        <dataNodes:DataNodeStatusViewModel />
     </Design.DataContext>
 
     <StackPanel Orientation="Vertical">

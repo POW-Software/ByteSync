@@ -4,16 +4,12 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Avalonia.Threading;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.DataNodes;
 using ByteSync.Business.DataSources;
-using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces;
-using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Factories.Proxies;
 using ByteSync.Interfaces.Repositories;
@@ -23,7 +19,7 @@ using DynamicData.Binding;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-namespace ByteSync.ViewModels.Sessions.Members;
+namespace ByteSync.ViewModels.Sessions.DataNodes;
 
 public class DataNodeSourcesViewModel : ActivatableViewModelBase
 {

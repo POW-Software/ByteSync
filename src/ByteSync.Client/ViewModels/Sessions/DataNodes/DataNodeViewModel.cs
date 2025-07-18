@@ -1,13 +1,13 @@
 ﻿using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Media;
-using ByteSync.Business.SessionMembers;
 using ByteSync.Business.DataNodes;
+using ByteSync.Business.SessionMembers;
 using ByteSync.Interfaces.Controls.Themes;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-namespace ByteSync.ViewModels.Sessions.Members;
+namespace ByteSync.ViewModels.Sessions.DataNodes;
 
 public class DataNodeViewModel : ActivatableViewModelBase
 {

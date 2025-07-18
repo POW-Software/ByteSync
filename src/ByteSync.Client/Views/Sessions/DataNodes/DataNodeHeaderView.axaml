@@ -3,13 +3,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
-             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
-             xmlns:vm="clr-namespace:ByteSync.ViewModels.Sessions.Members"
-             x:Class="ByteSync.Views.Sessions.Members.DataNodeHeaderView">
+             xmlns:dataNodes="clr-namespace:ByteSync.ViewModels.Sessions.DataNodes"
+             x:Class="ByteSync.Views.Sessions.DataNodes.DataNodeHeaderView">
 
     <Design.DataContext>
-        <vm:DataNodeHeaderViewModel />
+        <dataNodes:DataNodeHeaderViewModel />
     </Design.DataContext>
 
     <Grid>

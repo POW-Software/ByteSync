@@ -4,12 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:misc="clr-namespace:ByteSync.Views.Misc"
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
-             xmlns:members="clr-namespace:ByteSync.ViewModels.Sessions.Members"
+             xmlns:dataNodes="clr-namespace:ByteSync.ViewModels.Sessions.DataNodes"
              mc:Ignorable="d"
-             x:Class="ByteSync.Views.Sessions.Members.DataNodeSourcesView">
+             x:Class="ByteSync.Views.Sessions.DataNodes.DataNodeSourcesView">
 
     <Design.DataContext>
-        <members:DataNodeSourcesViewModel />
+        <dataNodes:DataNodeSourcesViewModel />
     </Design.DataContext>
 
     <StackPanel Orientation="Vertical">

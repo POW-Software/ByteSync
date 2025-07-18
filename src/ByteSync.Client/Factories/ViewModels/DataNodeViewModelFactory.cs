@@ -4,7 +4,7 @@ using ByteSync.Business.SessionMembers;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
-using ByteSync.ViewModels.Sessions.Members;
+using ByteSync.ViewModels.Sessions.DataNodes;
 
 namespace ByteSync.Factories.ViewModels;
 
