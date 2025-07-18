@@ -60,11 +60,6 @@ public class DownloadTarget
     {
         lock (SyncRoot)
         {
-            if (!MemoryStreams.ContainsKey(partNumber))
-            {
-                MemoryStreams.Add(partNumber, new MemoryStream());
-            }
-
             return MemoryStreams[partNumber];
         }
     }
@@ -77,6 +72,14 @@ public class DownloadTarget
             {
                 MemoryStreams.Remove(partNumber);
             }
+        }
+    }
+
+    public void AddOrReplaceMemoryStream(int partNumber, MemoryStream stream)
+    {
+        lock (SyncRoot)
+        {
+            MemoryStreams[partNumber] = stream;
         }
     }
 

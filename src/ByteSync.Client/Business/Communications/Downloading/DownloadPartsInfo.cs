@@ -21,6 +21,8 @@ public class DownloadPartsInfo
         
     public List<int> MergedParts { get;  }
 
+    public int TotalPartsCount { get; set; }
+
     public List<int> GetMergeableParts()
     {
         return GetNextElements(SentToMerge, DownloadedParts);

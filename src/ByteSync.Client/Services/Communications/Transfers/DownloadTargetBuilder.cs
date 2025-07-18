@@ -14,11 +14,15 @@ namespace ByteSync.Services.Communications.Transfers;
 
 public class DownloadTargetBuilder : IDownloadTargetBuilder
 {
+    
     private readonly ICloudSessionLocalDataManager _cloudSessionLocalDataManager;
     private readonly ISessionProfileLocalDataManager _sessionProfileLocalDataManager;
     private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository;
     private readonly IConnectionService _connectionService;
     private readonly ITemporaryFileManagerFactory _temporaryFileManagerFactory;
+
+    // Add a cache to ensure singleton DownloadTarget per fileId
+    private readonly Dictionary<string, DownloadTarget> _downloadTargetCache = new();
 
     public DownloadTargetBuilder(ICloudSessionLocalDataManager cloudSessionLocalDataManager, ISessionProfileLocalDataManager sessionProfileLocalDataManager,
         ISharedActionsGroupRepository sharedActionsGroupRepository, IConnectionService connectionService,
@@ -33,6 +37,10 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder
     
     public DownloadTarget BuildDownloadTarget(SharedFileDefinition sharedFileDefinition)
     {
+        // Check cache first
+        if (_downloadTargetCache.TryGetValue(sharedFileDefinition.Id, out var existing))
+            return existing;
+
         LocalSharedFile? sharedFile = null;
         var downloadDestinations = new HashSet<string>();
         string destinationPath;
@@ -130,6 +138,16 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder
         downloadTarget.LastWriteTimeUtcPerActionsGroupId = datesPerActionsGroupId;
         downloadTarget.TemporaryFileManagers = temporaryFileManagers;
 
+        // Store in cache
+        _downloadTargetCache[sharedFileDefinition.Id] = downloadTarget;
+
         return downloadTarget;
     }
+
+    // Optional: method to clear the cache (e.g., on session end)
+    public void ClearCache()
+    {
+        _downloadTargetCache.Clear();
+    }
+    
 }

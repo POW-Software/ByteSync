@@ -75,9 +75,9 @@ public class MergerDecrypter : IMergerDecrypter
             
         TotalReadFiles += 1;
         _logger.LogDebug("MergeAndDecrypt memoryStream {Number}", TotalReadFiles);
-
         var memoryStream = DownloadTarget.GetMemoryStream(TotalReadFiles);
 
+        
         memoryStream.Position = 0;
         await memoryStream.CopyToAsync(cryptoStream, CancellationTokenSource.Token);
     }

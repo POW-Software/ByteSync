@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.IO.Compression;
-using System.Threading.Tasks;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
