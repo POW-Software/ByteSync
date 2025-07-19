@@ -1,4 +1,5 @@
 using ByteSync.Business.DataNodes;
+using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Communications.Http;
@@ -11,6 +12,8 @@ using ByteSync.Services.Inventories;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using System.Reactive.Subjects;
+using System.Reactive.Linq;
 
 namespace ByteSync.Tests.Services.Inventories;
 
@@ -24,6 +27,8 @@ public class DataNodeServiceTests
     private Mock<IDataNodeRepository> _dataNodeRepositoryMock = null!;
     private Mock<IDataNodeCodeGenerator> _codeGeneratorMock = null!;
     private DataNodeService _service = null!;
+    private BehaviorSubject<AbstractSession?> _sessionSubject = null!;
+    private BehaviorSubject<SessionStatus> _sessionStatusSubject = null!;
 
     [SetUp]
     public void SetUp()
@@ -35,12 +40,26 @@ public class DataNodeServiceTests
         _dataNodeRepositoryMock = new Mock<IDataNodeRepository>();
         _codeGeneratorMock = new Mock<IDataNodeCodeGenerator>();
 
+        // Setup observables
+        _sessionSubject = new BehaviorSubject<AbstractSession?>(null);
+        _sessionStatusSubject = new BehaviorSubject<SessionStatus>(SessionStatus.None);
+        
+        _sessionServiceMock.SetupGet(s => s.SessionObservable).Returns(_sessionSubject);
+        _sessionServiceMock.SetupGet(s => s.SessionStatusObservable).Returns(_sessionStatusSubject);
+
         _service = new DataNodeService(_sessionServiceMock.Object,
             _connectionServiceMock.Object,
             _dataEncrypterMock.Object,
             _inventoryApiClientMock.Object,
             _dataNodeRepositoryMock.Object,
             _codeGeneratorMock.Object);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _sessionSubject?.Dispose();
+        _sessionStatusSubject?.Dispose();
     }
 
     [Test]
