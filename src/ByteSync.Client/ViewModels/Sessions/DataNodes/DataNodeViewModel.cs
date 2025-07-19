@@ -48,7 +48,6 @@ public class DataNodeViewModel : ActivatableViewModelBase
         JoinedSessionOn = sessionMember.JoinedSessionOn;
         DataNode = dataNode;
         
-        // Commande pour ajouter un nouveau DataNode
         AddDataNodeCommand = ReactiveCommand.CreateFromTask(AddDataNode);
         
         this.WhenActivated(disposables =>
@@ -71,18 +70,15 @@ public class DataNodeViewModel : ActivatableViewModelBase
                     SetMainGridBrush();
                 })
                 .DisposeWith(disposables);
-                
-            // Observer les changements dans la liste des DataNodes pour mettre à jour IsLastDataNode
+            
             _dataNodeRepository.ObservableCache.Connect()
                 .WhereReasonsAre(ChangeReason.Add, ChangeReason.Remove)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => UpdateIsLastDataNode())
                 .DisposeWith(disposables);
-                
-            // Initialiser IsLastDataNode
+            
             UpdateIsLastDataNode();
             
-            // Observer les changements de IsLocalMachine et IsLastDataNode pour mettre à jour ShowAddButton
             this.WhenAnyValue(x => x.IsLocalMachine, x => x.IsLastDataNode)
                 .Select(tuple => tuple.Item1 && tuple.Item2)
                 .ObserveOn(RxApp.MainThreadScheduler)
@@ -128,7 +124,6 @@ public class DataNodeViewModel : ActivatableViewModelBase
             return;
         }
         
-        // Le dernier DataNode est celui avec le NodeId le plus élevé (tri alphabétique)
         var lastDataNode = currentMemberDataNodes.Last();
         IsLastDataNode = DataNode.NodeId == lastDataNode.NodeId;
     }

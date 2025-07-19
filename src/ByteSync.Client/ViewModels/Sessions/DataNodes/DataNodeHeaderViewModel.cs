@@ -4,6 +4,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Media;
 using ByteSync.Assets.Resources;
+using ByteSync.Business.DataNodes;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Themes;
@@ -17,27 +18,33 @@ public class DataNodeHeaderViewModel : ActivatableViewModelBase
 {
     private readonly IThemeService _themeService;
     private readonly ILocalizationService _localizationService;
-    private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly SessionMember _sessionMember;
+    private readonly DataNode _dataNode;
 
     private IBrush _currentMemberLetterBackGround = null!;
     private IBrush _otherMemberLetterBackGround = null!;
     private IBrush _currentMemberLetterBorder = null!;
     private IBrush _otherMemberLetterBorder = null!;
 
+    public DataNodeHeaderViewModel()
+    {
+
+    }
+
     public DataNodeHeaderViewModel(SessionMember sessionMember,
+        DataNode dataNode,
         bool isLocalMachine,
         ILocalizationService localizationService,
-        IThemeService themeService,
-        ISessionMemberRepository sessionMemberRepository)
+        IThemeService themeService)
     {
         _sessionMember = sessionMember;
+        _dataNode = dataNode;
         _localizationService = localizationService;
         _themeService = themeService;
-        _sessionMemberRepository = sessionMemberRepository;
 
         IsLocalMachine = isLocalMachine;
         ClientInstanceId = sessionMember.ClientInstanceId;
+        Code = dataNode.Code;
 
         InitializeBrushes();
         SetLetterBrushes();
@@ -51,9 +58,11 @@ public class DataNodeHeaderViewModel : ActivatableViewModelBase
 
         this.WhenActivated(disposables =>
         {
-            _sessionMemberRepository.Watch(sessionMember)
-                .Subscribe(item => PositionInList = item.Current.PositionInList)
-                .DisposeWith(disposables);
+            var codeSubscription = _dataNode
+                .WhenAnyValue(x => x.Code)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(newCode => Code = newCode);
+            codeSubscription.DisposeWith(disposables);
 
             Observable.FromEventPattern<PropertyChangedEventArgs>(_localizationService, nameof(_localizationService.PropertyChanged))
                 .Subscribe(_ => UpdateMachineDescription())
@@ -88,7 +97,7 @@ public class DataNodeHeaderViewModel : ActivatableViewModelBase
     public IBrush LetterBorderBrush { get; private set; } = null!;
 
     [Reactive]
-    public int PositionInList { get; private set; }
+    public string Code { get; set; } = string.Empty;
 
     private void InitializeBrushes()
     {

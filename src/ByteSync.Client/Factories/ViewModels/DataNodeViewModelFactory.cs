@@ -29,6 +29,7 @@ public class DataNodeViewModelFactory : IDataNodeViewModelFactory
         
         var dataNodeHeaderViewModel = _context.Resolve<DataNodeHeaderViewModel>(
             new TypedParameter(typeof(SessionMember), sessionMember),
+            new TypedParameter(typeof(DataNode), dataNode),
             new TypedParameter(typeof(bool), isLocalMachine));
         
         var dataNodeSourcesViewModel = _context.Resolve<DataNodeSourcesViewModel>(
