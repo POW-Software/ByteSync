@@ -17,13 +17,13 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!-- Lettre (A, B, C, …) -->
+        <!-- Letter (A, B, Aa, …) -->
         <Label Grid.Column="0" Content="{Binding PositionInList, Converter={StaticResource IntToLetterConverter}}" VerticalContentAlignment="Center"
                HorizontalContentAlignment="Center" FontWeight="Bold" FontSize="24"
                Margin="6 6" BorderThickness="1" Width="36"
                Background="{Binding LetterBackBrush}" BorderBrush="{Binding LetterBorderBrush}" />
 
-        <!-- Texte -->
+        <!-- Text -->
         <StackPanel Orientation="Vertical" Grid.Column="2" Margin="6,0">
             <TextBlock FontWeight="Bold" Text="{Binding MachineDescription}" Margin="3" />
             <TextBlock FontStyle="Italic" Text="{Binding ClientInstanceId}" Margin="3"

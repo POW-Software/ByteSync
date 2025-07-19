@@ -13,9 +13,10 @@
     </Design.DataContext>
 
     <StackPanel Orientation="Vertical">
-        <!-- Ligne des boutons d'ajout -->
+        <!-- Add Buttons Row -->
         <DockPanel IsVisible="{Binding IsLocalMachine}">
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                <!-- Add Directory Button -->
                 <Button Command="{Binding AddDirectoryCommand}" HorizontalAlignment="Left" Margin="3"
                         IsEnabled="{Binding IsFileSystemSelectionEnabled}"
                         BorderThickness="0" Background="Transparent">
@@ -27,7 +28,7 @@
                     </StackPanel>
                 </Button>
 
-                <!-- Fichiers (masqué si nécessaire) -->
+                <!-- Add File Button -->
                 <Button Command="{Binding AddFileCommand}" HorizontalAlignment="Left" Margin="3"
                         IsEnabled="{Binding IsFileSystemSelectionEnabled}"
                         BorderThickness="0" Background="Transparent">
@@ -45,7 +46,7 @@
             </StackPanel>
         </DockPanel>
 
-        <!-- Grille des sources -->
+        <!-- Sources DataGrid -->
         <DataGrid AutoGenerateColumns="False" Margin="6" ItemsSource="{Binding DataSources}" Classes="NoHeaders"
                   IsReadOnly="True" x:Name="TheGrid" IsEnabled="{Binding IsFileSystemSelectionEnabled}"
                   HeadersVisibility="None" Foreground="{DynamicResource SystemBaseHighColor}">
