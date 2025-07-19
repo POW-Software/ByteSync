@@ -32,7 +32,6 @@ public class DataNodePushReceiver : IPushReceiver
                 var dataNode = _dataEncrypter.DecryptDataNode(dto.EncryptedDataNode);
                 dataNode.ClientInstanceId = dto.ClientInstanceId;
                 _dataNodeService.ApplyAddDataNodeLocally(dataNode);
-                _codeGenerator.RecomputeCodes();
             });
 
         _hubPushHandler2.DataNodeRemoved
@@ -42,7 +41,6 @@ public class DataNodePushReceiver : IPushReceiver
                 var dataNode = _dataEncrypter.DecryptDataNode(dto.EncryptedDataNode);
                 dataNode.ClientInstanceId = dto.ClientInstanceId;
                 _dataNodeService.ApplyRemoveDataNodeLocally(dataNode);
-                _codeGenerator.RecomputeCodes();
             });
     }
 }

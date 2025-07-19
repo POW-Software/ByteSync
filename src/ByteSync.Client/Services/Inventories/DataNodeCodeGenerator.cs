@@ -42,6 +42,8 @@ public class DataNodeCodeGenerator : IDataNodeCodeGenerator, IDisposable
         var sessionMembers = _sessionMemberRepository.SortedSessionMembers.ToList();
         var updates = new List<DataNode>();
 
+        int globalIndex = 0;
+
         for (int mIndex = 0; mIndex < sessionMembers.Count; mIndex++)
         {
             var member = sessionMembers[mIndex];
@@ -56,11 +58,26 @@ public class DataNodeCodeGenerator : IDataNodeCodeGenerator, IDisposable
             {
                 foreach (var node in nodes)
                 {
+                    var needsUpdate = false;
+                    
                     if (node.Code != memberLetter)
                     {
                         node.Code = memberLetter;
+                        needsUpdate = true;
+                    }
+                    
+                    if (node.OrderIndex != globalIndex)
+                    {
+                        node.OrderIndex = globalIndex;
+                        needsUpdate = true;
+                    }
+                    
+                    if (needsUpdate)
+                    {
                         updates.Add(node);
                     }
+                    
+                    globalIndex++;
                 }
             }
             else
@@ -68,11 +85,26 @@ public class DataNodeCodeGenerator : IDataNodeCodeGenerator, IDisposable
                 for (int i = 0; i < nodes.Count; i++)
                 {
                     var code = memberLetter + ((char)('a' + i));
+                    var needsUpdate = false;
+                    
                     if (nodes[i].Code != code)
                     {
                         nodes[i].Code = code;
+                        needsUpdate = true;
+                    }
+                    
+                    if (nodes[i].OrderIndex != globalIndex)
+                    {
+                        nodes[i].OrderIndex = globalIndex;
+                        needsUpdate = true;
+                    }
+                    
+                    if (needsUpdate)
+                    {
                         updates.Add(nodes[i]);
                     }
+                    
+                    globalIndex++;
                 }
             }
         }

@@ -46,6 +46,7 @@ public class DataNodeViewModel : ActivatableViewModelBase
 
         IsLocalMachine = isLocalMachine;
         JoinedSessionOn = sessionMember.JoinedSessionOn;
+        OrderIndex = dataNode.OrderIndex;
         DataNode = dataNode;
         
         AddDataNodeCommand = ReactiveCommand.CreateFromTask(AddDataNode);
@@ -141,6 +142,9 @@ public class DataNodeViewModel : ActivatableViewModelBase
         
     [Reactive]
     public DateTimeOffset JoinedSessionOn { get; set; }
+    
+    [Reactive]
+    public int OrderIndex { get; set; }
     
     [Reactive]
     public bool IsLastDataNode { get; set; }

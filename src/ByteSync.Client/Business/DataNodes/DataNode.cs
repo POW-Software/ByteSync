@@ -16,4 +16,7 @@ public class DataNode
     
     [Reactive]
     public string Code { get; set; }
+    
+    [Reactive]
+    public int OrderIndex { get; set; }
 }
