@@ -1,5 +1,4 @@
 using ByteSync.Business.DataNodes;
-using ByteSync.Business.SessionMembers;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Repositories;
 using DynamicData;

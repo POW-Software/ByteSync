@@ -1,4 +1,7 @@
+using System.Reactive.Linq;
+using System.Threading;
 using ByteSync.Business.DataNodes;
+using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
@@ -17,6 +20,9 @@ public class DataNodeService : IDataNodeService
     private readonly IInventoryApiClient _inventoryApiClient;
     private readonly IDataNodeRepository _dataNodeRepository;
     private readonly IDataNodeCodeGenerator _codeGenerator;
+    
+    private int _nodeCounter;
+    private readonly SemaphoreSlim _counterSemaphore = new(1, 1);
 
     public DataNodeService(ISessionService sessionService, IConnectionService connectionService,
         IDataEncrypter dataEncrypter,
@@ -29,6 +35,15 @@ public class DataNodeService : IDataNodeService
         _inventoryApiClient = inventoryApiClient;
         _dataNodeRepository = dataNodeRepository;
         _codeGenerator = codeGenerator;
+        
+        // Reset the counter when a session ends or is reset
+        _sessionService.SessionObservable
+            .Where(session => session == null)
+            .SelectMany(_ => Observable.FromAsync(ResetNodeCounterAsync));
+
+        _sessionService.SessionStatusObservable
+            .Where(status => status == SessionStatus.Preparation)
+            .SelectMany(_ => Observable.FromAsync(ResetNodeCounterAsync));
     }
 
     public async Task<bool> TryAddDataNode(DataNode dataNode)
@@ -49,9 +64,20 @@ public class DataNodeService : IDataNodeService
         return isAddOK;
     }
 
-    public Task CreateAndTryAddDataNode(string? nodeId = null)
+    public async Task CreateAndTryAddDataNode(string? nodeId = null)
     {
-        nodeId ??= $"NID_{Guid.NewGuid()}";
+        if (nodeId == null)
+        {
+            await _counterSemaphore.WaitAsync();
+            try
+            {
+                nodeId = $"NID_{++_nodeCounter:D6}"; // Format: NID_000001, NID_000002, etc.
+            }
+            finally
+            {
+                _counterSemaphore.Release();
+            }
+        }
         
         var dataNode = new DataNode
         {
@@ -59,7 +85,7 @@ public class DataNodeService : IDataNodeService
             ClientInstanceId = _connectionService.ClientInstanceId!
         };
 
-        return TryAddDataNode(dataNode);
+        await TryAddDataNode(dataNode);
     }
 
     public async Task<bool> TryRemoveDataNode(DataNode dataNode)
@@ -90,5 +116,18 @@ public class DataNodeService : IDataNodeService
     {
         _dataNodeRepository.Remove(dataNode);
         _codeGenerator.RecomputeCodes();
+    }
+    
+    public async Task ResetNodeCounterAsync()
+    {
+        await _counterSemaphore.WaitAsync();
+        try
+        {
+            _nodeCounter = 0;
+        }
+        finally
+        {
+            _counterSemaphore.Release();
+        }
     }
 }
