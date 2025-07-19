@@ -71,7 +71,7 @@ public class DataNodeService : IDataNodeService
             await _counterSemaphore.WaitAsync();
             try
             {
-                nodeId = $"NID_{++_nodeCounter:D6}"; // Format: NID_000001, NID_000002, etc.
+                nodeId = $"NID_{DateTimeOffset.UtcNow.Ticks}_{++_nodeCounter:D6}"; // Format: NID_000001, NID_000002, etc.
             }
             finally
             {
