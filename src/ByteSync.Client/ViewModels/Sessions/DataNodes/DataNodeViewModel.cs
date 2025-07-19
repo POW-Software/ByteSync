@@ -1,17 +1,23 @@
-﻿using System.Reactive.Disposables;
+﻿using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Media;
 using ByteSync.Business.DataNodes;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Interfaces.Controls.Themes;
+using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Interfaces.Repositories;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using DynamicData;
 
 namespace ByteSync.ViewModels.Sessions.DataNodes;
 
 public class DataNodeViewModel : ActivatableViewModelBase
 {
     private readonly IThemeService _themeService;
+    private readonly IDataNodeService _dataNodeService;
+    private readonly IDataNodeRepository _dataNodeRepository;
     
     private IBrush _currentMemberBackGround = null!;
     private IBrush _otherMemberBackGround = null!;
@@ -28,9 +34,11 @@ public class DataNodeViewModel : ActivatableViewModelBase
     public DataNodeViewModel(SessionMember sessionMember, DataNode dataNode, bool isLocalMachine,
         DataNodeSourcesViewModel dataNodeSourcesViewModel, DataNodeHeaderViewModel dataNodeHeaderViewModel,
         DataNodeStatusViewModel dataNodeStatusViewModel,
-        IThemeService themeService)
+        IThemeService themeService, IDataNodeService dataNodeService, IDataNodeRepository dataNodeRepository)
     {
         _themeService = themeService;
+        _dataNodeService = dataNodeService;
+        _dataNodeRepository = dataNodeRepository;
         
         SourcesViewModel = dataNodeSourcesViewModel;
         HeaderViewModel = dataNodeHeaderViewModel;
@@ -38,6 +46,10 @@ public class DataNodeViewModel : ActivatableViewModelBase
 
         IsLocalMachine = isLocalMachine;
         JoinedSessionOn = sessionMember.JoinedSessionOn;
+        DataNode = dataNode;
+        
+        // Commande pour ajouter un nouveau DataNode
+        AddDataNodeCommand = ReactiveCommand.CreateFromTask(AddDataNode);
         
         this.WhenActivated(disposables =>
         {
@@ -58,6 +70,23 @@ public class DataNodeViewModel : ActivatableViewModelBase
                     InitializeBrushes();
                     SetMainGridBrush();
                 })
+                .DisposeWith(disposables);
+                
+            // Observer les changements dans la liste des DataNodes pour mettre à jour IsLastDataNode
+            _dataNodeRepository.ObservableCache.Connect()
+                .WhereReasonsAre(ChangeReason.Add, ChangeReason.Remove)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ => UpdateIsLastDataNode())
+                .DisposeWith(disposables);
+                
+            // Initialiser IsLastDataNode
+            UpdateIsLastDataNode();
+            
+            // Observer les changements de IsLocalMachine et IsLastDataNode pour mettre à jour ShowAddButton
+            this.WhenAnyValue(x => x.IsLocalMachine, x => x.IsLastDataNode)
+                .Select(tuple => tuple.Item1 && tuple.Item2)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .ToPropertyEx(this, x => x.ShowAddButton)
                 .DisposeWith(disposables);
         });
 
@@ -83,6 +112,31 @@ public class DataNodeViewModel : ActivatableViewModelBase
     private IBrush CurrentMemberBackGround => _currentMemberBackGround;
 
     private IBrush OtherMemberBackGround => _otherMemberBackGround;
+    
+    private void UpdateIsLastDataNode()
+    {
+        if (!IsLocalMachine)
+        {
+            IsLastDataNode = false;
+            return;
+        }
+        
+        var currentMemberDataNodes = _dataNodeRepository.SortedCurrentMemberDataNodes;
+        if (currentMemberDataNodes.Count == 0)
+        {
+            IsLastDataNode = false;
+            return;
+        }
+        
+        // Le dernier DataNode est celui avec le NodeId le plus élevé (tri alphabétique)
+        var lastDataNode = currentMemberDataNodes.Last();
+        IsLastDataNode = DataNode.NodeId == lastDataNode.NodeId;
+    }
+    
+    private async Task AddDataNode()
+    {
+        await _dataNodeService.CreateAndTryAddDataNode();
+    }
         
     [Reactive]
     public bool IsLocalMachine { get; set; }
@@ -91,5 +145,14 @@ public class DataNodeViewModel : ActivatableViewModelBase
     public IBrush MainGridBrush { get; set; } = null!;
         
     [Reactive]
-    public DateTimeOffset JoinedSessionOn { get; set; } 
+    public DateTimeOffset JoinedSessionOn { get; set; }
+    
+    [Reactive]
+    public bool IsLastDataNode { get; set; }
+    
+    public extern bool ShowAddButton { [ObservableAsProperty] get; }
+    
+    public DataNode DataNode { get; }
+    
+    public ReactiveCommand<Unit, Unit> AddDataNodeCommand { get; }
 }

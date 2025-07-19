@@ -2,6 +2,8 @@
 using ByteSync.Business.DataNodes;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Interfaces.Controls.Applications;
+using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.ViewModels.Sessions.DataNodes;
@@ -36,15 +38,13 @@ public class DataNodeViewModelFactory : IDataNodeViewModelFactory
         var dataNodeStatusViewModel = _context.Resolve<DataNodeStatusViewModel>(
             new TypedParameter(typeof(SessionMember), sessionMember),
             new TypedParameter(typeof(bool), isLocalMachine));
-
-        var result = _context.Resolve<DataNodeViewModel>(
-            new TypedParameter(typeof(DataNode), dataNode),
-            new TypedParameter(typeof(SessionMember), sessionMember),
-            new TypedParameter(typeof(bool), isLocalMachine),
-            new TypedParameter(typeof(DataNodeHeaderViewModel), dataNodeHeaderViewModel),
-            new TypedParameter(typeof(DataNodeSourcesViewModel), dataNodeSourcesViewModel),
-            new TypedParameter(typeof(DataNodeStatusViewModel), dataNodeStatusViewModel));
-
-        return result;
+        
+        var themeService = _context.Resolve<IThemeService>();
+        var dataNodeService = _context.Resolve<IDataNodeService>();
+        var dataNodeRepository = _context.Resolve<IDataNodeRepository>();
+        
+        return new DataNodeViewModel(sessionMember, dataNode, isLocalMachine,
+            dataNodeSourcesViewModel, dataNodeHeaderViewModel, dataNodeStatusViewModel,
+            themeService, dataNodeService, dataNodeRepository);
     }
 }

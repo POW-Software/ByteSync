@@ -52,7 +52,7 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
         ComparisonResult = comparisonResultViewModel;
         SynchronizationProcess = synchronizationMainViewModel;
         
-        var sessionMemberCache = _dataNodeRepository.ObservableCache.Connect()
+        var dataNodesCache = _dataNodeRepository.ObservableCache.Connect()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Transform(smi => _dataNodeViewModelFactory.CreateDataNodeViewModel(smi))
             .AutoRefresh(vm => vm.JoinedSessionOn)
@@ -64,7 +64,7 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
 
         this.WhenActivated(disposables =>
         {
-            sessionMemberCache.DisposeWith(disposables);
+            dataNodesCache.DisposeWith(disposables);
             
             _sessionService.SessionMode
                 .Where(x => x != null)
