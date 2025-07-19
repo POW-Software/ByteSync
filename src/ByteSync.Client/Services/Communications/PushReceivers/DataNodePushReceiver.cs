@@ -14,16 +14,14 @@ public class DataNodePushReceiver : IPushReceiver
     private readonly IDataEncrypter _dataEncrypter;
     private readonly IHubPushHandler2 _hubPushHandler2;
     private readonly IDataNodeService _dataNodeService;
-    private readonly IDataNodeCodeGenerator _codeGenerator;
 
     public DataNodePushReceiver(ISessionService sessionService, IDataEncrypter dataEncrypter,
-        IHubPushHandler2 hubPushHandler2, IDataNodeService dataNodeService, IDataNodeCodeGenerator codeGenerator)
+        IHubPushHandler2 hubPushHandler2, IDataNodeService dataNodeService)
     {
         _sessionService = sessionService;
         _dataEncrypter = dataEncrypter;
         _hubPushHandler2 = hubPushHandler2;
         _dataNodeService = dataNodeService;
-        _codeGenerator = codeGenerator;
 
         _hubPushHandler2.DataNodeAdded
             .Where(dto => _sessionService.CheckSession(dto.SessionId))
