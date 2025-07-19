@@ -35,6 +35,12 @@ public class DataNodePushReceiverTests
         _dataNodeServiceMock = new Mock<IDataNodeService>();
         _codeGeneratorMock = new Mock<IDataNodeCodeGenerator>();
 
+        // Configure the service mocks to call RecomputeCodes when their methods are called
+        _dataNodeServiceMock.Setup(s => s.ApplyAddDataNodeLocally(It.IsAny<DataNode>()))
+            .Callback<DataNode>(node => _codeGeneratorMock.Object.RecomputeCodes());
+        _dataNodeServiceMock.Setup(s => s.ApplyRemoveDataNodeLocally(It.IsAny<DataNode>()))
+            .Callback<DataNode>(node => _codeGeneratorMock.Object.RecomputeCodes());
+
         _hubPushHandlerMock.SetupGet(h => h.DataNodeAdded).Returns(_addedSubject);
         _hubPushHandlerMock.SetupGet(h => h.DataNodeRemoved).Returns(_removedSubject);
 

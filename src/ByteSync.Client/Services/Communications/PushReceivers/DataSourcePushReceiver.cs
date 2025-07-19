@@ -31,7 +31,6 @@ public class DataSourcePushReceiver : IPushReceiver
             {
                 var dataSource = _dataEncrypter.DecryptDataSource(dto.EncryptedDataSource);
                 _dataSourceService.ApplyAddDataSourceLocally(dataSource);
-                _codeGenerator.RecomputeCodesForNode(dataSource.DataNodeId);
             });
         
         _hubPushHandler2.DataSourceRemoved
@@ -40,7 +39,6 @@ public class DataSourcePushReceiver : IPushReceiver
             {
                 var dataSource = _dataEncrypter.DecryptDataSource(dto.EncryptedDataSource);
                 _dataSourceService.ApplyRemoveDataSourceLocally(dataSource);
-                _codeGenerator.RecomputeCodesForNode(dataSource.DataNodeId);
             });
     }
 }
