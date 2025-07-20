@@ -68,7 +68,7 @@ public class InventoryFinishedService : IInventoryFinishedService
 
             sharedFileDefinition.ClientInstanceId = inventory.Endpoint.ClientInstanceId;
             sharedFileDefinition.SessionId = session.SessionId;
-            sharedFileDefinition.AdditionalName = inventory.Code;
+            sharedFileDefinition.AdditionalName = $"{inventory.Endpoint.ClientInstanceId}_{inventory.Code}";
 
             var inventoryFile = new InventoryFile(sharedFileDefinition, inventoryFullName);
 

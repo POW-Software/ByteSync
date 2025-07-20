@@ -1,6 +1,7 @@
 ﻿using System.Reactive.Linq;
 using ByteSync.Business;
 using ByteSync.Business.Communications;
+using ByteSync.Business.DataNodes;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
@@ -19,17 +20,20 @@ public class InventoryService : IInventoryService
     private readonly IInventoryApiClient _inventoryApiClient;
     private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly IInventoryFileRepository _inventoryFileRepository;
+    private readonly IDataNodeRepository _dataNodeRepository;
     private readonly ILogger<InventoryService> _logger;
 
 
     public InventoryService(ISessionService sessionService, IConnectionService connectionService, IInventoryApiClient inventoryApiClient,
-        ISessionMemberRepository sessionMemberRepository, IInventoryFileRepository inventoryFileRepository, ILogger<InventoryService> logger)
+        ISessionMemberRepository sessionMemberRepository, IInventoryFileRepository inventoryFileRepository, 
+        IDataNodeRepository dataNodeRepository, ILogger<InventoryService> logger)
     {
         _sessionService = sessionService;
         _connectionService = connectionService;
         _inventoryApiClient = inventoryApiClient;
         _sessionMemberRepository = sessionMemberRepository;
         _inventoryFileRepository = inventoryFileRepository;
+        _dataNodeRepository = dataNodeRepository;
         _logger = logger;
 
         InventoryProcessData = new InventoryProcessData();
@@ -75,39 +79,61 @@ public class InventoryService : IInventoryService
     {
         await Task.Run(() =>
         {
-            var otherSessionMembersCount = _sessionMemberRepository.SortedOtherSessionMembers.Count();
-
             var currentEndPoint = _connectionService.CurrentEndPoint!;
-
             var inventoriesFilesCache = _inventoryFileRepository.Elements.ToList();
+            var allDataNodes = _dataNodeRepository.Elements.ToList();
 
-            var areBaseInventoriesComplete =
-                inventoriesFilesCache
-                    .Where(inventoryFile => inventoryFile.IsBaseInventory)
-                    .Count(inventoryFile =>
-                        !inventoryFile.SharedFileDefinition.IsCreatedBy(currentEndPoint)) == otherSessionMembersCount
-                &&
-                inventoriesFilesCache
-                    .Where(inventoryFile => inventoryFile.IsBaseInventory)
-                    .Count(inventoryFile =>
-                        inventoryFile.SharedFileDefinition.IsCreatedBy(currentEndPoint)) > 0;
-            
-            var areFullInventoriesComplete =
-                inventoriesFilesCache
-                    .Where(inventoryFile => inventoryFile.IsFullInventory)
-                    .Count(inventoryFile =>
-                        !inventoryFile.SharedFileDefinition.IsCreatedBy(currentEndPoint)) == otherSessionMembersCount
-                &&
-                inventoriesFilesCache
-                    .Where(inventoryFile => inventoryFile.IsFullInventory)
-                    .Count(inventoryFile =>
-                        inventoryFile.SharedFileDefinition.IsCreatedBy(currentEndPoint)) > 0;
-        
+            // Get all DataNodes from other session members
+            var otherDataNodes = allDataNodes
+                .Where(dataNode => !dataNode.ClientInstanceId.Equals(currentEndPoint.ClientInstanceId))
+                .ToList();
+
+            // Get all DataNodes from current member
+            var currentMemberDataNodes = allDataNodes
+                .Where(dataNode => dataNode.ClientInstanceId.Equals(currentEndPoint.ClientInstanceId))
+                .ToList();
+
+            // Check base inventories by DataNode
+            var areBaseInventoriesComplete = CheckInventoriesCompleteByDataNode(
+                inventoriesFilesCache, 
+                otherDataNodes, 
+                currentMemberDataNodes, 
+                LocalInventoryModes.Base);
+
+            // Check full inventories by DataNode
+            var areFullInventoriesComplete = CheckInventoriesCompleteByDataNode(
+                inventoriesFilesCache, 
+                otherDataNodes, 
+                currentMemberDataNodes, 
+                LocalInventoryModes.Full);
         
             InventoryProcessData.AreBaseInventoriesComplete.OnNext(areBaseInventoriesComplete);
             InventoryProcessData.AreFullInventoriesComplete.OnNext(areFullInventoriesComplete);
         });
     }
+
+    private bool CheckInventoriesCompleteByDataNode(
+        List<InventoryFile> inventoriesFilesCache,
+        List<DataNode> otherDataNodes,
+        List<DataNode> currentMemberDataNodes,
+        LocalInventoryModes inventoryMode)
+    {
+        // Check that each DataNode from other members has a corresponding inventory
+        var otherDataNodesWithInventories = otherDataNodes
+            .Where(dataNode => inventoriesFilesCache
+                .Where(inventoryFile => inventoryFile.LocalInventoryMode == inventoryMode)
+                .Any(inventoryFile => inventoryFile.SharedFileDefinition.AdditionalName.EndsWith($"_{dataNode.Code}")))
+            .Count();
+
+        // Check that current member has at least one inventory for their DataNodes
+        var currentMemberHasInventories = currentMemberDataNodes
+            .Any(dataNode => inventoriesFilesCache
+                .Where(inventoryFile => inventoryFile.LocalInventoryMode == inventoryMode)
+                .Any(inventoryFile => inventoryFile.SharedFileDefinition.AdditionalName.EndsWith($"_{dataNode.Code}")));
+
+        return otherDataNodesWithInventories == otherDataNodes.Count && currentMemberHasInventories;
+    }
+
     public Task AbortInventory()
     {
         _logger.LogInformation("inventory aborted on user request");
