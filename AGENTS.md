@@ -1,3 +1,10 @@
+## Project Overview
+
+This is a C#/.NET solution using .NET 8. Use `dotnet` commands for building and testing:
+- `dotnet build` - Build the solution
+- `dotnet test` - Run all tests
+- `dotnet restore` - Restore dependencies
+
 ## Branch & PR Guidelines
 
 ### Overview
@@ -28,8 +35,13 @@ Examples:
 - Always create a branch using the proper prefix.
 - PR titles must follow the documented format.
 
-### Commenting Guidelines
+## Commenting Guidelines
 - All comments must be written in English.
 - Do not add comments or Javadoc/XML-style documentation in C# code.
 - Comments are only allowed when strictly necessary to explain complex or non-obvious logic.
 - Prefer clear and self-explanatory code over adding comments.
+
+## Build and Test Guidelines
+- Always use `--verbosity minimal` for dotnet commands to avoid output overload and potential freezing.
+- Use `--no-restore` and `--no-build` flags when appropriate to speed up operations.
+- Prefer building and testing in separate steps to avoid blocking issues.
