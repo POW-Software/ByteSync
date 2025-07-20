@@ -1,18 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Threading.Tasks;
+﻿using System.Reactive.Subjects;
 using ByteSync.Business;
 using ByteSync.Business.Communications;
 using ByteSync.Business.DataNodes;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.Sessions;
-using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.SharedFiles;
-using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Repositories;
-using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Inventories;
 using FluentAssertions;
@@ -26,9 +19,6 @@ namespace ByteSync.Tests.Services.Inventories
     public class InventoryServiceTests
     {
         private Mock<ISessionService> _sessionServiceMock;
-        private Mock<IConnectionService> _connectionServiceMock;
-        private Mock<IInventoryApiClient> _inventoryApiClientMock;
-        private Mock<ISessionMemberRepository> _sessionMemberRepositoryMock;
         private Mock<IInventoryFileRepository> _inventoryFileRepositoryMock;
         private Mock<IDataNodeRepository> _dataNodeRepositoryMock;
         private Mock<ILogger<InventoryService>> _loggerMock;
@@ -38,9 +28,6 @@ namespace ByteSync.Tests.Services.Inventories
         public void Setup()
         {
             _sessionServiceMock = new Mock<ISessionService>();
-            _connectionServiceMock = new Mock<IConnectionService>();
-            _inventoryApiClientMock = new Mock<IInventoryApiClient>();
-            _sessionMemberRepositoryMock = new Mock<ISessionMemberRepository>();
             _inventoryFileRepositoryMock = new Mock<IInventoryFileRepository>();
             _dataNodeRepositoryMock = new Mock<IDataNodeRepository>();
             _loggerMock = new Mock<ILogger<InventoryService>>();
@@ -48,14 +35,8 @@ namespace ByteSync.Tests.Services.Inventories
             var sessionStatusSubject = new Subject<SessionStatus>();
             _sessionServiceMock.Setup(x => x.SessionStatusObservable).Returns(sessionStatusSubject);
 
-            var currentEndPoint = new ByteSyncEndpoint() { ClientInstanceId = "current_client_instance_id" };
-            _connectionServiceMock.Setup(x => x.CurrentEndPoint).Returns(currentEndPoint);
-
             _inventoryService = new InventoryService(
                 _sessionServiceMock.Object,
-                _connectionServiceMock.Object,
-                _inventoryApiClientMock.Object,
-                _sessionMemberRepositoryMock.Object,
                 _inventoryFileRepositoryMock.Object,
                 _dataNodeRepositoryMock.Object,
                 _loggerMock.Object);

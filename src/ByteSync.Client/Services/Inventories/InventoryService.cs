@@ -4,11 +4,8 @@ using ByteSync.Business.Communications;
 using ByteSync.Business.DataNodes;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.Sessions;
-using ByteSync.Common.Business.Sessions.Cloud;
-using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Repositories;
-using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Inventories;
@@ -16,22 +13,15 @@ namespace ByteSync.Services.Inventories;
 public class InventoryService : IInventoryService
 {
     private readonly ISessionService _sessionService;
-    private readonly IConnectionService _connectionService;
-    private readonly IInventoryApiClient _inventoryApiClient;
-    private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly IInventoryFileRepository _inventoryFileRepository;
     private readonly IDataNodeRepository _dataNodeRepository;
     private readonly ILogger<InventoryService> _logger;
 
 
-    public InventoryService(ISessionService sessionService, IConnectionService connectionService, IInventoryApiClient inventoryApiClient,
-        ISessionMemberRepository sessionMemberRepository, IInventoryFileRepository inventoryFileRepository, 
+    public InventoryService(ISessionService sessionService, IInventoryFileRepository inventoryFileRepository, 
         IDataNodeRepository dataNodeRepository, ILogger<InventoryService> logger)
     {
         _sessionService = sessionService;
-        _connectionService = connectionService;
-        _inventoryApiClient = inventoryApiClient;
-        _sessionMemberRepository = sessionMemberRepository;
         _inventoryFileRepository = inventoryFileRepository;
         _dataNodeRepository = dataNodeRepository;
         _logger = logger;
@@ -44,12 +34,6 @@ public class InventoryService : IInventoryService
             {
                 InventoryProcessData.Reset();
             });
-        
-        
-        // _sessionService.SessionStatusObservable.DistinctUntilChanged()
-        //     .Where(ss => ss.In(SessionStatus.Preparation))
-        //     .Subscribe(_ => _remainingTimeComputer.Stop());
-        // todo, stopper également si session resettée #WI19
     }
 
     public InventoryProcessData InventoryProcessData { get; }
@@ -79,32 +63,17 @@ public class InventoryService : IInventoryService
     {
         await Task.Run(() =>
         {
-            var currentEndPoint = _connectionService.CurrentEndPoint!;
             var inventoriesFilesCache = _inventoryFileRepository.Elements.ToList();
             var allDataNodes = _dataNodeRepository.Elements.ToList();
-
-            // Get all DataNodes from other session members
-            var otherDataNodes = allDataNodes
-                .Where(dataNode => !dataNode.ClientInstanceId.Equals(currentEndPoint.ClientInstanceId))
-                .ToList();
-
-            // Get all DataNodes from current member
-            var currentMemberDataNodes = allDataNodes
-                .Where(dataNode => dataNode.ClientInstanceId.Equals(currentEndPoint.ClientInstanceId))
-                .ToList();
-
-            // Check base inventories by DataNode
+            
             var areBaseInventoriesComplete = CheckInventoriesCompleteByDataNode(
-                inventoriesFilesCache, 
-                otherDataNodes, 
-                currentMemberDataNodes, 
+                inventoriesFilesCache,
+                allDataNodes,
                 LocalInventoryModes.Base);
-
-            // Check full inventories by DataNode
+            
             var areFullInventoriesComplete = CheckInventoriesCompleteByDataNode(
-                inventoriesFilesCache, 
-                otherDataNodes, 
-                currentMemberDataNodes, 
+                inventoriesFilesCache,
+                allDataNodes,
                 LocalInventoryModes.Full);
         
             InventoryProcessData.AreBaseInventoriesComplete.OnNext(areBaseInventoriesComplete);
@@ -114,27 +83,14 @@ public class InventoryService : IInventoryService
 
     private bool CheckInventoriesCompleteByDataNode(
         List<InventoryFile> inventoriesFilesCache,
-        List<DataNode> otherDataNodes,
-        List<DataNode> currentMemberDataNodes,
+        List<DataNode> allDataNodes,
         LocalInventoryModes inventoryMode)
     {
-        // Check that each DataNode from other members has a corresponding inventory
-        var otherDataNodesWithInventories = otherDataNodes.Count(dataNode =>
+        return allDataNodes.All(dataNode =>
             inventoriesFilesCache
                 .Where(inventoryFile => inventoryFile.LocalInventoryMode == inventoryMode)
                 .Any(inventoryFile =>
                     inventoryFile.SharedFileDefinition.ClientInstanceId == dataNode.ClientInstanceId));
-
-
-        // Check that current member has at least one inventory for their DataNodes
-        var currentMemberDataNodesWithInventories = currentMemberDataNodes.Count(dataNode =>
-            inventoriesFilesCache
-                .Where(inventoryFile => inventoryFile.LocalInventoryMode == inventoryMode)
-                .Any(inventoryFile =>
-                    inventoryFile.SharedFileDefinition.ClientInstanceId == dataNode.ClientInstanceId));
-
-        return otherDataNodesWithInventories == otherDataNodes.Count 
-               && currentMemberDataNodesWithInventories == currentMemberDataNodes.Count;
     }
 
     public Task AbortInventory()

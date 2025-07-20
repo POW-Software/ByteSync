@@ -13,7 +13,6 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Comparisons;
-using ByteSync.Services.Sessions;
 
 namespace ByteSync.Services.Inventories;
 
