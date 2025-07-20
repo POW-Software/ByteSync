@@ -42,6 +42,6 @@ Examples:
 - Prefer clear and self-explanatory code over adding comments.
 
 ## Build and Test Guidelines
-- Always use `--verbosity minimal` for dotnet commands to avoid output overload and potential freezing.
-- Use `--no-restore` and `--no-build` flags when appropriate to speed up operations.
-- Prefer building and testing in separate steps to avoid blocking issues.
+- Always run build and test as two separate commands to avoid blocking issues. `dotnet build --verbosity quiet`
+- Use `dotnet build --verbosity quiet` to build the solution.
+- Add `--no-restore` and `--no-build` when necessary to speed up operations.
