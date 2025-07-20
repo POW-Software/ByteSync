@@ -248,6 +248,37 @@ namespace ByteSync.Tests.Services.Inventories
             // Assert
             result.Should().BeTrue();
         }
+        
+        [Test]
+        public async Task CheckInventoriesReady_ShouldNotDependOnCodeProperty()
+        {
+            // Arrange
+            var dataNodes = new List<DataNode>
+            {
+                new DataNode { NodeId = "node1", ClientInstanceId = "other_client_1", Code = "X" },
+                new DataNode { NodeId = "node2", ClientInstanceId = "current_client_instance_id", Code = "Y" }
+            };
+
+            var inventoryFiles = new List<InventoryFile>
+            {
+                // Les codes ne correspondent pas, mais les ClientInstanceId oui
+                CreateInventoryFile("other_client_1", "DIFFERENT_CODE", SharedFileTypes.BaseInventory),
+                CreateInventoryFile("current_client_instance_id", "ANOTHER_CODE", SharedFileTypes.BaseInventory)
+            };
+
+            _dataNodeRepositoryMock.Setup(x => x.Elements).Returns(dataNodes);
+            _inventoryFileRepositoryMock.Setup(x => x.Elements).Returns(inventoryFiles);
+
+            bool? result = null;
+            _inventoryService.InventoryProcessData.AreBaseInventoriesComplete
+                .Subscribe(value => result = value);
+
+            // Act
+            await _inventoryService.SetLocalInventory(inventoryFiles, LocalInventoryModes.Base);
+
+            // Assert
+            result.Should().BeTrue();
+        }
 
         private static InventoryFile CreateInventoryFile(string clientInstanceId, string code, SharedFileTypes sharedFileType)
         {

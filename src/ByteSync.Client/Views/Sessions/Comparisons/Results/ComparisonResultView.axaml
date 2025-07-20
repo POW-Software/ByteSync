@@ -178,10 +178,10 @@
                         </DataGridTemplateColumn>
 
 
-                        <!-- Header="{Binding InventoryAName}" -->
+                        <!-- Header="{Binding Inventory1Name}" -->
                         <DataGridTemplateColumn Width="Auto" CanUserResize="True">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock Text="{Binding InventoryAName}" Classes="BsDataGridHeader" />
+                                <TextBlock Text="{Binding Inventory1Name}" Classes="BsDataGridHeader" />
                             </DataGridTemplateColumn.Header>
 
                             <DataGridTemplateColumn.CellTemplate>
@@ -191,9 +191,9 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumnBVisible}">
+                        <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumn2Visible}">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock Text="{Binding InventoryBName}" Classes="BsDataGridHeader" />
+                                <TextBlock Text="{Binding Inventory2Name}" Classes="BsDataGridHeader" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -203,9 +203,9 @@
                         </DataGridTemplateColumn>
 
 
-                        <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumnCVisible}">
+                        <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumn3Visible}">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock Text="{Binding InventoryCName}" Classes="BsDataGridHeader" />
+                                <TextBlock Text="{Binding Inventory3Name}" Classes="BsDataGridHeader" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -214,9 +214,9 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumnDVisible}">
+                        <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumn4Visible}">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock Text="{Binding InventoryDName}" Classes="BsDataGridHeader" />
+                                <TextBlock Text="{Binding Inventory4Name}" Classes="BsDataGridHeader" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -225,9 +225,9 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumnEVisible}">
+                        <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumn5Visible}">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock Text="{Binding InventoryEName}" Classes="BsDataGridHeader" />
+                                <TextBlock Text="{Binding Inventory5Name}" Classes="BsDataGridHeader" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>

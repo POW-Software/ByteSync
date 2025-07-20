@@ -119,19 +119,22 @@ public class InventoryService : IInventoryService
         LocalInventoryModes inventoryMode)
     {
         // Check that each DataNode from other members has a corresponding inventory
-        var otherDataNodesWithInventories = otherDataNodes
-            .Where(dataNode => inventoriesFilesCache
+        var otherDataNodesWithInventories = otherDataNodes.Count(dataNode =>
+            inventoriesFilesCache
                 .Where(inventoryFile => inventoryFile.LocalInventoryMode == inventoryMode)
-                .Any(inventoryFile => inventoryFile.SharedFileDefinition.AdditionalName.EndsWith($"_{dataNode.Code}")))
-            .Count();
+                .Any(inventoryFile =>
+                    inventoryFile.SharedFileDefinition.ClientInstanceId == dataNode.ClientInstanceId));
+
 
         // Check that current member has at least one inventory for their DataNodes
-        var currentMemberHasInventories = currentMemberDataNodes
-            .Any(dataNode => inventoriesFilesCache
+        var currentMemberDataNodesWithInventories = currentMemberDataNodes.Count(dataNode =>
+            inventoriesFilesCache
                 .Where(inventoryFile => inventoryFile.LocalInventoryMode == inventoryMode)
-                .Any(inventoryFile => inventoryFile.SharedFileDefinition.AdditionalName.EndsWith($"_{dataNode.Code}")));
+                .Any(inventoryFile =>
+                    inventoryFile.SharedFileDefinition.ClientInstanceId == dataNode.ClientInstanceId));
 
-        return otherDataNodesWithInventories == otherDataNodes.Count && currentMemberHasInventories;
+        return otherDataNodesWithInventories == otherDataNodes.Count 
+               && currentMemberDataNodesWithInventories == currentMemberDataNodes.Count;
     }
 
     public Task AbortInventory()
