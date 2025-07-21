@@ -1,5 +1,6 @@
 ﻿using ByteSync.Business.Communications;
 using ByteSync.Business.Communications.Downloading;
+using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
@@ -9,30 +10,55 @@ using ByteSync.Interfaces.Profiles;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Services.Sessions;
+using System.Reactive.Linq;
 
 namespace ByteSync.Services.Communications.Transfers;
 
-public class DownloadTargetBuilder : IDownloadTargetBuilder
+public class DownloadTargetBuilder : IDownloadTargetBuilder, IDisposable
 {
+    
     private readonly ICloudSessionLocalDataManager _cloudSessionLocalDataManager;
     private readonly ISessionProfileLocalDataManager _sessionProfileLocalDataManager;
     private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository;
     private readonly IConnectionService _connectionService;
     private readonly ITemporaryFileManagerFactory _temporaryFileManagerFactory;
+    private readonly ISessionService _sessionService;
+
+    // Add a cache to ensure singleton DownloadTarget per fileId
+    private readonly Dictionary<string, DownloadTarget> _downloadTargetCache = new();
+    
+    // Track subscriptions for proper disposal
+    private readonly IDisposable _sessionSubscription;
+    private readonly IDisposable _sessionStatusSubscription;
+    private bool _disposed = false;
 
     public DownloadTargetBuilder(ICloudSessionLocalDataManager cloudSessionLocalDataManager, ISessionProfileLocalDataManager sessionProfileLocalDataManager,
         ISharedActionsGroupRepository sharedActionsGroupRepository, IConnectionService connectionService,
-        ITemporaryFileManagerFactory temporaryFileManagerFactory)
+        ITemporaryFileManagerFactory temporaryFileManagerFactory, ISessionService sessionService)
     {
         _cloudSessionLocalDataManager = cloudSessionLocalDataManager;
         _sessionProfileLocalDataManager = sessionProfileLocalDataManager;
         _sharedActionsGroupRepository = sharedActionsGroupRepository;
         _connectionService = connectionService;
         _temporaryFileManagerFactory = temporaryFileManagerFactory;
+        _sessionService = sessionService;
+        
+        // Subscribe to session lifecycle events to automatically clear cache
+        _sessionSubscription = _sessionService.SessionObservable
+            .Where(session => session == null)
+            .Subscribe(_ => ClearCache());
+            
+        _sessionStatusSubscription = _sessionService.SessionStatusObservable
+            .Where(status => status == SessionStatus.Preparation)
+            .Subscribe(_ => ClearCache());
     }
     
     public DownloadTarget BuildDownloadTarget(SharedFileDefinition sharedFileDefinition)
     {
+        // Check cache first
+        if (_downloadTargetCache.TryGetValue(sharedFileDefinition.Id, out var existing))
+            return existing;
+
         LocalSharedFile? sharedFile = null;
         var downloadDestinations = new HashSet<string>();
         string destinationPath;
@@ -130,6 +156,25 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder
         downloadTarget.LastWriteTimeUtcPerActionsGroupId = datesPerActionsGroupId;
         downloadTarget.TemporaryFileManagers = temporaryFileManagers;
 
+        // Store in cache
+        _downloadTargetCache[sharedFileDefinition.Id] = downloadTarget;
+
         return downloadTarget;
+    }
+    
+    public void ClearCache()
+    {
+        _downloadTargetCache.Clear();
+    }
+    
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            _sessionSubscription?.Dispose();
+            _sessionStatusSubscription?.Dispose();
+            ClearCache();
+            _disposed = true;
+        }
     }
 }
