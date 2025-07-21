@@ -37,4 +37,38 @@ public class DownloadPartsCoordinatorTests
         coordinator.SetAllPartsKnown(2);
         coordinator.AllPartsQueued.Should().BeTrue();
     }
+
+    [Test]
+    public async Task AddAvailablePartAsync_QueuesPartsAndCompletesWhenAllKnown()
+    {
+        var coordinator = new DownloadPartsCoordinator();
+        await coordinator.SetAllPartsKnownAsync(2);
+        await coordinator.AddAvailablePartAsync(1);
+        await coordinator.AddAvailablePartAsync(2);
+        coordinator.DownloadPartsInfo.AvailableParts.Should().Contain(1);
+        coordinator.DownloadPartsInfo.AvailableParts.Should().Contain(2);
+        coordinator.AllPartsQueued.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task SetAllPartsKnownAsync_CompletesQueueWhenAllPartsAdded()
+    {
+        var coordinator = new DownloadPartsCoordinator();
+        await coordinator.AddAvailablePartAsync(1);
+        await coordinator.AddAvailablePartAsync(2);
+        await coordinator.SetAllPartsKnownAsync(2);
+        coordinator.AllPartsQueued.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task AddAvailablePartAsync_DoesNotCauseInfiniteRecursion()
+    {
+        var coordinator = new DownloadPartsCoordinator();
+        await coordinator.SetAllPartsKnownAsync(1);
+        
+        await coordinator.AddAvailablePartAsync(1);
+        
+        coordinator.DownloadPartsInfo.AvailableParts.Should().Contain(1);
+        coordinator.AllPartsQueued.Should().BeTrue();
+    }
 } 

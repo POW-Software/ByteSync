@@ -6,4 +6,6 @@ namespace ByteSync.Interfaces.Controls.Communications;
 public interface IDownloadTargetBuilder
 {
     DownloadTarget BuildDownloadTarget(SharedFileDefinition sharedFileDefinition);
+    
+    void ClearCache();
 }
