@@ -3,6 +3,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using ByteSync.Helpers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Extensions.Http;
 
@@ -26,6 +27,8 @@ namespace ByteSync.DependencyInjection.Modules;
 
         private void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging();
+            
             services.AddHttpClient("ApiClient")
                 .AddPolicyHandler((serviceProvider, request) =>
                 {
