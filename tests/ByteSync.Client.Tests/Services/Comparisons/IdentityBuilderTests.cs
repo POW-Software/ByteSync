@@ -175,7 +175,7 @@ public class IdentityBuilderTests : AbstractTester
         
         var dataNode = new DataNode
         {
-            NodeId = "NodeA",
+            Id = "NodeA",
             Code = "NodeA",
             ClientInstanceId = endpoint.ClientInstanceId
         };

@@ -48,9 +48,9 @@ namespace ByteSync.Tests.Services.Inventories
             // Arrange
             var dataNodes = new List<DataNode>
             {
-                new DataNode { NodeId = "node1", ClientInstanceId = "other_client_1", Code = "A" },
-                new DataNode { NodeId = "node2", ClientInstanceId = "other_client_2", Code = "B" },
-                new DataNode { NodeId = "node3", ClientInstanceId = "current_client_instance_id", Code = "C" }
+                new DataNode { Id = "node1", ClientInstanceId = "other_client_1", Code = "A" },
+                new DataNode { Id = "node2", ClientInstanceId = "other_client_2", Code = "B" },
+                new DataNode { Id = "node3", ClientInstanceId = "current_client_instance_id", Code = "C" }
             };
 
             var inventoryFiles = new List<InventoryFile>
@@ -80,9 +80,9 @@ namespace ByteSync.Tests.Services.Inventories
             // Arrange
             var dataNodes = new List<DataNode>
             {
-                new DataNode { NodeId = "node1", ClientInstanceId = "other_client_1", Code = "A" },
-                new DataNode { NodeId = "node2", ClientInstanceId = "other_client_2", Code = "B" },
-                new DataNode { NodeId = "node3", ClientInstanceId = "current_client_instance_id", Code = "C" }
+                new DataNode { Id = "node1", ClientInstanceId = "other_client_1", Code = "A" },
+                new DataNode { Id = "node2", ClientInstanceId = "other_client_2", Code = "B" },
+                new DataNode { Id = "node3", ClientInstanceId = "current_client_instance_id", Code = "C" }
             };
 
             var inventoryFiles = new List<InventoryFile>
@@ -112,8 +112,8 @@ namespace ByteSync.Tests.Services.Inventories
             // Arrange
             var dataNodes = new List<DataNode>
             {
-                new DataNode { NodeId = "node1", ClientInstanceId = "other_client_1", Code = "A" },
-                new DataNode { NodeId = "node2", ClientInstanceId = "current_client_instance_id", Code = "B" }
+                new DataNode { Id = "node1", ClientInstanceId = "other_client_1", Code = "A" },
+                new DataNode { Id = "node2", ClientInstanceId = "current_client_instance_id", Code = "B" }
             };
 
             var inventoryFiles = new List<InventoryFile>
@@ -142,8 +142,8 @@ namespace ByteSync.Tests.Services.Inventories
             // Arrange
             var dataNodes = new List<DataNode>
             {
-                new DataNode { NodeId = "node1", ClientInstanceId = "current_client_instance_id", Code = "A" },
-                new DataNode { NodeId = "node2", ClientInstanceId = "current_client_instance_id", Code = "B" }
+                new DataNode { Id = "node1", ClientInstanceId = "current_client_instance_id", Code = "A" },
+                new DataNode { Id = "node2", ClientInstanceId = "current_client_instance_id", Code = "B" }
             };
 
             var inventoryFiles = new List<InventoryFile>
@@ -172,8 +172,8 @@ namespace ByteSync.Tests.Services.Inventories
             // Arrange
             var dataNodes = new List<DataNode>
             {
-                new DataNode { NodeId = "node1", ClientInstanceId = "other_client_1", Code = "A" },
-                new DataNode { NodeId = "node2", ClientInstanceId = "current_client_instance_id", Code = "B" }
+                new DataNode { Id = "node1", ClientInstanceId = "other_client_1", Code = "A" },
+                new DataNode { Id = "node2", ClientInstanceId = "current_client_instance_id", Code = "B" }
             };
 
             var inventoryFiles = new List<InventoryFile>
@@ -202,8 +202,8 @@ namespace ByteSync.Tests.Services.Inventories
             // Arrange
             var dataNodes = new List<DataNode>
             {
-                new DataNode { NodeId = "node1", ClientInstanceId = "other_client_1", Code = "A" },
-                new DataNode { NodeId = "node2", ClientInstanceId = "current_client_instance_id", Code = "B" }
+                new DataNode { Id = "node1", ClientInstanceId = "other_client_1", Code = "A" },
+                new DataNode { Id = "node2", ClientInstanceId = "current_client_instance_id", Code = "B" }
             };
 
             var inventoryFiles = new List<InventoryFile>
@@ -236,8 +236,8 @@ namespace ByteSync.Tests.Services.Inventories
             // Arrange
             var dataNodes = new List<DataNode>
             {
-                new DataNode { NodeId = "node1", ClientInstanceId = "other_client_1", Code = "X" },
-                new DataNode { NodeId = "node2", ClientInstanceId = "current_client_instance_id", Code = "Y" }
+                new DataNode { Id = "node1", ClientInstanceId = "other_client_1", Code = "X" },
+                new DataNode { Id = "node2", ClientInstanceId = "current_client_instance_id", Code = "Y" }
             };
 
             var inventoryFiles = new List<InventoryFile>

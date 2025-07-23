@@ -31,7 +31,7 @@ public class TestInventoryBuilderFactory : IntegrationTest
     public void DataSourceFiltering_ShouldFilterByDataNodeId()
     {
         // Arrange
-        var fakeDataNode = new DataNode { NodeId = "TestNode1", Code = "A", ClientInstanceId = "TestClient" };
+        var fakeDataNode = new DataNode { Id = "TestNode1", Code = "A", ClientInstanceId = "TestClient" };
         var fakeDataSources = new List<DataSource> 
         { 
             new DataSource { DataNodeId = "TestNode1", Code = "DS1" },
@@ -41,7 +41,7 @@ public class TestInventoryBuilderFactory : IntegrationTest
         
         // Act - Test the filtering logic directly
         var filteredDataSources = fakeDataSources
-            .Where(ds => ds.DataNodeId == fakeDataNode.NodeId)
+            .Where(ds => ds.DataNodeId == fakeDataNode.Id)
             .ToList();
         
         // Assert
@@ -55,7 +55,7 @@ public class TestInventoryBuilderFactory : IntegrationTest
     public void DataSourceFiltering_ShouldReturnEmptyWhenNoMatchingDataNode()
     {
         // Arrange
-        var fakeDataNode = new DataNode { NodeId = "TestNode1", Code = "A", ClientInstanceId = "TestClient" };
+        var fakeDataNode = new DataNode { Id = "TestNode1", Code = "A", ClientInstanceId = "TestClient" };
         var fakeDataSources = new List<DataSource> 
         { 
             new DataSource { DataNodeId = "TestNode2", Code = "DS3" }, // Different DataNode
@@ -64,7 +64,7 @@ public class TestInventoryBuilderFactory : IntegrationTest
         
         // Act - Test the filtering logic directly
         var filteredDataSources = fakeDataSources
-            .Where(ds => ds.DataNodeId == fakeDataNode.NodeId)
+            .Where(ds => ds.DataNodeId == fakeDataNode.Id)
             .ToList();
         
         // Assert
@@ -77,9 +77,9 @@ public class TestInventoryBuilderFactory : IntegrationTest
         // Arrange
         var dataNodes = new List<DataNode>
         {
-            new DataNode { NodeId = "Node3", OrderIndex = 3, Code = "C" },
-            new DataNode { NodeId = "Node1", OrderIndex = 1, Code = "A" },
-            new DataNode { NodeId = "Node2", OrderIndex = 2, Code = "B" }
+            new DataNode { Id = "Node3", OrderIndex = 3, Code = "C" },
+            new DataNode { Id = "Node1", OrderIndex = 1, Code = "A" },
+            new DataNode { Id = "Node2", OrderIndex = 2, Code = "B" }
         };
         
         // Act

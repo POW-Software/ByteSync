@@ -33,7 +33,7 @@ public class DataSourceCodeGenerator : IDataSourceCodeGenerator, IDisposable
             {
                 foreach (var change in changes)
                 {
-                    RecomputeCodesForNode(change.Current.NodeId);
+                    RecomputeCodesForNode(change.Current.Id);
                 }
             });
     }

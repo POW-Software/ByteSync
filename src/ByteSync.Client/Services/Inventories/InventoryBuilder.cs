@@ -53,7 +53,7 @@ public class InventoryBuilder : IInventoryBuilder
         inventory.Endpoint = SessionMember.Endpoint;
         inventory.MachineName = SessionMember.MachineName;
         inventory.Code = InventoryCode;
-        inventory.NodeId = DataNode.NodeId;
+        inventory.NodeId = DataNode.Id;
 
         return inventory;
     }

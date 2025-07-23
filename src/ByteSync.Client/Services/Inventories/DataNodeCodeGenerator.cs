@@ -34,7 +34,7 @@ public class DataNodeCodeGenerator : IDataNodeCodeGenerator, IDisposable
 
         var nodesByMember = allNodes
             .GroupBy(n => n.ClientInstanceId)
-            .ToDictionary(g => g.Key, g => g.OrderBy(n => n.NodeId).ToList());
+            .ToDictionary(g => g.Key, g => g.OrderBy(n => n.Id).ToList());
 
         bool singlePerMember = nodesByMember.Values.All(list => list.Count == 1);
 

@@ -101,10 +101,11 @@ public class DataSourceService : IDataSourceService
     {
         var dataSource = new DataSource();
 
+        dataSource.Id = Guid.NewGuid().ToString();
         dataSource.Path = path;
         dataSource.Type = fileSystemType;
         dataSource.ClientInstanceId = _connectionService.ClientInstanceId!;
-        dataSource.DataNodeId = dataNode.NodeId;
+        dataSource.DataNodeId = dataNode.Id;
         dataSource.InitialTimestamp = DateTime.UtcNow;
 
         return TryAddDataSource(dataSource);

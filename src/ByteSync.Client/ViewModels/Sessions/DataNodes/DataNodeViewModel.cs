@@ -126,7 +126,7 @@ public class DataNodeViewModel : ActivatableViewModelBase
         }
         
         var lastDataNode = currentMemberDataNodes.Last();
-        IsLastDataNode = DataNode.NodeId == lastDataNode.NodeId;
+        IsLastDataNode = DataNode.Id == lastDataNode.Id;
     }
     
     private async Task AddDataNode()

@@ -59,7 +59,7 @@ public class DataNodeSourcesViewModel : ActivatableViewModelBase
             .Subscribe(canRun);
         
         var dataNodesObservable = _dataSourceRepository.ObservableCache.Connect()
-            .Filter(ds => ds.DataNodeId == _dataNode.NodeId)
+            .Filter(ds => ds.DataNodeId == _dataNode.Id)
             .Sort(SortExpressionComparer<DataSource>.Ascending(p => p.Code))
             .Transform(node => _dataSourceProxyFactory.CreateDataSourceProxy(node))
             .DisposeMany()

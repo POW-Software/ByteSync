@@ -55,8 +55,8 @@ public class DataNodeCodeGeneratorTests
         var member2 = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1"), JoinedSessionOn = DateTimeOffset.Now };
         _sessionMemberRepository.AddOrUpdate(new[] { member1, member2 });
 
-        var node1 = new DataNode { NodeId = "N1", ClientInstanceId = "CID0" };
-        var node2 = new DataNode { NodeId = "N2", ClientInstanceId = "CID1" };
+        var node1 = new DataNode { Id = "N1", ClientInstanceId = "CID0" };
+        var node2 = new DataNode { Id = "N2", ClientInstanceId = "CID1" };
         _dataNodeRepository.AddOrUpdate(new[] { node1, node2 });
 
         node1.Code.Should().Be("A");
@@ -70,11 +70,11 @@ public class DataNodeCodeGeneratorTests
         var member2 = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1"), JoinedSessionOn = DateTimeOffset.Now };
         _sessionMemberRepository.AddOrUpdate(new[] { member1, member2 });
 
-        var node1 = new DataNode { NodeId = "N1", ClientInstanceId = "CID0" };
-        var node2 = new DataNode { NodeId = "N2", ClientInstanceId = "CID1" };
+        var node1 = new DataNode { Id = "N1", ClientInstanceId = "CID0" };
+        var node2 = new DataNode { Id = "N2", ClientInstanceId = "CID1" };
         _dataNodeRepository.AddOrUpdate(new[] { node1, node2 });
 
-        var extra = new DataNode { NodeId = "N3", ClientInstanceId = "CID0" };
+        var extra = new DataNode { Id = "N3", ClientInstanceId = "CID0" };
         _dataNodeRepository.AddOrUpdate(extra);
 
         node1.Code.Should().Be("Aa");
@@ -102,7 +102,7 @@ public class DataNodeCodeGeneratorTests
     [Test]
     public void RecomputeCodes_DoesNothing_WhenNoSessionMembers()
     {
-        var node = new DataNode { NodeId = "N1", ClientInstanceId = "CID0" };
+        var node = new DataNode { Id = "N1", ClientInstanceId = "CID0" };
         _dataNodeRepository.AddOrUpdate(node);
 
         // Should not throw and should not update anything
@@ -118,10 +118,10 @@ public class DataNodeCodeGeneratorTests
         var member2 = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1"), JoinedSessionOn = DateTimeOffset.Now };
         _sessionMemberRepository.AddOrUpdate(new[] { member1, member2 });
 
-        var node1 = new DataNode { NodeId = "N1", ClientInstanceId = "CID0" };
-        var node2 = new DataNode { NodeId = "N2", ClientInstanceId = "CID0" };
-        var node3 = new DataNode { NodeId = "N3", ClientInstanceId = "CID0" };
-        var node4 = new DataNode { NodeId = "N4", ClientInstanceId = "CID1" };
+        var node1 = new DataNode { Id = "N1", ClientInstanceId = "CID0" };
+        var node2 = new DataNode { Id = "N2", ClientInstanceId = "CID0" };
+        var node3 = new DataNode { Id = "N3", ClientInstanceId = "CID0" };
+        var node4 = new DataNode { Id = "N4", ClientInstanceId = "CID1" };
         _dataNodeRepository.AddOrUpdate(new[] { node1, node2, node3, node4 });
 
         node1.Code.Should().Be("Aa");
@@ -137,9 +137,9 @@ public class DataNodeCodeGeneratorTests
         var member2 = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1"), JoinedSessionOn = DateTimeOffset.Now };
         _sessionMemberRepository.AddOrUpdate(new[] { member1, member2 });
 
-        var node1 = new DataNode { NodeId = "N1", ClientInstanceId = "CID0" };
-        var node2 = new DataNode { NodeId = "N2", ClientInstanceId = "CID1" };
-        var node3 = new DataNode { NodeId = "N3", ClientInstanceId = "CID0" };
+        var node1 = new DataNode { Id = "N1", ClientInstanceId = "CID0" };
+        var node2 = new DataNode { Id = "N2", ClientInstanceId = "CID1" };
+        var node3 = new DataNode { Id = "N3", ClientInstanceId = "CID0" };
         _dataNodeRepository.AddOrUpdate(new[] { node1, node2, node3 });
 
         // Since member1 (CID0) has 2 nodes, singlePerMember becomes false
@@ -155,7 +155,7 @@ public class DataNodeCodeGeneratorTests
         var member = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID0"), JoinedSessionOn = DateTimeOffset.Now };
         _sessionMemberRepository.AddOrUpdate(member);
 
-        var node = new DataNode { NodeId = "N1", ClientInstanceId = "CID0", Code = "A", OrderIndex = 0 };
+        var node = new DataNode { Id = "N1", ClientInstanceId = "CID0", Code = "A", OrderIndex = 0 };
         _dataNodeRepository.AddOrUpdate(node);
 
         // First call should not update since codes are already correct
@@ -173,7 +173,7 @@ public class DataNodeCodeGeneratorTests
         var member3 = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID2"), JoinedSessionOn = DateTimeOffset.Now.AddSeconds(10) };
         _sessionMemberRepository.AddOrUpdate(new[] { member1, member2, member3 });
 
-        var node = new DataNode { NodeId = "N1", ClientInstanceId = "CID1" };
+        var node = new DataNode { Id = "N1", ClientInstanceId = "CID1" };
         _dataNodeRepository.AddOrUpdate(node);
 
         // Member1 (CID0) and Member3 (CID2) have no nodes, only Member2 (CID1) has a node
@@ -188,8 +188,8 @@ public class DataNodeCodeGeneratorTests
         var member2 = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID1"), JoinedSessionOn = DateTimeOffset.Now };
         _sessionMemberRepository.AddOrUpdate(new[] { member1, member2 });
 
-        var node1 = new DataNode { NodeId = "N1", ClientInstanceId = "CID0", Code = "A", OrderIndex = 0 }; // Already correct
-        var node2 = new DataNode { NodeId = "N2", ClientInstanceId = "CID1", Code = "Wrong", OrderIndex = 999 }; // Needs update
+        var node1 = new DataNode { Id = "N1", ClientInstanceId = "CID0", Code = "A", OrderIndex = 0 }; // Already correct
+        var node2 = new DataNode { Id = "N2", ClientInstanceId = "CID1", Code = "Wrong", OrderIndex = 999 }; // Needs update
         _dataNodeRepository.AddOrUpdate(new[] { node1, node2 });
 
         _generator.RecomputeCodes();
@@ -206,9 +206,9 @@ public class DataNodeCodeGeneratorTests
         var member = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID0"), JoinedSessionOn = DateTimeOffset.Now };
         _sessionMemberRepository.AddOrUpdate(member);
 
-        var node2 = new DataNode { NodeId = "N2", ClientInstanceId = "CID0" };
-        var node1 = new DataNode { NodeId = "N1", ClientInstanceId = "CID0" };
-        var node3 = new DataNode { NodeId = "N3", ClientInstanceId = "CID0" };
+        var node2 = new DataNode { Id = "N2", ClientInstanceId = "CID0" };
+        var node1 = new DataNode { Id = "N1", ClientInstanceId = "CID0" };
+        var node3 = new DataNode { Id = "N3", ClientInstanceId = "CID0" };
         _dataNodeRepository.AddOrUpdate(new[] { node2, node1, node3 });
 
         node1.Code.Should().Be("Aa"); // N1 comes first alphabetically
@@ -233,9 +233,9 @@ public class DataNodeCodeGeneratorTests
         var member3 = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID2"), JoinedSessionOn = DateTimeOffset.Now.AddSeconds(10) };
         _sessionMemberRepository.AddOrUpdate(new[] { member1, member2, member3 });
 
-        var node1 = new DataNode { NodeId = "N1", ClientInstanceId = "CID0" };
-        var node2 = new DataNode { NodeId = "N2", ClientInstanceId = "CID1" };
-        var node3 = new DataNode { NodeId = "N3", ClientInstanceId = "CID2" };
+        var node1 = new DataNode { Id = "N1", ClientInstanceId = "CID0" };
+        var node2 = new DataNode { Id = "N2", ClientInstanceId = "CID1" };
+        var node3 = new DataNode { Id = "N3", ClientInstanceId = "CID2" };
         _dataNodeRepository.AddOrUpdate(new[] { node1, node2, node3 });
 
         // Since all members have exactly one node, singlePerMember is true
@@ -258,10 +258,10 @@ public class DataNodeCodeGeneratorTests
         var member3 = new SessionMember { Endpoint = ByteSyncEndPointHelper.BuildEndPoint("CID2"), JoinedSessionOn = DateTimeOffset.Now.AddSeconds(10) };
         _sessionMemberRepository.AddOrUpdate(new[] { member1, member2, member3 });
 
-        var node1 = new DataNode { NodeId = "N1", ClientInstanceId = "CID0" }; // Single node for member1
-        var node2 = new DataNode { NodeId = "N2", ClientInstanceId = "CID1" }; // Single node for member2
-        var node3 = new DataNode { NodeId = "N3", ClientInstanceId = "CID2" }; // First node for member3
-        var node4 = new DataNode { NodeId = "N4", ClientInstanceId = "CID2" }; // Second node for member3
+        var node1 = new DataNode { Id = "N1", ClientInstanceId = "CID0" }; // Single node for member1
+        var node2 = new DataNode { Id = "N2", ClientInstanceId = "CID1" }; // Single node for member2
+        var node3 = new DataNode { Id = "N3", ClientInstanceId = "CID2" }; // First node for member3
+        var node4 = new DataNode { Id = "N4", ClientInstanceId = "CID2" }; // Second node for member3
         _dataNodeRepository.AddOrUpdate(new[] { node1, node2, node3, node4 });
 
         // Since member3 has multiple nodes, singlePerMember becomes false

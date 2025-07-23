@@ -168,7 +168,7 @@ public class DataInventoryRunner : IDataInventoryRunner
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to create inventory builder for DataNode {NodeId}", dataNode.NodeId);
+                    _logger.LogError(ex, "Failed to create inventory builder for DataNode {DataNodeId}", dataNode.Id);
                 }
             }
             

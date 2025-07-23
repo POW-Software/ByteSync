@@ -81,7 +81,7 @@ public class DataNodeService : IDataNodeService
         
         var dataNode = new DataNode
         {
-            NodeId = nodeId,
+            Id = nodeId,
             ClientInstanceId = _connectionService.ClientInstanceId!
         };
 

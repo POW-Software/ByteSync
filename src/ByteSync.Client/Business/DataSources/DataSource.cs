@@ -13,6 +13,8 @@ public class DataSource : ReactiveObject
 
     }
     
+    public string Id { get; set; } = null!;
+    
     public FileSystemTypes Type { get; set; }
 
     public string Path { get; set; }
@@ -59,6 +61,6 @@ public class DataSource : ReactiveObject
     
     public bool BelongsTo(DataNode dataNode)
     {
-        return DataNodeId.IsNotEmpty() && DataNodeId.Equals(dataNode.NodeId);
+        return DataNodeId.IsNotEmpty() && DataNodeId.Equals(dataNode.Id);
     }
 }

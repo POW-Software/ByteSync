@@ -10,7 +10,7 @@ public class DataNode
 
     }
 
-    public string NodeId { get; set; } = null!;
+    public string Id { get; set; } = null!;
 
     public string ClientInstanceId { get; set; } = null!;
     

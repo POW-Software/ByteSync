@@ -33,7 +33,7 @@ public class InventoryBuilderFactory : IInventoryBuilderFactory
         var sessionMember = sessionMemberRepository.GetCurrentSessionMember();
         var cloudSessionSettings = sessionService.CurrentSessionSettings!;
         var myDataSources = dataSourceRepository.SortedCurrentMemberDataSources
-            .Where(ds => ds.DataNodeId == dataNode.NodeId)
+            .Where(ds => ds.DataNodeId == dataNode.Id)
             .ToList();
         
         var inventoryBuilder = _context.Resolve<IInventoryBuilder>(

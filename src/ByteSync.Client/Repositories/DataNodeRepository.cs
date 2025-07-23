@@ -21,7 +21,7 @@ public class DataNodeRepository : BaseSourceCacheRepository<DataNode, string>, I
         _sessionInvalidationCachePolicy.Initialize(SourceCache, true, false);
     }
 
-    protected override string KeySelector(DataNode dataNode) => dataNode.NodeId;
+    protected override string KeySelector(DataNode dataNode) => dataNode.Id;
 
     public IObservableCache<DataNode, string> CurrentMemberDataNodes { get; }
 
@@ -29,7 +29,7 @@ public class DataNodeRepository : BaseSourceCacheRepository<DataNode, string>, I
     {
         get
         {
-            return CurrentMemberDataNodes.Items.OrderBy(n => n.NodeId).ToList();
+            return CurrentMemberDataNodes.Items.OrderBy(n => n.Id).ToList();
         }
     }
 }
