@@ -40,9 +40,9 @@ public class FileTransferFunction
         return response;
     }
     
-    [Function("GetDownloadFileUrlFunction")]
-    public async Task<HttpResponseData> GetDownloadFileUrl(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/file/getDownloadUrl")]
+    [Function("GetDownloadFileModeFunction")]
+    public async Task<HttpResponseData> GetDownloadFileMode(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/file/getDownloadMode")]
         HttpRequestData req,
         FunctionContext executionContext,
         string sessionId)
@@ -56,9 +56,10 @@ public class FileTransferFunction
             transferParameters.SharedFileDefinition,
             transferParameters.PartNumber!.Value
         );
-           
+
+        var responseObject = new FileSourceInfo(url, "BlobStorage");
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(url, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(responseObject, HttpStatusCode.OK);
 
         return response;
     }

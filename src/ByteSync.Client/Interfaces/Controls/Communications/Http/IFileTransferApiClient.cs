@@ -7,7 +7,7 @@ public interface IFileTransferApiClient
 {   
     Task<string> GetUploadFileUrl(TransferParameters transferParameters);
     
-    Task<string> GetDownloadFileUrl(TransferParameters transferParameters);
+    Task<FileSourceInfo> GetDownloadFileMode(TransferParameters transferParameters);
     
     Task AssertFilePartIsUploaded(TransferParameters transferParameters);
     

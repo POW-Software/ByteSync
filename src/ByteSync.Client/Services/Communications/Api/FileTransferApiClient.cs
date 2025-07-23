@@ -32,18 +32,18 @@ public class FileTransferApiClient : IFileTransferApiClient
         }
     }
     
-    public async Task<string> GetDownloadFileUrl(TransferParameters transferParameters)
+    public async Task<FileSourceInfo> GetDownloadFileMode(TransferParameters transferParameters)
     {
         try
         {
-            var result = await _apiInvoker.PostAsync<string>($"session/{transferParameters.SessionId}/file/getDownloadUrl", 
+            var result = await _apiInvoker.PostAsync<FileSourceInfo>($"session/{transferParameters.SessionId}/file/getDownloadMode", 
                 transferParameters);
 
             return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error while getting download file url");
+            _logger.LogError(ex, "Error while getting download file mode");
             
             throw;
         }

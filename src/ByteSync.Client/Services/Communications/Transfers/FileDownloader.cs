@@ -18,6 +18,7 @@ public class FileDownloader : IFileDownloader
     private readonly IErrorManager _errorManager;
     private readonly IResourceManager _resourceManager;
     private readonly IDownloadPartsCoordinator _partsCoordinator;
+    private readonly IDownloadStrategyFactory _downloadStrategyFactory;
     private readonly SemaphoreSlim _semaphoreSlim;
     private readonly ILogger<FileDownloader> _logger;
 
@@ -40,6 +41,7 @@ public class FileDownloader : IFileDownloader
         IErrorManager errorManager,
         IResourceManager resourceManager,
         IDownloadPartsCoordinator partsCoordinator,
+        IDownloadStrategyFactory downloadStrategyFactory,
         ILogger<FileDownloader> logger)
     {
         _policyFactory = policyFactory;
@@ -48,6 +50,7 @@ public class FileDownloader : IFileDownloader
         _errorManager = errorManager;
         _resourceManager = resourceManager;
         _partsCoordinator = partsCoordinator;
+        _downloadStrategyFactory = downloadStrategyFactory;
         _semaphoreSlim = new SemaphoreSlim(1, 1);
         SharedFileDefinition = sharedFileDefinition;
         DownloadTarget = downloadTargetBuilder.BuildDownloadTarget(sharedFileDefinition);
@@ -112,13 +115,12 @@ public class FileDownloader : IFileDownloader
                         SharedFileDefinition = SharedFileDefinition,
                         PartNumber = partNumber
                     };
-                    var downloadUrl = await _fileTransferApiClient.GetDownloadFileUrl(transferParameters);
+                    var downloadInfo = await _fileTransferApiClient.GetDownloadFileMode(transferParameters);
+                    
                     var memoryStream = new MemoryStream();
-                    var options = new BlobClientOptions();
-                    options.Retry.NetworkTimeout = TimeSpan.FromMinutes(20);
-                    var blob = new BlobClient(new Uri(downloadUrl), options);
-                    var response = await blob.DownloadToAsync(memoryStream, CancellationTokenSource.Token);
-                    memoryStream.Position = 0;
+                    var downloadStrategy = _downloadStrategyFactory.GetStrategy(downloadInfo);
+                    var response = await downloadStrategy.DownloadAsync(memoryStream, downloadInfo, CancellationTokenSource.Token);
+                    
                     DownloadTarget.AddOrReplaceMemoryStream(partNumber, memoryStream);
                     return response;
                 });
