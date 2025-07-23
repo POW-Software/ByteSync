@@ -1,0 +1,134 @@
+using System.Threading;
+using System.Threading.Channels;
+using Azure;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using ByteSync.Business.Communications.Transfers;
+using ByteSync.Common.Business.SharedFiles;
+using ByteSync.Interfaces;
+using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Controls.Communications.Http;
+
+namespace ByteSync.Services.Communications.Transfers;
+
+public class FileUploadWorker : IFileUploadWorker
+{
+    private readonly IPolicyFactory _policyFactory;
+    private readonly IFileTransferApiClient _fileTransferApiClient;
+    private readonly ILogger<FileUploadWorker> _logger;
+    private readonly SharedFileDefinition _sharedFileDefinition;
+    private readonly object _syncRoot;
+    private readonly ManualResetEvent _exceptionOccurred;
+    private readonly ManualResetEvent _uploadingIsFinished;
+
+    public FileUploadWorker(IPolicyFactory policyFactory, IFileTransferApiClient fileTransferApiClient,
+        SharedFileDefinition sharedFileDefinition, object syncRoot, ManualResetEvent exceptionOccurred,
+        ManualResetEvent uploadingIsFinished, ILogger<FileUploadWorker> logger)
+    {
+        _policyFactory = policyFactory;
+        _fileTransferApiClient = fileTransferApiClient;
+        _sharedFileDefinition = sharedFileDefinition;
+        _syncRoot = syncRoot;
+        _exceptionOccurred = exceptionOccurred;
+        _uploadingIsFinished = uploadingIsFinished;
+        _logger = logger;
+    }
+
+    public void StartUploadWorkers(Channel<FileUploaderSlice> availableSlices, int workerCount, UploadProgressState progressState)
+    {
+        for (var i = 0; i < workerCount; i++)
+        {
+            _ = Task.Run(() => UploadAvailableSlicesAsync(availableSlices, progressState));
+        }
+    }
+
+    public async Task UploadAvailableSlicesAsync(Channel<FileUploaderSlice> availableSlices, UploadProgressState progressState)
+    {
+        while (await availableSlices.Reader.WaitToReadAsync())
+        {
+            if (availableSlices.Reader.TryRead(out var slice))
+            {
+                try
+                {
+                    var policy = _policyFactory.BuildFileUploadPolicy();
+                    var response = await policy.ExecuteAsync(() => DoUpload(slice));
+
+                    if (response != null && !response.GetRawResponse().IsError)
+                    {
+                        var transferParameters = new TransferParameters
+                        {
+                            SessionId = _sharedFileDefinition.SessionId,
+                            SharedFileDefinition = _sharedFileDefinition,
+                            PartNumber = slice.PartNumber
+                        };
+                        
+                        await _fileTransferApiClient.AssertFilePartIsUploaded(transferParameters);
+
+                        lock (_syncRoot)
+                        {
+                            progressState.TotalUploadedSlices += 1;
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("UploadAvailableSlice: unable to get upload url");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "UploadAvailableSlice");
+                    _exceptionOccurred.Set();
+                    return;
+                }
+            }
+        }
+
+        lock (_syncRoot)
+        {
+            if (progressState.TotalUploadedSlices == progressState.TotalCreatedSlices)
+            {
+                _uploadingIsFinished.Set();
+            }
+        }
+    }
+    
+    private async Task<Response<BlobContentInfo>> DoUpload(FileUploaderSlice slice)
+    {
+        try
+        {
+            lock (_syncRoot)
+            {
+                // Track concurrent uploads for debugging
+            }
+            
+            var transferParameters = new TransferParameters
+            {
+                SessionId = _sharedFileDefinition.SessionId,
+                SharedFileDefinition = _sharedFileDefinition,
+                PartNumber = slice.PartNumber
+            };
+            
+            var uploadFileUrl = await _fileTransferApiClient.GetUploadFileUrl(transferParameters);
+
+            _logger.LogDebug("UploadAvailableSlice: starting sending slice {number} ({length} KB)", 
+                slice.PartNumber, slice.MemoryStream.Length / 1024d);
+
+            var options = new BlobClientOptions();
+            options.Retry.NetworkTimeout = TimeSpan.FromMinutes(60);
+
+            slice.MemoryStream.Position = 0;
+            var blob = new BlobClient(new Uri(uploadFileUrl), options);
+            var response = await blob.UploadAsync(slice.MemoryStream);
+
+            _logger.LogDebug("UploadAvailableSlice: slice {number} is uploaded", slice.PartNumber);
+
+            return response;
+        }
+        catch (Exception)
+        {
+            _logger.LogError("Error while uploading slice {number}, sharedFileDefinitionId:{sharedFileDefinitionId} ", 
+                slice.PartNumber, _sharedFileDefinition.Id);
+            throw;
+        }
+    }
+} 
