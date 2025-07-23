@@ -41,13 +41,13 @@ public static class IdentityBuilder
     {
         string relativePath;
         var rawRelativePath = IOUtils.ExtractRelativePath(fullName, baseFullName);
-            
-        // On utilise '/' comme séparateur, que ce soit sur Windows, Linux ou Mac
-        // Car
-        //  - '/' est le séparateur sur Linux et Mac
-        //  ' "\" est le séparateu sur Windows
-        // Et que '/' est interdit sur Windows dans les noms de fichiers
-        // Alors que "\" est autorisé au moins sur Linux
+        
+        // We use '/' as a separator, whether on Windows, Linux or Mac
+        // Because
+        // - '/' is the separator on Linux and Mac
+        // ' "\" is the separator on Windows
+        // And that '/' is forbidden on Windows in file names
+        // While "\" is allowed at least on Linux
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             relativePath = rawRelativePath.Replace(Path.DirectorySeparatorChar, '/');
@@ -55,6 +55,11 @@ public static class IdentityBuilder
         else
         {
             relativePath = rawRelativePath;
+        }
+
+        if (!relativePath.StartsWith('/'))
+        {
+            relativePath = "/" + relativePath;
         }
 
         return relativePath;
