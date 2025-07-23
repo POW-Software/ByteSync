@@ -42,17 +42,6 @@ public class AuthenticateCommandHandler_Tests
     [Test]
     public async Task Authenticate_WithValidData_ReturnsSuccessResponse()
     {
-        // Arrange
-        var repository = _scope.Resolve<IClientSoftwareVersionSettingsRepository>();
-        ClientSoftwareVersionSettings settings = new ClientSoftwareVersionSettings
-        {
-            MinimalVersion = new SoftwareVersion
-            {
-                Version = "1.0.0"
-            }
-        };
-        await repository.SaveUnique(settings);
-        
         var clientId = "integration-client-id";
         var clientInstanceId = "integration-client-instance";
         var version = "2.0.0";
