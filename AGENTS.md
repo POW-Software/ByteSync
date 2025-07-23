@@ -42,6 +42,7 @@ Examples:
 - Prefer clear and self-explanatory code over adding comments.
 
 ## Build and Test Guidelines
-- Always run build and test as two separate commands to avoid blocking issues. `dotnet build --verbosity quiet`
-- Use `dotnet build --verbosity quiet` to build the solution.
-- Add `--no-restore` and `--no-build` when necessary to speed up operations.
+- Always run build and test as two separate commands to avoid blocking issues.
+- Use `dotnet build --verbosity quiet /property:WarningLevel=0` to build the solution.
+- When running tests, do not use the `--verbosity` modifier.
+- If you need to clean the solution, use `dotnet clean --verbosity quiet` before building.
