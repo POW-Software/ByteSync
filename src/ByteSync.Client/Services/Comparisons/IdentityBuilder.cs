@@ -8,6 +8,8 @@ namespace ByteSync.Services.Comparisons;
 
 public static class IdentityBuilder
 {
+    public const char GLOBAL_DIRECTORY_SEPARATOR = '/';
+    
     public static DirectoryDescription BuildDirectoryDescription(InventoryPart inventoryPart, DirectoryInfo directoryInfo)
     {
         var relativePath = ExtractRelativePath(directoryInfo.FullName, inventoryPart.RootPath); 
@@ -50,16 +52,16 @@ public static class IdentityBuilder
         // While "\" is allowed at least on Linux
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            relativePath = rawRelativePath.Replace(Path.DirectorySeparatorChar, '/');
+            relativePath = rawRelativePath.Replace(Path.DirectorySeparatorChar, GLOBAL_DIRECTORY_SEPARATOR);
         }
         else
         {
             relativePath = rawRelativePath;
         }
 
-        if (!relativePath.StartsWith('/'))
+        if (!relativePath.StartsWith(GLOBAL_DIRECTORY_SEPARATOR))
         {
-            relativePath = "/" + relativePath;
+            relativePath = GLOBAL_DIRECTORY_SEPARATOR + relativePath;
         }
 
         return relativePath;
