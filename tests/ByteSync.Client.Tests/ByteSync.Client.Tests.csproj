@@ -30,5 +30,4 @@
       <ProjectReference Include="..\ByteSync.TestsCommon\ByteSync.TestsCommon.csproj" />
       <ProjectReference Include="..\..\src\ByteSync.Client\ByteSync.Client.csproj" />
     </ItemGroup>
-
 </Project>

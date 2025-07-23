@@ -17,13 +17,19 @@ public class AuthenticateCommandHandler_Tests
     [SetUp]
     public void Setup()
     {
+        var fakeVersionService = FakeItEasy.A.Fake<ByteSync.ServerCommon.Interfaces.Services.Clients.IClientSoftwareVersionService>();
+        FakeItEasy.A.CallTo(() => fakeVersionService.IsClientVersionAllowed(FakeItEasy.A<ByteSync.Common.Business.Auth.LoginData>.Ignored)).Returns(Task.FromResult(true));
+
         _scope = GlobalTestSetup.Container.BeginLifetimeScope(builder =>
         {
             builder.RegisterModule(new RepositoriesModule(true));
             builder.RegisterModule(new LoadersModule(false));
             builder.RegisterType<ByteSync.ServerCommon.Commands.Authentication.AuthenticateCommandHandler>()
-            .AsSelf()
-            .InstancePerLifetimeScope();
+                .AsSelf()
+                .InstancePerLifetimeScope();
+            builder.RegisterInstance(fakeVersionService)
+                .As<ByteSync.ServerCommon.Interfaces.Services.Clients.IClientSoftwareVersionService>()
+                .SingleInstance();
         });
     }
 
