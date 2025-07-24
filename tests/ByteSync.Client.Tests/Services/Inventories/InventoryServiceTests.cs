@@ -18,11 +18,11 @@ namespace ByteSync.Tests.Services.Inventories
     [TestFixture]
     public class InventoryServiceTests
     {
-        private Mock<ISessionService> _sessionServiceMock;
-        private Mock<IInventoryFileRepository> _inventoryFileRepositoryMock;
-        private Mock<IDataNodeRepository> _dataNodeRepositoryMock;
-        private Mock<ILogger<InventoryService>> _loggerMock;
-        private InventoryService _inventoryService;
+        private Mock<ISessionService> _sessionServiceMock = null!;
+        private Mock<IInventoryFileRepository> _inventoryFileRepositoryMock = null!;
+        private Mock<IDataNodeRepository> _dataNodeRepositoryMock = null!;
+        private Mock<ILogger<InventoryService>> _loggerMock = null!;
+        private InventoryService _inventoryService = null!;
 
         [SetUp]
         public void Setup()
