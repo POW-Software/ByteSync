@@ -72,13 +72,13 @@ public class DataNodeServiceTests
         var node = new DataNode { Id = "N1", ClientInstanceId = "CID" };
         var encrypted = new EncryptedDataNode();
         _dataEncrypterMock.Setup(e => e.EncryptDataNode(node)).Returns(encrypted);
-        _inventoryApiClientMock.Setup(a => a.AddDataNode(sessionId, encrypted))
+        _inventoryApiClientMock.Setup(a => a.AddDataNode(sessionId, "CID", encrypted))
             .ReturnsAsync(true);
 
         var result = await _service.TryAddDataNode(node);
 
         result.Should().BeTrue();
-        _inventoryApiClientMock.Verify(a => a.AddDataNode(sessionId, encrypted), Times.Once);
+        _inventoryApiClientMock.Verify(a => a.AddDataNode(sessionId, "CID", encrypted), Times.Once);
         _dataNodeRepositoryMock.Verify(r => r.AddOrUpdate(node), Times.Once);
         _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
@@ -95,7 +95,7 @@ public class DataNodeServiceTests
         var result = await _service.TryAddDataNode(node);
 
         result.Should().BeTrue();
-        _inventoryApiClientMock.Verify(a => a.AddDataNode(It.IsAny<string>(), It.IsAny<EncryptedDataNode>()), Times.Never);
+        _inventoryApiClientMock.Verify(a => a.AddDataNode(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<EncryptedDataNode>()), Times.Never);
         _dataNodeRepositoryMock.Verify(r => r.AddOrUpdate(node), Times.Once);
         _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
@@ -110,7 +110,7 @@ public class DataNodeServiceTests
         var node = new DataNode { Id = "N1", ClientInstanceId = "CID" };
         var encrypted = new EncryptedDataNode();
         _dataEncrypterMock.Setup(e => e.EncryptDataNode(node)).Returns(encrypted);
-        _inventoryApiClientMock.Setup(a => a.AddDataNode(sessionId, encrypted))
+        _inventoryApiClientMock.Setup(a => a.AddDataNode(sessionId, "CID", encrypted))
             .ReturnsAsync(false);
 
         var result = await _service.TryAddDataNode(node);
@@ -128,13 +128,13 @@ public class DataNodeServiceTests
             .Returns(new CloudSession { SessionId = sessionId });
         _connectionServiceMock.SetupGet(c => c.ClientInstanceId).Returns("CID");
         var node = new DataNode { Id = "N1", ClientInstanceId = "CID" };
-        _inventoryApiClientMock.Setup(a => a.RemoveDataNode(sessionId, It.IsAny<EncryptedDataNode>()))
+        _inventoryApiClientMock.Setup(a => a.RemoveDataNode(sessionId, "CID", It.IsAny<EncryptedDataNode>()))
             .ReturnsAsync(true);
 
         var result = await _service.TryRemoveDataNode(node);
 
         result.Should().BeTrue();
-        _inventoryApiClientMock.Verify(a => a.RemoveDataNode(sessionId, It.IsAny<EncryptedDataNode>()), Times.Once);
+        _inventoryApiClientMock.Verify(a => a.RemoveDataNode(sessionId, "CID", It.IsAny<EncryptedDataNode>()), Times.Once);
         _dataNodeRepositoryMock.Verify(r => r.Remove(node), Times.Once);
         _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
@@ -151,7 +151,7 @@ public class DataNodeServiceTests
         var result = await _service.TryRemoveDataNode(node);
 
         result.Should().BeTrue();
-        _inventoryApiClientMock.Verify(a => a.RemoveDataNode(It.IsAny<string>(), It.IsAny<EncryptedDataNode>()), Times.Never);
+        _inventoryApiClientMock.Verify(a => a.RemoveDataNode(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<EncryptedDataNode>()), Times.Never);
         _dataNodeRepositoryMock.Verify(r => r.Remove(node), Times.Once);
         _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
@@ -164,7 +164,7 @@ public class DataNodeServiceTests
             .Returns(new CloudSession { SessionId = sessionId });
         _connectionServiceMock.SetupGet(c => c.ClientInstanceId).Returns("CID");
         var node = new DataNode { Id = "N1", ClientInstanceId = "CID" };
-        _inventoryApiClientMock.Setup(a => a.RemoveDataNode(sessionId, It.IsAny<EncryptedDataNode>()))
+        _inventoryApiClientMock.Setup(a => a.RemoveDataNode(sessionId, "CID", It.IsAny<EncryptedDataNode>()))
             .ReturnsAsync(false);
 
         var result = await _service.TryRemoveDataNode(node);
@@ -184,12 +184,12 @@ public class DataNodeServiceTests
         var encrypted = new EncryptedDataNode();
         _dataEncrypterMock.Setup(e => e.EncryptDataNode(It.Is<DataNode>(n => n.Id == "NODE" && n.ClientInstanceId == "CID")))
             .Returns(encrypted);
-        _inventoryApiClientMock.Setup(a => a.AddDataNode(sessionId, encrypted))
+        _inventoryApiClientMock.Setup(a => a.AddDataNode(sessionId, "CID", encrypted))
             .ReturnsAsync(true);
 
         await _service.CreateAndTryAddDataNode("NODE");
 
-        _inventoryApiClientMock.Verify(a => a.AddDataNode(sessionId, encrypted), Times.Once);
+        _inventoryApiClientMock.Verify(a => a.AddDataNode(sessionId, "CID", encrypted), Times.Once);
         _dataNodeRepositoryMock.Verify(r => r.AddOrUpdate(It.Is<DataNode>(n => n.Id == "NODE" && n.ClientInstanceId == "CID")), Times.Once);
         _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }

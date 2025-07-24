@@ -31,11 +31,11 @@ public class InventoryApiClient : IInventoryApiClient
         }
     }
 
-    public async Task<List<EncryptedDataSource>?> GetDataSources(string sessionId, string clientInstanceId)
+    public async Task<List<EncryptedDataSource>?> GetDataSources(string sessionId, string clientInstanceId, string dataNodeId)
     {
         try
         {
-            var result = await _apiInvoker.GetAsync<List<EncryptedDataSource>?>($"session/{sessionId}/inventory/dataSource/{clientInstanceId}");
+            var result = await _apiInvoker.GetAsync<List<EncryptedDataSource>?>($"session/{sessionId}/inventory/{clientInstanceId}/dataNode/{dataNodeId}/dataSource");
 
             return result;
         }
@@ -47,11 +47,11 @@ public class InventoryApiClient : IInventoryApiClient
         }
     }
     
-    public async Task<bool> AddDataSource(string sessionId, EncryptedDataSource encryptedDataSource)
+    public async Task<bool> AddDataSource(string sessionId, string clientInstanceId, string dataNodeId, EncryptedDataSource encryptedDataSource)
     {
         try
         {
-            var result = await _apiInvoker.PostAsync<bool>($"session/{sessionId}/inventory/dataSource", encryptedDataSource);
+            var result = await _apiInvoker.PostAsync<bool>($"session/{sessionId}/inventory/{clientInstanceId}/dataNode/{dataNodeId}/dataSource", encryptedDataSource);
 
             return result;
         }
@@ -63,11 +63,11 @@ public class InventoryApiClient : IInventoryApiClient
         }
     }
     
-    public async Task<bool> RemoveDataSource(string sessionId, EncryptedDataSource encryptedDataSource)
+    public async Task<bool> RemoveDataSource(string sessionId, string clientInstanceId, string dataNodeId, EncryptedDataSource encryptedDataSource)
     {
         try
         {
-            var result = await _apiInvoker.DeleteAsync<bool>($"session/{sessionId}/inventory/dataSource", encryptedDataSource);
+            var result = await _apiInvoker.DeleteAsync<bool>($"session/{sessionId}/inventory/{clientInstanceId}/dataNode/{dataNodeId}/dataSource", encryptedDataSource);
 
             return result;
         }
@@ -83,7 +83,7 @@ public class InventoryApiClient : IInventoryApiClient
     {
         try
         {
-            var result = await _apiInvoker.GetAsync<List<EncryptedDataNode>?>($"session/{sessionId}/inventory/dataNode/{clientInstanceId}");
+            var result = await _apiInvoker.GetAsync<List<EncryptedDataNode>?>($"session/{sessionId}/inventory/{clientInstanceId}/dataNode");
 
             return result;
         }
@@ -95,11 +95,11 @@ public class InventoryApiClient : IInventoryApiClient
         }
     }
 
-    public async Task<bool> AddDataNode(string sessionId, EncryptedDataNode encryptedDataNode)
+    public async Task<bool> AddDataNode(string sessionId, string clientInstanceId, EncryptedDataNode encryptedDataNode)
     {
         try
         {
-            var result = await _apiInvoker.PostAsync<bool>($"session/{sessionId}/inventory/dataNode", encryptedDataNode);
+            var result = await _apiInvoker.PostAsync<bool>($"session/{sessionId}/inventory/{clientInstanceId}/dataNode", encryptedDataNode);
 
             return result;
         }
@@ -111,11 +111,11 @@ public class InventoryApiClient : IInventoryApiClient
         }
     }
 
-    public async Task<bool> RemoveDataNode(string sessionId, EncryptedDataNode encryptedDataNode)
+    public async Task<bool> RemoveDataNode(string sessionId, string clientInstanceId, EncryptedDataNode encryptedDataNode)
     {
         try
         {
-            var result = await _apiInvoker.DeleteAsync<bool>($"session/{sessionId}/inventory/dataNode", encryptedDataNode);
+            var result = await _apiInvoker.DeleteAsync<bool>($"session/{sessionId}/inventory/{clientInstanceId}/dataNode", encryptedDataNode);
 
             return result;
         }

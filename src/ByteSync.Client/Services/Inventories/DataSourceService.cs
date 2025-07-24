@@ -37,34 +37,6 @@ public class DataSourceService : IDataSourceService
         _dataSourceRepository = dataSourceRepository;
         _dataNodeRepository = dataNodeRepository;
         _codeGenerator = codeGenerator;
-
-        // _dataNodeRepository.SortedSessionMembersObservable
-        //     .OnItemRemoved(_ =>
-        //     {
-        //         UpdateCodesForAllMembers(_dataNodeRepository.Elements);
-        //     })
-        //     .Subscribe();
-        //
-        // _dataNodeRepository.SortedSessionMembersObservable
-        //     .OnItemAdded(sessionMemberInfo => Observable.FromAsync(() => GetSessionMemberDataSources(sessionMemberInfo))) // Task.Run(() => NewMethod(sessionMemberInfo)))
-        //     .Subscribe();
-    }
-
-    private async Task GetSessionMemberDataSources(SessionMember sessionMember)
-    {
-        if (!sessionMember.HasClientInstanceId(_connectionService.ClientInstanceId!))
-        {
-            var encryptedDataSources = await _inventoryApiClient.GetDataSources(sessionMember.SessionId, sessionMember.ClientInstanceId);
-
-            if (encryptedDataSources != null)
-            {
-                foreach (var encryptedDataSource in encryptedDataSources)
-                {
-                    var dataSource = _dataEncrypter.DecryptDataSource(encryptedDataSource);
-                    await TryAddDataSource(dataSource);
-                }
-            }
-        }
     }
 
     // TODO data-nodes-and-local-sync
@@ -77,7 +49,7 @@ public class DataSourceService : IDataSourceService
                 && dataSource.ClientInstanceId == _connectionService.ClientInstanceId)
             {
                 var encryptedDataSource = _dataEncrypter.EncryptDataSource(dataSource);
-                isAddOK = await _inventoryApiClient.AddDataSource(cloudSession.SessionId, encryptedDataSource);
+                isAddOK = await _inventoryApiClient.AddDataSource(cloudSession.SessionId, _connectionService.ClientInstanceId!, dataSource.DataNodeId, encryptedDataSource);
             }
 
             if (isAddOK)
@@ -114,7 +86,7 @@ public class DataSourceService : IDataSourceService
     public async Task<bool> TryRemoveDataSource(DataSource dataSource)
     {
         var encryptedDataSource = _dataEncrypter.EncryptDataSource(dataSource);
-        var isRemoveOK = await _inventoryApiClient.RemoveDataSource(_sessionService.SessionId!, encryptedDataSource);
+        var isRemoveOK = await _inventoryApiClient.RemoveDataSource(_sessionService.SessionId!, _connectionService.ClientInstanceId!, dataSource.DataNodeId, encryptedDataSource);
         
         if (isRemoveOK)
         {
