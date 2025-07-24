@@ -242,7 +242,7 @@ namespace ByteSync.Tests.Services.Inventories
 
             var inventoryFiles = new List<InventoryFile>
             {
-                // Les codes ne correspondent pas, mais les ClientInstanceId oui
+                // Codes don't match, but ClientInstanceId does
                 CreateInventoryFile("other_client_1", "DIFFERENT_CODE", SharedFileTypes.BaseInventory),
                 CreateInventoryFile("current_client_instance_id", "ANOTHER_CODE", SharedFileTypes.BaseInventory)
             };
