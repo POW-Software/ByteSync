@@ -102,8 +102,6 @@ public class SlicerEncrypter : ISlicerEncrypter
                 cryptoSteam = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write, true);
 
                 fileUploaderSlice = new FileUploaderSlice(TotalGeneratedFiles, memoryStream);
-                    
-                _logger.LogDebug("Start slicing/encrypting {sliceNumber}", fileUploaderSlice.PartNumber);
             }
 
             await cryptoSteam.WriteAsync(bytes, 0, readBytes);
@@ -129,11 +127,6 @@ public class SlicerEncrypter : ISlicerEncrypter
             {
                 canContinue = false;
             }
-        }
-
-        if (fileUploaderSlice != null)
-        {
-            _logger.LogDebug("End slicing/encrypting {sliceNumber}", fileUploaderSlice.PartNumber);
         }
 
         cryptoSteam?.Dispose();
