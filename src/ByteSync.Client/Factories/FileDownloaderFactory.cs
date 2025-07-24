@@ -5,6 +5,7 @@ using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Services.Communications.Transfers;
+using ByteSync.Services.Communications.Transfers.Strategies;
 
 namespace ByteSync.Factories;
 
@@ -72,6 +73,9 @@ public class FileDownloaderFactory : IFileDownloaderFactory
         var fileMerger = new FileMerger(mergerDecrypters, errorManager, downloadTarget, semaphoreSlim);
         // FilePartDownloadAsserter
         var filePartDownloadAsserter = new FilePartDownloadAsserter(_fileTransferApiClient, semaphoreSlim, errorManager, _logger);
+        
+        // DownloadStrategyFactory
+        var downloadStrategyFactory = new DownloadStrategyFactory();
 
         return new FileDownloader(
             sharedFileDefinition,
@@ -83,6 +87,7 @@ public class FileDownloaderFactory : IFileDownloaderFactory
             errorManager,
             resourceManager,
             partsCoordinator,
+            downloadStrategyFactory,
             _loggerFileDownloader
         );
     }
