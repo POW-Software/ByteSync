@@ -45,11 +45,11 @@ public class DataSourceCodeGeneratorTests
     [Test]
     public void Codes_Assigned_Sequentially_OnAdd()
     {
-        var node = new DataNode { NodeId = "N1", ClientInstanceId = "CID0", Code = "A" };
+        var node = new DataNode { Id = "N1", ClientInstanceId = "CID0", Code = "A" };
         _dataNodeRepository.AddOrUpdate(node);
 
-        var ds1 = new DataSource { DataNodeId = node.NodeId, ClientInstanceId = "CID0", Path = "path1", InitialTimestamp = DateTime.Now};
-        var ds2 = new DataSource { DataNodeId = node.NodeId, ClientInstanceId = "CID0", Path = "path2", InitialTimestamp = DateTime.Now.AddMilliseconds(1) };
+        var ds1 = new DataSource { DataNodeId = node.Id, ClientInstanceId = "CID0", Path = "path1", InitialTimestamp = DateTime.Now};
+        var ds2 = new DataSource { DataNodeId = node.Id, ClientInstanceId = "CID0", Path = "path2", InitialTimestamp = DateTime.Now.AddMilliseconds(1) };
 
         _dataSourceRepository.AddOrUpdate(ds1);
         _dataSourceRepository.AddOrUpdate(ds2);
@@ -61,12 +61,12 @@ public class DataSourceCodeGeneratorTests
     [Test]
     public void Codes_Renumber_OnRemove()
     {
-        var node = new DataNode { NodeId = "N1", ClientInstanceId = "CID0", Code = "A" };
+        var node = new DataNode { Id = "N1", ClientInstanceId = "CID0", Code = "A" };
         _dataNodeRepository.AddOrUpdate(node);
 
-        var ds1 = new DataSource { DataNodeId = node.NodeId, ClientInstanceId = "CID0", Path = "path1", InitialTimestamp = DateTime.Now };
-        var ds2 = new DataSource { DataNodeId = node.NodeId, ClientInstanceId = "CID0", Path = "path2", InitialTimestamp = DateTime.Now.AddMilliseconds(1) };
-        var ds3 = new DataSource { DataNodeId = node.NodeId, ClientInstanceId = "CID0", Path = "path3", InitialTimestamp = DateTime.Now.AddMilliseconds(2) };
+        var ds1 = new DataSource { DataNodeId = node.Id, ClientInstanceId = "CID0", Path = "path1", InitialTimestamp = DateTime.Now };
+        var ds2 = new DataSource { DataNodeId = node.Id, ClientInstanceId = "CID0", Path = "path2", InitialTimestamp = DateTime.Now.AddMilliseconds(1) };
+        var ds3 = new DataSource { DataNodeId = node.Id, ClientInstanceId = "CID0", Path = "path3", InitialTimestamp = DateTime.Now.AddMilliseconds(2) };
         _dataSourceRepository.AddOrUpdate(new[] { ds1, ds2, ds3 });
 
         _dataSourceRepository.Remove(ds2);
@@ -78,11 +78,11 @@ public class DataSourceCodeGeneratorTests
     [Test]
     public void Codes_Update_WhenNodeCodeChanges()
     {
-        var node = new DataNode { NodeId = "N1", ClientInstanceId = "CID0", Code = "A" };
+        var node = new DataNode { Id = "N1", ClientInstanceId = "CID0", Code = "A" };
         _dataNodeRepository.AddOrUpdate(node);
 
-        var ds1 = new DataSource { DataNodeId = node.NodeId, ClientInstanceId = "CID0", Path = "path1", InitialTimestamp = DateTime.Now };
-        var ds2 = new DataSource { DataNodeId = node.NodeId, ClientInstanceId = "CID0", Path = "path2", InitialTimestamp = DateTime.Now.AddMilliseconds(1) };
+        var ds1 = new DataSource { DataNodeId = node.Id, ClientInstanceId = "CID0", Path = "path1", InitialTimestamp = DateTime.Now };
+        var ds2 = new DataSource { DataNodeId = node.Id, ClientInstanceId = "CID0", Path = "path2", InitialTimestamp = DateTime.Now.AddMilliseconds(1) };
         _dataSourceRepository.AddOrUpdate(new[] { ds1, ds2 });
 
         node.Code = "B";

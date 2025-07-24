@@ -1,5 +1,4 @@
 using ByteSync.Business.DataNodes;
-using ByteSync.Business.SessionMembers;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Repositories;
 using DynamicData;
@@ -35,12 +34,14 @@ public class DataNodeCodeGenerator : IDataNodeCodeGenerator, IDisposable
 
         var nodesByMember = allNodes
             .GroupBy(n => n.ClientInstanceId)
-            .ToDictionary(g => g.Key, g => g.OrderBy(n => n.NodeId).ToList());
+            .ToDictionary(g => g.Key, g => g.OrderBy(n => n.Id).ToList());
 
         bool singlePerMember = nodesByMember.Values.All(list => list.Count == 1);
 
         var sessionMembers = _sessionMemberRepository.SortedSessionMembers.ToList();
         var updates = new List<DataNode>();
+
+        int globalIndex = 0;
 
         for (int mIndex = 0; mIndex < sessionMembers.Count; mIndex++)
         {
@@ -56,11 +57,26 @@ public class DataNodeCodeGenerator : IDataNodeCodeGenerator, IDisposable
             {
                 foreach (var node in nodes)
                 {
+                    var needsUpdate = false;
+                    
                     if (node.Code != memberLetter)
                     {
                         node.Code = memberLetter;
+                        needsUpdate = true;
+                    }
+                    
+                    if (node.OrderIndex != globalIndex)
+                    {
+                        node.OrderIndex = globalIndex;
+                        needsUpdate = true;
+                    }
+                    
+                    if (needsUpdate)
+                    {
                         updates.Add(node);
                     }
+                    
+                    globalIndex++;
                 }
             }
             else
@@ -68,11 +84,26 @@ public class DataNodeCodeGenerator : IDataNodeCodeGenerator, IDisposable
                 for (int i = 0; i < nodes.Count; i++)
                 {
                     var code = memberLetter + ((char)('a' + i));
+                    var needsUpdate = false;
+                    
                     if (nodes[i].Code != code)
                     {
                         nodes[i].Code = code;
+                        needsUpdate = true;
+                    }
+                    
+                    if (nodes[i].OrderIndex != globalIndex)
+                    {
+                        nodes[i].OrderIndex = globalIndex;
+                        needsUpdate = true;
+                    }
+                    
+                    if (needsUpdate)
+                    {
                         updates.Add(nodes[i]);
                     }
+                    
+                    globalIndex++;
                 }
             }
         }

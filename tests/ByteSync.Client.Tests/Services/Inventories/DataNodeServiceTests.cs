@@ -1,4 +1,5 @@
 using ByteSync.Business.DataNodes;
+using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Communications.Http;
@@ -11,6 +12,8 @@ using ByteSync.Services.Inventories;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using System.Reactive.Subjects;
+using System.Reactive.Linq;
 
 namespace ByteSync.Tests.Services.Inventories;
 
@@ -24,6 +27,8 @@ public class DataNodeServiceTests
     private Mock<IDataNodeRepository> _dataNodeRepositoryMock = null!;
     private Mock<IDataNodeCodeGenerator> _codeGeneratorMock = null!;
     private DataNodeService _service = null!;
+    private BehaviorSubject<AbstractSession?> _sessionSubject = null!;
+    private BehaviorSubject<SessionStatus> _sessionStatusSubject = null!;
 
     [SetUp]
     public void SetUp()
@@ -35,12 +40,26 @@ public class DataNodeServiceTests
         _dataNodeRepositoryMock = new Mock<IDataNodeRepository>();
         _codeGeneratorMock = new Mock<IDataNodeCodeGenerator>();
 
+        // Setup observables
+        _sessionSubject = new BehaviorSubject<AbstractSession?>(null);
+        _sessionStatusSubject = new BehaviorSubject<SessionStatus>(SessionStatus.None);
+        
+        _sessionServiceMock.SetupGet(s => s.SessionObservable).Returns(_sessionSubject);
+        _sessionServiceMock.SetupGet(s => s.SessionStatusObservable).Returns(_sessionStatusSubject);
+
         _service = new DataNodeService(_sessionServiceMock.Object,
             _connectionServiceMock.Object,
             _dataEncrypterMock.Object,
             _inventoryApiClientMock.Object,
             _dataNodeRepositoryMock.Object,
             _codeGeneratorMock.Object);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _sessionSubject?.Dispose();
+        _sessionStatusSubject?.Dispose();
     }
 
     [Test]
@@ -50,7 +69,7 @@ public class DataNodeServiceTests
         _sessionServiceMock.SetupGet(s => s.CurrentSession)
             .Returns(new CloudSession { SessionId = sessionId });
         _connectionServiceMock.SetupGet(c => c.ClientInstanceId).Returns("CID");
-        var node = new DataNode { NodeId = "N1", ClientInstanceId = "CID" };
+        var node = new DataNode { Id = "N1", ClientInstanceId = "CID" };
         var encrypted = new EncryptedDataNode();
         _dataEncrypterMock.Setup(e => e.EncryptDataNode(node)).Returns(encrypted);
         _inventoryApiClientMock.Setup(a => a.AddDataNode(sessionId, encrypted))
@@ -71,7 +90,7 @@ public class DataNodeServiceTests
         _sessionServiceMock.SetupGet(s => s.CurrentSession)
             .Returns(new CloudSession { SessionId = sessionId });
         _connectionServiceMock.SetupGet(c => c.ClientInstanceId).Returns("CID");
-        var node = new DataNode { NodeId = "N1", ClientInstanceId = "OTHER" };
+        var node = new DataNode { Id = "N1", ClientInstanceId = "OTHER" };
 
         var result = await _service.TryAddDataNode(node);
 
@@ -88,7 +107,7 @@ public class DataNodeServiceTests
         _sessionServiceMock.SetupGet(s => s.CurrentSession)
             .Returns(new CloudSession { SessionId = sessionId });
         _connectionServiceMock.SetupGet(c => c.ClientInstanceId).Returns("CID");
-        var node = new DataNode { NodeId = "N1", ClientInstanceId = "CID" };
+        var node = new DataNode { Id = "N1", ClientInstanceId = "CID" };
         var encrypted = new EncryptedDataNode();
         _dataEncrypterMock.Setup(e => e.EncryptDataNode(node)).Returns(encrypted);
         _inventoryApiClientMock.Setup(a => a.AddDataNode(sessionId, encrypted))
@@ -108,7 +127,7 @@ public class DataNodeServiceTests
         _sessionServiceMock.SetupGet(s => s.CurrentSession)
             .Returns(new CloudSession { SessionId = sessionId });
         _connectionServiceMock.SetupGet(c => c.ClientInstanceId).Returns("CID");
-        var node = new DataNode { NodeId = "N1", ClientInstanceId = "CID" };
+        var node = new DataNode { Id = "N1", ClientInstanceId = "CID" };
         _inventoryApiClientMock.Setup(a => a.RemoveDataNode(sessionId, It.IsAny<EncryptedDataNode>()))
             .ReturnsAsync(true);
 
@@ -127,7 +146,7 @@ public class DataNodeServiceTests
         _sessionServiceMock.SetupGet(s => s.CurrentSession)
             .Returns(new CloudSession { SessionId = sessionId });
         _connectionServiceMock.SetupGet(c => c.ClientInstanceId).Returns("CID");
-        var node = new DataNode { NodeId = "N1", ClientInstanceId = "OTHER" };
+        var node = new DataNode { Id = "N1", ClientInstanceId = "OTHER" };
 
         var result = await _service.TryRemoveDataNode(node);
 
@@ -144,7 +163,7 @@ public class DataNodeServiceTests
         _sessionServiceMock.SetupGet(s => s.CurrentSession)
             .Returns(new CloudSession { SessionId = sessionId });
         _connectionServiceMock.SetupGet(c => c.ClientInstanceId).Returns("CID");
-        var node = new DataNode { NodeId = "N1", ClientInstanceId = "CID" };
+        var node = new DataNode { Id = "N1", ClientInstanceId = "CID" };
         _inventoryApiClientMock.Setup(a => a.RemoveDataNode(sessionId, It.IsAny<EncryptedDataNode>()))
             .ReturnsAsync(false);
 
@@ -163,7 +182,7 @@ public class DataNodeServiceTests
             .Returns(new CloudSession { SessionId = sessionId });
         _connectionServiceMock.SetupGet(c => c.ClientInstanceId).Returns("CID");
         var encrypted = new EncryptedDataNode();
-        _dataEncrypterMock.Setup(e => e.EncryptDataNode(It.Is<DataNode>(n => n.NodeId == "NODE" && n.ClientInstanceId == "CID")))
+        _dataEncrypterMock.Setup(e => e.EncryptDataNode(It.Is<DataNode>(n => n.Id == "NODE" && n.ClientInstanceId == "CID")))
             .Returns(encrypted);
         _inventoryApiClientMock.Setup(a => a.AddDataNode(sessionId, encrypted))
             .ReturnsAsync(true);
@@ -171,7 +190,7 @@ public class DataNodeServiceTests
         await _service.CreateAndTryAddDataNode("NODE");
 
         _inventoryApiClientMock.Verify(a => a.AddDataNode(sessionId, encrypted), Times.Once);
-        _dataNodeRepositoryMock.Verify(r => r.AddOrUpdate(It.Is<DataNode>(n => n.NodeId == "NODE" && n.ClientInstanceId == "CID")), Times.Once);
+        _dataNodeRepositoryMock.Verify(r => r.AddOrUpdate(It.Is<DataNode>(n => n.Id == "NODE" && n.ClientInstanceId == "CID")), Times.Once);
         _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
 }

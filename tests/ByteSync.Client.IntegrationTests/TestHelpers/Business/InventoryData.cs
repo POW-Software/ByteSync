@@ -14,6 +14,7 @@ public class InventoryData
         DataSources = new List<DataSource>();
 
         DataSource dataSource = new DataSource();
+        dataSource.Id = Guid.NewGuid().ToString();
         dataSource.Path = inventoryPartRoot.FullName;
         dataSource.Type = FileSystemTypes.Directory;
         

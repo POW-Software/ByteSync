@@ -1,5 +1,4 @@
-﻿using System.Reactive.Linq;
-using ByteSync.Business.DataNodes;
+﻿using ByteSync.Business.DataNodes;
 using ByteSync.Business.DataSources;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Common.Business.Inventories;
@@ -11,8 +10,6 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Services.Sessions;
-using ByteSync.Services.Sessions;
-using DynamicData;
 
 namespace ByteSync.Services.Inventories;
 
@@ -104,10 +101,11 @@ public class DataSourceService : IDataSourceService
     {
         var dataSource = new DataSource();
 
+        dataSource.Id = Guid.NewGuid().ToString();
         dataSource.Path = path;
         dataSource.Type = fileSystemType;
         dataSource.ClientInstanceId = _connectionService.ClientInstanceId!;
-        dataSource.DataNodeId = dataNode.NodeId;
+        dataSource.DataNodeId = dataNode.Id;
         dataSource.InitialTimestamp = DateTime.UtcNow;
 
         return TryAddDataSource(dataSource);

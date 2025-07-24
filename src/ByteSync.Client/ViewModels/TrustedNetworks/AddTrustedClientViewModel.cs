@@ -10,13 +10,12 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Services.Communications;
 using ByteSync.ViewModels.Misc;
-using ByteSync.ViewModels.TrustedNetworks;
 using ByteSync.Views;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
 
-namespace ByteSync.ViewModels.Sessions.Members;
+namespace ByteSync.ViewModels.TrustedNetworks;
 
 public class AddTrustedClientViewModel : FlyoutElementViewModel
 {

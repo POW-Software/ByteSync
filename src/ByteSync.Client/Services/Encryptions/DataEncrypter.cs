@@ -35,12 +35,12 @@ public class DataEncrypter : IDataEncrypter
 
     public EncryptedDataSource EncryptDataSource(DataSource dataSource)
     {
-        return Encrypt<EncryptedDataSource>(dataSource);
+        return Encrypt<EncryptedDataSource>(dataSource, dataSource.Id);
     }
 
     public EncryptedDataNode EncryptDataNode(DataNode dataNode)
     {
-        return Encrypt<EncryptedDataNode>(dataNode);
+        return Encrypt<EncryptedDataNode>(dataNode, dataNode.Id);
     }
 
     public DataSource DecryptDataSource(EncryptedDataSource encryptedDataSource)
@@ -63,7 +63,7 @@ public class DataEncrypter : IDataEncrypter
         return Decrypt<SessionMemberPrivateData>(encryptedSessionMemberPrivateData);
     }
 
-    public T Encrypt<T>(object data) where T : IEncryptedSessionData, new()
+    private T Encrypt<T>(object data, string? id = null) where T : IEncryptedSessionData, new()
     {
         var aes = Aes.Create();
         aes.Key = _cloudSessionConnectionRepository.GetAesEncryptionKey()!;
@@ -80,7 +80,7 @@ public class DataEncrypter : IDataEncrypter
         }
         
         var encryptedData = new T();
-        encryptedData.Id = Guid.NewGuid().ToString();
+        encryptedData.Id = id ?? Guid.NewGuid().ToString();
         encryptedData.IV = aes.IV;
         encryptedData.Data = ms.ToArray();
 

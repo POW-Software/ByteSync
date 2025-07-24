@@ -61,6 +61,7 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
         }, transaction);
 
         List<EncryptedDataSource>? dataSources = null;
+        List<EncryptedDataNode>? dataNodes = null;
         if (updateSessionResult.IsWaitingForTransaction)
         {
             await _inventoryRepository.UpdateIfExists(request.SessionId, inventoryData =>
@@ -69,6 +70,7 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
                 if (inventoryMember != null)
                 {
                     dataSources = inventoryMember.DataSources.ToList();
+                    dataNodes = inventoryMember.DataNodes.ToList();
                     inventoryData.InventoryMembers.Remove(inventoryMember);
                 }
 
@@ -110,6 +112,15 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
                 {            
                     var dataSourceDto = new DataSourceDTO(request.SessionId, request.ClientInstanceId, dataSource);
                     await _invokeClientsService.SessionGroup(request.SessionId).DataSourceRemoved(dataSourceDto);
+                }
+            }
+            
+            if (dataNodes != null)
+            {
+                foreach (var dataNode in dataNodes)
+                {            
+                    var dataNodeDto = new DataNodeDTO(request.SessionId, request.ClientInstanceId, dataNode);
+                    await _invokeClientsService.SessionGroup(request.SessionId).DataNodeRemoved(dataNodeDto);
                 }
             }
         }

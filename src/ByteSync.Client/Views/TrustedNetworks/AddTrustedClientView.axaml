@@ -4,12 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:misc="clr-namespace:ByteSync.Views.Misc"
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
-             xmlns:members="clr-namespace:ByteSync.ViewModels.Sessions.Members"
+             xmlns:trustedNetworks="clr-namespace:ByteSync.ViewModels.TrustedNetworks"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="800"
-             x:Class="ByteSync.Views.Sessions.Members.AddTrustedClientView">
+             x:Class="ByteSync.Views.TrustedNetworks.AddTrustedClientView">
    
     <Design.DataContext>
-        <members:AddTrustedClientViewModel />
+        <trustedNetworks:AddTrustedClientViewModel />
     </Design.DataContext>
     
     <UserControl.Styles>

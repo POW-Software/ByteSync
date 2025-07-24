@@ -92,7 +92,7 @@ public class ComparisonResultPreparer
             
             var dataNode = new DataNode
             {
-                NodeId = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid().ToString(),
                 ClientInstanceId = sessionMemberInfo.ClientInstanceId,
                 Code = inventoryData.Letter + "1"
             };
