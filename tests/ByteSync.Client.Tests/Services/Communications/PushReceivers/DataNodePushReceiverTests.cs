@@ -20,7 +20,6 @@ public class DataNodePushReceiverTests
     private Mock<IDataEncrypter> _dataEncrypterMock = null!;
     private Mock<IHubPushHandler2> _hubPushHandlerMock = null!;
     private Mock<IDataNodeService> _dataNodeServiceMock = null!;
-    private Mock<IDataNodeCodeGenerator> _codeGeneratorMock = null!;
 
     [SetUp]
     public void SetUp()
@@ -33,13 +32,12 @@ public class DataNodePushReceiverTests
         _dataEncrypterMock = new Mock<IDataEncrypter>();
         _hubPushHandlerMock = new Mock<IHubPushHandler2>();
         _dataNodeServiceMock = new Mock<IDataNodeService>();
-        _codeGeneratorMock = new Mock<IDataNodeCodeGenerator>();
 
         _hubPushHandlerMock.SetupGet(h => h.DataNodeAdded).Returns(_addedSubject);
         _hubPushHandlerMock.SetupGet(h => h.DataNodeRemoved).Returns(_removedSubject);
 
         _ = new DataNodePushReceiver(_sessionServiceMock.Object, _dataEncrypterMock.Object,
-            _hubPushHandlerMock.Object, _dataNodeServiceMock.Object, _codeGeneratorMock.Object);
+            _hubPushHandlerMock.Object, _dataNodeServiceMock.Object);
     }
 
     [Test]
@@ -53,7 +51,6 @@ public class DataNodePushReceiverTests
         _addedSubject.OnNext(dto);
 
         _dataNodeServiceMock.Verify(s => s.ApplyAddDataNodeLocally(It.Is<DataNode>(d => d == node && d.ClientInstanceId == dto.ClientInstanceId)), Times.Once);
-        _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
 
     [Test]
@@ -67,6 +64,5 @@ public class DataNodePushReceiverTests
         _removedSubject.OnNext(dto);
 
         _dataNodeServiceMock.Verify(s => s.ApplyRemoveDataNodeLocally(It.Is<DataNode>(d => d == node && d.ClientInstanceId == dto.ClientInstanceId)), Times.Once);
-        _codeGeneratorMock.Verify(g => g.RecomputeCodes(), Times.Once);
     }
 }

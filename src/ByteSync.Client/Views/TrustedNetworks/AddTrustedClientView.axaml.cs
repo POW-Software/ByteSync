@@ -1,7 +1,7 @@
 ﻿using Avalonia.ReactiveUI;
-using ByteSync.ViewModels.Sessions.Members;
+using ByteSync.ViewModels.TrustedNetworks;
 
-namespace ByteSync.Views.Sessions.Members;
+namespace ByteSync.Views.TrustedNetworks;
 
 public partial class AddTrustedClientView : ReactiveUserControl<AddTrustedClientViewModel>
 {

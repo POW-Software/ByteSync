@@ -22,23 +22,23 @@ public class InventoryBuilderFactory : IInventoryBuilderFactory
         _context = context;
     }
     
-    public IInventoryBuilder CreateInventoryBuilder()
+    public IInventoryBuilder CreateInventoryBuilder(DataNode dataNode)
     {
         var sessionMemberRepository = _context.Resolve<ISessionMemberRepository>();
         var sessionService = _context.Resolve<ISessionService>();
         var inventoryService = _context.Resolve<IInventoryService>();
         var environmentService = _context.Resolve<IEnvironmentService>();
         var dataSourceRepository = _context.Resolve<IDataSourceRepository>();
-        var dataNodeRepository = _context.Resolve<IDataNodeRepository>();
         
         var sessionMember = sessionMemberRepository.GetCurrentSessionMember();
         var cloudSessionSettings = sessionService.CurrentSessionSettings!;
-        var myDataSources = dataSourceRepository.SortedCurrentMemberDataSources;
-        var myDataNode = dataNodeRepository.SortedCurrentMemberDataNodes.First();
+        var myDataSources = dataSourceRepository.SortedCurrentMemberDataSources
+            .Where(ds => ds.DataNodeId == dataNode.Id)
+            .ToList();
         
         var inventoryBuilder = _context.Resolve<IInventoryBuilder>(
             new TypedParameter(typeof(SessionMember), sessionMember),
-            new TypedParameter(typeof(DataNode), myDataNode),
+            new TypedParameter(typeof(DataNode), dataNode),
             new TypedParameter(typeof(SessionSettings), cloudSessionSettings),
             new TypedParameter(typeof(InventoryProcessData), inventoryService.InventoryProcessData),
             new TypedParameter(typeof(OSPlatforms), environmentService.OSPlatform),

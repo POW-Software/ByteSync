@@ -73,9 +73,9 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         IsResultLoadingError = false;
         AreResultsLoaded = false;
         
-        IsColumnBVisible = true;
-        IsColumnCVisible = true;
-        IsColumnDVisible = true;
+        IsColumn2Visible = true;
+        IsColumn3Visible = true;
+        IsColumn4Visible = true;
         
         SelectedItems = new ObservableCollection<ComparisonItemViewModel>();
 
@@ -191,31 +191,31 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     public string? PathHeader { get; set; }
 
     [Reactive]
-    public string? InventoryAName { get; set; }
+    public string? Inventory1Name { get; set; }
 
     [Reactive]
-    public string? InventoryBName { get; set; }
+    public string? Inventory2Name { get; set; }
 
     [Reactive]
-    public string? InventoryCName { get; set; }
+    public string? Inventory3Name { get; set; }
 
     [Reactive]
-    public string? InventoryDName { get; set; }
+    public string? Inventory4Name { get; set; }
 
     [Reactive]
-    public string? InventoryEName { get; set; }
+    public string? Inventory5Name { get; set; }
 
     [Reactive]
-    public bool IsColumnBVisible { get; set; }
+    public bool IsColumn2Visible { get; set; }
     
     [Reactive]
-    public bool IsColumnCVisible { get; set; }
+    public bool IsColumn3Visible { get; set; }
 
     [Reactive]
-    public bool IsColumnDVisible { get; set; }
+    public bool IsColumn4Visible { get; set; }
 
     [Reactive]
-    public bool IsColumnEVisible { get; set; }
+    public bool IsColumn5Visible { get; set; }
 
     [Reactive]
     public bool IsEditionEnabled { get; set; }
@@ -269,8 +269,6 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
 
     private void SetColumnsNameAndVisibility(ComparisonResult comparisonResult)
     {
-        var inventoryWord = _localizationService[nameof(Resources.ComparisonResult_Inventory)];
-        
         var pathHeader = _sessionService.CurrentSessionSettings!.DataType switch
         {
             DataTypes.Files => _localizationService[nameof(Resources.General_File)],
@@ -280,60 +278,43 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         };
         PathHeader = pathHeader.ToUpper();
 
-        InventoryAName = $"{inventoryWord} A ({ComputeColumnInventoryDescription(0, comparisonResult)})";
+        Inventory1Name = ComputeColumnInventoryDescription(0, comparisonResult);
 
-        IsColumnBVisible = comparisonResult.Inventories.Count > 1;
+        IsColumn2Visible = comparisonResult.Inventories.Count > 1;
         if (comparisonResult.Inventories.Count > 1)
         {
-            InventoryBName = $"{inventoryWord} B ({ComputeColumnInventoryDescription(1, comparisonResult)})";
+            Inventory2Name = ComputeColumnInventoryDescription(1, comparisonResult);
         }
 
-        IsColumnCVisible = comparisonResult.Inventories.Count > 2;
+        IsColumn3Visible = comparisonResult.Inventories.Count > 2;
         if (comparisonResult.Inventories.Count > 2)
         {
-            InventoryCName = $"{inventoryWord} C ({ComputeColumnInventoryDescription(2, comparisonResult)})";
+            Inventory3Name = ComputeColumnInventoryDescription(2, comparisonResult);
         }
 
-        IsColumnDVisible = comparisonResult.Inventories.Count > 3;
+        IsColumn4Visible = comparisonResult.Inventories.Count > 3;
         if (comparisonResult.Inventories.Count > 3)
         {
-            InventoryDName = $"{inventoryWord} D ({ComputeColumnInventoryDescription(3, comparisonResult)})";
+            Inventory4Name = ComputeColumnInventoryDescription(3, comparisonResult);
         }
 
-        IsColumnEVisible = comparisonResult.Inventories.Count > 4;
+        IsColumn5Visible = comparisonResult.Inventories.Count > 4;
         if (comparisonResult.Inventories.Count > 4)
         {
-            InventoryEName = $"{inventoryWord} E ({ComputeColumnInventoryDescription(3, comparisonResult)})";
+            Inventory5Name = ComputeColumnInventoryDescription(4, comparisonResult);
         }
     }
     
     private string ComputeColumnInventoryDescription(int inventoryIndex, ComparisonResult comparisonResult)
     {
-        if (_sessionService.IsCloudSession)
-        {
-        #if DEBUG
-            if (Environment.GetCommandLineArgs().Contains(DebugArguments.SHOW_DEMO_DATA))
-            {
-                var result = $"MACHINE_NAME_{inventoryIndex + 1}";
-                return result;
-            }
-        #endif
-                
-            return comparisonResult.Inventories[inventoryIndex].MachineName;
-        }
-        else
-        {
-            var result = comparisonResult.Inventories[inventoryIndex].InventoryParts[0].RootPath
-                .Trim('\\', '/');
-            
-            const int maxLength = 30;
-            if (result.Length > maxLength)
-            {
-                result = result.Substring(0, 12).Trim() + "..." + comparisonResult.Inventories[inventoryIndex].InventoryParts[0].RootName;
-            }
-
-            return result;
-        }
+        var inventoryWord = _localizationService[nameof(Resources.ComparisonResult_Inventory)];
+        
+        var inventory = comparisonResult.Inventories[inventoryIndex];
+        var description = comparisonResult.Inventories.Count == 1 ? string.Empty : inventory.MachineName;
+        
+        return string.IsNullOrEmpty(description) 
+            ? $"{inventoryWord} {inventory.Code}"
+            : $"{inventoryWord} {inventory.Code} ({description})";
     }
     
     private void AddManualAction()

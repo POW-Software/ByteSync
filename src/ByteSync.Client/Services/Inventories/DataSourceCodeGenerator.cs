@@ -1,4 +1,3 @@
-using ByteSync.Business.DataNodes;
 using ByteSync.Business.DataSources;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Repositories;
@@ -34,7 +33,7 @@ public class DataSourceCodeGenerator : IDataSourceCodeGenerator, IDisposable
             {
                 foreach (var change in changes)
                 {
-                    RecomputeCodesForNode(change.Current.NodeId);
+                    RecomputeCodesForNode(change.Current.Id);
                 }
             });
     }
