@@ -53,14 +53,16 @@ public class FullInventoryRunner : IFullInventoryRunner
                 inventoriesBuildersAndItems.Add(new (inventoryBuilder, items));
             }
 
-            foreach (var tuple in inventoriesBuildersAndItems)
-            {
-                var inventoryBuilder = tuple.Item1;
-                var items = tuple.Item2;
+            await Parallel.ForEachAsync(inventoriesBuildersAndItems, 
+                new ParallelOptions { MaxDegreeOfParallelism = 2, CancellationToken = InventoryProcessData.CancellationTokenSource.Token}, 
+                async (tuple, token) =>
+                {
+                    var inventoryBuilder = tuple.Item1;
+                    var items = tuple.Item2;
 
-                var fullInventoryFullName = _cloudSessionLocalDataManager.GetCurrentMachineInventoryPath(inventoryBuilder.InventoryCode, LocalInventoryModes.Full);
-                await inventoryBuilder.RunAnalysisAsync(fullInventoryFullName, items, InventoryProcessData.CancellationTokenSource.Token);
-            }
+                    var fullInventoryFullName = _cloudSessionLocalDataManager.GetCurrentMachineInventoryPath(inventoryBuilder.InventoryCode, LocalInventoryModes.Full);
+                    await inventoryBuilder.RunAnalysisAsync(fullInventoryFullName, items, token);
+                });
             
             if (!InventoryProcessData.CancellationTokenSource.Token.IsCancellationRequested)
             {

@@ -231,5 +231,25 @@
       <DependentUpon>AnnouncementView.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Sessions\DataNodes\DataNodeHeaderView.axaml.cs">
+      <DependentUpon>DataNodeHeaderView.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Sessions\DataNodes\DataNodeSourcesView.axaml.cs">
+      <DependentUpon>DataNodeSourcesView.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Sessions\DataNodes\DataNodeStatusView.axaml.cs">
+      <DependentUpon>DataNodeStatusView.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Sessions\DataNodes\DataNodeView.axaml.cs">
+      <DependentUpon>DataNodeView.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\TrustedNetworks\AddTrustedClientView.axaml.cs">
+      <DependentUpon>AddTrustedClientView.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

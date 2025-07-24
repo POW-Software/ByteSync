@@ -1,6 +1,6 @@
 ﻿using ByteSync.Business.DataNodes;
 using ByteSync.Business.SessionMembers;
-using ByteSync.ViewModels.Sessions.Members;
+using ByteSync.ViewModels.Sessions.DataNodes;
 
 namespace ByteSync.Interfaces.Factories.ViewModels;
 

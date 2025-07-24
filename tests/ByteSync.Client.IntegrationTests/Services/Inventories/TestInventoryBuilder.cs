@@ -754,7 +754,7 @@ public class TestInventoryBuilder : IntegrationTest
         
         var dataNode = new DataNode
         {
-            NodeId = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid().ToString(),
             ClientInstanceId = sessionMemberInfo.ClientInstanceId,
             Code = "Code"
         };

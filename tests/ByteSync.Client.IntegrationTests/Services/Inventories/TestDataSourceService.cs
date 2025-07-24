@@ -200,7 +200,7 @@ public class TestDataSourceService : IntegrationTest
         };
         var dataNode = new DataNode
         {
-            NodeId = "test-node-id",
+            Id = "test-node-id",
             ClientInstanceId = _currentEndPoint.ClientInstanceId
         };
         

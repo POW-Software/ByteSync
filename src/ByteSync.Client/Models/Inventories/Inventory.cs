@@ -14,6 +14,8 @@ public class Inventory
     public ByteSyncEndpoint Endpoint { get; set; } = null!;
         
     public string Code { get; set; } = null!;
+    
+    public string NodeId { get; set; }
 
     public DateTimeOffset StartDateTime { get; set; }
         

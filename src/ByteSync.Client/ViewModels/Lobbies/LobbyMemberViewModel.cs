@@ -51,6 +51,7 @@ public class LobbyMemberViewModel : ActivatableViewModelBase
         {
             var dataSource = new DataSource
             {
+                Id = Guid.NewGuid().ToString(),
                 Code = sessionProfileDataSource.Code,
                 Type = sessionProfileDataSource.Type,
                 Path = sessionProfileDataSource.Path,

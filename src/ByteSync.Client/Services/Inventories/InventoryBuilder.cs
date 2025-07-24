@@ -13,7 +13,6 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Comparisons;
-using ByteSync.Services.Sessions;
 
 namespace ByteSync.Services.Inventories;
 
@@ -53,7 +52,8 @@ public class InventoryBuilder : IInventoryBuilder
             
         inventory.Endpoint = SessionMember.Endpoint;
         inventory.MachineName = SessionMember.MachineName;
-        inventory.Code = InventoryCode!;
+        inventory.Code = InventoryCode;
+        inventory.NodeId = DataNode.Id;
 
         return inventory;
     }
@@ -267,8 +267,8 @@ public class InventoryBuilder : IInventoryBuilder
             }
                 
             // https://stackoverflow.com/questions/1485155/check-if-a-file-is-real-or-a-symbolic-link
-            // Exemple pour créer un symlink :
-            //  - Windows: New-Item -ItemType SymbolicLink -Path  C:\Users\paulf\Desktop\testVide\SL -Target C:\Users\paulf\Desktop\testA_
+            // Example to create a symlink :
+            //  - Windows: New-Item -ItemType SymbolicLink -Path \path\to\symlink -Target \path\to\target
             if (subDirectory.Attributes.HasFlag(FileAttributes.ReparsePoint))
             {
                 _logger.LogWarning("Directory {Directory} is ignored because it has flag 'ReparsePoint'", subDirectory.FullName);
@@ -325,11 +325,11 @@ public class InventoryBuilder : IInventoryBuilder
         }
             
         // https://stackoverflow.com/questions/1485155/check-if-a-file-is-real-or-a-symbolic-link
-        // Exemple pour créer un symlink :
-        //  - Windows: New-Item -ItemType SymbolicLink -Path  C:\Users\paulf\Desktop\testVide\SL -Target C:\Users\paulf\Desktop\testA_
+        // Example to create a symlink :
+        //  - Windows: New-Item -ItemType SymbolicLink -Path \path\to\symlink -Target \path\to\target
         if (fileInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
         {
-            _logger.LogWarning("File {File} is ignored because it has flag 'ReparsePoint'. It might be a symolic link", fileInfo.FullName);
+            _logger.LogWarning("File {File} is ignored because it has flag 'ReparsePoint'. It might be a symbolic link", fileInfo.FullName);
             return;
         }
 
@@ -361,7 +361,8 @@ public class InventoryBuilder : IInventoryBuilder
 
     private void AddFileSystemDescription(InventoryPart inventoryPart, FileSystemDescription fileSystemDescription)
     {
-        if (fileSystemDescription.RelativePath.IsNotEmpty())
+        if (fileSystemDescription.RelativePath.IsNotEmpty() 
+            && !fileSystemDescription.RelativePath.Equals(IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR.ToString()))
         {
             inventoryPart.AddFileSystemDescription(fileSystemDescription);
 

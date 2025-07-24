@@ -5,7 +5,7 @@ namespace ByteSync.TestsCommon;
 
 public abstract class AbstractTester
 {
-    private const string TEST_DIRECTORY_NAME = "POW_Unit_Tests";
+    private const string TEST_DIRECTORY_NAME = "ByteSync_Automated_Tests";
 
     protected static object _staticSyncRoot = new object();
 
@@ -17,30 +17,17 @@ public abstract class AbstractTester
     {
         SyncRoot = new object();
         
-        // Permet que les Console.WriteLine soient publiés en temps réel
+        // Enables Console.WriteLine to be published in real time
         // https://youtrack.jetbrains.com/issue/RIDER-40359
         Console.SetOut(TestContext.Progress);
     }
-
-    /// <summary>
-    /// Crée un répertoire Windows qui pourra contenir des fichiers pour les tests.
-    /// Si D: existe, crée le dossier D:\POW_Unit_Tests,
-    /// Sinon, crée le dossier POW_Unit_Tests dans le répertoire utilisateur
-    /// </summary>
+    
     protected virtual void CreateTestDirectory()
     {
         lock (_staticSyncRoot)
         {
-            string testDirectoryFullName;
-            if (Directory.Exists(@"D:\"))
-            {
-                testDirectoryFullName = @"D:\" + TEST_DIRECTORY_NAME;
-            }
-            else
-            {
-                testDirectoryFullName = Environment.GetFolderPath(Environment.SpecialFolder.Personal) +
-                                        Path.DirectorySeparatorChar + TEST_DIRECTORY_NAME;
-            }
+            string testDirectoryFullName = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) +
+                                           Path.DirectorySeparatorChar + TEST_DIRECTORY_NAME;
             
             testDirectoryFullName = IOUtils.Combine(testDirectoryFullName, MiscUtils.CreateGUID());
 
