@@ -115,8 +115,11 @@ public class AddDataSourceCommandHandlerTests
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
         var encryptedDataSource = new EncryptedDataSource { Id = "dataSource1" };
         var inventoryData = new InventoryEntity(sessionId);
-        inventoryData.InventoryMembers.Add(new InventoryMemberEntity
-            { ClientInstanceId = client.ClientInstanceId, DataSources = [ encryptedDataSource ] });
+        var inventoryMember = new InventoryMemberEntity { ClientInstanceId = client.ClientInstanceId };
+        var dataNode = new InventoryDataNodeEntity { Id = "dataNodeId" };
+        dataNode.DataSources.Add(new InventoryDataSourceEntity(encryptedDataSource));
+        inventoryMember.DataNodes.Add(dataNode);
+        inventoryData.InventoryMembers.Add(inventoryMember);
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));
@@ -124,14 +127,15 @@ public class AddDataSourceCommandHandlerTests
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored))
             .Invokes((string _, Func<InventoryEntity, InventoryEntity> func) => func(inventoryData));
 
-        var request = new AddDataSourceRequest(sessionId, client, client.ClientInstanceId, "dateNodeId", encryptedDataSource);
+        var request = new AddDataSourceRequest(sessionId, client, client.ClientInstanceId, "dataNodeId", encryptedDataSource);
         
         // Act
         await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         inventoryData.InventoryMembers.Count.Should().Be(1);
-        inventoryData.InventoryMembers[0].DataSources.Count.Should().Be(1);
+        inventoryData.InventoryMembers[0].DataNodes.Count.Should().Be(1);
+        inventoryData.InventoryMembers[0].DataNodes[0].DataSources.Count.Should().Be(1);
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored)).MustHaveHappenedOnceExactly();
     }
 }

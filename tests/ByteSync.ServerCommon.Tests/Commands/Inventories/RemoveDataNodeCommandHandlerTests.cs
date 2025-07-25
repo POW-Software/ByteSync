@@ -72,7 +72,9 @@ public class RemoveDataNodeCommandHandlerTests
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
         var encryptedDataNode = new EncryptedDataNode{ Id = "dataNode1" };
         var inventoryData = new InventoryEntity(sessionId);
-        inventoryData.InventoryMembers.Add(new InventoryMemberEntity { ClientInstanceId = client.ClientInstanceId, DataNodes = [ encryptedDataNode ], DataSources = [] });
+        inventoryData.InventoryMembers.Add(new InventoryMemberEntity { ClientInstanceId = client.ClientInstanceId });
+        var dataNode = new InventoryDataNodeEntity(encryptedDataNode);
+        inventoryData.InventoryMembers[0].DataNodes.Add(dataNode);
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));

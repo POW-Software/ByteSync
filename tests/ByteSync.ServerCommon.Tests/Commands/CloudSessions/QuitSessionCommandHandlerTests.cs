@@ -244,8 +244,10 @@ public class QuitSessionCommandHandlerTests
         var inventoryMember = new InventoryMemberEntity { ClientInstanceId = "clientInstance1" };
         var dataSource1 = new EncryptedDataSource { Id = "path1", Data = new byte[] { 1, 2, 3 }, IV = new byte[] { 4, 5, 6 } };
         var dataSource2 = new EncryptedDataSource { Id = "path2", Data = new byte[] { 7, 8, 9 }, IV = new byte[] { 10, 11, 12 } };
-        inventoryMember.DataSources.Add(dataSource1);
-        inventoryMember.DataSources.Add(dataSource2);
+        var dataNode = new InventoryDataNodeEntity { Id = "dataNodeId" };
+        dataNode.DataSources.Add(new InventoryDataSourceEntity(dataSource1));
+        dataNode.DataSources.Add(new InventoryDataSourceEntity(dataSource2));
+        inventoryMember.DataNodes.Add(dataNode);
         inventoryData.InventoryMembers.Add(inventoryMember);
         
         var synchronizationEntity = new SynchronizationEntity
@@ -319,8 +321,8 @@ public class QuitSessionCommandHandlerTests
         var inventoryMember = new InventoryMemberEntity { ClientInstanceId = "clientInstance1" };
         var dataNode1 = new EncryptedDataNode { Id = "node1", Data = new byte[] { 1, 2, 3 }, IV = new byte[] { 4, 5, 6 } };
         var dataNode2 = new EncryptedDataNode { Id = "node2", Data = new byte[] { 7, 8, 9 }, IV = new byte[] { 10, 11, 12 } };
-        inventoryMember.DataNodes.Add(dataNode1);
-        inventoryMember.DataNodes.Add(dataNode2);
+        inventoryMember.DataNodes.Add(new InventoryDataNodeEntity(dataNode1));
+        inventoryMember.DataNodes.Add(new InventoryDataNodeEntity(dataNode2));
         inventoryData.InventoryMembers.Add(inventoryMember);
         
         var synchronizationEntity = new SynchronizationEntity
