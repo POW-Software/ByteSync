@@ -46,10 +46,19 @@ public class RemoveDataSourceCommandHandler : IRequestHandler<RemoveDataSourceRe
             if (!inventoryData.IsInventoryStarted)
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, request.SessionId, request.Client);
+                
+                var dataNode = inventoryMember.DataNodes.SingleOrDefault(n => n.Id == request.DataNodeId);
 
-                inventoryMember.DataSources.RemoveAll(p => p.Id == request.EncryptedDataSource.Id);
-
-                return inventoryData;
+                if (dataNode != null)
+                {
+                    dataNode.DataSources.RemoveAll(p => p.Id == request.EncryptedDataSource.Id);
+                    return inventoryData;
+                }
+                else
+                {
+                    _logger.LogWarning("RemoveDataSource: DataNode {dataNodeId} not found in session {sessionId}", request.DataNodeId, request.SessionId);
+                    return null;
+                }
             }
             else
             {

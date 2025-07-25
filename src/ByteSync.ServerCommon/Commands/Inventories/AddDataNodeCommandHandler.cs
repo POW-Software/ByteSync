@@ -51,7 +51,7 @@ public class AddDataNodeCommandHandler : IRequestHandler<AddDataNodeRequest, boo
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
 
                 inventoryMember.DataNodes.RemoveAll(n => n.Id == encryptedDataNode.Id);
-                inventoryMember.DataNodes.Add(encryptedDataNode);
+                inventoryMember.DataNodes.Add(new InventoryDataNodeEntity(encryptedDataNode));
 
                 return inventoryData;
             }

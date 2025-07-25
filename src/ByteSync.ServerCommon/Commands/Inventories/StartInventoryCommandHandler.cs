@@ -124,7 +124,7 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
                 startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.UnknownError);
             }
             else if (inventoryData.InventoryMembers.Count < cloudSessionData.SessionMembers.Count
-                     || inventoryData.InventoryMembers.Any(imd => imd.DataSources.Count == 0))
+                     || inventoryData.InventoryMembers.Any(imd => imd.DataNodes.Any(dn => dn.DataSources.Count == 0)))
             {
                 startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
             }

@@ -38,7 +38,17 @@ public class GetDataSourcesCommandHandler : IRequestHandler<GetDataSourcesReques
             _logger.LogInformation("GetDataSources: clientInstanceId {clientInstanceId} not found in session {sessionId}", clientInstanceId, sessionId);
             return new List<EncryptedDataSource>();
         }
-
-        return inventoryMember.DataSources.ToList();
+        
+        var dataNode = inventoryMember.DataNodes.Find(n => n.Id == request.DataNodeId);
+        
+        if (dataNode == null)
+        {
+            _logger.LogInformation("GetDataSources: DataNode {dataNodeId} not found in session {sessionId}", request.DataNodeId, sessionId);
+            return new List<EncryptedDataSource>();
+        }
+        else
+        {
+            return dataNode.DataSources.Select(ds => ds.EncryptedDataSource).ToList();
+        }
     }
 }

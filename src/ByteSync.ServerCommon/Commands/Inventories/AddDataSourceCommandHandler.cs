@@ -50,11 +50,21 @@ public class AddDataSourceCommandHandler : IRequestHandler<AddDataSourceRequest,
             if (!inventoryData.IsInventoryStarted)
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
-
-                inventoryMember.DataSources.RemoveAll(p => p.Id == encryptedDataSource.Id);
-                inventoryMember.DataSources.Add(encryptedDataSource);
                 
-                return inventoryData;
+                var dataNode = inventoryMember.DataNodes.SingleOrDefault(n => n.Id == request.DataNodeId);
+
+                if (dataNode != null)
+                {
+                    dataNode.DataSources.RemoveAll(n => n.Id == encryptedDataSource.Id);
+                    dataNode.DataSources.Add(new InventoryDataSourceEntity(encryptedDataSource));
+                    
+                    return inventoryData;
+                }
+                else
+                {
+                    _logger.LogWarning("AddDataSource: session {sessionId} has no data node with id {dataNodeId}", sessionId, request.DataNodeId);
+                    return null;
+                }
             }
             else
             {
