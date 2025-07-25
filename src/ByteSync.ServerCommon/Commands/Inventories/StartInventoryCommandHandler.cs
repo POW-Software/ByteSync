@@ -97,11 +97,7 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
         else
         {
             var cloudSessionData = sessionUpdateResult.Element!;
-            if (cloudSessionData.SessionMembers.Count < 2)
-            {
-                startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.LessThan2Members);
-            }
-            else if (cloudSessionData.SessionMembers.Count > 5)
+            if (cloudSessionData.SessionMembers.Count > 5)
             {
                 startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.MoreThan5Members);
             }
@@ -127,6 +123,14 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
                      || inventoryData.InventoryMembers.Any(imd => imd.DataNodes.Count == 0 || imd.DataNodes.Any(dn => dn.DataSources.Count == 0)))
             {
                 startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
+            }
+            else
+            {
+                var totalDataNodes = inventoryData.InventoryMembers.Sum(imd => imd.DataNodes.Count);
+                if (totalDataNodes > 5)
+                {
+                    startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.MoreThan5DataNodes);
+                }
             }
 
             if (startInventoryResult == null)

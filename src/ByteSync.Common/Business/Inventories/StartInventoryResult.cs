@@ -14,7 +14,7 @@ public enum StartInventoryStatuses
     AtLeastOneMemberWithNoDataToSynchronize = 8,
     LessThan2DataSources = 9,
     MoreThan5DataSources = 10,
-    Unknown_11 = 11,
+    MoreThan5DataNodes = 11,
     Unknown_12 = 12,
     Unknown_13 = 13,
     Unknown_14 = 14,
