@@ -40,9 +40,10 @@ Examples:
 
 ## Build and Test Guidelines
 - Always run build and test as two separate commands to avoid blocking issues.
-- Use `& "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -Command "dotnet build --verbosity minimal /property:WarningLevel=0 > build_output.txt 2>&1"` to build the solution and capture all output including errors (recommended to avoid blocking issues).
-- Alternative: Use `dotnet build --verbosity quiet /property:WarningLevel=0 > build_output.txt 2>&1` with PowerShell 5.
-- To view compilation errors: `Get-Content build_output.txt -Head 20`
-- To count compilation errors: `Get-Content build_output.txt | findstr "error CS" | Measure-Object -Line`
+- On Windows :
+  - Use `& "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -Command "dotnet build --verbosity minimal /property:WarningLevel=0 > build_output.txt 2>&1"` to build the solution and capture all output including errors (recommended to avoid blocking issues).
+  - Alternative: Use `dotnet build --verbosity minimal /property:WarningLevel=0 > build_output.txt 2>&1` with PowerShell 5.
+  - To view compilation errors: `Get-Content build_output.txt -Head 20`
+  - To count compilation errors: `Get-Content build_output.txt | findstr "error CS" | Measure-Object -Line`
 - When running tests, do not use the `--verbosity` modifier.
 - If you need to clean the solution, use `dotnet clean --verbosity quiet` before building.
