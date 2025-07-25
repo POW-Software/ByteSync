@@ -125,6 +125,9 @@ public class InventoryBeforeStartViewModel : ActivatableViewModelBase
             StartInventoryStatuses.LessThan2DataSources => _localizationService[
                 nameof(Resources.InventoryProcess_LessThan2DataSources)],
             
+            StartInventoryStatuses.LessThan2DataNodes => _localizationService[
+                nameof(Resources.InventoryProcess_LessThan2DataNodes)],
+            
             StartInventoryStatuses.MoreThan5DataSources => _localizationService[
                 nameof(Resources.InventoryProcess_MoreThan5DataSources)],
             

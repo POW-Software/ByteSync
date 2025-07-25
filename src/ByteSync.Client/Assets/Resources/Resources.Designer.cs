@@ -2412,6 +2412,12 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
+        public static string InventoryProcess_LessThan2DataNodes {
+            get {
+                return ResourceManager.GetString("InventoryProcess_LessThan2DataNodes", resourceCulture);
+            }
+        }
+        
         public static string InventoryProcess_MoreThan5DataNodes {
             get {
                 return ResourceManager.GetString("InventoryProcess_MoreThan5DataNodes", resourceCulture);

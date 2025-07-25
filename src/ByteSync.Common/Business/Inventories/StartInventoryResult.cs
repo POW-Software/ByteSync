@@ -15,7 +15,7 @@ public enum StartInventoryStatuses
     LessThan2DataSources = 9,
     MoreThan5DataSources = 10,
     MoreThan5DataNodes = 11,
-    Unknown_12 = 12,
+    LessThan2DataNodes = 12,
     Unknown_13 = 13,
     Unknown_14 = 14,
     UnknownError = 30

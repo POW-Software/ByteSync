@@ -6,6 +6,7 @@ This is a C#/.NET solution using .NET 8.
 
 ### Overview
 This repository uses a branch-based development workflow. Please follow the conventions below when working in this project, especially when creating branches, writing PR titles, and generating commits or documentation.
+Agents must not create branches until explicitly instructed to do so by a human.
 
 ### Branch Naming
 Use the following prefixes:
