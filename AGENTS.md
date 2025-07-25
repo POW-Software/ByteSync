@@ -1,9 +1,6 @@
 ## Project Overview
 
-This is a C#/.NET solution using .NET 8. Use `dotnet` commands for building and testing:
-- `dotnet build` - Build the solution
-- `dotnet test` - Run all tests
-- `dotnet restore` - Restore dependencies
+This is a C#/.NET solution using .NET 8.
 
 ## Branch & PR Guidelines
 
@@ -43,6 +40,9 @@ Examples:
 
 ## Build and Test Guidelines
 - Always run build and test as two separate commands to avoid blocking issues.
-- Use `dotnet build --verbosity quiet /property:WarningLevel=0` to build the solution.
+- Use `& "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -Command "dotnet build --verbosity minimal /property:WarningLevel=0 > build_output.txt 2>&1"` to build the solution and capture all output including errors (recommended to avoid blocking issues).
+- Alternative: Use `dotnet build --verbosity quiet /property:WarningLevel=0 > build_output.txt 2>&1` with PowerShell 5.
+- To view compilation errors: `Get-Content build_output.txt -Head 20`
+- To count compilation errors: `Get-Content build_output.txt | findstr "error CS" | Measure-Object -Line`
 - When running tests, do not use the `--verbosity` modifier.
 - If you need to clean the solution, use `dotnet clean --verbosity quiet` before building.
