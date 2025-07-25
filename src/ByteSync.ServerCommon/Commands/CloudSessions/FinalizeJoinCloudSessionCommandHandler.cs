@@ -1,7 +1,6 @@
 ﻿using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Sessions;
-using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Helpers;
 using ByteSync.ServerCommon.Interfaces.Mappers;
 using ByteSync.ServerCommon.Interfaces.Repositories;

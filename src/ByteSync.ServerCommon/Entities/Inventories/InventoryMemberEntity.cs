@@ -1,11 +1,11 @@
 ﻿using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions;
 
-namespace ByteSync.ServerCommon.Business.Sessions;
+namespace ByteSync.ServerCommon.Entities.Inventories;
 
-public class InventoryMemberData
+public class InventoryMemberEntity
 {
-    public InventoryMemberData()
+    public InventoryMemberEntity()
     {
         DataNodes = new List<EncryptedDataNode>();
         DataSources = new List<EncryptedDataSource>();

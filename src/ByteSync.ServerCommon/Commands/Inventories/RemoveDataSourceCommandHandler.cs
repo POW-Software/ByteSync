@@ -1,11 +1,10 @@
 ﻿using ByteSync.Common.Business.Sessions;
-using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System.Linq;
+using ByteSync.ServerCommon.Entities.Inventories;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
@@ -42,7 +41,7 @@ public class RemoveDataSourceCommandHandler : IRequestHandler<RemoveDataSourceRe
 
         var updateEntityResult = await _inventoryRepository.AddOrUpdate(request.SessionId, inventoryData =>
         {
-            inventoryData ??= new InventoryData(request.SessionId);
+            inventoryData ??= new InventoryEntity(request.SessionId);
 
             if (!inventoryData.IsInventoryStarted)
             {

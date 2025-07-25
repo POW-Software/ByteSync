@@ -1,9 +1,8 @@
 ﻿using ByteSync.Common.Business.Sessions;
-using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
-using System.Linq;
+using ByteSync.ServerCommon.Entities.Inventories;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -46,7 +45,7 @@ public class AddDataSourceCommandHandler : IRequestHandler<AddDataSourceRequest,
         
         var updateEntityResult = await _inventoryRepository.AddOrUpdate(sessionId, inventoryData =>
         {
-            inventoryData ??= new InventoryData(sessionId);
+            inventoryData ??= new InventoryEntity(sessionId);
 
             if (!inventoryData.IsInventoryStarted)
             {

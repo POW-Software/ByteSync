@@ -1,5 +1,5 @@
 using ByteSync.Common.Business.Sessions;
-using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Entities.Inventories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
@@ -44,7 +44,7 @@ public class AddDataNodeCommandHandler : IRequestHandler<AddDataNodeRequest, boo
 
         var updateEntityResult = await _inventoryRepository.AddOrUpdate(sessionId, inventoryData =>
         {
-            inventoryData ??= new InventoryData(sessionId);
+            inventoryData ??= new InventoryEntity(sessionId);
 
             if (!inventoryData.IsInventoryStarted)
             {

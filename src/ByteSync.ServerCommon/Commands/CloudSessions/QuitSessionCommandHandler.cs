@@ -6,7 +6,6 @@ using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
-using System.Linq;
 
 namespace ByteSync.ServerCommon.Commands.CloudSessions;
 

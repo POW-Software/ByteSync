@@ -1,4 +1,4 @@
-﻿using ByteSync.ServerCommon.Business.Sessions;
+﻿using ByteSync.ServerCommon.Entities.Inventories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
@@ -31,7 +31,7 @@ public class SetLocalInventoryStatusCommandHandler : IRequestHandler<SetLocalInv
 
         var updateResult = await _inventoryRepository.AddOrUpdate(sessionId, inventoryData =>
         {
-            inventoryData ??= new InventoryData(sessionId);
+            inventoryData ??= new InventoryEntity(sessionId);
 
             var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
                 
