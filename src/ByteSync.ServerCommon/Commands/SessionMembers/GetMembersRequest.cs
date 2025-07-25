@@ -1,7 +1,7 @@
 using ByteSync.Common.Business.Sessions.Cloud;
 using MediatR;
 
-namespace ByteSync.ServerCommon.Commands.CloudSessions;
+namespace ByteSync.ServerCommon.Commands.SessionMembers;
 
 public class GetMembersRequest : IRequest<List<SessionMemberInfoDTO>>
 {

@@ -37,8 +37,6 @@ public class InventoryFunction
         return response;
     }
     
-
-    
     [Function("InventoryAddDataSourceFunction")]
     public async Task<HttpResponseData> AddDataSource(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/inventory/{clientInstanceId}/dataNode/{dataNodeId}/dataSource")] 

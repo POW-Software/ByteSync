@@ -14,23 +14,24 @@ namespace ByteSync.Services.Communications;
 public class PublicKeysTruster : IPublicKeysTruster
 {
     private readonly IEnvironmentService _environmentService;
-    private readonly ICloudSessionApiClient _cloudSessionApiClient;
     private readonly ITrustApiClient _trustApiClient;
     private readonly IPublicKeysManager _publicKeysManager;
     private readonly ITrustProcessPublicKeysRepository _trustProcessPublicKeysRepository;
     private readonly INavigationEventsHub _navigationEventsHub;
+    private readonly ISessionMemberApiClient _sessionMemberApiClient;
     private readonly ILogger<PublicKeysTruster> _logger;
 
-    public PublicKeysTruster(IEnvironmentService environmentService, ICloudSessionApiClient cloudSessionApiClient,
-        ITrustApiClient trustApiClient, IPublicKeysManager publicKeysManager, ITrustProcessPublicKeysRepository trustPublicKeysRepository,
-        INavigationEventsHub navigationEventsHub, ILogger<PublicKeysTruster> logger)
+    public PublicKeysTruster(IEnvironmentService environmentService, ITrustApiClient trustApiClient, 
+        IPublicKeysManager publicKeysManager, ITrustProcessPublicKeysRepository trustPublicKeysRepository,
+        INavigationEventsHub navigationEventsHub, ISessionMemberApiClient sessionMemberApiClient, 
+        ILogger<PublicKeysTruster> logger)
     {
         _environmentService = environmentService;
-        _cloudSessionApiClient = cloudSessionApiClient;
         _trustApiClient = trustApiClient;
         _publicKeysManager = publicKeysManager;
         _trustProcessPublicKeysRepository = trustPublicKeysRepository;
         _navigationEventsHub = navigationEventsHub;
+        _sessionMemberApiClient = sessionMemberApiClient;
         _logger = logger;
     }
     
@@ -41,7 +42,7 @@ public class PublicKeysTruster : IPublicKeysTruster
     
     public async Task<List<string>?> TrustMissingMembersPublicKeys(string sessionId, CancellationToken cancellationToken = default)
     {
-        var membersClientInstanceIds = await _cloudSessionApiClient.GetMembersClientInstanceIds(sessionId, cancellationToken);
+        var membersClientInstanceIds = await _sessionMemberApiClient.GetMembersClientInstanceIds(sessionId, cancellationToken);
 
         var nonFullyTrustedMembersIds = new List<string>();
         foreach (var memberInstanceId in membersClientInstanceIds)
@@ -206,7 +207,7 @@ public class PublicKeysTruster : IPublicKeysTruster
     {
         if (memberIdsToCheck == null)
         {
-            var sessionMemberInstanceIds = await _cloudSessionApiClient.GetMembersClientInstanceIds(sessionId, cancellationToken);
+            var sessionMemberInstanceIds = await _sessionMemberApiClient.GetMembersClientInstanceIds(sessionId, cancellationToken);
             
             memberIdsToCheck = new List<string>(sessionMemberInstanceIds);
         }

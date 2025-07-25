@@ -16,10 +16,32 @@ public class SessionMemberFunction
     {
         _mediator = mediator;
     }
+    
+    [Function("GetMembersInstanceIdsFunction")]
+    public async Task<HttpResponseData> GetMembersInstanceIds(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/members/InstanceIds")] HttpRequestData req,
+        FunctionContext executionContext, string sessionId)
+    {
+        var result = await _mediator.Send(new GetMembersInstanceIdsRequest(sessionId));
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+        return response;
+    }
+    
+    [Function("GetMembersFunction")]
+    public async Task<HttpResponseData> GetMembers(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/members")] HttpRequestData req,
+        FunctionContext executionContext, string sessionId)
+    {
+        var result = await _mediator.Send(new GetMembersRequest(sessionId));
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+        return response;
+    }
 
     [Function("SessionMemberSetGeneralStatusFunction")]
     public async Task<HttpResponseData> SetGeneralStatus(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/sessionMember/{clientInstanceId}/generalStatus")] 
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/members/{clientInstanceId}/generalStatus")] 
         HttpRequestData req,
         FunctionContext executionContext,
         string sessionId)

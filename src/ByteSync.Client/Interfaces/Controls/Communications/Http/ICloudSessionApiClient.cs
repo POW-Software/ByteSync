@@ -14,8 +14,6 @@ public interface ICloudSessionApiClient
 
     Task ResetCloudSession(string sessionId);
     
-    Task<List<string>> GetMembersClientInstanceIds(string sessionId, CancellationToken cancellationToken = default);
-    
     Task<JoinSessionResult> AskPasswordExchangeKey(AskCloudSessionPasswordExchangeKeyParameters parameters, 
         CancellationToken cancellationToken = default);
     
@@ -33,6 +31,4 @@ public interface ICloudSessionApiClient
     Task InformPasswordIsWrong(string sessionId, string joinerInstanceId);
     
     Task UpdateSettings(string sessionId, EncryptedSessionSettings encryptedSessionSettings);
-
-    Task<List<SessionMemberInfoDTO>> GetMembers(string sessionId);
 }

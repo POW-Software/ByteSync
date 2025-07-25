@@ -16,7 +16,6 @@ namespace ByteSync.Services.Sessions.Connecting;
 
 public class AfterJoinSessionService : IAfterJoinSessionService
 {
-    private readonly ICloudSessionApiClient _cloudSessionApiClient;
     private readonly ISessionService _sessionService;
     private readonly ISessionMemberService _sessionMemberService;
     private readonly IDataNodeService _dataNodeService;
@@ -30,10 +29,10 @@ public class AfterJoinSessionService : IAfterJoinSessionService
     private readonly IQuitSessionService _quitSessionService;
     private readonly IDataSourceRepository _dataSourceRepository;
     private readonly IDataNodeRepository _dataNodeRepository;
+    private readonly ISessionMemberApiClient _sessionMemberApiClient;
     private readonly ILogger<AfterJoinSessionService> _logger;
 
     public AfterJoinSessionService(
-        ICloudSessionApiClient cloudSessionApiClient,
         ISessionService sessionService,
         ISessionMemberService sessionMemberService,
         IDataNodeService dataNodeService,  
@@ -47,9 +46,9 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         IQuitSessionService quitSessionService,
         IDataSourceRepository dataSourceRepository,
         IDataNodeRepository dataNodeRepository,
+        ISessionMemberApiClient sessionMemberApiClient,
         ILogger<AfterJoinSessionService> logger)
     {
-        _cloudSessionApiClient = cloudSessionApiClient;
         _sessionService = sessionService;
         _sessionMemberService = sessionMemberService;
         _dataNodeService = dataNodeService;
@@ -63,12 +62,13 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         _quitSessionService = quitSessionService;
         _dataSourceRepository = dataSourceRepository;
         _dataNodeRepository = dataNodeRepository;
+        _sessionMemberApiClient = sessionMemberApiClient;
         _logger = logger;
     }
     
     public async Task Process(AfterJoinSessionRequest request)
     {
-        var sessionMemberInfoDtos = await _cloudSessionApiClient.GetMembers(request.CloudSessionResult.SessionId);
+        var sessionMemberInfoDtos = await _sessionMemberApiClient.GetMembers(request.CloudSessionResult.SessionId);
         
         await CheckOtherMembersAreTrustedAndChecked(request, sessionMemberInfoDtos);
 
