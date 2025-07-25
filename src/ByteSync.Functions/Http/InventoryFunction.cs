@@ -37,24 +37,7 @@ public class InventoryFunction
         return response;
     }
     
-    [Function("InventorySetLocalInventoryStatusFunction")]
-    public async Task<HttpResponseData> SetLocalInventoryStatus(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/inventory/{clientInstanceId}/localStatus")] 
-        HttpRequestData req,
-        FunctionContext executionContext,
-        string sessionId)
-    {
-        var client = FunctionHelper.GetClientFromContext(executionContext);
-        var localInventoryStatusParameters = await FunctionHelper.DeserializeRequestBody<UpdateSessionMemberGeneralStatusParameters>(req);
-            
-        var request = new SetLocalInventoryStatusRequest(client, localInventoryStatusParameters);
-        var result = await _mediator.Send(request);
 
-        var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
-        
-        return response;
-    }
     
     [Function("InventoryAddDataSourceFunction")]
     public async Task<HttpResponseData> AddDataSource(

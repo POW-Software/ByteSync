@@ -1,8 +1,8 @@
-﻿using ByteSync.Common.Business.Sessions;
+using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
-using ByteSync.ServerCommon.Commands.Inventories;
+using ByteSync.ServerCommon.Commands.SessionMembers;
 using ByteSync.ServerCommon.Entities.Inventories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
@@ -12,31 +12,31 @@ using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.ServerCommon.Tests.Commands.Inventories;
+namespace ByteSync.ServerCommon.Tests.Commands.SessionMembers;
 
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
-public class SetLocalInventoryStatusCommandHandlerTests
+public class SetGeneralStatusCommandHandlerTests
 {
     private readonly IInventoryRepository _mockInventoryRepository;
     private readonly IInventoryMemberService _mockInventoryMemberService;
     private readonly IInvokeClientsService _mockInvokeClientsService;
-    private readonly ILogger<SetLocalInventoryStatusCommandHandler> _mockLogger;
+    private readonly ILogger<SetGeneralStatusCommandHandler> _mockLogger;
     
-    private readonly SetLocalInventoryStatusCommandHandler _setLocalInventoryStatusCommandHandler;
+    private readonly SetGeneralStatusCommandHandler _setGeneralStatusCommandHandler;
     
-    public SetLocalInventoryStatusCommandHandlerTests()
+    public SetGeneralStatusCommandHandlerTests()
     {
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
         _mockInventoryMemberService = A.Fake<IInventoryMemberService>();
         _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
-        _mockLogger = A.Fake<ILogger<SetLocalInventoryStatusCommandHandler>>();
+        _mockLogger = A.Fake<ILogger<SetGeneralStatusCommandHandler>>();
         
-        _setLocalInventoryStatusCommandHandler = new SetLocalInventoryStatusCommandHandler(_mockInventoryRepository, _mockInventoryMemberService, 
+        _setGeneralStatusCommandHandler = new SetGeneralStatusCommandHandler(_mockInventoryRepository, _mockInventoryMemberService, 
             _mockInvokeClientsService, _mockLogger);
     }
     
     [Test]
-    public async Task SetLocalInventoryStatus_UpdatesStatus_WhenUtcChangeDateIsLater()
+    public async Task SetGeneralStatus_UpdatesStatus_WhenUtcChangeDateIsLater()
     {
         // Arrange
         var sessionId = "testSession";
@@ -63,10 +63,10 @@ public class SetLocalInventoryStatusCommandHandlerTests
             })
             .ReturnsLazily(() => UpdateResultBuilder.BuildAddOrUpdateResult(funcResult, false));
 
-        var request = new SetLocalInventoryStatusRequest(client, parameters);
+        var request = new SetGeneralStatusRequest(client, parameters);
 
         // Act
-        var result  = await _setLocalInventoryStatusCommandHandler.Handle(request, CancellationToken.None);
+        var result  = await _setGeneralStatusCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         result.Should().Be(true);
@@ -77,7 +77,7 @@ public class SetLocalInventoryStatusCommandHandlerTests
     }
     
     [Test]
-    public async Task SetLocalInventoryStatus_DoesNotUpdateStatus_WhenUtcChangeDateIsOlder()
+    public async Task SetGeneralStatus_DoesNotUpdateStatus_WhenUtcChangeDateIsOlder()
     {
         // Arrange
         var sessionId = "testSession";
@@ -111,10 +111,10 @@ public class SetLocalInventoryStatusCommandHandlerTests
             })
             .ReturnsLazily(() => UpdateResultBuilder.BuildAddOrUpdateResult(funcResult, false));
 
-        var request = new SetLocalInventoryStatusRequest(client, parameters);
+        var request = new SetGeneralStatusRequest(client, parameters);
 
         // Act
-        var result = await _setLocalInventoryStatusCommandHandler.Handle(request, CancellationToken.None);
+        var result = await _setGeneralStatusCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         result.Should().Be(false);
@@ -125,7 +125,7 @@ public class SetLocalInventoryStatusCommandHandlerTests
     }
     
     [Test]
-    public async Task SetLocalInventoryStatus_CreatesNewInventoryData_WhenInventoryDataIsNull()
+    public async Task SetGeneralStatus_CreatesNewInventoryData_WhenInventoryDataIsNull()
     {
         // Arrange
         var sessionId = "testSession";
@@ -161,10 +161,10 @@ public class SetLocalInventoryStatusCommandHandlerTests
             })
             .ReturnsLazily(() => UpdateResultBuilder.BuildAddOrUpdateResult(capturedInventoryData, false));
 
-        var request = new SetLocalInventoryStatusRequest(client, parameters);
+        var request = new SetGeneralStatusRequest(client, parameters);
 
         // Act
-        var result = await _setLocalInventoryStatusCommandHandler.Handle(request, CancellationToken.None);
+        var result = await _setGeneralStatusCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         result.Should().Be(true);
@@ -184,7 +184,7 @@ public class SetLocalInventoryStatusCommandHandlerTests
     [Test]
     [TestCase(true)]
     [TestCase(false)]
-    public async Task SetLocalInventoryStatus_HandlesRegardlessOfIsInventoryStarted(bool isInventoryStarted)
+    public async Task SetGeneralStatus_HandlesRegardlessOfIsInventoryStarted(bool isInventoryStarted)
     {
         // Arrange
         var sessionId = "testSession";
@@ -217,10 +217,10 @@ public class SetLocalInventoryStatusCommandHandlerTests
             })
             .ReturnsLazily(() => UpdateResultBuilder.BuildAddOrUpdateResult(funcResult, false));
 
-        var request = new SetLocalInventoryStatusRequest(client, parameters);
+        var request = new SetGeneralStatusRequest(client, parameters);
 
         // Act
-        var result = await _setLocalInventoryStatusCommandHandler.Handle(request, CancellationToken.None);
+        var result = await _setGeneralStatusCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         result.Should().Be(true);
@@ -229,4 +229,4 @@ public class SetLocalInventoryStatusCommandHandlerTests
         A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
-}
+} 
