@@ -1,5 +1,6 @@
 ﻿using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Entities;
+using ByteSync.ServerCommon.Entities.Inventories;
 using ByteSync.ServerCommon.Factories;
 using ByteSync.ServerCommon.Repositories;
 using ByteSync.ServerCommon.Services;
@@ -15,7 +16,7 @@ namespace ByteSync.ServerCommon.Tests.Repositories;
 public class InventoryRepositoryTests
 {
     private InventoryRepository _repository;
-    private CacheRepository<InventoryData> _cacheRepository;
+    private CacheRepository<InventoryEntity> _cacheRepository;
     private RedisInfrastructureService _redisInfrastructureService;
     
     [SetUp]
@@ -30,7 +31,7 @@ public class InventoryRepositoryTests
             cacheKeyFactory, 
             loggerFactoryMock);
             
-        _cacheRepository = new CacheRepository<InventoryData>(_redisInfrastructureService);
+        _cacheRepository = new CacheRepository<InventoryEntity>(_redisInfrastructureService);
         
         _repository = new InventoryRepository(_redisInfrastructureService, _cacheRepository);
     }
@@ -40,7 +41,7 @@ public class InventoryRepositoryTests
     {
         // Arrange
         string sessionId = "testSession_" + DateTime.Now.Ticks;
-        var inventoryData = new InventoryData
+        var inventoryData = new InventoryEntity
         {
             SessionId = sessionId,
             InventoryMembers = [new() { ClientInstanceId = "client1" }]
@@ -67,7 +68,7 @@ public class InventoryRepositoryTests
         string clientId1 = "client1";
         string clientId2 = "client2";
         
-        var inventoryData = new InventoryData
+        var inventoryData = new InventoryEntity
         {
             SessionId = sessionId,
             InventoryMembers =
@@ -93,7 +94,7 @@ public class InventoryRepositoryTests
     {
         // Arrange
         string sessionId = "testSession_" + DateTime.Now.Ticks;
-        var inventoryData = new InventoryData
+        var inventoryData = new InventoryEntity
         {
             SessionId = sessionId,
             InventoryMembers = [new() { ClientInstanceId = "client1" }]
@@ -127,7 +128,7 @@ public class InventoryRepositoryTests
     {
         // Arrange
         string sessionId = "testSession_" + DateTime.Now.Ticks;
-        var inventoryData = new InventoryData
+        var inventoryData = new InventoryEntity
         {
             SessionId = sessionId,
             InventoryMembers = [new() { ClientInstanceId = "client1" }]

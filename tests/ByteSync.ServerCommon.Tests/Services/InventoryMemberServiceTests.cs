@@ -1,6 +1,7 @@
 ﻿using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Entities.Inventories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Services;
 using FluentAssertions;
@@ -11,7 +12,7 @@ namespace ByteSync.ServerCommon.Tests.Services;
 public class InventoryMemberServiceTests
 {
     private IInventoryMemberService _inventoryMemberService;
-    private InventoryData _inventoryData;
+    private InventoryEntity _inventoryEntity;
     private Client _client;
     private string _sessionId;
 
@@ -19,9 +20,9 @@ public class InventoryMemberServiceTests
     public void Setup()
     {
         _inventoryMemberService = new InventoryMemberService();
-        _inventoryData = new InventoryData
+        _inventoryEntity = new InventoryEntity
         {
-            InventoryMembers = new List<InventoryMemberData>()
+            InventoryMembers = new List<InventoryMemberEntity>()
         };
         _client = new Client();
         _client.ClientInstanceId = "client123";
@@ -32,32 +33,32 @@ public class InventoryMemberServiceTests
     public void GetOrCreateInventoryMember_WhenInventoryMemberDoesNotExist_ShouldCreateNewInventoryMember()
     {
         // Act
-        var result = _inventoryMemberService.GetOrCreateInventoryMember(_inventoryData, _sessionId, _client);
+        var result = _inventoryMemberService.GetOrCreateInventoryMember(_inventoryEntity, _sessionId, _client);
 
         // Assert
         result.Should().NotBeNull();
         result.SessionId.Should().Be(_sessionId);
         result.ClientInstanceId.Should().Be(_client.ClientInstanceId);
         result.SessionMemberGeneralStatus.Should().Be(SessionMemberGeneralStatus.InventoryWaitingForStart);
-        _inventoryData.InventoryMembers.Should().ContainSingle();
-        _inventoryData.InventoryMembers.First().Should().BeEquivalentTo(result);
+        _inventoryEntity.InventoryMembers.Should().ContainSingle();
+        _inventoryEntity.InventoryMembers.First().Should().BeEquivalentTo(result);
     }
 
     [Test]
     public void GetOrCreateInventoryMember_WhenInventoryMemberExists_ShouldReturnExistingInventoryMember()
     {
         // Arrange
-        var existingInventoryMember = new InventoryMemberData
+        var existingInventoryMember = new InventoryMemberEntity
         {
             ClientInstanceId = _client.ClientInstanceId,
             SessionId = _sessionId,
             SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryWaitingForStart
         };
 
-        _inventoryData.InventoryMembers.Add(existingInventoryMember);
+        _inventoryEntity.InventoryMembers.Add(existingInventoryMember);
 
         // Act
-        var result = _inventoryMemberService.GetOrCreateInventoryMember(_inventoryData, _sessionId, _client);
+        var result = _inventoryMemberService.GetOrCreateInventoryMember(_inventoryEntity, _sessionId, _client);
 
         // Assert
         result.Should().Be(existingInventoryMember);

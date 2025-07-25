@@ -8,4 +8,6 @@ public interface IDataNodeRepository : IBaseSourceCacheRepository<DataNode, stri
     IObservableCache<DataNode, string> CurrentMemberDataNodes { get; }
 
     IList<DataNode> SortedCurrentMemberDataNodes { get; }
+    
+    IEnumerable<DataNode> GetDataNodesByClientInstanceId(string clientInstanceId);
 }

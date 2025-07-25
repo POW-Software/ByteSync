@@ -164,14 +164,20 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         {
             if (!sessionMemberInfo.HasClientInstanceId(_environmentService.ClientInstanceId))
             {
-                var encryptedDataSources = await _inventoryApiClient.GetDataSources(request.CloudSessionResult.SessionId, sessionMemberInfo.ClientInstanceId);
-
-                if (encryptedDataSources != null)
+                // Get all data nodes for this session member to retrieve their data sources
+                var dataNodes = _dataNodeRepository.GetDataNodesByClientInstanceId(sessionMemberInfo.ClientInstanceId);
+                
+                foreach (var dataNode in dataNodes)
                 {
-                    foreach (var encryptedDataSource in encryptedDataSources)
+                    var encryptedDataSources = await _inventoryApiClient.GetDataSources(request.CloudSessionResult.SessionId, sessionMemberInfo.ClientInstanceId, dataNode.Id);
+
+                    if (encryptedDataSources != null)
                     {
-                        var dataSource = _dataEncrypter.DecryptDataSource(encryptedDataSource);
-                        await _dataSourceService.TryAddDataSource(dataSource);
+                        foreach (var encryptedDataSource in encryptedDataSources)
+                        {
+                            var dataSource = _dataEncrypter.DecryptDataSource(encryptedDataSource);
+                            await _dataSourceService.TryAddDataSource(dataSource);
+                        }
                     }
                 }
             }

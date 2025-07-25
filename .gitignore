@@ -359,3 +359,6 @@ healthchecksdb
 
 # Visual Studio Code
 .vscode/
+
+# Build output, used by AGENTS
+build_output.txt

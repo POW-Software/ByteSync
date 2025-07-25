@@ -6,6 +6,7 @@ using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Commands.CloudSessions;
 using ByteSync.ServerCommon.Entities;
+using ByteSync.ServerCommon.Entities.Inventories;
 using ByteSync.ServerCommon.Interfaces.Mappers;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
@@ -65,10 +66,10 @@ public class QuitSessionCommandHandlerTests
         cloudSessionData.IsSessionActivated = true;
         
 
-        var inventoryData = new InventoryData(sessionId);
+        var inventoryData = new InventoryEntity(sessionId);
         if (isQuitterAnInventoryMember)
         {
-            var inventoryMember = new InventoryMemberData { ClientInstanceId = "clientInstance1" };
+            var inventoryMember = new InventoryMemberEntity { ClientInstanceId = "clientInstance1" };
             inventoryData.InventoryMembers.Add(inventoryMember);
         }
         
@@ -89,8 +90,8 @@ public class QuitSessionCommandHandlerTests
             })
             .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
         
-        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, _mockTransaction, null))
-            .Invokes((string _, Func<InventoryData, bool> func, ITransaction? transaction, IRedLock? _) =>
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryEntity, bool>>.Ignored, _mockTransaction, null))
+            .Invokes((string _, Func<InventoryEntity, bool> func, ITransaction? transaction, IRedLock? _) =>
             {
                 funcResult = func(inventoryData);
                 isTransaction = transaction != null;
@@ -128,7 +129,7 @@ public class QuitSessionCommandHandlerTests
         A.CallTo(() => _mockCloudSessionsRepository.Update(sessionId, A<Func<CloudSessionData, bool>>.Ignored, _mockTransaction, null))
             .MustHaveHappenedOnceExactly();
 
-        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(sessionId, A<Func<InventoryData, bool>>.Ignored, _mockTransaction, null))
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(sessionId, A<Func<InventoryEntity, bool>>.Ignored, _mockTransaction, null))
             .MustHaveHappenedOnceExactly();
         
         A.CallTo(() => _mockSynchronizationRepository.UpdateIfExists(sessionId, A<Func<SynchronizationEntity, bool>>.Ignored, _mockTransaction, null))
@@ -156,8 +157,8 @@ public class QuitSessionCommandHandlerTests
         var cloudSessionData = new CloudSessionData();
         cloudSessionData.IsSessionActivated = false;
         
-        var inventoryData = new InventoryData(sessionId);
-        var inventoryMember = new InventoryMemberData { ClientInstanceId = "clientInstance1" };
+        var inventoryData = new InventoryEntity(sessionId);
+        var inventoryMember = new InventoryMemberEntity { ClientInstanceId = "clientInstance1" };
         inventoryData.InventoryMembers.Add(inventoryMember);
         
         var synchronizationEntity = new SynchronizationEntity
@@ -177,8 +178,8 @@ public class QuitSessionCommandHandlerTests
             })
             .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
         
-        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, _mockTransaction, null))
-            .Invokes((string _, Func<InventoryData, bool> func, ITransaction? transaction, IRedLock? _) =>
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryEntity, bool>>.Ignored, _mockTransaction, null))
+            .Invokes((string _, Func<InventoryEntity, bool> func, ITransaction? transaction, IRedLock? _) =>
             {
                 funcResult = func(inventoryData);
                 isTransaction = transaction != null;
@@ -211,7 +212,7 @@ public class QuitSessionCommandHandlerTests
         A.CallTo(() => _mockCloudSessionsRepository.Update(sessionId, A<Func<CloudSessionData, bool>>.Ignored, _mockTransaction, null))
             .MustHaveHappenedOnceExactly();
 
-        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(sessionId, A<Func<InventoryData, bool>>.Ignored, _mockTransaction, null))
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(sessionId, A<Func<InventoryEntity, bool>>.Ignored, _mockTransaction, null))
             .MustNotHaveHappened();
         
         A.CallTo(() => _mockSynchronizationRepository.UpdateIfExists(sessionId, A<Func<SynchronizationEntity, bool>>.Ignored, _mockTransaction, null))
@@ -239,12 +240,14 @@ public class QuitSessionCommandHandlerTests
         cloudSessionData.IsSessionActivated = true;
 
         // Create inventory data with path items
-        var inventoryData = new InventoryData(sessionId);
-        var inventoryMember = new InventoryMemberData { ClientInstanceId = "clientInstance1" };
+        var inventoryData = new InventoryEntity(sessionId);
+        var inventoryMember = new InventoryMemberEntity { ClientInstanceId = "clientInstance1" };
         var dataSource1 = new EncryptedDataSource { Id = "path1", Data = new byte[] { 1, 2, 3 }, IV = new byte[] { 4, 5, 6 } };
         var dataSource2 = new EncryptedDataSource { Id = "path2", Data = new byte[] { 7, 8, 9 }, IV = new byte[] { 10, 11, 12 } };
-        inventoryMember.DataSources.Add(dataSource1);
-        inventoryMember.DataSources.Add(dataSource2);
+        var dataNode = new InventoryDataNodeEntity { Id = "dataNodeId" };
+        dataNode.DataSources.Add(new InventoryDataSourceEntity(dataSource1));
+        dataNode.DataSources.Add(new InventoryDataSourceEntity(dataSource2));
+        inventoryMember.DataNodes.Add(dataNode);
         inventoryData.InventoryMembers.Add(inventoryMember);
         
         var synchronizationEntity = new SynchronizationEntity
@@ -264,8 +267,8 @@ public class QuitSessionCommandHandlerTests
             })
             .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
         
-        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, _mockTransaction, null))
-            .Invokes((string _, Func<InventoryData, bool> func, ITransaction? transaction, IRedLock? _) =>
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryEntity, bool>>.Ignored, _mockTransaction, null))
+            .Invokes((string _, Func<InventoryEntity, bool> func, ITransaction? transaction, IRedLock? _) =>
             {
                 funcResult = func(inventoryData);
                 isTransaction = transaction != null;
@@ -314,12 +317,12 @@ public class QuitSessionCommandHandlerTests
         cloudSessionData.IsSessionActivated = true;
 
         // Create inventory data with data nodes
-        var inventoryData = new InventoryData(sessionId);
-        var inventoryMember = new InventoryMemberData { ClientInstanceId = "clientInstance1" };
+        var inventoryData = new InventoryEntity(sessionId);
+        var inventoryMember = new InventoryMemberEntity { ClientInstanceId = "clientInstance1" };
         var dataNode1 = new EncryptedDataNode { Id = "node1", Data = new byte[] { 1, 2, 3 }, IV = new byte[] { 4, 5, 6 } };
         var dataNode2 = new EncryptedDataNode { Id = "node2", Data = new byte[] { 7, 8, 9 }, IV = new byte[] { 10, 11, 12 } };
-        inventoryMember.DataNodes.Add(dataNode1);
-        inventoryMember.DataNodes.Add(dataNode2);
+        inventoryMember.DataNodes.Add(new InventoryDataNodeEntity(dataNode1));
+        inventoryMember.DataNodes.Add(new InventoryDataNodeEntity(dataNode2));
         inventoryData.InventoryMembers.Add(inventoryMember);
         
         var synchronizationEntity = new SynchronizationEntity
@@ -339,8 +342,8 @@ public class QuitSessionCommandHandlerTests
             })
             .ReturnsLazily(() => UpdateResultBuilder.BuildUpdateResult(funcResult, cloudSessionData, isTransaction));
         
-        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryData, bool>>.Ignored, _mockTransaction, null))
-            .Invokes((string _, Func<InventoryData, bool> func, ITransaction? transaction, IRedLock? _) =>
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryEntity, bool>>.Ignored, _mockTransaction, null))
+            .Invokes((string _, Func<InventoryEntity, bool> func, ITransaction? transaction, IRedLock? _) =>
             {
                 funcResult = func(inventoryData);
                 isTransaction = transaction != null;

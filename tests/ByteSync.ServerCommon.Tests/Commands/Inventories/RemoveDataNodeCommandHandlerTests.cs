@@ -3,6 +3,7 @@ using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Commands.Inventories;
+using ByteSync.ServerCommon.Entities.Inventories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
@@ -41,26 +42,26 @@ public class RemoveDataNodeCommandHandlerTests
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
         var encryptedDataNode = new EncryptedDataNode{ Id = "dataNode1" };
-        var inventoryData = new InventoryData(sessionId);
+        var inventoryData = new InventoryEntity(sessionId);
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));
 
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
-            .Invokes((string _, Func<InventoryData, InventoryData> func) => func(inventoryData))
-            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored))
+            .Invokes((string _, Func<InventoryEntity, InventoryEntity> func) => func(inventoryData))
+            .Returns(new UpdateEntityResult<InventoryEntity>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
 
-        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, sessionId, client))
-            .Returns(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId });
+        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryEntity>.Ignored, sessionId, client))
+            .Returns(new InventoryMemberEntity { ClientInstanceId = client.ClientInstanceId });
 
-        var request = new RemoveDataNodeRequest(sessionId, client, encryptedDataNode);
+        var request = new RemoveDataNodeRequest(sessionId, client, client.ClientInstanceId, encryptedDataNode);
 
         // Act
         await _removeDataNodeCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, sessionId, client)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryEntity>.Ignored, sessionId, client)).MustHaveHappenedOnceExactly();
     }
 
     [Test]
@@ -70,26 +71,28 @@ public class RemoveDataNodeCommandHandlerTests
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
         var encryptedDataNode = new EncryptedDataNode{ Id = "dataNode1" };
-        var inventoryData = new InventoryData(sessionId);
-        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId, DataNodes = [ encryptedDataNode ], DataSources = [] });
+        var inventoryData = new InventoryEntity(sessionId);
+        inventoryData.InventoryMembers.Add(new InventoryMemberEntity { ClientInstanceId = client.ClientInstanceId });
+        var dataNode = new InventoryDataNodeEntity(encryptedDataNode);
+        inventoryData.InventoryMembers[0].DataNodes.Add(dataNode);
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));
 
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
-            .Invokes((string _, Func<InventoryData, InventoryData> func) => func(inventoryData))
-            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored))
+            .Invokes((string _, Func<InventoryEntity, InventoryEntity> func) => func(inventoryData))
+            .Returns(new UpdateEntityResult<InventoryEntity>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
 
-        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, sessionId, client))
-            .Returns(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId });
+        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryEntity>.Ignored, sessionId, client))
+            .Returns(new InventoryMemberEntity { ClientInstanceId = client.ClientInstanceId });
 
-        var request = new RemoveDataNodeRequest(sessionId, client, encryptedDataNode);
+        var request = new RemoveDataNodeRequest(sessionId, client, client.ClientInstanceId, encryptedDataNode);
 
         // Act
         await _removeDataNodeCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, sessionId, client)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryEntity>.Ignored, sessionId, client)).MustHaveHappenedOnceExactly();
     }
 }

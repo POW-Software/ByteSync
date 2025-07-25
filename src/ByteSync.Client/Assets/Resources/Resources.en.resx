@@ -17,4 +17,8 @@
 	<data name="LoginForm.PleaseLogin" xml:space="preserve">
 		  <value>Please Login</value>
 	</data>
+	<data name="InventoryProcess_MoreThan5DataNodes" xml:space="preserve">
+		<value>Unable to start the Data Inventory:
+You must select a maximum of 5 data nodes.</value>
+	</data>
 </root>

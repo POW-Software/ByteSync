@@ -39,7 +39,7 @@ public class InventoryFunction
     
     [Function("InventorySetLocalInventoryStatusFunction")]
     public async Task<HttpResponseData> SetLocalInventoryStatus(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/inventory/localStatus")] 
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/inventory/{clientInstanceId}/localStatus")] 
         HttpRequestData req,
         FunctionContext executionContext,
         string sessionId)
@@ -58,15 +58,17 @@ public class InventoryFunction
     
     [Function("InventoryAddDataSourceFunction")]
     public async Task<HttpResponseData> AddDataSource(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/inventory/dataSource")] 
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/inventory/{clientInstanceId}/dataNode/{dataNodeId}/dataSource")] 
         HttpRequestData req,
         FunctionContext executionContext,
-        string sessionId)
+        string sessionId,
+        string clientInstanceId,
+        string dataNodeId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var encryptedDataSource = await FunctionHelper.DeserializeRequestBody<EncryptedDataSource>(req);
 
-        var request = new AddDataSourceRequest(sessionId, client, encryptedDataSource);
+        var request = new AddDataSourceRequest(sessionId, client, clientInstanceId, dataNodeId, encryptedDataSource);
         var result = await _mediator.Send(request);
 
         var response = req.CreateResponse();
@@ -77,15 +79,17 @@ public class InventoryFunction
     
     [Function("InventoryRemoveDataSourceFunction")]
     public async Task<HttpResponseData> RemoveDataSource(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "session/{sessionId}/inventory/dataSource")] 
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "session/{sessionId}/inventory/{clientInstanceId}/dataNode/{dataNodeId}/dataSource")] 
         HttpRequestData req,
         FunctionContext executionContext,
-        string sessionId)
+        string sessionId,
+        string clientInstanceId,
+        string dataNodeId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var encryptedDataSource = await FunctionHelper.DeserializeRequestBody<EncryptedDataSource>(req);
 
-        var request = new RemoveDataSourceRequest(sessionId, client, encryptedDataSource);
+        var request = new RemoveDataSourceRequest(sessionId, client, clientInstanceId, dataNodeId, encryptedDataSource);
         var result = await _mediator.Send(request);
         
         var response = req.CreateResponse();
@@ -96,13 +100,14 @@ public class InventoryFunction
     
     [Function("InventoryGetDataSourcesFunction")]
     public async Task<HttpResponseData> GetDataSources(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/inventory/dataSource/{clientInstanceId}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/inventory/{clientInstanceId}/dataNode/{dataNodeId}/dataSource")]
         HttpRequestData req,
         FunctionContext executionContext,
         string sessionId,
-        string clientInstanceId)
+        string clientInstanceId,
+        string dataNodeId)
     {
-        var request = new GetDataSourcesRequest(sessionId, clientInstanceId);
+        var request = new GetDataSourcesRequest(sessionId, clientInstanceId, dataNodeId);
         var result = await _mediator.Send(request);
 
         var response = req.CreateResponse();
@@ -113,15 +118,16 @@ public class InventoryFunction
 
     [Function("InventoryAddDataNodeFunction")]
     public async Task<HttpResponseData> AddDataNode(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/inventory/dataNode")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/inventory/{clientInstanceId}/dataNode")]
         HttpRequestData req,
         FunctionContext executionContext,
-        string sessionId)
+        string sessionId, 
+        string clientInstanceId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var encryptedDataNode = await FunctionHelper.DeserializeRequestBody<EncryptedDataNode>(req);
 
-        var request = new AddDataNodeRequest(sessionId, client, encryptedDataNode);
+        var request = new AddDataNodeRequest(sessionId, client, clientInstanceId, encryptedDataNode);
         var result = await _mediator.Send(request);
 
         var response = req.CreateResponse();
@@ -132,15 +138,16 @@ public class InventoryFunction
 
     [Function("InventoryRemoveDataNodeFunction")]
     public async Task<HttpResponseData> RemoveDataNode(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "session/{sessionId}/inventory/dataNode")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "session/{sessionId}/inventory/{clientInstanceId}/dataNode")]
         HttpRequestData req,
         FunctionContext executionContext,
-        string sessionId)
+        string sessionId, 
+        string clientInstanceId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var encryptedDataNode = await FunctionHelper.DeserializeRequestBody<EncryptedDataNode>(req);
 
-        var request = new RemoveDataNodeRequest(sessionId, client, encryptedDataNode);
+        var request = new RemoveDataNodeRequest(sessionId, client, clientInstanceId, encryptedDataNode);
         var result = await _mediator.Send(request);
 
         var response = req.CreateResponse();
@@ -151,7 +158,7 @@ public class InventoryFunction
     
     [Function("InventoryGetDataNodesFunction")]
     public async Task<HttpResponseData> GetDataNodes(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/inventory/dataNode/{clientInstanceId}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/inventory/{clientInstanceId}/dataNode")]
         HttpRequestData req,
         FunctionContext executionContext,
         string sessionId,

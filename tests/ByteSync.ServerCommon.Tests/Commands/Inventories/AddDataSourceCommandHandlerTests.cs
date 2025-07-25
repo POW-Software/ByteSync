@@ -9,6 +9,7 @@ using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using System.Linq;
+using ByteSync.ServerCommon.Entities.Inventories;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -46,34 +47,34 @@ public class AddDataSourceCommandHandlerTests
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
         var encryptedDataSource = new EncryptedDataSource { Id = "dataSource1" };
-        var inventoryData = new InventoryData(sessionId);
+        var inventoryData = new InventoryEntity(sessionId);
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));
 
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
-            .Invokes((string _, Func<InventoryData, InventoryData> func) => func(inventoryData))
-            .Returns(new UpdateEntityResult<InventoryData>(inventoryData, UpdateEntityStatus.Saved));
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored))
+            .Invokes((string _, Func<InventoryEntity, InventoryEntity> func) => func(inventoryData))
+            .Returns(new UpdateEntityResult<InventoryEntity>(inventoryData, UpdateEntityStatus.Saved));
         
-        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client))
-            .Returns(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId });
+        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryEntity>.Ignored, "testSession", client))
+            .Returns(new InventoryMemberEntity { ClientInstanceId = client.ClientInstanceId });
 
         A.CallTo(() => _mockInvokeClientsService.SessionGroupExcept(sessionId, client)).Returns(_mockByteSyncPush);
 
         A.CallTo(() => _mockByteSyncPush.DataSourceAdded(A<DataSourceDTO>.Ignored)).Returns(Task.CompletedTask);
 
-        var request = new AddDataSourceRequest(sessionId, client, encryptedDataSource);
+        var request = new AddDataSourceRequest(sessionId, client, client.ClientInstanceId, "dataNodeId", encryptedDataSource);
         
         // Act
         await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInvokeClientsService.SessionGroupExcept(A<string>.Ignored, A<Client>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockByteSyncPush.DataSourceAdded(A<DataSourceDTO>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockByteSyncPush.DataSourceAdded(A<DataSourceDTO>.Ignored)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryEntity>.Ignored, "testSession", client)).MustHaveHappenedOnceExactly();
     }
 
     [Test]
@@ -83,27 +84,27 @@ public class AddDataSourceCommandHandlerTests
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
         var encryptedDataSource = new EncryptedDataSource { Id = "dataSource1" };
-        var inventoryData = new InventoryData(sessionId);
+        var inventoryData = new InventoryEntity(sessionId);
         inventoryData.IsInventoryStarted = true;
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));
 
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
-            .Invokes((string _, Func<InventoryData, InventoryData> func) => func(inventoryData));
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored))
+            .Invokes((string _, Func<InventoryEntity, InventoryEntity> func) => func(inventoryData));
 
         A.CallTo(() => _mockInvokeClientsService.SessionGroupExcept(sessionId, client)).Returns(_mockByteSyncPush);
 
         A.CallTo(() => _mockByteSyncPush.DataSourceAdded(A<DataSourceDTO>.Ignored)).Returns(Task.CompletedTask);
 
-        var request = new AddDataSourceRequest(sessionId, client, encryptedDataSource);
+        var request = new AddDataSourceRequest(sessionId, client, client.ClientInstanceId, "dataNodeId", encryptedDataSource);
         
         // Act
         await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         inventoryData.InventoryMembers.Count.Should().Be(0);
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored)).MustHaveHappenedOnceExactly();
     }
 
     [Test]
@@ -113,24 +114,28 @@ public class AddDataSourceCommandHandlerTests
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
         var encryptedDataSource = new EncryptedDataSource { Id = "dataSource1" };
-        var inventoryData = new InventoryData(sessionId);
-        inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = client.ClientInstanceId, DataSources = [ encryptedDataSource ] });
+        var inventoryData = new InventoryEntity(sessionId);
+        var inventoryMember = new InventoryMemberEntity { ClientInstanceId = client.ClientInstanceId };
+        var dataNode = new InventoryDataNodeEntity { Id = "dataNodeId" };
+        dataNode.DataSources.Add(new InventoryDataSourceEntity(encryptedDataSource));
+        inventoryMember.DataNodes.Add(dataNode);
+        inventoryData.InventoryMembers.Add(inventoryMember);
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));
 
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
-            .Invokes((string _, Func<InventoryData, InventoryData> func) => func(inventoryData));
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored))
+            .Invokes((string _, Func<InventoryEntity, InventoryEntity> func) => func(inventoryData));
 
-        var request = new AddDataSourceRequest(sessionId, client, encryptedDataSource);
+        var request = new AddDataSourceRequest(sessionId, client, client.ClientInstanceId, "dataNodeId", encryptedDataSource);
         
         // Act
         await _addDataSourceCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         inventoryData.InventoryMembers.Count.Should().Be(1);
-        inventoryData.InventoryMembers[0].DataSources.Count.Should().Be(1);
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored)).MustHaveHappenedOnceExactly();
+        inventoryData.InventoryMembers[0].DataNodes.Count.Should().Be(1);
+        inventoryData.InventoryMembers[0].DataNodes[0].DataSources.Count.Should().Be(1);
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored)).MustHaveHappenedOnceExactly();
     }
 }

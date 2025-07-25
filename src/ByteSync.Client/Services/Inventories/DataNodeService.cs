@@ -53,7 +53,7 @@ public class DataNodeService : IDataNodeService
             && dataNode.ClientInstanceId == _connectionService.ClientInstanceId)
         {
             var encryptedDataNode = _dataEncrypter.EncryptDataNode(dataNode);
-            isAddOK = await _inventoryApiClient.AddDataNode(cloudSession.SessionId, encryptedDataNode);
+            isAddOK = await _inventoryApiClient.AddDataNode(cloudSession.SessionId, _connectionService.ClientInstanceId!, encryptedDataNode);
         }
 
         if (isAddOK)
@@ -95,7 +95,7 @@ public class DataNodeService : IDataNodeService
             && dataNode.ClientInstanceId == _connectionService.ClientInstanceId)
         {
             var encryptedDataNode = _dataEncrypter.EncryptDataNode(dataNode);
-            isRemoveOK = await _inventoryApiClient.RemoveDataNode(cloudSession.SessionId, encryptedDataNode);
+            isRemoveOK = await _inventoryApiClient.RemoveDataNode(cloudSession.SessionId, _connectionService.ClientInstanceId!, encryptedDataNode);
         }
 
         if (isRemoveOK)

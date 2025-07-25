@@ -28,12 +28,13 @@ public class DataInventoryStarter : IDataInventoryStarter
     private readonly IDataInventoryRunner _dataInventoryRunner;
     private readonly IInventoryApiClient _inventoryApiClient;
     private readonly IDataSourceRepository _dataSourceRepository;
+    private readonly IDataNodeRepository _dataNodeRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly ILogger<DataInventoryStarter> _logger;
 
     public DataInventoryStarter(ISessionService sessionService, ICloudProxy connectionManager, IDataEncrypter dataEncrypter, 
         IDataInventoryRunner dataInventoryRunner, IInventoryApiClient inventoryApiClient, IDataSourceRepository dataSourceRepository, 
-        ISessionMemberRepository sessionMemberRepository, ILogger<DataInventoryStarter> logger)
+        IDataNodeRepository dataNodeRepository, ISessionMemberRepository sessionMemberRepository, ILogger<DataInventoryStarter> logger)
     {
         _sessionService = sessionService;
         _connectionManager = connectionManager;
@@ -41,6 +42,7 @@ public class DataInventoryStarter : IDataInventoryStarter
         _dataInventoryRunner = dataInventoryRunner;
         _inventoryApiClient = inventoryApiClient;
         _dataSourceRepository = dataSourceRepository;
+        _dataNodeRepository = dataNodeRepository;
         _sessionMemberRepository = sessionMemberRepository;
         _logger = logger;
         
@@ -145,6 +147,12 @@ public class DataInventoryStarter : IDataInventoryStarter
         FinalizeSessionSettings(sessionSettings);
 
         var result = CheckDataSources(session);
+        if (result != null)
+        {
+            return result;
+        }
+        
+        result = CheckDataNodes(session);
         if (result != null)
         {
             return result;
@@ -258,6 +266,20 @@ public class DataInventoryStarter : IDataInventoryStarter
             if (dataSources.Count > 5)
             {
                 return LogAndBuildStartInventoryResult(session, StartInventoryStatuses.MoreThan5DataSources);
+            }
+        }
+
+        return null;
+    }
+    
+    private StartInventoryResult? CheckDataNodes(AbstractSession session)
+    {
+        if (session is LocalSession)
+        {
+            var dataNodes = _dataNodeRepository.SortedCurrentMemberDataNodes;
+            if (dataNodes.Count > 5)
+            {
+                return LogAndBuildStartInventoryResult(session, StartInventoryStatuses.MoreThan5DataNodes);
             }
         }
 
