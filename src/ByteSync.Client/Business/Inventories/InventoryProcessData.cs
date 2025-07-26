@@ -10,6 +10,8 @@ namespace ByteSync.Business.Inventories;
 
 public class InventoryProcessData : ReactiveObject
 {
+    private readonly object _monitorDataLock = new object();
+    
     public InventoryProcessData()
     {
         MainStatus = new ReplaySubject<LocalInventoryPartStatus>(1);
@@ -132,9 +134,13 @@ public class InventoryProcessData : ReactiveObject
 
     public void UpdateMonitorData(Action<InventoryMonitorData> action)
     {
-        var newValue = InventoryMonitorDataSubject.Value;
-        action.Invoke(newValue);
+        lock (_monitorDataLock)
+        {
+            var currentValue = InventoryMonitorDataSubject.Value;
+            var newValue = currentValue with { };
+            action.Invoke(newValue);
         
-        InventoryMonitorDataSubject.OnNext(newValue);
+            InventoryMonitorDataSubject.OnNext(newValue);
+        }
     }
 }
