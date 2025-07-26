@@ -26,33 +26,23 @@ public class DataPartIndexer : IDataPartIndexer
         
         DataPartsByNames.Clear();
         
-        bool areMultiPartsInventories = inventories.Any(i => i.InventoryParts.Count > 1);
-        
-        var cptInventory = 0;
         foreach (var inventory in Inventories)
         {
-            var inventoryLetter = ((char)('A' + cptInventory)).ToString();
-            
-            if (!areMultiPartsInventories)
+            if (inventory.InventoryParts.Count == 1)
             {
-                var dataPart = new DataPart(inventoryLetter, inventory);
+                // Single part inventory: use inventory code directly
+                var dataPart = new DataPart(inventory.Code, inventory);
                 DataPartsByNames.Add(dataPart.Name, dataPart);
             }
             else
             {
-                var cptPart = 1;
+                // Multi-part inventory: use individual part codes
                 foreach (var inventoryPart in inventory.InventoryParts)
                 {
-                    var name = $"{inventoryLetter}{cptPart}";
-
-                    var dataPart = new DataPart(name, inventoryPart);
+                    var dataPart = new DataPart(inventoryPart.Code, inventoryPart);
                     DataPartsByNames.Add(dataPart.Name, dataPart);
-                    
-                    cptPart += 1;
                 }
             }
-
-            cptInventory += 1;
         }
     }
 

@@ -25,7 +25,8 @@ public class DataPartIndexerTests
         // Arrange
         var inventory = new Inventory
         {
-            InventoryParts = [new InventoryPart()]
+            Code = "A", // Set the code as it would be set by DataNodeCodeGenerator
+            InventoryParts = [new InventoryPart { Code = "A" }] // InventoryPart gets same code for single part
         };
 
         // Act
@@ -44,7 +45,11 @@ public class DataPartIndexerTests
         // Arrange
         var inventory = new Inventory
         {
-            InventoryParts = [new InventoryPart(), new InventoryPart()]
+            Code = "A", // Set the inventory code as it would be set by DataNodeCodeGenerator
+            InventoryParts = [
+                new InventoryPart { Code = "A1" }, // Each part gets its own code
+                new InventoryPart { Code = "A2" }
+            ]
         };
 
         // Act
@@ -63,7 +68,8 @@ public class DataPartIndexerTests
         // Arrange
         var inventory = new Inventory
         {
-            InventoryParts = [new InventoryPart()]
+            Code = "A", // Set the code as it would be set by DataNodeCodeGenerator
+            InventoryParts = [new InventoryPart { Code = "A" }] // Single part gets same code as inventory
         };
         _dataPartIndexer.BuildMap([inventory]);
 
@@ -81,7 +87,8 @@ public class DataPartIndexerTests
         // Arrange
         var inventory = new Inventory
         {
-            InventoryParts = [new InventoryPart()]
+            Code = "A", // Set the code as it would be set by DataNodeCodeGenerator
+            InventoryParts = [new InventoryPart { Code = "A" }] // Single part gets same code as inventory
         };
         _dataPartIndexer.BuildMap([inventory]);
 
@@ -90,7 +97,7 @@ public class DataPartIndexerTests
 
         // Assert
         dataPart.Should().NotBeNull();
-        dataPart.Name.Should().Be("A");
+        dataPart.Name.Should().Be("A"); // Should return "A" part for compatibility
     }
 
     [Test]
@@ -109,7 +116,8 @@ public class DataPartIndexerTests
         // Arrange
         var inventory = new Inventory
         {
-            InventoryParts = [new InventoryPart()]
+            Code = "A", // Set the code as it would be set by DataNodeCodeGenerator
+            InventoryParts = [new InventoryPart { Code = "A" }] // Single part gets same code as inventory
         };
         _dataPartIndexer.BuildMap([inventory]);
 
