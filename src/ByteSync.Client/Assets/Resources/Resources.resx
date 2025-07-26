@@ -973,6 +973,14 @@ You must select at least 2 data sources.</value>
     <value>Unable to start the Data Inventory:
 You must select a maximum of 5 data sources.</value>
   </data>
+  <data name="InventoryProcess_MoreThan5DataNodes" xml:space="preserve">
+    <value>Unable to start the Data Inventory:
+You must select a maximum of 5 data nodes.</value>
+  </data>
+  <data name="InventoryProcess_LessThan2DataNodes" xml:space="preserve">
+    <value>Unable to start the Data Inventory:
+You must select at least 2 data nodes.</value>
+  </data>
   <data name="SessionQuitChecker_QuitLocalActivated_Title" xml:space="preserve">
     <value>Quit the session</value>
   </data>

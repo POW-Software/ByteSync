@@ -1,13 +1,9 @@
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Common.Business.Sessions.Cloud;
-using ByteSync.ServerCommon.Commands.CloudSessions;
+using ByteSync.ServerCommon.Commands.SessionMembers;
 using ByteSync.ServerCommon.Interfaces.Services;
 using Moq;
-using NUnit.Framework;
 
-namespace ByteSync.ServerCommon.Tests.Commands.CloudSessions;
+namespace ByteSync.ServerCommon.Tests.Commands.SessionMembers;
 
 [TestFixture]
 public class GetMembersCommandHandlerTests

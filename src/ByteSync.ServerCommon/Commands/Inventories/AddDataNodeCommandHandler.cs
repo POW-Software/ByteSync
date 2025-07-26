@@ -1,5 +1,5 @@
 using ByteSync.Common.Business.Sessions;
-using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Entities.Inventories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
@@ -44,14 +44,14 @@ public class AddDataNodeCommandHandler : IRequestHandler<AddDataNodeRequest, boo
 
         var updateEntityResult = await _inventoryRepository.AddOrUpdate(sessionId, inventoryData =>
         {
-            inventoryData ??= new InventoryData(sessionId);
+            inventoryData ??= new InventoryEntity(sessionId);
 
             if (!inventoryData.IsInventoryStarted)
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
 
                 inventoryMember.DataNodes.RemoveAll(n => n.Id == encryptedDataNode.Id);
-                inventoryMember.DataNodes.Add(encryptedDataNode);
+                inventoryMember.DataNodes.Add(new InventoryDataNodeEntity(encryptedDataNode));
 
                 return inventoryData;
             }

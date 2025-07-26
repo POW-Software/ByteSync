@@ -1,10 +1,7 @@
-﻿using System.Collections.Concurrent;
-using ByteSync.Common.Business.Actions;
+﻿using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Common.Business.Synchronizations;
-using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Auth;
-using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Exceptions;
 using ByteSync.ServerCommon.Interfaces.Repositories;

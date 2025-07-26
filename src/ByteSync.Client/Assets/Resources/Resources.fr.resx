@@ -856,6 +856,14 @@ Vous devez sélectionner au moins 2 sources de données.</value>
 		<value>Impossible de démarrer l'Inventaire des Données :
 Vous devez sélectionner au maximum 5 sources de données.</value>
 	</data>
+	<data name="InventoryProcess_MoreThan5DataNodes" xml:space="preserve">
+		<value>Impossible de démarrer l'Inventaire des Données :
+Vous devez sélectionner au maximum 5 nœuds de données.</value>
+	</data>
+	<data name="InventoryProcess_LessThan2DataNodes" xml:space="preserve">
+    <value>Impossible de démarrer l'Inventaire des Données :
+Vous devez sélectionner au minimum 5 nœuds de données.</value>
+  </data>
 	<data name="SessionQuitChecker_QuitLocalActivated_Title" xml:space="preserve">
 		<value>Quitter la session</value>
 	</data>

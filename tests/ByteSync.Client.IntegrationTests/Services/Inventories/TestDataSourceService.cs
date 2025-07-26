@@ -51,7 +51,7 @@ public class TestDataSourceService : IntegrationTest
             .Setup(x => x.CheckDataSource(It.IsAny<DataSource>(), It.IsAny<IEnumerable<DataSource>>()))
             .ReturnsAsync(true);
         
-        inventoryApiClient.Setup(x => x.AddDataSource(_sessionId, It.IsAny<EncryptedDataSource>()))
+        inventoryApiClient.Setup(x => x.AddDataSource(_sessionId, _currentEndPoint.ClientInstanceId, It.IsAny<string>(), It.IsAny<EncryptedDataSource>()))
             .ReturnsAsync(true);
 
         var dataSource = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId };
@@ -62,7 +62,7 @@ public class TestDataSourceService : IntegrationTest
         // Assert
         result.Should().BeTrue();
         dataSourceRepository.Elements.Should().Contain(dataSource);
-        inventoryApiClient.Verify(x => x.AddDataSource(_sessionId, It.IsAny<EncryptedDataSource>()), Times.Once);
+        inventoryApiClient.Verify(x => x.AddDataSource(_sessionId, _currentEndPoint.ClientInstanceId, It.IsAny<string>(), It.IsAny<EncryptedDataSource>()), Times.Once);
     }
     
     [Test]
@@ -77,7 +77,7 @@ public class TestDataSourceService : IntegrationTest
             .Setup(x => x.CheckDataSource(It.IsAny<DataSource>(), It.IsAny<IEnumerable<DataSource>>()))
             .ReturnsAsync(true);
         
-        inventoryApiClient.Setup(x => x.AddDataSource(_sessionId, It.IsAny<EncryptedDataSource>()))
+        inventoryApiClient.Setup(x => x.AddDataSource(_sessionId, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<EncryptedDataSource>()))
             .ReturnsAsync(true);
 
         var dataSource = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId + "_FAKE" };
@@ -88,7 +88,7 @@ public class TestDataSourceService : IntegrationTest
         // Assert
         result.Should().BeTrue();
         dataSourceRepository.Elements.Should().Contain(dataSource);
-        inventoryApiClient.Verify(x => x.AddDataSource(_sessionId, It.IsAny<EncryptedDataSource>()), Times.Never);
+        inventoryApiClient.Verify(x => x.AddDataSource(_sessionId, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<EncryptedDataSource>()), Times.Never);
     }
     
     [Test]
@@ -124,7 +124,7 @@ public class TestDataSourceService : IntegrationTest
             .Setup(x => x.CheckDataSource(It.IsAny<DataSource>(), It.IsAny<IEnumerable<DataSource>>()))
             .ReturnsAsync(true);
         
-        inventoryApiClient.Setup(x => x.AddDataSource(_sessionId, It.IsAny<EncryptedDataSource>()))
+        inventoryApiClient.Setup(x => x.AddDataSource(_sessionId, _currentEndPoint.ClientInstanceId, It.IsAny<string>(), It.IsAny<EncryptedDataSource>()))
             .ReturnsAsync(false);
 
         var dataSource = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId };
@@ -149,7 +149,7 @@ public class TestDataSourceService : IntegrationTest
         var dataSource = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId };
         dataEncrypter.Setup(x => x.EncryptDataSource(dataSource)).Returns(new EncryptedDataSource());
         
-        inventoryApiClient.Setup(x => x.RemoveDataSource(_sessionId, It.IsAny<EncryptedDataSource>()))
+        inventoryApiClient.Setup(x => x.RemoveDataSource(_sessionId, _currentEndPoint.ClientInstanceId, It.IsAny<string>(), It.IsAny<EncryptedDataSource>()))
             .ReturnsAsync(true);
         
         dataSourceRepository.AddOrUpdate(dataSource);
@@ -173,7 +173,7 @@ public class TestDataSourceService : IntegrationTest
         var dataSource = new DataSource { ClientInstanceId = _currentEndPoint.ClientInstanceId };
         dataEncrypter.Setup(x => x.EncryptDataSource(dataSource)).Returns(new EncryptedDataSource());
         
-        inventoryApiClient.Setup(x => x.RemoveDataSource(_sessionId, It.IsAny<EncryptedDataSource>()))
+        inventoryApiClient.Setup(x => x.RemoveDataSource(_sessionId, _currentEndPoint.ClientInstanceId, It.IsAny<string>(), It.IsAny<EncryptedDataSource>()))
             .ReturnsAsync(false);
         
         dataSourceRepository.AddOrUpdate(dataSource);
@@ -211,7 +211,7 @@ public class TestDataSourceService : IntegrationTest
             .Setup(x => x.CheckDataSource(It.IsAny<DataSource>(), It.IsAny<IEnumerable<DataSource>>()))
             .ReturnsAsync(true);
         
-        inventoryApiClient.Setup(x => x.AddDataSource(_sessionId, It.IsAny<EncryptedDataSource>()))
+        inventoryApiClient.Setup(x => x.AddDataSource(_sessionId, _currentEndPoint.ClientInstanceId, It.IsAny<string>(), It.IsAny<EncryptedDataSource>()))
             .ReturnsAsync(true);
         
         sessionMemberRepository.AddOrUpdate(sessionMemberInfo);

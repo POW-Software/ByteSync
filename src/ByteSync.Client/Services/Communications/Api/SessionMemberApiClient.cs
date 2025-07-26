@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Common.Business.Inventories;
-using ByteSync.Common.Business.Sessions;
+﻿using System.Threading;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Communications.Http;
 
@@ -16,12 +14,40 @@ public class SessionMemberApiClient : ISessionMemberApiClient
         _apiInvoker = apiInvoker;
         _logger = logger;
     }
+    
+    public async Task<List<string>> GetMembersClientInstanceIds(string sessionId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return (await _apiInvoker.GetAsync<List<string>>($"session/{sessionId}/members/InstanceIds", cancellationToken))!;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error while getting session members client instance ids with sessionId: {sessionId}", sessionId);
+                
+            throw;
+        }
+    }
+    
+    public async Task<List<SessionMemberInfoDTO>> GetMembers(string sessionId)
+    {
+        try
+        {
+            return await _apiInvoker.GetAsync<List<SessionMemberInfoDTO>>($"session/{sessionId}/members");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error while getting session members with sessionId: {sessionId}", sessionId);
+                
+            throw;
+        }
+    }
 
     public async Task UpdateSessionMemberGeneralStatus(UpdateSessionMemberGeneralStatusParameters sessionMemberGeneralStatusParameters)
     {
         try
         {
-            await _apiInvoker.PostAsync($"session/{sessionMemberGeneralStatusParameters.SessionId}/inventory/localStatus", 
+            await _apiInvoker.PostAsync($"session/{sessionMemberGeneralStatusParameters.SessionId}/members/{sessionMemberGeneralStatusParameters.ClientInstanceId}/generalStatus", 
                 sessionMemberGeneralStatusParameters);
         }
         catch (Exception ex)

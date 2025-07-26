@@ -3,6 +3,7 @@ using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Commands.Inventories;
+using ByteSync.ServerCommon.Entities.Inventories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using FakeItEasy;
 using FluentAssertions;
@@ -35,9 +36,12 @@ public class GetDataSourcesCommandHandlerTests
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
         var encryptedDataSource = new EncryptedDataSource { Id = "dataSource1" };
-        var inventoryData = new InventoryData(sessionId);
-        inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = client.ClientInstanceId, DataSources = [ encryptedDataSource ] });
+        var inventoryData = new InventoryEntity(sessionId);
+        var inventoryMember = new InventoryMemberEntity { ClientInstanceId = client.ClientInstanceId };
+        var dataNode = new InventoryDataNodeEntity { Id = "nodeId" };
+        dataNode.DataSources.Add(new InventoryDataSourceEntity(encryptedDataSource));
+        inventoryMember.DataNodes.Add(dataNode);
+        inventoryData.InventoryMembers.Add(inventoryMember);
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));
@@ -45,7 +49,7 @@ public class GetDataSourcesCommandHandlerTests
         A.CallTo(() => _mockInventoryRepository.Get(sessionId))
             .Returns(inventoryData);
 
-        var request = new GetDataSourcesRequest(sessionId, client.ClientInstanceId);
+        var request = new GetDataSourcesRequest(sessionId, client.ClientInstanceId, "nodeId");
         
         // Act
         var dataSources = await _getDataSourcesCommandHandler.Handle(request, CancellationToken.None);
@@ -61,12 +65,12 @@ public class GetDataSourcesCommandHandlerTests
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var inventoryData = new InventoryData(sessionId);
+        var inventoryData = new InventoryEntity(sessionId);
 
         A.CallTo(() => _mockInventoryRepository.Get(sessionId))
             .Returns(inventoryData);
 
-        var request = new GetDataSourcesRequest(sessionId, client.ClientInstanceId);
+        var request = new GetDataSourcesRequest(sessionId, client.ClientInstanceId, "nodeId");
         
         // Act
         var dataSources = await _getDataSourcesCommandHandler.Handle(request, CancellationToken.None);
@@ -83,13 +87,17 @@ public class GetDataSourcesCommandHandlerTests
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
         var dataSource = new EncryptedDataSource { Id = "dataSource1" };
-        var inventoryData = new InventoryData(sessionId);
-        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId, DataSources = [ dataSource ] });
+        var inventoryData = new InventoryEntity(sessionId);
+        var inventoryMember = new InventoryMemberEntity { ClientInstanceId = client.ClientInstanceId };
+        var dataNode = new InventoryDataNodeEntity { Id = "nodeId" };
+        dataNode.DataSources.Add(new InventoryDataSourceEntity(dataSource));
+        inventoryMember.DataNodes.Add(dataNode);
+        inventoryData.InventoryMembers.Add(inventoryMember);
 
         A.CallTo(() => _mockInventoryRepository.Get(sessionId))
             .Returns(inventoryData);
         
-        var request = new GetDataSourcesRequest(sessionId, client.ClientInstanceId);
+        var request = new GetDataSourcesRequest(sessionId, client.ClientInstanceId, "nodeId");
         
         // Act
         var dataSources = await _getDataSourcesCommandHandler.Handle(request, CancellationToken.None);

@@ -1,8 +1,9 @@
-﻿using ByteSync.Common.Business.Sessions;
+using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
-using ByteSync.ServerCommon.Commands.Inventories;
+using ByteSync.ServerCommon.Commands.SessionMembers;
+using ByteSync.ServerCommon.Entities.Inventories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
@@ -11,31 +12,31 @@ using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.ServerCommon.Tests.Commands.Inventories;
+namespace ByteSync.ServerCommon.Tests.Commands.SessionMembers;
 
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
-public class SetLocalInventoryStatusCommandHandlerTests
+public class SetGeneralStatusCommandHandlerTests
 {
     private readonly IInventoryRepository _mockInventoryRepository;
     private readonly IInventoryMemberService _mockInventoryMemberService;
     private readonly IInvokeClientsService _mockInvokeClientsService;
-    private readonly ILogger<SetLocalInventoryStatusCommandHandler> _mockLogger;
+    private readonly ILogger<SetGeneralStatusCommandHandler> _mockLogger;
     
-    private readonly SetLocalInventoryStatusCommandHandler _setLocalInventoryStatusCommandHandler;
+    private readonly SetGeneralStatusCommandHandler _setGeneralStatusCommandHandler;
     
-    public SetLocalInventoryStatusCommandHandlerTests()
+    public SetGeneralStatusCommandHandlerTests()
     {
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
         _mockInventoryMemberService = A.Fake<IInventoryMemberService>();
         _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
-        _mockLogger = A.Fake<ILogger<SetLocalInventoryStatusCommandHandler>>();
+        _mockLogger = A.Fake<ILogger<SetGeneralStatusCommandHandler>>();
         
-        _setLocalInventoryStatusCommandHandler = new SetLocalInventoryStatusCommandHandler(_mockInventoryRepository, _mockInventoryMemberService, 
+        _setGeneralStatusCommandHandler = new SetGeneralStatusCommandHandler(_mockInventoryRepository, _mockInventoryMemberService, 
             _mockInvokeClientsService, _mockLogger);
     }
     
     [Test]
-    public async Task SetLocalInventoryStatus_UpdatesStatus_WhenUtcChangeDateIsLater()
+    public async Task SetGeneralStatus_UpdatesStatus_WhenUtcChangeDateIsLater()
     {
         // Arrange
         var sessionId = "testSession";
@@ -47,36 +48,36 @@ public class SetLocalInventoryStatusCommandHandlerTests
             SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryRunningAnalysis
         };
 
-        var inventoryData = new InventoryData(sessionId);
-        var inventoryMemberData = new InventoryMemberData { ClientInstanceId = client.ClientInstanceId };
+        var inventoryData = new InventoryEntity(sessionId);
+        var inventoryMemberData = new InventoryMemberEntity { ClientInstanceId = client.ClientInstanceId };
         
-        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client))
+        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryEntity>.Ignored, "testSession", client))
             .Invokes(() => inventoryData.InventoryMembers.Add(inventoryMemberData))
             .Returns(inventoryMemberData);
 
-        InventoryData? funcResult = null;
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
-            .Invokes((string _, Func<InventoryData?, InventoryData?> func) =>
+        InventoryEntity? funcResult = null;
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored))
+            .Invokes((string _, Func<InventoryEntity?, InventoryEntity?> func) =>
             {
                 funcResult = func(inventoryData);
             })
             .ReturnsLazily(() => UpdateResultBuilder.BuildAddOrUpdateResult(funcResult, false));
 
-        var request = new SetLocalInventoryStatusRequest(client, parameters);
+        var request = new SetGeneralStatusRequest(client, parameters);
 
         // Act
-        var result  = await _setLocalInventoryStatusCommandHandler.Handle(request, CancellationToken.None);
+        var result  = await _setGeneralStatusCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         result.Should().Be(true);
         inventoryData.InventoryMembers.Single().SessionMemberGeneralStatus.Should().Be(parameters.SessionMemberGeneralStatus);
         inventoryData.InventoryMembers.Single().LastLocalInventoryStatusUpdate.Should().Be(parameters.UtcChangeDate);
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored))
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
     
     [Test]
-    public async Task SetLocalInventoryStatus_DoesNotUpdateStatus_WhenUtcChangeDateIsOlder()
+    public async Task SetGeneralStatus_DoesNotUpdateStatus_WhenUtcChangeDateIsOlder()
     {
         // Arrange
         var sessionId = "testSession";
@@ -90,41 +91,41 @@ public class SetLocalInventoryStatusCommandHandlerTests
             SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryRunningAnalysis
         };
 
-        var inventoryData = new InventoryData(sessionId);
-        var inventoryMemberData = new InventoryMemberData 
+        var inventoryData = new InventoryEntity(sessionId);
+        var inventoryMemberData = new InventoryMemberEntity 
         { 
             ClientInstanceId = client.ClientInstanceId,
             SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryFinished,
             LastLocalInventoryStatusUpdate = newerDate
         };
         
-        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client))
+        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryEntity>.Ignored, "testSession", client))
             .Invokes(() => inventoryData.InventoryMembers.Add(inventoryMemberData))
             .Returns(inventoryMemberData);
 
-        InventoryData? funcResult = null;
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
-            .Invokes((string _, Func<InventoryData?, InventoryData?> func) =>
+        InventoryEntity? funcResult = null;
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored))
+            .Invokes((string _, Func<InventoryEntity?, InventoryEntity?> func) =>
             {
                 funcResult = func(inventoryData);
             })
             .ReturnsLazily(() => UpdateResultBuilder.BuildAddOrUpdateResult(funcResult, false));
 
-        var request = new SetLocalInventoryStatusRequest(client, parameters);
+        var request = new SetGeneralStatusRequest(client, parameters);
 
         // Act
-        var result = await _setLocalInventoryStatusCommandHandler.Handle(request, CancellationToken.None);
+        var result = await _setGeneralStatusCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         result.Should().Be(false);
         inventoryData.InventoryMembers.Single().SessionMemberGeneralStatus.Should().Be(SessionMemberGeneralStatus.InventoryFinished);
         inventoryData.InventoryMembers.Single().LastLocalInventoryStatusUpdate.Should().Be(newerDate);
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored))
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
     
     [Test]
-    public async Task SetLocalInventoryStatus_CreatesNewInventoryData_WhenInventoryDataIsNull()
+    public async Task SetGeneralStatus_CreatesNewInventoryData_WhenInventoryDataIsNull()
     {
         // Arrange
         var sessionId = "testSession";
@@ -137,33 +138,33 @@ public class SetLocalInventoryStatusCommandHandlerTests
             SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryRunningAnalysis
         };
         
-        var inventoryMemberData = new InventoryMemberData 
+        var inventoryMemberData = new InventoryMemberEntity 
         { 
             ClientInstanceId = client.ClientInstanceId,
             SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryFinished,
             LastLocalInventoryStatusUpdate = null
         };
         
-        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, "testSession", client))
-            .Invokes((InventoryData inventoryData, string _, Client _) => 
+        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryEntity>.Ignored, "testSession", client))
+            .Invokes((InventoryEntity inventoryEntity, string _, Client _) => 
             {
-                inventoryData.InventoryMembers.Add(inventoryMemberData);
+                inventoryEntity.InventoryMembers.Add(inventoryMemberData);
             })
             .Returns(inventoryMemberData);
 
-        InventoryData? capturedInventoryData = null;
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
-            .Invokes((string _, Func<InventoryData?, InventoryData?> func) =>
+        InventoryEntity? capturedInventoryData = null;
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored))
+            .Invokes((string _, Func<InventoryEntity?, InventoryEntity?> func) =>
             {
                 // Pass null to simulate non-existing inventory data
                 capturedInventoryData = func(null);
             })
             .ReturnsLazily(() => UpdateResultBuilder.BuildAddOrUpdateResult(capturedInventoryData, false));
 
-        var request = new SetLocalInventoryStatusRequest(client, parameters);
+        var request = new SetGeneralStatusRequest(client, parameters);
 
         // Act
-        var result = await _setLocalInventoryStatusCommandHandler.Handle(request, CancellationToken.None);
+        var result = await _setGeneralStatusCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         result.Should().Be(true);
@@ -176,14 +177,14 @@ public class SetLocalInventoryStatusCommandHandlerTests
         inventoryMember.SessionMemberGeneralStatus.Should().Be(parameters.SessionMemberGeneralStatus);
         inventoryMember.LastLocalInventoryStatusUpdate.Should().Be(parameters.UtcChangeDate);
 
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored))
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 
     [Test]
     [TestCase(true)]
     [TestCase(false)]
-    public async Task SetLocalInventoryStatus_HandlesRegardlessOfIsInventoryStarted(bool isInventoryStarted)
+    public async Task SetGeneralStatus_HandlesRegardlessOfIsInventoryStarted(bool isInventoryStarted)
     {
         // Arrange
         var sessionId = "testSession";
@@ -196,36 +197,36 @@ public class SetLocalInventoryStatusCommandHandlerTests
             SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryRunningAnalysis
         };
 
-        var inventoryData = new InventoryData(sessionId) { IsInventoryStarted = isInventoryStarted };
-        var inventoryMemberData = new InventoryMemberData
+        var inventoryData = new InventoryEntity(sessionId) { IsInventoryStarted = isInventoryStarted };
+        var inventoryMemberData = new InventoryMemberEntity
         {
             ClientInstanceId = client.ClientInstanceId,
             SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryFinished,
             LastLocalInventoryStatusUpdate = null
         };
 
-        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryData>.Ignored, sessionId, client))
+        A.CallTo(() => _mockInventoryMemberService.GetOrCreateInventoryMember(A<InventoryEntity>.Ignored, sessionId, client))
             .Invokes(() => inventoryData.InventoryMembers.Add(inventoryMemberData))
             .Returns(inventoryMemberData);
 
-        InventoryData? funcResult = null;
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryData?, InventoryData?>>.Ignored))
-            .Invokes((string _, Func<InventoryData?, InventoryData?> func) =>
+        InventoryEntity? funcResult = null;
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(A<string>.Ignored, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored))
+            .Invokes((string _, Func<InventoryEntity?, InventoryEntity?> func) =>
             {
                 funcResult = func(inventoryData);
             })
             .ReturnsLazily(() => UpdateResultBuilder.BuildAddOrUpdateResult(funcResult, false));
 
-        var request = new SetLocalInventoryStatusRequest(client, parameters);
+        var request = new SetGeneralStatusRequest(client, parameters);
 
         // Act
-        var result = await _setLocalInventoryStatusCommandHandler.Handle(request, CancellationToken.None);
+        var result = await _setGeneralStatusCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         result.Should().Be(true);
         inventoryData.InventoryMembers.Single().SessionMemberGeneralStatus.Should().Be(parameters.SessionMemberGeneralStatus);
         inventoryData.InventoryMembers.Single().LastLocalInventoryStatusUpdate.Should().Be(parameters.UtcChangeDate);
-        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryData?, InventoryData?>>.Ignored))
+        A.CallTo(() => _mockInventoryRepository.AddOrUpdate(sessionId, A<Func<InventoryEntity?, InventoryEntity?>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
-}
+} 
