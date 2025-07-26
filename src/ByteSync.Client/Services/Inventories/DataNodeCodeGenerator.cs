@@ -36,51 +36,106 @@ public class DataNodeCodeGenerator : IDataNodeCodeGenerator, IDisposable
             .GroupBy(n => n.ClientInstanceId)
             .ToDictionary(g => g.Key, g => g.OrderBy(n => n.Id).ToList());
 
-        bool singlePerMember = nodesByMember.Values.All(list => list.Count == 1);
-
         var sessionMembers = _sessionMemberRepository.SortedSessionMembers.ToList();
+        
+        // Use simple letters (A, B, C) if there's only one session member OR if all members have exactly one node
+        bool useSimpleLetters = sessionMembers.Count == 1 || nodesByMember.Values.All(list => list.Count == 1);
+
         var updates = new List<DataNode>();
 
         int globalIndex = 0;
 
-        for (int mIndex = 0; mIndex < sessionMembers.Count; mIndex++)
+        if (useSimpleLetters)
         {
-            var member = sessionMembers[mIndex];
-            if (!nodesByMember.TryGetValue(member.ClientInstanceId, out var nodes))
+            if (sessionMembers.Count == 1)
             {
-                continue;
-            }
-
-            var memberLetter = ((char)('A' + mIndex)).ToString();
-
-            if (singlePerMember)
-            {
-                foreach (var node in nodes)
+                // Single member: nodes get A, B, C... sequentially
+                for (int mIndex = 0; mIndex < sessionMembers.Count; mIndex++)
                 {
-                    var needsUpdate = false;
-                    
-                    if (node.Code != memberLetter)
+                    var member = sessionMembers[mIndex];
+                    if (!nodesByMember.TryGetValue(member.ClientInstanceId, out var nodes))
                     {
-                        node.Code = memberLetter;
-                        needsUpdate = true;
+                        continue;
                     }
-                    
-                    if (node.OrderIndex != globalIndex)
+
+                    foreach (var node in nodes)
                     {
-                        node.OrderIndex = globalIndex;
-                        needsUpdate = true;
+                        var code = ((char)('A' + globalIndex)).ToString();
+                        var needsUpdate = false;
+                        
+                        if (node.Code != code)
+                        {
+                            node.Code = code;
+                            needsUpdate = true;
+                        }
+                        
+                        if (node.OrderIndex != globalIndex)
+                        {
+                            node.OrderIndex = globalIndex;
+                            needsUpdate = true;
+                        }
+                        
+                        if (needsUpdate)
+                        {
+                            updates.Add(node);
+                        }
+                        
+                        globalIndex++;
                     }
-                    
-                    if (needsUpdate)
-                    {
-                        updates.Add(node);
-                    }
-                    
-                    globalIndex++;
                 }
             }
             else
             {
+                // Multiple members with one node each: each member gets their letter
+                for (int mIndex = 0; mIndex < sessionMembers.Count; mIndex++)
+                {
+                    var member = sessionMembers[mIndex];
+                    if (!nodesByMember.TryGetValue(member.ClientInstanceId, out var nodes))
+                    {
+                        continue;
+                    }
+
+                    var memberLetter = ((char)('A' + mIndex)).ToString();
+
+                    foreach (var node in nodes)
+                    {
+                        var needsUpdate = false;
+                        
+                        if (node.Code != memberLetter)
+                        {
+                            node.Code = memberLetter;
+                            needsUpdate = true;
+                        }
+                        
+                        if (node.OrderIndex != globalIndex)
+                        {
+                            node.OrderIndex = globalIndex;
+                            needsUpdate = true;
+                        }
+                        
+                        if (needsUpdate)
+                        {
+                            updates.Add(node);
+                        }
+                        
+                        globalIndex++;
+                    }
+                }
+            }
+        }
+        else
+        {
+            // For double letters, use member letter + node index within member
+            for (int mIndex = 0; mIndex < sessionMembers.Count; mIndex++)
+            {
+                var member = sessionMembers[mIndex];
+                if (!nodesByMember.TryGetValue(member.ClientInstanceId, out var nodes))
+                {
+                    continue;
+                }
+
+                var memberLetter = ((char)('A' + mIndex)).ToString();
+
                 for (int i = 0; i < nodes.Count; i++)
                 {
                     var code = memberLetter + ((char)('a' + i));
