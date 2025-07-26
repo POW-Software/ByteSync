@@ -21,13 +21,11 @@ public class DataSourceService : IDataSourceService
     private readonly IConnectionService _connectionService;
     private readonly IInventoryApiClient _inventoryApiClient;
     private readonly IDataSourceRepository _dataSourceRepository;
-    private readonly IDataNodeRepository _dataNodeRepository;
     private readonly IDataSourceCodeGenerator _codeGenerator;
 
     public DataSourceService(ISessionService sessionService, IDataSourceChecker dataSourceChecker, IDataEncrypter dataEncrypter,
         IConnectionService connectionService, IInventoryApiClient inventoryApiClient,
-        IDataSourceRepository dataSourceRepository, IDataNodeRepository dataNodeRepository,
-        IDataSourceCodeGenerator codeGenerator)
+        IDataSourceRepository dataSourceRepository, IDataSourceCodeGenerator codeGenerator)
     {
         _sessionService = sessionService;
         _dataSourceChecker = dataSourceChecker;
@@ -35,11 +33,9 @@ public class DataSourceService : IDataSourceService
         _connectionService = connectionService;
         _inventoryApiClient = inventoryApiClient;
         _dataSourceRepository = dataSourceRepository;
-        _dataNodeRepository = dataNodeRepository;
         _codeGenerator = codeGenerator;
     }
-
-    // TODO data-nodes-and-local-sync
+    
     public async Task<bool> TryAddDataSource(DataSource dataSource)
     {
         if (await _dataSourceChecker.CheckDataSource(dataSource, _dataSourceRepository.Elements))
