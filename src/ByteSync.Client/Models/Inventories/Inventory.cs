@@ -25,7 +25,7 @@ public class Inventory
 
     public string MachineName { get; set; }
     
-    public string CodeAndNodeId => $"{Code}_{NodeId}";
+    public string CodeAndId => $"{Code}_{InventoryId}";
 
     public void Add(InventoryPart inventoryPart)
     {

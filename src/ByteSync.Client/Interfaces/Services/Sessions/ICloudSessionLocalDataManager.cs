@@ -11,7 +11,7 @@ public interface ICloudSessionLocalDataManager
 
     string GetInventoryPath(SharedFileDefinition sharedFileDefinition);
         
-    string GetInventoryPath(string clientInstanceId, string inventoryCodeAndNodeId, LocalInventoryModes localInventoryMode);
+    string GetInventoryPath(string clientInstanceId, string inventoryCodeAndId, LocalInventoryModes localInventoryMode);
 
     string GetTempDeltaFullName(SharedDataPart source, SharedDataPart target);
         

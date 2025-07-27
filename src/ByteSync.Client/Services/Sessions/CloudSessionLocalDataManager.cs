@@ -70,7 +70,7 @@ public class CloudSessionLocalDataManager : ICloudSessionLocalDataManager
 
     public string GetCurrentMachineInventoryPath(Inventory inventory, LocalInventoryModes localInventoryMode)
     {
-        return GetInventoryPath(_environmentService.ClientInstanceId, inventory.CodeAndNodeId, localInventoryMode);
+        return GetInventoryPath(_environmentService.ClientInstanceId, inventory.CodeAndId, localInventoryMode);
     }
 
     public string GetInventoryPath(SharedFileDefinition sharedFileDefinition)
@@ -85,18 +85,18 @@ public class CloudSessionLocalDataManager : ICloudSessionLocalDataManager
         return GetInventoryPath(sessionMemberInfo!.ClientInstanceId, sharedFileDefinition.AdditionalName, localInventoryMode);
     }
 
-    public string GetInventoryPath(string clientInstanceId, string inventoryCodeAndNodeId, LocalInventoryModes localInventoryMode)
+    public string GetInventoryPath(string clientInstanceId, string inventoryCodeAndId, LocalInventoryModes localInventoryMode)
     {
         var machineFullPath = GetMachineFullPath(clientInstanceId);
         
         string fileName;
         if (localInventoryMode == LocalInventoryModes.Base)
         {
-            fileName = $"base_inventory_{inventoryCodeAndNodeId}.zip";
+            fileName = $"base_inventory_{inventoryCodeAndId}.zip";
         }
         else
         {
-            fileName = $"full_inventory_{inventoryCodeAndNodeId}.zip";
+            fileName = $"full_inventory_{inventoryCodeAndId}.zip";
         }
                 
         var inventoryFullName = IOUtils.Combine(machineFullPath, fileName);

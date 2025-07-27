@@ -189,10 +189,10 @@ public class TestSynchronizationActionHandler : IntegrationTest
         var signatureHashB = contentIdentityB.Core!.SignatureHash;
         
         SharedDataPart source = new SharedDataPart("fileToCopy1.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
-            inventoryDataA.Inventory.CodeAndNodeId, sourceA.FullName, fileParentPathComplement + "fileToCopy1.txt", signatureGuidA, signatureHashA, false);
+            inventoryDataA.Inventory.CodeAndId, sourceA.FullName, fileParentPathComplement + "fileToCopy1.txt", signatureGuidA, signatureHashA, false);
         
         SharedDataPart target = new SharedDataPart("fileToCopy1.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
-            inventoryDataB.Inventory.CodeAndNodeId, sourceB.FullName, fileParentPathComplement + "fileToCopy1.txt", signatureGuidB, signatureHashB, false);
+            inventoryDataB.Inventory.CodeAndId, sourceB.FullName, fileParentPathComplement + "fileToCopy1.txt", signatureGuidB, signatureHashB, false);
         
         SharedActionsGroup sharedActionsGroup = new SharedActionsGroup
         {
