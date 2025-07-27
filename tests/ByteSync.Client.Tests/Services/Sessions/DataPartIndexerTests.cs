@@ -11,7 +11,7 @@ namespace ByteSync.Tests.Services.Sessions;
 [TestFixture]
 public class DataPartIndexerTests
 {
-    private DataPartIndexer _dataPartIndexer;
+    private DataPartIndexer _dataPartIndexer = null!;
 
     [SetUp]
     public void SetUp()
@@ -132,5 +132,106 @@ public class DataPartIndexerTests
         // Assert
         synchronizationRule.Actions[0].Source.Should().Be(sourcePart);
         synchronizationRule.Conditions[0].Source.Should().Be(sourcePart);
+    }
+
+    [Test]
+    public void BuildMap_ShouldUseInventoryCodesWhenAllInventoriesHaveSinglePart()
+    {
+        // Arrange
+        var inventoryA = new Inventory
+        {
+            Code = "A",
+            InventoryParts = [new InventoryPart { Code = "A1" }]
+        };
+        var inventoryB = new Inventory
+        {
+            Code = "B",
+            InventoryParts = [new InventoryPart { Code = "B1" }]
+        };
+
+        // Act
+        _dataPartIndexer.BuildMap([inventoryA, inventoryB]);
+
+        // Assert
+        var dataParts = _dataPartIndexer.GetAllDataParts();
+        dataParts.Should().HaveCount(2);
+        
+        var dataPartNames = dataParts.Select(dp => dp.Name).OrderBy(name => name).ToList();
+        dataPartNames.Should().BeEquivalentTo(["A", "B"]);
+        
+        var dataPartA = _dataPartIndexer.GetDataPart("A");
+        var dataPartB = _dataPartIndexer.GetDataPart("B");
+        
+        dataPartA.Should().NotBeNull();
+        dataPartA.Inventory.Should().Be(inventoryA);
+        dataPartB.Should().NotBeNull();
+        dataPartB.Inventory.Should().Be(inventoryB);
+    }
+
+    [Test]
+    public void BuildMap_ShouldUseInventoryPartCodesWhenSomeInventoriesHaveMultipleParts()
+    {
+        // Arrange
+        var inventoryA = new Inventory
+        {
+            Code = "A",
+            InventoryParts = [new InventoryPart { Code = "A1" }]
+        };
+        var inventoryB = new Inventory
+        {
+            Code = "B",
+            InventoryParts = [
+                new InventoryPart { Code = "B1" },
+                new InventoryPart { Code = "B2" }
+            ]
+        };
+
+        // Act
+        _dataPartIndexer.BuildMap([inventoryA, inventoryB]);
+
+        // Assert
+        var dataParts = _dataPartIndexer.GetAllDataParts();
+        dataParts.Should().HaveCount(3);
+        
+        var dataPartNames = dataParts.Select(dp => dp.Name).OrderBy(name => name).ToList();
+        dataPartNames.Should().BeEquivalentTo(["A1", "B1", "B2"]);
+    }
+
+    [Test]
+    public void BuildMap_ShouldHandleMixedSinglePartInventoriesWithDifferentNamingConventions()
+    {
+        // Arrange
+        var inventoryA = new Inventory
+        {
+            Code = "A",
+            InventoryParts = [new InventoryPart { Code = "A" }]
+        };
+        var inventoryB = new Inventory
+        {
+            Code = "B", 
+            InventoryParts = [new InventoryPart { Code = "B" }]
+        };
+        var inventoryC = new Inventory
+        {
+            Code = "C",
+            InventoryParts = [new InventoryPart { Code = "C" }]
+        };
+
+        // Act
+        _dataPartIndexer.BuildMap([inventoryA, inventoryB, inventoryC]);
+
+        // Assert
+        var dataParts = _dataPartIndexer.GetAllDataParts();
+        dataParts.Should().HaveCount(3);
+        
+        var dataPartNames = dataParts.Select(dp => dp.Name).OrderBy(name => name).ToList();
+        dataPartNames.Should().BeEquivalentTo(["A", "B", "C"]);
+        
+        foreach (var inventory in new[] { inventoryA, inventoryB, inventoryC })
+        {
+            var dataPart = _dataPartIndexer.GetDataPart(inventory.Code);
+            dataPart.Should().NotBeNull();
+            dataPart.Inventory.Should().Be(inventory);
+        }
     }
 }

@@ -26,17 +26,17 @@ public class DataPartIndexer : IDataPartIndexer
         
         DataPartsByNames.Clear();
         
+        bool useSinglePartDataPartNames = Inventories.All(i => i.InventoryParts.Count == 1);
+        
         foreach (var inventory in Inventories)
         {
-            if (inventory.InventoryParts.Count == 1)
+            if (useSinglePartDataPartNames)
             {
-                // Single part inventory: use inventory code directly
                 var dataPart = new DataPart(inventory.Code, inventory);
                 DataPartsByNames.Add(dataPart.Name, dataPart);
             }
             else
             {
-                // Multi-part inventory: use individual part codes
                 foreach (var inventoryPart in inventory.InventoryParts)
                 {
                     var dataPart = new DataPart(inventoryPart.Code, inventoryPart);
