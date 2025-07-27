@@ -20,6 +20,8 @@ public class DataNodeService : IDataNodeService
     private readonly IInventoryApiClient _inventoryApiClient;
     private readonly IDataNodeRepository _dataNodeRepository;
     private readonly IDataNodeCodeGenerator _codeGenerator;
+    private readonly IDataSourceService _dataSourceService;
+    private readonly IDataSourceRepository _dataSourceRepository;
     
     private int _nodeCounter;
     private readonly SemaphoreSlim _counterSemaphore = new(1, 1);
@@ -27,7 +29,8 @@ public class DataNodeService : IDataNodeService
     public DataNodeService(ISessionService sessionService, IConnectionService connectionService,
         IDataEncrypter dataEncrypter,
         IInventoryApiClient inventoryApiClient, IDataNodeRepository dataNodeRepository,
-        IDataNodeCodeGenerator codeGenerator)
+        IDataNodeCodeGenerator codeGenerator, IDataSourceService dataSourceService,
+        IDataSourceRepository dataSourceRepository)
     {
         _sessionService = sessionService;
         _connectionService = connectionService;
@@ -35,6 +38,8 @@ public class DataNodeService : IDataNodeService
         _inventoryApiClient = inventoryApiClient;
         _dataNodeRepository = dataNodeRepository;
         _codeGenerator = codeGenerator;
+        _dataSourceService = dataSourceService;
+        _dataSourceRepository = dataSourceRepository;
         
         // Reset the counter when a session ends or is reset
         _sessionService.SessionObservable
@@ -90,6 +95,7 @@ public class DataNodeService : IDataNodeService
 
     public async Task<bool> TryRemoveDataNode(DataNode dataNode)
     {
+        // 1. Call API to remove DataNode (automatically removes DataSources server-side)
         var isRemoveOK = true;
         if (_sessionService.CurrentSession is CloudSession cloudSession
             && dataNode.ClientInstanceId == _connectionService.ClientInstanceId)
@@ -98,9 +104,19 @@ public class DataNodeService : IDataNodeService
             isRemoveOK = await _inventoryApiClient.RemoveDataNode(cloudSession.SessionId, _connectionService.ClientInstanceId!, encryptedDataNode);
         }
 
+        // 2. If API success → Remove DataNode AND associated DataSources locally
         if (isRemoveOK)
         {
+            var associatedDataSources = _dataSourceRepository.Elements
+                .Where(ds => ds.DataNodeId == dataNode.Id)
+                .ToList();
+            
             ApplyRemoveDataNodeLocally(dataNode);
+            
+            foreach (var dataSource in associatedDataSources)
+            {
+                _dataSourceService.ApplyRemoveDataSourceLocally(dataSource);
+            }
         }
 
         return isRemoveOK;
