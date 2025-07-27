@@ -10,14 +10,14 @@ public class SharedDataPart
 
     }
 
-    public SharedDataPart(string name, FileSystemTypes inventoryPartType, string clientInstanceId, string inventoryLetter, 
+    public SharedDataPart(string name, FileSystemTypes inventoryPartType, string clientInstanceId, string inventoryCodeAndNodeId, 
         string rootPath, string? relativePath,
         string? signatureGuid, string? signatureHash, bool hasAnalysisError)
     {
         Name = name;
         InventoryPartType = inventoryPartType;
         ClientInstanceId = clientInstanceId;
-        InventoryLetter = inventoryLetter;
+        InventoryCodeAndNodeId = inventoryCodeAndNodeId;
         RootPath = rootPath;
         RelativePath = relativePath;
         SignatureGuid = signatureGuid;
@@ -31,7 +31,7 @@ public class SharedDataPart
 
     public string ClientInstanceId { get; set; } = null!;
         
-    public string InventoryLetter { get; set; }  = null!;
+    public string InventoryCodeAndNodeId { get; set; }  = null!;
 
     public string RootPath { get; set; } = null!;
         

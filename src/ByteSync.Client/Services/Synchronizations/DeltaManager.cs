@@ -30,7 +30,7 @@ public class DeltaManager : IDeltaManager
         var deltaFullName = _cloudSessionLocalDataManager.GetTempDeltaFullName(sharedActionsGroup.Source!, sharedDataPart);
             
         var targetInventoryPath = _cloudSessionLocalDataManager.GetInventoryPath(sharedDataPart.ClientInstanceId, 
-            sharedDataPart.InventoryLetter, LocalInventoryModes.Full);
+            sharedDataPart.InventoryCodeAndNodeId, LocalInventoryModes.Full);
 
         using var targetInventoryLoader = new InventoryLoader(targetInventoryPath);
         
