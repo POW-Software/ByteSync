@@ -7,10 +7,12 @@ using Avalonia.Media;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.DataNodes;
 using ByteSync.Business.SessionMembers;
+using ByteSync.Business.Sessions;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.ViewModels.Misc;
 using DynamicData;
 using ReactiveUI;
@@ -24,6 +26,7 @@ public class DataNodeHeaderViewModel : ActivatableViewModelBase
     private readonly ILocalizationService _localizationService;
     private readonly IDataNodeRepository _dataNodeRepository;
     private readonly IDataNodeService _dataNodeService;
+    private readonly ISessionService _sessionService;
     private readonly SessionMember _sessionMember;
     private readonly DataNode _dataNode;
 
@@ -44,6 +47,7 @@ public class DataNodeHeaderViewModel : ActivatableViewModelBase
         IThemeService themeService,
         IDataNodeRepository dataNodeRepository,
         IDataNodeService dataNodeService,
+        ISessionService sessionService,
         ErrorViewModel errorViewModel)
     {
         _sessionMember = sessionMember;
@@ -52,13 +56,22 @@ public class DataNodeHeaderViewModel : ActivatableViewModelBase
         _themeService = themeService;
         _dataNodeRepository = dataNodeRepository;
         _dataNodeService = dataNodeService;
+        _sessionService = sessionService;
 
         IsLocalMachine = isLocalMachine;
         ClientInstanceId = sessionMember.ClientInstanceId;
         Code = dataNode.Code;
         RemoveDataNodeError = errorViewModel;
 
-        RemoveDataNodeCommand = ReactiveCommand.CreateFromTask(RemoveDataNode);
+        // Create command with canExecute based on session status
+        var canRemoveDataNode = _sessionService.SessionStatusObservable
+            .Select(status => status == SessionStatus.Preparation)
+            .CombineLatest(this.WhenAnyValue(x => x.IsLocalMachine, x => x.CanRemoveDataNode),
+                (isSessionInPreparation, localAndCanRemove) => 
+                    isSessionInPreparation && localAndCanRemove.Item1 && localAndCanRemove.Item2)
+            .ObserveOn(RxApp.MainThreadScheduler);
+        
+        RemoveDataNodeCommand = ReactiveCommand.CreateFromTask(RemoveDataNode, canRemoveDataNode);
 
         InitializeBrushes();
         SetLetterBrushes();

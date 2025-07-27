@@ -37,7 +37,8 @@
             <Button Grid.Column="3" Classes="AccentButton" Margin="6" Height="32" Width="32"
                     VerticalAlignment="Center"
                     Command="{Binding RemoveDataNodeCommand}" 
-                    IsVisible="{Binding ShowRemoveButton}">
+                    IsVisible="{Binding ShowRemoveButton}"
+                    IsEnabled="{Binding IsRemoveDataNodeEnabled}">
                 <misc:Icon FontSize="16" Value="RegularMinus" Margin="0" Width="24" Height="24" />
             </Button>
         </Grid>
