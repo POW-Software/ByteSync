@@ -25,7 +25,7 @@ public class DataPartIndexerTests
         // Arrange
         var inventory = new Inventory
         {
-            Code = "A", // Set the code as it would be set by DataNodeCodeGenerator
+            Code = "A",
             InventoryParts = [new InventoryPart { Code = "A" }] // InventoryPart gets same code for single part
         };
 
@@ -45,7 +45,7 @@ public class DataPartIndexerTests
         // Arrange
         var inventory = new Inventory
         {
-            Code = "A", // Set the inventory code as it would be set by DataNodeCodeGenerator
+            Code = "A",
             InventoryParts = [
                 new InventoryPart { Code = "A1" }, // Each part gets its own code
                 new InventoryPart { Code = "A2" }
@@ -68,7 +68,7 @@ public class DataPartIndexerTests
         // Arrange
         var inventory = new Inventory
         {
-            Code = "A", // Set the code as it would be set by DataNodeCodeGenerator
+            Code = "A",
             InventoryParts = [new InventoryPart { Code = "A" }] // Single part gets same code as inventory
         };
         _dataPartIndexer.BuildMap([inventory]);
@@ -87,7 +87,7 @@ public class DataPartIndexerTests
         // Arrange
         var inventory = new Inventory
         {
-            Code = "A", // Set the code as it would be set by DataNodeCodeGenerator
+            Code = "A",
             InventoryParts = [new InventoryPart { Code = "A" }] // Single part gets same code as inventory
         };
         _dataPartIndexer.BuildMap([inventory]);
@@ -116,7 +116,7 @@ public class DataPartIndexerTests
         // Arrange
         var inventory = new Inventory
         {
-            Code = "A", // Set the code as it would be set by DataNodeCodeGenerator
+            Code = "A",
             InventoryParts = [new InventoryPart { Code = "A" }] // Single part gets same code as inventory
         };
         _dataPartIndexer.BuildMap([inventory]);
