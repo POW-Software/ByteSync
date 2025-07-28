@@ -95,7 +95,6 @@ public class DataNodeService : IDataNodeService
 
     public async Task<bool> TryRemoveDataNode(DataNode dataNode)
     {
-        // 1. Call API to remove DataNode (automatically removes DataSources server-side)
         var isRemoveOK = true;
         if (_sessionService.CurrentSession is CloudSession cloudSession
             && dataNode.ClientInstanceId == _connectionService.ClientInstanceId)
@@ -103,8 +102,7 @@ public class DataNodeService : IDataNodeService
             var encryptedDataNode = _dataEncrypter.EncryptDataNode(dataNode);
             isRemoveOK = await _inventoryApiClient.RemoveDataNode(cloudSession.SessionId, _connectionService.ClientInstanceId!, encryptedDataNode);
         }
-
-        // 2. If API success → Remove DataNode AND associated DataSources locally
+        
         if (isRemoveOK)
         {
             var associatedDataSources = _dataSourceRepository.Elements
