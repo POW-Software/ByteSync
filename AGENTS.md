@@ -1,6 +1,20 @@
 ## Project Overview
 
-This is a C#/.NET solution using .NET 8.
+**ByteSync** is an open-source file synchronization software with end-to-end encryption and smart delta transfers, supporting up to 5 remote locations per session.
+
+This is a C#/.NET 8 solution with a client-server architecture:
+
+### Main Projects
+- **`ByteSync.Client/`** - Cross-platform desktop app (Avalonia UI, ReactiveUI/MVVM)
+- **`ByteSync.Functions/`** - Azure Functions serverless backend (HTTP APIs, SignalR hub)
+- **`ByteSync.Common/`** - Shared business logic and domain models
+- **`ByteSync.ServerCommon/`** - Server-side services and data repositories
+
+### Key Technologies
+- **Frontend**: Avalonia UI, ReactiveUI
+- **Backend**: Azure Functions, SignalR, MediatR (CQRS)
+- **Storage**: Azure Cosmos DB, Redis
+- **Sync**: FastRsync for binary diffs
 
 ## Branch & PR Guidelines
 
@@ -41,10 +55,6 @@ Examples:
 
 ## Build and Test Guidelines
 - Always run build and test as two separate commands to avoid blocking issues.
-- On Windows :
-  - Use `& "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -Command "dotnet build --verbosity minimal /property:WarningLevel=0 > build_output.txt 2>&1"` to build the solution and capture all output including errors (recommended to avoid blocking issues).
-  - Alternative: Use `dotnet build --verbosity minimal /property:WarningLevel=0 > build_output.txt 2>&1` with PowerShell 5.
-  - To view compilation errors: `Get-Content build_output.txt -Head 20`
-  - To count compilation errors: `Get-Content build_output.txt | findstr "error CS" | Measure-Object -Line`
+- Use `dotnet build --verbosity quiet` to build the solution.
 - When running tests, do not use the `--verbosity` modifier.
 - If you need to clean the solution, use `dotnet clean --verbosity quiet` before building.
