@@ -5,6 +5,7 @@
              xmlns:dataNodes="clr-namespace:ByteSync.ViewModels.Sessions.DataNodes"
              xmlns:dataNodes1="clr-namespace:ByteSync.Views.Sessions.DataNodes"
              xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ByteSync.Views.Sessions.DataNodes.DataNodeView">
     
@@ -40,11 +41,18 @@
         </Border>
         
         <!-- Add DataNode Button -->
-        <Button Classes="AccentButton" Margin="6" Height="32" Width="32"
+        <Button Classes="AccentButton" Margin="6 0 24 0 " Height="48" Width="48"
                 VerticalAlignment="Center"
                 Command="{Binding AddDataNodeCommand}" 
                 IsVisible="{Binding ShowAddButton}">
-            <misc:Icon FontSize="16" Value="RegularPlus" Margin="0" Width="24" Height="24" />
+            <misc:Icon FontSize="24" Value="RegularPlus" Margin="0" Width="24" Height="24" />
+            
+            <ToolTip.Tip>
+                <StackPanel Classes="ByteSyncToolTip">
+                    <TextBlock Text="{localizations:Loc DataNodeView_Tooltip_Header_Add}" />
+                    <TextBlock Text="{localizations:Loc DataNodeView_Tooltip_Content_Add}" />
+                </StackPanel>
+            </ToolTip.Tip>
         </Button>
     </StackPanel>
 

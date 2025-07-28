@@ -1,14 +1,13 @@
 ﻿using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions;
 
-namespace ByteSync.ServerCommon.Business.Sessions;
+namespace ByteSync.ServerCommon.Entities.Inventories;
 
-public class InventoryMemberData
+public class InventoryMemberEntity
 {
-    public InventoryMemberData()
+    public InventoryMemberEntity()
     {
-        DataNodes = new List<EncryptedDataNode>();
-        DataSources = new List<EncryptedDataSource>();
+        DataNodes = new List<InventoryDataNodeEntity>();
     }
     
     public string SessionId { get; set; } = null!;
@@ -19,7 +18,5 @@ public class InventoryMemberData
         
     public DateTimeOffset? LastLocalInventoryStatusUpdate { get; set; }
     
-    public List<EncryptedDataNode> DataNodes { get; set; }
-
-    public List<EncryptedDataSource> DataSources { get; set; }
+    public List<InventoryDataNodeEntity> DataNodes { get; set; }
 }

@@ -1,7 +1,7 @@
 using ByteSync.ServerCommon.Interfaces.Services;
 using MediatR;
 
-namespace ByteSync.ServerCommon.Commands.CloudSessions;
+namespace ByteSync.ServerCommon.Commands.SessionMembers;
 
 public class GetMembersInstanceIdsCommandHandler : IRequestHandler<GetMembersInstanceIdsRequest, List<string>>
 {

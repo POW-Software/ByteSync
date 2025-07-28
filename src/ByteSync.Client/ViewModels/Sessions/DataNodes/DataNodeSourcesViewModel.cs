@@ -32,6 +32,11 @@ public class DataNodeSourcesViewModel : ActivatableViewModelBase
 
     private ReadOnlyObservableCollection<DataSourceProxy> _dataSources;
 
+    public DataNodeSourcesViewModel()
+    {
+
+    }
+    
     public DataNodeSourcesViewModel(DataNode dataNode,
         bool isLocalMachine,
         ISessionService sessionService,

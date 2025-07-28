@@ -40,6 +40,6 @@ public class GetDataNodesCommandHandler : IRequestHandler<GetDataNodesRequest, L
             return new List<EncryptedDataNode>();
         }
 
-        return inventoryMember.DataNodes;
+        return inventoryMember.DataNodes.Select(dn => dn.EncryptedDataNode).ToList();
     }
 }

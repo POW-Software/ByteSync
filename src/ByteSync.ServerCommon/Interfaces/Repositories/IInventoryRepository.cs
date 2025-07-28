@@ -1,8 +1,8 @@
-﻿using ByteSync.ServerCommon.Business.Sessions;
+﻿using ByteSync.ServerCommon.Entities.Inventories;
 
 namespace ByteSync.ServerCommon.Interfaces.Repositories;
 
-public interface IInventoryRepository : IRepository<InventoryData>
+public interface IInventoryRepository : IRepository<InventoryEntity>
 {
-    Task<InventoryMemberData?> GetInventoryMember(string sessionId, string clientInstanceId);
+    Task<InventoryMemberEntity?> GetInventoryMember(string sessionId, string clientInstanceId);
 }

@@ -62,20 +62,6 @@ public class CloudSessionApiClient : ICloudSessionApiClient
         }
     }
 
-    public async Task<List<string>> GetMembersClientInstanceIds(string sessionId, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            return (await _apiInvoker.GetAsync<List<string>>($"session/{sessionId}/membersInstanceIds", cancellationToken))!;
-        }
-        catch (Exception ex)
-        {
-            LogError(ex);
-                
-            throw;
-        }
-    }
-
     public async Task<JoinSessionResult> AskPasswordExchangeKey(AskCloudSessionPasswordExchangeKeyParameters parameters, 
         CancellationToken cancellationToken = default)
     {
@@ -175,20 +161,6 @@ public class CloudSessionApiClient : ICloudSessionApiClient
         try
         {
             await _apiInvoker.PostAsync($"session/{sessionId}/updateSettings", encryptedSessionSettings);
-        }
-        catch (Exception ex)
-        {
-            LogError(ex);
-                
-            throw;
-        }
-    }
-    
-    public async Task<List<SessionMemberInfoDTO>> GetMembers(string sessionId)
-    {
-        try
-        {
-            return await _apiInvoker.GetAsync<List<SessionMemberInfoDTO>>($"session/{sessionId}/members");
         }
         catch (Exception ex)
         {

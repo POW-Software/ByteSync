@@ -1,9 +1,8 @@
 ﻿using ByteSync.Common.Business.Sessions;
-using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
-using System.Linq;
+using ByteSync.ServerCommon.Entities.Inventories;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -46,16 +45,26 @@ public class AddDataSourceCommandHandler : IRequestHandler<AddDataSourceRequest,
         
         var updateEntityResult = await _inventoryRepository.AddOrUpdate(sessionId, inventoryData =>
         {
-            inventoryData ??= new InventoryData(sessionId);
+            inventoryData ??= new InventoryEntity(sessionId);
 
             if (!inventoryData.IsInventoryStarted)
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
-
-                inventoryMember.DataSources.RemoveAll(p => p.Id == encryptedDataSource.Id);
-                inventoryMember.DataSources.Add(encryptedDataSource);
                 
-                return inventoryData;
+                var dataNode = inventoryMember.DataNodes.SingleOrDefault(n => n.Id == request.DataNodeId);
+
+                if (dataNode != null)
+                {
+                    dataNode.DataSources.RemoveAll(n => n.Id == encryptedDataSource.Id);
+                    dataNode.DataSources.Add(new InventoryDataSourceEntity(encryptedDataSource));
+                    
+                    return inventoryData;
+                }
+                else
+                {
+                    _logger.LogWarning("AddDataSource: session {sessionId} has no data node with id {dataNodeId}", sessionId, request.DataNodeId);
+                    return null;
+                }
             }
             else
             {

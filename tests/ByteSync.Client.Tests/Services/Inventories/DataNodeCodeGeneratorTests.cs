@@ -211,9 +211,9 @@ public class DataNodeCodeGeneratorTests
         var node3 = new DataNode { Id = "N3", ClientInstanceId = "CID0" };
         _dataNodeRepository.AddOrUpdate(new[] { node2, node1, node3 });
 
-        node1.Code.Should().Be("Aa"); // N1 comes first alphabetically
-        node2.Code.Should().Be("Ab"); // N2 comes second
-        node3.Code.Should().Be("Ac"); // N3 comes third
+        node1.Code.Should().Be("A"); // N1 comes first alphabetically
+        node2.Code.Should().Be("B"); // N2 comes second
+        node3.Code.Should().Be("C"); // N3 comes third
     }
 
     [Test]
