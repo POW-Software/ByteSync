@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Security.Cryptography;
+using System.Threading;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
@@ -11,16 +12,13 @@ public class FileUploader : IFileUploader
 {
     private readonly ISlicerEncrypter _slicerEncrypter;
     private readonly ILogger<FileUploader> _logger;
-
-    // Coordination components
     private readonly IFileUploadCoordinator _fileUploadCoordinator;
     private readonly IFileSlicer _fileSlicer;
     private readonly IFileUploadWorker _fileUploadWorker;
     private readonly IFilePartUploadAsserter _filePartUploadAsserter;
-
-    // New separate components
     private readonly IFileUploadPreparer _fileUploadPreparer;
     private readonly IFileUploadProcessor _fileUploadProcessor;
+    private readonly SemaphoreSlim _semaphoreSlim;
 
     public FileUploader(
         string? localFileToUpload, 
@@ -31,7 +29,8 @@ public class FileUploader : IFileUploader
         IFileUploadWorker fileUploadWorker, 
         IFilePartUploadAsserter filePartUploadAsserter,
         ISlicerEncrypter slicerEncrypter, 
-        ILogger<FileUploader> logger)
+        ILogger<FileUploader> logger,
+        SemaphoreSlim semaphoreSlim)
     {
         if (localFileToUpload == null && memoryStream == null)
         {
@@ -60,7 +59,7 @@ public class FileUploader : IFileUploader
             fileUploadWorker,
             filePartUploadAsserter,
             localFileToUpload,
-            memoryStream);
+            semaphoreSlim);
     }
 
     public int? MaxSliceLength { get; set; }

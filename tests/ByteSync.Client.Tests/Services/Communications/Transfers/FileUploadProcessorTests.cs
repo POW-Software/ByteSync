@@ -8,6 +8,7 @@ using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Services.Communications.Transfers;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using System.Threading;
 
 namespace ByteSync.Tests.Services.Communications.Transfers;
 
@@ -24,6 +25,7 @@ public class FileUploadProcessorTests
     private string _testFilePath;
     private MemoryStream _testMemoryStream;
     private FileUploadProcessor _fileUploadProcessor;
+    private SemaphoreSlim _semaphoreSlim;
 
     [SetUp]
     public void SetUp()
@@ -53,12 +55,12 @@ public class FileUploadProcessorTests
         writer.Flush();
         _testMemoryStream.Position = 0;
 
-        // Setup coordinator mocks
         _mockFileUploadCoordinator.Setup(x => x.AvailableSlices).Returns(Channel.CreateBounded<FileUploaderSlice>(8));
         _mockFileUploadCoordinator.Setup(x => x.WaitForCompletionAsync()).Returns(Task.CompletedTask);
         _mockFileUploadCoordinator.Setup(x => x.SyncRoot).Returns(new object());
 
-        // Create processor instance
+        _semaphoreSlim = new SemaphoreSlim(1, 1);
+        
         _fileUploadProcessor = new FileUploadProcessor(
             _mockSlicerEncrypter.Object,
             _mockLogger.Object,
@@ -67,7 +69,7 @@ public class FileUploadProcessorTests
             _mockFileUploadWorker.Object,
             _mockFilePartUploadAsserter.Object,
             _testFilePath,
-            null);
+            _semaphoreSlim);
     }
 
     [TearDown]
@@ -78,6 +80,7 @@ public class FileUploadProcessorTests
             File.Delete(_testFilePath);
         }
         _testMemoryStream?.Dispose();
+        _semaphoreSlim?.Dispose();
     }
 
     [Test]
@@ -92,7 +95,7 @@ public class FileUploadProcessorTests
             _mockFileUploadWorker.Object,
             _mockFilePartUploadAsserter.Object,
             _testFilePath,
-            null);
+            _semaphoreSlim);
 
         // Assert
         processor.Should().NotBeNull();
@@ -223,7 +226,7 @@ public class FileUploadProcessorTests
             _mockFileUploadWorker.Object,
             _mockFilePartUploadAsserter.Object,
             null,
-            _testMemoryStream);
+            _semaphoreSlim);
 
         var expectedException = new Exception("Test exception");
         _mockFileSlicer.Setup(x => x.SliceAndEncryptAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>(), It.IsAny<int?>()))
@@ -254,6 +257,40 @@ public class FileUploadProcessorTests
 
         // Assert
         result.Should().Be(0); // Should return 0 when no progress state exists
+    }
+
+    [Test]
+    public async Task GetTotalCreatedSlices_AfterProcessUpload_ShouldReturnCorrectValue()
+    {
+        // Arrange
+        _mockFileSlicer.Setup(x => x.SliceAndEncryptAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>(), It.IsAny<int?>()))
+            .Returns(Task.CompletedTask);
+        _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _fileUploadProcessor.ProcessUpload(_sharedFileDefinition);
+        var result = _fileUploadProcessor.GetTotalCreatedSlices();
+
+        // Assert
+        result.Should().Be(0); // Should return 0 when no slices were created
+    }
+
+    [Test]
+    public async Task GetMaxConcurrentUploads_AfterProcessUpload_ShouldReturnCorrectValue()
+    {
+        // Arrange
+        _mockFileSlicer.Setup(x => x.SliceAndEncryptAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>(), It.IsAny<int?>()))
+            .Returns(Task.CompletedTask);
+        _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _fileUploadProcessor.ProcessUpload(_sharedFileDefinition);
+        var result = _fileUploadProcessor.GetMaxConcurrentUploads();
+
+        // Assert
+        result.Should().Be(0); // Should return 0 when no concurrent uploads occurred
     }
 
     [Test]

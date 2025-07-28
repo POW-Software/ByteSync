@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
@@ -29,35 +30,40 @@ public class FileUploaderFactory : IFileUploaderFactory
 
     public IFileUploader Build(string fullName, SharedFileDefinition sharedFileDefinition)
     {
-        // Create a new SlicerEncrypter instance for this upload
         var slicerEncrypter = _slicerEncrypterFactory.Create();
-        
-        // Create coordination components
         var fileUploadCoordinator = new FileUploadCoordinator(_loggerFactory.CreateLogger<FileUploadCoordinator>());
+        var semaphoreSlim = new SemaphoreSlim(1, 1);
         var fileSlicer = new FileSlicer(slicerEncrypter, fileUploadCoordinator.AvailableSlices, 
-            fileUploadCoordinator.SyncRoot, fileUploadCoordinator.ExceptionOccurred, 
+            semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, 
             _loggerFactory.CreateLogger<FileSlicer>());
         var fileUploadWorker = new FileUploadWorker(_policyFactory, _fileTransferApiClient, sharedFileDefinition,
-            fileUploadCoordinator.SyncRoot, fileUploadCoordinator.ExceptionOccurred, 
+            semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, 
             fileUploadCoordinator.UploadingIsFinished, _loggerFactory.CreateLogger<FileUploadWorker>());
         var filePartUploadAsserter = new FilePartUploadAsserter(_fileTransferApiClient, _sessionService);
         
-        return new FileUploader(fullName, null, sharedFileDefinition, fileUploadCoordinator, fileSlicer, 
-            fileUploadWorker, filePartUploadAsserter, slicerEncrypter, _loggerFactory.CreateLogger<FileUploader>());
+        return new FileUploader(
+            fullName, 
+            null, 
+            sharedFileDefinition, 
+            fileUploadCoordinator, 
+            fileSlicer, 
+            fileUploadWorker, 
+            filePartUploadAsserter, 
+            slicerEncrypter, 
+            _loggerFactory.CreateLogger<FileUploader>(),
+            semaphoreSlim);
     }
 
     public IFileUploader Build(MemoryStream memoryStream, SharedFileDefinition sharedFileDefinition)
     {
-        // Create a new SlicerEncrypter instance for this upload
         var slicerEncrypter = _slicerEncrypterFactory.Create();
-        
-        // Create coordination components
         var fileUploadCoordinator = new FileUploadCoordinator(_loggerFactory.CreateLogger<FileUploadCoordinator>());
+        var semaphoreSlim = new SemaphoreSlim(1, 1);
         var fileSlicer = new FileSlicer(slicerEncrypter, fileUploadCoordinator.AvailableSlices, 
-            fileUploadCoordinator.SyncRoot, fileUploadCoordinator.ExceptionOccurred, 
+            semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, 
             _loggerFactory.CreateLogger<FileSlicer>());
         var fileUploadWorker = new FileUploadWorker(_policyFactory, _fileTransferApiClient, sharedFileDefinition,
-            fileUploadCoordinator.SyncRoot, fileUploadCoordinator.ExceptionOccurred, 
+            semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, 
             fileUploadCoordinator.UploadingIsFinished, _loggerFactory.CreateLogger<FileUploadWorker>());
         var filePartUploadAsserter = new FilePartUploadAsserter(_fileTransferApiClient, _sessionService);
         
@@ -70,6 +76,7 @@ public class FileUploaderFactory : IFileUploaderFactory
             fileUploadWorker, 
             filePartUploadAsserter, 
             slicerEncrypter, 
-            _loggerFactory.CreateLogger<FileUploader>());
+            _loggerFactory.CreateLogger<FileUploader>(),
+            semaphoreSlim);
     }
 }

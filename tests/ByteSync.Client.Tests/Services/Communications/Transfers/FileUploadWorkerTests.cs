@@ -29,7 +29,8 @@ public class FileUploadWorkerTests
     private FileUploadWorker _fileUploadWorker;
     private Channel<FileUploaderSlice> _availableSlices;
     private UploadProgressState _progressState;
-
+    private SemaphoreSlim _semaphoreSlim;
+    
     [SetUp]
     public void SetUp()
     {
@@ -50,7 +51,7 @@ public class FileUploadWorkerTests
             UploadedFileLength = 1024
         };
 
-        _syncRoot = new object();
+        _semaphoreSlim = new SemaphoreSlim(1, 1);
         _exceptionOccurred = new ManualResetEvent(false);
         _uploadingIsFinished = new ManualResetEvent(false);
         _availableSlices = Channel.CreateBounded<FileUploaderSlice>(8);
@@ -60,12 +61,11 @@ public class FileUploadWorkerTests
             _mockPolicyFactory.Object,
             _mockFileTransferApiClient.Object,
             _sharedFileDefinition,
-            _syncRoot,
+            _semaphoreSlim,
             _exceptionOccurred,
             _uploadingIsFinished,
             _mockLogger.Object);
 
-        // Setup policy factory to return the real policy
         _mockPolicyFactory.Setup(x => x.BuildFileUploadPolicy()).Returns(_policy);
     }
 

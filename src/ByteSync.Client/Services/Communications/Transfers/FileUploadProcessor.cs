@@ -1,4 +1,4 @@
-using System.IO;
+using System.Threading;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
@@ -15,7 +15,7 @@ public class FileUploadProcessor : IFileUploadProcessor
     private readonly IFileUploadWorker _fileUploadWorker;
     private readonly IFilePartUploadAsserter _filePartUploadAsserter;
     private readonly string? _localFileToUpload;
-    private readonly MemoryStream? _memoryStream;
+    private readonly SemaphoreSlim _semaphoreSlim;
 
     // State tracking
     private UploadProgressState? _progressState;
@@ -28,7 +28,7 @@ public class FileUploadProcessor : IFileUploadProcessor
         IFileUploadWorker fileUploadWorker,
         IFilePartUploadAsserter filePartUploadAsserter,
         string? localFileToUpload,
-        MemoryStream? memoryStream)
+        SemaphoreSlim semaphoreSlim)
     {
         _slicerEncrypter = slicerEncrypter;
         _logger = logger;
@@ -37,7 +37,7 @@ public class FileUploadProcessor : IFileUploadProcessor
         _fileUploadWorker = fileUploadWorker;
         _filePartUploadAsserter = filePartUploadAsserter;
         _localFileToUpload = localFileToUpload;
-        _memoryStream = memoryStream;
+        _semaphoreSlim = semaphoreSlim;
     }
 
     public async Task ProcessUpload(SharedFileDefinition sharedFileDefinition, int? maxSliceLength = null)
@@ -74,17 +74,27 @@ public class FileUploadProcessor : IFileUploadProcessor
 
     public int GetTotalCreatedSlices()
     {
-        lock (_fileUploadCoordinator.SyncRoot)
+        _semaphoreSlim.Wait();
+        try
         {
             return _progressState?.TotalCreatedSlices ?? 0;
         }
+        finally
+        {
+            _semaphoreSlim.Release();
+        }
     }
-    
+
     public int GetMaxConcurrentUploads()
     {
-        lock (_fileUploadCoordinator.SyncRoot)
+        _semaphoreSlim.Wait();
+        try
         {
             return _progressState?.MaxConcurrentUploads ?? 0;
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
         }
     }
 } 

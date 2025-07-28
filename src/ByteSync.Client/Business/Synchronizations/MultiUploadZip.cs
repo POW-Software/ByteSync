@@ -70,9 +70,6 @@ public class MultiUploadZip : IDisposable
     public void CloseZip()
     {
         ZipArchive.Dispose();
-        
-        // Reset the MemoryStream position to the beginning for upload
-        MemoryStream.Position = 0;
     }
 
     public void Dispose()

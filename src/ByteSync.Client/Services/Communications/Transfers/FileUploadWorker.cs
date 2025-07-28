@@ -17,18 +17,17 @@ public class FileUploadWorker : IFileUploadWorker
     private readonly IFileTransferApiClient _fileTransferApiClient;
     private readonly ILogger<FileUploadWorker> _logger;
     private readonly SharedFileDefinition _sharedFileDefinition;
-    private readonly object _syncRoot;
     private readonly ManualResetEvent _exceptionOccurred;
     private readonly ManualResetEvent _uploadingIsFinished;
-
+    private readonly SemaphoreSlim _semaphoreSlim;
     public FileUploadWorker(IPolicyFactory policyFactory, IFileTransferApiClient fileTransferApiClient,
-        SharedFileDefinition sharedFileDefinition, object syncRoot, ManualResetEvent exceptionOccurred,
+        SharedFileDefinition sharedFileDefinition, SemaphoreSlim semaphoreSlim, ManualResetEvent exceptionOccurred,
         ManualResetEvent uploadingIsFinished, ILogger<FileUploadWorker> logger)
     {
         _policyFactory = policyFactory;
         _fileTransferApiClient = fileTransferApiClient;
         _sharedFileDefinition = sharedFileDefinition;
-        _syncRoot = syncRoot;
+        _semaphoreSlim = semaphoreSlim;
         _exceptionOccurred = exceptionOccurred;
         _uploadingIsFinished = uploadingIsFinished;
         _logger = logger;
@@ -63,10 +62,14 @@ public class FileUploadWorker : IFileUploadWorker
                         };
                         
                         await _fileTransferApiClient.AssertFilePartIsUploaded(transferParameters);
-
-                        lock (_syncRoot)
+                        await _semaphoreSlim.WaitAsync();
+                        try
                         {
                             progressState.TotalUploadedSlices += 1;
+                        }
+                        finally
+                        {
+                            _semaphoreSlim.Release();
                         }
                     }
                     else
@@ -77,18 +80,35 @@ public class FileUploadWorker : IFileUploadWorker
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "UploadAvailableSlice");
+                    
+                    await _semaphoreSlim.WaitAsync();
+                    try
+                    {
+                        progressState.LastException = ex;
+                    }
+                    finally
+                    {
+                        _semaphoreSlim.Release();   
+                    }
+                    
                     _exceptionOccurred.Set();
+                    
                     return;
                 }
             }
         }
 
-        lock (_syncRoot)
+        await _semaphoreSlim.WaitAsync();
+        try
         {
             if (progressState.TotalUploadedSlices == progressState.TotalCreatedSlices)
             {
                 _uploadingIsFinished.Set();
             }
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
         }
     }
     
@@ -96,11 +116,6 @@ public class FileUploadWorker : IFileUploadWorker
     {
         try
         {
-            lock (_syncRoot)
-            {
-                // Track concurrent uploads for debugging
-            }
-            
             var transferParameters = new TransferParameters
             {
                 SessionId = _sharedFileDefinition.SessionId,

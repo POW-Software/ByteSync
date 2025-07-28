@@ -16,7 +16,7 @@ public class FileSlicerTests
     private Mock<ISlicerEncrypter> _mockSlicerEncrypter;
     private Mock<ILogger<FileSlicer>> _mockLogger;
     private Channel<FileUploaderSlice> _availableSlices;
-    private object _syncRoot;
+    private SemaphoreSlim _semaphoreSlim;
     private ManualResetEvent _exceptionOccurred;
     private FileSlicer _fileSlicer;
     private SharedFileDefinition _sharedFileDefinition;
@@ -28,13 +28,13 @@ public class FileSlicerTests
         _mockSlicerEncrypter = new Mock<ISlicerEncrypter>();
         _mockLogger = new Mock<ILogger<FileSlicer>>();
         _availableSlices = Channel.CreateBounded<FileUploaderSlice>(8);
-        _syncRoot = new object();
+        _semaphoreSlim = new SemaphoreSlim(1, 1);
         _exceptionOccurred = new ManualResetEvent(false);
 
         _fileSlicer = new FileSlicer(
             _mockSlicerEncrypter.Object,
             _availableSlices,
-            _syncRoot,
+            _semaphoreSlim,
             _exceptionOccurred,
             _mockLogger.Object);
 
@@ -52,6 +52,7 @@ public class FileSlicerTests
     public void TearDown()
     {
         _exceptionOccurred?.Dispose();
+        _semaphoreSlim?.Dispose();
     }
 
     [Test]
@@ -299,14 +300,14 @@ public class FileSlicerTests
 
 
     [Test]
-    public void SyncRoot_ShouldReturnSameInstance()
+    public void SemaphoreSlim_ShouldReturnSameInstance()
     {
         // Act
-        var syncRoot1 = _syncRoot;
-        var syncRoot2 = _syncRoot;
+        var semaphore1 = _semaphoreSlim;
+        var semaphore2 = _semaphoreSlim;
 
         // Assert
-        syncRoot1.Should().BeSameAs(syncRoot2);
+        semaphore1.Should().BeSameAs(semaphore2);
     }
 
     [Test]

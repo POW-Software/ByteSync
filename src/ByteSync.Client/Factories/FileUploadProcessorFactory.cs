@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
@@ -41,11 +42,12 @@ public class FileUploadProcessorFactory : IFileUploadProcessorFactory
         
         // Create coordination components
         var fileUploadCoordinator = new FileUploadCoordinator(_loggerFactory.CreateLogger<FileUploadCoordinator>());
+        var semaphoreSlim = new SemaphoreSlim(1, 1);
         var fileSlicer = new FileSlicer(slicerEncrypter, fileUploadCoordinator.AvailableSlices, 
-            fileUploadCoordinator.SyncRoot, fileUploadCoordinator.ExceptionOccurred, 
+            semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, 
             _loggerFactory.CreateLogger<FileSlicer>());
         var fileUploadWorker = new FileUploadWorker(_policyFactory, _fileTransferApiClient, sharedFileDefinition,
-            fileUploadCoordinator.SyncRoot, fileUploadCoordinator.ExceptionOccurred, 
+            semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, 
             fileUploadCoordinator.UploadingIsFinished, _loggerFactory.CreateLogger<FileUploadWorker>());
         var filePartUploadAsserter = new FilePartUploadAsserter(_fileTransferApiClient, _sessionService);
         
@@ -57,6 +59,6 @@ public class FileUploadProcessorFactory : IFileUploadProcessorFactory
             fileUploadWorker,
             filePartUploadAsserter,
             localFileToUpload,
-            memoryStream);
+            semaphoreSlim);
     }
 } 
