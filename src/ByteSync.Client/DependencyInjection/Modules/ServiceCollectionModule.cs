@@ -27,7 +27,6 @@ namespace ByteSync.DependencyInjection.Modules;
 
         private void ConfigureServices(IServiceCollection services)
         {
-
             services.AddHttpClient("ApiClient")
                 .AddPolicyHandler((serviceProvider, request) =>
                 {
