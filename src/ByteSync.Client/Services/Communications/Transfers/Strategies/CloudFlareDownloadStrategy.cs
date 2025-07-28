@@ -9,7 +9,7 @@ namespace ByteSync.Services.Communications.Transfers.Strategies;
 
 public class CloudFlareDownloadStrategy : IDownloadStrategy
 {
-    public async Task<Response> DownloadAsync(Stream memoryStream, FileSourceInfo downloadInfo, CancellationToken cancellationToken)
+    public async Task<Response> DownloadAsync(Stream memoryStream, FileStorageLocation storageLocation, CancellationToken cancellationToken)
     {
         // TODO: Implement CloudFlare download strategy
         // This could use HttpClient to download from CloudFlare URLs
@@ -17,7 +17,7 @@ public class CloudFlareDownloadStrategy : IDownloadStrategy
         
         /*
         using var httpClient = new HttpClient();
-        var httpResponse = await httpClient.GetAsync(downloadInfo.Url, cancellationToken);
+        var httpResponse = await httpClient.GetAsync(storageLocation.Url, cancellationToken);
         await httpResponse.Content.CopyToAsync(memoryStream, cancellationToken);
         memoryStream.Position = 0;
         // Create a mock Response object for CloudFlare (since it's not Azure)

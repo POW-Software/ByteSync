@@ -115,11 +115,11 @@ public class FileDownloader : IFileDownloader
                         SharedFileDefinition = SharedFileDefinition,
                         PartNumber = partNumber
                     };
-                    var downloadInfo = await _fileTransferApiClient.GetDownloadFileMode(transferParameters);
+                    var downloadLocation = await _fileTransferApiClient.GetDownloadFileStorageLocation(transferParameters);
                     
                     var memoryStream = new MemoryStream();
-                    var downloadStrategy = _downloadStrategyFactory.GetStrategy(downloadInfo);
-                    var response = await downloadStrategy.DownloadAsync(memoryStream, downloadInfo, CancellationTokenSource.Token);
+                    var downloadStrategy = _downloadStrategyFactory.GetStrategy(downloadLocation);
+                    var response = await downloadStrategy.DownloadAsync(memoryStream, downloadLocation, CancellationTokenSource.Token);
                     
                     DownloadTarget.AddOrReplaceMemoryStream(partNumber, memoryStream);
                     return response;

@@ -39,10 +39,33 @@ public class FileTransferFunction
 
         return response;
     }
+
+    [Function("GetDownloadFileUrlFunction")]
+    public async Task<HttpResponseData> GetDownloadFileUrl(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/file/getDownloadUrl")]
+        HttpRequestData req,
+        FunctionContext executionContext,
+        string sessionId)
+    {
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var transferParameters = await FunctionHelper.DeserializeRequestBody<TransferParameters>(req);
+
+        var url = await _transferLocationService.GetDownloadFileUrl(
+            sessionId,
+            client,
+            transferParameters.SharedFileDefinition,
+            transferParameters.PartNumber!.Value
+        );
+           
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(url, HttpStatusCode.OK);
+
+        return response;
+    }
     
-    [Function("GetDownloadFileModeFunction")]
-    public async Task<HttpResponseData> GetDownloadFileMode(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/file/getDownloadMode")]
+    [Function("GetDownloadFileStorageLocationFunction")]
+    public async Task<HttpResponseData> GetDownloadFileStorageLocation(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/file/getDownloadStorageLocation")]
         HttpRequestData req,
         FunctionContext executionContext,
         string sessionId)
@@ -57,7 +80,7 @@ public class FileTransferFunction
             transferParameters.PartNumber!.Value
         );
 
-        var responseObject = new FileSourceInfo(url, "BlobStorage");
+        var responseObject = _transferLocationService.CreateResponseObject(url,StorageProvider.AzureBlobStorage);
         var response = req.CreateResponse();
         await response.WriteAsJsonAsync(responseObject, HttpStatusCode.OK);
 

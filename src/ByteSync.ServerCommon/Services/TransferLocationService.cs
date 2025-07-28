@@ -175,6 +175,15 @@ public class TransferLocationService : ITransferLocationService
             }
         }
     }
+
+    public FileStorageLocation CreateResponseObject(String Url, StorageProvider StorageProvider)
+    {
+        if (StorageProvider == StorageProvider.AzureBlobStorage)
+            return new FileStorageLocation(Url, StorageProvider.AzureBlobStorage);
+        else if (StorageProvider == StorageProvider.CloudFlareR2)
+            return new FileStorageLocation(Url, StorageProvider.CloudFlareR2);
+        else return null;
+    }
     
     private bool IsSharedFileDefinitionAllowed(SessionMemberData? sessionMemberData, SharedFileDefinition? sharedFileDefinition)
     {
@@ -197,4 +206,5 @@ public class TransferLocationService : ITransferLocationService
         
         return otherSessionMembers;
     }
+    
 }

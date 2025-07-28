@@ -18,4 +18,6 @@ public interface ITransferLocationService
     Task AssertFilePartIsDownloaded(string sessionId, Client client, SharedFileDefinition sharedFileDefinition, int partNumber);
     
     Task AssertDownloadIsFinished(string sessionId, Client client, SharedFileDefinition sharedFileDefinition);
+    
+    FileStorageLocation CreateResponseObject(string url, StorageProvider storageProvider);
 }

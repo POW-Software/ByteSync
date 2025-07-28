@@ -8,5 +8,5 @@ namespace ByteSync.Interfaces.Controls.Communications;
 
 public interface IDownloadStrategy
 {
-    Task<Response> DownloadAsync(Stream memoryStream, FileSourceInfo downloadInfo, CancellationToken cancellationToken);
+    Task<Response> DownloadAsync(Stream memoryStream, FileStorageLocation storageLocation, CancellationToken cancellationToken);
 } 

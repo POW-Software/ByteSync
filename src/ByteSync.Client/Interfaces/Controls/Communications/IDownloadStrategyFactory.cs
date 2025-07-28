@@ -4,5 +4,5 @@ namespace ByteSync.Interfaces.Controls.Communications;
 
 public interface IDownloadStrategyFactory
 {
-    IDownloadStrategy GetStrategy(FileSourceInfo downloadInfo);
+    IDownloadStrategy GetStrategy(FileStorageLocation storageLocation);
 } 

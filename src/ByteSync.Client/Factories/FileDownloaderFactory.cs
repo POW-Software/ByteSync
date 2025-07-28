@@ -15,16 +15,19 @@ public class FileDownloaderFactory : IFileDownloaderFactory
     private readonly IDownloadTargetBuilder _downloadTargetBuilder;
     private readonly IFileTransferApiClient _fileTransferApiClient;
     private readonly IMergerDecrypterFactory _mergerDecrypterFactory;
+    private readonly IDownloadStrategyFactory _downloadStrategyFactory;
     private readonly ILogger<FilePartDownloadAsserter> _logger;
     private readonly ILogger<FileDownloader> _loggerFileDownloader;
 
     public FileDownloaderFactory(IPolicyFactory policyFactory, IDownloadTargetBuilder downloadTargetBuilder,
-        IFileTransferApiClient fileTransferApiClient, IMergerDecrypterFactory mergerDecrypterFactory, ILogger<FilePartDownloadAsserter> logger, ILogger<FileDownloader> loggerFileDownloader)
+        IFileTransferApiClient fileTransferApiClient, IMergerDecrypterFactory mergerDecrypterFactory, 
+        IDownloadStrategyFactory downloadStrategyFactory, ILogger<FilePartDownloadAsserter> logger, ILogger<FileDownloader> loggerFileDownloader)
     {
         _policyFactory = policyFactory;
         _downloadTargetBuilder = downloadTargetBuilder;
         _fileTransferApiClient = fileTransferApiClient;
         _mergerDecrypterFactory = mergerDecrypterFactory;
+        _downloadStrategyFactory = downloadStrategyFactory;
         _logger = logger;
         _loggerFileDownloader = loggerFileDownloader;
     }
@@ -73,9 +76,6 @@ public class FileDownloaderFactory : IFileDownloaderFactory
         var fileMerger = new FileMerger(mergerDecrypters, errorManager, downloadTarget, semaphoreSlim);
         // FilePartDownloadAsserter
         var filePartDownloadAsserter = new FilePartDownloadAsserter(_fileTransferApiClient, semaphoreSlim, errorManager, _logger);
-        
-        // DownloadStrategyFactory
-        var downloadStrategyFactory = new DownloadStrategyFactory();
 
         return new FileDownloader(
             sharedFileDefinition,
@@ -87,7 +87,7 @@ public class FileDownloaderFactory : IFileDownloaderFactory
             errorManager,
             resourceManager,
             partsCoordinator,
-            downloadStrategyFactory,
+            _downloadStrategyFactory,
             _loggerFileDownloader
         );
     }
