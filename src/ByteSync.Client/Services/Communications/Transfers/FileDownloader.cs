@@ -6,6 +6,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using System.IO;
+using Autofac.Features.Indexed;
 
 namespace ByteSync.Services.Communications.Transfers;
 
@@ -18,7 +19,7 @@ public class FileDownloader : IFileDownloader
     private readonly IErrorManager _errorManager;
     private readonly IResourceManager _resourceManager;
     private readonly IDownloadPartsCoordinator _partsCoordinator;
-    private readonly IDownloadStrategyFactory _downloadStrategyFactory;
+    private readonly IIndex<StorageProvider, IDownloadStrategy> _strategies;
     private readonly SemaphoreSlim _semaphoreSlim;
     private readonly ILogger<FileDownloader> _logger;
 
@@ -41,7 +42,7 @@ public class FileDownloader : IFileDownloader
         IErrorManager errorManager,
         IResourceManager resourceManager,
         IDownloadPartsCoordinator partsCoordinator,
-        IDownloadStrategyFactory downloadStrategyFactory,
+        IIndex<StorageProvider, IDownloadStrategy> strategies,
         ILogger<FileDownloader> logger)
     {
         _policyFactory = policyFactory;
@@ -50,7 +51,7 @@ public class FileDownloader : IFileDownloader
         _errorManager = errorManager;
         _resourceManager = resourceManager;
         _partsCoordinator = partsCoordinator;
-        _downloadStrategyFactory = downloadStrategyFactory;
+        _strategies = strategies;
         _semaphoreSlim = new SemaphoreSlim(1, 1);
         SharedFileDefinition = sharedFileDefinition;
         DownloadTarget = downloadTargetBuilder.BuildDownloadTarget(sharedFileDefinition);
@@ -118,7 +119,7 @@ public class FileDownloader : IFileDownloader
                     var downloadLocation = await _fileTransferApiClient.GetDownloadFileStorageLocation(transferParameters);
                     
                     var memoryStream = new MemoryStream();
-                    var downloadStrategy = _downloadStrategyFactory.GetStrategy(downloadLocation);
+                    var downloadStrategy = _strategies[downloadLocation.StorageProvider];
                     var response = await downloadStrategy.DownloadAsync(memoryStream, downloadLocation, CancellationTokenSource.Token);
                     
                     DownloadTarget.AddOrReplaceMemoryStream(partNumber, memoryStream);
@@ -181,5 +182,5 @@ public class FileDownloader : IFileDownloader
     {
         _resourceManager.Cleanup();
     }
-    
+
 }

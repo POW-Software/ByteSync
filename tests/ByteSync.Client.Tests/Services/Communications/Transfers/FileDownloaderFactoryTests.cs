@@ -9,6 +9,7 @@ using ByteSync.Services.Communications.Transfers;
 using ByteSync.Factories;
 using ByteSync.Interfaces;
 using FluentAssertions;
+using Autofac.Features.Indexed;
 
 namespace ByteSync.Tests.Services.Communications.Transfers;
 
@@ -21,7 +22,7 @@ public class FileDownloaderFactoryTests
         var downloadTargetBuilder = new Mock<IDownloadTargetBuilder>();
         var fileTransferApiClient = new Mock<IFileTransferApiClient>();
         var mergerDecrypterFactory = new Mock<IMergerDecrypterFactory>();
-        var downloadStrategyFactory = new Mock<IDownloadStrategyFactory>();
+        var strategies = new Mock<IIndex<StorageProvider, IDownloadStrategy>>();
         var logger = new Mock<Microsoft.Extensions.Logging.ILogger<ByteSync.Services.Communications.Transfers.FilePartDownloadAsserter>>();
         var fileDownloaderLogger = new Mock<Microsoft.Extensions.Logging.ILogger<ByteSync.Services.Communications.Transfers.FileDownloader>>();
         var sharedFileDefinition = new SharedFileDefinition();
@@ -29,7 +30,7 @@ public class FileDownloaderFactoryTests
         downloadTargetBuilder.Setup(b => b.BuildDownloadTarget(sharedFileDefinition)).Returns(downloadTarget);
         mergerDecrypterFactory.Setup(f => f.Build(It.IsAny<string>(), downloadTarget, It.IsAny<System.Threading.CancellationTokenSource>()))
             .Returns(new Mock<ByteSync.Interfaces.Controls.Encryptions.IMergerDecrypter>().Object);
-        var factory = new FileDownloaderFactory(policyFactory.Object, downloadTargetBuilder.Object, fileTransferApiClient.Object, mergerDecrypterFactory.Object, downloadStrategyFactory.Object, logger.Object, fileDownloaderLogger.Object);
+        var factory = new FileDownloaderFactory(policyFactory.Object, downloadTargetBuilder.Object, fileTransferApiClient.Object, mergerDecrypterFactory.Object, strategies.Object, logger.Object, fileDownloaderLogger.Object);
         var downloader = factory.Build(sharedFileDefinition);
         downloader.Should().NotBeNull();
         downloader.SharedFileDefinition.Should().BeSameAs(sharedFileDefinition);

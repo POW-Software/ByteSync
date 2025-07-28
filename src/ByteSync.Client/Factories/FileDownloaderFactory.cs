@@ -6,6 +6,7 @@ using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Services.Communications.Transfers;
 using ByteSync.Services.Communications.Transfers.Strategies;
+using Autofac.Features.Indexed;
 
 namespace ByteSync.Factories;
 
@@ -15,19 +16,19 @@ public class FileDownloaderFactory : IFileDownloaderFactory
     private readonly IDownloadTargetBuilder _downloadTargetBuilder;
     private readonly IFileTransferApiClient _fileTransferApiClient;
     private readonly IMergerDecrypterFactory _mergerDecrypterFactory;
-    private readonly IDownloadStrategyFactory _downloadStrategyFactory;
+    private readonly IIndex<StorageProvider, IDownloadStrategy> _strategies;
     private readonly ILogger<FilePartDownloadAsserter> _logger;
     private readonly ILogger<FileDownloader> _loggerFileDownloader;
 
     public FileDownloaderFactory(IPolicyFactory policyFactory, IDownloadTargetBuilder downloadTargetBuilder,
         IFileTransferApiClient fileTransferApiClient, IMergerDecrypterFactory mergerDecrypterFactory, 
-        IDownloadStrategyFactory downloadStrategyFactory, ILogger<FilePartDownloadAsserter> logger, ILogger<FileDownloader> loggerFileDownloader)
+        IIndex<StorageProvider, IDownloadStrategy> strategies, ILogger<FilePartDownloadAsserter> logger, ILogger<FileDownloader> loggerFileDownloader)
     {
         _policyFactory = policyFactory;
         _downloadTargetBuilder = downloadTargetBuilder;
         _fileTransferApiClient = fileTransferApiClient;
         _mergerDecrypterFactory = mergerDecrypterFactory;
-        _downloadStrategyFactory = downloadStrategyFactory;
+        _strategies = strategies;
         _logger = logger;
         _loggerFileDownloader = loggerFileDownloader;
     }
@@ -87,7 +88,7 @@ public class FileDownloaderFactory : IFileDownloaderFactory
             errorManager,
             resourceManager,
             partsCoordinator,
-            _downloadStrategyFactory,
+            _strategies,
             _loggerFileDownloader
         );
     }
