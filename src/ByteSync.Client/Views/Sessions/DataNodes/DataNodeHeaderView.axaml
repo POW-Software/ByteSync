@@ -5,6 +5,7 @@
              mc:Ignorable="d"
              xmlns:dataNodes="clr-namespace:ByteSync.ViewModels.Sessions.DataNodes"
              xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
              x:Class="ByteSync.Views.Sessions.DataNodes.DataNodeHeaderView">
 
     <Design.DataContext>
@@ -40,6 +41,13 @@
                     IsVisible="{Binding ShowRemoveButton}"
                     IsEnabled="{Binding IsRemoveDataNodeEnabled}">
                 <misc:Icon FontSize="16" Value="RegularMinus" Margin="0" Width="24" Height="24" />
+                
+                <ToolTip.Tip>
+                    <StackPanel Classes="ByteSyncToolTip">
+                        <TextBlock Text="{localizations:Loc DataNodeHeaderView_Tooltip_Header_Remove}" />
+                        <TextBlock Text="{localizations:Loc DataNodeHeaderView_Tooltip_Content_Remove}" />
+                    </StackPanel>
+                </ToolTip.Tip>
             </Button>
         </Grid>
         
