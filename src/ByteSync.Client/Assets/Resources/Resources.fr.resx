@@ -1579,4 +1579,16 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	<data name="ComparisonResult_Filter_SyntaxDocumentation" xml:space="preserve">
 		<value>Syntaxe de filtrage</value>
 	</data>
+	<data name="DataNodeHeaderView_Tooltip_Header_Remove" xml:space="preserve">
+		<value>Supprimer le nœud de données</value>
+	</data>
+	<data name="DataNodeHeaderView_Tooltip_Content_Remove" xml:space="preserve">
+		<value>Supprimer ce nœud de données de la session de synchronisation.</value>
+	</data>
+	<data name="DataNodeView_Tooltip_Header_Add" xml:space="preserve">
+		<value>Ajouter un nœud de données</value>
+	</data>
+	<data name="DataNodeView_Tooltip_Content_Add" xml:space="preserve">
+		<value>Ajouter un nouveau nœud de données à la session de synchronisation.</value>
+	</data>
 </root>

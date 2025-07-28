@@ -39,7 +39,7 @@ public class BaseInventoryRunner : IBaseInventoryRunner
                 async (builder, token) =>
                 {
                     var baseInventoryFullName = _cloudSessionLocalDataManager
-                        .GetCurrentMachineInventoryPath(builder.InventoryCode, LocalInventoryModes.Base);
+                        .GetCurrentMachineInventoryPath(builder.Inventory, LocalInventoryModes.Base);
 
                     await builder.BuildBaseInventoryAsync(baseInventoryFullName, token);
                 });

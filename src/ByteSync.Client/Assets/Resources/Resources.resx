@@ -1714,4 +1714,16 @@ Do you want to save this new Session Profile with this name?</value>
   <data name="ComparisonResult_Filter_SyntaxDocumentation" xml:space="preserve">
     <value>Filtering Syntax</value>
   </data>
+  <data name="DataNodeHeaderView_Tooltip_Header_Remove" xml:space="preserve">
+    <value>Remove Data Node</value>
+  </data>
+  <data name="DataNodeHeaderView_Tooltip_Content_Remove" xml:space="preserve">
+    <value>Remove this data node from the synchronization session.</value>
+  </data>
+  <data name="DataNodeView_Tooltip_Header_Add" xml:space="preserve">
+    <value>Add Data Node</value>
+  </data>
+  <data name="DataNodeView_Tooltip_Content_Add" xml:space="preserve">
+    <value>Add a new data node to the synchronization session.</value>
+  </data>
 </root>

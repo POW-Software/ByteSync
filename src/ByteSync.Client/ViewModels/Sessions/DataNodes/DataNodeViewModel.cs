@@ -4,9 +4,11 @@ using System.Reactive.Linq;
 using Avalonia.Media;
 using ByteSync.Business.DataNodes;
 using ByteSync.Business.SessionMembers;
+using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using DynamicData;
@@ -18,6 +20,7 @@ public class DataNodeViewModel : ActivatableViewModelBase
     private readonly IThemeService _themeService;
     private readonly IDataNodeService _dataNodeService;
     private readonly IDataNodeRepository _dataNodeRepository;
+    private readonly ISessionService _sessionService;
     
     private IBrush _currentMemberBackGround = null!;
     private IBrush _otherMemberBackGround = null!;
@@ -34,11 +37,13 @@ public class DataNodeViewModel : ActivatableViewModelBase
     public DataNodeViewModel(SessionMember sessionMember, DataNode dataNode, bool isLocalMachine,
         DataNodeSourcesViewModel dataNodeSourcesViewModel, DataNodeHeaderViewModel dataNodeHeaderViewModel,
         DataNodeStatusViewModel dataNodeStatusViewModel,
-        IThemeService themeService, IDataNodeService dataNodeService, IDataNodeRepository dataNodeRepository)
+        IThemeService themeService, IDataNodeService dataNodeService, IDataNodeRepository dataNodeRepository,
+        ISessionService sessionService)
     {
         _themeService = themeService;
         _dataNodeService = dataNodeService;
         _dataNodeRepository = dataNodeRepository;
+        _sessionService = sessionService;
         
         SourcesViewModel = dataNodeSourcesViewModel;
         HeaderViewModel = dataNodeHeaderViewModel;
@@ -49,7 +54,15 @@ public class DataNodeViewModel : ActivatableViewModelBase
         OrderIndex = dataNode.OrderIndex;
         DataNode = dataNode;
         
-        AddDataNodeCommand = ReactiveCommand.CreateFromTask(AddDataNode);
+        // Create command with canExecute based on session status
+        var canAddDataNode = _sessionService.SessionStatusObservable
+            .Select(status => status == SessionStatus.Preparation)
+            .CombineLatest(this.WhenAnyValue(x => x.IsLocalMachine, x => x.IsLastDataNode),
+                (isSessionInPreparation, localAndLast) => 
+                    isSessionInPreparation && localAndLast.Item1 && localAndLast.Item2)
+            .ObserveOn(RxApp.MainThreadScheduler);
+        
+        AddDataNodeCommand = ReactiveCommand.CreateFromTask(AddDataNode, canAddDataNode);
         
         this.WhenActivated(disposables =>
         {

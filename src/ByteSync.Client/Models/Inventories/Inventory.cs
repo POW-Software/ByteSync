@@ -24,6 +24,8 @@ public class Inventory
     public List<InventoryPart> InventoryParts { get; set; }
 
     public string MachineName { get; set; }
+    
+    public string CodeAndId => $"{Code}_{InventoryId}";
 
     public void Add(InventoryPart inventoryPart)
     {

@@ -1,12 +1,12 @@
 ﻿using System.IO;
 using ByteSync.Business;
 using ByteSync.Business.Actions.Shared;
-using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Models.Inventories;
 
 namespace ByteSync.Services.Sessions;
 
@@ -42,11 +42,6 @@ public class CloudSessionLocalDataManager : ICloudSessionLocalDataManager
         return sessionLocalPath;
     }
 
-    private string GetMachineFullPath(ByteSyncEndpoint byteSyncEndpoint)
-    {
-        return GetMachineFullPath(byteSyncEndpoint.ClientInstanceId);
-    }
-
     private string GetMachineFullPath(string clientInstanceId)
     {
         var sessionLocalPath = GetSessionLocalPath();
@@ -73,9 +68,9 @@ public class CloudSessionLocalDataManager : ICloudSessionLocalDataManager
         return machineFullPath;
     }
 
-    public string GetCurrentMachineInventoryPath(string letter, LocalInventoryModes localInventoryMode)
+    public string GetCurrentMachineInventoryPath(Inventory inventory, LocalInventoryModes localInventoryMode)
     {
-        return GetInventoryPath(_environmentService.ClientInstanceId, letter, localInventoryMode);
+        return GetInventoryPath(_environmentService.ClientInstanceId, inventory.CodeAndId, localInventoryMode);
     }
 
     public string GetInventoryPath(SharedFileDefinition sharedFileDefinition)
@@ -90,43 +85,23 @@ public class CloudSessionLocalDataManager : ICloudSessionLocalDataManager
         return GetInventoryPath(sessionMemberInfo!.ClientInstanceId, sharedFileDefinition.AdditionalName, localInventoryMode);
     }
 
-    public string GetInventoryPath(string clientInstanceId, string inventoryLetter, LocalInventoryModes localInventoryMode)
+    public string GetInventoryPath(string clientInstanceId, string inventoryCodeAndId, LocalInventoryModes localInventoryMode)
     {
         var machineFullPath = GetMachineFullPath(clientInstanceId);
         
         string fileName;
         if (localInventoryMode == LocalInventoryModes.Base)
         {
-            fileName = $"base_inventory_{inventoryLetter}.zip";
+            fileName = $"base_inventory_{inventoryCodeAndId}.zip";
         }
         else
         {
-            fileName = $"full_inventory_{inventoryLetter}.zip";
+            fileName = $"full_inventory_{inventoryCodeAndId}.zip";
         }
                 
         var inventoryFullName = IOUtils.Combine(machineFullPath, fileName);
 
         return inventoryFullName;
-    }
-
-    public string GetFullPath(SharedFileDefinition sharedFileDefinition, int partNumber)
-    {
-        var sessionMemberInfo = _sessionMemberRepository.GetElement(sharedFileDefinition.ClientInstanceId);
-
-        if (sessionMemberInfo != null)
-        {
-            var machineFullPath = GetMachineFullPath(sessionMemberInfo.ClientInstanceId);
-
-            var fileName = sharedFileDefinition.GetFileName(partNumber);
-
-            var fullPath = IOUtils.Combine(machineFullPath, fileName);
-
-            return fullPath;
-        }
-        else
-        {
-            return null;
-        }
     }
 
     public string GetTempDeltaFullName(SharedDataPart source, SharedDataPart target)
