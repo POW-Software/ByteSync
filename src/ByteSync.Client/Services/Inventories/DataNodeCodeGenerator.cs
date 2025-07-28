@@ -1,4 +1,5 @@
 using ByteSync.Business.DataNodes;
+using ByteSync.Business.SessionMembers;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Repositories;
 using DynamicData;
@@ -36,13 +37,49 @@ public class DataNodeCodeGenerator : IDataNodeCodeGenerator, IDisposable
             .GroupBy(n => n.ClientInstanceId)
             .ToDictionary(g => g.Key, g => g.OrderBy(n => n.Id).ToList());
 
-        bool singlePerMember = nodesByMember.Values.All(list => list.Count == 1);
-
         var sessionMembers = _sessionMemberRepository.SortedSessionMembers.ToList();
         var updates = new List<DataNode>();
-
         int globalIndex = 0;
+        
+        bool useSimpleLetters = sessionMembers.Count == 1 || nodesByMember.Values.All(list => list.Count == 1);
+        
+        if (useSimpleLetters && sessionMembers.Count == 1)
+        {
+            ProcessSingleMember(sessionMembers, nodesByMember, updates, ref globalIndex);
+        }
+        else if (useSimpleLetters)
+        {
+            ProcessMultipleMembersOneNodeEach(sessionMembers, nodesByMember, updates, ref globalIndex);
+        }
+        else
+        {
+            ProcessMultipleMembersMultipleNodes(sessionMembers, nodesByMember, updates, ref globalIndex);
+        }
 
+        if (updates.Count > 0)
+        {
+            _dataNodeRepository.AddOrUpdate(updates);
+        }
+    }
+    
+    private void ProcessSingleMember(List<SessionMember> sessionMembers, Dictionary<string, List<DataNode>> nodesByMember, List<DataNode> updates, ref int globalIndex)
+    {
+        var member = sessionMembers[0];
+        if (!nodesByMember.TryGetValue(member.ClientInstanceId, out var nodes))
+        {
+            return;
+        }
+
+        foreach (var node in nodes)
+        {
+            var code = ((char)('A' + globalIndex)).ToString();
+            TryUpdateNode(node, code, globalIndex, updates);
+            globalIndex++;
+        }
+    }
+
+    private void ProcessMultipleMembersOneNodeEach(List<SessionMember> sessionMembers, Dictionary<string, List<DataNode>> nodesByMember, List<DataNode> updates, ref int globalIndex)
+    {
         for (int mIndex = 0; mIndex < sessionMembers.Count; mIndex++)
         {
             var member = sessionMembers[mIndex];
@@ -53,65 +90,57 @@ public class DataNodeCodeGenerator : IDataNodeCodeGenerator, IDisposable
 
             var memberLetter = ((char)('A' + mIndex)).ToString();
 
-            if (singlePerMember)
+            foreach (var node in nodes)
             {
-                foreach (var node in nodes)
-                {
-                    var needsUpdate = false;
-                    
-                    if (node.Code != memberLetter)
-                    {
-                        node.Code = memberLetter;
-                        needsUpdate = true;
-                    }
-                    
-                    if (node.OrderIndex != globalIndex)
-                    {
-                        node.OrderIndex = globalIndex;
-                        needsUpdate = true;
-                    }
-                    
-                    if (needsUpdate)
-                    {
-                        updates.Add(node);
-                    }
-                    
-                    globalIndex++;
-                }
+                TryUpdateNode(node, memberLetter, globalIndex, updates);
+                globalIndex++;
             }
-            else
+        }
+    }
+
+    private void ProcessMultipleMembersMultipleNodes(List<SessionMember> sessionMembers, Dictionary<string, List<DataNode>> nodesByMember, List<DataNode> updates, ref int globalIndex)
+    {
+        for (int mIndex = 0; mIndex < sessionMembers.Count; mIndex++)
+        {
+            var member = sessionMembers[mIndex];
+            if (!nodesByMember.TryGetValue(member.ClientInstanceId, out var nodes))
             {
-                for (int i = 0; i < nodes.Count; i++)
-                {
-                    var code = memberLetter + ((char)('a' + i));
-                    var needsUpdate = false;
-                    
-                    if (nodes[i].Code != code)
-                    {
-                        nodes[i].Code = code;
-                        needsUpdate = true;
-                    }
-                    
-                    if (nodes[i].OrderIndex != globalIndex)
-                    {
-                        nodes[i].OrderIndex = globalIndex;
-                        needsUpdate = true;
-                    }
-                    
-                    if (needsUpdate)
-                    {
-                        updates.Add(nodes[i]);
-                    }
-                    
-                    globalIndex++;
-                }
+                continue;
             }
+
+            var memberLetter = ((char)('A' + mIndex)).ToString();
+
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                var code = memberLetter + ((char)('a' + i));
+                TryUpdateNode(nodes[i], code, globalIndex, updates);
+                globalIndex++;
+            }
+        }
+    }
+    
+    private bool TryUpdateNode(DataNode node, string code, int orderIndex, List<DataNode> updates)
+    {
+        bool needsUpdate = false;
+
+        if (node.Code != code)
+        {
+            node.Code = code;
+            needsUpdate = true;
         }
 
-        if (updates.Count > 0)
+        if (node.OrderIndex != orderIndex)
         {
-            _dataNodeRepository.AddOrUpdate(updates);
+            node.OrderIndex = orderIndex;
+            needsUpdate = true;
         }
+
+        if (needsUpdate)
+        {
+            updates.Add(node);
+        }
+
+        return needsUpdate;
     }
 
     public void Dispose()

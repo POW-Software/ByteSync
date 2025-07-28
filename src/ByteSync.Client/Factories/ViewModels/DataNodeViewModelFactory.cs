@@ -6,6 +6,7 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.ViewModels.Sessions.DataNodes;
 
 namespace ByteSync.Factories.ViewModels;
@@ -43,9 +44,10 @@ public class DataNodeViewModelFactory : IDataNodeViewModelFactory
         var themeService = _context.Resolve<IThemeService>();
         var dataNodeService = _context.Resolve<IDataNodeService>();
         var dataNodeRepository = _context.Resolve<IDataNodeRepository>();
+        var sessionService = _context.Resolve<ISessionService>();
         
         return new DataNodeViewModel(sessionMember, dataNode, isLocalMachine,
             dataNodeSourcesViewModel, dataNodeHeaderViewModel, dataNodeStatusViewModel,
-            themeService, dataNodeService, dataNodeRepository);
+            themeService, dataNodeService, dataNodeRepository, sessionService);
     }
 }

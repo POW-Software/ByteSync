@@ -6,7 +6,6 @@ using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
-using System.Linq;
 
 namespace ByteSync.ServerCommon.Commands.CloudSessions;
 
@@ -60,8 +59,8 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
             return quitter != null;
         }, transaction);
 
-        List<EncryptedDataSource>? dataSources = null;
         List<EncryptedDataNode>? dataNodes = null;
+        List<EncryptedDataSource>? dataSources = null;
         if (updateSessionResult.IsWaitingForTransaction)
         {
             await _inventoryRepository.UpdateIfExists(request.SessionId, inventoryData =>
@@ -69,8 +68,9 @@ public class QuitSessionCommandHandler : IRequestHandler<QuitSessionRequest>
                 var inventoryMember = inventoryData.InventoryMembers.SingleOrDefault(m => m.ClientInstanceId.Equals(request.ClientInstanceId));
                 if (inventoryMember != null)
                 {
-                    dataSources = inventoryMember.DataSources.ToList();
-                    dataNodes = inventoryMember.DataNodes.ToList();
+                    dataSources = inventoryMember.DataNodes.SelectMany(dn => dn.DataSources)
+                        .Select(ds => ds.EncryptedDataSource).ToList();
+                    dataNodes = inventoryMember.DataNodes.Select(dn => dn.EncryptedDataNode).ToList();
                     inventoryData.InventoryMembers.Remove(inventoryMember);
                 }
 

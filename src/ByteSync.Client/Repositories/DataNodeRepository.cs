@@ -32,4 +32,9 @@ public class DataNodeRepository : BaseSourceCacheRepository<DataNode, string>, I
             return CurrentMemberDataNodes.Items.OrderBy(n => n.Id).ToList();
         }
     }
+    
+    public IEnumerable<DataNode> GetDataNodesByClientInstanceId(string clientInstanceId)
+    {
+        return SourceCache.Items.Where(node => Equals(node.ClientInstanceId, clientInstanceId));
+    }
 }

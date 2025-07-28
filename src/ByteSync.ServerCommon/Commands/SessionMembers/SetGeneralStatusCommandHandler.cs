@@ -1,21 +1,21 @@
-﻿using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Entities.Inventories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.ServerCommon.Commands.Inventories;
+namespace ByteSync.ServerCommon.Commands.SessionMembers;
 
-public class SetLocalInventoryStatusCommandHandler : IRequestHandler<SetLocalInventoryStatusRequest, bool>
+public class SetGeneralStatusCommandHandler : IRequestHandler<SetGeneralStatusRequest, bool>
 {
     private readonly IInventoryRepository _inventoryRepository;
     private readonly IInventoryMemberService _inventoryMemberService;
     private readonly IInvokeClientsService _invokeClientsService;
-    private readonly ILogger<SetLocalInventoryStatusCommandHandler> _logger;
+    private readonly ILogger<SetGeneralStatusCommandHandler> _logger;
 
-    public SetLocalInventoryStatusCommandHandler(IInventoryRepository inventoryRepository, IInventoryMemberService inventoryMemberService, 
-        IInvokeClientsService invokeClientsService, ILogger<SetLocalInventoryStatusCommandHandler> logger)
+    public SetGeneralStatusCommandHandler(IInventoryRepository inventoryRepository, IInventoryMemberService inventoryMemberService, 
+        IInvokeClientsService invokeClientsService, ILogger<SetGeneralStatusCommandHandler> logger)
     {
         _inventoryRepository = inventoryRepository;
         _inventoryMemberService = inventoryMemberService;
@@ -23,7 +23,7 @@ public class SetLocalInventoryStatusCommandHandler : IRequestHandler<SetLocalInv
         _logger = logger;
     }
 
-    public async Task<bool> Handle(SetLocalInventoryStatusRequest request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(SetGeneralStatusRequest request, CancellationToken cancellationToken)
     {
         var sessionId = request.Parameters.SessionId;
         var client = request.Client;
@@ -31,7 +31,7 @@ public class SetLocalInventoryStatusCommandHandler : IRequestHandler<SetLocalInv
 
         var updateResult = await _inventoryRepository.AddOrUpdate(sessionId, inventoryData =>
         {
-            inventoryData ??= new InventoryData(sessionId);
+            inventoryData ??= new InventoryEntity(sessionId);
 
             var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);
                 
@@ -47,7 +47,7 @@ public class SetLocalInventoryStatusCommandHandler : IRequestHandler<SetLocalInv
             }
             else
             {
-                _logger.LogWarning("SetLocalInventoryStatus: session {sessionId}, client {clientInstanceId} has a more recent status update", sessionId,
+                _logger.LogWarning("SetGeneralStatus: session {sessionId}, client {clientInstanceId} has a more recent status update", sessionId,
                     client.ClientInstanceId);
                 return null;
             }
@@ -55,10 +55,10 @@ public class SetLocalInventoryStatusCommandHandler : IRequestHandler<SetLocalInv
 
         if (!updateResult.IsSaved)
         {
-            _logger.LogWarning("SetLocalInventoryStatus: Failed to update status for session {sessionId}, client {clientInstanceId}", sessionId,
+            _logger.LogWarning("SetGeneralStatus: Failed to update status for session {sessionId}, client {clientInstanceId}", sessionId,
                 client.ClientInstanceId);
         }
 
         return updateResult.IsSaved;
     }
-}
+} 

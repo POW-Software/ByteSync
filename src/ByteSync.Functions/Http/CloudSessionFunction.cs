@@ -48,28 +48,6 @@ public class CloudSessionFunction
         return response;
     }
     
-    [Function("GetMembersInstanceIdsFunction")]
-    public async Task<HttpResponseData> GetMembersInstanceIds(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/membersInstanceIds")] HttpRequestData req,
-        FunctionContext executionContext, string sessionId)
-    {
-        var result = await _mediator.Send(new GetMembersInstanceIdsRequest(sessionId));
-        var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
-        return response;
-    }
-    
-    [Function("GetMembersFunction")]
-    public async Task<HttpResponseData> GetMembers(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/members")] HttpRequestData req,
-        FunctionContext executionContext, string sessionId)
-    {
-        var result = await _mediator.Send(new GetMembersRequest(sessionId));
-        var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
-        return response;
-    }
-    
     [Function("ValidateJoinCloudSessionFunction")]
     public async Task<HttpResponseData> ValidateJoinCloudSession(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/validateJoin")] HttpRequestData req,
