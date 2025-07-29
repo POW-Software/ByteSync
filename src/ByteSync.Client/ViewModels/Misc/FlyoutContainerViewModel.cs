@@ -1,15 +1,12 @@
 ﻿using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using Avalonia.Threading;
 using ByteSync.Assets.Resources;
 using ByteSync.Business;
-using ByteSync.Business.Events;
 using ByteSync.Business.Profiles;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Dialogs;
-using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -18,7 +15,6 @@ namespace ByteSync.ViewModels.Misc;
 
 public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
 {
-    private readonly INavigationEventsHub _navigationEventsHub;
     private readonly ILocalizationService _localizationService;
     private readonly IFlyoutElementViewModelFactory _flyoutElementViewModelFactory;
 
@@ -27,7 +23,7 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
             
     }
         
-    public FlyoutContainerViewModel(INavigationEventsHub navigationEventsHub, ILocalizationService localizationService,
+    public FlyoutContainerViewModel(ILocalizationService localizationService,
         IFlyoutElementViewModelFactory flyoutElementViewModelFactory)
     {
         // Required for “WhenActivated” activation to occur. Inverted at the start of WhenActivated
@@ -36,8 +32,7 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
         CanCloseCurrentFlyout = true;
 
         WaitingFlyoutCanNowBeOpened = new AutoResetEvent(false);
-
-        _navigationEventsHub = navigationEventsHub;
+        
         _localizationService = localizationService;
         _flyoutElementViewModelFactory = flyoutElementViewModelFactory;
             
@@ -67,31 +62,19 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
                 }
             });
 
-        this.WhenActivated(disposables =>
+        this.WhenActivated(HandleActivation);
+    }
+
+    private void HandleActivation(IDisposable compositeDisposable)
+    {
+        // We switch back here when the theme is changed!
+        // HasBeenActivatedOnce allows you to process only once and avoid flyout problems following a theme change
+        
+        if (!HasBeenActivatedOnce)
         {
-            // On repasse ici quand le thème est changé !
-            // HasBeenActivatedOnce permet de ne traiter qu'une fois et d'éviter les problèmes de Flyout suite à changement de thème
-            if (!HasBeenActivatedOnce)
-            {
-                DoCloseFlyout();
-                HasBeenActivatedOnce = true;
-            }
-            
-            Observable.FromEventPattern<TrustKeyDataRequestedArgs>(_navigationEventsHub, nameof(_navigationEventsHub.TrustKeyDataRequested))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(args => OnTrustKeyDataRequested(args.EventArgs))
-                .DisposeWith(disposables);
-            
-            Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.CreateCloudSessionProfileRequested))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => OnCreateCloudSessionProfileRequested())
-                .DisposeWith(disposables);
-            
-            // Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.CreateLocalSessionProfileRequested))
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(_ => OnCreateLocalSessionProfileRequested())
-            //     .DisposeWith(disposables);
-        });
+            DoCloseFlyout();
+            HasBeenActivatedOnce = true;
+        }
     }
 
     public AutoResetEvent WaitingFlyoutCanNowBeOpened { get; set; }
@@ -126,25 +109,11 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
         return result;
     }
     
-    private void OnTrustKeyDataRequested(TrustKeyDataRequestedArgs trustKeyDataRequestedArgs)
-    {
-        // Ici: contrôler qu'un affichage n'est pas déjà en cours ???
-        
-        ShowFlyout(nameof(Resources.Shell_TrustedClients), false, 
-            _flyoutElementViewModelFactory.BuilAddTrustedClientViewModel(trustKeyDataRequestedArgs.PublicKeyCheckData, 
-                trustKeyDataRequestedArgs.TrustDataParameters));
-    }
-    
     private void OnCreateCloudSessionProfileRequested()
     {
+        // Keep until feature is implemented
         ShowFlyout(nameof(Resources.Shell_CreateCloudSessionProfile), false, 
             _flyoutElementViewModelFactory.BuildCreateSessionProfileViewModel(ProfileTypes.Cloud));
-    }
-    
-    private void OnCreateLocalSessionProfileRequested()
-    {
-        ShowFlyout(nameof(Resources.Shell_CreateLocalSessionProfile), false, 
-            _flyoutElementViewModelFactory.BuildCreateSessionProfileViewModel(ProfileTypes.Local));
     }
     
     public void ShowFlyout(string titleKey, bool toggle, FlyoutElementViewModel flyoutElementViewModel) 

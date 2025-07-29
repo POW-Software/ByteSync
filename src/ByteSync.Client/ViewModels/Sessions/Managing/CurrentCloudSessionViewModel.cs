@@ -1,15 +1,10 @@
 ﻿using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Mixins;
 using ByteSync.Business.Arguments;
-using ByteSync.Business.Events;
 using ByteSync.Business.Sessions;
-using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Inventories;
-using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Views;
@@ -23,7 +18,6 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
 {
     private readonly ISessionService _sessionService;
     private readonly ISessionInterruptor _sessionInterruptor;
-    private readonly INavigationEventsHub _navigationEventsHub;
     private readonly IDataInventoryStarter _dataInventoryStarter;
     private readonly MainWindow _mainWindow;
 
@@ -31,13 +25,12 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
     {
     }
 
-    public CurrentCloudSessionViewModel(ISessionService sessionService, ISessionInterruptor sessionInterruptor, INavigationEventsHub navigationEventsHub,
+    public CurrentCloudSessionViewModel(ISessionService sessionService, ISessionInterruptor sessionInterruptor, 
         IDataInventoryStarter dataInventoryStarter, ISessionSettingsEditViewModelFactory sessionSettingsEditViewModel,
         MainWindow mainWindow)
     {
         _sessionService = sessionService;
         _sessionInterruptor = sessionInterruptor;
-        _navigationEventsHub = navigationEventsHub;
         _dataInventoryStarter = dataInventoryStarter;
         _mainWindow = mainWindow;
 
@@ -168,7 +161,7 @@ public class CurrentCloudSessionViewModel : ActivatableViewModelBase
 
         if (sessionId != null)
         {
-            await _navigationEventsHub.RaiseCreateCloudSessionProfileRequested();
+            // await _navigationEventsHub.RaiseCreateCloudSessionProfileRequested();
         }
     }
 }
