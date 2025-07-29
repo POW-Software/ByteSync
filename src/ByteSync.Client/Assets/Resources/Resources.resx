@@ -177,8 +177,8 @@
   <data name="OperationSelection_OfflineInventory" xml:space="preserve">
     <value>Offline inventory</value>
   </data>
-  <data name="OperationSelection_CloudSynchronization" xml:space="preserve">
-    <value>Cloud Synchronization</value>
+  <data name="OperationSelection_Synchronization" xml:space="preserve">
+    <value>Synchronization</value>
   </data>
   <data name="OperationSelection_OfflineComparison" xml:space="preserve">
     <value>Offline comparison</value>
@@ -538,7 +538,7 @@ Would you like to continue ?</value>
     <value>QUIT SESSION</value>
   </data>
   <data name="JoinCloudSession_JoinCloudSession" xml:space="preserve">
-    <value>JOIN CLOUD SESSION</value>
+    <value>JOIN SYNCHRONIZATION SESSION</value>
   </data>
   <data name="JoinCloudSession_Cancel" xml:space="preserve">
     <value>CANCEL</value>
@@ -1176,7 +1176,7 @@ Please stop the inventory or synchronization first.</value>
     <value>Load</value>
   </data>
   <data name="OperationSelection_Lobby" xml:space="preserve">
-    <value>Cloud Session Lobby</value>
+    <value>Synchronization Session Lobby</value>
   </data>
   <data name="LobbyMemberStatus_WaitingForJoin" xml:space="preserve">
     <value>Waiting to join the Lobby</value>
@@ -1194,12 +1194,12 @@ Please stop the inventory or synchronization first.</value>
     <value>Registering a Trusted Client</value>
   </data>
   <data name="AddTrustedClient_Introduction_OnSessionMemberSide" xml:space="preserve">
-    <value>A client that does not belong to your Trusted Clients applies to join the Cloud Session.
-You must add it to your Trusted Clients before it can join the Cloud Session.
+    <value>A client that does not belong to your Trusted Clients applies to join the Synchronization Session.
+You must add it to your Trusted Clients before it can join the Synchronization Session.
 Please make sure the Security Words are the same and in the same order on your client and the requesting client before saving this Trusted Client.</value>
   </data>
   <data name="AddTrustedClient_Introduction_OnJoiningMemberSide" xml:space="preserve">
-    <value>You are applying to join a Cloud Session that has members who do not belong to your Trusted Clients.
+    <value>You are applying to join a Synchronization Session that has members who do not belong to your Trusted Clients.
 You must add these Session Members to your Trusted Clients in order to join this session.
 Please ensure that the Security Words are the same and in the same order on your client and on each Session Member client before saving these Trusted Clients.</value>
   </data>
@@ -1285,16 +1285,16 @@ Please ensure that the Security Words are the same and in the same order on your
     <value>Error during cross-checking between Lobby Members</value>
   </data>
   <data name="LobbyMemberStatus_JoinedSession" xml:space="preserve">
-    <value>Joined the Cloud Session</value>
+    <value>Joined the Synchronization Session</value>
   </data>
   <data name="LobbyMemberStatus_CreatedSession" xml:space="preserve">
-    <value>Cloud Session created. Waiting for other Members to join it...</value>
+    <value>Synchronization Session created. Waiting for other Members to join it...</value>
   </data>
   <data name="Shell_CreateCloudSessionProfile" xml:space="preserve">
-    <value>Create a Cloud Session Profile</value>
+    <value>Create a Synchronization Session Profile</value>
   </data>
   <data name="ProfileType_CloudSession" xml:space="preserve">
-    <value>Cloud Session</value>
+    <value>Synchronization Session</value>
   </data>
   <data name="ProfileType_LocalSession" xml:space="preserve">
     <value>Local Session</value>
@@ -1357,11 +1357,11 @@ Please ensure that the Security Words are the same and in the same order on your
     <value>Synchronization Rules</value>
   </data>
   <data name="SessionProfileManager_OnReceivedCloudSessionProfile_Title" xml:space="preserve">
-    <value>Accepting the Cloud Session Profile</value>
+    <value>Accepting the Synchronization Session Profile</value>
   </data>
   <data name="SessionProfileManager_OnReceivedCloudSessionProfile_Message" xml:space="preserve">
-    <value>The First Member of the Cloud Session has created a Cloud Session Profile named '{0}'.
-Do you agree to save this Cloud Session Profile on your machine?</value>
+    <value>The First Member of the Synchronization Session has created a Synchronization Session Profile named '{0}'.
+Do you agree to save this Synchronization Session Profile on your machine?</value>
   </data>
   <data name="InventoryProcess_WaitingForAutomaticStart_CloudSession" xml:space="preserve">
     <value>The Data Inventory will start automatically when all Session Members are ready...</value>
@@ -1558,14 +1558,14 @@ The Data Inventory will be launched automatically.</value>
     <value>Join</value>
   </data>
   <data name="ProfilesView_Tooltip_Content_Join" xml:space="preserve">
-    <value>Join a Cloud Session Lobby.</value>
+    <value>Join a Synchronization Session Lobby.</value>
   </data>
   <data name="ProfilesView_Tooltip_Header_Details" xml:space="preserve">
     <value>Information</value>
   </data>
   <data name="ProfilesView_Tooltip_Content_Details" xml:space="preserve">
     <value>In the case of a Local Session, start a Session from the profile. The Data Inventory will have to be launched manually.
-In the case of a Cloud Session, show only the profile details.</value>
+In the case of a Synchronization Session, show only the profile details.</value>
   </data>
   <data name="ProfilesView_Tooltip_Header_Delete" xml:space="preserve">
     <value>Delete</value>
@@ -1574,10 +1574,10 @@ In the case of a Cloud Session, show only the profile details.</value>
     <value>Delete the Session Profile.</value>
   </data>
   <data name="HomeView_CloudSynchronization_ToolTip_Header" xml:space="preserve">
-    <value>Cloud Synchronization</value>
+    <value>Cloud</value>
   </data>
   <data name="HomeView_CloudSynchronization_ToolTip_Content" xml:space="preserve">
-    <value>Start a Cloud Session to synchronize and backup data remotely.
+    <value>Start a Synchronization Session to synchronize and backup data remotely.
 From 2 to 5 clients participate.</value>
   </data>
   <data name="HomeView_LocalSynchronization_ToolTip_Header" xml:space="preserve">
@@ -1676,7 +1676,7 @@ Do you want to save this new Session Profile with this name?</value>
     <value>Please use the original deployment system to update the software.</value>
   </data>
   <data name="CreateCloudSession_Create" xml:space="preserve">
-    <value>START CLOUD SESSION</value>
+    <value>START SYNCHRONIZATION SESSION</value>
   </data>
   <data name="CreateCloudSession_Cancel" xml:space="preserve">
     <value>CANCEL</value>
@@ -1685,10 +1685,10 @@ Do you want to save this new Session Profile with this name?</value>
     <value>An unknown error has occurred. Please check the log.</value>
   </data>
   <data name="CreateCloudSession_Header" xml:space="preserve">
-    <value>Create a new Cloud Session</value>
+    <value>Create a new Synchronization Session</value>
   </data>
   <data name="JoinCloudSession_Header" xml:space="preserve">
-    <value>Join an existing Cloud Session</value>
+    <value>Join an existing Synchronization Session</value>
   </data>
   <data name="JoinCloudSession_TimeoutError" xml:space="preserve">
     <value>The waiting period has expired.</value>

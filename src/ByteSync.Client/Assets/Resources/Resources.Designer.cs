@@ -1509,9 +1509,9 @@ namespace ByteSync.Assets.Resources {
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Cloud synchronization.
         /// </summary>
-        internal static string OperationSelection_CloudSynchronization {
+        internal static string OperationSelection_Synchronization {
             get {
-                return ResourceManager.GetString("OperationSelection_CloudSynchronization", resourceCulture);
+                return ResourceManager.GetString("OperationSelection_Synchronization", resourceCulture);
             }
         }
         

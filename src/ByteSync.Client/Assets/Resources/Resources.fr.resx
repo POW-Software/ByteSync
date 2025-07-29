@@ -69,8 +69,8 @@
   <data name="OperationSelection_OfflineInventory" xml:space="preserve">
 	  <value>Inventaire hors-ligne</value>
   </data>
-	<data name="OperationSelection_CloudSynchronization" xml:space="preserve">
-		<value>Synchronisation Cloud</value>
+	<data name="OperationSelection_Synchronization" xml:space="preserve">
+		<value>Synchronisation</value>
 	</data>
   <data name="OperationSelection_OfflineComparison" xml:space="preserve">
 	  <value>Comparaison hors-ligne</value>
@@ -430,7 +430,7 @@ Voulez-vous continuer ?</value>
 	  <value>QUITTER LA SESSION</value>
   </data>
   <data name="JoinCloudSession_JoinCloudSession" xml:space="preserve">
-	  <value>REJOINDRE LA SESSION CLOUD</value>
+	  <value>REJOINDRE LA SESSION DE SYNCHRONISATION</value>
   </data>
   <data name="JoinCloudSession_Cancel" xml:space="preserve">
 	  <value>ANNULER</value>
@@ -1068,14 +1068,14 @@ Veuillez interrompre l'inventaire ou la synchronisation au préalable.</value>
 		<value>En attente de rejoindre le Lobby</value>
 	</data>
 	<data name="OperationSelection_Lobby" xml:space="preserve">
-		<value>Lobby de Session Cloud</value>
+		<value>Lobby de Session de Synchronisation</value>
 	</data>
 	<data name="Shell_TrustedClients" xml:space="preserve">
 		<value>Enregistrement d'un Client de Confiance</value>
 	</data>
 	<data name="AddTrustedClient_Introduction_OnSessionMemberSide" xml:space="preserve">
-		<value>Un client qui n'appartient pas à vos Clients de Confiance demande à rejoindre la Session Cloud.
-Vous devez l'ajouter à votre Clients de Confiance pour qu'il puisse rejoindre la Session Cloud.
+		<value>Un client qui n'appartient pas à vos Clients de Confiance demande à rejoindre la Session de Synchronisation.
+Vous devez l'ajouter à votre Clients de Confiance pour qu'il puisse rejoindre la Session de Synchronisation.
 Veuillez vous assurer que les Mots de Sécurité sont identiques et dans le même ordre sur votre client et sur le client demandeur avant d'enregistrer ce Client de Confiance.</value>
 	</data>
 	<data name="AddTrustedClient_MachineName" xml:space="preserve">
@@ -1088,7 +1088,7 @@ Veuillez vous assurer que les Mots de Sécurité sont identiques et dans le mêm
 		<value>Reverse DNS :</value>
 	</data>
 	<data name="AddTrustedClient_Introduction_OnJoiningMemberSide" xml:space="preserve">
-		<value>Vous demandez à rejoindre une Session Cloud dont certains membres n'appartiennent pas à vos Clients de Confiance.
+		<value>Vous demandez à rejoindre une Session de Synchronisation dont certains membres n'appartiennent pas à vos Clients de Confiance.
 Vous devez ajouter ces Membres de la Session à vos Clients de Confiance pour pouvoir rejoindre cette session.
 Veuillez vous assurer que les Mots de Sécurité sont identiques et dans le même ordre sur votre client et sur chaque client Membre de la Session avant d'enregistrer ces Clients de Confiance.</value>
 	</data>
@@ -1165,16 +1165,16 @@ Veuillez vous assurer que les Mots de Sécurité sont identiques et dans le mêm
 		<value>Erreur durant le contrôle croisé entre les Membres du Lobby</value>
 	</data>
 	<data name="LobbyMemberStatus_JoinedSession" xml:space="preserve">
-		<value>A rejoint la Session Cloud</value>
+		<value>A rejoint la Session de Synchronisation</value>
 	</data>
 	<data name="LobbyMemberStatus_CreatedSession" xml:space="preserve">
-		<value>Session Cloud créée. En Attente que les autres Membres la rejoignent...</value>
+		<value>Session de Synchronisation créée. En Attente que les autres Membres la rejoignent...</value>
 	</data>
 	<data name="Shell_CreateCloudSessionProfile" xml:space="preserve">
-		<value>Créer un Profil de Session Cloud</value>
+		<value>Créer un Profil de Session de Synchronisation</value>
 	</data>
 	<data name="ProfileType_CloudSession" xml:space="preserve">
-		<value>Session Cloud</value>
+		<value>Session de Synchronisation</value>
 	</data>
 	<data name="ProfileType_LocalSession" xml:space="preserve">
 		<value>Session Locale</value>
@@ -1237,11 +1237,11 @@ Veuillez vous assurer que les Mots de Sécurité sont identiques et dans le mêm
 		<value>Voulez-vous supprimer le Profil de Session '{0}' ?</value>
 	</data>
 	<data name="SessionProfileManager_OnReceivedCloudSessionProfile_Message" xml:space="preserve">
-		<value>Le Premier Membre de la Session Cloud a créé un Profil de Session Cloud nommé '{0}'.
-Acceptez-vous d'enregistrer ce Profil de Session Cloud sur votre machine ?</value>
+		<value>Le Premier Membre de la Session de Synchronisation a créé un Profil de Session de Synchronisation nommé '{0}'.
+Acceptez-vous d'enregistrer ce Profil de Session de Synchronisation sur votre machine ?</value>
 	</data>
 	<data name="SessionProfileManager_OnReceivedCloudSessionProfile_Title" xml:space="preserve">
-		<value>Accepter le Profil de Session Cloud</value>
+		<value>Accepter le Profil de Session de Synchronisation</value>
 	</data>
 	<data name="InventoryProcess_WaitingForAutomaticStart_CloudSession" xml:space="preserve">
 		<value>L'Inventaire des Données démarrera automatiquement lorsque tous les Membres de la Session seront prêts...</value>
@@ -1435,11 +1435,11 @@ L'Inventaire des Données sera lancé automatiquement.</value>
 		<value>Informations</value>
 	</data>
 	<data name="ProfilesView_Tooltip_Content_Join" xml:space="preserve">
-		<value>Rejoindre un Lobby de Session Cloud.</value>
+		<value>Rejoindre un Lobby de Session de Synchronisation.</value>
 	</data>
 	<data name="ProfilesView_Tooltip_Content_Details" xml:space="preserve">
 		<value>Dans le cas d'une Session Locale, démarrer une Session à partir du profil. L'Inventaire des données devra être lancé manuellement.
-Dans le cas d'une Session Cloud, afficher uniquement les détails du profil.</value>
+Dans le cas d'une Session de Synchronisation, afficher uniquement les détails du profil.</value>
 	</data>
 	<data name="ProfilesView_Tooltip_Header_Delete" xml:space="preserve">
 		<value>Supprimer</value>
@@ -1448,11 +1448,11 @@ Dans le cas d'une Session Cloud, afficher uniquement les détails du profil.</va
 		<value>Supprimer le Profil de Session.</value>
 	</data>
 	<data name="HomeView_CloudSynchronization_ToolTip_Content" xml:space="preserve">
-		<value>Démarrer une Session Cloud pour synchroniser et sauvegarder des données à distance.
+		<value>Démarrer une Session de Synchronisation pour synchroniser et sauvegarder des données à distance.
 De 2 à 5 clients participent.</value>
 	</data>
 	<data name="HomeView_CloudSynchronization_ToolTip_Header" xml:space="preserve">
-		<value>Synchronisation Cloud</value>
+		<value>Synchronisation</value>
 	</data>
 	<data name="HomeView_LocalSynchronization_ToolTip_Header" xml:space="preserve">
 		<value>Synchronisation Locale</value>
@@ -1541,7 +1541,7 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 		<value>Veuillez utiliser le système de déploiement d'origine pour mettre à jour le logiciel.</value>
 	</data>
 	<data name="CreateCloudSession_Create" xml:space="preserve">
-		<value>DÉMARRER UNE SESSION CLOUD</value>
+		<value>DÉMARRER UNE SESSION DE SYNCHRONISATION</value>
 	</data>
 	<data name="CreateCloudSession_Cancel" xml:space="preserve">
 		<value>ANNULER</value>
@@ -1550,10 +1550,10 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 		<value>Une erreur inconnue est survenue. Veuillez consulter le journal.</value>
 	</data>
 	<data name="CreateCloudSession_Header" xml:space="preserve">
-		<value>Créer une nouvelle Session Cloud</value>
+		<value>Créer une nouvelle Session de Synchronisation</value>
 	</data>
 	<data name="JoinCloudSession_Header" xml:space="preserve">
-		<value>Rejoindre une Session Cloud existante</value>
+		<value>Rejoindre une Session de Synchronisation existante</value>
 	</data>
 	<data name="JoinCloudSession_TimeoutError" xml:space="preserve">
 		<value>Le délai d'attente a expiré.</value>
