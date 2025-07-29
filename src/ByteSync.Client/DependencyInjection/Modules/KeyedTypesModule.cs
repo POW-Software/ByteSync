@@ -3,9 +3,11 @@ using ByteSync.Business.Misc;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Communications;
 using ByteSync.Interfaces.Controls.Bootstrapping;
+using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Services.Bootstrappers;
 using ByteSync.Services.Communications.Transfers.AfterTransfers;
+using ByteSync.Services.Communications.Transfers.Strategies;
 using ByteSync.Services.TimeTracking;
 
 namespace ByteSync.DependencyInjection.Modules;
@@ -26,5 +28,8 @@ public class KeyedTypesModule : Module
         
         builder.RegisterType<GraphicalUserInterfaceBootstrapper>().Keyed<IBootstrapper>(OperationMode.GraphicalUserInterface);
         builder.RegisterType<CommandLineBootstrapper>().Keyed<IBootstrapper>(OperationMode.CommandLine);
+        
+        builder.RegisterType<BlobStorageDownloadStrategy>().Keyed<IDownloadStrategy>(StorageProvider.AzureBlobStorage);
+        builder.RegisterType<CloudFlareDownloadStrategy>().Keyed<IDownloadStrategy>(StorageProvider.CloudFlareR2);
     }
 }
