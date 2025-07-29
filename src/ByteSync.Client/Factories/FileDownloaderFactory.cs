@@ -69,7 +69,7 @@ public class FileDownloaderFactory : IFileDownloaderFactory
         var filePartDownloadAsserterLogger = _context.Resolve<ILogger<FilePartDownloadAsserter>>();
         var filePartDownloadAsserter = new FilePartDownloadAsserter(fileTransferApiClient, semaphoreSlim, errorManager, filePartDownloadAsserterLogger);
 
-        var getLaBonneStrategie = _context.Resolve<IIndex<StorageProvider, IDownloadStrategy>>();
+        var downloadStrategy = _context.Resolve<IIndex<StorageProvider, IDownloadStrategy>>();
 
         var fileDownloader = _context.Resolve<IFileDownloader>(
             new TypedParameter(typeof(SharedFileDefinition), sharedFileDefinition),
@@ -78,7 +78,7 @@ public class FileDownloaderFactory : IFileDownloaderFactory
             new TypedParameter(typeof(IErrorManager), errorManager),
             new TypedParameter(typeof(IResourceManager), resourceManager),
             new TypedParameter(typeof(IDownloadPartsCoordinator), partsCoordinator),
-            new TypedParameter(typeof(IIndex<StorageProvider, IDownloadStrategy>), getLaBonneStrategie)
+            new TypedParameter(typeof(IIndex<StorageProvider, IDownloadStrategy>), downloadStrategy)
         );
 
         return fileDownloader;

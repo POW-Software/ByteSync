@@ -2,15 +2,10 @@ using NUnit.Framework;
 using Moq;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
-using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Factories;
-using ByteSync.Interfaces;
 using FluentAssertions;
-using Autofac.Features.Indexed;
 using Autofac;
-using Autofac.Core;
-using Microsoft.Extensions.Logging;
 using ByteSync.TestsCommon.Mocking;
 
 namespace ByteSync.Tests.Services.Communications.Transfers;
@@ -38,10 +33,6 @@ public class FileDownloaderFactoryTests
         
         var downloadTargetBuilder = container.Resolve<Mock<IDownloadTargetBuilder>>();
         var mergerDecrypterFactory = container.Resolve<Mock<IMergerDecrypterFactory>>();
-        var fileTransferApiClient = container.Resolve<Mock<IFileTransferApiClient>>();
-        var strategies = container.Resolve<Mock<IIndex<StorageProvider, IDownloadStrategy>>>();
-        var logger = container.Resolve<Mock<ILogger<ByteSync.Services.Communications.Transfers.FilePartDownloadAsserter>>>();
-        var fileDownloaderLogger = new Mock<ILogger<ByteSync.Services.Communications.Transfers.FileDownloader>>();
         
         downloadTargetBuilder.Setup(b => b.BuildDownloadTarget(sharedFileDefinition)).Returns(downloadTarget);
         mergerDecrypterFactory.Setup(f => f.Build(It.IsAny<string>(), downloadTarget, It.IsAny<System.Threading.CancellationTokenSource>()))
