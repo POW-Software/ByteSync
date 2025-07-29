@@ -1,15 +1,17 @@
-using System.Collections.Generic;
 using NUnit.Framework;
 using Moq;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Factories;
-using ByteSync.Services.Communications.Transfers;
 using ByteSync.Factories;
 using ByteSync.Interfaces;
 using FluentAssertions;
 using Autofac.Features.Indexed;
+using Autofac;
+using Autofac.Core;
+using Microsoft.Extensions.Logging;
+using ByteSync.TestsCommon.Mocking;
 
 namespace ByteSync.Tests.Services.Communications.Transfers;
 
@@ -18,20 +20,38 @@ public class FileDownloaderFactoryTests
     [Test]
     public void Build_CreatesFileDownloaderWithAllDependencies()
     {
-        var policyFactory = new Mock<IPolicyFactory>();
-        var downloadTargetBuilder = new Mock<IDownloadTargetBuilder>();
-        var fileTransferApiClient = new Mock<IFileTransferApiClient>();
-        var mergerDecrypterFactory = new Mock<IMergerDecrypterFactory>();
-        var strategies = new Mock<IIndex<StorageProvider, IDownloadStrategy>>();
-        var logger = new Mock<Microsoft.Extensions.Logging.ILogger<ByteSync.Services.Communications.Transfers.FilePartDownloadAsserter>>();
-        var fileDownloaderLogger = new Mock<Microsoft.Extensions.Logging.ILogger<ByteSync.Services.Communications.Transfers.FileDownloader>>();
+        // Arrange
+        var builder = new ContainerBuilder();
+        builder.RegisterSource(new MoqRegistrationSource());
+        
         var sharedFileDefinition = new SharedFileDefinition();
         var downloadTarget = new ByteSync.Business.Communications.Downloading.DownloadTarget(sharedFileDefinition, null, new HashSet<string> { "file1" });
+        
+        var mockFileDownloader = new Mock<IFileDownloader>();
+        mockFileDownloader.Setup(f => f.SharedFileDefinition).Returns(sharedFileDefinition);
+        mockFileDownloader.Setup(f => f.DownloadTarget).Returns(downloadTarget);
+        
+        builder.RegisterInstance(mockFileDownloader.Object).As<IFileDownloader>();
+        
+        var container = builder.Build();
+        var context = container.Resolve<IComponentContext>();
+        
+        var downloadTargetBuilder = container.Resolve<Mock<IDownloadTargetBuilder>>();
+        var mergerDecrypterFactory = container.Resolve<Mock<IMergerDecrypterFactory>>();
+        var fileTransferApiClient = container.Resolve<Mock<IFileTransferApiClient>>();
+        var strategies = container.Resolve<Mock<IIndex<StorageProvider, IDownloadStrategy>>>();
+        var logger = container.Resolve<Mock<ILogger<ByteSync.Services.Communications.Transfers.FilePartDownloadAsserter>>>();
+        var fileDownloaderLogger = new Mock<ILogger<ByteSync.Services.Communications.Transfers.FileDownloader>>();
+        
         downloadTargetBuilder.Setup(b => b.BuildDownloadTarget(sharedFileDefinition)).Returns(downloadTarget);
         mergerDecrypterFactory.Setup(f => f.Build(It.IsAny<string>(), downloadTarget, It.IsAny<System.Threading.CancellationTokenSource>()))
             .Returns(new Mock<ByteSync.Interfaces.Controls.Encryptions.IMergerDecrypter>().Object);
-        var factory = new FileDownloaderFactory(policyFactory.Object, downloadTargetBuilder.Object, fileTransferApiClient.Object, mergerDecrypterFactory.Object, strategies.Object, logger.Object, fileDownloaderLogger.Object);
+        
+        // Act
+        var factory = new FileDownloaderFactory(context);
         var downloader = factory.Build(sharedFileDefinition);
+        
+        // Assert
         downloader.Should().NotBeNull();
         downloader.SharedFileDefinition.Should().BeSameAs(sharedFileDefinition);
         downloader.DownloadTarget.Should().BeSameAs(downloadTarget);

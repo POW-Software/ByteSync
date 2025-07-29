@@ -176,13 +176,16 @@ public class TransferLocationService : ITransferLocationService
         }
     }
 
-    public FileStorageLocation CreateResponseObject(String Url, StorageProvider StorageProvider)
+    public async Task<FileStorageLocation> GetDownloadFileStorageLocation(string sessionId, Client client,
+        TransferParameters transferParameters, StorageProvider storageProvider)
     {
-        if (StorageProvider == StorageProvider.AzureBlobStorage)
-            return new FileStorageLocation(Url, StorageProvider.AzureBlobStorage);
-        else if (StorageProvider == StorageProvider.CloudFlareR2)
-            return new FileStorageLocation(Url, StorageProvider.CloudFlareR2);
-        else return null;
+        var url = await GetDownloadFileUrl(
+            sessionId,
+            client,
+            transferParameters.SharedFileDefinition,
+            transferParameters.PartNumber!.Value
+        );
+        return new FileStorageLocation(url, storageProvider);
     }
     
     private bool IsSharedFileDefinitionAllowed(SessionMemberData? sessionMemberData, SharedFileDefinition? sharedFileDefinition)

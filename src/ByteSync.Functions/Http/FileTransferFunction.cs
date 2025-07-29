@@ -73,14 +73,11 @@ public class FileTransferFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var transferParameters = await FunctionHelper.DeserializeRequestBody<TransferParameters>(req);
 
-        var url = await _transferLocationService.GetDownloadFileUrl(
+        var responseObject = await _transferLocationService.GetDownloadFileStorageLocation(
             sessionId,
             client,
-            transferParameters.SharedFileDefinition,
-            transferParameters.PartNumber!.Value
-        );
-
-        var responseObject = _transferLocationService.CreateResponseObject(url,StorageProvider.AzureBlobStorage);
+            transferParameters, 
+            StorageProvider.AzureBlobStorage);
         var response = req.CreateResponse();
         await response.WriteAsJsonAsync(responseObject, HttpStatusCode.OK);
 

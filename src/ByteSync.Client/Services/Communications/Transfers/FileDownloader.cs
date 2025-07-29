@@ -1,5 +1,4 @@
 ﻿using System.Threading;
-using Azure.Storage.Blobs;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces;
