@@ -1574,7 +1574,7 @@ In the case of a Synchronization Session, show only the profile details.</value>
     <value>Delete the Session Profile.</value>
   </data>
   <data name="HomeView_CloudSynchronization_ToolTip_Header" xml:space="preserve">
-    <value>Cloud</value>
+    <value>Synchronization</value>
   </data>
   <data name="HomeView_CloudSynchronization_ToolTip_Content" xml:space="preserve">
     <value>Start a Synchronization Session to synchronize and backup data remotely.
