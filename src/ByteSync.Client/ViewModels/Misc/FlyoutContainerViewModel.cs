@@ -44,7 +44,7 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
         
         // https://stackoverflow.com/questions/29100381/getting-prior-value-on-change-of-property-using-reactiveui-in-wpf-mvvm
         // https://stackoverflow.com/questions/35784016/whenany-observableforproperty-how-to-access-previous-and-new-value
-        // Pourrait se simplier avec une propriété bool/Reactive sur Content pour savoir si CloseFlyout a été requesté
+        // Could be simplified with a bool/Reactive property on Content to know if CloseFlyout has been requested
         this.WhenAnyValue(x => x.Content)
             .StartWith(this.Content)
             .Buffer(2, 1)
@@ -126,7 +126,7 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
         {
             if (!CanCloseCurrentFlyout && Content != null)
             {
-                // On relance la demande en Taské
+                // We relaunch the request with a task
                 Task.Run(() =>
                 {
                     WaitingFlyoutCanNowBeOpened.WaitOne();
@@ -142,7 +142,7 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
 
             WaitingFlyoutCanNowBeOpened.Reset();
             
-            // On désactive le contenu actuel
+            // Disable current content
             Content?.CancelIfNeeded();
             
             DoShowFlyout(titleKey, flyoutElementViewModel);
