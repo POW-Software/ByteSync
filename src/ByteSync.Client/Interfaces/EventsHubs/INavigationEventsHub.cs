@@ -46,7 +46,7 @@ public interface INavigationEventsHub
     
     public event EventHandler<EventArgs>? CreateCloudSessionProfileRequested;
     
-    public event EventHandler<EventArgs>? CreateLocalSessionProfileRequested;
+    // public event EventHandler<EventArgs>? CreateLocalSessionProfileRequested;
 
     // void RaiseLogOutRequested();
     
@@ -86,5 +86,5 @@ public interface INavigationEventsHub
     
     Task RaiseCreateCloudSessionProfileRequested();
 
-    Task RaiseCreateLocalSessionProfileRequested();
+    // Task RaiseCreateLocalSessionProfileRequested();
 }

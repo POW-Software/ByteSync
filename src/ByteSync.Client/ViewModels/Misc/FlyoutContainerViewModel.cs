@@ -2,8 +2,6 @@
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
-using System.Threading.Tasks;
-using Avalonia.Controls.Mixins;
 using Avalonia.Threading;
 using ByteSync.Assets.Resources;
 using ByteSync.Business;
@@ -89,10 +87,10 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
                 .Subscribe(_ => OnCreateCloudSessionProfileRequested())
                 .DisposeWith(disposables);
             
-            Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.CreateLocalSessionProfileRequested))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => OnCreateLocalSessionProfileRequested())
-                .DisposeWith(disposables);
+            // Observable.FromEventPattern<EventArgs>(_navigationEventsHub, nameof(_navigationEventsHub.CreateLocalSessionProfileRequested))
+            //     .ObserveOn(RxApp.MainThreadScheduler)
+            //     .Subscribe(_ => OnCreateLocalSessionProfileRequested())
+            //     .DisposeWith(disposables);
         });
     }
 
