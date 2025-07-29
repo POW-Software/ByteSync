@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Security.Cryptography;
 using System.Threading;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
@@ -12,10 +11,6 @@ public class FileUploader : IFileUploader
 {
     private readonly ISlicerEncrypter _slicerEncrypter;
     private readonly ILogger<FileUploader> _logger;
-    private readonly IFileUploadCoordinator _fileUploadCoordinator;
-    private readonly IFileSlicer _fileSlicer;
-    private readonly IFileUploadWorker _fileUploadWorker;
-    private readonly IFilePartUploadAsserter _filePartUploadAsserter;
     private readonly IFileUploadPreparer _fileUploadPreparer;
     private readonly IFileUploadProcessor _fileUploadProcessor;
     private readonly SemaphoreSlim _semaphoreSlim;
@@ -43,11 +38,6 @@ public class FileUploader : IFileUploader
         LocalFileToUpload = localFileToUpload;
         MemoryStream = memoryStream;
         SharedFileDefinition = sharedFileDefinition ?? throw new NullReferenceException("SharedFileDefinition is null");
-
-        _fileUploadCoordinator = fileUploadCoordinator;
-        _fileSlicer = fileSlicer;
-        _fileUploadWorker = fileUploadWorker;
-        _filePartUploadAsserter = filePartUploadAsserter;
 
         // Create the separate components
         _fileUploadPreparer = new FileUploadPreparer();

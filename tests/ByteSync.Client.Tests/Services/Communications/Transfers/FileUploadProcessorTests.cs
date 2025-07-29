@@ -8,7 +8,6 @@ using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Services.Communications.Transfers;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using System.Threading;
 
 namespace ByteSync.Tests.Services.Communications.Transfers;
 
