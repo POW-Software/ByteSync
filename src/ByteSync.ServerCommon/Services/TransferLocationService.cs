@@ -175,6 +175,18 @@ public class TransferLocationService : ITransferLocationService
             }
         }
     }
+
+    public async Task<FileStorageLocation> GetDownloadFileStorageLocation(string sessionId, Client client,
+        TransferParameters transferParameters, StorageProvider storageProvider)
+    {
+        var url = await GetDownloadFileUrl(
+            sessionId,
+            client,
+            transferParameters.SharedFileDefinition,
+            transferParameters.PartNumber!.Value
+        );
+        return new FileStorageLocation(url, storageProvider);
+    }
     
     private bool IsSharedFileDefinitionAllowed(SessionMemberData? sessionMemberData, SharedFileDefinition? sharedFileDefinition)
     {
@@ -197,4 +209,5 @@ public class TransferLocationService : ITransferLocationService
         
         return otherSessionMembers;
     }
+    
 }
