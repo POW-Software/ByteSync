@@ -31,6 +31,23 @@ public class FileTransferApiClient : IFileTransferApiClient
         }
     }
     
+    public async Task<FileStorageLocation> GetUploadFileStorageLocation(TransferParameters transferParameters)
+    {
+        try
+        {
+            var result = await _apiInvoker.PostAsync<FileStorageLocation>($"session/{transferParameters.SessionId}/file/getUploadStorageLocation", 
+                transferParameters);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error while getting upload file storage location");
+            
+            throw;
+        }
+    }
+    
     public async Task<string> GetDownloadFileUrl(TransferParameters transferParameters)
     {
         try

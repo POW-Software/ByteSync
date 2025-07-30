@@ -60,7 +60,19 @@ public class TransferLocationService : ITransferLocationService
             return null;
         }
     }
-
+    
+    public async Task<FileStorageLocation> GetUploadFileStorageLocation(string sessionId, Client client,
+        TransferParameters transferParameters, StorageProvider storageProvider)
+    {
+        var url = await GetUploadFileUrl(
+            sessionId,
+            client,
+            transferParameters.SharedFileDefinition,
+            transferParameters.PartNumber!.Value
+        );
+        return new FileStorageLocation(url, storageProvider);
+    }
+    
     public async Task<string> GetDownloadFileUrl(string sessionId, Client client,
         SharedFileDefinition sharedFileDefinition, int partNumber)
     {
@@ -80,6 +92,18 @@ public class TransferLocationService : ITransferLocationService
         }
     }
 
+    public async Task<FileStorageLocation> GetDownloadFileStorageLocation(string sessionId, Client client,
+        TransferParameters transferParameters, StorageProvider storageProvider)
+    {
+        var url = await GetDownloadFileUrl(
+            sessionId,
+            client,
+            transferParameters.SharedFileDefinition,
+            transferParameters.PartNumber!.Value
+        );
+        return new FileStorageLocation(url, storageProvider);
+    }
+    
     public async Task AssertUploadIsFinished(string sessionId, Client client, TransferParameters transferParameters)
     {
         var session = await _cloudSessionsRepository.Get(sessionId);
@@ -174,18 +198,6 @@ public class TransferLocationService : ITransferLocationService
                 await _synchronizationService.OnDownloadIsFinishedAsync(sharedFileDefinition, client);
             }
         }
-    }
-
-    public async Task<FileStorageLocation> GetDownloadFileStorageLocation(string sessionId, Client client,
-        TransferParameters transferParameters, StorageProvider storageProvider)
-    {
-        var url = await GetDownloadFileUrl(
-            sessionId,
-            client,
-            transferParameters.SharedFileDefinition,
-            transferParameters.PartNumber!.Value
-        );
-        return new FileStorageLocation(url, storageProvider);
     }
     
     private bool IsSharedFileDefinitionAllowed(SessionMemberData? sessionMemberData, SharedFileDefinition? sharedFileDefinition)
