@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Threading;
 using Autofac;
 using ByteSync.Common.Business.SharedFiles;
@@ -12,26 +12,19 @@ using ByteSync.Services.Communications.Transfers;
 
 namespace ByteSync.Factories;
 
-public class FileUploaderFactory : IFileUploaderFactory
+public class FileUploadProcessorFactory : IFileUploadProcessorFactory
 {
     private readonly IComponentContext _context;
 
-    public FileUploaderFactory(IComponentContext context)
+    public FileUploadProcessorFactory(IComponentContext context)
     {
         _context = context;
     }
 
-    public IFileUploader Build(string fullName, SharedFileDefinition sharedFileDefinition)
-    {
-        return DoBuild(fullName, null, sharedFileDefinition);
-    }
-
-    public IFileUploader Build(MemoryStream memoryStream, SharedFileDefinition sharedFileDefinition)
-    {
-        return DoBuild(null, memoryStream, sharedFileDefinition);
-    }
-    
-    private IFileUploader DoBuild(string? fullName, MemoryStream? memoryStream, SharedFileDefinition sharedFileDefinition)
+    public IFileUploadProcessor Create(
+        string? localFileToUpload,
+        MemoryStream? memoryStream,
+        SharedFileDefinition sharedFileDefinition)
     {
         // Create the slicer encrypter
         var slicerEncrypter = _context.Resolve<ISlicerEncrypter>();
@@ -55,18 +48,16 @@ public class FileUploaderFactory : IFileUploaderFactory
         var sessionService = _context.Resolve<ISessionService>();
         var filePartUploadAsserter = new FilePartUploadAsserter(fileTransferApiClient, sessionService);
         
-        var fileUploader = _context.Resolve<IFileUploader>(
-            new TypedParameter(typeof(string), fullName),
-            new TypedParameter(typeof(MemoryStream), memoryStream),
-            new TypedParameter(typeof(SharedFileDefinition), sharedFileDefinition),
+        var fileUploadProcessor = _context.Resolve<IFileUploadProcessor>(
+            new TypedParameter(typeof(ISlicerEncrypter), slicerEncrypter),
             new TypedParameter(typeof(IFileUploadCoordinator), fileUploadCoordinator),
             new TypedParameter(typeof(IFileSlicer), fileSlicer),
             new TypedParameter(typeof(IFileUploadWorker), fileUploadWorker),
             new TypedParameter(typeof(IFilePartUploadAsserter), filePartUploadAsserter),
-            new TypedParameter(typeof(ISlicerEncrypter), slicerEncrypter),
+            new TypedParameter(typeof(string), localFileToUpload),
             new TypedParameter(typeof(SemaphoreSlim), semaphoreSlim)
         );
         
-        return fileUploader;
+        return fileUploadProcessor;
     }
-}
+} 
