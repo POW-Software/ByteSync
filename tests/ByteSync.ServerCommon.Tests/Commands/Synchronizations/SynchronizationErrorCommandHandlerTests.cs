@@ -17,6 +17,7 @@ public class SynchronizationErrorCommandHandlerTests
     private ITrackingActionRepository _mockTrackingActionRepository;
     private ISynchronizationStatusCheckerService _mockSynchronizationStatusCheckerService;
     private ISynchronizationProgressService _mockSynchronizationProgressService;
+    private ISynchronizationService _mockSynchronizationService;
     private ILogger<SynchronizationErrorCommandHandler> _mockLogger;
     private SynchronizationErrorCommandHandler _synchronizationErrorCommandHandler;
 
@@ -26,12 +27,14 @@ public class SynchronizationErrorCommandHandlerTests
         _mockTrackingActionRepository = A.Fake<ITrackingActionRepository>();
         _mockSynchronizationStatusCheckerService = A.Fake<ISynchronizationStatusCheckerService>();
         _mockSynchronizationProgressService = A.Fake<ISynchronizationProgressService>();
+        _mockSynchronizationService = A.Fake<ISynchronizationService>();
         _mockLogger = A.Fake<ILogger<SynchronizationErrorCommandHandler>>();
 
         _synchronizationErrorCommandHandler = new SynchronizationErrorCommandHandler(
             _mockTrackingActionRepository,
             _mockSynchronizationStatusCheckerService,
             _mockSynchronizationProgressService,
+            _mockSynchronizationService,
             _mockLogger);
     }
 

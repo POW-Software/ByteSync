@@ -1,5 +1,3 @@
-using ByteSync.Common.Business.Synchronizations;
-using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using MediatR;
@@ -12,17 +10,20 @@ public class DirectoryIsCreatedCommandHandler : IRequestHandler<DirectoryIsCreat
     private readonly ITrackingActionRepository _trackingActionRepository;
     private readonly ISynchronizationStatusCheckerService _synchronizationStatusCheckerService;
     private readonly ISynchronizationProgressService _synchronizationProgressService;
+    private readonly ISynchronizationService _synchronizationService;
     private readonly ILogger<DirectoryIsCreatedCommandHandler> _logger;
 
     public DirectoryIsCreatedCommandHandler(
         ITrackingActionRepository trackingActionRepository,
         ISynchronizationStatusCheckerService synchronizationStatusCheckerService,
         ISynchronizationProgressService synchronizationProgressService,
+        ISynchronizationService synchronizationService,
         ILogger<DirectoryIsCreatedCommandHandler> logger)
     {
         _trackingActionRepository = trackingActionRepository;
         _synchronizationStatusCheckerService = synchronizationStatusCheckerService;
         _synchronizationProgressService = synchronizationProgressService;
+        _synchronizationService = synchronizationService;
         _logger = logger;
     }
     
@@ -30,7 +31,7 @@ public class DirectoryIsCreatedCommandHandler : IRequestHandler<DirectoryIsCreat
     {
         if (request.ActionsGroupIds.Count == 0)
         {
-            _logger.LogInformation("OnSuccessOnTarget: no action group id provided");
+            _logger.LogInformation("Directory creation failed: no action group IDs provided");
             return;
         }
         
@@ -52,7 +53,7 @@ public class DirectoryIsCreatedCommandHandler : IRequestHandler<DirectoryIsCreat
                 synchronization.Progress.FinishedActionsCount += 1;
             }
             
-            needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
+            needSendSynchronizationUpdated = _synchronizationService.CheckSynchronizationIsFinished(synchronization);
 
             return true;
         });
@@ -64,30 +65,5 @@ public class DirectoryIsCreatedCommandHandler : IRequestHandler<DirectoryIsCreat
         
         _logger.LogInformation("Directory is created for session {SessionId} with {ActionCount} actions", 
             request.SessionId, request.ActionsGroupIds.Count);
-    }
-    
-    private bool CheckSynchronizationIsFinished(SynchronizationEntity synchronizationEntity)
-    {
-        bool isUpdated = false;
-        
-        if (!synchronizationEntity.IsEnded && 
-            (synchronizationEntity.Progress.AllMembersCompleted && 
-                (synchronizationEntity.Progress.AllActionsDone || synchronizationEntity.IsAbortRequested)))
-        {
-            synchronizationEntity.EndedOn = DateTimeOffset.Now;
-            
-            if (synchronizationEntity.IsAbortRequested)
-            {
-                synchronizationEntity.EndStatus = SynchronizationEndStatuses.Abortion;
-            }
-            else
-            {
-                synchronizationEntity.EndStatus = SynchronizationEndStatuses.Regular;
-            }
-            
-            isUpdated = true;
-        }
-
-        return isUpdated;
     }
 }

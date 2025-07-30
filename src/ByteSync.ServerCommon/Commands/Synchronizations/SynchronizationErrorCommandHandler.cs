@@ -1,5 +1,3 @@
-using ByteSync.Common.Business.Synchronizations;
-using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using MediatR;
@@ -12,17 +10,20 @@ public class SynchronizationErrorCommandHandler : IRequestHandler<Synchronizatio
     private readonly ITrackingActionRepository _trackingActionRepository;
     private readonly ISynchronizationStatusCheckerService _synchronizationStatusCheckerService;
     private readonly ISynchronizationProgressService _synchronizationProgressService;
+    private readonly ISynchronizationService _synchronizationService;
     private readonly ILogger<SynchronizationErrorCommandHandler> _logger;
 
     public SynchronizationErrorCommandHandler(
         ITrackingActionRepository trackingActionRepository,
         ISynchronizationStatusCheckerService synchronizationStatusCheckerService,
         ISynchronizationProgressService synchronizationProgressService,
+        ISynchronizationService synchronizationService,
         ILogger<SynchronizationErrorCommandHandler> logger)
     {
         _trackingActionRepository = trackingActionRepository;
         _synchronizationStatusCheckerService = synchronizationStatusCheckerService;
         _synchronizationProgressService = synchronizationProgressService;
+        _synchronizationService = synchronizationService;
         _logger = logger;
     }
     
@@ -30,7 +31,7 @@ public class SynchronizationErrorCommandHandler : IRequestHandler<Synchronizatio
     {
         if (request.SharedFileDefinition.ActionsGroupIds?.Count == 0)
         {
-            _logger.LogInformation("OnSuccessOnTarget: no action group id provided");
+            _logger.LogInformation("SynchronizationError: no action group IDs were provided");
             return;
         }
         
@@ -71,7 +72,7 @@ public class SynchronizationErrorCommandHandler : IRequestHandler<Synchronizatio
                 synchronization.Progress.FinishedActionsCount += 1;
             }
             
-            needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
+            needSendSynchronizationUpdated = _synchronizationService.CheckSynchronizationIsFinished(synchronization);
 
             return true;
         });
@@ -83,30 +84,5 @@ public class SynchronizationErrorCommandHandler : IRequestHandler<Synchronizatio
         
         _logger.LogInformation("Synchronization error reported for session {SessionId} with {ActionCount} actions", 
             request.SessionId, request.SharedFileDefinition.ActionsGroupIds?.Count ?? 0);
-    }
-    
-    private bool CheckSynchronizationIsFinished(SynchronizationEntity synchronizationEntity)
-    {
-        bool isUpdated = false;
-        
-        if (!synchronizationEntity.IsEnded && 
-            (synchronizationEntity.Progress.AllMembersCompleted && 
-                (synchronizationEntity.Progress.AllActionsDone || synchronizationEntity.IsAbortRequested)))
-        {
-            synchronizationEntity.EndedOn = DateTimeOffset.Now;
-            
-            if (synchronizationEntity.IsAbortRequested)
-            {
-                synchronizationEntity.EndStatus = SynchronizationEndStatuses.Abortion;
-            }
-            else
-            {
-                synchronizationEntity.EndStatus = SynchronizationEndStatuses.Regular;
-            }
-            
-            isUpdated = true;
-        }
-
-        return isUpdated;
     }
 }

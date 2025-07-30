@@ -1,5 +1,3 @@
-using ByteSync.Common.Business.Synchronizations;
-using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using MediatR;
@@ -11,16 +9,18 @@ public class MemberHasFinishedCommandHandler : IRequestHandler<MemberHasFinished
 {
     private readonly ISynchronizationRepository _synchronizationRepository;
     private readonly ISynchronizationProgressService _synchronizationProgressService;
+    private readonly ISynchronizationService _synchronizationService;
     private readonly ILogger<MemberHasFinishedCommandHandler> _logger;
 
     public MemberHasFinishedCommandHandler(
         ISynchronizationRepository synchronizationRepository,
-        ISynchronizationStatusCheckerService synchronizationStatusCheckerService,
         ISynchronizationProgressService synchronizationProgressService,
+        ISynchronizationService synchronizationService,
         ILogger<MemberHasFinishedCommandHandler> logger)
     {
         _synchronizationRepository = synchronizationRepository;
         _synchronizationProgressService = synchronizationProgressService;
+        _synchronizationService = synchronizationService;
         _logger = logger;
     }
     
@@ -34,7 +34,7 @@ public class MemberHasFinishedCommandHandler : IRequestHandler<MemberHasFinished
             {
                 synchronizationEntity.Progress.CompletedMembers.Add(request.Client.ClientInstanceId);
 
-                needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronizationEntity);
+                needSendSynchronizationUpdated = _synchronizationService.CheckSynchronizationIsFinished(synchronizationEntity);
                 
                 _logger.LogInformation("Member {ClientInstanceId} has finished synchronization", request.Client.ClientInstanceId);
                 
@@ -50,30 +50,5 @@ public class MemberHasFinishedCommandHandler : IRequestHandler<MemberHasFinished
         }
         
         _logger.LogInformation("Member has finished for session {SessionId}", request.SessionId);
-    }
-    
-    private bool CheckSynchronizationIsFinished(SynchronizationEntity synchronizationEntity)
-    {
-        bool isUpdated = false;
-        
-        if (!synchronizationEntity.IsEnded && 
-            (synchronizationEntity.Progress.AllMembersCompleted && 
-                (synchronizationEntity.Progress.AllActionsDone || synchronizationEntity.IsAbortRequested)))
-        {
-            synchronizationEntity.EndedOn = DateTimeOffset.Now;
-            
-            if (synchronizationEntity.IsAbortRequested)
-            {
-                synchronizationEntity.EndStatus = SynchronizationEndStatuses.Abortion;
-            }
-            else
-            {
-                synchronizationEntity.EndStatus = SynchronizationEndStatuses.Regular;
-            }
-            
-            isUpdated = true;
-        }
-
-        return isUpdated;
     }
 }

@@ -1,5 +1,3 @@
-using ByteSync.Common.Business.Synchronizations;
-using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using MediatR;
@@ -12,17 +10,20 @@ public class FileOrDirectoryIsDeletedCommandHandler : IRequestHandler<FileOrDire
     private readonly ITrackingActionRepository _trackingActionRepository;
     private readonly ISynchronizationStatusCheckerService _synchronizationStatusCheckerService;
     private readonly ISynchronizationProgressService _synchronizationProgressService;
+    private readonly ISynchronizationService _synchronizationService;
     private readonly ILogger<FileOrDirectoryIsDeletedCommandHandler> _logger;
 
     public FileOrDirectoryIsDeletedCommandHandler(
         ITrackingActionRepository trackingActionRepository,
         ISynchronizationStatusCheckerService synchronizationStatusCheckerService,
         ISynchronizationProgressService synchronizationProgressService,
+        ISynchronizationService synchronizationService,
         ILogger<FileOrDirectoryIsDeletedCommandHandler> logger)
     {
         _trackingActionRepository = trackingActionRepository;
         _synchronizationStatusCheckerService = synchronizationStatusCheckerService;
         _synchronizationProgressService = synchronizationProgressService;
+        _synchronizationService = synchronizationService;
         _logger = logger;
     }
     
@@ -30,7 +31,7 @@ public class FileOrDirectoryIsDeletedCommandHandler : IRequestHandler<FileOrDire
     {
         if (request.ActionsGroupIds.Count == 0)
         {
-            _logger.LogInformation("OnSuccessOnTarget: no action group id provided");
+            _logger.LogInformation("FileOrDirectoryIsDeleted: no action group IDs were provided for deletion operation");
             return;
         }
         
@@ -52,7 +53,7 @@ public class FileOrDirectoryIsDeletedCommandHandler : IRequestHandler<FileOrDire
                 synchronization.Progress.FinishedActionsCount += 1;
             }
             
-            needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
+            needSendSynchronizationUpdated = _synchronizationService.CheckSynchronizationIsFinished(synchronization);
 
             return true;
         });
@@ -64,30 +65,5 @@ public class FileOrDirectoryIsDeletedCommandHandler : IRequestHandler<FileOrDire
         
         _logger.LogInformation("File or directory is deleted for session {SessionId} with {ActionCount} actions", 
             request.SessionId, request.ActionsGroupIds.Count);
-    }
-    
-    private bool CheckSynchronizationIsFinished(SynchronizationEntity synchronizationEntity)
-    {
-        bool isUpdated = false;
-        
-        if (!synchronizationEntity.IsEnded && 
-            (synchronizationEntity.Progress.AllMembersCompleted && 
-                (synchronizationEntity.Progress.AllActionsDone || synchronizationEntity.IsAbortRequested)))
-        {
-            synchronizationEntity.EndedOn = DateTimeOffset.Now;
-            
-            if (synchronizationEntity.IsAbortRequested)
-            {
-                synchronizationEntity.EndStatus = SynchronizationEndStatuses.Abortion;
-            }
-            else
-            {
-                synchronizationEntity.EndStatus = SynchronizationEndStatuses.Regular;
-            }
-            
-            isUpdated = true;
-        }
-
-        return isUpdated;
     }
 }

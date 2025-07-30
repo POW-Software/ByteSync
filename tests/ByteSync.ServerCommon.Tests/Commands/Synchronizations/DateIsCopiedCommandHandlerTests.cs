@@ -16,6 +16,7 @@ public class DateIsCopiedCommandHandlerTests
     private ITrackingActionRepository _mockTrackingActionRepository;
     private ISynchronizationStatusCheckerService _mockSynchronizationStatusCheckerService;
     private ISynchronizationProgressService _mockSynchronizationProgressService;
+    private ISynchronizationService _mockSynchronizationService;
     private ILogger<DateIsCopiedCommandHandler> _mockLogger;
     private DateIsCopiedCommandHandler _dateIsCopiedCommandHandler;
 
@@ -25,12 +26,14 @@ public class DateIsCopiedCommandHandlerTests
         _mockTrackingActionRepository = A.Fake<ITrackingActionRepository>();
         _mockSynchronizationStatusCheckerService = A.Fake<ISynchronizationStatusCheckerService>();
         _mockSynchronizationProgressService = A.Fake<ISynchronizationProgressService>();
+        _mockSynchronizationService = A.Fake<ISynchronizationService>();
         _mockLogger = A.Fake<ILogger<DateIsCopiedCommandHandler>>();
 
         _dateIsCopiedCommandHandler = new DateIsCopiedCommandHandler(
             _mockTrackingActionRepository,
             _mockSynchronizationStatusCheckerService,
             _mockSynchronizationProgressService,
+            _mockSynchronizationService,
             _mockLogger);
     }
 

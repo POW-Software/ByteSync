@@ -1,5 +1,3 @@
-using ByteSync.Common.Business.Synchronizations;
-using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using MediatR;
@@ -12,17 +10,20 @@ public class LocalCopyIsDoneCommandHandler : IRequestHandler<LocalCopyIsDoneRequ
     private readonly ITrackingActionRepository _trackingActionRepository;
     private readonly ISynchronizationStatusCheckerService _synchronizationStatusCheckerService;
     private readonly ISynchronizationProgressService _synchronizationProgressService;
+    private readonly ISynchronizationService _synchronizationService;
     private readonly ILogger<LocalCopyIsDoneCommandHandler> _logger;
 
     public LocalCopyIsDoneCommandHandler(
         ITrackingActionRepository trackingActionRepository,
         ISynchronizationStatusCheckerService synchronizationStatusCheckerService,
         ISynchronizationProgressService synchronizationProgressService,
+        ISynchronizationService synchronizationService,
         ILogger<LocalCopyIsDoneCommandHandler> logger)
     {
         _trackingActionRepository = trackingActionRepository;
         _synchronizationStatusCheckerService = synchronizationStatusCheckerService;
         _synchronizationProgressService = synchronizationProgressService;
+        _synchronizationService = synchronizationService;
         _logger = logger;
     }
     
@@ -30,7 +31,7 @@ public class LocalCopyIsDoneCommandHandler : IRequestHandler<LocalCopyIsDoneRequ
     {
         if (request.ActionsGroupIds.Count == 0)
         {
-            _logger.LogInformation("OnSuccessOnTarget: no action group id provided");
+            _logger.LogInformation("LocalCopyIsDone: no action group IDs were provided");
             return;
         }
         
@@ -55,7 +56,7 @@ public class LocalCopyIsDoneCommandHandler : IRequestHandler<LocalCopyIsDoneRequ
             
             synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
             
-            needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
+            needSendSynchronizationUpdated = _synchronizationService.CheckSynchronizationIsFinished(synchronization);
 
             return true;
         });
@@ -67,30 +68,5 @@ public class LocalCopyIsDoneCommandHandler : IRequestHandler<LocalCopyIsDoneRequ
         
         _logger.LogInformation("Local copy is done for session {SessionId} with {ActionCount} actions", 
             request.SessionId, request.ActionsGroupIds.Count);
-    }
-    
-    private bool CheckSynchronizationIsFinished(SynchronizationEntity synchronizationEntity)
-    {
-        bool isUpdated = false;
-        
-        if (!synchronizationEntity.IsEnded && 
-            (synchronizationEntity.Progress.AllMembersCompleted && 
-                (synchronizationEntity.Progress.AllActionsDone || synchronizationEntity.IsAbortRequested)))
-        {
-            synchronizationEntity.EndedOn = DateTimeOffset.Now;
-            
-            if (synchronizationEntity.IsAbortRequested)
-            {
-                synchronizationEntity.EndStatus = SynchronizationEndStatuses.Abortion;
-            }
-            else
-            {
-                synchronizationEntity.EndStatus = SynchronizationEndStatuses.Regular;
-            }
-            
-            isUpdated = true;
-        }
-
-        return isUpdated;
     }
 }

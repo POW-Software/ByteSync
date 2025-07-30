@@ -16,6 +16,7 @@ public class FileOrDirectoryIsDeletedCommandHandlerTests
     private ITrackingActionRepository _mockTrackingActionRepository;
     private ISynchronizationStatusCheckerService _mockSynchronizationStatusCheckerService;
     private ISynchronizationProgressService _mockSynchronizationProgressService;
+    private ISynchronizationService _mockSynchronizationService;
     private ILogger<FileOrDirectoryIsDeletedCommandHandler> _mockLogger;
     private FileOrDirectoryIsDeletedCommandHandler _fileOrDirectoryIsDeletedCommandHandler;
 
@@ -25,12 +26,14 @@ public class FileOrDirectoryIsDeletedCommandHandlerTests
         _mockTrackingActionRepository = A.Fake<ITrackingActionRepository>();
         _mockSynchronizationStatusCheckerService = A.Fake<ISynchronizationStatusCheckerService>();
         _mockSynchronizationProgressService = A.Fake<ISynchronizationProgressService>();
+        _mockSynchronizationService = A.Fake<ISynchronizationService>();
         _mockLogger = A.Fake<ILogger<FileOrDirectoryIsDeletedCommandHandler>>();
 
         _fileOrDirectoryIsDeletedCommandHandler = new FileOrDirectoryIsDeletedCommandHandler(
             _mockTrackingActionRepository,
             _mockSynchronizationStatusCheckerService,
             _mockSynchronizationProgressService,
+            _mockSynchronizationService,
             _mockLogger);
     }
 

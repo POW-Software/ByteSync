@@ -16,6 +16,7 @@ public class DirectoryIsCreatedCommandHandlerTests
     private ITrackingActionRepository _mockTrackingActionRepository;
     private ISynchronizationStatusCheckerService _mockSynchronizationStatusCheckerService;
     private ISynchronizationProgressService _mockSynchronizationProgressService;
+    private ISynchronizationService _mockSynchronizationService;
     private ILogger<DirectoryIsCreatedCommandHandler> _mockLogger;
     private DirectoryIsCreatedCommandHandler _directoryIsCreatedCommandHandler;
 
@@ -25,12 +26,14 @@ public class DirectoryIsCreatedCommandHandlerTests
         _mockTrackingActionRepository = A.Fake<ITrackingActionRepository>();
         _mockSynchronizationStatusCheckerService = A.Fake<ISynchronizationStatusCheckerService>();
         _mockSynchronizationProgressService = A.Fake<ISynchronizationProgressService>();
+        _mockSynchronizationService = A.Fake<ISynchronizationService>();
         _mockLogger = A.Fake<ILogger<DirectoryIsCreatedCommandHandler>>();
 
         _directoryIsCreatedCommandHandler = new DirectoryIsCreatedCommandHandler(
             _mockTrackingActionRepository,
             _mockSynchronizationStatusCheckerService,
             _mockSynchronizationProgressService,
+            _mockSynchronizationService,
             _mockLogger);
     }
 

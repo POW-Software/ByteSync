@@ -16,6 +16,7 @@ public class LocalCopyIsDoneCommandHandlerTests
     private ITrackingActionRepository _mockTrackingActionRepository;
     private ISynchronizationStatusCheckerService _mockSynchronizationStatusCheckerService;
     private ISynchronizationProgressService _mockSynchronizationProgressService;
+    private ISynchronizationService _mockSynchronizationService;
     private ILogger<LocalCopyIsDoneCommandHandler> _mockLogger;
     private LocalCopyIsDoneCommandHandler _localCopyIsDoneCommandHandler;
 
@@ -25,12 +26,14 @@ public class LocalCopyIsDoneCommandHandlerTests
         _mockTrackingActionRepository = A.Fake<ITrackingActionRepository>();
         _mockSynchronizationStatusCheckerService = A.Fake<ISynchronizationStatusCheckerService>();
         _mockSynchronizationProgressService = A.Fake<ISynchronizationProgressService>();
+        _mockSynchronizationService = A.Fake<ISynchronizationService>();
         _mockLogger = A.Fake<ILogger<LocalCopyIsDoneCommandHandler>>();
 
         _localCopyIsDoneCommandHandler = new LocalCopyIsDoneCommandHandler(
             _mockTrackingActionRepository,
             _mockSynchronizationStatusCheckerService,
             _mockSynchronizationProgressService,
+            _mockSynchronizationService,
             _mockLogger);
     }
 

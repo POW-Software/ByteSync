@@ -16,8 +16,8 @@ namespace ByteSync.ServerCommon.Tests.Commands.Synchronizations;
 public class MemberHasFinishedCommandHandlerTests
 {
     private ISynchronizationRepository _mockSynchronizationRepository;
-    private ISynchronizationStatusCheckerService _mockSynchronizationStatusCheckerService;
     private ISynchronizationProgressService _mockSynchronizationProgressService;
+    private ISynchronizationService _mockSynchronizationService;
     private ILogger<MemberHasFinishedCommandHandler> _mockLogger;
     private MemberHasFinishedCommandHandler _memberHasFinishedCommandHandler;
 
@@ -25,14 +25,14 @@ public class MemberHasFinishedCommandHandlerTests
     public void Setup()
     {
         _mockSynchronizationRepository = A.Fake<ISynchronizationRepository>();
-        _mockSynchronizationStatusCheckerService = A.Fake<ISynchronizationStatusCheckerService>();
         _mockSynchronizationProgressService = A.Fake<ISynchronizationProgressService>();
+        _mockSynchronizationService = A.Fake<ISynchronizationService>();
         _mockLogger = A.Fake<ILogger<MemberHasFinishedCommandHandler>>();
 
         _memberHasFinishedCommandHandler = new MemberHasFinishedCommandHandler(
             _mockSynchronizationRepository,
-            _mockSynchronizationStatusCheckerService,
             _mockSynchronizationProgressService,
+            _mockSynchronizationService,
             _mockLogger);
     }
 
@@ -46,7 +46,7 @@ public class MemberHasFinishedCommandHandlerTests
         var request = new MemberHasFinishedRequest(sessionId, client);
 
         A.CallTo(() => _mockSynchronizationRepository.UpdateIfExists(sessionId, A<Func<SynchronizationEntity, bool>>._, A<ITransaction?>._, A<IRedLock?>._))
-            .Invokes((string _, Func<SynchronizationEntity, bool> func, ITransaction? transaction, IRedLock? redisLock) => 
+            .Invokes((string _, Func<SynchronizationEntity, bool> func) => 
             {
                 var synchronization = new SynchronizationEntity
                 {

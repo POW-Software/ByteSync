@@ -337,7 +337,7 @@ public class SynchronizationService : ISynchronizationService
         }
     }
 
-    private bool CheckSynchronizationIsFinished(SynchronizationEntity synchronizationEntity)
+    public bool CheckSynchronizationIsFinished(SynchronizationEntity synchronizationEntity)
     {
         bool isUpdated = false;
         
