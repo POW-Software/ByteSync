@@ -41,7 +41,6 @@ public class RemoveDataNodeCommandHandler : IRequestHandler<RemoveDataNodeReques
             return false;
         }
 
-        EncryptedDataNode? removedDataNode = null;
         var updateEntityResult = await _inventoryRepository.AddOrUpdate(sessionId, inventoryData =>
         {
             inventoryData ??= new InventoryEntity(sessionId);
@@ -61,9 +60,9 @@ public class RemoveDataNodeCommandHandler : IRequestHandler<RemoveDataNodeReques
             }
         });
 
-        if (updateEntityResult.IsSaved && removedDataNode != null)
+        if (updateEntityResult.IsSaved)
         {
-            var dto = new DataNodeDTO(sessionId, client.ClientInstanceId, removedDataNode);
+            var dto = new DataNodeDTO(sessionId, client.ClientInstanceId, request.EncryptedDataNode);
             await _invokeClientsService.SessionGroupExcept(sessionId, client).DataNodeRemoved(dto);
         }
 
