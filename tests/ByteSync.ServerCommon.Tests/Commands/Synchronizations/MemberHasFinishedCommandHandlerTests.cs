@@ -46,7 +46,7 @@ public class MemberHasFinishedCommandHandlerTests
         var request = new MemberHasFinishedRequest(sessionId, client);
 
         A.CallTo(() => _mockSynchronizationRepository.UpdateIfExists(sessionId, A<Func<SynchronizationEntity, bool>>._, A<ITransaction?>._, A<IRedLock?>._))
-            .Invokes((string _, Func<SynchronizationEntity, bool> func) => 
+            .Invokes((string _, Func<SynchronizationEntity, bool> func, ITransaction? transaction, IRedLock? redisLock) => 
             {
                 var synchronization = new SynchronizationEntity
                 {
