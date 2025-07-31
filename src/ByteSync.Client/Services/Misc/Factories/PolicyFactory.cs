@@ -1,6 +1,5 @@
-﻿using System.Threading.Tasks;
-using Azure;
-using Azure.Storage.Blobs.Models;
+﻿using Azure;
+using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Interfaces;
 using Polly;
 using Polly.Retry;
@@ -48,17 +47,17 @@ public class PolicyFactory : IPolicyFactory
         return policy;
     }
 
-    public AsyncRetryPolicy<Response<BlobContentInfo>> BuildFileUploadPolicy()
+    public AsyncRetryPolicy<UploadFileResponse> BuildFileUploadPolicy()
     {
         var policy = Policy
-            .HandleResult<Response<BlobContentInfo>>(x => x.GetRawResponse().IsError)
+            .HandleResult<UploadFileResponse>(x => !x.IsSuccess)
             .Or<RequestFailedException>(e => e.Status == 403)
             .WaitAndRetryAsync(MAX_RETRIES, SleepDurationProvider, onRetryAsync: async (response, timeSpan, retryCount, _) =>
             {
                 _logger.LogError("FileTransferOperation failed (Attempt number {AttemptNumber}). ResponseCode:{ResponseCode}" +
                                  "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
                                  "Waiting {WaitingTime} seconds before retry", 
-                    retryCount, response.Result?.GetRawResponse().Status!, response.Exception?.GetType().Name!, response.Exception?.Message!, timeSpan);
+                    retryCount, response.Result?.StatusCode!, response.Exception?.GetType().Name!, response.Exception?.Message!, timeSpan);
                 await Task.CompletedTask;
             });
         

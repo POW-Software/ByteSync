@@ -1,9 +1,8 @@
 using System.Threading;
 using System.Threading.Channels;
 using Autofac.Features.Indexed;
-using Azure;
-using Azure.Storage.Blobs.Models;
 using ByteSync.Business.Communications.Transfers;
+using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
@@ -59,7 +58,7 @@ public class FileUploadWorker : IFileUploadWorker
                     var policy = _policyFactory.BuildFileUploadPolicy();
                     var response = await policy.ExecuteAsync(() => DoUpload(slice));
 
-                    if (response != null && !response.GetRawResponse().IsError)
+                    if (response != null && response.IsSuccess)
                     {
                         var transferParameters = new TransferParameters
                         {
@@ -81,7 +80,7 @@ public class FileUploadWorker : IFileUploadWorker
                     }
                     else
                     {
-                        throw new Exception("UploadAvailableSlice: unable to get upload url");
+                        throw new Exception($"UploadAvailableSlice: unable to get upload url. Status: {response?.StatusCode}, Error: {response?.ErrorMessage}");
                     }
                 }
                 catch (Exception ex)
@@ -118,8 +117,8 @@ public class FileUploadWorker : IFileUploadWorker
             _semaphoreSlim.Release();
         }
     }
-    
-    private async Task<Response<BlobContentInfo>> DoUpload(FileUploaderSlice slice)
+
+    private async Task<UploadFileResponse> DoUpload(FileUploaderSlice slice)
     {
         try
         {
@@ -137,14 +136,8 @@ public class FileUploadWorker : IFileUploadWorker
             
             var uploadStrategy = _strategies[uploadLocation.StorageProvider];
             var response = await uploadStrategy.UploadAsync(_logger, slice, uploadLocation, CancellationTokenSource.Token);
-
-            var rawResponse = response.GetRawResponse<Response<BlobContentInfo>>();
-            if (rawResponse == null)
-            {
-                throw new InvalidOperationException("Upload strategy did not return a valid Azure response");
-            }
-
-            return rawResponse;
+            
+            return response;
         }
         catch (Exception)
         {

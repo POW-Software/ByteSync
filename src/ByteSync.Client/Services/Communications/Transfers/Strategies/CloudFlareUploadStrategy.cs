@@ -8,7 +8,7 @@ namespace ByteSync.Services.Communications.Transfers.Strategies;
 
 public class CloudFlareUploadStrategy : IUploadStrategy
 {
-    public async Task<UploadLocationResponse> UploadAsync(ILogger<FileUploadWorker> logger, FileUploaderSlice slice, FileStorageLocation storageLocation, CancellationToken cancellationToken)
+    public async Task<UploadFileResponse> UploadAsync(ILogger<FileUploadWorker> logger, FileUploaderSlice slice, FileStorageLocation storageLocation, CancellationToken cancellationToken)
     {
         try
         {
@@ -24,21 +24,21 @@ public class CloudFlareUploadStrategy : IUploadStrategy
             
             logger.LogDebug("UploadAvailableSlice: slice {number} is uploaded", slice.PartNumber);
             
-            return UploadLocationResponse.Success(
+            return UploadFileResponse.Success(
                 statusCode: (int)httpResponse.StatusCode
             );
             */
             
             // For now, return a mock successful response
             logger.LogDebug("UploadAvailableSlice: slice {number} is uploaded (mock)", slice.PartNumber);
-            return UploadLocationResponse.Success(
+            return UploadFileResponse.Success(
                 statusCode: 200
             );
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to upload slice {number}", slice.PartNumber);
-            return UploadLocationResponse.Failure(500, ex.Message);
+            return UploadFileResponse.Failure(500, ex.Message);
         }
     }
 }

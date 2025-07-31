@@ -8,5 +8,5 @@ namespace ByteSync.Interfaces.Controls.Communications;
 
 public interface IUploadStrategy
 {
-    Task<UploadLocationResponse> UploadAsync(ILogger<FileUploadWorker> logger, FileUploaderSlice slice, FileStorageLocation storageLocation, CancellationToken cancellationToken);
+    Task<UploadFileResponse> UploadAsync(ILogger<FileUploadWorker> logger, FileUploaderSlice slice, FileStorageLocation storageLocation, CancellationToken cancellationToken);
 }

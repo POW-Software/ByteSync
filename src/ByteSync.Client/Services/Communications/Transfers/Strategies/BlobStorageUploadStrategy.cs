@@ -9,7 +9,7 @@ namespace ByteSync.Services.Communications.Transfers.Strategies;
 
 public class BlobStorageUploadStrategy : IUploadStrategy
 {
-    public async Task<UploadLocationResponse> UploadAsync(ILogger<FileUploadWorker> logger, FileUploaderSlice slice, FileStorageLocation storageLocation, CancellationToken cancellationToken)
+    public async Task<UploadFileResponse> UploadAsync(ILogger<FileUploadWorker> logger, FileUploaderSlice slice, FileStorageLocation storageLocation, CancellationToken cancellationToken)
     {
         try
         {
@@ -21,8 +21,8 @@ public class BlobStorageUploadStrategy : IUploadStrategy
             var response = await blob.UploadAsync(slice.MemoryStream, cancellationToken);
                 
             logger.LogDebug("UploadAvailableSlice: slice {number} is uploaded", slice.PartNumber);
-            
-            return UploadLocationResponse.Success(
+
+            return UploadFileResponse.Success(
                 statusCode: response.GetRawResponse().Status,
                 response
             );
@@ -30,7 +30,7 @@ public class BlobStorageUploadStrategy : IUploadStrategy
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to upload slice {number}", slice.PartNumber);
-            return UploadLocationResponse.Failure(500, ex.Message);
+            return UploadFileResponse.Failure(500, ex.Message);
         }
     }
 }
