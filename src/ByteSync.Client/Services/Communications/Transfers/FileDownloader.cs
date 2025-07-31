@@ -124,7 +124,7 @@ public class FileDownloader : IFileDownloader
                     DownloadTarget.AddOrReplaceMemoryStream(partNumber, memoryStream);
                     return response;
                 });
-                if (response is { IsError: false })
+                if (response.IsSuccess)
                 {
                     await AssertFilePartIsDownloaded(partNumber);
                     await _semaphoreSlim.WaitAsync();

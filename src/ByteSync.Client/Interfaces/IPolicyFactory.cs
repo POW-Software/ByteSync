@@ -1,12 +1,11 @@
-﻿using Azure;
-using ByteSync.Common.Business.Communications.Transfers;
+﻿using ByteSync.Common.Business.Communications.Transfers;
 using Polly.Retry;
 
 namespace ByteSync.Interfaces;
 
 public interface IPolicyFactory
 {
-    AsyncRetryPolicy<Response> BuildFileDownloadPolicy(); 
+    AsyncRetryPolicy<DownloadFileResponse> BuildFileDownloadPolicy(); 
     
     AsyncRetryPolicy<UploadFileResponse> BuildFileUploadPolicy();
 }

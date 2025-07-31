@@ -1,7 +1,6 @@
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
-using Azure;
+using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
 
@@ -9,7 +8,7 @@ namespace ByteSync.Services.Communications.Transfers.Strategies;
 
 public class CloudFlareDownloadStrategy : IDownloadStrategy
 {
-    public async Task<Response> DownloadAsync(Stream memoryStream, FileStorageLocation storageLocation, CancellationToken cancellationToken)
+    public async Task<DownloadFileResponse> DownloadAsync(Stream memoryStream, FileStorageLocation storageLocation, CancellationToken cancellationToken)
     {
         // TODO: Implement CloudFlare download strategy
         // This could use HttpClient to download from CloudFlare URLs
