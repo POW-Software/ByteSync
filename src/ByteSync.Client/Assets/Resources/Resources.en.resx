@@ -11,12 +11,6 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
-	<data name="LoginForm.Help" xml:space="preserve">
-		<value>Help</value>
-	</data>
-	<data name="LoginForm.PleaseLogin" xml:space="preserve">
-		  <value>Please Login</value>
-	</data>
 	<data name="InventoryProcess_MoreThan5DataNodes" xml:space="preserve">
 		<value>Unable to start the Data Inventory:
 You must select a maximum of 5 data nodes.</value>

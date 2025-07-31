@@ -10,10 +10,10 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Services.Inventories;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using System.Reactive.Subjects;
-using System.Reactive.Linq;
 using ByteSync.Business.DataSources;
 
 namespace ByteSync.Tests.Services.Inventories;
@@ -29,12 +29,13 @@ public class DataNodeServiceTests
     private Mock<IDataNodeCodeGenerator> _codeGeneratorMock = null!;
     private Mock<IDataSourceService> _dataSourceServiceMock = null!;
     private Mock<IDataSourceRepository> _dataSourceRepositoryMock = null!;
+    private Mock<ILogger<DataNodeService>> _loggerMock = null!;
     private DataNodeService _service = null!;
     private BehaviorSubject<AbstractSession?> _sessionSubject = null!;
     private BehaviorSubject<SessionStatus> _sessionStatusSubject = null!;
 
     [SetUp]
-    public void SetUp()
+    public void Setup()
     {
         _sessionServiceMock = new Mock<ISessionService>();
         _connectionServiceMock = new Mock<IConnectionService>();
@@ -44,6 +45,7 @@ public class DataNodeServiceTests
         _codeGeneratorMock = new Mock<IDataNodeCodeGenerator>();
         _dataSourceServiceMock = new Mock<IDataSourceService>();
         _dataSourceRepositoryMock = new Mock<IDataSourceRepository>();
+        _loggerMock = new Mock<ILogger<DataNodeService>>();
 
         // Setup observables
         _sessionSubject = new BehaviorSubject<AbstractSession?>(null);
@@ -59,7 +61,8 @@ public class DataNodeServiceTests
             _dataNodeRepositoryMock.Object,
             _codeGeneratorMock.Object,
             _dataSourceServiceMock.Object,
-            _dataSourceRepositoryMock.Object);
+            _dataSourceRepositoryMock.Object,
+            _loggerMock.Object);
     }
 
     [TearDown]

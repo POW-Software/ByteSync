@@ -1,7 +1,5 @@
 ﻿using System.Reactive;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using ByteSync.Common.Helpers;
 using ByteSync.Common.Interfaces;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
@@ -9,7 +7,6 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Services.Misc;
 using ByteSync.ViewModels.Misc;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Headers;
 

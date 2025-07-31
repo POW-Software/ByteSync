@@ -1,6 +1,5 @@
 ﻿using ByteSync.Assets.Resources;
 using ByteSync.Common.Business.Versions;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Services.Misc;
 
