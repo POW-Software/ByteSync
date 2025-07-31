@@ -206,7 +206,93 @@ public class StartInventoryCommandHandlerTests
     }
     
     [Test]
-    public async Task StartInventory_AtLeastOneMemberWithNoDataToSynchronize_ReturnsAtLeastOneMemberWithNoDataToSynchronizeResult()
+    public async Task StartInventory_OneMemberWithNoDataNodes_ReturnsUnknownError()
+    {
+        // Arrange
+        var sessionId = "testSession";
+        var inventoryData = new InventoryEntity(sessionId);
+        var cloudSessionData = new CloudSessionData(null, new EncryptedSessionSettings(),
+            new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" });
+        cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null, cloudSessionData));
+        cloudSessionData.SessionMembers.Add(new SessionMemberData("client2", "client2", new PublicKeyInfo(), null, cloudSessionData));
+        
+        // Member 1 has DataNodes, Member 2 has no DataNodes (empty)
+        inventoryData.InventoryMembers.Add(new InventoryMemberEntity { ClientInstanceId = "client1" });
+        var dataNode = new InventoryDataNodeEntity { Id = "dataNodeId" };
+        dataNode.DataSources.Add(new InventoryDataSourceEntity { Id = "dataSource1" });
+        inventoryData.InventoryMembers[0].DataNodes.Add(dataNode);
+        
+        inventoryData.InventoryMembers.Add(new InventoryMemberEntity { ClientInstanceId = "client2" });
+        // client2 has no DataNodes - this should trigger UnknownError
+
+        A.CallTo(() => _mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
+            .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.WaitingForTransaction));
+        
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryEntity, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<InventoryEntity, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
+            .Returns(new UpdateEntityResult<InventoryEntity>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
+        
+        A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).DoesNothing();
+
+        var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
+
+        var request = new StartInventoryRequest(sessionId, client);
+
+        // Act
+        var result = await _startInventoryCommandHandler.Handle(request, CancellationToken.None);
+
+        // Assert
+        result.Status.Should().Be(StartInventoryStatuses.UnknownError);
+        A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustHaveHappenedOnceExactly();
+    }
+    
+    [Test]
+    public async Task StartInventory_OneMemberWithDataNodeButNoDataSource_ReturnsAtLeastOneMemberWithNoDataToSynchronize()
+    {
+        // Arrange
+        var sessionId = "testSession";
+        var inventoryData = new InventoryEntity(sessionId);
+        var cloudSessionData = new CloudSessionData(null, new EncryptedSessionSettings(),
+            new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" });
+        cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null, cloudSessionData));
+        cloudSessionData.SessionMembers.Add(new SessionMemberData("client2", "client2", new PublicKeyInfo(), null, cloudSessionData));
+        
+        // Member 1 has DataNode with DataSource, Member 2 has DataNode but no DataSource
+        inventoryData.InventoryMembers.Add(new InventoryMemberEntity { ClientInstanceId = "client1" });
+        var dataNode1 = new InventoryDataNodeEntity { Id = "dataNodeId1" };
+        dataNode1.DataSources.Add(new InventoryDataSourceEntity { Id = "dataSource1" });
+        inventoryData.InventoryMembers[0].DataNodes.Add(dataNode1);
+        
+        inventoryData.InventoryMembers.Add(new InventoryMemberEntity { ClientInstanceId = "client2" });
+        var dataNode2 = new InventoryDataNodeEntity { Id = "dataNodeId2" };
+        // dataNode2 has no DataSources - this should trigger AtLeastOneMemberWithNoDataToSynchronize
+        inventoryData.InventoryMembers[1].DataNodes.Add(dataNode2);
+
+        A.CallTo(() => _mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
+            .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.WaitingForTransaction));
+        
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryEntity, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<InventoryEntity, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
+            .Returns(new UpdateEntityResult<InventoryEntity>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
+        
+        A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).DoesNothing();
+
+        var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
+
+        var request = new StartInventoryRequest(sessionId, client);
+
+        // Act
+        var result = await _startInventoryCommandHandler.Handle(request, CancellationToken.None);
+
+        // Assert
+        result.Status.Should().Be(StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
+        A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustHaveHappenedOnceExactly();
+    }
+    
+    [Test]
+    public async Task StartInventory_OneMemberWithoutDataNodes_ReturnsUnknownError()
     {
         // Arrange
         var sessionId = "testSession";
@@ -221,6 +307,7 @@ public class StartInventoryCommandHandlerTests
         dataNode.DataSources.Add(new InventoryDataSourceEntity(encryptedDataSource));
         inventoryData.InventoryMembers[0].DataNodes.Add(dataNode);
         inventoryData.InventoryMembers.Add(new InventoryMemberEntity { ClientInstanceId = "client2" });
+        // client2 has no DataNodes - this should trigger UnknownError
         
         A.CallTo(() => _mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
@@ -240,7 +327,7 @@ public class StartInventoryCommandHandlerTests
         var result = await _startInventoryCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        result.Status.Should().Be(StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
+        result.Status.Should().Be(StartInventoryStatuses.UnknownError);
         A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustNotHaveHappened();
     }
     

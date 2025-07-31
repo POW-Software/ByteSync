@@ -119,24 +119,28 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
             {
                 startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.UnknownError);
             }
+            else if (inventoryData.InventoryMembers.Count < cloudSessionData.SessionMembers.Count)
+            {
+                startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
+            }
+            else if (inventoryData.InventoryMembers.Any(imd => imd.DataNodes.Count == 0))
+            {
+                startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.UnknownError);
+            }
+            else if (inventoryData.InventoryMembers.Any(imd => imd.DataNodes.Any(dn => dn.DataSources.Count == 0)))
+            {
+                startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
+            }
             else
             {
-                if (inventoryData.InventoryMembers.Count < cloudSessionData.SessionMembers.Count
-                    || inventoryData.InventoryMembers.Any(imd => imd.DataNodes.Count == 0 || imd.DataNodes.Any(dn => dn.DataSources.Count == 0)))
+                var totalDataNodes = inventoryData.InventoryMembers.Sum(imd => imd.DataNodes.Count);
+                if (totalDataNodes < 2)
                 {
-                    startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
+                    startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.LessThan2DataNodes);
                 }
-                else
+                else if (totalDataNodes > 5)
                 {
-                    var totalDataNodes = inventoryData.InventoryMembers.Sum(imd => imd.DataNodes.Count);
-                    if (totalDataNodes < 2)
-                    {
-                        startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.LessThan2DataNodes);
-                    }
-                    else if (totalDataNodes > 5)
-                    {
-                        startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.MoreThan5DataNodes);
-                    }
+                    startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.MoreThan5DataNodes);
                 }
             }
 
