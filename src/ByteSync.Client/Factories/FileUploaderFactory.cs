@@ -34,18 +34,14 @@ public class FileUploaderFactory : IFileUploaderFactory
     
     private IFileUploader DoBuild(string? fullName, MemoryStream? memoryStream, SharedFileDefinition sharedFileDefinition)
     {
-        // Create the slicer encrypter
         var slicerEncrypter = _context.Resolve<ISlicerEncrypter>();
         
-        // Create coordination components
         var fileUploadCoordinator = new FileUploadCoordinator(_context.Resolve<ILogger<FileUploadCoordinator>>());
         var semaphoreSlim = new SemaphoreSlim(1, 1);
         
-        // Create file slicer
         var fileSlicer = new FileSlicer(slicerEncrypter, fileUploadCoordinator.AvailableSlices, 
             semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, _context.Resolve<ILogger<FileSlicer>>());
         
-        // Create file upload worker
         var policyFactory = _context.Resolve<IPolicyFactory>();
         var fileTransferApiClient = _context.Resolve<IFileTransferApiClient>();
         var strategies = _context.Resolve<IIndex<StorageProvider, IUploadStrategy>>();
@@ -53,7 +49,6 @@ public class FileUploaderFactory : IFileUploaderFactory
             semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, strategies,
             fileUploadCoordinator.UploadingIsFinished, _context.Resolve<ILogger<FileUploadWorker>>());
         
-        // Create file part upload asserter
         var sessionService = _context.Resolve<ISessionService>();
         var filePartUploadAsserter = new FilePartUploadAsserter(fileTransferApiClient, sessionService);
         
