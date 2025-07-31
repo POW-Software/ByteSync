@@ -68,7 +68,7 @@ public class StartInventoryCommandHandlerTests
     }
     
     [Test]
-    public async Task StartInventory_OneMember_ReturnsAtLeastOneMemberWithNoDataToSynchronize()
+    public async Task StartInventory_OneMember_ReturnsUnknownError()
     {
         // Arrange
         var sessionId = "testSession";
@@ -83,10 +83,8 @@ public class StartInventoryCommandHandlerTests
         
         A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryEntity, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<InventoryEntity, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
-            .Returns(new UpdateEntityResult<InventoryEntity>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
+            .Returns(new UpdateEntityResult<InventoryEntity>(inventoryData, UpdateEntityStatus.NoOperation));
 
-        A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).DoesNothing();
-        
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
 
         var request = new StartInventoryRequest(sessionId, client);
@@ -95,8 +93,8 @@ public class StartInventoryCommandHandlerTests
         var result = await _startInventoryCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        result.Status.Should().Be(StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
-        A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustHaveHappenedOnceExactly();
+        result.Status.Should().Be(StartInventoryStatuses.UnknownError);
+        A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustNotHaveHappened();
     }
     
     [Test]
@@ -137,7 +135,7 @@ public class StartInventoryCommandHandlerTests
     }
     
     [Test]
-    public async Task StartInventory_LessInventoryMembersThanSessionMembers_ReturnsAtLeastOneMemberWithNoDataToSynchronize()
+    public async Task StartInventory_LessInventoryMembersThanSessionMembers_ReturnsUnknownError()
     {
         // Arrange
         var sessionId = "testSession";
@@ -153,9 +151,7 @@ public class StartInventoryCommandHandlerTests
         
         A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryEntity, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Invokes((string _, Func<InventoryEntity, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
-            .Returns(new UpdateEntityResult<InventoryEntity>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
-        
-        A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).DoesNothing();
+            .Returns(new UpdateEntityResult<InventoryEntity>(inventoryData, UpdateEntityStatus.NoOperation));
         
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
 
@@ -165,8 +161,8 @@ public class StartInventoryCommandHandlerTests
         var result = await _startInventoryCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        result.Status.Should().Be(StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
-        A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustHaveHappenedOnceExactly();
+        result.Status.Should().Be(StartInventoryStatuses.UnknownError);
+        A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustNotHaveHappened();
     }
     
         [Test]
@@ -292,46 +288,6 @@ public class StartInventoryCommandHandlerTests
     }
     
     [Test]
-    public async Task StartInventory_OneMemberWithoutDataNodes_ReturnsUnknownError()
-    {
-        // Arrange
-        var sessionId = "testSession";
-        var inventoryData = new InventoryEntity(sessionId);
-        var encryptedDataSource = new EncryptedDataSource { Id = "dataSource1" };
-        var cloudSessionData = new CloudSessionData(null, new EncryptedSessionSettings(),
-            new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" });
-        cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null, cloudSessionData));
-        cloudSessionData.SessionMembers.Add(new SessionMemberData("client2", "client2", new PublicKeyInfo(), null, cloudSessionData));
-        inventoryData.InventoryMembers.Add(new InventoryMemberEntity { ClientInstanceId = "client1" });
-        var dataNode = new InventoryDataNodeEntity { Id = "dataNodeId" };
-        dataNode.DataSources.Add(new InventoryDataSourceEntity(encryptedDataSource));
-        inventoryData.InventoryMembers[0].DataNodes.Add(dataNode);
-        inventoryData.InventoryMembers.Add(new InventoryMemberEntity { ClientInstanceId = "client2" });
-        // client2 has no DataNodes - this should trigger UnknownError
-        
-        A.CallTo(() => _mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
-            .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) => func(cloudSessionData))
-            .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData, UpdateEntityStatus.WaitingForTransaction));
-        
-        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryEntity, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
-            .Invokes((string _, Func<InventoryEntity, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
-            .Returns(new UpdateEntityResult<InventoryEntity>(inventoryData, UpdateEntityStatus.NoOperation));
-        
-        A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).DoesNothing();
-
-        var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-
-        var request = new StartInventoryRequest(sessionId, client);
-
-        // Act
-        var result = await _startInventoryCommandHandler.Handle(request, CancellationToken.None);
-
-        // Assert
-        result.Status.Should().Be(StartInventoryStatuses.UnknownError);
-        A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustNotHaveHappened();
-    }
-    
-    [Test]
     public async Task StartInventory_AllMembersHaveDataToSynchronize_ReturnsSuccessResultAndCallsSharedFilesServiceCorrectly()
     {
         // Arrange
@@ -375,7 +331,6 @@ public class StartInventoryCommandHandlerTests
         // Assert
         result.Status.Should().Be(StartInventoryStatuses.InventoryStartedSucessfully);
         A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).MustHaveHappenedOnceExactly();
-        A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustHaveHappenedOnceExactly();
     }
     
     [Test]
@@ -413,7 +368,7 @@ public class StartInventoryCommandHandlerTests
     }
     
     [Test]
-    public async Task StartInventory_OneMember_NoInventoryDataSet_ReturnsLessThan2Members()
+    public async Task StartInventory_OneMember_NoInventoryDataSet_ReturnsSessionNotFound()
     {
         // Arrange
         var sessionId = "testSession";
@@ -434,8 +389,6 @@ public class StartInventoryCommandHandlerTests
         A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryEntity, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Returns(new UpdateEntityResult<InventoryEntity>(inventoryData, UpdateEntityStatus.NotFound));
         
-        A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).DoesNothing();
-
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
 
         var request = new StartInventoryRequest(sessionId, client);
@@ -444,12 +397,12 @@ public class StartInventoryCommandHandlerTests
         var result = await _startInventoryCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        result.Status.Should().Be(StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
+        result.Status.Should().Be(StartInventoryStatuses.SessionNotFound);
         A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustNotHaveHappened();
     }
     
     [Test]
-    public async Task StartInventory_TwoMembers_NoInventoryDataSet_ReturnsAtLeastOneMemberWithNoDataToSynchronize()
+    public async Task StartInventory_TwoMembers_NoInventoryDataSet_ReturnsSessionNotFound()
     {
         // Arrange
         var sessionId = "testSession";
@@ -473,8 +426,6 @@ public class StartInventoryCommandHandlerTests
         A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored, A<Func<InventoryEntity, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
             .Returns(new UpdateEntityResult<InventoryEntity>(inventoryData, UpdateEntityStatus.NotFound));
         
-        A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).DoesNothing();
-
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
 
         var request = new StartInventoryRequest(sessionId, client);
@@ -483,7 +434,7 @@ public class StartInventoryCommandHandlerTests
         var result = await _startInventoryCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        result.Status.Should().Be(StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
+        result.Status.Should().Be(StartInventoryStatuses.SessionNotFound);
         A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustNotHaveHappened();
     }
     
@@ -526,6 +477,105 @@ public class StartInventoryCommandHandlerTests
 
         // Assert
         result.Status.Should().Be(StartInventoryStatuses.InventoryStartedSucessfully);
+        A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
+    public async Task StartInventory_LessThan2DataNodes_ReturnsLessThan2DataNodesResult()
+    {
+        // Arrange
+        var sessionId = "testSession";
+        var inventoryData = new InventoryEntity(sessionId);
+        var cloudSessionData = new CloudSessionData(null, new EncryptedSessionSettings(),
+            new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" });
+        cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null,
+            cloudSessionData));
+
+        // Only 1 member with 1 DataNode = total 1 DataNode (< 2)
+        inventoryData.InventoryMembers.Add(new InventoryMemberEntity { ClientInstanceId = "client1" });
+        var dataNode1 = new InventoryDataNodeEntity { Id = "dataNodeId1" };
+        dataNode1.DataSources.Add(new InventoryDataSourceEntity { Id = "dataSource1" });
+        inventoryData.InventoryMembers[0].DataNodes.Add(dataNode1);
+
+        A.CallTo(() => _mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored,
+                A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) =>
+                func(cloudSessionData))
+            .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData,
+                UpdateEntityStatus.WaitingForTransaction));
+
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored,
+                A<Func<InventoryEntity, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<InventoryEntity, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
+            .Returns(new UpdateEntityResult<InventoryEntity>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
+
+        A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).DoesNothing();
+
+        var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
+
+        var request = new StartInventoryRequest(sessionId, client);
+
+        // Act
+        var result = await _startInventoryCommandHandler.Handle(request, CancellationToken.None);
+
+        // Assert
+        result.Status.Should().Be(StartInventoryStatuses.LessThan2DataNodes);
+        A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
+    public async Task StartInventory_MoreThan5DataNodes_ReturnsMoreThan5DataNodesResult()
+    {
+        // Arrange
+        var sessionId = "testSession";
+        var inventoryData = new InventoryEntity(sessionId);
+        var cloudSessionData = new CloudSessionData(null, new EncryptedSessionSettings(),
+            new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" });
+        cloudSessionData.SessionMembers.Add(new SessionMemberData("client1", "client1", new PublicKeyInfo(), null,
+            cloudSessionData));
+        cloudSessionData.SessionMembers.Add(new SessionMemberData("client2", "client2", new PublicKeyInfo(), null,
+            cloudSessionData));
+
+        // Member 1 with 3 DataNodes + Member 2 with 3 DataNodes = total 6 DataNodes (> 5)
+        inventoryData.InventoryMembers.Add(new InventoryMemberEntity { ClientInstanceId = "client1" });
+        for (int i = 1; i <= 3; i++)
+        {
+            var dataNode = new InventoryDataNodeEntity { Id = $"dataNodeId{i}" };
+            dataNode.DataSources.Add(new InventoryDataSourceEntity { Id = $"dataSource{i}" });
+            inventoryData.InventoryMembers[0].DataNodes.Add(dataNode);
+        }
+
+        inventoryData.InventoryMembers.Add(new InventoryMemberEntity { ClientInstanceId = "client2" });
+        for (int i = 4; i <= 6; i++)
+        {
+            var dataNode = new InventoryDataNodeEntity { Id = $"dataNodeId{i}" };
+            dataNode.DataSources.Add(new InventoryDataSourceEntity { Id = $"dataSource{i}" });
+            inventoryData.InventoryMembers[1].DataNodes.Add(dataNode);
+        }
+
+        A.CallTo(() => _mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored,
+                A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<CloudSessionData, bool> func, ITransaction _, IRedLock _) =>
+                func(cloudSessionData))
+            .Returns(new UpdateEntityResult<CloudSessionData>(cloudSessionData,
+                UpdateEntityStatus.WaitingForTransaction));
+
+        A.CallTo(() => _mockInventoryRepository.UpdateIfExists(A<string>.Ignored,
+                A<Func<InventoryEntity, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
+            .Invokes((string _, Func<InventoryEntity, bool> func, ITransaction _, IRedLock _) => func(inventoryData))
+            .Returns(new UpdateEntityResult<InventoryEntity>(inventoryData, UpdateEntityStatus.WaitingForTransaction));
+
+        A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).DoesNothing();
+
+        var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
+
+        var request = new StartInventoryRequest(sessionId, client);
+
+        // Act
+        var result = await _startInventoryCommandHandler.Handle(request, CancellationToken.None);
+
+        // Assert
+        result.Status.Should().Be(StartInventoryStatuses.MoreThan5DataNodes);
         A.CallTo(() => _mockSharedFilesService.ClearSession(sessionId)).MustHaveHappenedOnceExactly();
     }
 }

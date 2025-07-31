@@ -115,13 +115,9 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
         UpdateEntityResult<InventoryEntity> inventoryUpdateResult;
         inventoryUpdateResult = await _inventoryRepository.UpdateIfExists(cloudSessionData.SessionId, inventoryData =>
         {
-            if (inventoryData.InventoryMembers.Count > cloudSessionData.SessionMembers.Count)
+            if (inventoryData.InventoryMembers.Count != cloudSessionData.SessionMembers.Count)
             {
                 startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.UnknownError);
-            }
-            else if (inventoryData.InventoryMembers.Count < cloudSessionData.SessionMembers.Count)
-            {
-                startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
             }
             else if (inventoryData.InventoryMembers.Any(imd => imd.DataNodes.Count == 0))
             {
@@ -155,8 +151,7 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
 
         if (inventoryUpdateResult.IsNotFound)
         {
-            startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, 
-                StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
+            startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.SessionNotFound);
         }
         
         return (inventoryUpdateResult, startInventoryResult);
