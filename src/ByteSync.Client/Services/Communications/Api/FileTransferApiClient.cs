@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Common.Business.SharedFiles;
+﻿using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications.Http;
 
 namespace ByteSync.Services.Communications.Api;
@@ -44,6 +43,23 @@ public class FileTransferApiClient : IFileTransferApiClient
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while getting download file url");
+            
+            throw;
+        }
+    }
+    
+    public async Task<FileStorageLocation> GetDownloadFileStorageLocation(TransferParameters transferParameters)
+    {
+        try
+        {
+            var result = await _apiInvoker.PostAsync<FileStorageLocation>($"session/{transferParameters.SessionId}/file/getDownloadStorageLocation", 
+                transferParameters);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error while getting download file storage location");
             
             throw;
         }
