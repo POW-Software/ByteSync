@@ -1,17 +1,10 @@
-﻿using System;
-using System.Reactive.Subjects;
-using ByteSync.Business.Inventories;
-using ByteSync.Interfaces.Controls.Inventories;
+﻿using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Dialogs;
-using ByteSync.Interfaces.EventsHubs;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.TestsCommon;
 using ByteSync.ViewModels.Sessions.Inventories;
-using Microsoft.Reactive.Testing;
 using Moq;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
-using ReactiveUI.Testing;
 
 namespace ByteSync.Tests.ViewModels.Sessions.Inventories;
 

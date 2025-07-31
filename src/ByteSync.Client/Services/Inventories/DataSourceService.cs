@@ -1,6 +1,5 @@
 ﻿using ByteSync.Business.DataNodes;
 using ByteSync.Business.DataSources;
-using ByteSync.Business.SessionMembers;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces;
@@ -22,10 +21,11 @@ public class DataSourceService : IDataSourceService
     private readonly IInventoryApiClient _inventoryApiClient;
     private readonly IDataSourceRepository _dataSourceRepository;
     private readonly IDataSourceCodeGenerator _codeGenerator;
+    private readonly ILogger<DataSourceService> _logger;
 
     public DataSourceService(ISessionService sessionService, IDataSourceChecker dataSourceChecker, IDataEncrypter dataEncrypter,
         IConnectionService connectionService, IInventoryApiClient inventoryApiClient,
-        IDataSourceRepository dataSourceRepository, IDataSourceCodeGenerator codeGenerator)
+        IDataSourceRepository dataSourceRepository, IDataSourceCodeGenerator codeGenerator, ILogger<DataSourceService> logger)
     {
         _sessionService = sessionService;
         _dataSourceChecker = dataSourceChecker;
@@ -34,6 +34,7 @@ public class DataSourceService : IDataSourceService
         _inventoryApiClient = inventoryApiClient;
         _dataSourceRepository = dataSourceRepository;
         _codeGenerator = codeGenerator;
+        _logger = logger;
     }
     
     public async Task<bool> TryAddDataSource(DataSource dataSource)
@@ -46,6 +47,12 @@ public class DataSourceService : IDataSourceService
             {
                 var encryptedDataSource = _dataEncrypter.EncryptDataSource(dataSource);
                 isAddOK = await _inventoryApiClient.AddDataSource(cloudSession.SessionId, _connectionService.ClientInstanceId!, dataSource.DataNodeId, encryptedDataSource);
+                
+                if (!isAddOK)
+                {
+                    _logger.LogWarning("Failed to add DataSource with ID {DataSourceId} and path {DataSourcePath} to DataNode {DataNodeId} in session {SessionId}", 
+                        dataSource.Id, dataSource.Path, dataSource.DataNodeId, cloudSession.SessionId);
+                }
             }
 
             if (isAddOK)
@@ -83,6 +90,12 @@ public class DataSourceService : IDataSourceService
     {
         var encryptedDataSource = _dataEncrypter.EncryptDataSource(dataSource);
         var isRemoveOK = await _inventoryApiClient.RemoveDataSource(_sessionService.SessionId!, _connectionService.ClientInstanceId!, dataSource.DataNodeId, encryptedDataSource);
+        
+        if (!isRemoveOK)
+        {
+            _logger.LogWarning("Failed to remove DataSource with ID {DataSourceId} and path {DataSourcePath} from DataNode {DataNodeId} in session {SessionId}", 
+                dataSource.Id, dataSource.Path, dataSource.DataNodeId, _sessionService.SessionId);
+        }
         
         if (isRemoveOK)
         {

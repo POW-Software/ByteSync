@@ -22,6 +22,7 @@ public class DataNodeService : IDataNodeService
     private readonly IDataNodeCodeGenerator _codeGenerator;
     private readonly IDataSourceService _dataSourceService;
     private readonly IDataSourceRepository _dataSourceRepository;
+    private readonly ILogger<DataNodeService> _logger;
     
     private int _nodeCounter;
     private readonly SemaphoreSlim _counterSemaphore = new(1, 1);
@@ -30,7 +31,7 @@ public class DataNodeService : IDataNodeService
         IDataEncrypter dataEncrypter,
         IInventoryApiClient inventoryApiClient, IDataNodeRepository dataNodeRepository,
         IDataNodeCodeGenerator codeGenerator, IDataSourceService dataSourceService,
-        IDataSourceRepository dataSourceRepository)
+        IDataSourceRepository dataSourceRepository, ILogger<DataNodeService> logger)
     {
         _sessionService = sessionService;
         _connectionService = connectionService;
@@ -40,6 +41,7 @@ public class DataNodeService : IDataNodeService
         _codeGenerator = codeGenerator;
         _dataSourceService = dataSourceService;
         _dataSourceRepository = dataSourceRepository;
+        _logger = logger;
         
         // Reset the counter when a session ends or is reset
         _sessionService.SessionObservable
@@ -59,6 +61,11 @@ public class DataNodeService : IDataNodeService
         {
             var encryptedDataNode = _dataEncrypter.EncryptDataNode(dataNode);
             isAddOK = await _inventoryApiClient.AddDataNode(cloudSession.SessionId, _connectionService.ClientInstanceId!, encryptedDataNode);
+            
+            if (!isAddOK)
+            {
+                _logger.LogWarning("Failed to add DataNode with ID {DataNodeId} to session {SessionId}", dataNode.Id, cloudSession.SessionId);
+            }
         }
 
         if (isAddOK)
@@ -101,6 +108,11 @@ public class DataNodeService : IDataNodeService
         {
             var encryptedDataNode = _dataEncrypter.EncryptDataNode(dataNode);
             isRemoveOK = await _inventoryApiClient.RemoveDataNode(cloudSession.SessionId, _connectionService.ClientInstanceId!, encryptedDataNode);
+            
+            if (!isRemoveOK)
+            {
+                _logger.LogWarning("Failed to remove DataNode with ID {DataNodeId} from session {SessionId}", dataNode.Id, cloudSession.SessionId);
+            }
         }
         
         if (isRemoveOK)
