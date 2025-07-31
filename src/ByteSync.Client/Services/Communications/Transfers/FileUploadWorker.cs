@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Channels;
+using Autofac.Features.Indexed;
 using Azure;
-using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
@@ -19,9 +19,14 @@ public class FileUploadWorker : IFileUploadWorker
     private readonly SharedFileDefinition _sharedFileDefinition;
     private readonly ManualResetEvent _exceptionOccurred;
     private readonly ManualResetEvent _uploadingIsFinished;
+    private readonly IIndex<StorageProvider, IUploadStrategy> _strategies;
     private readonly SemaphoreSlim _semaphoreSlim;
+    
+    private CancellationTokenSource CancellationTokenSource { get; }
+    
     public FileUploadWorker(IPolicyFactory policyFactory, IFileTransferApiClient fileTransferApiClient,
         SharedFileDefinition sharedFileDefinition, SemaphoreSlim semaphoreSlim, ManualResetEvent exceptionOccurred,
+        IIndex<StorageProvider, IUploadStrategy> strategies,
         ManualResetEvent uploadingIsFinished, ILogger<FileUploadWorker> logger)
     {
         _policyFactory = policyFactory;
@@ -30,7 +35,9 @@ public class FileUploadWorker : IFileUploadWorker
         _semaphoreSlim = semaphoreSlim;
         _exceptionOccurred = exceptionOccurred;
         _uploadingIsFinished = uploadingIsFinished;
+        _strategies = strategies;
         _logger = logger;
+        CancellationTokenSource = new CancellationTokenSource();
     }
 
     public void StartUploadWorkers(Channel<FileUploaderSlice> availableSlices, int workerCount, UploadProgressState progressState)
@@ -123,21 +130,21 @@ public class FileUploadWorker : IFileUploadWorker
                 PartNumber = slice.PartNumber
             };
             
-            var uploadFileUrl = await _fileTransferApiClient.GetUploadFileUrl(transferParameters);
+            var uploadLocation = await _fileTransferApiClient.GetUploadFileStorageLocation(transferParameters);
 
             _logger.LogDebug("UploadAvailableSlice: starting sending slice {number} ({length} KB)", 
                 slice.PartNumber, slice.MemoryStream.Length / 1024d);
+            
+            var uploadStrategy = _strategies[uploadLocation.StorageProvider];
+            var response = await uploadStrategy.UploadAsync(_logger, slice, uploadLocation, CancellationTokenSource.Token);
 
-            var options = new BlobClientOptions();
-            options.Retry.NetworkTimeout = TimeSpan.FromMinutes(60);
+            var rawResponse = response.GetRawResponse<Response<BlobContentInfo>>();
+            if (rawResponse == null)
+            {
+                throw new InvalidOperationException("Upload strategy did not return a valid Azure response");
+            }
 
-            slice.MemoryStream.Position = 0;
-            var blob = new BlobClient(new Uri(uploadFileUrl), options);
-            var response = await blob.UploadAsync(slice.MemoryStream);
-
-            _logger.LogDebug("UploadAvailableSlice: slice {number} is uploaded", slice.PartNumber);
-
-            return response;
+            return rawResponse;
         }
         catch (Exception)
         {

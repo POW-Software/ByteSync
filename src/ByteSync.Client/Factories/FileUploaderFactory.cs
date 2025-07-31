@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Threading;
 using Autofac;
+using Autofac.Features.Indexed;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
@@ -47,8 +48,9 @@ public class FileUploaderFactory : IFileUploaderFactory
         // Create file upload worker
         var policyFactory = _context.Resolve<IPolicyFactory>();
         var fileTransferApiClient = _context.Resolve<IFileTransferApiClient>();
+        var strategies = _context.Resolve<IIndex<StorageProvider, IUploadStrategy>>();
         var fileUploadWorker = new FileUploadWorker(policyFactory, fileTransferApiClient, sharedFileDefinition,
-            semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, 
+            semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, strategies,
             fileUploadCoordinator.UploadingIsFinished, _context.Resolve<ILogger<FileUploadWorker>>());
         
         // Create file part upload asserter

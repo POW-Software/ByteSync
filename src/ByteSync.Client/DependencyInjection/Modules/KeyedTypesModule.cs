@@ -31,5 +31,8 @@ public class KeyedTypesModule : Module
         
         builder.RegisterType<BlobStorageDownloadStrategy>().Keyed<IDownloadStrategy>(StorageProvider.AzureBlobStorage);
         builder.RegisterType<CloudFlareDownloadStrategy>().Keyed<IDownloadStrategy>(StorageProvider.CloudFlareR2);
+
+        builder.RegisterType<BlobStorageUploadStrategy>().Keyed<IUploadStrategy>(StorageProvider.AzureBlobStorage);
+        builder.RegisterType<CloudFlareUploadStrategy>().Keyed<IUploadStrategy>(StorageProvider.CloudFlareR2);
     }
 }

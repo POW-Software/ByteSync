@@ -3,9 +3,11 @@ using Moq;
 using System.Threading.Channels;
 using Azure;
 using Azure.Storage.Blobs.Models;
+using Autofac.Features.Indexed;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Services.Communications.Transfers;
 using FluentAssertions;
@@ -21,6 +23,7 @@ public class FileUploadWorkerTests
     private Mock<IPolicyFactory> _mockPolicyFactory;
     private Mock<IFileTransferApiClient> _mockFileTransferApiClient;
     private Mock<ILogger<FileUploadWorker>> _mockLogger;
+    private Mock<IIndex<StorageProvider, IUploadStrategy>> _mockStrategies;
     private AsyncRetryPolicy<Response<BlobContentInfo>> _policy;
     private SharedFileDefinition _sharedFileDefinition;
     private object _syncRoot;
@@ -37,6 +40,7 @@ public class FileUploadWorkerTests
         _mockPolicyFactory = new Mock<IPolicyFactory>();
         _mockFileTransferApiClient = new Mock<IFileTransferApiClient>();
         _mockLogger = new Mock<ILogger<FileUploadWorker>>();
+        _mockStrategies = new Mock<IIndex<StorageProvider, IUploadStrategy>>();
         
         // Create a test policy that returns a mock response
         _policy = Policy<Response<BlobContentInfo>>
@@ -63,6 +67,7 @@ public class FileUploadWorkerTests
             _sharedFileDefinition,
             _semaphoreSlim,
             _exceptionOccurred,
+            _mockStrategies.Object,
             _uploadingIsFinished,
             _mockLogger.Object);
 
