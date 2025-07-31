@@ -2148,9 +2148,9 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
-        public static string InventoryProcess_AtLeastOneMemberWithNoDataToSynchronize {
+        public static string InventoryProcess_AtLeastOneDataNodeWithNoDataSource {
             get {
-                return ResourceManager.GetString("InventoryProcess_AtLeastOneMemberWithNoDataToSynchronize", resourceCulture);
+                return ResourceManager.GetString("InventoryProcess_AtLeastOneDataNodeWithNoDataSource", resourceCulture);
             }
         }
         

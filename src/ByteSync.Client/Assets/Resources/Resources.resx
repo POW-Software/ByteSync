@@ -800,9 +800,9 @@ The Session must have a maximum of 5 members.</value>
 		<value>Unable to start the Data Inventory:
 An unknown error has occurred. Please check the log.</value>
 	</data>
-	<data name="InventoryProcess_AtLeastOneMemberWithNoDataToSynchronize" xml:space="preserve">
+	<data name="InventoryProcess_AtLeastOneDataNodeWithNoDataSource" xml:space="preserve">
 		<value>Unable to start the Data Inventory:
-All Session members must select data to synchronize.</value>
+At least one Data Node has no Data Source.</value>
 	</data>
 	<data name="ComparisonResult_ErrorDuringComparison" xml:space="preserve">
 		<value>An error occurred during the Local Inventories comparison.

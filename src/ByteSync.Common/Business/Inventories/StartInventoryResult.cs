@@ -11,7 +11,7 @@ public enum StartInventoryStatuses
     UndefinedSettings = 5,
     SessionNotFound = 6,
     UndefinedSession = 7,
-    AtLeastOneMemberWithNoDataToSynchronize = 8,
+    AtLeastOneDataNodeWithNoDataSource = 8,
     LessThan2DataSources = 9,
     MoreThan5DataSources = 10,
     MoreThan5DataNodes = 11,

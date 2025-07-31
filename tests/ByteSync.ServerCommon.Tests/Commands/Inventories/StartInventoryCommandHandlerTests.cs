@@ -244,7 +244,7 @@ public class StartInventoryCommandHandlerTests
     }
     
     [Test]
-    public async Task StartInventory_OneMemberWithDataNodeButNoDataSource_ReturnsAtLeastOneMemberWithNoDataToSynchronize()
+    public async Task StartInventory_OneMemberWithDataNodeButNoDataSource_ReturnsAtLeastOneDataNodeWithNoDataSource()
     {
         // Arrange
         var sessionId = "testSession";
@@ -262,7 +262,7 @@ public class StartInventoryCommandHandlerTests
         
         inventoryData.InventoryMembers.Add(new InventoryMemberEntity { ClientInstanceId = "client2" });
         var dataNode2 = new InventoryDataNodeEntity { Id = "dataNodeId2" };
-        // dataNode2 has no DataSources - this should trigger AtLeastOneMemberWithNoDataToSynchronize
+        // dataNode2 has no DataSources - this should trigger AtLeastOneDataNodeWithNoDataSource
         inventoryData.InventoryMembers[1].DataNodes.Add(dataNode2);
 
         A.CallTo(() => _mockCloudSessionsRepository.UpdateIfExists(A<string>.Ignored, A<Func<CloudSessionData, bool>>.Ignored, A<ITransaction>.Ignored, A<IRedLock>.Ignored))
@@ -283,7 +283,7 @@ public class StartInventoryCommandHandlerTests
         var result = await _startInventoryCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        result.Status.Should().Be(StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
+        result.Status.Should().Be(StartInventoryStatuses.AtLeastOneDataNodeWithNoDataSource);
         A.CallTo(() =>  _mockSharedFilesService.ClearSession(sessionId)).MustHaveHappenedOnceExactly();
     }
     

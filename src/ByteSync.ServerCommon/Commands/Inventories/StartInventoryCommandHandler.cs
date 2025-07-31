@@ -125,7 +125,7 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
             }
             else if (inventoryData.InventoryMembers.Any(imd => imd.DataNodes.Any(dn => dn.DataSources.Count == 0)))
             {
-                startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
+                startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.AtLeastOneDataNodeWithNoDataSource);
             }
             else
             {

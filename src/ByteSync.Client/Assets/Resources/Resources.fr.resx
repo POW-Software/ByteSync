@@ -791,9 +791,9 @@ Les paramètres de la Session ne sont pas définis.</value>
 		<value>Impossible de démarrer l'Inventaire des Données :
 Une erreur inconnue est survenue. Veuillez consulter le journal.</value>
 	</data>
-	<data name="InventoryProcess_AtLeastOneMemberWithNoDataToSynchronize" xml:space="preserve">
+	<data name="InventoryProcess_AtLeastOneDataNodeWithNoDataSource" xml:space="preserve">
 		<value>Impossible de démarrer l'Inventaire des Données :
-Tous les membres de la Session doivent sélectionner des données à synchroniser.</value>
+Au moins un Nœud de Données n'a pas de Source de Données.</value>
 	</data>
 	<data name="ComparisonResult_ErrorDuringComparison" xml:space="preserve">
 		<value>Une erreur est survenue durant la comparaison des Inventaires Locaux.
