@@ -91,18 +91,6 @@ public class TransferLocationService : ITransferLocationService
             return null;
         }
     }
-
-    public async Task<FileStorageLocation> GetDownloadFileStorageLocation(string sessionId, Client client,
-        TransferParameters transferParameters, StorageProvider storageProvider)
-    {
-        var url = await GetDownloadFileUrl(
-            sessionId,
-            client,
-            transferParameters.SharedFileDefinition,
-            transferParameters.PartNumber!.Value
-        );
-        return new FileStorageLocation(url, storageProvider);
-    }
     
     public async Task AssertUploadIsFinished(string sessionId, Client client, TransferParameters transferParameters)
     {
@@ -211,6 +199,18 @@ public class TransferLocationService : ITransferLocationService
         }
 
         return canGetUrl;
+    }
+    
+    public async Task<FileStorageLocation> GetDownloadFileStorageLocation(string sessionId, Client client,
+        TransferParameters transferParameters, StorageProvider storageProvider)
+    {
+        var url = await GetDownloadFileUrl(
+            sessionId,
+            client,
+            transferParameters.SharedFileDefinition,
+            transferParameters.PartNumber!.Value
+        );
+        return new FileStorageLocation(url, storageProvider);
     }
     
     private static List<SessionMemberData> GetOtherSessionMembers(CloudSessionData session, SessionMemberData sessionMemberData)

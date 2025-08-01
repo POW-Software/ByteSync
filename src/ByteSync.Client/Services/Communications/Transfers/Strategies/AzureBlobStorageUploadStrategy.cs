@@ -48,15 +48,7 @@ public class AzureBlobStorageUploadStrategy : IUploadStrategy
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to upload slice {number}", slice.PartNumber);
-            
-            // Encapsulate the full exception information
-            var errorMessage = $"Upload failed: {ex.GetType().Name}: {ex.Message}";
-            if (ex.InnerException != null)
-            {
-                errorMessage += $" Inner exception: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
-            }
-            
-            return UploadFileResponse.Failure(500, errorMessage);
+            return UploadFileResponse.Failure(500, ex);
         }
     }
 }

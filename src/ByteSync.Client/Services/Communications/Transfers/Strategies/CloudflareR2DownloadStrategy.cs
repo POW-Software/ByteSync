@@ -30,14 +30,7 @@ public class CloudflareR2DownloadStrategy : IDownloadStrategy
         }
         catch (Exception ex)
         {
-            // Encapsulate the full exception information
-            var errorMessage = $"Download failed: {ex.GetType().Name}: {ex.Message}";
-            if (ex.InnerException != null)
-            {
-                errorMessage += $" Inner exception: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
-            }
-            
-            return DownloadFileResponse.Failure(500, errorMessage);
+            return DownloadFileResponse.Failure(500, ex);
         }
     }
 } 
