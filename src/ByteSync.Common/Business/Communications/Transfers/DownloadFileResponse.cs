@@ -6,7 +6,7 @@ public class DownloadFileResponse
     public int StatusCode { get; set; }
     public string? ErrorMessage { get; set; }
 
-    public static DownloadFileResponse Success(int statusCode, object? rawResponse = null)
+    public static DownloadFileResponse Success(int statusCode)
     {
         return new DownloadFileResponse
         {
@@ -15,7 +15,7 @@ public class DownloadFileResponse
         };
     }
 
-    public static DownloadFileResponse Failure(int statusCode, string errorMessage, object? rawResponse = null)
+    public static DownloadFileResponse Failure(int statusCode, string errorMessage)
     {
         return new DownloadFileResponse
         {

@@ -130,7 +130,7 @@ public class FileUploadWorkerTests
         var mockUploadStrategy = new Mock<IUploadStrategy>();
         var mockUploadLocation = new FileStorageLocation(uploadUrl, storageProvider);
         
-        mockUploadStrategy.Setup(x => x.UploadAsync(It.IsAny<ILogger<FileUploadWorker>>(), It.IsAny<FileUploaderSlice>(), It.IsAny<FileStorageLocation>(), It.IsAny<CancellationToken>()))
+        mockUploadStrategy.Setup(x => x.UploadAsync( It.IsAny<FileUploaderSlice>(), It.IsAny<FileStorageLocation>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(UploadFileResponse.Success(200));
         
         _mockStrategies.Setup(x => x[storageProvider]).Returns(mockUploadStrategy.Object);
@@ -154,7 +154,7 @@ public class FileUploadWorkerTests
         
         // Verify the correct strategy was called for the storage provider
         _mockStrategies.Verify(x => x[storageProvider], Times.Once);
-        mockUploadStrategy.Verify(x => x.UploadAsync(It.IsAny<ILogger<FileUploadWorker>>(), slice, mockUploadLocation, It.IsAny<CancellationToken>()), Times.Once);
+        mockUploadStrategy.Verify(x => x.UploadAsync(slice, mockUploadLocation, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -167,7 +167,7 @@ public class FileUploadWorkerTests
         var mockUploadStrategy = new Mock<IUploadStrategy>();
         var mockUploadLocation = new FileStorageLocation("https://test.example.com/upload", storageProvider);
         
-        mockUploadStrategy.Setup(x => x.UploadAsync(It.IsAny<ILogger<FileUploadWorker>>(), It.IsAny<FileUploaderSlice>(), It.IsAny<FileStorageLocation>(), It.IsAny<CancellationToken>()))
+        mockUploadStrategy.Setup(x => x.UploadAsync(It.IsAny<FileUploaderSlice>(), It.IsAny<FileStorageLocation>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(UploadFileResponse.Failure(500, "Upload failed"));
         
         _mockStrategies.Setup(x => x[storageProvider]).Returns(mockUploadStrategy.Object);
@@ -247,7 +247,7 @@ public class FileUploadWorkerTests
         var mockUploadStrategy = new Mock<IUploadStrategy>();
         var mockUploadLocation = new FileStorageLocation("https://test.example.com/upload", storageProvider);
         
-        mockUploadStrategy.Setup(x => x.UploadAsync(It.IsAny<ILogger<FileUploadWorker>>(), It.IsAny<FileUploaderSlice>(), It.IsAny<FileStorageLocation>(), It.IsAny<CancellationToken>()))
+        mockUploadStrategy.Setup(x => x.UploadAsync(It.IsAny<FileUploaderSlice>(), It.IsAny<FileStorageLocation>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(UploadFileResponse.Success(200));
         
         _mockStrategies.Setup(x => x[storageProvider]).Returns(mockUploadStrategy.Object);
@@ -264,6 +264,6 @@ public class FileUploadWorkerTests
 
         // Assert
         _mockStrategies.Verify(x => x[storageProvider], Times.Once);
-        mockUploadStrategy.Verify(x => x.UploadAsync(It.IsAny<ILogger<FileUploadWorker>>(), slice, mockUploadLocation, It.IsAny<CancellationToken>()), Times.Once);
+        mockUploadStrategy.Verify(x => x.UploadAsync(slice, mockUploadLocation, It.IsAny<CancellationToken>()), Times.Once);
     }
 } 

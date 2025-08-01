@@ -29,10 +29,10 @@ public class KeyedTypesModule : Module
         builder.RegisterType<GraphicalUserInterfaceBootstrapper>().Keyed<IBootstrapper>(OperationMode.GraphicalUserInterface);
         builder.RegisterType<CommandLineBootstrapper>().Keyed<IBootstrapper>(OperationMode.CommandLine);
         
-        builder.RegisterType<BlobStorageDownloadStrategy>().Keyed<IDownloadStrategy>(StorageProvider.AzureBlobStorage);
-        builder.RegisterType<CloudFlareDownloadStrategy>().Keyed<IDownloadStrategy>(StorageProvider.CloudflareR2);
+        builder.RegisterType<AzureBlobStorageDownloadStrategy>().Keyed<IDownloadStrategy>(StorageProvider.AzureBlobStorage);
+        builder.RegisterType<CloudflareR2DownloadStrategy>().Keyed<IDownloadStrategy>(StorageProvider.CloudflareR2);
 
-        builder.RegisterType<BlobStorageUploadStrategy>().Keyed<IUploadStrategy>(StorageProvider.AzureBlobStorage);
-        builder.RegisterType<CloudFlareUploadStrategy>().Keyed<IUploadStrategy>(StorageProvider.CloudflareR2);
+        builder.RegisterType<AzureBlobStorageUploadStrategy>().Keyed<IUploadStrategy>(StorageProvider.AzureBlobStorage);
+        builder.RegisterType<CloudflareR2UploadStrategy>().Keyed<IUploadStrategy>(StorageProvider.CloudflareR2);
     }
 }

@@ -135,7 +135,7 @@ public class FileUploadWorker : IFileUploadWorker
                 slice.PartNumber, slice.MemoryStream.Length / 1024d);
             
             var uploadStrategy = _strategies[uploadLocation.StorageProvider];
-            var response = await uploadStrategy.UploadAsync(_logger, slice, uploadLocation, CancellationTokenSource.Token);
+            var response = await uploadStrategy.UploadAsync(slice, uploadLocation, CancellationTokenSource.Token);
             
             return response;
         }

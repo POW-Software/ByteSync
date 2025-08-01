@@ -6,7 +6,7 @@ public class UploadFileResponse
     public int StatusCode { get; set; }
     public string? ErrorMessage { get; set; }
 
-    public static UploadFileResponse Success(int statusCode, object? rawResponse = null)
+    public static UploadFileResponse Success(int statusCode)
     {
         return new UploadFileResponse
         {
@@ -15,7 +15,7 @@ public class UploadFileResponse
         };
     }
 
-    public static UploadFileResponse Failure(int statusCode, string errorMessage, object? rawResponse = null)
+    public static UploadFileResponse Failure(int statusCode, string errorMessage)
     {
         return new UploadFileResponse
         {
