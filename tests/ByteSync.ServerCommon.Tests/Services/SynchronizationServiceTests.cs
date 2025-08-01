@@ -1,159 +1,34 @@
-using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.SharedFiles;
-using ByteSync.Common.Business.Synchronizations;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Repositories;
-using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Services;
 using FakeItEasy;
-using FluentAssertions;
-using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Tests.Services;
 
 [TestFixture]
 public class SynchronizationServiceTests
 {
-    private ICloudSessionsRepository _cloudSessionsRepository;
     private ISynchronizationRepository _synchronizationRepository;
     private ITrackingActionRepository _trackingActionRepository;
     private ISynchronizationProgressService _synchronizationProgressService;
     private ISynchronizationStatusCheckerService _synchronizationStatusCheckerService;
-    private ILogger<SynchronizationService> _logger;
     
     private SynchronizationService _synchronizationService;
 
     [SetUp]
     public void Setup()
     {
-        _cloudSessionsRepository = A.Fake<ICloudSessionsRepository>(x => x.Strict());
         _synchronizationRepository = A.Fake<ISynchronizationRepository>(x => x.Strict());
         _trackingActionRepository = A.Fake<ITrackingActionRepository>(x => x.Strict());
         _synchronizationProgressService = A.Fake<ISynchronizationProgressService>(x => x.Strict());
         _synchronizationStatusCheckerService = A.Fake<ISynchronizationStatusCheckerService>(x => x.Strict());
-        _logger = A.Fake<ILogger<SynchronizationService>>();
         
-        _synchronizationService = new SynchronizationService(_cloudSessionsRepository, _synchronizationRepository, _trackingActionRepository, 
-            _synchronizationProgressService, _synchronizationStatusCheckerService, _logger); 
-    }
-
-    [Test]
-    public async Task GetSynchronization_WhenSynchronizationNotExists_ReturnsNull()
-    {
-        // Arrange
-        var client = new Client();
-        var sessionId = "sessionId";
-
-        A.CallTo(() => _synchronizationRepository.Get(A<string>.Ignored))
-            .Returns((SynchronizationEntity?)null);
-        
-        // Act
-        var result = await _synchronizationService.GetSynchronization(sessionId, client);
-        
-        // Assert
-        result.Should().BeNull();
-        A.CallTo(() => _synchronizationRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
-    }
-    
-    [Test]
-    public async Task GetSynchronization_WhenSynchronizationExistsAndClientMatches_ReturnsSynchronization()
-    {
-        // Arrange
-        var client = new Client();
-        client.ClientInstanceId = "clientInstanceId";
-        var sessionId = "sessionId";
-
-        var synchronizationEntity = new SynchronizationEntity();
-        synchronizationEntity.Progress.Members.Add(client.ClientInstanceId);
-        var synchronization = new Synchronization();
-
-        A.CallTo(() => _synchronizationRepository.Get(A<string>.Ignored))
-            .Returns(synchronizationEntity);
-        A.CallTo(() => _synchronizationProgressService.MapToSynchronization(synchronizationEntity))
-            .Returns(synchronization);
-        
-        // Act
-        var result = await _synchronizationService.GetSynchronization(sessionId, client);
-        
-        // Assert
-        result.Should().BeSameAs(synchronization);
-        A.CallTo(() => _synchronizationRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _synchronizationProgressService.MapToSynchronization(synchronizationEntity)).MustHaveHappenedOnceExactly();
-    }
-    
-    [Test]
-    public async Task StartSynchronization()
-    {
-        // Arrange
-        var client = new Client();
-        client.ClientInstanceId = "clientInstanceId";
-        var sessionId = "sessionId";
-
-        var synchronizationEntity = new SynchronizationEntity();
-        synchronizationEntity.Progress.Members.Add(client.ClientInstanceId);
-        var synchronization = new Synchronization();
-
-        A.CallTo(() => _synchronizationRepository.Get(A<string>.Ignored))
-            .Returns(synchronizationEntity);
-        A.CallTo(() => _synchronizationProgressService.MapToSynchronization(synchronizationEntity))
-            .Returns(synchronization);
-        
-        // Act
-        var result = await _synchronizationService.GetSynchronization(sessionId, client);
-        
-        // Assert
-        result.Should().BeSameAs(synchronization);
-        A.CallTo(() => _synchronizationRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _synchronizationProgressService.MapToSynchronization(synchronizationEntity)).MustHaveHappenedOnceExactly();
-    }
-    
-    [Test]
-    public async Task StartSynchronization_WhenNoExistingSynchronization_CreatesNewSynchronization()
-    {
-        // Arrange
-        var sessionId = "session1";
-        var client = new Client { ClientInstanceId = "client1" };
-        var actionsGroupDefinitions = new List<ActionsGroupDefinition> { new ActionsGroupDefinition() };
-        var session = new CloudSessionData();
-        var synchronization = new Synchronization();
-
-        A.CallTo(() => _synchronizationRepository.Get(sessionId)).Returns((SynchronizationEntity?)null);
-        A.CallTo(() => _cloudSessionsRepository.Get(sessionId)).Returns(session);
-        A.CallTo(() => _synchronizationRepository.AddSynchronization(A<SynchronizationEntity>._, actionsGroupDefinitions))
-            .Returns(Task.CompletedTask);
-        A.CallTo(() => _synchronizationProgressService.InformSynchronizationStarted(A<SynchronizationEntity>._, client))
-            .Returns(Task.CompletedTask);
-        
-        // Act
-        await _synchronizationService.StartSynchronization(sessionId, client, actionsGroupDefinitions);
-
-        // Assert
-        A.CallTo(() => _synchronizationRepository.AddSynchronization(A<SynchronizationEntity>._, actionsGroupDefinitions)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _synchronizationProgressService.InformSynchronizationStarted(A<SynchronizationEntity>._, client)).MustHaveHappenedOnceExactly();
-    }
-
-    [Test]
-    public async Task StartSynchronization_WhenSynchronizationExists_ReturnsExistingSynchronization()
-    {
-        // Arrange
-        var sessionId = "session1";
-        var client = new Client { ClientInstanceId = "client1" };
-        var actionsGroupDefinitions = new List<ActionsGroupDefinition> { new ActionsGroupDefinition() };
-        var synchronizationEntity = new SynchronizationEntity();
-        var synchronization = new Synchronization();
-
-        A.CallTo(() => _synchronizationRepository.Get(sessionId)).Returns(synchronizationEntity);
-        A.CallTo(() => _synchronizationProgressService.MapToSynchronization(synchronizationEntity))
-            .Returns(synchronization);
-
-        // Act
-        await _synchronizationService.StartSynchronization(sessionId, client, actionsGroupDefinitions);
-
-        // Assert
-        A.CallTo(() => _synchronizationRepository.AddSynchronization(A<SynchronizationEntity>._, actionsGroupDefinitions)).MustNotHaveHappened();
+        _synchronizationService = new SynchronizationService(_synchronizationRepository, _trackingActionRepository, 
+            _synchronizationProgressService, _synchronizationStatusCheckerService); 
     }
     
     [Test]

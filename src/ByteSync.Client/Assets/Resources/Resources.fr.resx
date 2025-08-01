@@ -1,4 +1,50 @@
 ﻿<root>
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="metadata">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0"/>
+							</xsd:sequence>
+							<xsd:attribute name="name" use="required" type="xsd:string"/>
+							<xsd:attribute name="type" type="xsd:string"/>
+							<xsd:attribute name="mimetype" type="xsd:string"/>
+							<xsd:attribute ref="xml:space"/>
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="assembly">
+						<xsd:complexType>
+							<xsd:attribute name="alias" type="xsd:string"/>
+							<xsd:attribute name="name" type="xsd:string"/>
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+							<xsd:attribute ref="xml:space"/>
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required"/>
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
 	<resheader name="resmimetype">
 		<value>text/microsoft-resx</value>
 	</resheader>
@@ -6,132 +52,96 @@
 		<value>1.3</value>
 	</resheader>
 	<resheader name="reader">
-		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
 	</resheader>
 	<resheader name="writer">
-		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
 	</resheader>
-	<data name="LoginForm.Help" xml:space="preserve">
-    <value>Aide</value>
-  </data>
-  <data name="LoginForm.PleaseLogin" xml:space="preserve">
-    <value>Veuillez vous authentifier</value>
-  </data>
-  <data name="LoginForm.EmailWatermark" xml:space="preserve">
-    <value>Saisissez votre courriel</value>
-  </data>
-	<data name="LoginForm.Email" xml:space="preserve">
-		<value>Adresse email :</value>
+	<data name="Shell_Account" xml:space="preserve">
+		<value>Détails de votre compte</value>
 	</data>
-  <data name="LoginForm.Serial" xml:space="preserve">
-    <value>Numéro de série :</value>
-  </data>
-	<data name="LoginForm.SignIn" xml:space="preserve">
-		<value>CONNEXION</value>
+	<data name="AccountDetails_LogOut" xml:space="preserve">
+		<value>Déconnexion</value>
 	</data>
-  <data name="LoginForm.SerialWatermark" xml:space="preserve">
-	  <value>Saisissez votre numéro de série</value>
-  </data>
-  <data name="LoginForm.Privacy" xml:space="preserve">
-	  <value>Confidentialité</value>
-  </data>
-  <data name="LoginForm.TermsOfUse" xml:space="preserve">
-	  <value>Conditions d'utilisation</value>
-  </data>
-  <data name="LoginForm.EmailSerialEmpty" xml:space="preserve">
-	  <value>Veuillez indiquer votre courriel et votre numéro de série.</value>
-  </data>
-  <data name="LoginForm.EmailEmpty" xml:space="preserve">
-	  <value>Veuillez indiquer votre courriel.
-</value>
-  </data>
-  <data name="LoginForm.SerialEmpty" xml:space="preserve">
-	  <value>Veuillez votre numéro de série.</value>
-  </data>
-  <data name="LoginForm.GetSerial" xml:space="preserve">
-	  <value>Obtenir un numéro de série</value>
-  </data>
-  <data name="Shell_Account" xml:space="preserve">
-	  <value>Détails de votre compte</value>
-  </data>
-  <data name="AccountDetails_LogOut" xml:space="preserve">
-	  <value>Déconnexion</value>
-  </data>
 	<data name="AboutApplication_VisitByteSyncWebSite" xml:space="preserve">
 		<value>Visiter le site web de ByteSync</value>
 	</data>
-  <data name="AccountDetails_Theme" xml:space="preserve">
-	  <value>Thème :</value>
-  </data>
-  <data name="AccountDetails_Locale" xml:space="preserve">
-	  <value>Langue :</value>
-  </data>
-  <data name="OperationSelection_OfflineInventory" xml:space="preserve">
-	  <value>Inventaire hors-ligne</value>
-  </data>
-	<data name="OperationSelection_CloudSynchronization" xml:space="preserve">
-		<value>Synchronisation Cloud</value>
+	<data name="AccountDetails_Theme" xml:space="preserve">
+		<value>Thème :</value>
 	</data>
-  <data name="OperationSelection_OfflineComparison" xml:space="preserve">
-	  <value>Comparaison hors-ligne</value>
-  </data>
-  <data name="OperationSelection_Documentation" xml:space="preserve">
-	  <value>Documentation</value>
-  </data>
-  <data name="JoinCloudSession_SessionId" xml:space="preserve">
-	  <value>Identifiant de session (Session ID) :</value>
-  </data>
-  <data name="JoinCloudSession_SessionPassword" xml:space="preserve">
-	  <value>Mot de passe de session :</value>
-  </data>
-  <data name="Shell_Home" xml:space="preserve">
-	  <value>Accueil</value>
-  </data>
-  <data name="SessionMachineView_ThisComputer" xml:space="preserve">
-	  <value>Cet ordinateur</value>
-  </data>
-  <data name="AccountDetails_ExploreAppData" xml:space="preserve">
-	  <value>Explorer le répertoire AppData</value>
-  </data>
-  <data name="GroupedActionEdit_Differences" xml:space="preserve">
-	  <value>Différences</value>
-  </data>
-  <data name="GroupedActionEdit_Conditions" xml:space="preserve">
-	  <value>Conditions</value>
-  </data>
-  <data name="GroupedActionEdit_Inventory" xml:space="preserve">
-	  <value>Inventaire</value>
-  </data>
+	<data name="AccountDetails_Locale" xml:space="preserve">
+		<value>Langue :</value>
+	</data>
+	<data name="OperationSelection_OfflineInventory" xml:space="preserve">
+		<value>Inventaire hors-ligne</value>
+	</data>
+	<data name="OperationSelection_Synchronization" xml:space="preserve">
+		<value>Synchronisation</value>
+	</data>
+	<data name="OperationSelection_OfflineComparison" xml:space="preserve">
+		<value>Comparaison hors-ligne</value>
+	</data>
+	<data name="OperationSelection_Documentation" xml:space="preserve">
+		<value>Documentation</value>
+	</data>
+	<data name="JoinCloudSession_SessionId" xml:space="preserve">
+		<value>Identifiant de session (Session ID) :</value>
+	</data>
+	<data name="JoinCloudSession_SessionPassword" xml:space="preserve">
+		<value>Mot de passe de session :</value>
+	</data>
+	<data name="Shell_Home" xml:space="preserve">
+		<value>Accueil</value>
+	</data>
+	<data name="SessionMachineView_ThisComputer" xml:space="preserve">
+		<value>Cet ordinateur</value>
+	</data>
+	<data name="AccountDetails_ExploreAppData" xml:space="preserve">
+		<value>Explorer le répertoire AppData</value>
+	</data>
+	<data name="GroupedActionEdit_Differences" xml:space="preserve">
+		<value>Différences</value>
+	</data>
+	<data name="GroupedActionEdit_Conditions" xml:space="preserve">
+		<value>Conditions</value>
+	</data>
+	<data name="GroupedActionEdit_Inventory" xml:space="preserve">
+		<value>Inventaire</value>
+	</data>
 	<data name="Shell_CreateSynchronizationRule" xml:space="preserve">
 		<value>Créer une Règle de Synchronisation</value>
 	</data>
-  <data name="SynchronizationRulesGlobal_Any" xml:space="preserve">
-	  <value>Une</value>
-  </data>
-  <data name="SynchronizationRulesGlobal_If" xml:space="preserve">
-	  <value>Si</value>
-  </data>
-  <data name="SynchronizationRulesGlobal_TextAfterAny" xml:space="preserve">
-	  <value>des conditions suivantes est vérifiée :</value>
-  </data>
-  <data name="SynchronizationRulesGlobal_TextAfterAll" xml:space="preserve">
-	  <value>les conditions suivantes sont vérifiées :</value>
-  </data>
-  <data name="SynchronizationRulesGlobal_All" xml:space="preserve">
-	  <value>Toutes</value>
-  </data>
-  <data name="AtomicConditionEdit_Content" xml:space="preserve">
-	  <value>Contenu</value>
-  </data>
-  <data name="AtomicConditionEdit_LastWriteTime" xml:space="preserve">
-	  <value>Dernière écriture</value>
-  </data>
-  <data name="AtomicConditionEdit_Size" xml:space="preserve">
-          <value>Taille</value>
-  </data>
-  <data name="AtomicConditionEdit_Name" xml:space="preserve">
-          <value>Nom</value>
-  </data>
+	<data name="SynchronizationRulesGlobal_Any" xml:space="preserve">
+		<value>Une</value>
+	</data>
+	<data name="SynchronizationRulesGlobal_If" xml:space="preserve">
+		<value>Si</value>
+	</data>
+	<data name="SynchronizationRulesGlobal_TextAfterAny" xml:space="preserve">
+		<value>des conditions suivantes est vérifiée :</value>
+	</data>
+	<data name="SynchronizationRulesGlobal_TextAfterAll" xml:space="preserve">
+		<value>les conditions suivantes sont vérifiées :</value>
+	</data>
+	<data name="SynchronizationRulesGlobal_All" xml:space="preserve">
+		<value>Toutes</value>
+	</data>
+	<data name="AtomicConditionEdit_Content" xml:space="preserve">
+		<value>Contenu</value>
+	</data>
+	<data name="AtomicConditionEdit_LastWriteTime" xml:space="preserve">
+		<value>Dernière écriture</value>
+	</data>
+	<data name="AtomicConditionEdit_Size" xml:space="preserve">
+		<value>Taille</value>
+	</data>
+	<data name="AtomicConditionEdit_Name" xml:space="preserve">
+		<value>Nom</value>
+	</data>
 	<data name="AtomicConditionEdit_Equals" xml:space="preserve">
 		<value>Égal à</value>
 	</data>
@@ -144,87 +154,87 @@
 	<data name="AtomicConditionEdit_NotExistsOn" xml:space="preserve">
 		<value>Absent sur</value>
 	</data>
-  <data name="AccountDetails_Zoom" xml:space="preserve">
-	  <value>Zoom :</value>
-  </data>
+	<data name="AccountDetails_Zoom" xml:space="preserve">
+		<value>Zoom :</value>
+	</data>
 	<data name="AtomicConditionEdit_IsDateBefore" xml:space="preserve">
 		<value>Avant</value>
 	</data>
 	<data name="AtomicConditionEdit_IsDateAfter" xml:space="preserve">
 		<value>Après</value>
 	</data>
-  <data name="AtomicConditionEdit_Custom" xml:space="preserve">
-	  <value>Personnalisé</value>
-  </data>
+	<data name="AtomicConditionEdit_Custom" xml:space="preserve">
+		<value>Personnalisé</value>
+	</data>
 	<data name="AtomicConditionEdit_IsSizeGreaterThan" xml:space="preserve">
 		<value>Supérieure à</value>
 	</data>
 	<data name="AtomicConditionEdit_IsSizeLessThan" xml:space="preserve">
 		<value>Inférieure à</value>
 	</data>
-  <data name="AtomicConditionEdit_Source" xml:space="preserve">
-	  <value>Source ou Propriété</value>
-  </data>
-  <data name="AtomicConditionEdit_ComparisonElement" xml:space="preserve">
-	  <value>Élément</value>
-  </data>
-  <data name="AtomicConditionEdit_ComparisonOperator" xml:space="preserve">
-	  <value>Opérateur</value>
-  </data>
-  <data name="AtomicConditionEdit_Destination" xml:space="preserve">
-	  <value>Destination</value>
-  </data>
-  <data name="AtomicConditionEdit_NamePlaceholder" xml:space="preserve">
-	  <value>Nom</value>
-  </data>
-  <data name="AtomicConditionEdit_DateTime" xml:space="preserve">
-	  <value>Date et heure</value>
-  </data>
-  <data name="Misc_SizeUnit_Byte" xml:space="preserve">
-	  <value>o</value>
-  </data>
-  <data name="Misc_SizeUnit_KiloByte" xml:space="preserve">
-	  <value>Ko</value>
-  </data>
-  <data name="Misc_SizeUnit_MegaByte" xml:space="preserve">
-	  <value>Mo</value>
-  </data>
-  <data name="Misc_SizeUnit_GigaByte" xml:space="preserve">
-	  <value>Go</value>
-  </data>
-  <data name="Misc_SizeUnit_TeraByte" xml:space="preserve">
-	  <value>To</value>
-  </data>
-  <data name="SynchronizationRulesGlobal_Conditions" xml:space="preserve">
-	  <value>Conditions</value>
-  </data>
-  <data name="SynchronizationRulesGlobal_AddCondition" xml:space="preserve">
-	  <value>AJOUTER CONDITION</value>
-  </data>
-  <data name="SynchronizationRulesGlobal_Actions" xml:space="preserve">
-	  <value>Actions</value>
-  </data>
-  <data name="SynchronizationRulesGlobal_AddAction" xml:space="preserve">
-	  <value>AJOUTER ACTION</value>
-  </data>
-  <data name="SynchronizationRulesGlobal_DoTheFollowingActions" xml:space="preserve">
-	  <value>Effectuer les actions suivantes :</value>
-  </data>
-  <data name="AtomicActionEdit_Action" xml:space="preserve">
-	  <value>Action</value>
-  </data>
+	<data name="AtomicConditionEdit_Source" xml:space="preserve">
+		<value>Source ou Propriété</value>
+	</data>
+	<data name="AtomicConditionEdit_ComparisonElement" xml:space="preserve">
+		<value>Élément</value>
+	</data>
+	<data name="AtomicConditionEdit_ComparisonOperator" xml:space="preserve">
+		<value>Opérateur</value>
+	</data>
+	<data name="AtomicConditionEdit_Destination" xml:space="preserve">
+		<value>Destination</value>
+	</data>
+	<data name="AtomicConditionEdit_NamePlaceholder" xml:space="preserve">
+		<value>Nom</value>
+	</data>
+	<data name="AtomicConditionEdit_DateTime" xml:space="preserve">
+		<value>Date et heure</value>
+	</data>
+	<data name="Misc_SizeUnit_Byte" xml:space="preserve">
+		<value>o</value>
+	</data>
+	<data name="Misc_SizeUnit_KiloByte" xml:space="preserve">
+		<value>Ko</value>
+	</data>
+	<data name="Misc_SizeUnit_MegaByte" xml:space="preserve">
+		<value>Mo</value>
+	</data>
+	<data name="Misc_SizeUnit_GigaByte" xml:space="preserve">
+		<value>Go</value>
+	</data>
+	<data name="Misc_SizeUnit_TeraByte" xml:space="preserve">
+		<value>To</value>
+	</data>
+	<data name="SynchronizationRulesGlobal_Conditions" xml:space="preserve">
+		<value>Conditions</value>
+	</data>
+	<data name="SynchronizationRulesGlobal_AddCondition" xml:space="preserve">
+		<value>AJOUTER CONDITION</value>
+	</data>
+	<data name="SynchronizationRulesGlobal_Actions" xml:space="preserve">
+		<value>Actions</value>
+	</data>
+	<data name="SynchronizationRulesGlobal_AddAction" xml:space="preserve">
+		<value>AJOUTER ACTION</value>
+	</data>
+	<data name="SynchronizationRulesGlobal_DoTheFollowingActions" xml:space="preserve">
+		<value>Effectuer les actions suivantes :</value>
+	</data>
+	<data name="AtomicActionEdit_Action" xml:space="preserve">
+		<value>Action</value>
+	</data>
 	<data name="AtomicActionEdit_From" xml:space="preserve">
 		<value>Depuis</value>
 	</data>
-  <data name="AtomicActionEdit_To" xml:space="preserve">
-	  <value>Vers</value>
-  </data>
-  <data name="AtomicActionEdit_Source" xml:space="preserve">
-	  <value>Source</value>
-  </data>
-  <data name="AtomicActionEdit_Destination" xml:space="preserve">
-	  <value>Destination</value>
-  </data>
+	<data name="AtomicActionEdit_To" xml:space="preserve">
+		<value>Vers</value>
+	</data>
+	<data name="AtomicActionEdit_Source" xml:space="preserve">
+		<value>Source</value>
+	</data>
+	<data name="AtomicActionEdit_Destination" xml:space="preserve">
+		<value>Destination</value>
+	</data>
 	<data name="AtomicActionEdit_SynchronizeContentAndDate" xml:space="preserve">
 		<value>Copier</value>
 	</data>
@@ -234,18 +244,18 @@
 	<data name="AtomicActionEdit_SynchronizeDate" xml:space="preserve">
 		<value>Copier les dates uniquement</value>
 	</data>
-  <data name="AtomicActionEdit_DoNothing" xml:space="preserve">
-	  <value>Ne rien faire</value>
-  </data>
-  <data name="SynchronizationRulesGlobal_Save" xml:space="preserve">
-	  <value>ENREGISTRER</value>
-  </data>
-  <data name="SynchronizationRulesGlobal_Reset" xml:space="preserve">
-	  <value>RÉINITIALISER</value>
-  </data>
-  <data name="SynchronizationRulesGlobal_Cancel" xml:space="preserve">
-	  <value>ANNULER</value>
-  </data>
+	<data name="AtomicActionEdit_DoNothing" xml:space="preserve">
+		<value>Ne rien faire</value>
+	</data>
+	<data name="SynchronizationRulesGlobal_Save" xml:space="preserve">
+		<value>ENREGISTRER</value>
+	</data>
+	<data name="SynchronizationRulesGlobal_Reset" xml:space="preserve">
+		<value>RÉINITIALISER</value>
+	</data>
+	<data name="SynchronizationRulesGlobal_Cancel" xml:space="preserve">
+		<value>ANNULER</value>
+	</data>
 	<data name="ManageSynchronizationRulesView_SynchronizationRules" xml:space="preserve">
 		<value>Règles de synchronisation</value>
 	</data>
@@ -258,27 +268,27 @@
 	<data name="Shell_EditSynchronizationRule" xml:space="preserve">
 		<value>Éditer une Règle de Synchronisation</value>
 	</data>
-  <data name="SynchronizationRuleSummary_IfAll" xml:space="preserve">
-	  <value>Si toutes</value>
-  </data>
-  <data name="SynchronizationRuleSummary_IfAny" xml:space="preserve">
-	  <value>Si une</value>
-  </data>
-  <data name="SynchronizationRuleSummary_Then" xml:space="preserve">
-	  <value>Alors</value>
-  </data>
+	<data name="SynchronizationRuleSummary_IfAll" xml:space="preserve">
+		<value>Si toutes</value>
+	</data>
+	<data name="SynchronizationRuleSummary_IfAny" xml:space="preserve">
+		<value>Si une</value>
+	</data>
+	<data name="SynchronizationRuleSummary_Then" xml:space="preserve">
+		<value>Alors</value>
+	</data>
 	<data name="ComparisonResult_Element" xml:space="preserve">
 		<value>FICHIER</value>
 	</data>
 	<data name="Shell_CreateTargetedAction" xml:space="preserve">
 		<value>Créer une Action Ciblée</value>
 	</data>
-  <data name="TargetedActionEditionGlobal_Actions" xml:space="preserve">
-	  <value>Actions</value>
-  </data>
-  <data name="TargetedActionEditionGlobal_DoTheFollowingAction" xml:space="preserve">
-	  <value>Effectuer l'action suivante :</value>
-  </data>
+	<data name="TargetedActionEditionGlobal_Actions" xml:space="preserve">
+		<value>Actions</value>
+	</data>
+	<data name="TargetedActionEditionGlobal_DoTheFollowingAction" xml:space="preserve">
+		<value>Effectuer l'action suivante :</value>
+	</data>
 	<data name="SynchronizationActionDescription_Action_SynchronizeContent" xml:space="preserve">
 		<value>Copier le contenu uniquement</value>
 	</data>
@@ -288,15 +298,15 @@
 	<data name="SynchronizationActionDescription_Action_SynchronizeDate" xml:space="preserve">
 		<value>Copier les dates uniquement</value>
 	</data>
-  <data name="SynchronizationActionDescription_Action_DoNothing" xml:space="preserve">
-	  <value>Ne rien faire</value>
-  </data>
-  <data name="SynchronizationActionDescription_From" xml:space="preserve">
-	  <value>de</value>
-  </data>
-  <data name="SynchronizationActionDescription_To" xml:space="preserve">
-	  <value>vers</value>
-  </data>
+	<data name="SynchronizationActionDescription_Action_DoNothing" xml:space="preserve">
+		<value>Ne rien faire</value>
+	</data>
+	<data name="SynchronizationActionDescription_From" xml:space="preserve">
+		<value>de</value>
+	</data>
+	<data name="SynchronizationActionDescription_To" xml:space="preserve">
+		<value>vers</value>
+	</data>
 	<data name="ComparisonResult_AddTargetedAction" xml:space="preserve">
 		<value>AJOUTER ACTION CIBLÉE</value>
 	</data>
@@ -306,60 +316,60 @@
 	<data name="ComparisonResult_Filter" xml:space="preserve">
 		<value>Filtrer les éléments affichés</value>
 	</data>
-  <data name="SessionMachine_AddDirectory" xml:space="preserve">
-	  <value>Ajouter Répertoire</value>
-  </data>
-  <data name="SessionMachine_AddFile" xml:space="preserve">
-	  <value>Ajouter Fichier</value>
-  </data>
-  <data name="SessionMachine_StartInventory" xml:space="preserve">
-	  <value>DÉMARRER INVENTAIRE</value>
-  </data>
-  <data name="SessionMachine_NoDataSelected" xml:space="preserve">
-	  <value>Veuillez sélectionner des données</value>
-  </data>
-  <data name="SessionMachine_Status_WaitingForStart" xml:space="preserve">
-	  <value>En attente du démarrage de l'inventaire</value>
-  </data>
-  <data name="ComparisonResult_Inventory" xml:space="preserve">
-	  <value>INVENTAIRE</value>
-  </data>
+	<data name="SessionMachine_AddDirectory" xml:space="preserve">
+		<value>Ajouter Répertoire</value>
+	</data>
+	<data name="SessionMachine_AddFile" xml:space="preserve">
+		<value>Ajouter Fichier</value>
+	</data>
+	<data name="SessionMachine_StartInventory" xml:space="preserve">
+		<value>DÉMARRER INVENTAIRE</value>
+	</data>
+	<data name="SessionMachine_NoDataSelected" xml:space="preserve">
+		<value>Veuillez sélectionner des données</value>
+	</data>
+	<data name="SessionMachine_Status_WaitingForStart" xml:space="preserve">
+		<value>En attente du démarrage de l'inventaire</value>
+	</data>
+	<data name="ComparisonResult_Inventory" xml:space="preserve">
+		<value>INVENTAIRE</value>
+	</data>
 	<data name="ComparisonResult_ContentRepartition" xml:space="preserve">
 		<value>INITIAL</value>
 	</data>
-  <data name="TargetedActionEditionGlobal_SaveWarning" xml:space="preserve">
-	  <value>L'action que vous êtes en train de créer ne peut pas être appliquée à tous les éléments sélectionnés.
+	<data name="TargetedActionEditionGlobal_SaveWarning" xml:space="preserve">
+		<value>L'action que vous êtes en train de créer ne peut pas être appliquée à tous les éléments sélectionnés.
 Éléments valides : {{VALID_ITEMS}}
 Éléments non valides : {{NON_VALID_ITEMS}}
 Voulez-vous continuer ?</value>
-  </data>
-  <data name="TargetedActionEditionGlobal_SaveForValidItems" xml:space="preserve">
-	  <value>Enregistrer et appliquer aux éléments valides</value>
-  </data>
-  <data name="TargetedActionEditionGlobal_SaveWarningLocked" xml:space="preserve">
-	  <value>L'action que vous êtes en train de créer ne peut être appliquée à aucun élément sélectionné.</value>
-  </data>
-  <data name="SynchronizationRuleSummary_If" xml:space="preserve">
-	  <value>Si</value>
-  </data>
-  <data name="AtomicConditionDescription_ComparisonElement_Content" xml:space="preserve">
-	  <value>Contenu</value>
-  </data>
-  <data name="AtomicConditionDescription_ComparisonElement_Date" xml:space="preserve">
-	  <value>Date</value>
-  </data>
-  <data name="AtomicConditionDescription_ComparisonElement_Size" xml:space="preserve">
-          <value>Taille</value>
-  </data>
-  <data name="AtomicConditionDescription_ComparisonElement_Name" xml:space="preserve">
-          <value>Nom</value>
-  </data>
-  <data name="AtomicConditionDescription_ConditionOperator_Equals" xml:space="preserve">
-	  <value>Est égal à</value>
-  </data>
-  <data name="AtomicConditionDescription_ConditionOperator_NotEquals" xml:space="preserve">
-	  <value>N'est pas égal à</value>
-  </data>
+	</data>
+	<data name="TargetedActionEditionGlobal_SaveForValidItems" xml:space="preserve">
+		<value>Enregistrer et appliquer aux éléments valides</value>
+	</data>
+	<data name="TargetedActionEditionGlobal_SaveWarningLocked" xml:space="preserve">
+		<value>L'action que vous êtes en train de créer ne peut être appliquée à aucun élément sélectionné.</value>
+	</data>
+	<data name="SynchronizationRuleSummary_If" xml:space="preserve">
+		<value>Si</value>
+	</data>
+	<data name="AtomicConditionDescription_ComparisonElement_Content" xml:space="preserve">
+		<value>Contenu</value>
+	</data>
+	<data name="AtomicConditionDescription_ComparisonElement_Date" xml:space="preserve">
+		<value>Date</value>
+	</data>
+	<data name="AtomicConditionDescription_ComparisonElement_Size" xml:space="preserve">
+		<value>Taille</value>
+	</data>
+	<data name="AtomicConditionDescription_ComparisonElement_Name" xml:space="preserve">
+		<value>Nom</value>
+	</data>
+	<data name="AtomicConditionDescription_ConditionOperator_Equals" xml:space="preserve">
+		<value>Est égal à</value>
+	</data>
+	<data name="AtomicConditionDescription_ConditionOperator_NotEquals" xml:space="preserve">
+		<value>N'est pas égal à</value>
+	</data>
 	<data name="AtomicConditionDescription_ConditionOperator_ExistsOn" xml:space="preserve">
 		<value>Présent sur</value>
 	</data>
@@ -378,27 +388,27 @@ Voulez-vous continuer ?</value>
 	<data name="AtomicConditionDescription_ConditionOperator_IsDateAfter" xml:space="preserve">
 		<value>Est après</value>
 	</data>
-  <data name="InventoryProcess_IdentifiedFiles" xml:space="preserve">
-	  <value>Fichiers identifiés :</value>
-  </data>
-  <data name="InventoryProcess_IdentifiedDirectories" xml:space="preserve">
-	  <value>Répertoires identifiés :</value>
-  </data>
-  <data name="InventoryProcess_Start" xml:space="preserve">
-	  <value>Démarrage :</value>
-  </data>
-  <data name="InventoryProcess_ElapsedTime" xml:space="preserve">
-	  <value>Temps écoulé :</value>
-  </data>
-  <data name="InventoryProcess_RemainingTime" xml:space="preserve">
-	  <value>Temps restant :</value>
-  </data>
-  <data name="InventoryProcess_EstimatedEnd" xml:space="preserve">
-	  <value>Fin estimée :</value>
-  </data>
-  <data name="InventoryProcess_AnalyzedFiles" xml:space="preserve">
-	  <value>Fichiers analysés :</value>
-  </data>
+	<data name="InventoryProcess_IdentifiedFiles" xml:space="preserve">
+		<value>Fichiers identifiés :</value>
+	</data>
+	<data name="InventoryProcess_IdentifiedDirectories" xml:space="preserve">
+		<value>Répertoires identifiés :</value>
+	</data>
+	<data name="InventoryProcess_Start" xml:space="preserve">
+		<value>Démarrage :</value>
+	</data>
+	<data name="InventoryProcess_ElapsedTime" xml:space="preserve">
+		<value>Temps écoulé :</value>
+	</data>
+	<data name="InventoryProcess_RemainingTime" xml:space="preserve">
+		<value>Temps restant :</value>
+	</data>
+	<data name="InventoryProcess_EstimatedEnd" xml:space="preserve">
+		<value>Fin estimée :</value>
+	</data>
+	<data name="InventoryProcess_AnalyzedFiles" xml:space="preserve">
+		<value>Fichiers analysés :</value>
+	</data>
 	<data name="InventoryProcess_ProcessedSize" xml:space="preserve">
 		<value>Volume analysé :</value>
 	</data>
@@ -423,138 +433,105 @@ Voulez-vous continuer ?</value>
 	<data name="InventoryProcess_AnalysisSuccess" xml:space="preserve">
 		<value>Analyse Locale terminée !</value>
 	</data>
-  <data name="InventoryProcess_End" xml:space="preserve">
-	  <value>Fin :</value>
-  </data>
-  <data name="CloudSession_QuitSession" xml:space="preserve">
-	  <value>QUITTER LA SESSION</value>
-  </data>
-  <data name="JoinCloudSession_JoinCloudSession" xml:space="preserve">
-	  <value>REJOINDRE LA SESSION CLOUD</value>
-  </data>
-  <data name="JoinCloudSession_Cancel" xml:space="preserve">
-	  <value>ANNULER</value>
-  </data>
-  <data name="SynchronizationMain_CurrentAction" xml:space="preserve">
-	  <value>Action en cours :</value>
-  </data>
+	<data name="InventoryProcess_End" xml:space="preserve">
+		<value>Fin :</value>
+	</data>
+	<data name="CloudSession_QuitSession" xml:space="preserve">
+		<value>QUITTER LA SESSION</value>
+	</data>
+	<data name="JoinCloudSession_JoinCloudSession" xml:space="preserve">
+		<value>REJOINDRE LA SESSION DE SYNCHRONISATION</value>
+	</data>
+	<data name="JoinCloudSession_Cancel" xml:space="preserve">
+		<value>ANNULER</value>
+	</data>
+	<data name="SynchronizationMain_CurrentAction" xml:space="preserve">
+		<value>Action en cours :</value>
+	</data>
 	<data name="SynchronizationMain_RunActions" xml:space="preserve">
 		<value>DÉMARRER LA SYNCHRONISATION</value>
 	</data>
-  <data name="SynchronizationMain_NoActionWarning" xml:space="preserve">
-	  <value>Pas d'action configurée, veuillez configurer une action au minimum.</value>
-  </data>
-  <data name="InventoryProcess_StartLocalInventory" xml:space="preserve">
-	  <value>DÉMARRER INVENTAIRE LOCAL</value>
-  </data>
+	<data name="SynchronizationMain_NoActionWarning" xml:space="preserve">
+		<value>Pas d'action configurée, veuillez configurer une action au minimum.</value>
+	</data>
+	<data name="InventoryProcess_StartLocalInventory" xml:space="preserve">
+		<value>DÉMARRER INVENTAIRE LOCAL</value>
+	</data>
 	<data name="SessionMachine_Status_RunningIdentification" xml:space="preserve">
 		<value>Identification en cours</value>
 	</data>
-  <data name="SessionMachine_Status_Finished" xml:space="preserve">
-	  <value>Inventaire terminé</value>
-  </data>
-  <data name="SynchronizationMain_Start" xml:space="preserve">
-	  <value>Démarrage :</value>
-  </data>
-  <data name="SynchronizationMain_ElapsedTime" xml:space="preserve">
-	  <value>Temps écoulé :</value>
-  </data>
-  <data name="SynchronizationMain_RemainingTime" xml:space="preserve">
-	  <value>Temps restant :</value>
-  </data>
+	<data name="SessionMachine_Status_Finished" xml:space="preserve">
+		<value>Inventaire terminé</value>
+	</data>
+	<data name="SynchronizationMain_Start" xml:space="preserve">
+		<value>Démarrage :</value>
+	</data>
+	<data name="SynchronizationMain_ElapsedTime" xml:space="preserve">
+		<value>Temps écoulé :</value>
+	</data>
+	<data name="SynchronizationMain_RemainingTime" xml:space="preserve">
+		<value>Temps restant :</value>
+	</data>
 	<data name="SynchronizationMain_HandledActions" xml:space="preserve">
 		<value>Actions traitées :</value>
 	</data>
 	<data name="SynchronizationMain_ProcessedVolume" xml:space="preserve">
 		<value>Volume traité :</value>
 	</data>
-  <data name="SynchronizationMain_EstimatedEnd" xml:space="preserve">
-	  <value>Fin estimée :</value>
-  </data>
-  <data name="SynchronizationMain_End" xml:space="preserve">
-	  <value>Fin :</value>
-  </data>
-  <data name="SynchronizationMain_SynchronizationDone" xml:space="preserve">
-	  <value>Synchronisation terminée !</value>
-  </data>
-  <data name="SynchronizationMain_SynchronizationRunning" xml:space="preserve">
-	  <value>Synchronisation en cours</value>
-  </data>
+	<data name="SynchronizationMain_EstimatedEnd" xml:space="preserve">
+		<value>Fin estimée :</value>
+	</data>
+	<data name="SynchronizationMain_End" xml:space="preserve">
+		<value>Fin :</value>
+	</data>
+	<data name="SynchronizationMain_SynchronizationDone" xml:space="preserve">
+		<value>Synchronisation terminée !</value>
+	</data>
+	<data name="SynchronizationMain_SynchronizationRunning" xml:space="preserve">
+		<value>Synchronisation en cours</value>
+	</data>
 	<data name="SynchronizationMain_ExchangedVolume" xml:space="preserve">
 		<value>Volume échangé :</value>
 	</data>
-  <data name="Status_OK" xml:space="preserve">
-	  <value>OK</value>
-  </data>
-  <data name="Status_Done" xml:space="preserve">
-	  <value>Traité !</value>
-  </data>
-  <data name="General_Colon" xml:space="preserve">
-	  <value> :</value>
-  </data>
-  <data name="Header_Account_Tooltip" xml:space="preserve">
-	  <value>Afficher les détails de votre compte.</value>
-  </data>
+	<data name="Status_OK" xml:space="preserve">
+		<value>OK</value>
+	</data>
+	<data name="Status_Done" xml:space="preserve">
+		<value>Traité !</value>
+	</data>
+	<data name="General_Colon" xml:space="preserve">
+		<value> :</value>
+	</data>
+	<data name="Header_Account_Tooltip" xml:space="preserve">
+		<value>Afficher les détails de votre compte.</value>
+	</data>
 	<data name="Header_Documentation_Tooltip" xml:space="preserve">
 		<value>Consulter la documentation en ligne sur le site web de ByteSync.</value>
 	</data>
 	<data name="Header_Home_Tooltip" xml:space="preserve">
 		<value>Revenir à la page d'accueil de POW ByteSync.</value>
 	</data>
-  <data name="AccountDetails_OpenLog" xml:space="preserve">
-	  <value>Ouvrir le journal</value>
-  </data>
-  <data name="LoginForm_EditedByPowSoftware" xml:space="preserve">
-	  <value>par POW Software</value>
-  </data>
-  <data name="Login_Version" xml:space="preserve">
-	  <value>Version {0}</value>
-  </data>
-  <data name="UpdateDetails_AvailableUpdate_Mandatory" xml:space="preserve">
-	  <value>Une mise à jour obligatoire est disponible ({0}).</value>
-  </data>
-  <data name="UpdateDetails_AvailableUpdate_Recommended" xml:space="preserve">
-	  <value>Une mise à jour recommandée est disponible ({0}).</value>
-  </data>
-  <data name="UpdateDetails_AvailableUpdate_Optional" xml:space="preserve">
-	  <value>Une mise à jour optionnelle est disponible ({0}).</value>
-  </data>
-  <data name="Login_UpdateDialog_Cancel" xml:space="preserve">
-	  <value>Annuler</value>
-  </data>
-  <data name="Login_UpdateDialog_Update" xml:space="preserve">
-	  <value>Mettre à jour</value>
-  </data>
-  <data name="Login_UpdateDialog_Title" xml:space="preserve">
-	  <value>Mettre à jour l'application</value>
-  </data>
-  <data name="Login_UpdateDialog_Message" xml:space="preserve">
-	  <value>Voulez-vous mettre à jour l'application à la version {0} ?</value>
-  </data>
-  <data name="UpdateDetails_AvailableUpdate_ReleaseNotes" xml:space="preserve">
-	  <value>Notes de version</value>
-  </data>
-  <data name="UpdateDetails_AvailableUpdate_UpdateNow" xml:space="preserve">
-	  <value>Mettre à jour maintenant</value>
-  </data>
-  <data name="Login_SigninError_UnknownError" xml:space="preserve">
-	  <value>Erreur inconnue</value>
-  </data>
-  <data name="Login_SigninError_Unable" xml:space="preserve">
-	  <value>Impossible de se connecter : {0}</value>
-  </data>
-  <data name="Misc_SeparatorComma" xml:space="preserve">
-	  <value>, </value>
-  </data>
-  <data name="Login_SigninError_NoAvailableSlot" xml:space="preserve">
-	  <value>Ce numéro de série n'a plus de jeton de connexion disponible</value>
-  </data>
-	<data name="Login_SigninError_EmailOrSerialNotFound" xml:space="preserve">
-		<value>Adresse email ou numéro de série inconnu</value>
+	<data name="AccountDetails_OpenLog" xml:space="preserve">
+		<value>Ouvrir le journal</value>
 	</data>
-  <data name="Login_SigninError_VersionNotAllowed" xml:space="preserve">
-	  <value>Cette version de l'application n'est plus supportée. Veuillez mettre à jour l'application.</value>
-  </data>
+	<data name="UpdateDetails_AvailableUpdate_Mandatory" xml:space="preserve">
+		<value>Une mise à jour obligatoire est disponible ({0}).</value>
+	</data>
+	<data name="UpdateDetails_AvailableUpdate_Recommended" xml:space="preserve">
+		<value>Une mise à jour recommandée est disponible ({0}).</value>
+	</data>
+	<data name="UpdateDetails_AvailableUpdate_Optional" xml:space="preserve">
+		<value>Une mise à jour optionnelle est disponible ({0}).</value>
+	</data>
+	<data name="UpdateDetails_AvailableUpdate_ReleaseNotes" xml:space="preserve">
+		<value>Notes de version</value>
+	</data>
+	<data name="UpdateDetails_AvailableUpdate_UpdateNow" xml:space="preserve">
+		<value>Mettre à jour maintenant</value>
+	</data>
+	<data name="Misc_SeparatorComma" xml:space="preserve">
+		<value>, </value>
+	</data>
 	<data name="Header_GeneralSettings_Tooltip" xml:space="preserve">
 		<value>Afficher les paramètres de l'application.</value>
 	</data>
@@ -564,18 +541,18 @@ Voulez-vous continuer ?</value>
 	<data name="Header_GeneralSettings" xml:space="preserve">
 		<value>Paramètres de l'application</value>
 	</data>
-  <data name="AccountDetails_Serial" xml:space="preserve">
-	  <value>Numéro de série :</value>
-  </data>
-  <data name="AccountDetails_Product" xml:space="preserve">
-	  <value>Logiciel :</value>
-  </data>
-  <data name="AccountDetails_Subscription" xml:space="preserve">
-	  <value>Abonnement :</value>
-  </data>
-  <data name="JoinCloudSession_ErrorMessage" xml:space="preserve">
-	  <value>Une erreur est survenue. Veuillez consulter le journal.</value>
-  </data>
+	<data name="AccountDetails_Serial" xml:space="preserve">
+		<value>Numéro de série :</value>
+	</data>
+	<data name="AccountDetails_Product" xml:space="preserve">
+		<value>Logiciel :</value>
+	</data>
+	<data name="AccountDetails_Subscription" xml:space="preserve">
+		<value>Abonnement :</value>
+	</data>
+	<data name="JoinCloudSession_ErrorMessage" xml:space="preserve">
+		<value>Une erreur est survenue. Veuillez consulter le journal.</value>
+	</data>
 	<data name="JoinCloudSession_WrongPassword" xml:space="preserve">
 		<value>Le mot de passe fourni est incorrect. Veuillez réessayer.</value>
 	</data>
@@ -614,9 +591,6 @@ Voulez-vous continuer ?</value>
 	</data>
 	<data name="AnalysisMode_Checksum" xml:space="preserve">
 		<value>Checksum</value>
-	</data>
-	<data name="Login_SigninError_SerialExpired" xml:space="preserve">
-		<value>Votre abonnement est expiré</value>
 	</data>
 	<data name="InventoryProcess_AnalysisPending" xml:space="preserve">
 		<value>Analyse Locale en attente</value>
@@ -668,17 +642,6 @@ Voulez-vous continuer ?</value>
 	</data>
 	<data name="ContentIdentity_ErrorDescription" xml:space="preserve">
 		<value>Description de l'erreur :</value>
-	</data>
-	<data name="LoginForm_BetaWarningCaption" xml:space="preserve">
-		<value>Avertissement Version Bêta</value>
-	</data>
-	<data name="LoginForm_BetaWarningContent" xml:space="preserve">
-		<value>Veuillez noter qu'il s'agit d'une version Bêta du logiciel ByteSync, qui est encore en phase de test et qui va subir des améliorations avant sa commercialisation. 
-Le logiciel et tout le contenu lié sont fournis sous licence "TELLE QUELLE" et peuvent contenir des bugs et des problèmes de stabilité. 
-POW Software, l'éditeur, ne donne aucune garantie, qu'elle soit expresse ou implicite, quant à l'adéquation, la facilité d'utilisation ou la fiabilité du logiciel.</value>
-	</data>
-	<data name="LoginForm_BetaWarningCheckbox" xml:space="preserve">
-		<value>Je comprends et j'accepte d'utiliser cette version Bêta du logiciel</value>
 	</data>
 	<data name="JoinCloudSession_SessionNotFound" xml:space="preserve">
 		<value>La session n'a pas été trouvée. Veuillez vérifier l'identifiant de session fourni.</value>
@@ -798,9 +761,6 @@ Veuillez interrompre l'inventaire ou la synchronisation au préalable.</value>
 Si vous quittez la session, celle-ci sera en erreur et les autres participants ne pourront pas synchroniser de données.
 Voulez-vous quitter la session ?</value>
 	</data>
-	<data name="LoginForm_AboutTheOpenBeta" xml:space="preserve">
-		<value>À propos de la Bêta Ouverte</value>
-	</data>
 	<data name="ComparisonResult_WaitingForResults" xml:space="preserve">
 		<value>Comparaison des Inventaires Locaux en cours, veuillez patienter...</value>
 	</data>
@@ -831,9 +791,9 @@ Les paramètres de la Session ne sont pas définis.</value>
 		<value>Impossible de démarrer l'Inventaire des Données :
 Une erreur inconnue est survenue. Veuillez consulter le journal.</value>
 	</data>
-	<data name="InventoryProcess_AtLeastOneMemberWithNoDataToSynchronize" xml:space="preserve">
+	<data name="InventoryProcess_AtLeastOneDataNodeWithNoDataSource" xml:space="preserve">
 		<value>Impossible de démarrer l'Inventaire des Données :
-Tous les membres de la Session doivent sélectionner des données à synchroniser.</value>
+Au moins un Nœud de Données n'a pas de Source de Données.</value>
 	</data>
 	<data name="ComparisonResult_ErrorDuringComparison" xml:space="preserve">
 		<value>Une erreur est survenue durant la comparaison des Inventaires Locaux.
@@ -861,9 +821,9 @@ Vous devez sélectionner au maximum 5 sources de données.</value>
 Vous devez sélectionner au maximum 5 nœuds de données.</value>
 	</data>
 	<data name="InventoryProcess_LessThan2DataNodes" xml:space="preserve">
-    <value>Impossible de démarrer l'Inventaire des Données :
+		<value>Impossible de démarrer l'Inventaire des Données :
 Vous devez sélectionner au minimum 5 nœuds de données.</value>
-  </data>
+	</data>
 	<data name="SessionQuitChecker_QuitLocalActivated_Title" xml:space="preserve">
 		<value>Quitter la session</value>
 	</data>
@@ -1068,14 +1028,14 @@ Veuillez interrompre l'inventaire ou la synchronisation au préalable.</value>
 		<value>En attente de rejoindre le Lobby</value>
 	</data>
 	<data name="OperationSelection_Lobby" xml:space="preserve">
-		<value>Lobby de Session Cloud</value>
+		<value>Lobby de Session de Synchronisation</value>
 	</data>
 	<data name="Shell_TrustedClients" xml:space="preserve">
 		<value>Enregistrement d'un Client de Confiance</value>
 	</data>
 	<data name="AddTrustedClient_Introduction_OnSessionMemberSide" xml:space="preserve">
-		<value>Un client qui n'appartient pas à vos Clients de Confiance demande à rejoindre la Session Cloud.
-Vous devez l'ajouter à votre Clients de Confiance pour qu'il puisse rejoindre la Session Cloud.
+		<value>Un client qui n'appartient pas à vos Clients de Confiance demande à rejoindre la Session de Synchronisation.
+Vous devez l'ajouter à votre Clients de Confiance pour qu'il puisse rejoindre la Session de Synchronisation.
 Veuillez vous assurer que les Mots de Sécurité sont identiques et dans le même ordre sur votre client et sur le client demandeur avant d'enregistrer ce Client de Confiance.</value>
 	</data>
 	<data name="AddTrustedClient_MachineName" xml:space="preserve">
@@ -1088,7 +1048,7 @@ Veuillez vous assurer que les Mots de Sécurité sont identiques et dans le mêm
 		<value>Reverse DNS :</value>
 	</data>
 	<data name="AddTrustedClient_Introduction_OnJoiningMemberSide" xml:space="preserve">
-		<value>Vous demandez à rejoindre une Session Cloud dont certains membres n'appartiennent pas à vos Clients de Confiance.
+		<value>Vous demandez à rejoindre une Session de Synchronisation dont certains membres n'appartiennent pas à vos Clients de Confiance.
 Vous devez ajouter ces Membres de la Session à vos Clients de Confiance pour pouvoir rejoindre cette session.
 Veuillez vous assurer que les Mots de Sécurité sont identiques et dans le même ordre sur votre client et sur chaque client Membre de la Session avant d'enregistrer ces Clients de Confiance.</value>
 	</data>
@@ -1165,16 +1125,16 @@ Veuillez vous assurer que les Mots de Sécurité sont identiques et dans le mêm
 		<value>Erreur durant le contrôle croisé entre les Membres du Lobby</value>
 	</data>
 	<data name="LobbyMemberStatus_JoinedSession" xml:space="preserve">
-		<value>A rejoint la Session Cloud</value>
+		<value>A rejoint la Session de Synchronisation</value>
 	</data>
 	<data name="LobbyMemberStatus_CreatedSession" xml:space="preserve">
-		<value>Session Cloud créée. En Attente que les autres Membres la rejoignent...</value>
+		<value>Session de Synchronisation créée. En Attente que les autres Membres la rejoignent...</value>
 	</data>
 	<data name="Shell_CreateCloudSessionProfile" xml:space="preserve">
-		<value>Créer un Profil de Session Cloud</value>
+		<value>Créer un Profil de Session de Synchronisation</value>
 	</data>
 	<data name="ProfileType_CloudSession" xml:space="preserve">
-		<value>Session Cloud</value>
+		<value>Session de Synchronisation</value>
 	</data>
 	<data name="ProfileType_LocalSession" xml:space="preserve">
 		<value>Session Locale</value>
@@ -1237,11 +1197,11 @@ Veuillez vous assurer que les Mots de Sécurité sont identiques et dans le mêm
 		<value>Voulez-vous supprimer le Profil de Session '{0}' ?</value>
 	</data>
 	<data name="SessionProfileManager_OnReceivedCloudSessionProfile_Message" xml:space="preserve">
-		<value>Le Premier Membre de la Session Cloud a créé un Profil de Session Cloud nommé '{0}'.
-Acceptez-vous d'enregistrer ce Profil de Session Cloud sur votre machine ?</value>
+		<value>Le Premier Membre de la Session de Synchronisation a créé un Profil de Session de Synchronisation nommé '{0}'.
+Acceptez-vous d'enregistrer ce Profil de Session de Synchronisation sur votre machine ?</value>
 	</data>
 	<data name="SessionProfileManager_OnReceivedCloudSessionProfile_Title" xml:space="preserve">
-		<value>Accepter le Profil de Session Cloud</value>
+		<value>Accepter le Profil de Session de Synchronisation</value>
 	</data>
 	<data name="InventoryProcess_WaitingForAutomaticStart_CloudSession" xml:space="preserve">
 		<value>L'Inventaire des Données démarrera automatiquement lorsque tous les Membres de la Session seront prêts...</value>
@@ -1435,11 +1395,11 @@ L'Inventaire des Données sera lancé automatiquement.</value>
 		<value>Informations</value>
 	</data>
 	<data name="ProfilesView_Tooltip_Content_Join" xml:space="preserve">
-		<value>Rejoindre un Lobby de Session Cloud.</value>
+		<value>Rejoindre un Lobby de Session de Synchronisation.</value>
 	</data>
 	<data name="ProfilesView_Tooltip_Content_Details" xml:space="preserve">
 		<value>Dans le cas d'une Session Locale, démarrer une Session à partir du profil. L'Inventaire des données devra être lancé manuellement.
-Dans le cas d'une Session Cloud, afficher uniquement les détails du profil.</value>
+Dans le cas d'une Session de Synchronisation, afficher uniquement les détails du profil.</value>
 	</data>
 	<data name="ProfilesView_Tooltip_Header_Delete" xml:space="preserve">
 		<value>Supprimer</value>
@@ -1448,18 +1408,11 @@ Dans le cas d'une Session Cloud, afficher uniquement les détails du profil.</va
 		<value>Supprimer le Profil de Session.</value>
 	</data>
 	<data name="HomeView_CloudSynchronization_ToolTip_Content" xml:space="preserve">
-		<value>Démarrer une Session Cloud pour synchroniser et sauvegarder des données à distance.
+		<value>Démarrer une Session de Synchronisation pour synchroniser et sauvegarder des données à distance.
 De 2 à 5 clients participent.</value>
 	</data>
 	<data name="HomeView_CloudSynchronization_ToolTip_Header" xml:space="preserve">
-		<value>Synchronisation Cloud</value>
-	</data>
-	<data name="HomeView_LocalSynchronization_ToolTip_Header" xml:space="preserve">
-		<value>Synchronisation Locale</value>
-	</data>
-	<data name="HomeView_LocalSynchronization_ToolTip_Content" xml:space="preserve">
-		<value>Démarrer une Session Locale pour synchroniser et sauvegarder des données localement.
-1 seul client participe.</value>
+		<value>Synchronisation</value>
 	</data>
 	<data name="CreateCloudSessionProfileView_AlreadyAProfileWithSameName" xml:space="preserve">
 		<value>Un Profil de Session portant le même nom existe déjà.
@@ -1541,7 +1494,7 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 		<value>Veuillez utiliser le système de déploiement d'origine pour mettre à jour le logiciel.</value>
 	</data>
 	<data name="CreateCloudSession_Create" xml:space="preserve">
-		<value>DÉMARRER UNE SESSION CLOUD</value>
+		<value>DÉMARRER UNE SESSION DE SYNCHRONISATION</value>
 	</data>
 	<data name="CreateCloudSession_Cancel" xml:space="preserve">
 		<value>ANNULER</value>
@@ -1550,10 +1503,10 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 		<value>Une erreur inconnue est survenue. Veuillez consulter le journal.</value>
 	</data>
 	<data name="CreateCloudSession_Header" xml:space="preserve">
-		<value>Créer une nouvelle Session Cloud</value>
+		<value>Créer une nouvelle Session de Synchronisation</value>
 	</data>
 	<data name="JoinCloudSession_Header" xml:space="preserve">
-		<value>Rejoindre une Session Cloud existante</value>
+		<value>Rejoindre une Session de Synchronisation existante</value>
 	</data>
 	<data name="JoinCloudSession_TimeoutError" xml:space="preserve">
 		<value>Le délai d'attente a expiré.</value>

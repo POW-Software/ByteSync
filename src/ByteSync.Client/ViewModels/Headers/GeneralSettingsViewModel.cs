@@ -2,15 +2,9 @@
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using Autofac;
-using Avalonia.Controls.Mixins;
 using ByteSync.Business.Configurations;
-using ByteSync.Common.Interfaces;
-using ByteSync.Common.Helpers;
-using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
-using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Updates;
 using ByteSync.ViewModels.Misc;
