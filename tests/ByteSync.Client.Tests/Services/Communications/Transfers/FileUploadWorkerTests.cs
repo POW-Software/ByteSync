@@ -122,7 +122,7 @@ public class FileUploadWorkerTests
 
     [Test]
     [TestCase(StorageProvider.AzureBlobStorage, "https://test.blob.core.windows.net/test/upload")]
-    [TestCase(StorageProvider.CloudFlareR2, "https://test-bucket.r2.cloudflarestorage.com/test/upload")]
+    [TestCase(StorageProvider.CloudflareR2, "https://test-bucket.r2.cloudflarestorage.com/test/upload")]
     public async Task UploadAvailableSlicesAsync_WhenAllSlicesUploaded_ShouldSetUploadingFinished(StorageProvider storageProvider, string uploadUrl)
     {
         // Arrange
@@ -159,7 +159,7 @@ public class FileUploadWorkerTests
 
     [Test]
     [TestCase(StorageProvider.AzureBlobStorage)]
-    [TestCase(StorageProvider.CloudFlareR2)]
+    [TestCase(StorageProvider.CloudflareR2)]
     public async Task UploadAvailableSlicesAsync_WhenUploadFails_ShouldHandleError(StorageProvider storageProvider)
     {
         // Arrange
@@ -239,7 +239,7 @@ public class FileUploadWorkerTests
 
     [Test]
     [TestCase(StorageProvider.AzureBlobStorage)]
-    [TestCase(StorageProvider.CloudFlareR2)]
+    [TestCase(StorageProvider.CloudflareR2)]
     public async Task UploadAvailableSlicesAsync_ShouldUseCorrectStrategyForStorageProvider(StorageProvider storageProvider)
     {
         // Arrange
