@@ -1,11 +1,12 @@
 using NUnit.Framework;
 using Moq;
 using System.Threading.Channels;
-using Azure;
-using Azure.Storage.Blobs.Models;
+using Autofac.Features.Indexed;
 using ByteSync.Business.Communications.Transfers;
+using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Services.Communications.Transfers;
 using FluentAssertions;
@@ -21,7 +22,8 @@ public class FileUploadWorkerTests
     private Mock<IPolicyFactory> _mockPolicyFactory;
     private Mock<IFileTransferApiClient> _mockFileTransferApiClient;
     private Mock<ILogger<FileUploadWorker>> _mockLogger;
-    private AsyncRetryPolicy<Response<BlobContentInfo>> _policy;
+    private Mock<IIndex<StorageProvider, IUploadStrategy>> _mockStrategies;
+    private AsyncRetryPolicy<UploadFileResponse> _policy;
     private SharedFileDefinition _sharedFileDefinition;
     private object _syncRoot;
     private ManualResetEvent _exceptionOccurred;
@@ -37,10 +39,11 @@ public class FileUploadWorkerTests
         _mockPolicyFactory = new Mock<IPolicyFactory>();
         _mockFileTransferApiClient = new Mock<IFileTransferApiClient>();
         _mockLogger = new Mock<ILogger<FileUploadWorker>>();
+        _mockStrategies = new Mock<IIndex<StorageProvider, IUploadStrategy>>();
         
         // Create a test policy that returns a mock response
-        _policy = Policy<Response<BlobContentInfo>>
-            .HandleResult(x => x.GetRawResponse().IsError)
+        _policy = Policy<UploadFileResponse>
+            .HandleResult(x => !x.IsSuccess)
             .Or<Exception>()
             .RetryAsync(0, onRetry: (exception, retryCount, context) => { });
 
@@ -63,6 +66,7 @@ public class FileUploadWorkerTests
             _sharedFileDefinition,
             _semaphoreSlim,
             _exceptionOccurred,
+            _mockStrategies.Object,
             _uploadingIsFinished,
             _mockLogger.Object);
 
@@ -117,18 +121,21 @@ public class FileUploadWorkerTests
     }
 
     [Test]
-    public async Task UploadAvailableSlicesAsync_WhenAllSlicesUploaded_ShouldSetUploadingFinished()
+    [TestCase(StorageProvider.AzureBlobStorage, "https://test.blob.core.windows.net/test/upload")]
+    [TestCase(StorageProvider.CloudflareR2, "https://test-bucket.r2.cloudflarestorage.com/test/upload")]
+    public async Task UploadAvailableSlicesAsync_WhenAllSlicesUploaded_ShouldSetUploadingFinished(StorageProvider storageProvider, string uploadUrl)
     {
         // Arrange
         var slice = new FileUploaderSlice(1, new MemoryStream());
-        var mockResponse = new Mock<Response<BlobContentInfo>>();
-        var mockRawResponse = new Mock<Response>();
+        var mockUploadStrategy = new Mock<IUploadStrategy>();
+        var mockUploadLocation = new FileStorageLocation(uploadUrl, storageProvider);
         
-        mockRawResponse.Setup(x => x.IsError).Returns(false);
-        mockResponse.Setup(x => x.GetRawResponse()).Returns(mockRawResponse.Object);
+        mockUploadStrategy.Setup(x => x.UploadAsync( It.IsAny<FileUploaderSlice>(), It.IsAny<FileStorageLocation>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(UploadFileResponse.Success(200));
         
-        _mockFileTransferApiClient.Setup(x => x.GetUploadFileUrl(It.IsAny<TransferParameters>()))
-            .ReturnsAsync("https://test.blob.core.windows.net/test/upload");
+        _mockStrategies.Setup(x => x[storageProvider]).Returns(mockUploadStrategy.Object);
+        _mockFileTransferApiClient.Setup(x => x.GetUploadFileStorageLocation(It.IsAny<TransferParameters>()))
+            .ReturnsAsync(mockUploadLocation);
         _mockFileTransferApiClient.Setup(x => x.AssertFilePartIsUploaded(It.IsAny<TransferParameters>()))
             .Returns(Task.CompletedTask);
 
@@ -142,8 +149,38 @@ public class FileUploadWorkerTests
         await _fileUploadWorker.UploadAvailableSlicesAsync(_availableSlices, _progressState);
 
         // Assert
-        // The upload will fail because blob.UploadAsync() will throw an exception
-        // We should verify that the exception is logged
+        // The upload should succeed and set uploading finished
+        _uploadingIsFinished.WaitOne(1000).Should().BeTrue();
+        
+        // Verify the correct strategy was called for the storage provider
+        _mockStrategies.Verify(x => x[storageProvider], Times.Once);
+        mockUploadStrategy.Verify(x => x.UploadAsync(slice, mockUploadLocation, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
+    [TestCase(StorageProvider.AzureBlobStorage)]
+    [TestCase(StorageProvider.CloudflareR2)]
+    public async Task UploadAvailableSlicesAsync_WhenUploadFails_ShouldHandleError(StorageProvider storageProvider)
+    {
+        // Arrange
+        var slice = new FileUploaderSlice(1, new MemoryStream());
+        var mockUploadStrategy = new Mock<IUploadStrategy>();
+        var mockUploadLocation = new FileStorageLocation("https://test.example.com/upload", storageProvider);
+        
+        mockUploadStrategy.Setup(x => x.UploadAsync(It.IsAny<FileUploaderSlice>(), It.IsAny<FileStorageLocation>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(UploadFileResponse.Failure(500, "Upload failed"));
+        
+        _mockStrategies.Setup(x => x[storageProvider]).Returns(mockUploadStrategy.Object);
+        _mockFileTransferApiClient.Setup(x => x.GetUploadFileStorageLocation(It.IsAny<TransferParameters>()))
+            .ReturnsAsync(mockUploadLocation);
+
+        await _availableSlices.Writer.WriteAsync(slice);
+        _availableSlices.Writer.Complete();
+
+        // Act
+        await _fileUploadWorker.UploadAvailableSlicesAsync(_availableSlices, _progressState);
+
+        // Assert
         _mockLogger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.AtLeastOnce);
         _exceptionOccurred.WaitOne(0).Should().BeTrue();
     }
@@ -198,5 +235,35 @@ public class FileUploadWorkerTests
         // Act & Assert
         var action = () => _fileUploadWorker.StartUploadWorkers(_availableSlices, 100, _progressState);
         action.Should().NotThrow();
+    }
+
+    [Test]
+    [TestCase(StorageProvider.AzureBlobStorage)]
+    [TestCase(StorageProvider.CloudflareR2)]
+    public async Task UploadAvailableSlicesAsync_ShouldUseCorrectStrategyForStorageProvider(StorageProvider storageProvider)
+    {
+        // Arrange
+        var slice = new FileUploaderSlice(1, new MemoryStream());
+        var mockUploadStrategy = new Mock<IUploadStrategy>();
+        var mockUploadLocation = new FileStorageLocation("https://test.example.com/upload", storageProvider);
+        
+        mockUploadStrategy.Setup(x => x.UploadAsync(It.IsAny<FileUploaderSlice>(), It.IsAny<FileStorageLocation>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(UploadFileResponse.Success(200));
+        
+        _mockStrategies.Setup(x => x[storageProvider]).Returns(mockUploadStrategy.Object);
+        _mockFileTransferApiClient.Setup(x => x.GetUploadFileStorageLocation(It.IsAny<TransferParameters>()))
+            .ReturnsAsync(mockUploadLocation);
+        _mockFileTransferApiClient.Setup(x => x.AssertFilePartIsUploaded(It.IsAny<TransferParameters>()))
+            .Returns(Task.CompletedTask);
+
+        await _availableSlices.Writer.WriteAsync(slice);
+        _availableSlices.Writer.Complete();
+
+        // Act
+        await _fileUploadWorker.UploadAvailableSlicesAsync(_availableSlices, _progressState);
+
+        // Assert
+        _mockStrategies.Verify(x => x[storageProvider], Times.Once);
+        mockUploadStrategy.Verify(x => x.UploadAsync(slice, mockUploadLocation, It.IsAny<CancellationToken>()), Times.Once);
     }
 } 
