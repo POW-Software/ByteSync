@@ -4,6 +4,8 @@ using Microsoft.Azure.Functions.Worker.Http;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Functions.Helpers.Misc;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Business.Settings;
+using Microsoft.Extensions.Options;
 
 namespace ByteSync.Functions.Http;
 
@@ -77,7 +79,7 @@ public class FileTransferFunction
             sessionId,
             client,
             transferParameters, 
-            StorageProvider.AzureBlobStorage);
+            _fileTransferSettings.DefaultStorageProvider);
         var response = req.CreateResponse();
         await response.WriteAsJsonAsync(responseObject, HttpStatusCode.OK);
 

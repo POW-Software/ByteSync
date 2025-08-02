@@ -86,7 +86,8 @@ var host = new HostBuilder()
         var configuration = serviceProvider.GetService<IConfiguration>()!;
         var appSettingsSection = configuration.GetSection("AppSettings");
         services.Configure<RedisSettings>(configuration.GetSection("Redis"));
-        services.Configure<BlobStorageSettings>(configuration.GetSection("BlobStorage"));
+        services.Configure<AzureBlobStorageSettings>(configuration.GetSection("AzureBlobStorage"));
+        services.Configure<CloudflareR2Settings>(configuration.GetSection("CloudflareR2"));
         services.Configure<SignalRSettings>(configuration.GetSection("SignalR"));
         services.Configure<AppSettings>(appSettingsSection);
         var appSettings = appSettingsSection.Get<AppSettings>();

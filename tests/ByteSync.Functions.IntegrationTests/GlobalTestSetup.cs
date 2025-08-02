@@ -49,7 +49,7 @@ public class GlobalTestSetup
     {
         // Configure your settings objects here
         services.Configure<RedisSettings>(Configuration.GetSection("Redis"));
-        services.Configure<BlobStorageSettings>(Configuration.GetSection("BlobStorage"));
+        services.Configure<AzureBlobStorageSettings>(Configuration.GetSection("AzureBlobStorage"));
         services.Configure<SignalRSettings>(Configuration.GetSection("SignalR"));
         services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
     }

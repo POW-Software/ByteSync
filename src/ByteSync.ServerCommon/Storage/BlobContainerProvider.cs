@@ -16,9 +16,9 @@ public class BlobContainerProvider : IBlobContainerProvider
 
     public BlobContainerClient GetBlobContainerClient()
     {
-        string accountName = _configuration.GetSection("BlobStorage:Account").Value!;
-        string accountKey = _configuration.GetSection("BlobStorage:Key").Value!;
-        string url = _configuration.GetSection("BlobStorage:Url").Value!;
+        string accountName = _configuration.GetSection("AzureBlobStorage:Account").Value!;
+        string accountKey = _configuration.GetSection("AzureBlobStorage:Key").Value!;
+        string url = _configuration.GetSection("AzureBlobStorage:Url").Value!;
 
         StorageSharedKeyCredential storageSharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
 

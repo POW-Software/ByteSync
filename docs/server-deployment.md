@@ -91,10 +91,10 @@ Below is the JSON structure indicating which properties must be set. In particul
   "Values": {
     "Redis:ConnectionString": "<your-redis-connection-string>",
     "Redis:Prefix": "<your-redis-prefix>",
-    "BlobStorage:Endpoint": "<your-blob-endpoint>",
-    "BlobStorage:Container": "<your-container-name>",
-    "BlobStorage:AccountKey": "<your-account-key>",
-    "BlobStorage:AccountName": "<your-account-name>",
+    "AzureBlobStorage:Endpoint": "<your-blob-endpoint>",
+    "AzureBlobStorage:Container": "<your-container-name>",
+    "AzureBlobStorage:AccountKey": "<your-account-key>",
+    "AzureBlobStorage:AccountName": "<your-account-name>",
     "SignalR:ConnectionString": "<your-signalr-connection-string>",
     "CosmosDb:ConnectionString": "<your-cosmosdb-connection-string>",
     "CosmosDb:DatabaseName": "<your-database-name>",
@@ -124,10 +124,10 @@ cd ByteSync.Functions
   dotnet user-secrets set "Redis:Prefix" "<your-redis-prefix>"
 
 # Blob Storage
-  dotnet user-secrets set "BlobStorage:Endpoint" "<your-blob-endpoint>"
-  dotnet user-secrets set "BlobStorage:Container" "<your-container-name>"
-  dotnet user-secrets set "BlobStorage:AccountKey" "<your-account-key>"
-  dotnet user-secrets set "BlobStorage:AccountName" "<your-account-name>"
+  dotnet user-secrets set "AzureBlobStorage:Endpoint" "<your-blob-endpoint>"
+dotnet user-secrets set "AzureBlobStorage:Container" "<your-container-name>"
+dotnet user-secrets set "AzureBlobStorage:AccountKey" "<your-account-key>"
+dotnet user-secrets set "AzureBlobStorage:AccountName" "<your-account-name>"
 
 # SignalR
   dotnet user-secrets set "SignalR:ConnectionString" "<your-signalr-connection-string>"
@@ -148,7 +148,7 @@ Repeat these steps for **ByteSync.Functions.IntegrationTests** and **ByteSync.Se
 ### 3. Using Azure App Configuration
 
 1. **Create an Azure App Configuration** resource via the Azure Portal.
-2. **Add** the keys listed above (e.g., `Redis:ConnectionString`, `BlobStorage:Endpoint`, etc.).
+2. **Add** the keys listed above (e.g., `Redis:ConnectionString`, `AzureBlobStorage:Endpoint`, etc.).
 3. **Link** your Azure Function to the App Configuration resource.
 4. Ensure your Azure Function is configured to pull values from Azure App Configuration.
 

@@ -30,6 +30,6 @@ public class KeyedTypesModule : Module
         builder.RegisterType<CommandLineBootstrapper>().Keyed<IBootstrapper>(OperationMode.CommandLine);
         
         builder.RegisterType<BlobStorageDownloadStrategy>().Keyed<IDownloadStrategy>(StorageProvider.AzureBlobStorage);
-        builder.RegisterType<CloudFlareDownloadStrategy>().Keyed<IDownloadStrategy>(StorageProvider.CloudFlareR2);
+        builder.RegisterType<CloudFlareDownloadStrategy>().Keyed<IDownloadStrategy>(StorageProvider.CloudflareR2);
     }
 }
