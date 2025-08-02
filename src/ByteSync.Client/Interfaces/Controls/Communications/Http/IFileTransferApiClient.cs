@@ -6,6 +6,8 @@ public interface IFileTransferApiClient
 {   
     Task<string> GetUploadFileUrl(TransferParameters transferParameters);
     
+    Task<FileStorageLocation> GetUploadFileStorageLocation(TransferParameters transferParameters);
+    
     Task<string> GetDownloadFileUrl(TransferParameters transferParameters);
     
     Task<FileStorageLocation> GetDownloadFileStorageLocation(TransferParameters transferParameters);
