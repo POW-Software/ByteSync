@@ -96,10 +96,9 @@ Below is the JSON structure indicating which properties must be set. In particul
     "AzureBlobStorage:AccountKey": "<your-account-key>",
     "AzureBlobStorage:AccountName": "<your-account-name>",
     "SignalR:ConnectionString": "<your-signalr-connection-string>",
-    "CosmosDb:ConnectionString": "<your-cosmosdb-connection-string>",
-    "CosmosDb:DatabaseName": "<your-database-name>",
     "AppSettings:Secret": "YOUR_UNIQUE_RANDOM_SEED",
-    "AppSettings:AnnouncementsUrl": ""
+    "AppSettings:AnnouncementsUrl": "", 
+    "AppSettings:DefaultStorageProvider": "<your-storage-provider>"
   }
 }
 ```
