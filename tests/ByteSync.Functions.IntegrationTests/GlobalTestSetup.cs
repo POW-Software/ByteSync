@@ -50,6 +50,7 @@ public class GlobalTestSetup
         // Configure your settings objects here
         services.Configure<RedisSettings>(Configuration.GetSection("Redis"));
         services.Configure<AzureBlobStorageSettings>(Configuration.GetSection("AzureBlobStorage"));
+        services.Configure<CloudflareR2Settings>(Configuration.GetSection("CloudflareR2"));
         services.Configure<SignalRSettings>(Configuration.GetSection("SignalR"));
         services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
     }
