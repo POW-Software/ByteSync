@@ -36,7 +36,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="appsettings.secret.json">
+      <None Update="server-common-integration-tests.local.settings.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

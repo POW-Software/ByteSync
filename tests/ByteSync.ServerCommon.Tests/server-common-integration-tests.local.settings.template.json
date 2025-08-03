@@ -1,0 +1,22 @@
+﻿{
+  "Redis": {
+    "ConnectionString": "",
+    "Prefix": ""
+  },
+  "AzureBlobStorage": {
+    "Endpoint": "",
+    "Container": "",
+    "AccountKey": "",
+    "AccountName": ""
+  },
+  "CloudflareR2": {
+    "ConfigurationTemplateToSetHere": ""
+  },
+  "SignalR": {
+    "ConnectionString": ""
+  },
+  "AppSettings": {
+    "Secret": ""
+  }
+}
+

@@ -12,7 +12,7 @@ public class TestSettingsInitializer
     public IConfiguration InitConfiguration()
     {
         var config = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.Secret.json", optional: false) // Secret configuration
+            .AddJsonFile("server-common-integration-tests.local.settings.json", optional: false)
             .Build();
 
         return config;
