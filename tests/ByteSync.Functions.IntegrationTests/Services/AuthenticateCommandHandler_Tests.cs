@@ -1,4 +1,5 @@
 using Autofac;
+using ByteSync.Common.Business.Auth;
 using ByteSync.Functions.IntegrationTests.TestHelpers.Autofac;
 using ByteSync.ServerCommon.Commands.Authentication;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
@@ -15,7 +16,7 @@ public class AuthenticateCommandHandler_Tests
     public void Setup()
     {
         var fakeVersionService = A.Fake<IClientSoftwareVersionService>();
-        A.CallTo(() => fakeVersionService.IsClientVersionAllowed(A<Common.Business.Auth.LoginData>.Ignored)).Returns(Task.FromResult(true));
+        A.CallTo(() => fakeVersionService.IsClientVersionAllowed(A<LoginData>.Ignored)).Returns(Task.FromResult(true));
 
         _scope = GlobalTestSetup.Container.BeginLifetimeScope(builder =>
         {
@@ -45,7 +46,7 @@ public class AuthenticateCommandHandler_Tests
         var osPlatform = Common.Business.Misc.OSPlatforms.Windows;
         var ipAddress = "127.0.0.1";
 
-        var loginData = new Common.Business.Auth.LoginData
+        var loginData = new LoginData
         {
             ClientId = clientId,
             ClientInstanceId = clientInstanceId,
@@ -57,12 +58,12 @@ public class AuthenticateCommandHandler_Tests
         var handler = _scope.Resolve<AuthenticateCommandHandler>();
 
         // Act
-        var response = await handler.Handle(request, default);
+        var response = await handler.Handle(request, CancellationToken.None);
 
         // Assert
         Assert.That(response, Is.Not.Null);
         Assert.That(response.IsSuccess, Is.True, "Authentication should succeed with valid data");
-        Assert.That(response.InitialConnectionStatus, Is.EqualTo(Common.Business.Auth.InitialConnectionStatus.Success));
+        Assert.That(response.InitialConnectionStatus, Is.EqualTo(InitialConnectionStatus.Success));
         Assert.That(response.AuthenticationTokens, Is.Not.Null, "AuthenticationTokens should not be null");
         Assert.That(response.EndPoint, Is.Not.Null, "EndPoint should not be null");
     }

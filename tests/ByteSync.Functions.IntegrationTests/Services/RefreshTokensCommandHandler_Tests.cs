@@ -1,4 +1,5 @@
 using Autofac;
+using ByteSync.Common.Business.Auth;
 using ByteSync.ServerCommon.Repositories;
 using ByteSync.Functions.IntegrationTests.TestHelpers.Autofac;
 using ByteSync.ServerCommon.Business.Auth;
@@ -44,7 +45,7 @@ public class RefreshTokensCommandHandler_Tests
         var now = DateTimeOffset.UtcNow;
 
         await clientsRepository.AddOrUpdate(clientInstanceId, c => {
-            if (c == null) c = new Client();
+            c ??= new Client();
             c.ClientId = clientId;
             c.ClientInstanceId = clientInstanceId;
             c.Version = version;
@@ -64,7 +65,7 @@ public class RefreshTokensCommandHandler_Tests
 
         var handler = _scope.Resolve<RefreshTokensCommandHandler>();
         var request = new RefreshTokensRequest(
-            new Common.Business.Auth.RefreshTokensData {
+            new RefreshTokensData {
                 Token = refreshToken,
                 ClientInstanceId = clientInstanceId,
                 Version = version,
@@ -74,10 +75,10 @@ public class RefreshTokensCommandHandler_Tests
         );
 
         // Act
-        var response = await handler.Handle(request, default);
+        var response = await handler.Handle(request, CancellationToken.None);
 
         // Assert
-        Assert.That(response.RefreshTokensStatus, Is.EqualTo(Common.Business.Auth.RefreshTokensStatus.RefreshTokenOk));
+        Assert.That(response.RefreshTokensStatus, Is.EqualTo(RefreshTokensStatus.RefreshTokenOk));
         Assert.That(response.AuthenticationTokens, Is.Not.Null);
 
         // Assert that the refresh token was updated (rotated)
