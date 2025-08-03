@@ -8,11 +8,11 @@ namespace ByteSync.ServerCommon.Services;
 
 public class BlobStorageContainerService : IBlobStorageContainerService
 {
-    private readonly BlobStorageSettings _blobStorageSettings;
+    private readonly AzureBlobStorageSettings _blobStorageSettings;
     
     private StorageSharedKeyCredential? _storageSharedKeyCredential;
 
-    public BlobStorageContainerService(IOptions<BlobStorageSettings> blobStorageSettings)
+    public BlobStorageContainerService(IOptions<AzureBlobStorageSettings> blobStorageSettings)
     {
         _blobStorageSettings = blobStorageSettings.Value;
     }

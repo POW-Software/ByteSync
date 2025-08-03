@@ -9,14 +9,14 @@ namespace ByteSync.ServerCommon.Tests.Services;
 [TestFixture]
 public class BlobStorageContainerServiceTests
 {
-    private BlobStorageSettings _settings;
-    private IOptions<BlobStorageSettings> _options;
+    private AzureBlobStorageSettings _settings;
+    private IOptions<AzureBlobStorageSettings> _options;
     private BlobStorageContainerService _service;
 
     [SetUp]
     public void SetUp()
     {
-        _settings = new BlobStorageSettings
+        _settings = new AzureBlobStorageSettings
         {
             AccountName = "testaccount",
             AccountKey = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("testkey")),

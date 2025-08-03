@@ -1,11 +1,13 @@
 ﻿using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Helpers;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ByteSync.ServerCommon.Services;
 
@@ -18,11 +20,13 @@ public class TransferLocationService : ITransferLocationService
     private readonly IUsageStatisticsService _usageStatisticsService;
     private readonly ISynchronizationService _synchronizationService;
     private readonly ILogger<TransferLocationService> _logger;
+    private readonly StorageProvider _storageProvider;
 
     public TransferLocationService(ICloudSessionsRepository cloudSessionsRepository, IBlobUrlService blobUrlService,
         IInvokeClientsService invokeClientsService, 
         ISharedFilesService sharedFilesService, IUsageStatisticsService usageStatisticsService, 
         ISynchronizationService synchronizationService,
+        IOptions<AppSettings> appSettings,
         ILogger<TransferLocationService> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
@@ -31,6 +35,7 @@ public class TransferLocationService : ITransferLocationService
         _sharedFilesService = sharedFilesService;
         _usageStatisticsService = usageStatisticsService;
         _synchronizationService = synchronizationService;
+        _storageProvider = appSettings.Value.DefaultStorageProvider;
         _logger = logger;
     }
     
@@ -62,7 +67,7 @@ public class TransferLocationService : ITransferLocationService
     }
     
     public async Task<FileStorageLocation> GetUploadFileStorageLocation(string sessionId, Client client,
-        TransferParameters transferParameters, StorageProvider storageProvider)
+        TransferParameters transferParameters)
     {
         var url = await GetUploadFileUrl(
             sessionId,
@@ -70,7 +75,7 @@ public class TransferLocationService : ITransferLocationService
             transferParameters.SharedFileDefinition,
             transferParameters.PartNumber!.Value
         );
-        return new FileStorageLocation(url, storageProvider);
+        return new FileStorageLocation(url, _storageProvider);
     }
     
     public async Task<string> GetDownloadFileUrl(string sessionId, Client client,
@@ -202,7 +207,7 @@ public class TransferLocationService : ITransferLocationService
     }
     
     public async Task<FileStorageLocation> GetDownloadFileStorageLocation(string sessionId, Client client,
-        TransferParameters transferParameters, StorageProvider storageProvider)
+        TransferParameters transferParameters)
     {
         var url = await GetDownloadFileUrl(
             sessionId,
@@ -210,7 +215,7 @@ public class TransferLocationService : ITransferLocationService
             transferParameters.SharedFileDefinition,
             transferParameters.PartNumber!.Value
         );
-        return new FileStorageLocation(url, storageProvider);
+        return new FileStorageLocation(url, _storageProvider);
     }
     
     private static List<SessionMemberData> GetOtherSessionMembers(CloudSessionData session, SessionMemberData sessionMemberData)

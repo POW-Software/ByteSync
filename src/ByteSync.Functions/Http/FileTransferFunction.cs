@@ -53,8 +53,7 @@ public class FileTransferFunction
         var responseObject = await _transferLocationService.GetUploadFileStorageLocation(
             sessionId,
             client,
-            transferParameters, 
-            StorageProvider.AzureBlobStorage); // TODO: Make this configurable
+            transferParameters);
         var response = req.CreateResponse();
         await response.WriteAsJsonAsync(responseObject, HttpStatusCode.OK);
 
@@ -97,8 +96,7 @@ public class FileTransferFunction
         var responseObject = await _transferLocationService.GetDownloadFileStorageLocation(
             sessionId,
             client,
-            transferParameters, 
-            StorageProvider.AzureBlobStorage); // TODO: Make this configurable
+            transferParameters);
         var response = req.CreateResponse();
         await response.WriteAsJsonAsync(responseObject, HttpStatusCode.OK);
 
