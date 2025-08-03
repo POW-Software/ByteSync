@@ -293,6 +293,39 @@ public class TestFiltering : BaseTestFiltering
         filter2(comparisonItem).Should().BeTrue();
     }
     
+    [Test]
+    public void TestParse_IncompleteExpression_WithOperator()
+    {
+        // Arrange
+        var filterText = "size>300kb"; // Missing data source, should be detected as incomplete expression
+        
+        ConfigureDataPartIndexer();
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeFalse();
+        parseResult.ErrorMessage.Should().NotBeNull();
+        parseResult.ErrorMessage.Should().Contain("requires a data source prefix");
+    }
+    
+    [Test]
+    public void TestParse_CompleteExpression_WithSource()
+    {
+        // Arrange
+        var filterText = "A1.size>300kb"; // Complete expression with source
+        
+        ConfigureDataPartIndexer();
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeTrue();
+        parseResult.Expression.Should().BeOfType<PropertyComparisonExpression>();
+    }
+    
     private void ConfigureDataPartIndexer(string inventoryACode = "A", string inventoryBCode = "B")
     {
         inventoryACode = inventoryACode.ToUpperInvariant();
