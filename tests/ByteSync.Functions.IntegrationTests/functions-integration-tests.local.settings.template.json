@@ -1,0 +1,19 @@
+﻿{
+  "Redis": {
+    "ConnectionString": "",
+    "Prefix": ""
+  },
+  "AzureBlobStorage": {
+    "Endpoint": "",
+    "Container": "",
+    "AccountKey": "",
+    "AccountName": ""
+  },
+  "SignalR": {
+    "ConnectionString": ""
+  },
+  "AppSettings": {
+    "Secret": ""
+  }
+}
+
