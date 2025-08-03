@@ -42,6 +42,7 @@ The following projects require configuration to function properly:
 
 - **ByteSync.Functions**
 - **ByteSync.Functions.IntegrationTests**
+- **ByteSync.ServerCommon.Tests**
 
 ## Configuration Storage Options
 
@@ -92,6 +93,9 @@ Refer to the template files mentioned above for the exact structure and property
    
    # For ByteSync.Functions.IntegrationTests
    cp tests/ByteSync.Functions.IntegrationTests/functions-integration-tests.local.settings.template.json tests/ByteSync.Functions.IntegrationTests/functions-integration-tests.local.settings.json
+   
+    # For ByteSync.ServerCommon.Tests
+   cp tests/ByteSync.ServerCommon.Tests/server-common-tests.local.settings.template.json tests/ByteSync.ServerCommon.Tests/server-common-tests.local.settings.json
    ```
 
 2. Edit the copied files and fill in your actual configuration values.
