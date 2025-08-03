@@ -9,6 +9,9 @@
     "AccountKey": "",
     "AccountName": ""
   },
+  "CloudflareR2": {
+    "ConfigurationTemplateToSetHere": ""
+  },
   "SignalR": {
     "ConnectionString": ""
   },
