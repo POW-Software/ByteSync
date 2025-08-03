@@ -12,20 +12,20 @@ using Microsoft.Extensions.Options;
 namespace ByteSync.ServerCommon.Tests.Commands.Storage;
 
 [TestFixture]
-public class CleanupBlobStorageSnippetsCommandHandlerTests
+public class CleanupAzureBlobStorageSnippetsCommandHandlerTests
 {
     private IBlobStorageContainerService _blobStorageContainerService = null!;
-    private ILogger<CleanupBlobStorageSnippetsCommandHandler> _logger = null!;
-    private IOptions<BlobStorageSettings> _options = null!;
-    private CleanupBlobStorageSnippetsCommandHandler _handler = null!;
-    private BlobStorageSettings _settings = null!;
+    private ILogger<CleanupAzureBlobStorageSnippetsCommandHandler> _logger = null!;
+    private IOptions<AzureBlobStorageSettings> _options = null!;
+    private CleanupAzureBlobStorageSnippetsCommandHandler _handler = null!;
+    private AzureBlobStorageSettings _settings = null!;
 
     [SetUp]
     public void Setup()
     {
         _blobStorageContainerService = A.Fake<IBlobStorageContainerService>();
-        _logger = A.Fake<ILogger<CleanupBlobStorageSnippetsCommandHandler>>();
-        _settings = new BlobStorageSettings
+        _logger = A.Fake<ILogger<CleanupAzureBlobStorageSnippetsCommandHandler>>();
+        _settings = new AzureBlobStorageSettings
         {
             RetentionDurationInDays = 3,
             AccountName = "test",
@@ -33,10 +33,10 @@ public class CleanupBlobStorageSnippetsCommandHandlerTests
             Endpoint = "https://test.blob.core.windows.net/",
             Container = "test"
         };
-        _options = A.Fake<IOptions<BlobStorageSettings>>();
+        _options = A.Fake<IOptions<AzureBlobStorageSettings>>();
         A.CallTo(() => _options.Value).Returns(_settings);
 
-        _handler = new CleanupBlobStorageSnippetsCommandHandler(_blobStorageContainerService, _options, _logger);
+        _handler = new CleanupAzureBlobStorageSnippetsCommandHandler(_blobStorageContainerService, _options, _logger);
     }
 
     [Test]

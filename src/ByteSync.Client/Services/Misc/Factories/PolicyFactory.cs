@@ -1,6 +1,5 @@
-﻿using System.Threading.Tasks;
-using Azure;
-using Azure.Storage.Blobs.Models;
+﻿using System.Net.Http;
+using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Interfaces;
 using Polly;
 using Polly.Retry;
@@ -31,34 +30,34 @@ public class PolicyFactory : IPolicyFactory
         return result;
     }
 
-    public AsyncRetryPolicy<Response> BuildFileDownloadPolicy()
+    public AsyncRetryPolicy<DownloadFileResponse> BuildFileDownloadPolicy()
     {
         var policy = Policy
-            .HandleResult<Response>(x => x.IsError)
-            .Or<RequestFailedException>(e => e.Status == 403)
+            .HandleResult<DownloadFileResponse>(x => !x.IsSuccess)
+            .Or<HttpRequestException>(e => e.StatusCode == System.Net.HttpStatusCode.Forbidden)
             .WaitAndRetryAsync(MAX_RETRIES, SleepDurationProvider, onRetryAsync: async (response, timeSpan, retryCount, _) =>
             {
                 _logger.LogError("FileTransferOperation failed (Attempt number {AttemptNumber}). ResponseCode:{ResponseCode}" +
                                  "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
                                  "Waiting {WaitingTime} seconds before retry", 
-                    retryCount, response.Result?.Status!, response.Exception?.GetType().Name!, response.Exception?.Message!, timeSpan);
+                    retryCount, response.Result?.StatusCode!, response.Exception?.GetType().Name!, response.Exception?.Message!, timeSpan);
                 await Task.CompletedTask;
             });
         
         return policy;
     }
 
-    public AsyncRetryPolicy<Response<BlobContentInfo>> BuildFileUploadPolicy()
+    public AsyncRetryPolicy<UploadFileResponse> BuildFileUploadPolicy()
     {
         var policy = Policy
-            .HandleResult<Response<BlobContentInfo>>(x => x.GetRawResponse().IsError)
-            .Or<RequestFailedException>(e => e.Status == 403)
+            .HandleResult<UploadFileResponse>(x => !x.IsSuccess)
+            .Or<HttpRequestException>(e => e.StatusCode == System.Net.HttpStatusCode.Forbidden)
             .WaitAndRetryAsync(MAX_RETRIES, SleepDurationProvider, onRetryAsync: async (response, timeSpan, retryCount, _) =>
             {
                 _logger.LogError("FileTransferOperation failed (Attempt number {AttemptNumber}). ResponseCode:{ResponseCode}" +
                                  "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
                                  "Waiting {WaitingTime} seconds before retry", 
-                    retryCount, response.Result?.GetRawResponse().Status!, response.Exception?.GetType().Name!, response.Exception?.Message!, timeSpan);
+                    retryCount, response.Result?.StatusCode!, response.Exception?.GetType().Name!, response.Exception?.Message!, timeSpan);
                 await Task.CompletedTask;
             });
         

@@ -1,9 +1,8 @@
 using System.Threading;
 using System.Threading.Channels;
-using Azure;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
+using Autofac.Features.Indexed;
 using ByteSync.Business.Communications.Transfers;
+using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
@@ -19,9 +18,14 @@ public class FileUploadWorker : IFileUploadWorker
     private readonly SharedFileDefinition _sharedFileDefinition;
     private readonly ManualResetEvent _exceptionOccurred;
     private readonly ManualResetEvent _uploadingIsFinished;
+    private readonly IIndex<StorageProvider, IUploadStrategy> _strategies;
     private readonly SemaphoreSlim _semaphoreSlim;
+    
+    private CancellationTokenSource CancellationTokenSource { get; }
+    
     public FileUploadWorker(IPolicyFactory policyFactory, IFileTransferApiClient fileTransferApiClient,
         SharedFileDefinition sharedFileDefinition, SemaphoreSlim semaphoreSlim, ManualResetEvent exceptionOccurred,
+        IIndex<StorageProvider, IUploadStrategy> strategies,
         ManualResetEvent uploadingIsFinished, ILogger<FileUploadWorker> logger)
     {
         _policyFactory = policyFactory;
@@ -30,7 +34,9 @@ public class FileUploadWorker : IFileUploadWorker
         _semaphoreSlim = semaphoreSlim;
         _exceptionOccurred = exceptionOccurred;
         _uploadingIsFinished = uploadingIsFinished;
+        _strategies = strategies;
         _logger = logger;
+        CancellationTokenSource = new CancellationTokenSource();
     }
 
     public void StartUploadWorkers(Channel<FileUploaderSlice> availableSlices, int workerCount, UploadProgressState progressState)
@@ -52,7 +58,7 @@ public class FileUploadWorker : IFileUploadWorker
                     var policy = _policyFactory.BuildFileUploadPolicy();
                     var response = await policy.ExecuteAsync(() => DoUpload(slice));
 
-                    if (response != null && !response.GetRawResponse().IsError)
+                    if (response != null && response.IsSuccess)
                     {
                         var transferParameters = new TransferParameters
                         {
@@ -74,7 +80,7 @@ public class FileUploadWorker : IFileUploadWorker
                     }
                     else
                     {
-                        throw new Exception("UploadAvailableSlice: unable to get upload url");
+                        throw new Exception($"UploadAvailableSlice: unable to get upload url. Status: {response?.StatusCode}, Error: {response?.ErrorMessage}");
                     }
                 }
                 catch (Exception ex)
@@ -111,8 +117,8 @@ public class FileUploadWorker : IFileUploadWorker
             _semaphoreSlim.Release();
         }
     }
-    
-    private async Task<Response<BlobContentInfo>> DoUpload(FileUploaderSlice slice)
+
+    private async Task<UploadFileResponse> DoUpload(FileUploaderSlice slice)
     {
         try
         {
@@ -123,20 +129,14 @@ public class FileUploadWorker : IFileUploadWorker
                 PartNumber = slice.PartNumber
             };
             
-            var uploadFileUrl = await _fileTransferApiClient.GetUploadFileUrl(transferParameters);
+            var uploadLocation = await _fileTransferApiClient.GetUploadFileStorageLocation(transferParameters);
 
             _logger.LogDebug("UploadAvailableSlice: starting sending slice {number} ({length} KB)", 
                 slice.PartNumber, slice.MemoryStream.Length / 1024d);
-
-            var options = new BlobClientOptions();
-            options.Retry.NetworkTimeout = TimeSpan.FromMinutes(60);
-
-            slice.MemoryStream.Position = 0;
-            var blob = new BlobClient(new Uri(uploadFileUrl), options);
-            var response = await blob.UploadAsync(slice.MemoryStream);
-
-            _logger.LogDebug("UploadAvailableSlice: slice {number} is uploaded", slice.PartNumber);
-
+            
+            var uploadStrategy = _strategies[uploadLocation.StorageProvider];
+            var response = await uploadStrategy.UploadAsync(slice, uploadLocation, CancellationTokenSource.Token);
+            
             return response;
         }
         catch (Exception)

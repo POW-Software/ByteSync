@@ -13,7 +13,6 @@ public class FileUploader : IFileUploader
     private readonly ILogger<FileUploader> _logger;
     private readonly IFileUploadPreparer _fileUploadPreparer;
     private readonly IFileUploadProcessor _fileUploadProcessor;
-    private readonly SemaphoreSlim _semaphoreSlim;
 
     public FileUploader(
         string? localFileToUpload, 

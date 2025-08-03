@@ -1,6 +1,6 @@
 ﻿namespace ByteSync.ServerCommon.Business.Settings;
 
-public class BlobStorageSettings
+public class AzureBlobStorageSettings
 {
     public string AccountName { get; set; } = null!;
     

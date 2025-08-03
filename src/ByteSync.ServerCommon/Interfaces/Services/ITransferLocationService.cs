@@ -8,11 +8,14 @@ public interface ITransferLocationService
     Task<string> GetUploadFileUrl(string sessionId, Client client,
         SharedFileDefinition sharedFileDefinition, int partNumber);
     
+    Task<FileStorageLocation> GetUploadFileStorageLocation(string sessionId, Client client,
+        TransferParameters transferParameters);
+    
     Task<string> GetDownloadFileUrl(string sessionId, Client client,
         SharedFileDefinition sharedFileDefinition, int partNumber);
     
     Task<FileStorageLocation> GetDownloadFileStorageLocation(string sessionId, Client client,
-        TransferParameters transferParameters, StorageProvider storageProvider);
+        TransferParameters transferParameters);
     
     Task AssertFilePartIsUploaded(string sessionId, Client client, TransferParameters transferParameters);
     

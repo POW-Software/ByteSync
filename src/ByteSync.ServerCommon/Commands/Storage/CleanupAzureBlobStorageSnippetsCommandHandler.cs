@@ -7,16 +7,16 @@ using Microsoft.Extensions.Options;
 
 namespace ByteSync.ServerCommon.Commands.Storage;
 
-public class CleanupBlobStorageSnippetsCommandHandler : IRequestHandler<CleanupBlobStorageSnippetsRequest, int>
+public class CleanupAzureBlobStorageSnippetsCommandHandler : IRequestHandler<CleanupBlobStorageSnippetsRequest, int>
 {
     private readonly IBlobStorageContainerService _blobStorageContainerService;
-    private readonly ILogger<CleanupBlobStorageSnippetsCommandHandler> _logger;
-    private readonly BlobStorageSettings _blobStorageSettings;
+    private readonly ILogger<CleanupAzureBlobStorageSnippetsCommandHandler> _logger;
+    private readonly AzureBlobStorageSettings _blobStorageSettings;
 
-    public CleanupBlobStorageSnippetsCommandHandler(
+    public CleanupAzureBlobStorageSnippetsCommandHandler(
         IBlobStorageContainerService blobStorageContainerService,
-        IOptions<BlobStorageSettings> blobStorageSettings,
-        ILogger<CleanupBlobStorageSnippetsCommandHandler> logger)
+        IOptions<AzureBlobStorageSettings> blobStorageSettings,
+        ILogger<CleanupAzureBlobStorageSnippetsCommandHandler> logger)
     {
         _blobStorageContainerService = blobStorageContainerService;
         _blobStorageSettings = blobStorageSettings.Value;

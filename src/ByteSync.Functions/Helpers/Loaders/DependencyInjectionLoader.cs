@@ -3,7 +3,6 @@ using Autofac;
 using ByteSync.Common.Interfaces.Hub;
 using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
-using ByteSync.ServerCommon.Storage;
 using Microsoft.Azure.SignalR.Management;
 
 namespace ByteSync.Functions.Helpers.Loaders;
@@ -60,10 +59,6 @@ public static class DependencyInjectionLoader
     
         builder.RegisterAssemblyTypes(executingAssembly)
             .Where(t => t.Name.EndsWith("Mapper"))
-            .InstancePerLifetimeScope()
-            .AsImplementedInterfaces();
-    
-        builder.RegisterType<BlobContainerProvider>()
             .InstancePerLifetimeScope()
             .AsImplementedInterfaces();
     

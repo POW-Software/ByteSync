@@ -1,4 +1,6 @@
-﻿namespace ByteSync.ServerCommon.Business.Settings;
+﻿using ByteSync.Common.Business.SharedFiles;
+
+namespace ByteSync.ServerCommon.Business.Settings;
 
 public class AppSettings
 {
@@ -11,4 +13,6 @@ public class AppSettings
     public string UpdatesDefinitionUrl { get; set; } = "";
 
     public string AnnouncementsUrl { get; set; } = "";
+    
+    public StorageProvider DefaultStorageProvider { get; set; } = StorageProvider.AzureBlobStorage;
 }
