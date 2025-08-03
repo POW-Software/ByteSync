@@ -1,6 +1,8 @@
 using Autofac;
 using ByteSync.ServerCommon.Repositories;
 using ByteSync.Functions.IntegrationTests.TestHelpers.Autofac;
+using ByteSync.ServerCommon.Business.Auth;
+using ByteSync.ServerCommon.Commands.Authentication;
 
 namespace ByteSync.Functions.IntegrationTests.Services;
 
@@ -16,7 +18,7 @@ public class RefreshTokensCommandHandler_Tests
         {
             builder.RegisterModule(new RepositoriesModule(true));
             builder.RegisterModule(new LoadersModule(false));
-            builder.RegisterType<ByteSync.ServerCommon.Commands.Authentication.RefreshTokensCommandHandler>()
+            builder.RegisterType<RefreshTokensCommandHandler>()
                     .AsSelf()
                     .InstancePerLifetimeScope();
         });
@@ -37,18 +39,18 @@ public class RefreshTokensCommandHandler_Tests
         var clientId = "integration-client-id";
         var refreshToken = "valid-refresh-token";
         var version = "2.0.0";
-        var osPlatform = ByteSync.Common.Business.Misc.OSPlatforms.Windows;
+        var osPlatform = Common.Business.Misc.OSPlatforms.Windows;
         var ipAddress = "localhost";
         var now = DateTimeOffset.UtcNow;
 
         await clientsRepository.AddOrUpdate(clientInstanceId, c => {
-            if (c == null) c = new ByteSync.ServerCommon.Business.Auth.Client();
+            if (c == null) c = new Client();
             c.ClientId = clientId;
             c.ClientInstanceId = clientInstanceId;
             c.Version = version;
             c.OsPlatform = osPlatform;
             c.IpAddress = ipAddress;
-            c.RefreshToken = new ByteSync.ServerCommon.Business.Auth.RefreshToken {
+            c.RefreshToken = new RefreshToken {
                 Token = refreshToken,
                 Expires = now.AddMinutes(10),
                 Created = now,
@@ -60,9 +62,9 @@ public class RefreshTokensCommandHandler_Tests
             return c;
         });
 
-        var handler = _scope.Resolve<ByteSync.ServerCommon.Commands.Authentication.RefreshTokensCommandHandler>();
-        var request = new ByteSync.ServerCommon.Commands.Authentication.RefreshTokensRequest(
-            new ByteSync.Common.Business.Auth.RefreshTokensData {
+        var handler = _scope.Resolve<RefreshTokensCommandHandler>();
+        var request = new RefreshTokensRequest(
+            new Common.Business.Auth.RefreshTokensData {
                 Token = refreshToken,
                 ClientInstanceId = clientInstanceId,
                 Version = version,
@@ -75,7 +77,7 @@ public class RefreshTokensCommandHandler_Tests
         var response = await handler.Handle(request, default);
 
         // Assert
-        Assert.That(response.RefreshTokensStatus, Is.EqualTo(ByteSync.Common.Business.Auth.RefreshTokensStatus.RefreshTokenOk));
+        Assert.That(response.RefreshTokensStatus, Is.EqualTo(Common.Business.Auth.RefreshTokensStatus.RefreshTokenOk));
         Assert.That(response.AuthenticationTokens, Is.Not.Null);
 
         // Assert that the refresh token was updated (rotated)

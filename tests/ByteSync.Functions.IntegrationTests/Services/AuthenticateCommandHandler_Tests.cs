@@ -1,10 +1,7 @@
 using Autofac;
-using ByteSync.Common.Business.Versions;
 using ByteSync.Functions.IntegrationTests.TestHelpers.Autofac;
-using ByteSync.ServerCommon.Business.Settings;
-using ByteSync.ServerCommon.Interfaces.Repositories;
+using ByteSync.ServerCommon.Commands.Authentication;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
-using ByteSync.ServerCommon.Loaders;
 using FakeItEasy;
 
 namespace ByteSync.Functions.IntegrationTests.Services;
@@ -17,18 +14,18 @@ public class AuthenticateCommandHandler_Tests
     [SetUp]
     public void Setup()
     {
-        var fakeVersionService = FakeItEasy.A.Fake<ByteSync.ServerCommon.Interfaces.Services.Clients.IClientSoftwareVersionService>();
-        FakeItEasy.A.CallTo(() => fakeVersionService.IsClientVersionAllowed(FakeItEasy.A<ByteSync.Common.Business.Auth.LoginData>.Ignored)).Returns(Task.FromResult(true));
+        var fakeVersionService = A.Fake<IClientSoftwareVersionService>();
+        A.CallTo(() => fakeVersionService.IsClientVersionAllowed(A<Common.Business.Auth.LoginData>.Ignored)).Returns(Task.FromResult(true));
 
         _scope = GlobalTestSetup.Container.BeginLifetimeScope(builder =>
         {
             builder.RegisterModule(new RepositoriesModule(true));
             builder.RegisterModule(new LoadersModule(false));
-            builder.RegisterType<ByteSync.ServerCommon.Commands.Authentication.AuthenticateCommandHandler>()
+            builder.RegisterType<AuthenticateCommandHandler>()
                 .AsSelf()
                 .InstancePerLifetimeScope();
             builder.RegisterInstance(fakeVersionService)
-                .As<ByteSync.ServerCommon.Interfaces.Services.Clients.IClientSoftwareVersionService>()
+                .As<IClientSoftwareVersionService>()
                 .SingleInstance();
         });
     }
@@ -45,10 +42,10 @@ public class AuthenticateCommandHandler_Tests
         var clientId = "integration-client-id";
         var clientInstanceId = "integration-client-instance";
         var version = "2.0.0";
-        var osPlatform = ByteSync.Common.Business.Misc.OSPlatforms.Windows;
+        var osPlatform = Common.Business.Misc.OSPlatforms.Windows;
         var ipAddress = "127.0.0.1";
 
-        var loginData = new ByteSync.Common.Business.Auth.LoginData
+        var loginData = new Common.Business.Auth.LoginData
         {
             ClientId = clientId,
             ClientInstanceId = clientInstanceId,
@@ -56,8 +53,8 @@ public class AuthenticateCommandHandler_Tests
             OsPlatform = osPlatform
         };
 
-        var request = new ByteSync.ServerCommon.Commands.Authentication.AuthenticateRequest(loginData, ipAddress);
-        var handler = _scope.Resolve<ByteSync.ServerCommon.Commands.Authentication.AuthenticateCommandHandler>();
+        var request = new AuthenticateRequest(loginData, ipAddress);
+        var handler = _scope.Resolve<AuthenticateCommandHandler>();
 
         // Act
         var response = await handler.Handle(request, default);
@@ -65,7 +62,7 @@ public class AuthenticateCommandHandler_Tests
         // Assert
         Assert.That(response, Is.Not.Null);
         Assert.That(response.IsSuccess, Is.True, "Authentication should succeed with valid data");
-        Assert.That(response.InitialConnectionStatus, Is.EqualTo(ByteSync.Common.Business.Auth.InitialConnectionStatus.Success));
+        Assert.That(response.InitialConnectionStatus, Is.EqualTo(Common.Business.Auth.InitialConnectionStatus.Success));
         Assert.That(response.AuthenticationTokens, Is.Not.Null, "AuthenticationTokens should not be null");
         Assert.That(response.EndPoint, Is.Not.Null, "EndPoint should not be null");
     }

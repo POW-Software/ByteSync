@@ -23,7 +23,7 @@ public class GlobalTestSetup
         ByteSyncServerCommonAssembly = GetReferencedAssemblyByName("ByteSync.ServerCommon");
         
         Configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.Secret.json", optional: true) // Secret configuration
+            .AddJsonFile("functions-integration-tests.local.settings.json", optional: false)
             .Build();
         
         var builder = new ContainerBuilder();
