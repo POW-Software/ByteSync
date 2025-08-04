@@ -24,7 +24,7 @@ public class CloudflareR2UrlService : ICloudflareR2UrlService
     {
         var s3Client = GetS3Client();
         var key = GetServerFileName(sharedFileDefinition, partNumber);
-
+        
         var request = new GetPreSignedUrlRequest
         {
             BucketName = _cloudflareR2Settings.BucketName,
@@ -33,7 +33,8 @@ public class CloudflareR2UrlService : ICloudflareR2UrlService
             Expires = DateTime.UtcNow.AddMinutes(60)
         };
 
-        return await Task.FromResult(s3Client.GetPreSignedURL(request));
+        var preSignedUrl = s3Client.GetPreSignedURL(request);
+        return await Task.FromResult(preSignedUrl);
     }
 
     public async Task<string> GetDownloadFileUrl(SharedFileDefinition sharedFileDefinition, int partNumber)
@@ -55,20 +56,18 @@ public class CloudflareR2UrlService : ICloudflareR2UrlService
     public async Task DeleteObject(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
         var s3Client = GetS3Client();
-        var key = GetServerFileName(sharedFileDefinition, partNumber);
-
-        _logger.LogInformation("Deleting object {Key} from Cloudflare R2", key);
+        string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
 
         var request = new DeleteObjectRequest
         {
             BucketName = _cloudflareR2Settings.BucketName,
-            Key = key
+            Key = finalFileName
         };
 
         var response = await s3Client.DeleteObjectAsync(request);
-        if (response.HttpStatusCode != System.Net.HttpStatusCode.NoContent)
+        if (!response.HttpStatusCode.Equals(System.Net.HttpStatusCode.OK))
         {
-            _logger.LogWarning("Failed to delete object {Key} from Cloudflare R2", key);
+            _logger.LogWarning("Blob {FileName} not found", finalFileName);
         }
     }
 
@@ -104,7 +103,7 @@ public class CloudflareR2UrlService : ICloudflareR2UrlService
                 new AmazonS3Config
                 {
                     ServiceURL = _cloudflareR2Settings.Endpoint,
-                    ForcePathStyle = true // Required for Cloudflare R2
+                    ForcePathStyle = true
                 });
         }
 
@@ -113,7 +112,9 @@ public class CloudflareR2UrlService : ICloudflareR2UrlService
 
     private string GetServerFileName(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        return sharedFileDefinition.SessionId + "_" + sharedFileDefinition.ClientInstanceId + "_" +
-               sharedFileDefinition.GetFileName(partNumber);
+        var fileName = sharedFileDefinition.GetFileName(partNumber);
+        var serverFileName = sharedFileDefinition.SessionId + "_" + sharedFileDefinition.ClientInstanceId + "_" + fileName;
+        
+        return serverFileName;
     }
 } 
