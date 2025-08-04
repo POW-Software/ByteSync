@@ -15,6 +15,7 @@ public class TransferLocationService : ITransferLocationService
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly IBlobUrlService _blobUrlService;
+    private readonly ICloudflareR2UrlService _cloudflareR2UrlService;
     private readonly IInvokeClientsService _invokeClientsService;
     private readonly ISharedFilesService _sharedFilesService;
     private readonly IUsageStatisticsService _usageStatisticsService;
@@ -23,6 +24,7 @@ public class TransferLocationService : ITransferLocationService
     private readonly StorageProvider _storageProvider;
 
     public TransferLocationService(ICloudSessionsRepository cloudSessionsRepository, IBlobUrlService blobUrlService,
+        ICloudflareR2UrlService cloudflareR2UrlService,
         IInvokeClientsService invokeClientsService, 
         ISharedFilesService sharedFilesService, IUsageStatisticsService usageStatisticsService, 
         ISynchronizationService synchronizationService,
@@ -31,6 +33,7 @@ public class TransferLocationService : ITransferLocationService
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _blobUrlService = blobUrlService;
+        _cloudflareR2UrlService = cloudflareR2UrlService;
         _invokeClientsService = invokeClientsService;
         _sharedFilesService = sharedFilesService;
         _usageStatisticsService = usageStatisticsService;
@@ -53,7 +56,12 @@ public class TransferLocationService : ITransferLocationService
 
         if (canGetUrl)
         {
-            string uploadUrl = await _blobUrlService.GetUploadFileUrl(sharedFileDefinition, partNumber);
+            string uploadUrl = _storageProvider switch
+            {
+                StorageProvider.AzureBlobStorage => await _blobUrlService.GetUploadFileUrl(sharedFileDefinition, partNumber),
+                StorageProvider.CloudflareR2 => await _cloudflareR2UrlService.GetUploadFileUrl(sharedFileDefinition, partNumber),
+                _ => throw new NotSupportedException($"Storage provider {_storageProvider} is not supported")
+            };
 
             _logger.LogInformation("GetUploadFileUrl: OK for {@cloudSession} by {@member} {@sharedFileDefinition}",
                 sessionMemberData?.CloudSessionData.BuildLog(), sessionMemberData?.BuildLog(), sharedFileDefinition.BuildLog());
@@ -87,9 +95,14 @@ public class TransferLocationService : ITransferLocationService
 
         if (canGetUrl)
         {
-            string uploadUrl = await _blobUrlService.GetDownloadFileUrl(sharedFileDefinition, partNumber);
+            string downloadUrl = _storageProvider switch
+            {
+                StorageProvider.AzureBlobStorage => await _blobUrlService.GetDownloadFileUrl(sharedFileDefinition, partNumber),
+                StorageProvider.CloudflareR2 => await _cloudflareR2UrlService.GetDownloadFileUrl(sharedFileDefinition, partNumber),
+                _ => throw new NotSupportedException($"Storage provider {_storageProvider} is not supported")
+            };
 
-            return uploadUrl;
+            return downloadUrl;
         }
         else
         {

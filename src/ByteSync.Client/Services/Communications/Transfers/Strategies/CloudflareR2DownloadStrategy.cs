@@ -1,5 +1,7 @@
 using System.IO;
 using System.Threading;
+using Amazon.S3;
+using Amazon.S3.Model;
 using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
@@ -12,21 +14,53 @@ public class CloudflareR2DownloadStrategy : IDownloadStrategy
     {
         try
         {
-            // TODO: Implement CloudFlare download strategy
-            // This could use HttpClient to download from CloudFlare URLs
-            // or use CloudFlare-specific SDK if available
+            // Parse the Cloudflare R2 URL to extract bucket and key
+            var uri = new Uri(storageLocation.Url);
+            var pathSegments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
             
-            /*
-            using var httpClient = new HttpClient();
-            var httpResponse = await httpClient.GetAsync(storageLocation.Url, cancellationToken);
-            await httpResponse.Content.CopyToAsync(memoryStream, cancellationToken);
-            memoryStream.Position = 0;
-            // Create a mock Response object for CloudFlare (since it's not Azure)
-            var mockResponse = new MockResponse(httpResponse.StatusCode);
-            return mockResponse;
-            */
+            if (pathSegments.Length < 2)
+            {
+                return DownloadFileResponse.Failure(400, "Invalid Cloudflare R2 URL format");
+            }
             
-            throw new NotImplementedException("CloudFlare download strategy not yet implemented");
+            var bucketName = pathSegments[0];
+            var key = string.Join("/", pathSegments.Skip(1));
+            
+            // Extract account ID from the hostname
+            var hostname = uri.Host;
+            var accountId = hostname.Split('.')[0]; // e.g., "account-id.r2.cloudflarestorage.com"
+            
+            // For Cloudflare R2, we need to construct the S3 client with the proper endpoint
+            var s3Client = new AmazonS3Client(new AmazonS3Config
+            {
+                ServiceURL = $"https://{accountId}.r2.cloudflarestorage.com",
+                ForcePathStyle = true // Required for Cloudflare R2
+            });
+
+            var request = new GetObjectRequest
+            {
+                BucketName = bucketName,
+                Key = key
+            };
+            
+            using var response = await s3Client.GetObjectAsync(request, cancellationToken);
+            
+            if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
+            {
+                await response.ResponseStream.CopyToAsync(memoryStream, cancellationToken);
+                memoryStream.Position = 0;
+                
+                return DownloadFileResponse.Success(
+                    statusCode: (int)response.HttpStatusCode
+                );
+            }
+            else
+            {
+                return DownloadFileResponse.Failure(
+                    statusCode: (int)response.HttpStatusCode,
+                    errorMessage: $"Download failed with status code: {response.HttpStatusCode}"
+                );
+            }
         }
         catch (Exception ex)
         {
