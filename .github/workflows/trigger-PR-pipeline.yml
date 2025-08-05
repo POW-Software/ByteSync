@@ -11,7 +11,7 @@ env:
     tests/ByteSync.Functions.IntegrationTests/ByteSync.Functions.IntegrationTests.csproj
     tests/ByteSync.Functions.UnitTests/ByteSync.Functions.UnitTests.csproj
     tests/ByteSync.ServerCommon.Tests/ByteSync.ServerCommon.Tests.csproj
-    test/ByteSync.TestsCommon/ByteSync.TestsCommon.csproj
+    tests/ByteSync.TestsCommon/ByteSync.TestsCommon.csproj
   
 jobs:
   # === LINUX ===
@@ -62,8 +62,10 @@ jobs:
 
       - name: Run Tests
         run: |
-          for proj in $TEST_PROJECTS; do 
-          dotnet test "$proj" --no-restore --no-build
+          echo "$TEST_PROJECT" | while read -r $project; do 
+          if [ -n $project]; then
+          dotnet test "$project" --no-restore --no-build
+          fi
           done
         shell: bash
 
@@ -126,8 +128,10 @@ jobs:
 
       - name: Run Tests
         run: |
-          for proj in $TEST_PROJECTS; do 
-          dotnet test "$proj" --no-restore --no-build
+          echo "$TEST_PROJECT" | while read -r $project; do 
+          if [ -n $project]; then
+          dotnet test "$project" --no-restore --no-build
+          fi
           done
         shell: bash
         
@@ -190,8 +194,10 @@ jobs:
 
       - name: Run Tests
         run: |
-          for proj in $TEST_PROJECTS; do 
-          dotnet test "$proj" --no-restore --no-build
+          echo "$TEST_PROJECT" | while read -r $project; do 
+          if [ -n $project]; then
+          dotnet test "$project" --no-restore --no-build
+          fi
           done
         shell: bash
         
