@@ -62,8 +62,8 @@ jobs:
 
       - name: Run Tests
         run: |
-          echo "$TEST_PROJECT" | while read -r $project; do 
-          if [ -n $project]; then
+          echo "$TEST_PROJECTS" | while read -r project; do 
+          if [ -n $project ]; then
           dotnet test "$project" --no-restore --no-build
           fi
           done
