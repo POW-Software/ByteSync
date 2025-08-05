@@ -3,6 +3,16 @@ name: Pipeline PR push
 on:
   pull_request:
 
+env:
+  TEST_PROJECTS: |
+    tests/ByteSync.Client.IntegrationTests/ByteSync.Client.IntegrationTests.csproj
+    tests/ByteSync.Client.Tests/ByteSync.Client.Tests.csproj
+    tests/ByteSync.Common.Tests/ByteSync.Common.Tests.csproj
+    tests/ByteSync.Functions.IntegrationTests/ByteSync.Functions.IntegrationTests.csproj
+    tests/ByteSync.Functions.UnitTests/ByteSync.Functions.UnitTests.csproj
+    tests/ByteSync.ServerCommon.Tests/ByteSync.ServerCommon.Tests.csproj
+    test/ByteSync.TestsCommon/ByteSync.TestsCommon.csproj
+  
 jobs:
   # === LINUX ===
   build-linux:
@@ -51,7 +61,10 @@ jobs:
       - run: dotnet restore --locked-mode
 
       - name: Run Tests
-        run: dotnet test --no-restore --no-build
+        run: for proj in $TEST_PROJECTS; do 
+          dotnet test "$proj" --no-restore --no-build
+          done
+        shell: bash
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
@@ -111,8 +124,11 @@ jobs:
       - run: dotnet restore --locked-mode
 
       - name: Run Tests
-        run: dotnet test --no-restore --no-build
-
+        run: for proj in $TEST_PROJECTS; do 
+          dotnet test "$proj" --no-restore --no-build
+          done
+        shell: bash
+        
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         with:
@@ -171,8 +187,11 @@ jobs:
       - run: dotnet restore --locked-mode
 
       - name: Run Tests
-        run: dotnet test --no-restore --no-build
-
+        run: for proj in $TEST_PROJECTS; do 
+          dotnet test "$proj" --no-restore --no-build
+          done
+        shell: bash
+        
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         with:
