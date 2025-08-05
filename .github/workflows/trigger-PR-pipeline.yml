@@ -1,57 +1,184 @@
-name: Pipeline PR push 
+name: Pipeline PR push
+
 on:
   pull_request:
 
 jobs:
-  build:
-    runs-on: ${{matrix.os}}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+  # === LINUX ===
+  build-linux:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-        
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Setup .NET 8 Environment 
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-      - name: Create config file for ByteSync.Client
-        run: echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON}}' > src/ByteSync.Client/local.settings.json
-      
+
+      - name: Create config file
+        shell: bash
+        run: echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
+
       - run: dotnet restore --locked-mode
       - run: dotnet clean --verbosity quiet
       - run: dotnet build --verbosity quiet /property:WarningLevel=0
-  
-  test:
-    needs: build
-    runs-on: ${{matrix.os}}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-    steps:     
+
+  test-linux:
+    needs: build-linux
+    runs-on: ubuntu-latest
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Setup .NET 8 Environment 
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-        
+
       - run: dotnet restore --locked-mode
 
       - name: Run Tests
-        run : dotnet test
+        run: dotnet test --no-restore --no-build
 
-      - name: Upload Test Results as Artifacts
+      - name: Upload Test Results
         uses: actions/upload-artifact@v4
         with:
-          name: PR-test-results-${{matrix.os}}
+          name: PR-test-results-linux
           path: ./TestResults/*.trx
-          
+
+      - name: Show Failed Tests
+        if: failure()
+        run: echo "Some tests failed. Check uploaded artifacts for detailed logs."
+
+
+  # === macOS ===
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Setup .NET 8 Environment 
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Create config file
+        shell: bash
+        run: echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
+
+      - run: dotnet restore --locked-mode
+      - run: dotnet clean --verbosity quiet
+      - run: dotnet build --verbosity quiet /property:WarningLevel=0
+
+  test-mac:
+    needs: build-mac
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 8 Environment 
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - run: dotnet restore --locked-mode
+
+      - name: Run Tests
+        run: dotnet test --no-restore --no-build
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: PR-test-results-mac
+          path: ./TestResults/*.trx
+
+      - name: Show Failed Tests
+        if: failure()
+        run: echo "Some tests failed. Check uploaded artifacts for detailed logs."
+
+
+  # === WINDOWS ===
+  build-win:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: C:\Users\runneradmin\.nuget\packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Setup .NET 8 Environment 
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Create config file
+        shell: bash
+        run: echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
+
+      - run: dotnet restore --locked-mode
+      - run: dotnet clean --verbosity quiet
+      - run: dotnet build --verbosity quiet /property:WarningLevel=0
+
+  test-win:
+    needs: build-win
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 8 Environment 
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - run: dotnet restore --locked-mode
+
+      - name: Run Tests
+        run: dotnet test --no-restore --no-build
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: PR-test-results-win
+          path: ./TestResults/*.trx
+
       - name: Show Failed Tests
         if: failure()
         run: echo "Some tests failed. Check uploaded artifacts for detailed logs."
