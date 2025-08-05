@@ -1,5 +1,5 @@
 ﻿{
-  "IsEncrypted": false,
+  "IsEncrypted": "",
   "Values": {
     "AzureWebJobsStorage": "",
     "FUNCTIONS_WORKER_RUNTIME": "",
@@ -10,7 +10,12 @@
     "AppSettings:SkipClientsVersionCheck": "",
     "AppSettings:UpdatesDefinitionUrl": "",
     "AppSettings:AnnouncementsUrl": "",
-    "AppSettings:DefaultStorageProvider": ""
+    "AppSettings:DefaultStorageProvider": "",
+    "CloudflareR2:AccessKeyId": "",
+    "CloudflareR2:SecretAccessKey": "",
+    "CloudflareR2:Endpoint": "",
+    "CloudflareR2:BucketName": "",
+    "CloudflareR2:RetentionDurationInDays": ""
   }
 }
 
