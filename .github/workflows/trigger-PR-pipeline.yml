@@ -1,0 +1,53 @@
+name: Pipeline PR push 
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+        
+      - name: Setup .NET 8 Environment 
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+        
+      - run: dotnet restore --locked-mode
+      - run: dotnet clean --verbosity quiet
+      - run: dotnet build --verbosity quiet /property:WarningLevel=0
+  
+  test:
+    needs: build
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+    steps:
+      - name: Setup .NET 8 Environment 
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+        
+      - run: dotnet restore --locked-mode
+
+      - name: Run Tests
+        run : dotnet test
+
+      - name: Upload Test Results as Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: PR-test-results-${{matrix.os}}
+          path: ./TestResults/*.trx
+          
+      - name: Show Failed Tests
+        if: failure()
+        run: echo "Some tests failed. Check uploaded artifacts for detailed logs."
+        
