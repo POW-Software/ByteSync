@@ -13,7 +13,6 @@
     <ItemGroup>
         <PackageReference Include="Autofac" Version="8.3.0" />
         <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
-        <PackageReference Include="AWSSDK.S3" Version="4.0.6.2" />
         <PackageReference Include="FakeItEasy" Version="8.3.0" />
         <PackageReference Include="AwesomeAssertions" Version="8.0.1" />
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />

@@ -10,7 +10,6 @@
     <ItemGroup>
         <PackageReference Include="Autofac" Version="8.3.0" />
         <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
-        <PackageReference Include="AWSSDK.S3" Version="4.0.6.2" />
         <PackageReference Include="Azure.Identity" Version="1.13.2" />
         <PackageReference Include="MediatR" Version="12.5.0" />
         <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.23.0" />

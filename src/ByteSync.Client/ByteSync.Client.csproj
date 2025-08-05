@@ -62,7 +62,6 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
     <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.3.0" />
     <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="11.3.0" />
-    <PackageReference Include="AWSSDK.S3" Version="4.0.6.2" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.24.0" />
     <PackageReference Include="DynamicData" Version="9.4.1" />
     <PackageReference Include="FastRsyncNet" Version="2.4.3" />
