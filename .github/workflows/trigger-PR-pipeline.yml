@@ -18,7 +18,9 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-        
+      - name: Create config file for ByteSync.Client
+        run: echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON}}' > src/ByteSync.Client/local.settings.json
+      
       - run: dotnet restore --locked-mode
       - run: dotnet clean --verbosity quiet
       - run: dotnet build --verbosity quiet /property:WarningLevel=0
