@@ -61,7 +61,8 @@ jobs:
       - run: dotnet restore --locked-mode
 
       - name: Run Tests
-        run: for proj in $TEST_PROJECTS; do 
+        run: |
+          for proj in $TEST_PROJECTS; do 
           dotnet test "$proj" --no-restore --no-build
           done
         shell: bash
@@ -124,7 +125,8 @@ jobs:
       - run: dotnet restore --locked-mode
 
       - name: Run Tests
-        run: for proj in $TEST_PROJECTS; do 
+        run: |
+          for proj in $TEST_PROJECTS; do 
           dotnet test "$proj" --no-restore --no-build
           done
         shell: bash
@@ -187,7 +189,8 @@ jobs:
       - run: dotnet restore --locked-mode
 
       - name: Run Tests
-        run: for proj in $TEST_PROJECTS; do 
+        run: |
+          for proj in $TEST_PROJECTS; do 
           dotnet test "$proj" --no-restore --no-build
           done
         shell: bash
