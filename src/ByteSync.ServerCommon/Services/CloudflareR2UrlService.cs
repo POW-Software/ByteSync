@@ -33,8 +33,8 @@ public class CloudflareR2UrlService : ICloudflareR2UrlService
             Expires = DateTime.UtcNow.AddMinutes(60)
         };
 
-        var preSignedUrl = s3Client.GetPreSignedURL(request);
-        return await Task.FromResult(preSignedUrl);
+        var preSignedUrl = await s3Client.GetPreSignedURLAsync(request);
+        return preSignedUrl;
     }
 
     public async Task<string> GetDownloadFileUrl(SharedFileDefinition sharedFileDefinition, int partNumber)
@@ -50,7 +50,7 @@ public class CloudflareR2UrlService : ICloudflareR2UrlService
             Expires = DateTime.UtcNow.AddMinutes(20)
         };
 
-        return await Task.FromResult(s3Client.GetPreSignedURL(request));
+        return await s3Client.GetPreSignedURLAsync(request);
     }
 
     public async Task DeleteObject(SharedFileDefinition sharedFileDefinition, int partNumber)
