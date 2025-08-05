@@ -154,4 +154,76 @@ public class TestFiltering_Size : BaseTestFiltering
         // Assert
         result.Should().Be(expectedResult);
     }
+    
+    // Documentation examples tests
+    
+    [Test]
+    public void TestParse_ExactSize_1024()
+    {
+        // Arrange - "size == 1024"
+        var filterText = "size == 1024";
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeTrue();
+        parseResult.Expression.Should().NotBeNull();
+    }
+    
+    [Test]
+    public void TestEvaluate_ExactSize_1024()
+    {
+        // Arrange - "size == 1024"
+        var filterText = "size == 1024";
+        
+        // Test file with exact size
+        var comparisonItem1 = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 1024);
+        
+        // Test file with different size
+        var comparisonItem2 = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 1025);
+        
+        // Act
+        var result1 = EvaluateFilterExpression(filterText, comparisonItem1);
+        var result2 = EvaluateFilterExpression(filterText, comparisonItem2);
+        
+        // Assert
+        result1.Should().BeTrue(); // Exact match should be true
+        result2.Should().BeFalse(); // Different size should be false
+    }
+    
+    [Test]
+    public void TestParse_NotZeroSize()
+    {
+        // Arrange - "size != 0"
+        var filterText = "size != 0";
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeTrue();
+        parseResult.Expression.Should().NotBeNull();
+    }
+    
+    [Test]
+    public void TestEvaluate_NotZeroSize()
+    {
+        // Arrange - "size != 0"
+        var filterText = "size != 0";
+        
+        // Test zero-size file
+        var comparisonItem1 = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 0);
+        
+        // Test non-zero size file
+        var comparisonItem2 = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 100);
+        
+        // Act
+        var result1 = EvaluateFilterExpression(filterText, comparisonItem1);
+        var result2 = EvaluateFilterExpression(filterText, comparisonItem2);
+        
+        // Assert
+        result1.Should().BeFalse(); // Zero size should be excluded
+        result2.Should().BeTrue(); // Non-zero size should match
+    }
 }
