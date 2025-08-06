@@ -41,7 +41,8 @@ jobs:
         run: |
           echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
           echo '${{ secrets.FUNCTIONS_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON }}' > tests/ByteSync.Functions.IntegrationTests/functions-integration-tests.local.settings.json
-        
+          echo '${{ secrets.SERVER_COMMON_TESTS_LOCAL_SETTINGS }}' > tests/ByteSync.ServerCommon.Tests/server-common-tests.local.settings.json
+      
       - run: dotnet restore --locked-mode
       - run: dotnet clean --verbosity quiet
       - run: dotnet build --verbosity quiet /property:WarningLevel=0
@@ -121,6 +122,7 @@ jobs:
         run: |
           echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
           echo '${{ secrets.FUNCTIONS_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON }}' > tests/ByteSync.Functions.IntegrationTests/functions-integration-tests.local.settings.json
+          echo '${{ secrets.SERVER_COMMON_TESTS_LOCAL_SETTINGS }}' > tests/ByteSync.ServerCommon.Tests/server-common-tests.local.settings.json
 
       - run: dotnet restore --locked-mode
       - run: dotnet clean --verbosity quiet
@@ -200,6 +202,7 @@ jobs:
         run: |
           echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
           echo '${{ secrets.FUNCTIONS_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON }}' > tests/ByteSync.Functions.IntegrationTests/functions-integration-tests.local.settings.json
+          echo '${{ secrets.SERVER_COMMON_TESTS_LOCAL_SETTINGS }}' > tests/ByteSync.ServerCommon.Tests/server-common-tests.local.settings.json
 
       - run: dotnet restore --locked-mode
       - run: dotnet clean --verbosity quiet
@@ -208,7 +211,7 @@ jobs:
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts-linux
+          name: build-artifacts-windows
           path: |
             **/bin/
             **/obj/
@@ -232,7 +235,7 @@ jobs:
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: build-artifacts-linux
+          name: build-artifacts-windows
           
       - name: Run Tests
         run: |
