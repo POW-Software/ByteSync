@@ -5,13 +5,13 @@ on:
 
 env:
   TEST_PROJECTS: |
-    Tests/ByteSync.Client.IntegrationTests/ByteSync.Client.IntegrationTests.csproj
-    Tests/ByteSync.Client.Tests/ByteSync.Client.Tests.csproj
-    Tests/ByteSync.Common.Tests/ByteSync.Common.Tests.csproj
-    Tests/ByteSync.Functions.IntegrationTests/ByteSync.Functions.IntegrationTests.csproj
-    Tests/ByteSync.Functions.UnitTests/ByteSync.Functions.UnitTests.csproj
-    Tests/ByteSync.ServerCommon.Tests/ByteSync.ServerCommon.Tests.csproj
-    Tests/ByteSync.TestsCommon/ByteSync.TestsCommon.csproj
+    tests/ByteSync.Client.IntegrationTests/ByteSync.Client.IntegrationTests.csproj
+    tests/ByteSync.Client.Tests/ByteSync.Client.Tests.csproj
+    tests/ByteSync.Common.Tests/ByteSync.Common.Tests.csproj
+    tests/ByteSync.Functions.IntegrationTests/ByteSync.Functions.IntegrationTests.csproj
+    tests/ByteSync.Functions.UnitTests/ByteSync.Functions.UnitTests.csproj
+    tests/ByteSync.ServerCommon.Tests/ByteSync.ServerCommon.Tests.csproj
+    tests/ByteSync.TestsCommon/ByteSync.TestsCommon.csproj
   
 jobs:
   # === LINUX ===
