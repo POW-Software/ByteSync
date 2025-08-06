@@ -36,15 +36,17 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Create config file
+      - name: Create Config Files
         shell: bash
-        run: echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
-
+        run: |
+          echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
+          echo '${{ secrets.FUNCTIONS_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON}}' > src/ByteSync.Functions.IntegrationTests/functions-integration-tests.local.settings.json
+        
       - run: dotnet restore --locked-mode
       - run: dotnet clean --verbosity quiet
       - run: dotnet build --verbosity quiet /property:WarningLevel=0
 
-      - name: Upload build artifacts
+      - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-linux
@@ -67,9 +69,8 @@ jobs:
           dotnet-version: '8.0.x'
 
       - run: dotnet restore --locked-mode
-      - run: echo "$TEST_PROJECTS"
-
-      - name: Download build artifacts
+      
+      - name: Download Build Artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts-linux
@@ -94,8 +95,6 @@ jobs:
         if: failure()
         run: echo "Some tests failed. Check uploaded artifacts for detailed logs."
 
-
-  # === macOS ===
   build-mac:
     runs-on: macos-latest
     steps:
@@ -117,13 +116,23 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Create config file
+      - name: Create config files
         shell: bash
-        run: echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
+        run: |
+          echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
+          echo '${{ secrets.FUNCTIONS_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON}}' > src/ByteSync.Functions.IntegrationTests/functions-integration-tests.local.settings.json
 
       - run: dotnet restore --locked-mode
       - run: dotnet clean --verbosity quiet
       - run: dotnet build --verbosity quiet /property:WarningLevel=0
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-mac
+          path: |
+            **/bin/
+            **/obj/
 
   test-mac:
     needs: build-mac
@@ -140,7 +149,12 @@ jobs:
           dotnet-version: '8.0.x'
 
       - run: dotnet restore --locked-mode
-
+      
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-mac
+          
       - name: Run Tests
         run: |
           echo "$TEST_PROJECT" | while read -r $project; do 
@@ -160,8 +174,6 @@ jobs:
         if: failure()
         run: echo "Some tests failed. Check uploaded artifacts for detailed logs."
 
-
-  # === WINDOWS ===
   build-win:
     runs-on: windows-latest
     steps:
@@ -183,14 +195,24 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Create config file
+      - name: Create Config Files
         shell: bash
-        run: echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
+        run: |
+          echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
+          echo '${{ secrets.FUNCTIONS_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON}}' > src/ByteSync.Functions.IntegrationTests/functions-integration-tests.local.settings.json
 
       - run: dotnet restore --locked-mode
       - run: dotnet clean --verbosity quiet
       - run: dotnet build --verbosity quiet /property:WarningLevel=0
-
+      
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-linux
+          path: |
+            **/bin/
+            **/obj/
+            
   test-win:
     needs: build-win
     runs-on: windows-latest
@@ -206,7 +228,12 @@ jobs:
           dotnet-version: '8.0.x'
 
       - run: dotnet restore --locked-mode
-
+      
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-linux
+          
       - name: Run Tests
         run: |
           echo "$TEST_PROJECT" | while read -r $project; do 
