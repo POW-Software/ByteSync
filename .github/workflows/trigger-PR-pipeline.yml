@@ -44,6 +44,14 @@ jobs:
       - run: dotnet clean --verbosity quiet
       - run: dotnet build --verbosity quiet /property:WarningLevel=0
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-linux
+          path: |
+            **/bin/
+            **/obj/
+
   test-linux:
     needs: build-linux
     runs-on: ubuntu-latest
@@ -60,6 +68,12 @@ jobs:
 
       - run: dotnet restore --locked-mode
       - run: echo "$TEST_PROJECTS"
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-linux
+    
       - name: Run Tests
         run: |
           echo "$TEST_PROJECTS" | while read -r project; do 
