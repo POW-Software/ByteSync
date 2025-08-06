@@ -92,6 +92,16 @@ var host = new HostBuilder()
         services.Configure<AppSettings>(appSettingsSection);
         var appSettings = appSettingsSection.Get<AppSettings>();
         
+        var logger = serviceProvider.GetService<ILogger<Program>>();
+        if (logger != null && appSettings != null)
+        {
+            logger.LogInformation("AppSettings loaded - JwtDurationInSeconds: {JwtDuration}, " +
+                                  "SkipClientsVersionCheck: {SkipCheck}, DefaultStorageProvider: {DefaultStorageProvider}", 
+                appSettings.JwtDurationInSeconds, 
+                appSettings.SkipClientsVersionCheck, 
+                appSettings.DefaultStorageProvider);
+        }
+        
         services.AddClaimAuthorization();
         services.AddJwtAuthentication(appSettings!.Secret);
         
