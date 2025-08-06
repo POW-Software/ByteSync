@@ -85,7 +85,6 @@ jobs:
           dotnet test "$project" --no-restore --no-build --logger "trx;LogFileName=$safe_name.trx" --results-directory ./TestResults
           fi
           done
-        continue-on-error: true
         shell: bash
 
       - name: Upload Test Results
@@ -93,7 +92,6 @@ jobs:
         with:
           name: PR-test-results-linux
           path: ./TestResults/
-        if: always() 
 
       - name: Show Failed Tests
         if: failure()
@@ -162,12 +160,13 @@ jobs:
           
       - name: Run Tests
         run: |
-          echo "$TEST_PROJECT" | while read -r project; do 
-          if [ -n $project ]; then
+          echo "$TEST_PROJECTS" | while IFS= read -r project; do 
+          if [ -n "$project" ]; then
+          echo "Running test project: $project"
+          safe_name=$(basename "$project" .csproj)
           dotnet test "$project" --no-restore --no-build --logger "trx;LogFileName=$safe_name.trx" --results-directory ./TestResults
           fi
           done
-        continue-on-error: true
         shell: bash
         
       - name: Upload Test Results
@@ -243,12 +242,13 @@ jobs:
           
       - name: Run Tests
         run: |
-          echo "$TEST_PROJECT" | while read -r project; do 
-          if [ -n $project ]; then
-          dotnet test "$project" --no-restore --no-build --logger "trx;LogFileName=$safe_name.trx" --results-directory TestResults
+          echo "$TEST_PROJECTS" | while IFS= read -r project; do 
+          if [ -n "$project" ]; then
+          echo "Running test project: $project"
+          safe_name=$(basename "$project" .csproj)
+          dotnet test "$project" --no-restore --no-build --logger "trx;LogFileName=$safe_name.trx" --results-directory ./TestResults
           fi
           done
-        continue-on-error: true
         shell: bash
         
       - name: Upload Test Results
