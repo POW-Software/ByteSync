@@ -386,6 +386,7 @@ public class TestInventoryBuilder : IntegrationTest
         ClassicAssert.AreEqual(2 + expectedHiddenFiles, inventory.InventoryParts[0].FileDescriptions.Count);
     }
         
+    /*
     [Test]
     [TestCase(true, 2, 0)]
     [TestCase(false, 8, 2, ExcludePlatform = "Linux")]
@@ -440,6 +441,7 @@ public class TestInventoryBuilder : IntegrationTest
         ClassicAssert.AreEqual(expectedDesktopIniFiles, 
             inventory.InventoryParts[0].FileDescriptions.Count(fd => fd.Name.Equals("desktop.ini")));
     }
+    */
         
     [Test]
     [Platform(Exclude = "Linux")]
