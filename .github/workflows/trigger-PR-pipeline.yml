@@ -3,23 +3,30 @@ name: Pipeline PR push
 on:
   pull_request:
 
-env:
-  TEST_PROJECTS: |
-    tests/ByteSync.Client.IntegrationTests/ByteSync.Client.IntegrationTests.csproj
-    tests/ByteSync.Client.Tests/ByteSync.Client.Tests.csproj
-    tests/ByteSync.Common.Tests/ByteSync.Common.Tests.csproj
-    tests/ByteSync.Functions.IntegrationTests/ByteSync.Functions.IntegrationTests.csproj
-    tests/ByteSync.Functions.UnitTests/ByteSync.Functions.UnitTests.csproj
-    tests/ByteSync.ServerCommon.Tests/ByteSync.ServerCommon.Tests.csproj
-    tests/ByteSync.TestsCommon/ByteSync.TestsCommon.csproj
-
 jobs:
+  discover-tests:
+    runs-on: ubuntu-latest
+    outputs:
+      testProjects: ${{ steps.set-matrix.outputs.testProjects }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Find Test Projects
+        id: set-matrix
+        run: |
+          projects=$(find tests -name '*.csproj' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "Found test projects: $projects"
+          echo "testProjects=$projects" >> $GITHUB_OUTPUT
+
   build-and-test:
+    needs: discover-tests
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-
+        testProject: ${{ fromJson(needs.discover-tests.outputs.testProjects) }}
+    name: build-and-test (${{ matrix.os }} | ${{ matrix.testProject }})
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,7 +41,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Setup .NET 8 Environment 
+      - name: Setup .NET 8 Environment
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
@@ -50,30 +57,19 @@ jobs:
       - run: dotnet clean --verbosity quiet
       - run: dotnet build --verbosity quiet /property:WarningLevel=0
 
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts-${{ matrix.os == 'windows-latest' && 'windows' || matrix.os == 'ubuntu-latest' && 'linux' || 'mac' }}
-          path: |
-            **/bin/
-            **/obj/
-
-      - name: Run Tests
+      - name: Run Test Project
         run: |
           mkdir -p TestResults
-          echo "$TEST_PROJECTS" | while IFS= read -r project; do 
-            if [ -n "$project" ]; then
-              echo "Running test project: $project"
-              safe_name=$(basename "$project" .csproj)
-              dotnet test "$project" --no-restore --no-build --logger "trx;LogFileName=$safe_name.trx" --results-directory ./TestResults
-            fi
-          done
+          project="${{ matrix.testProject }}"
+          safe_name=$(basename "$project" .csproj)
+          echo "Running test project: $project"
+          dotnet test "$project" --no-restore --no-build --logger "trx;LogFileName=$safe_name.trx" --results-directory ./TestResults
         shell: bash
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         with:
-          name: PR-test-results-${{ matrix.os == 'windows-latest' && 'windows' || matrix.os == 'ubuntu-latest' && 'linux' || 'mac' }}
+          name: PR-test-results-${{ matrix.os }}-${{ hashFiles(matrix.testProject) }}
           path: ./TestResults/
 
       - name: Show Failed Tests
