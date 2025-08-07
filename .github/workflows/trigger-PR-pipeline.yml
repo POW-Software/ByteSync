@@ -18,21 +18,28 @@ jobs:
           projects=$(find tests -name '*.csproj' | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "Found test projects: $projects"
           echo "testProjects=$projects" >> $GITHUB_OUTPUT
-
-  build:
+  build-and-test:
+    needs: discover-tests
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    outputs:
-      os: ${{ matrix.os }}
-    name: build (${{ matrix.os }})
+        testProject: ${{ fromJson(needs.discover-tests.outputs.testProjects) }}
+    name: build-and-test (${{ matrix.os }} | ${{ matrix.testProject }})
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup .NET 8
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ matrix.os == 'windows-latest' && env.USERPROFILE || '~' }}/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+      - name: Setup .NET 8 Environment
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
@@ -43,51 +50,23 @@ jobs:
           echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
           echo '${{ secrets.FUNCTIONS_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON }}' > tests/ByteSync.Functions.IntegrationTests/functions-integration-tests.local.settings.json
           echo '${{ secrets.SERVER_COMMON_TESTS_LOCAL_SETTINGS }}' > tests/ByteSync.ServerCommon.Tests/server-common-tests.local.settings.json
-
       - run: dotnet restore --locked-mode
       - run: dotnet clean --verbosity quiet
       - run: dotnet build --verbosity quiet /property:WarningLevel=0
-
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts-${{ matrix.os }}
-          path: |
-            **/bin/
-            **/obj/
-
-  build-and-test:
-    needs: [discover-tests, build]
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        testProject: ${{ fromJson(needs.discover-tests.outputs.testProjects) }}
-    name: build-and-test (${{ matrix.os }} | ${{ matrix.testProject }})
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET 8
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts-${{ matrix.os }}
 
       - name: Run Test Project
         run: |
           mkdir -p TestResults
           project="${{ matrix.testProject }}"
           safe_name=$(basename "$project" .csproj)
+          echo "Running test project: $project"
           dotnet test "$project" --no-restore --no-build --logger "trx;LogFileName=$safe_name.trx" --results-directory ./TestResults
         shell: bash
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ matrix.os }}-${{ hashFiles(matrix.testProject) }}
+          name: PR-test-results-${{ matrix.os }}-${{ hashFiles(matrix.testProject) }}
           path: ./TestResults/
 
       - name: Show Failed Tests
