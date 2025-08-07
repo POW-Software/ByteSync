@@ -30,15 +30,16 @@ public class TransferLocationService : ITransferLocationService
         _logger = logger;
     }
     
-    public async Task<string> GetUploadFileUrl(string sessionId, Client client,
-        SharedFileDefinition sharedFileDefinition, int partNumber)
+    public async Task<string> GetUploadFileUrl(string sessionId, Client client, TransferParameters transferParameters)
     {
-        if (partNumber <= 0)
+        if (transferParameters.PartNumber == null || transferParameters.PartNumber <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(partNumber), "Part number must be greater than 0");
+            throw new ArgumentOutOfRangeException(nameof(transferParameters.PartNumber), "Part number must be greater than 0");
         }
         
         var sessionMemberData = await _cloudSessionsRepository.GetSessionMember(sessionId, client);
+        var sharedFileDefinition = transferParameters.SharedFileDefinition;
+        var partNumber = transferParameters.PartNumber.Value;
 
         bool canGetUrl = IsSharedFileDefinitionAllowed(sessionMemberData, sharedFileDefinition);
 
@@ -62,10 +63,16 @@ public class TransferLocationService : ITransferLocationService
         }
     }
     
-    public async Task<string> GetDownloadFileUrl(string sessionId, Client client,
-        SharedFileDefinition sharedFileDefinition, int partNumber)
+    public async Task<string> GetDownloadFileUrl(string sessionId, Client client, TransferParameters transferParameters)
     {
+        if (transferParameters.PartNumber == null || transferParameters.PartNumber <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(transferParameters.PartNumber), "Part number must be greater than 0");
+        }
+        
         var sessionMemberData = await _cloudSessionsRepository.GetSessionMember(sessionId, client);
+        var sharedFileDefinition = transferParameters.SharedFileDefinition;
+        var partNumber = transferParameters.PartNumber.Value;
 
         bool canGetUrl = IsSharedFileDefinitionAllowed(sessionMemberData, sharedFileDefinition);
 

@@ -28,8 +28,7 @@ public class GetUploadFileStorageLocationCommandHandler : IRequestHandler<GetUpl
         var url = await _transferLocationService.GetUploadFileUrl(
             request.SessionId,
             request.Client,
-            request.TransferParameters.SharedFileDefinition,
-            request.TransferParameters.PartNumber!.Value
+            request.TransferParameters
         );
         
         var responseObject = new FileStorageLocation(url, _storageProvider);

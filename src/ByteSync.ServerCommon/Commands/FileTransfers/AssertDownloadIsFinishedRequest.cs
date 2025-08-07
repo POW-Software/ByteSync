@@ -6,14 +6,14 @@ namespace ByteSync.ServerCommon.Commands.FileTransfers;
 
 public class AssertDownloadIsFinishedRequest : IRequest
 {
-    public AssertDownloadIsFinishedRequest(string sessionId, Client client, SharedFileDefinition sharedFileDefinition)
+    public AssertDownloadIsFinishedRequest(string sessionId, Client client, TransferParameters transferParameters)
     {
         SessionId = sessionId;
         Client = client;
-        SharedFileDefinition = sharedFileDefinition;
+        TransferParameters = transferParameters;
     }
 
     public string SessionId { get; set; }
     public Client Client { get; set; }
-    public SharedFileDefinition SharedFileDefinition { get; set; }
+    public TransferParameters TransferParameters { get; set; }
 } 

@@ -6,11 +6,9 @@ namespace ByteSync.ServerCommon.Interfaces.Services;
 
 public interface ITransferLocationService
 {
-    Task<string> GetUploadFileUrl(string sessionId, Client client,
-        SharedFileDefinition sharedFileDefinition, int partNumber);
+    Task<string> GetUploadFileUrl(string sessionId, Client client, TransferParameters transferParameters);
     
-    Task<string> GetDownloadFileUrl(string sessionId, Client client,
-        SharedFileDefinition sharedFileDefinition, int partNumber);
+    Task<string> GetDownloadFileUrl(string sessionId, Client client, TransferParameters transferParameters);
 
     bool IsSharedFileDefinitionAllowed(SessionMemberData? sessionMemberData, SharedFileDefinition? sharedFileDefinition);
 }

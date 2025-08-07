@@ -26,20 +26,21 @@ public class AssertDownloadIsFinishedCommandHandler : IRequestHandler<AssertDown
     public async Task Handle(AssertDownloadIsFinishedRequest request, CancellationToken cancellationToken)
     {
         var sessionMemberData = await _cloudSessionsRepository.GetSessionMember(request.SessionId, request.Client);
+        var sharedFileDefinition = request.TransferParameters.SharedFileDefinition;
 
-        if (_transferLocationService.IsSharedFileDefinitionAllowed(sessionMemberData, request.SharedFileDefinition))
+        if (_transferLocationService.IsSharedFileDefinitionAllowed(sessionMemberData, sharedFileDefinition))
         {
             _logger.LogInformation("AssertDownloadIsFinished: {cloudSession} {sharedFileDefinition}",
                 sessionMemberData!.CloudSessionData.SessionId,
-                request.SharedFileDefinition.Id);
+                sharedFileDefinition.Id);
 
-            if (request.SharedFileDefinition.IsSynchronization)
+            if (sharedFileDefinition.IsSynchronization)
             {
-                await _synchronizationService.OnDownloadIsFinishedAsync(request.SharedFileDefinition, request.Client);
+                await _synchronizationService.OnDownloadIsFinishedAsync(sharedFileDefinition, request.Client);
             }
         }
         
         _logger.LogDebug("Download finished asserted for session {SessionId}, file {FileId}", 
-            request.SessionId, request.SharedFileDefinition.Id);
+            request.SessionId, sharedFileDefinition.Id);
     }
 } 

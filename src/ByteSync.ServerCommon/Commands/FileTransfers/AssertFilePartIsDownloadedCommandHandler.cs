@@ -26,13 +26,15 @@ public class AssertFilePartIsDownloadedCommandHandler : IRequestHandler<AssertFi
     public async Task Handle(AssertFilePartIsDownloadedRequest request, CancellationToken cancellationToken)
     {
         var sessionMemberData = await _cloudSessionsRepository.GetSessionMember(request.SessionId, request.Client);
+        var sharedFileDefinition = request.TransferParameters.SharedFileDefinition;
+        var partNumber = request.TransferParameters.PartNumber!.Value;
 
-        if (_transferLocationService.IsSharedFileDefinitionAllowed(sessionMemberData, request.SharedFileDefinition))
+        if (_transferLocationService.IsSharedFileDefinitionAllowed(sessionMemberData, sharedFileDefinition))
         {
-            await _sharedFilesService.AssertFilePartIsDownloaded(request.SharedFileDefinition, request.Client, request.PartNumber);
+            await _sharedFilesService.AssertFilePartIsDownloaded(sharedFileDefinition, request.Client, partNumber);
         }
         
         _logger.LogDebug("File part download asserted for session {SessionId}, file {FileId}, part {PartNumber}", 
-            request.SessionId, request.SharedFileDefinition.Id, request.PartNumber);
+            request.SessionId, sharedFileDefinition.Id, partNumber);
     }
 } 

@@ -6,16 +6,14 @@ namespace ByteSync.ServerCommon.Commands.FileTransfers;
 
 public class GetUploadFileUrlRequest : IRequest<string>
 {
-    public GetUploadFileUrlRequest(string sessionId, Client client, SharedFileDefinition sharedFileDefinition, int partNumber)
+    public GetUploadFileUrlRequest(string sessionId, Client client, TransferParameters transferParameters)
     {
         SessionId = sessionId;
         Client = client;
-        SharedFileDefinition = sharedFileDefinition;
-        PartNumber = partNumber;
+        TransferParameters = transferParameters;
     }
 
     public string SessionId { get; set; }
     public Client Client { get; set; }
-    public SharedFileDefinition SharedFileDefinition { get; set; }
-    public int PartNumber { get; set; }
+    public TransferParameters TransferParameters { get; set; }
 } 

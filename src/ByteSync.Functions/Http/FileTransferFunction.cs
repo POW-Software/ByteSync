@@ -27,7 +27,7 @@ public class FileTransferFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var transferParameters = await FunctionHelper.DeserializeRequestBody<TransferParameters>(req);
         
-        var request = new GetUploadFileUrlRequest(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value);
+        var request = new GetUploadFileUrlRequest(sessionId, client, transferParameters);
         var url = await _mediator.Send(request);
            
         var response = req.CreateResponse();
@@ -64,7 +64,7 @@ public class FileTransferFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var transferParameters = await FunctionHelper.DeserializeRequestBody<TransferParameters>(req);
 
-        var request = new GetDownloadFileUrlRequest(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value);
+        var request = new GetDownloadFileUrlRequest(sessionId, client, transferParameters);
         var url = await _mediator.Send(request);
            
         var response = req.CreateResponse();
@@ -120,7 +120,7 @@ public class FileTransferFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var transferParameters = await FunctionHelper.DeserializeRequestBody<TransferParameters>(req);
 
-        var request = new AssertFilePartIsDownloadedRequest(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value);
+        var request = new AssertFilePartIsDownloadedRequest(sessionId, client, transferParameters);
         await _mediator.Send(request);
 
         var response = req.CreateResponse();
@@ -158,7 +158,7 @@ public class FileTransferFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var transferParameters = await FunctionHelper.DeserializeRequestBody<TransferParameters>(req);
 
-        var request = new AssertDownloadIsFinishedRequest(sessionId, client, transferParameters.SharedFileDefinition);
+        var request = new AssertDownloadIsFinishedRequest(sessionId, client, transferParameters);
         await _mediator.Send(request);
 
         var response = req.CreateResponse();

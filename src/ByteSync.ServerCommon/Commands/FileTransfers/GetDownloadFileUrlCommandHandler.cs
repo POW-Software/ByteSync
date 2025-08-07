@@ -22,12 +22,11 @@ public class GetDownloadFileUrlCommandHandler : IRequestHandler<GetDownloadFileU
         var url = await _transferLocationService.GetDownloadFileUrl(
             request.SessionId,
             request.Client,
-            request.SharedFileDefinition,
-            request.PartNumber
+            request.TransferParameters
         );
         
         _logger.LogDebug("Download file URL generated for session {SessionId}, file {FileId}, part {PartNumber}", 
-            request.SessionId, request.SharedFileDefinition.Id, request.PartNumber);
+            request.SessionId, request.TransferParameters.SharedFileDefinition.Id, request.TransferParameters.PartNumber);
         
         return url;
     }
