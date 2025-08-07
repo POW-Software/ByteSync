@@ -35,25 +35,25 @@ public class SessionMemberData
         EncryptedPrivateData = encryptedSessionMemberPrivateData;
     }
     
-    public string ClientInstanceId { get; set; }
-    
-    public string ClientId { get; set; }
-        
-    public PublicKeyInfo PublicKeyInfo { get; set; }
-        
+    public string ClientInstanceId { get; set; } = null!;
+
+    public string ClientId { get; set; } = null!;
+
+    public PublicKeyInfo PublicKeyInfo { get; set; } = null!;
+
     public string? ProfileClientId { get; set; }
 
-    public CloudSessionData CloudSessionData { get; set; }
+    public CloudSessionData CloudSessionData { get; set; } = null!;
 
     public DateTimeOffset JoinedSessionOn { get; set; }
 
     /// <summary>
     /// InstanceId of the client that must validate the SessionMemberData
     /// </summary>
-    public string ValidatorInstanceId { get; set; }
+    public string ValidatorInstanceId { get; set; } = null!;
 
-    public string FinalizationPassword { get; set; }
-        
+    public string FinalizationPassword { get; set; } = null!;
+
     public List<string> AuthCheckClientInstanceIds { get; set; }
 
     public int PositionInList
