@@ -23,8 +23,8 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
         ISynchronizationService synchronizationService,
         IInvokeClientsService invokeClientsService,
         IUsageStatisticsService usageStatisticsService,
-        ILogger<AssertFilePartIsUploadedCommandHandler> logger,
-        ITransferLocationService transferLocationService)
+        ITransferLocationService transferLocationService,
+        ILogger<AssertFilePartIsUploadedCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _sharedFilesService = sharedFilesService;

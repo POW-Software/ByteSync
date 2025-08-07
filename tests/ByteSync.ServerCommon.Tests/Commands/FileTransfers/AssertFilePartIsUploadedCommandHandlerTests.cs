@@ -19,20 +19,21 @@ public class AssertFilePartIsUploadedCommandHandlerTests
     private ISynchronizationService _mockSynchronizationService;
     private IInvokeClientsService _mockInvokeClientsService;
     private IUsageStatisticsService _mockUsageStatisticsService;
+    private ITransferLocationService _mockTransferLocationService = A.Fake<ITransferLocationService>();
     private ILogger<AssertFilePartIsUploadedCommandHandler> _mockLogger;
     private AssertFilePartIsUploadedCommandHandler _assertFilePartIsUploadedCommandHandler;
-    private ITransferLocationService _mockTransferLocationService = A.Fake<ITransferLocationService>();
+
     
     [SetUp]
     public void Setup()
     {
-        _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
-        _mockSharedFilesService = A.Fake<ISharedFilesService>();
-        _mockSynchronizationService = A.Fake<ISynchronizationService>();
-        _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
-        _mockUsageStatisticsService = A.Fake<IUsageStatisticsService>();
+        _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>(options => options.Strict());
+        _mockSharedFilesService = A.Fake<ISharedFilesService>(options => options.Strict());
+        _mockSynchronizationService = A.Fake<ISynchronizationService>(options => options.Strict());
+        _mockInvokeClientsService = A.Fake<IInvokeClientsService>(options => options.Strict());
+        _mockUsageStatisticsService = A.Fake<IUsageStatisticsService>(options => options.Strict());
+        _mockTransferLocationService = A.Fake<ITransferLocationService>(options => options.Strict());
         _mockLogger = A.Fake<ILogger<AssertFilePartIsUploadedCommandHandler>>();
-        _mockTransferLocationService = A.Fake<ITransferLocationService>();
         
         _assertFilePartIsUploadedCommandHandler = new AssertFilePartIsUploadedCommandHandler(
             _mockCloudSessionsRepository,
@@ -40,8 +41,8 @@ public class AssertFilePartIsUploadedCommandHandlerTests
             _mockSynchronizationService,
             _mockInvokeClientsService,
             _mockUsageStatisticsService,
-            _mockLogger,
-            _mockTransferLocationService);
+            _mockTransferLocationService,
+            _mockLogger);
     }
 
     [Test]
@@ -58,6 +59,11 @@ public class AssertFilePartIsUploadedCommandHandlerTests
         };
 
         var request = new AssertFilePartIsUploadedRequest(sessionId, client, transferParameters);
+        
+        
+        // Mock the session repository to return a valid session and session member
+        var mockSession = new CloudSessionData();
+        A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId)).Returns(mockSession);
         
         // Mock the session repository to return a valid session member
         var mockSessionMember = new SessionMemberData { ClientInstanceId = client.ClientInstanceId };
