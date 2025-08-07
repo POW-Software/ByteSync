@@ -60,7 +60,7 @@ public class CleanupAzureBlobStorageSnippetsCommandHandlerTests
             .Returns(Task.FromResult(container));
 
         // Act
-        var result = await _handler.Handle(new CleanupBlobStorageSnippetsRequest(), CancellationToken.None);
+        var result = await _handler.Handle(new CleanupAzureBlobStorageSnippetsRequest(), CancellationToken.None);
 
         // Assert
         result.Should().Be(2);
@@ -76,7 +76,7 @@ public class CleanupAzureBlobStorageSnippetsCommandHandlerTests
         _settings.RetentionDurationInDays = 0;
 
         // Act
-        var result = await _handler.Handle(new CleanupBlobStorageSnippetsRequest(), CancellationToken.None);
+        var result = await _handler.Handle(new CleanupAzureBlobStorageSnippetsRequest(), CancellationToken.None);
 
         // Assert
         result.Should().Be(0);
@@ -94,7 +94,7 @@ public class CleanupAzureBlobStorageSnippetsCommandHandlerTests
             .Returns(Task.FromResult(container));
 
         // Act
-        var result = await _handler.Handle(new CleanupBlobStorageSnippetsRequest(), CancellationToken.None);
+        var result = await _handler.Handle(new CleanupAzureBlobStorageSnippetsRequest(), CancellationToken.None);
 
         // Assert
         result.Should().Be(0);
@@ -120,7 +120,7 @@ public class CleanupAzureBlobStorageSnippetsCommandHandlerTests
             .Returns(Task.FromResult(container));
 
         // Act
-        var result = await _handler.Handle(new CleanupBlobStorageSnippetsRequest(), CancellationToken.None);
+        var result = await _handler.Handle(new CleanupAzureBlobStorageSnippetsRequest(), CancellationToken.None);
 
         // Assert
         result.Should().Be(0);
