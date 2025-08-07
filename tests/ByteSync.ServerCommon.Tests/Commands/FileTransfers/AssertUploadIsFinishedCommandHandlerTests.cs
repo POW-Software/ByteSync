@@ -1,7 +1,7 @@
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
-using ByteSync.ServerCommon.Commands.FileTransfer;
+using ByteSync.ServerCommon.Commands.FileTransfers;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
@@ -9,18 +9,17 @@ using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.ServerCommon.Tests.Commands.FileTransfer;
+namespace ByteSync.ServerCommon.Tests.Commands.FileTransfers;
 
 [TestFixture]
-public class AssertFilePartIsUploadedCommandHandlerTests
+public class AssertUploadIsFinishedCommandHandlerTests
 {
     private ICloudSessionsRepository _mockCloudSessionsRepository;
     private ISharedFilesService _mockSharedFilesService;
     private ISynchronizationService _mockSynchronizationService;
     private IInvokeClientsService _mockInvokeClientsService;
-    private IUsageStatisticsService _mockUsageStatisticsService;
-    private ILogger<AssertFilePartIsUploadedCommandHandler> _mockLogger;
-    private AssertFilePartIsUploadedCommandHandler _assertFilePartIsUploadedCommandHandler;
+    private ILogger<AssertUploadIsFinishedCommandHandler> _mockLogger;
+    private AssertUploadIsFinishedCommandHandler _assertUploadIsFinishedCommandHandler;
     private ITransferLocationService _mockTransferLocationService = A.Fake<ITransferLocationService>();
     
     [SetUp]
@@ -30,22 +29,20 @@ public class AssertFilePartIsUploadedCommandHandlerTests
         _mockSharedFilesService = A.Fake<ISharedFilesService>();
         _mockSynchronizationService = A.Fake<ISynchronizationService>();
         _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
-        _mockUsageStatisticsService = A.Fake<IUsageStatisticsService>();
-        _mockLogger = A.Fake<ILogger<AssertFilePartIsUploadedCommandHandler>>();
+        _mockLogger = A.Fake<ILogger<AssertUploadIsFinishedCommandHandler>>();
         _mockTransferLocationService = A.Fake<ITransferLocationService>();
         
-        _assertFilePartIsUploadedCommandHandler = new AssertFilePartIsUploadedCommandHandler(
+        _assertUploadIsFinishedCommandHandler = new AssertUploadIsFinishedCommandHandler(
             _mockCloudSessionsRepository,
             _mockSharedFilesService,
             _mockSynchronizationService,
             _mockInvokeClientsService,
-            _mockUsageStatisticsService,
             _mockLogger,
             _mockTransferLocationService);
     }
 
     [Test]
-    public async Task Handle_ValidRequest_AssertsFilePartIsUploaded()
+    public async Task Handle_ValidRequest_AssertsUploadIsFinished()
     {
         // Arrange
         var sessionId = "session1";
@@ -54,28 +51,34 @@ public class AssertFilePartIsUploadedCommandHandlerTests
         {
             SessionId = sessionId,
             SharedFileDefinition = new SharedFileDefinition { Id = "file1" },
-            PartNumber = 1
+            PartNumber = 1,
+            TotalParts = 3
         };
 
-        var request = new AssertFilePartIsUploadedRequest(sessionId, client, transferParameters);
-        
-        // Mock the session repository to return a valid session member
+        var request = new AssertUploadIsFinishedRequest(sessionId, client, transferParameters);
+
+        // Mock the session repository to return a valid session
+        var mockSession = new CloudSessionData();
         var mockSessionMember = new SessionMemberData { ClientInstanceId = client.ClientInstanceId };
-        A.CallTo(() => _mockCloudSessionsRepository.GetSessionMember(sessionId, client)).Returns(mockSessionMember);
+        mockSession.SessionMembers.Add(mockSessionMember);
+        
+        // Add the shared file definition's client to the session members so IsSharedFileDefinitionAllowed returns true
+        var fileOwnerMember = new SessionMemberData { ClientInstanceId = transferParameters.SharedFileDefinition.ClientInstanceId };
+        mockSession.SessionMembers.Add(fileOwnerMember);
+        
+        A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId)).Returns(mockSession);
         
         // Mock the transfer location service to return true for IsSharedFileDefinitionAllowed
         A.CallTo(() => _mockTransferLocationService.IsSharedFileDefinitionAllowed(mockSessionMember, transferParameters.SharedFileDefinition))
             .Returns(true);
 
-        // Mock the usage statistics service
-        A.CallTo(() => _mockUsageStatisticsService.RegisterUploadUsage(client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
-            .Returns(Task.CompletedTask);
-
         // Act
-        await _assertFilePartIsUploadedCommandHandler.Handle(request, CancellationToken.None);
+        await _assertUploadIsFinishedCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _mockUsageStatisticsService.RegisterUploadUsage(client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+        A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockTransferLocationService.IsSharedFileDefinitionAllowed(mockSessionMember, transferParameters.SharedFileDefinition))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -89,11 +92,12 @@ public class AssertFilePartIsUploadedCommandHandlerTests
         {
             SessionId = sessionId,
             SharedFileDefinition = new SharedFileDefinition { Id = "file1" },
-            PartNumber = 1
+            PartNumber = 1,
+            TotalParts = 3
         };
         var expectedException = new InvalidOperationException("Test exception");
 
-        var request = new AssertFilePartIsUploadedRequest(sessionId, client, transferParameters);
+        var request = new AssertUploadIsFinishedRequest(sessionId, client, transferParameters);
 
         // Mock the session repository to throw an exception
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
@@ -101,9 +105,10 @@ public class AssertFilePartIsUploadedCommandHandlerTests
 
         // Act & Assert
         var exception = await FluentActions.Awaiting(() => 
-            _assertFilePartIsUploadedCommandHandler.Handle(request, CancellationToken.None))
+            _assertUploadIsFinishedCommandHandler.Handle(request, CancellationToken.None))
             .Should().ThrowAsync<InvalidOperationException>();
 
         exception.Which.Should().Be(expectedException);
     }
+
 } 

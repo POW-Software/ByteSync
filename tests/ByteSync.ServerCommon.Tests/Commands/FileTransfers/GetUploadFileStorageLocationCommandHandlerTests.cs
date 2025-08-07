@@ -1,33 +1,33 @@
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Settings;
-using ByteSync.ServerCommon.Commands.FileTransfer;
+using ByteSync.ServerCommon.Commands.FileTransfers;
 using ByteSync.ServerCommon.Interfaces.Services;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace ByteSync.ServerCommon.Tests.Commands.FileTransfer;
+namespace ByteSync.ServerCommon.Tests.Commands.FileTransfers;
 
 [TestFixture]
-public class GetDownloadFileStorageLocationCommandHandlerTests
+public class GetUploadFileStorageLocationCommandHandlerTests
 {
     private ITransferLocationService _mockTransferLocationService;
-    private ILogger<GetDownloadFileStorageLocationCommandHandler> _mockLogger;
-    private GetDownloadFileStorageLocationCommandHandler _getDownloadFileStorageLocationCommandHandler;
+    private ILogger<GetUploadFileStorageLocationCommandHandler> _mockLogger;
+    private GetUploadFileStorageLocationCommandHandler _getUploadFileStorageLocationCommandHandler;
 
     [SetUp]
     public void Setup()
     {
         _mockTransferLocationService = A.Fake<ITransferLocationService>();
-        _mockLogger = A.Fake<ILogger<GetDownloadFileStorageLocationCommandHandler>>();
+        _mockLogger = A.Fake<ILogger<GetUploadFileStorageLocationCommandHandler>>();
 
         var mockAppSettings = A.Fake<IOptions<AppSettings>>();
         var appSettings = new AppSettings { DefaultStorageProvider = StorageProvider.AzureBlobStorage };
         A.CallTo(() => mockAppSettings.Value).Returns(appSettings);
 
-        _getDownloadFileStorageLocationCommandHandler = new GetDownloadFileStorageLocationCommandHandler(
+        _getUploadFileStorageLocationCommandHandler = new GetUploadFileStorageLocationCommandHandler(
             _mockTransferLocationService,
             mockAppSettings,
             _mockLogger);
@@ -45,19 +45,19 @@ public class GetDownloadFileStorageLocationCommandHandlerTests
             SharedFileDefinition = new SharedFileDefinition { Id = "file1" },
             PartNumber = 1
         };
-        var expectedStorageLocation = new FileStorageLocation("https://example.com/download-url", StorageProvider.AzureBlobStorage);
+        var expectedStorageLocation = new FileStorageLocation("https://example.com/upload-url", StorageProvider.AzureBlobStorage);
 
-        var request = new GetDownloadFileStorageLocationRequest(sessionId, client, transferParameters);
+        var request = new GetUploadFileStorageLocationRequest(sessionId, client, transferParameters);
 
-        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
-            .Returns("https://example.com/download-url");
+        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+            .Returns("https://example.com/upload-url");
 
         // Act
-        var result = await _getDownloadFileStorageLocationCommandHandler.Handle(request, CancellationToken.None);
+        var result = await _getUploadFileStorageLocationCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         result.Should().Be(expectedStorageLocation);
-        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -73,19 +73,19 @@ public class GetDownloadFileStorageLocationCommandHandlerTests
             SharedFileDefinition = new SharedFileDefinition { Id = "file2" },
             PartNumber = 3
         };
-        var expectedStorageLocation = new FileStorageLocation("https://example.com/upload-url", StorageProvider.CloudflareR2);
+        var expectedStorageLocation = new FileStorageLocation("https://example.com/download-url", StorageProvider.CloudflareR2);
 
-        var request = new GetDownloadFileStorageLocationRequest(sessionId, client, transferParameters);
+        var request = new GetUploadFileStorageLocationRequest(sessionId, client, transferParameters);
 
-        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
-            .Returns("https://example.com/upload-url");
+        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+            .Returns("https://example.com/download-url");
 
         // Act
-        var result = await _getDownloadFileStorageLocationCommandHandler.Handle(request, CancellationToken.None);
+        var result = await _getUploadFileStorageLocationCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         result.Should().NotBe(expectedStorageLocation);
-        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -103,14 +103,14 @@ public class GetDownloadFileStorageLocationCommandHandlerTests
         };
         var expectedException = new InvalidOperationException("Test exception");
 
-        var request = new GetDownloadFileStorageLocationRequest(sessionId, client, transferParameters);
+        var request = new GetUploadFileStorageLocationRequest(sessionId, client, transferParameters);
 
-        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
             .Throws(expectedException);
 
         // Act & Assert
         var exception = await FluentActions.Awaiting(() => 
-            _getDownloadFileStorageLocationCommandHandler.Handle(request, CancellationToken.None))
+            _getUploadFileStorageLocationCommandHandler.Handle(request, CancellationToken.None))
             .Should().ThrowAsync<InvalidOperationException>();
 
         exception.Which.Should().Be(expectedException);

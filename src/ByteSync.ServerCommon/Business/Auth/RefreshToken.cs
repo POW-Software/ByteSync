@@ -17,9 +17,9 @@ public class RefreshToken : ICloneable
     
     public DateTimeOffset? Revoked { get; set; }
     
-    public string RevokedByIp { get; set; }
+    public string? RevokedByIp { get; set; }
     
-    public string ReplacedByToken { get; set; }
+    public string? ReplacedByToken { get; set; }
 
     public bool IsActive
     {

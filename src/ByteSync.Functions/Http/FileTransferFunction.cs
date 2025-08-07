@@ -3,7 +3,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Functions.Helpers.Misc;
-using ByteSync.ServerCommon.Commands.FileTransfer;
+using ByteSync.ServerCommon.Commands.FileTransfers;
 using MediatR;
 
 namespace ByteSync.Functions.Http;

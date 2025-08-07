@@ -2,7 +2,7 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
-namespace ByteSync.ServerCommon.Commands.FileTransfer;
+namespace ByteSync.ServerCommon.Commands.FileTransfers;
 
 public class AssertUploadIsFinishedRequest : IRequest
 {

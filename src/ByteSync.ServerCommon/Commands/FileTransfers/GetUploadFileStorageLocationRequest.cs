@@ -2,11 +2,11 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
-namespace ByteSync.ServerCommon.Commands.FileTransfer;
+namespace ByteSync.ServerCommon.Commands.FileTransfers;
 
-public class AssertFilePartIsUploadedRequest : IRequest
+public class GetUploadFileStorageLocationRequest : IRequest<FileStorageLocation>
 {
-    public AssertFilePartIsUploadedRequest(string sessionId, Client client, TransferParameters transferParameters)
+    public GetUploadFileStorageLocationRequest(string sessionId, Client client, TransferParameters transferParameters)
     {
         SessionId = sessionId;
         Client = client;

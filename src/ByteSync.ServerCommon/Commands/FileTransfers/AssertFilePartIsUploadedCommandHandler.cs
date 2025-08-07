@@ -6,7 +6,7 @@ using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.ServerCommon.Commands.FileTransfer;
+namespace ByteSync.ServerCommon.Commands.FileTransfers;
 
 public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFilePartIsUploadedRequest>
 {

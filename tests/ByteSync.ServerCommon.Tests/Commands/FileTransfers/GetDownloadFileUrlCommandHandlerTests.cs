@@ -1,52 +1,52 @@
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Auth;
-using ByteSync.ServerCommon.Commands.FileTransfer;
+using ByteSync.ServerCommon.Commands.FileTransfers;
 using ByteSync.ServerCommon.Interfaces.Services;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.ServerCommon.Tests.Commands.FileTransfer;
+namespace ByteSync.ServerCommon.Tests.Commands.FileTransfers;
 
 [TestFixture]
-public class GetUploadFileUrlCommandHandlerTests
+public class GetDownloadFileUrlCommandHandlerTests
 {
     private ITransferLocationService _mockTransferLocationService;
-    private ILogger<GetUploadFileUrlCommandHandler> _mockLogger;
-    private GetUploadFileUrlCommandHandler _getUploadFileUrlCommandHandler;
+    private ILogger<GetDownloadFileUrlCommandHandler> _mockLogger;
+    private GetDownloadFileUrlCommandHandler _getDownloadFileUrlCommandHandler;
 
     [SetUp]
     public void Setup()
     {
         _mockTransferLocationService = A.Fake<ITransferLocationService>();
-        _mockLogger = A.Fake<ILogger<GetUploadFileUrlCommandHandler>>();
+        _mockLogger = A.Fake<ILogger<GetDownloadFileUrlCommandHandler>>();
 
-        _getUploadFileUrlCommandHandler = new GetUploadFileUrlCommandHandler(
+        _getDownloadFileUrlCommandHandler = new GetDownloadFileUrlCommandHandler(
             _mockTransferLocationService,
             _mockLogger);
     }
 
     [Test]
-    public async Task Handle_ValidRequest_ReturnsUploadUrl()
+    public async Task Handle_ValidRequest_ReturnsDownloadUrl()
     {
         // Arrange
         var sessionId = "session1";
         var client = new Client { ClientInstanceId = "client1" };
         var sharedFileDefinition = new SharedFileDefinition { Id = "file1" };
         var partNumber = 1;
-        var expectedUrl = "https://example.com/upload-url";
+        var expectedUrl = "https://example.com/download-url";
 
-        var request = new GetUploadFileUrlRequest(sessionId, client, sharedFileDefinition, partNumber);
+        var request = new GetDownloadFileUrlRequest(sessionId, client, sharedFileDefinition, partNumber);
 
-        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, sharedFileDefinition, partNumber))
+        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, sharedFileDefinition, partNumber))
             .Returns(expectedUrl);
 
         // Act
-        var result = await _getUploadFileUrlCommandHandler.Handle(request, CancellationToken.None);
+        var result = await _getDownloadFileUrlCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         result.Should().Be(expectedUrl);
-        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, sharedFileDefinition, partNumber))
+        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, sharedFileDefinition, partNumber))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -58,19 +58,19 @@ public class GetUploadFileUrlCommandHandlerTests
         var client = new Client { ClientInstanceId = "client1" };
         var sharedFileDefinition = new SharedFileDefinition { Id = "file1" };
         var partNumber = 5;
-        var expectedUrl = "https://example.com/upload-url-part5";
+        var expectedUrl = "https://example.com/download-url-part5";
 
-        var request = new GetUploadFileUrlRequest(sessionId, client, sharedFileDefinition, partNumber);
+        var request = new GetDownloadFileUrlRequest(sessionId, client, sharedFileDefinition, partNumber);
 
-        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, sharedFileDefinition, partNumber))
+        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, sharedFileDefinition, partNumber))
             .Returns(expectedUrl);
 
         // Act
-        var result = await _getUploadFileUrlCommandHandler.Handle(request, CancellationToken.None);
+        var result = await _getDownloadFileUrlCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
         result.Should().Be(expectedUrl);
-        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, sharedFileDefinition, partNumber))
+        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, sharedFileDefinition, partNumber))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -84,14 +84,14 @@ public class GetUploadFileUrlCommandHandlerTests
         var partNumber = 1;
         var expectedException = new InvalidOperationException("Test exception");
 
-        var request = new GetUploadFileUrlRequest(sessionId, client, sharedFileDefinition, partNumber);
+        var request = new GetDownloadFileUrlRequest(sessionId, client, sharedFileDefinition, partNumber);
 
-        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, sharedFileDefinition, partNumber))
+        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, sharedFileDefinition, partNumber))
             .Throws(expectedException);
 
         // Act & Assert
         var exception = await FluentActions.Awaiting(() => 
-            _getUploadFileUrlCommandHandler.Handle(request, CancellationToken.None))
+            _getDownloadFileUrlCommandHandler.Handle(request, CancellationToken.None))
             .Should().ThrowAsync<InvalidOperationException>();
 
         exception.Which.Should().Be(expectedException);

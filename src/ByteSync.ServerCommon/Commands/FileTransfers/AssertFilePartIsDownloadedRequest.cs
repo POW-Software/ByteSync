@@ -2,11 +2,11 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
-namespace ByteSync.ServerCommon.Commands.FileTransfer;
+namespace ByteSync.ServerCommon.Commands.FileTransfers;
 
-public class GetDownloadFileUrlRequest : IRequest<string>
+public class AssertFilePartIsDownloadedRequest : IRequest
 {
-    public GetDownloadFileUrlRequest(string sessionId, Client client, SharedFileDefinition sharedFileDefinition, int partNumber)
+    public AssertFilePartIsDownloadedRequest(string sessionId, Client client, SharedFileDefinition sharedFileDefinition, int partNumber)
     {
         SessionId = sessionId;
         Client = client;

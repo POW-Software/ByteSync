@@ -3,7 +3,7 @@ using ByteSync.ServerCommon.Interfaces.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.ServerCommon.Commands.FileTransfer;
+namespace ByteSync.ServerCommon.Commands.FileTransfers;
 
 public class AssertFilePartIsDownloadedCommandHandler : IRequestHandler<AssertFilePartIsDownloadedRequest>
 {

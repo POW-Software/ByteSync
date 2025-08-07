@@ -5,27 +5,27 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace ByteSync.ServerCommon.Commands.FileTransfer;
+namespace ByteSync.ServerCommon.Commands.FileTransfers;
 
-public class GetUploadFileStorageLocationCommandHandler : IRequestHandler<GetUploadFileStorageLocationRequest, FileStorageLocation>
+public class GetDownloadFileStorageLocationCommandHandler : IRequestHandler<GetDownloadFileStorageLocationRequest, FileStorageLocation>
 {
     private readonly ITransferLocationService _transferLocationService;
-    private readonly ILogger<GetUploadFileStorageLocationCommandHandler> _logger;
+    private readonly ILogger<GetDownloadFileStorageLocationCommandHandler> _logger;
     private readonly StorageProvider _storageProvider;
 
-    public GetUploadFileStorageLocationCommandHandler(
+    public GetDownloadFileStorageLocationCommandHandler(
         ITransferLocationService transferLocationService,
         IOptions<AppSettings> appSettings,
-        ILogger<GetUploadFileStorageLocationCommandHandler> logger)
+        ILogger<GetDownloadFileStorageLocationCommandHandler> logger)
     {
         _transferLocationService = transferLocationService;
         _storageProvider = appSettings.Value.DefaultStorageProvider;
         _logger = logger;
     }
     
-    public async Task<FileStorageLocation> Handle(GetUploadFileStorageLocationRequest request, CancellationToken cancellationToken)
+    public async Task<FileStorageLocation> Handle(GetDownloadFileStorageLocationRequest request, CancellationToken cancellationToken)
     {
-        var url = await _transferLocationService.GetUploadFileUrl(
+        var url = await _transferLocationService.GetDownloadFileUrl(
             request.SessionId,
             request.Client,
             request.TransferParameters.SharedFileDefinition,
@@ -34,7 +34,7 @@ public class GetUploadFileStorageLocationCommandHandler : IRequestHandler<GetUpl
         
         var responseObject = new FileStorageLocation(url, _storageProvider);
         
-        _logger.LogDebug("Upload file storage location generated for session {SessionId}, file {FileId}", 
+        _logger.LogDebug("Download file storage location generated for session {SessionId}, file {FileId}", 
             request.SessionId, request.TransferParameters.SharedFileDefinition.Id);
         
         return responseObject;
