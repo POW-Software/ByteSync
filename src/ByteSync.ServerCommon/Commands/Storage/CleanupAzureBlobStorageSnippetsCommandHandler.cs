@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace ByteSync.ServerCommon.Commands.Storage;
 
-public class CleanupAzureBlobStorageSnippetsCommandHandler : IRequestHandler<CleanupBlobStorageSnippetsRequest, int>
+public class CleanupAzureBlobStorageSnippetsCommandHandler : IRequestHandler<CleanupAzureBlobStorageSnippetsRequest, int>
 {
     private readonly IBlobStorageContainerService _blobStorageContainerService;
     private readonly ILogger<CleanupAzureBlobStorageSnippetsCommandHandler> _logger;
@@ -23,7 +23,7 @@ public class CleanupAzureBlobStorageSnippetsCommandHandler : IRequestHandler<Cle
         _logger = logger;
     }
 
-    public async Task<int> Handle(CleanupBlobStorageSnippetsRequest request, CancellationToken cancellationToken)
+    public async Task<int> Handle(CleanupAzureBlobStorageSnippetsRequest request, CancellationToken cancellationToken)
     {
         if (_blobStorageSettings.RetentionDurationInDays < 1)
         {
