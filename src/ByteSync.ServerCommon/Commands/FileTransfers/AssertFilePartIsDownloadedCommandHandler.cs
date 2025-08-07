@@ -9,19 +9,18 @@ public class AssertFilePartIsDownloadedCommandHandler : IRequestHandler<AssertFi
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly ISharedFilesService _sharedFilesService;
-    private readonly ILogger<AssertFilePartIsDownloadedCommandHandler> _logger;
     private readonly ITransferLocationService _transferLocationService;
+    private readonly ILogger<AssertFilePartIsDownloadedCommandHandler> _logger;
 
-    public AssertFilePartIsDownloadedCommandHandler(
-        ICloudSessionsRepository cloudSessionsRepository,
+    public AssertFilePartIsDownloadedCommandHandler(ICloudSessionsRepository cloudSessionsRepository,
         ISharedFilesService sharedFilesService,
-        ILogger<AssertFilePartIsDownloadedCommandHandler> logger,
-        ITransferLocationService transferLocationService)
+        ITransferLocationService transferLocationService,
+        ILogger<AssertFilePartIsDownloadedCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _sharedFilesService = sharedFilesService;
-        _logger = logger;
         _transferLocationService = transferLocationService;
+        _logger = logger;
     }
     
     public async Task Handle(AssertFilePartIsDownloadedRequest request, CancellationToken cancellationToken)

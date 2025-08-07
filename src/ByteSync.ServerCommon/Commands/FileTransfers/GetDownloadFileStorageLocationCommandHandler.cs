@@ -10,8 +10,8 @@ namespace ByteSync.ServerCommon.Commands.FileTransfers;
 public class GetDownloadFileStorageLocationCommandHandler : IRequestHandler<GetDownloadFileStorageLocationRequest, FileStorageLocation>
 {
     private readonly ITransferLocationService _transferLocationService;
-    private readonly ILogger<GetDownloadFileStorageLocationCommandHandler> _logger;
     private readonly StorageProvider _storageProvider;
+    private readonly ILogger<GetDownloadFileStorageLocationCommandHandler> _logger;
 
     public GetDownloadFileStorageLocationCommandHandler(
         ITransferLocationService transferLocationService,

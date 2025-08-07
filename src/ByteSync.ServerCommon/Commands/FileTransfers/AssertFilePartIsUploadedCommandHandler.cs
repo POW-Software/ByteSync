@@ -15,8 +15,9 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
     private readonly ISynchronizationService _synchronizationService;
     private readonly IInvokeClientsService _invokeClientsService;
     private readonly IUsageStatisticsService _usageStatisticsService;
-    private readonly ILogger<AssertFilePartIsUploadedCommandHandler> _logger;
     private readonly ITransferLocationService _transferLocationService;
+    private readonly ILogger<AssertFilePartIsUploadedCommandHandler> _logger;
+    
     public AssertFilePartIsUploadedCommandHandler(
         ICloudSessionsRepository cloudSessionsRepository,
         ISharedFilesService sharedFilesService,
@@ -31,8 +32,8 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
         _synchronizationService = synchronizationService;
         _invokeClientsService = invokeClientsService;
         _usageStatisticsService = usageStatisticsService;
-        _logger = logger;
         _transferLocationService = transferLocationService;
+        _logger = logger;
     }
     
     public async Task Handle(AssertFilePartIsUploadedRequest request, CancellationToken cancellationToken)

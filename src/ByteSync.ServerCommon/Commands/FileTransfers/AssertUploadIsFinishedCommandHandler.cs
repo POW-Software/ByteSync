@@ -14,23 +14,22 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
     private readonly ISharedFilesService _sharedFilesService;
     private readonly ISynchronizationService _synchronizationService;
     private readonly IInvokeClientsService _invokeClientsService;
-    private readonly ILogger<AssertUploadIsFinishedCommandHandler> _logger;
     private readonly ITransferLocationService _transferLocationService;
 
-    public AssertUploadIsFinishedCommandHandler(
-        ICloudSessionsRepository cloudSessionsRepository,
+    private readonly ILogger<AssertUploadIsFinishedCommandHandler> _logger;
+    public AssertUploadIsFinishedCommandHandler(ICloudSessionsRepository cloudSessionsRepository,
         ISharedFilesService sharedFilesService,
         ISynchronizationService synchronizationService,
         IInvokeClientsService invokeClientsService,
-        ILogger<AssertUploadIsFinishedCommandHandler> logger,
-        ITransferLocationService transferLocationService)
+        ITransferLocationService transferLocationService,
+        ILogger<AssertUploadIsFinishedCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _sharedFilesService = sharedFilesService;
         _synchronizationService = synchronizationService;
         _invokeClientsService = invokeClientsService;
-        _logger = logger;
         _transferLocationService = transferLocationService;
+        _logger = logger;
     }
     
     public async Task Handle(AssertUploadIsFinishedRequest request, CancellationToken cancellationToken)

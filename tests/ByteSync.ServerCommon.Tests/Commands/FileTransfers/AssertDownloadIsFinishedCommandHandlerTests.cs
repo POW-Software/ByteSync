@@ -30,8 +30,7 @@ public class AssertDownloadIsFinishedCommandHandlerTests
         _assertDownloadIsFinishedCommandHandler = new AssertDownloadIsFinishedCommandHandler(
             _mockCloudSessionsRepository,
             _mockSynchronizationService,
-            _mockLogger,
-            _mockTransferLocationService);
+            _mockTransferLocationService, _mockLogger);
     }
 
     [Test]

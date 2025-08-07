@@ -37,8 +37,7 @@ public class AssertUploadIsFinishedCommandHandlerTests
             _mockSharedFilesService,
             _mockSynchronizationService,
             _mockInvokeClientsService,
-            _mockLogger,
-            _mockTransferLocationService);
+            _mockTransferLocationService, _mockLogger);
     }
 
     [Test]

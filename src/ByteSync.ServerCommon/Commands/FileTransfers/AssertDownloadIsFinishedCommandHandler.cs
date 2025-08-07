@@ -9,19 +9,18 @@ public class AssertDownloadIsFinishedCommandHandler : IRequestHandler<AssertDown
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly ISynchronizationService _synchronizationService;
-    private readonly ILogger<AssertDownloadIsFinishedCommandHandler> _logger;
     private readonly ITransferLocationService _transferLocationService;
+    private readonly ILogger<AssertDownloadIsFinishedCommandHandler> _logger;
 
-    public AssertDownloadIsFinishedCommandHandler(
-        ICloudSessionsRepository cloudSessionsRepository,
+    public AssertDownloadIsFinishedCommandHandler(ICloudSessionsRepository cloudSessionsRepository,
         ISynchronizationService synchronizationService,
-        ILogger<AssertDownloadIsFinishedCommandHandler> logger,
-        ITransferLocationService transferLocationService)
+        ITransferLocationService transferLocationService,
+        ILogger<AssertDownloadIsFinishedCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _synchronizationService = synchronizationService;
-        _logger = logger;
         _transferLocationService = transferLocationService;
+        _logger = logger;
     }
     
     public async Task Handle(AssertDownloadIsFinishedRequest request, CancellationToken cancellationToken)

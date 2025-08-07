@@ -30,8 +30,7 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
         _assertFilePartIsDownloadedCommandHandler = new AssertFilePartIsDownloadedCommandHandler(
             _mockCloudSessionsRepository,
             _mockSharedFilesService,
-            _mockLogger,
-            _mockTransferLocationService);
+            _mockTransferLocationService, _mockLogger);
     }
 
     [Test]
