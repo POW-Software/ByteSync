@@ -19,8 +19,6 @@ public interface ICloudSessionsService
 
     Task<List<SessionMemberInfoDTO>> GetSessionMembersInfosAsync(string sessionId);
     
-    Task<bool> ResetSession(string sessionId, Client client);
-    
     Task GiveCloudSessionPasswordExchangeKey(Client client, GiveCloudSessionPasswordExchangeKeyParameters parameters);
 
     Task InformPasswordIsWrong(Client client, string sessionId, string clientInstanceId);

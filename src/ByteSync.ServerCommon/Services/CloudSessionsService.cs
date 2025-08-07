@@ -1,5 +1,4 @@
 ﻿using ByteSync.Common.Business.EndPoints;
-using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Helpers;
@@ -17,22 +16,15 @@ namespace ByteSync.ServerCommon.Services;
 public class CloudSessionsService : ICloudSessionsService
 {
     private readonly ILogger<CloudSessionsService> _logger;
-    private readonly ISharedFilesService _sharedFilesService;
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
-    private readonly ISynchronizationService _synchronizationService;
-    private readonly IInventoryService _inventoryService;
     private readonly ISessionMemberMapper _sessionMemberConverter;
     private readonly IInvokeClientsService _invokeClientsService;
 
-    public CloudSessionsService(ILogger<CloudSessionsService> logger, ISharedFilesService sharedFilesService,
-        ICloudSessionsRepository cloudSessionsRepository, ISynchronizationService synchronizationService, IInventoryService inventoryService,
+    public CloudSessionsService(ILogger<CloudSessionsService> logger, ICloudSessionsRepository cloudSessionsRepository, 
         ISessionMemberMapper sessionMemberConverter, IInvokeClientsService invokeClientsService)
     {
         _logger = logger;
-        _sharedFilesService = sharedFilesService;
         _cloudSessionsRepository = cloudSessionsRepository;
-        _synchronizationService = synchronizationService;
-        _inventoryService = inventoryService;
         _sessionMemberConverter = sessionMemberConverter;
         _invokeClientsService = invokeClientsService;
     }
@@ -229,29 +221,6 @@ public class CloudSessionsService : ICloudSessionsService
         }
 
         return result;
-    }
-    
-    public async Task<bool> ResetSession(string sessionId, Client client)
-    {
-        await _cloudSessionsRepository.Update(sessionId, cloudSessionData =>
-        {
-            cloudSessionData.ResetSession();
-            
-            return true;
-        });
-        
-        await _inventoryService.ResetSession(sessionId);
-
-        await _synchronizationService.ResetSession(sessionId);
-        
-        await _sharedFilesService.ClearSession(sessionId);
-        
-        _logger.LogInformation("ResetSession: session {sessionId} reset by {clientInstanceId}", sessionId, client.ClientInstanceId);
-        
-        await _invokeClientsService.SessionGroupExcept(sessionId, client)
-            .SessionResetted(new BaseSessionDto(sessionId, client.ClientInstanceId));
-
-        return true;
     }
     
     public async Task<JoinSessionResult> AskJoinCloudSession(Client client, AskJoinCloudSessionParameters parameters)
