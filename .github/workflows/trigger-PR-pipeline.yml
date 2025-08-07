@@ -15,7 +15,7 @@ jobs:
       - name: Find Test Projects
         id: set-matrix
         run: |
-          projects=$(find tests -name '*.csproj' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          projects=$(find tests -name '*Tests.csproj' | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "Found test projects: $projects"
           echo "testProjects=$projects" >> $GITHUB_OUTPUT
   build-and-test:
