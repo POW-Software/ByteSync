@@ -42,7 +42,13 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
         var sharedFileDefinition = new SharedFileDefinition { Id = "file1" };
         var partNumber = 1;
 
-        var request = new AssertFilePartIsDownloadedRequest(sessionId, client, sharedFileDefinition, partNumber);
+        var transferParameters = new TransferParameters
+        {
+            SessionId = sessionId,
+            SharedFileDefinition = sharedFileDefinition,
+            PartNumber = partNumber
+        };
+        var request = new AssertFilePartIsDownloadedRequest(sessionId, client, transferParameters);
 
         // Mock the session repository to return a valid session member
         var mockSessionMember = new SessionMemberData { ClientInstanceId = client.ClientInstanceId };
@@ -76,7 +82,13 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
         var partNumber = 1;
         var expectedException = new InvalidOperationException("Test exception");
 
-        var request = new AssertFilePartIsDownloadedRequest(sessionId, client, sharedFileDefinition, partNumber);
+        var transferParameters = new TransferParameters
+        {
+            SessionId = sessionId,
+            SharedFileDefinition = sharedFileDefinition,
+            PartNumber = partNumber
+        };
+        var request = new AssertFilePartIsDownloadedRequest(sessionId, client, transferParameters);
 
         // Mock the session repository to throw an exception
         A.CallTo(() => _mockCloudSessionsRepository.GetSessionMember(sessionId, client))

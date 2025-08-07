@@ -49,7 +49,7 @@ public class GetUploadFileStorageLocationCommandHandlerTests
 
         var request = new GetUploadFileStorageLocationRequest(sessionId, client, transferParameters);
 
-        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, transferParameters))
             .Returns("https://example.com/upload-url");
 
         // Act
@@ -57,7 +57,7 @@ public class GetUploadFileStorageLocationCommandHandlerTests
 
         // Assert
         result.Should().Be(expectedStorageLocation);
-        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, transferParameters))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -77,7 +77,7 @@ public class GetUploadFileStorageLocationCommandHandlerTests
 
         var request = new GetUploadFileStorageLocationRequest(sessionId, client, transferParameters);
 
-        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, transferParameters))
             .Returns("https://example.com/download-url");
 
         // Act
@@ -85,7 +85,7 @@ public class GetUploadFileStorageLocationCommandHandlerTests
 
         // Assert
         result.Should().NotBe(expectedStorageLocation);
-        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, transferParameters))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -105,7 +105,7 @@ public class GetUploadFileStorageLocationCommandHandlerTests
 
         var request = new GetUploadFileStorageLocationRequest(sessionId, client, transferParameters);
 
-        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+        A.CallTo(() => _mockTransferLocationService.GetUploadFileUrl(sessionId, client, transferParameters))
             .Throws(expectedException);
 
         // Act & Assert

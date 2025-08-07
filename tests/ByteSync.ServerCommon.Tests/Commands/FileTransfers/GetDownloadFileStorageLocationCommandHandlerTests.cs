@@ -49,7 +49,7 @@ public class GetDownloadFileStorageLocationCommandHandlerTests
 
         var request = new GetDownloadFileStorageLocationRequest(sessionId, client, transferParameters);
 
-        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters))
             .Returns("https://example.com/download-url");
 
         // Act
@@ -57,7 +57,7 @@ public class GetDownloadFileStorageLocationCommandHandlerTests
 
         // Assert
         result.Should().Be(expectedStorageLocation);
-        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -77,7 +77,7 @@ public class GetDownloadFileStorageLocationCommandHandlerTests
 
         var request = new GetDownloadFileStorageLocationRequest(sessionId, client, transferParameters);
 
-        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters))
             .Returns("https://example.com/upload-url");
 
         // Act
@@ -85,7 +85,7 @@ public class GetDownloadFileStorageLocationCommandHandlerTests
 
         // Assert
         result.Should().NotBe(expectedStorageLocation);
-        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -105,7 +105,7 @@ public class GetDownloadFileStorageLocationCommandHandlerTests
 
         var request = new GetDownloadFileStorageLocationRequest(sessionId, client, transferParameters);
 
-        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters))
             .Throws(expectedException);
 
         // Act & Assert

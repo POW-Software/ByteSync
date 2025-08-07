@@ -36,9 +36,15 @@ public class GetDownloadFileUrlCommandHandlerTests
         var partNumber = 1;
         var expectedUrl = "https://example.com/download-url";
 
-        var request = new GetDownloadFileUrlRequest(sessionId, client, sharedFileDefinition, partNumber);
+        var transferParameters = new TransferParameters
+        {
+            SessionId = sessionId,
+            SharedFileDefinition = sharedFileDefinition,
+            PartNumber = partNumber
+        };
+        var request = new GetDownloadFileUrlRequest(sessionId, client, transferParameters);
 
-        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, sharedFileDefinition, partNumber))
+        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters))
             .Returns(expectedUrl);
 
         // Act
@@ -46,7 +52,7 @@ public class GetDownloadFileUrlCommandHandlerTests
 
         // Assert
         result.Should().Be(expectedUrl);
-        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, sharedFileDefinition, partNumber))
+        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -60,9 +66,15 @@ public class GetDownloadFileUrlCommandHandlerTests
         var partNumber = 5;
         var expectedUrl = "https://example.com/download-url-part5";
 
-        var request = new GetDownloadFileUrlRequest(sessionId, client, sharedFileDefinition, partNumber);
+        var transferParameters = new TransferParameters
+        {
+            SessionId = sessionId,
+            SharedFileDefinition = sharedFileDefinition,
+            PartNumber = partNumber
+        };
+        var request = new GetDownloadFileUrlRequest(sessionId, client, transferParameters);
 
-        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, sharedFileDefinition, partNumber))
+        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters))
             .Returns(expectedUrl);
 
         // Act
@@ -70,7 +82,7 @@ public class GetDownloadFileUrlCommandHandlerTests
 
         // Assert
         result.Should().Be(expectedUrl);
-        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, sharedFileDefinition, partNumber))
+        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -84,9 +96,15 @@ public class GetDownloadFileUrlCommandHandlerTests
         var partNumber = 1;
         var expectedException = new InvalidOperationException("Test exception");
 
-        var request = new GetDownloadFileUrlRequest(sessionId, client, sharedFileDefinition, partNumber);
+        var transferParameters = new TransferParameters
+        {
+            SessionId = sessionId,
+            SharedFileDefinition = sharedFileDefinition,
+            PartNumber = partNumber
+        };
+        var request = new GetDownloadFileUrlRequest(sessionId, client, transferParameters);
 
-        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, sharedFileDefinition, partNumber))
+        A.CallTo(() => _mockTransferLocationService.GetDownloadFileUrl(sessionId, client, transferParameters))
             .Throws(expectedException);
 
         // Act & Assert
