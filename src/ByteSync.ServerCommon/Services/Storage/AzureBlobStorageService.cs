@@ -1,20 +1,26 @@
-﻿using Azure.Storage.Blobs;
+﻿using Azure.Storage;
+using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using ByteSync.ServerCommon.Business.Settings;
 
 namespace ByteSync.ServerCommon.Services.Storage;
 
-public class AzureBlobStorageUrlService : IAzureBlobStorageUrlService
+public class AzureBlobStorageService : IAzureBlobStorageService
 {
-    private readonly IAzureBlobStorageContainerService _azureBlobStorageContainerService;
-    private readonly ILogger<AzureBlobStorageUrlService> _logger;
+    private readonly AzureBlobStorageSettings _blobStorageSettings;
+    private readonly ILogger<AzureBlobStorageService> _logger;
+    
+    private StorageSharedKeyCredential? _storageSharedKeyCredential;
+    private BlobContainerClient? _containerClient;
 
-    public AzureBlobStorageUrlService(IAzureBlobStorageContainerService azureBlobStorageContainerService, ILogger<AzureBlobStorageUrlService> logger)
+    public AzureBlobStorageService(IOptions<AzureBlobStorageSettings> blobStorageSettings, ILogger<AzureBlobStorageService> logger)
     {
-        _azureBlobStorageContainerService = azureBlobStorageContainerService;
+        _blobStorageSettings = blobStorageSettings.Value;
         _logger = logger;
     }
 
@@ -30,7 +36,7 @@ public class AzureBlobStorageUrlService : IAzureBlobStorageUrlService
 
     private async Task<string> ComputeUrl(SharedFileDefinition sharedFileDefinition, int partNumber, BlobSasPermissions permission)
     {
-        var container = await _azureBlobStorageContainerService.BuildBlobContainerClient();
+        var container = await BuildBlobContainerClient();
 
         string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
 
@@ -62,7 +68,7 @@ public class AzureBlobStorageUrlService : IAzureBlobStorageUrlService
         BlobUriBuilder blobUriBuilder = new BlobUriBuilder(blobClient.Uri)
         {
             // Specify the user delegation key.
-            Sas = sasBuilder.ToSasQueryParameters(_azureBlobStorageContainerService.StorageSharedKeyCredential)
+            Sas = sasBuilder.ToSasQueryParameters(StorageSharedKeyCredential)
         };
 
         return blobUriBuilder.ToUri().ToString();
@@ -76,7 +82,7 @@ public class AzureBlobStorageUrlService : IAzureBlobStorageUrlService
 
     public async Task DeleteObject(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        var container = await _azureBlobStorageContainerService.BuildBlobContainerClient();
+        var container = await BuildBlobContainerClient();
 
         string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
             
@@ -93,7 +99,7 @@ public class AzureBlobStorageUrlService : IAzureBlobStorageUrlService
 
     public async Task<long?> GetObjectSize(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        var container = await _azureBlobStorageContainerService.BuildBlobContainerClient();
+        var container = await BuildBlobContainerClient();
             
         string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
             
@@ -107,5 +113,46 @@ public class AzureBlobStorageUrlService : IAzureBlobStorageUrlService
         }
 
         return result;
+    }
+
+    public async Task<BlobContainerClient> BuildBlobContainerClient()
+    {
+        if (_containerClient == null)
+        {
+            Uri containerUri = BuildContainerUri();
+            _containerClient = new BlobContainerClient(containerUri, StorageSharedKeyCredential);
+            await _containerClient.CreateIfNotExistsAsync();
+        }
+
+        return _containerClient;
+    }
+
+    public StorageSharedKeyCredential StorageSharedKeyCredential
+    {
+        get
+        {
+            if (_storageSharedKeyCredential == null)
+            {
+                _storageSharedKeyCredential = BuildStorageSharedKeyCredential();
+            }
+            
+            return _storageSharedKeyCredential;
+        }
+    }
+
+    private Uri BuildContainerUri()
+    {
+        string endpoint = _blobStorageSettings.Endpoint.TrimEnd('/');
+        string container = _blobStorageSettings.Container.TrimStart('/').TrimEnd('/') + "/";
+
+        Uri baseUri = new Uri(endpoint);
+        Uri fullUri = new Uri(baseUri, container);
+
+        return fullUri;
+    }
+    
+    private StorageSharedKeyCredential BuildStorageSharedKeyCredential()
+    {
+        return new StorageSharedKeyCredential(_blobStorageSettings.AccountName, _blobStorageSettings.AccountKey);
     }
 }

@@ -8,13 +8,13 @@ using Microsoft.Extensions.Options;
 
 namespace ByteSync.ServerCommon.Services.Storage;
 
-public class CloudflareR2UrlService : ICloudflareR2UrlService
+public class CloudflareR2Service : ICloudflareR2Service
 {
     private readonly CloudflareR2Settings _cloudflareR2Settings;
-    private readonly ILogger<CloudflareR2UrlService> _logger;
+    private readonly ILogger<CloudflareR2Service> _logger;
     private AmazonS3Client? _s3Client;
 
-    public CloudflareR2UrlService(IOptions<CloudflareR2Settings> cloudflareR2Settings, ILogger<CloudflareR2UrlService> logger)
+    public CloudflareR2Service(IOptions<CloudflareR2Settings> cloudflareR2Settings, ILogger<CloudflareR2Service> logger)
     {
         _cloudflareR2Settings = cloudflareR2Settings.Value;
         _logger = logger;
@@ -22,7 +22,7 @@ public class CloudflareR2UrlService : ICloudflareR2UrlService
 
     public async Task<string> GetUploadFileUrl(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        var s3Client = GetS3Client();
+        var s3Client = BuildS3Client();
         var key = GetServerFileName(sharedFileDefinition, partNumber);
         
         var request = new GetPreSignedUrlRequest
@@ -39,7 +39,7 @@ public class CloudflareR2UrlService : ICloudflareR2UrlService
 
     public async Task<string> GetDownloadFileUrl(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        var s3Client = GetS3Client();
+        var s3Client = BuildS3Client();
         var key = GetServerFileName(sharedFileDefinition, partNumber);
 
         var request = new GetPreSignedUrlRequest
@@ -55,7 +55,7 @@ public class CloudflareR2UrlService : ICloudflareR2UrlService
 
     public async Task DeleteObject(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        var s3Client = GetS3Client();
+        var s3Client = BuildS3Client();
         string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
 
         var request = new DeleteObjectRequest
@@ -75,7 +75,7 @@ public class CloudflareR2UrlService : ICloudflareR2UrlService
     {
         try
         {
-            var s3Client = GetS3Client();
+            var s3Client = BuildS3Client();
             var key = GetServerFileName(sharedFileDefinition, partNumber);
 
             var request = new GetObjectMetadataRequest
@@ -93,7 +93,7 @@ public class CloudflareR2UrlService : ICloudflareR2UrlService
         }
     }
 
-    private AmazonS3Client GetS3Client()
+    public AmazonS3Client BuildS3Client()
     {
         if (_s3Client == null)
         {

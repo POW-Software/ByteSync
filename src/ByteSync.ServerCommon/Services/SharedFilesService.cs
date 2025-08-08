@@ -11,13 +11,13 @@ namespace ByteSync.ServerCommon.Services;
 public class SharedFilesService : ISharedFilesService
 {
     private readonly ISharedFilesRepository _sharedFilesRepository;
-    private readonly IAzureBlobStorageUrlService _azureBlobStorageUrlService;
+    private readonly IAzureBlobStorageService _azureBlobStorageService;
     private readonly ILogger<SharedFilesService> _logger;
 
-    public SharedFilesService(ISharedFilesRepository sharedFilesRepository, IAzureBlobStorageUrlService azureBlobStorageUrlService, ILogger<SharedFilesService> logger)
+    public SharedFilesService(ISharedFilesRepository sharedFilesRepository, IAzureBlobStorageService azureBlobStorageService, ILogger<SharedFilesService> logger)
     {
         _sharedFilesRepository = sharedFilesRepository;
-        _azureBlobStorageUrlService = azureBlobStorageUrlService;
+        _azureBlobStorageService = azureBlobStorageService;
         _logger = logger;
     }
     public async Task AssertFilePartIsUploaded(SharedFileDefinition sharedFileDefinition, int partNumber, ICollection<string> recipients)
@@ -75,7 +75,7 @@ public class SharedFilesService : ISharedFilesService
         {
             try
             {
-                await _azureBlobStorageUrlService.DeleteObject(sharedFileDefinition, partNumber);
+                await _azureBlobStorageService.DeleteObject(sharedFileDefinition, partNumber);
             }
             catch (Exception ex)
             {
@@ -106,7 +106,7 @@ public class SharedFilesService : ISharedFilesService
             {
                 try
                 {
-                    await _azureBlobStorageUrlService.DeleteObject(sharedFileData.SharedFileDefinition, i);
+                    await _azureBlobStorageService.DeleteObject(sharedFileData.SharedFileDefinition, i);
                 }
                 catch (Exception ex)
                 {

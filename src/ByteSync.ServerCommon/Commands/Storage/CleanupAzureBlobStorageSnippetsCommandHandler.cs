@@ -9,16 +9,16 @@ namespace ByteSync.ServerCommon.Commands.Storage;
 
 public class CleanupAzureBlobStorageSnippetsCommandHandler : IRequestHandler<CleanupAzureBlobStorageSnippetsRequest, int>
 {
-    private readonly IAzureBlobStorageContainerService _azureBlobStorageContainerService;
+    private readonly IAzureBlobStorageService _azureBlobStorageService;
     private readonly ILogger<CleanupAzureBlobStorageSnippetsCommandHandler> _logger;
     private readonly AzureBlobStorageSettings _blobStorageSettings;
 
     public CleanupAzureBlobStorageSnippetsCommandHandler(
-        IAzureBlobStorageContainerService azureBlobStorageContainerService,
+        IAzureBlobStorageService azureBlobStorageService,
         IOptions<AzureBlobStorageSettings> blobStorageSettings,
         ILogger<CleanupAzureBlobStorageSnippetsCommandHandler> logger)
     {
-        _azureBlobStorageContainerService = azureBlobStorageContainerService;
+        _azureBlobStorageService = azureBlobStorageService;
         _blobStorageSettings = blobStorageSettings.Value;
         _logger = logger;
     }
@@ -31,7 +31,7 @@ public class CleanupAzureBlobStorageSnippetsCommandHandler : IRequestHandler<Cle
             return 0;
         }
 
-        var container = await _azureBlobStorageContainerService.BuildBlobContainerClient();
+        var container = await _azureBlobStorageService.BuildBlobContainerClient();
         if (!await container.ExistsAsync(cancellationToken))
         {
             _logger.LogWarning("...Container not found, no element deleted");

@@ -4,7 +4,7 @@ using ByteSync.ServerCommon.Services.Storage;
 namespace ByteSync.Functions.IntegrationTests.Services;
 
 [TestFixture]
-public class AzureBlobStorageUrlService_Tests
+public class AzureBlobStorageService_Tests
 {
     private ILifetimeScope _scope;
 
@@ -23,7 +23,7 @@ public class AzureBlobStorageUrlService_Tests
     [Test]
     public void TestWithSettings()
     {
-        var AzureBlobStorageUrlService = _scope.Resolve<AzureBlobStorageUrlService>();
+        var AzureBlobStoragService = _scope.Resolve<AzureBlobStorageService>();
         
     }
 }

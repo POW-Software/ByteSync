@@ -10,16 +10,16 @@ namespace ByteSync.ServerCommon.Commands.Storage;
 
 public class CleanupCloudflareR2SnippetsCommandHandler : IRequestHandler<CleanupCloudflareR2SnippetsRequest, int>
 {
-    private readonly ICloudflareR2BucketService _cloudflareR2BucketService;
+    private readonly ICloudflareR2Service _cloudflareR2Service;
     private readonly ILogger<CleanupCloudflareR2SnippetsCommandHandler> _logger;
     private readonly CloudflareR2Settings _cloudflareR2Settings;
 
     public CleanupCloudflareR2SnippetsCommandHandler(
-        ICloudflareR2BucketService cloudflareR2BucketService,
+        ICloudflareR2Service cloudflareR2Service,
         IOptions<CloudflareR2Settings> cloudflareR2Settings,
         ILogger<CleanupCloudflareR2SnippetsCommandHandler> logger)
     {
-        _cloudflareR2BucketService = cloudflareR2BucketService;
+        _cloudflareR2Service = cloudflareR2Service;
         _cloudflareR2Settings = cloudflareR2Settings.Value;
         _logger = logger;
     }
@@ -37,7 +37,7 @@ public class CleanupCloudflareR2SnippetsCommandHandler : IRequestHandler<Cleanup
 
         try
         {
-            var s3Client = _cloudflareR2BucketService.BuildS3Client();
+            var s3Client = _cloudflareR2Service.BuildS3Client();
 
             var listObjectsRequest = new ListObjectsV2Request
             {

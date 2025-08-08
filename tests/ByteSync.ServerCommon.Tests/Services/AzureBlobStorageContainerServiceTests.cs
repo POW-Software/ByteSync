@@ -11,7 +11,7 @@ public class AzureBlobStorageContainerServiceTests
 {
     private AzureBlobStorageSettings _settings;
     private IOptions<AzureBlobStorageSettings> _options;
-    private AzureBlobStorageContainerService _service;
+    private AzureBlobStorageService _service;
 
     [SetUp]
     public void SetUp()
@@ -24,7 +24,8 @@ public class AzureBlobStorageContainerServiceTests
             Container = "testcontainer"
         };
         _options = Options.Create(_settings);
-        _service = new AzureBlobStorageContainerService(_options);
+        var logger = Microsoft.Extensions.Logging.Abstractions.NullLogger<AzureBlobStorageService>.Instance;
+        _service = new AzureBlobStorageService(_options, logger);
     }
 
     [Test]

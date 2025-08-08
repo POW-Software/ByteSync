@@ -2,7 +2,7 @@ namespace ByteSync.ServerCommon.Interfaces.Services.Storage;
 
 using ByteSync.Common.Business.SharedFiles;
 
-public interface IProviderUrlService
+public interface IProviderService
 {
     Task<string> GetUploadFileUrl(SharedFileDefinition sharedFileDefinition, int partNumber);
     Task<string> GetDownloadFileUrl(SharedFileDefinition sharedFileDefinition, int partNumber);

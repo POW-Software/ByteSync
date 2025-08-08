@@ -1,8 +1,8 @@
-using Amazon.S3;
-
 namespace ByteSync.ServerCommon.Interfaces.Services.Storage;
 
-public interface ICloudflareR2BucketService
+using Amazon.S3;
+
+public interface ICloudflareR2Service : IProviderService
 {
     AmazonS3Client BuildS3Client();
-} 
+}

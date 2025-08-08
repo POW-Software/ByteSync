@@ -14,19 +14,19 @@ namespace ByteSync.ServerCommon.Services;
 public class TransferLocationService : ITransferLocationService
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
-    private readonly IAzureBlobStorageUrlService _azureBlobStorageUrlService;
-    private readonly ICloudflareR2UrlService _cloudflareR2UrlService;
+    private readonly IAzureBlobStorageService _azureBlobStorageService;
+    private readonly ICloudflareR2Service _cloudflareR2Service;
     private readonly ILogger<TransferLocationService> _logger;
     private readonly StorageProvider _storageProvider;
 
-    public TransferLocationService(ICloudSessionsRepository cloudSessionsRepository, IAzureBlobStorageUrlService azureBlobStorageUrlService,
-        ICloudflareR2UrlService cloudflareR2UrlService,
+    public TransferLocationService(ICloudSessionsRepository cloudSessionsRepository, IAzureBlobStorageService azureBlobStorageService,
+        ICloudflareR2Service cloudflareR2Service,
         IOptions<AppSettings> appSettings,
         ILogger<TransferLocationService> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
-        _azureBlobStorageUrlService = azureBlobStorageUrlService;
-        _cloudflareR2UrlService = cloudflareR2UrlService;
+        _azureBlobStorageService = azureBlobStorageService;
+        _cloudflareR2Service = cloudflareR2Service;
         _storageProvider = appSettings.Value.DefaultStorageProvider;
         _logger = logger;
     }
@@ -48,8 +48,8 @@ public class TransferLocationService : ITransferLocationService
         {
             string uploadUrl = _storageProvider switch
             {
-                StorageProvider.AzureBlobStorage => await _azureBlobStorageUrlService.GetUploadFileUrl(sharedFileDefinition, partNumber),
-                StorageProvider.CloudflareR2 => await _cloudflareR2UrlService.GetUploadFileUrl(sharedFileDefinition, partNumber),
+                StorageProvider.AzureBlobStorage => await _azureBlobStorageService.GetUploadFileUrl(sharedFileDefinition, partNumber),
+                StorageProvider.CloudflareR2 => await _cloudflareR2Service.GetUploadFileUrl(sharedFileDefinition, partNumber),
                 _ => throw new NotSupportedException($"Storage provider {_storageProvider} is not supported")
             };
 
@@ -81,8 +81,8 @@ public class TransferLocationService : ITransferLocationService
         {
             string downloadUrl = _storageProvider switch
             {
-                StorageProvider.AzureBlobStorage => await _azureBlobStorageUrlService.GetDownloadFileUrl(sharedFileDefinition, partNumber),
-                StorageProvider.CloudflareR2 => await _cloudflareR2UrlService.GetDownloadFileUrl(sharedFileDefinition, partNumber),
+                StorageProvider.AzureBlobStorage => await _azureBlobStorageService.GetDownloadFileUrl(sharedFileDefinition, partNumber),
+                StorageProvider.CloudflareR2 => await _cloudflareR2Service.GetDownloadFileUrl(sharedFileDefinition, partNumber),
                 _ => throw new NotSupportedException($"Storage provider {_storageProvider} is not supported")
             };
 
