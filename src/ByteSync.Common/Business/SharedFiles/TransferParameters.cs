@@ -13,4 +13,6 @@ public class TransferParameters
     public int? TotalParts { get; set; }
     
     public List<string>? ActionsGroupIds { get; set; }
+    
+    public StorageProvider StorageProvider { get; set; }
 }

@@ -78,4 +78,6 @@ public class SharedFileData
 
         return false;
     }
+    
+    public StorageProvider StorageProvider { get; set; }
 }
