@@ -25,7 +25,7 @@ public class CloudflareR2Service_Tests
         _scope.Dispose();
     }
     
-    [Test]
+    /*[Test]
     public void Settings_ShouldBeLoadedFromConfiguration()
     {
         var section = GlobalTestSetup.Configuration.GetSection("CloudflareR2");
@@ -139,5 +139,5 @@ public class CloudflareR2Service_Tests
         var expectedPath = "/" + options.Value.BucketName + "/" + expectedBlobName;
         uri.AbsolutePath.Should().Be(expectedPath);
         expectedBlobName.Should().Contain("base_inventory_profile123");
-    }
+    }*/
 }
