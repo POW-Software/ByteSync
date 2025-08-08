@@ -6,12 +6,12 @@ using Microsoft.Extensions.Options;
 
 namespace ByteSync.ServerCommon.Services.Storage;
 
-public class CloudflareR2Service : ICloudflareR2Service
+public class CloudflareR2BucketService : ICloudflareR2BucketService
 {
     private readonly CloudflareR2Settings _cloudflareR2Settings;
     private AmazonS3Client? _s3Client;
 
-    public CloudflareR2Service(IOptions<CloudflareR2Settings> cloudflareR2Settings)
+    public CloudflareR2BucketService(IOptions<CloudflareR2Settings> cloudflareR2Settings)
     {
         _cloudflareR2Settings = cloudflareR2Settings.Value;
     }

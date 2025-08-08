@@ -75,7 +75,7 @@ public class SharedFilesService : ISharedFilesService
         {
             try
             {
-                await _azureBlobStorageUrlService.DeleteBlob(sharedFileDefinition, partNumber);
+                await _azureBlobStorageUrlService.DeleteObject(sharedFileDefinition, partNumber);
             }
             catch (Exception ex)
             {
@@ -106,7 +106,7 @@ public class SharedFilesService : ISharedFilesService
             {
                 try
                 {
-                    await _azureBlobStorageUrlService.DeleteBlob(sharedFileData.SharedFileDefinition, i);
+                    await _azureBlobStorageUrlService.DeleteObject(sharedFileData.SharedFileDefinition, i);
                 }
                 catch (Exception ex)
                 {

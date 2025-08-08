@@ -10,16 +10,16 @@ namespace ByteSync.ServerCommon.Commands.Storage;
 
 public class CleanupCloudflareR2SnippetsCommandHandler : IRequestHandler<CleanupCloudflareR2SnippetsRequest, int>
 {
-    private readonly ICloudflareR2Service _cloudflareR2Service;
+    private readonly ICloudflareR2BucketService _cloudflareR2BucketService;
     private readonly ILogger<CleanupCloudflareR2SnippetsCommandHandler> _logger;
     private readonly CloudflareR2Settings _cloudflareR2Settings;
 
     public CleanupCloudflareR2SnippetsCommandHandler(
-        ICloudflareR2Service cloudflareR2Service,
+        ICloudflareR2BucketService cloudflareR2BucketService,
         IOptions<CloudflareR2Settings> cloudflareR2Settings,
         ILogger<CleanupCloudflareR2SnippetsCommandHandler> logger)
     {
-        _cloudflareR2Service = cloudflareR2Service;
+        _cloudflareR2BucketService = cloudflareR2BucketService;
         _cloudflareR2Settings = cloudflareR2Settings.Value;
         _logger = logger;
     }
@@ -42,7 +42,7 @@ public class CleanupCloudflareR2SnippetsCommandHandler : IRequestHandler<Cleanup
 
         try
         {
-            var listObjectsResponse = await _cloudflareR2Service.ListObjectsAsync(listObjectsRequest, cancellationToken);
+            var listObjectsResponse = await _cloudflareR2BucketService.ListObjectsAsync(listObjectsRequest, cancellationToken);
             
             foreach (var s3Object in listObjectsResponse.S3Objects)
             {
@@ -57,7 +57,7 @@ public class CleanupCloudflareR2SnippetsCommandHandler : IRequestHandler<Cleanup
                         Key = s3Object.Key
                     };
                     
-                    await _cloudflareR2Service.DeleteObjectAsync(deleteRequest, cancellationToken);
+                    await _cloudflareR2BucketService.DeleteObjectAsync(deleteRequest, cancellationToken);
                     deletedObjectsCount += 1;
                 }
             }

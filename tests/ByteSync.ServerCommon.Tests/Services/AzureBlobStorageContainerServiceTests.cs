@@ -7,11 +7,11 @@ using Microsoft.Extensions.Options;
 namespace ByteSync.ServerCommon.Tests.Services;
 
 [TestFixture]
-public class BlobStorageContainerServiceTests
+public class AzureBlobStorageContainerServiceTests
 {
     private AzureBlobStorageSettings _settings;
     private IOptions<AzureBlobStorageSettings> _options;
-    private BlobStorageContainerService _service;
+    private AzureBlobStorageContainerService _service;
 
     [SetUp]
     public void SetUp()
@@ -24,7 +24,7 @@ public class BlobStorageContainerServiceTests
             Container = "testcontainer"
         };
         _options = Options.Create(_settings);
-        _service = new BlobStorageContainerService(_options);
+        _service = new AzureBlobStorageContainerService(_options);
     }
 
     [Test]

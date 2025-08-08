@@ -14,7 +14,7 @@ namespace ByteSync.ServerCommon.Tests.Commands.Storage;
 [TestFixture]
 public class CleanupAzureBlobStorageSnippetsCommandHandlerTests
 {
-    private IBlobStorageContainerService _blobStorageContainerService = null!;
+    private IAzureBlobStorageContainerService _azureBlobStorageContainerService = null!;
     private ILogger<CleanupAzureBlobStorageSnippetsCommandHandler> _logger = null!;
     private IOptions<AzureBlobStorageSettings> _options = null!;
     private CleanupAzureBlobStorageSnippetsCommandHandler _handler = null!;
@@ -23,7 +23,7 @@ public class CleanupAzureBlobStorageSnippetsCommandHandlerTests
     [SetUp]
     public void Setup()
     {
-        _blobStorageContainerService = A.Fake<IBlobStorageContainerService>();
+        _azureBlobStorageContainerService = A.Fake<IAzureBlobStorageContainerService>();
         _logger = A.Fake<ILogger<CleanupAzureBlobStorageSnippetsCommandHandler>>();
         _settings = new AzureBlobStorageSettings
         {
@@ -36,7 +36,7 @@ public class CleanupAzureBlobStorageSnippetsCommandHandlerTests
         _options = A.Fake<IOptions<AzureBlobStorageSettings>>();
         A.CallTo(() => _options.Value).Returns(_settings);
 
-        _handler = new CleanupAzureBlobStorageSnippetsCommandHandler(_blobStorageContainerService, _options, _logger);
+        _handler = new CleanupAzureBlobStorageSnippetsCommandHandler(_azureBlobStorageContainerService, _options, _logger);
     }
 
     [Test]
@@ -56,7 +56,7 @@ public class CleanupAzureBlobStorageSnippetsCommandHandlerTests
             .Returns(Task.FromResult(Response.FromValue(true, default)));
         A.CallTo(() => container.GetBlobsAsync(A<BlobTraits>._, A<BlobStates>._, null, A<CancellationToken>._))
             .Returns(new TestAsyncPageable<BlobItem>(blobs));
-        A.CallTo(() => _blobStorageContainerService.BuildBlobContainerClient())
+        A.CallTo(() => _azureBlobStorageContainerService.BuildBlobContainerClient())
             .Returns(Task.FromResult(container));
 
         // Act
@@ -80,7 +80,7 @@ public class CleanupAzureBlobStorageSnippetsCommandHandlerTests
 
         // Assert
         result.Should().Be(0);
-        A.CallTo(() => _blobStorageContainerService.BuildBlobContainerClient()).MustNotHaveHappened();
+        A.CallTo(() => _azureBlobStorageContainerService.BuildBlobContainerClient()).MustNotHaveHappened();
     }
 
     [Test]
@@ -90,7 +90,7 @@ public class CleanupAzureBlobStorageSnippetsCommandHandlerTests
         var container = A.Fake<BlobContainerClient>();
         A.CallTo(() => container.ExistsAsync(A<CancellationToken>._))
             .Returns(Task.FromResult(Response.FromValue(false, default)));
-        A.CallTo(() => _blobStorageContainerService.BuildBlobContainerClient())
+        A.CallTo(() => _azureBlobStorageContainerService.BuildBlobContainerClient())
             .Returns(Task.FromResult(container));
 
         // Act
@@ -116,7 +116,7 @@ public class CleanupAzureBlobStorageSnippetsCommandHandlerTests
             .Returns(Task.FromResult(Response.FromValue(true, default)));
         A.CallTo(() => container.GetBlobsAsync(A<BlobTraits>._, A<BlobStates>._, null, A<CancellationToken>._))
             .Returns(new TestAsyncPageable<BlobItem>(blobs));
-        A.CallTo(() => _blobStorageContainerService.BuildBlobContainerClient())
+        A.CallTo(() => _azureBlobStorageContainerService.BuildBlobContainerClient())
             .Returns(Task.FromResult(container));
 
         // Act

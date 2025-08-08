@@ -9,12 +9,12 @@ namespace ByteSync.ServerCommon.Services.Storage;
 
 public class AzureBlobStorageUrlService : IAzureBlobStorageUrlService
 {
-    private readonly IBlobStorageContainerService _blobStorageContainerService;
+    private readonly IAzureBlobStorageContainerService _azureBlobStorageContainerService;
     private readonly ILogger<AzureBlobStorageUrlService> _logger;
 
-    public AzureBlobStorageUrlService(IBlobStorageContainerService blobStorageContainerService, ILogger<AzureBlobStorageUrlService> logger)
+    public AzureBlobStorageUrlService(IAzureBlobStorageContainerService azureBlobStorageContainerService, ILogger<AzureBlobStorageUrlService> logger)
     {
-        _blobStorageContainerService = blobStorageContainerService;
+        _azureBlobStorageContainerService = azureBlobStorageContainerService;
         _logger = logger;
     }
 
@@ -30,7 +30,7 @@ public class AzureBlobStorageUrlService : IAzureBlobStorageUrlService
 
     private async Task<string> ComputeUrl(SharedFileDefinition sharedFileDefinition, int partNumber, BlobSasPermissions permission)
     {
-        var container = await _blobStorageContainerService.BuildBlobContainerClient();
+        var container = await _azureBlobStorageContainerService.BuildBlobContainerClient();
 
         string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
 
@@ -62,7 +62,7 @@ public class AzureBlobStorageUrlService : IAzureBlobStorageUrlService
         BlobUriBuilder blobUriBuilder = new BlobUriBuilder(blobClient.Uri)
         {
             // Specify the user delegation key.
-            Sas = sasBuilder.ToSasQueryParameters(_blobStorageContainerService.StorageSharedKeyCredential)
+            Sas = sasBuilder.ToSasQueryParameters(_azureBlobStorageContainerService.StorageSharedKeyCredential)
         };
 
         return blobUriBuilder.ToUri().ToString();
@@ -74,9 +74,9 @@ public class AzureBlobStorageUrlService : IAzureBlobStorageUrlService
                sharedFileDefinition.GetFileName(partNumber);
     }
 
-    public async Task DeleteBlob(SharedFileDefinition sharedFileDefinition, int partNumber)
+    public async Task DeleteObject(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        var container = await _blobStorageContainerService.BuildBlobContainerClient();
+        var container = await _azureBlobStorageContainerService.BuildBlobContainerClient();
 
         string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
             
@@ -91,9 +91,9 @@ public class AzureBlobStorageUrlService : IAzureBlobStorageUrlService
         }
     }
 
-    public async Task<long?> GetBlobSize(SharedFileDefinition sharedFileDefinition, int partNumber)
+    public async Task<long?> GetObjectSize(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        var container = await _blobStorageContainerService.BuildBlobContainerClient();
+        var container = await _azureBlobStorageContainerService.BuildBlobContainerClient();
             
         string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
             

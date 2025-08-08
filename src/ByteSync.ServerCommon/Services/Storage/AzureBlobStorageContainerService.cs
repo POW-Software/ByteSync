@@ -1,31 +1,35 @@
-﻿using Azure.Storage;
+﻿using Azure;
+using Azure.Storage;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using Microsoft.Extensions.Options;
 
 namespace ByteSync.ServerCommon.Services.Storage;
 
-public class BlobStorageContainerService : IBlobStorageContainerService
+public class AzureBlobStorageContainerService : IAzureBlobStorageContainerService
 {
     private readonly AzureBlobStorageSettings _blobStorageSettings;
     
     private StorageSharedKeyCredential? _storageSharedKeyCredential;
+    private BlobContainerClient? _containerClient;
 
-    public BlobStorageContainerService(IOptions<AzureBlobStorageSettings> blobStorageSettings)
+    public AzureBlobStorageContainerService(IOptions<AzureBlobStorageSettings> blobStorageSettings)
     {
         _blobStorageSettings = blobStorageSettings.Value;
     }
     
     public async Task<BlobContainerClient> BuildBlobContainerClient()
     {
-        Uri containerUri = BuildContainerUri();
-        
-        var container = new BlobContainerClient(containerUri, StorageSharedKeyCredential);
-        
-        await container.CreateIfNotExistsAsync();
+        if (_containerClient == null)
+        {
+            Uri containerUri = BuildContainerUri();
+            _containerClient = new BlobContainerClient(containerUri, StorageSharedKeyCredential);
+            await _containerClient.CreateIfNotExistsAsync();
+        }
 
-        return container;
+        return _containerClient;
     }
 
     public StorageSharedKeyCredential StorageSharedKeyCredential
@@ -39,6 +43,18 @@ public class BlobStorageContainerService : IBlobStorageContainerService
             
             return _storageSharedKeyCredential;
         }
+    }
+
+    public async Task<AsyncPageable<BlobItem>> ListObjectsAsync(CancellationToken cancellationToken)
+    {
+        var container = await BuildBlobContainerClient();
+        return container.GetBlobsAsync(cancellationToken: cancellationToken);
+    }
+
+    public async Task DeleteObjectAsync(string blobName, CancellationToken cancellationToken)
+    {
+        var container = await BuildBlobContainerClient();
+        await container.DeleteBlobIfExistsAsync(blobName, DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: cancellationToken);
     }
 
     private Uri BuildContainerUri()
