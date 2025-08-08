@@ -34,14 +34,15 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
     }
 
     [Test]
-    public async Task Handle_ValidRequest_AssertsFilePartIsDownloaded()
+    [TestCase(StorageProvider.AzureBlobStorage)]
+    [TestCase(StorageProvider.CloudflareR2)]
+    public async Task Handle_ValidRequest_AssertsFilePartIsDownloaded(StorageProvider storageProvider)
     {
         // Arrange
         var sessionId = "session1";
         var client = new Client { ClientInstanceId = "client1" };
         var sharedFileDefinition = new SharedFileDefinition { Id = "file1" };
         var partNumber = 1;
-        var storageProvider = StorageProvider.AzureBlobStorage;
 
         var transferParameters = new TransferParameters
         {
@@ -107,50 +108,6 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
             .Should().ThrowAsync<InvalidOperationException>();
 
         exception.Which.Should().Be(expectedException);
-    }
-
-    [Test]
-    [TestCase(StorageProvider.AzureBlobStorage)]
-    [TestCase(StorageProvider.CloudflareR2)]
-    public async Task Handle_ValidRequest_WorksWithAnyStorageProvider(StorageProvider storageProvider)
-    {
-        // Arrange
-        var sessionId = "session1";
-        var client = new Client { ClientInstanceId = "client1" };
-        var sharedFileDefinition = new SharedFileDefinition { Id = "file1" };
-        var partNumber = 1;
-
-        var transferParameters = new TransferParameters
-        {
-            SessionId = sessionId,
-            SharedFileDefinition = sharedFileDefinition,
-            PartNumber = partNumber,
-            StorageProvider = storageProvider
-        };
-        var request = new AssertFilePartIsDownloadedRequest(sessionId, client, transferParameters);
-
-        // Mock the session repository to return a valid session member
-        var mockSessionMember = new SessionMemberData { ClientInstanceId = client.ClientInstanceId };
-        A.CallTo(() => _mockCloudSessionsRepository.GetSessionMember(sessionId, client)).Returns(mockSessionMember);
-        
-        // Mock the transfer location service to return true for IsSharedFileDefinitionAllowed
-        A.CallTo(() => _mockTransferLocationService.IsSharedFileDefinitionAllowed(mockSessionMember, sharedFileDefinition))
-            .Returns(true);
-
-        // Mock the shared files service
-        A.CallTo(() => _mockSharedFilesService.AssertFilePartIsDownloaded(sharedFileDefinition, client, partNumber, storageProvider))
-            .Returns(Task.CompletedTask);
-
-        // Act
-        await _assertFilePartIsDownloadedCommandHandler.Handle(request, CancellationToken.None);
-
-        // Assert
-        A.CallTo(() => _mockCloudSessionsRepository.GetSessionMember(sessionId, client))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _mockTransferLocationService.IsSharedFileDefinitionAllowed(mockSessionMember, sharedFileDefinition))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _mockSharedFilesService.AssertFilePartIsDownloaded(sharedFileDefinition, client, partNumber, storageProvider))
-            .MustHaveHappenedOnceExactly();
     }
     
 } 
