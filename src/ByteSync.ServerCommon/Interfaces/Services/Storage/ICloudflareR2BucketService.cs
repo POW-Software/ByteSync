@@ -1,10 +1,8 @@
-using Amazon.S3.Model;
+using Amazon.S3;
 
 namespace ByteSync.ServerCommon.Interfaces.Services.Storage;
 
 public interface ICloudflareR2BucketService
 {
-    Task<ListObjectsV2Response> ListObjectsAsync(ListObjectsV2Request request, CancellationToken cancellationToken);
-    
-    Task<DeleteObjectResponse> DeleteObjectAsync(DeleteObjectRequest request, CancellationToken cancellationToken);
+    AmazonS3Client BuildS3Client();
 } 

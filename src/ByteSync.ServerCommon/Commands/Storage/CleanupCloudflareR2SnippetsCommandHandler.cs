@@ -32,32 +32,34 @@ public class CleanupCloudflareR2SnippetsCommandHandler : IRequestHandler<Cleanup
             return 0;
         }
 
-        var listObjectsRequest = new ListObjectsV2Request
-        {
-            BucketName = _cloudflareR2Settings.BucketName
-        };
-
         var deletedObjectsCount = 0;
         var cutoffDate = DateTime.UtcNow.AddDays(-_cloudflareR2Settings.RetentionDurationInDays);
 
         try
         {
-            var listObjectsResponse = await _cloudflareR2BucketService.ListObjectsAsync(listObjectsRequest, cancellationToken);
-            
+            var s3Client = _cloudflareR2BucketService.BuildS3Client();
+
+            var listObjectsRequest = new ListObjectsV2Request
+            {
+                BucketName = _cloudflareR2Settings.BucketName
+            };
+
+            var listObjectsResponse = await s3Client.ListObjectsV2Async(listObjectsRequest, cancellationToken);
+
             foreach (var s3Object in listObjectsResponse.S3Objects)
             {
                 if (s3Object.LastModified <= cutoffDate)
                 {
-                    _logger.LogInformation("Deleting obsolete R2 object {ObjectKey} (LastModified:{LastModified})", 
+                    _logger.LogInformation("Deleting obsolete R2 object {ObjectKey} (LastModified:{LastModified})",
                         s3Object.Key, s3Object.LastModified);
-                    
+
                     var deleteRequest = new DeleteObjectRequest
                     {
                         BucketName = _cloudflareR2Settings.BucketName,
                         Key = s3Object.Key
                     };
-                    
-                    await _cloudflareR2BucketService.DeleteObjectAsync(deleteRequest, cancellationToken);
+
+                    await s3Client.DeleteObjectAsync(deleteRequest, cancellationToken);
                     deletedObjectsCount += 1;
                 }
             }

@@ -1,5 +1,4 @@
 using Amazon.S3;
-using Amazon.S3.Model;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using Microsoft.Extensions.Options;
@@ -16,19 +15,7 @@ public class CloudflareR2BucketService : ICloudflareR2BucketService
         _cloudflareR2Settings = cloudflareR2Settings.Value;
     }
 
-    public async Task<ListObjectsV2Response> ListObjectsAsync(ListObjectsV2Request request, CancellationToken cancellationToken)
-    {
-        var s3Client = GetS3Client();
-        return await s3Client.ListObjectsV2Async(request, cancellationToken);
-    }
-
-    public async Task<DeleteObjectResponse> DeleteObjectAsync(DeleteObjectRequest request, CancellationToken cancellationToken)
-    {
-        var s3Client = GetS3Client();
-        return await s3Client.DeleteObjectAsync(request, cancellationToken);
-    }
-
-    private AmazonS3Client GetS3Client()
+    public AmazonS3Client BuildS3Client()
     {
         if (_s3Client == null)
         {

@@ -1,7 +1,5 @@
-﻿using Azure;
-using Azure.Storage;
+﻿using Azure.Storage;
 using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using Microsoft.Extensions.Options;
@@ -44,19 +42,7 @@ public class AzureBlobStorageContainerService : IAzureBlobStorageContainerServic
             return _storageSharedKeyCredential;
         }
     }
-
-    public async Task<AsyncPageable<BlobItem>> ListObjectsAsync(CancellationToken cancellationToken)
-    {
-        var container = await BuildBlobContainerClient();
-        return container.GetBlobsAsync(cancellationToken: cancellationToken);
-    }
-
-    public async Task DeleteObjectAsync(string blobName, CancellationToken cancellationToken)
-    {
-        var container = await BuildBlobContainerClient();
-        await container.DeleteBlobIfExistsAsync(blobName, DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: cancellationToken);
-    }
-
+    
     private Uri BuildContainerUri()
     {
         string endpoint = _blobStorageSettings.Endpoint.TrimEnd('/');
