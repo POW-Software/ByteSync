@@ -1,6 +1,6 @@
 using ByteSync.Common.Business.SharedFiles;
 
-namespace ByteSync.ServerCommon.Interfaces.Services;
+namespace ByteSync.ServerCommon.Interfaces.Services.Storage;
 
 public interface ICloudflareR2UrlService
 {

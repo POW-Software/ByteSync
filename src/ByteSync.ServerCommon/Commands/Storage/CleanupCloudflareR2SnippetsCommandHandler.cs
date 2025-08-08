@@ -1,7 +1,7 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using ByteSync.ServerCommon.Business.Settings;
-using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

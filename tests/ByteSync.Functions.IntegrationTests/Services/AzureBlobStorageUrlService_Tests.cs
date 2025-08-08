@@ -1,10 +1,10 @@
 ﻿using Autofac;
-using ByteSync.ServerCommon.Services;
+using ByteSync.ServerCommon.Services.Storage;
 
 namespace ByteSync.Functions.IntegrationTests.Services;
 
 [TestFixture]
-public class BlobUrlService_Tests
+public class AzureBlobStorageUrlService_Tests
 {
     private ILifetimeScope _scope;
 
@@ -23,7 +23,7 @@ public class BlobUrlService_Tests
     [Test]
     public void TestWithSettings()
     {
-        var blobUrlService = _scope.Resolve<BlobUrlService>();
+        var AzureBlobStorageUrlService = _scope.Resolve<AzureBlobStorageUrlService>();
         
     }
 }

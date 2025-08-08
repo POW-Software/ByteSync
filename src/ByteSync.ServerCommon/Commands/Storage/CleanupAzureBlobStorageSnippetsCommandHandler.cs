@@ -1,6 +1,6 @@
 using Azure.Storage.Blobs.Models;
 using ByteSync.ServerCommon.Business.Settings;
-using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

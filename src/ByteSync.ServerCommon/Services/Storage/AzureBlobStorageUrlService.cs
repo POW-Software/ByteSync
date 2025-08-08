@@ -2,17 +2,17 @@
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
 using ByteSync.Common.Business.SharedFiles;
-using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.ServerCommon.Services;
+namespace ByteSync.ServerCommon.Services.Storage;
 
-public class BlobUrlService : IBlobUrlService
+public class AzureBlobStorageUrlService : IAzureBlobStorageUrlService
 {
     private readonly IBlobStorageContainerService _blobStorageContainerService;
-    private readonly ILogger<BlobUrlService> _logger;
+    private readonly ILogger<AzureBlobStorageUrlService> _logger;
 
-    public BlobUrlService(IBlobStorageContainerService blobStorageContainerService, ILogger<BlobUrlService> logger)
+    public AzureBlobStorageUrlService(IBlobStorageContainerService blobStorageContainerService, ILogger<AzureBlobStorageUrlService> logger)
     {
         _blobStorageContainerService = blobStorageContainerService;
         _logger = logger;

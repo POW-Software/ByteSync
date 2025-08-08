@@ -3,6 +3,7 @@ using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Services;
@@ -10,13 +11,13 @@ namespace ByteSync.ServerCommon.Services;
 public class SharedFilesService : ISharedFilesService
 {
     private readonly ISharedFilesRepository _sharedFilesRepository;
-    private readonly IBlobUrlService _blobUrlService;
+    private readonly IAzureBlobStorageUrlService _azureBlobStorageUrlService;
     private readonly ILogger<SharedFilesService> _logger;
 
-    public SharedFilesService(ISharedFilesRepository sharedFilesRepository, IBlobUrlService blobUrlService, ILogger<SharedFilesService> logger)
+    public SharedFilesService(ISharedFilesRepository sharedFilesRepository, IAzureBlobStorageUrlService azureBlobStorageUrlService, ILogger<SharedFilesService> logger)
     {
         _sharedFilesRepository = sharedFilesRepository;
-        _blobUrlService = blobUrlService;
+        _azureBlobStorageUrlService = azureBlobStorageUrlService;
         _logger = logger;
     }
     public async Task AssertFilePartIsUploaded(SharedFileDefinition sharedFileDefinition, int partNumber, ICollection<string> recipients)
@@ -74,7 +75,7 @@ public class SharedFilesService : ISharedFilesService
         {
             try
             {
-                await _blobUrlService.DeleteBlob(sharedFileDefinition, partNumber);
+                await _azureBlobStorageUrlService.DeleteBlob(sharedFileDefinition, partNumber);
             }
             catch (Exception ex)
             {
@@ -105,7 +106,7 @@ public class SharedFilesService : ISharedFilesService
             {
                 try
                 {
-                    await _blobUrlService.DeleteBlob(sharedFileData.SharedFileDefinition, i);
+                    await _azureBlobStorageUrlService.DeleteBlob(sharedFileData.SharedFileDefinition, i);
                 }
                 catch (Exception ex)
                 {

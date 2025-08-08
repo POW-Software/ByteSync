@@ -2,11 +2,11 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Settings;
-using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace ByteSync.ServerCommon.Services;
+namespace ByteSync.ServerCommon.Services.Storage;
 
 public class CloudflareR2UrlService : ICloudflareR2UrlService
 {

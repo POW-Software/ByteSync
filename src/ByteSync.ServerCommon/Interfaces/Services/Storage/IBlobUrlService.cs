@@ -1,8 +1,8 @@
 ﻿using ByteSync.Common.Business.SharedFiles;
 
-namespace ByteSync.ServerCommon.Interfaces.Services;
+namespace ByteSync.ServerCommon.Interfaces.Services.Storage;
 
-public interface IBlobUrlService
+public interface IAzureBlobStorageUrlService
 {
     Task<string> GetUploadFileUrl(SharedFileDefinition sharedFileDefinition, int partNumber);
     

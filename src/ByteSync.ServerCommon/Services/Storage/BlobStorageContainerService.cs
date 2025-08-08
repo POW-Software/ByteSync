@@ -1,10 +1,10 @@
 ﻿using Azure.Storage;
 using Azure.Storage.Blobs;
 using ByteSync.ServerCommon.Business.Settings;
-using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using Microsoft.Extensions.Options;
 
-namespace ByteSync.ServerCommon.Services;
+namespace ByteSync.ServerCommon.Services.Storage;
 
 public class BlobStorageContainerService : IBlobStorageContainerService
 {

@@ -1,6 +1,6 @@
 using Amazon.S3.Model;
 
-namespace ByteSync.ServerCommon.Interfaces.Services;
+namespace ByteSync.ServerCommon.Interfaces.Services.Storage;
 
 public interface ICloudflareR2Service
 {

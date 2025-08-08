@@ -1,6 +1,6 @@
 using Azure.Storage;
 using ByteSync.ServerCommon.Business.Settings;
-using ByteSync.ServerCommon.Services;
+using ByteSync.ServerCommon.Services.Storage;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 
