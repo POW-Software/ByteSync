@@ -131,7 +131,7 @@ public class SynchronizationProgressService : ISynchronizationProgressService
             FinishedActionsCount = synchronizationEntity.Progress.FinishedActionsCount,
             ErrorActionsCount = synchronizationEntity.Progress.ErrorsCount,
             
-            Version = DateTimeOffset.Now.Ticks,
+            Version = DateTimeOffset.UtcNow.Ticks,
             
             TrackingActionSummaries = trackingActionSummaries,
         };
