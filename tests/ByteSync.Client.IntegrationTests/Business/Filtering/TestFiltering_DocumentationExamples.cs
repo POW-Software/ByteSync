@@ -225,6 +225,27 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
         parseResult.Expression.Should().NotBeNull();
     }
     
+    [Test]
+    public void TestEvaluate_Not_SizeLessThan10KB_Or_NameTempPrefix()
+    {
+        // Arrange
+        var filterText = "not (A1.size<10KB or name:\"temp*\")";
+        
+        var smallTemp = PrepareComparisonWithOneContent("A1", "hash", DateTime.Now, 5 * 1024, "temp.log");
+        var bigNonTemp = PrepareComparisonWithOneContent("A1", "hash", DateTime.Now, 20 * 1024, "report.txt");
+        var bigTemp = PrepareComparisonWithOneContent("A1", "hash", DateTime.Now, 20 * 1024, "temp_backup.txt");
+        
+        // Act
+        var resultSmallTemp = EvaluateFilterExpression(filterText, smallTemp);
+        var resultBigNonTemp = EvaluateFilterExpression(filterText, bigNonTemp);
+        var resultBigTemp = EvaluateFilterExpression(filterText, bigTemp);
+        
+        // Assert
+        resultSmallTemp.Should().BeFalse();
+        resultBigNonTemp.Should().BeTrue();
+        resultBigTemp.Should().BeFalse();
+    }
+    
     private void ConfigureDataPartIndexer(string inventoryACode = "A", string inventoryBCode = "B")
     {
         inventoryACode = inventoryACode.ToUpperInvariant();
