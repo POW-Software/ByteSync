@@ -27,7 +27,7 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
     [Test]
     public void TestParse_ComplexFileFilter_WithNameSizeAndExistence()
     {
-        // Arrange - "is:file AND name==\"report*\" AND A1.size>1MB AND NOT on:B1"
+        // Arrange
         var filterText = "is:file AND name==\"report*\" AND A1.size>1MB AND NOT on:B1";
         
         ConfigureDataPartIndexer();
@@ -43,7 +43,7 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
     [Test]
     public void TestEvaluate_ComplexFileFilter_WithNameSizeAndExistence()
     {
-        // Arrange - "is:file AND name==\"report*\" AND A1.size>1MB AND NOT on:B1" 
+        // Arrange
         var filterText = "is:file AND name==\"report*\" AND A1.size>1MB AND NOT on:B1";
         
         // Create a file that matches: is file, name starts with "report", size > 1MB, only on A
@@ -59,8 +59,8 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
     [Test]
     public void TestParse_LogFilesWithActions()
     {
-        // Arrange - "name == \"*.log\" AND actions:copy"
-        var filterText = "name == \"*.log\" AND actions:copy";
+        // Arrange
+        var filterText = "name == \"*.log\" AND actions.copy";
         
         ConfigureDataPartIndexer();
         
@@ -72,30 +72,33 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
         parseResult.Expression.Should().NotBeNull();
     }
     
-    [Test]
-    public void TestEvaluate_LogFilesWithActions()
+    [Theory]
+    [TestCase("name==*.log AND actions.copy", true)]
+    [TestCase("name==\"*.log\" AND actions.copy", true)]
+    [TestCase("name == \"*.log\" AND actions.copy", true)]
+    [TestCase("name == \"*.log\" AND actions.copy > 0", true)]
+    [TestCase("name == \"*.log\" AND actions.copy == 0", false)]
+    [TestCase("name == \"*.log\" AND actions.copy==0", false)]
+    public void TestEvaluate_LogFilesWithActions(string filterText, bool expectedResult)
     {
-        // Arrange - "name == \"*.log\" AND actions:copy"
-        var filterText = "name == \"*.log\" AND actions:copy";
-        
         var comparisonItem = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 1024, "app.log");
         
         // Add copy action
-        var copyAction = CreateAtomicAction(comparisonItem, ActionOperatorTypes.SynchronizeContentOnly, false);
+        var copyAction = CreateAtomicAction(comparisonItem, ActionOperatorTypes.SynchronizeContentAndDate, false);
         _mockActionRepository.AddOrUpdate(new List<AtomicAction> { copyAction });
         
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
         
         // Assert
-        result.Should().BeTrue();
+        result.Should().Be(expectedResult);
     }
     
     [Test]
     public void TestParse_OnlyOnSourceAndWillBeCopied()
     {
-        // Arrange - "only:A AND actions:copy"
-        var filterText = "only:A AND actions:copy";
+        // Arrange
+        var filterText = "only:A AND actions.copy";
         
         ConfigureDataPartIndexer();
         
@@ -110,7 +113,7 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
     [Test]
     public void TestParse_ExcludeBackupPaths()
     {
-        // Arrange - "NOT path:\"*backup*\""
+        // Arrange
         var filterText = "NOT path:\"*backup*\"";
         
         // Act
@@ -124,7 +127,7 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
     [Test]
     public void TestEvaluate_ExcludeBackupPaths()
     {
-        // Arrange - "NOT path:\"*backup*\""
+        // Arrange
         var filterText = "NOT path:\"*backup*\"";
         
         // Test with non-backup path (should match)
@@ -147,7 +150,7 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
     [Test]
     public void TestParse_FileAndDirectoryWithSize()
     {
-        // Arrange - "(is:file OR is:directory) AND A1.size > 1MB"
+        // Arrange
         var filterText = "(is:file OR is:directory) AND A1.size > 1MB";
         
         ConfigureDataPartIndexer();
@@ -163,7 +166,7 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
     [Test]
     public void TestParse_DuplicatedFiles()
     {
-        // Arrange - "A1.contents==A2.contents AND A1.size==A2.size AND is:file"
+        // Arrange
         var filterText = "A1.contents==A2.contents AND A1.size==A2.size AND is:file";
         
         ConfigureDataPartIndexer("A", "A"); // Need A1 and A2 from same inventory A
@@ -179,7 +182,7 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
     [Test]
     public void TestParse_OldTempFiles()
     {
-        // Arrange - "(name=~\"\\\\.(tmp|bak|log)$\") AND A1.last-write-time < now-6M"
+        // Arrange
         var filterText = "(name=~\"\\\\.(tmp|bak|log)$\") AND A1.last-write-time < now-6M";
         
         ConfigureDataPartIndexer();
@@ -195,7 +198,7 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
     [Test]
     public void TestParse_ExecutablesInDocuments()
     {
-        // Arrange - "path:\"*/Documents/*\" AND name=~\"\\\\.(exe|dll|bat)$\""
+        // Arrange
         var filterText = "path:\"*/Documents/*\" AND name=~\"\\\\.(exe|dll|bat)$\"";
         
         // Act
@@ -209,7 +212,7 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
     [Test]
     public void TestParse_RecentProjectFiles()
     {
-        // Arrange - "path:\"*MyProject*\" AND is:file AND A1.last-write-time >= now-7d"
+        // Arrange
         var filterText = "path:\"*MyProject*\" AND is:file AND A1.last-write-time >= now-7d";
         
         ConfigureDataPartIndexer();
