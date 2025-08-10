@@ -1,4 +1,5 @@
 using System.IO;
+using System.Net.Http;
 using System.Threading;
 using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
@@ -8,25 +9,40 @@ namespace ByteSync.Services.Communications.Transfers.Strategies;
 
 public class CloudflareR2DownloadStrategy : IDownloadStrategy
 {
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ILogger<CloudflareR2DownloadStrategy> _logger;
+
+    public CloudflareR2DownloadStrategy(IHttpClientFactory httpClientFactory, ILogger<CloudflareR2DownloadStrategy> logger)
+    {
+        _httpClientFactory = httpClientFactory;
+        _logger = logger;
+    }
+
     public async Task<DownloadFileResponse> DownloadAsync(Stream memoryStream, FileStorageLocation storageLocation, CancellationToken cancellationToken)
     {
         try
         {
-            // TODO: Implement CloudFlare download strategy
-            // This could use HttpClient to download from CloudFlare URLs
-            // or use CloudFlare-specific SDK if available
+            using var httpClient = _httpClientFactory.CreateClient();
+            httpClient.Timeout = TimeSpan.FromMinutes(10);
             
-            /*
-            using var httpClient = new HttpClient();
-            var httpResponse = await httpClient.GetAsync(storageLocation.Url, cancellationToken);
-            await httpResponse.Content.CopyToAsync(memoryStream, cancellationToken);
-            memoryStream.Position = 0;
-            // Create a mock Response object for CloudFlare (since it's not Azure)
-            var mockResponse = new MockResponse(httpResponse.StatusCode);
-            return mockResponse;
-            */
+            using var response = await httpClient.GetAsync(storageLocation.Url, cancellationToken);
             
-            throw new NotImplementedException("CloudFlare download strategy not yet implemented");
+            if (response.IsSuccessStatusCode)
+            {
+                await response.Content.CopyToAsync(memoryStream, cancellationToken);
+                memoryStream.Position = 0;
+                
+                return DownloadFileResponse.Success(
+                    statusCode: (int)response.StatusCode
+                );
+            }
+            else
+            {
+                return DownloadFileResponse.Failure(
+                    statusCode: (int)response.StatusCode,
+                    errorMessage: $"Download failed with status code: {response.StatusCode}"
+                );
+            }
         }
         catch (Exception ex)
         {
