@@ -322,7 +322,7 @@ public class TestFiltering_Name : BaseTestFiltering
     [Test]
     public void TestParse_ExactNameMatch_README()
     {
-        // Arrange - "name:README.md"
+        // Arrange
         var filterText = "name:README.md";
         
         // Act
@@ -336,7 +336,7 @@ public class TestFiltering_Name : BaseTestFiltering
     [Test]
     public void TestEvaluate_ExactNameMatch_README()
     {
-        // Arrange - "name:README.md"
+        // Arrange
         var filterText = "name:README.md";
         var comparisonItem = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 50, "README.md");
         
@@ -350,7 +350,7 @@ public class TestFiltering_Name : BaseTestFiltering
     [Test]
     public void TestParse_ExactNameEquals_File1()
     {
-        // Arrange - "name==\"file1.txt\""
+        // Arrange
         var filterText = "name==\"file1.txt\"";
         
         // Act
@@ -364,7 +364,7 @@ public class TestFiltering_Name : BaseTestFiltering
     [Test]
     public void TestEvaluate_ExactNameEquals_File1()
     {
-        // Arrange - "name==\"file1.txt\""
+        // Arrange
         var filterText = "name==\"file1.txt\"";
         var comparisonItem = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 50, "file1.txt");
         
@@ -378,7 +378,7 @@ public class TestFiltering_Name : BaseTestFiltering
     [Test]
     public void TestParse_ExcludeName_TempLog()
     {
-        // Arrange - "name!=\"temp.log\""
+        // Arrange
         var filterText = "name!=\"temp.log\"";
         
         // Act
@@ -392,7 +392,7 @@ public class TestFiltering_Name : BaseTestFiltering
     [Test]
     public void TestEvaluate_ExcludeName_TempLog()
     {
-        // Arrange - "name!=\"temp.log\""
+        // Arrange
         var filterText = "name!=\"temp.log\"";
         
         // Test with temp.log (should not match)
@@ -413,7 +413,7 @@ public class TestFiltering_Name : BaseTestFiltering
     [Test]
     public void TestParse_NameStartsWith_File1()
     {
-        // Arrange - "name:file1*"
+        // Arrange
         var filterText = "name:file1*";
         
         // Act
@@ -427,7 +427,7 @@ public class TestFiltering_Name : BaseTestFiltering
     [Test]
     public void TestEvaluate_NameStartsWith_File1()
     {
-        // Arrange - "name:file1*"
+        // Arrange
         var filterText = "name:file1*";
         
         // Test files that start with file1
@@ -449,7 +449,7 @@ public class TestFiltering_Name : BaseTestFiltering
     [Test]
     public void TestParse_NameEndsWith_Log()
     {
-        // Arrange - "name==*.log"
+        // Arrange
         var filterText = "name==*.log";
         
         // Act
@@ -463,7 +463,7 @@ public class TestFiltering_Name : BaseTestFiltering
     [Test]
     public void TestEvaluate_NameEndsWith_Log()
     {
-        // Arrange - "name==*.log"
+        // Arrange
         var filterText = "name==*.log";
         
         // Test files that end with .log
@@ -485,7 +485,7 @@ public class TestFiltering_Name : BaseTestFiltering
     [Test]
     public void TestParse_RegexPattern_LogTxtFiles()
     {
-        // Arrange - "name=~\"^log_.*\\\\.txt$\""
+        // Arrange
         var filterText = "name=~\"^log_.*\\\\.txt$\"";
         
         // Act
@@ -499,8 +499,8 @@ public class TestFiltering_Name : BaseTestFiltering
     [Test]
     public void TestEvaluate_RegexPattern_LogTxtFiles()
     {
-        // Arrange - "name=~\"^log_.*\\\\.txt$\""
-        var filterText = "name=~\"^log_.*\\\\.txt$\"";
+        // Arrange
+        var filterText = "name=~\"^log_.*\\.txt$\"";
         
         // Test files matching the regex pattern
         var comparisonItem1 = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 50, "log_error.txt");
@@ -524,7 +524,7 @@ public class TestFiltering_Name : BaseTestFiltering
     [Test]
     public void TestParse_RegexPattern_ReportPdfFiles()
     {
-        // Arrange - "name =~ \"^report.*\\\\.pdf$\""
+        // Arrange
         var filterText = "name =~ \"^report.*\\\\.pdf$\"";
         
         // Act
@@ -538,8 +538,8 @@ public class TestFiltering_Name : BaseTestFiltering
     [Test]
     public void TestEvaluate_RegexPattern_ReportPdfFiles()
     {
-        // Arrange - "name =~ \"^report.*\\\\.pdf$\""
-        var filterText = "name =~ \"^report.*\\\\.pdf$\"";
+        // Arrange
+        var filterText = "name =~ \"^report.*\\.pdf$\"";
         
         // Test files matching the regex pattern
         var comparisonItem1 = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 50, "report.pdf");
@@ -563,7 +563,7 @@ public class TestFiltering_Name : BaseTestFiltering
     [Test]
     public void TestParse_RegexPattern_LogExtensions()
     {
-        // Arrange - "name=~\"\\\\.log$\""
+        // Arrange
         var filterText = "name=~\"\\\\.log$\"";
         
         // Act
@@ -577,8 +577,8 @@ public class TestFiltering_Name : BaseTestFiltering
     [Test]
     public void TestEvaluate_RegexPattern_LogExtensions()
     {
-        // Arrange - "name=~\"\\\\.log$\""
-        var filterText = "name=~\"\\\\.log$\"";
+        // Arrange
+        var filterText = "name=~\"\\.log$\"";
         
         // Test files ending with .log
         var comparisonItem1 = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 50, "application.log");

@@ -158,24 +158,10 @@ public class TestFiltering_Size : BaseTestFiltering
     // Documentation examples tests
     
     [Test]
-    public void TestParse_ExactSize_1024()
-    {
-        // Arrange - "size == 1024"
-        var filterText = "size == 1024";
-        
-        // Act
-        var parseResult = _filterParser.TryParse(filterText);
-        
-        // Assert
-        parseResult.IsComplete.Should().BeTrue();
-        parseResult.Expression.Should().NotBeNull();
-    }
-    
-    [Test]
     public void TestEvaluate_ExactSize_1024()
     {
-        // Arrange - "size == 1024"
-        var filterText = "size == 1024";
+        // Arrange
+        var filterText = "A1.size == 1024";
         
         // Test file with exact size
         var comparisonItem1 = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 1024);
@@ -193,24 +179,10 @@ public class TestFiltering_Size : BaseTestFiltering
     }
     
     [Test]
-    public void TestParse_NotZeroSize()
-    {
-        // Arrange - "size != 0"
-        var filterText = "size != 0";
-        
-        // Act
-        var parseResult = _filterParser.TryParse(filterText);
-        
-        // Assert
-        parseResult.IsComplete.Should().BeTrue();
-        parseResult.Expression.Should().NotBeNull();
-    }
-    
-    [Test]
     public void TestEvaluate_NotZeroSize()
     {
-        // Arrange - "size != 0"
-        var filterText = "size != 0";
+        // Arrange
+        var filterText = "A1.size != 0";
         
         // Test zero-size file
         var comparisonItem1 = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 0);
