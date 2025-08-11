@@ -5,11 +5,11 @@ namespace ByteSync.ServerCommon.Interfaces.Services;
 
 public interface ISharedFilesService
 {
-    Task AssertFilePartIsUploaded(SharedFileDefinition sharedFileDefinition, int partNumber, ICollection<string> recipients);
+    Task AssertFilePartIsUploaded(TransferParameters transferParameters, ICollection<string> recipients);
 
-    Task AssertUploadIsFinished(SharedFileDefinition sharedFileDefinition, int totalParts, ICollection<string> recipients);
+    Task AssertUploadIsFinished(TransferParameters transferParameters, ICollection<string> recipients);
 
-    Task AssertFilePartIsDownloaded(SharedFileDefinition sharedFileDefinition, Client client, int partNumber, TransferParameters transferParameters);
+    Task AssertFilePartIsDownloaded(Client client, TransferParameters transferParameters);
     
     // Task AssertDownloadIsFinished(SharedFileDefinition sharedFileDefinition, Client client);
     

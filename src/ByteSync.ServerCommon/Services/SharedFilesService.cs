@@ -30,8 +30,11 @@ public class SharedFilesService : ISharedFilesService
         _logger = logger;
         _storageProvider = appSettings.Value.DefaultStorageProvider;
     }
-    public async Task AssertFilePartIsUploaded(SharedFileDefinition sharedFileDefinition, int partNumber, ICollection<string> recipients)
+    public async Task AssertFilePartIsUploaded(TransferParameters transferParameters, ICollection<string> recipients)
     {
+        var sharedFileDefinition = transferParameters.SharedFileDefinition;
+        var partNumber = transferParameters.PartNumber!.Value;
+
         await _sharedFilesRepository.AddOrUpdate(sharedFileDefinition, sharedFileData =>
         {
             sharedFileData ??= new SharedFileData(sharedFileDefinition, recipients, _storageProvider);
@@ -42,8 +45,11 @@ public class SharedFilesService : ISharedFilesService
         });
     }
 
-    public async Task AssertUploadIsFinished(SharedFileDefinition sharedFileDefinition, int totalParts, ICollection<string> recipients)
+    public async Task AssertUploadIsFinished(TransferParameters transferParameters, ICollection<string> recipients)
     {
+        var sharedFileDefinition = transferParameters.SharedFileDefinition;
+        var totalParts = transferParameters.TotalParts!.Value;
+
         await _sharedFilesRepository.AddOrUpdate(sharedFileDefinition, sharedFileData =>
         {
             sharedFileData ??= new SharedFileData(sharedFileDefinition, recipients, _storageProvider);
@@ -54,8 +60,10 @@ public class SharedFilesService : ISharedFilesService
         });
     }
 
-    public async Task AssertFilePartIsDownloaded(SharedFileDefinition sharedFileDefinition, Client downloadedBy, int partNumber, TransferParameters transferParameters)
+    public async Task AssertFilePartIsDownloaded(Client downloadedBy, TransferParameters transferParameters)
     {
+        var sharedFileDefinition = transferParameters.SharedFileDefinition;
+        var partNumber = transferParameters.PartNumber!.Value;
         bool deleteBlob = false;
         bool unregister = false;
         

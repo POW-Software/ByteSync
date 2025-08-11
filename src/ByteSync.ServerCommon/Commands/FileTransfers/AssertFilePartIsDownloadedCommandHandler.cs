@@ -31,7 +31,7 @@ public class AssertFilePartIsDownloadedCommandHandler : IRequestHandler<AssertFi
 
         if (_transferLocationService.IsSharedFileDefinitionAllowed(sessionMemberData, sharedFileDefinition))
         {
-            await _sharedFilesService.AssertFilePartIsDownloaded(sharedFileDefinition, request.Client, partNumber, request.TransferParameters);
+            await _sharedFilesService.AssertFilePartIsDownloaded(request.Client, request.TransferParameters);
         }
         
         _logger.LogDebug("File part download asserted for session {SessionId}, file {FileId}, part {PartNumber}", 

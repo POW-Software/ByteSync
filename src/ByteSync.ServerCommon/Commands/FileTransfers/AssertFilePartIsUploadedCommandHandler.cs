@@ -51,7 +51,7 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
             {
                 var otherSessionMembers = GetOtherSessionMembers(session!, sessionMemberData);
                 
-                await _sharedFilesService.AssertFilePartIsUploaded(sharedFileDefinition, partNumber, 
+                await _sharedFilesService.AssertFilePartIsUploaded(request.TransferParameters, 
                     otherSessionMembers.Select(sm => sm.ClientInstanceId).ToList());
 
                 var transferPush = new FileTransferPush
