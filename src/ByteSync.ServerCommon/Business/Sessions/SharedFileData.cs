@@ -9,8 +9,8 @@ public class SharedFileData
     {
         
     }
-    
-    public SharedFileData(SharedFileDefinition sharedFileDefinition, ICollection<string> recipients)
+
+    public SharedFileData(SharedFileDefinition sharedFileDefinition, ICollection<string> recipients, StorageProvider storageProvider)
     {
         SharedFileDefinition = sharedFileDefinition;
 
@@ -24,11 +24,13 @@ public class SharedFileData
             {
                 cleanedData = recipient.Substring("CIID_".Length);
             }
-                
+
             Recipients.Add(cleanedData);
         }
-            
+
         DownloadedBy = new Dictionary<int, HashSet<string>>();
+
+        StorageProvider = storageProvider;
     }
 
     public SharedFileDefinition SharedFileDefinition { get; set; } = null!;

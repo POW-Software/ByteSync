@@ -62,7 +62,7 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
             .Returns(true);
 
         // Mock the shared files service
-        A.CallTo(() => _mockSharedFilesService.AssertFilePartIsDownloaded(sharedFileDefinition, client, partNumber, storageProvider))
+        A.CallTo(() => _mockSharedFilesService.AssertFilePartIsDownloaded(sharedFileDefinition, client, partNumber, transferParameters))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -73,7 +73,7 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockTransferLocationService.IsSharedFileDefinitionAllowed(mockSessionMember, sharedFileDefinition))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _mockSharedFilesService.AssertFilePartIsDownloaded(sharedFileDefinition, client, partNumber, storageProvider))
+        A.CallTo(() => _mockSharedFilesService.AssertFilePartIsDownloaded(sharedFileDefinition, client, partNumber, transferParameters))
             .MustHaveHappenedOnceExactly();
     }
 

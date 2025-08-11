@@ -9,7 +9,7 @@ public interface ISharedFilesService
 
     Task AssertUploadIsFinished(SharedFileDefinition sharedFileDefinition, int totalParts, ICollection<string> recipients);
 
-    Task AssertFilePartIsDownloaded(SharedFileDefinition sharedFileDefinition, Client client, int partNumber, StorageProvider storageProvider);
+    Task AssertFilePartIsDownloaded(SharedFileDefinition sharedFileDefinition, Client client, int partNumber, TransferParameters transferParameters);
     
     // Task AssertDownloadIsFinished(SharedFileDefinition sharedFileDefinition, Client client);
     

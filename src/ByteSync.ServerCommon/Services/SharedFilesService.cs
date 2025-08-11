@@ -34,10 +34,7 @@ public class SharedFilesService : ISharedFilesService
     {
         await _sharedFilesRepository.AddOrUpdate(sharedFileDefinition, sharedFileData =>
         {
-            sharedFileData ??= new SharedFileData(sharedFileDefinition, recipients)
-            {
-                StorageProvider = _storageProvider
-            };
+            sharedFileData ??= new SharedFileData(sharedFileDefinition, recipients, _storageProvider);
             
             sharedFileData.UploadedPartsNumbers.Add(partNumber);
 
@@ -49,10 +46,7 @@ public class SharedFilesService : ISharedFilesService
     {
         await _sharedFilesRepository.AddOrUpdate(sharedFileDefinition, sharedFileData =>
         {
-            sharedFileData ??= new SharedFileData(sharedFileDefinition, recipients)
-            {
-                StorageProvider = _storageProvider
-            };
+            sharedFileData ??= new SharedFileData(sharedFileDefinition, recipients, _storageProvider);
 
             sharedFileData.TotalParts = totalParts;
 
@@ -60,7 +54,7 @@ public class SharedFilesService : ISharedFilesService
         });
     }
 
-    public async Task AssertFilePartIsDownloaded(SharedFileDefinition sharedFileDefinition, Client downloadedBy, int partNumber, StorageProvider storageProvider)
+    public async Task AssertFilePartIsDownloaded(SharedFileDefinition sharedFileDefinition, Client downloadedBy, int partNumber, TransferParameters transferParameters)
     {
         bool deleteBlob = false;
         bool unregister = false;
@@ -91,11 +85,11 @@ public class SharedFilesService : ISharedFilesService
         {
             try
             {
-                await (storageProvider switch
+                await (transferParameters.StorageProvider switch
                 {
                     StorageProvider.AzureBlobStorage => _blobUrlService.DeleteBlob(sharedFileDefinition, partNumber),
                     StorageProvider.CloudflareR2     => _cloudflareR2UrlService.DeleteObject(sharedFileDefinition, partNumber),
-                    _ => throw new NotSupportedException($"Storage provider {storageProvider} is not supported")
+                    _ => throw new NotSupportedException($"Storage provider {transferParameters.StorageProvider} is not supported")
                 });
             }
             catch (Exception ex)
