@@ -125,7 +125,7 @@ public class SynchronizationService : ISynchronizationService
             (synchronizationEntity.Progress.AllMembersCompleted && 
                 (synchronizationEntity.Progress.AllActionsDone || synchronizationEntity.IsAbortRequested)))
         {
-            synchronizationEntity.EndedOn = DateTimeOffset.Now;
+            synchronizationEntity.EndedOn = DateTimeOffset.UtcNow;
             
             if (synchronizationEntity.IsAbortRequested)
             {
