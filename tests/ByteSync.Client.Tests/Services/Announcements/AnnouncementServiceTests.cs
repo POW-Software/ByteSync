@@ -53,7 +53,7 @@ public class AnnouncementServiceTests
 
         protected override TimeSpan RefreshDelay => _delay;
     }
-    /*
+    
     [Test]
     public async Task Start_ShouldRefreshAnnouncementsPeriodically()
     {
@@ -73,5 +73,5 @@ public class AnnouncementServiceTests
         _repository.Verify(r => r.Clear(), Times.AtLeast(2));
         _repository.Verify(r => r.AddOrUpdate(It.IsAny<IEnumerable<Announcement>>()), Times.AtLeast(2));
     }
-    */
+    
 }
