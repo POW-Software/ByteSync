@@ -4,15 +4,19 @@ on:
   pull_request:
 
 jobs:
-- name: SonarCloud Scan
-  uses: SonarSource/sonarcloud-github-action@v5
-  with:
-    args: >
-      -Dsonar.organization=pow-software
-      -Dsonar.projectKey=pow-software_ByteSync
-  env:
-    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  sonarcloud:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: SonarSource/sonarcloud-github-action@v5
+        with:
+          args: >
+            -Dsonar.organization=pow-software
+            -Dsonar.projectKey=pow-software_ByteSync
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   discover-tests:
     runs-on: ubuntu-latest
