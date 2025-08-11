@@ -1,4 +1,3 @@
-using Azure.Storage.Blobs.Models;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using MediatR;
@@ -31,22 +30,15 @@ public class CleanupAzureBlobStorageSnippetsCommandHandler : IRequestHandler<Cle
             return 0;
         }
 
-        var container = await _azureBlobStorageService.BuildBlobContainerClient();
-        if (!await container.ExistsAsync(cancellationToken))
-        {
-            _logger.LogWarning("...Container not found, no element deleted");
-            return 0;
-        }
-
         var deletedBlobsCount = 0;
-        var blobs = container.GetBlobsAsync();
-        await foreach (var blobItem in blobs.WithCancellation(cancellationToken))
+        var allObjects = await _azureBlobStorageService.GetAllObjects(cancellationToken);
+
+        foreach (var obj in allObjects)
         {
-            if (blobItem.Properties.CreatedOn != null &&
-                blobItem.Properties.CreatedOn <= DateTimeOffset.UtcNow.AddDays(-_blobStorageSettings.RetentionDurationInDays))
+            if (obj.Value != null && obj.Value <= DateTimeOffset.UtcNow.AddDays(-_blobStorageSettings.RetentionDurationInDays))
             {
-                _logger.LogInformation("Deleting Obsolete blob {BlobName} (CreatedOn:{CreatedOn})", blobItem.Name, blobItem.Properties.CreatedOn);
-                await container.DeleteBlobAsync(blobItem.Name, DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: cancellationToken);
+                _logger.LogInformation("Deleting obsolete blob {Key} (LastModified:{LastModified})", obj.Key, obj.Value);
+                await _azureBlobStorageService.DeleteObjectByKey(obj.Key, cancellationToken);
                 deletedBlobsCount += 1;
             }
         }

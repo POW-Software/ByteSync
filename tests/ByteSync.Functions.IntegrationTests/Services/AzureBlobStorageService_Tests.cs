@@ -3,6 +3,7 @@ using ByteSync.ServerCommon.Services.Storage;
 using ByteSync.ServerCommon.Business.Settings;
 using Microsoft.Extensions.Options;
 using ByteSync.Common.Business.SharedFiles;
+using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
 using FluentAssertions;
 
 namespace ByteSync.Functions.IntegrationTests.Services;
@@ -29,17 +30,15 @@ public class AzureBlobStorageService_Tests
     {
         var azureBlobStorageService = _scope.Resolve<AzureBlobStorageService>();
         azureBlobStorageService.Should().NotBeNull();
-        azureBlobStorageService.StorageSharedKeyCredential.Should().NotBeNull();
     }
 
     [Test]
     public void StorageSharedKeyCredential_ShouldMatchConfiguredAccountName()
     {
         var options = _scope.Resolve<IOptions<AzureBlobStorageSettings>>();
-        var azureBlobStorageService = _scope.Resolve<AzureBlobStorageService>();
-
+        var factory = _scope.Resolve<IAzureBlobContainerClientFactory>();
         options.Value.Should().NotBeNull();
-        azureBlobStorageService.StorageSharedKeyCredential.AccountName.Should().Be(options.Value.AccountName);
+        factory.GetCredential().AccountName.Should().Be(options.Value.AccountName);
     }
 
     [Test]

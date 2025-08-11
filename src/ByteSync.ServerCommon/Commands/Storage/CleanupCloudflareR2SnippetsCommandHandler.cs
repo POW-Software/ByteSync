@@ -1,5 +1,3 @@
-using Amazon.S3;
-using Amazon.S3.Model;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using MediatR;
@@ -35,39 +33,16 @@ public class CleanupCloudflareR2SnippetsCommandHandler : IRequestHandler<Cleanup
         var deletedObjectsCount = 0;
         var cutoffDate = DateTime.UtcNow.AddDays(-_cloudflareR2Settings.RetentionDurationInDays);
 
-        try
+        var allObjects = await _cloudflareR2Service.GetAllObjects(cancellationToken);
+
+        foreach (var obj in allObjects)
         {
-            var s3Client = _cloudflareR2Service.BuildS3Client();
-
-            var listObjectsRequest = new ListObjectsV2Request
+            if (obj.Value <= cutoffDate)
             {
-                BucketName = _cloudflareR2Settings.BucketName
-            };
-
-            var listObjectsResponse = await s3Client.ListObjectsV2Async(listObjectsRequest, cancellationToken);
-
-            foreach (var s3Object in listObjectsResponse.S3Objects)
-            {
-                if (s3Object.LastModified <= cutoffDate)
-                {
-                    _logger.LogInformation("Deleting obsolete R2 object {ObjectKey} (LastModified:{LastModified})",
-                        s3Object.Key, s3Object.LastModified);
-
-                    var deleteRequest = new DeleteObjectRequest
-                    {
-                        BucketName = _cloudflareR2Settings.BucketName,
-                        Key = s3Object.Key
-                    };
-
-                    await s3Client.DeleteObjectAsync(deleteRequest, cancellationToken);
-                    deletedObjectsCount += 1;
-                }
+                _logger.LogInformation("Deleting obsolete R2 object {ObjectKey} (LastModified:{LastModified})", obj.Key, obj.Value);
+                await _cloudflareR2Service.DeleteObjectByKey(obj.Key, cancellationToken);
+                deletedObjectsCount += 1;
             }
-        }
-        catch (AmazonS3Exception ex)
-        {
-            _logger.LogError(ex, "Error listing or deleting objects from R2 bucket {BucketName}", _cloudflareR2Settings.BucketName);
-            return 0;
         }
 
         return deletedObjectsCount;

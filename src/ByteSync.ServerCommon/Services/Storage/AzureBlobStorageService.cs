@@ -4,23 +4,20 @@ using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Interfaces.Services.Storage;
+using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using ByteSync.ServerCommon.Business.Settings;
 
 namespace ByteSync.ServerCommon.Services.Storage;
 
 public class AzureBlobStorageService : IAzureBlobStorageService
 {
-    private readonly AzureBlobStorageSettings _blobStorageSettings;
     private readonly ILogger<AzureBlobStorageService> _logger;
-    
-    private StorageSharedKeyCredential? _storageSharedKeyCredential;
-    private BlobContainerClient? _containerClient;
+    private readonly IAzureBlobContainerClientFactory _clientFactory;
 
-    public AzureBlobStorageService(IOptions<AzureBlobStorageSettings> blobStorageSettings, ILogger<AzureBlobStorageService> logger)
+    public AzureBlobStorageService(IAzureBlobContainerClientFactory clientFactory,
+        ILogger<AzureBlobStorageService> logger)
     {
-        _blobStorageSettings = blobStorageSettings.Value;
+        _clientFactory = clientFactory;
         _logger = logger;
     }
 
@@ -36,7 +33,7 @@ public class AzureBlobStorageService : IAzureBlobStorageService
 
     private async Task<string> ComputeUrl(SharedFileDefinition sharedFileDefinition, int partNumber, BlobSasPermissions permission)
     {
-        var container = await BuildBlobContainerClient();
+        var container = await _clientFactory.GetOrCreateContainer(CancellationToken.None);
 
         string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
 
@@ -82,7 +79,7 @@ public class AzureBlobStorageService : IAzureBlobStorageService
 
     public async Task DeleteObject(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        var container = await BuildBlobContainerClient();
+        var container = await _clientFactory.GetOrCreateContainer(CancellationToken.None);
 
         string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
             
@@ -96,63 +93,25 @@ public class AzureBlobStorageService : IAzureBlobStorageService
             _logger.LogWarning("Blob {FileName} not found", finalFileName);
         }
     }
-
-    public async Task<long?> GetObjectSize(SharedFileDefinition sharedFileDefinition, int partNumber)
-    {
-        var container = await BuildBlobContainerClient();
-            
-        string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
-            
-        BlobClient blobClient = container.GetBlobClient(finalFileName);
-
-        long? result = null;
-        if (blobClient != null)
-        {
-            var response =  await blobClient.GetPropertiesAsync();
-            result = response.Value.ContentLength;
-        }
-
-        return result;
-    }
-
-    public async Task<BlobContainerClient> BuildBlobContainerClient()
-    {
-        if (_containerClient == null)
-        {
-            Uri containerUri = BuildContainerUri();
-            _containerClient = new BlobContainerClient(containerUri, StorageSharedKeyCredential);
-            await _containerClient.CreateIfNotExistsAsync();
-        }
-
-        return _containerClient;
-    }
-
-    public StorageSharedKeyCredential StorageSharedKeyCredential
-    {
-        get
-        {
-            if (_storageSharedKeyCredential == null)
-            {
-                _storageSharedKeyCredential = BuildStorageSharedKeyCredential();
-            }
-            
-            return _storageSharedKeyCredential;
-        }
-    }
-
-    private Uri BuildContainerUri()
-    {
-        string endpoint = _blobStorageSettings.Endpoint.TrimEnd('/');
-        string container = _blobStorageSettings.Container.TrimStart('/').TrimEnd('/') + "/";
-
-        Uri baseUri = new Uri(endpoint);
-        Uri fullUri = new Uri(baseUri, container);
-
-        return fullUri;
-    }
     
-    private StorageSharedKeyCredential BuildStorageSharedKeyCredential()
+    private StorageSharedKeyCredential StorageSharedKeyCredential => _clientFactory.GetCredential();
+
+    public async Task<IReadOnlyCollection<KeyValuePair<string, DateTimeOffset?>>> GetAllObjects(CancellationToken cancellationToken)
     {
-        return new StorageSharedKeyCredential(_blobStorageSettings.AccountName, _blobStorageSettings.AccountKey);
+        var container = await _clientFactory.GetOrCreateContainer(cancellationToken);
+        var results = new List<KeyValuePair<string, DateTimeOffset?>>();
+
+        await foreach (var blobItem in container.GetBlobsAsync().WithCancellation(cancellationToken))
+        {
+            results.Add(new KeyValuePair<string, DateTimeOffset?>(blobItem.Name, blobItem.Properties.CreatedOn));
+        }
+
+        return results;
+    }
+
+    public async Task DeleteObjectByKey(string key, CancellationToken cancellationToken)
+    {
+        var container = await _clientFactory.GetOrCreateContainer(cancellationToken);
+        await container.DeleteBlobIfExistsAsync(key, DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: cancellationToken);
     }
 }

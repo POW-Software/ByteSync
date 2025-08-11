@@ -3,6 +3,7 @@ using Amazon.S3.Model;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Services.Storage;
+using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -12,17 +13,20 @@ public class CloudflareR2Service : ICloudflareR2Service
 {
     private readonly CloudflareR2Settings _cloudflareR2Settings;
     private readonly ILogger<CloudflareR2Service> _logger;
-    private AmazonS3Client? _s3Client;
+    private readonly ICloudflareR2ClientFactory _clientFactory;
 
-    public CloudflareR2Service(IOptions<CloudflareR2Settings> cloudflareR2Settings, ILogger<CloudflareR2Service> logger)
+    public CloudflareR2Service(IOptions<CloudflareR2Settings> cloudflareR2Settings,
+        ICloudflareR2ClientFactory clientFactory,
+        ILogger<CloudflareR2Service> logger)
     {
         _cloudflareR2Settings = cloudflareR2Settings.Value;
+        _clientFactory = clientFactory;
         _logger = logger;
     }
 
     public async Task<string> GetUploadFileUrl(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        var s3Client = BuildS3Client();
+        var s3Client = _clientFactory.GetClient();
         var key = GetServerFileName(sharedFileDefinition, partNumber);
         
         var request = new GetPreSignedUrlRequest
@@ -39,7 +43,7 @@ public class CloudflareR2Service : ICloudflareR2Service
 
     public async Task<string> GetDownloadFileUrl(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        var s3Client = BuildS3Client();
+        var s3Client = _clientFactory.GetClient();
         var key = GetServerFileName(sharedFileDefinition, partNumber);
 
         var request = new GetPreSignedUrlRequest
@@ -55,7 +59,7 @@ public class CloudflareR2Service : ICloudflareR2Service
 
     public async Task DeleteObject(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        var s3Client = BuildS3Client();
+        var s3Client = _clientFactory.GetClient();
         string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
 
         var request = new DeleteObjectRequest
@@ -71,44 +75,7 @@ public class CloudflareR2Service : ICloudflareR2Service
         }
     }
 
-    public async Task<long?> GetObjectSize(SharedFileDefinition sharedFileDefinition, int partNumber)
-    {
-        try
-        {
-            var s3Client = BuildS3Client();
-            var key = GetServerFileName(sharedFileDefinition, partNumber);
-
-            var request = new GetObjectMetadataRequest
-            {
-                BucketName = _cloudflareR2Settings.BucketName,
-                Key = key
-            };
-
-            var response = await s3Client.GetObjectMetadataAsync(request);
-            return response.ContentLength;
-        }
-        catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-        {
-            return null;
-        }
-    }
-
-    public AmazonS3Client BuildS3Client()
-    {
-        if (_s3Client == null)
-        {
-            _s3Client = new AmazonS3Client(
-                _cloudflareR2Settings.AccessKeyId,
-                _cloudflareR2Settings.SecretAccessKey,
-                new AmazonS3Config
-                {
-                    ServiceURL = _cloudflareR2Settings.Endpoint,
-                    ForcePathStyle = true
-                });
-        }
-
-        return _s3Client;
-    }
+    // client creation delegated to factory
 
     private string GetServerFileName(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
@@ -116,5 +83,31 @@ public class CloudflareR2Service : ICloudflareR2Service
         var serverFileName = sharedFileDefinition.SessionId + "_" + sharedFileDefinition.ClientInstanceId + "_" + fileName;
         
         return serverFileName;
+    }
+
+    public async Task<IReadOnlyCollection<KeyValuePair<string, DateTimeOffset?>>> GetAllObjects(CancellationToken cancellationToken)
+    {
+        var client = _clientFactory.GetClient();
+        var request = new ListObjectsV2Request
+        {
+            BucketName = _cloudflareR2Settings.BucketName
+        };
+
+        var response = await client.ListObjectsV2Async(request, cancellationToken);
+        return response.S3Objects
+            .Select(o => new KeyValuePair<string, DateTimeOffset?>(o.Key, o.LastModified))
+            .ToList();
+    }
+
+    public async Task DeleteObjectByKey(string key, CancellationToken cancellationToken)
+    {
+        var client = _clientFactory.GetClient();
+        var deleteRequest = new DeleteObjectRequest
+        {
+            BucketName = _cloudflareR2Settings.BucketName,
+            Key = key
+        };
+
+        await client.DeleteObjectAsync(deleteRequest, cancellationToken);
     }
 } 
