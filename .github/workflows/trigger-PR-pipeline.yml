@@ -13,7 +13,7 @@ jobs:
         with:
           args: >
             -Dsonar.organization=pow-software
-            -Dsonar.projectKey=pow-software_ByteSync
+            -Dsonar.projectKey=pow-software_bytesync
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
