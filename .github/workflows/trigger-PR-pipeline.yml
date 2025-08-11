@@ -4,6 +4,16 @@ on:
   pull_request:
 
 jobs:
+- name: SonarCloud Scan
+  uses: SonarSource/sonarcloud-github-action@v5
+  with:
+    args: >
+      -Dsonar.organization=pow-software
+      -Dsonar.projectKey=pow-software_ByteSync
+  env:
+    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   discover-tests:
     runs-on: ubuntu-latest
     outputs:
@@ -18,6 +28,7 @@ jobs:
           projects=$(find tests -name '*Tests.csproj' | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "Found test projects: $projects"
           echo "testProjects=$projects" >> $GITHUB_OUTPUT
+
   build-and-test:
     needs: discover-tests
     runs-on: ${{ matrix.os }}
