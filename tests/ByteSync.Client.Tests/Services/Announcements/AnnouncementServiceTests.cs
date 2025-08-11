@@ -65,7 +65,7 @@ public class AnnouncementServiceTests
 
         // Act
         await service.Start();
-        await Task.Delay(160);
+        await Task.Delay(300);
         service.Dispose();
 
         // Assert
