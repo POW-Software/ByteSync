@@ -38,7 +38,7 @@ public class RequestSynchronizationAbortCommandHandler : IRequestHandler<Request
 
             if (synchronizationEntity.AbortRequestedOn == null)
             {
-                synchronizationEntity.AbortRequestedOn = DateTimeOffset.Now;
+                synchronizationEntity.AbortRequestedOn = DateTimeOffset.UtcNow;
                 isDateUpdated = true;
             }
             
