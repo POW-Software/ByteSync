@@ -12,19 +12,19 @@ public class SharedFilesService : ISharedFilesService
 {
     private readonly ISharedFilesRepository _sharedFilesRepository;
     private readonly IAzureBlobStorageService _azureBlobStorageService;
-    private readonly ICloudflareR2UrlService _cloudflareR2UrlService;
+    private readonly ICloudflareR2Service _cloudflareR2Service;
 
     private readonly ILogger<SharedFilesService> _logger;
 
     public SharedFilesService(
         ISharedFilesRepository sharedFilesRepository,
         IAzureBlobStorageService azureBlobStorageService,
-        ICloudflareR2UrlService cloudflareR2UrlService,
+        ICloudflareR2Service cloudflareR2Service,
         ILogger<SharedFilesService> logger)
     {
         _sharedFilesRepository = sharedFilesRepository;
         _azureBlobStorageService = azureBlobStorageService;
-        _cloudflareR2UrlService = cloudflareR2UrlService;
+        _cloudflareR2Service = cloudflareR2Service;
         _logger = logger;
     }
     
@@ -94,8 +94,8 @@ public class SharedFilesService : ISharedFilesService
             {
                 await (transferParameters.StorageProvider switch
                 {
-                    StorageProvider.AzureBlobStorage => _azureBlobStorageService.DeleteBlob(sharedFileDefinition, partNumber),
-                    StorageProvider.CloudflareR2     => _cloudflareR2UrlService.DeleteObject(sharedFileDefinition, partNumber),
+                    StorageProvider.AzureBlobStorage => _azureBlobStorageService.DeleteObject(sharedFileDefinition, partNumber),
+                    StorageProvider.CloudflareR2     => _cloudflareR2Service.DeleteObject(sharedFileDefinition, partNumber),
                     _ => throw new NotSupportedException($"Storage provider {transferParameters.StorageProvider} is not supported")
                 });
             }
@@ -130,8 +130,8 @@ public class SharedFilesService : ISharedFilesService
                 {
                     await (sharedFileData.StorageProvider switch
                     {
-                        StorageProvider.AzureBlobStorage => _azureBlobStorageService.DeleteBlob(sharedFileData.SharedFileDefinition, i),
-                        StorageProvider.CloudflareR2     => _cloudflareR2UrlService.DeleteObject(sharedFileData.SharedFileDefinition, i),
+                        StorageProvider.AzureBlobStorage => _azureBlobStorageService.DeleteObject(sharedFileData.SharedFileDefinition, i),
+                        StorageProvider.CloudflareR2     => _cloudflareR2Service.DeleteObject(sharedFileData.SharedFileDefinition, i),
                         _ => throw new NotSupportedException($"Storage provider {sharedFileData.StorageProvider} is not supported")
                     });
                 }
