@@ -22,6 +22,12 @@ jobs:
           merge-multiple: true
           path: ./TestResults
 
+      - name: Create Client config for build
+        shell: bash
+        run: |
+          mkdir -p src/ByteSync.Client
+          echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
+
       - name: Setup .NET 8 Environment
         uses: actions/setup-dotnet@v4
         with:
