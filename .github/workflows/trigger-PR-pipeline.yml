@@ -22,13 +22,36 @@ jobs:
           merge-multiple: true
           path: ./TestResults
 
-      - uses: SonarSource/sonarcloud-github-action@v5
+      - name: Setup .NET 8 Environment
+        uses: actions/setup-dotnet@v4
         with:
-          args: >
-            -Dsonar.organization=pow-software
-            -Dsonar.projectKey=POW-Software_ByteSync
-            -Dsonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
-            -Dsonar.cs.vstest.reportsPaths=**/*.trx
+          dotnet-version: '8.0.x'
+
+      - name: Install SonarScanner for .NET
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      - name: SonarCloud Begin (prepare)
+        run: >
+          dotnet sonarscanner begin
+          /k:"POW-Software_ByteSync"
+          /o:"pow-software"
+          /d:sonar.host.url="https://sonarcloud.io"
+          /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+          /d:sonar.cs.vstest.reportsPaths="**/*.trx"
+
+      - name: Build (no tests)
+        run: |
+          dotnet restore --locked-mode
+          dotnet clean --verbosity quiet
+          dotnet build --verbosity quiet /property:WarningLevel=0
+
+      - name: SonarCloud End (publish)
+        run: >
+          dotnet sonarscanner end
+          /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
