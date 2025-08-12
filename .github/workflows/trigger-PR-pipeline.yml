@@ -6,6 +6,18 @@ on:
   pull_request:
 
 jobs:
+  sonarcloud:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: SonarSource/sonarcloud-github-action@v5
+        with:
+          args: >
+            -Dsonar.organization=pow-software
+            -Dsonar.projectKey=POW-Software_ByteSync
+            -Dsonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   discover-tests:
     runs-on: ubuntu-latest
     outputs:
@@ -62,7 +74,16 @@ jobs:
           project="${{ matrix.testProject }}"
           safe_name=$(basename "$project" .csproj)
           echo "Running test project: $project"
-          dotnet test "$project" --no-restore --no-build --logger "trx;LogFileName=$safe_name.trx" --results-directory ./TestResults
+          dotnet test "$project" \
+            --no-restore \
+            --no-build \
+            --logger "trx;LogFileName=$safe_name.trx" \
+            --results-directory ./TestResults \
+              --collect:"XPlat Code Coverage" \
+              /p:CollectCoverage=true \
+              /p:CoverletOutput=./TestResults/coverage.opencover.xml \
+              /p:CoverletOutputFormat=opencover \
+              /p:Include=[*]*
         shell: bash
 
       - name: Upload Test Results
