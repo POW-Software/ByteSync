@@ -47,7 +47,7 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
             {
                 var otherSessionMembers = GetOtherSessionMembers(session!, sessionMemberData);
                 
-                await _sharedFilesService.AssertUploadIsFinished(sharedFileDefinition, totalParts, 
+                await _sharedFilesService.AssertUploadIsFinished(request.TransferParameters, 
                     otherSessionMembers.Select(sm => sm.ClientInstanceId).ToList());
 
                 var transferPush = new FileTransferPush

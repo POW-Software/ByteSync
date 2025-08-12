@@ -53,7 +53,13 @@ public class SynchronizationProgressService : ISynchronizationProgressService
 
     public async Task UploadIsFinished(SharedFileDefinition sharedFileDefinition, int totalParts, HashSet<string> targetInstanceIds)
     {
-        await _sharedFilesService.AssertUploadIsFinished(sharedFileDefinition, totalParts, targetInstanceIds);
+        var transferParameters = new TransferParameters
+        {
+            SessionId = sharedFileDefinition.SessionId,
+            SharedFileDefinition = sharedFileDefinition,
+            TotalParts = totalParts
+        };
+        await _sharedFilesService.AssertUploadIsFinished(transferParameters, targetInstanceIds);
 
         var fileTransferPush = new FileTransferPush
         {
@@ -68,7 +74,13 @@ public class SynchronizationProgressService : ISynchronizationProgressService
 
     public async Task FilePartIsUploaded(SharedFileDefinition sharedFileDefinition, int partNumber, HashSet<string> targetInstanceIds)
     {
-        await _sharedFilesService.AssertFilePartIsUploaded(sharedFileDefinition, partNumber, targetInstanceIds);
+        var transferParameters = new TransferParameters
+        {
+            SessionId = sharedFileDefinition.SessionId,
+            SharedFileDefinition = sharedFileDefinition,
+            PartNumber = partNumber
+        };
+        await _sharedFilesService.AssertFilePartIsUploaded(transferParameters, targetInstanceIds);
             
         var fileTransferPush = new FileTransferPush
         {

@@ -107,26 +107,27 @@ public class FileDownloader : IFileDownloader
                     break;
                 }
 
-                var response = await policy.ExecuteAsync(async () =>
+                var transferParameters = new TransferParameters
                 {
-                    var transferParameters = new TransferParameters
-                    {
-                        SessionId = SharedFileDefinition.SessionId,
-                        SharedFileDefinition = SharedFileDefinition,
-                        PartNumber = partNumber
-                    };
-                    var downloadLocation = await _fileTransferApiClient.GetDownloadFileStorageLocation(transferParameters);
-                    
+                    SessionId = SharedFileDefinition.SessionId,
+                    SharedFileDefinition = SharedFileDefinition,
+                    PartNumber = partNumber
+                };
+                var downloadLocation = await _fileTransferApiClient.GetDownloadFileStorageLocation(transferParameters);
+                var storageProvider = downloadLocation.StorageProvider;
+                
+                var downloadResponse = await policy.ExecuteAsync(async () =>
+                {
                     var memoryStream = new MemoryStream();
-                    var downloadStrategy = _strategies[downloadLocation.StorageProvider];
+                    var downloadStrategy = _strategies[storageProvider];
                     var response = await downloadStrategy.DownloadAsync(memoryStream, downloadLocation, CancellationTokenSource.Token);
                     
                     DownloadTarget.AddOrReplaceMemoryStream(partNumber, memoryStream);
                     return response;
                 });
-                if (response.IsSuccess)
+                if (downloadResponse.IsSuccess)
                 {
-                    await AssertFilePartIsDownloaded(partNumber);
+                    await AssertFilePartIsDownloaded(partNumber, storageProvider);
                     await _semaphoreSlim.WaitAsync();
                     try
                     {
@@ -166,14 +167,16 @@ public class FileDownloader : IFileDownloader
         }
     }
 
-    private async Task AssertFilePartIsDownloaded(int partNumber)
+    private async Task AssertFilePartIsDownloaded(int partNumber, StorageProvider storageProvider)
     {
         var transferParameters = new TransferParameters
         {
             SessionId = SharedFileDefinition.SessionId,
             SharedFileDefinition = SharedFileDefinition,
-            PartNumber = partNumber
+            PartNumber = partNumber,
+            StorageProvider = storageProvider
         };
+        
         await _filePartDownloadAsserter.AssertAsync(transferParameters);
     }
     
