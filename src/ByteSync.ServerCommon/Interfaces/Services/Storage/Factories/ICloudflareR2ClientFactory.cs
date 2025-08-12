@@ -6,5 +6,3 @@ public interface ICloudflareR2ClientFactory
 {
     AmazonS3Client GetClient();
 }
-
-

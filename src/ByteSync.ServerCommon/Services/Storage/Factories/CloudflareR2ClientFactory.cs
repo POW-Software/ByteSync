@@ -32,5 +32,3 @@ public class CloudflareR2ClientFactory : ICloudflareR2ClientFactory
         return _client;
     }
 }
-
-

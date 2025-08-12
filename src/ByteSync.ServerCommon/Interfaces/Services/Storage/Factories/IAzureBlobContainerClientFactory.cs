@@ -10,5 +10,3 @@ public interface IAzureBlobContainerClientFactory
     Task<BlobContainerClient> GetOrCreateContainer(CancellationToken cancellationToken);
     StorageSharedKeyCredential GetCredential();
 }
-
-

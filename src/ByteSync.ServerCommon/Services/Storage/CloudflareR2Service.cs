@@ -75,8 +75,6 @@ public class CloudflareR2Service : ICloudflareR2Service
         }
     }
 
-    // client creation delegated to factory
-
     private string GetServerFileName(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
         var fileName = sharedFileDefinition.GetFileName(partNumber);

@@ -38,5 +38,3 @@ public class AzureBlobContainerClientFactory : IAzureBlobContainerClientFactory
         return _storageSharedKeyCredential ??= new StorageSharedKeyCredential(_settings.AccountName, _settings.AccountKey);
     }
 }
-
-
