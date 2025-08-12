@@ -234,7 +234,7 @@ public abstract class BaseTestFiltering : IntegrationTest
     {
         var comparisonItem = CreateBasicComparisonItem(FileSystemTypes.File, "/" + fileName.TrimStart('/'), fileName);
 
-        string letter = dataPartId[0].ToString();
+        var letter = new string(dataPartId.TakeWhile(char.IsLetter).ToArray());
 
         var (fileDesc, inventoryPart) = CreateFileDescription(
             $"Id_{letter}",

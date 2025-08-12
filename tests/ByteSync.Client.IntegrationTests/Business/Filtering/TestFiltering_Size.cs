@@ -154,4 +154,48 @@ public class TestFiltering_Size : BaseTestFiltering
         // Assert
         result.Should().Be(expectedResult);
     }
+    
+    // Documentation examples tests
+    
+    [Test]
+    public void TestEvaluate_ExactSize_1024()
+    {
+        // Arrange
+        var filterText = "A1.size == 1024";
+        
+        // Test file with exact size
+        var comparisonItem1 = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 1024);
+        
+        // Test file with different size
+        var comparisonItem2 = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 1025);
+        
+        // Act
+        var result1 = EvaluateFilterExpression(filterText, comparisonItem1);
+        var result2 = EvaluateFilterExpression(filterText, comparisonItem2);
+        
+        // Assert
+        result1.Should().BeTrue(); // Exact match should be true
+        result2.Should().BeFalse(); // Different size should be false
+    }
+    
+    [Test]
+    public void TestEvaluate_NotZeroSize()
+    {
+        // Arrange
+        var filterText = "A1.size != 0";
+        
+        // Test zero-size file
+        var comparisonItem1 = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 0);
+        
+        // Test non-zero size file
+        var comparisonItem2 = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 100);
+        
+        // Act
+        var result1 = EvaluateFilterExpression(filterText, comparisonItem1);
+        var result2 = EvaluateFilterExpression(filterText, comparisonItem2);
+        
+        // Assert
+        result1.Should().BeFalse(); // Zero size should be excluded
+        result2.Should().BeTrue(); // Non-zero size should match
+    }
 }

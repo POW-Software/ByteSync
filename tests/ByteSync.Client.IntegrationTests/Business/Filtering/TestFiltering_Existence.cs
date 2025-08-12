@@ -29,6 +29,25 @@ public class TestFiltering_Existence : BaseTestFiltering
         result.Should().Be(expectedResult);
     }
     
+    [TestCase("Aa1", true)]
+    [TestCase("Bb1", false)]
+    [Test]
+    public void TestOn_MultiDataNode(string location, bool expectedResult)
+    {
+        // Arrange
+        var now = DateTime.Now;
+        var comparisonItem = PrepareComparisonWithOneContent(
+            "Aa1", "sameHash", now, 50);
+    
+        var filterText = $"on:{location}";
+    
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+    
+        // Assert
+        result.Should().Be(expectedResult);
+    }
+    
     [TestCase("A1", false)]
     [TestCase("B1", true)]
     [Test]
