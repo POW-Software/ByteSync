@@ -1,20 +1,23 @@
-﻿using Azure.Storage.Blobs;
+﻿using Azure.Storage;
+using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
 using ByteSync.Common.Business.SharedFiles;
-using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Storage;
+using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
 using Microsoft.Extensions.Logging;
 
-namespace ByteSync.ServerCommon.Services;
+namespace ByteSync.ServerCommon.Services.Storage;
 
-public class BlobUrlService : IBlobUrlService
+public class AzureBlobStorageService : IAzureBlobStorageService
 {
-    private readonly IBlobStorageContainerService _blobStorageContainerService;
-    private readonly ILogger<BlobUrlService> _logger;
+    private readonly ILogger<AzureBlobStorageService> _logger;
+    private readonly IAzureBlobContainerClientFactory _clientFactory;
 
-    public BlobUrlService(IBlobStorageContainerService blobStorageContainerService, ILogger<BlobUrlService> logger)
+    public AzureBlobStorageService(IAzureBlobContainerClientFactory clientFactory,
+        ILogger<AzureBlobStorageService> logger)
     {
-        _blobStorageContainerService = blobStorageContainerService;
+        _clientFactory = clientFactory;
         _logger = logger;
     }
 
@@ -30,7 +33,7 @@ public class BlobUrlService : IBlobUrlService
 
     private async Task<string> ComputeUrl(SharedFileDefinition sharedFileDefinition, int partNumber, BlobSasPermissions permission)
     {
-        var container = await _blobStorageContainerService.BuildBlobContainerClient();
+        var container = await _clientFactory.GetOrCreateContainer(CancellationToken.None);
 
         string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
 
@@ -62,7 +65,7 @@ public class BlobUrlService : IBlobUrlService
         BlobUriBuilder blobUriBuilder = new BlobUriBuilder(blobClient.Uri)
         {
             // Specify the user delegation key.
-            Sas = sasBuilder.ToSasQueryParameters(_blobStorageContainerService.StorageSharedKeyCredential)
+            Sas = sasBuilder.ToSasQueryParameters(StorageSharedKeyCredential)
         };
 
         return blobUriBuilder.ToUri().ToString();
@@ -74,9 +77,9 @@ public class BlobUrlService : IBlobUrlService
                sharedFileDefinition.GetFileName(partNumber);
     }
 
-    public async Task DeleteBlob(SharedFileDefinition sharedFileDefinition, int partNumber)
+    public async Task DeleteObject(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        var container = await _blobStorageContainerService.BuildBlobContainerClient();
+        var container = await _clientFactory.GetOrCreateContainer(CancellationToken.None);
 
         string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
             
@@ -90,22 +93,31 @@ public class BlobUrlService : IBlobUrlService
             _logger.LogWarning("Blob {FileName} not found", finalFileName);
         }
     }
+    
+    private StorageSharedKeyCredential StorageSharedKeyCredential => _clientFactory.GetCredential();
 
-    public async Task<long?> GetBlobSize(SharedFileDefinition sharedFileDefinition, int partNumber)
+    public async Task<IReadOnlyCollection<KeyValuePair<string, DateTimeOffset?>>> GetAllObjects(CancellationToken cancellationToken)
     {
-        var container = await _blobStorageContainerService.BuildBlobContainerClient();
-            
-        string finalFileName = GetServerFileName(sharedFileDefinition, partNumber);
-            
-        BlobClient blobClient = container.GetBlobClient(finalFileName);
+        var container = await _clientFactory.GetOrCreateContainer(cancellationToken);
+        var pages = container
+            .GetBlobsAsync(traits: BlobTraits.Metadata, states: BlobStates.All)
+            .AsPages(pageSizeHint: 1000);
+        var results = new List<KeyValuePair<string, DateTimeOffset?>>();
 
-        long? result = null;
-        if (blobClient != null)
+        await foreach (var page in pages.WithCancellation(cancellationToken))
         {
-            var response =  await blobClient.GetPropertiesAsync();
-            result = response.Value.ContentLength;
+            foreach (var blobItem in page.Values)
+            {
+                results.Add(new KeyValuePair<string, DateTimeOffset?>(blobItem.Name, blobItem.Properties.CreatedOn));
+            }
         }
 
-        return result;
+        return results;
+    }
+
+    public async Task DeleteObjectByKey(string key, CancellationToken cancellationToken)
+    {
+        var container = await _clientFactory.GetOrCreateContainer(cancellationToken);
+        await container.DeleteBlobIfExistsAsync(key, DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: cancellationToken);
     }
 }

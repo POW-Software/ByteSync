@@ -1,17 +1,18 @@
 using Azure.Storage;
 using ByteSync.ServerCommon.Business.Settings;
-using ByteSync.ServerCommon.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
+using ByteSync.ServerCommon.Services.Storage.Factories;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 
 namespace ByteSync.ServerCommon.Tests.Services;
 
 [TestFixture]
-public class BlobStorageContainerServiceTests
+public class AzureBlobStorageContainerServiceTests
 {
     private AzureBlobStorageSettings _settings;
     private IOptions<AzureBlobStorageSettings> _options;
-    private BlobStorageContainerService _service;
+    private IAzureBlobContainerClientFactory _factory;
 
     [SetUp]
     public void SetUp()
@@ -24,14 +25,14 @@ public class BlobStorageContainerServiceTests
             Container = "testcontainer"
         };
         _options = Options.Create(_settings);
-        _service = new BlobStorageContainerService(_options);
+        _factory = new AzureBlobContainerClientFactory(_options);
     }
 
     [Test]
     public void StorageSharedKeyCredential_ShouldReturnValidCredential()
     {
         // Act
-        var credential = _service.StorageSharedKeyCredential;
+        var credential = _factory.GetCredential();
 
         // Assert
         credential.Should().NotBeNull();
@@ -43,8 +44,8 @@ public class BlobStorageContainerServiceTests
     public void StorageSharedKeyCredential_ShouldBeSingleton()
     {
         // Act
-        var credential1 = _service.StorageSharedKeyCredential;
-        var credential2 = _service.StorageSharedKeyCredential;
+        var credential1 = _factory.GetCredential();
+        var credential2 = _factory.GetCredential();
 
         // Assert
         credential1.Should().BeSameAs(credential2);
