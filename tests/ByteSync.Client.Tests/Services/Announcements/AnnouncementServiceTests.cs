@@ -53,7 +53,7 @@ public class AnnouncementServiceTests
 
         protected override TimeSpan RefreshDelay => _delay;
     }
-    
+
     [Test]
     public async Task Start_ShouldRefreshAnnouncementsPeriodically()
     {
