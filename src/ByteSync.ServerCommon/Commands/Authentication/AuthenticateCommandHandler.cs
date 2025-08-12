@@ -74,7 +74,7 @@ public class AuthenticateCommandHandler : IRequestHandler<AuthenticateRequest, I
             return client;
         });
 
-        BindSerialResponse bindSerialResponse = await BindSerial(result.Element!, request.LoginData);
+        BindSerialResponse bindSerialResponse = await BindSerial(result.Element!);
 
         var endPoint = _byteSyncEndpointFactory.BuildByteSyncEndpoint(result.Element!, bindSerialResponse.ProductSerialDescription);
         
@@ -84,38 +84,13 @@ public class AuthenticateCommandHandler : IRequestHandler<AuthenticateRequest, I
         return authenticationResponse;
     }
     
-    private Task<BindSerialResponse> BindSerial(Client _, LoginData loginData)
+    private Task<BindSerialResponse> BindSerial(Client _)
     {
         BindSerialResponseStatus bindSerialResponseStatus;
-        ProductSerial? productSerial;
         
         bindSerialResponseStatus = BindSerialResponseStatus.NotSupplied;
-        productSerial = null;
 
         ProductSerialDescription? productSerialDescription = null;
-        if (productSerial != null)
-        {
-            SerialStatus serialStatus;
-            if (productSerial.IsExpired)
-            {
-                serialStatus = SerialStatus.Expired;
-            }
-            else
-            {
-                bool bindOK = true;
-
-                if (bindOK)
-                {
-                    serialStatus = SerialStatus.OK;
-                }
-                else
-                {
-                    serialStatus = SerialStatus.NoAvailableSlot;
-                }
-            }
-
-            productSerialDescription = BuildProductSerialDescription(productSerial, serialStatus);
-        }
 
         BindSerialResponse response = new BindSerialResponse(bindSerialResponseStatus, productSerialDescription);
 
