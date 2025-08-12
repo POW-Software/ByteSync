@@ -52,7 +52,7 @@ jobs:
         run: |
           dotnet restore --locked-mode
           dotnet clean --verbosity quiet
-          dotnet build --verbosity quiet /property:WarningLevel=0
+          dotnet build --verbosity quiet -clp:ErrorsOnly /property:WarningLevel=0
 
       - name: SonarCloud End (publish)
         run: >
