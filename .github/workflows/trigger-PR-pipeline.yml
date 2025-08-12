@@ -7,14 +7,28 @@ on:
 
 jobs:
   sonarcloud:
+    needs: build-and-test
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download test artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: PR-test-results-*
+          merge-multiple: true
+          path: ./TestResults
+
       - uses: SonarSource/sonarcloud-github-action@v5
         with:
           args: >
             -Dsonar.organization=pow-software
             -Dsonar.projectKey=POW-Software_ByteSync
             -Dsonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
+            -Dsonar.cs.vstest.reportsPaths=**/*.trx
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -80,10 +94,8 @@ jobs:
             --logger "trx;LogFileName=$safe_name.trx" \
             --results-directory ./TestResults \
               --collect:"XPlat Code Coverage" \
-              /p:CollectCoverage=true \
-              /p:CoverletOutput=./TestResults/coverage.opencover.xml \
-              /p:CoverletOutputFormat=opencover \
-              /p:Include=[*]*
+              -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover \
+                 DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.OutputDirectory=./TestResults
         shell: bash
 
       - name: Upload Test Results
