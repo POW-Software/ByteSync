@@ -34,7 +34,9 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
     }
 
     [Test]
-    public async Task Handle_ValidRequest_AssertsFilePartIsDownloaded()
+    [TestCase(StorageProvider.AzureBlobStorage)]
+    [TestCase(StorageProvider.CloudflareR2)]
+    public async Task Handle_ValidRequest_AssertsFilePartIsDownloaded(StorageProvider storageProvider)
     {
         // Arrange
         var sessionId = "session1";
@@ -46,7 +48,8 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
         {
             SessionId = sessionId,
             SharedFileDefinition = sharedFileDefinition,
-            PartNumber = partNumber
+            PartNumber = partNumber,
+            StorageProvider = storageProvider
         };
         var request = new AssertFilePartIsDownloadedRequest(sessionId, client, transferParameters);
 
@@ -59,7 +62,7 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
             .Returns(true);
 
         // Mock the shared files service
-        A.CallTo(() => _mockSharedFilesService.AssertFilePartIsDownloaded(sharedFileDefinition, client, partNumber))
+        A.CallTo(() => _mockSharedFilesService.AssertFilePartIsDownloaded(client, transferParameters))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -70,10 +73,14 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockTransferLocationService.IsSharedFileDefinitionAllowed(mockSessionMember, sharedFileDefinition))
             .MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockSharedFilesService.AssertFilePartIsDownloaded(client, transferParameters))
+            .MustHaveHappenedOnceExactly();
     }
 
     [Test]
-    public async Task Handle_WhenServiceThrowsException_PropagatesException()
+    [TestCase(StorageProvider.AzureBlobStorage)]
+    [TestCase(StorageProvider.CloudflareR2)]
+    public async Task Handle_WhenServiceThrowsException_PropagatesException(StorageProvider storageProvider)
     {
         // Arrange
         var sessionId = "session1";
@@ -86,7 +93,8 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
         {
             SessionId = sessionId,
             SharedFileDefinition = sharedFileDefinition,
-            PartNumber = partNumber
+            PartNumber = partNumber,
+            StorageProvider = storageProvider
         };
         var request = new AssertFilePartIsDownloadedRequest(sessionId, client, transferParameters);
 

@@ -37,7 +37,9 @@ public class SharedFilesRepositoryTests
     }
     
     [Test]
-    public async Task AddOrUpdate_IntegrationTest()
+    [TestCase(StorageProvider.AzureBlobStorage)]
+    [TestCase(StorageProvider.CloudflareR2)]
+    public async Task AddOrUpdate_IntegrationTest(StorageProvider storageProvider)
     {
         // Arrange
         var sharedFileDefinition = new SharedFileDefinition
@@ -48,7 +50,7 @@ public class SharedFilesRepositoryTests
 
         Func<SharedFileData?, SharedFileData> updateHandler = _ =>
         {
-            var sharedFileData = new SharedFileData(sharedFileDefinition, new List<string>());
+            var sharedFileData = new SharedFileData(sharedFileDefinition, new List<string>(), storageProvider);
 
             return sharedFileData;
         };
@@ -65,7 +67,9 @@ public class SharedFilesRepositoryTests
     }
     
     [Test]
-    public async Task Forget_IntegrationTest()
+    [TestCase(StorageProvider.AzureBlobStorage)]
+    [TestCase(StorageProvider.CloudflareR2)]
+    public async Task Forget_IntegrationTest(StorageProvider storageProvider)
     {
         // Arrange
         var sharedFileDefinition = new SharedFileDefinition
@@ -76,7 +80,7 @@ public class SharedFilesRepositoryTests
 
         Func<SharedFileData?, SharedFileData> updateHandler = _ =>
         {
-            var sharedFileData = new SharedFileData(sharedFileDefinition, new List<string>());
+            var sharedFileData = new SharedFileData(sharedFileDefinition, new List<string>(), storageProvider);
 
             return sharedFileData;
         };
@@ -92,7 +96,9 @@ public class SharedFilesRepositoryTests
     }
     
     [Test]
-    public async Task Clear_IntegrationTest()
+    [TestCase(StorageProvider.AzureBlobStorage)]
+    [TestCase(StorageProvider.CloudflareR2)]
+    public async Task Clear_IntegrationTest(StorageProvider storageProvider)
     {
         // Arrange
         var sharedFileDefinition = new SharedFileDefinition
@@ -103,7 +109,7 @@ public class SharedFilesRepositoryTests
 
         Func<SharedFileData?, SharedFileData> updateHandler = _ =>
         {
-            var sharedFileData = new SharedFileData(sharedFileDefinition, new List<string>());
+            var sharedFileData = new SharedFileData(sharedFileDefinition, new List<string>(), storageProvider);
 
             return sharedFileData;
         };
