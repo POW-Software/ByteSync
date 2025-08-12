@@ -99,11 +99,17 @@ public class AzureBlobStorageService : IAzureBlobStorageService
     public async Task<IReadOnlyCollection<KeyValuePair<string, DateTimeOffset?>>> GetAllObjects(CancellationToken cancellationToken)
     {
         var container = await _clientFactory.GetOrCreateContainer(cancellationToken);
+        var pages = container
+            .GetBlobsAsync(traits: BlobTraits.Metadata, states: BlobStates.All)
+            .AsPages(pageSizeHint: 1000);
         var results = new List<KeyValuePair<string, DateTimeOffset?>>();
 
-        await foreach (var blobItem in container.GetBlobsAsync().WithCancellation(cancellationToken))
+        await foreach (var page in pages.WithCancellation(cancellationToken))
         {
-            results.Add(new KeyValuePair<string, DateTimeOffset?>(blobItem.Name, blobItem.Properties.CreatedOn));
+            foreach (var blobItem in page.Values)
+            {
+                results.Add(new KeyValuePair<string, DateTimeOffset?>(blobItem.Name, blobItem.Properties.CreatedOn));
+            }
         }
 
         return results;

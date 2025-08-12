@@ -31,18 +31,19 @@ public class CleanupAzureBlobStorageSnippetsCommandHandler : IRequestHandler<Cle
         }
 
         var deletedBlobsCount = 0;
+        var cutoffDate = DateTimeOffset.UtcNow.AddDays(-_blobStorageSettings.RetentionDurationInDays);
         var allObjects = await _azureBlobStorageService.GetAllObjects(cancellationToken);
 
         foreach (var obj in allObjects)
         {
-            if (obj.Value != null && obj.Value <= DateTimeOffset.UtcNow.AddDays(-_blobStorageSettings.RetentionDurationInDays))
+            if (obj.Value != null && obj.Value <= cutoffDate)
             {
-                _logger.LogInformation("Deleting obsolete blob {Key} (LastModified:{LastModified})", obj.Key, obj.Value);
+                _logger.LogInformation("Deleting obsolete blob {Key} (CreatedOn:{CreatedOn})", obj.Key, obj.Value);
                 await _azureBlobStorageService.DeleteObjectByKey(obj.Key, cancellationToken);
                 deletedBlobsCount += 1;
             }
         }
-
+        
         return deletedBlobsCount;
     }
 } 
