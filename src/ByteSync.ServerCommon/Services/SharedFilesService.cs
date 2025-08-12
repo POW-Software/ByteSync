@@ -1,11 +1,9 @@
 ﻿using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
-using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace ByteSync.ServerCommon.Services;
 
@@ -15,29 +13,28 @@ public class SharedFilesService : ISharedFilesService
     private readonly IBlobUrlService _blobUrlService;
     private readonly ICloudflareR2UrlService _cloudflareR2UrlService;
     private readonly ILogger<SharedFilesService> _logger;
-    private readonly StorageProvider _storageProvider;
 
     public SharedFilesService(
         ISharedFilesRepository sharedFilesRepository,
         IBlobUrlService blobUrlService,
         ICloudflareR2UrlService cloudflareR2UrlService,
-        IOptions<AppSettings> appSettings,
         ILogger<SharedFilesService> logger)
     {
         _sharedFilesRepository = sharedFilesRepository;
         _blobUrlService = blobUrlService;
         _cloudflareR2UrlService = cloudflareR2UrlService;
         _logger = logger;
-        _storageProvider = appSettings.Value.DefaultStorageProvider;
     }
+    
     public async Task AssertFilePartIsUploaded(TransferParameters transferParameters, ICollection<string> recipients)
     {
         var sharedFileDefinition = transferParameters.SharedFileDefinition;
         var partNumber = transferParameters.PartNumber!.Value;
-
+        var storageProvider = transferParameters.StorageProvider;
+        
         await _sharedFilesRepository.AddOrUpdate(sharedFileDefinition, sharedFileData =>
         {
-            sharedFileData ??= new SharedFileData(sharedFileDefinition, recipients, _storageProvider);
+            sharedFileData ??= new SharedFileData(sharedFileDefinition, recipients, storageProvider);
             
             sharedFileData.UploadedPartsNumbers.Add(partNumber);
 
@@ -49,10 +46,10 @@ public class SharedFilesService : ISharedFilesService
     {
         var sharedFileDefinition = transferParameters.SharedFileDefinition;
         var totalParts = transferParameters.TotalParts!.Value;
-
+        var storageProvider = transferParameters.StorageProvider;
         await _sharedFilesRepository.AddOrUpdate(sharedFileDefinition, sharedFileData =>
         {
-            sharedFileData ??= new SharedFileData(sharedFileDefinition, recipients, _storageProvider);
+            sharedFileData ??= new SharedFileData(sharedFileDefinition, recipients, storageProvider);
 
             sharedFileData.TotalParts = totalParts;
 
