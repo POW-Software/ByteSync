@@ -76,7 +76,7 @@ public class QuitSessionCommandHandlerTests
         var synchronizationEntity = new SynchronizationEntity
         {
             SessionId = sessionId,
-            EndedOn = DateTimeOffset.Now
+            EndedOn = DateTimeOffset.UtcNow
         };
 
         bool funcResult = false;
@@ -164,7 +164,7 @@ public class QuitSessionCommandHandlerTests
         var synchronizationEntity = new SynchronizationEntity
         {
             SessionId = sessionId,
-            EndedOn = DateTimeOffset.Now
+            EndedOn = DateTimeOffset.UtcNow
         };
 
         bool funcResult = false;
@@ -253,7 +253,7 @@ public class QuitSessionCommandHandlerTests
         var synchronizationEntity = new SynchronizationEntity
         {
             SessionId = sessionId,
-            EndedOn = DateTimeOffset.Now
+            EndedOn = DateTimeOffset.UtcNow
         };
 
         bool funcResult = false;
@@ -328,7 +328,7 @@ public class QuitSessionCommandHandlerTests
         var synchronizationEntity = new SynchronizationEntity
         {
             SessionId = sessionId,
-            EndedOn = DateTimeOffset.Now
+            EndedOn = DateTimeOffset.UtcNow
         };
 
         bool funcResult = false;

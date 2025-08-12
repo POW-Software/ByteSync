@@ -41,7 +41,7 @@ public class StartSynchronizationCommandHandler : IRequestHandler<StartSynchroni
                     TotalActionsCount = request.ActionsGroupDefinitions.Count,
                     Members = session!.SessionMembers.Select(m => m.ClientInstanceId).ToList(),
                 },
-                StartedOn = DateTimeOffset.Now,
+                StartedOn = DateTimeOffset.UtcNow,
                 StartedBy = request.Client.ClientInstanceId
             };
             
