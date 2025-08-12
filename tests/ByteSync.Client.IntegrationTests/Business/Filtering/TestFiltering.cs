@@ -36,6 +36,23 @@ public class TestFiltering : BaseTestFiltering
     }
     
     [Test]
+    public void TestParse_Complete_Expression_MultiDataNode()
+    {
+        // Arrange
+        var filterText = "Aa1.contents==Ba1.contents";
+        
+        ConfigureDataPartIndexer("Aa", "Ba");
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeTrue();
+        parseResult.Expression.Should().NotBeNull();
+        parseResult.Expression.Should().BeOfType<PropertyComparisonExpression>();
+    }
+    
+    [Test]
     public void TestParse_CompleteLowerCase_Expression()
     {
         // Arrange
@@ -276,19 +293,67 @@ public class TestFiltering : BaseTestFiltering
         filter2(comparisonItem).Should().BeTrue();
     }
     
-    private void ConfigureDataPartIndexer()
+    [Test]
+    public void TestParse_IncompleteExpression_WithOperator()
     {
+        // Arrange
+        var filterText = "size>300kb"; // Missing data source, should be detected as incomplete expression
+        
+        ConfigureDataPartIndexer();
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeFalse();
+        parseResult.ErrorMessage.Should().NotBeNull();
+        parseResult.ErrorMessage.Should().Contain("requires a data source prefix");
+    }
+    
+    [Test]
+    public void TestParse_CompleteExpression_WithSource()
+    {
+        // Arrange
+        var filterText = "A1.size>300kb"; // Complete expression with source
+        
+        ConfigureDataPartIndexer();
+        
+        // Act
+        var parseResult = _filterParser.TryParse(filterText);
+        
+        // Assert
+        parseResult.IsComplete.Should().BeTrue();
+        parseResult.Expression.Should().BeOfType<PropertyComparisonExpression>();
+    }
+    
+    private void ConfigureDataPartIndexer(string inventoryACode = "A", string inventoryBCode = "B")
+    {
+        inventoryACode = inventoryACode.ToUpperInvariant();
+        inventoryBCode = inventoryBCode.ToUpperInvariant();
+        
         var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
-        var inventoryA = new Inventory { InventoryId = "Id_A", Code = "A" };
-        var inventoryB = new Inventory { InventoryId = "Id_B", Code = "B" };
+        var inventoryA = new Inventory
+        {
+            InventoryId = $"Id_{inventoryACode}", 
+            Code = inventoryACode
+        };
+        var inventoryB = new Inventory
+        {
+            InventoryId = $"Id_{inventoryBCode}", 
+            Code = inventoryBCode
+        };
     
-        var inventoryPartA = new InventoryPart(inventoryA, "/testRootA", FileSystemTypes.Directory);
-        var inventoryPartB = new InventoryPart(inventoryB, "/testRootB", FileSystemTypes.Directory);
+        var inventoryPartA = new InventoryPart(inventoryA, $"/testRoot{inventoryACode}", 
+            FileSystemTypes.Directory);
+        var inventoryPartB = new InventoryPart(inventoryB, $"/testRoot{inventoryBCode}", 
+            FileSystemTypes.Directory);
     
-        var dataPartA = new DataPart("A1", inventoryPartA);
-        var dataPartB = new DataPart("B1", inventoryPartB);
+        var dataPartAName = $"{inventoryACode}1";
+        var dataPartBName = $"{inventoryBCode}1";
+        var dataPartA = new DataPart(dataPartAName, inventoryPartA);
+        var dataPartB = new DataPart(dataPartBName, inventoryPartB);
     
-        mockDataPartIndexer.Setup(m => m.GetDataPart("A1")).Returns(dataPartA);
-        mockDataPartIndexer.Setup(m => m.GetDataPart("B1")).Returns(dataPartB);
+        mockDataPartIndexer.Setup(m => m.GetDataPart(dataPartAName)).Returns(dataPartA);
+        mockDataPartIndexer.Setup(m => m.GetDataPart(dataPartBName)).Returns(dataPartB);
     }
 }

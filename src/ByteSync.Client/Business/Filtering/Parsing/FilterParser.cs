@@ -26,35 +26,81 @@ public class FilterParser : IFilterParser
         _tokenizer.Initialize(filterText ?? string.Empty);
         CurrentToken = null;
         NextToken();
-        
+
         if (string.IsNullOrWhiteSpace(filterText))
-            return ParseResult.Success(new TrueExpression());
-
-        // Split by whitespace for simple text search
-        var terms = filterText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-        // Check if there are any special expressions
-        if (!terms.Any(t => t.Contains(":") || t.Contains(".") || t.Contains("(") ||
-                            t.StartsWith(Identifiers.OPERATOR_ACTIONS, StringComparison.OrdinalIgnoreCase) ||
-                            t.StartsWith(Identifiers.OPERATOR_NAME, StringComparison.OrdinalIgnoreCase) ||
-                            t.StartsWith(Identifiers.OPERATOR_PATH, StringComparison.OrdinalIgnoreCase) ||
-                            t.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
-                            t.Equals("OR", StringComparison.OrdinalIgnoreCase) ||
-                            t.Equals("NOT", StringComparison.OrdinalIgnoreCase)))
         {
-            // Simple text search
-            FilterExpression compositeExpression = new TrueExpression();
-            foreach (var term in terms)
-            {
-                var textExpression = new TextSearchExpression(term);
-                compositeExpression = new AndExpression(compositeExpression, textExpression);
-            }
-
-            return ParseResult.Success(compositeExpression);
+            return ParseResult.Success(new TrueExpression());
         }
 
-        // Otherwise, parse the expression
-        return TryParseExpression();
+        // Check if this looks like a complex expression vs simple text search
+        if (IsComplexExpression(filterText))
+        {
+            // Parse as complex expression
+            return TryParseExpression();
+        }
+        else
+        {
+            // Handle as simple text search
+            return CreateTextSearchExpression(filterText);
+        }
+    }
+
+    /// <summary>
+    /// Determines if the filter text contains patterns that indicate a complex expression
+    /// rather than a simple text search
+    /// </summary>
+    private bool IsComplexExpression(string filterText)
+    {
+        // Split by whitespace to analyze individual terms
+        var terms = filterText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+        return terms.Any(term => 
+            // Property access patterns
+            term.Contains(':') || 
+            term.Contains('.') || 
+            
+            // Grouping
+            term.Contains('(') || 
+            term.Contains(')') ||
+            
+            // Comparison operators (key improvement)
+            term.Contains("==") || 
+            term.Contains("!=") || 
+            term.Contains(">=") || 
+            term.Contains("<=") || 
+            term.Contains('>') || 
+            term.Contains('<') || 
+            term.Contains("=~") ||
+            term.Contains("<>") ||
+            term.Contains('=') ||
+            
+            // Special operators/keywords
+            term.StartsWith(Identifiers.OPERATOR_ACTIONS, StringComparison.OrdinalIgnoreCase) ||
+            term.StartsWith(Identifiers.OPERATOR_NAME, StringComparison.OrdinalIgnoreCase) ||
+            term.StartsWith(Identifiers.OPERATOR_PATH, StringComparison.OrdinalIgnoreCase) ||
+            
+            // Logical operators
+            term.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
+            term.Equals("OR", StringComparison.OrdinalIgnoreCase) ||
+            term.Equals("NOT", StringComparison.OrdinalIgnoreCase)
+        );
+    }
+
+    /// <summary>
+    /// Creates a text search expression for simple text queries
+    /// </summary>
+    private ParseResult CreateTextSearchExpression(string filterText)
+    {
+        var terms = filterText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        
+        FilterExpression compositeExpression = new TrueExpression();
+        foreach (var term in terms)
+        {
+            var textExpression = new TextSearchExpression(term);
+            compositeExpression = new AndExpression(compositeExpression, textExpression);
+        }
+
+        return ParseResult.Success(compositeExpression);
     }
 
     private ParseResult TryParseExpression()
@@ -435,6 +481,13 @@ public class FilterParser : IFilterParser
             }
             else
             {
+                // Check if this identifier is followed by an operator
+                // This would indicate an incomplete property comparison (missing data source)
+                if (CurrentToken?.Type == FilterTokenType.Operator)
+                {
+                    return ParseResult.Incomplete($"Property '{identifier}' requires a data source prefix (e.g., A1.{identifier})");
+                }
+                
                 // Simple text search
                 return ParseResult.Success(new TextSearchExpression(identifier));
             }
