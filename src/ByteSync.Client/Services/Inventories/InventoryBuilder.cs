@@ -2,8 +2,9 @@
 using System.Threading;
 using ByteSync.Business;
 using ByteSync.Business.Arguments;
+using ByteSync.Business.DataNodes;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.Inventories;
-using ByteSync.Business.PathItems;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
@@ -12,7 +13,6 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Comparisons;
-using ByteSync.Services.Sessions;
 
 namespace ByteSync.Services.Inventories;
 
@@ -22,12 +22,13 @@ public class InventoryBuilder : IInventoryBuilder
     
     private const int FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 4194304; 
         
-    public InventoryBuilder(SessionMemberInfo sessionMemberInfo, SessionSettings sessionSettings, InventoryProcessData inventoryProcessData, 
+    public InventoryBuilder(SessionMember sessionMember, DataNode dataNode, SessionSettings sessionSettings, InventoryProcessData inventoryProcessData, 
         OSPlatforms osPlatform, FingerprintModes fingerprintMode, ILogger<InventoryBuilder> logger)
     {
         _logger = logger;
         
-        SessionMemberInfo = sessionMemberInfo;
+        SessionMember = sessionMember;
+        DataNode = dataNode;
         SessionSettings = sessionSettings;
         InventoryProcessData = inventoryProcessData;
         FingerprintMode = fingerprintMode;
@@ -49,14 +50,17 @@ public class InventoryBuilder : IInventoryBuilder
                     
         _logger.LogDebug("InventoryBuilder.AddInventoryPart: Creating inventory {InventoryId}", id);
             
-        inventory.Endpoint = SessionMemberInfo.Endpoint;
-        inventory.MachineName = SessionMemberInfo.MachineName;
-        inventory.Letter = InventoryLetter!;
+        inventory.Endpoint = SessionMember.Endpoint;
+        inventory.MachineName = SessionMember.MachineName;
+        inventory.Code = InventoryCode;
+        inventory.NodeId = DataNode.Id;
 
         return inventory;
     }
     
-    private SessionMemberInfo SessionMemberInfo { get; }
+    private SessionMember SessionMember { get; }
+    
+    private DataNode DataNode { get; }
 
     public Inventory Inventory { get; }
         
@@ -66,7 +70,7 @@ public class InventoryBuilder : IInventoryBuilder
         
     public SessionSettings? SessionSettings { get; }
 
-    public string InventoryLetter => SessionMemberInfo.GetLetter();
+    public string InventoryCode => DataNode.Code;
 
     private InventoryFileAnalyzer InventoryFileAnalyzer { get; }
 
@@ -92,11 +96,11 @@ public class InventoryBuilder : IInventoryBuilder
         }
     }
 
-    public InventoryPart AddInventoryPart(PathItem pathItem)
+    public InventoryPart AddInventoryPart(DataSource dataSource)
     {
-        var inventoryPart = AddInventoryPart(pathItem.Path);
+        var inventoryPart = AddInventoryPart(dataSource.Path);
 
-        inventoryPart.Code = pathItem.Code;
+        inventoryPart.Code = dataSource.Code;
 
         return inventoryPart;
     }
@@ -131,7 +135,7 @@ public class InventoryBuilder : IInventoryBuilder
 
     private void BuildBaseInventory(string inventoryFullName, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory started", InventoryLetter);
+        _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory started", InventoryCode);
         
         _logger.LogInformation("Local Inventory parts:");
         foreach (var inventoryPart in Inventory.InventoryParts)
@@ -151,7 +155,7 @@ public class InventoryBuilder : IInventoryBuilder
             foreach (var inventoryPart in inventoryPartsToAnalyze)
             {
                 _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Identification started on part {Code:l} {Path}", 
-                    InventoryLetter, inventoryPart.Code, inventoryPart.RootPath);
+                    InventoryCode, inventoryPart.Code, inventoryPart.RootPath);
                     
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -170,7 +174,7 @@ public class InventoryBuilder : IInventoryBuilder
                 }
                     
                 _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Identification completed on {Code:l} {Path}", 
-                    InventoryLetter, inventoryPart.Code, inventoryPart.RootPath);
+                    InventoryCode, inventoryPart.Code, inventoryPart.RootPath);
             }
             
             Inventory.EndDateTime = DateTimeOffset.Now;
@@ -178,7 +182,7 @@ public class InventoryBuilder : IInventoryBuilder
             InventorySaver.WriteInventory();
                 
             _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Identification completed ({ItemsCount} files found)", 
-                InventoryLetter, Inventory.InventoryParts.Sum(ip => ip.FileDescriptions.Count));
+                InventoryCode, Inventory.InventoryParts.Sum(ip => ip.FileDescriptions.Count));
         }
         finally
         {
@@ -193,7 +197,7 @@ public class InventoryBuilder : IInventoryBuilder
 
     internal void RunAnalysis(string inventoryFullName, HashSet<IndexedItem> items, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Analysis started", InventoryLetter);
+        _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Analysis started", InventoryCode);
             
         try
         {
@@ -218,7 +222,7 @@ public class InventoryBuilder : IInventoryBuilder
             InventorySaver.WriteInventory();
 
             _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Analysis completed ({ItemsCount} files analyzed)",
-                InventoryLetter, items.Count);
+                InventoryCode, items.Count);
         }
         finally
         {
@@ -263,8 +267,8 @@ public class InventoryBuilder : IInventoryBuilder
             }
                 
             // https://stackoverflow.com/questions/1485155/check-if-a-file-is-real-or-a-symbolic-link
-            // Exemple pour créer un symlink :
-            //  - Windows: New-Item -ItemType SymbolicLink -Path  C:\Users\paulf\Desktop\testVide\SL -Target C:\Users\paulf\Desktop\testA_
+            // Example to create a symlink :
+            //  - Windows: New-Item -ItemType SymbolicLink -Path \path\to\symlink -Target \path\to\target
             if (subDirectory.Attributes.HasFlag(FileAttributes.ReparsePoint))
             {
                 _logger.LogWarning("Directory {Directory} is ignored because it has flag 'ReparsePoint'", subDirectory.FullName);
@@ -321,11 +325,11 @@ public class InventoryBuilder : IInventoryBuilder
         }
             
         // https://stackoverflow.com/questions/1485155/check-if-a-file-is-real-or-a-symbolic-link
-        // Exemple pour créer un symlink :
-        //  - Windows: New-Item -ItemType SymbolicLink -Path  C:\Users\paulf\Desktop\testVide\SL -Target C:\Users\paulf\Desktop\testA_
+        // Example to create a symlink :
+        //  - Windows: New-Item -ItemType SymbolicLink -Path \path\to\symlink -Target \path\to\target
         if (fileInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
         {
-            _logger.LogWarning("File {File} is ignored because it has flag 'ReparsePoint'. It might be a symolic link", fileInfo.FullName);
+            _logger.LogWarning("File {File} is ignored because it has flag 'ReparsePoint'. It might be a symbolic link", fileInfo.FullName);
             return;
         }
 
@@ -357,7 +361,8 @@ public class InventoryBuilder : IInventoryBuilder
 
     private void AddFileSystemDescription(InventoryPart inventoryPart, FileSystemDescription fileSystemDescription)
     {
-        if (fileSystemDescription.RelativePath.IsNotEmpty())
+        if (fileSystemDescription.RelativePath.IsNotEmpty() 
+            && !fileSystemDescription.RelativePath.Equals(IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR.ToString()))
         {
             inventoryPart.AddFileSystemDescription(fileSystemDescription);
 

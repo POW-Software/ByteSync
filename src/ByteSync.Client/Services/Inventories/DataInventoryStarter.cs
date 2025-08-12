@@ -1,6 +1,6 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
-using ByteSync.Business.PathItems;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.Profiles;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
@@ -27,20 +27,22 @@ public class DataInventoryStarter : IDataInventoryStarter
     private readonly IDataEncrypter _dataEncrypter;
     private readonly IDataInventoryRunner _dataInventoryRunner;
     private readonly IInventoryApiClient _inventoryApiClient;
-    private readonly IPathItemRepository _pathItemRepository;
+    private readonly IDataSourceRepository _dataSourceRepository;
+    private readonly IDataNodeRepository _dataNodeRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
     private readonly ILogger<DataInventoryStarter> _logger;
 
     public DataInventoryStarter(ISessionService sessionService, ICloudProxy connectionManager, IDataEncrypter dataEncrypter, 
-        IDataInventoryRunner dataInventoryRunner, IInventoryApiClient inventoryApiClient, IPathItemRepository pathItemRepository, 
-        ISessionMemberRepository sessionMemberRepository, ILogger<DataInventoryStarter> logger)
+        IDataInventoryRunner dataInventoryRunner, IInventoryApiClient inventoryApiClient, IDataSourceRepository dataSourceRepository, 
+        IDataNodeRepository dataNodeRepository, ISessionMemberRepository sessionMemberRepository, ILogger<DataInventoryStarter> logger)
     {
         _sessionService = sessionService;
         _connectionManager = connectionManager;
         _dataEncrypter = dataEncrypter;
         _dataInventoryRunner = dataInventoryRunner;
         _inventoryApiClient = inventoryApiClient;
-        _pathItemRepository = pathItemRepository;
+        _dataSourceRepository = dataSourceRepository;
+        _dataNodeRepository = dataNodeRepository;
         _sessionMemberRepository = sessionMemberRepository;
         _logger = logger;
         
@@ -51,7 +53,7 @@ public class DataInventoryStarter : IDataInventoryStarter
         _sessionService.RunSessionProfileInfoObservable.CombineLatest(
                 _sessionMemberRepository.SortedSessionMembersObservable
                     .QueryWhenChanged(),
-                _pathItemRepository.ObservableCache.Connect()
+                _dataSourceRepository.ObservableCache.Connect()
                     .QueryWhenChanged())
             .Where(tuple => tuple.First is RunCloudSessionProfileInfo && tuple.First.AutoStartsInventory
                           && tuple.Second.Count == 
@@ -71,35 +73,35 @@ public class DataInventoryStarter : IDataInventoryStarter
             .Subscribe();
     }
 
-    private async Task CheckInventoryAutoStart((AbstractRunSessionProfileInfo? First, IQuery<SessionMemberInfo, string> Second, 
-        IQuery<PathItem, string> Third) tuple)
+    private async Task CheckInventoryAutoStart((AbstractRunSessionProfileInfo? First, IQuery<SessionMember, string> Second, 
+        IQuery<DataSource, string> Third) tuple)
     {
         var runCloudSessionProfileInfo = (RunCloudSessionProfileInfo)tuple.First!;
         var cloudSessionProfileDetails = runCloudSessionProfileInfo.ProfileDetails;
         var allSessionMembers = tuple.Second.Items;
-        var allPathItems = tuple.Third.Items.ToList();
+        var allDataSources = tuple.Third.Items.ToList();
 
         var allOK = true;
         foreach (var sessionMemberInfo in allSessionMembers)
         {
-            var pathItems = allPathItems
-                .Where(pi => pi.BelongsTo(sessionMemberInfo))
+            var dataSources = allDataSources
+                .Where(ds => ds.BelongsTo(sessionMemberInfo))
                 .ToList();
                             
-            var expectedPathItems = cloudSessionProfileDetails
+            var expectedDataSources = cloudSessionProfileDetails
                 .Members.Single(m => m.ProfileClientId.Equals(sessionMemberInfo.ProfileClientId))
-                .PathItems.OrderBy(pi => pi.Code)
+                .DataSources.OrderBy(ds => ds.Code)
                 .ToList();
 
-            if (pathItems.Count == expectedPathItems.Count)
+            if (dataSources.Count == expectedDataSources.Count)
             {
-                var sessionProfilesPathItems = new List<SessionProfilePathItem>();
-                foreach (var pathItem in pathItems)
+                var sessionProfileDataSources = new List<SessionProfileDataSource>();
+                foreach (var dataSource in dataSources)
                 {
-                    sessionProfilesPathItems.Add(new SessionProfilePathItem(pathItem));
+                    sessionProfileDataSources.Add(new SessionProfileDataSource(dataSource));
                 }
                 
-                if (!sessionProfilesPathItems.HaveSameContent(expectedPathItems))
+                if (!sessionProfileDataSources.HaveSameContent(expectedDataSources))
                 {
                     allOK = false;
                 }
@@ -144,7 +146,13 @@ public class DataInventoryStarter : IDataInventoryStarter
         
         FinalizeSessionSettings(sessionSettings);
 
-        var result = CheckPathItems(session);
+        var result = CheckDataSources(session);
+        if (result != null)
+        {
+            return result;
+        }
+        
+        result = CheckDataNodes(session);
         if (result != null)
         {
             return result;
@@ -246,18 +254,32 @@ public class DataInventoryStarter : IDataInventoryStarter
         }
     }
 
-    private StartInventoryResult? CheckPathItems(AbstractSession session)
+    private StartInventoryResult? CheckDataSources(AbstractSession session)
     {
         if (session is LocalSession)
         {
-            var pathItems = _pathItemRepository.SortedCurrentMemberPathItems;
-            if (pathItems.Count < 2)
+            var dataSources = _dataSourceRepository.SortedCurrentMemberDataSources;
+            if (dataSources.Count < 2)
             {
                 return LogAndBuildStartInventoryResult(session, StartInventoryStatuses.LessThan2DataSources);
             }
-            if (pathItems.Count > 5)
+            if (dataSources.Count > 5)
             {
                 return LogAndBuildStartInventoryResult(session, StartInventoryStatuses.MoreThan5DataSources);
+            }
+        }
+
+        return null;
+    }
+    
+    private StartInventoryResult? CheckDataNodes(AbstractSession session)
+    {
+        if (session is LocalSession)
+        {
+            var dataNodes = _dataNodeRepository.SortedCurrentMemberDataNodes;
+            if (dataNodes.Count > 5)
+            {
+                return LogAndBuildStartInventoryResult(session, StartInventoryStatuses.MoreThan5DataNodes);
             }
         }
 

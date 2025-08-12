@@ -52,7 +52,10 @@ public class FileTransferPushReceiver : IPushReceiver
                 {
                     await afterTransferSharedFile.OnFilePartUploaded(sharedFileDefinition);
                 }
-                
+
+                // Ensure the download is started so the coordinator is registered
+                await _downloadManager.FileDownloaderCache.GetFileDownloader(sharedFileDefinition);
+
                 await _downloadManager.OnFilePartReadyToDownload(sharedFileDefinition, fileTransferPush.PartNumber!.Value);
             }
         }
@@ -91,7 +94,10 @@ public class FileTransferPushReceiver : IPushReceiver
                 {
                     await afterTransferSharedFile.OnUploadFinished(sharedFileDefinition);
                 }
-                
+
+                // Ensure the download is started so the coordinator is registered
+                await _downloadManager.FileDownloaderCache.GetFileDownloader(sharedFileDefinition);
+
                 await _downloadManager.OnFileReadyToFinalize(sharedFileDefinition, fileTransferPush.TotalParts!.Value);
             }
         }

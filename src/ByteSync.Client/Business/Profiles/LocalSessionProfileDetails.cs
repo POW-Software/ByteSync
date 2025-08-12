@@ -1,4 +1,4 @@
-﻿using ByteSync.Business.PathItems;
+﻿using ByteSync.Business.DataSources;
 
 namespace ByteSync.Business.Profiles;
 
@@ -8,7 +8,7 @@ public class LocalSessionProfileDetails : AbstrastSessionProfileDetails
     {
         Options = new LocalSessionProfileOptions();
         
-        PathItems = new List<PathItem>();
+        DataSources = new List<DataSource>();
     }
     
     public override string ProfileId
@@ -23,5 +23,5 @@ public class LocalSessionProfileDetails : AbstrastSessionProfileDetails
 
     public LocalSessionProfileOptions Options { get; set; }
     
-    public IList<PathItem> PathItems { get; set; }
+    public IList<DataSource> DataSources { get; set; }
 }

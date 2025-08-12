@@ -1,9 +1,9 @@
 ﻿using ByteSync.ServerCommon.Business.Auth;
-using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Entities.Inventories;
 
 namespace ByteSync.ServerCommon.Interfaces.Services;
 
 public interface IInventoryMemberService
 {
-    InventoryMemberData GetOrCreateInventoryMember(InventoryData inventoryData, string sessionId, Client client);
+    InventoryMemberEntity GetOrCreateInventoryMember(InventoryEntity inventoryEntity, string sessionId, Client client);
 }

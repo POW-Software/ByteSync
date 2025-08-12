@@ -13,7 +13,9 @@ public class Inventory
         
     public ByteSyncEndpoint Endpoint { get; set; } = null!;
         
-    public string Letter { get; set; } = null!;
+    public string Code { get; set; } = null!;
+    
+    public string NodeId { get; set; }
 
     public DateTimeOffset StartDateTime { get; set; }
         
@@ -22,6 +24,8 @@ public class Inventory
     public List<InventoryPart> InventoryParts { get; set; }
 
     public string MachineName { get; set; }
+    
+    public string CodeAndId => $"{Code}_{InventoryId}";
 
     public void Add(InventoryPart inventoryPart)
     {

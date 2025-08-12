@@ -1,4 +1,5 @@
 ﻿using ByteSync.Business;
+using ByteSync.Business.DataNodes;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
@@ -68,9 +69,6 @@ public class ComparisonResultPreparer
     {
         foreach (var inventoryData in InventoryDatas)
         {
-            string inventoryFile = _cloudSessionLocalDataManager.GetCurrentMachineInventoryPath(inventoryData.Letter, LocalInventoryModes.Base);
-            BaseInventoryFiles.Add(inventoryFile);
-            
             var endpoint = new ByteSyncEndpoint
             {
                 ClientId = $"CI_{inventoryData.Letter}",
@@ -79,7 +77,7 @@ public class ComparisonResultPreparer
                 OSPlatform = OSPlatforms.Windows
             };
             
-            var sessionMemberInfo = new SessionMemberInfo
+            var sessionMemberInfo = new SessionMember
             {
                 Endpoint = endpoint,
                 PositionInList = inventoryData.Letter[0] - 'A',
@@ -89,17 +87,27 @@ public class ComparisonResultPreparer
                 }
             };
             
+            var dataNode = new DataNode
+            {
+                Id = Guid.NewGuid().ToString(),
+                ClientInstanceId = sessionMemberInfo.ClientInstanceId,
+                Code = inventoryData.Letter + "1"
+            };
+            
             Mock<ILogger<InventoryBuilder>> loggerMock = new Mock<ILogger<InventoryBuilder>>();
             
-            InventoryBuilder inventoryBuilder = new InventoryBuilder(sessionMemberInfo, SessionSettings, new InventoryProcessData(), 
+            InventoryBuilder inventoryBuilder = new InventoryBuilder(sessionMemberInfo, dataNode, SessionSettings, new InventoryProcessData(), 
                 OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object);
             
-            foreach (var pathItem in inventoryData.PathItems)
+            foreach (var dataSource in inventoryData.DataSources)
             {
-                inventoryBuilder.AddInventoryPart(pathItem);
+                inventoryBuilder.AddInventoryPart(dataSource);
             }
             
             inventoryData.InventoryBuilder = inventoryBuilder;
+            
+            string inventoryFile = _cloudSessionLocalDataManager.GetCurrentMachineInventoryPath(inventoryData.Inventory, LocalInventoryModes.Base);
+            BaseInventoryFiles.Add(inventoryFile);
             
             await inventoryBuilder.BuildBaseInventoryAsync(inventoryFile);
         }
@@ -120,7 +128,7 @@ public class ComparisonResultPreparer
             FilesIdentifier filesIdentifier = new FilesIdentifier(inventoryData.Inventory, SessionSettings, inventoryComparer.Indexer);
             var items = filesIdentifier.Identify(comparisonResult);
         
-            string inventoryFull = _cloudSessionLocalDataManager.GetCurrentMachineInventoryPath(inventoryData.Letter, LocalInventoryModes.Full);
+            string inventoryFull = _cloudSessionLocalDataManager.GetCurrentMachineInventoryPath(inventoryData.Inventory, LocalInventoryModes.Full);
             FullInventoryFiles.Add(inventoryFull);
             await inventoryData.InventoryBuilder.RunAnalysisAsync(inventoryFull, items, new CancellationToken());
         }

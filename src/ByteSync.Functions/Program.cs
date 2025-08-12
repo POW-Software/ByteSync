@@ -86,15 +86,26 @@ var host = new HostBuilder()
         var configuration = serviceProvider.GetService<IConfiguration>()!;
         var appSettingsSection = configuration.GetSection("AppSettings");
         services.Configure<RedisSettings>(configuration.GetSection("Redis"));
-        services.Configure<BlobStorageSettings>(configuration.GetSection("BlobStorage"));
+        services.Configure<AzureBlobStorageSettings>(configuration.GetSection("AzureBlobStorage"));
+        services.Configure<CloudflareR2Settings>(configuration.GetSection("CloudflareR2"));
         services.Configure<SignalRSettings>(configuration.GetSection("SignalR"));
         services.Configure<AppSettings>(appSettingsSection);
         var appSettings = appSettingsSection.Get<AppSettings>();
         
+        var logger = serviceProvider.GetService<ILogger<Program>>();
+        if (logger != null && appSettings != null)
+        {
+            logger.LogInformation("AppSettings loaded - JwtDurationInSeconds: {JwtDuration}, " +
+                                  "SkipClientsVersionCheck: {SkipCheck}, DefaultStorageProvider: {DefaultStorageProvider}", 
+                appSettings.JwtDurationInSeconds, 
+                appSettings.SkipClientsVersionCheck, 
+                appSettings.DefaultStorageProvider);
+        }
+        
         services.AddClaimAuthorization();
         services.AddJwtAuthentication(appSettings!.Secret);
         
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(AddPathItemRequest).Assembly));
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(AddDataSourceRequest).Assembly));
     })
     .Build();
 

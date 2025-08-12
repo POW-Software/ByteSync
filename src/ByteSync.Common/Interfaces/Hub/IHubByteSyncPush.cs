@@ -33,13 +33,15 @@ public interface IHubByteSyncPush
 
     Task SessionSettingsUpdated(SessionSettingsUpdatedDTO sessionSettingsUpdatedDto);
 
-    Task SessionOnFatalError(CloudSessionFatalError cloudSessionFatalError);
-
     Task InventoryStarted(InventoryStartedDTO inventoryStartedDto);
 
-    Task PathItemAdded(PathItemDTO pathItemDto);
+    Task DataNodeAdded(DataNodeDTO dataNodeDto);
 
-    Task PathItemRemoved(PathItemDTO pathItemDto);
+    Task DataNodeRemoved(DataNodeDTO dataNodeDto);
+
+    Task DataSourceAdded(DataSourceDTO dataSourceDto);
+
+    Task DataSourceRemoved(DataSourceDTO dataSourceDto);
 
     Task FilePartUploaded(FileTransferPush fileTransferPush);
 

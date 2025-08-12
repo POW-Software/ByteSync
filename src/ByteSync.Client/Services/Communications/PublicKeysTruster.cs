@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Threading;
+using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
@@ -7,30 +8,34 @@ using ByteSync.Common.Business.Trust.Connections;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
-using ByteSync.Interfaces.EventsHubs;
+using ByteSync.Interfaces.Dialogs;
+using ByteSync.Interfaces.Factories.ViewModels;
 
 namespace ByteSync.Services.Communications;
 
 public class PublicKeysTruster : IPublicKeysTruster
 {
     private readonly IEnvironmentService _environmentService;
-    private readonly ICloudSessionApiClient _cloudSessionApiClient;
     private readonly ITrustApiClient _trustApiClient;
     private readonly IPublicKeysManager _publicKeysManager;
     private readonly ITrustProcessPublicKeysRepository _trustProcessPublicKeysRepository;
-    private readonly INavigationEventsHub _navigationEventsHub;
+    private readonly IDialogService _dialogService;
+    private readonly IFlyoutElementViewModelFactory _flyoutElementViewModelFactory;
+    private readonly ISessionMemberApiClient _sessionMemberApiClient;
     private readonly ILogger<PublicKeysTruster> _logger;
 
-    public PublicKeysTruster(IEnvironmentService environmentService, ICloudSessionApiClient cloudSessionApiClient,
-        ITrustApiClient trustApiClient, IPublicKeysManager publicKeysManager, ITrustProcessPublicKeysRepository trustPublicKeysRepository,
-        INavigationEventsHub navigationEventsHub, ILogger<PublicKeysTruster> logger)
+    public PublicKeysTruster(IEnvironmentService environmentService, ITrustApiClient trustApiClient, 
+        IPublicKeysManager publicKeysManager, ITrustProcessPublicKeysRepository trustPublicKeysRepository,
+        IDialogService dialogService, IFlyoutElementViewModelFactory flyoutElementViewModelFactory,
+        ISessionMemberApiClient sessionMemberApiClient, ILogger<PublicKeysTruster> logger)
     {
         _environmentService = environmentService;
-        _cloudSessionApiClient = cloudSessionApiClient;
         _trustApiClient = trustApiClient;
         _publicKeysManager = publicKeysManager;
         _trustProcessPublicKeysRepository = trustPublicKeysRepository;
-        _navigationEventsHub = navigationEventsHub;
+        _dialogService = dialogService;
+        _flyoutElementViewModelFactory = flyoutElementViewModelFactory;
+        _sessionMemberApiClient = sessionMemberApiClient;
         _logger = logger;
     }
     
@@ -41,7 +46,7 @@ public class PublicKeysTruster : IPublicKeysTruster
     
     public async Task<List<string>?> TrustMissingMembersPublicKeys(string sessionId, CancellationToken cancellationToken = default)
     {
-        var membersClientInstanceIds = await _cloudSessionApiClient.GetMembersClientInstanceIds(sessionId, cancellationToken);
+        var membersClientInstanceIds = await _sessionMemberApiClient.GetMembersClientInstanceIds(sessionId, cancellationToken);
 
         var nonFullyTrustedMembersIds = new List<string>();
         foreach (var memberInstanceId in membersClientInstanceIds)
@@ -107,7 +112,9 @@ public class PublicKeysTruster : IPublicKeysTruster
             requestTrustProcessParameters.SessionId, myPublicKeyCheckData.OtherPartyPublicKeyInfo!.ClientId);
         
         var trustDataParameters = new TrustDataParameters(1, 1, false, requestTrustProcessParameters.SessionId, peerTrustProcessData);
-        _navigationEventsHub.RaiseTrustKeyDataRequested(requestTrustProcessParameters.JoinerPublicKeyCheckData, trustDataParameters);
+        var addTrustedClientViewModel = _flyoutElementViewModelFactory.BuilAddTrustedClientViewModel(
+            requestTrustProcessParameters.JoinerPublicKeyCheckData, trustDataParameters);
+        _dialogService.ShowFlyout(nameof(Resources.Shell_TrustedClients), false, addTrustedClientViewModel);
     }
 
     public async Task OnPublicKeyValidationIsFinishedAsync(PublicKeyValidationParameters publicKeyValidationParameters)
@@ -176,7 +183,9 @@ public class PublicKeysTruster : IPublicKeysTruster
                 .ResetPeerTrustProcessData(sessionId, publicKeyCheckData.IssuerPublicKeyInfo.ClientId);
 
             var trustDataParameters = new TrustDataParameters(cpt, keysToTrust.Count, true, sessionId, peerTrustProcessData);
-            _navigationEventsHub.RaiseTrustKeyDataRequested(publicKeyCheckData, trustDataParameters);
+            var addTrustedClientViewModel = _flyoutElementViewModelFactory.BuilAddTrustedClientViewModel(
+                publicKeyCheckData, trustDataParameters);
+            _dialogService.ShowFlyout(nameof(Resources.Shell_TrustedClients), false, addTrustedClientViewModel);
 
             var myPublicKeyCheckData = _publicKeysManager.BuildJoinerPublicKeyCheckData(publicKeyCheckData);
 
@@ -206,7 +215,7 @@ public class PublicKeysTruster : IPublicKeysTruster
     {
         if (memberIdsToCheck == null)
         {
-            var sessionMemberInstanceIds = await _cloudSessionApiClient.GetMembersClientInstanceIds(sessionId, cancellationToken);
+            var sessionMemberInstanceIds = await _sessionMemberApiClient.GetMembersClientInstanceIds(sessionId, cancellationToken);
             
             memberIdsToCheck = new List<string>(sessionMemberInstanceIds);
         }
@@ -254,16 +263,6 @@ public class PublicKeysTruster : IPublicKeysTruster
             _logger.LogWarning("Timeout during trust check process");
             return JoinSessionResult.BuildFrom(JoinSessionStatus.TrustCheckFailed);
         }
-    }
-    
-    private void LogUnknownSessionReceived(string? sessionId, [CallerMemberName] string caller = "")
-    {
-        if (caller.IsNullOrEmpty())
-        {
-            caller = "UnknownCaller";
-        }
-
-        _logger.LogError("CloudSessionConnector.{caller}: unknown sessionId received ({sessionId})", caller, sessionId);
     }
 
     private void LogProblem(string problemDescription, [CallerMemberName] string caller = "")

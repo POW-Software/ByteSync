@@ -3,6 +3,7 @@ using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Commands.Inventories;
+using ByteSync.ServerCommon.Entities.Inventories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using FakeItEasy;
 using FluentAssertions;
@@ -11,33 +12,36 @@ using Microsoft.Extensions.Logging;
 namespace ByteSync.ServerCommon.Tests.Commands.Inventories;
 
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
-public class GetPathItemsCommandHandlerTests
+public class GetDataSourcesCommandHandlerTests
 {
     private readonly ICloudSessionsRepository _mockCloudSessionsRepository;
     private readonly IInventoryRepository _mockInventoryRepository;
-    private readonly ILogger<GetPathItemsCommandHandler> _mockLogger;
+    private readonly ILogger<GetDataSourcesCommandHandler> _mockLogger;
     
-    private readonly GetPathItemsCommandHandler _getPathItemsCommandHandler;
+    private readonly GetDataSourcesCommandHandler _getDataSourcesCommandHandler;
 
-    public GetPathItemsCommandHandlerTests()
+    public GetDataSourcesCommandHandlerTests()
     {
         _mockInventoryRepository = A.Fake<IInventoryRepository>();
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
-        _mockLogger = A.Fake<ILogger<GetPathItemsCommandHandler>>();
+        _mockLogger = A.Fake<ILogger<GetDataSourcesCommandHandler>>();
         
-        _getPathItemsCommandHandler = new GetPathItemsCommandHandler(_mockInventoryRepository, _mockLogger);
+        _getDataSourcesCommandHandler = new GetDataSourcesCommandHandler(_mockInventoryRepository, _mockLogger);
     }
     
     [Test]
-    public async Task GetPathItems_InventoryNotStarted_ReturnsNull()
+    public async Task GetDataSources_InventoryNotStarted_ReturnsNull()
     {
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var encryptedPathItem = new EncryptedPathItem { Code = "pathItem1" };
-        var inventoryData = new InventoryData(sessionId);
-        inventoryData.InventoryMembers.Add(new InventoryMemberData
-            { ClientInstanceId = client.ClientInstanceId, SharedPathItems = new List<EncryptedPathItem> { encryptedPathItem } });
+        var encryptedDataSource = new EncryptedDataSource { Id = "dataSource1" };
+        var inventoryData = new InventoryEntity(sessionId);
+        var inventoryMember = new InventoryMemberEntity { ClientInstanceId = client.ClientInstanceId };
+        var dataNode = new InventoryDataNodeEntity { Id = "nodeId" };
+        dataNode.DataSources.Add(new InventoryDataSourceEntity(encryptedDataSource));
+        inventoryMember.DataNodes.Add(dataNode);
+        inventoryData.InventoryMembers.Add(inventoryMember);
 
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(new CloudSessionData(null, new EncryptedSessionSettings(), client));
@@ -45,58 +49,62 @@ public class GetPathItemsCommandHandlerTests
         A.CallTo(() => _mockInventoryRepository.Get(sessionId))
             .Returns(inventoryData);
 
-        var request = new GetPathItemsRequest(sessionId, client.ClientInstanceId);
+        var request = new GetDataSourcesRequest(sessionId, client.ClientInstanceId, "nodeId");
         
         // Act
-        var pathItems = await _getPathItemsCommandHandler.Handle(request, CancellationToken.None);
+        var dataSources = await _getDataSourcesCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        pathItems!.Count.Should().Be(1);
+        dataSources!.Count.Should().Be(1);
         A.CallTo(() => _mockInventoryRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
     }
     
     [Test]
-    public async Task GetPathItems_NoPathItems_ReturnsEmptyList()
+    public async Task GetDataSources_NoDataSources_ReturnsEmptyList()
     {
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var inventoryData = new InventoryData(sessionId);
+        var inventoryData = new InventoryEntity(sessionId);
 
         A.CallTo(() => _mockInventoryRepository.Get(sessionId))
             .Returns(inventoryData);
 
-        var request = new GetPathItemsRequest(sessionId, client.ClientInstanceId);
+        var request = new GetDataSourcesRequest(sessionId, client.ClientInstanceId, "nodeId");
         
         // Act
-        var pathItems = await _getPathItemsCommandHandler.Handle(request, CancellationToken.None);
+        var dataSources = await _getDataSourcesCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        pathItems.Should().BeEmpty();
+        dataSources.Should().BeEmpty();
         A.CallTo(() => _mockInventoryRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
     }
     
     [Test]
-    public async Task GetPathItems_OnePathItem_ReturnsPathItem()
+    public async Task GetDataSources_OneDataSource_ReturnsDataSource()
     {
         // Arrange
         var sessionId = "testSession";
         var client = new Client { ClientId = "client1", ClientInstanceId = "clientInstanceId1" };
-        var pathItem = new EncryptedPathItem { Code = "pathItem1" };
-        var inventoryData = new InventoryData(sessionId);
-        inventoryData.InventoryMembers.Add(new InventoryMemberData { ClientInstanceId = client.ClientInstanceId, SharedPathItems = new List<EncryptedPathItem> { pathItem } });
+        var dataSource = new EncryptedDataSource { Id = "dataSource1" };
+        var inventoryData = new InventoryEntity(sessionId);
+        var inventoryMember = new InventoryMemberEntity { ClientInstanceId = client.ClientInstanceId };
+        var dataNode = new InventoryDataNodeEntity { Id = "nodeId" };
+        dataNode.DataSources.Add(new InventoryDataSourceEntity(dataSource));
+        inventoryMember.DataNodes.Add(dataNode);
+        inventoryData.InventoryMembers.Add(inventoryMember);
 
         A.CallTo(() => _mockInventoryRepository.Get(sessionId))
             .Returns(inventoryData);
         
-        var request = new GetPathItemsRequest(sessionId, client.ClientInstanceId);
+        var request = new GetDataSourcesRequest(sessionId, client.ClientInstanceId, "nodeId");
         
         // Act
-        var pathItems = await _getPathItemsCommandHandler.Handle(request, CancellationToken.None);
+        var dataSources = await _getDataSourcesCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        pathItems.Should().NotBeNull();
-        pathItems!.Count.Should().Be(1);
+        dataSources.Should().NotBeNull();
+        dataSources!.Count.Should().Be(1);
         A.CallTo(() => _mockInventoryRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
     }
 }

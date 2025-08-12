@@ -1,5 +1,4 @@
 ﻿using ByteSync.Interfaces.Services.Filtering;
-using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Business.Filtering.Parsing;
 
@@ -8,7 +7,7 @@ public class FilterTokenizer : IFilterTokenizer
     private string _filterText = null!;
     private int _position;
 
-    public void Initialize(string filterText)
+    public void Initialize(string? filterText)
     {
         _filterText = filterText ?? string.Empty;
         _position = 0;
@@ -197,17 +196,13 @@ public class FilterTokenizer : IFilterTokenizer
             var currentToken = _filterText.Substring(start, _position - start);
             FilterTokenType currentTokenType;
 
-            if (currentToken.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
-                currentToken.Equals("OR", StringComparison.OrdinalIgnoreCase) ||
-                currentToken.Equals("NOT", StringComparison.OrdinalIgnoreCase) ||
-                currentToken == "&&" || currentToken == "||")
+            if (IsLogicalOperator(currentToken))
             {
                 currentTokenType = FilterTokenType.LogicalOperator;
             }
             else
             {
-                if ((char.IsLetter(currentToken[0]) &&
-                     (currentToken.Length == 1 || currentToken.Skip(1).All(char.IsDigit))) ||
+                if (IsDataPartOrDataSourceIdentifier(currentToken) ||
                     Identifiers.All().Any(name => currentToken.ToLower().Equals(name.ToLower())))
                 {
                     currentTokenType = FilterTokenType.Identifier;
@@ -224,5 +219,38 @@ public class FilterTokenizer : IFilterTokenizer
                 Type = currentTokenType
             };
         }
+    }
+    
+    private static bool IsLogicalOperator(string token)
+    {
+        return token.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
+               token.Equals("OR", StringComparison.OrdinalIgnoreCase) ||
+               token.Equals("NOT", StringComparison.OrdinalIgnoreCase) ||
+               token == "&&" || token == "||";
+    }
+    
+    private static bool IsDataPartOrDataSourceIdentifier(string token)
+    {
+        if (string.IsNullOrEmpty(token) || token.Length > 3)
+        {
+            return false;
+        }
+
+        if (!char.IsLetter(token[0]))
+        {
+            return false;
+        }
+
+        if (token.Length == 1)
+        {
+            return true;
+        }
+
+        if (token.Length == 2)
+        {
+            return char.IsLetter(token[1]) || char.IsDigit(token[1]);
+        }
+        
+        return char.IsLetter(token[1]) && char.IsDigit(token[2]);
     }
 }

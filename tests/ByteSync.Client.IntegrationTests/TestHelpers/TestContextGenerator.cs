@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using ByteSync.Business.SessionMembers;
+using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Business.Sessions.Cloud;
@@ -8,6 +9,8 @@ using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Services.Sessions;
 using Moq;
+using System.Reactive.Subjects;
+using ByteSync.Common.Business.Sessions;
 
 namespace ByteSync.Client.IntegrationTests.TestHelpers;
 
@@ -26,13 +29,23 @@ public class TestContextGenerator
         
         Mock<ISessionService> mockSessionService = _container.Resolve<Mock<ISessionService>>();
         
-        mockSessionService.Setup(m => m.CurrentSession).Returns(new CloudSession
+        // Create subjects for observables
+        var sessionSubject = new BehaviorSubject<AbstractSession?>(null);
+        var sessionStatusSubject = new BehaviorSubject<SessionStatus>(SessionStatus.Preparation);
+        
+        var cloudSession = new CloudSession
         {
             SessionId = sessionId,
             Created = DateTime.UtcNow,
-        });
+        };
         
+        mockSessionService.Setup(m => m.CurrentSession).Returns(cloudSession);
         mockSessionService.Setup(m => m.SessionId).Returns(sessionId);
+        mockSessionService.Setup(m => m.SessionObservable).Returns(sessionSubject);
+        mockSessionService.Setup(m => m.SessionStatusObservable).Returns(sessionStatusSubject);
+        
+        // Emit the current session
+        sessionSubject.OnNext(cloudSession);
         
         return sessionId;
     }
@@ -51,7 +64,7 @@ public class TestContextGenerator
         mockEnvironmentService.Setup(m => m.ClientInstanceId).Returns(currentEndPoint.ClientInstanceId);
         
         var mockSessionMemberRepository = _container.Resolve<Mock<ISessionMemberRepository>>();
-        mockSessionMemberRepository.Setup(m => m.GetElement("CII_A")).Returns(new SessionMemberInfo
+        mockSessionMemberRepository.Setup(m => m.GetElement("CII_A")).Returns(new SessionMember
         {
             PrivateData = new SessionMemberPrivateData
             {

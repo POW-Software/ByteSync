@@ -16,10 +16,11 @@ public interface IHubPushHandler2
     Subject<SessionMemberInfoDTO> MemberJoinedSession { get; }
     Subject<SessionMemberInfoDTO> MemberQuittedSession { get; }
     Subject<SessionSettingsUpdatedDTO> SessionSettingsUpdated { get; }
-    Subject<CloudSessionFatalError> SessionOnFatalError { get; }
     Subject<InventoryStartedDTO> InventoryStarted { get; }
-    Subject<PathItemDTO> PathItemAdded { get; }
-    Subject<PathItemDTO> PathItemRemoved { get; }
+    Subject<DataNodeDTO> DataNodeAdded { get; }
+    Subject<DataNodeDTO> DataNodeRemoved { get; }
+    Subject<DataSourceDTO> DataSourceAdded { get; }
+    Subject<DataSourceDTO> DataSourceRemoved { get; }
     Subject<FileTransferPush> FilePartUploaded { get; }
     Subject<FileTransferPush> UploadFinished { get; }
     Subject<string> OnReconnected { get; }

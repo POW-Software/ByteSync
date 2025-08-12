@@ -44,7 +44,7 @@ public class SessionMemberPushReceiver : IPushReceiver
             .Where(csr => _sessionService.CheckSession(csr.SessionId))
             .Subscribe(smi =>
             {
-                var elementsToUpdate = new List<SessionMemberInfo>();
+                var elementsToUpdate = new List<SessionMember>();
                 
                 foreach (var anySessionMemberInfo in _sessionMemberRepository.Elements)
                 {

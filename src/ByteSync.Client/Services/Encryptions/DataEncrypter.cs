@@ -1,8 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Security.Cryptography;
-using ByteSync.Business.PathItems;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
+using ByteSync.Business.DataNodes;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Controls.Json;
@@ -31,20 +33,24 @@ public class DataEncrypter : IDataEncrypter
         return Decrypt<SessionSettings>(encryptedSessionSettings);
     }
 
-    public EncryptedPathItem EncryptPathItem(PathItem pathItem)
+    public EncryptedDataSource EncryptDataSource(DataSource dataSource)
     {
-        var encryptedPathItem = Encrypt<EncryptedPathItem>(pathItem);
-        encryptedPathItem.Code = pathItem.Code;
-        
-        return encryptedPathItem;
+        return Encrypt<EncryptedDataSource>(dataSource, dataSource.Id);
     }
 
-    public PathItem DecryptPathItem(EncryptedPathItem encryptedPathItem)
+    public EncryptedDataNode EncryptDataNode(DataNode dataNode)
     {
-        var pathItem = Decrypt<PathItem>(encryptedPathItem);
-        pathItem.Code = encryptedPathItem.Code;
+        return Encrypt<EncryptedDataNode>(dataNode, dataNode.Id);
+    }
 
-        return pathItem;
+    public DataSource DecryptDataSource(EncryptedDataSource encryptedDataSource)
+    {
+       return Decrypt<DataSource>(encryptedDataSource);
+    }
+
+    public DataNode DecryptDataNode(EncryptedDataNode encryptedDataNode)
+    {
+        return Decrypt<DataNode>(encryptedDataNode);
     }
     
     public EncryptedSessionMemberPrivateData EncryptSessionMemberPrivateData(SessionMemberPrivateData sessionMemberPrivateData)
@@ -57,7 +63,7 @@ public class DataEncrypter : IDataEncrypter
         return Decrypt<SessionMemberPrivateData>(encryptedSessionMemberPrivateData);
     }
 
-    public T Encrypt<T>(object data) where T : IEncryptedSessionData, new()
+    private T Encrypt<T>(object data, string? id = null) where T : IEncryptedSessionData, new()
     {
         var aes = Aes.Create();
         aes.Key = _cloudSessionConnectionRepository.GetAesEncryptionKey()!;
@@ -74,6 +80,7 @@ public class DataEncrypter : IDataEncrypter
         }
         
         var encryptedData = new T();
+        encryptedData.Id = id ?? Guid.NewGuid().ToString();
         encryptedData.IV = aes.IV;
         encryptedData.Data = ms.ToArray();
 

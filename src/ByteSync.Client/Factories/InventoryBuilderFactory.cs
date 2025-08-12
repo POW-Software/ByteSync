@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using ByteSync.Business;
+using ByteSync.Business.DataNodes;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
@@ -21,28 +22,31 @@ public class InventoryBuilderFactory : IInventoryBuilderFactory
         _context = context;
     }
     
-    public IInventoryBuilder CreateInventoryBuilder()
+    public IInventoryBuilder CreateInventoryBuilder(DataNode dataNode)
     {
         var sessionMemberRepository = _context.Resolve<ISessionMemberRepository>();
         var sessionService = _context.Resolve<ISessionService>();
         var inventoryService = _context.Resolve<IInventoryService>();
         var environmentService = _context.Resolve<IEnvironmentService>();
-        var pathItemRepository = _context.Resolve<IPathItemRepository>();
+        var dataSourceRepository = _context.Resolve<IDataSourceRepository>();
         
         var sessionMember = sessionMemberRepository.GetCurrentSessionMember();
         var cloudSessionSettings = sessionService.CurrentSessionSettings!;
-        var myPathItems = pathItemRepository.SortedCurrentMemberPathItems;
+        var myDataSources = dataSourceRepository.SortedCurrentMemberDataSources
+            .Where(ds => ds.DataNodeId == dataNode.Id)
+            .ToList();
         
         var inventoryBuilder = _context.Resolve<IInventoryBuilder>(
-            new TypedParameter(typeof(SessionMemberInfo), sessionMember),
+            new TypedParameter(typeof(SessionMember), sessionMember),
+            new TypedParameter(typeof(DataNode), dataNode),
             new TypedParameter(typeof(SessionSettings), cloudSessionSettings),
             new TypedParameter(typeof(InventoryProcessData), inventoryService.InventoryProcessData),
             new TypedParameter(typeof(OSPlatforms), environmentService.OSPlatform),
             new TypedParameter(typeof(FingerprintModes), FingerprintModes.Rsync));
 
-        foreach (var pathItem in myPathItems)
+        foreach (var dataSource in myDataSources)
         {
-            inventoryBuilder.AddInventoryPart(pathItem);
+            inventoryBuilder.AddInventoryPart(dataSource);
         }
         
         return inventoryBuilder;

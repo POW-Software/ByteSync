@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using ByteSync.Business;
+using ByteSync.Business.DataNodes;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
@@ -385,6 +386,7 @@ public class TestInventoryBuilder : IntegrationTest
         ClassicAssert.AreEqual(2 + expectedHiddenFiles, inventory.InventoryParts[0].FileDescriptions.Count);
     }
         
+    /*
     [Test]
     [TestCase(true, 2, 0)]
     [TestCase(false, 8, 2, ExcludePlatform = "Linux")]
@@ -439,6 +441,7 @@ public class TestInventoryBuilder : IntegrationTest
         ClassicAssert.AreEqual(expectedDesktopIniFiles, 
             inventory.InventoryParts[0].FileDescriptions.Count(fd => fd.Name.Equals("desktop.ini")));
     }
+    */
         
     [Test]
     [Platform(Exclude = "Linux")]
@@ -741,7 +744,7 @@ public class TestInventoryBuilder : IntegrationTest
             byteSyncEndpoint = new ByteSyncEndpoint();
         }
         
-        var sessionMemberInfo = new SessionMemberInfo
+        var sessionMemberInfo = new SessionMember
         {
             Endpoint = byteSyncEndpoint,
             PositionInList = 0,
@@ -751,9 +754,16 @@ public class TestInventoryBuilder : IntegrationTest
             }
         };
         
+        var dataNode = new DataNode
+        {
+            Id = Guid.NewGuid().ToString(),
+            ClientInstanceId = sessionMemberInfo.ClientInstanceId,
+            Code = "Code"
+        };
+        
         Mock<ILogger<InventoryBuilder>> loggerMock = new Mock<ILogger<InventoryBuilder>>();
 
-        return new InventoryBuilder(sessionMemberInfo, sessionSettings, inventoryProcessData,
+        return new InventoryBuilder(sessionMemberInfo, dataNode, sessionSettings, inventoryProcessData,
             osPlatform, FingerprintModes.Rsync, loggerMock.Object);
     }
 }

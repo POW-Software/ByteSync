@@ -1,4 +1,4 @@
-﻿using ByteSync.Business.PathItems;
+﻿using ByteSync.Business.DataSources;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Helpers;
 using ByteSync.Models.FileSystems;
@@ -11,41 +11,42 @@ public class InventoryData
 {
     public InventoryData(DirectoryInfo inventoryPartRoot)
     {
-        PathItems = new List<PathItem>();
+        DataSources = new List<DataSource>();
 
-        PathItem pathItem = new PathItem();
-        pathItem.Path = inventoryPartRoot.FullName;
-        pathItem.Type = FileSystemTypes.Directory;
+        DataSource dataSource = new DataSource();
+        dataSource.Id = Guid.NewGuid().ToString();
+        dataSource.Path = inventoryPartRoot.FullName;
+        dataSource.Type = FileSystemTypes.Directory;
         
-        PathItems.Add(pathItem);
+        DataSources.Add(dataSource);
     }
     
     public InventoryData(params DirectoryInfo[] inventoryPartRoots)
     {
-        PathItems = new List<PathItem>();
+        DataSources = new List<DataSource>();
 
         foreach (var inventoryPartRoot in inventoryPartRoots)
         {
-            PathItem pathItem = new PathItem();
-            pathItem.Path = inventoryPartRoot.FullName;
-            pathItem.Type = FileSystemTypes.Directory;
+            DataSource dataSource = new DataSource();
+            dataSource.Path = inventoryPartRoot.FullName;
+            dataSource.Type = FileSystemTypes.Directory;
         
-            PathItems.Add(pathItem);
+            DataSources.Add(dataSource);
         }
     }
     
     public InventoryData(FileInfo inventoryPartRoot)
     {
-        PathItems = new List<PathItem>();
+        DataSources = new List<DataSource>();
 
-        PathItem pathItem = new PathItem();
-        pathItem.Path = inventoryPartRoot.FullName;
-        pathItem.Type = FileSystemTypes.File;
+        DataSource dataSource = new DataSource();
+        dataSource.Path = inventoryPartRoot.FullName;
+        dataSource.Type = FileSystemTypes.File;
         
-        PathItems.Add(pathItem);
+        DataSources.Add(dataSource);
     }
 
-    public List<PathItem> PathItems { get; }
+    public List<DataSource> DataSources { get; }
 
     public string Letter { get; private set; }
     
@@ -87,12 +88,12 @@ public class InventoryData
         Letter = letter;
 
         int cpt = 0;
-        foreach (var pathItem in PathItems)
+        foreach (var dataSource in DataSources)
         {
             cpt += 1;
             
             string code = letter + cpt;
-            pathItem.Code = code;
+            dataSource.Code = code;
         }
     }
 }

@@ -1,233 +1,154 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
-using System.Threading;
-using System.Threading.Channels;
-using System.Threading.Tasks;
-using Azure.Storage.Blobs;
+﻿using System.Threading;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Common.Business.SharedFiles;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
-using ByteSync.Interfaces.Controls.Encryptions;
-using ByteSync.Interfaces.Factories;
-using Serilog;
+using System.IO;
+using Autofac.Features.Indexed;
 
 namespace ByteSync.Services.Communications.Transfers;
 
-[SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
 public class FileDownloader : IFileDownloader
 {
-    private readonly IPolicyFactory _policyFactory;
-    private readonly IDownloadTargetBuilder _downloadTargetBuilder;
-    private readonly IFileTransferApiClient _fileTransferApiClient;
-    private readonly IMergerDecrypterFactory _mergerDecrypterFactory;
     
-    public FileDownloader(SharedFileDefinition sharedFileDefinition, IPolicyFactory policyFactory, IDownloadTargetBuilder downloadTargetBuilder,
-        IFileTransferApiClient fileTransferApiClient, IMergerDecrypterFactory mergerDecrypterFactory)
+    private readonly IPolicyFactory _policyFactory;
+    private readonly IFileTransferApiClient _fileTransferApiClient;
+    private readonly IFilePartDownloadAsserter _filePartDownloadAsserter;
+    private readonly IErrorManager _errorManager;
+    private readonly IResourceManager _resourceManager;
+    private readonly IDownloadPartsCoordinator _partsCoordinator;
+    private readonly IIndex<StorageProvider, IDownloadStrategy> _strategies;
+    private readonly SemaphoreSlim _semaphoreSlim;
+    private readonly ILogger<FileDownloader> _logger;
+
+    public IDownloadPartsCoordinator PartsCoordinator => _partsCoordinator;
+    public SharedFileDefinition SharedFileDefinition { get; private set; }
+    public DownloadTarget DownloadTarget { get; private set; }
+
+    private static SemaphoreSlim DownloadSemaphore { get; } = new SemaphoreSlim(8);
+    private Task MergerTask { get; set; }
+    private List<Task> DownloadTasks { get; }
+    private CancellationTokenSource CancellationTokenSource { get; }
+
+    public FileDownloader(
+        SharedFileDefinition sharedFileDefinition,
+        IPolicyFactory policyFactory,
+        IDownloadTargetBuilder downloadTargetBuilder,
+        IFileTransferApiClient fileTransferApiClient,
+        IFilePartDownloadAsserter filePartDownloadAsserter,
+        IFileMerger fileMerger,
+        IErrorManager errorManager,
+        IResourceManager resourceManager,
+        IDownloadPartsCoordinator partsCoordinator,
+        IIndex<StorageProvider, IDownloadStrategy> strategies,
+        ILogger<FileDownloader> logger)
     {
         _policyFactory = policyFactory;
-        _downloadTargetBuilder = downloadTargetBuilder;
         _fileTransferApiClient = fileTransferApiClient;
-        _mergerDecrypterFactory = mergerDecrypterFactory;
-        
-        SyncRoot = new object();
-
-        DownloadPartsInfo = new DownloadPartsInfo();
-        DownloadQueue = new BlockingCollection<int>();
-        MergeChannel = Channel.CreateUnbounded<int>();
-
-        DownloadTasks = new List<Task>();
-        FilePartIsDownloadedAsserters = new List<Task>();
-
-        CancellationTokenSource = new CancellationTokenSource();
-        
+        _filePartDownloadAsserter = filePartDownloadAsserter;
+        _errorManager = errorManager;
+        _resourceManager = resourceManager;
+        _partsCoordinator = partsCoordinator;
+        _strategies = strategies;
+        _semaphoreSlim = new SemaphoreSlim(1, 1);
         SharedFileDefinition = sharedFileDefinition;
-
-        DownloadTarget = _downloadTargetBuilder.BuildDownloadTarget(sharedFileDefinition);
-        
-        InitializeMergerDecrypters();
-        MergerTask = Task.Run(MergeFile);
-
+        DownloadTarget = downloadTargetBuilder.BuildDownloadTarget(sharedFileDefinition);
+        CancellationTokenSource = new CancellationTokenSource();
+        MergerTask = Task.Run(async () =>
+        {
+            while (await _partsCoordinator.MergeChannel.Reader.WaitToReadAsync())
+            {
+                var partToMerge = await _partsCoordinator.MergeChannel.Reader.ReadAsync();
+                try
+                {
+                    await fileMerger.MergeAsync(partToMerge);
+                }
+                finally
+                {
+                    DownloadSemaphore.Release();
+                }
+            }
+        });
         var downloadTasks = Math.Min(8, Environment.ProcessorCount * 2);
+        DownloadTasks = new List<Task>();
         for (var i = 0; i < downloadTasks; i++)
         {
             var task = Task.Run(DownloadFile);
-            
             DownloadTasks.Add(task);
         }
     }
 
-    private object SyncRoot { get; }
-
-    public SharedFileDefinition SharedFileDefinition { get; private set; }
-    
-    private static SemaphoreSlim DownloadSemaphore { get; } = new SemaphoreSlim(8);
-
-    private DownloadPartsInfo DownloadPartsInfo { get; }
-
-    private List<IMergerDecrypter>? MergerDecrypters { get; set; }
-
-    private int? TotalPartsCount { get; set; }
-
-    public DownloadTarget DownloadTarget { get; private set; }
-
-    private BlockingCollection<int> DownloadQueue { get; }
-    
-    private Channel<int> MergeChannel { get; }
-    
-    private Task MergerTask { get; set; }
-    
-    private List<Task> DownloadTasks { get; }
-    
-    private List<Task> FilePartIsDownloadedAsserters { get; }
-    
-    private CancellationTokenSource CancellationTokenSource { get; }
-
-    private bool IsError { get; set; }
-
-    public Task AddAvailablePartAsync(int partNumber)
-    {
-        return Task.Run(() =>
-        {
-            lock (SyncRoot)
-            {
-                if (IsError)
-                {
-                    return;
-                }
-                
-                DownloadPartsInfo.AvailableParts.Add(partNumber);
-            
-                var newDownloadableParts = DownloadPartsInfo.GetDownloadableParts();
-                DownloadPartsInfo.SentToDownload.AddAll(newDownloadableParts);
-            
-                newDownloadableParts.ForEach(p => DownloadQueue.Add(p));
-            
-                // 06/03/2023: Avant, on travaillait sur DownloadPartsInfo.AvailableParts.Count == TotalPartsCount !?
-                if (DownloadPartsInfo.SentToDownload.Count == TotalPartsCount)
-                {
-                    DownloadQueue.CompleteAdding();
-                }
-            }
-        });
-    }
-
-    public async Task SetAllAvailablePartsKnownAsync(int partsCount)
-    {
-        await Task.Run(() => SetAllAvailablePartsKnown(partsCount));
-    }
-    
     public async Task WaitForFileFullyExtracted()
     {
         await Task.Run(async () =>
         {
             await Task.WhenAll(DownloadTasks);
-            await Task.WhenAll(FilePartIsDownloadedAsserters);
-
             await MergerTask;
-            
-            bool isError;
-            lock (SyncRoot)
-            {
-                isError = IsError;
-            }
 
-            if (isError)
+            if (await _errorManager.IsErrorAsync())
             {
                 throw new Exception("An error occurred while downloading file " + DownloadTarget.DownloadDestinations.JoinToString(", "));
             }
         });
     }
 
-    private void SetAllAvailablePartsKnown(int partsCount)
-    {
-        lock (SyncRoot)
-        {
-            TotalPartsCount = partsCount;
-
-            if (DownloadPartsInfo.SentToMerge.Count == TotalPartsCount)
-            {
-                MergeChannel.Writer.TryComplete();
-            }
-
-            // 06/03/2023: Avant, on travaillait sur DownloadPartsInfo.AvailableParts.Count == TotalPartsCount !?
-            if (DownloadPartsInfo.SentToDownload.Count == TotalPartsCount)
-            {
-                DownloadQueue.CompleteAdding();
-            }
-        }
-    }
-
     private async Task DownloadFile()
     {
-        foreach (var partNumber in DownloadQueue.GetConsumingEnumerable())
+        foreach (var partNumber in _partsCoordinator.DownloadQueue.GetConsumingEnumerable())
         {
             var policy = _policyFactory.BuildFileDownloadPolicy();
-            
             var isDownloadSuccess = false;
-
             try
             {
                 await DownloadSemaphore.WaitAsync();
-
-                lock (SyncRoot)
+                if (await _errorManager.IsErrorAsync())
                 {
-                    if (IsError)
-                    {
-                        break;
-                    }
+                    break;
                 }
-                
-                var response = await policy.ExecuteAsync(async () =>
-                    {
-                        var transferParameters = new TransferParameters
-                        {
-                            SessionId = SharedFileDefinition.SessionId,
-                            SharedFileDefinition = SharedFileDefinition,
-                            PartNumber = partNumber
-                        };
-                        
-                        var downloadUrl = await _fileTransferApiClient.GetDownloadFileUrl(transferParameters);
 
-                        var memoryStream = DownloadTarget.GetMemoryStream(partNumber);
-
-                        var options = new BlobClientOptions();
-                        options.Retry.NetworkTimeout = TimeSpan.FromMinutes(20);
-
-                        var blob = new BlobClient(new Uri(downloadUrl), options);
-                        var response = await blob.DownloadToAsync(memoryStream, CancellationTokenSource.Token);
-
-                        return response;
-                    }
-                );
-
-                if (response is { IsError: false })
+                var transferParameters = new TransferParameters
                 {
-                    AssertFilePartIsDownloaded(partNumber);
-
-                    //if (SharedFileDefinition.SharedFileType == SharedFileTypes.FullInventory)
-                    //{
-                    //   throw new Exception("Test");
-                    //}
+                    SessionId = SharedFileDefinition.SessionId,
+                    SharedFileDefinition = SharedFileDefinition,
+                    PartNumber = partNumber
+                };
+                var downloadLocation = await _fileTransferApiClient.GetDownloadFileStorageLocation(transferParameters);
+                var storageProvider = downloadLocation.StorageProvider;
+                
+                var downloadResponse = await policy.ExecuteAsync(async () =>
+                {
+                    var memoryStream = new MemoryStream();
+                    var downloadStrategy = _strategies[storageProvider];
+                    var response = await downloadStrategy.DownloadAsync(memoryStream, downloadLocation, CancellationTokenSource.Token);
                     
-                    lock (SyncRoot)
+                    DownloadTarget.AddOrReplaceMemoryStream(partNumber, memoryStream);
+                    return response;
+                });
+                if (downloadResponse.IsSuccess)
+                {
+                    await AssertFilePartIsDownloaded(partNumber, storageProvider);
+                    await _semaphoreSlim.WaitAsync();
+                    try
                     {
-                        DownloadPartsInfo.DownloadedParts.Add(partNumber);
-                        var newMergeableParts = DownloadPartsInfo.GetMergeableParts();
-
+                        _partsCoordinator.DownloadPartsInfo.DownloadedParts.Add(partNumber);
+                        var newMergeableParts = _partsCoordinator.DownloadPartsInfo.GetMergeableParts();
                         foreach (var partToGiveToMerger in newMergeableParts)
                         {
-                            MergeChannel.Writer.WriteAsync(partToGiveToMerger).GetAwaiter().GetResult();
+                            _partsCoordinator.MergeChannel.Writer.WriteAsync(partToGiveToMerger).GetAwaiter()
+                                .GetResult();
                         }
-                        
-                        DownloadPartsInfo.SentToMerge.AddAll(newMergeableParts);
-                        
-                        if (DownloadPartsInfo.SentToMerge.Count == TotalPartsCount)
+
+                        _partsCoordinator.DownloadPartsInfo.SentToMerge.AddAll(newMergeableParts);
+                        if (_partsCoordinator.DownloadPartsInfo.SentToMerge.Count ==
+                            _partsCoordinator.DownloadPartsInfo.TotalPartsCount)
                         {
-                            MergeChannel.Writer.TryComplete();
+                            _partsCoordinator.MergeChannel.Writer.TryComplete();
                         }
+                    }
+                    finally
+                    {
+                        _semaphoreSlim.Release();
                     }
 
                     isDownloadSuccess = true;
@@ -235,114 +156,33 @@ public class FileDownloader : IFileDownloader
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "DownloadFile - SharedFileType:{SharedFileType} - PartNumber:{PartNumber}", 
+                _logger.LogError(ex, "DownloadFile - SharedFileType:{SharedFileType} - PartNumber:{PartNumber}",
                     SharedFileDefinition.SharedFileType, partNumber);
             }
 
             if (!isDownloadSuccess)
             {
-                lock (SyncRoot)
-                {
-                    SetOnError();
-                }
+                await _errorManager.SetOnErrorAsync();
             }
         }
     }
 
-    private void SetOnError()
+    private async Task AssertFilePartIsDownloaded(int partNumber, StorageProvider storageProvider)
     {
-        IsError = true;
-        MergeChannel.Writer.TryComplete();
-        DownloadQueue.CompleteAdding();
-        
-        CancellationTokenSource.Cancel();
-    }
-
-    private void AssertFilePartIsDownloaded(int partNumber)
-    {
-        var task = Task.Run(() =>
+        var transferParameters = new TransferParameters
         {
-            try
-            {
-                var transferParameters = new TransferParameters
-                {
-                    SessionId = SharedFileDefinition.SessionId,
-                    SharedFileDefinition = SharedFileDefinition,
-                    PartNumber = partNumber
-                };
-                
-                _fileTransferApiClient.AssertFilePartIsDownloaded(transferParameters);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "AssertFilePartIsDownloaded - SharedFileType:{SharedFileType} - PartNumber:{PartNumber}", 
-                    SharedFileDefinition.SharedFileType, partNumber);
-                
-                lock (SyncRoot)
-                {
-                    SetOnError();
-                }
-            }
-        });
+            SessionId = SharedFileDefinition.SessionId,
+            SharedFileDefinition = SharedFileDefinition,
+            PartNumber = partNumber,
+            StorageProvider = storageProvider
+        };
         
-        FilePartIsDownloadedAsserters.Add(task);
-    }
-
-
-    private async Task MergeFile()
-    {
-        while (await MergeChannel.Reader.WaitToReadAsync())
-        {
-            var partToMerge = await MergeChannel.Reader.ReadAsync();
-
-            try
-            {
-                foreach (var mergerDecrypter in MergerDecrypters!)
-                {
-                    await mergerDecrypter.MergeAndDecrypt();
-                }
-
-                DownloadTarget.RemoveMemoryStream(partToMerge);
-
-                lock (SyncRoot)
-                {
-                    DownloadPartsInfo.MergedParts.Add(partToMerge);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "MergeFile");
-
-                lock (SyncRoot)
-                {
-                    SetOnError();
-                }
-
-                break;
-            }
-            finally
-            {
-                DownloadSemaphore.Release();
-            }
-        }
+        await _filePartDownloadAsserter.AssertAsync(transferParameters);
     }
     
-    private void InitializeMergerDecrypters()
+    public void CleanupResources()
     {
-        if (MergerDecrypters == null)
-        {
-            MergerDecrypters = new List<IMergerDecrypter>();
-            foreach (var localPath in DownloadTarget.DownloadDestinations)
-            {
-                var mergerDecrypter = _mergerDecrypterFactory.Build(localPath, DownloadTarget, CancellationTokenSource);
-                MergerDecrypters.Add(mergerDecrypter);
-            }
-        }
+        _resourceManager.Cleanup();
     }
-    
-    public void Dispose()
-    {
-        DownloadPartsInfo.Clear();
-        DownloadTarget.ClearMemoryStream();
-    }
+
 }

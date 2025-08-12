@@ -4,17 +4,18 @@ using Microsoft.Azure.Functions.Worker.Http;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Functions.Helpers.Misc;
-using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Commands.Synchronizations;
+using MediatR;
 
 namespace ByteSync.Functions.Http;
 
 public class SynchronizationFunction
 {
-    private readonly ISynchronizationService _synchronizationService;
+    private readonly IMediator _mediator;
 
-    public SynchronizationFunction(ISynchronizationService synchronizationService)
+    public SynchronizationFunction(IMediator mediator)
     {
-        _synchronizationService = synchronizationService;
+        _mediator = mediator;
     }
     
     [Function("StartSynchronizationFunction")]
@@ -27,7 +28,8 @@ public class SynchronizationFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var synchronizationStartRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationStartRequest>(req);
             
-        await _synchronizationService.StartSynchronization(sessionId, client, synchronizationStartRequest.ActionsGroupDefinitions);
+        var request = new StartSynchronizationRequest(sessionId, client, synchronizationStartRequest.ActionsGroupDefinitions);
+        await _mediator.Send(request);
 
         var response = req.CreateResponse();
         response.StatusCode = HttpStatusCode.OK;
@@ -45,7 +47,8 @@ public class SynchronizationFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
 
-        await _synchronizationService.OnLocalCopyIsDoneAsync(sessionId, actionsGroupIds, client);
+        var request = new LocalCopyIsDoneRequest(sessionId, client, actionsGroupIds);
+        await _mediator.Send(request);
             
         var response = req.CreateResponse();
         response.StatusCode = HttpStatusCode.OK;
@@ -63,7 +66,8 @@ public class SynchronizationFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
 
-        await _synchronizationService.OnDateIsCopied(sessionId, actionsGroupIds, client);
+        var request = new DateIsCopiedRequest(sessionId, client, actionsGroupIds);
+        await _mediator.Send(request);
         
         var response = req.CreateResponse();
         response.StatusCode = HttpStatusCode.OK;
@@ -81,7 +85,8 @@ public class SynchronizationFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
 
-        await _synchronizationService.OnFileOrDirectoryIsDeletedAsync(sessionId, actionsGroupIds, client);
+        var request = new FileOrDirectoryIsDeletedRequest(sessionId, client, actionsGroupIds);
+        await _mediator.Send(request);
             
         var response = req.CreateResponse();
         response.StatusCode = HttpStatusCode.OK;
@@ -99,7 +104,8 @@ public class SynchronizationFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
 
-        await _synchronizationService.OnDirectoryIsCreatedAsync(sessionId, actionsGroupIds, client);
+        var request = new DirectoryIsCreatedRequest(sessionId, client, actionsGroupIds);
+        await _mediator.Send(request);
             
         var response = req.CreateResponse();
         response.StatusCode = HttpStatusCode.OK;
@@ -116,7 +122,8 @@ public class SynchronizationFunction
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
 
-        await _synchronizationService.OnMemberHasFinished(sessionId, client);
+        var request = new MemberHasFinishedRequest(sessionId, client);
+        await _mediator.Send(request);
             
         var response = req.CreateResponse();
         response.StatusCode = HttpStatusCode.OK;
@@ -133,7 +140,8 @@ public class SynchronizationFunction
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
 
-        await _synchronizationService.RequestAbortSynchronization(sessionId, client);
+        var request = new RequestSynchronizationAbortRequest(sessionId, client);
+        await _mediator.Send(request);
       
         var response = req.CreateResponse();
         response.StatusCode = HttpStatusCode.OK;
@@ -151,7 +159,8 @@ public class SynchronizationFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var sharedFileDefinition = await FunctionHelper.DeserializeRequestBody<SharedFileDefinition>(req);
 
-        await _synchronizationService.AssertSynchronizationActionErrors(sessionId, sharedFileDefinition.ActionsGroupIds!, client);
+        var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition);
+        await _mediator.Send(request);
             
         var response = req.CreateResponse();
         response.StatusCode = HttpStatusCode.OK;
@@ -169,7 +178,8 @@ public class SynchronizationFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
 
-        await _synchronizationService.AssertSynchronizationActionErrors(sessionId, actionsGroupIds, client);
+        var request = new SynchronizationErrorsRequest(sessionId, client, actionsGroupIds);
+        await _mediator.Send(request);
             
         var response = req.CreateResponse();
         response.StatusCode = HttpStatusCode.OK;

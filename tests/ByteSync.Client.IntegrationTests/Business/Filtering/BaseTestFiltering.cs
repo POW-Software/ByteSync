@@ -76,7 +76,7 @@ public abstract class BaseTestFiltering : IntegrationTest
         string relativePath = "/unset")
     {
         string letter = inventoryId.Replace("Id_", "");
-        var inventory = new Inventory { InventoryId = inventoryId, Letter = letter };
+        var inventory = new Inventory { InventoryId = inventoryId, Code = letter };
         
         string code = $"{letter}1";
         var inventoryPart = new InventoryPart(inventory, rootPath, FileSystemTypes.Directory);
@@ -101,7 +101,7 @@ public abstract class BaseTestFiltering : IntegrationTest
         string rootPath)
     {
         string letter = inventoryId.Replace("Id_", "");
-        var inventory = new Inventory { InventoryId = inventoryId, Letter = letter };
+        var inventory = new Inventory { InventoryId = inventoryId, Code = letter };
         
         string code = $"{letter}1";
         var inventoryPart = new InventoryPart(inventory, rootPath, FileSystemTypes.Directory);
@@ -234,7 +234,7 @@ public abstract class BaseTestFiltering : IntegrationTest
     {
         var comparisonItem = CreateBasicComparisonItem(FileSystemTypes.File, "/" + fileName.TrimStart('/'), fileName);
 
-        string letter = dataPartId[0].ToString();
+        var letter = new string(dataPartId.TakeWhile(char.IsLetter).ToArray());
 
         var (fileDesc, inventoryPart) = CreateFileDescription(
             $"Id_{letter}",

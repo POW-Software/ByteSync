@@ -6,6 +6,7 @@ using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Inventories;
@@ -19,11 +20,12 @@ public class DataInventoryRunner : IDataInventoryRunner
     private readonly IInventoryBuilderFactory _inventoryBuilderFactory;
     private readonly IBaseInventoryRunner _baseInventoryRunner;
     private readonly IFullInventoryRunner _fullInventoryRunner;
+    private readonly IDataNodeRepository _dataNodeRepository;
     private readonly ILogger<DataInventoryRunner> _logger;
 
     public DataInventoryRunner(ISessionService sessionService, IInventoryService inventoryService, ITimeTrackingCache timeTrackingCache, 
         ISessionMemberService sessionMemberService, IInventoryBuilderFactory inventoryBuilderFactory, IBaseInventoryRunner baseInventoryRunner, 
-        IFullInventoryRunner fullInventoryRunner, ILogger<DataInventoryRunner> logger)
+        IFullInventoryRunner fullInventoryRunner, IDataNodeRepository dataNodeRepository, ILogger<DataInventoryRunner> logger)
     {
         _sessionService = sessionService;
         _inventoryService = inventoryService;
@@ -32,6 +34,7 @@ public class DataInventoryRunner : IDataInventoryRunner
         _inventoryBuilderFactory = inventoryBuilderFactory;
         _baseInventoryRunner = baseInventoryRunner;
         _fullInventoryRunner = fullInventoryRunner;
+        _dataNodeRepository = dataNodeRepository;
         _logger = logger;
         
         InventoryProcessData.MainStatus.DistinctUntilChanged()
@@ -150,9 +153,24 @@ public class DataInventoryRunner : IDataInventoryRunner
             InventoryProcessData.IdentificationStatus.OnNext(LocalInventoryPartStatus.Running);
             InventoryProcessData.AnalysisStatus.OnNext(LocalInventoryPartStatus.Pending);
             
+            var localDataNodes = _dataNodeRepository.SortedCurrentMemberDataNodes
+                .OrderBy(n => n.OrderIndex)
+                .ToList();
+            
             var inventoryBuilders = new List<IInventoryBuilder>();
-            var inventoryBuilder = _inventoryBuilderFactory.CreateInventoryBuilder();                
-            inventoryBuilders.Add(inventoryBuilder);
+            
+            foreach (var dataNode in localDataNodes)
+            {
+                try
+                {
+                    var inventoryBuilder = _inventoryBuilderFactory.CreateInventoryBuilder(dataNode);
+                    inventoryBuilders.Add(inventoryBuilder);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to create inventory builder for DataNode {DataNodeId}", dataNode.Id);
+                }
+            }
             
             InventoryProcessData.InventoryBuilders = inventoryBuilders;
 

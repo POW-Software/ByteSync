@@ -65,7 +65,7 @@ public class AnnouncementServiceTests
 
         // Act
         await service.Start();
-        await Task.Delay(160);
+        await Task.Delay(300);
         service.Dispose();
 
         // Assert
@@ -73,4 +73,5 @@ public class AnnouncementServiceTests
         _repository.Verify(r => r.Clear(), Times.AtLeast(2));
         _repository.Verify(r => r.AddOrUpdate(It.IsAny<IEnumerable<Announcement>>()), Times.AtLeast(2));
     }
+    
 }

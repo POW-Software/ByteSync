@@ -117,7 +117,7 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             
-            <DataGrid AutoGenerateColumns="False" Margin="6" ItemsSource="{Binding Path=PathItems}" Classes="NoHeaders"
+            <DataGrid AutoGenerateColumns="False" Margin="6" ItemsSource="{Binding Path=DataSources}" Classes="NoHeaders"
                       IsReadOnly="True" x:Name="TheGrid" HeadersVisibility="None" Name="MembersDataGrid"  >
                 
                 <Interaction.Behaviors>
@@ -141,7 +141,7 @@
                 </Interaction.Behaviors>
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding PathItem.Code}" Header="Code" Width="Auto" FontSize="14"/>
+                    <DataGridTextColumn Binding="{Binding DataSource.Code}" Header="Code" Width="Auto" FontSize="14"/>
                     <DataGridTextColumn Binding="{Binding ElementType}" Header="Type" Width="Auto" FontSize="14"/>
                     <DataGridTemplateColumn Header="Path" Width="*" CanUserResize="True">
                         <DataGridTemplateColumn.CellTemplate>

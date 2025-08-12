@@ -1,9 +1,9 @@
 using ByteSync.Business.Comparisons;
-using Prism.Mvvm;
+using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Actions.Misc;
 
-public class SourceOrPropertyViewModel : BindableBase
+public class SourceOrPropertyViewModel : ViewModelBase
 {
     private string _displayName;
     private string _description;
@@ -29,22 +29,18 @@ public class SourceOrPropertyViewModel : BindableBase
     }
 
     public DataPart? DataPart { get; set; }
+    
     public ComparisonProperty? ComparisonProperty { get; set; }
     
     public bool IsDataPart { get; set; }
+    
     public bool IsProperty => !IsDataPart;
 
-    public string DisplayName
-    {
-        get => _displayName;
-        set => SetProperty(ref _displayName, value);
-    }
+    [Reactive]
+    public string DisplayName { get; set; }
 
-    public string Description
-    {
-        get => _description;
-        set => SetProperty(ref _description, value);
-    }
+    [Reactive]
+    public string Description { get; set; }
 
     public bool IsNameProperty
     {

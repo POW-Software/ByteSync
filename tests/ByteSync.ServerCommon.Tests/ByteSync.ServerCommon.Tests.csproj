@@ -11,6 +11,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="AWSSDK.S3" Version="4.0.6.2" />
         <PackageReference Include="Azure.Identity" Version="1.13.2" />
         <PackageReference Include="FakeItEasy" Version="8.3.0" />
         <PackageReference Include="AwesomeAssertions" Version="8.0.1" />
@@ -36,7 +37,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="appsettings.secret.json">
+      <None Update="server-common-tests.local.settings.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

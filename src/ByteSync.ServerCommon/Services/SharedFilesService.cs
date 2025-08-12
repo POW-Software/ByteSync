@@ -3,6 +3,7 @@ using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Services;
@@ -10,20 +11,32 @@ namespace ByteSync.ServerCommon.Services;
 public class SharedFilesService : ISharedFilesService
 {
     private readonly ISharedFilesRepository _sharedFilesRepository;
-    private readonly IBlobUrlService _blobUrlService;
+    private readonly IAzureBlobStorageService _azureBlobStorageService;
+    private readonly ICloudflareR2Service _cloudflareR2Service;
+
     private readonly ILogger<SharedFilesService> _logger;
 
-    public SharedFilesService(ISharedFilesRepository sharedFilesRepository, IBlobUrlService blobUrlService, ILogger<SharedFilesService> logger)
+    public SharedFilesService(
+        ISharedFilesRepository sharedFilesRepository,
+        IAzureBlobStorageService azureBlobStorageService,
+        ICloudflareR2Service cloudflareR2Service,
+        ILogger<SharedFilesService> logger)
     {
         _sharedFilesRepository = sharedFilesRepository;
-        _blobUrlService = blobUrlService;
+        _azureBlobStorageService = azureBlobStorageService;
+        _cloudflareR2Service = cloudflareR2Service;
         _logger = logger;
     }
-    public async Task AssertFilePartIsUploaded(SharedFileDefinition sharedFileDefinition, int partNumber, ICollection<string> recipients)
+    
+    public async Task AssertFilePartIsUploaded(TransferParameters transferParameters, ICollection<string> recipients)
     {
+        var sharedFileDefinition = transferParameters.SharedFileDefinition;
+        var partNumber = transferParameters.PartNumber!.Value;
+        var storageProvider = transferParameters.StorageProvider;
+        
         await _sharedFilesRepository.AddOrUpdate(sharedFileDefinition, sharedFileData =>
         {
-            sharedFileData ??= new SharedFileData(sharedFileDefinition, recipients);
+            sharedFileData ??= new SharedFileData(sharedFileDefinition, recipients, storageProvider);
             
             sharedFileData.UploadedPartsNumbers.Add(partNumber);
 
@@ -31,11 +44,14 @@ public class SharedFilesService : ISharedFilesService
         });
     }
 
-    public async Task AssertUploadIsFinished(SharedFileDefinition sharedFileDefinition, int totalParts, ICollection<string> recipients)
+    public async Task AssertUploadIsFinished(TransferParameters transferParameters, ICollection<string> recipients)
     {
+        var sharedFileDefinition = transferParameters.SharedFileDefinition;
+        var totalParts = transferParameters.TotalParts!.Value;
+        var storageProvider = transferParameters.StorageProvider;
         await _sharedFilesRepository.AddOrUpdate(sharedFileDefinition, sharedFileData =>
         {
-            sharedFileData ??= new SharedFileData(sharedFileDefinition, recipients);
+            sharedFileData ??= new SharedFileData(sharedFileDefinition, recipients, storageProvider);
 
             sharedFileData.TotalParts = totalParts;
 
@@ -43,8 +59,10 @@ public class SharedFilesService : ISharedFilesService
         });
     }
 
-    public async Task AssertFilePartIsDownloaded(SharedFileDefinition sharedFileDefinition, Client downloadedBy, int partNumber)
+    public async Task AssertFilePartIsDownloaded(Client downloadedBy, TransferParameters transferParameters)
     {
+        var sharedFileDefinition = transferParameters.SharedFileDefinition;
+        var partNumber = transferParameters.PartNumber!.Value;
         bool deleteBlob = false;
         bool unregister = false;
         
@@ -74,7 +92,12 @@ public class SharedFilesService : ISharedFilesService
         {
             try
             {
-                await _blobUrlService.DeleteBlob(sharedFileDefinition, partNumber);
+                await (transferParameters.StorageProvider switch
+                {
+                    StorageProvider.AzureBlobStorage => _azureBlobStorageService.DeleteObject(sharedFileDefinition, partNumber),
+                    StorageProvider.CloudflareR2     => _cloudflareR2Service.DeleteObject(sharedFileDefinition, partNumber),
+                    _ => throw new NotSupportedException($"Storage provider {transferParameters.StorageProvider} is not supported")
+                });
             }
             catch (Exception ex)
             {
@@ -105,7 +128,12 @@ public class SharedFilesService : ISharedFilesService
             {
                 try
                 {
-                    await _blobUrlService.DeleteBlob(sharedFileData.SharedFileDefinition, i);
+                    await (sharedFileData.StorageProvider switch
+                    {
+                        StorageProvider.AzureBlobStorage => _azureBlobStorageService.DeleteObject(sharedFileData.SharedFileDefinition, i),
+                        StorageProvider.CloudflareR2     => _cloudflareR2Service.DeleteObject(sharedFileData.SharedFileDefinition, i),
+                        _ => throw new NotSupportedException($"Storage provider {sharedFileData.StorageProvider} is not supported")
+                    });
                 }
                 catch (Exception ex)
                 {

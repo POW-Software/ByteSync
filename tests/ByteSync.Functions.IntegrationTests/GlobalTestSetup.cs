@@ -23,7 +23,7 @@ public class GlobalTestSetup
         ByteSyncServerCommonAssembly = GetReferencedAssemblyByName("ByteSync.ServerCommon");
         
         Configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.Secret.json", optional: true) // Secret configuration
+            .AddJsonFile("functions-integration-tests.local.settings.json", optional: false)
             .Build();
         
         var builder = new ContainerBuilder();
@@ -49,7 +49,8 @@ public class GlobalTestSetup
     {
         // Configure your settings objects here
         services.Configure<RedisSettings>(Configuration.GetSection("Redis"));
-        services.Configure<BlobStorageSettings>(Configuration.GetSection("BlobStorage"));
+        services.Configure<AzureBlobStorageSettings>(Configuration.GetSection("AzureBlobStorage"));
+        services.Configure<CloudflareR2Settings>(Configuration.GetSection("CloudflareR2"));
         services.Configure<SignalRSettings>(Configuration.GetSection("SignalR"));
         services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
     }

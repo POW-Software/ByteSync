@@ -8,6 +8,7 @@ using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using ByteSync.ServerCommon.Entities.Inventories;
 using RedLockNet;
 using StackExchange.Redis;
 
@@ -49,7 +50,7 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
         
         var transaction = _redisInfrastructureService.OpenTransaction();
         
-        UpdateEntityResult<InventoryData>? inventoryUpdateResult = null;
+        UpdateEntityResult<InventoryEntity>? inventoryUpdateResult = null;
         
         var sessionUpdateResult = await ActivateSession(sessionId, transaction, sessionRedisLock);
 
@@ -96,11 +97,7 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
         else
         {
             var cloudSessionData = sessionUpdateResult.Element!;
-            if (cloudSessionData.SessionMembers.Count < 2)
-            {
-                startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.LessThan2Members);
-            }
-            else if (cloudSessionData.SessionMembers.Count > 5)
+            if (cloudSessionData.SessionMembers.Count > 5)
             {
                 startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.MoreThan5Members);
             }
@@ -109,23 +106,38 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
         return startInventoryResult;
     }
 
-    private async Task<(UpdateEntityResult<InventoryData> inventoryUpdateResult, StartInventoryResult? startInventoryResult)> UpdateInventory( 
+    private async Task<(UpdateEntityResult<InventoryEntity> inventoryUpdateResult, StartInventoryResult? startInventoryResult)> UpdateInventory( 
         UpdateEntityResult<CloudSessionData> sessionUpdateResult, ITransaction transaction, IRedLock inventoryRedisLock)
     {
         StartInventoryResult? startInventoryResult = null;
         var cloudSessionData = sessionUpdateResult.Element!;
         
-        UpdateEntityResult<InventoryData> inventoryUpdateResult;
+        UpdateEntityResult<InventoryEntity> inventoryUpdateResult;
         inventoryUpdateResult = await _inventoryRepository.UpdateIfExists(cloudSessionData.SessionId, inventoryData =>
         {
-            if (inventoryData.InventoryMembers.Count > cloudSessionData.SessionMembers.Count)
+            if (inventoryData.InventoryMembers.Count != cloudSessionData.SessionMembers.Count)
             {
                 startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.UnknownError);
             }
-            else if (inventoryData.InventoryMembers.Count < cloudSessionData.SessionMembers.Count
-                     || inventoryData.InventoryMembers.Any(imd => imd.SharedPathItems.Count == 0))
+            else if (inventoryData.InventoryMembers.Any(imd => imd.DataNodes.Count == 0))
             {
-                startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
+                startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.UnknownError);
+            }
+            else if (inventoryData.InventoryMembers.Any(imd => imd.DataNodes.Any(dn => dn.DataSources.Count == 0)))
+            {
+                startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.AtLeastOneDataNodeWithNoDataSource);
+            }
+            else
+            {
+                var totalDataNodes = inventoryData.InventoryMembers.Sum(imd => imd.DataNodes.Count);
+                if (totalDataNodes < 2)
+                {
+                    startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.LessThan2DataNodes);
+                }
+                else if (totalDataNodes > 5)
+                {
+                    startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.MoreThan5DataNodes);
+                }
             }
 
             if (startInventoryResult == null)
@@ -139,8 +151,7 @@ public class StartInventoryCommandHandler : IRequestHandler<StartInventoryReques
 
         if (inventoryUpdateResult.IsNotFound)
         {
-            startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, 
-                StartInventoryStatuses.AtLeastOneMemberWithNoDataToSynchronize);
+            startInventoryResult = LogAndBuildStartInventoryResult(cloudSessionData, StartInventoryStatuses.SessionNotFound);
         }
         
         return (inventoryUpdateResult, startInventoryResult);

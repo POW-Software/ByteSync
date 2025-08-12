@@ -30,11 +30,11 @@ public class RunCloudSessionProfileInfo : AbstractRunSessionProfileInfo
         }
     }
 
-    public List<SessionProfilePathItem> GetMyPathItems()
+    public List<SessionProfileDataSource> GetMyDataSources()
     {
         var myProfileMember = ProfileDetails.Members.Single(m => m.ProfileClientId.Equals(LocalProfileClientId));
 
-        return myProfileMember.PathItems.OrderBy(pi => pi.Code).ToList();
+        return myProfileMember.DataSources.OrderBy(ds => ds.Code).ToList();
     }
 
     public override AbstrastSessionProfileDetails GetProfileDetails()

@@ -8,9 +8,9 @@ using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
+using ByteSync.ViewModels.Sessions.DataNodes;
 using ByteSync.ViewModels.Sessions.Inventories;
 using ByteSync.ViewModels.Sessions.Managing;
-using ByteSync.ViewModels.Sessions.Members;
 using ByteSync.ViewModels.Sessions.Synchronizations;
 using DynamicData;
 using DynamicData.Binding;
@@ -29,20 +29,22 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
     
     private readonly ISessionService _sessionService;
     
-    private ReadOnlyObservableCollection<SessionMachineViewModel> _data;
-    private readonly ISessionMachineViewModelFactory _sessionMachineViewModelFactory;
+    private ReadOnlyObservableCollection<DataNodeViewModel> _dataNodes;
+    private readonly IDataNodeViewModelFactory _dataNodeViewModelFactory;
+    private readonly IDataNodeRepository _dataNodeRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
 
     public SessionMainViewModel(IScreen screen, ISessionService sessionService, InventoryProcessViewModel inventoryProcessViewModel, 
         ComparisonResultViewModel comparisonResultViewModel, CurrentCloudSessionViewModel currentCloudSessionViewModel, 
-        SynchronizationMainViewModel synchronizationMainViewModel, ISessionMachineViewModelFactory sessionMachineViewModelFactory, 
-        ISessionMemberRepository sessionMemberRepository)
+        SynchronizationMainViewModel synchronizationMainViewModel, IDataNodeViewModelFactory dataNodeViewModelFactory, 
+        IDataNodeRepository dataNodeRepository, ISessionMemberRepository sessionMemberRepository)
     {
         HostScreen = screen;
         Activator = new ViewModelActivator();
 
         _sessionService = sessionService;
-        _sessionMachineViewModelFactory = sessionMachineViewModelFactory;
+        _dataNodeViewModelFactory = dataNodeViewModelFactory;
+        _dataNodeRepository = dataNodeRepository;
         _sessionMemberRepository = sessionMemberRepository;
         
         CloudSessionManagement = currentCloudSessionViewModel;
@@ -50,19 +52,19 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
         ComparisonResult = comparisonResultViewModel;
         SynchronizationProcess = synchronizationMainViewModel;
         
-        var sessionMemberCache = _sessionMemberRepository.ObservableCache.Connect()
+        var dataNodesCache = _dataNodeRepository.ObservableCache.Connect()
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Transform(smi => _sessionMachineViewModelFactory.CreateSessionMachineViewModel(smi))
-            .AutoRefresh(vm => vm.JoinedSessionOn)
-            .Sort(SortExpressionComparer<SessionMachineViewModel>.Ascending(vm => vm.JoinedSessionOn))
+            .Transform(smi => _dataNodeViewModelFactory.CreateDataNodeViewModel(smi))
+            .AutoRefresh(vm => vm.OrderIndex)
+            .Sort(SortExpressionComparer<DataNodeViewModel>.Ascending(vm => vm.OrderIndex))
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Bind(out _data)
+            .Bind(out _dataNodes)
             .DisposeMany()
             .Subscribe();
 
         this.WhenActivated(disposables =>
         {
-            sessionMemberCache.DisposeWith(disposables);
+            dataNodesCache.DisposeWith(disposables);
             
             _sessionService.SessionMode
                 .Where(x => x != null)
@@ -100,7 +102,7 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
         });
     }
     
-    public ReadOnlyObservableCollection<SessionMachineViewModel> Machines => _data;
+    public ReadOnlyObservableCollection<DataNodeViewModel> DataNodes => _dataNodes;
 
     [Reactive]
     public ViewModelBase? CloudSessionManagement { get; set; }

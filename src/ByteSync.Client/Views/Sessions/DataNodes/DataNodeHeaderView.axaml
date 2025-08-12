@@ -1,0 +1,57 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             xmlns:dataNodes="clr-namespace:ByteSync.ViewModels.Sessions.DataNodes"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             x:Class="ByteSync.Views.Sessions.DataNodes.DataNodeHeaderView">
+
+    <Design.DataContext>
+        <dataNodes:DataNodeHeaderViewModel />
+    </Design.DataContext>
+
+    <StackPanel Orientation="Vertical">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Letter (A, B, Aa, …) -->
+            <Label Grid.Column="0" Content="{Binding Code}" VerticalContentAlignment="Center"
+                   HorizontalContentAlignment="Center" FontWeight="Bold" FontSize="24"
+                   Margin="6 6" BorderThickness="1" Width="48"
+                   Background="{Binding LetterBackBrush}" BorderBrush="{Binding LetterBorderBrush}" />
+
+            <!-- Text -->
+            <StackPanel Orientation="Vertical" Grid.Column="2" Margin="6,0">
+                <TextBlock FontWeight="Bold" Text="{Binding MachineDescription}" Margin="3" />
+                <TextBlock FontStyle="Italic" Text="{Binding ClientInstanceId}" Margin="3"
+                           IsVisible="{Binding ClientInstanceId, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+            </StackPanel>
+
+            <!-- Remove DataNode Button -->
+            <Button Grid.Column="3" Classes="AccentButton" Margin="6" Height="32" Width="32"
+                    VerticalAlignment="Center"
+                    Command="{Binding RemoveDataNodeCommand}" 
+                    IsVisible="{Binding ShowRemoveButton}"
+                    IsEnabled="{Binding IsRemoveDataNodeEnabled}">
+                <misc:Icon FontSize="16" Value="RegularMinus" Margin="0" Width="24" Height="24" />
+                
+                <ToolTip.Tip>
+                    <StackPanel Classes="ByteSyncToolTip">
+                        <TextBlock Text="{localizations:Loc DataNodeHeaderView_Tooltip_Header_Remove}" />
+                        <TextBlock Text="{localizations:Loc DataNodeHeaderView_Tooltip_Content_Remove}" />
+                    </StackPanel>
+                </ToolTip.Tip>
+            </Button>
+        </Grid>
+        
+        <!-- Error Display -->
+        <ContentControl Content="{Binding RemoveDataNodeError}" Margin="6,0" MaxWidth="400"/>
+    </StackPanel>
+</UserControl> 

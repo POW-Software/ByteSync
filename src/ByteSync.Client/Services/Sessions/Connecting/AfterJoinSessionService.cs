@@ -16,10 +16,10 @@ namespace ByteSync.Services.Sessions.Connecting;
 
 public class AfterJoinSessionService : IAfterJoinSessionService
 {
-    private readonly ICloudSessionApiClient _cloudSessionApiClient;
     private readonly ISessionService _sessionService;
     private readonly ISessionMemberService _sessionMemberService;
-    private readonly IPathItemsService _pathItemsService;
+    private readonly IDataNodeService _dataNodeService;
+    private readonly IDataSourceService _dataSourceService;
     private readonly IDataEncrypter _dataEncrypter;
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
     private readonly IInventoryApiClient _inventoryApiClient;
@@ -27,14 +27,16 @@ public class AfterJoinSessionService : IAfterJoinSessionService
     private readonly IEnvironmentService _environmentService;
     private readonly ICloudSessionConnectionService _cloudSessionConnectionService;
     private readonly IQuitSessionService _quitSessionService;
-    private readonly IPathItemRepository _pathItemRepository;
+    private readonly IDataSourceRepository _dataSourceRepository;
+    private readonly IDataNodeRepository _dataNodeRepository;
+    private readonly ISessionMemberApiClient _sessionMemberApiClient;
     private readonly ILogger<AfterJoinSessionService> _logger;
 
     public AfterJoinSessionService(
-        ICloudSessionApiClient cloudSessionApiClient,
         ISessionService sessionService,
         ISessionMemberService sessionMemberService,
-        IPathItemsService pathItemsService,
+        IDataNodeService dataNodeService,  
+        IDataSourceService dataSourceService,
         IDataEncrypter dataEncrypter,
         ICloudSessionConnectionRepository cloudSessionConnectionRepository,
         IInventoryApiClient inventoryApiClient,
@@ -42,13 +44,15 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         IEnvironmentService environmentService,
         ICloudSessionConnectionService cloudSessionConnectionService,
         IQuitSessionService quitSessionService,
-        IPathItemRepository pathItemRepository,
+        IDataSourceRepository dataSourceRepository,
+        IDataNodeRepository dataNodeRepository,
+        ISessionMemberApiClient sessionMemberApiClient,
         ILogger<AfterJoinSessionService> logger)
     {
-        _cloudSessionApiClient = cloudSessionApiClient;
         _sessionService = sessionService;
         _sessionMemberService = sessionMemberService;
-        _pathItemsService = pathItemsService;
+        _dataNodeService = dataNodeService;
+        _dataSourceService = dataSourceService;
         _dataEncrypter = dataEncrypter;
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         _inventoryApiClient = inventoryApiClient;
@@ -56,13 +60,15 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         _environmentService = environmentService;
         _cloudSessionConnectionService = cloudSessionConnectionService;
         _quitSessionService = quitSessionService;
-        _pathItemRepository = pathItemRepository;
+        _dataSourceRepository = dataSourceRepository;
+        _dataNodeRepository = dataNodeRepository;
+        _sessionMemberApiClient = sessionMemberApiClient;
         _logger = logger;
     }
     
     public async Task Process(AfterJoinSessionRequest request)
     {
-        var sessionMemberInfoDtos = await _cloudSessionApiClient.GetMembers(request.CloudSessionResult.SessionId);
+        var sessionMemberInfoDtos = await _sessionMemberApiClient.GetMembers(request.CloudSessionResult.SessionId);
         
         await CheckOtherMembersAreTrustedAndChecked(request, sessionMemberInfoDtos);
 
@@ -72,8 +78,10 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         await _sessionService.SetCloudSession(request.CloudSessionResult.CloudSession, request.RunCloudSessionProfileInfo, sessionSettings, password);
         
         _sessionMemberService.AddOrUpdate(sessionMemberInfoDtos);
+
+        await FillDataNodes(request, sessionMemberInfoDtos);
         
-        await FillPathItems(request, sessionMemberInfoDtos);
+        await FillDataSources(request, sessionMemberInfoDtos);
     }
 
     private async Task CheckOtherMembersAreTrustedAndChecked(AfterJoinSessionRequest request, List<SessionMemberInfoDTO> sessionMemberInfoDtos)
@@ -118,15 +126,37 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         return password;
     }
     
-    private async Task FillPathItems(AfterJoinSessionRequest request, List<SessionMemberInfoDTO> sessionMemberInfoDtos)
+    private async Task FillDataNodes(AfterJoinSessionRequest request, List<SessionMemberInfoDTO> sessionMemberInfoDtos)
+    {
+        await _dataNodeService.CreateAndTryAddDataNode();
+        
+        foreach (var sessionMemberInfo in sessionMemberInfoDtos)
+        {
+            if (!sessionMemberInfo.HasClientInstanceId(_environmentService.ClientInstanceId))
+            {
+                var encryptedDataNodes = await _inventoryApiClient.GetDataNodes(request.CloudSessionResult.SessionId, sessionMemberInfo.ClientInstanceId);
+
+                if (encryptedDataNodes != null)
+                {
+                    foreach (var encryptedDataNode in encryptedDataNodes)
+                    {
+                        var dataNode = _dataEncrypter.DecryptDataNode(encryptedDataNode);
+                        await _dataNodeService.TryAddDataNode(dataNode);
+                    }
+                }
+            }
+        }
+    }
+    
+    private async Task FillDataSources(AfterJoinSessionRequest request, List<SessionMemberInfoDTO> sessionMemberInfoDtos)
     {
         if (request.RunCloudSessionProfileInfo != null)
         {
-            var myPathItems = request.RunCloudSessionProfileInfo.GetMyPathItems();
+            var myDataSources = request.RunCloudSessionProfileInfo.GetMyDataSources();
             
-            foreach (var pathItem in myPathItems)
+            foreach (var dataSource in myDataSources)
             {
-                await _pathItemsService.CreateAndTryAddPathItem(pathItem.Path, pathItem.Type);
+                // await _dataSourceService.CreateAndTryAddDataSource(dataSource.Path, dataSource.Type);
             }
         }
 
@@ -134,88 +164,100 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         {
             if (!sessionMemberInfo.HasClientInstanceId(_environmentService.ClientInstanceId))
             {
-                var encryptedPathItems = await _inventoryApiClient.GetPathItems(request.CloudSessionResult.SessionId, sessionMemberInfo.ClientInstanceId);
-
-                if (encryptedPathItems != null)
+                // Get all data nodes for this session member to retrieve their data sources
+                var dataNodes = _dataNodeRepository.GetDataNodesByClientInstanceId(sessionMemberInfo.ClientInstanceId);
+                
+                foreach (var dataNode in dataNodes)
                 {
-                    foreach (var encryptedPathItem in encryptedPathItems)
+                    var encryptedDataSources = await _inventoryApiClient.GetDataSources(request.CloudSessionResult.SessionId, sessionMemberInfo.ClientInstanceId, dataNode.Id);
+
+                    if (encryptedDataSources != null)
                     {
-                        var pathItem = _dataEncrypter.DecryptPathItem(encryptedPathItem);
-                        await _pathItemsService.TryAddPathItem(pathItem);
+                        foreach (var encryptedDataSource in encryptedDataSources)
+                        {
+                            var dataSource = _dataEncrypter.DecryptDataSource(encryptedDataSource);
+                            await _dataSourceService.TryAddDataSource(dataSource);
+                        }
                     }
                 }
             }
         }
 
-        AddDebugPathItems();
+        AddDebugDataSources();
     }
 
-    private void AddDebugPathItems()
+    private void AddDebugDataSources()
     {
-        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTA))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTA))
         {
-            DebugAddDesktopPathItem("testA");
+            DebugAddDesktopDataSource("testA");
         }
 
-        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTA1))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTA1))
         {
-            DebugAddDesktopPathItem("testA1");
+            DebugAddDesktopDataSource("testA1");
         }
 
-        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTB))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTB))
         {
-            DebugAddDesktopPathItem("testB");
+            DebugAddDesktopDataSource("testB");
         }
 
-        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTB1))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTB1))
         {
-            DebugAddDesktopPathItem("testB1");
+            DebugAddDesktopDataSource("testB1");
         }
 
-        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTC))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTC))
         {
-            DebugAddDesktopPathItem("testC");
+            DebugAddDesktopDataSource("testC");
         }
 
-        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTC1))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTC1))
         {
-            DebugAddDesktopPathItem("testC1");
+            DebugAddDesktopDataSource("testC1");
         }
 
-        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTD))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTD))
         {
-            DebugAddDesktopPathItem("testD");
+            DebugAddDesktopDataSource("testD");
         }
 
-        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTD1))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTD1))
         {
-            DebugAddDesktopPathItem("testD1");
+            DebugAddDesktopDataSource("testD1");
         }
 
-        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTE))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTE))
         {
-            DebugAddDesktopPathItem("testE");
+            DebugAddDesktopDataSource("testE");
         }
 
-        if (_environmentService.Arguments.Contains(DebugArguments.ADD_PATHITEM_TESTE1))
+        if (_environmentService.Arguments.Contains(DebugArguments.ADD_DATASOURCE_TESTE1))
         {
-            DebugAddDesktopPathItem("testE1");
+            DebugAddDesktopDataSource("testE1");
         }
     }
     
-    private void DebugAddDesktopPathItem(string folderName)
+    private void DebugAddDesktopDataSource(string folderName)
     {
-        var myPathItems = _pathItemRepository.Elements.Where(pi => pi.ClientInstanceId == _environmentService.ClientInstanceId).ToList();
+        var myDataSources = _dataSourceRepository.Elements.Where(ds => ds.ClientInstanceId == _environmentService.ClientInstanceId).ToList();
                 
-        if (myPathItems.Any(pi => pi.Path.Equals(IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
+        if (myDataSources.Any(ds => ds.Path.Equals(IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
                 StringComparison.InvariantCultureIgnoreCase)))
         {
             return;
         }
 
-        _pathItemsService.CreateAndTryAddPathItem(
+        var dataNode = _dataNodeRepository.CurrentMemberDataNodes.Items.FirstOrDefault();
+        if (dataNode == null)
+        {
+            return;
+        }
+
+        _dataSourceService.CreateAndTryAddDataSource(
             IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
-            FileSystemTypes.Directory);
+            FileSystemTypes.Directory, dataNode);
     }
 
     private string GeneratePassword()

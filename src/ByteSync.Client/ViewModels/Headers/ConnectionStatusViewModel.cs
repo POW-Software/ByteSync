@@ -1,6 +1,5 @@
 ﻿using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Avalonia.Controls.Mixins;
 using Avalonia.Media;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Communications;

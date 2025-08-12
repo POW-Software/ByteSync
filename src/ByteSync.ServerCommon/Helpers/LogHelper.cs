@@ -1,5 +1,4 @@
 ﻿using ByteSync.Common.Business.EndPoints;
-using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Auth;
@@ -89,18 +88,18 @@ public static class LogHelper
         };
     }
 
-    public static object BuildLog(this EncryptedPathItem sharedPathItem)
-    {
-        if (sharedPathItem == null)
-        {
-            return null;
-        }
-
-        return new
-        {
-            Code = sharedPathItem.Code,
-        };
-    }
+    // public static object BuildLog(this EncryptedDataSource sharedDataSource)
+    // {
+    //     if (sharedDataSource == null)
+    //     {
+    //         return null;
+    //     }
+    //
+    //     return new
+    //     {
+    //         Code = sharedDataSource.Code,
+    //     };
+    // }
 
     // public static object BuildLog(this ProductSerial productSerial)
     // {

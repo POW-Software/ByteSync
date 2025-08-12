@@ -153,17 +153,6 @@ public class ComparisonItemViewModel : IDisposable
         }
     }
 
-    // internal HashSet<ContentIdentityViewModel> GetContentIdentityViews(InventoryPart inventoryPart)
-    // {
-    //     var contentIdentityViewModelsByInventory =
-    //         GetContentIdentityViews(inventoryPart.Inventory);
-    //
-    //     var result = Enumerable.ToHashSet(contentIdentityViewModelsByInventory
-    //             .Where(civm => civm.ContentIdentity.IsPresentIn(inventoryPart)).ToList());
-    //
-    //     return result;
-    // }
-
     public void ClearTargetedActions()
     {
         _targetedActionsService.ClearTargetedActions(this);

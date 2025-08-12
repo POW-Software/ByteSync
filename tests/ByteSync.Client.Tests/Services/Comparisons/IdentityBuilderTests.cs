@@ -1,6 +1,7 @@
 ﻿using ByteSync.Business;
+using ByteSync.Business.DataNodes;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.Inventories;
-using ByteSync.Business.PathItems;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.EndPoints;
@@ -94,21 +95,65 @@ public class IdentityBuilderTests : AbstractTester
         fileDescription.RelativePath.Should().Be(directoryRelativePath);
     }
 
-    private static InventoryBuilder GetInventoryBuilder(FileSystemInfo pathItemRoot)
+    [Test]
+    public void Test_RelativePathAlwaysStartsWithSlash()
     {
-        PathItem pathItem = new PathItem();
-        pathItem.Path = pathItemRoot.FullName;
-        if (pathItemRoot is DirectoryInfo)
+        CreateTestDirectory();
+        var dataA = CreateSubTestDirectory("dataA");
+        
+        // Test with directory inventory part - RootPath with trailing slash
+        var inventoryBuilder1 = GetInventoryBuilder(dataA);
+        var inventoryPart1 = inventoryBuilder1.Inventory!.InventoryParts.Single();
+        inventoryPart1.RootPath = dataA.FullName + Path.DirectorySeparatorChar; // Ensure trailing slash
+        
+        var file1 = CreateFileInDirectory(dataA, "test1.txt", "content1");
+        var fileDescription1 = IdentityBuilder.BuildFileDescription(inventoryPart1, file1);
+        fileDescription1.RelativePath.Should().StartWith("/");
+        
+        var subDir1 = new DirectoryInfo(dataA.Combine("subdir1"));
+        subDir1.Create();
+        var dirDescription1 = IdentityBuilder.BuildDirectoryDescription(inventoryPart1, subDir1);
+        dirDescription1.RelativePath.Should().StartWith("/");
+        
+        // Test with directory inventory part - RootPath without trailing slash
+        var inventoryBuilder2 = GetInventoryBuilder(dataA);
+        var inventoryPart2 = inventoryBuilder2.Inventory!.InventoryParts.Single();
+        inventoryPart2.RootPath = dataA.FullName.TrimEnd(Path.DirectorySeparatorChar); // Remove trailing slash
+        
+        var file2 = CreateFileInDirectory(dataA, "test2.txt", "content2");
+        var fileDescription2 = IdentityBuilder.BuildFileDescription(inventoryPart2, file2);
+        fileDescription2.RelativePath.Should().StartWith("/");
+        
+        var subDir2 = new DirectoryInfo(dataA.Combine("subdir2"));
+        subDir2.Create();
+        var dirDescription2 = IdentityBuilder.BuildDirectoryDescription(inventoryPart2, subDir2);
+        dirDescription2.RelativePath.Should().StartWith("/");
+        
+        // Test with file inventory part
+        var file3 = CreateFileInDirectory(dataA, "test3.txt", "content3");
+        var inventoryBuilder3 = GetInventoryBuilder(file3);
+        var inventoryPart3 = inventoryBuilder3.Inventory!.InventoryParts.Single();
+        
+        var fileDescription3 = IdentityBuilder.BuildFileDescription(inventoryPart3, file3);
+        fileDescription3.RelativePath.Should().StartWith("/");
+        fileDescription3.RelativePath.Should().Be("/test3.txt");
+    }
+
+    private static InventoryBuilder GetInventoryBuilder(FileSystemInfo dataSourceRoot)
+    {
+        DataSource dataSource = new DataSource();
+        dataSource.Path = dataSourceRoot.FullName;
+        if (dataSourceRoot is DirectoryInfo)
         {
-            pathItem.Type = FileSystemTypes.Directory;
+            dataSource.Type = FileSystemTypes.Directory;
         }
-        else if (pathItemRoot is FileInfo)
+        else if (dataSourceRoot is FileInfo)
         {
-            pathItem.Type = FileSystemTypes.File;
+            dataSource.Type = FileSystemTypes.File;
         }
         else
         {
-            Assert.Fail("unknown type " + pathItemRoot.GetType().Name);
+            Assert.Fail("unknown type " + dataSourceRoot.GetType().Name);
         }
         
         Mock<ILogger<InventoryBuilder>> loggerMock = new Mock<ILogger<InventoryBuilder>>();
@@ -118,7 +163,7 @@ public class IdentityBuilderTests : AbstractTester
             ClientInstanceId = $"CII_A"
         };
 
-        var sessionMemberInfo = new SessionMemberInfo
+        var sessionMemberInfo = new SessionMember
         {
             Endpoint = endpoint,
             PositionInList = 0,
@@ -128,11 +173,18 @@ public class IdentityBuilderTests : AbstractTester
             }
         };
         
-        InventoryBuilder inventoryBuilder = new InventoryBuilder(sessionMemberInfo, 
+        var dataNode = new DataNode
+        {
+            Id = "NodeA",
+            Code = "NodeA",
+            ClientInstanceId = endpoint.ClientInstanceId
+        };
+        
+        InventoryBuilder inventoryBuilder = new InventoryBuilder(sessionMemberInfo, dataNode,
             SessionSettingsHelper.BuildDefaultSessionSettings(DataTypes.FilesDirectories, LinkingKeys.RelativePath), 
             new InventoryProcessData(), OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object);
 
-        inventoryBuilder.AddInventoryPart(pathItem);
+        inventoryBuilder.AddInventoryPart(dataSource);
             
         inventoryBuilder.Inventory.Should().NotBeNull();
         inventoryBuilder.Inventory.InventoryParts.Count.Should().Be(1);

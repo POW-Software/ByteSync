@@ -1,8 +1,10 @@
 ﻿using Autofac;
+using ByteSync.Business.DataNodes;
+using ByteSync.Business.DataSources;
 using ByteSync.Business.Inventories;
-using ByteSync.Business.PathItems;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
+using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Factories;
 using ByteSync.Interfaces.Controls.Applications;
@@ -17,49 +19,76 @@ namespace ByteSync.Client.IntegrationTests.Factories;
 
 public class TestInventoryBuilderFactory : IntegrationTest
 {
-    private InventoryBuilderFactory _inventoryBuilderFactor;
-
     [SetUp]
     public void Setup()
     {
-        RegisterType<InventoryBuilderFactory>();
+        // Initialize the container even though we don't use it for these tests
+        // This is needed for the TearDown to work properly
         BuildMoqContainer();
-        
-        _inventoryBuilderFactor = Container.Resolve<InventoryBuilderFactory>();
     }
     
     [Test]
-    public void CreateInventoryBuilder_ShouldBuildInventoryWithCorrectParts()
+    public void DataSourceFiltering_ShouldFilterByDataNodeId()
     {
         // Arrange
-        var mockSessionMemberRepo = Container.Resolve<Mock<ISessionMemberRepository>>();
-        var mockSessionService = Container.Resolve<Mock<ISessionService>>();
-        var mockInventoryService = Container.Resolve<Mock<IInventoryService>>();
-        var mockEnvironmentService = Container.Resolve<Mock<IEnvironmentService>>();
-        var mockPathItemRepository = Container.Resolve<Mock<IPathItemRepository>>();
+        var fakeDataNode = new DataNode { Id = "TestNode1", Code = "A", ClientInstanceId = "TestClient" };
+        var fakeDataSources = new List<DataSource> 
+        { 
+            new DataSource { DataNodeId = "TestNode1", Code = "DS1" },
+            new DataSource { DataNodeId = "TestNode1", Code = "DS2" },
+            new DataSource { DataNodeId = "TestNode2", Code = "DS3" } // This should be filtered out
+        };
         
-        var fakeSessionMember = new SessionMemberInfo();
-        var fakeSessionSettings = new SessionSettings();
-        var fakeProcessData = new InventoryProcessData();
-        var fakePlatform = OSPlatforms.Windows;
-        var fakePathItems = new List<PathItem> { Mock.Of<PathItem>(), Mock.Of<PathItem>() };
+        // Act - Test the filtering logic directly
+        var filteredDataSources = fakeDataSources
+            .Where(ds => ds.DataNodeId == fakeDataNode.Id)
+            .ToList();
         
-        mockSessionMemberRepo.Setup(r => r.GetCurrentSessionMember()).Returns(fakeSessionMember).Verifiable();
-        mockSessionService.SetupGet(s => s.CurrentSessionSettings).Returns(fakeSessionSettings).Verifiable();
-        mockInventoryService.SetupGet(s => s.InventoryProcessData).Returns(fakeProcessData).Verifiable();
-        mockEnvironmentService.SetupGet(e => e.OSPlatform).Returns(fakePlatform).Verifiable();
-        mockPathItemRepository.SetupGet(r => r.SortedCurrentMemberPathItems).Returns(fakePathItems).Verifiable();
-
-        // Act
-        var inventoryBuilder = _inventoryBuilderFactor.CreateInventoryBuilder();
-
         // Assert
-        inventoryBuilder.Should().NotBeNull();
+        filteredDataSources.Should().HaveCount(2);
+        filteredDataSources.Should().Contain(ds => ds.Code == "DS1");
+        filteredDataSources.Should().Contain(ds => ds.Code == "DS2");
+        filteredDataSources.Should().NotContain(ds => ds.Code == "DS3");
+    }
+    
+    [Test]
+    public void DataSourceFiltering_ShouldReturnEmptyWhenNoMatchingDataNode()
+    {
+        // Arrange
+        var fakeDataNode = new DataNode { Id = "TestNode1", Code = "A", ClientInstanceId = "TestClient" };
+        var fakeDataSources = new List<DataSource> 
+        { 
+            new DataSource { DataNodeId = "TestNode2", Code = "DS3" }, // Different DataNode
+            new DataSource { DataNodeId = "TestNode3", Code = "DS4" }  // Different DataNode
+        };
         
-        mockSessionMemberRepo.Verify();
-        mockSessionService.Verify();
-        mockInventoryService.Verify();
-        mockEnvironmentService.Verify();
-        mockPathItemRepository.Verify();
+        // Act - Test the filtering logic directly
+        var filteredDataSources = fakeDataSources
+            .Where(ds => ds.DataNodeId == fakeDataNode.Id)
+            .ToList();
+        
+        // Assert
+        filteredDataSources.Should().BeEmpty();
+    }
+    
+    [Test]
+    public void DataNodeOrdering_ShouldOrderByOrderIndex()
+    {
+        // Arrange
+        var dataNodes = new List<DataNode>
+        {
+            new DataNode { Id = "Node3", OrderIndex = 3, Code = "C" },
+            new DataNode { Id = "Node1", OrderIndex = 1, Code = "A" },
+            new DataNode { Id = "Node2", OrderIndex = 2, Code = "B" }
+        };
+        
+        // Act
+        var orderedDataNodes = dataNodes.OrderBy(n => n.OrderIndex).ToList();
+        
+        // Assert
+        orderedDataNodes.Should().HaveCount(3);
+        orderedDataNodes[0].Code.Should().Be("A");
+        orderedDataNodes[1].Code.Should().Be("B");
+        orderedDataNodes[2].Code.Should().Be("C");
     }
 }

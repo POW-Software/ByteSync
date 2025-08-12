@@ -42,7 +42,7 @@ public class SessionMemberService : ISessionMemberService
 
     public void AddOrUpdate(List<SessionMemberInfoDTO> sessionMemberInfoDtos)
     {
-        var sessionMemberInfos = new List<SessionMemberInfo>();
+        var sessionMemberInfos = new List<SessionMember>();
         
         foreach (var sessionMemberInfoDto in sessionMemberInfoDtos)
         {

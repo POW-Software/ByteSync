@@ -1,13 +1,11 @@
-﻿using System.Net.Http;
-using Azure;
-using Azure.Storage.Blobs.Models;
+﻿using ByteSync.Common.Business.Communications.Transfers;
 using Polly.Retry;
 
 namespace ByteSync.Interfaces;
 
 public interface IPolicyFactory
 {
-    AsyncRetryPolicy<Response> BuildFileDownloadPolicy(); 
+    AsyncRetryPolicy<DownloadFileResponse> BuildFileDownloadPolicy(); 
     
-    AsyncRetryPolicy<Response<BlobContentInfo>> BuildFileUploadPolicy();
+    AsyncRetryPolicy<UploadFileResponse> BuildFileUploadPolicy();
 }

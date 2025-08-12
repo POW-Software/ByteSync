@@ -41,7 +41,7 @@ public class InventoryAnalysisViewModel : ActivatableViewModelBase
             .DisposeWith(disposables);
         
         _inventoryService.InventoryProcessData.InventoryMonitorObservable
-            .Throttle(TimeSpan.FromMilliseconds(500))
+            .Sample(TimeSpan.FromMilliseconds(500))
             .Subscribe(m =>
             {
                 AnalyzeErrors = m.AnalyzeErrors;

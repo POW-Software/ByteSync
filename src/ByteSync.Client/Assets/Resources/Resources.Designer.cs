@@ -1120,222 +1120,6 @@ namespace ByteSync.Assets.Resources {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à Unknown email or serial.
-        /// </summary>
-        internal static string Login_SigninError_EmailOrSerialNotFound {
-            get {
-                return ResourceManager.GetString("Login_SigninError_EmailOrSerialNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à This serial has no remaining connection slot.
-        /// </summary>
-        internal static string Login_SigninError_NoAvailableSlot {
-            get {
-                return ResourceManager.GetString("Login_SigninError_NoAvailableSlot", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Unable to sign in: {0}.
-        /// </summary>
-        internal static string Login_SigninError_Unable {
-            get {
-                return ResourceManager.GetString("Login_SigninError_Unable", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Unknown error.
-        /// </summary>
-        internal static string Login_SigninError_UnknownError {
-            get {
-                return ResourceManager.GetString("Login_SigninError_UnknownError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à The version of this application is not supported. Please update the application..
-        /// </summary>
-        internal static string Login_SigninError_VersionNotAllowed {
-            get {
-                return ResourceManager.GetString("Login_SigninError_VersionNotAllowed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Cancel.
-        /// </summary>
-        internal static string Login_UpdateDialog_Cancel {
-            get {
-                return ResourceManager.GetString("Login_UpdateDialog_Cancel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Do you want to update the application to version {0}?.
-        /// </summary>
-        internal static string Login_UpdateDialog_Message {
-            get {
-                return ResourceManager.GetString("Login_UpdateDialog_Message", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Update application.
-        /// </summary>
-        internal static string Login_UpdateDialog_Title {
-            get {
-                return ResourceManager.GetString("Login_UpdateDialog_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Update.
-        /// </summary>
-        internal static string Login_UpdateDialog_Update {
-            get {
-                return ResourceManager.GetString("Login_UpdateDialog_Update", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Version {0}.
-        /// </summary>
-        internal static string Login_Version {
-            get {
-                return ResourceManager.GetString("Login_Version", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à by POW Software.
-        /// </summary>
-        internal static string LoginForm_EditedByPowSoftware {
-            get {
-                return ResourceManager.GetString("LoginForm_EditedByPowSoftware", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Email:.
-        /// </summary>
-        internal static string LoginForm_Email {
-            get {
-                return ResourceManager.GetString("LoginForm.Email", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Please enter your email address..
-        /// </summary>
-        internal static string LoginForm_EmailEmpty {
-            get {
-                return ResourceManager.GetString("LoginForm.EmailEmpty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Please enter your email address and your serial number..
-        /// </summary>
-        internal static string LoginForm_EmailSerialEmpty {
-            get {
-                return ResourceManager.GetString("LoginForm.EmailSerialEmpty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Enter your email address.
-        /// </summary>
-        internal static string LoginForm_EmailWatermark {
-            get {
-                return ResourceManager.GetString("LoginForm.EmailWatermark", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Get a serial.
-        /// </summary>
-        internal static string LoginForm_GetSerial {
-            get {
-                return ResourceManager.GetString("LoginForm.GetSerial", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Help.
-        /// </summary>
-        internal static string LoginForm_Help {
-            get {
-                return ResourceManager.GetString("LoginForm.Help", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Please Login.
-        /// </summary>
-        internal static string LoginForm_PleaseLogin {
-            get {
-                return ResourceManager.GetString("LoginForm.PleaseLogin", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Privacy policy.
-        /// </summary>
-        internal static string LoginForm_Privacy {
-            get {
-                return ResourceManager.GetString("LoginForm.Privacy", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Serial:.
-        /// </summary>
-        internal static string LoginForm_Serial {
-            get {
-                return ResourceManager.GetString("LoginForm.Serial", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Please enter your serial number..
-        /// </summary>
-        internal static string LoginForm_SerialEmpty {
-            get {
-                return ResourceManager.GetString("LoginForm.SerialEmpty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Enter your serial.
-        /// </summary>
-        internal static string LoginForm_SerialWatermark {
-            get {
-                return ResourceManager.GetString("LoginForm.SerialWatermark", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Sign in.
-        /// </summary>
-        internal static string LoginForm_SignIn {
-            get {
-                return ResourceManager.GetString("LoginForm.SignIn", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Terms of Use.
-        /// </summary>
-        internal static string LoginForm_TermsOfUse {
-            get {
-                return ResourceManager.GetString("LoginForm.TermsOfUse", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Recherche une chaîne localisée semblable à ADD AUTOMATIC ACTION.
         /// </summary>
         internal static string ManageSynchronizationRulesView_AddSynchronizationRule {
@@ -1509,9 +1293,9 @@ namespace ByteSync.Assets.Resources {
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Cloud synchronization.
         /// </summary>
-        internal static string OperationSelection_CloudSynchronization {
+        internal static string OperationSelection_Synchronization {
             get {
-                return ResourceManager.GetString("OperationSelection_CloudSynchronization", resourceCulture);
+                return ResourceManager.GetString("OperationSelection_Synchronization", resourceCulture);
             }
         }
         
@@ -2364,9 +2148,9 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
-        public static string InventoryProcess_AtLeastOneMemberWithNoDataToSynchronize {
+        public static string InventoryProcess_AtLeastOneDataNodeWithNoDataSource {
             get {
-                return ResourceManager.GetString("InventoryProcess_AtLeastOneMemberWithNoDataToSynchronize", resourceCulture);
+                return ResourceManager.GetString("InventoryProcess_AtLeastOneDataNodeWithNoDataSource", resourceCulture);
             }
         }
         
@@ -2412,6 +2196,18 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
+        public static string InventoryProcess_LessThan2DataNodes {
+            get {
+                return ResourceManager.GetString("InventoryProcess_LessThan2DataNodes", resourceCulture);
+            }
+        }
+        
+        public static string InventoryProcess_MoreThan5DataNodes {
+            get {
+                return ResourceManager.GetString("InventoryProcess_MoreThan5DataNodes", resourceCulture);
+            }
+        }
+        
         public static string InventoryProcess_WaitingForAutomaticStart_CloudSession {
             get {
                 return ResourceManager.GetString("InventoryProcess_WaitingForAutomaticStart_CloudSession", resourceCulture);
@@ -2448,15 +2244,15 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
-        public static string PathItemChecker_SubPathError_Title {
+        public static string DataSourceChecker_SubPathError_Title {
             get {
-                return ResourceManager.GetString("PathItemChecker_SubPathError_Title", resourceCulture);
+                return ResourceManager.GetString("DataSourceChecker_SubPathError_Title", resourceCulture);
             }
         }
         
-        public static string PathItemChecker_SubPathError_Message {
+        public static string DataSourceChecker_SubPathError_Message {
             get {
-                return ResourceManager.GetString("PathItemChecker_SubPathError_Message", resourceCulture);
+                return ResourceManager.GetString("DataSourceChecker_SubPathError_Message", resourceCulture);
             }
         }
         

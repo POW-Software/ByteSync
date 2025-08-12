@@ -21,7 +21,7 @@ public class NavigationService : INavigationService
     
     public void NavigateTo(NavigationPanel navigationPanel)
     {
-        NavigationDetails navigationDetails; // = new NavigationInfos();
+        NavigationDetails navigationDetails;
 
         switch (navigationPanel)
         {
@@ -30,7 +30,7 @@ public class NavigationService : INavigationService
                 break;
             
             case NavigationPanel.CloudSynchronization:
-                navigationDetails = BuildNavigationInfo(navigationPanel, "RegularAnalyse", nameof(Resources.OperationSelection_CloudSynchronization));
+                navigationDetails = BuildNavigationInfo(navigationPanel, "RegularAnalyse", nameof(Resources.OperationSelection_Synchronization));
                 break;
             
             case NavigationPanel.LocalSynchronization:

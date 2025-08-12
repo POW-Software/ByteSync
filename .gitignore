@@ -4,7 +4,7 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 # Local Settings
-**/local.settings.json
+**/*local.settings.json
 
 # appsettings.secret.json files
 **/appsettings.secret.json
@@ -359,3 +359,6 @@ healthchecksdb
 
 # Visual Studio Code
 .vscode/
+
+# Build output, used by AGENTS
+build_output.txt
