@@ -8,7 +8,7 @@ namespace ByteSync.Common.Helpers;
 
 public class DebugUtils
 {
-    private static Random _random = new Random();
+    private static ThreadLocal<Random> _random = new ThreadLocal<Random>(() => new Random());
     
     public static async Task DebugTaskDelay(double seconds, 
         [CallerMemberName] string callerName = "", [CallerFilePath] string callerFilePath = "")
@@ -29,7 +29,7 @@ public class DebugUtils
         }
         else
         {
-            milliseconds = _random.Next((int)(minSeconds * 1000), (int)(maxSeconds * 1000));
+            milliseconds = _random.Value.Next((int)(minSeconds * 1000), (int)(maxSeconds * 1000));
         }
 
         double seconds = milliseconds / 1000d;
@@ -75,7 +75,7 @@ public class DebugUtils
         
         var top = (int) Math.Pow(10, decimals);
 
-        var r = _random.Next(top) + 1;
+        var r = _random.Value.Next(top) + 1;
 
         bool isRandom = r < iProbability;
         
@@ -110,7 +110,7 @@ public class DebugUtils
         }
         else
         {
-            milliseconds = _random.Next((int)(minSeconds * 1000), (int)(maxSeconds * 1000));
+            milliseconds = _random.Value.Next((int)(minSeconds * 1000), (int)(maxSeconds * 1000));
         }
 
         double seconds = milliseconds / 1000d;

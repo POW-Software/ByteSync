@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace ByteSync.Common.Helpers;
 
 public static class RandomUtils
 {
-    private static readonly Random _random = new Random();
+    private static ThreadLocal<Random> _random = new ThreadLocal<Random>(() => new Random());
 
     /// <summary>
     /// Génère une chaîne de lettres alétoires.
@@ -36,24 +37,24 @@ public static class RandomUtils
     {
         if (upperCase == null)
         {
-            if (_random.Next(2) == 0)
+            if (_random.Value.Next(2) == 0)
             {
-                return (char) _random.Next('A', 'Z');
+                return (char) _random.Value.Next('A', 'Z');
             }
             else
             {
-                return (char) _random.Next('a', 'z');
+                return (char) _random.Value.Next('a', 'z');
             }
         }
         else
         {
             if (upperCase.Value)
             {
-                return (char) _random.Next('A', 'Z');
+                return (char) _random.Value.Next('A', 'Z');
             }
             else
             {
-                return (char) _random.Next('a', 'z');
+                return (char) _random.Value.Next('a', 'z');
             }
         }
     }
@@ -69,7 +70,7 @@ public static class RandomUtils
         int max = (int) Math.Pow(10, digits); // max = 1000
         max = max - 1; // max = 999, OK :)
 
-        var result = _random.Next(1, max).ToString().PadLeft(digits, '0');
+        var result = _random.Value.Next(1, max).ToString().PadLeft(digits, '0');
 
         return result;
     }
@@ -82,7 +83,7 @@ public static class RandomUtils
         }
         else
         {
-            var r = _random.Next(collection.Count);
+            var r = _random.Value.Next(collection.Count);
 
             if (collection is IList<T>)
             {
