@@ -62,49 +62,29 @@ public class FunctionsE2ETests
         {
             FileName = "dotnet",
             Arguments = $"publish \"{projectRoot}\" -c Release -o \"{publishDir}\"",
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
             UseShellExecute = false
         };
 
         using var publish = new Process { StartInfo = startInfo };
-        var stdout = new StringBuilder();
-        var stderr = new StringBuilder();
-        publish.OutputDataReceived += (_, e) => { if (e.Data != null) stdout.AppendLine(e.Data); };
-        publish.ErrorDataReceived += (_, e) => { if (e.Data != null) stderr.AppendLine(e.Data); };
 
         publish.Start();
-        publish.BeginOutputReadLine();
-        publish.BeginErrorReadLine();
         publish.WaitForExit();
         
         publish.ExitCode.Should().Be(0);
         
         var cfg = GlobalTestSetup.Configuration;
-        string redisConnectionString = cfg["Redis:ConnectionString"]!;
-        string redisPrefix = cfg["Redis:Prefix"] ?? "e2e";
-        string signalRConnectionString = cfg["SignalR:ConnectionString"]!;
-        string appSecret = cfg["AppSettings:Secret"] ?? "IntegrationTestSecret";
-
         var env = new Dictionary<string, string>
         {
-            ["AzureWebJobsStorage"] = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tHQVh9+3JHB+F/2j3xYZx3d/==;BlobEndpoint=http://host.docker.internal:10000/devstoreaccount1;QueueEndpoint=http://host.docker.internal:10001/devstoreaccount1;TableEndpoint=http://host.docker.internal:10002/devstoreaccount1",
-            ["FUNCTIONS_WORKER_RUNTIME"] = "dotnet-isolated",
-            ["ASPNETCORE_URLS"] = "http://+:80",
-            ["AzureSignalRConnectionString"] = signalRConnectionString,
-            ["AppSettings__JwtDurationInSeconds"] = "3600",
-            ["AppSettings__SkipClientsVersionCheck"] = "true",
-            ["Redis__ConnectionString"] = redisConnectionString,
-            ["Redis__Prefix"] = redisPrefix,
-            ["SignalR__ConnectionString"] = signalRConnectionString,
-            ["AppSettings__Secret"] = appSecret,
-            ["AppSettings__DefaultStorageProvider"] = "AzureBlobStorage",
-            ["AzureBlobStorage__Endpoint"] = "http://host.docker.internal:10000/devstoreaccount1",
-            ["AzureBlobStorage__AccountName"] = "devstoreaccount1",
-            ["AzureBlobStorage__AccountKey"] = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tHQVh9+3JHB+F/2j3xYZx3d/==",
-            ["AzureBlobStorage__Container"] = "bytesync-test"
+            ["AzureWebJobsStorage"] = cfg["AzureWebJobsStorage"],
+            ["AppSettings__SkipClientsVersionCheck"] = "True" ,
+            ["Redis__ConnectionString"] = cfg["Redis:ConnectionString"]!,
+            ["SignalR__ConnectionString"] = cfg["SignalR:ConnectionString"]!,
+            ["AppSettings__Secret"] = cfg["AppSettings:Secret"],
+            ["AzureBlobStorage__Endpoint"] = cfg["AzureBlobStorage:Endpoint"],
+            ["AzureBlobStorage__AccountName"] = cfg["AzureBlobStorage:AccountName"],
+            ["AzureBlobStorage__AccountKey"] = cfg["AzureBlobStorage:AccountKey"],
+            ["AzureBlobStorage__Container"] = cfg["AzureBlobStorage:Container"] 
         };
-
 
         var functionsBuilder = new ContainerBuilder()
             .WithImage("mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated8.0")
@@ -121,17 +101,12 @@ public class FunctionsE2ETests
         
         _http = new HttpClient { BaseAddress = new Uri("http://localhost:7071/api/") };
         _http.DefaultRequestHeaders.Add("User-Agent", "ByteSync-E2E-Test");
-        for (var i = 0; i < 20; i++)
-		{
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 		var resp = await _http.GetAsync("announcements", cts.Token);
-		if (resp.IsSuccessStatusCode)
-		{
-			break;
-		}
+
 	    await Task.Delay(1000);
-		}
+		
     }
 
     [OneTimeTearDown]
@@ -139,7 +114,7 @@ public class FunctionsE2ETests
     {
         await _functions.DisposeAsync();
         await _azurite.DisposeAsync();
-        _http?.Dispose();
+        _http.Dispose();
     }
 
     [Test]
@@ -188,7 +163,7 @@ public class FunctionsE2ETests
         
         var askResult = await PostJsonAsync<JoinSessionResult>($"session/{sessionId}/askPasswordExchangeKey", askParams, tokenB.AuthenticationTokens!.JwtToken);
         askResult.Should().NotBeNull();
-        askResult!.Status.Should().Be(JoinSessionStatus.ProcessingNormally);
+        askResult.Status.Should().Be(JoinSessionStatus.ProcessingNormally);
 
         var validateParams = new ValidateJoinCloudSessionParameters(sessionId, loginB.ClientInstanceId, loginA.ClientInstanceId, new byte[] { 1,2,3,4,5,6,7,8 });
         await PostJsonAsync<object>($"session/{sessionId}/validateJoin", validateParams, tokenB.AuthenticationTokens!.JwtToken);
@@ -213,7 +188,6 @@ public class FunctionsE2ETests
     {
         var loginJson = JsonSerializer.Serialize(login);
         using var loginContent = new StringContent(loginJson, Encoding.UTF8, "application/json");
-        loginContent.Headers.ContentLength = Encoding.UTF8.GetByteCount(loginJson);
         TestContext.Progress.WriteLine($"{DateTime.UtcNow:o} | POST /auth/login");
         var authResp = await _http.PostAsync("auth/login", loginContent);
         if (!authResp.IsSuccessStatusCode)
@@ -233,7 +207,6 @@ public class FunctionsE2ETests
     {
         var json = JsonSerializer.Serialize(body);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
-        content.Headers.ContentLength = Encoding.UTF8.GetByteCount(json);
         using var req = new HttpRequestMessage(HttpMethod.Post, relativeUrl);
         req.Content = content;
         req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwtToken);
@@ -246,7 +219,6 @@ public class FunctionsE2ETests
         }
         if (typeof(T) == typeof(object)) return default;
         var respJson = await resp.Content.ReadAsStringAsync();
-        TestContext.Progress.WriteLine($"{DateTime.UtcNow:o} | Response {relativeUrl}: {respJson}");
         return JsonSerializer.Deserialize<T>(respJson, JsonSerializerOptionsHelper.BuildOptions());
     }
 
