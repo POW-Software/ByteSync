@@ -111,12 +111,14 @@ jobs:
       - run: dotnet restore --locked-mode
       - run: dotnet clean --verbosity quiet
       - run: dotnet build --verbosity quiet /property:WarningLevel=0
-
-      - name: Set up Docker 
-        uses: docker/setup-docker-action@v4
         
       - name: Run Test Project
         run: |
+          extra_filter=""
+          if [[ "${{ matrix.os }}" != "ubuntu-latest" ]]; then
+            extra_filter="--filter FullyQualifiedName!~E2E_Auth_Session_Tests"
+          fi
+
           mkdir -p TestResults
           project="${{ matrix.testProject }}"
           safe_name=$(basename "$project" .csproj)
@@ -124,6 +126,7 @@ jobs:
           dotnet test "$project" \
             --no-restore \
             --no-build \
+            $extra_filter \
             --logger "trx;LogFileName=$safe_name.trx" \
             --results-directory ./TestResults \
               --collect:"XPlat Code Coverage" \
