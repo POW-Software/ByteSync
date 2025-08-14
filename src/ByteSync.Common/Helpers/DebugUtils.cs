@@ -23,7 +23,8 @@ public class DebugUtils
     #if DEBUG
 
         double milliseconds;
-        if (minSeconds == maxSeconds)
+        double epsilon = 1e-10;
+        if (double.Abs(minSeconds - maxSeconds) < epsilon)
         {
             milliseconds = minSeconds * 1000;
         }
