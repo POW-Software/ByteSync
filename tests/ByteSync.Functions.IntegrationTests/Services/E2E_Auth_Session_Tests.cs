@@ -86,16 +86,16 @@ public class E2E_Auth_Session_Tests
             ["AzureBlobStorage__Container"] = cfg["AzureBlobStorage:Container"] 
         };
 
-        var functionsBuilder = new ContainerBuilder()
-            .WithImage("mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated8.0")
-            .WithName($"bytesync-functions-e2e-{Guid.NewGuid():N}")
-            .WithPortBinding(7071, 80)
-            .WithBindMount(publishDir, "/home/site/wwwroot")
-            .WithEnvironment(env)
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(
-                req => req
-                .ForPort(80)
-                .ForPath("/api/healthz")));
+		var functionsBuilder = new ContainerBuilder()
+			.WithImage("mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated8.0")
+			.WithName($"bytesync-functions-e2e-{Guid.NewGuid():N}")
+			.WithPortBinding(7071, 80)
+			.WithBindMount(publishDir, "/home/site/wwwroot")
+			.WithEnvironment(env)
+			.WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(
+				req => req
+				.ForPort(80)
+				.ForPath("/api/announcements")));
         
         _functions = functionsBuilder.Build();
 
