@@ -105,9 +105,6 @@ public class E2E_Auth_Session_Tests
         _http = new HttpClient { BaseAddress = new Uri("http://localhost:7071/api/") };
         _http.DefaultRequestHeaders.Add("User-Agent", "ByteSync-E2E-Test");
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-		var resp = await _http.GetAsync("announcements", cts.Token);
-
 	    await Task.Delay(1000);
 		
     }

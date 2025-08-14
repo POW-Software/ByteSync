@@ -80,7 +80,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         testProject: ${{ fromJson(needs.discover-tests.outputs.testProjects) }}
     name: build-and-test (${{ matrix.os }} | ${{ matrix.testProject }})
     steps:
