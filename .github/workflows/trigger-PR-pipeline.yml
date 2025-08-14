@@ -6,6 +6,61 @@ on:
   pull_request:
 
 jobs:
+  sonarcloud:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download test artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: PR-test-results-*
+          merge-multiple: true
+          path: ./TestResults
+
+      - name: Create Client config for build
+        shell: bash
+        run: |
+          mkdir -p src/ByteSync.Client
+          echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
+
+      - name: Setup .NET 8 Environment
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install SonarScanner for .NET
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      - name: SonarCloud Begin (prepare)
+        run: >
+          dotnet sonarscanner begin
+          /k:"POW-Software_ByteSync"
+          /o:"pow-software"
+          /d:sonar.host.url="https://sonarcloud.io"
+          /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+          /d:sonar.cs.vstest.reportsPaths="**/*.trx"
+
+      - name: Build (no tests)
+        run: |
+          dotnet restore --locked-mode
+          dotnet clean --verbosity quiet
+          dotnet build --verbosity quiet -clp:ErrorsOnly /property:WarningLevel=0
+
+      - name: SonarCloud End (publish)
+        run: >
+          dotnet sonarscanner end
+          /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   discover-tests:
     runs-on: ubuntu-latest
     outputs:
@@ -62,7 +117,14 @@ jobs:
           project="${{ matrix.testProject }}"
           safe_name=$(basename "$project" .csproj)
           echo "Running test project: $project"
-          dotnet test "$project" --no-restore --no-build --logger "trx;LogFileName=$safe_name.trx" --results-directory ./TestResults
+          dotnet test "$project" \
+            --no-restore \
+            --no-build \
+            --logger "trx;LogFileName=$safe_name.trx" \
+            --results-directory ./TestResults \
+              --collect:"XPlat Code Coverage" \
+              -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover \
+                 DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.OutputDirectory=./TestResults
         shell: bash
 
       - name: Upload Test Results
