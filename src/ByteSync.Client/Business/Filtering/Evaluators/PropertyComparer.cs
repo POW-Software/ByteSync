@@ -41,20 +41,37 @@ public class PropertyComparer : IPropertyComparer
             {
                 var s2 = (value2.Value as string)!;
 
-                if (op switch
-                    {
-                        ComparisonOperator.Equals => string.Equals(s1, s2, StringComparison.OrdinalIgnoreCase),
-                        ComparisonOperator.NotEquals => !string.Equals(s1, s2, StringComparison.OrdinalIgnoreCase),
-                        ComparisonOperator.GreaterThan => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) > 0,
-                        ComparisonOperator.LessThan => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) < 0,
-                        ComparisonOperator.GreaterThanOrEqual => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) >= 0,
-                        ComparisonOperator.LessThanOrEqual => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) <= 0,
-                        ComparisonOperator.RegexMatch => Regex.IsMatch(s1, s2),
-                        _ => throw new ArgumentException($"Unsupported string operator: {op}")
-                    })
-                {
-                    return true;
-                }
+				bool isMatch;
+				if (op == ComparisonOperator.RegexMatch)
+				{
+					try
+					{
+						var safeRegex = new Regex(s2, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(500));
+						isMatch = safeRegex.IsMatch(s1);
+					}
+					catch (ArgumentException)
+					{
+						isMatch = false;
+					}
+				}
+				else
+				{
+					isMatch = op switch
+					{
+						ComparisonOperator.Equals => string.Equals(s1, s2, StringComparison.OrdinalIgnoreCase),
+						ComparisonOperator.NotEquals => !string.Equals(s1, s2, StringComparison.OrdinalIgnoreCase),
+						ComparisonOperator.GreaterThan => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) > 0,
+						ComparisonOperator.LessThan => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) < 0,
+						ComparisonOperator.GreaterThanOrEqual => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) >= 0,
+						ComparisonOperator.LessThanOrEqual => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase) <= 0,
+						_ => throw new ArgumentException($"Unsupported string operator: {op}")
+					};
+				}
+
+				if (isMatch)
+				{
+					return true;
+				}
             }
         }
 

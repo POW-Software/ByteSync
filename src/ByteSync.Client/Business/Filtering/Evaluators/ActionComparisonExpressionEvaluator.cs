@@ -81,7 +81,10 @@ public class ActionComparisonExpressionEvaluator : ExpressionEvaluator<ActionCom
     
     private int FilterActionsByType(List<AtomicAction> actions, string actionType)
     {
-        var actionTypePattern = new Regex(@"^([a-zA-Z-]+)$", RegexOptions.IgnoreCase);
+        var actionTypePattern = new Regex(
+            @"^([a-zA-Z-]+)$", 
+            RegexOptions.IgnoreCase,
+            TimeSpan.FromMilliseconds(500));
         var match = actionTypePattern.Match(actionType);
         
         if (!match.Success)

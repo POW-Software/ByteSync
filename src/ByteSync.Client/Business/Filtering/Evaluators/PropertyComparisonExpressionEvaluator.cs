@@ -48,10 +48,11 @@ public class PropertyComparisonExpressionEvaluator : ExpressionEvaluator<Propert
         // Handle special case for regex
         if (op == ComparisonOperator.RegexMatch && sourceValues.Any(sv => sv.Value is string))
         {
-            try
-            {
-                return sourceValues.Any(sv => Regex.IsMatch(sv.Value.ToString()!, targetValue));
-            }
+			try
+			{
+				var safeRegex = new Regex(targetValue, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(500));
+				return sourceValues.Any(sv => safeRegex.IsMatch(sv.Value.ToString()!));
+			}
             catch (ArgumentException)
             {
                 // Invalid regex

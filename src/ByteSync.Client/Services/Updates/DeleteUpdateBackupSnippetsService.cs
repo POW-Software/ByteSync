@@ -25,11 +25,11 @@ public class DeleteUpdateBackupSnippetsService : IDeleteUpdateBackupSnippetsServ
             _logger.LogWarning("Unable to guess ApplicationBaseDirectory");
             return Task.CompletedTask;
         }
-        
+
         var regexes = new List<Regex>
         {
-            new(@$"{UpdateConstants.BAK_EXTENSION}\d+$"),
-            new(@$"^{UpdateConstants.UPDATE_UNZIP_EXTRACT_START_NAME}")
+            new(@$"{UpdateConstants.BAK_EXTENSION}\d+$", RegexOptions.None, TimeSpan.FromMilliseconds(500)),
+            new(@$"^{UpdateConstants.UPDATE_UNZIP_EXTRACT_START_NAME}", RegexOptions.None, TimeSpan.FromMilliseconds(500))
         };
         
         foreach (var regex in regexes)

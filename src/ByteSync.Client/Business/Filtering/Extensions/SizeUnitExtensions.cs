@@ -7,7 +7,8 @@ public static class SizeUnitExtensions
 {
     public static long ToBytes(this string sizeWithUnit)
     {
-        var match = Regex.Match(sizeWithUnit, @"^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)$");
+        var safeRegex = new Regex(@"^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)$", RegexOptions.None, TimeSpan.FromMilliseconds(500));
+        var match = safeRegex.Match(sizeWithUnit);
         if (!match.Success)
             return long.Parse(sizeWithUnit); // Assume bytes if no unit specified
 
