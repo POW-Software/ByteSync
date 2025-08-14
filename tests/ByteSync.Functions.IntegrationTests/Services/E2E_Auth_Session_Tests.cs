@@ -92,7 +92,10 @@ public class E2E_Auth_Session_Tests
             .WithPortBinding(7071, 80)
             .WithBindMount(publishDir, "/home/site/wwwroot")
             .WithEnvironment(env)
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(80));
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(
+                req => req
+                .ForPort(80)
+                .ForPath("/api/healthz")));
         
         _functions = functionsBuilder.Build();
 
