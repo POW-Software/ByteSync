@@ -15,7 +15,7 @@ using FluentAssertions;
 namespace ByteSync.Functions.IntegrationTests.Services;
 
 [TestFixture]
-public class FunctionsE2ETests
+public class E2E_Auth_Session_Tests
 {
     
     private IContainer _azurite = null!;
