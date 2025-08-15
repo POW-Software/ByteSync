@@ -1,0 +1,159 @@
+using System.Diagnostics;
+using System.Text;
+using System.Text.Json;
+using ByteSync.Common.Business.Auth;
+using ByteSync.Common.Business.Sessions.Cloud;
+using ByteSync.Common.Controls.Json;
+using DotNet.Testcontainers.Builders;
+using ContainerBuilder = DotNet.Testcontainers.Builders.ContainerBuilder;
+using IContainer = DotNet.Testcontainers.Containers.IContainer;
+using FluentAssertions;
+
+namespace ByteSync.Functions.IntegrationTests.End2End;
+
+public class E2E_Auth_Session_Initializer : IAsyncDisposable
+{
+    public IContainer Azurite { get; private set; } = null!;
+    public IContainer Functions { get; private set; } = null!;
+    public HttpClient Http { get; private set; } = null!;
+
+    public async Task InitializeAsync()
+    {
+        Azurite = new ContainerBuilder()
+            .WithImage("mcr.microsoft.com/azure-storage/azurite")
+            .WithName($"bytesync-azurite-e2e-{Guid.NewGuid():N}")
+            .WithPortBinding(10000, 10000)
+            .WithPortBinding(10001, 10001)
+            .WithPortBinding(10002, 10002)
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(10000))
+            .Build();
+
+        using (var azuriteCts = new CancellationTokenSource(TimeSpan.FromSeconds(90)))
+        {
+            await Azurite.StartAsync(azuriteCts.Token);
+        }
+
+        string ResolveFunctionsProjectRoot()
+        {
+            var dir = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
+            while (dir != null && !File.Exists(Path.Combine(dir.FullName, "ByteSync.sln")))
+            {
+                dir = dir.Parent;
+            }
+            if (dir != null)
+            {
+                var candidate = Path.Combine(dir.FullName, "src", "ByteSync.Functions");
+                if (Directory.Exists(candidate)) return candidate;
+            }
+            return Path.GetFullPath(Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", "..", "..", "..", "src", "ByteSync.Functions"));
+        }
+
+        var projectRoot = ResolveFunctionsProjectRoot();
+        var publishDir = Path.Combine(Path.GetTempPath(), $"bytesync-func-pub-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(publishDir);
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "dotnet",
+            Arguments = $"publish \"{projectRoot}\" -c Release -o \"{publishDir}\"",
+            UseShellExecute = false
+        };
+
+        using var publish = new Process { StartInfo = startInfo };
+        publish.Start();
+        publish.WaitForExit();
+        publish.ExitCode.Should().Be(0);
+
+        var cfg = GlobalTestSetup.Configuration;
+        var env = new Dictionary<string, string>
+        {
+            ["AzureWebJobsStorage"] = cfg["AzureWebJobsStorage"],
+            ["AppSettings__SkipClientsVersionCheck"] = "True" ,
+            ["Redis__ConnectionString"] = cfg["Redis:ConnectionString"]!,
+            ["SignalR__ConnectionString"] = cfg["SignalR:ConnectionString"]!,
+            ["AppSettings__Secret"] = cfg["AppSettings:Secret"],
+            ["AzureBlobStorage__Endpoint"] = cfg["AzureBlobStorage:Endpoint"],
+            ["AzureBlobStorage__AccountName"] = cfg["AzureBlobStorage:AccountName"],
+            ["AzureBlobStorage__AccountKey"] = cfg["AzureBlobStorage:AccountKey"],
+            ["AzureBlobStorage__Container"] = cfg["AzureBlobStorage:Container"] 
+        };
+
+        var functionsBuilder = new ContainerBuilder()
+            .WithImage("mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated8.0")
+            .WithName($"bytesync-functions-e2e-{Guid.NewGuid():N}")
+            .WithPortBinding(7071, 80)
+            .WithBindMount(publishDir, "/home/site/wwwroot")
+            .WithEnvironment(env)
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(
+                req => req
+                    .ForPort(80)
+                    .ForPath("/api/announcements")));
+
+        Functions = functionsBuilder.Build();
+        using var funcCts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+        await Functions.StartAsync(funcCts.Token);
+
+        Http = new HttpClient { BaseAddress = new Uri("http://localhost:7071/api/") };
+        Http.DefaultRequestHeaders.Add("User-Agent", "ByteSync-E2E-Test");
+        await Task.Delay(1000);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await Functions.DisposeAsync();
+        await Azurite.DisposeAsync();
+        Http.Dispose();
+    }
+
+    public async Task<List<SessionMemberInfoDTO>> GetMembersAsync(string sessionId, string jwtToken)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Get, $"session/{sessionId}/members");
+        req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwtToken);
+        var resp = await Http.SendAsync(req);
+        if (!resp.IsSuccessStatusCode)
+        {
+            var body = await resp.Content.ReadAsStringAsync();
+            Assert.Fail($"GET session/{sessionId}/members failed: {(int)resp.StatusCode} {resp.ReasonPhrase}. Body: {body}");
+        }
+        var json = await resp.Content.ReadAsStringAsync();
+        var list = JsonSerializer.Deserialize<List<SessionMemberInfoDTO>>(json, JsonSerializerOptionsHelper.BuildOptions());
+        return list ?? new List<SessionMemberInfoDTO>();
+    }
+
+    public async Task<InitialAuthenticationResponse> LoginAsync(LoginData login)
+    {
+        var loginJson = JsonSerializer.Serialize(login);
+        using var loginContent = new StringContent(loginJson, Encoding.UTF8, "application/json");
+        TestContext.Progress.WriteLine($"{DateTime.UtcNow:o} | POST /auth/login");
+        var authResp = await Http.PostAsync("auth/login", loginContent);
+        if (!authResp.IsSuccessStatusCode)
+        {
+            var body = await authResp.Content.ReadAsStringAsync();
+            Assert.Fail($"auth/login failed: {(int)authResp.StatusCode} {authResp.ReasonPhrase}. Body: {body}");
+        }
+        var authJson = await authResp.Content.ReadAsStringAsync();
+        var auth = JsonSerializer.Deserialize<InitialAuthenticationResponse>(authJson, JsonSerializerOptionsHelper.BuildOptions())!;
+        auth.IsSuccess.Should().BeTrue();
+        auth.AuthenticationTokens.Should().NotBeNull();
+        auth.AuthenticationTokens!.JwtToken.Should().NotBeNullOrEmpty();
+        return auth;
+    }
+
+    public async Task<T?> PostJsonAsync<T>(string relativeUrl, object body, string jwtToken)
+    {
+        var json = JsonSerializer.Serialize(body);
+        using var content = new StringContent(json, Encoding.UTF8, "application/json");
+        using var req = new HttpRequestMessage(HttpMethod.Post, relativeUrl);
+        req.Content = content;
+        req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwtToken);
+        TestContext.Progress.WriteLine($"{DateTime.UtcNow:o} | POST {relativeUrl}");
+        var resp = await Http.SendAsync(req);
+        if (!resp.IsSuccessStatusCode)
+        {
+            var respBody = await resp.Content.ReadAsStringAsync();
+            Assert.Fail($"POST {relativeUrl} failed: {(int)resp.StatusCode} {resp.ReasonPhrase}. Body: {respBody}");
+        }
+        if (typeof(T) == typeof(object)) return default;
+        var respJson = await resp.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<T>(respJson, JsonSerializerOptionsHelper.BuildOptions());
+    }
+}

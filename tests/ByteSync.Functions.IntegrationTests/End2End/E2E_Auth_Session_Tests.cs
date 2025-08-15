@@ -4,7 +4,7 @@ using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using FluentAssertions;
 
-namespace ByteSync.Functions.IntegrationTests.Services;
+namespace ByteSync.Functions.IntegrationTests.End2End;
 
 [SetUpFixture]
 public class E2E_Auth_Session_Tests

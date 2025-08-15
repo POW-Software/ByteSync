@@ -5,7 +5,7 @@ using ByteSync.Functions.IntegrationTests.TestHelpers.Autofac;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Commands.Authentication;
 
-namespace ByteSync.Functions.IntegrationTests.Services;
+namespace ByteSync.Functions.IntegrationTests.Integration.Services;
 
 [TestFixture]
 public class RefreshTokensCommandHandler_Tests
