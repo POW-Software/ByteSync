@@ -28,9 +28,9 @@ public class RandomUtilsTests
 	[Test]
 	public void GetRandomLetters_WithNull_YieldsBothCasesOverMultipleSamples()
 	{
-		var result = RandomUtils.GetRandomLetters(256, null);
+		var result = RandomUtils.GetRandomLetters(1024, null);
 
-		result.Should().HaveLength(256);
+		result.Should().HaveLength(1024);
 		result.Any(char.IsUpper).Should().BeTrue();
 		result.Any(char.IsLower).Should().BeTrue();
 	}
@@ -49,7 +49,7 @@ public class RandomUtilsTests
 		bool seenUpper = false;
 		bool seenLower = false;
 
-		for (int i = 0; i < 512 && (!seenUpper || !seenLower); i++)
+		for (int i = 0; i < 8192 && (!seenUpper || !seenLower); i++)
 		{
 			char c = RandomUtils.GetRandomLetter(null);
 			if (char.IsUpper(c)) seenUpper = true;
