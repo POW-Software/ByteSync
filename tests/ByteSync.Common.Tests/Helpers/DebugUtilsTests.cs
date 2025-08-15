@@ -71,6 +71,13 @@ namespace TestingCommon.Helpers
         }
 
         [Test]
+        public void IsRandom_MidProbability_ShouldExecuteRandomPath()
+        {
+            Action act = () => DebugUtils.IsRandom(0.5m);
+            act.Should().NotThrow();
+        }
+
+        [Test]
         public void DebugSleep_SingleParameter_ShouldSleep()
         {
             var before = DateTime.UtcNow;
