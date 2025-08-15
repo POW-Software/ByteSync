@@ -109,6 +109,8 @@ public class FileUploadProcessorTests
             .Returns(Task.CompletedTask);
         _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
             .Returns(Task.CompletedTask);
+        _mockFileUploadCoordinator.Setup(x => x.WaitForCompletionAsync())
+            .Returns(Task.Delay(150)); // Small delay to let tasks start
 
         // Act
         await _fileUploadProcessor.ProcessUpload(_sharedFileDefinition);
