@@ -6,7 +6,7 @@ using ByteSync.Common.Business.SharedFiles;
 using Microsoft.Extensions.Configuration;
 using FluentAssertions;
 
-namespace ByteSync.Functions.IntegrationTests.Services;
+namespace ByteSync.Functions.IntegrationTests.Integration.Services;
 
 [TestFixture]
 public class CloudflareR2Service_Tests

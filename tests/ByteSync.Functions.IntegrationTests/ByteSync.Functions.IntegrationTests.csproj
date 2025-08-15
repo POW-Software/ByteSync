@@ -29,6 +29,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Testcontainers" Version="4.6.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -41,6 +42,10 @@
       <None Update="functions-integration-tests.local.settings.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Integration\" />
     </ItemGroup>
 
 </Project>
