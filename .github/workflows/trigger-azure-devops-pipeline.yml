@@ -66,7 +66,6 @@ jobs:
                      "${{ vars.AZURE_DEVOPS_PROJECT_URL }}/_apis/pipelines/${{ env.pipelineId }}/runs?api-version=6.0-preview.1")
         echo "runId=$(echo $response | jq -r '.id')" >> $GITHUB_ENV
         echo "Response: $response"
-        echo "runId=$(echo $response | jq -r '.id')" >> $GITHUB_ENV
 
     - name: Wait for Pipeline to Complete
       id: wait-pipeline
