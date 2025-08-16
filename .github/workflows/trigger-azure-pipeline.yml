@@ -1,0 +1,87 @@
+name: Trigger Azure Pipeline on PR Commit
+
+on:
+  pull_request:
+    branches:
+      - master             
+    types: [synchronize, opened]
+    paths:
+      - 'src/ByteSync.Common/**'
+      - 'src/ByteSync.Functions/**'
+      - 'src/ByteSync.ServerCommon/**'
+      - 'tests/ByteSync.Common.Tests/**'
+      - 'tests/ByteSync.Functions.IntegrationTests/**'
+      - 'tests/ByteSync.Functions.UnitTests/**'
+      - 'tests/ByteSync.ServerCommon.Tests/**'
+      - 'tests/ByteSync.TestsCommon/**'
+
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/ByteSync.Common/**'
+      - 'src/ByteSync.Functions/**'
+      - 'src/ByteSync.ServerCommon/**'
+      - 'tests/ByteSync.Common.Tests/**'
+      - 'tests/ByteSync.Functions.IntegrationTests/**'
+      - 'tests/ByteSync.Functions.UnitTests/**'
+      - 'tests/ByteSync.ServerCommon.Tests/**'
+      - 'tests/ByteSync.TestsCommon/**'
+
+  workflow_dispatch:      
+ 
+jobs:
+  trigger-azure-pipeline:
+    if: ${{ github.actor == 'paul-fresquet' }}    # allows only paul-fresquet
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Extract branch name
+      shell: bash
+      run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
+      id: extract_branch
+
+    - name: Get Pipeline ID by Name
+      id: get-pipeline-id
+      run: |
+        response=$(curl -X GET -H "Authorization: Bearer ${{ secrets.AZURE_DEVOPS_TOKEN }}" \
+                     "${{ vars.AZURE_DEVOPS_PROJECT_URL }}/_apis/pipelines?api-version=6.0-preview.1")
+        pipelineId=$(echo $response | jq -r '.value[] | select(.name=="${{ vars.AZURE_DEVOPS_PIPELINE }}") | .id')
+        if [ -z "$pipelineId" ]; then
+          echo "Error: Pipeline not found" >&2
+          exit 1
+        fi
+        echo "pipelineId=$pipelineId" >> $GITHUB_ENV
+
+    - name: Trigger Azure Pipeline
+      id: trigger-pipeline
+      run: |
+        response=$(curl -X POST -H "Authorization: Bearer ${{ secrets.AZURE_DEVOPS_TOKEN }}" \
+                     -H "Content-Type: application/json" \
+                     -d "{\"resources\": {}, \"variables\": {
+                         \"github-branch\": {
+                             \"value\": \"${branch}\"
+                         }
+                     }}" \
+                     "${{ vars.AZURE_DEVOPS_PROJECT_URL }}/_apis/pipelines/${{ env.pipelineId }}/runs?api-version=6.0-preview.1")
+        echo "runId=$(echo $response | jq -r '.id')" >> $GITHUB_ENV
+        echo "Response: $response"
+        echo "runId=$(echo $response | jq -r '.id')" >> $GITHUB_ENV
+
+    - name: Wait for Pipeline to Complete
+      id: wait-pipeline
+      run: |
+        status="inProgress"
+        while [ "$status" == "inProgress" ]; do
+          sleep 30
+          response=$(curl -X GET -H "Authorization: Bearer ${{ secrets.AZURE_DEVOPS_TOKEN }}" \
+                       "${{ vars.AZURE_DEVOPS_PROJECT_URL }}/_apis/pipelines/${{ env.pipelineId }}/runs/${{ env.runId }}?api-version=6.0-preview.1")
+          status=$(echo $response | jq -r '.state')
+        done
+
+        result=$(echo $response | jq -r '.result')
+        echo "result=$result" >> $GITHUB_ENV
+
+    - name: Check Pipeline Result
+      if: env.result != 'succeeded'
+      run: exit 1
