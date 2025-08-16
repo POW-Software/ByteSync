@@ -56,6 +56,10 @@ public class SynchronizationService : ISynchronizationService
     
     public async Task AbortSynchronization()
     {
+        _logger.LogInformation("synchronization aborted on user request");
+
+        SynchronizationProcessData.RequestSynchronizationAbort();
+        
         var session = await _sessionService.SessionObservable.FirstOrDefaultAsync();
         
         if (session is CloudSession cloudSession)
