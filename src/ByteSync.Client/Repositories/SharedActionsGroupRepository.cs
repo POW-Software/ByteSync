@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Business.Actions.Shared;
+﻿using ByteSync.Business.Actions.Shared;
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Interfaces.Repositories;
@@ -17,7 +16,7 @@ public class SharedActionsGroupRepository : BaseSourceCacheRepository<SharedActi
     {
         _logger = logger;
         
-        OrganizedSharedActionsGroups = new List<SharedActionsGroup>();
+        OrganizedSharedActionsGroups = [];
         
         _sessionInvalidationCachePolicy = sessionInvalidationCachePolicy;
         _sessionInvalidationCachePolicy.Initialize(SourceCache, true, true);
@@ -25,17 +24,13 @@ public class SharedActionsGroupRepository : BaseSourceCacheRepository<SharedActi
     
     protected override string KeySelector(SharedActionsGroup sharedAtomicAction) => sharedAtomicAction.ActionsGroupId;
 
-    public IObservableCache<SharedActionsGroup, string> SharedActionsGroups => ObservableCache;
-
-    public IEnumerable<SharedActionsGroup> SharedActionsGroupsList => SourceCache.Items;
-
     public List<SharedActionsGroup> OrganizedSharedActionsGroups { get; private set; }
     
     public List<ActionsGroupDefinition> GetActionsGroupsDefinitions()
     {
-        List<ActionsGroupDefinition> result = new List<ActionsGroupDefinition>();
+        List<ActionsGroupDefinition> result = [];
         
-        foreach (var sharedActionsGroup in SharedActionsGroupsList)
+        foreach (var sharedActionsGroup in SourceCache.Items)
         {
             result.Add(sharedActionsGroup.GetDefinition());
         }
