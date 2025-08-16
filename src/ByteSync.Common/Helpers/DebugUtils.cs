@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
@@ -8,8 +9,7 @@ namespace ByteSync.Common.Helpers;
 
 public class DebugUtils
 {
-    private static Random _random = new Random();
-    
+
     public static async Task DebugTaskDelay(double seconds, 
         [CallerMemberName] string callerName = "", [CallerFilePath] string callerFilePath = "")
     {
@@ -23,13 +23,14 @@ public class DebugUtils
     #if DEBUG
 
         double milliseconds;
-        if (minSeconds == maxSeconds)
+        double epsilon = 1e-10;
+        if (double.Abs(minSeconds - maxSeconds) < epsilon)
         {
             milliseconds = minSeconds * 1000;
         }
         else
         {
-            milliseconds = _random.Next((int)(minSeconds * 1000), (int)(maxSeconds * 1000));
+            milliseconds = RandomNumberGenerator.GetInt32((int)(minSeconds * 1000), (int)(maxSeconds * 1000) + 1);
         }
 
         double seconds = milliseconds / 1000d;
@@ -75,7 +76,7 @@ public class DebugUtils
         
         var top = (int) Math.Pow(10, decimals);
 
-        var r = _random.Next(top) + 1;
+        var r = RandomNumberGenerator.GetInt32(top + 1) + 1;
 
         bool isRandom = r < iProbability;
         
@@ -110,7 +111,7 @@ public class DebugUtils
         }
         else
         {
-            milliseconds = _random.Next((int)(minSeconds * 1000), (int)(maxSeconds * 1000));
+            milliseconds = RandomNumberGenerator.GetInt32((int)(minSeconds * 1000), (int)(maxSeconds * 1000) + 1);
         }
 
         double seconds = milliseconds / 1000d;

@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
@@ -149,16 +150,19 @@ class WebAccessor : IWebAccessor
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 url = url.Replace("&", "^&");
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("cmd", $"/c start {url}")
+                var cmdTrustedPath = Path.Combine(Environment.SystemDirectory, "cmd.exe");
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(cmdTrustedPath, $"/c start {url}")
                     { CreateNoWindow = true });
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                System.Diagnostics.Process.Start("xdg-open", url);
+                var xdgTrustedPath = "/usr/bin/xdg-open";
+                System.Diagnostics.Process.Start(xdgTrustedPath, url);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                System.Diagnostics.Process.Start("open", url);
+                var openTrustedPath = "/usr/bin/open";
+                System.Diagnostics.Process.Start(openTrustedPath, url);
             }
             else
             {

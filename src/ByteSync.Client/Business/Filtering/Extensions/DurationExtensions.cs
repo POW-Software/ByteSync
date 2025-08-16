@@ -7,7 +7,9 @@ public static class DurationExtensions
 {
     public static TimeSpan ToTimeSpan(this string durationWithUnit)
     {
-        var match = Regex.Match(durationWithUnit, @"^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)$");
+        var safeRegex = new Regex(@"^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)$", RegexOptions.None, TimeSpan.FromMilliseconds(500));
+
+        var match = safeRegex.Match(durationWithUnit);
         if (!match.Success)
             return TimeSpan.FromSeconds(double.Parse(durationWithUnit)); // Assume seconds if no unit
 

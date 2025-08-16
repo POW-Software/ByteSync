@@ -24,7 +24,8 @@ public class SafetyWordsComputer
         {
             throw new ArgumentOutOfRangeException(nameof(hexInput), "input can not be empty");
         }
-        if (!Regex.IsMatch(hexInput, "^[0-9a-f]+$", RegexOptions.IgnoreCase))
+        var safeRegex = new Regex("^[0-9a-f]+$", RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(500));
+        if (!safeRegex.IsMatch(hexInput))
         {
             throw new ArgumentOutOfRangeException(nameof(hexInput), "wrong input format");
         }
