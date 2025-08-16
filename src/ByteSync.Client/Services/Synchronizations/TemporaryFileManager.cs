@@ -98,8 +98,8 @@ public class TemporaryFileManager : ITemporaryFileManager
     {
         try
         {
-            _logger.LogWarning("An exception has occurred during validation operations on file {file}: {type} - {message}. Trying to revert operation", 
-                DestinationFullName, exception.GetType().Name, exception.Message);
+            _logger.LogWarning("An exception has occurred during validation operations on file {file}: {type}. Trying to revert operation", 
+                DestinationFullName, exception.GetType().Name);
             if (!HasValidationStarted)
             {
                 // We try to delete the DestinationTemporaryPath file if it exists

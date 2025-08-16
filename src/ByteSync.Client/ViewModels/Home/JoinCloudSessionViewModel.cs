@@ -10,6 +10,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ByteSync.Interfaces.Services.Sessions.Connecting.Joining;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -143,7 +144,8 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
             string errorMessage = _localizationService[ErrorMessageSource!];
             if (exception != null)
             {
-                errorMessage += $" ({exception.Message})";
+                _logger.LogError(exception, "Session join error occurred");
+                // Don't expose exception details to the user for security reasons
             }
 
             ErrorMessage = errorMessage;
