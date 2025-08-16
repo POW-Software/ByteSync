@@ -3,7 +3,6 @@ using System.Reactive.Linq;
 using ByteSync.Business.Arguments;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
-using ByteSync.Common.Business.Sessions.Local;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Repositories;
@@ -54,14 +53,6 @@ public class SynchronizationLooper : ISynchronizationLooper
         get
         {
             return Session as CloudSession;
-        }
-    }
-    
-    private LocalSession? LocalSession
-    {
-        get
-        {
-            return Session as LocalSession;
         }
     }
     
