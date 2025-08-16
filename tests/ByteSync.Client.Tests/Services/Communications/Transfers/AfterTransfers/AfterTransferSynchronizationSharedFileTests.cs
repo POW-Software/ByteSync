@@ -54,7 +54,7 @@ public class AfterTransferSynchronizationSharedFileTests
     {
         _synchronizationDataTransmitted.Dispose();
         _cancellationTokenSource.Dispose();
-        _synchronizationProcessData.CancellationTokenSource?.Dispose();
+        _synchronizationProcessData.CancellationTokenSource.Dispose();
     }
 
     [Test]
@@ -74,7 +74,7 @@ public class AfterTransferSynchronizationSharedFileTests
     public void Constructor_WithNullSynchronizationService_ShouldNotThrow()
     {
         // Act & Assert
-        Action act = () => new AfterTransferSynchronizationSharedFile(
+        Action act = () => _ = new AfterTransferSynchronizationSharedFile(
             null!,
             _mockSynchronizationApiClient.Object);
 
@@ -85,7 +85,7 @@ public class AfterTransferSynchronizationSharedFileTests
     public void Constructor_WithNullSynchronizationApiClient_ShouldNotThrow()
     {
         // Act & Assert
-        Action act = () => new AfterTransferSynchronizationSharedFile(
+        Action act = () => _ = new AfterTransferSynchronizationSharedFile(
             _mockSynchronizationService.Object,
             null!);
 
