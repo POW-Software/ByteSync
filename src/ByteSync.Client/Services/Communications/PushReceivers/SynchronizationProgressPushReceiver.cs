@@ -1,4 +1,5 @@
 ﻿using ByteSync.Common.Business.Synchronizations;
+using ByteSync.Helpers;
 using ByteSync.Interfaces.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Communications.SignalR;
@@ -47,6 +48,26 @@ public class SynchronizationProgressPushReceiver : IPushReceiver
             if (sessionId != synchronizationProgressPush.SessionId)
             {
                 _logger.LogWarning("Received a synchronization progress push for a different session than the current one");
+                return;
+            }
+            
+            try
+            {
+                // Wait for synchronization data to be transmitted with timeout and cancellation
+                var timeout = TimeSpan.FromMinutes(1);
+                var synchronizationData = _synchronizationService.SynchronizationProcessData;
+                
+                await synchronizationData.SynchronizationDataTransmitted.WaitUntilTrue(timeout, 
+                    synchronizationData.CancellationTokenSource.Token);
+            }
+            catch (TimeoutException)
+            {
+                _logger.LogError("Timeout waiting for synchronization data transmission (1 minute) for session {SessionId}", sessionId);
+                return;
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("Synchronization progress processing cancelled for session {SessionId}", sessionId);
                 return;
             }
 
