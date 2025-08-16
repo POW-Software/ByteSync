@@ -32,7 +32,7 @@ on:
  
 jobs:
   trigger-azure-pipeline:
-    if: ${{ github.actor == 'paul-fresquet' }}    # allows only paul-fresquet
+    if: ${{ secrets.AZURE_DEVOPS_TOKEN != '' && vars.AZURE_DEVOPS_PROJECT_URL != '' && vars.AZURE_DEVOPS_PIPELINE != '' }}
     runs-on: ubuntu-latest
     steps:
 
