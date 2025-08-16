@@ -29,7 +29,11 @@ on:
       - 'tests/ByteSync.TestsCommon/**'
 
   workflow_dispatch:      
- 
+
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   trigger-azure-pipeline:
     if: ${{ secrets.AZURE_DEVOPS_TOKEN != '' && vars.AZURE_DEVOPS_PROJECT_URL != '' && vars.AZURE_DEVOPS_PIPELINE != '' }}
