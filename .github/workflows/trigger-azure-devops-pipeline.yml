@@ -36,7 +36,7 @@ permissions:
 
 jobs:
   trigger-azure-pipeline:
-    if: ${{ secrets.AZURE_DEVOPS_TOKEN != '' && vars.AZURE_DEVOPS_PROJECT_URL != '' && vars.AZURE_DEVOPS_PIPELINE != '' }}
+    if: secrets.AZURE_DEVOPS_TOKEN != '' && vars.AZURE_DEVOPS_PROJECT_URL != '' && vars.AZURE_DEVOPS_PIPELINE != ''
     runs-on: ubuntu-latest
     steps:
 
