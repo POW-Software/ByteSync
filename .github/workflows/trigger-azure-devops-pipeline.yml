@@ -36,9 +36,24 @@ permissions:
 
 jobs:
   trigger-azure-pipeline:
-    if: secrets.AZURE_DEVOPS_TOKEN != '' && vars.AZURE_DEVOPS_PROJECT_URL != '' && vars.AZURE_DEVOPS_PIPELINE != ''
     runs-on: ubuntu-latest
     steps:
+
+    - name: Check required configuration
+      run: |
+        if [ -z "${{ secrets.AZURE_DEVOPS_TOKEN }}" ]; then
+          echo "Error: AZURE_DEVOPS_TOKEN secret is not set"
+          exit 1
+        fi
+        if [ -z "${{ vars.AZURE_DEVOPS_PROJECT_URL }}" ]; then
+          echo "Error: AZURE_DEVOPS_PROJECT_URL variable is not set"
+          exit 1
+        fi
+        if [ -z "${{ vars.AZURE_DEVOPS_PIPELINE }}" ]; then
+          echo "Error: AZURE_DEVOPS_PIPELINE variable is not set"
+          exit 1
+        fi
+        echo "All required configuration is present"
 
     - name: Extract branch name
       shell: bash
