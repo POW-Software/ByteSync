@@ -59,14 +59,14 @@ public class TestSynchronizationActionHandler : IntegrationTest
     }
     
     [Test]
-    public void Test_FailUnknownOperator()
+    public async Task Test_FailUnknownOperator()
     {  
         var sharedActionsGroup = new SharedActionsGroup
         {
             ActionsGroupId = "ACI_Test",
         };
 
-        FluentActions.Awaiting(() => _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup))
+        await FluentActions.Awaiting(() => _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup))
             .Should().ThrowAsync<ApplicationException>();
     }
     
@@ -501,7 +501,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         };
 
         // Should throw exception because Create operation should only work for directories
-        FluentActions.Awaiting(() => _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup))
+        await FluentActions.Awaiting(() => _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup))
             .Should().ThrowAsync<ApplicationException>();
     }
 
@@ -532,7 +532,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         };
 
         // Should throw IOException when trying to delete non-empty directory with recursive=false
-        FluentActions.Awaiting(() => _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup))
+        await FluentActions.Awaiting(() => _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup))
             .Should().ThrowAsync<IOException>();
         
         // Directory should still exist because the delete operation failed
@@ -544,7 +544,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
     public async Task Test_RunSynchronizationAction_CancelledImmediately_ShouldThrowOperationCancelledException()
     {
         var cancellationTokenSource = new CancellationTokenSource();
-        cancellationTokenSource.Cancel();
+        await cancellationTokenSource.CancelAsync();
 
         var sharedActionsGroup = new SharedActionsGroup
         {
@@ -556,7 +556,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
             PathIdentity = new PathIdentity(FileSystemTypes.File, "/test.txt", "test.txt", "/test.txt")
         };
 
-        FluentActions.Awaiting(() => _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup, cancellationTokenSource.Token))
+        await FluentActions.Awaiting(() => _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup, cancellationTokenSource.Token))
             .Should().ThrowAsync<OperationCanceledException>();
     }
 
@@ -650,9 +650,6 @@ public class TestSynchronizationActionHandler : IntegrationTest
         
         var fileA = _testDirectoryService.CreateFileInDirectory(sourceA, "fileToSync.txt", "content_for_multiple");
         
-        var fileBPath = Path.Combine(sourceB.FullName, "fileToSync.txt");
-        var fileCPath = Path.Combine(sourceC.FullName, "fileToSync.txt");
-        
         var cancellationTokenSource = new CancellationTokenSource();
         
         var source = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
@@ -677,9 +674,9 @@ public class TestSynchronizationActionHandler : IntegrationTest
         // Cancel after a short delay to potentially interrupt processing
         _ = Task.Run(async () =>
         {
-            await Task.Delay(50);
-            cancellationTokenSource.Cancel();
-        });
+            await Task.Delay(50, CancellationToken.None);
+            await cancellationTokenSource.CancelAsync();
+        }, cancellationTokenSource.Token).ConfigureAwait(false);
 
         try
         {
@@ -764,7 +761,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         var cancellationTokenSource = new CancellationTokenSource();
         await cancellationTokenSource.CancelAsync();
 
-        FluentActions.Awaiting(() => _synchronizationActionHandler.RunPendingSynchronizationActions(cancellationTokenSource.Token))
+        await FluentActions.Awaiting(() => _synchronizationActionHandler.RunPendingSynchronizationActions(cancellationTokenSource.Token))
             .Should().ThrowAsync<OperationCanceledException>();
     }
 }
