@@ -943,6 +943,9 @@ Veuillez interrompre l'inventaire ou la synchronisation au préalable.</value>
 	<data name="SynchronizationMain_AbortSynchronization_Message" xml:space="preserve">
 		<value>Voulez abandonner la synchronisation en cours ?</value>
 	</data>
+	<data name="SynchronizationMain_AbortSynchronization" xml:space="preserve">
+		<value>ABANDONNER</value>
+	</data>
 	<data name="General_or" xml:space="preserve">
 		<value>ou</value>
 	</data>
