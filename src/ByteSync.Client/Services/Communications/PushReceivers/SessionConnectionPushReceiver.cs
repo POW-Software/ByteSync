@@ -1,6 +1,5 @@
 ﻿using ByteSync.Interfaces.Communications;
 using ByteSync.Interfaces.Controls.Communications.SignalR;
-using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ByteSync.Interfaces.Services.Sessions.Connecting.Joining;
 using ByteSync.Interfaces.Services.Sessions.Connecting.Validating;
 

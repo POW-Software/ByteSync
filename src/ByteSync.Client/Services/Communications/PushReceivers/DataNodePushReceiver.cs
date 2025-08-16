@@ -1,5 +1,4 @@
 using System.Reactive.Linq;
-using ByteSync.Business.DataNodes;
 using ByteSync.Interfaces.Communications;
 using ByteSync.Interfaces.Controls.Communications.SignalR;
 using ByteSync.Interfaces.Controls.Encryptions;

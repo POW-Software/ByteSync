@@ -21,25 +21,33 @@ public class AfterTransferSynchronizationSharedFile : IAfterTransferSharedFile
     
     public async Task OnFilePartUploaded(SharedFileDefinition sharedFileDefinition)
     {
-        await _synchronizationService.SynchronizationProcessData.SynchronizationDataTransmitted.WaitUntilTrue();
+        await WaitForSynchronizationDataTransmitted();
     }
 
     public async Task OnUploadFinished(SharedFileDefinition sharedFileDefinition)
     {
-        await _synchronizationService.SynchronizationProcessData.SynchronizationDataTransmitted.WaitUntilTrue();
+        await WaitForSynchronizationDataTransmitted();
     }
 
     public async Task OnFilePartUploadedError(SharedFileDefinition sharedFileDefinition, Exception exception)
     {
-        await _synchronizationService.SynchronizationProcessData.SynchronizationDataTransmitted.WaitUntilTrue();
+        await WaitForSynchronizationDataTransmitted();
         
         await _synchronizationApiClient.InformSynchronizationActionError(sharedFileDefinition);
     }
 
     public async Task OnUploadFinishedError(SharedFileDefinition sharedFileDefinition, Exception exception)
     {
-        await _synchronizationService.SynchronizationProcessData.SynchronizationDataTransmitted.WaitUntilTrue();
+        await WaitForSynchronizationDataTransmitted();
         
         await _synchronizationApiClient.InformSynchronizationActionError(sharedFileDefinition);
+    }
+    
+    private async Task WaitForSynchronizationDataTransmitted()
+    {
+        var synchronizationData = _synchronizationService.SynchronizationProcessData;
+        
+        await synchronizationData.SynchronizationDataTransmitted.WaitUntilTrue(
+            synchronizationData.CancellationTokenSource.Token);
     }
 }

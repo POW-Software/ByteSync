@@ -952,6 +952,9 @@ Please stop the inventory or synchronization first.</value>
 	<data name="SynchronizationMain_AbortSynchronization_Message" xml:space="preserve">
 		<value>Want to abort the current synchronization?</value>
 	</data>
+	<data name="SynchronizationMain_AbortSynchronization" xml:space="preserve">
+		<value>ABORT</value>
+	</data>
 	<data name="General_or" xml:space="preserve">
 		<value>or</value>
 	</data>

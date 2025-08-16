@@ -1,4 +1,5 @@
 ﻿using System.Reactive.Subjects;
+using System.Threading;
 using ByteSync.Common.Business.Synchronizations;
 
 namespace ByteSync.Business.Synchronizations;
@@ -16,6 +17,8 @@ public class SynchronizationProcessData
         
         SynchronizationProgress = new BehaviorSubject<SynchronizationProgress?>(null);
         
+        CancellationTokenSource = new CancellationTokenSource();
+        
         Reset();
     }
 
@@ -30,6 +33,8 @@ public class SynchronizationProcessData
     
     public long TotalVolumeToProcess { get; set; }
     public long TotalActionsToProcess { get; set; }
+    
+    public CancellationTokenSource CancellationTokenSource { get; private set; }
 
     public Task<bool> IsSynchronizationEnd()
     {
@@ -54,5 +59,17 @@ public class SynchronizationProcessData
         SynchronizationDataTransmitted.OnNext(false);
         
         SynchronizationProgress.OnNext(null);
+        
+        CancellationTokenSource = new CancellationTokenSource();
+    }
+    
+    public void RequestSynchronizationAbort()
+    {
+        CancellationTokenSource.Cancel();
+        var synchronizationAbortRequest = new SynchronizationAbortRequest
+        {
+            RequestedOn = DateTimeOffset.Now
+        };
+        SynchronizationAbortRequest.OnNext(synchronizationAbortRequest);
     }
 }

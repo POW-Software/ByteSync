@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading;
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Common.Business.Actions;
@@ -44,30 +45,37 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
 
     // public AbstractSession Session => _sessionService.SessionObservable.Value!;
 
-    public async Task RunSynchronizationAction(SharedActionsGroup sharedActionsGroup)
+    public async Task RunSynchronizationAction(SharedActionsGroup sharedActionsGroup, CancellationToken cancellationToken = default)
     {
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            
             if (sharedActionsGroup.IsSynchronizeContentOnly || sharedActionsGroup.IsFinallySynchronizeContentAndDate)
             {
-                await RunCopyContentSynchronizationAction(sharedActionsGroup);
+                await RunCopyContentSynchronizationAction(sharedActionsGroup, cancellationToken);
             }
             else if (sharedActionsGroup.IsSynchronizeDate || sharedActionsGroup.IsFinallySynchronizeDate)
             {
-                await RunCopyDateSynchronizationAction(sharedActionsGroup);
+                await RunCopyDateSynchronizationAction(sharedActionsGroup, cancellationToken);
             }
             else if (sharedActionsGroup.IsDelete)
             {
-                await RunDeleteSynchronizationAction(sharedActionsGroup);
+                await RunDeleteSynchronizationAction(sharedActionsGroup, cancellationToken);
             }
             else if (sharedActionsGroup.IsCreate)
             {
-                await RunCreateSynchronizationAction(sharedActionsGroup);
+                await RunCreateSynchronizationAction(sharedActionsGroup, cancellationToken);
             }
             else
             {
                 throw new ApplicationException("Unknown action operator");
             }
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("SynchronizationAction cancelled for {ActionsGroupId}", sharedActionsGroup.ActionsGroupId);
+            throw;
         }
         catch (Exception)
         {
@@ -77,9 +85,11 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         }
     }
 
-    public async Task RunPendingSynchronizationActions()
+    public async Task RunPendingSynchronizationActions(CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Running pending synchronization actions");
+        
+        cancellationToken.ThrowIfCancellationRequested();
         
         if (_sessionService.CurrentSession is CloudSession)
         {
@@ -98,13 +108,17 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         }
     }
 
-    private async Task RunCopyContentSynchronizationAction(SharedActionsGroup sharedActionsGroup)
+    private async Task RunCopyContentSynchronizationAction(SharedActionsGroup sharedActionsGroup, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+        
         var localTargets = GetLocalTargets(sharedActionsGroup);
         if (localTargets.Count > 0)
         {
-            await RunCopyContentLocal(sharedActionsGroup, localTargets);
+            await RunCopyContentLocal(sharedActionsGroup, localTargets, cancellationToken);
         }
+        
+        cancellationToken.ThrowIfCancellationRequested();
         
         var remoteTargets = GetRemoteTargets(sharedActionsGroup);
         if (remoteTargets.Count > 0)
@@ -113,12 +127,14 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         }
     }
 
-    private  async Task RunCopyContentLocal(SharedActionsGroup sharedActionsGroup, HashSet<SharedDataPart> localTargets)
+    private  async Task RunCopyContentLocal(SharedActionsGroup sharedActionsGroup, HashSet<SharedDataPart> localTargets, CancellationToken cancellationToken)
     {
         var sourceFullName = sharedActionsGroup.GetSourceFullName();
         
         foreach (var sharedDataPart in localTargets)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            
             var destinationFullName = sharedActionsGroup.GetFullName(sharedDataPart);
 
             if (sharedActionsGroup.SynchronizationType == SynchronizationTypes.Full)
@@ -215,11 +231,13 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         return remoteTargets;
     }
 
-    private async Task RunCopyDateSynchronizationAction(SharedActionsGroup sharedActionsGroup)
+    private async Task RunCopyDateSynchronizationAction(SharedActionsGroup sharedActionsGroup, CancellationToken cancellationToken)
     {
         var fullNames = sharedActionsGroup.GetTargetsFullNames(CurrentEndPoint);
         foreach (var destinationPath in fullNames)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            
             if (File.Exists(destinationPath))
             {
                 await ApplyDatesFromSharedActionsGroup(sharedActionsGroup, destinationPath);
@@ -237,11 +255,13 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         }
     }
     
-    private async Task RunDeleteSynchronizationAction(SharedActionsGroup sharedActionsGroup)
+    private async Task RunDeleteSynchronizationAction(SharedActionsGroup sharedActionsGroup, CancellationToken cancellationToken)
     {
         var fullNames = sharedActionsGroup.GetTargetsFullNames(CurrentEndPoint);
         foreach (var destinationPath in fullNames)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            
             if (sharedActionsGroup.IsFile && File.Exists(destinationPath))
             {
                 var fileInfo = new FileInfo(destinationPath);
@@ -271,11 +291,13 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         }
     }
     
-    private async Task RunCreateSynchronizationAction(SharedActionsGroup sharedActionsGroup)
+    private async Task RunCreateSynchronizationAction(SharedActionsGroup sharedActionsGroup, CancellationToken cancellationToken)
     {
         var fullNames = sharedActionsGroup.GetTargetsFullNames(CurrentEndPoint);
         foreach (var destinationPath in fullNames)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            
             if (sharedActionsGroup.PathIdentity.FileSystemType == FileSystemTypes.Directory)
             {
                 var directoryInfo = new DirectoryInfo(destinationPath);

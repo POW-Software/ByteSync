@@ -83,7 +83,7 @@
                                 Command="{Binding Path=AbortSynchronizationCommand}" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
                                 <misc:Icon FontSize="12" Value="RegularX"  />
-                                <TextBlock Text="{localizations:Loc InventoryProcess_AbortInventory}" />
+                                <TextBlock Text="{localizations:Loc SynchronizationMain_AbortSynchronization}" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
