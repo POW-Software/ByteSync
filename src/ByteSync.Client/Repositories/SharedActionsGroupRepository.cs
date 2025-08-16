@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Business.Actions.Shared;
+﻿using ByteSync.Business.Actions.Shared;
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Interfaces.Repositories;
