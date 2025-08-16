@@ -61,9 +61,9 @@ public class SynchronizationProgressPushReceiver : IPushReceiver
                 await synchronizationData.SynchronizationDataTransmitted.WaitUntilTrue(SynchronizationDataTransmissionTimeout, 
                     synchronizationData.CancellationTokenSource.Token);
             }
-            catch (TimeoutException)
+            catch (TimeoutException te)
             {
-                _logger.LogError("Timeout waiting for synchronization data transmission ({Timeout}) for session {SessionId}", 
+                _logger.LogError(te, "Timeout waiting for synchronization data transmission ({Timeout}) for session {SessionId}", 
                     SynchronizationDataTransmissionTimeout, sessionId);
                 return;
             }

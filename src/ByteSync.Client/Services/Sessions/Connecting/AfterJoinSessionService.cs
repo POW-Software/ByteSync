@@ -263,7 +263,7 @@ public class AfterJoinSessionService : IAfterJoinSessionService
             FileSystemTypes.Directory, dataNode);
     }
 
-    private string GeneratePassword()
+    private static string GeneratePassword()
     {
         var sb = new StringBuilder();
         for (var i = 0; i < 5; i++)
