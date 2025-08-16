@@ -6,10 +6,11 @@ using ByteSync.Business.Communications.Downloading;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace ByteSync.Services.Encryptions;
 
-public class MergerDecrypter : IMergerDecrypter
+public class MergerDecrypter : IMergerDecrypter, IDisposable
 {
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
     private readonly ILogger<MergerDecrypter> _logger;
@@ -31,11 +32,11 @@ public class MergerDecrypter : IMergerDecrypter
 
     public SharedFileDefinition SharedFileDefinition { get; private set; } = null!;
 
-    private Aes Aes { get; set; } = null!;
+    private Aes? Aes { get; set; }
         
     private DownloadTarget DownloadTarget { get; set; } = null!;
         
-    private CancellationTokenSource CancellationTokenSource { get; set; } 
+    private CancellationTokenSource CancellationTokenSource { get; set; } = null!; 
         
     private void Initialize(string finalFile, DownloadTarget downloadTarget, CancellationTokenSource cancellationTokenSource)
     {
@@ -45,7 +46,19 @@ public class MergerDecrypter : IMergerDecrypter
         SharedFileDefinition = downloadTarget.SharedFileDefinition;
             
         Aes = Aes.Create();
-        Aes.Key = _cloudSessionConnectionRepository.GetAesEncryptionKey()!;
+        
+        var encryptionKey = _cloudSessionConnectionRepository.GetAesEncryptionKey();
+        if (encryptionKey == null)
+        {
+            throw new InvalidOperationException("Encryption key is not available");
+        }
+        
+        if (SharedFileDefinition.IV == null || SharedFileDefinition.IV.Length == 0)
+        {
+            throw new InvalidOperationException("Invalid IV provided");
+        }
+        
+        Aes.Key = encryptionKey;
         Aes.IV = SharedFileDefinition.IV;
 
         CancellationTokenSource = cancellationTokenSource;
@@ -67,10 +80,15 @@ public class MergerDecrypter : IMergerDecrypter
         {
             return;
         }
+
+        if (Aes == null)
+        {
+            throw new InvalidOperationException("AES encryption not initialized");
+        }
             
         await using var outStream = new FileStream(FinalFile, FileMode.Append);
             
-        var cryptoTransform = Aes.CreateDecryptor(Aes.Key, Aes.IV);
+        using var cryptoTransform = Aes.CreateDecryptor(Aes.Key, Aes.IV);
         await using var cryptoStream = new CryptoStream(outStream, cryptoTransform, CryptoStreamMode.Write);
             
         TotalReadFiles += 1;
@@ -80,5 +98,10 @@ public class MergerDecrypter : IMergerDecrypter
         
         memoryStream.Position = 0;
         await memoryStream.CopyToAsync(cryptoStream, CancellationTokenSource.Token);
+    }
+
+    public void Dispose()
+    {
+        Aes?.Dispose();
     }
 }

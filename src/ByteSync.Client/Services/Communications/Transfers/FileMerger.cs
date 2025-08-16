@@ -1,5 +1,8 @@
 using ByteSync.Interfaces.Controls.Encryptions;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Security.Cryptography;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Interfaces.Controls.Communications;
 
@@ -31,15 +34,34 @@ public class FileMerger : IFileMerger
             {
                 foreach (var mergerDecrypter in _mergerDecrypters)
                 {
-                    await mergerDecrypter.MergeAndDecrypt();
+                    try
+                    {
+                        await mergerDecrypter.MergeAndDecrypt();
+                    }
+                    finally
+                    {
+                        mergerDecrypter.Dispose();
+                    }
                 }
 
                 _downloadTarget.RemoveMemoryStream(partToMerge);
             }
-            catch
+            catch (InvalidOperationException ex)
+            {
+                // Log security-related exceptions without exposing sensitive details
+                await _errorManager.SetOnErrorAsync();
+                throw new InvalidOperationException("Encryption operation failed", ex);
+            }
+            catch (CryptographicException ex)
+            {
+                // Handle cryptographic failures securely
+                await _errorManager.SetOnErrorAsync();
+                throw new InvalidOperationException("Cryptographic operation failed", ex);
+            }
+            catch (Exception ex)
             {
                 await _errorManager.SetOnErrorAsync();
-                throw;
+                throw new InvalidOperationException("Merge operation failed", ex);
             }
         }
         finally
