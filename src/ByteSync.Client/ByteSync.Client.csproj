@@ -53,15 +53,14 @@
   <ItemGroup>
     <PackageReference Include="Autofac" Version="8.4.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
-    <PackageReference Include="Avalonia" Version="11.3.0" />
-    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.0" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.3.0" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.0" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.0" />
+    <PackageReference Include="Avalonia" Version="11.3.4" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.4" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.4" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.4" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.4" />
     <PackageReference Include="Avalonia.Svg.Skia" Version="11.3.0" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
-    <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.3.0" />
-    <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.4" />
+    <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="11.3.4" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.25.0" />
     <PackageReference Include="DynamicData" Version="9.4.1" />
     <PackageReference Include="FastRsyncNet" Version="2.4.3" />
@@ -95,6 +94,7 @@
     <PackageReference Include="System.Security.Cryptography.Cng" Version="5.0.0" />
     <PackageReference Include="System.Security.Cryptography.OpenSsl" Version="5.0.0" />
     <PackageReference Update="Packaging.Targets" Version="0.1.232" />
+    <PackageReference Include="Xaml.Behaviors.Avalonia" Version="11.3.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ByteSync.Common\ByteSync.Common.csproj" />

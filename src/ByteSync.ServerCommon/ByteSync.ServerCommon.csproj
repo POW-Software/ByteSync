@@ -11,7 +11,7 @@
       <PackageReference Include="AWSSDK.S3" Version="4.0.6.6" />
       <PackageReference Include="Azure.Identity" Version="1.15.0" />
       <PackageReference Include="Azure.Storage.Blobs" Version="12.25.0" />
-      <PackageReference Include="MediatR" Version="12.5.0" />
+      <PackageReference Include="MediatR" Version="13.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.19" />
       <PackageReference Include="Microsoft.Azure.SignalR" Version="1.31.0" />
       <PackageReference Include="Microsoft.Azure.SignalR.Management" Version="1.31.0" />
