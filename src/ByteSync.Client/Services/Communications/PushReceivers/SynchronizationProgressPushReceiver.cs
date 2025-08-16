@@ -18,6 +18,8 @@ public class SynchronizationProgressPushReceiver : IPushReceiver
     private readonly ISynchronizationApiClient _synchronizationApiClient;
     private readonly ILogger<SynchronizationProgressPushReceiver> _logger;
 
+    protected virtual TimeSpan SynchronizationDataTransmissionTimeout => TimeSpan.FromMinutes(1);
+
     public SynchronizationProgressPushReceiver(IHubPushHandler2 hubPushHandler2, ISessionService sessionService,
         ISynchronizationService synchronizationService, ISharedActionsGroupRepository sharedActionsGroupRepository, 
         ISynchronizationApiClient synchronizationApiClient,
@@ -54,15 +56,15 @@ public class SynchronizationProgressPushReceiver : IPushReceiver
             try
             {
                 // Wait for synchronization data to be transmitted with timeout and cancellation
-                var timeout = TimeSpan.FromMinutes(1);
                 var synchronizationData = _synchronizationService.SynchronizationProcessData;
                 
-                await synchronizationData.SynchronizationDataTransmitted.WaitUntilTrue(timeout, 
+                await synchronizationData.SynchronizationDataTransmitted.WaitUntilTrue(SynchronizationDataTransmissionTimeout, 
                     synchronizationData.CancellationTokenSource.Token);
             }
             catch (TimeoutException)
             {
-                _logger.LogError("Timeout waiting for synchronization data transmission (1 minute) for session {SessionId}", sessionId);
+                _logger.LogError("Timeout waiting for synchronization data transmission ({Timeout}) for session {SessionId}", 
+                    SynchronizationDataTransmissionTimeout, sessionId);
                 return;
             }
             catch (OperationCanceledException)
