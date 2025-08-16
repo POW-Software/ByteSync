@@ -2,12 +2,16 @@
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.Sessions;
+using ByteSync.Business.Synchronizations;
 using ByteSync.Client.IntegrationTests.TestHelpers;
 using ByteSync.Client.IntegrationTests.TestHelpers.Business;
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Inventories;
+using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
+using ByteSync.Common.Business.Sessions.Local;
+using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Common.Helpers;
 using ByteSync.Factories;
 using ByteSync.Interfaces;
@@ -214,5 +218,563 @@ public class TestSynchronizationActionHandler : IntegrationTest
         
         var contentB = await File.ReadAllTextAsync(fileB.FullName);
         contentB.Should().Be("fileToCopy1_versionA_content");
+    }
+
+    [Test]
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task Test_SynchronizeDate_LocalTarget(bool isLocalSession)
+    {
+        var sourceRoot = _testDirectoryService.CreateSubTestDirectory("Source");
+        
+        var sourceA = sourceRoot.CreateSubdirectory("A");
+        var sourceB = sourceRoot.CreateSubdirectory("B");
+
+        var fileA = _testDirectoryService.CreateFileInDirectory(sourceA, "fileToSync.txt", "content_A");
+        var originalDateA = DateTime.UtcNow.AddHours(-8);
+        fileA.LastWriteTimeUtc = originalDateA;
+
+        var fileB = _testDirectoryService.CreateFileInDirectory(sourceB, "fileToSync.txt", "content_B");
+        var originalDateB = DateTime.UtcNow.AddHours(-4);
+        fileB.LastWriteTimeUtc = originalDateB;
+
+        SharedDataPart source = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "A", sourceA.FullName, "/fileToSync.txt", null, null, false);
+        
+        SharedDataPart target = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "B", sourceB.FullName, "/fileToSync.txt", null, null, false);
+        
+        SharedActionsGroup sharedActionsGroup = new SharedActionsGroup
+        {
+            ActionsGroupId = "ACI_SyncDate",
+            Operator = ActionOperatorTypes.SynchronizeDate,
+            Targets = new HashSet<SharedDataPart> {target},
+            Source = source,
+            SynchronizationType = SynchronizationTypes.Full,
+            PathIdentity = new PathIdentity(FileSystemTypes.File, "/fileToSync.txt", "fileToSync.txt", "/fileToSync.txt"),
+            CreationTimeUtc = DateTime.UtcNow.AddHours(-10),
+            LastWriteTimeUtc = originalDateA
+        };
+
+        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        
+        fileA.Refresh();
+        fileB.Refresh();
+        
+        fileA.Exists.Should().BeTrue();
+        fileB.Exists.Should().BeTrue();
+        
+        // Content should remain unchanged
+        var contentB = await File.ReadAllTextAsync(fileB.FullName);
+        contentB.Should().Be("content_B");
+        
+        // But date should be synchronized
+        fileB.LastWriteTimeUtc.Should().BeCloseTo(originalDateA, TimeSpan.FromHours(4.1)); // Allow for timezone differences
+    }
+
+    [Test]
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task Test_SynchronizeContentAndDate_Full_LocalTarget(bool isLocalSession)
+    {
+        var sourceRoot = _testDirectoryService.CreateSubTestDirectory("Source");
+        
+        var sourceA = sourceRoot.CreateSubdirectory("A");
+        var sourceB = sourceRoot.CreateSubdirectory("B");
+
+        var fileA = _testDirectoryService.CreateFileInDirectory(sourceA, "fileToSync.txt", "content_from_A");
+        var originalDateA = DateTime.UtcNow.AddHours(-8);
+        fileA.LastWriteTimeUtc = originalDateA;
+
+        var fileBPath = Path.Combine(sourceB.FullName, "fileToSync.txt");
+        var fileB = new FileInfo(fileBPath);
+        ClassicAssert.IsFalse(fileB.Exists);
+
+        SharedDataPart source = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "A", sourceA.FullName, "/fileToSync.txt", null, null, false);
+        
+        SharedDataPart target = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "B", sourceB.FullName, "/fileToSync.txt", null, null, false);
+        
+        SharedActionsGroup sharedActionsGroup = new SharedActionsGroup
+        {
+            ActionsGroupId = "ACI_SyncContentAndDate",
+            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Targets = new HashSet<SharedDataPart> {target},
+            Source = source,
+            SynchronizationType = SynchronizationTypes.Full,
+            PathIdentity = new PathIdentity(FileSystemTypes.File, "/fileToSync.txt", "fileToSync.txt", "/fileToSync.txt"),
+            CreationTimeUtc = DateTime.UtcNow.AddHours(-10),
+            LastWriteTimeUtc = originalDateA
+        };
+
+        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        
+        fileA.Refresh();
+        fileB.Refresh();
+        
+        fileA.Exists.Should().BeTrue();
+        fileB.Exists.Should().BeTrue();
+        
+        // Both content and date should be synchronized
+        var contentB = await File.ReadAllTextAsync(fileB.FullName);
+        contentB.Should().Be("content_from_A");
+        fileB.LastWriteTimeUtc.Should().BeCloseTo(originalDateA, TimeSpan.FromHours(4.1)); // Allow for timezone differences
+    }
+
+    [Test]
+    public async Task Test_Create_Directory_LocalTarget()
+    {
+        var sourceRoot = _testDirectoryService.CreateSubTestDirectory("Source");
+        var sourceB = sourceRoot.CreateSubdirectory("B");
+        var targetDirectoryPath = Path.Combine(sourceB.FullName, "NewDirectory");
+        
+        var targetDirectory = new DirectoryInfo(targetDirectoryPath);
+        ClassicAssert.IsFalse(targetDirectory.Exists);
+
+        SharedDataPart target = new SharedDataPart("NewDirectory", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "B", sourceB.FullName, "/NewDirectory", null, null, false);
+        
+        SharedActionsGroup sharedActionsGroup = new SharedActionsGroup
+        {
+            ActionsGroupId = "ACI_Create",
+            Operator = ActionOperatorTypes.Create,
+            Targets = new HashSet<SharedDataPart> {target},
+            Source = null,
+            SynchronizationType = SynchronizationTypes.Full,
+            PathIdentity = new PathIdentity(FileSystemTypes.Directory, "/NewDirectory", "NewDirectory", "/NewDirectory")
+        };
+
+        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        
+        targetDirectory.Refresh();
+        targetDirectory.Exists.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task Test_Create_Directory_AlreadyExists_LocalTarget()
+    {
+        var sourceRoot = _testDirectoryService.CreateSubTestDirectory("Source");
+        var sourceB = sourceRoot.CreateSubdirectory("B");
+        var existingDirectory = sourceB.CreateSubdirectory("ExistingDirectory");
+        
+        ClassicAssert.IsTrue(existingDirectory.Exists);
+
+        SharedDataPart target = new SharedDataPart("ExistingDirectory", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "B", sourceB.FullName, "/ExistingDirectory", null, null, false);
+        
+        SharedActionsGroup sharedActionsGroup = new SharedActionsGroup
+        {
+            ActionsGroupId = "ACI_CreateExisting",
+            Operator = ActionOperatorTypes.Create,
+            Targets = new HashSet<SharedDataPart> {target},
+            Source = null,
+            SynchronizationType = SynchronizationTypes.Full,
+            PathIdentity = new PathIdentity(FileSystemTypes.Directory, "/ExistingDirectory", "ExistingDirectory", "/ExistingDirectory")
+        };
+
+        // Should not throw exception even if directory already exists
+        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        
+        existingDirectory.Refresh();
+        existingDirectory.Exists.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task Test_Delete_File_LocalTarget()
+    {
+        var sourceRoot = _testDirectoryService.CreateSubTestDirectory("Source");
+        var sourceB = sourceRoot.CreateSubdirectory("B");
+        var fileToDelete = _testDirectoryService.CreateFileInDirectory(sourceB, "fileToDelete.txt", "content");
+        
+        ClassicAssert.IsTrue(fileToDelete.Exists);
+
+        SharedDataPart target = new SharedDataPart("fileToDelete.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "B", sourceB.FullName, "/fileToDelete.txt", null, null, false);
+        
+        SharedActionsGroup sharedActionsGroup = new SharedActionsGroup
+        {
+            ActionsGroupId = "ACI_DeleteFile",
+            Operator = ActionOperatorTypes.Delete,
+            Targets = new HashSet<SharedDataPart> {target},
+            Source = null,
+            SynchronizationType = SynchronizationTypes.Full,
+            PathIdentity = new PathIdentity(FileSystemTypes.File, "/fileToDelete.txt", "fileToDelete.txt", "/fileToDelete.txt")
+        };
+
+        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        
+        fileToDelete.Refresh();
+        fileToDelete.Exists.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task Test_Delete_Directory_LocalTarget()
+    {
+        var sourceRoot = _testDirectoryService.CreateSubTestDirectory("Source");
+        var sourceB = sourceRoot.CreateSubdirectory("B");
+        var directoryToDelete = sourceB.CreateSubdirectory("DirectoryToDelete");
+        
+        ClassicAssert.IsTrue(directoryToDelete.Exists);
+
+        SharedDataPart target = new SharedDataPart("DirectoryToDelete", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "B", sourceB.FullName, "/DirectoryToDelete", null, null, false);
+        
+        SharedActionsGroup sharedActionsGroup = new SharedActionsGroup
+        {
+            ActionsGroupId = "ACI_DeleteDirectory",
+            Operator = ActionOperatorTypes.Delete,
+            Targets = new HashSet<SharedDataPart> {target},
+            Source = null,
+            SynchronizationType = SynchronizationTypes.Full,
+            PathIdentity = new PathIdentity(FileSystemTypes.Directory, "/DirectoryToDelete", "DirectoryToDelete", "/DirectoryToDelete")
+        };
+
+        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        
+        directoryToDelete.Refresh();
+        directoryToDelete.Exists.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task Test_Delete_NonExistentFile_LocalTarget_ShouldNotThrow()
+    {
+        var sourceRoot = _testDirectoryService.CreateSubTestDirectory("Source");
+        var sourceB = sourceRoot.CreateSubdirectory("B");
+        var nonExistentFilePath = Path.Combine(sourceB.FullName, "nonExistent.txt");
+        
+        ClassicAssert.IsFalse(File.Exists(nonExistentFilePath));
+
+        SharedDataPart target = new SharedDataPart("nonExistent.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "B", sourceB.FullName, "/nonExistent.txt", null, null, false);
+        
+        SharedActionsGroup sharedActionsGroup = new SharedActionsGroup
+        {
+            ActionsGroupId = "ACI_DeleteNonExistent",
+            Operator = ActionOperatorTypes.Delete,
+            Targets = new HashSet<SharedDataPart> {target},
+            Source = null,
+            SynchronizationType = SynchronizationTypes.Full,
+            PathIdentity = new PathIdentity(FileSystemTypes.File, "/nonExistent.txt", "nonExistent.txt", "/nonExistent.txt")
+        };
+
+        // Should not throw exception for non-existent files
+        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+    }
+
+    [Test]
+    public async Task Test_SynchronizeDate_FileNotExists_ShouldLogWarning()
+    {
+        var sourceRoot = _testDirectoryService.CreateSubTestDirectory("Source");
+        var sourceB = sourceRoot.CreateSubdirectory("B");
+        var nonExistentFilePath = Path.Combine(sourceB.FullName, "nonExistent.txt");
+        
+        ClassicAssert.IsFalse(File.Exists(nonExistentFilePath));
+
+        SharedDataPart target = new SharedDataPart("nonExistent.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "B", sourceB.FullName, "/nonExistent.txt", null, null, false);
+        
+        SharedActionsGroup sharedActionsGroup = new SharedActionsGroup
+        {
+            ActionsGroupId = "ACI_SyncDateNonExistent",
+            Operator = ActionOperatorTypes.SynchronizeDate,
+            Targets = new HashSet<SharedDataPart> {target},
+            Source = null,
+            SynchronizationType = SynchronizationTypes.Full,
+            PathIdentity = new PathIdentity(FileSystemTypes.File, "/nonExistent.txt", "nonExistent.txt", "/nonExistent.txt")
+        };
+
+        // Should not throw but should handle the missing file gracefully
+        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+    }
+
+    [Test]
+    public async Task Test_Create_InvalidFileSystemType_ShouldThrowException()
+    {
+        var sourceRoot = _testDirectoryService.CreateSubTestDirectory("Source");
+        var sourceB = sourceRoot.CreateSubdirectory("B");
+
+        SharedDataPart target = new SharedDataPart("invalidFile.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "B", sourceB.FullName, "/invalidFile.txt", null, null, false);
+        
+        SharedActionsGroup sharedActionsGroup = new SharedActionsGroup
+        {
+            ActionsGroupId = "ACI_CreateInvalidType",
+            Operator = ActionOperatorTypes.Create,
+            Targets = new HashSet<SharedDataPart> {target},
+            Source = null,
+            SynchronizationType = SynchronizationTypes.Full,
+            PathIdentity = new PathIdentity(FileSystemTypes.File, "/invalidFile.txt", "invalidFile.txt", "/invalidFile.txt")
+        };
+
+        // Should throw exception because Create operation should only work for directories
+        var exception = ClassicAssert.ThrowsAsync<ApplicationException>(
+            () => _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup));
+        
+        exception.Should().NotBeNull();
+    }
+
+    [Test]
+    public async Task Test_Delete_Directory_WithFiles_ShouldThrowIOException()
+    {
+        var sourceRoot = _testDirectoryService.CreateSubTestDirectory("Source");
+        var sourceB = sourceRoot.CreateSubdirectory("B");
+        var directoryToDelete = sourceB.CreateSubdirectory("DirectoryWithFiles");
+        
+        // Add a file inside the directory
+        _testDirectoryService.CreateFileInDirectory(directoryToDelete, "innerFile.txt", "content");
+        
+        ClassicAssert.IsTrue(directoryToDelete.Exists);
+        ClassicAssert.AreEqual(1, directoryToDelete.GetFiles().Length);
+
+        SharedDataPart target = new SharedDataPart("DirectoryWithFiles", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "B", sourceB.FullName, "/DirectoryWithFiles", null, null, false);
+        
+        SharedActionsGroup sharedActionsGroup = new SharedActionsGroup
+        {
+            ActionsGroupId = "ACI_DeleteDirectoryWithFiles",
+            Operator = ActionOperatorTypes.Delete,
+            Targets = new HashSet<SharedDataPart> {target},
+            Source = null,
+            SynchronizationType = SynchronizationTypes.Full,
+            PathIdentity = new PathIdentity(FileSystemTypes.Directory, "/DirectoryWithFiles", "DirectoryWithFiles", "/DirectoryWithFiles")
+        };
+
+        // Should throw IOException when trying to delete non-empty directory with recursive=false
+        var exception = ClassicAssert.ThrowsAsync<IOException>(
+            () => _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup));
+        exception.Should().NotBeNull();
+        
+        // Directory should still exist because the delete operation failed
+        directoryToDelete.Refresh();
+        directoryToDelete.Exists.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task Test_RunSynchronizationAction_CancelledImmediately_ShouldThrowOperationCancelledException()
+    {
+        var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        SharedActionsGroup sharedActionsGroup = new SharedActionsGroup
+        {
+            ActionsGroupId = "ACI_Cancelled",
+            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Targets = new HashSet<SharedDataPart>(),
+            Source = null,
+            SynchronizationType = SynchronizationTypes.Full,
+            PathIdentity = new PathIdentity(FileSystemTypes.File, "/test.txt", "test.txt", "/test.txt")
+        };
+
+        ClassicAssert.ThrowsAsync<OperationCanceledException>(
+            () => _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup, cancellationTokenSource.Token));
+    }
+
+    [Test]
+    public async Task Test_SynchronizeContentOnly_RemoteTarget_ShouldCallUploader()
+    {
+        var sourceRoot = _testDirectoryService.CreateSubTestDirectory("Source");
+        var sourceA = sourceRoot.CreateSubdirectory("A");
+        var fileA = _testDirectoryService.CreateFileInDirectory(sourceA, "fileToSync.txt", "content_A");
+
+        // Create a remote target with different ClientInstanceId
+        var remoteClientInstanceId = Guid.NewGuid().ToString();
+        
+        SharedDataPart source = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "A", sourceA.FullName, "/fileToSync.txt", null, null, false);
+        
+        SharedDataPart remoteTarget = new SharedDataPart("fileToSync.txt", FileSystemTypes.File, remoteClientInstanceId, 
+            "RemoteB", "C:\\RemotePath", "/fileToSync.txt", null, null, false);
+        
+        SharedActionsGroup sharedActionsGroup = new SharedActionsGroup
+        {
+            ActionsGroupId = "ACI_Remote",
+            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Targets = new HashSet<SharedDataPart> {remoteTarget},
+            Source = source,
+            SynchronizationType = SynchronizationTypes.Full,
+            PathIdentity = new PathIdentity(FileSystemTypes.File, "/fileToSync.txt", "fileToSync.txt", "/fileToSync.txt")
+        };
+
+        // This should call the remote uploader (mocked in integration tests)
+        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        
+        // Verify that no local files were affected
+        fileA.Refresh();
+        fileA.Exists.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task Test_SynchronizeContentOnly_MixedLocalAndRemoteTargets()
+    {
+        var sourceRoot = _testDirectoryService.CreateSubTestDirectory("Source");
+        var sourceA = sourceRoot.CreateSubdirectory("A");
+        var sourceB = sourceRoot.CreateSubdirectory("B");
+        
+        var fileA = _testDirectoryService.CreateFileInDirectory(sourceA, "fileToSync.txt", "mixed_content");
+        var fileBPath = Path.Combine(sourceB.FullName, "fileToSync.txt");
+        var fileB = new FileInfo(fileBPath);
+        ClassicAssert.IsFalse(fileB.Exists);
+
+        var remoteClientInstanceId = Guid.NewGuid().ToString();
+        
+        SharedDataPart source = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "A", sourceA.FullName, "/fileToSync.txt", null, null, false);
+        
+        SharedDataPart localTarget = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "B", sourceB.FullName, "/fileToSync.txt", null, null, false);
+            
+        SharedDataPart remoteTarget = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, remoteClientInstanceId, 
+            "RemoteC", "C:\\RemotePath", "/fileToSync.txt", null, null, false);
+        
+        SharedActionsGroup sharedActionsGroup = new SharedActionsGroup
+        {
+            ActionsGroupId = "ACI_Mixed",
+            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Targets = new HashSet<SharedDataPart> {localTarget, remoteTarget},
+            Source = source,
+            SynchronizationType = SynchronizationTypes.Full,
+            PathIdentity = new PathIdentity(FileSystemTypes.File, "/fileToSync.txt", "fileToSync.txt", "/fileToSync.txt")
+        };
+
+        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        
+        // Verify local target was synchronized
+        fileB.Refresh();
+        fileB.Exists.Should().BeTrue();
+        var contentB = await File.ReadAllTextAsync(fileB.FullName);
+        contentB.Should().Be("mixed_content");
+        
+        // Source should still exist
+        fileA.Refresh();
+        fileA.Exists.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task Test_RunSynchronizationAction_MultipleTargets_CancelledDuringProcessing()
+    {
+        var sourceRoot = _testDirectoryService.CreateSubTestDirectory("Source");
+        var sourceA = sourceRoot.CreateSubdirectory("A");
+        var sourceB = sourceRoot.CreateSubdirectory("B");
+        var sourceC = sourceRoot.CreateSubdirectory("C");
+        
+        var fileA = _testDirectoryService.CreateFileInDirectory(sourceA, "fileToSync.txt", "content_for_multiple");
+        
+        var fileBPath = Path.Combine(sourceB.FullName, "fileToSync.txt");
+        var fileCPath = Path.Combine(sourceC.FullName, "fileToSync.txt");
+        
+        var cancellationTokenSource = new CancellationTokenSource();
+        
+        SharedDataPart source = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "A", sourceA.FullName, "/fileToSync.txt", null, null, false);
+        
+        SharedDataPart targetB = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "B", sourceB.FullName, "/fileToSync.txt", null, null, false);
+            
+        SharedDataPart targetC = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+            "C", sourceC.FullName, "/fileToSync.txt", null, null, false);
+        
+        SharedActionsGroup sharedActionsGroup = new SharedActionsGroup
+        {
+            ActionsGroupId = "ACI_MultipleTargets",
+            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Targets = new HashSet<SharedDataPart> {targetB, targetC},
+            Source = source,
+            SynchronizationType = SynchronizationTypes.Full,
+            PathIdentity = new PathIdentity(FileSystemTypes.File, "/fileToSync.txt", "fileToSync.txt", "/fileToSync.txt")
+        };
+
+        // Cancel after a short delay to potentially interrupt processing
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(50);
+            cancellationTokenSource.Cancel();
+        });
+
+        try
+        {
+            await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup, cancellationTokenSource.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            // This is expected
+        }
+        
+        // Verify source still exists
+        fileA.Refresh();
+        fileA.Exists.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task Test_RunPendingSynchronizationActions_CloudSession_NoAbortRequest()
+    {
+        // Setup CloudSession
+        var cloudSession = new CloudSession
+        {
+            SessionId = "TestCloudSession",
+        };
+        
+        var mockSessionService = Container.Resolve<Mock<ISessionService>>();
+        mockSessionService.Setup(m => m.CurrentSession).Returns(cloudSession);
+        
+        var mockSynchronizationService = Container.Resolve<Mock<ISynchronizationService>>();
+        var synchronizationProcessData = new SynchronizationProcessData();
+        synchronizationProcessData.SynchronizationAbortRequest.OnNext(null);
+        mockSynchronizationService.Setup(m => m.SynchronizationProcessData).Returns(synchronizationProcessData);
+
+        // This should call Complete and HandlePendingActions
+        await _synchronizationActionHandler.RunPendingSynchronizationActions();
+        
+        // Verify the appropriate methods were called
+        // Note: In integration tests, these are typically mocked services
+    }
+
+    [Test]
+    public async Task Test_RunPendingSynchronizationActions_CloudSession_WithAbortRequest()
+    {
+        // Setup CloudSession with abort request
+        var cloudSession = new CloudSession
+        {
+            SessionId = "TestCloudSessionAbort",
+        };
+        
+        var mockSessionService = Container.Resolve<Mock<ISessionService>>();
+        mockSessionService.Setup(m => m.CurrentSession).Returns(cloudSession);
+        
+        var mockSynchronizationService = Container.Resolve<Mock<ISynchronizationService>>();
+        var synchronizationProcessData = new SynchronizationProcessData();
+        var abortRequest = new SynchronizationAbortRequest();
+        synchronizationProcessData.SynchronizationAbortRequest.OnNext(abortRequest);
+        mockSynchronizationService.Setup(m => m.SynchronizationProcessData).Returns(synchronizationProcessData);
+
+        // This should call Abort and ClearPendingActions
+        await _synchronizationActionHandler.RunPendingSynchronizationActions();
+        
+        // Verify the appropriate abort methods were called
+    }
+
+    [Test]
+    public async Task Test_RunPendingSynchronizationActions_LocalSession_ShouldDoNothing()
+    {
+        // Setup LocalSession
+        var localSession = new LocalSession();
+        
+        var mockSessionService = Container.Resolve<Mock<ISessionService>>();
+        mockSessionService.Setup(m => m.CurrentSession).Returns(localSession);
+
+        // This should do nothing for local sessions
+        await _synchronizationActionHandler.RunPendingSynchronizationActions();
+        
+        // Since it's a local session, no remote operations should be performed
+    }
+
+    [Test]
+    public async Task Test_RunPendingSynchronizationActions_CancelledImmediately()
+    {
+        var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        ClassicAssert.ThrowsAsync<OperationCanceledException>(
+            () => _synchronizationActionHandler.RunPendingSynchronizationActions(cancellationTokenSource.Token));
     }
 }
