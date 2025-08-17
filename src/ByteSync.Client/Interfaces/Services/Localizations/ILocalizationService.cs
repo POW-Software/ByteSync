@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using ByteSync.Business;
 
-namespace ByteSync.Interfaces;
+namespace ByteSync.Interfaces.Services.Localizations;
 
 public interface ILocalizationService : INotifyPropertyChanged
 {

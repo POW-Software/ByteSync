@@ -8,6 +8,7 @@ using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Updates;
 using ByteSync.ViewModels.Headers;
 using DynamicData;

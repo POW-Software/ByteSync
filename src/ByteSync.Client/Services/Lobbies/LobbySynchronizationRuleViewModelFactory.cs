@@ -3,6 +3,7 @@ using ByteSync.Business.Sessions;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Lobbies;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.ViewModels.Lobbies;
 using CloudSessionProfileDetails = ByteSync.Business.Profiles.CloudSessionProfileDetails;
 

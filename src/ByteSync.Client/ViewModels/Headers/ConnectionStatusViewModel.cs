@@ -7,6 +7,7 @@ using ByteSync.Business.Themes;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Services.Communications;
+using ByteSync.Interfaces.Services.Localizations;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

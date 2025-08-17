@@ -5,6 +5,7 @@ using ByteSync.Assets.Resources;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Interfaces;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Services.Localizations;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

@@ -3,6 +3,7 @@ using ByteSync.Business.Actions.Loose;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Services.Localizations;
 using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Lobbies;

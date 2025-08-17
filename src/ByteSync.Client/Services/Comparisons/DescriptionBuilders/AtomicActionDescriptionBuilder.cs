@@ -2,6 +2,7 @@
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Interfaces.Business;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Services.Localizations;
 
 namespace ByteSync.Services.Comparisons.DescriptionBuilders;
 

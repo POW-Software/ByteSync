@@ -8,6 +8,7 @@ using ByteSync.Business.Profiles;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
+using ByteSync.Interfaces.Services.Localizations;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
