@@ -96,7 +96,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         return AtomicActionValidationResult.Success();
     }
 
-    private AtomicActionValidationResult CheckBasicConsistency(AtomicAction atomicAction, ComparisonItem comparisonItem)
+    private static AtomicActionValidationResult CheckBasicConsistency(AtomicAction atomicAction, ComparisonItem comparisonItem)
     {
         if (atomicAction.Operator.In(ActionOperatorTypes.SynchronizeContentAndDate, ActionOperatorTypes.SynchronizeContentOnly,
                 ActionOperatorTypes.SynchronizeDate))
@@ -158,7 +158,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         return AtomicActionValidationResult.Success();
     }
     
-    private AtomicActionValidationResult CheckAdvancedConsistency(AtomicAction atomicAction, ComparisonItem comparisonItem)
+    private static AtomicActionValidationResult CheckAdvancedConsistency(AtomicAction atomicAction, ComparisonItem comparisonItem)
     {
         if (atomicAction.Operator.In(ActionOperatorTypes.SynchronizeContentAndDate, ActionOperatorTypes.SynchronizeContentOnly,
         ActionOperatorTypes.SynchronizeDate))
