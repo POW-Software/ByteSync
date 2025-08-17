@@ -10,6 +10,13 @@ public class ItemCountToLocalizedTextConverter : IValueConverter
 {
     private readonly ILocalizationService _localizationService;
 
+    // Constructor for DI (tests)
+    public ItemCountToLocalizedTextConverter(ILocalizationService localizationService)
+    {
+        _localizationService = localizationService;
+    }
+
+    // Parameterless constructor for XAML/Container resolution
     public ItemCountToLocalizedTextConverter()
     {
         if (!Design.IsDesignMode)
@@ -20,7 +27,7 @@ public class ItemCountToLocalizedTextConverter : IValueConverter
 
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (Design.IsDesignMode)
+        if (Design.IsDesignMode || _localizationService == null)
         {
             return "item:";
         }
