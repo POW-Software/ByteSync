@@ -1,11 +1,8 @@
-using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
-using ByteSync.Business.Configurations;
 using ByteSync.Business.Inventories;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces;
@@ -32,7 +29,6 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
     private Mock<IActionEditViewModelFactory> _mockActionEditViewModelFactory = null!;
     private Mock<IAtomicActionValidationFailureReasonService> _mockFailureReasonService = null!;
     private Subject<CultureDefinition> _cultureSubject = null!;
-    private TargetedActionGlobalViewModel _viewModel = null!;
     private List<ComparisonItem> _comparisonItems = null!;
 
     [SetUp]
@@ -58,21 +54,17 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             .Returns("Test failure message");
 
         // Create simple mock comparison items (all same type to avoid FileSystemType issues)
-        _comparisonItems = new List<ComparisonItem>
-        {
+        _comparisonItems =
+        [
             CreateMockComparisonItem(FileSystemTypes.File),
-            CreateMockComparisonItem(FileSystemTypes.File) // Use same type to satisfy Single() check
-        };
+            CreateMockComparisonItem(FileSystemTypes.File)
+        ];
 
         // Mock action edit view model
         var mockActionEditViewModel = new Mock<AtomicActionEditViewModel>();
         _mockActionEditViewModelFactory.Setup(x => x.BuildAtomicActionEditViewModel(
                 It.IsAny<FileSystemTypes>(), It.IsAny<bool>(), It.IsAny<AtomicAction>(), It.IsAny<List<ComparisonItem>>()))
             .Returns(mockActionEditViewModel.Object);
-
-        // Create viewModel only for tests that don't require constructor validation
-        // Individual tests will create their own instances as needed
-        _viewModel = null;
     }
 
     private ComparisonItem CreateMockComparisonItem(FileSystemTypes fileSystemType)
@@ -197,11 +189,11 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             Reason = AtomicActionValidationFailureReason.InvalidSourceCount,
             Count = 2,
             LocalizedMessage = "Old message",
-            AffectedItems = new List<ComparisonItem>()
+            AffectedItems = []
         };
         viewModel.FailureSummaries.Add(failureSummary);
 
-        // Setup the new localized message before triggering the culture change
+        // Set up the new localized message before triggering the culture change
         _mockFailureReasonService.Setup(x => x.GetLocalizedMessage(AtomicActionValidationFailureReason.InvalidSourceCount))
             .Returns("New localized message");
 
@@ -235,7 +227,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             Reason = AtomicActionValidationFailureReason.InvalidSourceCount,
             Count = 1,
             LocalizedMessage = "Test",
-            AffectedItems = new List<ComparisonItem>()
+            AffectedItems = []
         });
 
         // Use reflection or expose method for testing
@@ -276,7 +268,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             .GetMethod("ShowConsistencyWarning", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
         // Act
-        showConsistencyWarningMethod?.Invoke(viewModel, new object[] { result });
+        showConsistencyWarningMethod?.Invoke(viewModel, [result]);
 
         // Assert
         viewModel.ShowSaveValidItemsCommand.Should().BeTrue();
@@ -317,7 +309,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             .GetMethod("ShowConsistencyWarning", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
         // Act
-        showConsistencyWarningMethod?.Invoke(viewModel, new object[] { result });
+        showConsistencyWarningMethod?.Invoke(viewModel, [result]);
 
         // Assert
         viewModel.ShowSaveValidItemsCommand.Should().BeFalse();
@@ -355,7 +347,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             .GetMethod("ShowConsistencyWarning", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
         // Act
-        showConsistencyWarningMethod?.Invoke(viewModel, new object[] { result });
+        showConsistencyWarningMethod?.Invoke(viewModel, [result]);
 
         // Assert
         viewModel.FailureSummaries.Should().HaveCount(2);
@@ -388,7 +380,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             Reason = AtomicActionValidationFailureReason.InvalidSourceCount,
             Count = 1,
             LocalizedMessage = "Test",
-            AffectedItems = new List<ComparisonItem>()
+            AffectedItems = []
         });
 
         // Use reflection to access private method
@@ -511,12 +503,14 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         var pathIdentity1 = new PathIdentity(FileSystemTypes.File, "file1.txt", "file1.txt", "file1.txt");
         var item1 = new ComparisonItem(pathIdentity1);
 
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         var pathIdentity2 = new PathIdentity(FileSystemTypes.Directory, "directory1", null, "directory1");
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         var item2 = new ComparisonItem(pathIdentity2);
 
         var summary = new ValidationFailureSummary
         {
-            AffectedItems = new List<ComparisonItem> { item1, item2 }
+            AffectedItems = [item1, item2]
         };
 
         // Act
