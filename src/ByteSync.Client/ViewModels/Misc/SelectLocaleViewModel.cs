@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using Avalonia.Controls.Mixins;
 using ByteSync.Business;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Services.Localizations;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

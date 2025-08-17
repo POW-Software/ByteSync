@@ -3,6 +3,7 @@ using Autofac;
 using Avalonia.Controls;
 using Avalonia.Data.Converters;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Services.Localizations;
 
 namespace ByteSync.Services.Converters;
 

@@ -11,6 +11,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.ViewModels.Misc;
 using ByteSync.Services.Localizations;

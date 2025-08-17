@@ -1,5 +1,6 @@
 ﻿using ByteSync.Interfaces;
 using ByteSync.Interfaces.Dialogs;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.ViewModels.Misc;
 
 namespace ByteSync.Services.Dialogs;

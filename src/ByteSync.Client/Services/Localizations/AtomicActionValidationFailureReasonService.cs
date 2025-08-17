@@ -1,12 +1,7 @@
 using ByteSync.Business.Comparisons;
-using ByteSync.Interfaces;
+using ByteSync.Interfaces.Services.Localizations;
 
 namespace ByteSync.Services.Localizations;
-
-public interface IAtomicActionValidationFailureReasonService
-{
-    string GetLocalizedMessage(AtomicActionValidationFailureReason reason);
-}
 
 public class AtomicActionValidationFailureReasonService : IAtomicActionValidationFailureReasonService
 {

@@ -11,6 +11,7 @@ using ByteSync.Common.Business.Lobbies;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Lobbies;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Services.Lobbies;
 using ByteSync.ViewModels.Sessions.Managing;
 using ReactiveUI;

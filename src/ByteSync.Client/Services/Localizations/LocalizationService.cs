@@ -9,6 +9,7 @@ using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Services.Localizations;
 
 namespace ByteSync.Services.Localizations;
 

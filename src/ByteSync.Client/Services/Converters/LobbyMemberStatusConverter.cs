@@ -5,6 +5,7 @@ using Avalonia.Data.Converters;
 using ByteSync.Assets.Resources;
 using ByteSync.Common.Business.Lobbies;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Services.Localizations;
 
 namespace ByteSync.Services.Converters;
 

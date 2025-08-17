@@ -9,6 +9,7 @@ using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Announcements;
 using ByteSync.Interfaces.Services.Communications;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Updates;
 using Splat.Autofac;
 

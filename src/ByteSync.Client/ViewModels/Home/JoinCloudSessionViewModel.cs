@@ -8,6 +8,7 @@ using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ByteSync.Interfaces.Services.Sessions.Connecting.Joining;
 using ReactiveUI;

@@ -5,6 +5,7 @@ using ByteSync.Business.Configurations;
 using ByteSync.Common.Business.Announcements;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.TestsCommon;
 using ByteSync.ViewModels.Announcements;
 using DynamicData;
