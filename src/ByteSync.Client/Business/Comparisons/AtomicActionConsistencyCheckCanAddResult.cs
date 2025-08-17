@@ -14,14 +14,14 @@ public class AtomicActionConsistencyCheckCanAddResult
     
     public List<ComparisonItemValidationResult> ValidationResults { get; set; }
     
-    public HashSet<ComparisonItem> ValidComparisons 
+    public HashSet<ComparisonItem> GetValidComparisonItems()
     { 
-        get => ValidationResults.Where(r => r.IsValid).Select(r => r.ComparisonItem).ToHashSet();
+        return ValidationResults.Where(r => r.IsValid).Select(r => r.ComparisonItem).ToHashSet();
     }
     
-    public HashSet<ComparisonItem> NonValidComparisons 
+    public HashSet<ComparisonItem> GetInvalidComparisonItems()
     { 
-        get => ValidationResults.Where(r => !r.IsValid).Select(r => r.ComparisonItem).ToHashSet();
+        return ValidationResults.Where(r => !r.IsValid).Select(r => r.ComparisonItem).ToHashSet();
     }
     
     public List<ComparisonItemValidationResult> ValidValidations

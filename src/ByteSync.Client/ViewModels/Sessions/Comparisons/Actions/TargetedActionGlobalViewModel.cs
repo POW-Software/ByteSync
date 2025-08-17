@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Avalonia.Controls.Mixins;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
@@ -29,8 +28,6 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
     private readonly IAtomicActionConsistencyChecker _atomicActionConsistencyChecker;
     private readonly IActionEditViewModelFactory _actionEditViewModelFactory;
 
-    public const string SYNCHRONIZATION_ACTION_PARAMETER = "SynchronizationAction";
-
     public TargetedActionGlobalViewModel() 
     {
 
@@ -52,8 +49,6 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         _actionEditViewModelFactory = actionEditViewModelFactory;
 
         Actions = new ObservableCollection<AtomicActionEditViewModel>();
-            
-        // ComparisonResult = _sessionDataHolder.ComparisonResult;
 
         var canSave = this
             .WhenAnyValue(
@@ -114,7 +109,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
     public bool CanEditAction => _canEditAction.Value;
 
     [Reactive]
-    public string SaveWarning { get; set; }
+    public string SaveWarning { get; set; } = string.Empty;
     
     [Reactive]
     public bool AreMissingFields { get; set; }
@@ -181,15 +176,10 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
             
             ResetWarning();
 
-            _targetedActionsService.AddTargetedAction(atomicAction, result.ValidComparisons);
+            _targetedActionsService.AddTargetedAction(atomicAction, result.GetValidComparisonItems());
 
             _dialogService.CloseFlyout();
         }
-    }
-
-    private bool CanSave()
-    {
-        return !ShowWarning || !ShowSaveValidItemsCommand;
     }
 
     private AtomicAction? Export()
@@ -276,12 +266,12 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
     
     private void ShowConsistencyWarning(AtomicActionConsistencyCheckCanAddResult checkCanAddResult)
     {
-        ShowSaveValidItemsCommand = checkCanAddResult.ValidComparisons.Count > 0;
+        ShowSaveValidItemsCommand = checkCanAddResult.GetValidComparisonItems().Count > 0;
 
         if (ShowSaveValidItemsCommand)
         {
-            IsInconsistentWithValidItems = new Tuple<int, int>(checkCanAddResult.ValidComparisons.Count, 
-                checkCanAddResult.NonValidComparisons.Count);
+            IsInconsistentWithValidItems = new Tuple<int, int>(checkCanAddResult.GetValidComparisonItems().Count, 
+                checkCanAddResult.GetInvalidComparisonItems().Count);
             IsInconsistentWithNoValidItems = false;
         }
         else

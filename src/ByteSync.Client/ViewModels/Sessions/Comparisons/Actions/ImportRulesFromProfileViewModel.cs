@@ -3,7 +3,6 @@ using System.Reactive.Linq;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Profiles;
 using ByteSync.Common.Business.Sessions.Cloud;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Profiles;
 using ByteSync.Interfaces.Lobbies;
 using ByteSync.Interfaces.Profiles;
