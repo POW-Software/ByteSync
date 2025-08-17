@@ -7,24 +7,38 @@ public class AtomicActionConsistencyCheckCanAddResult
     public AtomicActionConsistencyCheckCanAddResult(ICollection<ComparisonItem> comparisonItems)
     {
         ComparisonItems = comparisonItems;
-
-        ValidComparisons = new HashSet<ComparisonItem>();
-        
-        NonValidComparisons = new HashSet<ComparisonItem>();
+        ValidationResults = new List<ComparisonItemValidationResult>();
     }
 
     public ICollection<ComparisonItem> ComparisonItems { get; set; }
     
-    public HashSet<ComparisonItem> ValidComparisons { get; set; }
+    public List<ComparisonItemValidationResult> ValidationResults { get; set; }
     
-    public HashSet<ComparisonItem> NonValidComparisons { get; set; }
+    public HashSet<ComparisonItem> ValidComparisons 
+    { 
+        get => ValidationResults.Where(r => r.IsValid).Select(r => r.ComparisonItem).ToHashSet();
+    }
+    
+    public HashSet<ComparisonItem> NonValidComparisons 
+    { 
+        get => ValidationResults.Where(r => !r.IsValid).Select(r => r.ComparisonItem).ToHashSet();
+    }
+    
+    public List<ComparisonItemValidationResult> ValidValidations
+    {
+        get => ValidationResults.Where(r => r.IsValid).ToList();
+    }
+    
+    public List<ComparisonItemValidationResult> FailedValidations
+    {
+        get => ValidationResults.Where(r => !r.IsValid).ToList();
+    }
     
     public bool IsOK
     {
         get
         {
-            bool isOK = ValidComparisons.Count == ComparisonItems.Count 
-                        && NonValidComparisons.Count == 0
+            bool isOK = ValidationResults.All(r => r.IsValid)
                         && ComparisonItems.Count != 0;
             
             return isOK;
