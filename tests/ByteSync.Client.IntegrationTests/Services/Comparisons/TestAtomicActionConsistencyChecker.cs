@@ -1,10 +1,12 @@
 ﻿using Autofac;
 using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
+using ByteSync.Business.Inventories;
 using ByteSync.Business.Sessions;
 using ByteSync.Client.IntegrationTests.TestHelpers;
 using ByteSync.Client.IntegrationTests.TestHelpers.Business;
 using ByteSync.Common.Business.Actions;
+using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Helpers;
 using ByteSync.Factories.ViewModels;
 using ByteSync.Interfaces;
@@ -12,6 +14,7 @@ using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
+using ByteSync.Models.Inventories;
 using ByteSync.Services.Comparisons;
 using ByteSync.Services.Sessions;
 using ByteSync.TestsCommon;
@@ -165,11 +168,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         checkResult.ValidValidations.Count.Should().Be(0);
         checkResult.FailedValidations.Count.Should().Be(comparisonItemViewModelsCount);
 
-        // Vérification que chaque échec a une raison spécifique
         checkResult.FailedValidations.Should().OnlyContain(f => f.FailureReason != null);
-        // ClassicAssert.IsFalse(checkResult.IsOK);
-        // ClassicAssert.AreEqual(0, checkResult.ValidComparisons.Count);
-        // ClassicAssert.AreEqual(comparisonItemViewModelsCount, checkResult.NonValidComparisons.Count);
     }
 
 
@@ -184,7 +183,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         ComparisonResult comparisonResult;
 
         var dataA = _testDirectoryService.CreateSubTestDirectory("dataA");
-        var fileA = _testDirectoryService.CreateFileInDirectory(dataA, "fileA.txt", "fileAContent");
+        _ = _testDirectoryService.CreateFileInDirectory(dataA, "fileA.txt", "fileAContent");
         var dataB = _testDirectoryService.CreateSubTestDirectory("dataB");
         var fileB = _testDirectoryService.CreateFileInDirectory(dataB, "fileB.txt", "fileBContent___");
 
@@ -200,7 +199,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         {
             Source = inventoryDataA.GetSingleDataPart(),
             Operator = ActionOperatorTypes.SynchronizeContentAndDate,
-            Destination = inventoryDataB.GetSingleDataPart() // On demande la création sur B, ça ne peut passer
+            Destination = inventoryDataB.GetSingleDataPart()
         };
 
         var checkResult = _atomicActionConsistencyChecker.CheckCanAdd(atomicAction, comparisonResult.ComparisonItems);
@@ -208,7 +207,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         checkResult.IsOK.Should().BeFalse();
         checkResult.ValidValidations.Count.Should().Be(0);
         checkResult.FailedValidations.Count.Should().Be(2);
-        
+
         checkResult.FailedValidations.Should().OnlyContain(f => f.FailureReason != null);
     }
 
@@ -219,8 +218,6 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
     public async Task Test_FileOnAAndB_SameContentAndDate(ActionOperatorTypes actionOperator, int expectedValidItems)
     {
         AtomicAction atomicAction;
-        AtomicActionConsistencyChecker atomicActionConsistencyChecker;
-
         ComparisonResult comparisonResult;
 
         var dataA = _testDirectoryService.CreateSubTestDirectory("dataA");
@@ -252,4 +249,175 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         checkResult.ValidValidations.Count.Should().Be(expectedValidItems);
         checkResult.FailedValidations.Count.Should().Be(1 - expectedValidItems);
     }
+
+    #region Basic Consistency Tests - Operation Type Compatibility
+
+    [Test]
+    public void Test_SynchronizeOperationOnDirectoryNotAllowed()
+    {
+        // Arrange
+        var inventoryA = new Inventory { InventoryId = "Id_A", Code = "A" };
+        var inventoryB = new Inventory { InventoryId = "Id_B", Code = "B" };
+        var inventoryPartA = new InventoryPart(inventoryA, "/testRootA", FileSystemTypes.Directory);
+        var inventoryPartB = new InventoryPart(inventoryB, "/testRootB", FileSystemTypes.Directory);
+
+        var atomicAction = new AtomicAction
+        {
+            Source = new DataPart("A1", inventoryPartA),
+            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Destination = new DataPart("B1", inventoryPartB)
+        };
+
+        var pathIdentity = new PathIdentity(FileSystemTypes.Directory, "/testDir", "testDir", "/testDir");
+        var comparisonItem = new ComparisonItem(pathIdentity);
+
+        // Act
+        var result = _atomicActionConsistencyChecker.CheckCanAdd(atomicAction, comparisonItem);
+
+        // Assert
+        result.IsOK.Should().BeFalse();
+        result.FailedValidations.Should().HaveCount(1);
+        result.FailedValidations[0].FailureReason.Should()
+            .Be(AtomicActionValidationFailureReason.SynchronizeOperationOnDirectoryNotAllowed);
+    }
+
+    [Test]
+    public void Test_CreateOperationOnFileNotAllowed()
+    {
+        // Arrange
+        var inventoryB = new Inventory { InventoryId = "Id_B", Code = "B" };
+        var inventoryPartB = new InventoryPart(inventoryB, "/testRootB", FileSystemTypes.Directory);
+
+        var atomicAction = new AtomicAction
+        {
+            Source = null,
+            Operator = ActionOperatorTypes.Create,
+            Destination = new DataPart("B1", inventoryPartB)
+        };
+
+        var pathIdentity = new PathIdentity(FileSystemTypes.File, "/testFile.txt", "testFile.txt", "/testFile.txt");
+        var comparisonItem = new ComparisonItem(pathIdentity);
+
+        // Act
+        var result = _atomicActionConsistencyChecker.CheckCanAdd(atomicAction, comparisonItem);
+
+        // Assert
+        result.IsOK.Should().BeFalse();
+        result.FailedValidations.Should().HaveCount(1);
+        result.FailedValidations[0].FailureReason.Should()
+            .Be(AtomicActionValidationFailureReason.CreateOperationOnFileNotAllowed);
+    }
+
+    #endregion
+
+    #region Basic Consistency Tests - Source Requirements
+
+    [Test]
+    public void Test_SourceRequiredForSynchronizeOperation()
+    {
+        // Arrange
+        var inventoryB = new Inventory { InventoryId = "Id_B", Code = "B" };
+        var inventoryPartB = new InventoryPart(inventoryB, "/testRootB", FileSystemTypes.Directory);
+
+        var atomicAction = new AtomicAction
+        {
+            Source = null, // Missing source
+            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Destination = new DataPart("B1", inventoryPartB)
+        };
+
+        var pathIdentity = new PathIdentity(FileSystemTypes.File, "/testFile.txt", "testFile.txt", "/testFile.txt");
+        var comparisonItem = new ComparisonItem(pathIdentity);
+
+        // Act
+        var result = _atomicActionConsistencyChecker.CheckCanAdd(atomicAction, comparisonItem);
+
+        // Assert
+        result.IsOK.Should().BeFalse();
+        result.FailedValidations.Should().HaveCount(1);
+        result.FailedValidations[0].FailureReason.Should()
+            .Be(AtomicActionValidationFailureReason.SourceRequiredForSynchronizeOperation);
+    }
+
+    [Test]
+    public void Test_DestinationRequiredForSynchronizeOperation()
+    {
+        // Arrange
+        var inventoryA = new Inventory { InventoryId = "Id_A", Code = "A" };
+        var inventoryPartA = new InventoryPart(inventoryA, "/testRootA", FileSystemTypes.Directory);
+
+        var atomicAction = new AtomicAction
+        {
+            Source = new DataPart("A1", inventoryPartA),
+            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Destination = null // Missing destination
+        };
+
+        var pathIdentity = new PathIdentity(FileSystemTypes.File, "/testFile.txt", "testFile.txt", "/testFile.txt");
+        var comparisonItem = new ComparisonItem(pathIdentity);
+
+        // Act
+        var result = _atomicActionConsistencyChecker.CheckCanAdd(atomicAction, comparisonItem);
+
+        // Assert
+        result.IsOK.Should().BeFalse();
+        result.FailedValidations.Should().HaveCount(1);
+        result.FailedValidations[0].FailureReason.Should()
+            .Be(AtomicActionValidationFailureReason.DestinationRequiredForSynchronizeOperation);
+    }
+
+    #endregion
+
+    #region Success Cases Tests
+
+    [Test]
+    public void Test_ValidDoNothingOperation_Success()
+    {
+        // Arrange
+        var atomicAction = new AtomicAction
+        {
+            Source = null,
+            Operator = ActionOperatorTypes.DoNothing,
+            Destination = null
+        };
+
+        var pathIdentity = new PathIdentity(FileSystemTypes.File, "/testFile.txt", "testFile.txt", "/testFile.txt");
+        var comparisonItem = new ComparisonItem(pathIdentity);
+
+        // Act
+        var result = _atomicActionConsistencyChecker.CheckCanAdd(atomicAction, comparisonItem);
+
+        // Assert
+        result.IsOK.Should().BeTrue();
+        result.ValidValidations.Should().HaveCount(1);
+        result.FailedValidations.Should().BeEmpty();
+    }
+
+    [Test]
+    public void Test_ValidCreateOperationOnDirectory_Success()
+    {
+        // Arrange
+        var inventoryB = new Inventory { InventoryId = "Id_B", Code = "B" };
+        var inventoryPartB = new InventoryPart(inventoryB, "/testRootB", FileSystemTypes.Directory);
+
+        var atomicAction = new AtomicAction
+        {
+            Source = null,
+            Operator = ActionOperatorTypes.Create,
+            Destination = new DataPart("B1", inventoryPartB)
+        };
+
+        var pathIdentity = new PathIdentity(FileSystemTypes.Directory, "/testDir", "testDir", "/testDir");
+        var comparisonItem = new ComparisonItem(pathIdentity);
+
+        // Act
+        var result = _atomicActionConsistencyChecker.CheckCanAdd(atomicAction, comparisonItem);
+
+        // Assert
+        result.IsOK.Should().BeTrue();
+        result.ValidValidations.Should().HaveCount(1);
+        result.FailedValidations.Should().BeEmpty();
+    }
+
+    #endregion
 }
