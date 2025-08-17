@@ -128,8 +128,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
     [Reactive]
     public bool IsInconsistentWithNoValidItems { get; set; }
     
-    [Reactive] 
-    public List<ValidationFailureSummary> FailureSummaries { get; set; } = new();
+    public ObservableCollection<ValidationFailureSummary> FailureSummaries { get; set; } = new();
     
     [Reactive] 
     public string ActionIssuesHeaderMessage { get; set; } = string.Empty;
@@ -287,6 +286,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         AreMissingFields = true;
         IsInconsistentWithValidItems = null;
         IsInconsistentWithNoValidItems = false;
+        FailureSummaries.Clear(); // Clear previous validation failure summaries
 
         DoShowWarning();
     }
@@ -308,7 +308,8 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         }
         
         // Generate failure summaries with detailed information
-        FailureSummaries = checkCanAddResult.FailedValidations
+        FailureSummaries.Clear();
+        var summaries = checkCanAddResult.FailedValidations
             .GroupBy(f => f.FailureReason!.Value)
             .Select(g => new ValidationFailureSummary 
             {
@@ -317,8 +318,12 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
                 LocalizedMessage = _failureReasonLocalizer.GetLocalizedMessage(g.Key),
                 AffectedItems = g.Select(f => f.ComparisonItem).ToList()
             })
-            .OrderByDescending(s => s.Count) // Most frequent failures first
-            .ToList();
+            .OrderByDescending(s => s.Count); // Most frequent failures first
+        
+        foreach (var summary in summaries)
+        {
+            FailureSummaries.Add(summary);
+        }
         
         AreMissingFields = false;
 
