@@ -1664,4 +1664,11 @@ Do you want to save this new Session Profile with this name?</value>
 	<data name="TargetedActionEditionGlobal_AffectedItemsTooltip" xml:space="preserve">
 		<value>Affected items:</value>
 	</data>
+	<!-- Item count localization for pluralization -->
+	<data name="ValidationFailure_ItemSingular" xml:space="preserve">
+		<value>item:</value>
+	</data>
+	<data name="ValidationFailure_ItemPlural" xml:space="preserve">
+		<value>items:</value>
+	</data>
 </root>

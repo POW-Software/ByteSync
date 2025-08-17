@@ -1637,4 +1637,11 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	<data name="TargetedActionEditionGlobal_AffectedItemsTooltip" xml:space="preserve">
 		<value>Éléments affectés :</value>
 	</data>
+	<!-- Item count localization for pluralization -->
+	<data name="ValidationFailure_ItemSingular" xml:space="preserve">
+		<value>élément :</value>
+	</data>
+	<data name="ValidationFailure_ItemPlural" xml:space="preserve">
+		<value>éléments :</value>
+	</data>
 </root>

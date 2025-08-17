@@ -17,7 +17,7 @@
     </Design.DataContext>
     
     <UserControl.Resources>
-        <converters:IntToBoolConverter x:Key="IntToBoolConverter"/>
+        <converters:ItemCountToLocalizedTextConverter x:Key="ItemCountToLocalizedTextConverter"/>
     </UserControl.Resources>
     
     <Grid Background="{DynamicResource Gray7}">
@@ -104,9 +104,8 @@
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="•" Margin="0,0,6,0" />
                                         <TextBlock Text="{Binding Count}" FontWeight="SemiBold" />
-                                        <TextBlock Text=" item" Margin="0,0,2,0" />
-                                        <TextBlock Text="s" IsVisible="{Binding Count, Converter={StaticResource IntToBoolConverter}}" />
-                                        <TextBlock Text=": " />
+                                        <TextBlock Text=" " />
+                                        <TextBlock Text="{Binding Count, Converter={StaticResource ItemCountToLocalizedTextConverter}}" Margin="0,0,4,0" />
                                         <TextBlock Text="{Binding LocalizedMessage}" />
                                     </StackPanel>
                                     <ToolTip.Tip>

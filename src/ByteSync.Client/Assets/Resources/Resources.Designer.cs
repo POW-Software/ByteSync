@@ -2920,5 +2920,23 @@ namespace ByteSync.Assets.Resources {
                 return ResourceManager.GetString("ValidationFailure_TargetRequiredForSynchronizeDateOrDelete", resourceCulture);
             }
         }
+        
+        /// <summary>
+        /// Looks up a localized string similar to item:.
+        /// </summary>
+        internal static string ValidationFailure_ItemSingular {
+            get {
+                return ResourceManager.GetString("ValidationFailure_ItemSingular", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to items:.
+        /// </summary>
+        internal static string ValidationFailure_ItemPlural {
+            get {
+                return ResourceManager.GetString("ValidationFailure_ItemPlural", resourceCulture);
+            }
+        }
     }
 }
