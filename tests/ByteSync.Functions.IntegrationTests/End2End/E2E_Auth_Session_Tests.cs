@@ -53,7 +53,7 @@ public class E2E_Auth_Session_Tests
         };
         var createResult = await _api.PostJsonAsync<CloudSessionResult>("session", createParams);
         createResult.Should().NotBeNull();
-        var sessionId = createResult!.SessionId;
+        var sessionId = createResult.SessionId;
         var creatorMembers = await _api.GetJsonAsync<List<SessionMemberInfoDTO>>($"session/{sessionId}/members");
         creatorMembers.Any(m => m.ClientInstanceId == loginA.ClientInstanceId).Should().BeTrue();
         var loginB = new LoginData
