@@ -1,9 +1,4 @@
 using System.Diagnostics;
-using System.Text;
-using System.Text.Json;
-using ByteSync.Common.Business.Auth;
-using ByteSync.Common.Business.Sessions.Cloud;
-using ByteSync.Common.Controls.Json;
 using DotNet.Testcontainers.Builders;
 using ContainerBuilder = DotNet.Testcontainers.Builders.ContainerBuilder;
 using IContainer = DotNet.Testcontainers.Containers.IContainer;
@@ -60,21 +55,21 @@ public class E2E_Auth_Session_Initializer
 
         using var publish = new Process { StartInfo = startInfo };
         publish.Start();
-        publish.WaitForExit();
+        await publish.WaitForExitAsync();
         publish.ExitCode.Should().Be(0);
 
         var cfg = GlobalTestSetup.Configuration;
         var env = new Dictionary<string, string>
         {
-            ["AzureWebJobsStorage"] = cfg["AzureWebJobsStorage"],
+            ["AzureWebJobsStorage"] = cfg["AzureWebJobsStorage"]!,
             ["AppSettings__SkipClientsVersionCheck"] = "True" ,
             ["Redis__ConnectionString"] = cfg["Redis:ConnectionString"]!,
             ["SignalR__ConnectionString"] = cfg["SignalR:ConnectionString"]!,
-            ["AppSettings__Secret"] = cfg["AppSettings:Secret"],
-            ["AzureBlobStorage__Endpoint"] = cfg["AzureBlobStorage:Endpoint"],
-            ["AzureBlobStorage__AccountName"] = cfg["AzureBlobStorage:AccountName"],
-            ["AzureBlobStorage__AccountKey"] = cfg["AzureBlobStorage:AccountKey"],
-            ["AzureBlobStorage__Container"] = cfg["AzureBlobStorage:Container"] 
+            ["AppSettings__Secret"] = cfg["AppSettings:Secret"]!,
+            ["AzureBlobStorage__Endpoint"] = cfg["AzureBlobStorage:Endpoint"]!,
+            ["AzureBlobStorage__AccountName"] = cfg["AzureBlobStorage:AccountName"]!,
+            ["AzureBlobStorage__AccountKey"] = cfg["AzureBlobStorage:AccountKey"]!,
+            ["AzureBlobStorage__Container"] = cfg["AzureBlobStorage:Container"]! 
         };
 
         var functionsBuilder = new ContainerBuilder()
@@ -94,7 +89,7 @@ public class E2E_Auth_Session_Initializer
 
         Http = new HttpClient { BaseAddress = new Uri("http://localhost:7071/api/") };
         Http.DefaultRequestHeaders.Add("User-Agent", "ByteSync-E2E-Test");
-        await Task.Delay(1000);
+        await Task.Delay(1000, funcCts.Token);
     }
     
 }
