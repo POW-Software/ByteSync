@@ -1,4 +1,5 @@
 ﻿using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Avalonia.Controls;
@@ -95,11 +96,16 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         RejectClientCommand = ReactiveCommand.CreateFromTask(RejectClient, canRun);
         
         CancelCommand = ReactiveCommand.CreateFromTask(Cancel);
-        
-        Observable.Merge(CopyToClipboardCommand.IsExecuting, CheckClipboardCommand.IsExecuting, 
-                ValidateClientCommand.IsExecuting, RejectClientCommand.IsExecuting,
-                CancelCommand.IsExecuting)
-                    .Select(executing => !executing).Subscribe(canRun);
+
+        this.WhenActivated(disposables =>
+        {
+            Observable.Merge(CopyToClipboardCommand.IsExecuting, CheckClipboardCommand.IsExecuting, 
+                    ValidateClientCommand.IsExecuting, RejectClientCommand.IsExecuting,
+                    CancelCommand.IsExecuting)
+                .Select(executing => !executing)
+                .Subscribe(canRun)
+                .DisposeWith(disposables);
+        });
     }
 
     public TrustedPublicKey TrustedPublicKey { get; set; }

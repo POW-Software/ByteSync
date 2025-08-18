@@ -1,4 +1,5 @@
 ﻿using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using Avalonia.Threading;
@@ -42,31 +43,11 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
 
         var canClose = this.WhenAnyValue(x => x.CanCloseCurrentFlyout);
         CloseCommand = ReactiveCommand.Create(Close, canClose);
-        
-        // https://stackoverflow.com/questions/29100381/getting-prior-value-on-change-of-property-using-reactiveui-in-wpf-mvvm
-        // https://stackoverflow.com/questions/35784016/whenany-observableforproperty-how-to-access-previous-and-new-value
-        // Could be simplified with a bool/Reactive property on Content to know if CloseFlyout has been requested
-        this.WhenAnyValue(x => x.Content)
-            .StartWith(this.Content)
-            .Buffer(2, 1)
-            .Select(b => (Previous: b[0], Current: b[1]))
-            .Subscribe(x =>
-            {
-                if (x.Previous != null)
-                {
-                    x.Previous.CloseFlyoutRequested -= OnCloseFlyoutRequested;
-                }
-                
-                if (x.Current != null)
-                {
-                    x.Current.CloseFlyoutRequested += OnCloseFlyoutRequested;
-                }
-            });
 
         this.WhenActivated(HandleActivation);
     }
 
-    private void HandleActivation(IDisposable compositeDisposable)
+    private void HandleActivation(CompositeDisposable compositeDisposable)
     {
         // We switch back here when the theme is changed!
         // HasBeenActivatedOnce allows you to process only once and avoid flyout problems following a theme change
@@ -75,6 +56,27 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
         {
             DoCloseFlyout();
             HasBeenActivatedOnce = true;
+            
+            // https://stackoverflow.com/questions/29100381/getting-prior-value-on-change-of-property-using-reactiveui-in-wpf-mvvm
+            // https://stackoverflow.com/questions/35784016/whenany-observableforproperty-how-to-access-previous-and-new-value
+            // Could be simplified with a bool/Reactive property on Content to know if CloseFlyout has been requested
+            this.WhenAnyValue(x => x.Content)
+                .StartWith(this.Content)
+                .Buffer(2, 1)
+                .Select(b => (Previous: b[0], Current: b[1]))
+                .Subscribe(x =>
+                {
+                    if (x.Previous != null)
+                    {
+                        x.Previous.CloseFlyoutRequested -= OnCloseFlyoutRequested;
+                    }
+
+                    if (x.Current != null)
+                    {
+                        x.Current.CloseFlyoutRequested += OnCloseFlyoutRequested;
+                    }
+                })
+                .DisposeWith(compositeDisposable);
         }
     }
 
