@@ -74,19 +74,20 @@ public class SharedFilesServiceTests
         await service.AssertFilePartIsDownloaded(client, parameters);
 
         // Assert
-        if (storageProvider == StorageProvider.AzureBlobStorage)
+        switch (storageProvider)
         {
-            A.CallTo(() => _azureBlobStorageService.DeleteObject(sharedFileDefinition, partNumber))
-                .MustHaveHappenedOnceExactly();
-            A.CallTo(() => _cloudflareR2Service.DeleteObject(A<SharedFileDefinition>._, A<int>._))
-                .MustNotHaveHappened();
-        }
-        else
-        {
-            A.CallTo(() => _cloudflareR2Service.DeleteObject(sharedFileDefinition, partNumber))
-                .MustHaveHappenedOnceExactly();
-            A.CallTo(() => _azureBlobStorageService.DeleteObject(A<SharedFileDefinition>._, A<int>._))
-                .MustNotHaveHappened();
+            case StorageProvider.AzureBlobStorage:
+                A.CallTo(() => _azureBlobStorageService.DeleteObject(sharedFileDefinition, partNumber))
+                    .MustHaveHappenedOnceExactly();
+                A.CallTo(() => _cloudflareR2Service.DeleteObject(A<SharedFileDefinition>._, A<int>._))
+                    .MustNotHaveHappened();
+                break;
+            case StorageProvider.CloudflareR2:
+                A.CallTo(() => _cloudflareR2Service.DeleteObject(sharedFileDefinition, partNumber))
+                    .MustHaveHappenedOnceExactly();
+                A.CallTo(() => _azureBlobStorageService.DeleteObject(A<SharedFileDefinition>._, A<int>._))
+                    .MustNotHaveHappened();
+                break;
         }
 
         A.CallTo(() => _sharedFilesRepository.Forget(sharedFileDefinition))
@@ -94,7 +95,9 @@ public class SharedFilesServiceTests
     }
 
     [Test]
-    public async Task AssertFilePartIsDownloaded_WhenRetentionEnabled_DoesNotDeleteObject_ButUnregistersWhenFullyDownloaded()
+    [TestCase(StorageProvider.AzureBlobStorage)]
+    [TestCase(StorageProvider.CloudflareR2)]
+    public async Task AssertFilePartIsDownloaded_WhenRetentionEnabled_DoesNotDeleteObject_ButUnregistersWhenFullyDownloaded(StorageProvider storageProvider)
     {
         // Arrange
         var appSettings = Options.Create(new AppSettings { RetainFilesAfterTransfer = true });
@@ -103,7 +106,7 @@ public class SharedFilesServiceTests
         var partNumber = 1;
         var recipients = new List<string> { "A", "B" };
         var sharedFileDefinition = new SharedFileDefinition { Id = "file-2" };
-        var preExisting = new SharedFileData(sharedFileDefinition, recipients, StorageProvider.AzureBlobStorage)
+        var preExisting = new SharedFileData(sharedFileDefinition, recipients, storageProvider)
         {
             TotalParts = 1,
             UploadedPartsNumbers = new HashSet<int> { 1 },
@@ -127,7 +130,7 @@ public class SharedFilesServiceTests
             SessionId = "session-2",
             SharedFileDefinition = sharedFileDefinition,
             PartNumber = partNumber,
-            StorageProvider = StorageProvider.AzureBlobStorage
+            StorageProvider = storageProvider
         };
 
         // Act
@@ -148,7 +151,9 @@ public class SharedFilesServiceTests
     }
 
     [Test]
-    public async Task AssertFilePartIsDownloaded_WhenPartNotFullyDownloaded_DoesNotDeleteOrUnregister()
+    [TestCase(StorageProvider.AzureBlobStorage)]
+    [TestCase(StorageProvider.CloudflareR2)]
+    public async Task AssertFilePartIsDownloaded_WhenPartNotFullyDownloaded_DoesNotDeleteOrUnregister(StorageProvider storageProvider)
     {
         // Arrange
         var appSettings = Options.Create(new AppSettings { RetainFilesAfterTransfer = false });
@@ -157,7 +162,7 @@ public class SharedFilesServiceTests
         var partNumber = 1;
         var recipients = new List<string> { "A", "B" };
         var sharedFileDefinition = new SharedFileDefinition { Id = "file-3" };
-        var preExisting = new SharedFileData(sharedFileDefinition, recipients, StorageProvider.AzureBlobStorage)
+        var preExisting = new SharedFileData(sharedFileDefinition, recipients, storageProvider)
         {
             TotalParts = 2,
             UploadedPartsNumbers = new HashSet<int> { 1, 2 },
@@ -178,7 +183,7 @@ public class SharedFilesServiceTests
             SessionId = "session-3",
             SharedFileDefinition = sharedFileDefinition,
             PartNumber = partNumber,
-            StorageProvider = StorageProvider.AzureBlobStorage
+            StorageProvider = storageProvider
         };
 
         // Act
