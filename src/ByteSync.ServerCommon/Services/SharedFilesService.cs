@@ -67,7 +67,7 @@ public class SharedFilesService : ISharedFilesService
     {
         var sharedFileDefinition = transferParameters.SharedFileDefinition;
         var partNumber = transferParameters.PartNumber!.Value;
-        bool objectDeletable = false;
+        bool shouldDeletePart = false;
         bool unregister = false;
         
         await _sharedFilesRepository.AddOrUpdate(sharedFileDefinition, sharedFileData =>
@@ -79,7 +79,9 @@ public class SharedFilesService : ISharedFilesService
 
             sharedFileData.SetDownloadedBy(downloadedBy.ClientInstanceId, partNumber);
             
-            objectDeletable = sharedFileData.IsPartFullyDownloaded(partNumber);
+            bool isPartFullyDownloaded = sharedFileData.IsPartFullyDownloaded(partNumber);
+            
+            shouldDeletePart = isPartFullyDownloaded && !_appSettings.RetainFilesAfterTransfer;
             
             if (sharedFileData.IsFullyDownloaded)
             {
@@ -89,21 +91,9 @@ public class SharedFilesService : ISharedFilesService
             return sharedFileData;
         });
 
-        if ((objectDeletable) && (!_appSettings.RetainFilesAfterTransfer))
+        if ((shouldDeletePart) && (!_appSettings.RetainFilesAfterTransfer))
         {
-            try
-            {
-                await (transferParameters.StorageProvider switch
-                {
-                    StorageProvider.AzureBlobStorage => _azureBlobStorageService.DeleteObject(sharedFileDefinition, partNumber),
-                    StorageProvider.CloudflareR2     => _cloudflareR2Service.DeleteObject(sharedFileDefinition, partNumber),
-                    _ => throw new NotSupportedException($"Storage provider {transferParameters.StorageProvider} is not supported")
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Can not delete blob for SharedFileDefinition:{Id} / PartNumber:{PartNumber}", sharedFileDefinition.Id, partNumber);
-            }
+            await DeleteDownloadedPart(transferParameters, sharedFileDefinition, partNumber);
         }
 
         if (unregister)
@@ -116,6 +106,24 @@ public class SharedFilesService : ISharedFilesService
             {
                 _logger.LogError(ex, "Can not unregister SharedFileDefinition:{Id}", sharedFileDefinition.Id);
             }
+        }
+    }
+
+    private async Task DeleteDownloadedPart(TransferParameters transferParameters,
+        SharedFileDefinition sharedFileDefinition, int partNumber)
+    {
+        try
+        {
+            await (transferParameters.StorageProvider switch
+            {
+                StorageProvider.AzureBlobStorage => _azureBlobStorageService.DeleteObject(sharedFileDefinition, partNumber),
+                StorageProvider.CloudflareR2     => _cloudflareR2Service.DeleteObject(sharedFileDefinition, partNumber),
+                _ => throw new NotSupportedException($"Storage provider {transferParameters.StorageProvider} is not supported")
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Can not delete blob for SharedFileDefinition:{Id} / PartNumber:{PartNumber}", sharedFileDefinition.Id, partNumber);
         }
     }
 
