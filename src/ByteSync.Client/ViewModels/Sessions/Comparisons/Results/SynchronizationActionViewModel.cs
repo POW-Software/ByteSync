@@ -7,6 +7,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Services.Comparisons.DescriptionBuilders;
 using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
 using ReactiveUI;

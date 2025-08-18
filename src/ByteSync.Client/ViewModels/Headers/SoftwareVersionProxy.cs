@@ -1,6 +1,7 @@
 ﻿using ByteSync.Assets.Resources;
 using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Services.Misc;
 
 namespace ByteSync.ViewModels.Headers;

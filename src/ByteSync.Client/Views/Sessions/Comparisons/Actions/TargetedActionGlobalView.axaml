@@ -6,6 +6,7 @@
              xmlns:actions="clr-namespace:ByteSync.ViewModels.Sessions.Comparisons.Actions"
              xmlns:misc="clr-namespace:ByteSync.Views.Misc"
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             xmlns:converters="clr-namespace:ByteSync.Services.Converters"
 
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              
@@ -14,6 +15,10 @@
     <Design.DataContext>
         <actions:TargetedActionGlobalViewModel />
     </Design.DataContext>
+    
+    <UserControl.Resources>
+        <converters:ItemCountToLocalizedTextConverter x:Key="ItemCountToLocalizedTextConverter"/>
+    </UserControl.Resources>
     
     <Grid Background="{DynamicResource Gray7}">
         <Grid.RowDefinitions>
@@ -84,18 +89,55 @@
         </DockPanel>
 
         <StackPanel Grid.Row="2" Orientation="Vertical" HorizontalAlignment="Center" Margin="24"
-            IsVisible="{Binding Path=ShowWarning}">
+                    IsVisible="{Binding Path=ShowWarning}">
             <StackPanel MinWidth="300" MaxWidth="450" HorizontalAlignment="Center" Background="{DynamicResource OtherMemberBackGround}">
-                <Label>
+                
+                <!-- Header with failure details if present -->
+                <StackPanel IsVisible="{Binding FailureSummaries.Count}">
+                    <TextBlock Text="{Binding ActionIssuesHeaderMessage}" Margin="6" FontWeight="SemiBold" />
+                    
+                    <!-- List of failure summaries with tooltip -->
+                    <ItemsControl ItemsSource="{Binding FailureSummaries}" Margin="20,0,6,6">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,2" Padding="4" Background="Transparent">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="•" Margin="0,0,6,0" />
+                                        <TextBlock Text="{Binding Count}" FontWeight="SemiBold" />
+                                        <TextBlock Text=" " />
+                                        <TextBlock Text="{Binding Count, Converter={StaticResource ItemCountToLocalizedTextConverter}}" Margin="0,0,4,0" />
+                                        <TextBlock Text="{Binding LocalizedMessage}" />
+                                    </StackPanel>
+                                    <ToolTip.Tip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding $parent[UserControl].((actions:TargetedActionGlobalViewModel)DataContext).AffectedItemsTooltipHeader}" 
+                                                      FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{Binding AffectedItemsTooltip}" />
+                                        </StackPanel>
+                                    </ToolTip.Tip>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+                
+                <!-- Standard message for missing fields -->
+                <Label IsVisible="{Binding !FailureSummaries.Count}">
                     <TextBlock Text="{Binding SaveWarning}" TextWrapping="Wrap" />
                 </Label>
+                
+                <!-- Separator if we have both -->
+                <Border Height="1" Background="{DynamicResource Gray5}" Margin="6" 
+                       IsVisible="{Binding FailureSummaries.Count}" />
+                
+                <!-- Continuation message -->
+                <TextBlock Text="{Binding SaveWarning}" TextWrapping="Wrap" Margin="6"
+                          IsVisible="{Binding FailureSummaries.Count}" />
 
                 <Button HorizontalAlignment="Center" Margin="6 9" Command="{Binding Path=SaveValidItemsCommand}" MaxHeight="30"
                         IsVisible="{Binding Path=ShowSaveValidItemsCommand}" BorderThickness="0" >
-
                     <StackPanel Orientation="Horizontal" Margin="2">
                         <misc:Icon FontSize="12" Value="RegularSave" />
-                        
                         <TextBlock Text="{localizations:Loc TargetedActionEditionGlobal_SaveForValidItems}" Margin="6 0 0 0" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>

@@ -952,6 +952,9 @@ Please stop the inventory or synchronization first.</value>
 	<data name="SynchronizationMain_AbortSynchronization_Message" xml:space="preserve">
 		<value>Want to abort the current synchronization?</value>
 	</data>
+	<data name="SynchronizationMain_AbortSynchronization" xml:space="preserve">
+		<value>ABORT</value>
+	</data>
 	<data name="General_or" xml:space="preserve">
 		<value>or</value>
 	</data>
@@ -1570,5 +1573,102 @@ Do you want to save this new Session Profile with this name?</value>
 	</data>
 	<data name="DataNodeView_Tooltip_Content_Add" xml:space="preserve">
 		<value>Add a new data node to the synchronization session.</value>
+	</data>
+	<!-- Atomic Action Validation Failure Reasons -->
+	<!-- Basic Consistency - Operation Type Compatibility -->
+	<data name="ValidationFailure_SynchronizeOperationOnDirectoryNotAllowed" xml:space="preserve">
+		<value>Cannot sync directories</value>
+	</data>
+	<data name="ValidationFailure_CreateOperationOnFileNotAllowed" xml:space="preserve">
+		<value>Cannot create files</value>
+	</data>
+	<!-- Basic Consistency - Source Requirements -->
+	<data name="ValidationFailure_SourceRequiredForSynchronizeOperation" xml:space="preserve">
+		<value>Source required for sync</value>
+	</data>
+	<data name="ValidationFailure_SourceNotAllowedForDeleteOperation" xml:space="preserve">
+		<value>Source not allowed for delete</value>
+	</data>
+	<data name="ValidationFailure_SourceNotAllowedForCreateOperation" xml:space="preserve">
+		<value>Source not allowed for create</value>
+	</data>
+	<!-- Basic Consistency - Destination Requirements -->
+	<data name="ValidationFailure_DestinationRequiredForSynchronizeOperation" xml:space="preserve">
+		<value>Destination required for sync</value>
+	</data>
+	<data name="ValidationFailure_DestinationRequiredForDeleteOperation" xml:space="preserve">
+		<value>Destination required for delete</value>
+	</data>
+	<data name="ValidationFailure_DestinationRequiredForCreateOperation" xml:space="preserve">
+		<value>Destination required for create</value>
+	</data>
+	<!-- Advanced Consistency - Source Issues -->
+	<data name="ValidationFailure_InvalidSourceCount" xml:space="preserve">
+		<value>Invalid source data</value>
+	</data>
+	<data name="ValidationFailure_SourceHasAnalysisError" xml:space="preserve">
+		<value>Source has analysis error</value>
+	</data>
+	<!-- Advanced Consistency - Target Issues -->
+	<data name="ValidationFailure_TargetFileNotPresent" xml:space="preserve">
+		<value>Target file not found</value>
+	</data>
+	<data name="ValidationFailure_AtLeastOneTargetsHasAnalysisError" xml:space="preserve">
+		<value>Target has analysis error</value>
+	</data>
+	<data name="ValidationFailure_TargetRequiredForSynchronizeDateOrDelete" xml:space="preserve">
+		<value>Target required for this operation</value>
+	</data>
+	<data name="ValidationFailure_CreateOperationRequiresDirectoryTarget" xml:space="preserve">
+		<value>Create requires directory target</value>
+	</data>
+	<data name="ValidationFailure_TargetAlreadyExistsForCreateOperation" xml:space="preserve">
+		<value>Target already exists</value>
+	</data>
+	<!-- Advanced Consistency - Content Analysis -->
+	<data name="ValidationFailure_NothingToCopyContentAndDateIdentical" xml:space="preserve">
+		<value>Content and date already identical</value>
+	</data>
+	<data name="ValidationFailure_NothingToCopyContentIdentical" xml:space="preserve">
+		<value>Content already identical</value>
+	</data>
+	<!-- Consistency Against Already Set Actions - Rule Conflicts -->
+	<data name="ValidationFailure_NonTargetedActionNotAllowedWithExistingDoNothingAction" xml:space="preserve">
+		<value>Cannot mix with do-nothing action</value>
+	</data>
+	<!-- Consistency Against Already Set Actions - Source/Destination Conflicts -->
+	<data name="ValidationFailure_SourceCannotBeDestinationOfAnotherAction" xml:space="preserve">
+		<value>Source conflicts with another action</value>
+	</data>
+	<data name="ValidationFailure_DestinationCannotBeSourceOfAnotherAction" xml:space="preserve">
+		<value>Destination conflicts with another action</value>
+	</data>
+	<data name="ValidationFailure_DestinationAlreadyUsedByNonComplementaryAction" xml:space="preserve">
+		<value>Destination already in use</value>
+	</data>
+	<!-- Consistency Against Already Set Actions - Delete Conflicts -->
+	<data name="ValidationFailure_CannotDeleteItemAlreadyUsedInAnotherAction" xml:space="preserve">
+		<value>Cannot delete item used elsewhere</value>
+	</data>
+	<data name="ValidationFailure_CannotOperateOnItemBeingDeleted" xml:space="preserve">
+		<value>Cannot operate on item being deleted</value>
+	</data>
+	<!-- Consistency Against Already Set Actions - Duplicate Actions -->
+	<data name="ValidationFailure_DuplicateActionNotAllowed" xml:space="preserve">
+		<value>Duplicate action not allowed</value>
+	</data>
+	<!-- UI Messages -->
+	<data name="TargetedActionEditionGlobal_ActionIssues" xml:space="preserve">
+		<value>The action cannot be applied to some items:</value>
+	</data>
+	<data name="TargetedActionEditionGlobal_AffectedItemsTooltip" xml:space="preserve">
+		<value>Affected items:</value>
+	</data>
+	<!-- Item count localization for pluralization -->
+	<data name="ValidationFailure_ItemSingular" xml:space="preserve">
+		<value>item:</value>
+	</data>
+	<data name="ValidationFailure_ItemPlural" xml:space="preserve">
+		<value>items:</value>
 	</data>
 </root>

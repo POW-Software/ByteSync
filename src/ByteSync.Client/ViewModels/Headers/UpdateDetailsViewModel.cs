@@ -19,6 +19,7 @@ using DynamicData.Binding;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ByteSync.Helpers;
+using ByteSync.Interfaces.Services.Localizations;
 
 namespace ByteSync.ViewModels.Headers;
 

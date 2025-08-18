@@ -19,7 +19,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition SharedSizeGroup="StatusCell" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="{Binding Letter}" 
+                    <TextBlock MinWidth="20" Text="{Binding Letter}" TextAlignment="Center" 
                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                Margin="2 0"
                                FontWeight="Bold" Foreground="{Binding ForeBrush}" />

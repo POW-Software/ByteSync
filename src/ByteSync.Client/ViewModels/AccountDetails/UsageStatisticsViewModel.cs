@@ -8,6 +8,7 @@ using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Themes;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Services.Converters;
 using ByteSync.ViewModels.Misc;
 using LiveChartsCore;

@@ -28,13 +28,14 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         
         foreach (var comparisonItem in comparisonItems)
         {
-            if (CanApply(atomicAction, comparisonItem))
+            var validationResult = CanApply(atomicAction, comparisonItem);
+            if (validationResult.IsValid)
             {
-                result.ValidComparisons.Add(comparisonItem);
+                result.ValidationResults.Add(new ComparisonItemValidationResult(comparisonItem, true));
             }
             else
             {
-                result.NonValidComparisons.Add(comparisonItem);
+                result.ValidationResults.Add(new ComparisonItemValidationResult(comparisonItem, validationResult.FailureReason!.Value));
             }
         }
 
@@ -43,7 +44,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
 
     public List<AtomicAction> GetApplicableActions(ICollection<SynchronizationRule> synchronizationRules)
     {
-        List<AtomicAction> appliableActions = new List<AtomicAction>();
+        List<AtomicAction> applicableActions = new List<AtomicAction>();
 
         var allActions = new List<AtomicAction>();
         foreach (var synchronizationRule in synchronizationRules)
@@ -55,103 +56,98 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         if (doNothingAction != null)
         {
             // If one of the actions is a doNothing, we will only use that one
-            appliableActions.Add(doNothingAction);
+            applicableActions.Add(doNothingAction);
         }
         else
         {
             // Otherwise, we look one by one
             foreach (var atomicAction in allActions)
             {
-                if (CheckConsistencyAgainstAlreadySetActions(atomicAction, appliableActions))
+                if (CheckConsistencyAgainstAlreadySetActions(atomicAction, applicableActions).IsValid)
                 {
-                    appliableActions.Add(atomicAction);
+                    applicableActions.Add(atomicAction);
                 }
             }
         }
 
-        return appliableActions;
+        return applicableActions;
     }
     
-    private bool CanApply(AtomicAction atomicAction, ComparisonItem comparisonItem)
+    private AtomicActionValidationResult CanApply(AtomicAction atomicAction, ComparisonItem comparisonItem)
     {
-        var isBasicConsistencyOK = CheckBasicConsistency(atomicAction, comparisonItem);
-        if (!isBasicConsistencyOK)
+        var basicConsistencyResult = CheckBasicConsistency(atomicAction, comparisonItem);
+        if (!basicConsistencyResult.IsValid)
         {
-            return false;
+            return basicConsistencyResult;
         }
         
-        var isAdvancedConsistencyOK = CheckAdvancedConsistency(atomicAction, comparisonItem);
-        if (!isAdvancedConsistencyOK)
+        var advancedConsistencyResult = CheckAdvancedConsistency(atomicAction, comparisonItem);
+        if (!advancedConsistencyResult.IsValid)
         {
-            return false;
+            return advancedConsistencyResult;
         }
 
-        var isConsistencyAgainstAlreadySetActionsOK = CheckConsistencyAgainstAlreadySetActions(atomicAction, comparisonItem);
-        if (!isConsistencyAgainstAlreadySetActionsOK)
+        var consistencyAgainstAlreadySetActionsResult = CheckConsistencyAgainstAlreadySetActions(atomicAction, comparisonItem);
+        if (!consistencyAgainstAlreadySetActionsResult.IsValid)
         {
-            return false;
+            return consistencyAgainstAlreadySetActionsResult;
         }
 
-        return true;
+        return AtomicActionValidationResult.Success();
     }
 
-    private bool CheckBasicConsistency(AtomicAction atomicAction, ComparisonItem comparisonItem)
+    private static AtomicActionValidationResult CheckBasicConsistency(AtomicAction atomicAction, ComparisonItem comparisonItem)
     {
         if (atomicAction.Operator.In(ActionOperatorTypes.SynchronizeContentAndDate, ActionOperatorTypes.SynchronizeContentOnly,
                 ActionOperatorTypes.SynchronizeDate))
         {
             if (comparisonItem.FileSystemType == FileSystemTypes.Directory)
             {
-                // These operators cannot be applied to a Directory
-                return false;
+                return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.SynchronizeOperationOnDirectoryNotAllowed);
             }
                 
-            // On a content and/or date copy, Source and Destination must be defined
             if (atomicAction.Source == null)
             {
-                return false;
+                return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.SourceRequiredForSynchronizeOperation);
             }
                 
             if (atomicAction.Destination == null)
             {
-                return false;
+                return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.DestinationRequiredForSynchronizeOperation);
             }
         }
         else if (atomicAction.Operator == ActionOperatorTypes.DoNothing)
         {
-            // Do nothing: always OK
-            return true;
+            // ReSharper disable once DuplicatedStatements
+            return AtomicActionValidationResult.Success();
         }
         else if (atomicAction.Operator == ActionOperatorTypes.Delete)
         {
-            // On a deletion, Source must always be null, Destination must always be defined
             if (atomicAction.Source != null)
             {
-                return false;
+                return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.SourceNotAllowedForDeleteOperation);
             }
                 
             if (atomicAction.Destination == null)
             {
-                return false;
+                return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.DestinationRequiredForDeleteOperation);
             }
         }
         else if (atomicAction.Operator == ActionOperatorTypes.Create)
         {
             if (comparisonItem.FileSystemType == FileSystemTypes.File)
             {
-                // This operator cannot be applied to a File
-                return false;
+                return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.CreateOperationOnFileNotAllowed);
             }
                 
-            // On a creation, Source must always be null, Destination must always be defined
             if (atomicAction.Source != null)
             {
-                return false;
+                return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.SourceNotAllowedForCreateOperation);
             }
                 
             if (atomicAction.Destination == null)
             {
-                return false;
+                return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.DestinationRequiredForCreateOperation);
             }
         }
         else
@@ -159,44 +155,37 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
             throw new ApplicationException("AtomicActionConsistencyChecker: unknown action '{synchronizationAction.Action}'");
         }
 
-        return true;
+        return AtomicActionValidationResult.Success();
     }
     
-    private bool CheckAdvancedConsistency(AtomicAction atomicAction, ComparisonItem comparisonItem)
+    private static AtomicActionValidationResult CheckAdvancedConsistency(AtomicAction atomicAction, ComparisonItem comparisonItem)
     {
         if (atomicAction.Operator.In(ActionOperatorTypes.SynchronizeContentAndDate, ActionOperatorTypes.SynchronizeContentOnly,
         ActionOperatorTypes.SynchronizeDate))
         {
             if (atomicAction.Source != null)
             {
-                // var contentIdentityViewsSource =
-                //     comparisonItemViewModel.GetContentIdentityViews(synchronizationAction.Source.GetAppliableInventory());
-
                 var sourceInventoryPart = atomicAction.Source.GetApplicableInventoryPart();
                     
                 var contentIdentitiesSources = comparisonItem.GetContentIdentities(sourceInventoryPart);
 
                 if (contentIdentitiesSources.Count != 1)
                 {
-                    // No source or too many sources!
-                    return false;
+                    return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.InvalidSourceCount);
                 }
                 var contentIdentitySource = contentIdentitiesSources.Single();
                 
                 if (contentIdentitySource.HasAnalysisError)
                 {
-                    // If the source has an analysis error, we cannot proceed
-                    return false;
+                    return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.SourceHasAnalysisError);
                 }
-                    
-                    
-                var targetInventoryPart = atomicAction.Destination.GetApplicableInventoryPart();
+                
+                var targetInventoryPart = atomicAction.Destination!.GetApplicableInventoryPart();
                 var contentIdentityViewsTargets = comparisonItem.GetContentIdentities(targetInventoryPart);
 
-                // We cannot send to an InventoryPartTypes.File that is not present
                 if (contentIdentityViewsTargets.Count == 0 && targetInventoryPart.InventoryPartType == FileSystemTypes.File)
                 {
-                    return false;
+                    return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.TargetFileNotPresent);
                 }
                     
                 if (contentIdentitySource.InventoryPartsByLastWriteTimes.Count == 1 
@@ -206,61 +195,54 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
                                                              && ci.InventoryPartsByLastWriteTimes.Keys.Single()
                                                                  .Equals(contentIdentitySource.InventoryPartsByLastWriteTimes.Keys.Single())))
                 {
-                    // In this case, the content is the same and there is only one date => there is nothing to copy
-                    return false;
+                    return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.NothingToCopyContentAndDateIdentical);
                 }
 
-                if (contentIdentityViewsTargets.Count > 0 && contentIdentityViewsTargets.All(t => t.HasAnalysisError))
+                if (contentIdentityViewsTargets.Count > 0 && contentIdentityViewsTargets.Any(t => t.HasAnalysisError))
                 {
-                    // If all targets have an analysis error, we cannot proceed
-                    return false;
+                    return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.AtLeastOneTargetsHasAnalysisError);
                 }
                 
-                // If CopyContentOnly and no target or if a target with different content, it's OK
-                // We invert the condition
                 if (atomicAction.IsSynchronizeContentOnly && contentIdentityViewsTargets.Count != 0 &&
                     contentIdentityViewsTargets.All(t => contentIdentitySource.Core!.Equals(t.Core!)))
                 {
-                    return false;
+                    return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.NothingToCopyContentIdentical);
                 }
             }
         }
 
         if (atomicAction.IsSynchronizeDate || atomicAction.IsDelete)
         {
-            var targetInventoryPart = atomicAction.Destination.GetApplicableInventoryPart();
+            var targetInventoryPart = atomicAction.Destination!.GetApplicableInventoryPart();
             var contentIdentitiesTargets = comparisonItem.GetContentIdentities(targetInventoryPart);
                 
             if (contentIdentitiesTargets.Count == 0)
             {
-                // No destination, forbidden on a date or a deletion 
-                return false;
+                return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.TargetRequiredForSynchronizeDateOrDelete);
             }
         }
             
         if (atomicAction.IsCreate)
         {
-            var targetInventoryPart = atomicAction.Destination.GetApplicableInventoryPart();
+            var targetInventoryPart = atomicAction.Destination!.GetApplicableInventoryPart();
                 
-            // We cannot do anything on a target of type InventoryPartTypes.File
             if (targetInventoryPart.InventoryPartType == FileSystemTypes.File)
             {
-                return false;
+                return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.CreateOperationRequiresDirectoryTarget);
             }
                 
             var contentIdentitiesTargets = comparisonItem.GetContentIdentities(targetInventoryPart);
 
             if (contentIdentitiesTargets.Count != 0)
             {
-                // There is a destination, forbidden on a directory creation
-                return false;
+                return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.TargetAlreadyExistsForCreateOperation);
             }
         }
 
-        return true;
+        return AtomicActionValidationResult.Success();
     }
 
-    private bool CheckConsistencyAgainstAlreadySetActions(AtomicAction atomicAction, ComparisonItem comparisonItem)
+    private AtomicActionValidationResult CheckConsistencyAgainstAlreadySetActions(AtomicAction atomicAction, ComparisonItem comparisonItem)
     {
         List<AtomicAction> alreadySetAtomicActions = _atomicActionRepository.GetAtomicActions(comparisonItem);
 
@@ -274,34 +256,28 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         return CheckConsistencyAgainstAlreadySetActions(atomicAction, alreadySetAtomicActions);
     }
 
-    private bool CheckConsistencyAgainstAlreadySetActions(AtomicAction atomicAction, List<AtomicAction> alreadySetAtomicActions)
+    private AtomicActionValidationResult CheckConsistencyAgainstAlreadySetActions(AtomicAction atomicAction, List<AtomicAction> alreadySetAtomicActions)
     {
         if (alreadySetAtomicActions.Count == 0)
         {
-            return true;
+            return AtomicActionValidationResult.Success();
         }
         
         if (!atomicAction.IsTargeted && alreadySetAtomicActions.Any(a => a.IsDoNothing))
         {
-            // If the action is not Targeted and an action is already in DoNothing, we cannot register it
-            return false;
+            return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.NonTargetedActionNotAllowedWithExistingDoNothingAction);
         }
 
-        // A source cannot be a destination
-        // We cannot be a destination multiple times, but we can be a source multiple times
-        // We cannot be deleted if we are the source or destination of another action
         if (alreadySetAtomicActions.Any(ma =>
                 !atomicAction.IsDelete && // 16/02/2023: What is the purpose of this IsDelete?
                 Equals(ma.Destination, atomicAction.Source)))
         {
-            // A source cannot be the destination of another already registered action
-            return false;
+            return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.SourceCannotBeDestinationOfAnotherAction);
         }
             
         if (alreadySetAtomicActions.Any(ma => Equals(ma.Source, atomicAction.Destination)))
         {
-            // A destination cannot be the source of another already registered action
-            return false;
+            return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.DestinationCannotBeSourceOfAnotherAction);
         }
         
         if (alreadySetAtomicActions.Any(ma => Equals(ma.Destination, atomicAction.Destination)))
@@ -313,17 +289,12 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
                 if ((!alreadySetAtomicAction.IsSynchronizeDate || !atomicAction.IsSynchronizeContentOnly)
                     && (!alreadySetAtomicAction.IsSynchronizeContentOnly || !atomicAction.IsSynchronizeDate))
                 {
-                    // We can be a destination multiple times if one is in IsSynchronizeDate and the other in IsSynchronizeContentOnly
-                    // Because they are complementary
-                    
-                    // Otherwise, it's not OK
-                    return false;
+                    return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.DestinationAlreadyUsedByNonComplementaryAction);
                 }
             }
             else
             {
-                // We cannot be a destination multiple times => A destination cannot be the destination of another already registered action
-                return false;
+                return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.DestinationAlreadyUsedByNonComplementaryAction);
             }
         }
 
@@ -332,24 +303,21 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
             if (alreadySetAtomicActions.Any(ma => 
                     Equals(ma.Destination, atomicAction.Destination) || Equals(ma.Source, atomicAction.Destination)))
             {
-                // Impossible to register the deletion operation if the destination is already the source or destination of another action
-                return false;
+                return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.CannotDeleteItemAlreadyUsedInAnotherAction);
             }
         }
             
         if (alreadySetAtomicActions.Any(ma => ma.Operator == ActionOperatorTypes.Delete &&
                 (Equals(ma.Destination, atomicAction.Destination) || Equals(ma.Destination, atomicAction.Source))))
         {
-            // Impossible to register an operation if the Source or Destination are the destination of a deletion
-            return false;
+            return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.CannotOperateOnItemBeingDeleted);
         }
 
         if (atomicAction.Operator != ActionOperatorTypes.DoNothing && alreadySetAtomicActions.Any(s => s.IsSimilarTo(atomicAction)))
         {
-            // Impossible to register a duplicate of an already registered action
-            return false;
+            return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.DuplicateActionNotAllowed);
         }
 
-        return true;
+        return AtomicActionValidationResult.Success();
     }
 }

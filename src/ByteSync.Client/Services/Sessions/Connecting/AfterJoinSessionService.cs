@@ -242,8 +242,11 @@ public class AfterJoinSessionService : IAfterJoinSessionService
     private void DebugAddDesktopDataSource(string folderName)
     {
         var myDataSources = _dataSourceRepository.Elements.Where(ds => ds.ClientInstanceId == _environmentService.ClientInstanceId).ToList();
-                
-        if (myDataSources.Any(ds => ds.Path.Equals(IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
+
+        string baseFolderPath = IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            "ByteSync_Tests");
+        
+        if (myDataSources.Any(ds => ds.Path.Equals(IOUtils.Combine(baseFolderPath, folderName), 
                 StringComparison.InvariantCultureIgnoreCase)))
         {
             return;
@@ -256,11 +259,11 @@ public class AfterJoinSessionService : IAfterJoinSessionService
         }
 
         _dataSourceService.CreateAndTryAddDataSource(
-            IOUtils.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), folderName), 
+            IOUtils.Combine(baseFolderPath, folderName), 
             FileSystemTypes.Directory, dataNode);
     }
 
-    private string GeneratePassword()
+    private static string GeneratePassword()
     {
         var sb = new StringBuilder();
         for (var i = 0; i < 5; i++)

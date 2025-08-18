@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Services.Localizations;
 
 namespace ByteSync.Services.Communications;
 

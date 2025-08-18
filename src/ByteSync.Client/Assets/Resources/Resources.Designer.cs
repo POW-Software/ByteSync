@@ -2686,5 +2686,257 @@ namespace ByteSync.Assets.Resources {
                 return ResourceManager.GetString("ConnectionStatus_Unkown", resourceCulture);
             }
         }
+        
+        /// <summary>
+        /// Looks up a localized string similar to The action cannot be applied to some items:.
+        /// </summary>
+        internal static string TargetedActionEditionGlobal_ActionIssues {
+            get {
+                return ResourceManager.GetString("TargetedActionEditionGlobal_ActionIssues", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Affected items:.
+        /// </summary>
+        internal static string TargetedActionEditionGlobal_AffectedItemsTooltip {
+            get {
+                return ResourceManager.GetString("TargetedActionEditionGlobal_AffectedItemsTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Target has analysis error.
+        /// </summary>
+        internal static string ValidationFailure_AtLeastOneTargetsHasAnalysisError {
+            get {
+                return ResourceManager.GetString("ValidationFailure_AtLeastOneTargetsHasAnalysisError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Cannot delete item used elsewhere.
+        /// </summary>
+        internal static string ValidationFailure_CannotDeleteItemAlreadyUsedInAnotherAction {
+            get {
+                return ResourceManager.GetString("ValidationFailure_CannotDeleteItemAlreadyUsedInAnotherAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Cannot operate on item being deleted.
+        /// </summary>
+        internal static string ValidationFailure_CannotOperateOnItemBeingDeleted {
+            get {
+                return ResourceManager.GetString("ValidationFailure_CannotOperateOnItemBeingDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Cannot create files.
+        /// </summary>
+        internal static string ValidationFailure_CreateOperationOnFileNotAllowed {
+            get {
+                return ResourceManager.GetString("ValidationFailure_CreateOperationOnFileNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Create requires directory target.
+        /// </summary>
+        internal static string ValidationFailure_CreateOperationRequiresDirectoryTarget {
+            get {
+                return ResourceManager.GetString("ValidationFailure_CreateOperationRequiresDirectoryTarget", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Destination already in use.
+        /// </summary>
+        internal static string ValidationFailure_DestinationAlreadyUsedByNonComplementaryAction {
+            get {
+                return ResourceManager.GetString("ValidationFailure_DestinationAlreadyUsedByNonComplementaryAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Destination conflicts with another action.
+        /// </summary>
+        internal static string ValidationFailure_DestinationCannotBeSourceOfAnotherAction {
+            get {
+                return ResourceManager.GetString("ValidationFailure_DestinationCannotBeSourceOfAnotherAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Destination required for create.
+        /// </summary>
+        internal static string ValidationFailure_DestinationRequiredForCreateOperation {
+            get {
+                return ResourceManager.GetString("ValidationFailure_DestinationRequiredForCreateOperation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Destination required for delete.
+        /// </summary>
+        internal static string ValidationFailure_DestinationRequiredForDeleteOperation {
+            get {
+                return ResourceManager.GetString("ValidationFailure_DestinationRequiredForDeleteOperation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Destination required for sync.
+        /// </summary>
+        internal static string ValidationFailure_DestinationRequiredForSynchronizeOperation {
+            get {
+                return ResourceManager.GetString("ValidationFailure_DestinationRequiredForSynchronizeOperation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Duplicate action not allowed.
+        /// </summary>
+        internal static string ValidationFailure_DuplicateActionNotAllowed {
+            get {
+                return ResourceManager.GetString("ValidationFailure_DuplicateActionNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Invalid source data.
+        /// </summary>
+        internal static string ValidationFailure_InvalidSourceCount {
+            get {
+                return ResourceManager.GetString("ValidationFailure_InvalidSourceCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Cannot mix with do-nothing action.
+        /// </summary>
+        internal static string ValidationFailure_NonTargetedActionNotAllowedWithExistingDoNothingAction {
+            get {
+                return ResourceManager.GetString("ValidationFailure_NonTargetedActionNotAllowedWithExistingDoNothingAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Content already identical.
+        /// </summary>
+        internal static string ValidationFailure_NothingToCopyContentIdentical {
+            get {
+                return ResourceManager.GetString("ValidationFailure_NothingToCopyContentIdentical", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Content and date already identical.
+        /// </summary>
+        internal static string ValidationFailure_NothingToCopyContentAndDateIdentical {
+            get {
+                return ResourceManager.GetString("ValidationFailure_NothingToCopyContentAndDateIdentical", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Source conflicts with another action.
+        /// </summary>
+        internal static string ValidationFailure_SourceCannotBeDestinationOfAnotherAction {
+            get {
+                return ResourceManager.GetString("ValidationFailure_SourceCannotBeDestinationOfAnotherAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Source has analysis error.
+        /// </summary>
+        internal static string ValidationFailure_SourceHasAnalysisError {
+            get {
+                return ResourceManager.GetString("ValidationFailure_SourceHasAnalysisError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Source not allowed for create.
+        /// </summary>
+        internal static string ValidationFailure_SourceNotAllowedForCreateOperation {
+            get {
+                return ResourceManager.GetString("ValidationFailure_SourceNotAllowedForCreateOperation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Source not allowed for delete.
+        /// </summary>
+        internal static string ValidationFailure_SourceNotAllowedForDeleteOperation {
+            get {
+                return ResourceManager.GetString("ValidationFailure_SourceNotAllowedForDeleteOperation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Source required for sync.
+        /// </summary>
+        internal static string ValidationFailure_SourceRequiredForSynchronizeOperation {
+            get {
+                return ResourceManager.GetString("ValidationFailure_SourceRequiredForSynchronizeOperation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Cannot sync directories.
+        /// </summary>
+        internal static string ValidationFailure_SynchronizeOperationOnDirectoryNotAllowed {
+            get {
+                return ResourceManager.GetString("ValidationFailure_SynchronizeOperationOnDirectoryNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Target already exists.
+        /// </summary>
+        internal static string ValidationFailure_TargetAlreadyExistsForCreateOperation {
+            get {
+                return ResourceManager.GetString("ValidationFailure_TargetAlreadyExistsForCreateOperation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Target file not found.
+        /// </summary>
+        internal static string ValidationFailure_TargetFileNotPresent {
+            get {
+                return ResourceManager.GetString("ValidationFailure_TargetFileNotPresent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to Target required for this operation.
+        /// </summary>
+        internal static string ValidationFailure_TargetRequiredForSynchronizeDateOrDelete {
+            get {
+                return ResourceManager.GetString("ValidationFailure_TargetRequiredForSynchronizeDateOrDelete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to item:.
+        /// </summary>
+        internal static string ValidationFailure_ItemSingular {
+            get {
+                return ResourceManager.GetString("ValidationFailure_ItemSingular", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to items:.
+        /// </summary>
+        internal static string ValidationFailure_ItemPlural {
+            get {
+                return ResourceManager.GetString("ValidationFailure_ItemPlural", resourceCulture);
+            }
+        }
     }
 }

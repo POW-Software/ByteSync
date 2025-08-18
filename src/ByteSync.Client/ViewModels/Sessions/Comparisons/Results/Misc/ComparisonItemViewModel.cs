@@ -9,6 +9,7 @@ using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Converters;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.Inventories;
 using DynamicData;

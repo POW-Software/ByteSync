@@ -1,4 +1,5 @@
 ﻿using ByteSync.Common.Business.Synchronizations;
+using ByteSync.Helpers;
 using ByteSync.Interfaces.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Communications.SignalR;
@@ -16,6 +17,8 @@ public class SynchronizationProgressPushReceiver : IPushReceiver
     private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository;
     private readonly ISynchronizationApiClient _synchronizationApiClient;
     private readonly ILogger<SynchronizationProgressPushReceiver> _logger;
+
+    protected virtual TimeSpan SynchronizationDataTransmissionTimeout => TimeSpan.FromMinutes(1);
 
     public SynchronizationProgressPushReceiver(IHubPushHandler2 hubPushHandler2, ISessionService sessionService,
         ISynchronizationService synchronizationService, ISharedActionsGroupRepository sharedActionsGroupRepository, 
@@ -47,6 +50,26 @@ public class SynchronizationProgressPushReceiver : IPushReceiver
             if (sessionId != synchronizationProgressPush.SessionId)
             {
                 _logger.LogWarning("Received a synchronization progress push for a different session than the current one");
+                return;
+            }
+            
+            try
+            {
+                // Wait for synchronization data to be transmitted with timeout and cancellation
+                var synchronizationData = _synchronizationService.SynchronizationProcessData;
+                
+                await synchronizationData.SynchronizationDataTransmitted.WaitUntilTrue(SynchronizationDataTransmissionTimeout, 
+                    synchronizationData.CancellationTokenSource.Token);
+            }
+            catch (TimeoutException te)
+            {
+                _logger.LogError(te, "Timeout waiting for synchronization data transmission ({Timeout}) for session {SessionId}", 
+                    SynchronizationDataTransmissionTimeout, sessionId);
+                return;
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("Synchronization progress processing cancelled for session {SessionId}", sessionId);
                 return;
             }
 

@@ -3,6 +3,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Localizations;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

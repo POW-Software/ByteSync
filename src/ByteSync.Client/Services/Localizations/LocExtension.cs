@@ -5,6 +5,7 @@ using Avalonia.Data.Converters;
 using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Services.Converters;
 
 namespace ByteSync.Services.Localizations;

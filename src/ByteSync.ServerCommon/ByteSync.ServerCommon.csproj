@@ -8,20 +8,20 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="AWSSDK.S3" Version="4.0.6.2" />
-      <PackageReference Include="Azure.Identity" Version="1.13.2" />
-      <PackageReference Include="Azure.Storage.Blobs" Version="12.24.0" />
+      <PackageReference Include="AWSSDK.S3" Version="4.0.6.6" />
+      <PackageReference Include="Azure.Identity" Version="1.15.0" />
+      <PackageReference Include="Azure.Storage.Blobs" Version="12.25.0" />
       <PackageReference Include="MediatR" Version="12.5.0" />
-      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.15" />
-      <PackageReference Include="Microsoft.Azure.SignalR" Version="1.30.3" />
-      <PackageReference Include="Microsoft.Azure.SignalR.Management" Version="1.30.3" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.19" />
+      <PackageReference Include="Microsoft.Azure.SignalR" Version="1.31.0" />
+      <PackageReference Include="Microsoft.Azure.SignalR.Management" Version="1.31.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
       <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
-      <PackageReference Include="Polly" Version="8.5.2" />
+      <PackageReference Include="Polly" Version="8.6.2" />
       <PackageReference Include="RedLock.net" Version="2.3.2" />
-      <PackageReference Include="StackExchange.Redis" Version="2.8.37" />
+      <PackageReference Include="StackExchange.Redis" Version="2.8.58" />
     </ItemGroup>
 
     <ItemGroup>

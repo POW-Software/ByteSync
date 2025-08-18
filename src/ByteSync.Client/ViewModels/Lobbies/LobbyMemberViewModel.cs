@@ -11,6 +11,7 @@ using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Factories.Proxies;
 using ByteSync.Interfaces.Lobbies;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Services.Lobbies;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;

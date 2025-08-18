@@ -10,7 +10,7 @@ using ByteSync.Services.Communications.PushReceivers;
 using Moq;
 using NUnit.Framework;
 
-namespace ByteSync.Tests.Services.Communications;
+namespace ByteSync.Tests.Services.Communications.PushReceivers;
 
 [TestFixture]
 public class DataSourcePushReceiverTests
