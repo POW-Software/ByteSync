@@ -91,7 +91,7 @@ public class SharedFilesService : ISharedFilesService
             return sharedFileData;
         });
 
-        if ((shouldDeletePart) && (!_appSettings.RetainFilesAfterTransfer))
+        if (shouldDeletePart)
         {
             await DeleteDownloadedPart(transferParameters, sharedFileDefinition, partNumber);
         }
