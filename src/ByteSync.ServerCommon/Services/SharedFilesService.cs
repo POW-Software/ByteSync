@@ -79,11 +79,8 @@ public class SharedFilesService : ISharedFilesService
 
             sharedFileData.SetDownloadedBy(downloadedBy.ClientInstanceId, partNumber);
             
-            if (sharedFileData.IsPartFullyDownloaded(partNumber))
-            {
-                objectDeletable = true;
-            }
-
+            objectDeletable = sharedFileData.IsPartFullyDownloaded(partNumber);
+            
             if (sharedFileData.IsFullyDownloaded)
             {
                 unregister = true;
