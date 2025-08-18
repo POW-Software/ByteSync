@@ -29,12 +29,31 @@ on:
       - 'tests/ByteSync.TestsCommon/**'
 
   workflow_dispatch:      
- 
+
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   trigger-azure-pipeline:
-    if: ${{ github.actor == 'paul-fresquet' }}    # allows only paul-fresquet
     runs-on: ubuntu-latest
     steps:
+
+    - name: Check required configuration
+      run: |
+        if [ -z "${{ secrets.AZURE_DEVOPS_TOKEN }}" ]; then
+          echo "Error: AZURE_DEVOPS_TOKEN secret is not set"
+          exit 1
+        fi
+        if [ -z "${{ vars.AZURE_DEVOPS_PROJECT_URL }}" ]; then
+          echo "Error: AZURE_DEVOPS_PROJECT_URL variable is not set"
+          exit 1
+        fi
+        if [ -z "${{ vars.AZURE_DEVOPS_PIPELINE }}" ]; then
+          echo "Error: AZURE_DEVOPS_PIPELINE variable is not set"
+          exit 1
+        fi
+        echo "All required configuration is present"
 
     - name: Extract branch name
       shell: bash
@@ -66,7 +85,6 @@ jobs:
                      "${{ vars.AZURE_DEVOPS_PROJECT_URL }}/_apis/pipelines/${{ env.pipelineId }}/runs?api-version=6.0-preview.1")
         echo "runId=$(echo $response | jq -r '.id')" >> $GITHUB_ENV
         echo "Response: $response"
-        echo "runId=$(echo $response | jq -r '.id')" >> $GITHUB_ENV
 
     - name: Wait for Pipeline to Complete
       id: wait-pipeline

@@ -1,6 +1,7 @@
 ﻿using ByteSync.Assets.Resources;
 using ByteSync.Business.Sessions;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Services.Localizations;
 using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Managing;

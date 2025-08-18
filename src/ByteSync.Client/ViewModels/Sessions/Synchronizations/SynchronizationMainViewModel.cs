@@ -15,6 +15,7 @@ using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.ViewModels.Misc;
 using DynamicData;

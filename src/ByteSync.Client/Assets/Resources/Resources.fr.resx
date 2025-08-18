@@ -943,6 +943,9 @@ Veuillez interrompre l'inventaire ou la synchronisation au préalable.</value>
 	<data name="SynchronizationMain_AbortSynchronization_Message" xml:space="preserve">
 		<value>Voulez abandonner la synchronisation en cours ?</value>
 	</data>
+	<data name="SynchronizationMain_AbortSynchronization" xml:space="preserve">
+		<value>ABANDONNER</value>
+	</data>
 	<data name="General_or" xml:space="preserve">
 		<value>ou</value>
 	</data>
@@ -1543,5 +1546,102 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	</data>
 	<data name="DataNodeView_Tooltip_Content_Add" xml:space="preserve">
 		<value>Ajouter un nouveau nœud de données à la session de synchronisation.</value>
+	</data>
+	<!-- Atomic Action Validation Failure Reasons -->
+	<!-- Basic Consistency - Operation Type Compatibility -->
+	<data name="ValidationFailure_SynchronizeOperationOnDirectoryNotAllowed" xml:space="preserve">
+		<value>Impossible de synchroniser les dossiers</value>
+	</data>
+	<data name="ValidationFailure_CreateOperationOnFileNotAllowed" xml:space="preserve">
+		<value>Impossible de créer des fichiers</value>
+	</data>
+	<!-- Basic Consistency - Source Requirements -->
+	<data name="ValidationFailure_SourceRequiredForSynchronizeOperation" xml:space="preserve">
+		<value>Source requise pour la synchronisation</value>
+	</data>
+	<data name="ValidationFailure_SourceNotAllowedForDeleteOperation" xml:space="preserve">
+		<value>Source interdite pour la suppression</value>
+	</data>
+	<data name="ValidationFailure_SourceNotAllowedForCreateOperation" xml:space="preserve">
+		<value>Source interdite pour la création</value>
+	</data>
+	<!-- Basic Consistency - Destination Requirements -->
+	<data name="ValidationFailure_DestinationRequiredForSynchronizeOperation" xml:space="preserve">
+		<value>Destination requise pour la synchronisation</value>
+	</data>
+	<data name="ValidationFailure_DestinationRequiredForDeleteOperation" xml:space="preserve">
+		<value>Destination requise pour la suppression</value>
+	</data>
+	<data name="ValidationFailure_DestinationRequiredForCreateOperation" xml:space="preserve">
+		<value>Destination requise pour la création</value>
+	</data>
+	<!-- Advanced Consistency - Source Issues -->
+	<data name="ValidationFailure_InvalidSourceCount" xml:space="preserve">
+		<value>Données source invalides</value>
+	</data>
+	<data name="ValidationFailure_SourceHasAnalysisError" xml:space="preserve">
+		<value>Erreur d'analyse de la source</value>
+	</data>
+	<!-- Advanced Consistency - Target Issues -->
+	<data name="ValidationFailure_TargetFileNotPresent" xml:space="preserve">
+		<value>Fichier cible introuvable</value>
+	</data>
+	<data name="ValidationFailure_AtLeastOneTargetsHasAnalysisError" xml:space="preserve">
+		<value>Erreur d'analyse de la cible</value>
+	</data>
+	<data name="ValidationFailure_TargetRequiredForSynchronizeDateOrDelete" xml:space="preserve">
+		<value>Cible requise pour cette opération</value>
+	</data>
+	<data name="ValidationFailure_CreateOperationRequiresDirectoryTarget" xml:space="preserve">
+		<value>La création nécessite un dossier cible</value>
+	</data>
+	<data name="ValidationFailure_TargetAlreadyExistsForCreateOperation" xml:space="preserve">
+		<value>La cible existe déjà</value>
+	</data>
+	<!-- Advanced Consistency - Content Analysis -->
+	<data name="ValidationFailure_NothingToCopyContentAndDateIdentical" xml:space="preserve">
+		<value>Contenu et date déjà identiques</value>
+	</data>
+	<data name="ValidationFailure_NothingToCopyContentIdentical" xml:space="preserve">
+		<value>Contenu déjà identique</value>
+	</data>
+	<!-- Consistency Against Already Set Actions - Rule Conflicts -->
+	<data name="ValidationFailure_NonTargetedActionNotAllowedWithExistingDoNothingAction" xml:space="preserve">
+		<value>Impossible de mélanger avec une action "ne rien faire"</value>
+	</data>
+	<!-- Consistency Against Already Set Actions - Source/Destination Conflicts -->
+	<data name="ValidationFailure_SourceCannotBeDestinationOfAnotherAction" xml:space="preserve">
+		<value>Source en conflit avec une autre action</value>
+	</data>
+	<data name="ValidationFailure_DestinationCannotBeSourceOfAnotherAction" xml:space="preserve">
+		<value>Destination en conflit avec une autre action</value>
+	</data>
+	<data name="ValidationFailure_DestinationAlreadyUsedByNonComplementaryAction" xml:space="preserve">
+		<value>Destination déjà utilisée</value>
+	</data>
+	<!-- Consistency Against Already Set Actions - Delete Conflicts -->
+	<data name="ValidationFailure_CannotDeleteItemAlreadyUsedInAnotherAction" xml:space="preserve">
+		<value>Impossible de supprimer un élément utilisé ailleurs</value>
+	</data>
+	<data name="ValidationFailure_CannotOperateOnItemBeingDeleted" xml:space="preserve">
+		<value>Impossible d'opérer sur un élément en cours de suppression</value>
+	</data>
+	<!-- Consistency Against Already Set Actions - Duplicate Actions -->
+	<data name="ValidationFailure_DuplicateActionNotAllowed" xml:space="preserve">
+		<value>Action en double interdite</value>
+	</data>
+	<!-- UI Messages -->
+	<data name="TargetedActionEditionGlobal_ActionIssues" xml:space="preserve">
+		<value>L'action ne peut pas être appliquée à certains éléments :</value>
+	</data>
+	<data name="TargetedActionEditionGlobal_AffectedItemsTooltip" xml:space="preserve">
+		<value>Éléments affectés :</value>
+	</data>
+	<!-- Item count localization for pluralization -->
+	<data name="ValidationFailure_ItemSingular" xml:space="preserve">
+		<value>élément :</value>
+	</data>
+	<data name="ValidationFailure_ItemPlural" xml:space="preserve">
+		<value>éléments :</value>
 	</data>
 </root>

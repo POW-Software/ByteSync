@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Business;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Services.Localizations;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

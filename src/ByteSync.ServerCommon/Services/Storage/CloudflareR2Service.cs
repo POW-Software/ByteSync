@@ -92,9 +92,9 @@ public class CloudflareR2Service : ICloudflareR2Service
         };
 
         var response = await client.ListObjectsV2Async(request, cancellationToken);
-        return response.S3Objects
+        return response.S3Objects?
             .Select(o => new KeyValuePair<string, DateTimeOffset?>(o.Key, o.LastModified))
-            .ToList();
+            .ToList() ?? [];
     }
 
     public async Task DeleteObjectByKey(string key, CancellationToken cancellationToken)

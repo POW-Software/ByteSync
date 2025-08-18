@@ -15,6 +15,7 @@ using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Filtering;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;

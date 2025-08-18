@@ -6,6 +6,7 @@ using ByteSync.Business.SessionMembers;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Localizations;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

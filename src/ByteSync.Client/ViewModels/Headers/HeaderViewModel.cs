@@ -10,6 +10,7 @@ using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.ViewModels.Misc;
 using DynamicData;
 using ReactiveUI;

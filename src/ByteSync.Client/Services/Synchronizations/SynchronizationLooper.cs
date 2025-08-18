@@ -3,7 +3,6 @@ using System.Reactive.Linq;
 using ByteSync.Business.Arguments;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
-using ByteSync.Common.Business.Sessions.Local;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Repositories;
@@ -57,22 +56,17 @@ public class SynchronizationLooper : ISynchronizationLooper
         }
     }
     
-    private LocalSession? LocalSession
-    {
-        get
-        {
-            return Session as LocalSession;
-        }
-    }
-    
     public bool IsSynchronizationAbortRequested { get; private set; }
     
     public async Task CloudSessionSynchronizationLoop()
     {
+        var cancellationToken = _synchronizationService.SynchronizationProcessData.CancellationTokenSource.Token;
         var preparedSharedActionsGroups = _sharedActionsGroupRepository.OrganizedSharedActionsGroups;
         
         foreach (var sharedActionsGroup in preparedSharedActionsGroups)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            
             if (IsSynchronizationAbortRequested)
             {
                 break;
@@ -94,7 +88,12 @@ public class SynchronizationLooper : ISynchronizationLooper
                 }
             #endif
                 
-                await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+                await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("Synchronization cancelled");
+                break;
             }
             catch (Exception ex)
             {
@@ -104,7 +103,12 @@ public class SynchronizationLooper : ISynchronizationLooper
 
         try
         {
-            await _synchronizationActionHandler.RunPendingSynchronizationActions();
+            cancellationToken.ThrowIfCancellationRequested();
+            await _synchronizationActionHandler.RunPendingSynchronizationActions(cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("Pending synchronization actions cancelled");
         }
         catch (Exception ex)
         {
