@@ -6,7 +6,6 @@ using Avalonia.Threading;
 using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Business.Profiles;
-using ByteSync.Interfaces;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Services.Localizations;
@@ -105,11 +104,19 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
 
     public async Task<MessageBoxResult?> ShowMessageBoxAsync(MessageBoxViewModel messageBoxViewModel)
     {
-        ShowFlyout(messageBoxViewModel.TitleKey, false, messageBoxViewModel);
-
-        var result = await messageBoxViewModel.WaitForResponse();
-
-        return result;
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            ShowFlyout(messageBoxViewModel.TitleKey, false, messageBoxViewModel);
+            return await messageBoxViewModel.WaitForResponse();
+        }
+        else
+        {
+            return await Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                ShowFlyout(messageBoxViewModel.TitleKey, false, messageBoxViewModel);
+                return await messageBoxViewModel.WaitForResponse();
+            });
+        }
     }
     
     private void OnCreateCloudSessionProfileRequested()
@@ -120,6 +127,19 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
     }
     
     public void ShowFlyout(string titleKey, bool toggle, FlyoutElementViewModel flyoutElementViewModel) 
+    {
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            DoShowFlyoutInternal(titleKey, toggle, flyoutElementViewModel);
+        }
+        else
+        {
+            Dispatcher.UIThread.InvokeAsync(() => 
+                DoShowFlyoutInternal(titleKey, toggle, flyoutElementViewModel));
+        }
+    }
+    
+    public void DoShowFlyoutInternal(string titleKey, bool toggle, FlyoutElementViewModel flyoutElementViewModel) 
     {
         if (toggle && Content != null && Content.GetType() == flyoutElementViewModel.GetType())
         {
@@ -171,7 +191,14 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
 
     public void CloseFlyout()
     {
-        DoCloseFlyout();
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            DoCloseFlyout();
+        }
+        else
+        {
+            Dispatcher.UIThread.InvokeAsync(DoCloseFlyout);
+        }
     }
 
     private void DoCloseFlyout()

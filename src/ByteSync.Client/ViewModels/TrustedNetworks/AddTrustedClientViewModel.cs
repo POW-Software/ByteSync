@@ -8,7 +8,6 @@ using ByteSync.Business.Communications;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
-using ByteSync.Interfaces.Dialogs;
 using ByteSync.Services.Communications;
 using ByteSync.ViewModels.Misc;
 using ByteSync.Views;
@@ -21,7 +20,6 @@ namespace ByteSync.ViewModels.TrustedNetworks;
 public class AddTrustedClientViewModel : FlyoutElementViewModel
 {
     private readonly IPublicKeysManager _publicKeysManager;
-    private readonly IDialogService _dialogService;
     private readonly IApplicationSettingsRepository _applicationSettingsRepository;
     private readonly IPublicKeysTruster _publicKeysTruster;
     private readonly MainWindow _mainWindow;
@@ -49,8 +47,8 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
     }
 
     public AddTrustedClientViewModel(PublicKeyCheckData? publicKeyCheckData, TrustDataParameters trustDataParameters,
-        IPublicKeysManager publicKeysManager, IDialogService dialogService, 
-        IApplicationSettingsRepository applicationSettingsManager, IPublicKeysTruster publicKeysTruster, MainWindow mainWindow) 
+        IPublicKeysManager publicKeysManager, IApplicationSettingsRepository applicationSettingsManager, 
+        IPublicKeysTruster publicKeysTruster, MainWindow mainWindow) 
     {
     #if DEBUG
         if (Design.IsDesignMode)
@@ -60,7 +58,6 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
     #endif
 
         _publicKeysManager = publicKeysManager;
-        _dialogService = dialogService;
         _applicationSettingsRepository = applicationSettingsManager;
         _publicKeysTruster = publicKeysTruster;
         _mainWindow = mainWindow;
@@ -286,7 +283,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
             }
             
             Container.CanCloseCurrentFlyout = true;
-            _dialogService.CloseFlyout();
+            RaiseCloseFlyoutRequested();
         }
         catch (Exception ex)
         {
@@ -311,7 +308,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
             await Task.WhenAll(task, task2);
         
             Container.CanCloseCurrentFlyout = true;
-            _dialogService.CloseFlyout();
+            RaiseCloseFlyoutRequested();
         }
         catch (Exception ex)
         {
