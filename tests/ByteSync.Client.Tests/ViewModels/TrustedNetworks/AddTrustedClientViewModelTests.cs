@@ -8,7 +8,6 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.TrustedNetworks;
-using ByteSync.Views;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -172,6 +171,57 @@ public class AddTrustedClientViewModelTests
 
         // Assert
         vm.Container.CanCloseCurrentFlyout.Should().BeFalse();
+    }
+
+    [Test]
+    public void WhenActivated_Toggles_CanExecute_While_Command_IsExecuting()
+    {
+        var check = CreateCheckData();
+        var trustParams = CreateTrustParams(out _, true, true);
+
+        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
+            _truster.Object, _logger.Object, null!)
+        {
+            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false }
+        };
+
+        // Arrange a long-running Cancel to keep IsExecuting = true
+        var tcs = new TaskCompletionSource();
+        _truster.Setup(t => t.OnPublicKeyValidationCanceled(It.IsAny<PublicKeyCheckData>(), trustParams))
+            .Returns(tcs.Task);
+
+        // Activate to wire up WhenActivated subscriptions
+        vm.Activator.Activate();
+
+        bool canExecuteCopy = true;
+        using var sub = vm.CopyToClipboardCommand.CanExecute.Subscribe(v => canExecuteCopy = v);
+
+        // Initially true
+        canExecuteCopy.Should().BeTrue();
+
+        // Start Cancel (this flips canRun to false while executing)
+        vm.CancelCommand.Execute().Subscribe();
+
+        // Wait until CanExecute becomes false
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        while (canExecuteCopy && sw.ElapsedMilliseconds < 1000)
+        {
+            System.Threading.Thread.Sleep(10);
+        }
+
+        canExecuteCopy.Should().BeFalse();
+
+        // Complete the cancel to release IsExecuting
+        tcs.SetResult();
+
+        // Wait until CanExecute becomes true again
+        sw.Restart();
+        while (!canExecuteCopy && sw.ElapsedMilliseconds < 1000)
+        {
+            System.Threading.Thread.Sleep(10);
+        }
+
+        canExecuteCopy.Should().BeTrue();
     }
 }
 
