@@ -96,6 +96,50 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
     }
 
     [Test]
+    public async Task ValidateClient_Waits_For_OtherParty_Then_Closes_On_UI()
+    {
+        var check = CreateCheckData();
+        var trustParams = CreateTrustParams(false, true); // OtherPartyHasFinished = false initially
+
+        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
+            _truster.Object, _logger.Object, null!)
+        {
+            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false }
+        };
+
+        bool closed = false;
+        vm.CloseFlyoutRequested += (_, _) => closed = true;
+
+        // Truster marks my party checked only; other party not yet finished
+        _truster.Setup(t => t.OnPublicKeyValidationFinished(It.IsAny<PublicKeyCheckData>(), trustParams, true))
+            .Returns(() =>
+            {
+                trustParams.PeerTrustProcessData.SetMyPartyChecked(true);
+                return Task.CompletedTask;
+            });
+
+        await ExecuteOnUiThread(() =>
+        {
+            vm.Container.IsFlyoutContainerVisible = true;
+            vm.ValidateClientCommand.Execute().Subscribe();
+            return Task.CompletedTask;
+        });
+
+        // Simulate the remote party finishing shortly after
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(100);
+            trustParams.PeerTrustProcessData.SetOtherPartyChecked(true);
+        });
+
+        // Wait for close request (will include the internal 3s delay after success)
+        PumpUntil(() => closed);
+
+        closed.Should().BeTrue();
+        vm.Container.CanCloseCurrentFlyout.Should().BeTrue();
+    }
+
+    [Test]
     public async Task RejectClient_Should_ShowError_Then_Close_On_UI()
     {
         var check = CreateCheckData();
@@ -177,6 +221,97 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
 
         vm.IsClipboardCheckOK.Should().BeFalse();
         vm.IsClipboardCheckError.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task ValidateClient_Exception_Should_Be_Caught_And_Not_Close()
+    {
+        var check = CreateCheckData();
+        var trustParams = CreateTrustParams(false, true);
+
+        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
+            _truster.Object, _logger.Object, null!)
+        {
+            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false }
+        };
+
+        bool closed = false;
+        vm.CloseFlyoutRequested += (_, _) => closed = true;
+
+        // Force a synchronous exception inside ValidateClient at the first await
+        _truster.Setup(t => t.OnPublicKeyValidationFinished(It.IsAny<PublicKeyCheckData>(), trustParams, true))
+            .Throws(new InvalidOperationException("boom-validate"));
+
+        bool completed = false;
+        await ExecuteOnUiThread(() =>
+        {
+            vm.Container.IsFlyoutContainerVisible = true;
+            vm.ValidateClientCommand.Execute().Subscribe(_ => { }, _ => { }, () => completed = true);
+            return Task.CompletedTask;
+        });
+
+        PumpUntil(() => completed);
+
+        closed.Should().BeFalse();
+        vm.Container.CanCloseCurrentFlyout.Should().BeFalse();
+        vm.ShowSuccess.Should().BeFalse();
+        vm.ShowError.Should().BeFalse();
+
+        _logger.Verify(x => x.Log(
+            LogLevel.Error,
+            It.IsAny<EventId>(),
+            It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("ValidateClient")),
+            It.IsAny<Exception>(),
+            It.IsAny<Func<It.IsAnyType, Exception, string>>()
+        ), Times.AtLeastOnce);
+    }
+
+    [Test]
+    public async Task RejectClient_Exception_Should_Be_Caught_And_Not_Close()
+    {
+        var check = CreateCheckData();
+        var trustParams = CreateTrustParams(false, false);
+
+        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
+            _truster.Object, _logger.Object, null!)
+        {
+            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false }
+        };
+
+        bool closed = false;
+        vm.CloseFlyoutRequested += (_, _) => closed = true;
+
+        // Throw synchronously on first truster call to enter catch early
+        _truster.Setup(t => t.OnPublicKeyValidationFinished(It.IsAny<PublicKeyCheckData>(), trustParams, false))
+            .Throws(new InvalidOperationException("boom-reject"));
+
+        // Ensure cancel is NOT called due to early exception
+        _truster.Setup(t => t.OnPublicKeyValidationCanceled(It.IsAny<PublicKeyCheckData>(), trustParams))
+            .Throws(new Exception("should-not-be-called"));
+
+        bool completed = false;
+        await ExecuteOnUiThread(() =>
+        {
+            vm.Container.IsFlyoutContainerVisible = true;
+            vm.RejectClientCommand.Execute().Subscribe(_ => { }, _ => { }, () => completed = true);
+            return Task.CompletedTask;
+        });
+
+        PumpUntil(() => completed);
+
+        closed.Should().BeFalse();
+        vm.Container.CanCloseCurrentFlyout.Should().BeFalse();
+        vm.ShowError.Should().BeFalse();
+
+        _logger.Verify(x => x.Log(
+            LogLevel.Error,
+            It.IsAny<EventId>(),
+            It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("RejectClient")),
+            It.IsAny<Exception>(),
+            It.IsAny<Func<It.IsAnyType, Exception, string>>()
+        ), Times.AtLeastOnce);
+
+        _truster.Verify(t => t.OnPublicKeyValidationCanceled(It.IsAny<PublicKeyCheckData>(), trustParams), Times.Never);
     }
 }
 
