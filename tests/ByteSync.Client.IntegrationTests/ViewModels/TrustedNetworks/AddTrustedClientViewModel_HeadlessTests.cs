@@ -96,6 +96,42 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
     }
 
     [Test]
+    public async Task RejectClient_Should_ShowError_Then_Close_On_UI()
+    {
+        var check = CreateCheckData();
+        var trustParams = CreateTrustParams(false, false);
+
+        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
+            _truster.Object, _logger.Object, null!)
+        {
+            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false }
+        };
+
+        bool closed = false;
+        vm.CloseFlyoutRequested += (_, _) => closed = true;
+
+        _truster.Setup(t => t.OnPublicKeyValidationFinished(It.IsAny<PublicKeyCheckData>(), trustParams, false))
+            .Returns(Task.CompletedTask);
+        _truster.Setup(t => t.OnPublicKeyValidationCanceled(It.IsAny<PublicKeyCheckData>(), trustParams))
+            .Returns(Task.CompletedTask);
+
+        await ExecuteOnUiThread(() =>
+        {
+            vm.Container.IsFlyoutContainerVisible = true;
+            vm.RejectClientCommand.Execute().Subscribe();
+            return Task.CompletedTask;
+        });
+
+        // Attendre que le flag de fermeture soit positionné (après délai interne et callbacks)
+        PumpUntil(() => closed);
+
+        closed.Should().BeTrue();
+        vm.Container.CanCloseCurrentFlyout.Should().BeTrue();
+        _truster.Verify(t => t.OnPublicKeyValidationFinished(It.IsAny<PublicKeyCheckData>(), trustParams, false), Times.Once);
+        _truster.Verify(t => t.OnPublicKeyValidationCanceled(It.IsAny<PublicKeyCheckData>(), trustParams), Times.Once);
+    }
+
+    [Test]
     public async Task CopyToClipboard_WhenClipboardNull_Should_Set_ErrorFlags()
     {
         var check = CreateCheckData();
