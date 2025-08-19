@@ -90,6 +90,52 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
         closed.Should().BeTrue();
         vm.Container.CanCloseCurrentFlyout.Should().BeTrue();
     }
+
+    [Test]
+    public async Task CopyToClipboard_WhenClipboardNull_Should_Set_ErrorFlags()
+    {
+        var check = CreateCheckData();
+        var trustParams = CreateTrustParams(false, true);
+
+        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object, _truster.Object, null!)
+        {
+            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false },
+            SafetyKeyParts = new[] { "alpha", "beta" }
+        };
+
+        await ExecuteOnUiThread(async () =>
+        {
+            vm.CopyToClipboardCommand.Execute().Subscribe();
+            await Task.CompletedTask;
+        });
+        PumpUntil(() => vm.IsCopyToClipboardOK || vm.IsClipboardCheckError);
+
+        vm.IsCopyToClipboardOK.Should().BeFalse();
+        vm.IsClipboardCheckError.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task CheckClipboard_WhenClipboardNull_Should_Set_ErrorFlags()
+    {
+        var check = CreateCheckData();
+        var trustParams = CreateTrustParams(false, true);
+
+        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object, _truster.Object, null!)
+        {
+            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false },
+            SafetyKeyParts = new[] { "alpha", "beta" }
+        };
+
+        await ExecuteOnUiThread(async () =>
+        {
+            vm.CheckClipboardCommand.Execute().Subscribe();
+            await Task.CompletedTask;
+        });
+        PumpUntil(() => vm.IsClipboardCheckOK || vm.IsClipboardCheckError);
+
+        vm.IsClipboardCheckOK.Should().BeFalse();
+        vm.IsClipboardCheckError.Should().BeTrue();
+    }
 }
 
 
