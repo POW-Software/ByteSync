@@ -63,6 +63,44 @@ public class FlyoutContainerViewModel_HeadlessTests : HeadlessIntegrationTest
             await Task.CompletedTask;
         });
     }
+
+    [Test]
+    public async Task ShowMessageBoxAsync_From_BackgroundThread_Uses_Dispatcher_Path()
+    {
+        var vm = new FlyoutContainerViewModel(_localizationServiceMock.Object, _factoryMock.Object);
+        vm.Activator.Activate();
+
+        var messageBox = new MessageBoxViewModel("Bg.Title", null, null, _localizationServiceMock.Object);
+
+        // Call from a background thread so Dispatcher.UIThread.CheckAccess() is false
+        Task<MessageBoxResult?> resultTask = Task.Run(() => vm.ShowMessageBoxAsync(messageBox));
+
+        // Ensure UI actually opened on dispatcher
+        PumpUntil(() => vm.Content is not null);
+        await ExecuteOnUiThread(async () =>
+        {
+            vm.Content.Should().BeSameAs(messageBox);
+            vm.IsFlyoutContainerVisible.Should().BeTrue();
+            await Task.CompletedTask;
+        });
+
+        // Click OK on UI
+        await ExecuteOnUiThread(async () =>
+        {
+            messageBox.OKButtonCommand.Execute().Subscribe();
+            await Task.CompletedTask;
+        });
+
+        var result = await resultTask;
+        result.Should().Be(MessageBoxResult.OK);
+
+        await ExecuteOnUiThread(async () =>
+        {
+            vm.IsFlyoutContainerVisible.Should().BeFalse();
+            vm.Content.Should().BeNull();
+            await Task.CompletedTask;
+        });
+    }
 }
 
 
