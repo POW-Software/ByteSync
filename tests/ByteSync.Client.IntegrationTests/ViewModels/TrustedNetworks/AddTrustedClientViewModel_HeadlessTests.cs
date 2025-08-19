@@ -11,6 +11,7 @@ using ByteSync.ViewModels.TrustedNetworks;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Avalonia.Input.Platform;
 
 namespace ByteSync.Client.IntegrationTests.ViewModels.TrustedNetworks;
 
@@ -427,6 +428,77 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
         {
             throw new InvalidOperationException("clipboard-throw");
         }
+    }
+
+    private sealed class MockClipboardViewModel : AddTrustedClientViewModel
+    {
+        private readonly IClipboard _clipboard;
+
+        public MockClipboardViewModel(PublicKeyCheckData publicKeyCheckData, TrustDataParameters trustDataParameters,
+            IPublicKeysManager publicKeysManager, IApplicationSettingsRepository applicationSettingsManager,
+            IPublicKeysTruster publicKeysTruster, ILogger<AddTrustedClientViewModel> logger, IClipboard clipboard)
+            : base(publicKeyCheckData, trustDataParameters, publicKeysManager, applicationSettingsManager, publicKeysTruster, logger, null!)
+        {
+            _clipboard = clipboard;
+        }
+
+        protected override IClipboard? GetClipboard() => _clipboard;
+    }
+
+    [Test]
+    public async Task CopyToClipboard_WhenClipboardAvailable_Should_Set_OKFlags()
+    {
+        var check = CreateCheckData();
+        var trustParams = CreateTrustParams(false, true);
+
+        var clipboard = new Mock<IClipboard>();
+        clipboard.Setup(c => c.SetTextAsync(It.IsAny<string>())).Returns(Task.CompletedTask);
+
+        var vm = new MockClipboardViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
+            _truster.Object, _logger.Object, clipboard.Object)
+        {
+            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false },
+            SafetyKeyParts = new[] { "alpha", "beta" }
+        };
+
+        await ExecuteOnUiThread(async () =>
+        {
+            vm.CopyToClipboardCommand.Execute().Subscribe();
+            await Task.CompletedTask;
+        });
+        PumpUntil(() => vm.IsCopyToClipboardOK || vm.IsClipboardCheckError);
+
+        vm.IsCopyToClipboardOK.Should().BeTrue();
+        vm.IsClipboardCheckError.Should().BeFalse();
+        clipboard.Verify(c => c.SetTextAsync("alpha beta"), Times.Once);
+    }
+
+    [Test]
+    public async Task CheckClipboard_WhenClipboardAvailable_Matching_Should_Set_OK()
+    {
+        var check = CreateCheckData();
+        var trustParams = CreateTrustParams(false, true);
+
+        var clipboard = new Mock<IClipboard>();
+        clipboard.Setup(c => c.GetTextAsync()).Returns(Task.FromResult("alpha beta"));
+
+        var vm = new MockClipboardViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
+            _truster.Object, _logger.Object, clipboard.Object)
+        {
+            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false },
+            SafetyKeyParts = new[] { "alpha", "beta" }
+        };
+
+        await ExecuteOnUiThread(async () =>
+        {
+            vm.CheckClipboardCommand.Execute().Subscribe();
+            await Task.CompletedTask;
+        });
+        PumpUntil(() => vm.IsClipboardCheckOK || vm.IsClipboardCheckError);
+
+        vm.IsClipboardCheckOK.Should().BeTrue();
+        vm.IsClipboardCheckError.Should().BeFalse();
+        clipboard.Verify(c => c.GetTextAsync(), Times.Once);
     }
 }
 
