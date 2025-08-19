@@ -143,6 +143,14 @@ public class AddTrustedClientViewModelTests
         vm.Container.CanCloseCurrentFlyout.Should().BeTrue();
         closeRequested.Should().BeTrue();
     }
+
+    [Test]
+    public void EmptyConstructor_Should_Work_Fine()
+    {
+        var vm = new AddTrustedClientViewModel();
+        
+        vm.Should().NotBeNull();
+    }
 }
 
 
