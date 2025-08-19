@@ -347,6 +347,87 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
         closed.Should().BeFalse();
         vm.Container.CanCloseCurrentFlyout.Should().BeFalse();
     }
+
+    [Test]
+    public async Task CopyToClipboard_Exception_Should_Set_ErrorFlags()
+    {
+        var check = CreateCheckData();
+        var trustParams = CreateTrustParams(false, true);
+
+        var vm = new ThrowingClipboardViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
+            _truster.Object, _logger.Object)
+        {
+            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false },
+            SafetyKeyParts = null!
+        };
+
+        await ExecuteOnUiThread(async () =>
+        {
+            vm.CopyToClipboardCommand.Execute().Subscribe();
+            await Task.CompletedTask;
+        });
+
+        PumpUntil(() => vm.IsCopyToClipboardOK || vm.IsClipboardCheckError);
+
+        vm.IsCopyToClipboardOK.Should().BeFalse();
+        vm.IsClipboardCheckError.Should().BeTrue();
+
+        _logger.Verify(x => x.Log(
+            LogLevel.Error,
+            It.IsAny<EventId>(),
+            It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("CopyToClipboard error")),
+            It.IsAny<Exception>(),
+            It.IsAny<Func<It.IsAnyType, Exception, string>>()
+        ), Times.AtLeastOnce);
+    }
+
+    [Test]
+    public async Task CheckClipboard_Exception_Should_Set_ErrorFlags()
+    {
+        var check = CreateCheckData();
+        var trustParams = CreateTrustParams(false, true);
+
+        var vm = new ThrowingClipboardViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
+            _truster.Object, _logger.Object)
+        {
+            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false },
+            SafetyKeyParts = null!
+        };
+
+        await ExecuteOnUiThread(async () =>
+        {
+            vm.CheckClipboardCommand.Execute().Subscribe();
+            await Task.CompletedTask;
+        });
+
+        PumpUntil(() => vm.IsClipboardCheckOK || vm.IsClipboardCheckError);
+
+        vm.IsClipboardCheckOK.Should().BeFalse();
+        vm.IsClipboardCheckError.Should().BeTrue();
+
+        _logger.Verify(x => x.Log(
+            LogLevel.Error,
+            It.IsAny<EventId>(),
+            It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("CheckClipboard error")),
+            It.IsAny<Exception>(),
+            It.IsAny<Func<It.IsAnyType, Exception, string>>()
+        ), Times.AtLeastOnce);
+    }
+
+    private sealed class ThrowingClipboardViewModel : AddTrustedClientViewModel
+    {
+        public ThrowingClipboardViewModel(PublicKeyCheckData publicKeyCheckData, TrustDataParameters trustDataParameters,
+            IPublicKeysManager publicKeysManager, IApplicationSettingsRepository applicationSettingsManager,
+            IPublicKeysTruster publicKeysTruster, ILogger<AddTrustedClientViewModel> logger)
+            : base(publicKeyCheckData, trustDataParameters, publicKeysManager, applicationSettingsManager, publicKeysTruster, logger, null!)
+        {
+        }
+
+        protected override Avalonia.Input.Platform.IClipboard? GetClipboard()
+        {
+            throw new InvalidOperationException("clipboard-throw");
+        }
+    }
 }
 
 

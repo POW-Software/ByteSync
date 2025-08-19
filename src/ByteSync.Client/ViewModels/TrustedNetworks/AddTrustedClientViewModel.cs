@@ -4,6 +4,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using ByteSync.Business;
 using ByteSync.Business.Communications;
 using ByteSync.Common.Business.EndPoints;
@@ -186,7 +187,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         
         try
         {
-            var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
+            var clipboard = GetClipboard();
 
             if (clipboard != null)
             {
@@ -219,7 +220,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         
         try
         {
-            var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
+            var clipboard = GetClipboard();
 
             if (clipboard != null)
             {
@@ -247,6 +248,11 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         }
     }
 
+    protected virtual IClipboard? GetClipboard()
+    {
+        return TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
+    }
+    
     
     private async Task ValidateClient()
     {
