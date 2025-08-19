@@ -186,7 +186,7 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
             _truster.Object, _logger.Object, null!)
         {
             Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false },
-            SafetyKeyParts = new[] { "alpha", "beta" }
+            SafetyKeyParts = ["alpha", "beta"]
         };
 
         await ExecuteOnUiThread(async () =>
@@ -210,7 +210,7 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
             _truster.Object, _logger.Object, null!)
         {
             Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false },
-            SafetyKeyParts = new[] { "alpha", "beta" }
+            SafetyKeyParts = ["alpha", "beta"]
         };
 
         await ExecuteOnUiThread(async () =>
@@ -263,7 +263,7 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
             It.IsAny<EventId>(),
             It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("ValidateClient")),
             It.IsAny<Exception>(),
-            It.IsAny<Func<It.IsAnyType, Exception, string>>()
+            It.IsAny<Func<It.IsAnyType, Exception, string>>()!
         ), Times.AtLeastOnce);
     }
 
@@ -309,7 +309,7 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
             It.IsAny<EventId>(),
             It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("RejectClient")),
             It.IsAny<Exception>(),
-            It.IsAny<Func<It.IsAnyType, Exception, string>>()
+            It.IsAny<Func<It.IsAnyType, Exception, string>>()!
         ), Times.AtLeastOnce);
 
         _truster.Verify(t => t.OnPublicKeyValidationCanceled(It.IsAny<PublicKeyCheckData>(), trustParams), Times.Never);
@@ -411,7 +411,7 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
             It.IsAny<EventId>(),
             It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("CheckClipboard error")),
             It.IsAny<Exception>(),
-            It.IsAny<Func<It.IsAnyType, Exception, string>>()
+            It.IsAny<Func<It.IsAnyType, Exception, string>>()!
         ), Times.AtLeastOnce);
     }
 
@@ -442,7 +442,7 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
             _clipboard = clipboard;
         }
 
-        protected override IClipboard? GetClipboard() => _clipboard;
+        protected override IClipboard GetClipboard() => _clipboard;
     }
 
     [Test]
@@ -458,7 +458,7 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
             _truster.Object, _logger.Object, clipboard.Object)
         {
             Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false },
-            SafetyKeyParts = new[] { "alpha", "beta" }
+            SafetyKeyParts = ["alpha", "beta"]
         };
 
         await ExecuteOnUiThread(async () =>
@@ -480,13 +480,13 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
         var trustParams = CreateTrustParams(false, true);
 
         var clipboard = new Mock<IClipboard>();
-        clipboard.Setup(c => c.GetTextAsync()).Returns(Task.FromResult("alpha beta"));
+        clipboard.Setup(c => c.GetTextAsync()).Returns(Task.FromResult("alpha beta")!);
 
         var vm = new MockClipboardViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
             _truster.Object, _logger.Object, clipboard.Object)
         {
             Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false },
-            SafetyKeyParts = new[] { "alpha", "beta" }
+            SafetyKeyParts = ["alpha", "beta"]
         };
 
         await ExecuteOnUiThread(async () =>

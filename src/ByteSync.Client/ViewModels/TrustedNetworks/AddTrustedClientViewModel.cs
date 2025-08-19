@@ -267,8 +267,6 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
 
                 isSuccess = await TrustDataParameters.PeerTrustProcessData.WaitForPeerTrustProcessFinished();
 
-                // bool isSuccess = await _trustProcessPublicKeysHolder.WaitForPeerTrustProcessFinished(TrustDataParameters.SessionId);
-
                 IsWaitingForOtherParty = false;
             }
             else
