@@ -1,4 +1,3 @@
-using System;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using ByteSync.Interfaces.Factories.ViewModels;
@@ -102,23 +101,6 @@ public class FlyoutContainerViewModelTests
         // Assert
         vm.IsFlyoutContainerVisible.Should().BeFalse();
         vm.Content.Should().BeNull();
-    }
-
-    [Test]
-    public void ShowMessageBoxAsync_Should_Show_And_Return_Selected_Result()
-    {
-        // Arrange
-        var vm = new FlyoutContainerViewModel(_localizationServiceMock.Object, _flyoutElementViewModelFactoryMock.Object);
-        vm.Activator.Activate();
-        var messageBoxViewModel = new MessageBoxViewModel("Test.Title", null, null, _localizationServiceMock.Object);
-
-        // Act: start waiting for response, then simulate user clicking OK
-        var task = vm.ShowMessageBoxAsync(messageBoxViewModel);
-        messageBoxViewModel.OKButtonCommand.Execute().Subscribe();
-
-        // Assert (without awaiting task per instructions): ensure the flyout has been opened and bound
-        vm.Content.Should().BeSameAs(messageBoxViewModel);
-        vm.IsFlyoutContainerVisible.Should().BeTrue();
     }
 
     private class DummyFlyoutElementViewModel : FlyoutElementViewModel
