@@ -14,28 +14,27 @@ namespace ByteSync.Client.IntegrationTests.TestHelpers;
 public abstract class HeadlessIntegrationTest : IntegrationTest
 {
     private static bool _initialized;
+    private static readonly object _setupLock = new object();
     // No need for a running lifetime; we will pump UI jobs manually
 
     [OneTimeSetUp]
     public static void GlobalSetup()
     {
-        if (_initialized)
+        if (_initialized) return;
+
+        lock (_setupLock)
         {
-            return;
+            if (_initialized) return;
+
+            AppBuilder.Configure<TestApp>()
+                .UseHeadless(new AvaloniaHeadlessPlatformOptions())
+                .SetupWithoutStarting();
+
+            _initialized = true;
         }
-
-        AppBuilder.Configure<TestApp>()
-            .UseHeadless(new AvaloniaHeadlessPlatformOptions())
-            .SetupWithoutStarting();
-
-        _initialized = true;
     }
 
-    [OneTimeTearDown]
-    public static void GlobalTeardown()
-    {
-        _initialized = false;
-    }
+    // Do not tear down headless AppBuilder; Avalonia only supports setup once per process
 
     protected Task ExecuteOnUiThread(Func<Task> action)
     {
