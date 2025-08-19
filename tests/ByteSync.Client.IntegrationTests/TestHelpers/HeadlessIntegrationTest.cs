@@ -87,6 +87,16 @@ public abstract class HeadlessIntegrationTest : IntegrationTest
         }
     }
 
+    protected void PumpUntil(Func<bool> condition, int timeoutMs = 5000)
+    {
+        var sw = Stopwatch.StartNew();
+        while (!condition() && sw.ElapsedMilliseconds < timeoutMs)
+        {
+            Dispatcher.UIThread.RunJobs();
+            Thread.Sleep(1);
+        }
+    }
+
     private class TestApp : Application
     {
     }
