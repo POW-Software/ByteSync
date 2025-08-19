@@ -13,7 +13,6 @@ using ByteSync.ViewModels.Misc;
 using ByteSync.Views;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Serilog;
 
 namespace ByteSync.ViewModels.TrustedNetworks;
 
@@ -22,6 +21,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
     private readonly IPublicKeysManager _publicKeysManager;
     private readonly IApplicationSettingsRepository _applicationSettingsRepository;
     private readonly IPublicKeysTruster _publicKeysTruster;
+    private readonly ILogger<AddTrustedClientViewModel> _logger;
     private readonly MainWindow _mainWindow;
 
     public AddTrustedClientViewModel()
@@ -48,7 +48,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
 
     public AddTrustedClientViewModel(PublicKeyCheckData? publicKeyCheckData, TrustDataParameters trustDataParameters,
         IPublicKeysManager publicKeysManager, IApplicationSettingsRepository applicationSettingsManager, 
-        IPublicKeysTruster publicKeysTruster, MainWindow mainWindow) 
+        IPublicKeysTruster publicKeysTruster, ILogger<AddTrustedClientViewModel> logger, MainWindow mainWindow) 
     {
     #if DEBUG
         if (Design.IsDesignMode)
@@ -60,6 +60,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         _publicKeysManager = publicKeysManager;
         _applicationSettingsRepository = applicationSettingsManager;
         _publicKeysTruster = publicKeysTruster;
+        _logger = logger;
         _mainWindow = mainWindow;
 
         if (publicKeyCheckData == null)
@@ -194,7 +195,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
             }
             else
             {
-                Log.Warning("CopyToClipboard: unable to acess clipboard");
+                _logger.LogWarning("CopyToClipboard: unable to acess clipboard");
                 
                 IsCopyToClipboardOK = false;
                 IsClipboardCheckError = true;
@@ -202,7 +203,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "CopyToClipboard error");
+            _logger.LogError(ex, "CopyToClipboard error");
             
             IsCopyToClipboardOK = false;
             IsClipboardCheckError = true;
@@ -229,7 +230,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
             }
             else
             {
-                Log.Warning("CheckClipboard: unable to acess clipboard");
+                _logger.LogWarning("CheckClipboard: unable to acess clipboard");
                 
                 IsClipboardCheckOK = false;
                 IsClipboardCheckError = true;
@@ -237,7 +238,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "CheckClipboard error");
+            _logger.LogError(ex, "CheckClipboard error");
             
             IsClipboardCheckOK = false;
             IsClipboardCheckError = true;
@@ -287,7 +288,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "ValidateClient");
+            _logger.LogError(ex, "ValidateClient");
         }
     }
     
@@ -295,7 +296,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
     {
         try
         {
-            Log.Warning("Current user rejected Public Key {@publicKey}", TrustedPublicKey);
+            _logger.LogWarning("Current user rejected Public Key {@publicKey}", TrustedPublicKey);
         
             var task = _publicKeysTruster.OnPublicKeyValidationFinished(PublicKeyCheckData!, TrustDataParameters, false);
             // We also cancel, otherwise, we continue to wait for the other's response
@@ -312,13 +313,13 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "RejectClient");
+            _logger.LogError(ex, "RejectClient");
         }
     }
     
     private async Task Cancel()
     {
-        Log.Warning("Current user cancelled waiting for Public Key {@publicKey} cross check", TrustedPublicKey);
+        _logger.LogWarning("Current user cancelled waiting for Public Key {@publicKey} cross check", TrustedPublicKey);
         
         await _publicKeysTruster.OnPublicKeyValidationCanceled(PublicKeyCheckData!, TrustDataParameters);
     }

@@ -10,6 +10,7 @@ using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.TrustedNetworks;
 using ByteSync.Views;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 
@@ -21,6 +22,7 @@ public class AddTrustedClientViewModelTests
     private Mock<IPublicKeysManager> _publicKeysManager = null!;
     private Mock<IApplicationSettingsRepository> _appSettings = null!;
     private Mock<IPublicKeysTruster> _truster = null!;
+    private Mock<ILogger<AddTrustedClientViewModel>> _logger = null!;
 
     private PublicKeyCheckData CreateCheckData()
     {
@@ -41,6 +43,7 @@ public class AddTrustedClientViewModelTests
         _publicKeysManager = new Mock<IPublicKeysManager>();
         _appSettings = new Mock<IApplicationSettingsRepository>();
         _truster = new Mock<IPublicKeysTruster>();
+        _logger = new Mock<ILogger<AddTrustedClientViewModel>>();
 
         _appSettings.Setup(a => a.GetCurrentApplicationSettings())
             .Returns(new ApplicationSettings { ClientId = "MyClient" });
@@ -75,7 +78,7 @@ public class AddTrustedClientViewModelTests
         var trustParams = CreateTrustParams(out var peer, true, true);
 
         var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
-            _truster.Object, null!)
+            _truster.Object, _logger.Object, null!)
         {
             Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false }
         };
@@ -102,7 +105,7 @@ public class AddTrustedClientViewModelTests
         var trustParams = CreateTrustParams(out var peer, true, false);
 
         var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
-            _truster.Object, null!)
+            _truster.Object, _logger.Object, null!)
         {
             Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false }
         };
@@ -128,7 +131,7 @@ public class AddTrustedClientViewModelTests
         var trustParams = CreateTrustParams(out _, true, false);
 
         var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
-            _truster.Object, null!)
+            _truster.Object, _logger.Object, null!)
         {
             Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false }
         };

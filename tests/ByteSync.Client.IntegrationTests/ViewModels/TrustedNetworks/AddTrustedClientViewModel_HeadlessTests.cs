@@ -9,6 +9,7 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.TrustedNetworks;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace ByteSync.Client.IntegrationTests.ViewModels.TrustedNetworks;
@@ -18,6 +19,7 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
     private Mock<IPublicKeysManager> _publicKeysManager = null!;
     private Mock<IApplicationSettingsRepository> _appSettings = null!;
     private Mock<IPublicKeysTruster> _truster = null!;
+    private Mock<ILogger<AddTrustedClientViewModel>> _logger = null!;
 
     [SetUp]
     public void Setup()
@@ -25,6 +27,7 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
         _publicKeysManager = new Mock<IPublicKeysManager>();
         _appSettings = new Mock<IApplicationSettingsRepository>();
         _truster = new Mock<IPublicKeysTruster>();
+        _logger = new Mock<ILogger<AddTrustedClientViewModel>>();
 
         _appSettings.Setup(a => a.GetCurrentApplicationSettings())
             .Returns(new ApplicationSettings { ClientId = "MyClient" });
@@ -62,7 +65,8 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
         var check = CreateCheckData();
         var trustParams = CreateTrustParams(false, true); // force async path waiting for other party
         // Avoid instantiating MainWindow in headless; pass a dummy via null-forgiving
-        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object, _truster.Object, null!)
+        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object, 
+            _truster.Object, _logger.Object, null!)
         {
             Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false }
         };
@@ -97,7 +101,8 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
         var check = CreateCheckData();
         var trustParams = CreateTrustParams(false, true);
 
-        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object, _truster.Object, null!)
+        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object, 
+            _truster.Object, _logger.Object, null!)
         {
             Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false },
             SafetyKeyParts = new[] { "alpha", "beta" }
@@ -120,7 +125,8 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
         var check = CreateCheckData();
         var trustParams = CreateTrustParams(false, true);
 
-        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object, _truster.Object, null!)
+        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object, 
+            _truster.Object, _logger.Object, null!)
         {
             Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false },
             SafetyKeyParts = new[] { "alpha", "beta" }
