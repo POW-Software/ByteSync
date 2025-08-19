@@ -154,6 +154,25 @@ public class AddTrustedClientViewModelTests
         
         vm.Should().NotBeNull();
     }
+
+    [Test]
+    public void OnDisplayed_Should_Disable_Flyout_Closing()
+    {
+        var check = CreateCheckData();
+        var trustParams = CreateTrustParams(out _, true, true);
+
+        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
+            _truster.Object, _logger.Object, null!)
+        {
+            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = true }
+        };
+
+        // Act
+        vm.OnDisplayed();
+
+        // Assert
+        vm.Container.CanCloseCurrentFlyout.Should().BeFalse();
+    }
 }
 
 

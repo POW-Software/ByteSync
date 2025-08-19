@@ -1,4 +1,5 @@
-﻿using System.Reactive;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -24,6 +25,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
     private readonly ILogger<AddTrustedClientViewModel> _logger;
     private readonly MainWindow _mainWindow;
 
+    [ExcludeFromCodeCoverage]
     public AddTrustedClientViewModel()
     {
     #if DEBUG
