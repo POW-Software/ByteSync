@@ -313,6 +313,40 @@ public class AddTrustedClientViewModel_HeadlessTests : HeadlessIntegrationTest
 
         _truster.Verify(t => t.OnPublicKeyValidationCanceled(It.IsAny<PublicKeyCheckData>(), trustParams), Times.Never);
     }
+
+    [Test]
+    public async Task CancelCommand_Should_Call_Truster_Cancel_And_Not_Close()
+    {
+        var check = CreateCheckData();
+        var trustParams = CreateTrustParams(false, false);
+
+        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
+            _truster.Object, _logger.Object, null!)
+        {
+            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false }
+        };
+
+        bool closed = false;
+        vm.CloseFlyoutRequested += (_, _) => closed = true;
+
+        _truster.Setup(t => t.OnPublicKeyValidationCanceled(It.IsAny<PublicKeyCheckData>(), trustParams))
+            .Returns(Task.CompletedTask);
+
+        bool completed = false;
+        await ExecuteOnUiThread(() =>
+        {
+            vm.Container.IsFlyoutContainerVisible = true;
+            vm.CancelCommand.Execute().Subscribe(_ => { }, _ => { }, () => completed = true);
+            return Task.CompletedTask;
+        });
+
+        PumpUntil(() => completed);
+
+        _truster.Verify(t => t.OnPublicKeyValidationCanceled(It.IsAny<PublicKeyCheckData>(), trustParams), Times.Once);
+        _truster.Verify(t => t.OnPublicKeyValidationFinished(It.IsAny<PublicKeyCheckData>(), trustParams, It.IsAny<bool>()), Times.Never);
+        closed.Should().BeFalse();
+        vm.Container.CanCloseCurrentFlyout.Should().BeFalse();
+    }
 }
 
 
