@@ -1,4 +1,5 @@
-﻿using System.Reactive;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
@@ -119,6 +120,7 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
         }
     }
     
+    [ExcludeFromCodeCoverage]
     private void OnCreateCloudSessionProfileRequested()
     {
         // Keep until feature is implemented
