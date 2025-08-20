@@ -9,6 +9,8 @@ public class AppSettings
     public int JwtDurationInSeconds { get; set; } = 3600;
     
     public bool SkipClientsVersionCheck { get; set; } = false;
+    
+    public bool RetainFilesAfterTransfer { get; set; } = false;
 
     public string UpdatesDefinitionUrl { get; set; } = "";
 

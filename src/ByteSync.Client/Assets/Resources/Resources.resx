@@ -1389,9 +1389,6 @@ Do you agree to save this Synchronization Session Profile on your machine?</valu
 	<data name="UsageStatisticsView_ShowLimit" xml:space="preserve">
 		<value>Monthly limit</value>
 	</data>
-	<data name="UsageStatisticsView_ShowPreviousPeriod" xml:space="preserve">
-		<value>Previous period</value>
-	</data>
 	<data name="UsageStatisticsView_ProgressiveScale" xml:space="preserve">
 		<value>Progressive scale</value>
 	</data>
