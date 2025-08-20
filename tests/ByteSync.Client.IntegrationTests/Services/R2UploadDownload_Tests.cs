@@ -47,10 +47,11 @@ public class R2UploadDownload_Tests
         using var scope = _clientScope;
         var uploaderFactory = scope.Resolve<IFileUploaderFactory>();
         var downloaderFactory = scope.Resolve<IFileDownloaderFactory>();
+        var r2Service = scope.Resolve<ICloudflareR2Service>();
 
         var shared = new SharedFileDefinition
         {
-            SessionId = Guid.NewGuid().ToString("N"),
+            SessionId = "itests-" + Guid.NewGuid().ToString("N"),
             ClientInstanceId = Guid.NewGuid().ToString("N"),
             SharedFileType = SharedFileTypes.FullSynchronization,
             IV = AesGenerator.GenerateIV()
@@ -61,13 +62,20 @@ public class R2UploadDownload_Tests
         await File.WriteAllTextAsync(tempFile, inputContent);
 
         var uploader = uploaderFactory.Build(tempFile, shared);
+        (uploader as ByteSync.Services.Communications.Transfers.FileUploader)!.MaxSliceLength = 1 * 1024 * 1024;
         await uploader.Upload();
 
         var downloader = downloaderFactory.Build(shared);
         await downloader.WaitForFileFullyExtracted();
         (downloader as ByteSync.Services.Communications.Transfers.FileDownloader)?.CleanupResources();
 
-        Assert.That(true, Is.True);
+        // Cleanup uploaded objects for this test
+        var prefix = shared.SessionId + "_" + shared.ClientInstanceId + "_";
+        var all = await r2Service.GetAllObjects(CancellationToken.None);
+        foreach (var kvp in all.Where(o => o.Key.StartsWith(prefix)))
+        {
+            await r2Service.DeleteObjectByKey(kvp.Key, CancellationToken.None);
+        }
     }
 }
 

@@ -46,10 +46,11 @@ public class R2UploadResume_Tests
     {
         using var scope = _clientScope;
         var uploaderFactory = scope.Resolve<IFileUploaderFactory>();
+        var r2Service = scope.Resolve<ICloudflareR2Service>();
 
         var shared = new SharedFileDefinition
         {
-            SessionId = Guid.NewGuid().ToString("N"),
+            SessionId = "itests-" + Guid.NewGuid().ToString("N"),
             ClientInstanceId = Guid.NewGuid().ToString("N"),
             SharedFileType = SharedFileTypes.FullSynchronization,
             IV = AesGenerator.GenerateIV()
@@ -61,10 +62,19 @@ public class R2UploadResume_Tests
         await File.WriteAllTextAsync(tempFile, inputContent);
 
         var uploader = uploaderFactory.Build(tempFile, shared);
+        (uploader as ByteSync.Services.Communications.Transfers.FileUploader)!.MaxSliceLength = 1 * 1024 * 1024;
 
         // We will not instrument the HTTP pipeline here; rely on real R2 stability.
         // A proper transient-fault simulation can be added with a DelegatingHandler injected into IHttpClientFactory.
         await uploader.Upload();
+
+        // Cleanup
+        var prefix = shared.SessionId + "_" + shared.ClientInstanceId + "_";
+        var all = await r2Service.GetAllObjects(CancellationToken.None);
+        foreach (var kvp in all.Where(o => o.Key.StartsWith(prefix)))
+        {
+            await r2Service.DeleteObjectByKey(kvp.Key, CancellationToken.None);
+        }
     }
 }
 
