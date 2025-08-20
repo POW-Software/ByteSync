@@ -47,9 +47,9 @@ public abstract class IntegrationTest
     {
         if (TestContext.CurrentContext.Result.Outcome  == ResultState.Success)
         {
-            _testDirectoryService.Clear();
+            _testDirectoryService?.Clear();
         }
         
-        _container.Dispose();
+        _container?.Dispose();
     }
 }

@@ -11,6 +11,7 @@
     "AppSettings:UpdatesDefinitionUrl": "",
     "AppSettings:AnnouncementsUrl": "",
     "AppSettings:DefaultStorageProvider": "",
+    "AppSettings:RetainFilesAfterTransfer": "",
     "CloudflareR2:AccessKeyId": "",
     "CloudflareR2:SecretAccessKey": "",
     "CloudflareR2:Endpoint": "",
