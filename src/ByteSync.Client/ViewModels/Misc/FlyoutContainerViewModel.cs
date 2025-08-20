@@ -1,11 +1,12 @@
-﻿using System.Reactive;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using Avalonia.Threading;
 using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Business.Profiles;
-using ByteSync.Interfaces;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Services.Localizations;
@@ -42,31 +43,11 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
 
         var canClose = this.WhenAnyValue(x => x.CanCloseCurrentFlyout);
         CloseCommand = ReactiveCommand.Create(Close, canClose);
-        
-        // https://stackoverflow.com/questions/29100381/getting-prior-value-on-change-of-property-using-reactiveui-in-wpf-mvvm
-        // https://stackoverflow.com/questions/35784016/whenany-observableforproperty-how-to-access-previous-and-new-value
-        // Could be simplified with a bool/Reactive property on Content to know if CloseFlyout has been requested
-        this.WhenAnyValue(x => x.Content)
-            .StartWith(this.Content)
-            .Buffer(2, 1)
-            .Select(b => (Previous: b[0], Current: b[1]))
-            .Subscribe(x =>
-            {
-                if (x.Previous != null)
-                {
-                    x.Previous.CloseFlyoutRequested -= OnCloseFlyoutRequested;
-                }
-                
-                if (x.Current != null)
-                {
-                    x.Current.CloseFlyoutRequested += OnCloseFlyoutRequested;
-                }
-            });
 
         this.WhenActivated(HandleActivation);
     }
 
-    private void HandleActivation(IDisposable compositeDisposable)
+    private void HandleActivation(CompositeDisposable compositeDisposable)
     {
         // We switch back here when the theme is changed!
         // HasBeenActivatedOnce allows you to process only once and avoid flyout problems following a theme change
@@ -75,6 +56,27 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
         {
             DoCloseFlyout();
             HasBeenActivatedOnce = true;
+            
+            // https://stackoverflow.com/questions/29100381/getting-prior-value-on-change-of-property-using-reactiveui-in-wpf-mvvm
+            // https://stackoverflow.com/questions/35784016/whenany-observableforproperty-how-to-access-previous-and-new-value
+            // Could be simplified with a bool/Reactive property on Content to know if CloseFlyout has been requested
+            this.WhenAnyValue(x => x.Content)
+                .StartWith(this.Content)
+                .Buffer(2, 1)
+                .Select(b => (Previous: b[0], Current: b[1]))
+                .Subscribe(x =>
+                {
+                    if (x.Previous != null)
+                    {
+                        x.Previous.CloseFlyoutRequested -= OnCloseFlyoutRequested;
+                    }
+
+                    if (x.Current != null)
+                    {
+                        x.Current.CloseFlyoutRequested += OnCloseFlyoutRequested;
+                    }
+                })
+                .DisposeWith(compositeDisposable);
         }
     }
 
@@ -103,13 +105,22 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
 
     public async Task<MessageBoxResult?> ShowMessageBoxAsync(MessageBoxViewModel messageBoxViewModel)
     {
-        ShowFlyout(messageBoxViewModel.TitleKey, false, messageBoxViewModel);
-
-        var result = await messageBoxViewModel.WaitForResponse();
-
-        return result;
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            ShowFlyout(messageBoxViewModel.TitleKey, false, messageBoxViewModel);
+            return await messageBoxViewModel.WaitForResponse();
+        }
+        else
+        {
+            return await Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                ShowFlyout(messageBoxViewModel.TitleKey, false, messageBoxViewModel);
+                return await messageBoxViewModel.WaitForResponse();
+            });
+        }
     }
     
+    [ExcludeFromCodeCoverage]
     private void OnCreateCloudSessionProfileRequested()
     {
         // Keep until feature is implemented
@@ -118,6 +129,19 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
     }
     
     public void ShowFlyout(string titleKey, bool toggle, FlyoutElementViewModel flyoutElementViewModel) 
+    {
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            DoShowFlyoutInternal(titleKey, toggle, flyoutElementViewModel);
+        }
+        else
+        {
+            Dispatcher.UIThread.InvokeAsync(() => 
+                DoShowFlyoutInternal(titleKey, toggle, flyoutElementViewModel));
+        }
+    }
+    
+    public void DoShowFlyoutInternal(string titleKey, bool toggle, FlyoutElementViewModel flyoutElementViewModel) 
     {
         if (toggle && Content != null && Content.GetType() == flyoutElementViewModel.GetType())
         {
@@ -169,7 +193,14 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
 
     public void CloseFlyout()
     {
-        DoCloseFlyout();
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            DoCloseFlyout();
+        }
+        else
+        {
+            Dispatcher.UIThread.InvokeAsync(DoCloseFlyout);
+        }
     }
 
     private void DoCloseFlyout()

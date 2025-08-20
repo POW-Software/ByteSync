@@ -1,30 +1,32 @@
-﻿using System.Reactive;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using ByteSync.Business;
 using ByteSync.Business.Communications;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
-using ByteSync.Interfaces.Dialogs;
 using ByteSync.Services.Communications;
 using ByteSync.ViewModels.Misc;
 using ByteSync.Views;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Serilog;
 
 namespace ByteSync.ViewModels.TrustedNetworks;
 
 public class AddTrustedClientViewModel : FlyoutElementViewModel
 {
     private readonly IPublicKeysManager _publicKeysManager;
-    private readonly IDialogService _dialogService;
     private readonly IApplicationSettingsRepository _applicationSettingsRepository;
     private readonly IPublicKeysTruster _publicKeysTruster;
+    private readonly ILogger<AddTrustedClientViewModel> _logger;
     private readonly MainWindow _mainWindow;
 
+    [ExcludeFromCodeCoverage]
     public AddTrustedClientViewModel()
     {
     #if DEBUG
@@ -48,8 +50,8 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
     }
 
     public AddTrustedClientViewModel(PublicKeyCheckData? publicKeyCheckData, TrustDataParameters trustDataParameters,
-        IPublicKeysManager publicKeysManager, IDialogService dialogService, 
-        IApplicationSettingsRepository applicationSettingsManager, IPublicKeysTruster publicKeysTruster, MainWindow mainWindow) 
+        IPublicKeysManager publicKeysManager, IApplicationSettingsRepository applicationSettingsManager, 
+        IPublicKeysTruster publicKeysTruster, ILogger<AddTrustedClientViewModel> logger, MainWindow mainWindow) 
     {
     #if DEBUG
         if (Design.IsDesignMode)
@@ -59,9 +61,9 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
     #endif
 
         _publicKeysManager = publicKeysManager;
-        _dialogService = dialogService;
         _applicationSettingsRepository = applicationSettingsManager;
         _publicKeysTruster = publicKeysTruster;
+        _logger = logger;
         _mainWindow = mainWindow;
 
         if (publicKeyCheckData == null)
@@ -95,11 +97,16 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         RejectClientCommand = ReactiveCommand.CreateFromTask(RejectClient, canRun);
         
         CancelCommand = ReactiveCommand.CreateFromTask(Cancel);
-        
-        Observable.Merge(CopyToClipboardCommand.IsExecuting, CheckClipboardCommand.IsExecuting, 
-                ValidateClientCommand.IsExecuting, RejectClientCommand.IsExecuting,
-                CancelCommand.IsExecuting)
-                    .Select(executing => !executing).Subscribe(canRun);
+
+        this.WhenActivated(disposables =>
+        {
+            Observable.Merge(CopyToClipboardCommand.IsExecuting, CheckClipboardCommand.IsExecuting, 
+                    ValidateClientCommand.IsExecuting, RejectClientCommand.IsExecuting,
+                    CancelCommand.IsExecuting)
+                .Select(executing => !executing)
+                .Subscribe(canRun)
+                .DisposeWith(disposables);
+        });
     }
 
     public TrustedPublicKey TrustedPublicKey { get; set; }
@@ -180,7 +187,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         
         try
         {
-            var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
+            var clipboard = GetClipboard();
 
             if (clipboard != null)
             {
@@ -191,7 +198,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
             }
             else
             {
-                Log.Warning("CopyToClipboard: unable to acess clipboard");
+                _logger.LogWarning("CopyToClipboard: unable to acess clipboard");
                 
                 IsCopyToClipboardOK = false;
                 IsClipboardCheckError = true;
@@ -199,7 +206,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "CopyToClipboard error");
+            _logger.LogError(ex, "CopyToClipboard error");
             
             IsCopyToClipboardOK = false;
             IsClipboardCheckError = true;
@@ -213,7 +220,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         
         try
         {
-            var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
+            var clipboard = GetClipboard();
 
             if (clipboard != null)
             {
@@ -226,7 +233,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
             }
             else
             {
-                Log.Warning("CheckClipboard: unable to acess clipboard");
+                _logger.LogWarning("CheckClipboard: unable to acess clipboard");
                 
                 IsClipboardCheckOK = false;
                 IsClipboardCheckError = true;
@@ -234,13 +241,18 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "CheckClipboard error");
+            _logger.LogError(ex, "CheckClipboard error");
             
             IsClipboardCheckOK = false;
             IsClipboardCheckError = true;
         }
     }
 
+    protected virtual IClipboard? GetClipboard()
+    {
+        return TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
+    }
+    
     
     private async Task ValidateClient()
     {
@@ -254,8 +266,6 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
                 IsWaitingForOtherParty = true;
 
                 isSuccess = await TrustDataParameters.PeerTrustProcessData.WaitForPeerTrustProcessFinished();
-
-                // bool isSuccess = await _trustProcessPublicKeysHolder.WaitForPeerTrustProcessFinished(TrustDataParameters.SessionId);
 
                 IsWaitingForOtherParty = false;
             }
@@ -280,11 +290,11 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
             }
             
             Container.CanCloseCurrentFlyout = true;
-            _dialogService.CloseFlyout();
+            RaiseCloseFlyoutRequested();
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "ValidateClient");
+            _logger.LogError(ex, "ValidateClient");
         }
     }
     
@@ -292,7 +302,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
     {
         try
         {
-            Log.Warning("Current user rejected Public Key {@publicKey}", TrustedPublicKey);
+            _logger.LogWarning("Current user rejected Public Key {@publicKey}", TrustedPublicKey);
         
             var task = _publicKeysTruster.OnPublicKeyValidationFinished(PublicKeyCheckData!, TrustDataParameters, false);
             // We also cancel, otherwise, we continue to wait for the other's response
@@ -305,17 +315,17 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
             await Task.WhenAll(task, task2);
         
             Container.CanCloseCurrentFlyout = true;
-            _dialogService.CloseFlyout();
+            RaiseCloseFlyoutRequested();
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "RejectClient");
+            _logger.LogError(ex, "RejectClient");
         }
     }
     
     private async Task Cancel()
     {
-        Log.Warning("Current user cancelled waiting for Public Key {@publicKey} cross check", TrustedPublicKey);
+        _logger.LogWarning("Current user cancelled waiting for Public Key {@publicKey} cross check", TrustedPublicKey);
         
         await _publicKeysTruster.OnPublicKeyValidationCanceled(PublicKeyCheckData!, TrustDataParameters);
     }
