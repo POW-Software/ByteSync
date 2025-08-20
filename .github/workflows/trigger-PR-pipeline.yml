@@ -24,9 +24,11 @@ jobs:
 
       - name: Create Client config for build
         shell: bash
+        env: 
+          CLIENT_LOCAL_SETTINGS_JSON: ${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}
         run: |
           mkdir -p src/ByteSync.Client
-          echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
+          echo "$CLIENT_LOCAL_SETTINGS_JSON" > src/ByteSync.Client/local.settings.json
 
       - name: Setup .NET 8 Environment
         uses: actions/setup-dotnet@v4
@@ -39,12 +41,14 @@ jobs:
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
       - name: SonarCloud Begin (prepare)
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
           dotnet sonarscanner begin
           /k:"POW-Software_ByteSync"
           /o:"pow-software"
           /d:sonar.host.url="https://sonarcloud.io"
-          /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          /d:sonar.login="$SONAR_TOKEN"
           /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
           /d:sonar.cs.vstest.reportsPaths="**/*.trx"
 
@@ -55,9 +59,11 @@ jobs:
           dotnet build --verbosity quiet -clp:ErrorsOnly /property:WarningLevel=0
 
       - name: SonarCloud End (publish)
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
           dotnet sonarscanner end
-          /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          /d:sonar.login="$SONAR_TOKEN"
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -103,10 +109,14 @@ jobs:
 
       - name: Create Config Files
         shell: bash
+        env:
+          CLIENT_LOCAL_SETTINGS_JSON: ${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}
+          FUNCTIONS_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON: ${{ secrets.FUNCTIONS_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON }}
+          SERVER_COMMON_TESTS_LOCAL_SETTINGS: ${{ secrets.SERVER_COMMON_TESTS_LOCAL_SETTINGS }}
         run: |
-          echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
-          echo '${{ secrets.FUNCTIONS_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON }}' > tests/ByteSync.Functions.IntegrationTests/functions-integration-tests.local.settings.json
-          echo '${{ secrets.SERVER_COMMON_TESTS_LOCAL_SETTINGS }}' > tests/ByteSync.ServerCommon.Tests/server-common-tests.local.settings.json
+          echo "$CLIENT_LOCAL_SETTINGS_JSON" > src/ByteSync.Client/local.settings.json
+          echo "$FUNCTIONS_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON" > tests/ByteSync.Functions.IntegrationTests/functions-integration-tests.local.settings.json
+          echo "$SERVER_COMMON_TESTS_LOCAL_SETTINGS" > tests/ByteSync.ServerCommon.Tests/server-common-tests.local.settings.json
       
       - run: dotnet restore --locked-mode
       - run: dotnet clean --verbosity quiet
