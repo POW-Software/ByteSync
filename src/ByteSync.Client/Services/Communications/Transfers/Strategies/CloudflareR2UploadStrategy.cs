@@ -1,4 +1,5 @@
 ﻿using System.Net.Http;
+using System.IO;
 using System.Threading;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.Communications.Transfers;
@@ -28,7 +29,9 @@ public class CloudflareR2UploadStrategy : IUploadStrategy
             using var httpClient = _httpClientFactory.CreateClient();
             httpClient.Timeout = TimeSpan.FromMinutes(10);
             
-            using var content = new StreamContent(slice.MemoryStream);
+            // Create a per-attempt copy so disposing the content won't close the original slice stream
+            using var attemptStream = new MemoryStream(slice.MemoryStream.ToArray(), writable: false);
+            using var content = new StreamContent(attemptStream);
             using var response = await httpClient.PutAsync(storageLocation.Url, content, cancellationToken);
 
             if (response.IsSuccessStatusCode)
