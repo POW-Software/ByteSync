@@ -6,7 +6,7 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
 using FluentAssertions;
 
-namespace ByteSync.Functions.IntegrationTests.Services;
+namespace ByteSync.Functions.IntegrationTests.Integration.Services;
 
 [TestFixture]
 public class AzureBlobStorageService_Tests
