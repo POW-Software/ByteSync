@@ -109,14 +109,12 @@ jobs:
           CLIENT_LOCAL_SETTINGS_JSON: ${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}
           FUNCTIONS_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON: ${{ secrets.FUNCTIONS_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON }}
           SERVER_COMMON_TESTS_LOCAL_SETTINGS: ${{ secrets.SERVER_COMMON_TESTS_LOCAL_SETTINGS }}
+          CLIENT_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON: ${{ secrets.CLIENT_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON }}
         run: |
-          echo '${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}' > src/ByteSync.Client/local.settings.json
-          echo '${{ secrets.FUNCTIONS_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON }}' > tests/ByteSync.Functions.IntegrationTests/functions-integration-tests.local.settings.json
-          echo '${{ secrets.SERVER_COMMON_TESTS_LOCAL_SETTINGS }}' > tests/ByteSync.ServerCommon.Tests/server-common-tests.local.settings.json
-          echo '${{ secrets.CLIENT_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON }}' > tests/ByteSync.Client.IntegrationTests/client-integration-tests.local.settings.json
           echo "$CLIENT_LOCAL_SETTINGS_JSON" > src/ByteSync.Client/local.settings.json
           echo "$FUNCTIONS_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON" > tests/ByteSync.Functions.IntegrationTests/functions-integration-tests.local.settings.json
           echo "$SERVER_COMMON_TESTS_LOCAL_SETTINGS" > tests/ByteSync.ServerCommon.Tests/server-common-tests.local.settings.json
+          echo "$CLIENT_INTEGRATION_TESTS_LOCAL_SETTINGS_JSON" > tests/ByteSync.Client.IntegrationTests/client-integration-tests.local.settings.json
       
       - run: dotnet restore --locked-mode
       - run: dotnet clean --verbosity quiet
