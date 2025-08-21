@@ -375,7 +375,8 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
             condition.ConditionOperator.In(ConditionOperatorTypes.Equals, ConditionOperatorTypes.NotEquals))
         {
             var regex = "^" + Regex.Escape(pattern).Replace("\\*", ".*") + "$";
-            var isMatch = Regex.IsMatch(name, regex, RegexOptions.IgnoreCase);
+            var safeRegex = new Regex(regex,RegexOptions.IgnoreCase,TimeSpan.FromMilliseconds(500));
+            var isMatch = safeRegex.IsMatch(name);
             result = condition.ConditionOperator == ConditionOperatorTypes.Equals ? isMatch : !isMatch;
         }
         else

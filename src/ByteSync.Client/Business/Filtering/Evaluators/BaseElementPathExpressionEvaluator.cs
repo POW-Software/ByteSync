@@ -34,13 +34,20 @@ public abstract class BaseElementPathExpressionEvaluator<T> : ExpressionEvaluato
 
             searchText = "^" + Regex.Escape(expression.SearchText).Replace("\\*", ".*") + "$";
         }
-
+        
+        var regex = new Regex(
+            searchText,
+            RegexOptions.IgnoreCase,
+            TimeSpan.FromMilliseconds(200) 
+        );
+        
+        // https://stackoverflow.com/questions/3968845/format-string-with-dashes
         return comparisonOperator switch
         {
             ComparisonOperator.Equals => string.Equals(targetValue, searchText, StringComparison.OrdinalIgnoreCase),
             ComparisonOperator.NotEquals => !string.Equals(targetValue, searchText, StringComparison.OrdinalIgnoreCase),
-            ComparisonOperator.RegexMatch => Regex.IsMatch(targetValue, searchText, RegexOptions.IgnoreCase),
-            ComparisonOperator.RegexNotMatch => !Regex.IsMatch(targetValue, searchText, RegexOptions.IgnoreCase),
+            ComparisonOperator.RegexMatch => regex.IsMatch(targetValue),
+            ComparisonOperator.RegexNotMatch => !regex.IsMatch(targetValue),
             _ => false
         };
     }
