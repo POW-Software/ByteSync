@@ -5,7 +5,7 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Encryptions;
 
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Services.Communications.Transfers.Uploading;
 
 public class FileUploader : IFileUploader
 {

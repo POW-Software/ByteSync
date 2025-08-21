@@ -8,7 +8,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Services.Communications.Transfers.Uploading;
 
 public class FileUploadWorker : IFileUploadWorker
 {

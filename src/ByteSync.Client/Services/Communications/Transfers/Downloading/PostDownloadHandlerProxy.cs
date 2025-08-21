@@ -1,11 +1,10 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Business.Communications;
+﻿using ByteSync.Business.Communications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Profiles;
 
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Services.Communications.Transfers.Downloading;
 
 public class PostDownloadHandlerProxy : IPostDownloadHandlerProxy
 {

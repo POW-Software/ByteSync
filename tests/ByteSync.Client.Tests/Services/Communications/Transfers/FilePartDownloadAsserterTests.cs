@@ -4,6 +4,7 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Services.Communications.Transfers;
+using ByteSync.Services.Communications.Transfers.Downloading;
 
 namespace ByteSync.Tests.Services.Communications.Transfers;
 

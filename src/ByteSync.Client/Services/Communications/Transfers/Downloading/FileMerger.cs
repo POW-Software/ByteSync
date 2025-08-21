@@ -1,9 +1,9 @@
-using ByteSync.Interfaces.Controls.Encryptions;
 using System.Threading;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Controls.Encryptions;
 
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Services.Communications.Transfers.Downloading;
 
 public class FileMerger : IFileMerger
 {

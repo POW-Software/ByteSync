@@ -4,7 +4,7 @@ using System.Threading.Channels;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Interfaces.Controls.Communications;
 
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Services.Communications.Transfers.Downloading;
 
 public class DownloadPartsCoordinator : IDownloadPartsCoordinator
 {

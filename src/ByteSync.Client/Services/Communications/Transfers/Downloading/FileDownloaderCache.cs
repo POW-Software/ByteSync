@@ -6,7 +6,7 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Services.Sessions;
 
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Services.Communications.Transfers.Downloading;
 
 public class FileDownloaderCache : IFileDownloaderCache
 {

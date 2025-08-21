@@ -3,7 +3,7 @@ using System.Threading.Channels;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Interfaces.Controls.Communications;
 
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Services.Communications.Transfers.Uploading;
 
 public class FileUploadCoordinator : IFileUploadCoordinator
 {

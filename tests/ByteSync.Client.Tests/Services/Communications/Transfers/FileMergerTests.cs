@@ -3,6 +3,7 @@ using NUnit.Framework;
 using Moq;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Services.Communications.Transfers;
+using ByteSync.Services.Communications.Transfers.Downloading;
 using FluentAssertions;
 
 namespace ByteSync.Tests.Services.Communications.Transfers;

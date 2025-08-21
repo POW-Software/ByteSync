@@ -7,6 +7,7 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Communications.Transfers;
+using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 

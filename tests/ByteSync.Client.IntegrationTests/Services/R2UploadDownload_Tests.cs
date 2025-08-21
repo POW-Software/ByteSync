@@ -15,6 +15,8 @@ using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
 using ByteSync.ServerCommon.Services.Storage;
 using ByteSync.ServerCommon.Services.Storage.Factories;
 using ByteSync.Services.Communications.Transfers;
+using ByteSync.Services.Communications.Transfers.Downloading;
+using ByteSync.Services.Communications.Transfers.Uploading;
 
 namespace ByteSync.Client.IntegrationTests.Services;
 
@@ -119,7 +121,7 @@ public class R2UploadDownload_Tests
         await File.WriteAllTextAsync(tempFile, inputContent);
 
         var uploader = uploaderFactory.Build(tempFile, shared);
-        (uploader as ByteSync.Services.Communications.Transfers.FileUploader)!.MaxSliceLength = 1 * 1024 * 1024;
+        (uploader as FileUploader)!.MaxSliceLength = 1 * 1024 * 1024;
         await uploader.Upload();
 
         // Build a downloader in this scope (wired to R2FileTransferApiClient), then feed parts directly

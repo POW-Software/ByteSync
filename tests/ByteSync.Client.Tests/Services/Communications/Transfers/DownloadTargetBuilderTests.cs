@@ -8,6 +8,7 @@ using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Communications.Transfers;
+using ByteSync.Services.Communications.Transfers.Downloading;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;

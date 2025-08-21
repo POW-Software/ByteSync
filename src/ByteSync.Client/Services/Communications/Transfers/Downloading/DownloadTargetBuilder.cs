@@ -1,4 +1,5 @@
-﻿using ByteSync.Business.Communications;
+﻿using System.Reactive.Linq;
+using ByteSync.Business.Communications;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Actions;
@@ -10,9 +11,8 @@ using ByteSync.Interfaces.Profiles;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Services.Sessions;
-using System.Reactive.Linq;
 
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Services.Communications.Transfers.Downloading;
 
 public class DownloadTargetBuilder : IDownloadTargetBuilder, IDisposable
 {

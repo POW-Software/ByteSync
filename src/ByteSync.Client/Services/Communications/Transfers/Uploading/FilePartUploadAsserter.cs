@@ -3,7 +3,7 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Services.Sessions;
 
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Services.Communications.Transfers.Uploading;
 
 public class FilePartUploadAsserter : IFilePartUploadAsserter
 {

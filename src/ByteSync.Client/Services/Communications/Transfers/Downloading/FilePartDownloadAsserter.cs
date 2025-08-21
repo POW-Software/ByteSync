@@ -1,9 +1,9 @@
-using ByteSync.Common.Business.SharedFiles;
-using ByteSync.Interfaces.Controls.Communications.Http;
 using System.Threading;
+using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Controls.Communications.Http;
 
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Services.Communications.Transfers.Downloading;
 
 public class FilePartDownloadAsserter : IFilePartDownloadAsserter
 {

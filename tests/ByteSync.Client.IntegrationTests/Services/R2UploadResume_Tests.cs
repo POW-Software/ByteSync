@@ -11,6 +11,7 @@ using ByteSync.ServerCommon.Services.Storage.Factories;
 using ByteSync.Client.IntegrationTests.TestHelpers.Http;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.ServerCommon.Business.Settings;
+using ByteSync.Services.Communications.Transfers.Uploading;
 
 namespace ByteSync.Client.IntegrationTests.Services;
 
@@ -75,7 +76,7 @@ public class R2UploadResume_Tests
         await File.WriteAllTextAsync(tempFile, inputContent);
 
         var uploader = uploaderFactory.Build(tempFile, shared);
-        (uploader as ByteSync.Services.Communications.Transfers.FileUploader)!.MaxSliceLength = 1 * 1024 * 1024;
+        (uploader as FileUploader)!.MaxSliceLength = 1 * 1024 * 1024;
 
         // We will not instrument the HTTP pipeline here; rely on real R2 stability.
         // A proper transient-fault simulation can be added with a DelegatingHandler injected into IHttpClientFactory.

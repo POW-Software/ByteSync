@@ -17,6 +17,8 @@ using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.ServerCommon.Business.Settings;
+using ByteSync.Services.Communications.Transfers.Downloading;
+using ByteSync.Services.Communications.Transfers.Uploading;
 
 namespace ByteSync.Client.IntegrationTests.Services;
 
@@ -125,7 +127,7 @@ public class R2DownloadResume_Tests
         await File.WriteAllTextAsync(tempFile, inputContent);
 
         var uploader = uploaderFactory.Build(tempFile, shared);
-        (uploader as ByteSync.Services.Communications.Transfers.FileUploader)!.MaxSliceLength = 1 * 1024 * 1024;
+        (uploader as FileUploader)!.MaxSliceLength = 1 * 1024 * 1024;
         await uploader.Upload();
 
         var downloader = downloaderFactory.Build(shared);
@@ -139,7 +141,7 @@ public class R2DownloadResume_Tests
         }
         await downloader.PartsCoordinator.SetAllPartsKnownAsync(partsCount);
         await downloader.WaitForFileFullyExtracted();
-        (downloader as ByteSync.Services.Communications.Transfers.FileDownloader)?.CleanupResources();
+        (downloader as FileDownloader)?.CleanupResources();
 
         // Cleanup
         var prefix = shared.SessionId + "_" + shared.ClientInstanceId + "_";

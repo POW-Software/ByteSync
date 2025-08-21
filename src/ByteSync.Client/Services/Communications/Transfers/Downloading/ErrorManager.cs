@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Channels;
 using ByteSync.Interfaces.Controls.Communications;
 
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Services.Communications.Transfers.Downloading;
 
 public class ErrorManager : IErrorManager
 {

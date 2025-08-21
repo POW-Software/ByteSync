@@ -1,13 +1,13 @@
-﻿using System.Threading;
+﻿using System.IO;
+using System.Threading;
+using Autofac.Features.Indexed;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
-using System.IO;
-using Autofac.Features.Indexed;
 
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Services.Communications.Transfers.Downloading;
 
 public class FileDownloader : IFileDownloader
 {

@@ -6,7 +6,7 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Factories;
 
-namespace ByteSync.Services.Communications.Transfers;
+namespace ByteSync.Services.Communications.Transfers.Downloading;
 
 public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalizer
 {
