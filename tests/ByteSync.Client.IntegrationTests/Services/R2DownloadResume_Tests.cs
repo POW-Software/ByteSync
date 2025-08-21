@@ -111,7 +111,7 @@ public class R2DownloadResume_Tests
         sharedActionsGroupRepository.SetSharedActionsGroups(new List<ByteSync.Business.Actions.Shared.SharedActionsGroup> { sag });
 
         // First upload a file so we can download it
-        var inputContent = new string('z', 2_000_000);
+        var inputContent = new string('z', 1_000_000);
         var tempFile = Path.GetTempFileName();
         await File.WriteAllTextAsync(tempFile, inputContent);
 
