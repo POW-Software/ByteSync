@@ -121,6 +121,14 @@ public class R2DownloadResume_Tests
         await uploader.Upload();
 
         var downloader = downloaderFactory.Build(shared);
+        var expectedKeyPrefix = shared.SessionId + "_" + shared.ClientInstanceId + "_synchronization_" + shared.Id + ".part";
+        var objects = await r2Service.GetAllObjects(CancellationToken.None);
+        var partsCount = objects.Count(o => o.Key.StartsWith(expectedKeyPrefix));
+        for (int i = 1; i <= partsCount; i++)
+        {
+            downloader.PartsCoordinator.AddAvailablePart(i);
+        }
+        downloader.PartsCoordinator.SetAllPartsKnown(partsCount);
         await downloader.WaitForFileFullyExtracted();
         (downloader as ByteSync.Services.Communications.Transfers.FileDownloader)?.CleanupResources();
 

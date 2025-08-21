@@ -114,10 +114,19 @@ public class R2UploadDownload_Tests
         (uploader as ByteSync.Services.Communications.Transfers.FileUploader)!.MaxSliceLength = 1 * 1024 * 1024;
         await uploader.Upload();
 
+        // Build a downloader in this scope (wired to R2FileTransferApiClient), then feed parts directly
         var downloader = downloaderFactory.Build(shared);
+        var expectedKeyPrefix = shared.SessionId + "_" + shared.ClientInstanceId + "_synchronization_" + shared.Id + ".part";
+        var objects = await r2Service.GetAllObjects(CancellationToken.None);
+        var partsCount = objects.Count(o => o.Key.StartsWith(expectedKeyPrefix));
+        for (int i = 1; i <= partsCount; i++)
+        {
+            downloader.PartsCoordinator.AddAvailablePart(i);
+        }
+        downloader.PartsCoordinator.SetAllPartsKnown(partsCount);
         await downloader.WaitForFileFullyExtracted();
         (downloader as ByteSync.Services.Communications.Transfers.FileDownloader)?.CleanupResources();
-
+        
         // Cleanup uploaded objects for this test
         var prefix = shared.SessionId + "_" + shared.ClientInstanceId + "_";
         var all = await r2Service.GetAllObjects(CancellationToken.None);

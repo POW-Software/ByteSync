@@ -51,6 +51,8 @@ public class FileDownloader : IFileDownloader
         _resourceManager = resourceManager;
         _partsCoordinator = partsCoordinator;
         _strategies = strategies;
+        _logger = logger;
+        
         _semaphoreSlim = new SemaphoreSlim(1, 1);
         SharedFileDefinition = sharedFileDefinition;
         DownloadTarget = downloadTargetBuilder.BuildDownloadTarget(sharedFileDefinition);
