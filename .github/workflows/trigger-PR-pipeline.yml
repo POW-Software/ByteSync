@@ -4,7 +4,11 @@ permissions:
   pull-requests: write
 on:
   pull_request:
-
+env:
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CLIENT_LOCAL_SETTINGS_JSON: ${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}
+  
 jobs:
   sonarcloud:
     needs: build-and-test
@@ -24,8 +28,6 @@ jobs:
 
       - name: Create Client config for build
         shell: bash
-        env: 
-          CLIENT_LOCAL_SETTINGS_JSON: ${{ secrets.CLIENT_LOCAL_SETTINGS_JSON }}
         run: |
           mkdir -p src/ByteSync.Client
           echo "$CLIENT_LOCAL_SETTINGS_JSON" > src/ByteSync.Client/local.settings.json
@@ -41,8 +43,6 @@ jobs:
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
       - name: SonarCloud Begin (prepare)
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
           dotnet sonarscanner begin
           /k:"POW-Software_ByteSync"
@@ -59,14 +59,10 @@ jobs:
           dotnet build --verbosity quiet -clp:ErrorsOnly /property:WarningLevel=0
 
       - name: SonarCloud End (publish)
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
           dotnet sonarscanner end
           /d:sonar.login="$SONAR_TOKEN"
-    env:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   discover-tests:
     runs-on: ubuntu-latest
     outputs:
