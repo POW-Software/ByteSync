@@ -1,5 +1,3 @@
-using System.Net.Http;
-
 namespace ByteSync.Client.IntegrationTests.TestHelpers.Http;
 
 public class FlakyHttpClientFactory : IHttpClientFactory
