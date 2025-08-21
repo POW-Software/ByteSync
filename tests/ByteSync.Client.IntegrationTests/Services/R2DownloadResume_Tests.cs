@@ -25,10 +25,9 @@ public class R2DownloadResume_Tests
 
         _clientScope = _clientContainer.BeginLifetimeScope(b =>
         {
-            // Simulate one GET 500 during download
+            // Simulate one GET 500 during download by replacing IHttpClientFactory used by strategies
             b.RegisterInstance(new FlakyCounter(putFailures: 0, getFailures: 1)).As<IFlakyCounter>().SingleInstance();
-            b.Register(ctx => new HttpClient(new FlakySharedHandler(ctx.Resolve<IFlakyCounter>())) { Timeout = TimeSpan.FromMinutes(10) })
-                .As<HttpClient>();
+            b.RegisterType<FlakyHttpClientFactory>().As<IHttpClientFactory>().SingleInstance();
 
             b.RegisterType<CloudflareR2ClientFactory>().As<ICloudflareR2ClientFactory>().SingleInstance();
             b.RegisterType<CloudflareR2Service>().As<ICloudflareR2Service>().SingleInstance();

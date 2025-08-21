@@ -25,10 +25,9 @@ public class R2UploadResume_Tests
 
         _clientScope = _clientContainer.BeginLifetimeScope(b =>
         {
-            // Override default HttpClientFactory used by strategies with a flaky handler to simulate 500 once
+            // Override IHttpClientFactory used by strategies with a flaky handler to simulate 500 once
             b.RegisterInstance(new FlakyCounter(putFailures: 1, getFailures: 0)).As<IFlakyCounter>().SingleInstance();
-            b.Register(ctx => new HttpClient(new FlakySharedHandler(ctx.Resolve<IFlakyCounter>())) { Timeout = TimeSpan.FromMinutes(10) })
-                .As<HttpClient>();
+            b.RegisterType<FlakyHttpClientFactory>().As<IHttpClientFactory>().SingleInstance();
 
             b.RegisterType<CloudflareR2ClientFactory>().As<ICloudflareR2ClientFactory>().SingleInstance();
             b.RegisterType<CloudflareR2Service>().As<ICloudflareR2Service>().SingleInstance();
