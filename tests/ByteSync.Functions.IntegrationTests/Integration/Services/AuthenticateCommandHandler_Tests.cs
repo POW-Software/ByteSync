@@ -5,7 +5,7 @@ using ByteSync.ServerCommon.Commands.Authentication;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using FakeItEasy;
 
-namespace ByteSync.Functions.IntegrationTests.Services;
+namespace ByteSync.Functions.IntegrationTests.Integration.Services;
 
 [TestFixture]
 public class AuthenticateCommandHandler_Tests
