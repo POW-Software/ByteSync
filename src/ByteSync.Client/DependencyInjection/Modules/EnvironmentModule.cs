@@ -1,5 +1,4 @@
-﻿using System.IO.Abstractions;
-using Autofac;
+﻿using Autofac;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Services.Applications;

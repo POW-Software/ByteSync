@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Autofac;
 using ByteSync.Business;
 using ByteSync.Client.IntegrationTests.TestHelpers;
@@ -8,7 +6,6 @@ using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Services.Dialogs;
 using ByteSync.ViewModels.Misc;
 using Moq;
-using NUnit.Framework;
 
 namespace ByteSync.Client.IntegrationTests.Services.Dialogs;
 
@@ -26,7 +23,7 @@ public class DialogService_HeadlessTests : HeadlessIntegrationTest
         var factory = new Mock<IMessageBoxViewModelFactory>();
         factory.Setup(f => f.CreateMessageBoxViewModel(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string[]?>()))
             .Returns((string titleKey, string? messageKey, string[]? args) =>
-                new MessageBoxViewModel(titleKey, messageKey, args == null ? null : new List<string>(args), localizationService.Object));
+                new MessageBoxViewModel(titleKey, messageKey, args == null ? null : [..args], localizationService.Object));
 
         _builder.RegisterInstance(dialogView.Object).As<IDialogView>();
         _builder.RegisterInstance(factory.Object).As<IMessageBoxViewModelFactory>();

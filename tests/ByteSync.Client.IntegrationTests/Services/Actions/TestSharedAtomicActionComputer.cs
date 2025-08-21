@@ -13,7 +13,6 @@ using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Repositories;
 using ByteSync.Services.Actions;
-using ByteSync.Services.Comparisons;
 using ByteSync.Services.Sessions;
 using ByteSync.TestsCommon;
 using FluentAssertions;

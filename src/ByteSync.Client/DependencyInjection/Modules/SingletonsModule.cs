@@ -1,6 +1,5 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
-using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Services.Automating;
 using ByteSync.Services.Bootstrappers;
 using ByteSync.Services.Communications;
@@ -8,10 +7,8 @@ using ByteSync.Services.Communications.SignalR;
 using ByteSync.Services.Communications.Transfers;
 using ByteSync.Services.Inventories;
 using ByteSync.Services.Navigations;
-using ByteSync.Services.Sessions;
 using ByteSync.Services.Sessions.Connecting;
 using ByteSync.Services.Synchronizations;
-using ByteSync.Common.Business.SharedFiles;
 
 namespace ByteSync.DependencyInjection.Modules;
 
