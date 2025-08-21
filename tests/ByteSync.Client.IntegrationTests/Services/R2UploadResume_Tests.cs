@@ -35,7 +35,7 @@ public class R2UploadResume_Tests
 
             b.RegisterType<CloudflareR2ClientFactory>().As<ICloudflareR2ClientFactory>().SingleInstance();
             b.RegisterType<CloudflareR2Service>().As<ICloudflareR2Service>().SingleInstance();
-            b.Register(_ => GlobalTestSetup.Container.Resolve<CloudflareR2Settings>())
+            b.Register(_ => GlobalTestSetup.Container.Resolve<Microsoft.Extensions.Options.IOptions<CloudflareR2Settings>>())
                 .As<Microsoft.Extensions.Options.IOptions<CloudflareR2Settings>>();
             b.RegisterType<R2FileTransferApiClient>().As<IFileTransferApiClient>().SingleInstance();
         });
