@@ -1,14 +1,20 @@
 using Autofac;
+using ByteSync.Business.Actions.Shared;
+using ByteSync.Business.Inventories;
 using ByteSync.Client.IntegrationTests.TestHelpers;
+using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.DependencyInjection;
-using ByteSync.Factories;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Communications;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
 using ByteSync.ServerCommon.Services.Storage;
 using ByteSync.ServerCommon.Services.Storage.Factories;
+using ByteSync.Services.Communications.Transfers;
 
 namespace ByteSync.Client.IntegrationTests.Services;
 
@@ -37,7 +43,7 @@ public class R2UploadDownload_Tests
         // Set AES key for encryption/decryption used by SlicerEncrypter
         using var scope = _clientScope.BeginLifetimeScope();
         var cloudSessionConnectionRepository = scope.Resolve<ByteSync.Interfaces.Repositories.ICloudSessionConnectionRepository>();
-        cloudSessionConnectionRepository.SetAesEncryptionKey(ByteSync.Client.IntegrationTests.TestHelpers.AesGenerator.GenerateKey());
+        cloudSessionConnectionRepository.SetAesEncryptionKey(AesGenerator.GenerateKey());
     }
 
     [TearDown]
@@ -56,9 +62,9 @@ public class R2UploadDownload_Tests
         var uploaderFactory = scope.Resolve<IFileUploaderFactory>();
         var downloaderFactory = scope.Resolve<IFileDownloaderFactory>();
         var r2Service = scope.Resolve<ICloudflareR2Service>();
-        var sharedActionsGroupRepository = scope.Resolve<ByteSync.Interfaces.Repositories.ISharedActionsGroupRepository>();
-        var sessionService = scope.Resolve<ByteSync.Interfaces.Services.Sessions.ISessionService>();
-        var connectionService = scope.Resolve<ByteSync.Interfaces.Services.Communications.IConnectionService>();
+        var sharedActionsGroupRepository = scope.Resolve<ISharedActionsGroupRepository>();
+        var sessionService = scope.Resolve<ISessionService>();
+        var connectionService = scope.Resolve<IConnectionService>();
 
         var shared = new SharedFileDefinition
         {
@@ -76,40 +82,40 @@ public class R2UploadDownload_Tests
             ClientId = shared.ClientInstanceId,
             Version = "itests",
             IpAddress = "127.0.0.1",
-            OSPlatform = ByteSync.Common.Business.Misc.OSPlatforms.Windows
+            OSPlatform = Common.Business.Misc.OSPlatforms.Windows
         };
         await sessionService.SetSessionStatus(ByteSync.Business.Sessions.SessionStatus.Preparation);
 
-        var sag = new ByteSync.Business.Actions.Shared.SharedActionsGroup
+        var sag = new SharedActionsGroup
         {
             ActionsGroupId = Guid.NewGuid().ToString("N"),
-            SynchronizationType = ByteSync.Common.Business.Actions.SynchronizationTypes.Full,
-            Source = new ByteSync.Business.Actions.Shared.SharedDataPart
+            SynchronizationType = Common.Business.Actions.SynchronizationTypes.Full,
+            Source = new SharedDataPart
             {
                 ClientInstanceId = shared.ClientInstanceId,
                 RootPath = Path.GetTempPath(),
-                InventoryPartType = ByteSync.Common.Business.Inventories.FileSystemTypes.File,
+                InventoryPartType = FileSystemTypes.File,
                 Name = "itests",
                 InventoryCodeAndId = "itests"
             },
-            PathIdentity = new ByteSync.Business.Inventories.PathIdentity
+            PathIdentity = new PathIdentity
             {
-                FileSystemType = ByteSync.Common.Business.Inventories.FileSystemTypes.File,
+                FileSystemType = FileSystemTypes.File,
                 LinkingKeyValue = "itests"
             }
         };
-        sag.Targets.Add(new ByteSync.Business.Actions.Shared.SharedDataPart
+        sag.Targets.Add(new SharedDataPart
         {
             ClientInstanceId = shared.ClientInstanceId,
             RootPath = Path.GetTempFileName(),
-            InventoryPartType = ByteSync.Common.Business.Inventories.FileSystemTypes.File,
+            InventoryPartType = FileSystemTypes.File,
             Name = "itests",
             InventoryCodeAndId = "itests"
         });
         shared.ActionsGroupIds = [sag.ActionsGroupId];
         sharedActionsGroupRepository.SetSharedActionsGroups([sag]);
 
-        var inputContent = new string('x', 1_500_000);
+        var inputContent = new string('x', 1_000_000);
         var tempFile = Path.GetTempFileName();
         await File.WriteAllTextAsync(tempFile, inputContent);
 
@@ -129,7 +135,7 @@ public class R2UploadDownload_Tests
         }
         await downloader.PartsCoordinator.SetAllPartsKnownAsync(partsCount);
         await downloader.WaitForFileFullyExtracted();
-        (downloader as ByteSync.Services.Communications.Transfers.FileDownloader)?.CleanupResources();
+        (downloader as FileDownloader)?.CleanupResources();
         
         // Cleanup uploaded objects for this test
         var prefix = shared.SessionId + "_" + shared.ClientInstanceId + "_";

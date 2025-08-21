@@ -2,7 +2,6 @@ using Autofac;
 using ByteSync.Client.IntegrationTests.TestHelpers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.DependencyInjection;
-using ByteSync.Factories;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Services.Storage;
@@ -10,6 +9,8 @@ using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
 using ByteSync.ServerCommon.Services.Storage;
 using ByteSync.ServerCommon.Services.Storage.Factories;
 using ByteSync.Client.IntegrationTests.TestHelpers.Http;
+using ByteSync.Interfaces.Repositories;
+using ByteSync.ServerCommon.Business.Settings;
 
 namespace ByteSync.Client.IntegrationTests.Services;
 
@@ -34,14 +35,14 @@ public class R2UploadResume_Tests
 
             b.RegisterType<CloudflareR2ClientFactory>().As<ICloudflareR2ClientFactory>().SingleInstance();
             b.RegisterType<CloudflareR2Service>().As<ICloudflareR2Service>().SingleInstance();
-            b.Register(_ => GlobalTestSetup.Container.Resolve<Microsoft.Extensions.Options.IOptions<ByteSync.ServerCommon.Business.Settings.CloudflareR2Settings>>())
-                .As<Microsoft.Extensions.Options.IOptions<ByteSync.ServerCommon.Business.Settings.CloudflareR2Settings>>();
+            b.Register(_ => GlobalTestSetup.Container.Resolve<CloudflareR2Settings>())
+                .As<Microsoft.Extensions.Options.IOptions<CloudflareR2Settings>>();
             b.RegisterType<R2FileTransferApiClient>().As<IFileTransferApiClient>().SingleInstance();
         });
         
         // Set AES key for encryption/decryption used by SlicerEncrypter
         using var scope = _clientScope.BeginLifetimeScope();
-        var cloudSessionConnectionRepository = scope.Resolve<ByteSync.Interfaces.Repositories.ICloudSessionConnectionRepository>();
+        var cloudSessionConnectionRepository = scope.Resolve<ICloudSessionConnectionRepository>();
         cloudSessionConnectionRepository.SetAesEncryptionKey(AesGenerator.GenerateKey());
     }
 

@@ -3,7 +3,6 @@ using ByteSync.Business.Navigations;
 using ByteSync.Client.IntegrationTests.TestHelpers;
 using ByteSync.Interfaces.Controls.Navigations;
 using ByteSync.Services.Navigations;
-using NUnit.Framework;
 
 namespace ByteSync.Client.IntegrationTests.Services.Navigations;
 

@@ -1,8 +1,9 @@
 using Autofac;
+using ByteSync.Business.Actions.Shared;
+using ByteSync.Business.Inventories;
 using ByteSync.Client.IntegrationTests.TestHelpers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.DependencyInjection;
-using ByteSync.Factories;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Services.Storage;
@@ -10,6 +11,12 @@ using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
 using ByteSync.ServerCommon.Services.Storage;
 using ByteSync.ServerCommon.Services.Storage.Factories;
 using ByteSync.Client.IntegrationTests.TestHelpers.Http;
+using ByteSync.Common.Business.Actions;
+using ByteSync.Common.Business.Inventories;
+using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Communications;
+using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.ServerCommon.Business.Settings;
 
 namespace ByteSync.Client.IntegrationTests.Services;
 
@@ -34,14 +41,14 @@ public class R2DownloadResume_Tests
 
             b.RegisterType<CloudflareR2ClientFactory>().As<ICloudflareR2ClientFactory>().SingleInstance();
             b.RegisterType<CloudflareR2Service>().As<ICloudflareR2Service>().SingleInstance();
-            b.Register(_ => GlobalTestSetup.Container.Resolve<Microsoft.Extensions.Options.IOptions<ByteSync.ServerCommon.Business.Settings.CloudflareR2Settings>>())
-                .As<Microsoft.Extensions.Options.IOptions<ByteSync.ServerCommon.Business.Settings.CloudflareR2Settings>>();
+            b.Register(_ => GlobalTestSetup.Container.Resolve<Microsoft.Extensions.Options.IOptions<CloudflareR2Settings>>())
+                .As<Microsoft.Extensions.Options.IOptions<CloudflareR2Settings>>();
             b.RegisterType<R2FileTransferApiClient>().As<IFileTransferApiClient>().SingleInstance();
         });
 
         // Set AES key for encryption/decryption used by SlicerEncrypter
         using var scope = _clientScope.BeginLifetimeScope();
-        var cloudSessionConnectionRepository = scope.Resolve<ByteSync.Interfaces.Repositories.ICloudSessionConnectionRepository>();
+        var cloudSessionConnectionRepository = scope.Resolve<ICloudSessionConnectionRepository>();
         cloudSessionConnectionRepository.SetAesEncryptionKey(AesGenerator.GenerateKey());
     }
 
@@ -60,9 +67,9 @@ public class R2DownloadResume_Tests
         var uploaderFactory = scope.Resolve<IFileUploaderFactory>();
         var downloaderFactory = scope.Resolve<IFileDownloaderFactory>();
         var r2Service = scope.Resolve<ICloudflareR2Service>();
-        var sharedActionsGroupRepository = scope.Resolve<ByteSync.Interfaces.Repositories.ISharedActionsGroupRepository>();
-        var sessionService = scope.Resolve<ByteSync.Interfaces.Services.Sessions.ISessionService>();
-        var connectionService = scope.Resolve<ByteSync.Interfaces.Services.Communications.IConnectionService>();
+        var sharedActionsGroupRepository = scope.Resolve<ISharedActionsGroupRepository>();
+        var sessionService = scope.Resolve<ISessionService>();
+        var connectionService = scope.Resolve<IConnectionService>();
 
         var shared = new SharedFileDefinition
         {
@@ -83,29 +90,29 @@ public class R2DownloadResume_Tests
         };
         await sessionService.SetSessionStatus(ByteSync.Business.Sessions.SessionStatus.Preparation);
 
-        var sag = new ByteSync.Business.Actions.Shared.SharedActionsGroup
+        var sag = new SharedActionsGroup
         {
             ActionsGroupId = Guid.NewGuid().ToString("N"),
-            SynchronizationType = Common.Business.Actions.SynchronizationTypes.Full,
-            Source = new ByteSync.Business.Actions.Shared.SharedDataPart
+            SynchronizationType = SynchronizationTypes.Full,
+            Source = new SharedDataPart
             {
                 ClientInstanceId = shared.ClientInstanceId,
                 RootPath = Path.GetTempPath(),
-                InventoryPartType = Common.Business.Inventories.FileSystemTypes.File,
+                InventoryPartType = FileSystemTypes.File,
                 Name = "itests",
                 InventoryCodeAndId = "itests"
             },
-            PathIdentity = new ByteSync.Business.Inventories.PathIdentity
+            PathIdentity = new PathIdentity
             {
-                FileSystemType = Common.Business.Inventories.FileSystemTypes.File,
+                FileSystemType = FileSystemTypes.File,
                 LinkingKeyValue = "itests"
             }
         };
-        sag.Targets.Add(new ByteSync.Business.Actions.Shared.SharedDataPart
+        sag.Targets.Add(new SharedDataPart
         {
             ClientInstanceId = shared.ClientInstanceId,
             RootPath = Path.GetTempFileName(),
-            InventoryPartType = Common.Business.Inventories.FileSystemTypes.File,
+            InventoryPartType = FileSystemTypes.File,
             Name = "itests",
             InventoryCodeAndId = "itests"
         });

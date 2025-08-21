@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Autofac;
 using ByteSync.Business;
 using ByteSync.Client.IntegrationTests.TestHelpers;
@@ -8,7 +6,6 @@ using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Services.Dialogs;
 using ByteSync.ViewModels.Misc;
 using Moq;
-using NUnit.Framework;
 
 namespace ByteSync.Client.IntegrationTests.Services.Dialogs;
 
