@@ -59,6 +59,9 @@ public class R2DownloadResume_Tests
         var uploaderFactory = scope.Resolve<IFileUploaderFactory>();
         var downloaderFactory = scope.Resolve<IFileDownloaderFactory>();
         var r2Service = scope.Resolve<ICloudflareR2Service>();
+        var sharedActionsGroupRepository = scope.Resolve<ByteSync.Interfaces.Repositories.ISharedActionsGroupRepository>();
+        var sessionService = scope.Resolve<ByteSync.Interfaces.Services.Sessions.ISessionService>();
+        var connectionService = scope.Resolve<ByteSync.Interfaces.Services.Communications.IConnectionService>();
 
         var shared = new SharedFileDefinition
         {
@@ -67,6 +70,46 @@ public class R2DownloadResume_Tests
             SharedFileType = SharedFileTypes.FullSynchronization,
             IV = AesGenerator.GenerateIV()
         };
+
+        // Minimal session/endPoint/context so DownloadTargetBuilder can resolve destinations
+        connectionService.CurrentEndPoint = new ByteSync.Common.Business.EndPoints.ByteSyncEndpoint
+        {
+            ClientInstanceId = shared.ClientInstanceId,
+            ClientId = shared.ClientInstanceId,
+            Version = "itests",
+            IpAddress = "127.0.0.1",
+            OSPlatform = ByteSync.Common.Business.Misc.OSPlatforms.Windows
+        };
+        await sessionService.SetSessionStatus(ByteSync.Business.Sessions.SessionStatus.Preparation);
+
+        var sag = new ByteSync.Business.Actions.Shared.SharedActionsGroup
+        {
+            ActionsGroupId = Guid.NewGuid().ToString("N"),
+            SynchronizationType = ByteSync.Common.Business.Actions.SynchronizationTypes.Full,
+            Source = new ByteSync.Business.Actions.Shared.SharedDataPart
+            {
+                ClientInstanceId = shared.ClientInstanceId,
+                RootPath = Path.GetTempPath(),
+                InventoryPartType = ByteSync.Common.Business.Inventories.FileSystemTypes.File,
+                Name = "itests",
+                InventoryCodeAndId = "itests"
+            },
+            PathIdentity = new ByteSync.Business.Inventories.PathIdentity
+            {
+                FileSystemType = ByteSync.Common.Business.Inventories.FileSystemTypes.File,
+                LinkingKeyValue = "itests"
+            }
+        };
+        sag.Targets.Add(new ByteSync.Business.Actions.Shared.SharedDataPart
+        {
+            ClientInstanceId = shared.ClientInstanceId,
+            RootPath = Path.GetTempFileName(),
+            InventoryPartType = ByteSync.Common.Business.Inventories.FileSystemTypes.File,
+            Name = "itests",
+            InventoryCodeAndId = "itests"
+        });
+        shared.ActionsGroupIds = new List<string> { sag.ActionsGroupId };
+        sharedActionsGroupRepository.SetSharedActionsGroups(new List<ByteSync.Business.Actions.Shared.SharedActionsGroup> { sag });
 
         // First upload a file so we can download it
         var inputContent = new string('z', 2_000_000);
