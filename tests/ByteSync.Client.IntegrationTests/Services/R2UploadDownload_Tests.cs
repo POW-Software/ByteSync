@@ -53,8 +53,7 @@ public class R2UploadDownload_Tests
     }
 
     [Test]
-    // [Explicit]
-    // [Category("Cloud")]
+    [Category("Cloud")]
     public async Task Upload_Then_Download_Should_Succeed_With_Small_Chunks()
     {
         // ReSharper disable once UseAwaitUsing
