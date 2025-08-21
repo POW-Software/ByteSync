@@ -6,7 +6,7 @@ using FluentAssertions;
 
 namespace ByteSync.Functions.IntegrationTests.End2End;
 
-public class E2E_Auth_Session_Initializer
+public class E2E_Environment_Setup
 {
     public IContainer Azurite { get; private set; } = null!;
     public IContainer Functions { get; private set; } = null!;
@@ -40,7 +40,7 @@ public class E2E_Auth_Session_Initializer
                 var candidate = Path.Combine(dir.FullName, "src", "ByteSync.Functions");
                 if (Directory.Exists(candidate)) return candidate;
             }
-            return Path.GetFullPath(Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", "..", "..", "..", "src", "ByteSync.Functions"));
+            return Path.GetFullPath(Path.Combine(TestContext.CurrentContext.TestDirectory, @"..\..\..\..\..\src\ByteSync.Functions"));
         }
 
         var projectRoot = ResolveFunctionsProjectRoot();

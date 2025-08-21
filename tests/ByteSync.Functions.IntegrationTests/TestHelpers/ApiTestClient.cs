@@ -1,9 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using ByteSync.Common.Business.Auth;
 using ByteSync.Common.Controls.Json;
-using FluentAssertions;
 
 namespace ByteSync.Functions.IntegrationTests.TestHelpers;
 
@@ -77,26 +75,7 @@ public sealed class ApiTestClient : IDisposable
         var responseJson = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<T>(responseJson, JsonSerializerOptionsHelper.BuildOptions());
     }
-
-    public async Task<InitialAuthenticationResponse> LoginAsync(LoginData login)
-    {
-        var loginJson = JsonSerializer.Serialize(login);
-        using var loginContent = new StringContent(loginJson, Encoding.UTF8, "application/json");
-        TestContext.Progress.WriteLine($"{DateTime.UtcNow:o} | POST /auth/login");
-        var authResponse = await _httpClient.PostAsync("auth/login", loginContent);
-        if (!authResponse.IsSuccessStatusCode)
-        {
-            var body = await authResponse.Content.ReadAsStringAsync();
-            Assert.Fail($"auth/login failed: {(int)authResponse.StatusCode} {authResponse.ReasonPhrase}. Body: {body}");
-        }
-
-        var authJson = await authResponse.Content.ReadAsStringAsync();
-        var auth = JsonSerializer.Deserialize<InitialAuthenticationResponse>(authJson, JsonSerializerOptionsHelper.BuildOptions())!;
-        auth.IsSuccess.Should().BeTrue();
-        auth.AuthenticationTokens.Should().NotBeNull();
-        auth.AuthenticationTokens!.JwtToken.Should().NotBeNullOrEmpty();
-        return auth;
-    }
+    
 
     public void Dispose()
     {
