@@ -35,6 +35,11 @@ public class R2UploadResume_Tests
                 .As<Microsoft.Extensions.Options.IOptions<ByteSync.ServerCommon.Business.Settings.CloudflareR2Settings>>();
             b.RegisterType<R2FileTransferApiClient>().As<IFileTransferApiClient>().SingleInstance();
         });
+        
+        // Set AES key for encryption/decryption used by SlicerEncrypter
+        using var scope = _clientScope.BeginLifetimeScope();
+        var cloudSessionConnectionRepository = scope.Resolve<ByteSync.Interfaces.Repositories.ICloudSessionConnectionRepository>();
+        cloudSessionConnectionRepository.SetAesEncryptionKey(AesGenerator.GenerateKey());
     }
 
     [TearDown]

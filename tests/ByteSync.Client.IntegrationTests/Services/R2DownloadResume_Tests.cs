@@ -39,7 +39,7 @@ public class R2DownloadResume_Tests
         // Set AES key for encryption/decryption used by SlicerEncrypter
         using var scope = _clientScope.BeginLifetimeScope();
         var cloudSessionConnectionRepository = scope.Resolve<ByteSync.Interfaces.Repositories.ICloudSessionConnectionRepository>();
-        cloudSessionConnectionRepository.SetAesEncryptionKey(ByteSync.Client.IntegrationTests.TestHelpers.AesGenerator.GenerateKey());
+        cloudSessionConnectionRepository.SetAesEncryptionKey(AesGenerator.GenerateKey());
     }
 
     [TearDown]
@@ -77,25 +77,25 @@ public class R2DownloadResume_Tests
             ClientId = shared.ClientInstanceId,
             Version = "itests",
             IpAddress = "127.0.0.1",
-            OSPlatform = ByteSync.Common.Business.Misc.OSPlatforms.Windows
+            OSPlatform = Common.Business.Misc.OSPlatforms.Windows
         };
         await sessionService.SetSessionStatus(ByteSync.Business.Sessions.SessionStatus.Preparation);
 
         var sag = new ByteSync.Business.Actions.Shared.SharedActionsGroup
         {
             ActionsGroupId = Guid.NewGuid().ToString("N"),
-            SynchronizationType = ByteSync.Common.Business.Actions.SynchronizationTypes.Full,
+            SynchronizationType = Common.Business.Actions.SynchronizationTypes.Full,
             Source = new ByteSync.Business.Actions.Shared.SharedDataPart
             {
                 ClientInstanceId = shared.ClientInstanceId,
                 RootPath = Path.GetTempPath(),
-                InventoryPartType = ByteSync.Common.Business.Inventories.FileSystemTypes.File,
+                InventoryPartType = Common.Business.Inventories.FileSystemTypes.File,
                 Name = "itests",
                 InventoryCodeAndId = "itests"
             },
             PathIdentity = new ByteSync.Business.Inventories.PathIdentity
             {
-                FileSystemType = ByteSync.Common.Business.Inventories.FileSystemTypes.File,
+                FileSystemType = Common.Business.Inventories.FileSystemTypes.File,
                 LinkingKeyValue = "itests"
             }
         };
@@ -103,7 +103,7 @@ public class R2DownloadResume_Tests
         {
             ClientInstanceId = shared.ClientInstanceId,
             RootPath = Path.GetTempFileName(),
-            InventoryPartType = ByteSync.Common.Business.Inventories.FileSystemTypes.File,
+            InventoryPartType = Common.Business.Inventories.FileSystemTypes.File,
             Name = "itests",
             InventoryCodeAndId = "itests"
         });
