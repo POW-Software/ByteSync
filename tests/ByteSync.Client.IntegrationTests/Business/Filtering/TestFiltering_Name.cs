@@ -1,4 +1,6 @@
 ﻿using FluentAssertions;
+using ByteSync.Business.Filtering.Expressions;
+using ByteSync.Business.Filtering.Parsing;
 
 namespace ByteSync.Client.IntegrationTests.Business.Filtering;
 
@@ -597,5 +599,55 @@ public class TestFiltering_Name : BaseTestFiltering
         result2.Should().BeTrue(); // error.log matches
         result3.Should().BeFalse(); // log.txt doesn't end with .log
         result4.Should().BeFalse(); // data.log.backup doesn't end with .log
+    }
+
+    [Test]
+    public void TestRegexNotMatch_Wildcard_NotEquals_WhenMatchesPattern_ShouldBeFalse()
+    {
+        // Arrange
+        var comparisonItem = PrepareComparisonWithOneContent(
+            "A1", "sameHash", DateTime.Now, 50, "file123.txt");
+
+        // NotEquals with wildcard triggers RegexNotMatch arm
+        var filterText = "name!=*.txt";
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Test]
+    public void TestRegexNotMatch_Wildcard_NotEquals_WhenDoesNotMatchPattern_ShouldBeTrue()
+    {
+        // Arrange
+        var comparisonItem = PrepareComparisonWithOneContent(
+            "A1", "sameHash", DateTime.Now, 50, "file123.doc");
+
+        var filterText = "name!=*.txt";
+
+        // Act
+        var result = EvaluateFilterExpression(filterText, comparisonItem);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Test]
+    public void TestDefaultBranch_WhenUnknownOperator_ShouldReturnFalse()
+    {
+        // Arrange
+        var comparisonItem = PrepareComparisonWithOneContent(
+            "A1", "sameHash", DateTime.Now, 50, "file123.txt");
+
+        var expr = new NameExpression("file123.txt", (ComparisonOperator)123);
+        var evaluator = _evaluatorFactory.GetEvaluator(expr);
+
+        // Act
+        var result = evaluator.Evaluate(expr, comparisonItem);
+
+        // Assert
+        result.Should().BeFalse();
     }
 }

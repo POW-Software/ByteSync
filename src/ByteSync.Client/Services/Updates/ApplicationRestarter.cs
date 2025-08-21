@@ -110,7 +110,7 @@ public class ApplicationRestarter : IApplicationRestarter
         // https://stackoverflow.com/questions/1308755/how-to-launch-an-app-on-os-x-with-command-line-the-best-way
             
         ProcessStartInfo processStartInfo = new ProcessStartInfo();
-        processStartInfo.FileName = "open";
+        processStartInfo.FileName = "/usr/bin/open";
             
         var applicationLauncher = new FileInfo(ApplicationLauncherFullName);
         DirectoryInfo appDirectory = 

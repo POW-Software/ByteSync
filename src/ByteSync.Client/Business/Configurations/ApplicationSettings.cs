@@ -309,8 +309,13 @@ public class ApplicationSettings : ICloneable
         var modulo = (long) (value % Math.Pow(base26Converter.FiguresCount, 10));
         var identifier = base26Converter.ConvertTo(modulo, 10).ToUpper();
 
+        var regex = new Regex(
+            @"^(....)(...)(...)$",
+            RegexOptions.None,
+            TimeSpan.FromMilliseconds(200) 
+        );
         // https://stackoverflow.com/questions/3968845/format-string-with-dashes
-        identifier = Regex.Replace(identifier, @"^(....)(...)(...)$", "$1-$2-$3");
+        identifier = regex.Replace(identifier, "$1-$2-$3");
 
         ClientId = identifier;
     }
