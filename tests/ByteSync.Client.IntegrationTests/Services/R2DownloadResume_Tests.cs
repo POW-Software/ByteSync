@@ -125,6 +125,7 @@ public class R2DownloadResume_Tests
         var expectedKeyPrefix = shared.SessionId + "_" + shared.ClientInstanceId + "_synchronization_" + shared.Id + ".part";
         var objects = await r2Service.GetAllObjects(CancellationToken.None);
         var partsCount = objects.Count(o => o.Key.StartsWith(expectedKeyPrefix));
+        await downloader.StartDownload();
         for (int i = 1; i <= partsCount; i++)
         {
             await downloader.PartsCoordinator.AddAvailablePartAsync(i);

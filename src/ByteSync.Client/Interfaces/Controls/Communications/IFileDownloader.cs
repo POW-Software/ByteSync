@@ -5,6 +5,8 @@ namespace ByteSync.Interfaces.Controls.Communications;
 
 public interface IFileDownloader
 {
+    Task StartDownload();
+    
     Task WaitForFileFullyExtracted();
     
     DownloadTarget DownloadTarget { get; }
