@@ -9,6 +9,7 @@ using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
 using ByteSync.ServerCommon.Services.Storage;
 using ByteSync.ServerCommon.Services.Storage.Factories;
+using ByteSync.Client.IntegrationTests.TestHelpers.Http;
 
 namespace ByteSync.Client.IntegrationTests.Services;
 
@@ -24,6 +25,11 @@ public class R2UploadResume_Tests
 
         _clientScope = _clientContainer.BeginLifetimeScope(b =>
         {
+            // Override default HttpClientFactory used by strategies with a flaky handler to simulate 500 once
+            b.RegisterInstance(new FlakyCounter(putFailures: 1, getFailures: 0)).As<IFlakyCounter>().SingleInstance();
+            b.Register(ctx => new HttpClient(new FlakySharedHandler(ctx.Resolve<IFlakyCounter>())) { Timeout = TimeSpan.FromMinutes(10) })
+                .As<HttpClient>();
+
             b.RegisterType<CloudflareR2ClientFactory>().As<ICloudflareR2ClientFactory>().SingleInstance();
             b.RegisterType<CloudflareR2Service>().As<ICloudflareR2Service>().SingleInstance();
             b.Register(ctx => GlobalTestSetup.Container.Resolve<Microsoft.Extensions.Options.IOptions<ByteSync.ServerCommon.Business.Settings.CloudflareR2Settings>>())
@@ -40,8 +46,8 @@ public class R2UploadResume_Tests
     }
 
     [Test]
-    [Explicit]
-    [Category("Cloud")]
+    // [Explicit]
+    // [Category("Cloud")]
     public async Task Upload_WithTransientFailure_Should_Retry_And_Succeed()
     {
         using var scope = _clientScope;

@@ -40,8 +40,8 @@ public class R2UploadDownload_Tests
     }
 
     [Test]
-    [Explicit]
-    [Category("Cloud")]
+    // [Explicit]
+    // [Category("Cloud")]
     public async Task Upload_Then_Download_Should_Succeed_With_Small_Chunks()
     {
         using var scope = _clientScope;
