@@ -26,7 +26,7 @@ public class DialogService_HeadlessTests : HeadlessIntegrationTest
         var factory = new Mock<IMessageBoxViewModelFactory>();
         factory.Setup(f => f.CreateMessageBoxViewModel(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string[]?>()))
             .Returns((string titleKey, string? messageKey, string[]? args) =>
-                new MessageBoxViewModel(titleKey, messageKey, args == null ? null : new List<string>(args), localizationService.Object));
+                new MessageBoxViewModel(titleKey, messageKey, args == null ? null : [..args], localizationService.Object));
 
         _builder.RegisterInstance(dialogView.Object).As<IDialogView>();
         _builder.RegisterInstance(factory.Object).As<IMessageBoxViewModelFactory>();

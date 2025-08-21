@@ -15,15 +15,18 @@ namespace ByteSync.Client.IntegrationTests.Services;
 
 public class R2DownloadResume_Tests
 {
-    private IContainer _clientContainer = null!;
     private ILifetimeScope _clientScope = null!;
 
     [SetUp]
     public void SetUp()
     {
-        _clientContainer = ServiceRegistrar.RegisterComponents();
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (ByteSync.Services.ContainerProvider.Container == null)
+        {
+            ServiceRegistrar.RegisterComponents();
+        }
 
-        _clientScope = _clientContainer.BeginLifetimeScope(b =>
+        _clientScope = ByteSync.Services.ContainerProvider.Container!.BeginLifetimeScope(b =>
         {
             // Simulate one GET 500 during download by replacing IHttpClientFactory used by strategies
             b.RegisterInstance(new FlakyCounter(putFailures: 0, getFailures: 1)).As<IFlakyCounter>().SingleInstance();
@@ -31,7 +34,7 @@ public class R2DownloadResume_Tests
 
             b.RegisterType<CloudflareR2ClientFactory>().As<ICloudflareR2ClientFactory>().SingleInstance();
             b.RegisterType<CloudflareR2Service>().As<ICloudflareR2Service>().SingleInstance();
-            b.Register(ctx => GlobalTestSetup.Container.Resolve<Microsoft.Extensions.Options.IOptions<ByteSync.ServerCommon.Business.Settings.CloudflareR2Settings>>())
+            b.Register(_ => GlobalTestSetup.Container.Resolve<Microsoft.Extensions.Options.IOptions<ByteSync.ServerCommon.Business.Settings.CloudflareR2Settings>>())
                 .As<Microsoft.Extensions.Options.IOptions<ByteSync.ServerCommon.Business.Settings.CloudflareR2Settings>>();
             b.RegisterType<R2FileTransferApiClient>().As<IFileTransferApiClient>().SingleInstance();
         });
@@ -45,15 +48,14 @@ public class R2DownloadResume_Tests
     [TearDown]
     public void TearDown()
     {
-        _clientScope?.Dispose();
-        _clientContainer?.Dispose();
+        _clientScope.Dispose();
     }
 
     [Test]
-    // [Explicit]
-    // [Category("Cloud")]
+    [Category("Cloud")]
     public async Task Download_WithTransientFailure_Should_Retry_And_Succeed()
     {
+        // ReSharper disable once UseAwaitUsing
         using var scope = _clientScope;
         var uploaderFactory = scope.Resolve<IFileUploaderFactory>();
         var downloaderFactory = scope.Resolve<IFileDownloaderFactory>();
@@ -107,8 +109,8 @@ public class R2DownloadResume_Tests
             Name = "itests",
             InventoryCodeAndId = "itests"
         });
-        shared.ActionsGroupIds = new List<string> { sag.ActionsGroupId };
-        sharedActionsGroupRepository.SetSharedActionsGroups(new List<ByteSync.Business.Actions.Shared.SharedActionsGroup> { sag });
+        shared.ActionsGroupIds = [sag.ActionsGroupId];
+        sharedActionsGroupRepository.SetSharedActionsGroups([sag]);
 
         // First upload a file so we can download it
         var inputContent = new string('z', 1_000_000);
@@ -125,9 +127,9 @@ public class R2DownloadResume_Tests
         var partsCount = objects.Count(o => o.Key.StartsWith(expectedKeyPrefix));
         for (int i = 1; i <= partsCount; i++)
         {
-            downloader.PartsCoordinator.AddAvailablePart(i);
+            await downloader.PartsCoordinator.AddAvailablePartAsync(i);
         }
-        downloader.PartsCoordinator.SetAllPartsKnown(partsCount);
+        await downloader.PartsCoordinator.SetAllPartsKnownAsync(partsCount);
         await downloader.WaitForFileFullyExtracted();
         (downloader as ByteSync.Services.Communications.Transfers.FileDownloader)?.CleanupResources();
 

@@ -15,15 +15,18 @@ namespace ByteSync.Client.IntegrationTests.Services;
 
 public class R2UploadResume_Tests
 {
-    private IContainer _clientContainer = null!;
     private ILifetimeScope _clientScope = null!;
 
     [SetUp]
     public void SetUp()
     {
-        _clientContainer = ServiceRegistrar.RegisterComponents();
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (ByteSync.Services.ContainerProvider.Container == null)
+        {
+            ServiceRegistrar.RegisterComponents();
+        }
 
-        _clientScope = _clientContainer.BeginLifetimeScope(b =>
+        _clientScope = ByteSync.Services.ContainerProvider.Container!.BeginLifetimeScope(b =>
         {
             // Override IHttpClientFactory used by strategies with a flaky handler to simulate 500 once
             b.RegisterInstance(new FlakyCounter(putFailures: 1, getFailures: 0)).As<IFlakyCounter>().SingleInstance();
@@ -31,7 +34,7 @@ public class R2UploadResume_Tests
 
             b.RegisterType<CloudflareR2ClientFactory>().As<ICloudflareR2ClientFactory>().SingleInstance();
             b.RegisterType<CloudflareR2Service>().As<ICloudflareR2Service>().SingleInstance();
-            b.Register(ctx => GlobalTestSetup.Container.Resolve<Microsoft.Extensions.Options.IOptions<ByteSync.ServerCommon.Business.Settings.CloudflareR2Settings>>())
+            b.Register(_ => GlobalTestSetup.Container.Resolve<Microsoft.Extensions.Options.IOptions<ByteSync.ServerCommon.Business.Settings.CloudflareR2Settings>>())
                 .As<Microsoft.Extensions.Options.IOptions<ByteSync.ServerCommon.Business.Settings.CloudflareR2Settings>>();
             b.RegisterType<R2FileTransferApiClient>().As<IFileTransferApiClient>().SingleInstance();
         });
@@ -45,15 +48,14 @@ public class R2UploadResume_Tests
     [TearDown]
     public void TearDown()
     {
-        _clientScope?.Dispose();
-        _clientContainer?.Dispose();
+        _clientScope.Dispose();
     }
 
     [Test]
-    // [Explicit]
-    // [Category("Cloud")]
+    [Category("Cloud")]
     public async Task Upload_WithTransientFailure_Should_Retry_And_Succeed()
     {
+        // ReSharper disable once UseAwaitUsing
         using var scope = _clientScope;
         var uploaderFactory = scope.Resolve<IFileUploaderFactory>();
         var r2Service = scope.Resolve<ICloudflareR2Service>();

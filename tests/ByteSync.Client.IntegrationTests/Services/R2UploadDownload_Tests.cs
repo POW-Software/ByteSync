@@ -14,19 +14,22 @@ namespace ByteSync.Client.IntegrationTests.Services;
 
 public class R2UploadDownload_Tests
 {
-    private IContainer _clientContainer = null!;
     private ILifetimeScope _clientScope = null!;
 
     [SetUp]
     public void SetUp()
     {
-        _clientContainer = ServiceRegistrar.RegisterComponents();
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (ByteSync.Services.ContainerProvider.Container == null)
+        {
+            ServiceRegistrar.RegisterComponents();
+        }
 
-        _clientScope = _clientContainer.BeginLifetimeScope(b =>
+        _clientScope = ByteSync.Services.ContainerProvider.Container!.BeginLifetimeScope(b =>
         {
             b.RegisterType<CloudflareR2ClientFactory>().As<ICloudflareR2ClientFactory>().SingleInstance();
             b.RegisterType<CloudflareR2Service>().As<ICloudflareR2Service>().SingleInstance();
-            b.Register(ctx => GlobalTestSetup.Container.Resolve<Microsoft.Extensions.Options.IOptions<ByteSync.ServerCommon.Business.Settings.CloudflareR2Settings>>())
+            b.Register(_ => GlobalTestSetup.Container.Resolve<Microsoft.Extensions.Options.IOptions<ByteSync.ServerCommon.Business.Settings.CloudflareR2Settings>>())
                 .As<Microsoft.Extensions.Options.IOptions<ByteSync.ServerCommon.Business.Settings.CloudflareR2Settings>>();
             b.RegisterType<R2FileTransferApiClient>().As<IFileTransferApiClient>().SingleInstance();
         });
@@ -40,8 +43,7 @@ public class R2UploadDownload_Tests
     [TearDown]
     public void TearDown()
     {
-        _clientScope?.Dispose();
-        _clientContainer?.Dispose();
+        _clientScope.Dispose();
     }
 
     [Test]
@@ -49,6 +51,7 @@ public class R2UploadDownload_Tests
     // [Category("Cloud")]
     public async Task Upload_Then_Download_Should_Succeed_With_Small_Chunks()
     {
+        // ReSharper disable once UseAwaitUsing
         using var scope = _clientScope;
         var uploaderFactory = scope.Resolve<IFileUploaderFactory>();
         var downloaderFactory = scope.Resolve<IFileDownloaderFactory>();
@@ -103,8 +106,8 @@ public class R2UploadDownload_Tests
             Name = "itests",
             InventoryCodeAndId = "itests"
         });
-        shared.ActionsGroupIds = new List<string> { sag.ActionsGroupId };
-        sharedActionsGroupRepository.SetSharedActionsGroups(new List<ByteSync.Business.Actions.Shared.SharedActionsGroup> { sag });
+        shared.ActionsGroupIds = [sag.ActionsGroupId];
+        sharedActionsGroupRepository.SetSharedActionsGroups([sag]);
 
         var inputContent = new string('x', 1_500_000);
         var tempFile = Path.GetTempFileName();
@@ -121,9 +124,9 @@ public class R2UploadDownload_Tests
         var partsCount = objects.Count(o => o.Key.StartsWith(expectedKeyPrefix));
         for (int i = 1; i <= partsCount; i++)
         {
-            downloader.PartsCoordinator.AddAvailablePart(i);
+            await downloader.PartsCoordinator.AddAvailablePartAsync(i);
         }
-        downloader.PartsCoordinator.SetAllPartsKnown(partsCount);
+        await downloader.PartsCoordinator.SetAllPartsKnownAsync(partsCount);
         await downloader.WaitForFileFullyExtracted();
         (downloader as ByteSync.Services.Communications.Transfers.FileDownloader)?.CleanupResources();
         
