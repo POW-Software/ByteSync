@@ -3,9 +3,9 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Factories;
-using ByteSync.Services.Communications.Transfers;
 using Autofac.Features.Indexed;
 using ByteSync.Interfaces.Controls.Communications.Http;
+using ByteSync.Services.Communications.Transfers.Downloading;
 
 namespace ByteSync.Factories;
 

@@ -4,7 +4,7 @@ using ByteSync.Services.Automating;
 using ByteSync.Services.Bootstrappers;
 using ByteSync.Services.Communications;
 using ByteSync.Services.Communications.SignalR;
-using ByteSync.Services.Communications.Transfers;
+using ByteSync.Services.Communications.Transfers.Downloading;
 using ByteSync.Services.Inventories;
 using ByteSync.Services.Navigations;
 using ByteSync.Services.Sessions.Connecting;

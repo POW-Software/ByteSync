@@ -1,5 +1,4 @@
-﻿using ByteSync.Interfaces;
-using ByteSync.Interfaces.Factories.ViewModels;
+﻿using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Inventories;

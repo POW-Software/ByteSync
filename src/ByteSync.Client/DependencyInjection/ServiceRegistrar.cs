@@ -7,6 +7,7 @@ using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Bootstrapping;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Services;
+using ByteSync.Services.Communications.Transfers.Downloading;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using Splat;
@@ -42,7 +43,7 @@ public static class ServiceRegistrar
         // Wire up the callback to break the circular dependency
         using (var scope = container.BeginLifetimeScope())
         {
-            var fileDownloaderCache = scope.Resolve<IFileDownloaderCache>() as ByteSync.Services.Communications.Transfers.FileDownloaderCache;
+            var fileDownloaderCache = scope.Resolve<IFileDownloaderCache>() as FileDownloaderCache;
             var downloadManager = scope.Resolve<IDownloadManager>();
             if (fileDownloaderCache != null)
             {
