@@ -9,7 +9,7 @@ using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Services.Sessions;
-using ByteSync.Services.Communications.Transfers;
+using ByteSync.Services.Communications.Transfers.Uploading;
 
 namespace ByteSync.Factories;
 
