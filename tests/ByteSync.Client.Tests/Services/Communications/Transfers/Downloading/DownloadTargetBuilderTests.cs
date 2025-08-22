@@ -12,7 +12,7 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 
-namespace ByteSync.Tests.Services.Communications.Transfers;
+namespace ByteSync.Tests.Services.Communications.Transfers.Downloading;
 
 [TestFixture]
 public class DownloadTargetBuilderTests

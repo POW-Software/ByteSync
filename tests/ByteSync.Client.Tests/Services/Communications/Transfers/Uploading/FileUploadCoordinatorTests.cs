@@ -1,11 +1,11 @@
-using NUnit.Framework;
-using Moq;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Moq;
+using NUnit.Framework;
 
-namespace ByteSync.Tests.Services.Communications.Transfers;
+namespace ByteSync.Tests.Services.Communications.Transfers.Uploading;
 
 [TestFixture]
 public class FileUploadCoordinatorTests

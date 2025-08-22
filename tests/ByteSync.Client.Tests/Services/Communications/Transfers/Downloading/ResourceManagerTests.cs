@@ -1,9 +1,9 @@
-using NUnit.Framework;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Services.Communications.Transfers.Downloading;
 using FluentAssertions;
+using NUnit.Framework;
 
-namespace ByteSync.Tests.Services.Communications.Transfers;
+namespace ByteSync.Tests.Services.Communications.Transfers.Downloading;
 
 public class ResourceManagerTests
 {

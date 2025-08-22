@@ -1,14 +1,14 @@
-using NUnit.Framework;
-using Moq;
+using Autofac;
 using ByteSync.Common.Business.SharedFiles;
+using ByteSync.Factories;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Factories;
-using ByteSync.Factories;
-using FluentAssertions;
-using Autofac;
 using ByteSync.TestsCommon.Mocking;
+using FluentAssertions;
+using Moq;
+using NUnit.Framework;
 
-namespace ByteSync.Tests.Services.Communications.Transfers;
+namespace ByteSync.Tests.Services.Communications.Transfers.Downloading;
 
 public class FileDownloaderFactoryTests
 {

@@ -1,5 +1,3 @@
-using NUnit.Framework;
-using Moq;
 using System.Threading.Channels;
 using Autofac.Features.Indexed;
 using ByteSync.Business.Communications.Transfers;
@@ -11,10 +9,12 @@ using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Moq;
+using NUnit.Framework;
 using Polly;
 using Polly.Retry;
 
-namespace ByteSync.Tests.Services.Communications.Transfers;
+namespace ByteSync.Tests.Services.Communications.Transfers.Uploading;
 
 [TestFixture]
 public class FileUploadWorkerTests

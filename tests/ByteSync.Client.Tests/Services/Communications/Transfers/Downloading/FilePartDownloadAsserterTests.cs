@@ -1,11 +1,11 @@
-using NUnit.Framework;
-using Moq;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Services.Communications.Transfers.Downloading;
+using Moq;
+using NUnit.Framework;
 
-namespace ByteSync.Tests.Services.Communications.Transfers;
+namespace ByteSync.Tests.Services.Communications.Transfers.Downloading;
 
 public class FilePartDownloadAsserterTests
 {

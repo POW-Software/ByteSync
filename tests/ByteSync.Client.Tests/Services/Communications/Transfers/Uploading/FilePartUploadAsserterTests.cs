@@ -1,20 +1,20 @@
-using NUnit.Framework;
-using Moq;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
+using Moq;
+using NUnit.Framework;
 
-namespace ByteSync.Tests.Services.Communications.Transfers;
+namespace ByteSync.Tests.Services.Communications.Transfers.Uploading;
 
 [TestFixture]
 public class FilePartUploadAsserterTests
 {
-    private Mock<IFileTransferApiClient> _mockFileTransferApiClient;
-    private Mock<ISessionService> _mockSessionService;
-    private FilePartUploadAsserter _filePartUploadAsserter;
-    private SharedFileDefinition _sharedFileDefinition;
+    private Mock<IFileTransferApiClient> _mockFileTransferApiClient = null!;
+    private Mock<ISessionService> _mockSessionService = null!;
+    private FilePartUploadAsserter _filePartUploadAsserter = null!;
+    private SharedFileDefinition _sharedFileDefinition = null!;
 
     [SetUp]
     public void SetUp()

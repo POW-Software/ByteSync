@@ -1,10 +1,10 @@
-using System.Threading.Channels;
 using System.Collections.Concurrent;
-using NUnit.Framework;
+using System.Threading.Channels;
 using ByteSync.Services.Communications.Transfers.Downloading;
 using FluentAssertions;
+using NUnit.Framework;
 
-namespace ByteSync.Tests.Services.Communications.Transfers;
+namespace ByteSync.Tests.Services.Communications.Transfers.Downloading;
 
 public class ErrorManagerTests
 {

@@ -28,26 +28,14 @@ public class PostDownloadHandlerProxy : IPostDownloadHandlerProxy
             {
                 await _sessionProfileManager.OnFileIsFullyDownloaded(localSharedFile);
             }
-            // else
-            // {
-            //     await _cloudSessionManager.OnFileIsFullyDownloaded(downloadTarget.LocalSharedFile);
-            // }
             
             else if (localSharedFile.SharedFileDefinition.IsSynchronizationStartData)
             {
                 await _synchronizationDataReceiver.OnSynchronizationDataFileDownloaded(localSharedFile);
-                
-
-            
-                // Log.Information("Synchronization actions retrieved and loaded: {Count}", 
-                //     synchronizationData.SharedActionsGroups.Count);
             }
             else if (localSharedFile.SharedFileDefinition.IsInventory)
             {
                 await _inventoryService.OnFileIsFullyDownloaded(localSharedFile);
-                // await _sessionDataHolder.OnFileIsFullyDownloaded(localSharedFile);
-
-                //await TryStartLobbyCloudSessionSynchronization();
             }
         }
     }

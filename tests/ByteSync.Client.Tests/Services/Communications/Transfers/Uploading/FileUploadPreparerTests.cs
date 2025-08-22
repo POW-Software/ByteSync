@@ -1,10 +1,10 @@
-using NUnit.Framework;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
+using NUnit.Framework;
 
-namespace ByteSync.Tests.Services.Communications.Transfers;
+namespace ByteSync.Tests.Services.Communications.Transfers.Uploading;
 
 [TestFixture]
 public class FileUploadPreparerTests
