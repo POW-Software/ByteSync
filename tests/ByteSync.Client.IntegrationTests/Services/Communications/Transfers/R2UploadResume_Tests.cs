@@ -1,19 +1,19 @@
 using Autofac;
 using ByteSync.Client.IntegrationTests.TestHelpers;
+using ByteSync.Client.IntegrationTests.TestHelpers.Http;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.DependencyInjection;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Repositories;
+using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
 using ByteSync.ServerCommon.Services.Storage;
 using ByteSync.ServerCommon.Services.Storage.Factories;
-using ByteSync.Client.IntegrationTests.TestHelpers.Http;
-using ByteSync.Interfaces.Repositories;
-using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.Services.Communications.Transfers.Uploading;
 
-namespace ByteSync.Client.IntegrationTests.Services;
+namespace ByteSync.Client.IntegrationTests.Services.Communications.Transfers;
 
 public class R2UploadResume_Tests
 {

@@ -17,7 +17,7 @@ using ByteSync.ServerCommon.Services.Storage.Factories;
 using ByteSync.Services.Communications.Transfers.Downloading;
 using ByteSync.Services.Communications.Transfers.Uploading;
 
-namespace ByteSync.Client.IntegrationTests.Services;
+namespace ByteSync.Client.IntegrationTests.Services.Communications.Transfers;
 
 public class R2UploadDownload_Tests
 {

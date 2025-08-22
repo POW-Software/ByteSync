@@ -16,7 +16,7 @@ using Moq;
 
 #pragma warning disable 168
 
-namespace ByteSync.Client.IntegrationTests.Services;
+namespace ByteSync.Client.IntegrationTests.Services.Communications.Transfers;
 
 public class TestSlicerEncrypter : IntegrationTest
 {

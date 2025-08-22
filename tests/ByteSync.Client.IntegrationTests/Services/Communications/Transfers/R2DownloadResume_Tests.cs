@@ -2,25 +2,25 @@ using Autofac;
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Inventories;
 using ByteSync.Client.IntegrationTests.TestHelpers;
+using ByteSync.Client.IntegrationTests.TestHelpers.Http;
+using ByteSync.Common.Business.Actions;
+using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.DependencyInjection;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Factories;
-using ByteSync.ServerCommon.Interfaces.Services.Storage;
-using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
-using ByteSync.ServerCommon.Services.Storage;
-using ByteSync.ServerCommon.Services.Storage.Factories;
-using ByteSync.Client.IntegrationTests.TestHelpers.Http;
-using ByteSync.Common.Business.Actions;
-using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.ServerCommon.Business.Settings;
+using ByteSync.ServerCommon.Interfaces.Services.Storage;
+using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
+using ByteSync.ServerCommon.Services.Storage;
+using ByteSync.ServerCommon.Services.Storage.Factories;
 using ByteSync.Services.Communications.Transfers.Downloading;
 using ByteSync.Services.Communications.Transfers.Uploading;
 
-namespace ByteSync.Client.IntegrationTests.Services;
+namespace ByteSync.Client.IntegrationTests.Services.Communications.Transfers;
 
 public class R2DownloadResume_Tests
 {
