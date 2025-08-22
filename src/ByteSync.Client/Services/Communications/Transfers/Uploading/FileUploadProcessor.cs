@@ -43,6 +43,7 @@ public class FileUploadProcessor : IFileUploadProcessor
     public async Task ProcessUpload(SharedFileDefinition sharedFileDefinition, int? maxSliceLength = null)
     {
         _progressState = new UploadProgressState();
+        _progressState.StartTimeUtc = DateTimeOffset.UtcNow;
         
         // Start upload workers
         for (var i = 0; i < 6; i++)
@@ -69,7 +70,20 @@ public class FileUploadProcessor : IFileUploadProcessor
         var totalCreatedSlices = GetTotalCreatedSlices();
         await _filePartUploadAsserter.AssertUploadIsFinished(sharedFileDefinition, totalCreatedSlices);
         
-        _logger.LogInformation("FileUploadProcessor: E2EE upload of {SharedFileDefinitionId} is finished", sharedFileDefinition.Id);
+        _progressState.EndTimeUtc = DateTimeOffset.UtcNow;
+        var durationMs = (_progressState.EndTimeUtc - _progressState.StartTimeUtc)?.TotalMilliseconds;
+        var totalBytes = _progressState.TotalUploadedBytes;
+        var bandwidthKbps = durationMs.HasValue && durationMs.Value > 0
+            ? (totalBytes * 8.0) / durationMs.Value
+            : 0.0;
+        _logger.LogInformation(
+            "FileUploadProcessor: E2EE upload of {SharedFileDefinitionId} is finished in {DurationMs} ms, uploaded {UploadedKB} KB, max concurrency {MaxConc}, approx bandwidth {Kbps:F2} kbps, {Errors} error(s)",
+            sharedFileDefinition.Id,
+            durationMs,
+            totalBytes / 1024d,
+            _progressState.MaxConcurrentUploads,
+            bandwidthKbps,
+            _progressState.Exceptions.Count);
     }
 
     public int GetTotalCreatedSlices()

@@ -54,6 +54,7 @@ public class FileSlicer : IFileSlicer
                     try
                     {
                         progressState.TotalCreatedSlices += 1;
+                        progressState.TotalCreatedBytes += fileUploaderSlice.MemoryStream.Length;
                     }
                     finally
                     {
@@ -77,6 +78,7 @@ public class FileSlicer : IFileSlicer
             try
             {
                 progressState.LastException = ex;
+                progressState.Exceptions.Add(ex);
             }
             finally
             {
