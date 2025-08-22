@@ -53,8 +53,24 @@ public class FileUploadWorker : IFileUploadWorker
         {
             if (availableSlices.Reader.TryRead(out var slice))
             {
+                var sliceStart = System.Diagnostics.Stopwatch.StartNew();
+
                 try
                 {
+                    await _semaphoreSlim.WaitAsync();
+                    try
+                    {
+                        progressState.ConcurrentUploads += 1;
+                        if (progressState.ConcurrentUploads > progressState.MaxConcurrentUploads)
+                        {
+                            progressState.MaxConcurrentUploads = progressState.ConcurrentUploads;
+                        }
+                    }
+                    finally
+                    {
+                        _semaphoreSlim.Release();
+                    }
+
                     var policy = _policyFactory.BuildFileUploadPolicy();
                     var response = await policy.ExecuteAsync(() => DoUpload(slice));
 
@@ -72,11 +88,32 @@ public class FileUploadWorker : IFileUploadWorker
                         try
                         {
                             progressState.TotalUploadedSlices += 1;
+                            var sliceBytes = slice.MemoryStream?.Length ?? 0L;
+                            progressState.TotalUploadedBytes += sliceBytes;
+                            var elapsedMs = sliceStart.ElapsedMilliseconds;
+                            var kbps = elapsedMs > 0 ? (sliceBytes * 8.0) / elapsedMs : 0.0;
+                            progressState.LastSliceUploadDurationMs = elapsedMs;
+                            progressState.LastSliceUploadedBytes = sliceBytes;
+                            progressState.SliceMetrics.Add(new SliceUploadMetric
+                            {
+                                PartNumber = slice.PartNumber,
+                                Bytes = sliceBytes,
+                                DurationMs = elapsedMs,
+                                BandwidthKbps = kbps
+                            });
                         }
                         finally
                         {
                             _semaphoreSlim.Release();
                         }
+                        _logger.LogInformation(
+                            "Slice {PartNumber}: {Bytes} bytes in {DurationMs} ms ({Kbps:F2} kbps)",
+                            slice.PartNumber,
+                            slice.MemoryStream?.Length ?? 0L,
+                            sliceStart.ElapsedMilliseconds,
+                            (slice.MemoryStream?.Length ?? 0L) > 0 && sliceStart.ElapsedMilliseconds > 0
+                                ? ((slice.MemoryStream?.Length ?? 0L) * 8.0) / sliceStart.ElapsedMilliseconds
+                                : 0.0);
                     }
                     else
                     {
@@ -91,6 +128,7 @@ public class FileUploadWorker : IFileUploadWorker
                     try
                     {
                         progressState.LastException = ex;
+                        progressState.Exceptions.Add(ex);
                     }
                     finally
                     {
@@ -100,6 +138,39 @@ public class FileUploadWorker : IFileUploadWorker
                     _exceptionOccurred.Set();
                     
                     return;
+                }
+                finally
+                {
+                // finalize per-slice metrics
+
+                    var elapsedMs = sliceStart?.ElapsedMilliseconds;
+                    await _semaphoreSlim.WaitAsync();
+                    try
+                    {
+                        if (elapsedMs.HasValue)
+                        {
+                            progressState.LastSliceUploadDurationMs = elapsedMs.Value;
+                            progressState.LastSliceUploadedBytes = slice.MemoryStream?.Length ?? 0L;
+                        }
+                    }
+                    finally
+                    {
+                        _semaphoreSlim.Release();
+                    }
+                
+
+                    await _semaphoreSlim.WaitAsync();
+                    try
+                    {
+                        if (progressState.ConcurrentUploads > 0)
+                        {
+                            progressState.ConcurrentUploads -= 1;
+                        }
+                    }
+                    finally
+                    {
+                        _semaphoreSlim.Release();
+                    }
                 }
             }
         }
