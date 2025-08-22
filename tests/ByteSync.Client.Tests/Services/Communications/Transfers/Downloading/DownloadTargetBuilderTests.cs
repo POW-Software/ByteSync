@@ -17,15 +17,15 @@ namespace ByteSync.Tests.Services.Communications.Transfers.Downloading;
 [TestFixture]
 public class DownloadTargetBuilderTests
 {
-    private Mock<ICloudSessionLocalDataManager> _cloudSessionLocalDataManager;
-    private Mock<ISessionProfileLocalDataManager> _sessionProfileLocalDataManager;
-    private Mock<ISharedActionsGroupRepository> _sharedActionsGroupRepository;
-    private Mock<IConnectionService> _connectionService;
-    private Mock<ITemporaryFileManagerFactory> _temporaryFileManagerFactory;
-    private Mock<ISessionService> _sessionService;
-    private Subject<AbstractSession?> _sessionSubject;
-    private Subject<SessionStatus> _sessionStatusSubject;
-    private DownloadTargetBuilder _downloadTargetBuilder;
+    private Mock<ICloudSessionLocalDataManager> _cloudSessionLocalDataManager = null!;
+    private Mock<ISessionProfileLocalDataManager> _sessionProfileLocalDataManager = null!;
+    private Mock<ISharedActionsGroupRepository> _sharedActionsGroupRepository = null!;
+    private Mock<IConnectionService> _connectionService = null!;
+    private Mock<ITemporaryFileManagerFactory> _temporaryFileManagerFactory = null!;
+    private Mock<ISessionService> _sessionService = null!;
+    private Subject<AbstractSession?> _sessionSubject = null!;
+    private Subject<SessionStatus> _sessionStatusSubject = null!;
+    private DownloadTargetBuilder _downloadTargetBuilder = null!;
 
     [SetUp]
     public void Setup()
