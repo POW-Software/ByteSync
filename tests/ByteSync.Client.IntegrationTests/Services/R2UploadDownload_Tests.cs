@@ -14,7 +14,6 @@ using ByteSync.ServerCommon.Interfaces.Services.Storage;
 using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
 using ByteSync.ServerCommon.Services.Storage;
 using ByteSync.ServerCommon.Services.Storage.Factories;
-using ByteSync.Services.Communications.Transfers;
 using ByteSync.Services.Communications.Transfers.Downloading;
 using ByteSync.Services.Communications.Transfers.Uploading;
 

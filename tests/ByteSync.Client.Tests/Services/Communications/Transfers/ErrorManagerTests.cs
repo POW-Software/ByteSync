@@ -1,7 +1,6 @@
 using System.Threading.Channels;
 using System.Collections.Concurrent;
 using NUnit.Framework;
-using ByteSync.Services.Communications.Transfers;
 using ByteSync.Services.Communications.Transfers.Downloading;
 using FluentAssertions;
 

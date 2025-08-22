@@ -1,6 +1,5 @@
 using NUnit.Framework;
 using ByteSync.Business.Communications.Downloading;
-using ByteSync.Services.Communications.Transfers;
 using ByteSync.Services.Communications.Transfers.Downloading;
 using FluentAssertions;
 

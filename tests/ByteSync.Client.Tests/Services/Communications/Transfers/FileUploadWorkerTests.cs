@@ -8,7 +8,6 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
-using ByteSync.Services.Communications.Transfers;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;

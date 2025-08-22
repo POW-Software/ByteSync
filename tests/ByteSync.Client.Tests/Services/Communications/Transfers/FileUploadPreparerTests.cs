@@ -1,7 +1,6 @@
 using NUnit.Framework;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
-using ByteSync.Services.Communications.Transfers;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
 

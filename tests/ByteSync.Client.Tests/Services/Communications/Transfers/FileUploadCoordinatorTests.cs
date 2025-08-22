@@ -1,7 +1,6 @@
 using NUnit.Framework;
 using Moq;
 using ByteSync.Business.Communications.Transfers;
-using ByteSync.Services.Communications.Transfers;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;

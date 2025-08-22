@@ -1,6 +1,5 @@
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Factories;
-using ByteSync.Services.Communications.Transfers;
 using ByteSync.Services.Communications.Transfers.Uploading;
 
 namespace ByteSync.Factories;

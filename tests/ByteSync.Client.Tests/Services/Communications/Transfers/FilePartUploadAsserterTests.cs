@@ -3,7 +3,6 @@ using Moq;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Services.Sessions;
-using ByteSync.Services.Communications.Transfers;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
 

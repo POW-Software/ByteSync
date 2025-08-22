@@ -3,7 +3,6 @@ using ByteSync.Business.Communications.Downloading;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
-using ByteSync.Services.Communications.Transfers;
 using ByteSync.Services.Communications.Transfers.Downloading;
 using ByteSync.TestsCommon;
 using Microsoft.Extensions.Logging;
