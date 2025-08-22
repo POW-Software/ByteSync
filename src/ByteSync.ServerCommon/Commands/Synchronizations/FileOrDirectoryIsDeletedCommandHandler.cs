@@ -35,7 +35,7 @@ public class FileOrDirectoryIsDeletedCommandHandler : IRequestHandler<FileOrDire
             return;
         }
         
-        bool needSendSynchronizationUpdated = false;
+        var needSendSynchronizationUpdated = false;
         
         var result = await _trackingActionRepository.AddOrUpdate(request.SessionId, request.ActionsGroupIds, (trackingAction, synchronization) =>
         {
@@ -44,7 +44,7 @@ public class FileOrDirectoryIsDeletedCommandHandler : IRequestHandler<FileOrDire
                 return false;
             }
             
-            bool wasTrackingActionFinished = trackingAction.IsFinished;
+            var wasTrackingActionFinished = trackingAction.IsFinished;
             
             trackingAction.AddSuccessOnTarget(request.Client.ClientInstanceId);
             

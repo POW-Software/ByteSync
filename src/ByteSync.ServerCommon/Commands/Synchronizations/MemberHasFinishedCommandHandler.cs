@@ -26,7 +26,7 @@ public class MemberHasFinishedCommandHandler : IRequestHandler<MemberHasFinished
     
     public async Task Handle(MemberHasFinishedRequest request, CancellationToken cancellationToken)
     {
-        bool needSendSynchronizationUpdated = false;
+        var needSendSynchronizationUpdated = false;
         
         var result = await _synchronizationRepository.UpdateIfExists(request.SessionId, synchronizationEntity =>
         {

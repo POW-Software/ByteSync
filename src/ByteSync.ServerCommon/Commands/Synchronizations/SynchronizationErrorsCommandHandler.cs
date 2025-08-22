@@ -35,7 +35,7 @@ public class SynchronizationErrorsCommandHandler : IRequestHandler<Synchronizati
             return;
         }
         
-        bool needSendSynchronizationUpdated = false;
+        var needSendSynchronizationUpdated = false;
         
         var result = await _trackingActionRepository.AddOrUpdate(request.SessionId, request.ActionsGroupIds, (trackingAction, synchronization) =>
         {
@@ -44,8 +44,8 @@ public class SynchronizationErrorsCommandHandler : IRequestHandler<Synchronizati
                 return false;
             }
             
-            bool wasTrackingActionFinished = trackingAction.IsFinished;
-            bool isNewError = !trackingAction.IsError;
+            var wasTrackingActionFinished = trackingAction.IsFinished;
+            var isNewError = !trackingAction.IsError;
             
             if (trackingAction.SourceClientInstanceId == request.Client.ClientInstanceId)
             {
