@@ -28,8 +28,10 @@ public class FileDownloader : IFileDownloader
 
     private static SemaphoreSlim DownloadSemaphore { get; } = new SemaphoreSlim(8);
     private Task MergerTask { get; set; }
-    private List<Task> DownloadTasks { get; }
+    private List<Task> DownloadTasks { get; set; }
     private CancellationTokenSource CancellationTokenSource { get; }
+    
+    private readonly IFileMerger _fileMerger;
 
     public FileDownloader(
         SharedFileDefinition sharedFileDefinition,
@@ -51,32 +53,45 @@ public class FileDownloader : IFileDownloader
         _resourceManager = resourceManager;
         _partsCoordinator = partsCoordinator;
         _strategies = strategies;
+        _logger = logger;
+        _fileMerger = fileMerger;
+        
         _semaphoreSlim = new SemaphoreSlim(1, 1);
         SharedFileDefinition = sharedFileDefinition;
         DownloadTarget = downloadTargetBuilder.BuildDownloadTarget(sharedFileDefinition);
         CancellationTokenSource = new CancellationTokenSource();
-        MergerTask = Task.Run(async () =>
+        // Do not auto-start; caller can control with Start() or WaitForFileFullyExtracted()
+    }
+
+    public async Task StartDownload()
+    {
+        await Task.Run(() =>
         {
-            while (await _partsCoordinator.MergeChannel.Reader.WaitToReadAsync())
+            MergerTask = Task.Run(async () =>
             {
-                var partToMerge = await _partsCoordinator.MergeChannel.Reader.ReadAsync();
-                try
+                while (await _partsCoordinator.MergeChannel.Reader.WaitToReadAsync())
                 {
-                    await fileMerger.MergeAsync(partToMerge);
+                    var partToMerge = await _partsCoordinator.MergeChannel.Reader.ReadAsync();
+                    try
+                    {
+                        await _fileMerger.MergeAsync(partToMerge);
+                    }
+                    finally
+                    {
+                        DownloadSemaphore.Release();
+                    }
                 }
-                finally
-                {
-                    DownloadSemaphore.Release();
-                }
+            });
+            
+            var downloadTasks = Math.Min(8, Environment.ProcessorCount * 2);
+            DownloadTasks = new List<Task>();
+            
+            for (var i = 0; i < downloadTasks; i++)
+            {
+                var task = Task.Run(DownloadFile);
+                DownloadTasks.Add(task);
             }
         });
-        var downloadTasks = Math.Min(8, Environment.ProcessorCount * 2);
-        DownloadTasks = new List<Task>();
-        for (var i = 0; i < downloadTasks; i++)
-        {
-            var task = Task.Run(DownloadFile);
-            DownloadTasks.Add(task);
-        }
     }
 
     public async Task WaitForFileFullyExtracted()

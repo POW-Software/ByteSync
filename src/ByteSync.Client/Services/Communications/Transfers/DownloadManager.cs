@@ -53,6 +53,8 @@ public class DownloadManager : IDownloadManager
 
         try
         {
+            await fileDownloader.StartDownload();
+            
             await partsCoordinator.SetAllPartsKnownAsync(partsCount);
             
             await fileDownloader.WaitForFileFullyExtracted();

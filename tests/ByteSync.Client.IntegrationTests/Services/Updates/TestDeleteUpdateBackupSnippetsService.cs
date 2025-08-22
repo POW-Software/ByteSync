@@ -1,8 +1,5 @@
-﻿using System.Runtime.InteropServices;
-using Autofac;
+﻿using Autofac;
 using ByteSync.Business.Updates;
-using ByteSync.Client.IntegrationTests.TestHelpers;
-using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Updates;
 using ByteSync.Services.Updates;
 using ByteSync.TestsCommon;

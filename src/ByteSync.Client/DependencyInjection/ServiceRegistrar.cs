@@ -1,8 +1,6 @@
 ﻿using Autofac;
 using Avalonia.ReactiveUI;
-using Avalonia.Threading;
 using ByteSync.Business.Arguments;
-using ByteSync.Common.Interfaces;
 using ByteSync.DependencyInjection.Modules;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
