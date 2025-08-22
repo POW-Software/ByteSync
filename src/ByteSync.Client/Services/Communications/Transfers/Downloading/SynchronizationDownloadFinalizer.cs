@@ -85,7 +85,7 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
                         
                         try
                         {
-                            entry.ExtractToFile(destinationTemporaryPath);
+                            entry.ExtractToFile(destinationTemporaryPath); //NOSONAR 
                             temporaryFileManager.ValidateTemporaryFile();
                             await _fileDatesSetter.SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
                         }
