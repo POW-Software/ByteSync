@@ -10,7 +10,7 @@ using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Sessions.Synchronizations;
 using Moq;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
+using FluentAssertions;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 
@@ -19,11 +19,11 @@ namespace ByteSync.Tests.ViewModels.Sessions.Synchronizations;
 [TestFixture]
 public class TestSynchronizationMainStatusViewModel : AbstractTester
 {
-    private SynchronizationMainStatusViewModel _viewModel;
-    private SynchronizationProcessData _processData;
-    private Mock<ISynchronizationService> _synchronizationService;
-    private Mock<IDialogService> _dialogService;
-    private Mock<ILogger<SynchronizationMainStatusViewModel>> _logger;
+    private SynchronizationMainStatusViewModel _viewModel = null!;
+    private SynchronizationProcessData _processData = null!;
+    private Mock<ISynchronizationService> _synchronizationService = null!;
+    private Mock<IDialogService> _dialogService = null!;
+    private Mock<ILogger<SynchronizationMainStatusViewModel>> _logger = null!;
 
     [SetUp]
     public void SetUp()
@@ -45,7 +45,7 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
     [Test]
     public void Test_Construction()
     {
-        ClassicAssert.IsNotNull(_viewModel.AbortSynchronizationCommand);
+        _viewModel.AbortSynchronizationCommand.Should().NotBeNull();
     }
 
     [Test]
@@ -55,10 +55,10 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
 
         _processData.SynchronizationStart.OnNext(new Synchronization { Started = DateTimeOffset.Now });
 
-        ClassicAssert.IsTrue(_viewModel.IsSynchronizationRunning);
-        ClassicAssert.IsTrue(_viewModel.IsMainProgressRingVisible);
-        ClassicAssert.IsFalse(_viewModel.IsMainCheckVisible);
-        ClassicAssert.AreEqual("Synchronization running", _viewModel.MainStatus);
+        _viewModel.IsSynchronizationRunning.Should().BeTrue();
+        _viewModel.IsMainProgressRingVisible.Should().BeTrue();
+        _viewModel.IsMainCheckVisible.Should().BeFalse();
+        _viewModel.MainStatus.Should().Be("Synchronization running");
     }
 
     [Test]
@@ -73,11 +73,11 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
             Status = SynchronizationEndStatuses.Abortion
         });
 
-        ClassicAssert.IsFalse(_viewModel.IsSynchronizationRunning);
-        ClassicAssert.AreEqual("Synchronization aborted", _viewModel.MainStatus);
-        ClassicAssert.AreEqual("SolidXCircle", _viewModel.MainIcon);
-        ClassicAssert.IsFalse(_viewModel.IsMainProgressRingVisible);
-        ClassicAssert.IsTrue(_viewModel.IsMainCheckVisible);
+        _viewModel.IsSynchronizationRunning.Should().BeFalse();
+        _viewModel.MainStatus.Should().Be("Synchronization aborted");
+        _viewModel.MainIcon.Should().Be("SolidXCircle");
+        _viewModel.IsMainProgressRingVisible.Should().BeFalse();
+        _viewModel.IsMainCheckVisible.Should().BeTrue();
     }
 
     [Test]
@@ -88,7 +88,7 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
         _processData.SynchronizationStart.OnNext(new Synchronization { Started = DateTimeOffset.Now });
         _processData.SynchronizationAbortRequest.OnNext(new SynchronizationAbortRequest());
 
-        ClassicAssert.AreEqual("Synchronization abort requested", _viewModel.MainStatus);
+        _viewModel.MainStatus.Should().Be("Synchronization abort requested");
     }
 
     [Test]
@@ -103,8 +103,8 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
             Status = SynchronizationEndStatuses.Error
         });
 
-        ClassicAssert.AreEqual("Error during synchronization", _viewModel.MainStatus);
-        ClassicAssert.AreEqual("SolidXCircle", _viewModel.MainIcon);
+        _viewModel.MainStatus.Should().Be("Error during synchronization");
+        _viewModel.MainIcon.Should().Be("SolidXCircle");
     }
 
     [Test]
@@ -119,8 +119,8 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
             Status = SynchronizationEndStatuses.Regular
         });
 
-        ClassicAssert.AreEqual("Synchronization done!", _viewModel.MainStatus);
-        ClassicAssert.AreEqual("SolidCheckCircle", _viewModel.MainIcon);
+        _viewModel.MainStatus.Should().Be("Synchronization done!");
+        _viewModel.MainIcon.Should().Be("SolidCheckCircle");
     }
 
     [Test]

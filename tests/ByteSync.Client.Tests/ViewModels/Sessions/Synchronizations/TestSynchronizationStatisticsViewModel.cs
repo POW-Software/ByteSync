@@ -1,5 +1,4 @@
 using ByteSync.Business.Actions.Shared;
-using ByteSync.Business.Sessions;
 using ByteSync.Business.Synchronizations;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Business.Misc;
@@ -12,7 +11,7 @@ using ByteSync.ViewModels.Sessions.Synchronizations;
 using DynamicData;
 using Moq;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
+using FluentAssertions;
 using System.Reactive.Subjects;
 
 namespace ByteSync.Tests.ViewModels.Sessions.Synchronizations;
@@ -20,9 +19,9 @@ namespace ByteSync.Tests.ViewModels.Sessions.Synchronizations;
 [TestFixture]
 public class TestSynchronizationStatisticsViewModel : AbstractTester
 {
-    private SynchronizationStatisticsViewModel _viewModel;
-    private SynchronizationProcessData _processData;
-    private BehaviorSubject<TimeTrack> _timeTrackSubject;
+    private SynchronizationStatisticsViewModel _viewModel = null!;
+    private SynchronizationProcessData _processData = null!;
+    private BehaviorSubject<TimeTrack> _timeTrackSubject = null!;
 
     [SetUp]
     public void SetUp()
@@ -55,7 +54,7 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
     [Test]
     public void Test_Construction()
     {
-        ClassicAssert.IsNotNull(_viewModel.EstimatedEndDateTimeLabel);
+        _viewModel.EstimatedEndDateTimeLabel.Should().NotBeNull();
     }
 
     [Test]
@@ -66,10 +65,10 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
         var start = new Synchronization { Started = DateTimeOffset.Now };
         _processData.SynchronizationStart.OnNext(start);
 
-        ClassicAssert.AreEqual(start.Started.LocalDateTime, _viewModel.StartDateTime);
-        ClassicAssert.AreEqual(0, _viewModel.HandledActions);
-        ClassicAssert.AreEqual(0, _viewModel.Errors);
-        ClassicAssert.AreEqual(TimeSpan.Zero, _viewModel.ElapsedTime);
+        _viewModel.StartDateTime.Should().Be(start.Started.LocalDateTime);
+        _viewModel.HandledActions.Should().Be(0);
+        _viewModel.Errors.Should().Be(0);
+        _viewModel.ElapsedTime.Should().Be(TimeSpan.Zero);
     }
 
     [Test]
@@ -80,7 +79,7 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
         _processData.TotalActionsToProcess = 42;
         _processData.SynchronizationDataTransmitted.OnNext(true);
 
-        ClassicAssert.AreEqual(42, _viewModel.TreatableActions);
+        _viewModel.TreatableActions.Should().Be(42);
     }
 
     [Test]
@@ -100,10 +99,10 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
         };
         _processData.SynchronizationProgress.OnNext(progress);
 
-        ClassicAssert.AreEqual(5, _viewModel.HandledActions);
-        ClassicAssert.AreEqual(1, _viewModel.Errors);
-        ClassicAssert.AreEqual(10, _viewModel.ProcessedVolume);
-        ClassicAssert.AreEqual(20, _viewModel.ExchangedVolume);
+        _viewModel.HandledActions.Should().Be(5);
+        _viewModel.Errors.Should().Be(1);
+        _viewModel.ProcessedVolume.Should().Be(10);
+        _viewModel.ExchangedVolume.Should().Be(20);
     }
 
     [Test]
@@ -119,8 +118,8 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
             Status = SynchronizationEndStatuses.Regular
         });
 
-        ClassicAssert.AreEqual("End:", _viewModel.EstimatedEndDateTimeLabel);
-        ClassicAssert.AreEqual(3, _viewModel.HandledActions);
-        ClassicAssert.AreEqual(1, _viewModel.Errors);
+        _viewModel.EstimatedEndDateTimeLabel.Should().Be("End:");
+        _viewModel.HandledActions.Should().Be(3);
+        _viewModel.Errors.Should().Be(1);
     }
 }

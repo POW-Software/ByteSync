@@ -14,9 +14,8 @@ using ByteSync.ViewModels.Sessions.Synchronizations;
 using DynamicData;
 using Moq;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
+using FluentAssertions;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 namespace ByteSync.Tests.ViewModels.Sessions.Synchronizations;
@@ -66,7 +65,7 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
     [Test]
     public void Test_Construction()
     {
-        ClassicAssert.IsNotNull(_viewModel.StartSynchronizationCommand);
+        _viewModel.StartSynchronizationCommand.Should().NotBeNull();
     }
 
     [Test]
@@ -80,10 +79,10 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
         _viewModel.IsProfileSessionSynchronization = false;
         _viewModel.HasSessionBeenRestarted = false;
 
-        ClassicAssert.IsTrue(_viewModel.ShowStartSynchronizationObservable);
+        _viewModel.ShowStartSynchronizationObservable.Should().BeTrue();
 
         _viewModel.IsSynchronizationRunning = true;
-        ClassicAssert.IsFalse(_viewModel.ShowStartSynchronizationObservable);
+        _viewModel.ShowStartSynchronizationObservable.Should().BeFalse();
     }
 
     [Test]
@@ -97,7 +96,7 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
         _viewModel.IsProfileSessionSynchronization = true;
         _viewModel.HasSessionBeenRestarted = false;
 
-        ClassicAssert.IsTrue(_viewModel.ShowWaitingForSynchronizationStartObservable);
+        _viewModel.ShowWaitingForSynchronizationStartObservable.Should().BeTrue();
     }
 
     [Test]
@@ -111,7 +110,7 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
         _viewModel.IsProfileSessionSynchronization = true;
         _viewModel.HasSessionBeenRestarted = false;
 
-        ClassicAssert.IsFalse(_viewModel.ShowStartSynchronizationObservable);
+        _viewModel.ShowStartSynchronizationObservable.Should().BeFalse();
     }
 
     [Test]
@@ -125,7 +124,7 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
         _viewModel.IsProfileSessionSynchronization = true;
         _viewModel.HasSessionBeenRestarted = true;
 
-        ClassicAssert.IsTrue(_viewModel.ShowStartSynchronizationObservable);
+        _viewModel.ShowStartSynchronizationObservable.Should().BeTrue();
     }
 
     [Test]
@@ -139,7 +138,7 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
         _viewModel.IsProfileSessionSynchronization = false;
         _viewModel.HasSessionBeenRestarted = false;
 
-        ClassicAssert.IsTrue(_viewModel.ShowWaitingForSynchronizationStartObservable);
+        _viewModel.ShowWaitingForSynchronizationStartObservable.Should().BeTrue();
     }
 
     [Test]
@@ -147,7 +146,7 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
     {
         await _viewModel.StartSynchronizationCommand.Execute();
         _synchronizationStarter.Verify(s => s.StartSynchronization(true), Times.Once);
-        ClassicAssert.IsNull(_viewModel.StartSynchronizationError.ErrorMessage);
+        _viewModel.StartSynchronizationError.ErrorMessage.Should().BeNull();
     }
 
     [Test]
@@ -157,6 +156,6 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
 
         await _viewModel.StartSynchronizationCommand.Execute();
 
-        ClassicAssert.IsNotNull(_viewModel.StartSynchronizationError.ErrorMessage);
+        _viewModel.StartSynchronizationError.ErrorMessage.Should().NotBeNull();
     }
 }
