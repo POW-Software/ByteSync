@@ -131,7 +131,7 @@ public class ThemeFactory : IThemeFactory
             colorScheme.MainWindowTopColor = colorScheme.VeryLightGray;
             colorScheme.MainWindowBottomColor = Color.FromArgb(0xFF, 0x04, 0x04, 0x04);
             
-            ComputeSecondaryColors(colorScheme, secondaryColorHue);
+            ComputeSecondaryColors(colorScheme, secondaryColorHue, themeMode);
             
             colorScheme.StatusMainBackGroundBrush = new SolidColorBrush(colorScheme.StatusMainBackGround.AvaloniaColor);
             colorScheme.StatusSecondaryBackGroundBrush = new SolidColorBrush(colorScheme.StatusSecondaryBackGround.AvaloniaColor);
@@ -213,7 +213,7 @@ public class ThemeFactory : IThemeFactory
             colorScheme.MainWindowTopColor = Color.FromArgb(0xFF, 0xFA, 0xFA, 0xFA);
             colorScheme.MainWindowBottomColor = Color.FromArgb(0xFF, 0xEF, 0xEF, 0xEF);
             
-            ComputeSecondaryColors(colorScheme, secondaryColorHue);
+            ComputeSecondaryColors(colorScheme, secondaryColorHue, themeMode);
             
             colorScheme.StatusMainBackGroundBrush = new SolidColorBrush(colorScheme.StatusMainBackGround.AvaloniaColor);
             colorScheme.StatusSecondaryBackGroundBrush = new SolidColorBrush(colorScheme.StatusSecondaryBackGround.AvaloniaColor);
@@ -227,7 +227,7 @@ public class ThemeFactory : IThemeFactory
         return colorScheme;
     }
     
-    private void ComputeSecondaryColors(ColorScheme colorScheme, double secondaryColorHue)
+    private void ComputeSecondaryColors(ColorScheme colorScheme, double secondaryColorHue, ThemeModes themeMode)
     {
         for (int i = 1; i <= 3; i++)
         {
@@ -241,9 +241,18 @@ public class ThemeFactory : IThemeFactory
         
         colorScheme.OtherMemberSecondaryBackGround = colorScheme.OtherMemberBackGround
             .WithHue(secondaryColorHue);
-        
-        colorScheme.StatusSecondaryBackGround = colorScheme.StatusMainBackGround
-            .WithHue(secondaryColorHue);
+
+        if (themeMode == ThemeModes.Dark)
+        {
+            colorScheme.StatusSecondaryBackGround = colorScheme.StatusMainBackGround
+                .WithHue(secondaryColorHue)
+                .AdjustSaturationValue(0, +0.20);
+        }
+        else
+        {
+            colorScheme.StatusSecondaryBackGround = colorScheme.StatusMainBackGround
+                .WithHue(secondaryColorHue);
+        }
     }
 
     private static void ComputeAttenuations(ColorScheme colorScheme)
