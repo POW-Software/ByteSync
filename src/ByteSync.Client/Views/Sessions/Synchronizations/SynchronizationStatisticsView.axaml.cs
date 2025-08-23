@@ -3,9 +3,9 @@ using ByteSync.ViewModels.Sessions.Synchronizations;
 
 namespace ByteSync.Views.Sessions.Synchronizations;
 
-public partial class SynchronizationMainView : ReactiveUserControl<SynchronizationMainViewModel>
+public partial class SynchronizationStatisticsView : ReactiveUserControl<SynchronizationStatisticsViewModel>
 {
-    public SynchronizationMainView()
+    public SynchronizationStatisticsView()
     {
         InitializeComponent();
     }
