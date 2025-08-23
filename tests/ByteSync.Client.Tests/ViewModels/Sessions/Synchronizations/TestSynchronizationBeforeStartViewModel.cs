@@ -2,8 +2,8 @@ using ByteSync.Business.Actions.Local;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.RunSessionInfos;
-using ByteSync.Common.Business.Sessions;
 using ByteSync.Business.Synchronizations;
+using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Localizations;
@@ -16,6 +16,7 @@ using Moq;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace ByteSync.Tests.ViewModels.Sessions.Synchronizations;
 
@@ -23,6 +24,8 @@ namespace ByteSync.Tests.ViewModels.Sessions.Synchronizations;
 public class TestSynchronizationBeforeStartViewModel : AbstractTester
 {
     private SynchronizationBeforeStartViewModel _viewModel;
+    private Mock<ISynchronizationStarter> _synchronizationStarter;
+    private Mock<ILocalizationService> _localizationService;
 
     [SetUp]
     public void SetUp()
@@ -45,12 +48,14 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
         var synchronizationService = new Mock<ISynchronizationService>();
         synchronizationService.SetupGet(s => s.SynchronizationProcessData).Returns(new SynchronizationProcessData());
 
-        var localizationService = new Mock<ILocalizationService>();
-        var synchronizationStarter = new Mock<ISynchronizationStarter>();
-        var errorViewModel = new ErrorViewModel(localizationService.Object);
+        _localizationService = new Mock<ILocalizationService>();
+        _localizationService.Setup(l => l["ErrorView_ErrorMessage"]).Returns("Error {0}");
 
-        _viewModel = new SynchronizationBeforeStartViewModel(sessionService.Object, localizationService.Object,
-            synchronizationService.Object, synchronizationStarter.Object, atomicRepository.Object,
+        _synchronizationStarter = new Mock<ISynchronizationStarter>();
+        var errorViewModel = new ErrorViewModel(_localizationService.Object);
+
+        _viewModel = new SynchronizationBeforeStartViewModel(sessionService.Object, _localizationService.Object,
+            synchronizationService.Object, _synchronizationStarter.Object, atomicRepository.Object,
             sessionMemberRepository.Object, errorViewModel);
     }
 
@@ -89,5 +94,65 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
         _viewModel.HasSessionBeenRestarted = false;
 
         ClassicAssert.IsTrue(_viewModel.ShowWaitingForSynchronizationStartObservable);
+    }
+
+    [Test]
+    public void ShowStartSynchronizationObservable_ShouldBeFalse_ForProfileSessionWithoutRestart()
+    {
+        using var _ = _viewModel.Activator.Activate();
+
+        _viewModel.IsSynchronizationRunning = false;
+        _viewModel.IsCloudSession = false;
+        _viewModel.IsSessionCreatedByMe = true;
+        _viewModel.IsProfileSessionSynchronization = true;
+        _viewModel.HasSessionBeenRestarted = false;
+
+        ClassicAssert.IsFalse(_viewModel.ShowStartSynchronizationObservable);
+    }
+
+    [Test]
+    public void ShowStartSynchronizationObservable_ShouldBeTrue_ForRestartedProfileSession()
+    {
+        using var _ = _viewModel.Activator.Activate();
+
+        _viewModel.IsSynchronizationRunning = false;
+        _viewModel.IsCloudSession = false;
+        _viewModel.IsSessionCreatedByMe = true;
+        _viewModel.IsProfileSessionSynchronization = true;
+        _viewModel.HasSessionBeenRestarted = true;
+
+        ClassicAssert.IsTrue(_viewModel.ShowStartSynchronizationObservable);
+    }
+
+    [Test]
+    public void ShowWaitingForSynchronizationStartObservable_ShouldBeTrue_ForCloudSessionNotCreatedByMe()
+    {
+        using var _ = _viewModel.Activator.Activate();
+
+        _viewModel.IsSynchronizationRunning = false;
+        _viewModel.IsCloudSession = true;
+        _viewModel.IsSessionCreatedByMe = false;
+        _viewModel.IsProfileSessionSynchronization = false;
+        _viewModel.HasSessionBeenRestarted = false;
+
+        ClassicAssert.IsTrue(_viewModel.ShowWaitingForSynchronizationStartObservable);
+    }
+
+    [Test]
+    public async Task StartSynchronizationCommand_ShouldStartProcess()
+    {
+        await _viewModel.StartSynchronizationCommand.Execute();
+        _synchronizationStarter.Verify(s => s.StartSynchronization(true), Times.Once);
+        ClassicAssert.IsNull(_viewModel.StartSynchronizationError.ErrorMessage);
+    }
+
+    [Test]
+    public async Task StartSynchronizationCommand_ShouldHandleException()
+    {
+        _synchronizationStarter.Setup(s => s.StartSynchronization(true)).ThrowsAsync(new InvalidOperationException());
+
+        await _viewModel.StartSynchronizationCommand.Execute();
+
+        ClassicAssert.IsNotNull(_viewModel.StartSynchronizationError.ErrorMessage);
     }
 }
