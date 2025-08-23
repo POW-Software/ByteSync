@@ -59,4 +59,35 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
     {
         ClassicAssert.IsNotNull(_viewModel.StartSynchronizationCommand);
     }
+
+    [Test]
+    public void ShowStartSynchronizationObservable_ShouldReflectConditions()
+    {
+        using var _ = _viewModel.Activator.Activate();
+
+        _viewModel.IsSynchronizationRunning = false;
+        _viewModel.IsCloudSession = false;
+        _viewModel.IsSessionCreatedByMe = true;
+        _viewModel.IsProfileSessionSynchronization = false;
+        _viewModel.HasSessionBeenRestarted = false;
+
+        ClassicAssert.IsTrue(_viewModel.ShowStartSynchronizationObservable);
+
+        _viewModel.IsSynchronizationRunning = true;
+        ClassicAssert.IsFalse(_viewModel.ShowStartSynchronizationObservable);
+    }
+
+    [Test]
+    public void ShowWaitingForSynchronizationStartObservable_ShouldBeTrue_ForProfileSession()
+    {
+        using var _ = _viewModel.Activator.Activate();
+
+        _viewModel.IsSynchronizationRunning = false;
+        _viewModel.IsCloudSession = false;
+        _viewModel.IsSessionCreatedByMe = true;
+        _viewModel.IsProfileSessionSynchronization = true;
+        _viewModel.HasSessionBeenRestarted = false;
+
+        ClassicAssert.IsTrue(_viewModel.ShowWaitingForSynchronizationStartObservable);
+    }
 }
