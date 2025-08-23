@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:synchronizations="clr-namespace:ByteSync.ViewModels.Sessions.Synchronizations"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:converters="clr-namespace:ByteSync.Services.Converters"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="200"
+             x:Class="ByteSync.Views.Sessions.Synchronizations.SynchronizationStatisticsView">
+
+    <Design.DataContext>
+        <synchronizations:SynchronizationStatisticsViewModel />
+    </Design.DataContext>
+
+    <UserControl.Resources>
+        <converters:FormatKbSizeConverter x:Key="FormatKbSizeConverter" />
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="Label.Description">
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="0 0 24 0"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid HorizontalAlignment="Left" Margin="3 12 3 0" VerticalAlignment="Center">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="75"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+
+        <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_Start}" Classes="Description" />
+        <Label Grid.Row="1" Grid.Column="1" Content="{Binding StartDateTime, StringFormat={}{0:G}}" HorizontalContentAlignment="Right" />
+
+        <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_ElapsedTime}" Classes="Description" />
+        <Label Grid.Row="2" Grid.Column="1" Content="{Binding ElapsedTime, StringFormat={}{0:c}}" HorizontalContentAlignment="Right" />
+
+        <Label Grid.Row="3" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_RemainingTime}" Classes="Description" />
+        <Label Grid.Row="3" Grid.Column="1" Content="{Binding RemainingTime, StringFormat={}{0:c}}" HorizontalContentAlignment="Right" />
+
+        <Label Grid.Row="4" Grid.Column="0" Content="{Binding EstimatedEndDateTimeLabel}" Classes="Description" />
+        <Label Grid.Row="4" Grid.Column="1" Content="{Binding EstimatedEndDateTime, StringFormat={}{0:G}}" HorizontalContentAlignment="Right" />
+
+        <Label Grid.Row="1" Grid.Column="3" Content="{localizations:Loc SynchronizationMain_HandledActions}" Classes="Description" />
+        <StackPanel Grid.Row="1" Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Label Content="{Binding HandledActions}" HorizontalContentAlignment="Left"/>
+            <Label Content="/" HorizontalContentAlignment="Left"/>
+            <Label Content="{Binding TreatableActions}" HorizontalContentAlignment="Left"/>
+        </StackPanel>
+
+        <Label Grid.Row="2" Grid.Column="3" Name="LabelErrorsDescription"
+               Content="{localizations:Loc SynchronizationMain_Errors}" Classes="Description" />
+        <Label Grid.Row="2" Grid.Column="4" Name="LabelErrorsValue"
+               Content="{Binding Errors}" HorizontalContentAlignment="Right" />
+
+        <Label Grid.Row="3" Grid.Column="3" Content="{localizations:Loc SynchronizationMain_ProcessedVolume}" Classes="Description" />
+        <StackPanel Grid.Row="3" Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Label Content="{Binding ProcessedVolume, Converter={StaticResource FormatKbSizeConverter}}" HorizontalContentAlignment="Left"/>
+            <Label Content="/" HorizontalContentAlignment="Left"/>
+            <Label Content="{Binding TotalVolume, Converter={StaticResource FormatKbSizeConverter}}" HorizontalContentAlignment="Left"/>
+        </StackPanel>
+
+        <Label Grid.Row="4" Grid.Column="3" IsVisible="{Binding IsCloudSession}"
+               Content="{localizations:Loc SynchronizationMain_ExchangedVolume}" Classes="Description" />
+        <Label Grid.Row="4" Grid.Column="4" IsVisible="{Binding IsCloudSession}"
+               Content="{Binding ExchangedVolume, Converter={StaticResource FormatKbSizeConverter}}" HorizontalContentAlignment="Right" />
+    </Grid>
+</UserControl>

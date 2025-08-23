@@ -1,172 +1,30 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:synchronizations="clr-namespace:ByteSync.ViewModels.Sessions.Synchronizations"
-             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
-             xmlns:converters="clr-namespace:ByteSync.Services.Converters"
-             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             xmlns:local="clr-namespace:ByteSync.Views.Sessions.Synchronizations"
              mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="200"
              x:Class="ByteSync.Views.Sessions.Synchronizations.SynchronizationMainView">
-    
+
     <Design.DataContext>
         <synchronizations:SynchronizationMainViewModel />
     </Design.DataContext>
-    
-    <UserControl.Resources>
-        <converters:FormatKbSizeConverter x:Key="FormatKbSizeConverter" />
-    </UserControl.Resources>
-    
-    <UserControl.Styles>
-        <Style Selector="Label.Description">
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Margin" Value="0 0 24 0"/>
-        </Style>
-    </UserControl.Styles>
 
     <Grid Margin="6" MinHeight="210">
         <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-            
-            <StackPanel Orientation="Vertical" IsVisible="{Binding !HasSynchronizationStarted}">
-                <!-- Start Synchronization Button -->
-                <StackPanel MinWidth="300" MaxWidth="450" Margin="12"
-                            IsVisible="{Binding ShowStartSynchronizationObservable}" 
-                            HorizontalAlignment="Center" Orientation="Vertical">
-                    <Button Classes="AccentButton" Margin="9" Height="32"
-                            Command="{Binding Path=StartSynchronizationCommand}" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal">
-                            <misc:Icon FontSize="12" Value="RegularPlay"  />
-                            <TextBlock Text="{localizations:Loc SynchronizationMain_RunActions}" />
-                        </StackPanel>
-                    </Button>
-                    
-                    <ContentControl Content="{Binding StartSynchronizationError}" Margin="6" MaxWidth="400"/>
-                </StackPanel>
-                
+            <Grid IsVisible="{Binding !HasSynchronizationStarted}">
+                <local:SynchronizationBeforeStartView DataContext="{Binding BeforeStartViewModel}"/>
+            </Grid>
 
-                <!-- Wait for Start message -->
-                <StackPanel MinWidth="300" Margin="12"
-                            IsVisible="{Binding ShowWaitingForSynchronizationStartObservable}"
-                            HorizontalAlignment="Center">
-                   
-                    <TextBlock FontWeight="Bold" Text="{Binding WaitingForSynchronizationStartMessage}" MaxWidth="500" 
-                               HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
-                </StackPanel>
-            </StackPanel>
-
-
-            <!-- Synchronization Details -->
             <Grid IsVisible="{Binding HasSynchronizationStarted}">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
-                    <ColumnDefinition Width="2*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 6">
-                    
-                    <misc:ActivityIndicator Width="120" Height="100" 
-                                         Margin="10,20,0,0" HorizontalAlignment="Center" VerticalAlignment="Top"
-                                         IsVisible="{Binding IsMainProgressRingVisible}"
-                                         />
-                    
-                    <!-- <misc:Icon FontSize="100" Value="SolidCheckCircle" Foreground="{DynamicResource SystemAccentColor}" Margin ="0 6" /> -->
-                    
-                    <misc:Icon FontSize="100" Value="{Binding MainIcon}" Foreground="{DynamicResource HomeCloudSynchronizationBackGround}" 
-                               IsVisible="{Binding IsMainCheckVisible}" Margin="6"
-                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                    
-                    <TextBlock Text="{Binding MainStatus}" TextAlignment="Center" 
-                               FontSize="17" FontWeight="Bold" Margin="6"/>
-                    
-                    <StackPanel Height="30" Orientation="Horizontal" HorizontalAlignment="Center" Margin="6" IsVisible="{Binding IsSynchronizationRunning}">
-                        <Button Classes="GenericButton" IsVisible="{Binding IsSynchronizationRunning}"
-                                Command="{Binding Path=AbortSynchronizationCommand}" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal">
-                                <misc:Icon FontSize="12" Value="RegularX"  />
-                                <TextBlock Text="{localizations:Loc SynchronizationMain_AbortSynchronization}" />
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-                    
-                </StackPanel>
-
-                <Grid Grid.Column="1" HorizontalAlignment="Left" Margin="3 12 3 0" VerticalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        <ColumnDefinition Width="75"></ColumnDefinition>
-                        <ColumnDefinition Width="Auto" ></ColumnDefinition>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                    </Grid.RowDefinitions>
-                    
-                    <Interaction.Behaviors>
-                        <DataTriggerBehavior Binding="{Binding Errors}" ComparisonCondition="NotEqual" Value="0">
-                            <ChangePropertyAction TargetObject="{Binding #LabelErrorsDescription}" 
-                                                  PropertyName="FontWeight" Value="Bold" />
-                            <ChangePropertyAction TargetObject="{Binding #LabelErrorsValue}" 
-                                                  PropertyName="FontWeight" Value="Bold" />
-                        </DataTriggerBehavior>
-                        <DataTriggerBehavior Binding="{Binding Errors}" ComparisonCondition="Equal" Value="0">
-                            <ChangePropertyAction TargetObject="{Binding #LabelErrorsDescription}" 
-                                                  PropertyName="FontWeight" Value="Regular" />
-                            <ChangePropertyAction TargetObject="{Binding #LabelErrorsValue}" 
-                                                  PropertyName="FontWeight" Value="Regular" />
-                        </DataTriggerBehavior>
-                    </Interaction.Behaviors>
-
-                    <!--<Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_CurrentAction}" HorizontalContentAlignment="Left" 
-                           Margin="0 0 0 12" IsVisible="{Binding IsMainProgressRingVisible}"/>
-                    <Label Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Content="{Binding CurrentAction}" HorizontalContentAlignment="Left" 
-                           Margin="0 0 0 12" FontStyle="Italic"/>-->
-
-                    <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_Start}" Classes="Description" />
-                    <Label Grid.Row="1" Grid.Column="1" Content="{Binding StartDateTime, StringFormat={}{0:G}}" HorizontalContentAlignment="Right" />
-
-                    <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_ElapsedTime}" Classes="Description" />
-                    <Label Grid.Row="2" Grid.Column="1" Content="{Binding ElapsedTime, StringFormat={}{0:c}}" HorizontalContentAlignment="Right" />
-
-                    <Label Grid.Row="3" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_RemainingTime}" Classes="Description" />
-                    <Label Grid.Row="3" Grid.Column="1" Content="{Binding RemainingTime, StringFormat={}{0:c}}" HorizontalContentAlignment="Right" />
-
-                    <Label Grid.Row="4" Grid.Column="0" Content="{Binding EstimatedEndDateTimeLabel}" Classes="Description" />
-                    <Label Grid.Row="4" Grid.Column="1" Content="{Binding EstimatedEndDateTime, StringFormat={}{0:G}}" HorizontalContentAlignment="Right" />
-
-
-
-                    <Label Grid.Row="1" Grid.Column="3" Content="{localizations:Loc SynchronizationMain_HandledActions}" Classes="Description" />
-                    <StackPanel Grid.Row="1" Grid.Column="4" Orientation="Horizontal"  HorizontalAlignment="Right">
-                        <Label Content="{Binding HandledActions}" HorizontalContentAlignment="Left"/>
-                        <Label Content="/" HorizontalContentAlignment="Left"/>
-                        <Label Content="{Binding TreatableActions}" HorizontalContentAlignment="Left"  />
-                    </StackPanel>
-
-                    <Label Grid.Row="2" Grid.Column="3" Name="LabelErrorsDescription"
-                           Content="{localizations:Loc SynchronizationMain_Errors}" Classes="Description" />
-                    <Label Grid.Row="2" Grid.Column="4" Name="LabelErrorsValue"
-                           Content="{Binding Errors}" HorizontalContentAlignment="Right" />
-
-                    <Label Grid.Row="3" Grid.Column="3" Content="{localizations:Loc SynchronizationMain_ProcessedVolume}" Classes="Description" />
-                    <StackPanel Grid.Row="3" Grid.Column="4" Orientation="Horizontal"  HorizontalAlignment="Right">
-                        <Label Content="{Binding ProcessedVolume, Converter={StaticResource FormatKbSizeConverter}}" HorizontalContentAlignment="Left"/>
-                        <Label Content="/" HorizontalContentAlignment="Left"/>
-                        <Label Content="{Binding TotalVolume, Converter={StaticResource FormatKbSizeConverter}}" HorizontalContentAlignment="Left"  />
-                    </StackPanel>
-
-                    <Label Grid.Row="4" Grid.Column="3" IsVisible="{Binding IsCloudSession}"
-                           Content="{localizations:Loc SynchronizationMain_ExchangedVolume}" Classes="Description" />
-                    <Label Grid.Row="4" Grid.Column="4" IsVisible="{Binding IsCloudSession}"
-                           Content="{Binding ExchangedVolume, Converter={StaticResource FormatKbSizeConverter}}" HorizontalContentAlignment="Right" />
-
-
-                </Grid>
+                <local:SynchronizationMainStatusView Grid.Column="0" DataContext="{Binding MainStatusViewModel}"/>
+                <local:SynchronizationStatisticsView Grid.Column="1" DataContext="{Binding StatisticsViewModel}"/>
             </Grid>
         </StackPanel>
     </Grid>

@@ -1,4 +1,5 @@
 ﻿using ByteSync.Common.Helpers;
+using System.Globalization;
 using NUnit.Framework;
 
 namespace ByteSync.TestsCommon;
@@ -20,6 +21,16 @@ public abstract class AbstractTester
         // Enables Console.WriteLine to be published in real time
         // https://youtrack.jetbrains.com/issue/RIDER-40359
         Console.SetOut(TestContext.Progress);
+    }
+    
+    [OneTimeSetUp]
+    public void ForceEnglishCulture()
+    {
+        var cultureInfo = new CultureInfo("en");
+        CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+        CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+        Thread.CurrentThread.CurrentCulture = cultureInfo;
+        Thread.CurrentThread.CurrentUICulture = cultureInfo;
     }
     
     protected virtual void CreateTestDirectory()
