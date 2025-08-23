@@ -12,7 +12,7 @@ using Moq;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace ByteSync.Tests.ViewModels.Sessions.Synchronizations;
 
@@ -23,6 +23,7 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
     private SynchronizationProcessData _processData;
     private Mock<ISynchronizationService> _synchronizationService;
     private Mock<IDialogService> _dialogService;
+    private Mock<ILogger<SynchronizationMainStatusViewModel>> _logger;
 
     [SetUp]
     public void SetUp()
@@ -35,8 +36,10 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
         _synchronizationService.SetupGet(s => s.SynchronizationProcessData).Returns(_processData);
 
         _dialogService = new Mock<IDialogService>();
+        _logger = new Mock<ILogger<SynchronizationMainStatusViewModel>>();
 
-        _viewModel = new SynchronizationMainStatusViewModel(sessionService.Object, _synchronizationService.Object, _dialogService.Object);
+        _viewModel = new SynchronizationMainStatusViewModel(sessionService.Object, _synchronizationService.Object, 
+            _dialogService.Object, _logger.Object);
     }
 
     [Test]

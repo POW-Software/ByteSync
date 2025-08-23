@@ -5,22 +5,21 @@ using ByteSync.Assets.Resources;
 using Avalonia.Controls;
 using ByteSync.Business;
 using ByteSync.Business.Sessions;
-using ByteSync.Business.Synchronizations;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Services.Sessions;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Serilog;
 
 namespace ByteSync.ViewModels.Sessions.Synchronizations;
 
 public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
 {
-    private readonly ISessionService _sessionService;
-    private readonly ISynchronizationService _synchronizationService;
-    private readonly IDialogService _dialogService;
+    private readonly ISessionService _sessionService = null!;
+    private readonly ISynchronizationService _synchronizationService = null!;
+    private readonly IDialogService _dialogService = null!;
+    private readonly ILogger<SynchronizationMainStatusViewModel> _logger = null!;
 
     public SynchronizationMainStatusViewModel()
     {
@@ -73,11 +72,12 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
     }
 
     public SynchronizationMainStatusViewModel(ISessionService sessionService, ISynchronizationService synchronizationService,
-        IDialogService dialogService) : this()
+        IDialogService dialogService, ILogger<SynchronizationMainStatusViewModel> logger) : this()
     {
         _sessionService = sessionService;
         _synchronizationService = synchronizationService;
         _dialogService = dialogService;
+        _logger = logger;
     }
 
     public ReactiveCommand<Unit, Unit> AbortSynchronizationCommand { get; }
@@ -115,11 +115,11 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "SynchronizationMainStatusViewModel.AbortSynchronization");
+            _logger.LogError(ex, "SynchronizationMainStatusViewModel.AbortSynchronization");
         }
     }
 
-    private void OnSynchronizationStarted(Synchronization synchronizationStart)
+    private void OnSynchronizationStarted(Synchronization _)
     {
         IsSynchronizationRunning = true;
         HandledActionsReset();
@@ -128,7 +128,7 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
         MainStatus = Resources.SynchronizationMain_SynchronizationRunning;
     }
 
-    private void OnSynchronizationAbortRequested(SynchronizationAbortRequest synchronizationAbortRequest)
+    private void OnSynchronizationAbortRequested(SynchronizationAbortRequest _)
     {
         if (IsSynchronizationRunning)
         {

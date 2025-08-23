@@ -13,18 +13,18 @@ using ByteSync.ViewModels.Misc;
 using DynamicData;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Serilog;
 
 namespace ByteSync.ViewModels.Sessions.Synchronizations;
 
 public class SynchronizationBeforeStartViewModel : ActivatableViewModelBase
 {
-    private readonly ISessionService _sessionService;
-    private readonly ILocalizationService _localizationService;
-    private readonly ISynchronizationService _synchronizationService;
-    private readonly ISynchronizationStarter _synchronizationStarter;
-    private readonly IAtomicActionRepository _atomicActionRepository;
-    private readonly ISessionMemberRepository _sessionMemberRepository;
+    private readonly ISessionService _sessionService = null!;
+    private readonly ILocalizationService _localizationService = null!;
+    private readonly ISynchronizationService _synchronizationService = null!;
+    private readonly ISynchronizationStarter _synchronizationStarter = null!;
+    private readonly IAtomicActionRepository _atomicActionRepository = null!;
+    private readonly ISessionMemberRepository _sessionMemberRepository = null!;
+    private readonly ILogger<SynchronizationBeforeStartViewModel> _logger = null!;
 
     public SynchronizationBeforeStartViewModel()
     {
@@ -32,7 +32,8 @@ public class SynchronizationBeforeStartViewModel : ActivatableViewModelBase
 
     public SynchronizationBeforeStartViewModel(ISessionService sessionService, ILocalizationService localizationService,
         ISynchronizationService synchronizationService, ISynchronizationStarter synchronizationStarter,
-        IAtomicActionRepository atomicActionRepository, ISessionMemberRepository sessionMemberRepository, ErrorViewModel errorViewModel)
+        IAtomicActionRepository atomicActionRepository, ISessionMemberRepository sessionMemberRepository, 
+        ILogger<SynchronizationBeforeStartViewModel> logger, ErrorViewModel errorViewModel)
     {
         _sessionService = sessionService;
         _localizationService = localizationService;
@@ -40,6 +41,7 @@ public class SynchronizationBeforeStartViewModel : ActivatableViewModelBase
         _synchronizationStarter = synchronizationStarter;
         _atomicActionRepository = atomicActionRepository;
         _sessionMemberRepository = sessionMemberRepository;
+        _logger = logger;
 
         StartSynchronizationError = errorViewModel;
 
@@ -142,7 +144,7 @@ public class SynchronizationBeforeStartViewModel : ActivatableViewModelBase
     public bool HasSessionBeenRestarted { get; set; }
 
     [Reactive]
-    public string WaitingForSynchronizationStartMessage { get; set; }
+    public string WaitingForSynchronizationStartMessage { get; set; } = string.Empty;
 
     [Reactive]
     public ErrorViewModel StartSynchronizationError { get; set; }
@@ -186,7 +188,7 @@ public class SynchronizationBeforeStartViewModel : ActivatableViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "SynchronizationBeforeStartViewModel.StartSynchronization");
+            _logger.LogError(ex, "SynchronizationBeforeStartViewModel.StartSynchronization");
 
             StartSynchronizationError.SetException(ex);
         }

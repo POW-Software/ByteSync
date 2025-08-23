@@ -17,6 +17,7 @@ using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace ByteSync.Tests.ViewModels.Sessions.Synchronizations;
 
@@ -26,6 +27,7 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
     private SynchronizationBeforeStartViewModel _viewModel;
     private Mock<ISynchronizationStarter> _synchronizationStarter;
     private Mock<ILocalizationService> _localizationService;
+    private Mock<ILogger<SynchronizationBeforeStartViewModel>> _logger;
 
     [SetUp]
     public void SetUp()
@@ -51,12 +53,14 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
         _localizationService = new Mock<ILocalizationService>();
         _localizationService.Setup(l => l["ErrorView_ErrorMessage"]).Returns("Error {0}");
 
+        _logger = new Mock<ILogger<SynchronizationBeforeStartViewModel>>();
+        
         _synchronizationStarter = new Mock<ISynchronizationStarter>();
         var errorViewModel = new ErrorViewModel(_localizationService.Object);
 
         _viewModel = new SynchronizationBeforeStartViewModel(sessionService.Object, _localizationService.Object,
             synchronizationService.Object, _synchronizationStarter.Object, atomicRepository.Object,
-            sessionMemberRepository.Object, errorViewModel);
+            sessionMemberRepository.Object, _logger.Object, errorViewModel);
     }
 
     [Test]

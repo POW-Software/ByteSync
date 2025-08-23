@@ -9,7 +9,6 @@ using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Serilog;
 using DynamicData;
 using ByteSync.Business.Misc;
 
@@ -17,10 +16,10 @@ namespace ByteSync.ViewModels.Sessions.Synchronizations;
 
 public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
 {
-    private readonly ISynchronizationService _synchronizationService;
-    private readonly ISessionService _sessionService;
-    private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository;
-    private readonly ITimeTrackingCache _timeTrackingCache;
+    private readonly ISynchronizationService _synchronizationService = null!;
+    private readonly ISessionService _sessionService = null!;
+    private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository= null!;
+    private readonly ITimeTrackingCache _timeTrackingCache= null!;
 
     private long? LastVersion { get; set; }
 
@@ -137,12 +136,12 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
         ElapsedTime = TimeSpan.Zero;
     }
 
-    private void OnSynchronizationDataTransmitted(bool tupleFirst)
+    private void OnSynchronizationDataTransmitted(bool _)
     {
         TreatableActions = _synchronizationService.SynchronizationProcessData.TotalActionsToProcess;
     }
 
-    private void OnSynchronizationEnded(SynchronizationEnd synchronizationEnd)
+    private void OnSynchronizationEnded(SynchronizationEnd _)
     {
         EstimatedEndDateTimeLabel = Resources.SynchronizationMain_End;
         var synchronizationProgress = _synchronizationService.SynchronizationProcessData.SynchronizationProgress.Value;
