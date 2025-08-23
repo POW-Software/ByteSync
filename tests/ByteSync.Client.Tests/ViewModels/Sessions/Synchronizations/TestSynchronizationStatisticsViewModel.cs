@@ -40,7 +40,9 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
         sharedActionsRepository.SetupGet(r => r.ObservableCache).Returns(sharedActionsCache);
 
         var timeTrackingCache = new Mock<ITimeTrackingCache>();
-        _timeTrackSubject = new BehaviorSubject<TimeTrack>(new TimeTrack());
+        var track = new TimeTrack();
+        track.Reset(DateTime.Now);
+        _timeTrackSubject = new BehaviorSubject<TimeTrack>(track);
         var timeTrackingComputer = new Mock<ITimeTrackingComputer>();
         timeTrackingComputer.Setup(t => t.RemainingTime).Returns(_timeTrackSubject);
         timeTrackingCache.Setup(c => c.GetTimeTrackingComputer("id", TimeTrackingComputerType.Synchronization))
