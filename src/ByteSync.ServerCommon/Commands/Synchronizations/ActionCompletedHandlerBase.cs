@@ -5,20 +5,21 @@ using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Commands.Synchronizations;
 
-public class LocalCopyIsDoneCommandHandler : IRequestHandler<LocalCopyIsDoneRequest>
+public abstract class ActionCompletedHandlerBase<TRequest> : IRequestHandler<TRequest>
+    where TRequest : IActionCompletedRequest
 {
-    private readonly ITrackingActionRepository _trackingActionRepository;
-    private readonly ISynchronizationStatusCheckerService _synchronizationStatusCheckerService;
-    private readonly ISynchronizationProgressService _synchronizationProgressService;
-    private readonly ISynchronizationService _synchronizationService;
-    private readonly ILogger<LocalCopyIsDoneCommandHandler> _logger;
+    protected readonly ITrackingActionRepository _trackingActionRepository;
+    protected readonly ISynchronizationStatusCheckerService _synchronizationStatusCheckerService;
+    protected readonly ISynchronizationProgressService _synchronizationProgressService;
+    protected readonly ISynchronizationService _synchronizationService;
+    protected readonly ILogger _logger;
 
-    public LocalCopyIsDoneCommandHandler(
+    protected ActionCompletedHandlerBase(
         ITrackingActionRepository trackingActionRepository,
         ISynchronizationStatusCheckerService synchronizationStatusCheckerService,
         ISynchronizationProgressService synchronizationProgressService,
         ISynchronizationService synchronizationService,
-        ILogger<LocalCopyIsDoneCommandHandler> logger)
+        ILogger logger)
     {
         _trackingActionRepository = trackingActionRepository;
         _synchronizationStatusCheckerService = synchronizationStatusCheckerService;
@@ -26,36 +27,36 @@ public class LocalCopyIsDoneCommandHandler : IRequestHandler<LocalCopyIsDoneRequ
         _synchronizationService = synchronizationService;
         _logger = logger;
     }
-    
-    public async Task Handle(LocalCopyIsDoneRequest request, CancellationToken cancellationToken)
+
+    protected abstract string EmptyIdsLog { get; }
+    protected abstract string DoneLogTemplate { get; }
+
+    public async Task Handle(TRequest request, CancellationToken cancellationToken)
     {
         if (request.ActionsGroupIds.Count == 0)
         {
-            _logger.LogInformation("LocalCopyIsDone: no action group IDs were provided");
+            _logger.LogInformation(EmptyIdsLog);
             return;
         }
-        
+
         var needSendSynchronizationUpdated = false;
-                
+
         var result = await _trackingActionRepository.AddOrUpdate(request.SessionId, request.ActionsGroupIds, (trackingAction, synchronization) =>
         {
             if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
             {
                 return false;
             }
-            
+
             var wasTrackingActionFinished = trackingAction.IsFinished;
-            
-            trackingAction.IsSourceSuccess = true;
+
             trackingAction.AddSuccessOnTarget(request.Client.ClientInstanceId);
 
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
                 synchronization.Progress.FinishedActionsCount += 1;
             }
-            
-            synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
-            
+
             needSendSynchronizationUpdated = _synchronizationService.CheckSynchronizationIsFinished(synchronization);
 
             return true;
@@ -65,8 +66,9 @@ public class LocalCopyIsDoneCommandHandler : IRequestHandler<LocalCopyIsDoneRequ
         {
             await _synchronizationProgressService.UpdateSynchronizationProgress(result, needSendSynchronizationUpdated);
         }
-        
-        _logger.LogInformation("Local copy is done for session {SessionId} with {ActionCount} actions", 
-            request.SessionId, request.ActionsGroupIds.Count);
+
+        _logger.LogInformation(DoneLogTemplate, request.SessionId, request.ActionsGroupIds.Count);
     }
 }
+
+
