@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using System.IO;
 using ByteSync.Business.Communications.Transfers;
 using FluentAssertions;
 

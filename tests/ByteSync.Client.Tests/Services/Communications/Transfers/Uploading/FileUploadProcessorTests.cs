@@ -78,8 +78,8 @@ public class FileUploadProcessorTests
         {
             File.Delete(_testFilePath);
         }
-        _testMemoryStream?.Dispose();
-        _semaphoreSlim?.Dispose();
+        _testMemoryStream.Dispose();
+        _semaphoreSlim.Dispose();
     }
 
     [Test]
@@ -206,7 +206,7 @@ public class FileUploadProcessorTests
         // Arrange
         var expectedException = new Exception("Test exception");
         _mockFileSlicer.Setup(x => x.SliceAndEncryptAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>(), It.IsAny<int?>()))
-            .Callback<SharedFileDefinition, UploadProgressState, int?>((_, progressState, _) => progressState.LastException = expectedException)
+            .Callback<SharedFileDefinition, UploadProgressState, int?>((_, progressState, _) => progressState.Exceptions.Add(expectedException))
             .Returns(Task.CompletedTask);
 
         // Act & Assert
@@ -231,7 +231,7 @@ public class FileUploadProcessorTests
 
         var expectedException = new Exception("Test exception");
         _mockFileSlicer.Setup(x => x.SliceAndEncryptAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>(), It.IsAny<int?>()))
-            .Callback<SharedFileDefinition, UploadProgressState, int?>((_, progressState, _) => progressState.LastException = expectedException)
+            .Callback<SharedFileDefinition, UploadProgressState, int?>((_, progressState, _) => progressState.Exceptions.Add(expectedException))
             .Returns(Task.CompletedTask);
 
         // Act & Assert

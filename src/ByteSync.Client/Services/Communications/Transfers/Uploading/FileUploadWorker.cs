@@ -91,15 +91,14 @@ public class FileUploadWorker : IFileUploadWorker
                             var sliceBytes = slice.MemoryStream?.Length ?? 0L;
                             progressState.TotalUploadedBytes += sliceBytes;
                             var elapsedMs = sliceStart.ElapsedMilliseconds;
-                            var kbps = elapsedMs > 0 ? (sliceBytes * 8.0) / elapsedMs : 0.0;
                             progressState.LastSliceUploadDurationMs = elapsedMs;
                             progressState.LastSliceUploadedBytes = sliceBytes;
                             progressState.SliceMetrics.Add(new SliceUploadMetric
                             {
+                                TaskId = Environment.CurrentManagedThreadId,
                                 PartNumber = slice.PartNumber,
                                 Bytes = sliceBytes,
-                                DurationMs = elapsedMs,
-                                BandwidthKbps = kbps
+                                ElapsedtimeMs = elapsedMs,
                             });
                         }
                         finally
@@ -127,7 +126,6 @@ public class FileUploadWorker : IFileUploadWorker
                     await _semaphoreSlim.WaitAsync();
                     try
                     {
-                        progressState.LastException = ex;
                         progressState.Exceptions.Add(ex);
                     }
                     finally
