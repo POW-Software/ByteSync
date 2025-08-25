@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Security.Cryptography;
+using System.Threading;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Encryptions;
@@ -81,7 +82,7 @@ public class SlicerEncrypter : ISlicerEncrypter
 
     public async Task<FileUploaderSlice?> SliceAndEncrypt()
     {
-        CryptoStream? cryptoSteam = null;
+        CryptoStream? cryptoStream = null;
         FileUploaderSlice? fileUploaderSlice = null;
 
         var bytes = InReader.ReadBytes(BufferSize);
@@ -91,19 +92,21 @@ public class SlicerEncrypter : ISlicerEncrypter
         var canContinue = TotalGeneratedFiles == 0 || readBytes > 0;
         while (canContinue)
         {
-            if (cryptoSteam == null)
+            if (cryptoStream == null)
             {
                 TotalGeneratedFiles += 1;
 
                 var memoryStream = new MemoryStream();
                 var encryptor = Aes.CreateEncryptor(Aes.Key, Aes.IV);
-                cryptoSteam = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write, true);
+                cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write, true);
 
                 fileUploaderSlice = new FileUploaderSlice(TotalGeneratedFiles, memoryStream);
             }
-
-            await cryptoSteam.WriteAsync(bytes, 0, readBytes);
-
+            
+            var cts = new CancellationTokenSource();
+            CancellationToken token = cts.Token;
+            await cryptoStream.WriteAsync(bytes.AsMemory(0, readBytes), token);
+            
             var sizeToRead = BufferSize;
             if (thisSessionReadBytes + sizeToRead > MaxSliceLength)
             {
@@ -127,7 +130,7 @@ public class SlicerEncrypter : ISlicerEncrypter
             }
         }
 
-        cryptoSteam?.Dispose();
+        cryptoStream?.Dispose();
 
         return fileUploaderSlice;
     }
@@ -137,5 +140,7 @@ public class SlicerEncrypter : ISlicerEncrypter
         InStream?.Dispose();
         InReader?.Dispose();
         Aes?.Dispose();
+        
+        GC.SuppressFinalize(this);
     }
 }
