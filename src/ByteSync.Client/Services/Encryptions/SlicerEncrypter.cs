@@ -103,11 +103,8 @@ public class SlicerEncrypter : ISlicerEncrypter
                 fileUploaderSlice = new FileUploaderSlice(TotalGeneratedFiles, memoryStream);
             }
             
-            using (var cts = new CancellationTokenSource())
-            {
-                await cryptoStream.WriteAsync(bytes.AsMemory(0, readBytes), cts.Token);;
-            }
-            
+            await cryptoStream.WriteAsync(bytes.AsMemory(0, readBytes), CancellationToken.None);
+           
             var sizeToRead = BufferSize;
             if (thisSessionReadBytes + sizeToRead > MaxSliceLength)
             {
