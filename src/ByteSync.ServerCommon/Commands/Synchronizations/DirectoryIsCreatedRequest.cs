@@ -1,9 +1,8 @@
 using ByteSync.ServerCommon.Business.Auth;
-using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Synchronizations;
 
-public class DirectoryIsCreatedRequest : IRequest
+public class DirectoryIsCreatedRequest : IActionCompletedRequest
 {
     public DirectoryIsCreatedRequest(string sessionId, Client client, List<string> actionsGroupIds)
     {

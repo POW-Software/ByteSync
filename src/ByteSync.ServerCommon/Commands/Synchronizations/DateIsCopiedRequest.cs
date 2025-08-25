@@ -1,9 +1,8 @@
 using ByteSync.ServerCommon.Business.Auth;
-using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Synchronizations;
 
-public class DateIsCopiedRequest : IRequest
+public class DateIsCopiedRequest : IActionCompletedRequest
 {
     public DateIsCopiedRequest(string sessionId, Client client, List<string> actionsGroupIds)
     {

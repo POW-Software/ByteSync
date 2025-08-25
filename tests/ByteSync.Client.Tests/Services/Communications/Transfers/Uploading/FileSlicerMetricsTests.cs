@@ -13,14 +13,14 @@ namespace ByteSync.Tests.Services.Communications.Transfers.Uploading;
 [TestFixture]
 public class FileSlicerMetricsTests
 {
-    private Mock<ISlicerEncrypter> _mockSlicerEncrypter;
-    private Mock<ILogger<FileSlicer>> _mockLogger;
-    private Channel<FileUploaderSlice> _availableSlices;
-    private SemaphoreSlim _semaphoreSlim;
-    private ManualResetEvent _exceptionOccurred;
-    private FileSlicer _fileSlicer;
-    private SharedFileDefinition _sharedFileDefinition;
-    private UploadProgressState _progressState;
+    private Mock<ISlicerEncrypter> _mockSlicerEncrypter = null!;
+    private Mock<ILogger<FileSlicer>> _mockLogger = null!;
+    private Channel<FileUploaderSlice> _availableSlices = null!;
+    private SemaphoreSlim _semaphoreSlim = null!;
+    private ManualResetEvent _exceptionOccurred = null!;
+    private FileSlicer _fileSlicer = null!;
+    private SharedFileDefinition _sharedFileDefinition = null!;
+    private UploadProgressState _progressState = null!;
 
     [SetUp]
     public void SetUp()
@@ -51,8 +51,8 @@ public class FileSlicerMetricsTests
     [TearDown]
     public void TearDown()
     {
-        _exceptionOccurred?.Dispose();
-        _semaphoreSlim?.Dispose();
+        _exceptionOccurred.Dispose();
+        _semaphoreSlim.Dispose();
     }
 
     [Test]
@@ -79,7 +79,6 @@ public class FileSlicerMetricsTests
 
         await _fileSlicer.SliceAndEncryptAsync(_sharedFileDefinition, _progressState);
 
-        _progressState.LastException.Should().NotBeNull();
         _progressState.Exceptions.Count.Should().Be(1);
     }
 }

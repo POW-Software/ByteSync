@@ -46,7 +46,7 @@ public class FileUploadProcessor : IFileUploadProcessor
         _progressState.StartTimeUtc = DateTimeOffset.UtcNow;
         
         // Start upload workers
-        for (var i = 0; i < 6; i++)
+        for (var i = 0; i < 2; i++)
         {
             _ = Task.Run(() => _fileUploadWorker.UploadAvailableSlicesAsync(_fileUploadCoordinator.AvailableSlices, _progressState));
         }
@@ -60,11 +60,12 @@ public class FileUploadProcessor : IFileUploadProcessor
 
         _slicerEncrypter.Dispose();
 
-        if (_progressState.LastException != null)
+        if (_progressState.Exceptions != null && _progressState.Exceptions.Count > 0)
         {
             var source = _localFileToUpload ?? "a stream";
-            throw new Exception($"An error occured while uploading '{source}' / sharedFileDefinition.Id:{sharedFileDefinition.Id}",
-                _progressState.LastException);
+            var lastException = _progressState.Exceptions[_progressState.Exceptions.Count - 1];
+            throw new InvalidOperationException($"An error occured while uploading '{source}' / sharedFileDefinition.Id:{sharedFileDefinition.Id}",
+                lastException);
         }
 
         var totalCreatedSlices = GetTotalCreatedSlices();
@@ -83,7 +84,7 @@ public class FileUploadProcessor : IFileUploadProcessor
             totalBytes / 1024d,
             _progressState.MaxConcurrentUploads,
             bandwidthKbps,
-            _progressState.Exceptions.Count);
+            _progressState.Exceptions!.Count);
     }
 
     public int GetTotalCreatedSlices()

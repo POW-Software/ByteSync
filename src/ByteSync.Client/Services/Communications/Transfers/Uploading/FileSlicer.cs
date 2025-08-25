@@ -77,7 +77,6 @@ public class FileSlicer : IFileSlicer
             await _semaphoreSlim.WaitAsync();
             try
             {
-                progressState.LastException = ex;
                 progressState.Exceptions.Add(ex);
             }
             finally

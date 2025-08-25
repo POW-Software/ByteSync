@@ -1,9 +1,8 @@
 using ByteSync.ServerCommon.Business.Auth;
-using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Synchronizations;
 
-public class SynchronizationErrorsRequest : IRequest
+public class SynchronizationErrorsRequest : IActionErrorRequest
 {
     public SynchronizationErrorsRequest(string sessionId, Client client, List<string> actionsGroupIds)
     {

@@ -1,9 +1,8 @@
 using ByteSync.ServerCommon.Business.Auth;
-using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Synchronizations;
 
-public class FileOrDirectoryIsDeletedRequest : IRequest
+public class FileOrDirectoryIsDeletedRequest : IActionCompletedRequest
 {
     public FileOrDirectoryIsDeletedRequest(string sessionId, Client client, List<string> actionsGroupIds)
     {

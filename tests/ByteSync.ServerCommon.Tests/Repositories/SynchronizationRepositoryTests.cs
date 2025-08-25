@@ -1,7 +1,6 @@
 ﻿using ByteSync.Common.Business.Actions;
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Factories;
-using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Repositories;
 using ByteSync.ServerCommon.Services;
 using ByteSync.ServerCommon.Tests.Helpers;
@@ -64,6 +63,46 @@ public class SynchronizationRepositoryTests
         
         savedEntity.Should().NotBeNull();
         savedEntity.Should().BeEquivalentTo(synchronizationEntity);
+    }
+
+    [Test]
+    public async Task AddSynchronization_ShouldSet_SourceClientInstanceId_BasedOn_IsInitialOperatingOnSourceNeeded()
+    {
+        // Arrange
+        string sessionId = "testSession_" + DateTime.Now.Ticks;
+        var synchronizationEntity = new SynchronizationEntity { SessionId = sessionId };
+
+        var actionsGroupDefinitions = new List<ActionsGroupDefinition>
+        {
+            new()
+            {
+                ActionsGroupId = "group_source_needed",
+                Operator = ActionOperatorTypes.SynchronizeContentOnly,
+                Source = "source-client-1",
+                Targets = new List<string> { "t1" }
+            },
+            new()
+            {
+                ActionsGroupId = "group_source_not_needed",
+                Operator = ActionOperatorTypes.SynchronizeDate,
+                Source = "source-client-2",
+                Targets = new List<string> { "t2" }
+            }
+        };
+
+        // Act
+        await _repository.AddSynchronization(synchronizationEntity, actionsGroupDefinitions);
+
+        // Assert
+        var cacheKey1 = _redisInfrastructureService.ComputeCacheKey(EntityType.TrackingAction, $"{sessionId}_group_source_needed");
+        var trackingEntity1 = await _trackingActionEntityCacheRepository.Get(cacheKey1);
+        trackingEntity1.Should().NotBeNull();
+        trackingEntity1!.SourceClientInstanceId.Should().Be("source-client-1");
+
+        var cacheKey2 = _redisInfrastructureService.ComputeCacheKey(EntityType.TrackingAction, $"{sessionId}_group_source_not_needed");
+        var trackingEntity2 = await _trackingActionEntityCacheRepository.Get(cacheKey2);
+        trackingEntity2.Should().NotBeNull();
+        trackingEntity2!.SourceClientInstanceId.Should().BeNull();
     }
 
     [Test]

@@ -33,8 +33,8 @@ public class RequestSynchronizationAbortCommandHandler : IRequestHandler<Request
                 return false;
             }
 
-            bool isDateUpdated = false;
-            bool isRequesterAdded = false;
+            var isDateUpdated = false;
+            var isRequesterAdded = false;
 
             if (synchronizationEntity.AbortRequestedOn == null)
             {

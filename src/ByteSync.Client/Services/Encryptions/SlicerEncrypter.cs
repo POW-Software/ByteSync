@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
+using System.Threading;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Encryptions;
@@ -22,8 +22,7 @@ public class SlicerEncrypter : ISlicerEncrypter
         _logger = logger;
             
         BufferSize = 4096;
-        MaxSliceLength = 64 * 1024 * 1024; // 64 Mo
-        MaxSliceLength = 4 * 1024 * 1024; // 4 Mo
+        MaxSliceLength = 1024 * 1024; // 1 Mb
     }
         
     public void Initialize(FileInfo fileToEncrypt, SharedFileDefinition sharedFileDefinition)
@@ -83,7 +82,7 @@ public class SlicerEncrypter : ISlicerEncrypter
 
     public async Task<FileUploaderSlice?> SliceAndEncrypt()
     {
-        CryptoStream? cryptoSteam = null;
+        CryptoStream? cryptoStream = null;
         FileUploaderSlice? fileUploaderSlice = null;
 
         var bytes = InReader.ReadBytes(BufferSize);
@@ -93,19 +92,19 @@ public class SlicerEncrypter : ISlicerEncrypter
         var canContinue = TotalGeneratedFiles == 0 || readBytes > 0;
         while (canContinue)
         {
-            if (cryptoSteam == null)
+            if (cryptoStream == null)
             {
                 TotalGeneratedFiles += 1;
 
                 var memoryStream = new MemoryStream();
                 var encryptor = Aes.CreateEncryptor(Aes.Key, Aes.IV);
-                cryptoSteam = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write, true);
+                cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write, true);
 
                 fileUploaderSlice = new FileUploaderSlice(TotalGeneratedFiles, memoryStream);
             }
-
-            await cryptoSteam.WriteAsync(bytes, 0, readBytes);
-
+            
+            await cryptoStream.WriteAsync(bytes.AsMemory(0, readBytes), CancellationToken.None);
+           
             var sizeToRead = BufferSize;
             if (thisSessionReadBytes + sizeToRead > MaxSliceLength)
             {
@@ -129,7 +128,7 @@ public class SlicerEncrypter : ISlicerEncrypter
             }
         }
 
-        cryptoSteam?.Dispose();
+        cryptoStream?.Dispose();
 
         return fileUploaderSlice;
     }
@@ -139,5 +138,7 @@ public class SlicerEncrypter : ISlicerEncrypter
         InStream?.Dispose();
         InReader?.Dispose();
         Aes?.Dispose();
+        
+        GC.SuppressFinalize(this);
     }
 }
