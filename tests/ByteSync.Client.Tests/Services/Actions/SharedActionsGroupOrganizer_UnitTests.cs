@@ -8,15 +8,16 @@ using ByteSync.Services.Actions;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using ByteSync.Tests.TestUtilities.Helpers;
 
 namespace ByteSync.Tests.Services.Actions;
 
 [TestFixture]
 public class SharedActionsGroupOrganizer_UnitTests
 {
-    private SharedActionsGroupOrganizer _sharedActionsGroupOrganizer;
-    private Mock<IConnectionService> _connectionService;
-    private Mock<ISharedActionsGroupRepository> _sharedActionsGroupRepository;
+    private SharedActionsGroupOrganizer _sharedActionsGroupOrganizer = null!;
+    private Mock<IConnectionService> _connectionService = null!;
+    private Mock<ISharedActionsGroupRepository> _sharedActionsGroupRepository = null!;
     
     [SetUp]
     public void SetUp()
@@ -54,9 +55,9 @@ public class SharedActionsGroupOrganizer_UnitTests
                 Operator = ActionOperatorTypes.SynchronizeContentAndDate,
                 ActionsGroupId = "AGId1",
                 PathIdentity = new PathIdentity(FileSystemTypes.File, "file1", "file1", "file1"), 
-                Source = new SharedDataPart("A1", FileSystemTypes.Directory, "CID1", "A", "root", "relative", null, null, false),
+                Source = SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CID1", "A", "root", "relative", null, null, false),
                 Targets = [
-                    new("B1", FileSystemTypes.Directory, "CID2", "B", "root", "relative", null, null, false)
+                    SharedDataPartTestFactory.Create("B1", FileSystemTypes.Directory, "CID2", "B", "root", "relative", null, null, false)
                 ],
                 SynchronizationType = SynchronizationTypes.Full,
                 SynchronizationStatus = null, 
@@ -104,9 +105,9 @@ public class SharedActionsGroupOrganizer_UnitTests
                 Operator = ActionOperatorTypes.SynchronizeContentAndDate,
                 ActionsGroupId = "AGId1",
                 PathIdentity = new PathIdentity(FileSystemTypes.File, "file1", "file1", "file1"), 
-                Source = new SharedDataPart("A1", FileSystemTypes.Directory, "CID1", "A", "root", "relative", null, null, false),
+                Source = SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CID1", "A", "root", "relative", null, null, false),
                 Targets = [
-                    new("B1", FileSystemTypes.Directory, "CID2", "B", "root", "relative", null, null, false)
+                    SharedDataPartTestFactory.Create("B1", FileSystemTypes.Directory, "CID2", "B", "root", "relative", null, null, false)
                 ],
                 SynchronizationType = null,
                 SynchronizationStatus = null, 

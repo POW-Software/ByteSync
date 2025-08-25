@@ -8,15 +8,16 @@ using ByteSync.TestsCommon;
 using Moq;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
+using ByteSync.Tests.TestUtilities.Helpers;
 
 namespace ByteSync.Tests.Services.Actions;
 
 [TestFixture]
 public class TestSharedActionsGroupComputer : AbstractTester
 {
-    private SharedActionsGroupComputer _sharedActionsGroupComputer;
-    private Mock<ISharedAtomicActionRepository> _sharedAtomicActionRepository;
-    private Mock<ISharedActionsGroupRepository> _sharedActionsGroupRepository;
+    private SharedActionsGroupComputer _sharedActionsGroupComputer = null!;
+    private Mock<ISharedAtomicActionRepository> _sharedAtomicActionRepository = null!;
+    private Mock<ISharedActionsGroupRepository> _sharedActionsGroupRepository = null!;
     
     [SetUp]
     public void SetUp()
@@ -44,8 +45,8 @@ public class TestSharedActionsGroupComputer : AbstractTester
         var sharedAtomicActions = new List<SharedAtomicAction>();
         sharedAtomicAction = new SharedAtomicAction("SAA1");
         sharedAtomicAction.PathIdentity = new PathIdentity(FileSystemTypes.File, "file1.txt", "file1.txt", "file1.txt");
-        sharedAtomicAction.Source = new SharedDataPart("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", null, null, false);
-        sharedAtomicAction.Target = new SharedDataPart("B1", FileSystemTypes.Directory, "CII_B", "B", "D:\\", "file1.txt", null, null, false);
+        sharedAtomicAction.Source = SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", null, null, false);
+        sharedAtomicAction.Target = SharedDataPartTestFactory.Create("B1", FileSystemTypes.Directory, "CII_B", "B", "D:\\", "file1.txt", null, null, false);
         sharedAtomicAction.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
         sharedAtomicAction.SynchronizationType = SynchronizationTypes.Full;
         sharedAtomicAction.Size = 10;
@@ -138,8 +139,8 @@ public class TestSharedActionsGroupComputer : AbstractTester
 
         sharedAtomicAction1 = new SharedAtomicAction("SAA1");
         sharedAtomicAction1.PathIdentity = new PathIdentity(FileSystemTypes.File, "file1.txt", "file1.txt", "file1.txt");
-        sharedAtomicAction1.Source = new SharedDataPart("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", null, null, false);
-        sharedAtomicAction1.Target = new SharedDataPart("B1", FileSystemTypes.Directory, "CII_B", "B", "D:\\", "file1.txt", null, null, false);
+        sharedAtomicAction1.Source = SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", null, null, false);
+        sharedAtomicAction1.Target = SharedDataPartTestFactory.Create("B1", FileSystemTypes.Directory, "CII_B", "B", "D:\\", "file1.txt", null, null, false);
         sharedAtomicAction1.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
         sharedAtomicAction1.SynchronizationType = SynchronizationTypes.Full;
         sharedAtomicAction1.Size = 10;
@@ -148,8 +149,8 @@ public class TestSharedActionsGroupComputer : AbstractTester
 
         sharedAtomicAction2 = new SharedAtomicAction("SAA2");
         sharedAtomicAction2.PathIdentity = new PathIdentity(FileSystemTypes.File, "file1.txt", "file1.txt", "file1.txt");
-        sharedAtomicAction2.Source = new SharedDataPart("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", null, null, false);
-        sharedAtomicAction2.Target = new SharedDataPart("C1", FileSystemTypes.Directory, "CII_C", "C", "D:\\", "file1.txt", null, null, false);
+        sharedAtomicAction2.Source = SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", null, null, false);
+        sharedAtomicAction2.Target = SharedDataPartTestFactory.Create("C1", FileSystemTypes.Directory, "CII_C", "C", "D:\\", "file1.txt", null, null, false);
         sharedAtomicAction2.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
         sharedAtomicAction2.SynchronizationType = SynchronizationTypes.Full;
         sharedAtomicAction2.Size = 10;
@@ -213,8 +214,8 @@ public class TestSharedActionsGroupComputer : AbstractTester
 
         sharedAtomicAction1 = new SharedAtomicAction("SAA1");
         sharedAtomicAction1.PathIdentity = new PathIdentity(FileSystemTypes.File, "file1.txt", "file1.txt", "file1.txt");
-        sharedAtomicAction1.Source = new SharedDataPart("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", "SigGuidA", "SigHashA", false);
-        sharedAtomicAction1.Target = new SharedDataPart("B1", FileSystemTypes.Directory, "CII_B", "B", "D:\\", "file1.txt", "SigGuidB", "SigHashBC", false);
+        sharedAtomicAction1.Source = SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", "SigGuidA", "SigHashA", false);
+        sharedAtomicAction1.Target = SharedDataPartTestFactory.Create("B1", FileSystemTypes.Directory, "CII_B", "B", "D:\\", "file1.txt", "SigGuidB", "SigHashBC", false);
         sharedAtomicAction1.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
         sharedAtomicAction1.SynchronizationType = SynchronizationTypes.Delta;
         sharedAtomicAction1.Size = 10;
@@ -223,8 +224,8 @@ public class TestSharedActionsGroupComputer : AbstractTester
 
         sharedAtomicAction2 = new SharedAtomicAction("SAA2");
         sharedAtomicAction2.PathIdentity = new PathIdentity(FileSystemTypes.File, "file1.txt", "file1.txt", "file1.txt");
-        sharedAtomicAction2.Source = new SharedDataPart("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", "SigGuidA", "SigHashA", false);
-        sharedAtomicAction2.Target = new SharedDataPart("C1", FileSystemTypes.Directory, "CII_C", "C", "D:\\", "file1.txt", "SigGuidC", "SigHashBC", false);
+        sharedAtomicAction2.Source = SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", "SigGuidA", "SigHashA", false);
+        sharedAtomicAction2.Target = SharedDataPartTestFactory.Create("C1", FileSystemTypes.Directory, "CII_C", "C", "D:\\", "file1.txt", "SigGuidC", "SigHashBC", false);
         sharedAtomicAction2.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
         sharedAtomicAction2.SynchronizationType = SynchronizationTypes.Delta;
         sharedAtomicAction2.Size = 10;
@@ -286,8 +287,8 @@ public class TestSharedActionsGroupComputer : AbstractTester
 
         sharedAtomicAction1 = new SharedAtomicAction("SAA1");
         sharedAtomicAction1.PathIdentity = new PathIdentity(FileSystemTypes.File, "file1.txt", "file1.txt", "file1.txt");
-        sharedAtomicAction1.Source = new SharedDataPart("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", "SigGuidA", "SigHashA", false);
-        sharedAtomicAction1.Target = new SharedDataPart("B1", FileSystemTypes.Directory, "CII_B", "B", "D:\\", "file1.txt", "SigGuidB", "SigHashB", false);
+        sharedAtomicAction1.Source = SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", "SigGuidA", "SigHashA", false);
+        sharedAtomicAction1.Target = SharedDataPartTestFactory.Create("B1", FileSystemTypes.Directory, "CII_B", "B", "D:\\", "file1.txt", "SigGuidB", "SigHashB", false);
         sharedAtomicAction1.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
         sharedAtomicAction1.SynchronizationType = SynchronizationTypes.Delta;
         sharedAtomicAction1.Size = 10;
@@ -296,8 +297,8 @@ public class TestSharedActionsGroupComputer : AbstractTester
 
         sharedAtomicAction2 = new SharedAtomicAction("SAA2");
         sharedAtomicAction2.PathIdentity = new PathIdentity(FileSystemTypes.File, "file1.txt", "file1.txt", "file1.txt");
-        sharedAtomicAction2.Source = new SharedDataPart("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", "SigGuidA", "SigHashA", false);
-        sharedAtomicAction2.Target = new SharedDataPart("C1", FileSystemTypes.Directory, "CII_C", "C", "D:\\", "file1.txt", "SigGuidC", "SigHashC", false);
+        sharedAtomicAction2.Source = SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", "SigGuidA", "SigHashA", false);
+        sharedAtomicAction2.Target = SharedDataPartTestFactory.Create("C1", FileSystemTypes.Directory, "CII_C", "C", "D:\\", "file1.txt", "SigGuidC", "SigHashC", false);
         sharedAtomicAction2.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
         sharedAtomicAction2.SynchronizationType = SynchronizationTypes.Delta;
         sharedAtomicAction2.Size = 10;
@@ -359,8 +360,8 @@ public class TestSharedActionsGroupComputer : AbstractTester
 
         sharedAtomicAction1 = new SharedAtomicAction("SAA1");
         sharedAtomicAction1.PathIdentity = new PathIdentity(FileSystemTypes.File, "file1.txt", "file1.txt", "file1.txt");
-        sharedAtomicAction1.Source = new SharedDataPart("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", "SigGuidA", "SigHashABC", false);
-        sharedAtomicAction1.Target = new SharedDataPart("B1", FileSystemTypes.Directory, "CII_B", "B", "D:\\", "file1.txt", "SigGuidB", "SigHashABC", false);
+        sharedAtomicAction1.Source = SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", "SigGuidA", "SigHashABC", false);
+        sharedAtomicAction1.Target = SharedDataPartTestFactory.Create("B1", FileSystemTypes.Directory, "CII_B", "B", "D:\\", "file1.txt", "SigGuidB", "SigHashABC", false);
         sharedAtomicAction1.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
         sharedAtomicAction1.SynchronizationType = SynchronizationTypes.Delta;
         sharedAtomicAction1.Size = 10;
@@ -369,8 +370,8 @@ public class TestSharedActionsGroupComputer : AbstractTester
 
         sharedAtomicAction2 = new SharedAtomicAction("SAA2");
         sharedAtomicAction2.PathIdentity = new PathIdentity(FileSystemTypes.File, "file1.txt", "file1.txt", "file1.txt");
-        sharedAtomicAction2.Source = new SharedDataPart("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", "SigGuidA", "SigHashABC", false);
-        sharedAtomicAction2.Target = new SharedDataPart("C1", FileSystemTypes.Directory, "CII_C", "C", "D:\\", "file1.txt", "SigGuidC", "SigHashABC", false);
+        sharedAtomicAction2.Source = SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", "SigGuidA", "SigHashABC", false);
+        sharedAtomicAction2.Target = SharedDataPartTestFactory.Create("C1", FileSystemTypes.Directory, "CII_C", "C", "D:\\", "file1.txt", "SigGuidC", "SigHashABC", false);
         sharedAtomicAction2.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
         sharedAtomicAction2.SynchronizationType = SynchronizationTypes.Delta;
         sharedAtomicAction2.Size = 10;
@@ -432,7 +433,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
 
         sharedAtomicAction1 = new SharedAtomicAction("SAA1");
         sharedAtomicAction1.PathIdentity = new PathIdentity(FileSystemTypes.File, "file1.txt", "file1.txt", "file1.txt");
-        sharedAtomicAction1.Source = new SharedDataPart("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", "SigGuidA", "SigHashABC", false);
+        sharedAtomicAction1.Source = SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", "SigGuidA", "SigHashABC", false);
         sharedAtomicAction1.Target = null;
         sharedAtomicAction1.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
         sharedAtomicAction1.SynchronizationType = SynchronizationTypes.Delta;
@@ -442,8 +443,8 @@ public class TestSharedActionsGroupComputer : AbstractTester
 
         sharedAtomicAction2 = new SharedAtomicAction("SAA2");
         sharedAtomicAction2.PathIdentity = new PathIdentity(FileSystemTypes.File, "file1.txt", "file1.txt", "file1.txt");
-        sharedAtomicAction2.Source = new SharedDataPart("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", "SigGuidA", "SigHashABC", false);
-        sharedAtomicAction2.Target = new SharedDataPart("C1", FileSystemTypes.Directory, "CII_C", "C", "D:\\", "file1.txt", "SigGuidC", "SigHashABC", false);
+        sharedAtomicAction2.Source = SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", "SigGuidA", "SigHashABC", false);
+        sharedAtomicAction2.Target = SharedDataPartTestFactory.Create("C1", FileSystemTypes.Directory, "CII_C", "C", "D:\\", "file1.txt", "SigGuidC", "SigHashABC", false);
         sharedAtomicAction2.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
         sharedAtomicAction2.SynchronizationType = SynchronizationTypes.Delta;
         sharedAtomicAction2.Size = 10;
