@@ -30,7 +30,7 @@ public class InformPublicKeyValidationIsFinishedCommandHandler: IRequestHandler<
         }
         else
         { 
-            _logger.LogInformation("AskCloudSessionMembersPublicKeys: session not found for sessionId '{sessionId}'. Can not proceed",
+            _logger.LogInformation("InformPublicKeyValidationIsFinished: session not found for sessionId '{sessionId}'. Can not proceed",
                 request.Parameters.SessionId);
         }
     }

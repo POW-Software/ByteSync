@@ -8,7 +8,7 @@ namespace ByteSync.ServerCommon.Commands.Trusts;
 public class RequestTrustPublicKeyCommandHandler: IRequestHandler<RequestTrustPublicKeyRequest>
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
-    public readonly IInvokeClientsService _invokeClientsService;
+    private readonly IInvokeClientsService _invokeClientsService;
     private readonly ILogger<SetAuthCheckedCommandHandler> _logger;
     
     public RequestTrustPublicKeyCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IInvokeClientsService invokeClientService, ILogger<SetAuthCheckedCommandHandler> logger)
@@ -30,7 +30,7 @@ public class RequestTrustPublicKeyCommandHandler: IRequestHandler<RequestTrustPu
         }
         else
         { 
-            _logger.LogInformation("InformPublicKeyValidationIsFinished: Recipient not found'. Can not proceed");
+            _logger.LogInformation("RequestTrustPublicKey: Recipient not found. Cannot proceed");
         }
     }
     
