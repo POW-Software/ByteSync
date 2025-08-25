@@ -45,7 +45,7 @@ public class FileUploadProcessor : IFileUploadProcessor
         _progressState = new UploadProgressState();
         
         // Start upload workers
-        for (var i = 0; i < 6; i++)
+        for (var i = 0; i < 2; i++)
         {
             _ = Task.Run(() => _fileUploadWorker.UploadAvailableSlicesAsync(_fileUploadCoordinator.AvailableSlices, _progressState));
         }
@@ -62,7 +62,7 @@ public class FileUploadProcessor : IFileUploadProcessor
         if (_progressState.LastException != null)
         {
             var source = _localFileToUpload ?? "a stream";
-            throw new Exception($"An error occured while uploading '{source}' / sharedFileDefinition.Id:{sharedFileDefinition.Id}",
+            throw new InvalidOperationException($"An error occured while uploading '{source}' / sharedFileDefinition.Id:{sharedFileDefinition.Id}",
                 _progressState.LastException);
         }
 
