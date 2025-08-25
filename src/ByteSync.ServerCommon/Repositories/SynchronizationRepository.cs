@@ -33,7 +33,9 @@ public class SynchronizationRepository : BaseRepository<SynchronizationEntity>, 
                 var trackingActionEntity = new TrackingActionEntity
                 {
                     ActionsGroupId = groupDefinition.ActionsGroupId,
-                    SourceClientInstanceId = groupDefinition.Source,
+                    SourceClientInstanceId = groupDefinition.IsInitialOperatingOnSourceNeeded 
+                        ? groupDefinition.Source 
+                        : null,
                     TargetClientInstanceIds = [..groupDefinition.Targets],
                     Size = groupDefinition.Size,
                 };
