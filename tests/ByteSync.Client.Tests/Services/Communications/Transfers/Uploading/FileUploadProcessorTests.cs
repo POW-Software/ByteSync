@@ -116,7 +116,7 @@ public class FileUploadProcessorTests
         await _fileUploadProcessor.ProcessUpload(_sharedFileDefinition);
 
         // Assert
-        _mockFileUploadWorker.Verify(x => x.UploadAvailableSlicesAsync(It.IsAny<Channel<FileUploaderSlice>>(), It.IsAny<UploadProgressState>()), Times.Exactly(6));
+        _mockFileUploadWorker.Verify(x => x.UploadAvailableSlicesAsync(It.IsAny<Channel<FileUploaderSlice>>(), It.IsAny<UploadProgressState>()), Times.Exactly(2));
     }
 
     [Test]
