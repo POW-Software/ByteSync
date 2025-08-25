@@ -45,7 +45,7 @@ public class FileUploadProcessor : IFileUploadProcessor
         _progressState = new UploadProgressState();
         
         // Start upload workers
-        for (var i = 0; i < 6; i++)
+        for (var i = 0; i < 2; i++)
         {
             _ = Task.Run(() => _fileUploadWorker.UploadAvailableSlicesAsync(_fileUploadCoordinator.AvailableSlices, _progressState));
         }

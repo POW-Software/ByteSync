@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Encryptions;
@@ -22,8 +21,7 @@ public class SlicerEncrypter : ISlicerEncrypter
         _logger = logger;
             
         BufferSize = 4096;
-        MaxSliceLength = 64 * 1024 * 1024; // 64 Mo
-        MaxSliceLength = 4 * 1024 * 1024; // 4 Mo
+        MaxSliceLength = 1024 * 1024; // 1 Mb
     }
         
     public void Initialize(FileInfo fileToEncrypt, SharedFileDefinition sharedFileDefinition)
