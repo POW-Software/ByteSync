@@ -1,5 +1,4 @@
 using ByteSync.Interfaces.Controls.Communications;
-using Microsoft.Extensions.Logging;
 
 namespace ByteSync.Services.Communications.Transfers.Uploading;
 
