@@ -16,6 +16,7 @@ public class FileUploadProcessor : IFileUploadProcessor
     private readonly IFilePartUploadAsserter _filePartUploadAsserter;
     private readonly string? _localFileToUpload;
     private readonly SemaphoreSlim _semaphoreSlim;
+    private readonly IAdaptiveUploadController _adaptiveUploadController;
 
     // State tracking
     private UploadProgressState? _progressState;
@@ -28,7 +29,8 @@ public class FileUploadProcessor : IFileUploadProcessor
         IFileUploadWorker fileUploadWorker,
         IFilePartUploadAsserter filePartUploadAsserter,
         string? localFileToUpload,
-        SemaphoreSlim semaphoreSlim)
+        SemaphoreSlim semaphoreSlim,
+        IAdaptiveUploadController adaptiveUploadController)
     {
         _slicerEncrypter = slicerEncrypter;
         _logger = logger;
@@ -38,6 +40,7 @@ public class FileUploadProcessor : IFileUploadProcessor
         _filePartUploadAsserter = filePartUploadAsserter;
         _localFileToUpload = localFileToUpload;
         _semaphoreSlim = semaphoreSlim;
+        _adaptiveUploadController = adaptiveUploadController;
     }
 
     public async Task ProcessUpload(SharedFileDefinition sharedFileDefinition, int? maxSliceLength = null)
@@ -45,26 +48,26 @@ public class FileUploadProcessor : IFileUploadProcessor
         _progressState = new UploadProgressState();
         _progressState.StartTimeUtc = DateTimeOffset.UtcNow;
         
-        // Start upload workers
-        for (var i = 0; i < 6; i++)
+        // Start upload workers (adaptive)
+        for (var i = 0; i < _adaptiveUploadController.CurrentParallelism; i++)
         {
-            _ = Task.Run(() => _fileUploadWorker.UploadAvailableSlicesAsync(_fileUploadCoordinator.AvailableSlices, _progressState));
+            _ = Task.Run(() => _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_fileUploadCoordinator.AvailableSlices, _progressState, _adaptiveUploadController));
         }
         
-        // Start slicer
-        await Task.Run(() => _fileSlicer.SliceAndEncryptAsync(sharedFileDefinition, _progressState, 
-            maxSliceLength));
+        // Start slicer (adaptive)
+        await Task.Run(() => _fileSlicer.SliceAndEncryptAdaptiveAsync(sharedFileDefinition, _progressState, _adaptiveUploadController));
         
         // Wait for completion
         await _fileUploadCoordinator.WaitForCompletionAsync();
 
         _slicerEncrypter.Dispose();
 
-        if (_progressState.LastException != null)
+        if (_progressState.Exceptions != null && _progressState.Exceptions.Count > 0)
         {
             var source = _localFileToUpload ?? "a stream";
-            throw new Exception($"An error occured while uploading '{source}' / sharedFileDefinition.Id:{sharedFileDefinition.Id}",
-                _progressState.LastException);
+            var lastException = _progressState.Exceptions[_progressState.Exceptions.Count - 1];
+            throw new InvalidOperationException($"An error occured while uploading '{source}' / sharedFileDefinition.Id:{sharedFileDefinition.Id}",
+                lastException);
         }
 
         var totalCreatedSlices = GetTotalCreatedSlices();
@@ -83,7 +86,7 @@ public class FileUploadProcessor : IFileUploadProcessor
             totalBytes / 1024d,
             _progressState.MaxConcurrentUploads,
             bandwidthKbps,
-            _progressState.Exceptions.Count);
+            _progressState.Exceptions!.Count);
     }
 
     public int GetTotalCreatedSlices()

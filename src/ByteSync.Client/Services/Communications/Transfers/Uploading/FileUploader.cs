@@ -24,7 +24,8 @@ public class FileUploader : IFileUploader
         IFilePartUploadAsserter filePartUploadAsserter,
         ISlicerEncrypter slicerEncrypter, 
         ILogger<FileUploader> logger,
-        SemaphoreSlim semaphoreSlim)
+        SemaphoreSlim semaphoreSlim,
+        IAdaptiveUploadController adaptiveUploadController)
     {
         if (localFileToUpload == null && memoryStream == null)
         {
@@ -48,7 +49,8 @@ public class FileUploader : IFileUploader
             fileUploadWorker,
             filePartUploadAsserter,
             localFileToUpload,
-            semaphoreSlim);
+            semaphoreSlim,
+            adaptiveUploadController);
     }
 
     public int? MaxSliceLength { get; set; }

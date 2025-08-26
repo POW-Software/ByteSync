@@ -1,6 +1,8 @@
-﻿using System.Net.Http;
+﻿using System.Net;
+using System.Net.Http;
 using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Interfaces;
+using ByteSync.Exceptions;
 using Polly;
 using Polly.Retry;
 
@@ -15,19 +17,22 @@ public class PolicyFactory : IPolicyFactory
         _logger = logger;
     }
     
-    private const int MAX_RETRIES = 4;
+    private const int MAX_RETRIES = 5; // 2s,4s,8s,16s,32s
+
+    private static readonly Random _jitter = new Random();
 
     private TimeSpan SleepDurationProvider(int retryAttempt)
     {
-        var seconds = 3;
-        if (retryAttempt > 1)
+        // Exponential backoff with jitter: 2^({attempt}-1) seconds + 0-500ms
+        var baseSeconds = Math.Pow(2, Math.Max(0, retryAttempt - 1));
+        var jitterMs = _jitter.Next(0, 500);
+        var delay = TimeSpan.FromSeconds(baseSeconds) + TimeSpan.FromMilliseconds(jitterMs);
+        // Cap at 45s to avoid excessive waits
+        if (delay > TimeSpan.FromSeconds(45))
         {
-            seconds = 5;
+            delay = TimeSpan.FromSeconds(45);
         }
-        
-        var result = TimeSpan.FromSeconds(seconds);
-        
-        return result;
+        return delay;
     }
 
     public AsyncRetryPolicy<DownloadFileResponse> BuildFileDownloadPolicy()
@@ -51,7 +56,21 @@ public class PolicyFactory : IPolicyFactory
     {
         var policy = Policy
             .HandleResult<UploadFileResponse>(x => !x.IsSuccess)
-            .Or<HttpRequestException>(e => e.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            .Or<HttpRequestException>(e => e.StatusCode == HttpStatusCode.Forbidden 
+                                           || e.StatusCode == HttpStatusCode.Unauthorized 
+                                           || e.StatusCode == HttpStatusCode.ServiceUnavailable 
+                                           || e.StatusCode == HttpStatusCode.BadGateway
+                                           || e.StatusCode == HttpStatusCode.GatewayTimeout
+                                           || e.StatusCode == HttpStatusCode.RequestTimeout
+                                           || e.StatusCode == HttpStatusCode.InternalServerError)
+            .Or<ApiException>(ex => ex.HttptatusCode == HttpStatusCode.Unauthorized 
+                                     || ex.HttptatusCode == HttpStatusCode.ServiceUnavailable 
+                                     || ex.HttptatusCode == HttpStatusCode.BadGateway
+                                     || ex.HttptatusCode == HttpStatusCode.GatewayTimeout
+                                     || ex.HttptatusCode == HttpStatusCode.RequestTimeout
+                                     || ex.HttptatusCode == HttpStatusCode.InternalServerError)
+            .Or<TaskCanceledException>()
+            .Or<TimeoutException>()
             .WaitAndRetryAsync(MAX_RETRIES, SleepDurationProvider, onRetryAsync: async (response, timeSpan, retryCount, _) =>
             {
                 _logger.LogError("FileTransferOperation failed (Attempt number {AttemptNumber}). ResponseCode:{ResponseCode}" +

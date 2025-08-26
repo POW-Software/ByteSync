@@ -83,7 +83,11 @@ public class FileUploadWorker : IFileUploadWorker
                             PartNumber = slice.PartNumber
                         };
                         
-                        await _fileTransferApiClient.AssertFilePartIsUploaded(transferParameters);
+                        await policy.ExecuteAsync(async () =>
+                        {
+                            await _fileTransferApiClient.AssertFilePartIsUploaded(transferParameters);
+                            return UploadFileResponse.Success(200);
+                        });
                         await _semaphoreSlim.WaitAsync();
                         try
                         {
@@ -188,6 +192,82 @@ public class FileUploadWorker : IFileUploadWorker
             _semaphoreSlim.Release();
         }
     }
+
+	public async Task UploadAvailableSlicesAdaptiveAsync(Channel<FileUploaderSlice> availableSlices, UploadProgressState progressState,
+	    IAdaptiveUploadController adaptiveUploadController)
+	{
+		while (await availableSlices.Reader.WaitToReadAsync())
+		{
+			if (availableSlices.Reader.TryRead(out var slice))
+			{
+				try
+				{
+					var policy = _policyFactory.BuildFileUploadPolicy();
+					var startedAt = DateTime.UtcNow;
+					var response = await policy.ExecuteAsync(() => DoUpload(slice));
+
+					var elapsed = DateTime.UtcNow - startedAt;
+					adaptiveUploadController.RecordUploadResult(elapsed, response != null && response.IsSuccess, slice.PartNumber, response?.StatusCode);
+
+					if (response != null && response.IsSuccess)
+					{
+						var transferParameters = new TransferParameters
+						{
+							SessionId = _sharedFileDefinition.SessionId,
+							SharedFileDefinition = _sharedFileDefinition,
+							PartNumber = slice.PartNumber
+						};
+
+						await _fileTransferApiClient.AssertFilePartIsUploaded(transferParameters);
+						await _semaphoreSlim.WaitAsync();
+						try
+						{
+							progressState.TotalUploadedSlices += 1;
+						}
+						finally
+						{
+							_semaphoreSlim.Release();
+						}
+					}
+					else
+					{
+						throw new Exception($"UploadAvailableSlice: unable to get upload url. Status: {response?.StatusCode}, Error: {response?.ErrorMessage}");
+					}
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "UploadAvailableSlice");
+
+					await _semaphoreSlim.WaitAsync();
+					try
+					{
+						progressState.Exceptions.Add(ex);
+					}
+					finally
+					{
+						_semaphoreSlim.Release();
+					}
+
+					_exceptionOccurred.Set();
+
+					return;
+				}
+			}
+		}
+
+		await _semaphoreSlim.WaitAsync();
+		try
+		{
+			if (progressState.TotalUploadedSlices == progressState.TotalCreatedSlices)
+			{
+				_uploadingIsFinished.Set();
+			}
+		}
+		finally
+		{
+			_semaphoreSlim.Release();
+		}
+	}
 
     private async Task<UploadFileResponse> DoUpload(FileUploaderSlice slice)
     {

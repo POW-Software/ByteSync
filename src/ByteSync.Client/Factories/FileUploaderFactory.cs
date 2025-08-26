@@ -51,6 +51,7 @@ public class FileUploaderFactory : IFileUploaderFactory
         
         var sessionService = _context.Resolve<ISessionService>();
         var filePartUploadAsserter = new FilePartUploadAsserter(fileTransferApiClient, sessionService);
+        var adaptiveUploadController = _context.Resolve<IAdaptiveUploadController>();
         
         var fileUploader = _context.Resolve<IFileUploader>(
             new TypedParameter(typeof(string), fullName),
@@ -61,7 +62,8 @@ public class FileUploaderFactory : IFileUploaderFactory
             new TypedParameter(typeof(IFileUploadWorker), fileUploadWorker),
             new TypedParameter(typeof(IFilePartUploadAsserter), filePartUploadAsserter),
             new TypedParameter(typeof(ISlicerEncrypter), slicerEncrypter),
-            new TypedParameter(typeof(SemaphoreSlim), semaphoreSlim)
+            new TypedParameter(typeof(SemaphoreSlim), semaphoreSlim),
+            new TypedParameter(typeof(IAdaptiveUploadController), adaptiveUploadController)
         );
         
         return fileUploader;
