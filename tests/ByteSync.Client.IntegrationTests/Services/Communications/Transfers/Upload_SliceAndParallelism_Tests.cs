@@ -138,7 +138,7 @@ public class Upload_SliceAndParallelism_Tests
         var shared = BuildShared("big1");
 
         var tempFile = Path.GetTempFileName();
-        var sliceLength = 1000;
+        var sliceLength = 500 * 1024; // 500KB;
         var inputContent = new string('b', sliceLength * 3 + 1); // > 3x slice length => 4 slices
         await File.WriteAllTextAsync(tempFile, inputContent);
 
@@ -162,7 +162,7 @@ public class Upload_SliceAndParallelism_Tests
         var shared = BuildShared("big3");
 
         var tempFile = Path.GetTempFileName();
-        var sliceLength = 1000;
+        var sliceLength = 500 * 1024; // 500KB;;
         var inputContent = new string('c', sliceLength * 3 + 5); // > 3x slice length => 4 slices
         await File.WriteAllTextAsync(tempFile, inputContent);
 
@@ -216,7 +216,7 @@ public class Upload_SliceAndParallelism_Tests
         var shared1 = BuildShared("b1");
         var shared2 = BuildShared("b2");
 
-        var sliceLength = 2560;
+        var sliceLength = 500 * 1024; // 500KB;;
         var c1 = new string('m', sliceLength * 3 + 3); // > 3x slice length => 4 slices
         var c2 = new string('n', sliceLength * 3 + 7); // > 3x slice length => 4 slices
 
