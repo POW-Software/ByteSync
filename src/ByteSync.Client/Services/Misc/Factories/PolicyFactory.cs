@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography;
 using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Interfaces;
 using ByteSync.Exceptions;
@@ -18,14 +19,12 @@ public class PolicyFactory : IPolicyFactory
     }
     
     private const int MAX_RETRIES = 5; // 2s,4s,8s,16s,32s
-
-    private static readonly Random _jitter = new Random();
-
+    
     private TimeSpan SleepDurationProvider(int retryAttempt)
     {
         // Exponential backoff with jitter: 2^({attempt}-1) seconds + 0-500ms
         var baseSeconds = Math.Pow(2, Math.Max(0, retryAttempt - 1));
-        var jitterMs = _jitter.Next(0, 500);
+        var jitterMs = RandomNumberGenerator.GetInt32(0, 500);
         var delay = TimeSpan.FromSeconds(baseSeconds) + TimeSpan.FromMilliseconds(jitterMs);
         // Cap at 45s to avoid excessive waits
         if (delay > TimeSpan.FromSeconds(45))

@@ -170,5 +170,3 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 		_successesInWindow = 0;
 	}
 }
-
-

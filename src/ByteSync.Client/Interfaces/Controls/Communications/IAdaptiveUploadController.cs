@@ -11,5 +11,3 @@ public interface IAdaptiveUploadController
 	// Record the result of an upload attempt for a slice
 	void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null, Exception? exception = null);
 }
-
-
