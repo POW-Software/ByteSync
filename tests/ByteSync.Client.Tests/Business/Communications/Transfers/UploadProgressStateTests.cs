@@ -19,7 +19,7 @@ public class UploadProgressStateTests
         progressState.TotalUploadedSlices.Should().Be(0);
         progressState.ConcurrentUploads.Should().Be(0);
         progressState.MaxConcurrentUploads.Should().Be(0);
-        progressState.LastException.Should().BeNull();
+        progressState.Exceptions.Should().BeEmpty();
     }
 
     [Test]
@@ -83,16 +83,15 @@ public class UploadProgressStateTests
     }
 
     [Test]
-    public void LastException_ShouldBeGettableAndSettable()
+    public void Exceptions_ShouldBeGettableAndSettable()
     {
         // Arrange
         var progressState = new UploadProgressState();
         var expectedException = new Exception("Test exception");
 
         // Act
-        progressState.LastException = expectedException;
-        var result = progressState.LastException;
-
+        progressState.Exceptions.Add(expectedException);
+        var result = progressState.Exceptions[0];
         // Assert
         result.Should().Be(expectedException);
     }
@@ -238,37 +237,38 @@ public class UploadProgressStateTests
     }
 
     [Test]
-    public void LastException_WithNullValue_ShouldWork()
+    public void Exceptions_WithNullValue_ShouldWork()
     {
         // Arrange
         var progressState = new UploadProgressState();
 
         // Act
-        progressState.LastException = null;
-        var result = progressState.LastException;
+        
+        progressState.Exceptions.Add(null!);
+        var result = progressState.Exceptions[0];
 
         // Assert
         result.Should().BeNull();
     }
 
     [Test]
-    public void LastException_WithDifferentExceptionTypes_ShouldWork()
+    public void Exceptions_WithDifferentExceptionTypes_ShouldWork()
     {
         // Arrange
         var progressState = new UploadProgressState();
 
         // Act & Assert
         var invalidOperationException = new InvalidOperationException("Invalid operation");
-        progressState.LastException = invalidOperationException;
-        progressState.LastException.Should().Be(invalidOperationException);
+        progressState.Exceptions.Add(invalidOperationException);
+        progressState.Exceptions[0].Should().Be(invalidOperationException);
 
         var argumentException = new ArgumentException("Invalid argument");
-        progressState.LastException = argumentException;
-        progressState.LastException.Should().Be(argumentException);
+        progressState.Exceptions.Add(argumentException);
+        progressState.Exceptions[1].Should().Be(argumentException);
 
         var timeoutException = new TimeoutException("Operation timed out");
-        progressState.LastException = timeoutException;
-        progressState.LastException.Should().Be(timeoutException);
+        progressState.Exceptions.Add(timeoutException);
+        progressState.Exceptions[2].Should().Be(timeoutException);
     }
 
     [Test]
@@ -282,14 +282,14 @@ public class UploadProgressStateTests
         progressState.TotalUploadedSlices = 5;
         progressState.ConcurrentUploads = 3;
         progressState.MaxConcurrentUploads = 8;
-        progressState.LastException = new Exception("Test");
+        progressState.Exceptions.Add(new Exception("Test"));
 
         // Assert
         progressState.TotalCreatedSlices.Should().Be(10);
         progressState.TotalUploadedSlices.Should().Be(5);
         progressState.ConcurrentUploads.Should().Be(3);
         progressState.MaxConcurrentUploads.Should().Be(8);
-        progressState.LastException.Should().NotBeNull();
+        progressState.Exceptions.Should().NotBeNull();
     }
 
     [Test]
@@ -326,7 +326,7 @@ public class UploadProgressStateTests
     }
 
     [Test]
-    public void LastException_ShouldPreserveInnerException()
+    public void Exceptions_ShouldPreserveInnerException()
     {
         // Arrange
         var progressState = new UploadProgressState();
@@ -334,11 +334,11 @@ public class UploadProgressStateTests
         var outerException = new Exception("Outer exception", innerException);
 
         // Act
-        progressState.LastException = outerException;
+        progressState.Exceptions.Add(outerException);
 
         // Assert
-        progressState.LastException.Should().Be(outerException);
-        progressState.LastException!.InnerException.Should().Be(innerException);
+        progressState.Exceptions[0].Should().Be(outerException);
+        progressState.Exceptions[0].InnerException.Should().Be(innerException);
     }
 
     [Test]
@@ -350,11 +350,11 @@ public class UploadProgressStateTests
         var exception = new Exception(exceptionMessage);
 
         // Act
-        progressState.LastException = exception;
+        progressState.Exceptions.Add(exception);
 
         // Assert
-        progressState.LastException.Should().Be(exception);
-        progressState.LastException!.Message.Should().Be(exceptionMessage);
+        progressState.Exceptions[0].Should().Be(exception);
+        progressState.Exceptions[0].Message.Should().Be(exceptionMessage);
     }
 
     [Test]
@@ -373,10 +373,10 @@ public class UploadProgressStateTests
         }
 
         // Act
-        progressState.LastException = exception;
+        progressState.Exceptions.Add(exception);
 
         // Assert
-        progressState.LastException.Should().Be(exception);
-        progressState.LastException!.StackTrace.Should().NotBeNullOrEmpty();
+        progressState.Exceptions[0].Should().Be(exception);
+        progressState.Exceptions[0].StackTrace.Should().NotBeNullOrEmpty();
     }
 } 

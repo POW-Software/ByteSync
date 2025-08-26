@@ -1,10 +1,9 @@
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Auth;
-using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Synchronizations;
 
-public class SynchronizationErrorRequest : IRequest
+public class SynchronizationErrorRequest : IActionErrorRequest
 {
     public SynchronizationErrorRequest(string sessionId, Client client, SharedFileDefinition sharedFileDefinition)
     {

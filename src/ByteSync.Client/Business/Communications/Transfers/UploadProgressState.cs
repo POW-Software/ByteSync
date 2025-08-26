@@ -6,7 +6,6 @@ public class UploadProgressState
     public int TotalUploadedSlices { get; set; }
     public int ConcurrentUploads { get; set; }
     public int MaxConcurrentUploads { get; set; }
-    public Exception? LastException { get; set; }
     public DateTimeOffset? StartTimeUtc { get; set; }
     public DateTimeOffset? EndTimeUtc { get; set; }
     public long TotalCreatedBytes { get; set; }
