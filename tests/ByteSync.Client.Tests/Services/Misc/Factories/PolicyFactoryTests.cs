@@ -35,7 +35,7 @@ public class PolicyFactoryTests
         var policy = _factory.BuildFileUploadPolicy();
 
         using var cts = new CancellationTokenSource();
-        cts.Cancel();
+        cts.CancelAfter(1);
 
         Func<Task> act = async () =>
         {
@@ -66,7 +66,7 @@ public class PolicyFactoryTests
         var policy = _factory.BuildFileUploadPolicy();
 
         using var cts = new CancellationTokenSource();
-        cts.Cancel();
+        cts.CancelAfter(1);
 
         Func<Task> act = async () =>
         {
@@ -92,7 +92,7 @@ public class PolicyFactoryTests
         var policy = _factory.BuildFileUploadPolicy();
 
         using var cts = new CancellationTokenSource();
-        cts.Cancel();
+        // no cancellation needed; exception is not handled and will bubble immediately
 
         Func<Task> act = async () =>
         {
