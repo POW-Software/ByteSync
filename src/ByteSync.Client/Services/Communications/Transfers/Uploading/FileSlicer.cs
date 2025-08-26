@@ -86,4 +86,65 @@ public class FileSlicer : IFileSlicer
             _exceptionOccurred.Set();
         }
     }
+
+	public async Task SliceAndEncryptAdaptiveAsync(SharedFileDefinition sharedFileDefinition, UploadProgressState progressState,
+	    IAdaptiveUploadController adaptiveUploadController)
+	{
+		try
+		{
+			_slicerEncrypter.MaxSliceLength = adaptiveUploadController.CurrentChunkSizeBytes;
+
+			var canContinue = true;
+			while (canContinue)
+			{
+				if (_exceptionOccurred.WaitOne(0))
+				{
+					return;
+				}
+
+				var nextSize = adaptiveUploadController.GetNextChunkSizeBytes();
+				if (nextSize > 0)
+				{
+					_slicerEncrypter.MaxSliceLength = nextSize;
+				}
+
+				var fileUploaderSlice = await _slicerEncrypter.SliceAndEncrypt();
+
+				if (fileUploaderSlice != null)
+				{
+					await _semaphoreSlim.WaitAsync();
+					try
+					{
+						progressState.TotalCreatedSlices += 1;
+					}
+					finally
+					{
+						_semaphoreSlim.Release();
+					}
+
+					await _availableSlices.Writer.WriteAsync(fileUploaderSlice);
+				}
+				else
+				{
+					_availableSlices.Writer.Complete();
+					canContinue = false;
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "SliceAndEncryptAdaptive");
+
+			await _semaphoreSlim.WaitAsync();
+			try
+			{
+				progressState.Exceptions.Add(ex);
+			}
+			finally
+			{
+				_semaphoreSlim.Release();
+			}
+			_exceptionOccurred.Set();
+		}
+	}
 } 

@@ -8,4 +8,7 @@ public interface IFileUploadWorker
     Task UploadAvailableSlicesAsync(Channel<FileUploaderSlice> availableSlices, UploadProgressState progressState);
     
     void StartUploadWorkers(Channel<FileUploaderSlice> availableSlices, int workerCount, UploadProgressState progressState);
+
+	Task UploadAvailableSlicesAdaptiveAsync(Channel<FileUploaderSlice> availableSlices, UploadProgressState progressState,
+	    IAdaptiveUploadController adaptiveUploadController);
 } 

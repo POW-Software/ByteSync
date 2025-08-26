@@ -7,5 +7,8 @@ public interface IFileSlicer
 {
     Task SliceAndEncryptAsync(SharedFileDefinition sharedFileDefinition, UploadProgressState progressState, 
         int? maxSliceLength = null);
+
+	Task SliceAndEncryptAdaptiveAsync(SharedFileDefinition sharedFileDefinition, UploadProgressState progressState,
+	    IAdaptiveUploadController adaptiveUploadController);
 } 
 
