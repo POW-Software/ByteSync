@@ -90,7 +90,7 @@ public class Upload_SliceAndParallelism_Tests
     [TearDown]
     public void TearDown()
     {
-        _clientScope?.Dispose();
+        _clientScope.Dispose();
     }
 
     private static SharedFileDefinition BuildShared(string? id = null)
