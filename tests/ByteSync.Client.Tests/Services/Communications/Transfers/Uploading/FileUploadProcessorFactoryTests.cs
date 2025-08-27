@@ -83,7 +83,7 @@ public class FileUploadProcessorFactoryTests
     public void Create_Should_Return_Processor_From_DI()
     {
         // Act
-        var result = _factory.Create("C:/tmp/file.bin", null, _sharedFileDefinition);
+        var result = _factory.Create(_mockSlicerEncrypter.Object, "C:/tmp/file.bin", null, _sharedFileDefinition);
 
         // Assert
         result.Should().BeSameAs(_mockProcessor.Object);
@@ -96,7 +96,7 @@ public class FileUploadProcessorFactoryTests
         using var memory = new MemoryStream(new byte[] { 1, 2, 3 });
 
         // Act
-        var result = _factory.Create(null, memory, _sharedFileDefinition);
+        var result = _factory.Create(_mockSlicerEncrypter.Object, null, memory, _sharedFileDefinition);
 
         // Assert
         result.Should().BeSameAs(_mockProcessor.Object);

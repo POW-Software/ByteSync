@@ -15,7 +15,7 @@ namespace ByteSync.Tests.Services.Communications.Transfers.Uploading;
 public class FileUploadProcessorTests
 {
     private Mock<ISlicerEncrypter> _mockSlicerEncrypter = null!;
-    private Mock<ILogger> _mockLogger = null!;
+    private Mock<ILogger<FileUploadProcessor>> _mockLogger = null!;
     private Mock<IFileUploadCoordinator> _mockFileUploadCoordinator = null!;
     private Mock<IFileSlicer> _mockFileSlicer = null!;
     private Mock<IFileUploadWorker> _mockFileUploadWorker = null!;
@@ -31,7 +31,7 @@ public class FileUploadProcessorTests
     public void SetUp()
     {
         _mockSlicerEncrypter = new Mock<ISlicerEncrypter>();
-        _mockLogger = new Mock<ILogger>();
+        _mockLogger = new Mock<ILogger<FileUploadProcessor>>();
         _mockFileUploadCoordinator = new Mock<IFileUploadCoordinator>();
         _mockFileSlicer = new Mock<IFileSlicer>();
         _mockFileUploadWorker = new Mock<IFileUploadWorker>();

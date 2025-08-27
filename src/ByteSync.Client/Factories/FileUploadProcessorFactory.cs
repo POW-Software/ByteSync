@@ -23,13 +23,11 @@ public class FileUploadProcessorFactory : IFileUploadProcessorFactory
     }
 
     public IFileUploadProcessor Create(
+        ISlicerEncrypter slicerEncrypter,
         string? localFileToUpload,
         MemoryStream? memoryStream,
         SharedFileDefinition sharedFileDefinition)
     {
-        // Create the slicer encrypter
-        var slicerEncrypter = _context.Resolve<ISlicerEncrypter>();
-        
         // Create coordination components
         var fileUploadCoordinator = new FileUploadCoordinator(_context.Resolve<ILogger<FileUploadCoordinator>>());
         var semaphoreSlim = new SemaphoreSlim(1, 1);

@@ -32,7 +32,7 @@ public class FileUploaderFactory : IFileUploaderFactory
         var preparerFactory = _context.Resolve<IFileUploadPreparerFactory>();
         var processorFactory = _context.Resolve<IFileUploadProcessorFactory>();
         var fileUploadPreparer = preparerFactory.Create();
-        var fileUploadProcessor = processorFactory.Create(fullName, memoryStream, sharedFileDefinition);
+        var fileUploadProcessor = processorFactory.Create(slicerEncrypter, fullName, memoryStream, sharedFileDefinition);
 
         var fileUploader = _context.Resolve<IFileUploader>(
             new TypedParameter(typeof(string), fullName),
