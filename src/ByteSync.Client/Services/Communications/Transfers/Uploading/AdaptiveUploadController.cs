@@ -1,4 +1,5 @@
 using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Communications.Transfers.Uploading;
 
@@ -27,15 +28,14 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 	private int _windowSize;
 	private readonly ILogger<AdaptiveUploadController> _logger;
 
-	public AdaptiveUploadController(ILogger<AdaptiveUploadController> logger)
+	public AdaptiveUploadController(ILogger<AdaptiveUploadController> logger, ISessionService sessionService)
 	{
 		_logger = logger;
-		_currentChunkSizeBytes = INITIAL_CHUNK_SIZE_BYTES;
-		_currentParallelism = MIN_PARALLELISM;
 		_recentDurations = new Queue<TimeSpan>();
 		_recentPartNumbers = new Queue<int>();
 		_recentSuccesses = new Queue<bool>();
-		_windowSize = _currentParallelism;
+		ResetState();
+		sessionService.SessionObservable.Subscribe(_ => { ResetState(); });
 	}
 
 	public int CurrentChunkSizeBytes => _currentChunkSizeBytes;
@@ -167,5 +167,13 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 			_recentSuccesses.Dequeue();
 		}
 		_successesInWindow = 0;
+	}
+
+	private void ResetState()
+	{
+		_currentChunkSizeBytes = INITIAL_CHUNK_SIZE_BYTES;
+		_currentParallelism = MIN_PARALLELISM;
+		_windowSize = _currentParallelism;
+		ResetWindow();
 	}
 }

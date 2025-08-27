@@ -11,6 +11,7 @@ public class FileUploadProcessor : IFileUploadProcessor
     private readonly ISlicerEncrypter _slicerEncrypter;
     private readonly ILogger<FileUploadProcessor> _logger;
     private readonly IFileUploadCoordinator _fileUploadCoordinator;
+    private readonly IUploadSlicingManager _uploadSlicingManager;
     private readonly IFileSlicer _fileSlicer;
     private readonly IFileUploadWorker _fileUploadWorker;
     private readonly IFilePartUploadAsserter _filePartUploadAsserter;
@@ -30,7 +31,8 @@ public class FileUploadProcessor : IFileUploadProcessor
         IFilePartUploadAsserter filePartUploadAsserter,
         string? localFileToUpload,
         SemaphoreSlim semaphoreSlim,
-        IAdaptiveUploadController adaptiveUploadController)
+        IAdaptiveUploadController adaptiveUploadController,
+        IUploadSlicingManager uploadSlicingManager)
     {
         _slicerEncrypter = slicerEncrypter;
         _logger = logger;
@@ -41,6 +43,7 @@ public class FileUploadProcessor : IFileUploadProcessor
         _localFileToUpload = localFileToUpload;
         _semaphoreSlim = semaphoreSlim;
         _adaptiveUploadController = adaptiveUploadController;
+        _uploadSlicingManager = uploadSlicingManager;
     }
 
     public async Task ProcessUpload(SharedFileDefinition sharedFileDefinition, int? maxSliceLength = null)
@@ -54,8 +57,8 @@ public class FileUploadProcessor : IFileUploadProcessor
             _ = Task.Run(() => _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_fileUploadCoordinator.AvailableSlices, _progressState!));
         }
         
-        // Start slicer (adaptive)
-        await Task.Run(() => _fileSlicer.SliceAndEncryptAdaptiveAsync(sharedFileDefinition, _progressState));
+        // Enqueue slicer (adaptive) to shared slicing manager to ensure FIFO and concurrency control
+        await _uploadSlicingManager.Enqueue(() => _fileSlicer.SliceAndEncryptAdaptiveAsync(sharedFileDefinition, _progressState));
         
         // Wait for completion
         await _fileUploadCoordinator.WaitForCompletionAsync();
