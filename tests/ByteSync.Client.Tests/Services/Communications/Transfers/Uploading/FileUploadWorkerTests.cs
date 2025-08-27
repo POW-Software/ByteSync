@@ -19,19 +19,19 @@ namespace ByteSync.Tests.Services.Communications.Transfers.Uploading;
 [TestFixture]
 public class FileUploadWorkerTests
 {
-    private Mock<IPolicyFactory> _mockPolicyFactory;
-    private Mock<IFileTransferApiClient> _mockFileTransferApiClient;
-    private Mock<ILogger<FileUploadWorker>> _mockLogger;
-    private Mock<IIndex<StorageProvider, IUploadStrategy>> _mockStrategies;
-    private AsyncRetryPolicy<UploadFileResponse> _policy;
-    private SharedFileDefinition _sharedFileDefinition;
-    private object _syncRoot;
-    private ManualResetEvent _exceptionOccurred;
-    private ManualResetEvent _uploadingIsFinished;
-    private FileUploadWorker _fileUploadWorker;
-    private Channel<FileUploaderSlice> _availableSlices;
-    private UploadProgressState _progressState;
-    private SemaphoreSlim _semaphoreSlim;
+    private Mock<IPolicyFactory> _mockPolicyFactory = null!;
+    private Mock<IFileTransferApiClient> _mockFileTransferApiClient = null!;
+    private Mock<ILogger<FileUploadWorker>> _mockLogger = null!;
+    private Mock<IIndex<StorageProvider, IUploadStrategy>> _mockStrategies = null!;
+    private AsyncRetryPolicy<UploadFileResponse> _policy = null!;
+    private SharedFileDefinition _sharedFileDefinition = null!;
+    private ManualResetEvent _exceptionOccurred = null!;
+    private ManualResetEvent _uploadingIsFinished = null!;
+    private FileUploadWorker _fileUploadWorker = null!;
+    private Channel<FileUploaderSlice> _availableSlices = null!;
+    private UploadProgressState _progressState = null!;
+    private SemaphoreSlim _semaphoreSlim = null!;
+    private Mock<IAdaptiveUploadController> _mockAdaptiveController = null!;
     
     [SetUp]
     public void SetUp()
@@ -45,7 +45,7 @@ public class FileUploadWorkerTests
         _policy = Policy<UploadFileResponse>
             .HandleResult(x => !x.IsSuccess)
             .Or<Exception>()
-            .RetryAsync(0, onRetry: (exception, retryCount, context) => { });
+            .RetryAsync(0, onRetry: (_, _, _) => { });
 
         _sharedFileDefinition = new SharedFileDefinition
         {
@@ -59,6 +59,7 @@ public class FileUploadWorkerTests
         _uploadingIsFinished = new ManualResetEvent(false);
         _availableSlices = Channel.CreateBounded<FileUploaderSlice>(8);
         _progressState = new UploadProgressState();
+        _mockAdaptiveController = new Mock<IAdaptiveUploadController>();
 
         _fileUploadWorker = new FileUploadWorker(
             _mockPolicyFactory.Object,
@@ -68,7 +69,8 @@ public class FileUploadWorkerTests
             _exceptionOccurred,
             _mockStrategies.Object,
             _uploadingIsFinished,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockAdaptiveController.Object);
 
         _mockPolicyFactory.Setup(x => x.BuildFileUploadPolicy()).Returns(_policy);
     }
@@ -76,8 +78,8 @@ public class FileUploadWorkerTests
     [TearDown]
     public void TearDown()
     {
-        _exceptionOccurred?.Dispose();
-        _uploadingIsFinished?.Dispose();
+        _exceptionOccurred.Dispose();
+        _uploadingIsFinished.Dispose();
     }
 
     [Test]
@@ -107,7 +109,6 @@ public class FileUploadWorkerTests
     {
         // Arrange
         var slice = new FileUploaderSlice(1, new MemoryStream());
-        var expectedException = new Exception("Upload failed");
 
         await _availableSlices.Writer.WriteAsync(slice);
         _availableSlices.Writer.Complete();

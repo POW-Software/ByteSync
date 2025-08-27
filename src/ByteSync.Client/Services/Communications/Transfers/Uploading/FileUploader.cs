@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Threading;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
@@ -18,13 +17,10 @@ public class FileUploader : IFileUploader
         string? localFileToUpload, 
         MemoryStream? memoryStream, 
         SharedFileDefinition sharedFileDefinition, 
-        IFileUploadCoordinator fileUploadCoordinator,
-        IFileSlicer fileSlicer, 
-        IFileUploadWorker fileUploadWorker, 
-        IFilePartUploadAsserter filePartUploadAsserter,
         ISlicerEncrypter slicerEncrypter, 
         ILogger<FileUploader> logger,
-        SemaphoreSlim semaphoreSlim)
+        IFileUploadPreparer fileUploadPreparer,
+        IFileUploadProcessor fileUploadProcessor)
     {
         if (localFileToUpload == null && memoryStream == null)
         {
@@ -33,22 +29,12 @@ public class FileUploader : IFileUploader
         
         _slicerEncrypter = slicerEncrypter;
         _logger = logger;
+        _fileUploadPreparer = fileUploadPreparer;
+        _fileUploadProcessor = fileUploadProcessor;
         
         LocalFileToUpload = localFileToUpload;
         MemoryStream = memoryStream;
         SharedFileDefinition = sharedFileDefinition ?? throw new NullReferenceException("SharedFileDefinition is null");
-
-        // Create the separate components
-        _fileUploadPreparer = new FileUploadPreparer();
-        _fileUploadProcessor = new FileUploadProcessor(
-            slicerEncrypter,
-            logger,
-            fileUploadCoordinator,
-            fileSlicer,
-            fileUploadWorker,
-            filePartUploadAsserter,
-            localFileToUpload,
-            semaphoreSlim);
     }
 
     public int? MaxSliceLength { get; set; }

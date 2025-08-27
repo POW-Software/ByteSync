@@ -31,6 +31,7 @@ public class FileUploadWorkerMetricsTests
     private Channel<FileUploaderSlice> _availableSlices = null!;
     private UploadProgressState _progressState = null!;
     private SemaphoreSlim _semaphoreSlim = null!;
+    private Mock<IAdaptiveUploadController> _mockAdaptiveUploadController = null!;
 
     [SetUp]
     public void SetUp()
@@ -57,6 +58,7 @@ public class FileUploadWorkerMetricsTests
         _uploadingIsFinished = new ManualResetEvent(false);
         _availableSlices = Channel.CreateBounded<FileUploaderSlice>(8);
         _progressState = new UploadProgressState();
+        _mockAdaptiveUploadController = new Mock<IAdaptiveUploadController>();
 
         _fileUploadWorker = new FileUploadWorker(
             _mockPolicyFactory.Object,
@@ -66,7 +68,8 @@ public class FileUploadWorkerMetricsTests
             _exceptionOccurred,
             _mockStrategies.Object,
             _uploadingIsFinished,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockAdaptiveUploadController.Object);
 
         _mockPolicyFactory.Setup(x => x.BuildFileUploadPolicy()).Returns(_policy);
     }

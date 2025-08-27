@@ -23,20 +23,19 @@ public class FileUploadProcessorFactory : IFileUploadProcessorFactory
     }
 
     public IFileUploadProcessor Create(
+        ISlicerEncrypter slicerEncrypter,
         string? localFileToUpload,
         MemoryStream? memoryStream,
         SharedFileDefinition sharedFileDefinition)
     {
-        // Create the slicer encrypter
-        var slicerEncrypter = _context.Resolve<ISlicerEncrypter>();
-        
         // Create coordination components
         var fileUploadCoordinator = new FileUploadCoordinator(_context.Resolve<ILogger<FileUploadCoordinator>>());
         var semaphoreSlim = new SemaphoreSlim(1, 1);
         
         // Create file slicer
+        var adaptiveUploadController = _context.Resolve<IAdaptiveUploadController>();
         var fileSlicer = new FileSlicer(slicerEncrypter, fileUploadCoordinator.AvailableSlices, 
-            semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, _context.Resolve<ILogger<FileSlicer>>());
+            semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, _context.Resolve<ILogger<FileSlicer>>(), adaptiveUploadController);
         
         // Create file upload worker
         var policyFactory = _context.Resolve<IPolicyFactory>();
@@ -44,7 +43,7 @@ public class FileUploadProcessorFactory : IFileUploadProcessorFactory
         var strategies = _context.Resolve<IIndex<StorageProvider, IUploadStrategy>>();
         var fileUploadWorker = new FileUploadWorker(policyFactory, fileTransferApiClient, sharedFileDefinition,
             semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, strategies,
-            fileUploadCoordinator.UploadingIsFinished, _context.Resolve<ILogger<FileUploadWorker>>());
+            fileUploadCoordinator.UploadingIsFinished, _context.Resolve<ILogger<FileUploadWorker>>(), adaptiveUploadController);
         
         // Create file part upload asserter
         var sessionService = _context.Resolve<ISessionService>();
@@ -57,7 +56,8 @@ public class FileUploadProcessorFactory : IFileUploadProcessorFactory
             new TypedParameter(typeof(IFileUploadWorker), fileUploadWorker),
             new TypedParameter(typeof(IFilePartUploadAsserter), filePartUploadAsserter),
             new TypedParameter(typeof(string), localFileToUpload),
-            new TypedParameter(typeof(SemaphoreSlim), semaphoreSlim)
+            new TypedParameter(typeof(SemaphoreSlim), semaphoreSlim),
+            new TypedParameter(typeof(IAdaptiveUploadController), adaptiveUploadController)
         );
         
         return fileUploadProcessor;
