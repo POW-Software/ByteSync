@@ -9,7 +9,7 @@ namespace ByteSync.Services.Communications.Transfers.Uploading;
 public class FileUploadProcessor : IFileUploadProcessor
 {
     private readonly ISlicerEncrypter _slicerEncrypter;
-    private readonly ILogger _logger;
+    private readonly ILogger<FileUploadProcessor> _logger;
     private readonly IFileUploadCoordinator _fileUploadCoordinator;
     private readonly IFileSlicer _fileSlicer;
     private readonly IFileUploadWorker _fileUploadWorker;
@@ -23,7 +23,7 @@ public class FileUploadProcessor : IFileUploadProcessor
 
     public FileUploadProcessor(
         ISlicerEncrypter slicerEncrypter,
-        ILogger logger,
+        ILogger<FileUploadProcessor> logger,
         IFileUploadCoordinator fileUploadCoordinator,
         IFileSlicer fileSlicer,
         IFileUploadWorker fileUploadWorker,
