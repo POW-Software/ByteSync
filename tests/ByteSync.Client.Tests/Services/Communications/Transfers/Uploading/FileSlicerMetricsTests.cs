@@ -1,6 +1,7 @@
 using System.Threading.Channels;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
+using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
@@ -15,6 +16,7 @@ public class FileSlicerMetricsTests
 {
     private Mock<ISlicerEncrypter> _mockSlicerEncrypter = null!;
     private Mock<ILogger<FileSlicer>> _mockLogger = null!;
+    private Mock<IAdaptiveUploadController> _mockAdaptiveController = null!;
     private Channel<FileUploaderSlice> _availableSlices = null!;
     private SemaphoreSlim _semaphoreSlim = null!;
     private ManualResetEvent _exceptionOccurred = null!;
@@ -27,6 +29,7 @@ public class FileSlicerMetricsTests
     {
         _mockSlicerEncrypter = new Mock<ISlicerEncrypter>();
         _mockLogger = new Mock<ILogger<FileSlicer>>();
+        _mockAdaptiveController = new Mock<IAdaptiveUploadController>();
         _availableSlices = Channel.CreateBounded<FileUploaderSlice>(8);
         _semaphoreSlim = new SemaphoreSlim(1, 1);
         _exceptionOccurred = new ManualResetEvent(false);
@@ -36,7 +39,8 @@ public class FileSlicerMetricsTests
             _availableSlices,
             _semaphoreSlim,
             _exceptionOccurred,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockAdaptiveController.Object);
 
         _sharedFileDefinition = new SharedFileDefinition
         {

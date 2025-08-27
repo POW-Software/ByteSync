@@ -35,8 +35,9 @@ public class FileUploadProcessorFactory : IFileUploadProcessorFactory
         var semaphoreSlim = new SemaphoreSlim(1, 1);
         
         // Create file slicer
+        var adaptiveUploadController = _context.Resolve<IAdaptiveUploadController>();
         var fileSlicer = new FileSlicer(slicerEncrypter, fileUploadCoordinator.AvailableSlices, 
-            semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, _context.Resolve<ILogger<FileSlicer>>());
+            semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, _context.Resolve<ILogger<FileSlicer>>(), adaptiveUploadController);
         
         // Create file upload worker
         var policyFactory = _context.Resolve<IPolicyFactory>();
@@ -44,14 +45,12 @@ public class FileUploadProcessorFactory : IFileUploadProcessorFactory
         var strategies = _context.Resolve<IIndex<StorageProvider, IUploadStrategy>>();
         var fileUploadWorker = new FileUploadWorker(policyFactory, fileTransferApiClient, sharedFileDefinition,
             semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, strategies,
-            fileUploadCoordinator.UploadingIsFinished, _context.Resolve<ILogger<FileUploadWorker>>());
+            fileUploadCoordinator.UploadingIsFinished, _context.Resolve<ILogger<FileUploadWorker>>(), adaptiveUploadController);
         
         // Create file part upload asserter
         var sessionService = _context.Resolve<ISessionService>();
         var filePartUploadAsserter = new FilePartUploadAsserter(fileTransferApiClient, sessionService);
         
-        var adaptiveUploadController = _context.Resolve<IAdaptiveUploadController>();
-
         var fileUploadProcessor = _context.Resolve<IFileUploadProcessor>(
             new TypedParameter(typeof(ISlicerEncrypter), slicerEncrypter),
             new TypedParameter(typeof(IFileUploadCoordinator), fileUploadCoordinator),

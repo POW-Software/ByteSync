@@ -110,7 +110,7 @@ public class FileUploadProcessorTests
     public async Task ProcessUpload_ShouldStartUploadWorkers()
     {
         // Arrange
-        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>(), It.IsAny<IAdaptiveUploadController>()))
+        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
             .Returns(Task.CompletedTask);
         _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
             .Returns(Task.CompletedTask);
@@ -121,14 +121,14 @@ public class FileUploadProcessorTests
         await _fileUploadProcessor.ProcessUpload(_sharedFileDefinition);
 
         // Assert
-        _mockFileUploadWorker.Verify(x => x.UploadAvailableSlicesAdaptiveAsync(It.IsAny<Channel<FileUploaderSlice>>(), It.IsAny<UploadProgressState>(), It.IsAny<IAdaptiveUploadController>()), Times.Exactly(2));
+        _mockFileUploadWorker.Verify(x => x.UploadAvailableSlicesAdaptiveAsync(It.IsAny<Channel<FileUploaderSlice>>(), It.IsAny<UploadProgressState>()), Times.Exactly(2));
     }
 
     [Test]
     public async Task ProcessUpload_ShouldStartSlicer()
     {
         // Arrange
-        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>(), It.IsAny<IAdaptiveUploadController>()))
+        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
             .Returns(Task.CompletedTask);
         _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
             .Returns(Task.CompletedTask);
@@ -137,7 +137,7 @@ public class FileUploadProcessorTests
         await _fileUploadProcessor.ProcessUpload(_sharedFileDefinition);
 
         // Assert
-        _mockFileSlicer.Verify(x => x.SliceAndEncryptAdaptiveAsync(_sharedFileDefinition, It.IsAny<UploadProgressState>(), _mockAdaptiveController.Object), Times.Once);
+        _mockFileSlicer.Verify(x => x.SliceAndEncryptAdaptiveAsync(_sharedFileDefinition, It.IsAny<UploadProgressState>()), Times.Once);
     }
 
     [Test]
@@ -145,7 +145,7 @@ public class FileUploadProcessorTests
     {
         // Arrange
         var maxSliceLength = 1024 * 1024; // 1MB
-        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>(), It.IsAny<IAdaptiveUploadController>()))
+        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
             .Returns(Task.CompletedTask);
         _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
             .Returns(Task.CompletedTask);
@@ -154,14 +154,14 @@ public class FileUploadProcessorTests
         await _fileUploadProcessor.ProcessUpload(_sharedFileDefinition, maxSliceLength);
 
         // Assert: adaptive slicer is used; maxSliceLength is ignored under adaptive mode
-        _mockFileSlicer.Verify(x => x.SliceAndEncryptAdaptiveAsync(_sharedFileDefinition, It.IsAny<UploadProgressState>(), It.IsAny<IAdaptiveUploadController>()), Times.Once);
+        _mockFileSlicer.Verify(x => x.SliceAndEncryptAdaptiveAsync(_sharedFileDefinition, It.IsAny<UploadProgressState>()), Times.Once);
     }
 
     [Test]
     public async Task ProcessUpload_ShouldWaitForCompletion()
     {
         // Arrange
-        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>(), It.IsAny<IAdaptiveUploadController>()))
+        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
             .Returns(Task.CompletedTask);
         _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
             .Returns(Task.CompletedTask);
@@ -177,7 +177,7 @@ public class FileUploadProcessorTests
     public async Task ProcessUpload_ShouldDisposeSlicerEncrypter()
     {
         // Arrange
-        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>(), It.IsAny<IAdaptiveUploadController>()))
+        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
             .Returns(Task.CompletedTask);
         _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
             .Returns(Task.CompletedTask);
@@ -193,7 +193,7 @@ public class FileUploadProcessorTests
     public async Task ProcessUpload_ShouldAssertUploadIsFinished()
     {
         // Arrange
-        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>(), It.IsAny<IAdaptiveUploadController>()))
+        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
             .Returns(Task.CompletedTask);
         _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
             .Returns(Task.CompletedTask);
@@ -210,8 +210,8 @@ public class FileUploadProcessorTests
     {
         // Arrange
         var expectedException = new Exception("Test exception");
-        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>(), It.IsAny<IAdaptiveUploadController>()))
-            .Callback<SharedFileDefinition, UploadProgressState, IAdaptiveUploadController>((_, progressState, _) => progressState.Exceptions.Add(expectedException))
+        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
+            .Callback<SharedFileDefinition, UploadProgressState>((_, progressState) => progressState.Exceptions.Add(expectedException))
             .Returns(Task.CompletedTask);
 
         // Act & Assert
@@ -236,8 +236,8 @@ public class FileUploadProcessorTests
             _mockAdaptiveController.Object);
 
         var expectedException = new Exception("Test exception");
-        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>(), It.IsAny<IAdaptiveUploadController>()))
-            .Callback<SharedFileDefinition, UploadProgressState, IAdaptiveUploadController>((_, progressState, _) => progressState.Exceptions.Add(expectedException))
+        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
+            .Callback<SharedFileDefinition, UploadProgressState>((_, progressState) => progressState.Exceptions.Add(expectedException))
             .Returns(Task.CompletedTask);
 
         // Act & Assert
@@ -270,7 +270,7 @@ public class FileUploadProcessorTests
     public async Task GetTotalCreatedSlices_AfterProcessUpload_ShouldReturnCorrectValue()
     {
         // Arrange
-        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>(), It.IsAny<IAdaptiveUploadController>()))
+        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
             .Returns(Task.CompletedTask);
         _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
             .Returns(Task.CompletedTask);

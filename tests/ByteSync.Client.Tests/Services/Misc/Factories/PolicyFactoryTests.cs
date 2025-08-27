@@ -1,7 +1,5 @@
 using System.Net;
-using System.Net.Http;
 using ByteSync.Exceptions;
-using ByteSync.Interfaces;
 using ByteSync.Services.Misc.Factories;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -35,7 +33,7 @@ public class PolicyFactoryTests
         var policy = _factory.BuildFileUploadPolicy();
 
         using var cts = new CancellationTokenSource();
-        cts.CancelAfter(1);
+        cts.CancelAfter(1000);
 
         Func<Task> act = async () =>
         {
@@ -66,7 +64,7 @@ public class PolicyFactoryTests
         var policy = _factory.BuildFileUploadPolicy();
 
         using var cts = new CancellationTokenSource();
-        cts.CancelAfter(1);
+        cts.CancelAfter(1000);
 
         Func<Task> act = async () =>
         {

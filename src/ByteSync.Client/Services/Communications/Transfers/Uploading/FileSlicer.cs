@@ -14,15 +14,17 @@ public class FileSlicer : IFileSlicer
     private readonly Channel<FileUploaderSlice> _availableSlices;
     private readonly SemaphoreSlim _semaphoreSlim;
     private readonly ManualResetEvent _exceptionOccurred;
+    private readonly IAdaptiveUploadController _adaptiveUploadController;
 
     public FileSlicer(ISlicerEncrypter slicerEncrypter, Channel<FileUploaderSlice> availableSlices, 
-        SemaphoreSlim semaphoreSlim, ManualResetEvent exceptionOccurred, ILogger<FileSlicer> logger)
+        SemaphoreSlim semaphoreSlim, ManualResetEvent exceptionOccurred, ILogger<FileSlicer> logger, IAdaptiveUploadController adaptiveUploadController)
     {
         _slicerEncrypter = slicerEncrypter;
         _availableSlices = availableSlices;
         _semaphoreSlim = semaphoreSlim;
         _exceptionOccurred = exceptionOccurred;
         _logger = logger;
+        _adaptiveUploadController = adaptiveUploadController;
     }
 
     public int? MaxSliceLength { get; set; }
@@ -87,64 +89,63 @@ public class FileSlicer : IFileSlicer
         }
     }
 
-	public async Task SliceAndEncryptAdaptiveAsync(SharedFileDefinition sharedFileDefinition, UploadProgressState progressState,
-	    IAdaptiveUploadController adaptiveUploadController)
-	{
-		try
-		{
-			_slicerEncrypter.MaxSliceLength = adaptiveUploadController.CurrentChunkSizeBytes;
+    public async Task SliceAndEncryptAdaptiveAsync(SharedFileDefinition sharedFileDefinition, UploadProgressState progressState)
+    {
+        try
+        {
+            _slicerEncrypter.MaxSliceLength = _adaptiveUploadController.CurrentChunkSizeBytes;
 
-			var canContinue = true;
-			while (canContinue)
-			{
-				if (_exceptionOccurred.WaitOne(0))
-				{
-					return;
-				}
+            var canContinue = true;
+            while (canContinue)
+            {
+                if (_exceptionOccurred.WaitOne(0))
+                {
+                    return;
+                }
 
-				var nextSize = adaptiveUploadController.GetNextChunkSizeBytes();
-				if (nextSize > 0)
-				{
-					_slicerEncrypter.MaxSliceLength = nextSize;
-				}
+                var nextSize = _adaptiveUploadController.GetNextChunkSizeBytes();
+                if (nextSize > 0)
+                {
+                    _slicerEncrypter.MaxSliceLength = nextSize;
+                }
 
-				var fileUploaderSlice = await _slicerEncrypter.SliceAndEncrypt();
+                var fileUploaderSlice = await _slicerEncrypter.SliceAndEncrypt();
 
-				if (fileUploaderSlice != null)
-				{
-					await _semaphoreSlim.WaitAsync();
-					try
-					{
-						progressState.TotalCreatedSlices += 1;
-					}
-					finally
-					{
-						_semaphoreSlim.Release();
-					}
+                if (fileUploaderSlice != null)
+                {
+                    await _semaphoreSlim.WaitAsync();
+                    try
+                    {
+                        progressState.TotalCreatedSlices += 1;
+                    }
+                    finally
+                    {
+                        _semaphoreSlim.Release();
+                    }
 
-					await _availableSlices.Writer.WriteAsync(fileUploaderSlice);
-				}
-				else
-				{
-					_availableSlices.Writer.Complete();
-					canContinue = false;
-				}
-			}
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "SliceAndEncryptAdaptive");
+                    await _availableSlices.Writer.WriteAsync(fileUploaderSlice);
+                }
+                else
+                {
+                    _availableSlices.Writer.Complete();
+                    canContinue = false;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "SliceAndEncryptAdaptive");
 
-			await _semaphoreSlim.WaitAsync();
-			try
-			{
-				progressState.Exceptions.Add(ex);
-			}
-			finally
-			{
-				_semaphoreSlim.Release();
-			}
-			_exceptionOccurred.Set();
-		}
-	}
+            await _semaphoreSlim.WaitAsync();
+            try
+            {
+                progressState.Exceptions.Add(ex);
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
+            _exceptionOccurred.Set();
+        }
+    }
 } 

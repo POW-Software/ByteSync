@@ -51,11 +51,11 @@ public class FileUploadProcessor : IFileUploadProcessor
         // Start upload workers (adaptive)
         for (var i = 0; i < _adaptiveUploadController.CurrentParallelism; i++)
         {
-            _ = Task.Run(() => _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_fileUploadCoordinator.AvailableSlices, _progressState, _adaptiveUploadController));
+            _ = Task.Run(() => _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_fileUploadCoordinator.AvailableSlices, _progressState!));
         }
         
         // Start slicer (adaptive)
-        await Task.Run(() => _fileSlicer.SliceAndEncryptAdaptiveAsync(sharedFileDefinition, _progressState, _adaptiveUploadController));
+        await Task.Run(() => _fileSlicer.SliceAndEncryptAdaptiveAsync(sharedFileDefinition, _progressState));
         
         // Wait for completion
         await _fileUploadCoordinator.WaitForCompletionAsync();

@@ -12,10 +12,10 @@ public class ApiException : Exception
     {
     }
 
-    public ApiException(string message, HttpStatusCode httptatusCode) : base(message)
+    public ApiException(string message, HttpStatusCode httpStatusCode) : base(message)
     {
-        HttptatusCode = httptatusCode;
+        HttpStatusCode = httpStatusCode;
     }
 
-    public HttpStatusCode? HttptatusCode { get; set; }
+    public HttpStatusCode? HttpStatusCode { get; set; }
 }

@@ -38,12 +38,11 @@ public class PolicyFactory : IPolicyFactory
     {
         var policy = Policy
             .HandleResult<DownloadFileResponse>(x => !x.IsSuccess)
-            .Or<HttpRequestException>(e => e.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            .Or<HttpRequestException>(e => e.StatusCode == HttpStatusCode.Forbidden)
             .WaitAndRetryAsync(MAX_RETRIES, SleepDurationProvider, onRetryAsync: async (response, timeSpan, retryCount, _) =>
             {
-                _logger.LogError("FileTransferOperation failed (Attempt number {AttemptNumber}). ResponseCode:{ResponseCode}" +
-                                 "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
-                                 "Waiting {WaitingTime} seconds before retry", 
+                _logger.LogError(response.Exception, 
+                    "FileTransferOperation failed (Attempt number {AttemptNumber}). ResponseCode:{ResponseCode} ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. Waiting {WaitingTime} seconds before retry",
                     retryCount, response.Result?.StatusCode!, response.Exception?.GetType().Name!, response.Exception?.Message!, timeSpan);
                 await Task.CompletedTask;
             });
@@ -62,19 +61,17 @@ public class PolicyFactory : IPolicyFactory
                                            || e.StatusCode == HttpStatusCode.GatewayTimeout
                                            || e.StatusCode == HttpStatusCode.RequestTimeout
                                            || e.StatusCode == HttpStatusCode.InternalServerError)
-            .Or<ApiException>(ex => ex.HttptatusCode == HttpStatusCode.Unauthorized 
-                                     || ex.HttptatusCode == HttpStatusCode.ServiceUnavailable 
-                                     || ex.HttptatusCode == HttpStatusCode.BadGateway
-                                     || ex.HttptatusCode == HttpStatusCode.GatewayTimeout
-                                     || ex.HttptatusCode == HttpStatusCode.RequestTimeout
-                                     || ex.HttptatusCode == HttpStatusCode.InternalServerError)
+            .Or<ApiException>(ex => ex.HttpStatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.ServiceUnavailable
+                                    || ex.HttpStatusCode == HttpStatusCode.BadGateway
+                                    || ex.HttpStatusCode == HttpStatusCode.GatewayTimeout
+                                    || ex.HttpStatusCode == HttpStatusCode.RequestTimeout
+                                    || ex.HttpStatusCode == HttpStatusCode.InternalServerError)
             .Or<TaskCanceledException>()
             .Or<TimeoutException>()
             .WaitAndRetryAsync(MAX_RETRIES, SleepDurationProvider, onRetryAsync: async (response, timeSpan, retryCount, _) =>
             {
-                _logger.LogError("FileTransferOperation failed (Attempt number {AttemptNumber}). ResponseCode:{ResponseCode}" +
-                                 "ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. " +
-                                 "Waiting {WaitingTime} seconds before retry", 
+                _logger.LogError(response.Exception,
+                    "FileTransferOperation failed (Attempt number {AttemptNumber}). ResponseCode:{ResponseCode} ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. Waiting {WaitingTime} seconds before retry",
                     retryCount, response.Result?.StatusCode!, response.Exception?.GetType().Name!, response.Exception?.Message!, timeSpan);
                 await Task.CompletedTask;
             });

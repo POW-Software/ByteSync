@@ -1,5 +1,3 @@
-using System.Threading.Channels;
-using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Encryptions;
@@ -16,10 +14,8 @@ public class FileUploaderTests
 {
     private Mock<ISlicerEncrypter> _mockSlicerEncrypter = null!;
     private Mock<ILogger<FileUploader>> _mockLogger = null!;
-    private Mock<IFileUploadCoordinator> _mockFileUploadCoordinator = null!;
-    private Mock<IFileSlicer> _mockFileSlicer = null!;
-    private Mock<IFileUploadWorker> _mockFileUploadWorker = null!;
-    private Mock<IFilePartUploadAsserter> _mockFilePartUploadAsserter = null!;
+    private Mock<IFileUploadPreparer> _mockFileUploadPreparer = null!;
+    private Mock<IFileUploadProcessor> _mockFileUploadProcessor = null!;
     private SharedFileDefinition _sharedFileDefinition = null!;
     private string _testFilePath = null!;
     private MemoryStream _testMemoryStream = null!;
@@ -31,10 +27,8 @@ public class FileUploaderTests
     {
         _mockSlicerEncrypter = new Mock<ISlicerEncrypter>();
         _mockLogger = new Mock<ILogger<FileUploader>>();
-        _mockFileUploadCoordinator = new Mock<IFileUploadCoordinator>();
-        _mockFileSlicer = new Mock<IFileSlicer>();
-        _mockFileUploadWorker = new Mock<IFileUploadWorker>();
-        _mockFilePartUploadAsserter = new Mock<IFilePartUploadAsserter>();
+        _mockFileUploadPreparer = new Mock<IFileUploadPreparer>();
+        _mockFileUploadProcessor = new Mock<IFileUploadProcessor>();
         _semaphoreSlim = new SemaphoreSlim(1, 1);
         _mockAdaptiveController = new Mock<IAdaptiveUploadController>();
 
@@ -56,11 +50,6 @@ public class FileUploaderTests
         writer.Flush();
         _testMemoryStream.Position = 0;
 
-        // Setup coordinator mocks
-        _mockFileUploadCoordinator.Setup(x => x.AvailableSlices).Returns(Channel.CreateBounded<FileUploaderSlice>(8));
-        _mockFileUploadCoordinator.Setup(x => x.WaitForCompletionAsync()).Returns(Task.CompletedTask);
-        _mockFileUploadCoordinator.Setup(x => x.SyncRoot).Returns(new object());
-        
         // Initialize semaphore
         _semaphoreSlim = new SemaphoreSlim(1, 1);
     }
@@ -84,14 +73,10 @@ public class FileUploaderTests
             _testFilePath,
             null,
             _sharedFileDefinition,
-            _mockFileUploadCoordinator.Object,
-            _mockFileSlicer.Object,
-            _mockFileUploadWorker.Object,
-            _mockFilePartUploadAsserter.Object,
             _mockSlicerEncrypter.Object,
             _mockLogger.Object,
-            _semaphoreSlim,
-            _mockAdaptiveController.Object);
+            _mockFileUploadPreparer.Object,
+            _mockFileUploadProcessor.Object);
 
         // Assert
         fileUploader.Should().NotBeNull();
@@ -105,14 +90,10 @@ public class FileUploaderTests
             null,
             _testMemoryStream,
             _sharedFileDefinition,
-            _mockFileUploadCoordinator.Object,
-            _mockFileSlicer.Object,
-            _mockFileUploadWorker.Object,
-            _mockFilePartUploadAsserter.Object,
             _mockSlicerEncrypter.Object,
             _mockLogger.Object,
-            _semaphoreSlim,
-            _mockAdaptiveController.Object);
+            _mockFileUploadPreparer.Object,
+            _mockFileUploadProcessor.Object);
 
         // Assert
         fileUploader.Should().NotBeNull();
@@ -126,14 +107,10 @@ public class FileUploaderTests
             null,
             null,
             _sharedFileDefinition,
-            _mockFileUploadCoordinator.Object,
-            _mockFileSlicer.Object,
-            _mockFileUploadWorker.Object,
-            _mockFilePartUploadAsserter.Object,
             _mockSlicerEncrypter.Object,
             _mockLogger.Object,
-            _semaphoreSlim,
-            _mockAdaptiveController.Object);
+            _mockFileUploadPreparer.Object,
+            _mockFileUploadProcessor.Object);
 
         action.Should().Throw<ApplicationException>()
             .WithMessage("localFileToUpload and memoryStream are null");
@@ -147,14 +124,10 @@ public class FileUploaderTests
             _testFilePath,
             null,
             null!,
-            _mockFileUploadCoordinator.Object,
-            _mockFileSlicer.Object,
-            _mockFileUploadWorker.Object,
-            _mockFilePartUploadAsserter.Object,
             _mockSlicerEncrypter.Object,
             _mockLogger.Object,
-            _semaphoreSlim,
-            _mockAdaptiveController.Object);
+            _mockFileUploadPreparer.Object,
+            _mockFileUploadProcessor.Object);
 
         action.Should().Throw<NullReferenceException>()
             .WithMessage("SharedFileDefinition is null");
@@ -168,14 +141,10 @@ public class FileUploaderTests
             _testFilePath,
             null,
             _sharedFileDefinition,
-            _mockFileUploadCoordinator.Object,
-            _mockFileSlicer.Object,
-            _mockFileUploadWorker.Object,
-            _mockFilePartUploadAsserter.Object,
             _mockSlicerEncrypter.Object,
             _mockLogger.Object,
-            _semaphoreSlim,
-            _mockAdaptiveController.Object);
+            _mockFileUploadPreparer.Object,
+            _mockFileUploadProcessor.Object);
 
         _mockSlicerEncrypter.Setup(x => x.Initialize(It.IsAny<FileInfo>(), It.IsAny<SharedFileDefinition>()));
 
@@ -199,14 +168,10 @@ public class FileUploaderTests
             null,
             _testMemoryStream,
             _sharedFileDefinition,
-            _mockFileUploadCoordinator.Object,
-            _mockFileSlicer.Object,
-            _mockFileUploadWorker.Object,
-            _mockFilePartUploadAsserter.Object,
             _mockSlicerEncrypter.Object,
             _mockLogger.Object,
-            _semaphoreSlim,
-            _mockAdaptiveController.Object);
+            _mockFileUploadPreparer.Object,
+            _mockFileUploadProcessor.Object);
 
         _mockSlicerEncrypter.Setup(x => x.Initialize(It.IsAny<MemoryStream>(), It.IsAny<SharedFileDefinition>()));
 
@@ -230,14 +195,10 @@ public class FileUploaderTests
             _testFilePath,
             null,
             _sharedFileDefinition,
-            _mockFileUploadCoordinator.Object,
-            _mockFileSlicer.Object,
-            _mockFileUploadWorker.Object,
-            _mockFilePartUploadAsserter.Object,
             _mockSlicerEncrypter.Object,
             _mockLogger.Object,
-            _semaphoreSlim,
-            _mockAdaptiveController.Object);
+            _mockFileUploadPreparer.Object,
+            _mockFileUploadProcessor.Object);
 
         var expectedValue = 1024 * 1024; // 1MB
 
@@ -257,17 +218,25 @@ public class FileUploaderTests
             _testFilePath,
             null,
             _sharedFileDefinition,
-            _mockFileUploadCoordinator.Object,
-            _mockFileSlicer.Object,
-            _mockFileUploadWorker.Object,
-            _mockFilePartUploadAsserter.Object,
             _mockSlicerEncrypter.Object,
             _mockLogger.Object,
-            _semaphoreSlim,
-            _mockAdaptiveController.Object);
+            _mockFileUploadPreparer.Object,
+            _mockFileUploadProcessor.Object);
 
         var fileInfo = new FileInfo(_testFilePath);
         var originalIV = _sharedFileDefinition.IV;
+
+        _mockFileUploadPreparer
+            .Setup(x => x.PrepareUpload(It.IsAny<SharedFileDefinition>(), It.IsAny<long>()))
+            .Callback<SharedFileDefinition, long>((s, len) =>
+            {
+                s.IV = new byte[] { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 };
+                s.UploadedFileLength = len;
+            });
+
+        _mockFileUploadProcessor
+            .Setup(x => x.ProcessUpload(It.IsAny<SharedFileDefinition>(), It.IsAny<int?>()))
+            .Returns(Task.CompletedTask);
 
         _mockSlicerEncrypter.Setup(x => x.Initialize(It.IsAny<FileInfo>(), It.IsAny<SharedFileDefinition>()));
 
