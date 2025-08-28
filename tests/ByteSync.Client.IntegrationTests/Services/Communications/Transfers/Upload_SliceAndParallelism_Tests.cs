@@ -1,7 +1,5 @@
 using Autofac;
-using ByteSync.Business.Communications.Transfers;
 using ByteSync.Client.IntegrationTests.TestHelpers;
-using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.DependencyInjection;
 using ByteSync.Interfaces.Controls.Communications;
@@ -17,86 +15,26 @@ public class Upload_SliceAndParallelism_Tests
 {
     private ILifetimeScope _clientScope = null!;
     
-    private static void WarmUpToParallelism(ILifetimeScope scope, int targetParallelism)
+    // Helper to inject a fixed adaptive controller for deterministic tests
+    private ILifetimeScope BeginAdaptiveScope(int chunkSizeBytes, int parallelism)
     {
-        var controller = scope.Resolve<IAdaptiveUploadController>();
-        var attempts = 0;
-        while (controller.CurrentParallelism < targetParallelism && attempts < 200)
+        return _clientScope.BeginLifetimeScope(b =>
         {
-            controller.RecordUploadResult(TimeSpan.FromMilliseconds(10), true, attempts, 200);
-            attempts++;
-        }
-        controller.CurrentParallelism.Should().BeGreaterThanOrEqualTo(targetParallelism);
+            b.RegisterInstance<IAdaptiveUploadController>(new FixedAdaptiveUploadController(chunkSizeBytes, parallelism)).SingleInstance();
+        });
     }
 
-    private class TestUploadStrategy : IUploadStrategy
-    {
-        private static readonly object Sync = new object();
-        public static readonly Dictionary<string, List<(int PartNumber, long Bytes, int TaskId)>> Records = new();
-
-        public Task<UploadFileResponse> UploadAsync(FileUploaderSlice slice, FileStorageLocation storageLocation, CancellationToken cancellationToken)
-        {
-            var taskId = Environment.CurrentManagedThreadId;
-            lock (Sync)
-            {
-                var sharedId = storageLocation.Url; // We will encode SharedFileDefinition.Id in the URL via TestApiClient
-                if (!Records.ContainsKey(sharedId))
-                {
-                    Records[sharedId] = new List<(int, long, int)>();
-                }
-                Records[sharedId].Add((slice.PartNumber, slice.MemoryStream?.Length ?? 0L, taskId));
-            }
-            return Task.FromResult(UploadFileResponse.Success(200));
-        }
-    }
-
-    private class FixedAdaptiveUploadController : IAdaptiveUploadController
-    {
-        public int CurrentChunkSizeBytes { get; private set; }
-        public int CurrentParallelism { get; private set; }
-
-        public FixedAdaptiveUploadController(int chunkSizeBytes, int parallelism)
-        {
-            CurrentChunkSizeBytes = chunkSizeBytes;
-            CurrentParallelism = parallelism;
-        }
-
-        public int GetNextChunkSizeBytes()
-        {
-            return CurrentChunkSizeBytes;
-        }
-
-        public void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null, Exception? exception = null)
-        {
-            // no-op: fixed behavior for tests
-        }
-    }
-
-    private class TestFileTransferApiClient : IFileTransferApiClient
-    {
-        public Task<string> GetUploadFileUrl(TransferParameters transferParameters)
-        {
-            // Use SharedFileDefinition.Id as a pseudo URL to key records
-            return Task.FromResult(transferParameters.SharedFileDefinition.Id);
-        }
-
-        public async Task<FileStorageLocation> GetUploadFileStorageLocation(TransferParameters transferParameters)
-        {
-            var url = await GetUploadFileUrl(transferParameters);
-            return new FileStorageLocation(url, StorageProvider.AzureBlobStorage);
-        }
-
-        public Task<string> GetDownloadFileUrl(TransferParameters transferParameters) => Task.FromResult(string.Empty);
-        public Task<FileStorageLocation> GetDownloadFileStorageLocation(TransferParameters transferParameters) => Task.FromResult(new FileStorageLocation(string.Empty, StorageProvider.AzureBlobStorage));
-        public Task AssertFilePartIsUploaded(TransferParameters transferParameters) => Task.CompletedTask;
-        public Task AssertUploadIsFinished(TransferParameters transferParameters) => Task.CompletedTask;
-        public Task AssertFilePartIsDownloaded(TransferParameters transferParameters) => Task.CompletedTask;
-        public Task AssertDownloadIsFinished(TransferParameters transferParameters) => Task.CompletedTask;
-    }
+    // Test doubles moved to TestHelpers/UploadTestDoubles.cs
 
     [SetUp]
     public void SetUp()
     {
+        // Ensure enough threadpool threads for stable parallel worker scheduling in tests
+        ThreadPool.GetMinThreads(out var worker, out var io);
+        if (worker < 8 || io < 8)
+        {
+            ThreadPool.SetMinThreads(Math.Max(worker, 8), Math.Max(io, 8));
+        }
         if (ByteSync.Services.ContainerProvider.Container == null)
         {
             ServiceRegistrar.RegisterComponents();
@@ -114,11 +52,8 @@ public class Upload_SliceAndParallelism_Tests
         var cloudSessionConnectionRepository = scope.Resolve<ICloudSessionConnectionRepository>();
         cloudSessionConnectionRepository.SetAesEncryptionKey(AesGenerator.GenerateKey());
 
-        // Clear previous records
-        lock (TestUploadStrategy.Records)
-        {
-            TestUploadStrategy.Records.Clear();
-        }
+        // Clear previous records and concurrency counters
+        TestUploadStrategy.Reset();
     }
 
     [TearDown]
@@ -142,10 +77,7 @@ public class Upload_SliceAndParallelism_Tests
     [Test]
     public async Task Upload_OneSmallFile_FixedSliceLen_FixedParallel_ShouldHaveOneTaskAndFullLength()
     {
-        using var scope = _clientScope.BeginLifetimeScope(b =>
-        {
-            b.RegisterInstance<IAdaptiveUploadController>(new FixedAdaptiveUploadController(1024, 2)).SingleInstance();
-        });
+        using var scope = BeginAdaptiveScope(1024, 2);
         var uploaderFactory = scope.Resolve<IFileUploaderFactory>();
 
         var shared = BuildShared("small1");
@@ -161,17 +93,14 @@ public class Upload_SliceAndParallelism_Tests
         TestUploadStrategy.Records.ContainsKey(shared.Id).Should().BeTrue();
         var recs = TestUploadStrategy.Records[shared.Id];
         recs.Count.Should().Be(1); // only one slice
-        recs.Select(r => r.TaskId).Distinct().Count().Should().Be(1); // one worker involved
+        TestUploadStrategy.MaxInFlight.Should().Be(1); // one worker involved
         shared.UploadedFileLength.Should().Be(inputContent.Length); // full length transferred
     }
 
     [Test]
     public async Task Upload_OneBigFile_MoreThanThreeSlices_FixedParallel2_ShouldHaveTwoTasksAndFullLength()
     {
-        using var scope = _clientScope.BeginLifetimeScope(b =>
-        {
-            b.RegisterInstance<IAdaptiveUploadController>(new FixedAdaptiveUploadController(1024 * 1024, 2)).SingleInstance();
-        });
+        using var scope = BeginAdaptiveScope(1024 * 1024, 2);
         var uploaderFactory = scope.Resolve<IFileUploaderFactory>();
 
         var shared = BuildShared("big1");
@@ -187,7 +116,7 @@ public class Upload_SliceAndParallelism_Tests
 
         var recs = TestUploadStrategy.Records[shared.Id];
         recs.Count.Should().BeGreaterThanOrEqualTo(4);
-        recs.Select(r => r.TaskId).Distinct().Count().Should().Be(2);
+        TestUploadStrategy.MaxInFlight.Should().Be(2);
         shared.UploadedFileLength.Should().Be(inputContent.Length);
     }
 
@@ -195,10 +124,7 @@ public class Upload_SliceAndParallelism_Tests
     [Test]
     public async Task Upload_TwoSmallFiles_FixedSliceLen_FixedParallel_ShouldHaveTwoTasksAndFullLength()
     {
-        using var scope = _clientScope.BeginLifetimeScope(b =>
-        {
-            b.RegisterInstance<IAdaptiveUploadController>(new FixedAdaptiveUploadController(1024, 2)).SingleInstance();
-        });
+        using var scope = BeginAdaptiveScope(1024, 2);
         var uploaderFactory = scope.Resolve<IFileUploaderFactory>();
 
         var shared1 = BuildShared("s1");
@@ -217,11 +143,7 @@ public class Upload_SliceAndParallelism_Tests
         // Run both uploads concurrently to involve two workers
         await Task.WhenAll(uploader1.Upload(), uploader2.Upload());
 
-        var allTaskIds = TestUploadStrategy.Records[shared1.Id].Select(r => r.TaskId)
-            .Concat(TestUploadStrategy.Records[shared2.Id].Select(r => r.TaskId))
-            .Distinct()
-            .ToList();
-        allTaskIds.Count.Should().Be(2);
+        TestUploadStrategy.MaxInFlight.Should().Be(2);
         TestUploadStrategy.Records[shared1.Id].Count.Should().Be(1);
         TestUploadStrategy.Records[shared2.Id].Count.Should().Be(1);
         shared1.UploadedFileLength.Should().Be(c1.Length);
@@ -231,10 +153,7 @@ public class Upload_SliceAndParallelism_Tests
     [Test]
     public async Task Upload_TwoBigFiles_MoreThanThreeSlicesEach_FixedParallel3_ShouldHaveThreeTasksAndFullLength()
     {
-        using var scope = _clientScope.BeginLifetimeScope(b =>
-        {
-            b.RegisterInstance<IAdaptiveUploadController>(new FixedAdaptiveUploadController(1024 * 1024, 3)).SingleInstance();
-        });
+        using var scope = BeginAdaptiveScope(1024 * 1024, 3);
         var uploaderFactory = scope.Resolve<IFileUploaderFactory>();
 
         var shared1 = BuildShared("b1");
@@ -257,8 +176,7 @@ public class Upload_SliceAndParallelism_Tests
 
         TestUploadStrategy.Records[shared1.Id].Count.Should().BeGreaterThanOrEqualTo(4);
         TestUploadStrategy.Records[shared2.Id].Count.Should().BeGreaterThanOrEqualTo(4);
-        TestUploadStrategy.Records[shared1.Id].Select(r => r.TaskId).Distinct().Count().Should().Be(3);
-        TestUploadStrategy.Records[shared2.Id].Select(r => r.TaskId).Distinct().Count().Should().Be(3);
+        TestUploadStrategy.MaxInFlight.Should().Be(3);
         shared1.UploadedFileLength.Should().Be(c1.Length);
         shared2.UploadedFileLength.Should().Be(c2.Length);
     }
