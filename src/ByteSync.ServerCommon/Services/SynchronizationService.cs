@@ -40,7 +40,7 @@ public class SynchronizationService : ISynchronizationService
             
             trackingAction.IsSourceSuccess = true;
 
-            foreach (var targetClientInstanceId in trackingAction.TargetClientInstanceIds)
+            foreach (var targetClientInstanceId in trackingAction.TargetClientInstanceAndNodeIds)
             {
                 targetInstanceIds.Add(targetClientInstanceId);
             }
@@ -71,7 +71,7 @@ public class SynchronizationService : ISynchronizationService
         var actionsGroupsId = sharedFileDefinition.ActionsGroupIds!.First();
         var trackingAction = await _trackingActionRepository.GetOrThrow(sharedFileDefinition.SessionId, actionsGroupsId);
         
-        await _synchronizationProgressService.FilePartIsUploaded(sharedFileDefinition, partNumber, trackingAction.TargetClientInstanceIds);
+        await _synchronizationProgressService.FilePartIsUploaded(sharedFileDefinition, partNumber, trackingAction.TargetClientInstanceAndNodeIds);
     }
 
     public async Task OnDownloadIsFinishedAsync(SharedFileDefinition sharedFileDefinition, Client client)

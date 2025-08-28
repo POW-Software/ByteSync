@@ -124,8 +124,8 @@ public class SharedActionsGroup : AbstractActionsGroup
         actionsGroupDefinition.FileSystemType = PathIdentity.FileSystemType;
         actionsGroupDefinition.Operator = Operator;
         actionsGroupDefinition.AppliesOnlySynchronizeDate = AppliesOnlySynchronizeDate;
-        actionsGroupDefinition.Source = Source?.ClientInstanceId;
-        actionsGroupDefinition.Targets = Targets.Select(t => t.ClientInstanceId).ToList();
+        actionsGroupDefinition.SourceClientInstanceId = Source?.ClientInstanceId;
+        actionsGroupDefinition.TargetClientInstanceAndNodeIds = Targets.Select(t => $"{t.ClientInstanceId}_{t.NodeId}").ToList();
         actionsGroupDefinition.Size = Size;
         actionsGroupDefinition.CreationTimeUtc = CreationTimeUtc;
         actionsGroupDefinition.LastWriteTimeUtc = LastWriteTimeUtc;

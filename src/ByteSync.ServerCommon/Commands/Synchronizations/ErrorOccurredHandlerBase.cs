@@ -60,13 +60,16 @@ public abstract class ErrorOccurredHandlerBase<TRequest> : IRequestHandler<TRequ
             }
             else
             {
-                if (trackingAction.TargetClientInstanceIds.Contains(request.Client.ClientInstanceId))
+                var targetClientInstanceAndNodeId = trackingAction.TargetClientInstanceAndNodeIds
+                    .FirstOrDefault(id => id.StartsWith($"{request.Client.ClientInstanceId}_"));
+                    
+                if (targetClientInstanceAndNodeId != null)
                 {
-                    trackingAction.AddErrorOnTarget(request.Client.ClientInstanceId);
+                    trackingAction.AddErrorOnTarget(targetClientInstanceAndNodeId);
                 }
                 else
                 {
-                    throw new InvalidOperationException("Client is not a target of the action");
+                    throw new InvalidOperationException("Client is not a source or target of the action");
                 }
             }
 

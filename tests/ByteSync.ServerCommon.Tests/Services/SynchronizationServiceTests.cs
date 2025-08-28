@@ -40,7 +40,7 @@ public class SynchronizationServiceTests
         var sharedFileDefinition = new SharedFileDefinition { SessionId = sessionId };
 
         TrackingActionEntity trackingActionEntity = new TrackingActionEntity();
-        trackingActionEntity.TargetClientInstanceIds.Add("targetClientInstanceId");
+        trackingActionEntity.TargetClientInstanceAndNodeIds.Add("targetClientInstanceId_nodeId");
         SynchronizationEntity synchronizationEntity = new SynchronizationEntity();
 
         A.CallTo(() => _trackingActionRepository.AddOrUpdate(sessionId, A<List<string>>.Ignored, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>.Ignored))
@@ -50,7 +50,7 @@ public class SynchronizationServiceTests
         A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .Returns(true);
 
-        A.CallTo(() => _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, 1, A<HashSet<string>>.That.Contains("targetClientInstanceId")))
+        A.CallTo(() => _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, 1, A<HashSet<string>>.That.Contains("targetClientInstanceId_nodeId")))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -61,7 +61,7 @@ public class SynchronizationServiceTests
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, 1, A<HashSet<string>>.That.Contains("targetClientInstanceId")))
+        A.CallTo(() => _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, 1, A<HashSet<string>>.That.Contains("targetClientInstanceId_nodeId")))
             .MustHaveHappenedOnceExactly();
     }
     
@@ -74,7 +74,7 @@ public class SynchronizationServiceTests
         var sharedFileDefinition = new SharedFileDefinition { SessionId = sessionId };
 
         TrackingActionEntity trackingActionEntity = new TrackingActionEntity();
-        trackingActionEntity.TargetClientInstanceIds.Add("targetClientInstanceId");
+        trackingActionEntity.TargetClientInstanceAndNodeIds.Add("targetClientInstanceId_nodeId");
         SynchronizationEntity synchronizationEntity = new SynchronizationEntity();
 
         A.CallTo(() => _trackingActionRepository.AddOrUpdate(sessionId, A<List<string>>.Ignored, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>.Ignored))
@@ -92,7 +92,7 @@ public class SynchronizationServiceTests
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, 1, A<HashSet<string>>.That.Contains("targetClientInstanceId")))
+        A.CallTo(() => _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, 1, A<HashSet<string>>.That.Contains("targetClientInstanceId_nodeId")))
             .MustNotHaveHappened();
     }
     
@@ -108,7 +108,7 @@ public class SynchronizationServiceTests
         };
 
         TrackingActionEntity trackingActionEntity = new TrackingActionEntity();
-        trackingActionEntity.TargetClientInstanceIds.Add("targetClientInstanceId");
+        trackingActionEntity.TargetClientInstanceAndNodeIds.Add("targetClientInstanceId_nodeId");
         SynchronizationEntity synchronizationEntity = new SynchronizationEntity();
 
         A.CallTo(() => _trackingActionRepository.GetOrThrow(sessionId, "ActionGroupId"))
@@ -117,7 +117,7 @@ public class SynchronizationServiceTests
         A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .Returns(true);
 
-        A.CallTo(() => _synchronizationProgressService.FilePartIsUploaded(sharedFileDefinition, 1, A<HashSet<string>>.That.Contains("targetClientInstanceId")))
+        A.CallTo(() => _synchronizationProgressService.FilePartIsUploaded(sharedFileDefinition, 1, A<HashSet<string>>.That.Contains("targetClientInstanceId_nodeId")))
             .Returns(Task.CompletedTask);
         
         A.CallTo(() => _synchronizationRepository.Get(sessionId))
@@ -130,7 +130,7 @@ public class SynchronizationServiceTests
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _synchronizationProgressService.FilePartIsUploaded(sharedFileDefinition, 1, A<HashSet<string>>.That.Contains("targetClientInstanceId")))
+        A.CallTo(() => _synchronizationProgressService.FilePartIsUploaded(sharedFileDefinition, 1, A<HashSet<string>>.That.Contains("targetClientInstanceId_nodeId")))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _synchronizationRepository.Get(sessionId))
             .MustHaveHappenedOnceExactly();

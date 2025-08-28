@@ -44,9 +44,9 @@ public class TrackingActionEntityTests
         // Arrange
         var entity = new TrackingActionEntity
         {
-            TargetClientInstanceIds = new HashSet<string> { "target1", "target2" },
-            SuccessTargetClientInstanceIds = new HashSet<string> { "target1" },
-            ErrorTargetClientInstanceIds = new HashSet<string> { "target2" }
+            TargetClientInstanceAndNodeIds = new HashSet<string> { "target1_node1", "target2_node2" },
+            SuccessTargetClientInstanceAndNodeIds = new HashSet<string> { "target1_node1" },
+            ErrorTargetClientInstanceAndNodeIds = new HashSet<string> { "target2_node2" }
         };
 
         // Act
@@ -62,9 +62,9 @@ public class TrackingActionEntityTests
         // Arrange
         var entity = new TrackingActionEntity
         {
-            TargetClientInstanceIds = new HashSet<string> { "target1", "target2", "target3" },
-            SuccessTargetClientInstanceIds = new HashSet<string> { "target1" },
-            ErrorTargetClientInstanceIds = new HashSet<string> { "target2" }
+            TargetClientInstanceAndNodeIds = new HashSet<string> { "target1_node1", "target2_node2", "target3_node3" },
+            SuccessTargetClientInstanceAndNodeIds = new HashSet<string> { "target1_node1" },
+            ErrorTargetClientInstanceAndNodeIds = new HashSet<string> { "target2_node2" }
         };
 
         // Act

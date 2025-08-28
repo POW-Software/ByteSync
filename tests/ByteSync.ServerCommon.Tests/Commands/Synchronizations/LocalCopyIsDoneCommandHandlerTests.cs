@@ -54,7 +54,7 @@ public class LocalCopyIsDoneCommandHandlerTests
             {
                 var trackingAction = new TrackingActionEntity
                 {
-                    TargetClientInstanceIds = new HashSet<string> { "client1", "client2" },
+                    TargetClientInstanceAndNodeIds = new HashSet<string> { "client1", "client2" },
                     Size = 1024L
                 };
                 var synchronization = new SynchronizationEntity

@@ -4,9 +4,9 @@ public class TrackingActionEntity
 {
     public TrackingActionEntity()
     {
-        TargetClientInstanceIds = new HashSet<string>();
-        SuccessTargetClientInstanceIds = new HashSet<string>();
-        ErrorTargetClientInstanceIds = new HashSet<string>();
+        TargetClientInstanceAndNodeIds = new HashSet<string>();
+        SuccessTargetClientInstanceAndNodeIds = new HashSet<string>();
+        ErrorTargetClientInstanceAndNodeIds = new HashSet<string>();
     }
     
     public string ActionsGroupId { get; set; } = null!;
@@ -15,27 +15,27 @@ public class TrackingActionEntity
     
     public bool? IsSourceSuccess { get; set; }
         
-    public HashSet<string> TargetClientInstanceIds { get; set; }
+    public HashSet<string> TargetClientInstanceAndNodeIds { get; set; }
 
-    public HashSet<string> SuccessTargetClientInstanceIds { get; set; }
+    public HashSet<string> SuccessTargetClientInstanceAndNodeIds { get; set; }
     
-    public HashSet<string> ErrorTargetClientInstanceIds { get; set; }
+    public HashSet<string> ErrorTargetClientInstanceAndNodeIds { get; set; }
     
     public long? Size { get; set; }
 
-    public void AddSuccessOnTarget(string clientInstanceId)
+    public void AddSuccessOnTarget(string clientInstanceAndNodeId)
     {
-        if (TargetClientInstanceIds.Contains(clientInstanceId) && !ErrorTargetClientInstanceIds.Contains(clientInstanceId))
+        if (TargetClientInstanceAndNodeIds.Contains(clientInstanceAndNodeId) && !ErrorTargetClientInstanceAndNodeIds.Contains(clientInstanceAndNodeId))
         {
-            SuccessTargetClientInstanceIds.Add(clientInstanceId);
+            SuccessTargetClientInstanceAndNodeIds.Add(clientInstanceAndNodeId);
         }
     }
     
-    public void AddErrorOnTarget(string clientInstanceId)
+    public void AddErrorOnTarget(string clientInstanceAndNodeId)
     {
-        if (TargetClientInstanceIds.Contains(clientInstanceId) && !SuccessTargetClientInstanceIds.Contains(clientInstanceId))
+        if (TargetClientInstanceAndNodeIds.Contains(clientInstanceAndNodeId) && !SuccessTargetClientInstanceAndNodeIds.Contains(clientInstanceAndNodeId))
         {
-            ErrorTargetClientInstanceIds.Add(clientInstanceId);
+            ErrorTargetClientInstanceAndNodeIds.Add(clientInstanceAndNodeId);
         }
     }
     
@@ -53,7 +53,8 @@ public class TrackingActionEntity
                 return false;
             }
 
-            bool isFinished = ErrorTargetClientInstanceIds.Count + SuccessTargetClientInstanceIds.Count >= TargetClientInstanceIds.Count;
+            bool isFinished = ErrorTargetClientInstanceAndNodeIds.Count + SuccessTargetClientInstanceAndNodeIds.Count 
+                              >= TargetClientInstanceAndNodeIds.Count;
 
             return isFinished;
         }
@@ -79,7 +80,7 @@ public class TrackingActionEntity
     {
         get
         {
-            return ErrorTargetClientInstanceIds.Count > 0;
+            return ErrorTargetClientInstanceAndNodeIds.Count > 0;
         }
     }
 }

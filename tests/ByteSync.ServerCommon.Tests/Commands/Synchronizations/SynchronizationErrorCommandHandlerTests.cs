@@ -59,7 +59,7 @@ public class SynchronizationErrorCommandHandlerTests
                 var trackingAction = new TrackingActionEntity
                 {
                     SourceClientInstanceId = "sourceClient",
-                    TargetClientInstanceIds = new HashSet<string> { "client1", "client2" }
+                    TargetClientInstanceAndNodeIds = new HashSet<string> { "client1_node1", "client2_node2" }
                 };
                 var synchronization = new SynchronizationEntity
                 {

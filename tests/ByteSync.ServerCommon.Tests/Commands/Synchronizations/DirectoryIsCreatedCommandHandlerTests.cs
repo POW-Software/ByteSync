@@ -54,7 +54,7 @@ public class DirectoryIsCreatedCommandHandlerTests
             {
                 var trackingAction = new TrackingActionEntity
                 {
-                    TargetClientInstanceIds = new HashSet<string> { "client1", "client2" }
+                    TargetClientInstanceAndNodeIds = new HashSet<string> { "client1_node1", "client2_node2" }
                 };
                 var synchronization = new SynchronizationEntity
                 {
