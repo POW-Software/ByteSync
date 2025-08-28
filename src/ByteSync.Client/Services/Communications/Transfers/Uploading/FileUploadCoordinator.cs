@@ -17,7 +17,7 @@ public class FileUploadCoordinator : IFileUploadCoordinator
     {
         _logger = logger;
         _syncRoot = new object();
-        _availableSlices = Channel.CreateBounded<FileUploaderSlice>(2);
+        _availableSlices = Channel.CreateUnbounded<FileUploaderSlice>();
         _uploadingIsFinished = new ManualResetEvent(false);
         _exceptionOccurred = new ManualResetEvent(false);
     }
