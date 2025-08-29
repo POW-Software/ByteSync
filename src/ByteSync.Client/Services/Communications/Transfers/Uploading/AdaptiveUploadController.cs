@@ -1,3 +1,5 @@
+using System.Reactive.Linq;
+using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Services.Sessions;
 
@@ -36,6 +38,9 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 		_recentSuccesses = new Queue<bool>();
 		ResetState();
 		sessionService.SessionObservable.Subscribe(_ => { ResetState(); });
+		sessionService.SessionStatusObservable
+			.Where(status => status == SessionStatus.Preparation)
+			.Subscribe(_ => { ResetState(); });
 	}
 
 	public int CurrentChunkSizeBytes => _currentChunkSizeBytes;

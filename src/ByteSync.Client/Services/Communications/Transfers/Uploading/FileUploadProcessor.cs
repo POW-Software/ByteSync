@@ -12,7 +12,6 @@ public class FileUploadProcessor : IFileUploadProcessor
     private readonly ILogger<FileUploadProcessor> _logger;
     private readonly IFileUploadCoordinator _fileUploadCoordinator;
     private readonly IUploadSlicingManager _uploadSlicingManager;
-    private readonly IFileSlicer _fileSlicer;
     private readonly IFileUploadWorker _fileUploadWorker;
     private readonly IFilePartUploadAsserter _filePartUploadAsserter;
     private readonly string? _localFileToUpload;
@@ -26,7 +25,6 @@ public class FileUploadProcessor : IFileUploadProcessor
         ISlicerEncrypter slicerEncrypter,
         ILogger<FileUploadProcessor> logger,
         IFileUploadCoordinator fileUploadCoordinator,
-        IFileSlicer fileSlicer,
         IFileUploadWorker fileUploadWorker,
         IFilePartUploadAsserter filePartUploadAsserter,
         string? localFileToUpload,
@@ -37,7 +35,6 @@ public class FileUploadProcessor : IFileUploadProcessor
         _slicerEncrypter = slicerEncrypter;
         _logger = logger;
         _fileUploadCoordinator = fileUploadCoordinator;
-        _fileSlicer = fileSlicer;
         _fileUploadWorker = fileUploadWorker;
         _filePartUploadAsserter = filePartUploadAsserter;
         _localFileToUpload = localFileToUpload;
@@ -48,18 +45,20 @@ public class FileUploadProcessor : IFileUploadProcessor
 
     public async Task ProcessUpload(SharedFileDefinition sharedFileDefinition, int? maxSliceLength = null)
     {
-        _progressState = new UploadProgressState();
-        _progressState.StartTimeUtc = DateTimeOffset.UtcNow;
-        
+        _progressState = await _uploadSlicingManager.Enqueue(
+            sharedFileDefinition,
+            _slicerEncrypter,
+            _fileUploadCoordinator.AvailableSlices,
+            _semaphoreSlim,
+            _fileUploadCoordinator.ExceptionOccurred,
+            _adaptiveUploadController);
+
         // Start upload workers (adaptive)
         for (var i = 0; i < _adaptiveUploadController.CurrentParallelism; i++)
         {
             _ = Task.Run(() => _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_fileUploadCoordinator.AvailableSlices, _progressState!));
         }
-        
-        // Enqueue slicer (adaptive) to shared slicing manager to ensure FIFO and concurrency control
-        await _uploadSlicingManager.Enqueue(() => _fileSlicer.SliceAndEncryptAdaptiveAsync(sharedFileDefinition, _progressState));
-        
+
         // Wait for completion
         await _fileUploadCoordinator.WaitForCompletionAsync();
 

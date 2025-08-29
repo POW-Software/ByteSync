@@ -104,32 +104,33 @@ public class FileSlicer : IFileSlicer
                 }
 
                 // Pause slicing if pending slices exceed 2 × current upload task count
-                while (true)
+                int pending;
+                int threshold;
+                await _semaphoreSlim.WaitAsync();
+                try
                 {
-                    if (_exceptionOccurred.WaitOne(0))
-                    {
-                        return;
-                    }
+                    pending = progressState.TotalCreatedSlices - progressState.TotalUploadedSlices;
+                    threshold = 2 * _adaptiveUploadController.CurrentParallelism;
+                }
+                finally
+                {
+                    _semaphoreSlim.Release();
+                }
 
-                    var threshold = 2 * _adaptiveUploadController.CurrentParallelism;
-                    int pending;
+                while (pending > threshold && !_exceptionOccurred.WaitOne(0))
+                {
+                    await Task.Delay(10);
+
                     await _semaphoreSlim.WaitAsync();
                     try
                     {
                         pending = progressState.TotalCreatedSlices - progressState.TotalUploadedSlices;
+                        threshold = 2 * _adaptiveUploadController.CurrentParallelism;
                     }
                     finally
                     {
                         _semaphoreSlim.Release();
                     }
-
-                    if (pending > threshold)
-                    {
-                        await Task.Delay(10);
-                        continue;
-                    }
-
-                    break;
                 }
 
                 var nextSize = _adaptiveUploadController.GetNextChunkSizeBytes();

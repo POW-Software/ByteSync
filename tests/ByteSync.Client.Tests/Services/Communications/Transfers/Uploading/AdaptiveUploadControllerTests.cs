@@ -1,3 +1,4 @@
+using ByteSync.Business.Sessions;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using Microsoft.Extensions.Logging.Abstractions;
 using FluentAssertions;
@@ -18,6 +19,7 @@ public class AdaptiveUploadControllerTests
     {
         var sessionService = new Mock<ISessionService>();
         sessionService.SetupGet(s => s.SessionObservable).Returns(System.Reactive.Linq.Observable.Return<AbstractSession?>(null));
+        sessionService.SetupGet(s => s.SessionStatusObservable).Returns(System.Reactive.Linq.Observable.Never<SessionStatus>());
         _controller = new AdaptiveUploadController(NullLogger<AdaptiveUploadController>.Instance, sessionService.Object);
     }
 
