@@ -3,19 +3,22 @@ using ByteSync.Business.Synchronizations;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Interfaces.Services.Communications;
 
 namespace ByteSync.Services.Synchronizations;
 
 public class SynchronizationActionServerInformer : ISynchronizationActionServerInformer
 {
     private readonly ISessionService _sessionService;
+    private readonly IConnectionService _connectionService;
     private readonly ISynchronizationApiClient _synchronizationApiClient;
     private readonly ILogger<SynchronizationActionServerInformer> _logger;
 
-    public SynchronizationActionServerInformer(ISessionService sessionService, ISynchronizationApiClient synchronizationApiClient,
-        ILogger<SynchronizationActionServerInformer> logger)
+    public SynchronizationActionServerInformer(ISessionService sessionService, IConnectionService connectionService, 
+        ISynchronizationApiClient synchronizationApiClient, ILogger<SynchronizationActionServerInformer> logger)
     {
         _sessionService = sessionService;
+        _connectionService = connectionService;
         _synchronizationApiClient = synchronizationApiClient;
         _logger = logger;
 
@@ -149,9 +152,17 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
 
     private void Register(SharedActionsGroup sharedActionsGroup, ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
     {
+        var nodeId = sharedActionsGroup.GetCurrentNodeId(_connectionService.CurrentEndPoint!);
+        
         if (!ServerInformerOperatorInfos.ContainsKey(cloudActionCaller))
         {
-            ServerInformerOperatorInfos.Add(cloudActionCaller, new ServerInformerOperatorInfo(cloudActionCaller));
+            ServerInformerOperatorInfos.Add(cloudActionCaller, new ServerInformerOperatorInfo(cloudActionCaller, nodeId));
+        }
+
+        // Mettre à jour le NodeId s'il n'était pas défini
+        if (ServerInformerOperatorInfos[cloudActionCaller].NodeId == null && nodeId != null)
+        {
+            ServerInformerOperatorInfos[cloudActionCaller].NodeId = nodeId;
         }
 
         ServerInformerOperatorInfos[cloudActionCaller].Add(sharedActionsGroup.ActionsGroupId);
@@ -169,7 +180,7 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
                 // https://stackoverflow.com/questions/15136542/parallel-foreach-with-asynchronous-lambda
                 var tasks = serverInformerOperatorInfo.ActionsGroupIds.Chunk(200).Select(async chunk =>
                 {
-                    await cloudActionCaller.Invoke(_sessionService.SessionId!, chunk.ToList());
+                    await cloudActionCaller.Invoke(_sessionService.SessionId!, chunk.ToList(), serverInformerOperatorInfo.NodeId);
                 });
 
                 await Task.WhenAll(tasks);

@@ -47,7 +47,24 @@ public class LocalCopyIsDoneCommandHandler : IRequestHandler<LocalCopyIsDoneRequ
             var wasTrackingActionFinished = trackingAction.IsFinished;
             
             trackingAction.IsSourceSuccess = true;
-            trackingAction.AddSuccessOnTarget(request.Client.ClientInstanceId);
+            
+            if (request.NodeId != null)
+            {
+                var targetClientInstanceAndNodeId = $"{request.Client.ClientInstanceId}_{request.NodeId}";
+                
+                if (trackingAction.TargetClientInstanceAndNodeIds.Contains(targetClientInstanceAndNodeId))
+                {
+                    trackingAction.AddSuccessOnTarget(targetClientInstanceAndNodeId);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Client {request.Client.ClientInstanceId} with NodeId {request.NodeId} is not a target of the action");
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("Client NodeId is required to identify the target");
+            }
 
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {

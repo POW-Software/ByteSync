@@ -45,9 +45,9 @@ public class SynchronizationFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var synchronizationActionRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationActionRequest>(req);
 
-        var request = new LocalCopyIsDoneRequest(sessionId, client, actionsGroupIds);
+        var request = new LocalCopyIsDoneRequest(sessionId, client, synchronizationActionRequest.ActionsGroupIds, synchronizationActionRequest.NodeId);
         await _mediator.Send(request);
             
         var response = req.CreateResponse();
@@ -64,9 +64,9 @@ public class SynchronizationFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var synchronizationActionRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationActionRequest>(req);
 
-        var request = new DateIsCopiedRequest(sessionId, client, actionsGroupIds);
+        var request = new DateIsCopiedRequest(sessionId, client, synchronizationActionRequest.ActionsGroupIds, synchronizationActionRequest.NodeId);
         await _mediator.Send(request);
         
         var response = req.CreateResponse();
@@ -83,9 +83,9 @@ public class SynchronizationFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var synchronizationActionRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationActionRequest>(req);
 
-        var request = new FileOrDirectoryIsDeletedRequest(sessionId, client, actionsGroupIds);
+        var request = new FileOrDirectoryIsDeletedRequest(sessionId, client, synchronizationActionRequest.ActionsGroupIds, synchronizationActionRequest.NodeId);
         await _mediator.Send(request);
             
         var response = req.CreateResponse();
@@ -102,9 +102,9 @@ public class SynchronizationFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var synchronizationActionRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationActionRequest>(req);
 
-        var request = new DirectoryIsCreatedRequest(sessionId, client, actionsGroupIds);
+        var request = new DirectoryIsCreatedRequest(sessionId, client, synchronizationActionRequest.ActionsGroupIds, synchronizationActionRequest.NodeId);
         await _mediator.Send(request);
             
         var response = req.CreateResponse();
@@ -157,9 +157,9 @@ public class SynchronizationFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        var sharedFileDefinition = await FunctionHelper.DeserializeRequestBody<SharedFileDefinition>(req);
+        var synchronizationErrorActionRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationErrorActionRequest>(req);
 
-        var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition);
+        var request = new SynchronizationErrorRequest(sessionId, client, synchronizationErrorActionRequest.SharedFileDefinition, synchronizationErrorActionRequest.NodeId);
         await _mediator.Send(request);
             
         var response = req.CreateResponse();
@@ -176,9 +176,9 @@ public class SynchronizationFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var synchronizationActionRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationActionRequest>(req);
 
-        var request = new SynchronizationErrorsRequest(sessionId, client, actionsGroupIds);
+        var request = new SynchronizationErrorsRequest(sessionId, client, synchronizationActionRequest.ActionsGroupIds, synchronizationActionRequest.NodeId);
         await _mediator.Send(request);
             
         var response = req.CreateResponse();

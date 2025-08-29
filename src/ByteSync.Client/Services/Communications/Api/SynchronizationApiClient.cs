@@ -32,12 +32,12 @@ public class SynchronizationApiClient : ISynchronizationApiClient
         }
     }
 
-    public async Task AssertLocalCopyIsDone(string sessionId, List<string> actionsGroupIds)
+    public async Task AssertLocalCopyIsDone(string sessionId, List<string> actionsGroupIds, string? nodeId)
     {
         try
         {
             await _apiInvoker.PostAsync($"session/{sessionId}/synchronization/localCopyIsDone", 
-                actionsGroupIds);
+                new SynchronizationActionRequest(actionsGroupIds, nodeId));
         }
         catch (Exception ex)
         {
@@ -47,12 +47,12 @@ public class SynchronizationApiClient : ISynchronizationApiClient
         }
     }
 
-    public async Task AssertDateIsCopied(string sessionId, List<string> actionsGroupIds)
+    public async Task AssertDateIsCopied(string sessionId, List<string> actionsGroupIds, string? nodeId)
     {
         try
         {
             await _apiInvoker.PostAsync($"session/{sessionId}/synchronization/dateIsCopied", 
-                actionsGroupIds);
+                new SynchronizationActionRequest(actionsGroupIds, nodeId));
         }
         catch (Exception ex)
         {
@@ -62,11 +62,12 @@ public class SynchronizationApiClient : ISynchronizationApiClient
         }
     }
 
-    public async Task AssertFileOrDirectoryIsDeleted(string sessionId, List<string> actionsGroupIds)
+    public async Task AssertFileOrDirectoryIsDeleted(string sessionId, List<string> actionsGroupIds, string? nodeId)
     {
         try
         {
-            await _apiInvoker.PostAsync($"session/{sessionId}/synchronization/fileOrDirectoryIsDeleted", actionsGroupIds);
+            await _apiInvoker.PostAsync($"session/{sessionId}/synchronization/fileOrDirectoryIsDeleted", 
+                new SynchronizationActionRequest(actionsGroupIds, nodeId));
         }
         catch (Exception ex)
         {
@@ -76,11 +77,12 @@ public class SynchronizationApiClient : ISynchronizationApiClient
         }
     }
 
-    public async Task AssertDirectoryIsCreated(string sessionId, List<string> actionsGroupIds)
+    public async Task AssertDirectoryIsCreated(string sessionId, List<string> actionsGroupIds, string? nodeId)
     {
         try
         {
-            await _apiInvoker.PostAsync($"session/{sessionId}/synchronization/directoryIsCreated", actionsGroupIds);
+            await _apiInvoker.PostAsync($"session/{sessionId}/synchronization/directoryIsCreated", 
+                new SynchronizationActionRequest(actionsGroupIds, nodeId));
         }
         catch (Exception ex)
         {
@@ -118,11 +120,12 @@ public class SynchronizationApiClient : ISynchronizationApiClient
         }
     }
 
-    public async Task InformSynchronizationActionError(SharedFileDefinition sharedFileDefinition)
+    public async Task InformSynchronizationActionError(SharedFileDefinition sharedFileDefinition, string? nodeId)
     {
         try
         {
-            await _apiInvoker.PostAsync($"session/{sharedFileDefinition.SessionId}/synchronization/error/", sharedFileDefinition);
+            await _apiInvoker.PostAsync($"session/{sharedFileDefinition.SessionId}/synchronization/error/", 
+                new SynchronizationErrorActionRequest(sharedFileDefinition, nodeId));
         }
         catch (Exception ex)
         {
@@ -132,11 +135,12 @@ public class SynchronizationApiClient : ISynchronizationApiClient
         }
     }
 
-    public async Task AssertSynchronizationActionErrors(string sessionId, List<string> actionsGroupIds)
+    public async Task AssertSynchronizationActionErrors(string sessionId, List<string> actionsGroupIds, string? nodeId)
     {
         try
         {
-            await _apiInvoker.PostAsync($"session/{sessionId}/synchronization/errors/", actionsGroupIds);
+            await _apiInvoker.PostAsync($"session/{sessionId}/synchronization/errors/", 
+                new SynchronizationActionRequest(actionsGroupIds, nodeId));
         }
         catch (Exception ex)
         {

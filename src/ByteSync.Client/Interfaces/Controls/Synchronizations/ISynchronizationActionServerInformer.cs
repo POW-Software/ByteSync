@@ -5,7 +5,7 @@ namespace ByteSync.Interfaces.Controls.Synchronizations;
 
 public interface ISynchronizationActionServerInformer
 {
-    public delegate Task CloudActionCaller(string sessionId, List<string> actionsGroupIds);
+    public delegate Task CloudActionCaller(string sessionId, List<string> actionsGroupIds, string? nodeId);
     
     Task HandleCloudActionDone(SharedActionsGroup sharedActionsGroup, CloudActionCaller cloudActionCaller);
 

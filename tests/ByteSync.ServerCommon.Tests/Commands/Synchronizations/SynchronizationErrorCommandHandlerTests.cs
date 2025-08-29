@@ -49,7 +49,7 @@ public class SynchronizationErrorCommandHandlerTests
             ActionsGroupIds = new List<string> { "group1", "group2" }
         };
 
-        var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition);
+        var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition, "testNodeId");
 
         A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(A<SynchronizationEntity>._))
             .Returns(true);
@@ -59,7 +59,7 @@ public class SynchronizationErrorCommandHandlerTests
                 var trackingAction = new TrackingActionEntity
                 {
                     SourceClientInstanceId = "sourceClient",
-                    TargetClientInstanceAndNodeIds = new HashSet<string> { "client1_node1", "client2_node2" }
+                    TargetClientInstanceAndNodeIds = new HashSet<string> { "client1_testNodeId", "client2_testNodeId" }
                 };
                 var synchronization = new SynchronizationEntity
                 {
@@ -92,7 +92,7 @@ public class SynchronizationErrorCommandHandlerTests
             ActionsGroupIds = new List<string>()
         };
 
-        var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition);
+        var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition, "testNodeId");
 
         // Act
         await _synchronizationErrorCommandHandler.Handle(request, CancellationToken.None);
@@ -115,7 +115,7 @@ public class SynchronizationErrorCommandHandlerTests
             ActionsGroupIds = new List<string> { "group1" }
         };
 
-        var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition);
+        var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition, "testNodeId");
         var expectedException = new InvalidOperationException("Test exception");
 
         A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, sharedFileDefinition.ActionsGroupIds!, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>._))

@@ -50,16 +50,22 @@ public abstract class ActionCompletedHandlerBase<TRequest> : IRequestHandler<TRe
 
             var wasTrackingActionFinished = trackingAction.IsFinished;
 
-            var targetClientInstanceAndNodeId = trackingAction.TargetClientInstanceAndNodeIds
-                .FirstOrDefault(id => id.StartsWith($"{request.Client.ClientInstanceId}_"));
-                
-            if (targetClientInstanceAndNodeId != null)
+            if (request.NodeId != null)
             {
-                trackingAction.AddSuccessOnTarget(targetClientInstanceAndNodeId);
+                var targetClientInstanceAndNodeId = $"{request.Client.ClientInstanceId}_{request.NodeId}";
+                
+                if (trackingAction.TargetClientInstanceAndNodeIds.Contains(targetClientInstanceAndNodeId))
+                {
+                    trackingAction.AddSuccessOnTarget(targetClientInstanceAndNodeId);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Client {request.Client.ClientInstanceId} with NodeId {request.NodeId} is not a target of the action");
+                }
             }
             else
             {
-                throw new InvalidOperationException("Client is not a target of the action");
+                throw new InvalidOperationException("Client NodeId is required to identify the target");
             }
 
             if (!wasTrackingActionFinished && trackingAction.IsFinished)

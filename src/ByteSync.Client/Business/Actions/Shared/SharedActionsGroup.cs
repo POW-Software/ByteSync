@@ -82,6 +82,12 @@ public class SharedActionsGroup : AbstractActionsGroup
 
         return result;
     }
+
+    public string? GetCurrentNodeId(ByteSyncEndpoint endpoint)
+    {
+        var target = Targets.FirstOrDefault(sdp => Equals(sdp.ClientInstanceId, endpoint.ClientInstanceId));
+        return target?.NodeId;
+    }
         
     public string GetFullName(SharedDataPart sharedDataPart)
     {
