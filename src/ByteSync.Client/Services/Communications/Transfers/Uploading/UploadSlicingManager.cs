@@ -97,27 +97,22 @@ public class UploadSlicingManager : IUploadSlicingManager
         {
             _workers.Add(Task.Run(async () =>
             {
+            await foreach (var work in _queue.Reader.ReadAllAsync(_cancellationTokenSource.Token))
+            {
                 try
                 {
-                    await foreach (var work in _queue.Reader.ReadAllAsync(_cancellationTokenSource.Token))
-                    {
-                        try
-                        {
-                            await work();
-                        }
-                        catch (OperationCanceledException)
-                        {
-                            break;
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Slicing worker error");
-                        }
-                    }
+                    await work();
                 }
                 catch (OperationCanceledException)
                 {
+                    break;
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Slicing worker error");
+                }
+            }
+                
             }));
         }
     }
@@ -126,37 +121,19 @@ public class UploadSlicingManager : IUploadSlicingManager
     {
         foreach (var subscription in _subscriptions)
         {
-            try
-            {
-                subscription.Dispose();
-            }
-            catch
-            {
-            }
+            subscription.Dispose();
         }
         _subscriptions.Clear();
-
-        try
-        {
-            _cancellationTokenSource.Cancel();
-        }
-        catch
-        {
-        }
-
+        
+        _cancellationTokenSource.Cancel();
+        
         _queue.Writer.TryComplete();
-
-        try
-        {
-            await Task.WhenAll(_workers).ConfigureAwait(false);
-        }
-        catch
-        {
-        }
-        finally
-        {
-            _cancellationTokenSource.Dispose();
-        }
+        
+        await Task.WhenAll(_workers).ConfigureAwait(false);
+        
+        
+        _cancellationTokenSource.Dispose();
+        
     }
 }
 
