@@ -117,4 +117,53 @@ public class DateIsCopiedCommandHandlerTests
 
         exception.Which.Should().Be(expectedException);
     }
+
+    [Test]
+    public async Task Handle_WithNodeIdNull_ShouldNotThrowException()
+    {
+        // Arrange
+        const string sessionId = "session123";
+        var client = new Client { ClientInstanceId = "client1" };
+        var actionsGroupIds = new List<string> { "action1" };
+        
+        // Request with NodeId = null
+        var request = new DateIsCopiedRequest(sessionId, client, actionsGroupIds, null);
+
+        A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>._))
+            .Invokes((string _, List<string> _, Func<TrackingActionEntity, SynchronizationEntity, bool> func) => 
+            {
+                var trackingAction = new TrackingActionEntity
+                {
+                    // Client1 a plusieurs NodeIds, Client2 en a un autre
+                    TargetClientInstanceAndNodeIds = new HashSet<string> 
+                    { 
+                        "client1_node1", 
+                        "client1_node2", 
+                        "client2_node3"
+                    }
+                };
+                
+                var synchronization = new SynchronizationEntity
+                {
+                    Progress = new SynchronizationProgressEntity()
+                };
+                
+                // Cette fonction devrait maintenant réussir au lieu de lancer une exception
+                var result = func(trackingAction, synchronization);
+                result.Should().BeTrue(); // Vérifie que l'opération a réussi
+            })
+            .Returns(new TrackingActionResult(true, new List<TrackingActionEntity>(), new SynchronizationEntity()));
+
+        A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(A<SynchronizationEntity>._))
+            .Returns(true);
+
+        A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(A<TrackingActionResult>._, A<bool>._))
+            .Returns(Task.CompletedTask);
+
+        // Act & Assert
+        // Cette opération ne doit plus lancer d'exception avec NodeId = null
+        await FluentActions.Awaiting(() => 
+            _dateIsCopiedCommandHandler.Handle(request, CancellationToken.None))
+            .Should().NotThrowAsync();
+    }
 }

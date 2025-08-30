@@ -62,6 +62,7 @@ public abstract class ErrorOccurredHandlerBase<TRequest> : IRequestHandler<TRequ
             {
                 if (request.NodeId != null)
                 {
+                    // NodeId spécifique fourni - traitement précis
                     var targetClientInstanceAndNodeId = $"{request.Client.ClientInstanceId}_{request.NodeId}";
                     
                     if (trackingAction.TargetClientInstanceAndNodeIds.Contains(targetClientInstanceAndNodeId))
@@ -75,7 +76,16 @@ public abstract class ErrorOccurredHandlerBase<TRequest> : IRequestHandler<TRequ
                 }
                 else
                 {
-                    throw new InvalidOperationException("Client NodeId is required to identify the target");
+                    // NodeId null - traitement d'erreur sur tous les targets correspondant au ClientInstanceId
+                    var clientPrefix = $"{request.Client.ClientInstanceId}_";
+                    var targetClientInstanceAndNodeIds = trackingAction.TargetClientInstanceAndNodeIds
+                        .Where(id => id.StartsWith(clientPrefix))
+                        .ToList();
+
+                    foreach (var targetId in targetClientInstanceAndNodeIds)
+                    {
+                        trackingAction.AddErrorOnTarget(targetId);
+                    }
                 }
             }
 

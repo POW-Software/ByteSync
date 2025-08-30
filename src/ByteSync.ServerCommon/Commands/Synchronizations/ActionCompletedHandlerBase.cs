@@ -52,6 +52,7 @@ public abstract class ActionCompletedHandlerBase<TRequest> : IRequestHandler<TRe
 
             if (request.NodeId != null)
             {
+                // NodeId spécifique fourni - traitement précis
                 var targetClientInstanceAndNodeId = $"{request.Client.ClientInstanceId}_{request.NodeId}";
                 
                 if (trackingAction.TargetClientInstanceAndNodeIds.Contains(targetClientInstanceAndNodeId))
@@ -65,7 +66,16 @@ public abstract class ActionCompletedHandlerBase<TRequest> : IRequestHandler<TRe
             }
             else
             {
-                throw new InvalidOperationException("Client NodeId is required to identify the target");
+                // NodeId null - traitement de tous les targets correspondant au ClientInstanceId
+                var clientPrefix = $"{request.Client.ClientInstanceId}_";
+                var targetClientInstanceAndNodeIds = trackingAction.TargetClientInstanceAndNodeIds
+                    .Where(id => id.StartsWith(clientPrefix))
+                    .ToList();
+
+                foreach (var targetId in targetClientInstanceAndNodeIds)
+                {
+                    trackingAction.AddSuccessOnTarget(targetId);
+                }
             }
 
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
