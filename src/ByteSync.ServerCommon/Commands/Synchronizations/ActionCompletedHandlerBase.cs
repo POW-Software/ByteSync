@@ -1,3 +1,4 @@
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using MediatR;
@@ -31,6 +32,22 @@ public abstract class ActionCompletedHandlerBase<TRequest> : IRequestHandler<TRe
     protected abstract string EmptyIdsLog { get; }
     protected abstract string DoneLogTemplate { get; }
 
+    /// <summary>
+    /// Permet aux classes dérivées de traiter la logique spécifique à la source (ex: IsSourceSuccess = true)
+    /// </summary>
+    protected virtual void ProcessSourceAction(TrackingActionEntity trackingAction, TRequest request)
+    {
+        // Implémentation par défaut : rien à faire
+    }
+
+    /// <summary>
+    /// Permet aux classes dérivées de mettre à jour la progression (ex: ProcessedVolume)
+    /// </summary>
+    protected virtual void UpdateProgress(SynchronizationEntity synchronization, TrackingActionEntity trackingAction, TRequest request)
+    {
+        // Implémentation par défaut : rien à faire
+    }
+
     public async Task Handle(TRequest request, CancellationToken cancellationToken)
     {
         if (request.ActionsGroupIds.Count == 0)
@@ -49,6 +66,9 @@ public abstract class ActionCompletedHandlerBase<TRequest> : IRequestHandler<TRe
             }
 
             var wasTrackingActionFinished = trackingAction.IsFinished;
+
+            // Permettre aux classes dérivées de traiter la logique source (ex: IsSourceSuccess = true)
+            ProcessSourceAction(trackingAction, request);
 
             if (request.NodeId != null)
             {
@@ -82,6 +102,9 @@ public abstract class ActionCompletedHandlerBase<TRequest> : IRequestHandler<TRe
             {
                 synchronization.Progress.FinishedActionsCount += 1;
             }
+
+            // Permettre aux classes dérivées de traiter la logique de progression (ex: ProcessedVolume)
+            UpdateProgress(synchronization, trackingAction, request);
 
             needSendSynchronizationUpdated = _synchronizationService.CheckSynchronizationIsFinished(synchronization);
 

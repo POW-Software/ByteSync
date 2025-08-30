@@ -1,17 +1,14 @@
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
-using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Commands.Synchronizations;
 
-public class LocalCopyIsDoneCommandHandler : IRequestHandler<LocalCopyIsDoneRequest>
+public class LocalCopyIsDoneCommandHandler : ActionCompletedHandlerBase<LocalCopyIsDoneRequest>
 {
-    private readonly ITrackingActionRepository _trackingActionRepository;
-    private readonly ISynchronizationStatusCheckerService _synchronizationStatusCheckerService;
-    private readonly ISynchronizationProgressService _synchronizationProgressService;
-    private readonly ISynchronizationService _synchronizationService;
-    private readonly ILogger<LocalCopyIsDoneCommandHandler> _logger;
+    protected override string EmptyIdsLog => "LocalCopyIsDone: no action group IDs were provided";
+    protected override string DoneLogTemplate => "Local copy is done for session {SessionId} with {ActionCount} actions";
 
     public LocalCopyIsDoneCommandHandler(
         ITrackingActionRepository trackingActionRepository,
@@ -19,81 +16,19 @@ public class LocalCopyIsDoneCommandHandler : IRequestHandler<LocalCopyIsDoneRequ
         ISynchronizationProgressService synchronizationProgressService,
         ISynchronizationService synchronizationService,
         ILogger<LocalCopyIsDoneCommandHandler> logger)
+        : base(trackingActionRepository, synchronizationStatusCheckerService, synchronizationProgressService, synchronizationService, logger)
     {
-        _trackingActionRepository = trackingActionRepository;
-        _synchronizationStatusCheckerService = synchronizationStatusCheckerService;
-        _synchronizationProgressService = synchronizationProgressService;
-        _synchronizationService = synchronizationService;
-        _logger = logger;
     }
-    
-    public async Task Handle(LocalCopyIsDoneRequest request, CancellationToken cancellationToken)
+
+    protected override void ProcessSourceAction(TrackingActionEntity trackingAction, LocalCopyIsDoneRequest request)
     {
-        if (request.ActionsGroupIds.Count == 0)
-        {
-            _logger.LogInformation("LocalCopyIsDone: no action group IDs were provided");
-            return;
-        }
-        
-        var needSendSynchronizationUpdated = false;
-                
-        var result = await _trackingActionRepository.AddOrUpdate(request.SessionId, request.ActionsGroupIds, (trackingAction, synchronization) =>
-        {
-            if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
-            {
-                return false;
-            }
-            
-            var wasTrackingActionFinished = trackingAction.IsFinished;
-            
-            trackingAction.IsSourceSuccess = true;
-            
-            if (request.NodeId != null)
-            {
-                // NodeId spécifique fourni - traitement précis
-                var targetClientInstanceAndNodeId = $"{request.Client.ClientInstanceId}_{request.NodeId}";
-                
-                if (trackingAction.TargetClientInstanceAndNodeIds.Contains(targetClientInstanceAndNodeId))
-                {
-                    trackingAction.AddSuccessOnTarget(targetClientInstanceAndNodeId);
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Client {request.Client.ClientInstanceId} with NodeId {request.NodeId} is not a target of the action");
-                }
-            }
-            else
-            {
-                // NodeId null - traitement de tous les targets correspondant au ClientInstanceId
-                var clientPrefix = $"{request.Client.ClientInstanceId}_";
-                var targetClientInstanceAndNodeIds = trackingAction.TargetClientInstanceAndNodeIds
-                    .Where(id => id.StartsWith(clientPrefix))
-                    .ToList();
+        // Spécificité LocalCopyIsDone : marquer la source comme réussie
+        trackingAction.IsSourceSuccess = true;
+    }
 
-                foreach (var targetId in targetClientInstanceAndNodeIds)
-                {
-                    trackingAction.AddSuccessOnTarget(targetId);
-                }
-            }
-
-            if (!wasTrackingActionFinished && trackingAction.IsFinished)
-            {
-                synchronization.Progress.FinishedActionsCount += 1;
-            }
-            
-            synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
-            
-            needSendSynchronizationUpdated = _synchronizationService.CheckSynchronizationIsFinished(synchronization);
-
-            return true;
-        });
-
-        if (result.IsSuccess)
-        {
-            await _synchronizationProgressService.UpdateSynchronizationProgress(result, needSendSynchronizationUpdated);
-        }
-        
-        _logger.LogInformation("Local copy is done for session {SessionId} with {ActionCount} actions", 
-            request.SessionId, request.ActionsGroupIds.Count);
+    protected override void UpdateProgress(SynchronizationEntity synchronization, TrackingActionEntity trackingAction, LocalCopyIsDoneRequest request)
+    {
+        // Spécificité LocalCopyIsDone : mettre à jour le volume traité
+        synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
     }
 }
