@@ -174,7 +174,12 @@ public class AssertUploadIsFinishedCommandHandlerTests
         A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .Returns(true);
 
-        A.CallTo(() => _mockSynchronizationProgressService.UploadIsFinished(sharedFileDefinition, 3, A<HashSet<string>>.That.Contains("targetClientInstanceId_nodeId")))
+        A.CallTo(() => _mockSharedFilesService.AssertUploadIsFinished(A<TransferParameters>._, A<ICollection<string>>.Ignored))
+            .Returns(Task.CompletedTask);
+        var hubPush = A.Fake<IHubByteSyncPush>();
+        A.CallTo(() => _mockInvokeClientsService.Clients(A<ICollection<string>>.Ignored))
+            .Returns(hubPush);
+        A.CallTo(() => hubPush.UploadFinished(A<FileTransferPush>._))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -185,7 +190,7 @@ public class AssertUploadIsFinishedCommandHandlerTests
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _mockSynchronizationProgressService.UploadIsFinished(sharedFileDefinition, 3, A<HashSet<string>>.That.Contains("targetClientInstanceId_nodeId")))
+        A.CallTo(() => _mockSharedFilesService.AssertUploadIsFinished(A<TransferParameters>._, A<ICollection<string>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -238,7 +243,7 @@ public class AssertUploadIsFinishedCommandHandlerTests
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _mockSynchronizationProgressService.UploadIsFinished(sharedFileDefinition, 3, A<HashSet<string>>.That.Contains("targetClientInstanceId_nodeId")))
+        A.CallTo(() => _mockSharedFilesService.AssertUploadIsFinished(A<TransferParameters>._, A<ICollection<string>>.Ignored))
             .MustNotHaveHappened();
     }
 

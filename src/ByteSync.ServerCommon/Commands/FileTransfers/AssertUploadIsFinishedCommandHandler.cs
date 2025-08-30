@@ -91,7 +91,24 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
 
                 if (result.IsSuccess)
                 {
-                    await _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, totalParts, targetInstanceIds);
+                    var transferParameters = new TransferParameters
+                    {
+                        SessionId = sharedFileDefinition.SessionId,
+                        SharedFileDefinition = sharedFileDefinition,
+                        TotalParts = totalParts
+                    };
+
+                    await _sharedFilesService.AssertUploadIsFinished(transferParameters, targetInstanceIds);
+
+                    var transferPush = new FileTransferPush
+                    {
+                        SessionId = sharedFileDefinition.SessionId,
+                        SharedFileDefinition = sharedFileDefinition,
+                        TotalParts = totalParts,
+                        ActionsGroupIds = sharedFileDefinition.ActionsGroupIds!
+                    };
+
+                    await _invokeClientsService.Clients(targetInstanceIds).UploadFinished(transferPush);
                 }
             }
         }

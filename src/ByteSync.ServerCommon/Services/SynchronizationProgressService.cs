@@ -51,26 +51,7 @@ public class SynchronizationProgressService : ISynchronizationProgressService
         await _invokeClientsService.SessionGroup(synchronization.SessionId).SynchronizationStarted(synchronization);
     }
 
-    public async Task UploadIsFinished(SharedFileDefinition sharedFileDefinition, int totalParts, HashSet<string> targetInstanceIds)
-    {
-        var transferParameters = new TransferParameters
-        {
-            SessionId = sharedFileDefinition.SessionId,
-            SharedFileDefinition = sharedFileDefinition,
-            TotalParts = totalParts
-        };
-        await _sharedFilesService.AssertUploadIsFinished(transferParameters, targetInstanceIds);
-
-        var fileTransferPush = new FileTransferPush
-        {
-            SessionId = sharedFileDefinition.SessionId,
-            SharedFileDefinition = sharedFileDefinition,
-            TotalParts = totalParts,
-            ActionsGroupIds = sharedFileDefinition.ActionsGroupIds!
-        };
-        
-        await _invokeClientsService.Clients(targetInstanceIds).UploadFinished(fileTransferPush);
-    }
+    // UploadIsFinished inlined into AssertUploadIsFinishedCommandHandler
 
     public async Task FilePartIsUploaded(SharedFileDefinition sharedFileDefinition, int partNumber, HashSet<string> targetInstanceIds)
     {
