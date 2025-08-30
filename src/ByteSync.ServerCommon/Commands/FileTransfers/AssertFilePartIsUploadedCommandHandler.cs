@@ -1,5 +1,6 @@
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Exceptions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
@@ -12,7 +13,10 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly ISharedFilesService _sharedFilesService;
-    private readonly ISynchronizationService _synchronizationService;
+    private readonly ISynchronizationRepository _synchronizationRepository;
+    private readonly ITrackingActionRepository _trackingActionRepository;
+    private readonly ISynchronizationStatusCheckerService _synchronizationStatusCheckerService;
+    private readonly ISynchronizationProgressService _synchronizationProgressService;
     private readonly IInvokeClientsService _invokeClientsService;
     private readonly IUsageStatisticsService _usageStatisticsService;
     private readonly ITransferLocationService _transferLocationService;
@@ -21,7 +25,10 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
     public AssertFilePartIsUploadedCommandHandler(
         ICloudSessionsRepository cloudSessionsRepository,
         ISharedFilesService sharedFilesService,
-        ISynchronizationService synchronizationService,
+        ISynchronizationRepository synchronizationRepository,
+        ITrackingActionRepository trackingActionRepository,
+        ISynchronizationStatusCheckerService synchronizationStatusCheckerService,
+        ISynchronizationProgressService synchronizationProgressService,
         IInvokeClientsService invokeClientsService,
         IUsageStatisticsService usageStatisticsService,
         ITransferLocationService transferLocationService,
@@ -29,7 +36,10 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _sharedFilesService = sharedFilesService;
-        _synchronizationService = synchronizationService;
+        _synchronizationRepository = synchronizationRepository;
+        _trackingActionRepository = trackingActionRepository;
+        _synchronizationStatusCheckerService = synchronizationStatusCheckerService;
+        _synchronizationProgressService = synchronizationProgressService;
         _invokeClientsService = invokeClientsService;
         _usageStatisticsService = usageStatisticsService;
         _transferLocationService = transferLocationService;
@@ -65,7 +75,22 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
             }
             else
             {
-                await _synchronizationService.OnFilePartIsUploadedAsync(sharedFileDefinition, partNumber);
+                var synchronization = await _synchronizationRepository.Get(sharedFileDefinition.SessionId);
+
+                if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
+                {
+                    return;
+                }
+                
+                if (sharedFileDefinition.ActionsGroupIds == null || sharedFileDefinition.ActionsGroupIds.Count == 0)
+                {
+                    throw new BadRequestException("sharedFileDefinition.ActionsGroupIds is null or empty");
+                }
+                
+                var actionsGroupsId = sharedFileDefinition.ActionsGroupIds!.First();
+                var trackingAction = await _trackingActionRepository.GetOrThrow(sharedFileDefinition.SessionId, actionsGroupsId);
+                
+                await _synchronizationProgressService.FilePartIsUploaded(sharedFileDefinition, partNumber, trackingAction.TargetClientInstanceAndNodeIds);
             }
         }
         

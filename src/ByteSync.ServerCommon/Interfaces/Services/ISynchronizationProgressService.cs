@@ -14,7 +14,5 @@ public interface ISynchronizationProgressService
     
     Task InformSynchronizationStarted(SynchronizationEntity synchronizationEntity, Client client);
     
-    Task<Synchronization> MapToSynchronization(SynchronizationEntity synchronizationEntity);
-    
     Task FilePartIsUploaded(SharedFileDefinition sharedFileDefinition, int partNumber, HashSet<string> targetInstanceIds);
 }

@@ -31,43 +31,4 @@ public class SynchronizationServiceTests
             _synchronizationProgressService, _synchronizationStatusCheckerService); 
     }
     
-    [Test]
-    public async Task OnFilePartIsUploadedAsync_WhenCheckSynchronizationSuccess_RunsNormally()
-    {
-        // Arrange
-        var sessionId = "sessionId";
-        var sharedFileDefinition = new SharedFileDefinition
-        {
-            SessionId = sessionId, 
-            ActionsGroupIds = new List<string> { "ActionGroupId" }
-        };
-
-        TrackingActionEntity trackingActionEntity = new TrackingActionEntity();
-        trackingActionEntity.TargetClientInstanceAndNodeIds.Add("targetClientInstanceId_nodeId");
-        SynchronizationEntity synchronizationEntity = new SynchronizationEntity();
-
-        A.CallTo(() => _trackingActionRepository.GetOrThrow(sessionId, "ActionGroupId"))
-            .Returns(trackingActionEntity);
-            
-        A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
-            .Returns(true);
-
-        A.CallTo(() => _synchronizationProgressService.FilePartIsUploaded(sharedFileDefinition, 1, A<HashSet<string>>.That.Contains("targetClientInstanceId_nodeId")))
-            .Returns(Task.CompletedTask);
-        
-        A.CallTo(() => _synchronizationRepository.Get(sessionId))
-            .Returns(synchronizationEntity);
-
-        // Act
-        await _synchronizationService.OnFilePartIsUploadedAsync(sharedFileDefinition, 1);
-        
-        A.CallTo(() => _trackingActionRepository.GetOrThrow(sessionId, "ActionGroupId"))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _synchronizationProgressService.FilePartIsUploaded(sharedFileDefinition, 1, A<HashSet<string>>.That.Contains("targetClientInstanceId_nodeId")))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _synchronizationRepository.Get(sessionId))
-            .MustHaveHappenedOnceExactly();
-    }
 }

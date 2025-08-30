@@ -25,25 +25,7 @@ public class SynchronizationService : ISynchronizationService
         _synchronizationStatusCheckerService = synchronizationStatusCheckerService;
     }
     
-    public async Task OnFilePartIsUploadedAsync(SharedFileDefinition sharedFileDefinition, int partNumber)
-    {
-        var synchronization = await _synchronizationRepository.Get(sharedFileDefinition.SessionId);
-
-        if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
-        {
-            return;
-        }
-        
-        if (sharedFileDefinition.ActionsGroupIds == null || sharedFileDefinition.ActionsGroupIds.Count == 0)
-        {
-            throw new BadRequestException("sharedFileDefinition.ActionsGroupIds is null or empty");
-        }
-        
-        var actionsGroupsId = sharedFileDefinition.ActionsGroupIds!.First();
-        var trackingAction = await _trackingActionRepository.GetOrThrow(sharedFileDefinition.SessionId, actionsGroupsId);
-        
-        await _synchronizationProgressService.FilePartIsUploaded(sharedFileDefinition, partNumber, trackingAction.TargetClientInstanceAndNodeIds);
-    }
+    // OnFilePartIsUploadedAsync has been inlined into AssertFilePartIsUploadedCommandHandler
 
     public async Task OnDownloadIsFinishedAsync(SharedFileDefinition sharedFileDefinition, Client client)
     {

@@ -6,8 +6,6 @@ namespace ByteSync.ServerCommon.Interfaces.Services;
 
 public interface ISynchronizationService
 {
-    Task OnFilePartIsUploadedAsync(SharedFileDefinition sharedFileDefinition, int partNumber);
-    
     Task OnDownloadIsFinishedAsync(SharedFileDefinition sharedFileDefinition, Client client);
     
     Task ResetSession(string sessionId);

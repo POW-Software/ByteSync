@@ -74,7 +74,7 @@ public class SynchronizationProgressService : ISynchronizationProgressService
         await _invokeClientsService.Clients(targetInstanceIds).FilePartUploaded(fileTransferPush);
     }
 
-    public Task<Synchronization> MapToSynchronization(SynchronizationEntity synchronizationEntity)
+    private Task<Synchronization> MapToSynchronization(SynchronizationEntity synchronizationEntity)
     {
         var synchronization = _synchronizationMapper.MapToSynchronization(synchronizationEntity);
 
