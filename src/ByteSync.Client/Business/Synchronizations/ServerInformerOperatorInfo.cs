@@ -1,15 +1,16 @@
-﻿using ByteSync.Interfaces.Controls.Synchronizations;
+﻿using ByteSync.Common.Business.Synchronizations;
+using ByteSync.Interfaces.Controls.Synchronizations;
 
 namespace ByteSync.Business.Synchronizations;
 
 public class ServerInformerOperatorInfo
 {
-    public ServerInformerOperatorInfo(ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller, string? nodeId = null)
+    public ServerInformerOperatorInfo(ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
     {
         CloudActionCaller = cloudActionCaller;
         // ActionsGroupDefinitions = new List<ActionsGroupDefinition>();
-        ActionsGroupIds = new List<string>();
-        NodeId = nodeId;
+        SynchronizationActionRequests = new List<SynchronizationActionRequest>();
+        // NodeId = nodeId;
         
         CreationDate = DateTime.Now;
     }
@@ -18,9 +19,9 @@ public class ServerInformerOperatorInfo
 
     // public List<ActionsGroupDefinition> ActionsGroupDefinitions { get; }
     
-    public List<string> ActionsGroupIds { get; }
+    public List<SynchronizationActionRequest> SynchronizationActionRequests { get; }
 
-    public string? NodeId { get; set; }
+    // public string? NodeId { get; set; }
     
     public DateTime CreationDate
     {
@@ -31,7 +32,7 @@ public class ServerInformerOperatorInfo
     {
         get
         {
-            return ActionsGroupIds.Count;
+            return SynchronizationActionRequests.Count;
         } 
     }
 
@@ -41,13 +42,18 @@ public class ServerInformerOperatorInfo
     //     ActionsGroupIds.Add(actionsGroupDefinition.ActionsGroupId);
     // }
     
-    public void Add(string actionsGroupdId)
+    // public void Add(string actionsGroupdId)
+    // {
+    //     ActionsGroupIds.Add(actionsGroupdId);
+    // }
+    //
+    // public void Add(List<string> actionsGroupdIds)
+    // {
+    //     ActionsGroupIds.AddAll(actionsGroupdIds);
+    // }
+
+    public void Add(SynchronizationActionRequest synchronizationActionRequest)
     {
-        ActionsGroupIds.Add(actionsGroupdId);
-    }
-    
-    public void Add(List<string> actionsGroupdIds)
-    {
-        ActionsGroupIds.AddAll(actionsGroupdIds);
+        SynchronizationActionRequests.Add(synchronizationActionRequest);
     }
 }

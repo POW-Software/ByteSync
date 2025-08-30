@@ -21,6 +21,6 @@ public class SynchronizationErrorCommandHandler : ErrorOccurredHandlerBase<Synch
 
     protected override List<string>? GetActionsGroupIds(SynchronizationErrorRequest request)
     {
-        return request.SharedFileDefinition.ActionsGroupIds;
+        return request.ActionsGroupIds;
     }
 }

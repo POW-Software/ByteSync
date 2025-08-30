@@ -5,16 +5,17 @@ namespace ByteSync.ServerCommon.Commands.Synchronizations;
 
 public class SynchronizationErrorRequest : IActionErrorRequest
 {
-    public SynchronizationErrorRequest(string sessionId, Client client, SharedFileDefinition sharedFileDefinition, string? nodeId)
+    public SynchronizationErrorRequest(string sessionId, Client client, List<string> actionsGroupIds, string? nodeId)
     {
         SessionId = sessionId;
         Client = client;
-        SharedFileDefinition = sharedFileDefinition;
+        ActionsGroupIds = actionsGroupIds;
         NodeId = nodeId;
     }
 
     public string SessionId { get; set; }
     public Client Client { get; set; }
-    public SharedFileDefinition SharedFileDefinition { get; set; }
+    
+    public List<string> ActionsGroupIds { get; set; }
     public string? NodeId { get; set; }
 }

@@ -49,7 +49,7 @@ public class SynchronizationErrorCommandHandlerTests
             ActionsGroupIds = new List<string> { "group1", "group2" }
         };
 
-        var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition, "testNodeId");
+        var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition.ActionsGroupIds, "testNodeId");
 
         A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(A<SynchronizationEntity>._))
             .Returns(true);
@@ -92,7 +92,7 @@ public class SynchronizationErrorCommandHandlerTests
             ActionsGroupIds = new List<string>()
         };
 
-        var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition, "testNodeId");
+        var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition.ActionsGroupIds, "testNodeId");
 
         // Act
         await _synchronizationErrorCommandHandler.Handle(request, CancellationToken.None);
@@ -115,7 +115,7 @@ public class SynchronizationErrorCommandHandlerTests
             ActionsGroupIds = new List<string> { "group1" }
         };
 
-        var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition, "testNodeId");
+        var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition.ActionsGroupIds, "testNodeId");
         var expectedException = new InvalidOperationException("Test exception");
 
         A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, sharedFileDefinition.ActionsGroupIds!, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>._))

@@ -9,13 +9,13 @@ public interface ISynchronizationApiClient
 {
     public Task StartSynchronization(SynchronizationStartRequest synchronizationStartRequest);
     
-    public Task AssertLocalCopyIsDone(string sessionId, List<string> actionsGroupIds, string? nodeId);
+    public Task AssertLocalCopyIsDone(string sessionId, SynchronizationActionRequest synchronizationActionRequest);
 
-    public Task AssertDateIsCopied(string sessionId, List<string> actionsGroupIds, string? nodeId);
+    public Task AssertDateIsCopied(string sessionId, SynchronizationActionRequest synchronizationActionRequest);
 
-    public Task AssertFileOrDirectoryIsDeleted(string sessionId, List<string> actionsGroupIds, string? nodeId);
+    public Task AssertFileOrDirectoryIsDeleted(string sessionId, SynchronizationActionRequest synchronizationActionRequest);
 
-    public Task AssertDirectoryIsCreated(string sessionId, List<string> actionsGroupIds, string? nodeId);
+    public Task AssertDirectoryIsCreated(string sessionId, SynchronizationActionRequest synchronizationActionRequest);
 
     public Task RequestAbortSynchronization(string sessionId);
     
@@ -23,5 +23,5 @@ public interface ISynchronizationApiClient
     
     Task InformSynchronizationActionError(SharedFileDefinition sharedFileDefinition, string? nodeId);
     
-    Task AssertSynchronizationActionErrors(string sessionId, List<string> actionsGroupIds, string? nodeId);
+    Task AssertSynchronizationActionErrors(string sessionId, SynchronizationActionRequest synchronizationActionRequest);
 }

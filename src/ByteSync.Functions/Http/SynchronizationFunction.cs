@@ -157,9 +157,9 @@ public class SynchronizationFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        var synchronizationErrorActionRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationErrorActionRequest>(req);
+        var synchronizationErrorActionRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationActionRequest>(req);
 
-        var request = new SynchronizationErrorRequest(sessionId, client, synchronizationErrorActionRequest.SharedFileDefinition, synchronizationErrorActionRequest.NodeId);
+        var request = new SynchronizationErrorRequest(sessionId, client, synchronizationErrorActionRequest.ActionsGroupIds, synchronizationErrorActionRequest.NodeId);
         await _mediator.Send(request);
             
         var response = req.CreateResponse();
