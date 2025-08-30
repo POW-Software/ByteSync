@@ -20,7 +20,6 @@ public class AssertUploadIsFinishedCommandHandlerTests
     private ICloudSessionsRepository _mockCloudSessionsRepository;
     private ISharedFilesService _mockSharedFilesService;
     private ITrackingActionRepository _mockTrackingActionRepository;
-    private ISynchronizationProgressService _mockSynchronizationProgressService;
     private ISynchronizationStatusCheckerService _mockSynchronizationStatusCheckerService;
     private IInvokeClientsService _mockInvokeClientsService;
     private ILogger<AssertUploadIsFinishedCommandHandler> _mockLogger;
@@ -33,7 +32,6 @@ public class AssertUploadIsFinishedCommandHandlerTests
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
         _mockSharedFilesService = A.Fake<ISharedFilesService>();
         _mockTrackingActionRepository = A.Fake<ITrackingActionRepository>(x => x.Strict());
-        _mockSynchronizationProgressService = A.Fake<ISynchronizationProgressService>(x => x.Strict());
         _mockSynchronizationStatusCheckerService = A.Fake<ISynchronizationStatusCheckerService>(x => x.Strict());
         _mockInvokeClientsService = A.Fake<IInvokeClientsService>();
         _mockLogger = A.Fake<ILogger<AssertUploadIsFinishedCommandHandler>>();
@@ -43,7 +41,6 @@ public class AssertUploadIsFinishedCommandHandlerTests
             _mockCloudSessionsRepository,
             _mockSharedFilesService,
             _mockTrackingActionRepository,
-            _mockSynchronizationProgressService,
             _mockSynchronizationStatusCheckerService,
             _mockInvokeClientsService,
             _mockTransferLocationService, _mockLogger);
@@ -142,7 +139,7 @@ public class AssertUploadIsFinishedCommandHandlerTests
         var sharedFileDefinition = new SharedFileDefinition 
         { 
             SessionId = sessionId,
-            ActionsGroupIds = new List<string> { "actionGroupId1" }
+            ActionsGroupIds = ["actionGroupId1"]
         };
         var transferParameters = new TransferParameters
         {
@@ -169,7 +166,7 @@ public class AssertUploadIsFinishedCommandHandlerTests
 
         A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, A<List<string>>.Ignored, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>.Ignored))
             .Invokes((string _, List<string> _, Func<TrackingActionEntity, SynchronizationEntity, bool> func) => func(trackingActionEntity, synchronizationEntity))
-            .Returns(new TrackingActionResult(true, new List<TrackingActionEntity>(), synchronizationEntity));
+            .Returns(new TrackingActionResult(true, [], synchronizationEntity));
             
         A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .Returns(true);
@@ -203,7 +200,7 @@ public class AssertUploadIsFinishedCommandHandlerTests
         var sharedFileDefinition = new SharedFileDefinition 
         { 
             SessionId = sessionId,
-            ActionsGroupIds = new List<string> { "actionGroupId1" }
+            ActionsGroupIds = ["actionGroupId1"]
         };
         var transferParameters = new TransferParameters
         {
@@ -230,7 +227,7 @@ public class AssertUploadIsFinishedCommandHandlerTests
 
         A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, A<List<string>>.Ignored, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>.Ignored))
             .Invokes((string _, List<string> _, Func<TrackingActionEntity, SynchronizationEntity, bool> func) => func(trackingActionEntity, synchronizationEntity))
-            .Returns(new TrackingActionResult(false, new List<TrackingActionEntity>(), synchronizationEntity));
+            .Returns(new TrackingActionResult(false, [], synchronizationEntity));
             
         A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .Returns(false);

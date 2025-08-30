@@ -13,7 +13,6 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly ISharedFilesService _sharedFilesService;
     private readonly ITrackingActionRepository _trackingActionRepository;
-    private readonly ISynchronizationProgressService _synchronizationProgressService;
     private readonly ISynchronizationStatusCheckerService _synchronizationStatusCheckerService;
     private readonly IInvokeClientsService _invokeClientsService;
     private readonly ITransferLocationService _transferLocationService;
@@ -22,7 +21,6 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
     public AssertUploadIsFinishedCommandHandler(ICloudSessionsRepository cloudSessionsRepository,
         ISharedFilesService sharedFilesService,
         ITrackingActionRepository trackingActionRepository,
-        ISynchronizationProgressService synchronizationProgressService,
         ISynchronizationStatusCheckerService synchronizationStatusCheckerService,
         IInvokeClientsService invokeClientsService,
         ITransferLocationService transferLocationService,
@@ -31,7 +29,6 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
         _cloudSessionsRepository = cloudSessionsRepository;
         _sharedFilesService = sharedFilesService;
         _trackingActionRepository = trackingActionRepository;
-        _synchronizationProgressService = synchronizationProgressService;
         _synchronizationStatusCheckerService = synchronizationStatusCheckerService;
         _invokeClientsService = invokeClientsService;
         _transferLocationService = transferLocationService;
@@ -53,26 +50,18 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
             {
                 var otherSessionMembers = GetOtherSessionMembers(session!, sessionMemberData);
                 
-                await _sharedFilesService.AssertUploadIsFinished(request.TransferParameters, 
-                    otherSessionMembers.Select(sm => sm.ClientInstanceId).ToList());
-
-                var transferPush = new FileTransferPush
-                {
-                    SessionId = request.SessionId,
-                    SharedFileDefinition = sharedFileDefinition,
-                    TotalParts = totalParts,
-                    ActionsGroupIds = request.TransferParameters.ActionsGroupIds
-                };
-                await _invokeClientsService.Clients(otherSessionMembers).UploadFinished(transferPush);
+                var otherSessionMemberIds = otherSessionMembers.Select(sm => sm.ClientInstanceId).ToList();
+                
+                await _sharedFilesService.AssertUploadIsFinished(request.TransferParameters, otherSessionMemberIds);
+                
+                await InformOtherClients(sharedFileDefinition, totalParts, otherSessionMemberIds);
             }
             else
             {
-                // Logic moved from SynchronizationService.OnUploadIsFinishedAsync
-                var actionsGroupsIds = sharedFileDefinition.ActionsGroupIds;
-
                 HashSet<string> targetInstanceIds = new HashSet<string>();
                         
-                var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, actionsGroupsIds!, (trackingAction, synchronization) =>
+                var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, sharedFileDefinition.ActionsGroupIds!, 
+                    (trackingAction, synchronization) =>
                 {
                     if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
                     {
@@ -91,24 +80,9 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
 
                 if (result.IsSuccess)
                 {
-                    var transferParameters = new TransferParameters
-                    {
-                        SessionId = sharedFileDefinition.SessionId,
-                        SharedFileDefinition = sharedFileDefinition,
-                        TotalParts = totalParts
-                    };
+                    await _sharedFilesService.AssertUploadIsFinished(request.TransferParameters, targetInstanceIds);
 
-                    await _sharedFilesService.AssertUploadIsFinished(transferParameters, targetInstanceIds);
-
-                    var transferPush = new FileTransferPush
-                    {
-                        SessionId = sharedFileDefinition.SessionId,
-                        SharedFileDefinition = sharedFileDefinition,
-                        TotalParts = totalParts,
-                        ActionsGroupIds = sharedFileDefinition.ActionsGroupIds!
-                    };
-
-                    await _invokeClientsService.Clients(targetInstanceIds).UploadFinished(transferPush);
+                    await InformOtherClients(sharedFileDefinition, totalParts, targetInstanceIds);
                 }
             }
         }
@@ -116,7 +90,21 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
         _logger.LogDebug("Upload finished asserted for session {SessionId}, file {FileId}", 
             request.SessionId, request.TransferParameters.SharedFileDefinition.Id);
     }
-    
+
+    private async Task InformOtherClients(SharedFileDefinition sharedFileDefinition, int totalParts,
+        ICollection<string> targetInstanceIds)
+    {
+        var transferPush = new FileTransferPush
+        {
+            SessionId = sharedFileDefinition.SessionId,
+            SharedFileDefinition = sharedFileDefinition,
+            TotalParts = totalParts,
+            ActionsGroupIds = sharedFileDefinition.ActionsGroupIds!
+        };
+
+        await _invokeClientsService.Clients(targetInstanceIds).UploadFinished(transferPush);
+    }
+
     private static List<SessionMemberData> GetOtherSessionMembers(CloudSessionData session, SessionMemberData sessionMemberData)
     {
         var otherSessionMembers = session.SessionMembers
