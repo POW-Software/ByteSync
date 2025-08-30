@@ -25,35 +25,6 @@ public class SynchronizationService : ISynchronizationService
         _synchronizationStatusCheckerService = synchronizationStatusCheckerService;
     }
     
-    public async Task OnUploadIsFinishedAsync(SharedFileDefinition sharedFileDefinition, int totalParts, Client client)
-    {
-        var actionsGroupsIds = sharedFileDefinition.ActionsGroupIds;
-
-        HashSet<string> targetInstanceIds = new HashSet<string>();
-                
-        var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, actionsGroupsIds!, (trackingAction, synchronization) =>
-        {
-            if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
-            {
-                return false;
-            }
-            
-            trackingAction.IsSourceSuccess = true;
-
-            foreach (var targetClientInstanceId in trackingAction.TargetClientInstanceAndNodeIds)
-            {
-                targetInstanceIds.Add(targetClientInstanceId);
-            }
-
-            return true;
-        });
-
-        if (result.IsSuccess)
-        {
-            await _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, totalParts, targetInstanceIds);
-        }
-    }
-
     public async Task OnFilePartIsUploadedAsync(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
         var synchronization = await _synchronizationRepository.Get(sharedFileDefinition.SessionId);

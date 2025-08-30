@@ -12,21 +12,27 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly ISharedFilesService _sharedFilesService;
-    private readonly ISynchronizationService _synchronizationService;
+    private readonly ITrackingActionRepository _trackingActionRepository;
+    private readonly ISynchronizationProgressService _synchronizationProgressService;
+    private readonly ISynchronizationStatusCheckerService _synchronizationStatusCheckerService;
     private readonly IInvokeClientsService _invokeClientsService;
     private readonly ITransferLocationService _transferLocationService;
 
     private readonly ILogger<AssertUploadIsFinishedCommandHandler> _logger;
     public AssertUploadIsFinishedCommandHandler(ICloudSessionsRepository cloudSessionsRepository,
         ISharedFilesService sharedFilesService,
-        ISynchronizationService synchronizationService,
+        ITrackingActionRepository trackingActionRepository,
+        ISynchronizationProgressService synchronizationProgressService,
+        ISynchronizationStatusCheckerService synchronizationStatusCheckerService,
         IInvokeClientsService invokeClientsService,
         ITransferLocationService transferLocationService,
         ILogger<AssertUploadIsFinishedCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _sharedFilesService = sharedFilesService;
-        _synchronizationService = synchronizationService;
+        _trackingActionRepository = trackingActionRepository;
+        _synchronizationProgressService = synchronizationProgressService;
+        _synchronizationStatusCheckerService = synchronizationStatusCheckerService;
         _invokeClientsService = invokeClientsService;
         _transferLocationService = transferLocationService;
         _logger = logger;
@@ -61,7 +67,32 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
             }
             else
             {
-                await _synchronizationService.OnUploadIsFinishedAsync(sharedFileDefinition, totalParts, request.Client);
+                // Logic moved from SynchronizationService.OnUploadIsFinishedAsync
+                var actionsGroupsIds = sharedFileDefinition.ActionsGroupIds;
+
+                HashSet<string> targetInstanceIds = new HashSet<string>();
+                        
+                var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, actionsGroupsIds!, (trackingAction, synchronization) =>
+                {
+                    if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
+                    {
+                        return false;
+                    }
+                    
+                    trackingAction.IsSourceSuccess = true;
+
+                    foreach (var targetClientInstanceId in trackingAction.TargetClientInstanceAndNodeIds)
+                    {
+                        targetInstanceIds.Add(targetClientInstanceId);
+                    }
+
+                    return true;
+                });
+
+                if (result.IsSuccess)
+                {
+                    await _synchronizationProgressService.UploadIsFinished(sharedFileDefinition, totalParts, targetInstanceIds);
+                }
             }
         }
         
