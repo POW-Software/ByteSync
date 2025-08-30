@@ -7,6 +7,7 @@ using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using FakeItEasy;
+using ByteSync.Common.Interfaces.Hub;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 
@@ -93,8 +94,11 @@ public class AssertFilePartIsUploadedCommandHandlerTests
         var trackingAction = new TrackingActionEntity();
         trackingAction.TargetClientInstanceAndNodeIds.Add("clientA_node");
         A.CallTo(() => _mockTrackingActionRepository.GetOrThrow(sessionId, A<string>._)).Returns(trackingAction);
-        A.CallTo(() => _mockSynchronizationProgressService.FilePartIsUploaded(transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value, A<HashSet<string>>.That.Contains("clientA_node")))
+        A.CallTo(() => _mockSharedFilesService.AssertFilePartIsUploaded(A<TransferParameters>._, A<ICollection<string>>.Ignored))
             .Returns(Task.CompletedTask);
+        var hubPush = A.Fake<IHubByteSyncPush>();
+        A.CallTo(() => _mockInvokeClientsService.Clients(A<ICollection<string>>.Ignored)).Returns(hubPush);
+        A.CallTo(() => hubPush.FilePartUploaded(A<FileTransferPush>._)).Returns(Task.CompletedTask);
 
         // Act
         await _assertFilePartIsUploadedCommandHandler.Handle(request, CancellationToken.None);
@@ -102,7 +106,7 @@ public class AssertFilePartIsUploadedCommandHandlerTests
         // Assert
         A.CallTo(() => _mockUsageStatisticsService.RegisterUploadUsage(client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _mockSynchronizationProgressService.FilePartIsUploaded(transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value, A<HashSet<string>>.That.Contains("clientA_node")))
+        A.CallTo(() => _mockSharedFilesService.AssertFilePartIsUploaded(A<TransferParameters>._, A<ICollection<string>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 

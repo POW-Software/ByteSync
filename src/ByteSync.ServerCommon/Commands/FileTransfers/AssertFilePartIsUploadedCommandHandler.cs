@@ -89,8 +89,23 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
                 
                 var actionsGroupsId = sharedFileDefinition.ActionsGroupIds!.First();
                 var trackingAction = await _trackingActionRepository.GetOrThrow(sharedFileDefinition.SessionId, actionsGroupsId);
+
+                var transferParameters = new TransferParameters
+                {
+                    SessionId = sharedFileDefinition.SessionId,
+                    SharedFileDefinition = sharedFileDefinition,
+                    PartNumber = partNumber
+                };
+                await _sharedFilesService.AssertFilePartIsUploaded(transferParameters, trackingAction.TargetClientInstanceAndNodeIds);
                 
-                await _synchronizationProgressService.FilePartIsUploaded(sharedFileDefinition, partNumber, trackingAction.TargetClientInstanceAndNodeIds);
+                var fileTransferPush = new FileTransferPush
+                {
+                    SessionId = sharedFileDefinition.SessionId,
+                    SharedFileDefinition = sharedFileDefinition,
+                    PartNumber = partNumber,
+                    ActionsGroupIds = sharedFileDefinition.ActionsGroupIds!
+                };
+                await _invokeClientsService.Clients(trackingAction.TargetClientInstanceAndNodeIds).FilePartUploaded(fileTransferPush);
             }
         }
         

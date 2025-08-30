@@ -14,5 +14,5 @@ public interface ISynchronizationProgressService
     
     Task InformSynchronizationStarted(SynchronizationEntity synchronizationEntity, Client client);
     
-    Task FilePartIsUploaded(SharedFileDefinition sharedFileDefinition, int partNumber, HashSet<string> targetInstanceIds);
+    // FilePartIsUploaded inlined into AssertFilePartIsUploadedCommandHandler
 }
