@@ -52,7 +52,7 @@ public class SynchronizationService : ISynchronizationService
 
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                synchronization.Progress.FinishedActionsCount += 1;
+                synchronization.Progress.FinishedAtomicActionsCount += 1;
                 synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
             }
 

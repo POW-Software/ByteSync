@@ -65,7 +65,7 @@ public abstract class ActionCompletedHandlerBase<TRequest> : IRequestHandler<TRe
                 return false;
             }
 
-            var wasTrackingActionFinished = trackingAction.IsFinished;
+            // var wasTrackingActionFinished = trackingAction.IsFinished;
 
             // Permettre aux classes dérivées de traiter la logique source (ex: IsSourceSuccess = true)
             ProcessSourceAction(trackingAction, request);
@@ -82,6 +82,7 @@ public abstract class ActionCompletedHandlerBase<TRequest> : IRequestHandler<TRe
                 if (trackingAction.TargetClientInstanceAndNodeIds.Contains(targetClientInstanceAndNodeId))
                 {
                     trackingAction.AddSuccessOnTarget(targetClientInstanceAndNodeId);
+                    synchronization.Progress.FinishedAtomicActionsCount += 1;
                 }
                 else
                 {
@@ -98,13 +99,14 @@ public abstract class ActionCompletedHandlerBase<TRequest> : IRequestHandler<TRe
                 foreach (var targetId in targetClientInstanceAndNodeIds)
                 {
                     trackingAction.AddSuccessOnTarget(targetId);
+                    synchronization.Progress.FinishedAtomicActionsCount += 1;
                 }
             }
 
-            if (!wasTrackingActionFinished && trackingAction.IsFinished)
-            {
-                synchronization.Progress.FinishedActionsCount += 1;
-            }
+            // if (!wasTrackingActionFinished && trackingAction.IsFinished)
+            // {
+            //     synchronization.Progress.FinishedAtomicActionsCount += 1;
+            // }
 
             // Permettre aux classes dérivées de traiter la logique de progression (ex: ProcessedVolume)
             UpdateProgress(synchronization, trackingAction, request);

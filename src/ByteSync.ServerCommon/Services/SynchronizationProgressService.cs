@@ -97,7 +97,7 @@ public class SynchronizationProgressService : ISynchronizationProgressService
             
             ProcessedVolume = synchronizationEntity.Progress.ProcessedVolume,
             ExchangedVolume = synchronizationEntity.Progress.ExchangedVolume,
-            FinishedActionsCount = synchronizationEntity.Progress.FinishedActionsCount,
+            FinishedActionsCount = synchronizationEntity.Progress.FinishedAtomicActionsCount,
             ErrorActionsCount = synchronizationEntity.Progress.ErrorsCount,
             
             Version = DateTimeOffset.UtcNow.Ticks,

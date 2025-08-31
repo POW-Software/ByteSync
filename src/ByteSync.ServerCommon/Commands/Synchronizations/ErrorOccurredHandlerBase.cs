@@ -98,7 +98,7 @@ public abstract class ErrorOccurredHandlerBase<TRequest> : IRequestHandler<TRequ
             }
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {
-                synchronization.Progress.FinishedActionsCount += 1;
+                synchronization.Progress.FinishedAtomicActionsCount += 1;
             }
 
             needSendSynchronizationUpdated = _synchronizationService.CheckSynchronizationIsFinished(synchronization);

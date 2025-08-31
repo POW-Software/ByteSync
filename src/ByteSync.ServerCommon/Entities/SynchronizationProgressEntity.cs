@@ -16,7 +16,7 @@ public class SynchronizationProgressEntity
     
     public long TotalActionsCount { get; set; }
     
-    public long FinishedActionsCount { get; set; }
+    public long FinishedAtomicActionsCount { get; set; }
     
     public int ErrorsCount { get; set; }
     
@@ -24,7 +24,7 @@ public class SynchronizationProgressEntity
     
     public List<string> Members { get; set; }
     
-    public bool AllActionsDone => FinishedActionsCount >= TotalActionsCount;
+    public bool AllActionsDone => FinishedAtomicActionsCount >= TotalActionsCount;
     
     public bool AllMembersCompleted => CompletedMembers.Count == Members.Count;
 }

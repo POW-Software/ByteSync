@@ -25,20 +25,26 @@ public class TrackingActionEntity
     
     public long? Size { get; set; }
 
-    public void AddSuccessOnTarget(ClientInstanceIdAndNodeId clientInstanceAndNodeId)
+    public bool AddSuccessOnTarget(ClientInstanceIdAndNodeId clientInstanceAndNodeId)
     {
         if (TargetClientInstanceAndNodeIds.Contains(clientInstanceAndNodeId) && !ErrorTargetClientInstanceAndNodeIds.Contains(clientInstanceAndNodeId))
         {
             SuccessTargetClientInstanceAndNodeIds.Add(clientInstanceAndNodeId);
+            return true;
         }
+
+        return false;
     }
     
-    public void AddErrorOnTarget(ClientInstanceIdAndNodeId clientInstanceAndNodeId)
+    public bool AddErrorOnTarget(ClientInstanceIdAndNodeId clientInstanceAndNodeId)
     {
         if (TargetClientInstanceAndNodeIds.Contains(clientInstanceAndNodeId) && !SuccessTargetClientInstanceAndNodeIds.Contains(clientInstanceAndNodeId))
         {
             ErrorTargetClientInstanceAndNodeIds.Add(clientInstanceAndNodeId);
+            return true;
         }
+
+        return false;
     }
     
     public bool IsFinished
