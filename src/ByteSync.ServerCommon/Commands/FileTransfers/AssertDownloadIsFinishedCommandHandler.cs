@@ -65,11 +65,11 @@ public class AssertDownloadIsFinishedCommandHandler : IRequestHandler<AssertDown
                     foreach (var target in targetsForClient)
                     {
                         trackingAction.AddSuccessOnTarget(target);
+                        synchronization.Progress.FinishedAtomicActionsCount += 1;
                     }
 
                     if (!wasTrackingActionFinished && trackingAction.IsFinished)
                     {
-                        synchronization.Progress.FinishedAtomicActionsCount += 1;
                         synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
                     }
 
