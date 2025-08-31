@@ -48,7 +48,7 @@ public class RequestSynchronizationAbortCommandHandlerTests
         A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeAborted(A<SynchronizationEntity>._))
             .Returns(true);
         A.CallTo(() => _mockSynchronizationRepository.UpdateIfExists(sessionId, A<Func<SynchronizationEntity, bool>>._, A<ITransaction?>._, A<IRedLock?>._))
-            .Invokes((string _, Func<SynchronizationEntity, bool> func, ITransaction? transaction, IRedLock? redisLock) => 
+            .Invokes((string _, Func<SynchronizationEntity, bool> func, ITransaction? _, IRedLock? _) => 
             {
                 var synchronization = new SynchronizationEntity
                 {

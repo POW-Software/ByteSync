@@ -55,11 +55,11 @@ public class SynchronizationErrorsCommandHandlerTests
                 var trackingAction = new TrackingActionEntity
                 {
                     SourceClientInstanceId = "sourceClient",
-                    TargetClientInstanceAndNodeIds = new HashSet<ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId>
-                    {
-                        new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId { ClientInstanceId = "client1", NodeId = "testNodeId" },
-                        new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId { ClientInstanceId = "client2", NodeId = "testNodeId" }
-                    }
+                    TargetClientInstanceAndNodeIds =
+                    [
+                        new() { ClientInstanceId = "client1", NodeId = "testNodeId" },
+                        new() { ClientInstanceId = "client2", NodeId = "testNodeId" }
+                    ]
                 };
                 var synchronization = new SynchronizationEntity
                 {
@@ -67,7 +67,7 @@ public class SynchronizationErrorsCommandHandlerTests
                 };
                 func(trackingAction, synchronization);
             })
-            .Returns(new TrackingActionResult(true, new List<TrackingActionEntity>(), new SynchronizationEntity()));
+            .Returns(new TrackingActionResult(true, [], new SynchronizationEntity()));
         A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(A<TrackingActionResult>._, A<bool>._))
             .Returns(Task.CompletedTask);
 

@@ -46,7 +46,7 @@ public class SynchronizationErrorCommandHandlerTests
         var client = new Client { ClientInstanceId = "client1" };
         var sharedFileDefinition = new SharedFileDefinition
         {
-            ActionsGroupIds = new List<string> { "group1", "group2" }
+            ActionsGroupIds = ["group1", "group2"]
         };
 
         var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition.ActionsGroupIds, "testNodeId");
@@ -59,11 +59,11 @@ public class SynchronizationErrorCommandHandlerTests
                 var trackingAction = new TrackingActionEntity
                 {
                     SourceClientInstanceId = "sourceClient",
-                    TargetClientInstanceAndNodeIds = new HashSet<ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId>
-                    {
-                        new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId { ClientInstanceId = "client1", NodeId = "testNodeId" },
-                        new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId { ClientInstanceId = "client2", NodeId = "testNodeId" }
-                    }
+                    TargetClientInstanceAndNodeIds =
+                    [
+                        new() { ClientInstanceId = "client1", NodeId = "testNodeId" },
+                        new() { ClientInstanceId = "client2", NodeId = "testNodeId" }
+                    ]
                 };
                 var synchronization = new SynchronizationEntity
                 {
@@ -71,7 +71,7 @@ public class SynchronizationErrorCommandHandlerTests
                 };
                 func(trackingAction, synchronization);
             })
-            .Returns(new TrackingActionResult(true, new List<TrackingActionEntity>(), new SynchronizationEntity()));
+            .Returns(new TrackingActionResult(true, [], new SynchronizationEntity()));
         A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(A<TrackingActionResult>._, A<bool>._))
             .Returns(Task.CompletedTask);
 
@@ -93,7 +93,7 @@ public class SynchronizationErrorCommandHandlerTests
         var client = new Client { ClientInstanceId = "client1" };
         var sharedFileDefinition = new SharedFileDefinition
         {
-            ActionsGroupIds = new List<string>()
+            ActionsGroupIds = []
         };
 
         var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition.ActionsGroupIds, "testNodeId");
@@ -116,7 +116,7 @@ public class SynchronizationErrorCommandHandlerTests
         var client = new Client { ClientInstanceId = "client1" };
         var sharedFileDefinition = new SharedFileDefinition
         {
-            ActionsGroupIds = new List<string> { "group1" }
+            ActionsGroupIds = ["group1"]
         };
 
         var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition.ActionsGroupIds, "testNodeId");

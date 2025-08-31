@@ -50,11 +50,11 @@ public class StartSynchronizationCommandHandlerTests
         var request = new StartSynchronizationRequest(sessionId, client, actionsGroupDefinitions);
         var session = new CloudSessionData
         {
-            SessionMembers = new List<SessionMemberData>
-            {
+            SessionMembers =
+            [
                 new() { ClientInstanceId = "client1" },
                 new() { ClientInstanceId = "client2" }
-            }
+            ]
         };
 
         A.CallTo(() => _mockSynchronizationRepository.Get(sessionId))
@@ -87,10 +87,7 @@ public class StartSynchronizationCommandHandlerTests
         var request = new StartSynchronizationRequest(sessionId, client, actionsGroupDefinitions);
         var session = new CloudSessionData
         {
-            SessionMembers = new List<SessionMemberData>
-            {
-                new() { ClientInstanceId = "client1" }
-            }
+            SessionMembers = [new() { ClientInstanceId = "client1" }]
         };
 
         A.CallTo(() => _mockSynchronizationRepository.Get(sessionId))

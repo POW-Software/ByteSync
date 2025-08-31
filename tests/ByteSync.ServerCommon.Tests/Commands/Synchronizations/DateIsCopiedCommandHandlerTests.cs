@@ -54,11 +54,11 @@ public class DateIsCopiedCommandHandlerTests
             {
                 var trackingAction = new TrackingActionEntity
                 {
-                    TargetClientInstanceAndNodeIds = new HashSet<ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId>
-                    {
-                        new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId { ClientInstanceId = "client1", NodeId = "testNodeId" },
-                        new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId { ClientInstanceId = "client2", NodeId = "testNodeId" }
-                    }
+                    TargetClientInstanceAndNodeIds =
+                    [
+                        new() { ClientInstanceId = "client1", NodeId = "testNodeId" },
+                        new() { ClientInstanceId = "client2", NodeId = "testNodeId" }
+                    ]
                 };
                 var synchronization = new SynchronizationEntity
                 {
@@ -66,7 +66,7 @@ public class DateIsCopiedCommandHandlerTests
                 };
                 func(trackingAction, synchronization);
             })
-            .Returns(new TrackingActionResult(true, new List<TrackingActionEntity>(), new SynchronizationEntity()));
+            .Returns(new TrackingActionResult(true, [], new SynchronizationEntity()));
         A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(A<TrackingActionResult>._, A<bool>._))
             .Returns(Task.CompletedTask);
 
@@ -139,12 +139,12 @@ public class DateIsCopiedCommandHandlerTests
                 var trackingAction = new TrackingActionEntity
                 {
                     // Client1 a plusieurs NodeIds, Client2 en a un autre
-                    TargetClientInstanceAndNodeIds = new HashSet<ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId>
-                    {
-                        new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId { ClientInstanceId = "client1", NodeId = "node1" },
-                        new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId { ClientInstanceId = "client1", NodeId = "node2" },
-                        new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId { ClientInstanceId = "client2", NodeId = "node3" }
-                    }
+                    TargetClientInstanceAndNodeIds =
+                    [
+                        new() { ClientInstanceId = "client1", NodeId = "node1" },
+                        new() { ClientInstanceId = "client1", NodeId = "node2" },
+                        new() { ClientInstanceId = "client2", NodeId = "node3" }
+                    ]
                 };
                 
                 var synchronization = new SynchronizationEntity
@@ -156,7 +156,7 @@ public class DateIsCopiedCommandHandlerTests
                 var result = func(trackingAction, synchronization);
                 result.Should().BeTrue(); // Vérifie que l'opération a réussi
             })
-            .Returns(new TrackingActionResult(true, new List<TrackingActionEntity>(), new SynchronizationEntity()));
+            .Returns(new TrackingActionResult(true, [], new SynchronizationEntity()));
 
         A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(A<SynchronizationEntity>._))
             .Returns(true);
