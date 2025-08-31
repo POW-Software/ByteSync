@@ -70,9 +70,9 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
                     
                     trackingAction.IsSourceSuccess = true;
 
-                    foreach (var targetClientInstanceId in trackingAction.TargetClientInstanceAndNodeIds)
+                    foreach (var target in trackingAction.TargetClientInstanceAndNodeIds)
                     {
-                        targetInstanceIds.Add(targetClientInstanceId);
+                        targetInstanceIds.Add(target.ClientInstanceId);
                     }
 
                     return true;

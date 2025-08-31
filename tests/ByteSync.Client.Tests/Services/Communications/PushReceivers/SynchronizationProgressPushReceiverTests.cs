@@ -251,9 +251,11 @@ public class SynchronizationProgressPushReceiverTests
         SetupSynchronizationDataTransmittedSuccess();
         _synchronizationServiceMock.Setup(s => s.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()))
             .ThrowsAsync(new Exception("Test exception"));
-        // TODO
-        // _synchronizationApiClientMock.Setup(c => c.AssertSynchronizationActionErrors(It.IsAny<string>(), It.IsAny<List<string>>(), It.IsAny<string?>()))
-        //     .ThrowsAsync(new Exception("API exception"));
+        _synchronizationApiClientMock
+            .Setup(c => c.AssertSynchronizationActionErrors(
+                It.IsAny<string>(),
+                It.IsAny<SynchronizationActionRequest>()))
+            .ThrowsAsync(new Exception("API exception"));
 
         // Act
         _synchronizationProgressUpdatedSubject.OnNext(synchronizationProgressPush);

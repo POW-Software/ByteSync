@@ -42,7 +42,13 @@ public class SynchronizationService : ISynchronizationService
             
             bool wasTrackingActionFinished = trackingAction.IsFinished;
             
-            trackingAction.AddSuccessOnTarget(client.ClientInstanceId);
+            var targetsForClient = trackingAction.TargetClientInstanceAndNodeIds
+                .Where(x => x.ClientInstanceId == client.ClientInstanceId)
+                .ToList();
+            foreach (var target in targetsForClient)
+            {
+                trackingAction.AddSuccessOnTarget(target);
+            }
 
             if (!wasTrackingActionFinished && trackingAction.IsFinished)
             {

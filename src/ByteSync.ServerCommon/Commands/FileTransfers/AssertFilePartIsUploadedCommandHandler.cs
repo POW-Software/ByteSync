@@ -93,7 +93,11 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
                     SharedFileDefinition = sharedFileDefinition,
                     PartNumber = partNumber
                 };
-                await _sharedFilesService.AssertFilePartIsUploaded(transferParameters, trackingAction.TargetClientInstanceAndNodeIds);
+                var recipientClientIds = trackingAction.TargetClientInstanceAndNodeIds
+                    .Select(x => x.ClientInstanceId)
+                    .Distinct()
+                    .ToList();
+                await _sharedFilesService.AssertFilePartIsUploaded(transferParameters, recipientClientIds);
                 
                 var fileTransferPush = new FileTransferPush
                 {
@@ -102,7 +106,7 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
                     PartNumber = partNumber,
                     ActionsGroupIds = sharedFileDefinition.ActionsGroupIds!
                 };
-                await _invokeClientsService.Clients(trackingAction.TargetClientInstanceAndNodeIds).FilePartUploaded(fileTransferPush);
+                await _invokeClientsService.Clients(recipientClientIds).FilePartUploaded(fileTransferPush);
             }
         }
         

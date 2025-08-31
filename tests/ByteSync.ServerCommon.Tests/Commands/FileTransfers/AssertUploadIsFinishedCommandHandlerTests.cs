@@ -161,7 +161,7 @@ public class AssertUploadIsFinishedCommandHandlerTests
 
         // Mock tracking action repository
         var trackingActionEntity = new TrackingActionEntity();
-        trackingActionEntity.TargetClientInstanceAndNodeIds.Add("targetClientInstanceId_nodeId");
+        trackingActionEntity.TargetClientInstanceAndNodeIds.Add(new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId { ClientInstanceId = "targetClientInstanceId", NodeId = "nodeId" });
         var synchronizationEntity = new SynchronizationEntity();
 
         A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, A<List<string>>.Ignored, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>.Ignored))
@@ -222,7 +222,7 @@ public class AssertUploadIsFinishedCommandHandlerTests
 
         // Mock tracking action repository to fail synchronization check
         var trackingActionEntity = new TrackingActionEntity();
-        trackingActionEntity.TargetClientInstanceAndNodeIds.Add("targetClientInstanceId_nodeId");
+        trackingActionEntity.TargetClientInstanceAndNodeIds.Add(new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId { ClientInstanceId = "targetClientInstanceId", NodeId = "nodeId" });
         var synchronizationEntity = new SynchronizationEntity();
 
         A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, A<List<string>>.Ignored, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>.Ignored))

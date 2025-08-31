@@ -125,7 +125,13 @@ public class SharedActionsGroup : AbstractActionsGroup
         actionsGroupDefinition.Operator = Operator;
         actionsGroupDefinition.AppliesOnlySynchronizeDate = AppliesOnlySynchronizeDate;
         actionsGroupDefinition.SourceClientInstanceId = Source?.ClientInstanceId;
-        actionsGroupDefinition.TargetClientInstanceAndNodeIds = Targets.Select(t => $"{t.ClientInstanceId}_{t.NodeId}").ToList();
+        actionsGroupDefinition.TargetClientInstanceAndNodeIds = Targets
+            .Select(t => new ClientInstanceIdAndNodeId
+            {
+                ClientInstanceId = t.ClientInstanceId,
+                NodeId = t.NodeId
+            })
+            .ToList();
         actionsGroupDefinition.Size = Size;
         actionsGroupDefinition.CreationTimeUtc = CreationTimeUtc;
         actionsGroupDefinition.LastWriteTimeUtc = LastWriteTimeUtc;

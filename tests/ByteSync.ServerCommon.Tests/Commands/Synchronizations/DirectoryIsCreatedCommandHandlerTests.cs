@@ -54,7 +54,11 @@ public class DirectoryIsCreatedCommandHandlerTests
             {
                 var trackingAction = new TrackingActionEntity
                 {
-                    TargetClientInstanceAndNodeIds = new HashSet<string> { "client1_testNodeId", "client2_testNodeId" }
+                    TargetClientInstanceAndNodeIds = new HashSet<ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId>
+                    {
+                        new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId { ClientInstanceId = "client1", NodeId = "testNodeId" },
+                        new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId { ClientInstanceId = "client2", NodeId = "testNodeId" }
+                    }
                 };
                 var synchronization = new SynchronizationEntity
                 {

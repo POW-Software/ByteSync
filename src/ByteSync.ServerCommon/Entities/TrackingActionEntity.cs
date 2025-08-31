@@ -1,12 +1,14 @@
-﻿namespace ByteSync.ServerCommon.Entities;
+﻿using ByteSync.Common.Business.Actions;
+
+namespace ByteSync.ServerCommon.Entities;
 
 public class TrackingActionEntity
 {
     public TrackingActionEntity()
     {
-        TargetClientInstanceAndNodeIds = new HashSet<string>();
-        SuccessTargetClientInstanceAndNodeIds = new HashSet<string>();
-        ErrorTargetClientInstanceAndNodeIds = new HashSet<string>();
+        TargetClientInstanceAndNodeIds = new HashSet<ClientInstanceIdAndNodeId>();
+        SuccessTargetClientInstanceAndNodeIds = new HashSet<ClientInstanceIdAndNodeId>();
+        ErrorTargetClientInstanceAndNodeIds = new HashSet<ClientInstanceIdAndNodeId>();
     }
     
     public string ActionsGroupId { get; set; } = null!;
@@ -15,15 +17,15 @@ public class TrackingActionEntity
     
     public bool? IsSourceSuccess { get; set; }
         
-    public HashSet<string> TargetClientInstanceAndNodeIds { get; set; }
+    public HashSet<ClientInstanceIdAndNodeId> TargetClientInstanceAndNodeIds { get; set; }
 
-    public HashSet<string> SuccessTargetClientInstanceAndNodeIds { get; set; }
+    public HashSet<ClientInstanceIdAndNodeId> SuccessTargetClientInstanceAndNodeIds { get; set; }
     
-    public HashSet<string> ErrorTargetClientInstanceAndNodeIds { get; set; }
+    public HashSet<ClientInstanceIdAndNodeId> ErrorTargetClientInstanceAndNodeIds { get; set; }
     
     public long? Size { get; set; }
 
-    public void AddSuccessOnTarget(string clientInstanceAndNodeId)
+    public void AddSuccessOnTarget(ClientInstanceIdAndNodeId clientInstanceAndNodeId)
     {
         if (TargetClientInstanceAndNodeIds.Contains(clientInstanceAndNodeId) && !ErrorTargetClientInstanceAndNodeIds.Contains(clientInstanceAndNodeId))
         {
@@ -31,7 +33,7 @@ public class TrackingActionEntity
         }
     }
     
-    public void AddErrorOnTarget(string clientInstanceAndNodeId)
+    public void AddErrorOnTarget(ClientInstanceIdAndNodeId clientInstanceAndNodeId)
     {
         if (TargetClientInstanceAndNodeIds.Contains(clientInstanceAndNodeId) && !SuccessTargetClientInstanceAndNodeIds.Contains(clientInstanceAndNodeId))
         {

@@ -91,7 +91,7 @@ public class AssertFilePartIsUploadedCommandHandlerTests
         A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
             .Returns(true);
         var trackingAction = new TrackingActionEntity();
-        trackingAction.TargetClientInstanceAndNodeIds.Add("clientA_node");
+        trackingAction.TargetClientInstanceAndNodeIds.Add(new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId { ClientInstanceId = "clientA", NodeId = "node" });
         A.CallTo(() => _mockTrackingActionRepository.GetOrThrow(sessionId, A<string>._)).Returns(trackingAction);
         A.CallTo(() => _mockSharedFilesService.AssertFilePartIsUploaded(A<TransferParameters>._, A<ICollection<string>>.Ignored))
             .Returns(Task.CompletedTask);

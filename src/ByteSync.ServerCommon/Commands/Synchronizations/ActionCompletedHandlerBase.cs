@@ -73,7 +73,11 @@ public abstract class ActionCompletedHandlerBase<TRequest> : IRequestHandler<TRe
             if (request.NodeId != null)
             {
                 // NodeId spécifique fourni - traitement précis
-                var targetClientInstanceAndNodeId = $"{request.Client.ClientInstanceId}_{request.NodeId}";
+                var targetClientInstanceAndNodeId = new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId
+                {
+                    ClientInstanceId = request.Client.ClientInstanceId,
+                    NodeId = request.NodeId
+                };
                 
                 if (trackingAction.TargetClientInstanceAndNodeIds.Contains(targetClientInstanceAndNodeId))
                 {
@@ -87,9 +91,8 @@ public abstract class ActionCompletedHandlerBase<TRequest> : IRequestHandler<TRe
             else
             {
                 // NodeId null - traitement de tous les targets correspondant au ClientInstanceId
-                var clientPrefix = $"{request.Client.ClientInstanceId}_";
                 var targetClientInstanceAndNodeIds = trackingAction.TargetClientInstanceAndNodeIds
-                    .Where(id => id.StartsWith(clientPrefix))
+                    .Where(x => x.ClientInstanceId == request.Client.ClientInstanceId)
                     .ToList();
 
                 foreach (var targetId in targetClientInstanceAndNodeIds)
