@@ -27,8 +27,7 @@ public class SynchronizationServiceTests
         _synchronizationProgressService = A.Fake<ISynchronizationProgressService>(x => x.Strict());
         _synchronizationStatusCheckerService = A.Fake<ISynchronizationStatusCheckerService>(x => x.Strict());
         
-        _synchronizationService = new SynchronizationService(_synchronizationRepository, _trackingActionRepository, 
-            _synchronizationProgressService, _synchronizationStatusCheckerService); 
+        _synchronizationService = new SynchronizationService(_synchronizationRepository); 
     }
     
 }
