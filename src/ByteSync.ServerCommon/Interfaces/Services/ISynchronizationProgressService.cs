@@ -13,6 +13,4 @@ public interface ISynchronizationProgressService
     Task UpdateSynchronizationProgress(SynchronizationEntity synchronizationEntity, bool needSendSynchronizationUpdated);
     
     Task InformSynchronizationStarted(SynchronizationEntity synchronizationEntity, Client client);
-    
-    // FilePartIsUploaded inlined into AssertFilePartIsUploadedCommandHandler
 }

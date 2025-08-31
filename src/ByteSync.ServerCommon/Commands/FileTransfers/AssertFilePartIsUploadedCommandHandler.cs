@@ -16,7 +16,6 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
     private readonly ISynchronizationRepository _synchronizationRepository;
     private readonly ITrackingActionRepository _trackingActionRepository;
     private readonly ISynchronizationStatusCheckerService _synchronizationStatusCheckerService;
-    private readonly ISynchronizationProgressService _synchronizationProgressService;
     private readonly IInvokeClientsService _invokeClientsService;
     private readonly IUsageStatisticsService _usageStatisticsService;
     private readonly ITransferLocationService _transferLocationService;
@@ -28,7 +27,6 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
         ISynchronizationRepository synchronizationRepository,
         ITrackingActionRepository trackingActionRepository,
         ISynchronizationStatusCheckerService synchronizationStatusCheckerService,
-        ISynchronizationProgressService synchronizationProgressService,
         IInvokeClientsService invokeClientsService,
         IUsageStatisticsService usageStatisticsService,
         ITransferLocationService transferLocationService,
@@ -39,7 +37,6 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
         _synchronizationRepository = synchronizationRepository;
         _trackingActionRepository = trackingActionRepository;
         _synchronizationStatusCheckerService = synchronizationStatusCheckerService;
-        _synchronizationProgressService = synchronizationProgressService;
         _invokeClientsService = invokeClientsService;
         _usageStatisticsService = usageStatisticsService;
         _transferLocationService = transferLocationService;

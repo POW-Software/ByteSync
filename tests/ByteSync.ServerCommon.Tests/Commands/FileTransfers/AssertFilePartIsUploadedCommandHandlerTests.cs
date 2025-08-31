@@ -21,7 +21,6 @@ public class AssertFilePartIsUploadedCommandHandlerTests
     private ISynchronizationRepository _mockSynchronizationRepository;
     private ITrackingActionRepository _mockTrackingActionRepository;
     private ISynchronizationStatusCheckerService _mockSynchronizationStatusCheckerService;
-    private ISynchronizationProgressService _mockSynchronizationProgressService;
     private IInvokeClientsService _mockInvokeClientsService;
     private IUsageStatisticsService _mockUsageStatisticsService;
     private ITransferLocationService _mockTransferLocationService = A.Fake<ITransferLocationService>();
@@ -37,7 +36,6 @@ public class AssertFilePartIsUploadedCommandHandlerTests
         _mockSynchronizationRepository = A.Fake<ISynchronizationRepository>(options => options.Strict());
         _mockTrackingActionRepository = A.Fake<ITrackingActionRepository>(options => options.Strict());
         _mockSynchronizationStatusCheckerService = A.Fake<ISynchronizationStatusCheckerService>(options => options.Strict());
-        _mockSynchronizationProgressService = A.Fake<ISynchronizationProgressService>(options => options.Strict());
         _mockInvokeClientsService = A.Fake<IInvokeClientsService>(options => options.Strict());
         _mockUsageStatisticsService = A.Fake<IUsageStatisticsService>(options => options.Strict());
         _mockTransferLocationService = A.Fake<ITransferLocationService>(options => options.Strict());
@@ -49,7 +47,6 @@ public class AssertFilePartIsUploadedCommandHandlerTests
             _mockSynchronizationRepository,
             _mockTrackingActionRepository,
             _mockSynchronizationStatusCheckerService,
-            _mockSynchronizationProgressService,
             _mockInvokeClientsService,
             _mockUsageStatisticsService,
             _mockTransferLocationService,
@@ -60,12 +57,14 @@ public class AssertFilePartIsUploadedCommandHandlerTests
     public async Task Handle_ValidRequest_AssertsFilePartIsUploaded()
     {
         // Arrange
-        var sessionId = "session1";
+        const string sessionId = "session1";
         var client = new Client { ClientInstanceId = "client1" };
         var transferParameters = new TransferParameters
         {
             SessionId = sessionId,
-            SharedFileDefinition = new SharedFileDefinition { Id = "file1", SessionId = sessionId, ActionsGroupIds = new List<string> { "ActionGroupId" } },
+            SharedFileDefinition = new SharedFileDefinition { Id = "file1", SessionId = sessionId, ActionsGroupIds =
+                ["ActionGroupId"]
+            },
             PartNumber = 1
         };
 

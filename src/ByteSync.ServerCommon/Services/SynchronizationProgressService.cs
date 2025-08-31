@@ -1,5 +1,4 @@
-﻿using ByteSync.Common.Business.SharedFiles;
-using ByteSync.Common.Business.Synchronizations;
+﻿using ByteSync.Common.Business.Synchronizations;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Entities;
@@ -50,10 +49,6 @@ public class SynchronizationProgressService : ISynchronizationProgressService
         var synchronization = await MapToSynchronization(synchronizationEntity);
         await _invokeClientsService.SessionGroup(synchronization.SessionId).SynchronizationStarted(synchronization);
     }
-
-    // UploadIsFinished inlined into AssertUploadIsFinishedCommandHandler
-
-    // FilePartIsUploaded inlined into AssertFilePartIsUploadedCommandHandler
 
     private Task<Synchronization> MapToSynchronization(SynchronizationEntity synchronizationEntity)
     {
