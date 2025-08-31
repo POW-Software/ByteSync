@@ -38,11 +38,11 @@ public class SharedDataPart
 
     public string RootPath { get; set; } = null!;
         
-    public string? RelativePath { get; }
+    public string? RelativePath { get; set; }
 
-    public string? SignatureGuid { get; } 
+    public string? SignatureGuid { get; set; } 
         
-    public string? SignatureHash { get; } 
+    public string? SignatureHash { get; set; } 
 
     public bool HasAnalysisError { get; set; }
 
