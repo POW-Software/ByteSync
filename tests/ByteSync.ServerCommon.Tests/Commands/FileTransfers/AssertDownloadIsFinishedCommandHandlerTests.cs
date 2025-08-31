@@ -14,6 +14,9 @@ namespace ByteSync.ServerCommon.Tests.Commands.FileTransfers;
 public class AssertDownloadIsFinishedCommandHandlerTests
 {
     private ICloudSessionsRepository _mockCloudSessionsRepository;
+    private ITrackingActionRepository _mockTrackingActionRepository;
+    private ISynchronizationProgressService _mockSynchronizationProgressService;
+    private ISynchronizationStatusCheckerService _mockSynchronizationStatusCheckerService;
     private ISynchronizationService _mockSynchronizationService;
     private ILogger<AssertDownloadIsFinishedCommandHandler> _mockLogger;
     private AssertDownloadIsFinishedCommandHandler _assertDownloadIsFinishedCommandHandler;
@@ -23,12 +26,18 @@ public class AssertDownloadIsFinishedCommandHandlerTests
     public void Setup()
     {
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
+        _mockTrackingActionRepository = A.Fake<ITrackingActionRepository>();
+        _mockSynchronizationProgressService = A.Fake<ISynchronizationProgressService>();
+        _mockSynchronizationStatusCheckerService = A.Fake<ISynchronizationStatusCheckerService>();
         _mockSynchronizationService = A.Fake<ISynchronizationService>();
         _mockLogger = A.Fake<ILogger<AssertDownloadIsFinishedCommandHandler>>();
         _mockTransferLocationService = A.Fake<ITransferLocationService>();
 
         _assertDownloadIsFinishedCommandHandler = new AssertDownloadIsFinishedCommandHandler(
             _mockCloudSessionsRepository,
+            _mockTrackingActionRepository,
+            _mockSynchronizationProgressService,
+            _mockSynchronizationStatusCheckerService,
             _mockSynchronizationService,
             _mockTransferLocationService, _mockLogger);
     }

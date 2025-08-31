@@ -1,6 +1,4 @@
-﻿using ByteSync.Common.Business.SharedFiles;
-using ByteSync.Common.Business.Synchronizations;
-using ByteSync.ServerCommon.Business.Auth;
+﻿using ByteSync.Common.Business.Synchronizations;
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Exceptions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
@@ -25,56 +23,7 @@ public class SynchronizationService : ISynchronizationService
         _synchronizationStatusCheckerService = synchronizationStatusCheckerService;
     }
     
-    // OnFilePartIsUploadedAsync has been inlined into AssertFilePartIsUploadedCommandHandler
-
-    public async Task OnDownloadIsFinishedAsync(SharedFileDefinition sharedFileDefinition, Client client)
-    {
-        var actionsGroupsIds = sharedFileDefinition.ActionsGroupIds;
-
-        bool needSendSynchronizationUpdated = false;
-                
-        var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, actionsGroupsIds!, (trackingAction, synchronization) =>
-        {
-            if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
-            {
-                return false;
-            }
-            
-            bool wasTrackingActionFinished = trackingAction.IsFinished;
-            
-            var targetsForClient = trackingAction.TargetClientInstanceAndNodeIds
-                .Where(x => x.ClientInstanceId == client.ClientInstanceId)
-                .ToList();
-            foreach (var target in targetsForClient)
-            {
-                trackingAction.AddSuccessOnTarget(target);
-            }
-
-            if (!wasTrackingActionFinished && trackingAction.IsFinished)
-            {
-                synchronization.Progress.FinishedAtomicActionsCount += 1;
-                synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
-            }
-
-            if (sharedFileDefinition.IsMultiFileZip)
-            {
-                synchronization.Progress.ExchangedVolume += trackingAction.Size ?? 0;
-            }
-            else
-            {
-                synchronization.Progress.ExchangedVolume += sharedFileDefinition.UploadedFileLength;
-            }
-            
-            needSendSynchronizationUpdated = CheckSynchronizationIsFinished(synchronization);
-
-            return true;
-        });
-
-        if (result.IsSuccess)
-        {
-            await _synchronizationProgressService.UpdateSynchronizationProgress(result, needSendSynchronizationUpdated);
-        }
-    }
+    // OnDownloadIsFinishedAsync has been inlined into AssertDownloadIsFinishedCommandHandler
 
     public bool CheckSynchronizationIsFinished(SynchronizationEntity synchronizationEntity)
     {
