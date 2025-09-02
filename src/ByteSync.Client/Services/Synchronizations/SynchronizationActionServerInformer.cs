@@ -31,17 +31,17 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
 
     public async Task HandleCloudActionDone(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget, ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
     {
-        await DoHandleTargetCloudAction(sharedActionsGroup, localTarget, cloudActionCaller);
+        await DoHandleCloudAction(sharedActionsGroup, localTarget, cloudActionCaller);
     }
     
     public async Task HandleCloudActionError(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget)
     {
-        await DoHandleTargetCloudAction(sharedActionsGroup, localTarget, _synchronizationApiClient.AssertSynchronizationActionErrors);
+        await DoHandleCloudAction(sharedActionsGroup, localTarget, _synchronizationApiClient.AssertSynchronizationActionErrors);
     }
 
     public async Task HandleCloudActionError(SharedActionsGroup sharedActionsGroup)
     {
-        await DoHandleTargetCloudAction(sharedActionsGroup, null, _synchronizationApiClient.AssertSynchronizationActionErrors);
+        await DoHandleCloudAction(sharedActionsGroup, null, _synchronizationApiClient.AssertSynchronizationActionErrors);
     }
 
     public async Task HandleCloudActionError(List<string> actionsGroupIds)
@@ -98,7 +98,7 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
         return Task.CompletedTask;
     }
 
-    private async Task DoHandleTargetCloudAction(SharedActionsGroup sharedActionsGroup, SharedDataPart? localTarget,
+    private async Task DoHandleCloudAction(SharedActionsGroup sharedActionsGroup, SharedDataPart? localTarget,
         ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
     {
         if (_sessionService.IsCloudSession)
