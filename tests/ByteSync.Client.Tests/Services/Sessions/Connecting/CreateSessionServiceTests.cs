@@ -24,17 +24,17 @@ namespace ByteSync.Tests.Services.Sessions.Connecting;
 [TestFixture]
 public class CreateSessionServiceTests
 {
-    private Mock<ICloudSessionConnectionRepository> _cloudSessionConnectionRepositoryMock;
-    private Mock<IDataEncrypter> _dataEncrypterMock;
-    private Mock<IEnvironmentService> _environmentServiceMock;
-    private Mock<ICloudSessionApiClient> _cloudSessionApiClientMock;
-    private Mock<IPublicKeysManager> _publicKeysManagerMock;
-    private Mock<ITrustProcessPublicKeysRepository> _trustProcessPublicKeysRepositoryMock;
-    private Mock<IDigitalSignaturesRepository> _digitalSignaturesRepositoryMock;
-    private Mock<IAfterJoinSessionService> _afterJoinSessionServiceMock;
-    private Mock<ICloudSessionConnectionService> _cloudSessionConnectionServiceMock;
-    private Mock<ILogger<CreateSessionService>> _loggerMock;
-    private CancellationTokenSource _cts;
+    private Mock<ICloudSessionConnectionRepository> _cloudSessionConnectionRepositoryMock = null!;
+    private Mock<IDataEncrypter> _dataEncrypterMock = null!;
+    private Mock<IEnvironmentService> _environmentServiceMock = null!;
+    private Mock<ICloudSessionApiClient> _cloudSessionApiClientMock = null!;
+    private Mock<IPublicKeysManager> _publicKeysManagerMock = null!;
+    private Mock<ITrustProcessPublicKeysRepository> _trustProcessPublicKeysRepositoryMock = null!;
+    private Mock<IDigitalSignaturesRepository> _digitalSignaturesRepositoryMock = null!;
+    private Mock<IAfterJoinSessionService> _afterJoinSessionServiceMock = null!;
+    private Mock<ICloudSessionConnectionService> _cloudSessionConnectionServiceMock = null!;
+    private Mock<ILogger<CreateSessionService>> _loggerMock = null!;
+    private CancellationTokenSource _cts = null!;
 
     private CreateSessionService _service;
 

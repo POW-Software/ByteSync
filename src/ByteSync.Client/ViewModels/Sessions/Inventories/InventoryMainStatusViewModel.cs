@@ -16,11 +16,11 @@ namespace ByteSync.ViewModels.Sessions.Inventories;
 
 public class InventoryMainStatusViewModel : ActivatableViewModelBase
 {
-    private readonly IInventoryService _inventoryService;
-    private readonly ISessionService _sessionService;
-    private readonly ITimeTrackingCache _timeTrackingCache;
-    private readonly IDialogService _dialogService;
-    private readonly ILogger<InventoryMainStatusViewModel> _logger;
+    private readonly IInventoryService _inventoryService = null!;
+    private readonly ISessionService _sessionService = null!;
+    private readonly ITimeTrackingCache _timeTrackingCache = null!;
+    private readonly IDialogService _dialogService = null!;
+    private readonly ILogger<InventoryMainStatusViewModel> _logger = null!;
 
     public InventoryMainStatusViewModel()
     {
@@ -68,15 +68,15 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
             .DisposeWith(disposables);
     }
     
-    public ReactiveCommand<Unit, Unit> AbortIventoryCommand { get; set; }
-    
+    public ReactiveCommand<Unit, Unit> AbortIventoryCommand { get; set; } = null!;
+
     public extern LocalInventoryPartStatus MainStatus { [ObservableAsProperty] get; }
     
     public extern bool IsInventoryRunning { [ObservableAsProperty] get; }
     
     [Reactive]
-    public string EstimatedProcessEndName { get; set; }
-    
+    public string EstimatedProcessEndName { get; set; } = null!;
+
     [Reactive]
     public DateTime? StartDateTime { get; set; }
     

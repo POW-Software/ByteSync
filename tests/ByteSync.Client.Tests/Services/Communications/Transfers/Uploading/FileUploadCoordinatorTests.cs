@@ -10,8 +10,8 @@ namespace ByteSync.Tests.Services.Communications.Transfers.Uploading;
 [TestFixture]
 public class FileUploadCoordinatorTests
 {
-    private Mock<ILogger<FileUploadCoordinator>> _mockLogger;
-    private FileUploadCoordinator _coordinator;
+    private Mock<ILogger<FileUploadCoordinator>> _mockLogger = null!;
+    private FileUploadCoordinator _coordinator = null!;
 
     [SetUp]
     public void SetUp()
