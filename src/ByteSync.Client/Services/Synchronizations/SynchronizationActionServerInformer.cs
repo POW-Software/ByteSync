@@ -11,15 +11,13 @@ namespace ByteSync.Services.Synchronizations;
 public class SynchronizationActionServerInformer : ISynchronizationActionServerInformer
 {
     private readonly ISessionService _sessionService;
-    private readonly IConnectionService _connectionService;
     private readonly ISynchronizationApiClient _synchronizationApiClient;
     private readonly ILogger<SynchronizationActionServerInformer> _logger;
 
-    public SynchronizationActionServerInformer(ISessionService sessionService, IConnectionService connectionService, 
+    public SynchronizationActionServerInformer(ISessionService sessionService,
         ISynchronizationApiClient synchronizationApiClient, ILogger<SynchronizationActionServerInformer> logger)
     {
         _sessionService = sessionService;
-        _connectionService = connectionService;
         _synchronizationApiClient = synchronizationApiClient;
         _logger = logger;
 
@@ -32,39 +30,44 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
     
     private object SyncRoot { get; }
 
-    public Task HandleCloudActionDone(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget, ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
+    public async Task HandleCloudActionDone(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget, ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
     {
-        return Task.Run(async () =>
-        {
-            await DoHandleTargetCloudAction(sharedActionsGroup, localTarget, cloudActionCaller);
-        });
+        await DoHandleTargetCloudAction(sharedActionsGroup, localTarget, cloudActionCaller);
     }
     
-    public Task HandleCloudActionError(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget)
+    public async Task HandleCloudActionError(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget)
     {
-        return Task.Run(async () =>
-        {
-            await DoHandleErrorCloudAction(sharedActionsGroup, _synchronizationApiClient.AssertSynchronizationActionErrors);
-        });
+        await DoHandleTargetCloudAction(sharedActionsGroup, localTarget, _synchronizationApiClient.AssertSynchronizationActionErrors);
     }
 
-    public Task HandleCloudActionError(SharedActionsGroup sharedActionsGroup)
+    public async Task HandleCloudActionError(SharedActionsGroup sharedActionsGroup)
     {
-        return Task.Run(async () =>
-        {
-            await DoHandleErrorCloudAction(sharedActionsGroup, _synchronizationApiClient.AssertSynchronizationActionErrors);
-        });
+        await DoHandleTargetCloudAction(sharedActionsGroup, null, _synchronizationApiClient.AssertSynchronizationActionErrors);
     }
 
-    public Task HandleCloudActionError(List<string> actionsGroupIds)
+    public async Task HandleCloudActionError(List<string> actionsGroupIds)
     {
-        // TODO
-        return Task.CompletedTask;
-        
-        // return Task.Run(async () =>
-        // {
-        //     await DoHandleCloudAction(actionsGroupIds, _synchronizationApiClient.AssertSynchronizationActionErrors);
-        // });
+        if (_sessionService.IsCloudSession)
+        {
+            var serverInformerOperatorInfosToHandle = new List<ServerInformerOperatorInfo>();
+
+            lock (SyncRoot)
+            {
+                ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller = _synchronizationApiClient.AssertSynchronizationActionErrors;
+
+                if (!ServerInformerOperatorInfos.ContainsKey(cloudActionCaller))
+                {
+                    ServerInformerOperatorInfos.Add(cloudActionCaller, new ServerInformerOperatorInfo(cloudActionCaller));
+                }
+
+                var synchronizationActionRequest = new SynchronizationActionRequest(actionsGroupIds, null);
+                ServerInformerOperatorInfos[cloudActionCaller].Add(synchronizationActionRequest);
+
+                GetServerInformerOperatorInfosToHandle(serverInformerOperatorInfosToHandle);
+            }
+
+            await Handle(serverInformerOperatorInfosToHandle);
+        }
     }
 
     public async Task HandlePendingActions()
@@ -96,41 +99,9 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
         return Task.CompletedTask;
     }
 
-    // private async Task DoHandleTargetCloudAction(List<string> actionsGroupIds, ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
-    // {
-    //     if (_sessionService.IsCloudSession)
-    //     {
-    //         var serverInformerOperatorInfosToHandle = new List<ServerInformerOperatorInfo>();
-    //         
-    //         lock (SyncRoot)
-    //         {
-    //             Register(actionsGroupIds, cloudActionCaller);
-    //
-    //             GetServerInformerOperatorInfosToHandle(serverInformerOperatorInfosToHandle);
-    //         }
-    //         
-    //         await Handle(serverInformerOperatorInfosToHandle);
-    //     }
-    // }
     
-    private async Task DoHandleErrorCloudAction(SharedActionsGroup sharedActionsGroup, ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
-    {
-        if (_sessionService.IsCloudSession)
-        {
-            var serverInformerOperatorInfosToHandle = new List<ServerInformerOperatorInfo>();
-            
-            lock (SyncRoot)
-            {
-                RegisterTargetCloudAction(sharedActionsGroup, cloudActionCaller);
 
-                GetServerInformerOperatorInfosToHandle(serverInformerOperatorInfosToHandle);
-            }
-            
-            await Handle(serverInformerOperatorInfosToHandle);
-        }
-    }
-
-    private async Task DoHandleTargetCloudAction(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget,
+    private async Task DoHandleTargetCloudAction(SharedActionsGroup sharedActionsGroup, SharedDataPart? localTarget,
         ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
     {
         if (_sessionService.IsCloudSession)
@@ -170,40 +141,15 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
         }
     }
     
-    // private void Register(List<string> actionsGroupIds, ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
-    // {
-    //     if (!ServerInformerOperatorInfos.ContainsKey(cloudActionCaller))
-    //     {
-    //         ServerInformerOperatorInfos.Add(cloudActionCaller, new ServerInformerOperatorInfo(cloudActionCaller));
-    //     }
-    //
-    //     ServerInformerOperatorInfos[cloudActionCaller].Add(actionsGroupIds);
-    // }
-
-    private void RegisterTargetCloudAction(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget,
+    private void RegisterTargetCloudAction(SharedActionsGroup sharedActionsGroup, SharedDataPart? localTarget,
         ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
     {
-        // var nodeId = sharedActionsGroup.GetCurrentNodeId(_connectionService.CurrentEndPoint!);
-        
         if (!ServerInformerOperatorInfos.ContainsKey(cloudActionCaller))
         {
             ServerInformerOperatorInfos.Add(cloudActionCaller, new ServerInformerOperatorInfo(cloudActionCaller));
         }
 
-        // // Mettre à jour le NodeId s'il n'était pas défini
-        // if (ServerInformerOperatorInfos[cloudActionCaller].NodeId == null && nodeId != null)
-        // {
-        //     ServerInformerOperatorInfos[cloudActionCaller].NodeId = nodeId;
-        // }
-
-        // foreach (var targetDataPart in sharedActionsGroup.Targets)
-        // {
-        //     var synchronizationActionRequest = new SynchronizationActionRequest(new List<string> { sharedActionsGroup.ActionsGroupId }, targetDataPart.NodeId);
-        //     
-        //     ServerInformerOperatorInfos[cloudActionCaller].Add(synchronizationActionRequest);
-        // }
-        
-        var synchronizationActionRequest = new SynchronizationActionRequest(new List<string> { sharedActionsGroup.ActionsGroupId }, localTarget.NodeId);
+        var synchronizationActionRequest = new SynchronizationActionRequest(new List<string> { sharedActionsGroup.ActionsGroupId }, localTarget?.NodeId);
             
         ServerInformerOperatorInfos[cloudActionCaller].Add(synchronizationActionRequest);
     }
@@ -216,16 +162,12 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
             {
                 var cloudActionCaller = serverInformerOperatorInfo.CloudActionCaller;
 
-                // https://stackoverflow.com/questions/419019/split-list-into-sublists-with-linq
-                // https://stackoverflow.com/questions/15136542/parallel-foreach-with-asynchronous-lambda
                 var tasks = serverInformerOperatorInfo.SynchronizationActionRequests.Chunk(200).Select(async chunk =>
                 {
                     foreach (var synchronizationActionRequest in  chunk.ToList())
                     {
                         await cloudActionCaller.Invoke(_sessionService.SessionId!, synchronizationActionRequest);
                     }
-                    
-                    // await cloudActionCaller.Invoke(_sessionService.SessionId!, chunk.ToList(), serverInformerOperatorInfo.NodeId);
                 });
 
                 await Task.WhenAll(tasks);
