@@ -4,7 +4,6 @@ using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Services.Sessions;
-using ByteSync.Interfaces.Services.Communications;
 
 namespace ByteSync.Services.Synchronizations;
 
@@ -99,8 +98,6 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
         return Task.CompletedTask;
     }
 
-    
-
     private async Task DoHandleTargetCloudAction(SharedActionsGroup sharedActionsGroup, SharedDataPart? localTarget,
         ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
     {
@@ -149,7 +146,7 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
             ServerInformerOperatorInfos.Add(cloudActionCaller, new ServerInformerOperatorInfo(cloudActionCaller));
         }
 
-        var synchronizationActionRequest = new SynchronizationActionRequest(new List<string> { sharedActionsGroup.ActionsGroupId }, localTarget?.NodeId);
+        var synchronizationActionRequest = new SynchronizationActionRequest([sharedActionsGroup.ActionsGroupId], localTarget?.NodeId);
             
         ServerInformerOperatorInfos[cloudActionCaller].Add(synchronizationActionRequest);
     }
