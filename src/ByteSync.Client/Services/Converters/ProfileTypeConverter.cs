@@ -51,7 +51,7 @@ public class ProfileTypeConverter : IValueConverter
         return status;
     }
 
-    public object? ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (Design.IsDesignMode)
         {
