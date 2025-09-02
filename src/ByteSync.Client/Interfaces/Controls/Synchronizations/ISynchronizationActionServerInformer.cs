@@ -8,7 +8,9 @@ public interface ISynchronizationActionServerInformer
 {
     public delegate Task CloudActionCaller(string sessionId, SynchronizationActionRequest synchronizationActionRequests);
     
-    Task HandleCloudActionDone(SharedActionsGroup sharedActionsGroup, CloudActionCaller cloudActionCaller);
+    Task HandleCloudActionDone(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget, CloudActionCaller cloudActionCaller);
+
+    Task HandleCloudActionError(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget);
 
     Task HandleCloudActionError(SharedActionsGroup sharedActionsGroup);
     
