@@ -17,11 +17,11 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Results;
 
 public class SynchronizationActionViewModel : ViewModelBase, IDisposable
 {
-    private readonly ISynchronizationService _synchronizationService;
-    private readonly ILocalizationService _localizationService;
-    private readonly ITargetedActionsService _targetedActionsService;
+    private readonly ISynchronizationService _synchronizationService = null!;
+    private readonly ILocalizationService _localizationService = null!;
+    private readonly ITargetedActionsService _targetedActionsService = null!;
     
-    private readonly CompositeDisposable _compositeDisposable;
+    private readonly CompositeDisposable _compositeDisposable = null!;
 
     public SynchronizationActionViewModel()
     {
@@ -62,15 +62,15 @@ public class SynchronizationActionViewModel : ViewModelBase, IDisposable
         SetTexts();
     }
 
-    public AtomicAction AtomicAction { get; }
-    
-    public ComparisonItemViewModel ComparisonItemViewModel { get; }
+    public AtomicAction AtomicAction { get; } = null!;
 
-    public ReactiveCommand<Unit, Unit> RemoveCommand { get; set; }
-    public ReactiveCommand<Unit, Unit> EditCommand { get; set; }
+    public ComparisonItemViewModel ComparisonItemViewModel { get; } = null!;
+
+    public ReactiveCommand<Unit, Unit> RemoveCommand { get; set; } = null!;
+    public ReactiveCommand<Unit, Unit> EditCommand { get; set; } = null!;
 
     [Reactive]
-    public string Actions { get; set; }
+    public string Actions { get; set; } = null!;
 
     [Reactive]
     public string Letter { get; set; }

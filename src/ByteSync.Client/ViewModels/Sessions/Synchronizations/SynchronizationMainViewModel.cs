@@ -31,11 +31,11 @@ public class SynchronizationMainViewModel : ActivatableViewModelBase
         });
     }
 
-    public SynchronizationBeforeStartViewModel BeforeStartViewModel { get; }
+    public SynchronizationBeforeStartViewModel BeforeStartViewModel { get; } = null!;
 
-    public SynchronizationMainStatusViewModel MainStatusViewModel { get; }
+    public SynchronizationMainStatusViewModel MainStatusViewModel { get; } = null!;
 
-    public SynchronizationStatisticsViewModel StatisticsViewModel { get; }
+    public SynchronizationStatisticsViewModel StatisticsViewModel { get; } = null!;
 
     public extern bool HasSynchronizationStarted { [ObservableAsProperty] get; }
 }

@@ -19,14 +19,14 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Results;
 
 public class SynchronizationRuleSummaryViewModel : ViewModelBase, IDisposable
 {
-    private readonly ISessionService _sessionService;
-    private readonly ILocalizationService _localizationService;
-    private readonly IDescriptionBuilderFactory _descriptionBuilderFactory;
-    private readonly ISynchronizationRulesService _synchronizationRulesService;
-    private readonly IDialogService _dialogService;
-    private readonly IFlyoutElementViewModelFactory _flyoutElementViewModelFactory;
-    private readonly ISynchronizationService _synchronizationService;
-    private readonly CompositeDisposable _compositeDisposable;
+    private readonly ISessionService _sessionService = null!;
+    private readonly ILocalizationService _localizationService = null!;
+    private readonly IDescriptionBuilderFactory _descriptionBuilderFactory = null!;
+    private readonly ISynchronizationRulesService _synchronizationRulesService = null!;
+    private readonly IDialogService _dialogService = null!;
+    private readonly IFlyoutElementViewModelFactory _flyoutElementViewModelFactory = null!;
+    private readonly ISynchronizationService _synchronizationService = null!;
+    private readonly CompositeDisposable _compositeDisposable = null!;
 
     private const string ICON_FILE = "RegularFile";
     private const string ICON_FOLDER = "RegularFolder";
@@ -93,28 +93,28 @@ public class SynchronizationRuleSummaryViewModel : ViewModelBase, IDisposable
             .DisposeWith(_compositeDisposable);
     }
 
-    public ReactiveCommand<Unit, Unit> RemoveCommand { get; set; }
-    
-    public ReactiveCommand<Unit, Unit> DuplicateCommand { get; set; }
+    public ReactiveCommand<Unit, Unit> RemoveCommand { get; set; } = null!;
 
-    public ReactiveCommand<Avalonia.Input.PointerPressedEventArgs, Unit> EditCommand { get; set; }
+    public ReactiveCommand<Unit, Unit> DuplicateCommand { get; set; } = null!;
 
-    public SynchronizationRule SynchronizationRule { get; private set; }
+    public ReactiveCommand<Avalonia.Input.PointerPressedEventArgs, Unit> EditCommand { get; set; } = null!;
 
-    [Reactive]
-    public string Mode { get; set; }
+    public SynchronizationRule SynchronizationRule { get; private set; } = null!;
 
     [Reactive]
-    public string Conditions { get; set; }
+    public string Mode { get; set; } = null!;
 
     [Reactive]
-    public string Then { get; set; }
+    public string Conditions { get; set; } = null!;
 
     [Reactive]
-    public string Actions { get; set; }
+    public string Then { get; set; } = null!;
 
     [Reactive]
-    public string IconName { get; set; }
+    public string Actions { get; set; } = null!;
+
+    [Reactive]
+    public string IconName { get; set; } = null!;
 
     [Reactive]
     public bool IsIconVisible { get; set; }
@@ -122,7 +122,7 @@ public class SynchronizationRuleSummaryViewModel : ViewModelBase, IDisposable
     public extern bool HasSynchronizationStarted { [ObservableAsProperty] get; }
 
     [Reactive]
-    public string ElementType { get; set; }
+    public string ElementType { get; set; } = null!;
 
     private void BuildDescription()
     {
