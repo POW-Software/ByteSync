@@ -64,14 +64,7 @@ public class SynchronizationErrorsCommandHandler : IRequestHandler<Synchronizati
                         NodeId = request.NodeId
                     };
                     
-                    if (trackingAction.TargetClientInstanceAndNodeIds.Contains(targetClientInstanceAndNodeId))
-                    {
-                        isErrorHandled |= HandleTarget(request, trackingAction, targetClientInstanceAndNodeId, synchronization);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"Client {request.Client.ClientInstanceId} with NodeId {request.NodeId} is not a target of the action");
-                    }
+                    isErrorHandled |= HandleTarget(request, trackingAction, targetClientInstanceAndNodeId, synchronization);
                 }
                 else
                 {
@@ -81,14 +74,7 @@ public class SynchronizationErrorsCommandHandler : IRequestHandler<Synchronizati
 
                     foreach (var targetId in targetClientInstanceAndNodeIds)
                     {
-                        if (trackingAction.TargetClientInstanceAndNodeIds.Contains(targetId))
-                        {
-                            isErrorHandled |= HandleTarget(request, trackingAction, targetId, synchronization);
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException($"Client {request.Client.ClientInstanceId} with NodeId {request.NodeId} is not a target of the action");
-                        }
+                        isErrorHandled |= HandleTarget(request, trackingAction, targetId, synchronization);
                     }
                 }
             }
@@ -113,20 +99,28 @@ public class SynchronizationErrorsCommandHandler : IRequestHandler<Synchronizati
         ClientInstanceIdAndNodeId targetId, SynchronizationEntity synchronization)
     {
         bool isErrorHandled = false;
-        
-        if (trackingAction.SuccessTargetClientInstanceAndNodeIds.Contains(targetId))
+
+        if (trackingAction.TargetClientInstanceAndNodeIds.Contains(targetId))
         {
-            _logger.LogWarning(
-                "Client {ClientInstanceId} with NodeId {NodeId} reported an error but was already marked as success for action {ActionGroupId}",
-                request.Client.ClientInstanceId, request.NodeId, trackingAction.ActionsGroupId);
+
+            if (trackingAction.SuccessTargetClientInstanceAndNodeIds.Contains(targetId))
+            {
+                _logger.LogWarning(
+                    "Client {ClientInstanceId} with NodeId {NodeId} reported an error but was already marked as success for action {ActionGroupId}",
+                    request.Client.ClientInstanceId, request.NodeId, trackingAction.ActionsGroupId);
+            }
+            else
+            {
+                trackingAction.AddErrorOnTarget(targetId);
+                synchronization.Progress.ErrorsCount += 1;
+                synchronization.Progress.FinishedAtomicActionsCount += 1;
+
+                isErrorHandled = true;
+            }
         }
         else
         {
-            trackingAction.AddErrorOnTarget(targetId);
-            synchronization.Progress.ErrorsCount += 1;
-            synchronization.Progress.FinishedAtomicActionsCount += 1;
-
-            isErrorHandled = true;
+            throw new InvalidOperationException($"Client {request.Client.ClientInstanceId} with NodeId {request.NodeId} is not a target of the action");
         }
 
         return isErrorHandled;
