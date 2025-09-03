@@ -15,19 +15,19 @@ public class SharedDataPartTests
         var type = typeof(SharedDataPart);
 
         string[] propertyNames =
-        {
+        [
             nameof(SharedDataPart.NodeId),
             nameof(SharedDataPart.RelativePath),
             nameof(SharedDataPart.SignatureGuid),
             nameof(SharedDataPart.SignatureHash)
-        };
+        ];
 
         foreach (var propertyName in propertyNames)
         {
             var property = type.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
             property.Should().NotBeNull("property {0} must exist", propertyName);
 
-            var setter = property!.SetMethod;
+            var setter = property.SetMethod;
             setter.Should().NotBeNull("property {0} must have a setter for deserialization", propertyName);
             setter!.IsPublic.Should().BeTrue("property {0} setter must be public for deserialization", propertyName);
         }
@@ -36,18 +36,18 @@ public class SharedDataPartTests
     [Test]
     public void Json_Deserialization_Should_Populate_Optional_Properties()
     {
-        string json = "{\n" +
-                      "  \"Name\": \"file.txt\",\n" +
-                      "  \"InventoryPartType\": \"File\",\n" +
-                      "  \"ClientInstanceId\": \"client-1\",\n" +
-                      "  \"InventoryCodeAndId\": \"inv-123\",\n" +
-                      "  \"NodeId\": \"node-xyz\",\n" +
-                      "  \"RootPath\": \"C:/root\",\n" +
-                      "  \"RelativePath\": \"sub/file.txt\",\n" +
-                      "  \"SignatureGuid\": \"guid-abc\",\n" +
-                      "  \"SignatureHash\": \"hash-123\",\n" +
-                      "  \"HasAnalysisError\": false\n" +
-                      "}";
+        var json = "{\n" +
+                   "  \"Name\": \"file.txt\",\n" +
+                   "  \"InventoryPartType\": \"File\",\n" +
+                   "  \"ClientInstanceId\": \"client-1\",\n" +
+                   "  \"InventoryCodeAndId\": \"inv-123\",\n" +
+                   "  \"NodeId\": \"node-xyz\",\n" +
+                   "  \"RootPath\": \"C:/root\",\n" +
+                   "  \"RelativePath\": \"sub/file.txt\",\n" +
+                   "  \"SignatureGuid\": \"guid-abc\",\n" +
+                   "  \"SignatureHash\": \"hash-123\",\n" +
+                   "  \"HasAnalysisError\": false\n" +
+                   "}";
 
         var result = JsonHelper.Deserialize<SharedDataPart>(json);
 
