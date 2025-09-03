@@ -149,25 +149,6 @@ public class SynchronizationFunction
         return response;
     }
     
-    [Function("SynchronizationErrorFunction")]
-    public async Task<HttpResponseData> SynchronizationError(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/synchronization/error")] 
-        HttpRequestData req,
-        FunctionContext executionContext, 
-        string sessionId)
-    {
-        var client = FunctionHelper.GetClientFromContext(executionContext);
-        var synchronizationErrorActionRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationActionRequest>(req);
-
-        var request = new SynchronizationErrorRequest(sessionId, client, synchronizationErrorActionRequest.ActionsGroupIds, synchronizationErrorActionRequest.NodeId);
-        await _mediator.Send(request);
-            
-        var response = req.CreateResponse();
-        response.StatusCode = HttpStatusCode.OK;
-
-        return response;
-    }
-    
     [Function("SynchronizationErrorsFunction")]
     public async Task<HttpResponseData> SynchronizationErrors(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/synchronization/errors")] 
@@ -178,7 +159,8 @@ public class SynchronizationFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var synchronizationActionRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationActionRequest>(req);
 
-        var request = new SynchronizationErrorsRequest(sessionId, client, synchronizationActionRequest.ActionsGroupIds, synchronizationActionRequest.NodeId);
+        var request = new SynchronizationErrorsRequest(sessionId, client, synchronizationActionRequest.ActionsGroupIds, 
+            synchronizationActionRequest.NodeId);
         await _mediator.Send(request);
             
         var response = req.CreateResponse();
