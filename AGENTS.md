@@ -63,7 +63,5 @@ Examples:
 - **PR Quality (Sonar)**: each PR must maintain a minimum coverage of 80%.
 
 ## Build and Test Guidelines
-- Always run build and test as two separate commands to avoid blocking issues.
-- Use `dotnet build --verbosity quiet /property:WarningLevel=0` to build the solution.
-- When running tests, do not use the `--verbosity` modifier.
+- Always run build and test as two separate commands to avoid blocking issues. 
 - If you need to clean the solution, use `dotnet clean --verbosity quiet` before building.
