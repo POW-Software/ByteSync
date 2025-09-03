@@ -1,3 +1,5 @@
+using ByteSync.Common.Business.Actions;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using MediatR;
@@ -44,20 +46,19 @@ public class SynchronizationErrorsCommandHandler : IRequestHandler<Synchronizati
             {
                 return false;
             }
-
-            var wasTrackingActionFinished = trackingAction.IsFinished;
-            var isNewError = !trackingAction.IsError;
+            
+            var isErrorHandled = false;
 
             if (trackingAction.SourceClientInstanceId == request.Client.ClientInstanceId)
             {
                 trackingAction.IsSourceSuccess = false;
+                isErrorHandled = true;
             }
             else
             {
                 if (request.NodeId != null)
                 {
-                    // NodeId spécifique fourni - traitement précis
-                    var targetClientInstanceAndNodeId = new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId
+                    var targetClientInstanceAndNodeId = new ClientInstanceIdAndNodeId
                     {
                         ClientInstanceId = request.Client.ClientInstanceId,
                         NodeId = request.NodeId
@@ -65,7 +66,7 @@ public class SynchronizationErrorsCommandHandler : IRequestHandler<Synchronizati
                     
                     if (trackingAction.TargetClientInstanceAndNodeIds.Contains(targetClientInstanceAndNodeId))
                     {
-                        trackingAction.AddErrorOnTarget(targetClientInstanceAndNodeId);
+                        isErrorHandled |= HandleTarget(request, trackingAction, targetClientInstanceAndNodeId, synchronization);
                     }
                     else
                     {
@@ -74,30 +75,30 @@ public class SynchronizationErrorsCommandHandler : IRequestHandler<Synchronizati
                 }
                 else
                 {
-                    // NodeId null - traitement d'erreur sur tous les targets correspondant au ClientInstanceId
                     var targetClientInstanceAndNodeIds = trackingAction.TargetClientInstanceAndNodeIds
                         .Where(x => x.ClientInstanceId == request.Client.ClientInstanceId)
                         .ToList();
 
                     foreach (var targetId in targetClientInstanceAndNodeIds)
                     {
-                        trackingAction.AddErrorOnTarget(targetId);
+                        if (trackingAction.TargetClientInstanceAndNodeIds.Contains(targetId))
+                        {
+                            isErrorHandled |= HandleTarget(request, trackingAction, targetId, synchronization);
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException($"Client {request.Client.ClientInstanceId} with NodeId {request.NodeId} is not a target of the action");
+                        }
                     }
                 }
             }
 
-            if (isNewError)
+            if (isErrorHandled)
             {
-                synchronization.Progress.ErrorsCount += 1;
-            }
-            if (!wasTrackingActionFinished && trackingAction.IsFinished)
-            {
-                synchronization.Progress.FinishedAtomicActionsCount += 1;
+                needSendSynchronizationUpdated = _synchronizationService.CheckSynchronizationIsFinished(synchronization);
             }
 
-            needSendSynchronizationUpdated = _synchronizationService.CheckSynchronizationIsFinished(synchronization);
-
-            return true;
+            return isErrorHandled;
         });
 
         if (result.IsSuccess)
@@ -106,5 +107,28 @@ public class SynchronizationErrorsCommandHandler : IRequestHandler<Synchronizati
         }
 
         _logger.LogInformation("Synchronization errors reported for session {SessionId} with {ActionCount} actions", request.SessionId, actionGroupIds.Count);
+    }
+
+    private bool HandleTarget(SynchronizationErrorsRequest request, TrackingActionEntity trackingAction,
+        ClientInstanceIdAndNodeId targetId, SynchronizationEntity synchronization)
+    {
+        bool isErrorHandled = false;
+        
+        if (trackingAction.SuccessTargetClientInstanceAndNodeIds.Contains(targetId))
+        {
+            _logger.LogWarning(
+                "Client {ClientInstanceId} with NodeId {NodeId} reported an error but was already marked as success for action {ActionGroupId}",
+                request.Client.ClientInstanceId, request.NodeId, trackingAction.ActionsGroupId);
+        }
+        else
+        {
+            trackingAction.AddErrorOnTarget(targetId);
+            synchronization.Progress.ErrorsCount += 1;
+            synchronization.Progress.FinishedAtomicActionsCount += 1;
+
+            isErrorHandled = true;
+        }
+
+        return isErrorHandled;
     }
 }

@@ -1,3 +1,4 @@
+using ByteSync.Common.Business.Actions;
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
@@ -31,27 +32,22 @@ public abstract class ActionCompletedHandlerBase<TRequest> : IRequestHandler<TRe
 
     protected abstract string EmptyIdsLog { get; }
     protected abstract string DoneLogTemplate { get; }
-
-    /// <summary>
-    /// Permet aux classes dérivées de traiter la logique spécifique à la source (ex: IsSourceSuccess = true)
-    /// </summary>
+    
     protected virtual void ProcessSourceAction(TrackingActionEntity trackingAction, TRequest request)
     {
-        // Implémentation par défaut : rien à faire
-    }
 
-    /// <summary>
-    /// Permet aux classes dérivées de mettre à jour la progression (ex: ProcessedVolume)
-    /// </summary>
+    }
+    
     protected virtual void UpdateProgress(SynchronizationEntity synchronization, TrackingActionEntity trackingAction, TRequest request)
     {
-        // Implémentation par défaut : rien à faire
+        
     }
 
     public async Task Handle(TRequest request, CancellationToken cancellationToken)
     {
         if (request.ActionsGroupIds.Count == 0)
         {
+            // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
             _logger.LogInformation(EmptyIdsLog);
             return;
         }
@@ -64,51 +60,31 @@ public abstract class ActionCompletedHandlerBase<TRequest> : IRequestHandler<TRe
             {
                 return false;
             }
-
-            // var wasTrackingActionFinished = trackingAction.IsFinished;
-
-            // Permettre aux classes dérivées de traiter la logique source (ex: IsSourceSuccess = true)
+            
             ProcessSourceAction(trackingAction, request);
 
             if (request.NodeId != null)
             {
-                // NodeId spécifique fourni - traitement précis
                 var targetClientInstanceAndNodeId = new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId
                 {
                     ClientInstanceId = request.Client.ClientInstanceId,
                     NodeId = request.NodeId
                 };
                 
-                if (trackingAction.TargetClientInstanceAndNodeIds.Contains(targetClientInstanceAndNodeId))
-                {
-                    trackingAction.AddSuccessOnTarget(targetClientInstanceAndNodeId);
-                    synchronization.Progress.FinishedAtomicActionsCount += 1;
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Client {request.Client.ClientInstanceId} with NodeId {request.NodeId} is not a target of the action");
-                }
+                HandleTarget(request, trackingAction, targetClientInstanceAndNodeId, synchronization);
             }
             else
             {
-                // NodeId null - traitement de tous les targets correspondant au ClientInstanceId
                 var targetClientInstanceAndNodeIds = trackingAction.TargetClientInstanceAndNodeIds
                     .Where(x => x.ClientInstanceId == request.Client.ClientInstanceId)
                     .ToList();
 
                 foreach (var targetId in targetClientInstanceAndNodeIds)
                 {
-                    trackingAction.AddSuccessOnTarget(targetId);
-                    synchronization.Progress.FinishedAtomicActionsCount += 1;
+                    HandleTarget(request, trackingAction, targetId, synchronization);
                 }
             }
-
-            // if (!wasTrackingActionFinished && trackingAction.IsFinished)
-            // {
-            //     synchronization.Progress.FinishedAtomicActionsCount += 1;
-            // }
-
-            // Permettre aux classes dérivées de traiter la logique de progression (ex: ProcessedVolume)
+            
             UpdateProgress(synchronization, trackingAction, request);
 
             needSendSynchronizationUpdated = _synchronizationService.CheckSynchronizationIsFinished(synchronization);
@@ -121,7 +97,30 @@ public abstract class ActionCompletedHandlerBase<TRequest> : IRequestHandler<TRe
             await _synchronizationProgressService.UpdateSynchronizationProgress(result, needSendSynchronizationUpdated);
         }
 
+        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
         _logger.LogInformation(DoneLogTemplate, request.SessionId, request.ActionsGroupIds.Count);
+    }
+
+    private void HandleTarget(TRequest request, TrackingActionEntity trackingAction,
+        ClientInstanceIdAndNodeId targetClientInstanceAndNodeId, SynchronizationEntity synchronization)
+    {
+        if (trackingAction.TargetClientInstanceAndNodeIds.Contains(targetClientInstanceAndNodeId))
+        {
+            if (trackingAction.ErrorTargetClientInstanceAndNodeIds.Contains(targetClientInstanceAndNodeId))
+            {
+                _logger.LogWarning("Client {ClientInstanceId} with NodeId {NodeId} reported action {ActionGroupId} as completed, but it was already marked as error",
+                    request.Client.ClientInstanceId, request.NodeId, trackingAction.ActionsGroupId);
+            }
+            else
+            {
+                trackingAction.AddSuccessOnTarget(targetClientInstanceAndNodeId);
+                synchronization.Progress.FinishedAtomicActionsCount += 1;
+            }
+        }
+        else
+        {
+            throw new InvalidOperationException($"Client {request.Client.ClientInstanceId} with NodeId {request.NodeId} is not a target of the action");
+        }
     }
 }
 
