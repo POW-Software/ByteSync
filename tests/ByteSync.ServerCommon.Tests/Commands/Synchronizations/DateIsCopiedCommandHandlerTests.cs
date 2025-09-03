@@ -154,7 +154,7 @@ public class DateIsCopiedCommandHandlerTests
                 
                 // Cette fonction devrait maintenant réussir au lieu de lancer une exception
                 var result = func(trackingAction, synchronization);
-                result.Should().BeTrue(); // Vérifie que l'opération a réussi
+                result.Should().BeTrue(); // Verifies that the operation succeeded
             })
             .Returns(new TrackingActionResult(true, [], new SynchronizationEntity()));
 
