@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Common.Business.SharedFiles;
+﻿using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Helpers;
 using ByteSync.Interfaces.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
