@@ -6,14 +6,17 @@ using ByteSync.Business.Comparisons;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Synchronizations;
 using ByteSync.Common.Business.Inventories;
+using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Interfaces.Controls.Synchronizations;
+using ByteSync.Interfaces.Converters;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Comparisons.DescriptionBuilders;
+using ByteSync.ViewModels.Sessions.Comparisons.Actions;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
 using FluentAssertions;
 using Moq;
@@ -80,8 +83,8 @@ public class SynchronizationRuleSummaryViewModelTests
 
     private void UseRealDescriptionFactory()
     {
-        var sizeUnitConverter = new Mock<ByteSync.Interfaces.Converters.ISizeUnitConverter>();
-        sizeUnitConverter.Setup(c => c.GetPrintableSizeUnit(It.IsAny<ByteSync.Common.Business.Misc.SizeUnits?>())).Returns("MB");
+        var sizeUnitConverter = new Mock<ISizeUnitConverter>();
+        sizeUnitConverter.Setup(c => c.GetPrintableSizeUnit(It.IsAny<SizeUnits?>())).Returns("MB");
 
         var realFactory = new ByteSync.Business.Comparisons.DescriptionBuilderFactory(_localizationService.Object, sizeUnitConverter.Object);
         _descriptionBuilderFactory.Setup(f => f.CreateAtomicConditionDescriptionBuilder())
@@ -167,7 +170,7 @@ public class SynchronizationRuleSummaryViewModelTests
         UseRealDescriptionFactory();
         var rule = CreateRuleWithOneConditionAndOneAction(FileSystemTypes.File);
 
-        var builtVm = new Mock<ByteSync.ViewModels.Sessions.Comparisons.Actions.SynchronizationRuleGlobalViewModel>().Object;
+        var builtVm = new Mock<SynchronizationRuleGlobalViewModel>().Object;
         _flyoutElementViewModelFactory
             .Setup(f => f.BuilSynchronizationRuleGlobalViewModel(rule, true))
             .Returns(builtVm);
