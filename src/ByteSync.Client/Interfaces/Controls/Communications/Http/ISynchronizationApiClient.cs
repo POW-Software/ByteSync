@@ -23,5 +23,5 @@ public interface ISynchronizationApiClient
     
     Task InformSynchronizationActionError(SharedFileDefinition sharedFileDefinition, string? nodeId);
     
-    Task AssertSynchronizationActionErrors(string sessionId, SynchronizationActionRequest synchronizationActionRequest);
+    Task InformSynchronizationActionErrors(string sessionId, SynchronizationActionRequest synchronizationActionRequest);
 }

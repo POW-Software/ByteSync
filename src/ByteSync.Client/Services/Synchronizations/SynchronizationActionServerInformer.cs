@@ -36,17 +36,17 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
     
     public async Task HandleCloudActionError(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget)
     {
-        await DoHandleCloudAction(sharedActionsGroup, localTarget, _synchronizationApiClient.AssertSynchronizationActionErrors);
+        await DoHandleCloudAction(sharedActionsGroup, localTarget, _synchronizationApiClient.InformSynchronizationActionErrors);
     }
 
     public async Task HandleCloudActionError(SharedActionsGroup sharedActionsGroup)
     {
-        await DoHandleCloudAction(sharedActionsGroup, null, _synchronizationApiClient.AssertSynchronizationActionErrors);
+        await DoHandleCloudAction(sharedActionsGroup, null, _synchronizationApiClient.InformSynchronizationActionErrors);
     }
 
     public async Task HandleCloudActionError(List<string> actionsGroupIds)
     {
-        await DoHandleCloudAction(actionsGroupIds, null, _synchronizationApiClient.AssertSynchronizationActionErrors);
+        await DoHandleCloudAction(actionsGroupIds, null, _synchronizationApiClient.InformSynchronizationActionErrors);
     }
 
     public async Task HandlePendingActions()

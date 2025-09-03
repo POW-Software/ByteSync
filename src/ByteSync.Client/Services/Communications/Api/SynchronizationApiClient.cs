@@ -122,20 +122,12 @@ public class SynchronizationApiClient : ISynchronizationApiClient
 
     public async Task InformSynchronizationActionError(SharedFileDefinition sharedFileDefinition, string? nodeId)
     {
-        try
-        {
-            await _apiInvoker.PostAsync($"session/{sharedFileDefinition.SessionId}/synchronization/error/", 
-                new SynchronizationActionRequest(sharedFileDefinition.ActionsGroupIds!, nodeId));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while informing synchronization action error: {sessionId}", sharedFileDefinition.SessionId);
+        var synchronizationActionRequest = new SynchronizationActionRequest(sharedFileDefinition.ActionsGroupIds!, nodeId);
 
-            throw;
-        }
+        await InformSynchronizationActionErrors(sharedFileDefinition.SessionId, synchronizationActionRequest);
     }
 
-    public async Task AssertSynchronizationActionErrors(string sessionId, SynchronizationActionRequest synchronizationActionRequest)
+    public async Task InformSynchronizationActionErrors(string sessionId, SynchronizationActionRequest synchronizationActionRequest)
     {
         try
         {
