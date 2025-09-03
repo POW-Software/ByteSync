@@ -138,7 +138,7 @@ public class DateIsCopiedCommandHandlerTests
             {
                 var trackingAction = new TrackingActionEntity
                 {
-                    // Client1 a plusieurs NodeIds, Client2 en a un autre
+                    // Client1 has multiple NodeIds, Client2 has another one
                     TargetClientInstanceAndNodeIds =
                     [
                         new() { ClientInstanceId = "client1", NodeId = "node1" },
