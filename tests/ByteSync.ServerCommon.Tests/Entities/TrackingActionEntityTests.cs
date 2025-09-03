@@ -45,19 +45,13 @@ public class TrackingActionEntityTests
         // Arrange
         var entity = new TrackingActionEntity
         {
-            TargetClientInstanceAndNodeIds = new HashSet<ClientInstanceIdAndNodeId>
-            {
-                new ClientInstanceIdAndNodeId { ClientInstanceId = "target1", NodeId = "node1" },
-                new ClientInstanceIdAndNodeId { ClientInstanceId = "target2", NodeId = "node2" }
-            },
-            SuccessTargetClientInstanceAndNodeIds = new HashSet<ClientInstanceIdAndNodeId>
-            {
-                new ClientInstanceIdAndNodeId { ClientInstanceId = "target1", NodeId = "node1" }
-            },
-            ErrorTargetClientInstanceAndNodeIds = new HashSet<ClientInstanceIdAndNodeId>
-            {
-                new ClientInstanceIdAndNodeId { ClientInstanceId = "target2", NodeId = "node2" }
-            }
+            TargetClientInstanceAndNodeIds =
+            [
+                new() { ClientInstanceId = "target1", NodeId = "node1" },
+                new() { ClientInstanceId = "target2", NodeId = "node2" }
+            ],
+            SuccessTargetClientInstanceAndNodeIds = [new() { ClientInstanceId = "target1", NodeId = "node1" }],
+            ErrorTargetClientInstanceAndNodeIds = [new() { ClientInstanceId = "target2", NodeId = "node2" }]
         };
 
         // Act
@@ -73,20 +67,14 @@ public class TrackingActionEntityTests
         // Arrange
         var entity = new TrackingActionEntity
         {
-            TargetClientInstanceAndNodeIds = new HashSet<ClientInstanceIdAndNodeId>
-            {
-                new ClientInstanceIdAndNodeId { ClientInstanceId = "target1", NodeId = "node1" },
-                new ClientInstanceIdAndNodeId { ClientInstanceId = "target2", NodeId = "node2" },
-                new ClientInstanceIdAndNodeId { ClientInstanceId = "target3", NodeId = "node3" }
-            },
-            SuccessTargetClientInstanceAndNodeIds = new HashSet<ClientInstanceIdAndNodeId>
-            {
-                new ClientInstanceIdAndNodeId { ClientInstanceId = "target1", NodeId = "node1" }
-            },
-            ErrorTargetClientInstanceAndNodeIds = new HashSet<ClientInstanceIdAndNodeId>
-            {
-                new ClientInstanceIdAndNodeId { ClientInstanceId = "target2", NodeId = "node2" }
-            }
+            TargetClientInstanceAndNodeIds =
+            [
+                new() { ClientInstanceId = "target1", NodeId = "node1" },
+                new() { ClientInstanceId = "target2", NodeId = "node2" },
+                new() { ClientInstanceId = "target3", NodeId = "node3" }
+            ],
+            SuccessTargetClientInstanceAndNodeIds = [new() { ClientInstanceId = "target1", NodeId = "node1" }],
+            ErrorTargetClientInstanceAndNodeIds = [new() { ClientInstanceId = "target2", NodeId = "node2" }]
         };
 
         // Act
