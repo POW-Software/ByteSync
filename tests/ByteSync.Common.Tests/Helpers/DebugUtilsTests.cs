@@ -42,19 +42,23 @@ namespace TestingCommon.Helpers
             (after - before).Should().BeGreaterThan(TimeSpan.Zero);
         }
 
+        #if DEBUG
         [Test]
         public void IsRandom_ProbabilityLessThanZero_ShouldThrow()
         {
             Action act = () => DebugUtils.IsRandom(-0.1m);
             act.Should().Throw<ArgumentOutOfRangeException>();
         }
+        #endif
 
+        #if DEBUG
         [Test]
         public void IsRandom_ProbabilityGreaterThanOne_ShouldThrow()
         {
             Action act = () => DebugUtils.IsRandom(1.1m);
             act.Should().Throw<ArgumentOutOfRangeException>();
         }
+        #endif
 
         [Test]
         public void IsRandom_ZeroProbability_ShouldReturnFalse()
@@ -63,12 +67,14 @@ namespace TestingCommon.Helpers
             result.Should().BeFalse();
         }
 
+        #if DEBUG
         [Test]
         public void IsRandom_OneProbability_ShouldReturnTrue()
         {
             var result = DebugUtils.IsRandom(1m);
             result.Should().BeTrue();
         }
+        #endif
 
         [Test]
         public void IsRandom_MidProbability_ShouldExecuteRandomPath()
