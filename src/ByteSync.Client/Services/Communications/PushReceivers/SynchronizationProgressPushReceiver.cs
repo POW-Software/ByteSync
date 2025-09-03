@@ -91,7 +91,7 @@ public class SynchronizationProgressPushReceiver : IPushReceiver
 
                     var request = new SynchronizationActionRequest(actionsGroupIds, null);
 
-                    await _synchronizationApiClient.InformSynchronizationActionErrors(sessionId!, request);
+                    await _synchronizationApiClient.InformSynchronizationActionErrors(sessionId, request);
                 }
                 catch (Exception ex2)
                 {
