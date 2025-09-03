@@ -153,7 +153,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 
                 File.Copy(sourceFullName, destinationFullName, true);
 
-                await ApplyDatesFromLocalSource(sharedActionsGroup, destinationFullName, sourceFullName);
+                await ApplyDatesFromLocalSource(sharedActionsGroup, destinationFullName);
             }
             else
             {
@@ -176,7 +176,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         }
     }
 
-    private async Task ApplyDatesFromLocalSource(SharedActionsGroup sharedActionsGroup, string destinationFullName, string sourceFullName)
+    private async Task ApplyDatesFromLocalSource(SharedActionsGroup sharedActionsGroup, string destinationFullName)
     {
         if (sharedActionsGroup.IsSynchronizeContentOnly)
         {
