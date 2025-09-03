@@ -43,5 +43,4 @@ public class SynchronizationService : ISynchronizationService
     {
         await _synchronizationRepository.ResetSession(sessionId);
     }
-
 }
