@@ -13,15 +13,13 @@ public class SynchronizationProgressService : ISynchronizationProgressService
     private readonly IInvokeClientsService _invokeClientsService;
     private readonly ITrackingActionMapper _trackingActionMapper;
     private readonly ISynchronizationMapper _synchronizationMapper;
-    private readonly ISharedFilesService _sharedFilesService;
 
     public SynchronizationProgressService(IInvokeClientsService invokeClientsService, ITrackingActionMapper trackingActionMapper, 
-        ISynchronizationMapper synchronizationMapper, ISharedFilesService sharedFilesService)
+        ISynchronizationMapper synchronizationMapper)
     {
         _invokeClientsService = invokeClientsService;
         _trackingActionMapper = trackingActionMapper;
         _synchronizationMapper = synchronizationMapper;
-        _sharedFilesService = sharedFilesService;
     }
 
     public async Task UpdateSynchronizationProgress(TrackingActionResult trackingActionResult, bool needSendSynchronizationUpdated)
