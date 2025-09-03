@@ -23,7 +23,8 @@ public class GlobalTestSetup
         ByteSyncServerCommonAssembly = GetReferencedAssemblyByName("ByteSync.ServerCommon");
         
         Configuration = new ConfigurationBuilder()
-            .AddJsonFile("functions-integration-tests.local.settings.json", optional: false)
+            .AddJsonFile("functions-integration-tests.local.settings.json", optional: true)
+            .AddEnvironmentVariables()
             .Build();
         
         var builder = new ContainerBuilder();
