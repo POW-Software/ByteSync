@@ -17,7 +17,8 @@ public class GlobalTestSetup
     public void RunBeforeAnyTests()
     {
         Configuration = new ConfigurationBuilder()
-            .AddJsonFile("client-integration-tests.local.settings.json", optional: false)
+            .AddJsonFile("client-integration-tests.local.settings.json", optional: true)
+            .AddEnvironmentVariables()
             .Build();
 
         var builder = new ContainerBuilder();
