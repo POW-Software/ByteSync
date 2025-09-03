@@ -129,7 +129,7 @@ public class SynchronizationService : ISynchronizationService
     public Task OnSynchronizationDataTransmitted(SharedSynchronizationStartData sharedSynchronizationStartData)
     {
         SynchronizationProcessData.TotalVolumeToProcess = sharedSynchronizationStartData.TotalVolumeToProcess;
-        SynchronizationProcessData.TotalActionsToProcess = sharedSynchronizationStartData.TotalActionsToProcess;
+        SynchronizationProcessData.TotalActionsToProcess = sharedSynchronizationStartData.TotalAtomicActionsToProcess;
         
         SynchronizationProcessData.SynchronizationDataTransmitted.OnNext(true);
         
