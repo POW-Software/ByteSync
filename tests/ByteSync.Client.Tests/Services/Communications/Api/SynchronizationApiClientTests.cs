@@ -38,7 +38,7 @@ public class SynchronizationApiClientTests
         var request = new SynchronizationStartRequest
         {
             SessionId = sessionId,
-            ActionsGroupDefinitions = new List<ActionsGroupDefinition>()
+            ActionsGroupDefinitions = []
         };
 
         _mockApiInvoker
@@ -62,7 +62,7 @@ public class SynchronizationApiClientTests
         var request = new SynchronizationStartRequest
         {
             SessionId = sessionId,
-            ActionsGroupDefinitions = new List<ActionsGroupDefinition>()
+            ActionsGroupDefinitions = []
         };
         var expectedException = new Exception("API error");
 
@@ -82,7 +82,7 @@ public class SynchronizationApiClientTests
     {
         // Arrange
         var sessionId = "test-session-id";
-        var request = new SynchronizationActionRequest(new List<string> { "action-group-1" }, "node-id");
+        var request = new SynchronizationActionRequest(["action-group-1"], "node-id");
 
         _mockApiInvoker
             .Setup(x => x.PostAsync($"session/{sessionId}/synchronization/localCopyIsDone", request, It.IsAny<CancellationToken>()))
@@ -102,7 +102,7 @@ public class SynchronizationApiClientTests
     {
         // Arrange
         var sessionId = "test-session-id";
-        var request = new SynchronizationActionRequest(new List<string> { "action-group-1" }, "node-id");
+        var request = new SynchronizationActionRequest(["action-group-1"], "node-id");
         var expectedException = new Exception("API error");
 
         _mockApiInvoker
@@ -121,7 +121,7 @@ public class SynchronizationApiClientTests
     {
         // Arrange
         var sessionId = "test-session-id";
-        var request = new SynchronizationActionRequest(new List<string> { "action-group-1" }, "node-id");
+        var request = new SynchronizationActionRequest(["action-group-1"], "node-id");
 
         _mockApiInvoker
             .Setup(x => x.PostAsync($"session/{sessionId}/synchronization/dateIsCopied", request, It.IsAny<CancellationToken>()))
@@ -141,7 +141,7 @@ public class SynchronizationApiClientTests
     {
         // Arrange
         var sessionId = "test-session-id";
-        var request = new SynchronizationActionRequest(new List<string> { "action-group-1" }, "node-id");
+        var request = new SynchronizationActionRequest(["action-group-1"], "node-id");
         var expectedException = new Exception("API error");
 
         _mockApiInvoker
@@ -160,7 +160,7 @@ public class SynchronizationApiClientTests
     {
         // Arrange
         var sessionId = "test-session-id";
-        var request = new SynchronizationActionRequest(new List<string> { "action-group-1" }, "node-id");
+        var request = new SynchronizationActionRequest(["action-group-1"], "node-id");
 
         _mockApiInvoker
             .Setup(x => x.PostAsync($"session/{sessionId}/synchronization/fileOrDirectoryIsDeleted", request, It.IsAny<CancellationToken>()))
@@ -180,7 +180,7 @@ public class SynchronizationApiClientTests
     {
         // Arrange
         var sessionId = "test-session-id";
-        var request = new SynchronizationActionRequest(new List<string> { "action-group-1" }, "node-id");
+        var request = new SynchronizationActionRequest(["action-group-1"], "node-id");
         var expectedException = new Exception("API error");
 
         _mockApiInvoker
@@ -199,7 +199,7 @@ public class SynchronizationApiClientTests
     {
         // Arrange
         var sessionId = "test-session-id";
-        var request = new SynchronizationActionRequest(new List<string> { "action-group-1" }, "node-id");
+        var request = new SynchronizationActionRequest(["action-group-1"], "node-id");
 
         _mockApiInvoker
             .Setup(x => x.PostAsync($"session/{sessionId}/synchronization/directoryIsCreated", request, It.IsAny<CancellationToken>()))
@@ -219,7 +219,7 @@ public class SynchronizationApiClientTests
     {
         // Arrange
         var sessionId = "test-session-id";
-        var request = new SynchronizationActionRequest(new List<string> { "action-group-1" }, "node-id");
+        var request = new SynchronizationActionRequest(["action-group-1"], "node-id");
         var expectedException = new Exception("API error");
 
         _mockApiInvoker
@@ -314,7 +314,7 @@ public class SynchronizationApiClientTests
         var sharedFileDefinition = new SharedFileDefinition
         {
             SessionId = "test-session-id",
-            ActionsGroupIds = new List<string> { "action-group-1", "action-group-2" }
+            ActionsGroupIds = ["action-group-1", "action-group-2"]
         };
         var nodeId = "test-node-id";
 
@@ -340,7 +340,7 @@ public class SynchronizationApiClientTests
         var sharedFileDefinition = new SharedFileDefinition
         {
             SessionId = "test-session-id",
-            ActionsGroupIds = new List<string> { "action-group-1" }
+            ActionsGroupIds = ["action-group-1"]
         };
 
         _mockApiInvoker
@@ -363,7 +363,7 @@ public class SynchronizationApiClientTests
     {
         // Arrange
         var sessionId = "test-session-id";
-        var request = new SynchronizationActionRequest(new List<string> { "action-group-1" }, "node-id");
+        var request = new SynchronizationActionRequest(["action-group-1"], "node-id");
 
         _mockApiInvoker
             .Setup(x => x.PostAsync($"session/{sessionId}/synchronization/errors/", request, It.IsAny<CancellationToken>()))
@@ -383,7 +383,7 @@ public class SynchronizationApiClientTests
     {
         // Arrange
         var sessionId = "test-session-id";
-        var request = new SynchronizationActionRequest(new List<string> { "action-group-1" }, "node-id");
+        var request = new SynchronizationActionRequest(["action-group-1"], "node-id");
         var expectedException = new Exception("API error");
 
         _mockApiInvoker
