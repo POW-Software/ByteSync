@@ -22,13 +22,11 @@ public class LocalCopyIsDoneCommandHandler : ActionCompletedHandlerBase<LocalCop
 
     protected override void ProcessSourceAction(TrackingActionEntity trackingAction, LocalCopyIsDoneRequest request)
     {
-        // Spécificité LocalCopyIsDone : marquer la source comme réussie
         trackingAction.IsSourceSuccess = true;
     }
 
     protected override void UpdateProgress(SynchronizationEntity synchronization, TrackingActionEntity trackingAction, LocalCopyIsDoneRequest request)
     {
-        // Spécificité LocalCopyIsDone : mettre à jour le volume traité
         synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
     }
 }

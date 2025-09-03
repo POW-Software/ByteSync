@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Functions.Helpers.Misc;
 using ByteSync.ServerCommon.Commands.Synchronizations;
