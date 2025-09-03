@@ -28,8 +28,8 @@ public class SynchronizationServiceTests
         {
             Progress = new SynchronizationProgressEntity
             {
-                Members = new List<string> { "a", "b" },
-                CompletedMembers = new List<string> { "a", "b" },
+                Members = ["a", "b"],
+                CompletedMembers = ["a", "b"],
                 TotalAtomicActionsCount = 10,
                 FinishedAtomicActionsCount = 10
             }
@@ -54,8 +54,8 @@ public class SynchronizationServiceTests
             AbortRequestedOn = DateTimeOffset.UtcNow,
             Progress = new SynchronizationProgressEntity
             {
-                Members = new List<string> { "a", "b" },
-                CompletedMembers = new List<string> { "a", "b" },
+                Members = ["a", "b"],
+                CompletedMembers = ["a", "b"],
                 TotalAtomicActionsCount = 10,
                 FinishedAtomicActionsCount = 5 // not all done, but abort requested
             }
@@ -78,8 +78,8 @@ public class SynchronizationServiceTests
         {
             Progress = new SynchronizationProgressEntity
             {
-                Members = new List<string> { "a", "b" },
-                CompletedMembers = new List<string> { "a" },
+                Members = ["a", "b"],
+                CompletedMembers = ["a"],
                 TotalAtomicActionsCount = 10,
                 FinishedAtomicActionsCount = 10
             }
@@ -106,8 +106,8 @@ public class SynchronizationServiceTests
             EndStatus = SynchronizationEndStatuses.Regular,
             Progress = new SynchronizationProgressEntity
             {
-                Members = new List<string> { "a" },
-                CompletedMembers = new List<string> { "a" },
+                Members = ["a"],
+                CompletedMembers = ["a"],
                 TotalAtomicActionsCount = 1,
                 FinishedAtomicActionsCount = 1
             }
