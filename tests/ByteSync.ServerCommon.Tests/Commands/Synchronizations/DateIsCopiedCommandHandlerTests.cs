@@ -165,7 +165,7 @@ public class DateIsCopiedCommandHandlerTests
             .Returns(Task.CompletedTask);
 
         // Act & Assert
-        // Cette opération ne doit plus lancer d'exception avec NodeId = null
+        // This operation should no longer throw an exception with NodeId = null
         await FluentActions.Awaiting(() => 
             _dateIsCopiedCommandHandler.Handle(request, CancellationToken.None))
             .Should().NotThrowAsync();
