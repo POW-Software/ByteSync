@@ -23,10 +23,10 @@ namespace ByteSync.Tests.ViewModels.Sessions.Synchronizations;
 [TestFixture]
 public class TestSynchronizationBeforeStartViewModel : AbstractTester
 {
-    private SynchronizationBeforeStartViewModel _viewModel;
-    private Mock<ISynchronizationStarter> _synchronizationStarter;
-    private Mock<ILocalizationService> _localizationService;
-    private Mock<ILogger<SynchronizationBeforeStartViewModel>> _logger;
+    private SynchronizationBeforeStartViewModel _viewModel = null!;
+    private Mock<ISynchronizationStarter> _synchronizationStarter = null!;
+    private Mock<ILocalizationService> _localizationService = null!;
+    private Mock<ILogger<SynchronizationBeforeStartViewModel>> _logger = null!;
 
     [SetUp]
     public void SetUp()
