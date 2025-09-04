@@ -3,29 +3,15 @@ using ByteSync.Interfaces.Controls.Synchronizations;
 
 namespace ByteSync.Business.Synchronizations;
 
-public class ServerInformerOperatorInfo
+public class ServerInformerData
 {
-    private class NodeBatch
-    {
-        public NodeBatch(string? nodeId)
-        {
-            NodeId = nodeId;
-            ActionsGroupIds = new HashSet<string>();
-            CreationDate = DateTime.Now;
-        }
+    private readonly Dictionary<string, ServerInformerNodeBatch> _batches;
 
-        public string? NodeId { get; }
-        public HashSet<string> ActionsGroupIds { get; }
-        public DateTime CreationDate { get; }
-    }
-
-    private readonly Dictionary<string, NodeBatch> _byNode;
-
-    public ServerInformerOperatorInfo(ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
+    public ServerInformerData(ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
     {
         CloudActionCaller = cloudActionCaller;
         SynchronizationActionRequests = new List<SynchronizationActionRequest>();
-        _byNode = new Dictionary<string, NodeBatch>();
+        _batches = new Dictionary<string, ServerInformerNodeBatch>();
     }
 
     public ISynchronizationActionServerInformer.CloudActionCaller CloudActionCaller { get; }
@@ -35,10 +21,10 @@ public class ServerInformerOperatorInfo
     public void Add(List<string> actionsGroupIds, string? nodeId)
     {
         var key = nodeId ?? string.Empty;
-        if (!_byNode.TryGetValue(key, out var batch))
+        if (!_batches.TryGetValue(key, out var batch))
         {
-            batch = new NodeBatch(nodeId);
-            _byNode[key] = batch;
+            batch = new ServerInformerNodeBatch(nodeId);
+            _batches[key] = batch;
         }
 
         foreach (var id in actionsGroupIds)
@@ -47,44 +33,44 @@ public class ServerInformerOperatorInfo
         }
     }
 
-    public IEnumerable<ServerInformerOperatorInfo> ExtractReadySlices(int readyCountThreshold, TimeSpan maxAge, int chunkSize)
+    public IEnumerable<ServerInformerData> ExtractReadySlices(int readyCountThreshold, TimeSpan maxAge, int chunkSize)
     {
         var now = DateTime.Now;
         var readyKeys = new List<string>();
-        foreach (var kv in _byNode)
+        foreach (var pair in _batches)
         {
-            var batch = kv.Value;
+            var batch = pair.Value;
             if (batch.ActionsGroupIds.Count >= readyCountThreshold || (maxAge > TimeSpan.Zero && (now - batch.CreationDate) > maxAge))
             {
-                readyKeys.Add(kv.Key);
+                readyKeys.Add(pair.Key);
             }
         }
 
-        var result = new List<ServerInformerOperatorInfo>();
+        var result = new List<ServerInformerData>();
         foreach (var key in readyKeys)
         {
-            var batch = _byNode[key];
+            var batch = _batches[key];
             result.Add(BuildSlice(batch, chunkSize));
-            _byNode.Remove(key);
+            _batches.Remove(key);
         }
 
         return result;
     }
 
-    public IEnumerable<ServerInformerOperatorInfo> ExtractAllSlices(int chunkSize)
+    public IEnumerable<ServerInformerData> ExtractAllSlices(int chunkSize)
     {
-        var result = new List<ServerInformerOperatorInfo>();
-        foreach (var batch in _byNode.Values)
+        var result = new List<ServerInformerData>();
+        foreach (var batch in _batches.Values)
         {
             result.Add(BuildSlice(batch, chunkSize));
         }
-        _byNode.Clear();
+        _batches.Clear();
         return result;
     }
 
-    private ServerInformerOperatorInfo BuildSlice(NodeBatch batch, int chunkSize)
+    private ServerInformerData BuildSlice(ServerInformerNodeBatch batch, int chunkSize)
     {
-        var slice = new ServerInformerOperatorInfo(CloudActionCaller);
+        var slice = new ServerInformerData(CloudActionCaller);
         var ids = batch.ActionsGroupIds.ToList();
         foreach (var chunk in ids.Chunk(chunkSize))
         {
