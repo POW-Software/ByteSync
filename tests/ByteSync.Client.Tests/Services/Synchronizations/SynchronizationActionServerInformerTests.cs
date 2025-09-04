@@ -359,9 +359,9 @@ public class SynchronizationActionServerInformerTests
         // Process pending actions
         await _synchronizationActionServerInformer.HandlePendingActions();
 
-        // Assert - Each action generates its own request, but they are processed together
-        callCount.Should().Be(2, "Each action generates its own request");
-        processedRequests.Should().HaveCount(2);
+        // Assert - Actions are grouped by NodeId into a single request
+        callCount.Should().Be(1, "Actions for the same NodeId are grouped");
+        processedRequests.Should().HaveCount(1);
         
         // Verify both actions were processed
         var allProcessedGroupIds = processedRequests.SelectMany(req => req.ActionsGroupIds).ToList();
@@ -401,9 +401,8 @@ public class SynchronizationActionServerInformerTests
         // Act - Process all pending actions
         await _synchronizationActionServerInformer.HandlePendingActions();
 
-        // Assert - Should have processed all 250 actions in chunks
-        // The code chunks by 200, so we expect multiple calls
-        callCount.Should().BeGreaterThan(0, "Should have processed the actions");
+        // Assert - Should have processed all 250 actions: 100 + 100 flushed during add, then 50 on pending
+        callCount.Should().Be(3, "Two auto-flushes at 100 + remaining 50 on pending");
         
         var totalActionsProcessed = processedRequests.Sum(req => req.ActionsGroupIds.Count);
         totalActionsProcessed.Should().Be(250, "All 250 actions should be processed");
@@ -442,6 +441,38 @@ public class SynchronizationActionServerInformerTests
             x => x.Invoke("test-session-id", 
                 It.Is<SynchronizationActionRequest>(req => req.ActionsGroupIds.Contains("group-2"))), 
             Times.Once);
+    }
+
+    [Test]
+    public async Task ActionsWithDifferentNodeIds_AreGroupedSeparately()
+    {
+        var callCount = 0;
+        var processedRequests = new List<SynchronizationActionRequest>();
+
+        _cloudActionCallerMock
+            .Setup(x => x.Invoke(It.IsAny<string>(), It.IsAny<SynchronizationActionRequest>()))
+            .Callback<string, SynchronizationActionRequest>((_, request) =>
+            {
+                callCount++;
+                processedRequests.Add(request);
+            })
+            .Returns(Task.CompletedTask);
+
+        var actionsGroup1 = new SharedActionsGroup { ActionsGroupId = "gA" };
+        var actionsGroup2 = new SharedActionsGroup { ActionsGroupId = "gB" };
+
+        var dataPartA = new SharedDataPart { NodeId = "node-A", ClientInstanceId = "c1", Name = "fA" };
+        var dataPartB = new SharedDataPart { NodeId = "node-B", ClientInstanceId = "c1", Name = "fB" };
+
+        await _synchronizationActionServerInformer.HandleCloudActionDone(actionsGroup1, dataPartA, _cloudActionCallerMock.Object);
+        await _synchronizationActionServerInformer.HandleCloudActionDone(actionsGroup2, dataPartB, _cloudActionCallerMock.Object);
+
+        await _synchronizationActionServerInformer.HandlePendingActions();
+
+        callCount.Should().Be(2, "Different NodeIds must produce separate requests");
+        processedRequests.Should().HaveCount(2);
+        processedRequests.Should().ContainSingle(r => r.NodeId == "node-A" && r.ActionsGroupIds.Contains("gA"));
+        processedRequests.Should().ContainSingle(r => r.NodeId == "node-B" && r.ActionsGroupIds.Contains("gB"));
     }
 
     [Test]

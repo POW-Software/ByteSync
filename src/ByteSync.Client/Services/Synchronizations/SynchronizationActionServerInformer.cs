@@ -13,6 +13,10 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
     private readonly ISynchronizationApiClient _synchronizationApiClient;
     private readonly ILogger<SynchronizationActionServerInformer> _logger;
 
+    private const int ReadyCountThreshold = 100;
+    private const int SendChunkSize = 200;
+    private static readonly TimeSpan MaxBatchAge = TimeSpan.FromSeconds(15);
+
     public SynchronizationActionServerInformer(ISessionService sessionService,
         ISynchronizationApiClient synchronizationApiClient, ILogger<SynchronizationActionServerInformer> logger)
     {
@@ -54,13 +58,17 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
         if (_sessionService.IsCloudSession)
         {
             List<ServerInformerOperatorInfo> serverInformerOperatorInfosToHandle;
-            
+
             lock (SyncRoot)
             {
-                serverInformerOperatorInfosToHandle = ServerInformerOperatorInfos.Values.ToList();
-                ServerInformerOperatorInfos.Clear();
+                serverInformerOperatorInfosToHandle = new List<ServerInformerOperatorInfo>();
+
+                foreach (var info in ServerInformerOperatorInfos.Values)
+                {
+                    serverInformerOperatorInfosToHandle.AddRange(info.ExtractAllSlices(SendChunkSize));
+                }
             }
-            
+
             await Handle(serverInformerOperatorInfosToHandle);
         }
     }
@@ -92,9 +100,7 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
             ServerInformerOperatorInfos.Add(cloudActionCaller, new ServerInformerOperatorInfo(cloudActionCaller));
         }
 
-        var synchronizationActionRequest = new SynchronizationActionRequest(actionsGroupIds, localTarget?.NodeId);
-            
-        ServerInformerOperatorInfos[cloudActionCaller].Add(synchronizationActionRequest);
+        ServerInformerOperatorInfos[cloudActionCaller].Add(actionsGroupIds, localTarget?.NodeId);
     }
 
     private async Task DoHandleCloudAction(List<string> actionsGroupIds, SharedDataPart? localTarget,
@@ -117,23 +123,10 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
 
     private void GetServerInformerOperatorInfosToHandle(List<ServerInformerOperatorInfo> serverInformerOperatorInfosToHandle)
     {
-        foreach (var serverInformerOperatorInfo in ServerInformerOperatorInfos.Values)
+        foreach (var info in ServerInformerOperatorInfos.Values)
         {
-            if (serverInformerOperatorInfo.ActionsCount >= 100 ||
-                serverInformerOperatorInfo.CreationDate.IsOlderThan(TimeSpan.FromSeconds(15)))
-            {
-                serverInformerOperatorInfosToHandle.Add(serverInformerOperatorInfo);
-            }
-        }
-
-        // We remove the elements we are processing
-        foreach (var serverInformerOperatorInfo in serverInformerOperatorInfosToHandle)
-        {
-            var isRemoved = ServerInformerOperatorInfos.Remove(serverInformerOperatorInfo.CloudActionCaller);
-            if (!isRemoved)
-            {
-                throw new Exception("Unexpected behaviour");
-            }
+            var slices = info.ExtractReadySlices(ReadyCountThreshold, MaxBatchAge, SendChunkSize);
+            serverInformerOperatorInfosToHandle.AddRange(slices);
         }
     }
     
@@ -145,7 +138,7 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
             {
                 var cloudActionCaller = serverInformerOperatorInfo.CloudActionCaller;
 
-                var tasks = serverInformerOperatorInfo.SynchronizationActionRequests.Chunk(200).Select(async chunk =>
+                var tasks = serverInformerOperatorInfo.SynchronizationActionRequests.Chunk(SendChunkSize).Select(async chunk =>
                 {
                     foreach (var synchronizationActionRequest in  chunk.ToList())
                     {
