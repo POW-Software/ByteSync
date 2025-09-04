@@ -53,6 +53,9 @@ public class SynchronizationErrorsCommandHandler : IRequestHandler<Synchronizati
             {
                 trackingAction.IsSourceSuccess = false;
                 isErrorHandled = true;
+
+                synchronization.Progress.ErrorsCount += trackingAction.TargetClientInstanceAndNodeIds.Count;
+                synchronization.Progress.FinishedAtomicActionsCount += trackingAction.TargetClientInstanceAndNodeIds.Count;
             }
             else
             {
