@@ -138,7 +138,7 @@ public class DateIsCopiedCommandHandlerTests
             {
                 var trackingAction = new TrackingActionEntity
                 {
-                    // Client1 a plusieurs NodeIds, Client2 en a un autre
+                    // Client1 has multiple NodeIds, Client2 has another one
                     TargetClientInstanceAndNodeIds =
                     [
                         new() { ClientInstanceId = "client1", NodeId = "node1" },
@@ -154,7 +154,7 @@ public class DateIsCopiedCommandHandlerTests
                 
                 // Cette fonction devrait maintenant réussir au lieu de lancer une exception
                 var result = func(trackingAction, synchronization);
-                result.Should().BeTrue(); // Vérifie que l'opération a réussi
+                result.Should().BeTrue(); // Verifies that the operation succeeded
             })
             .Returns(new TrackingActionResult(true, [], new SynchronizationEntity()));
 
@@ -165,7 +165,7 @@ public class DateIsCopiedCommandHandlerTests
             .Returns(Task.CompletedTask);
 
         // Act & Assert
-        // Cette opération ne doit plus lancer d'exception avec NodeId = null
+        // This operation should no longer throw an exception with NodeId = null
         await FluentActions.Awaiting(() => 
             _dateIsCopiedCommandHandler.Handle(request, CancellationToken.None))
             .Should().NotThrowAsync();
