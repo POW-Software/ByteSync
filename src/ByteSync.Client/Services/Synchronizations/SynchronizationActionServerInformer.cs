@@ -1,6 +1,5 @@
 ﻿using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Synchronizations;
-using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Services.Sessions;
@@ -141,7 +140,7 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
 
                 var tasks = serverInformerOperatorInfo.SynchronizationActionRequests.Chunk(SEND_CHUNK_SIZE).Select(async chunk =>
                 {
-                    foreach (var synchronizationActionRequest in  chunk.ToList())
+                    foreach (var synchronizationActionRequest in chunk.ToList())
                     {
                         await cloudActionCaller.Invoke(_sessionService.SessionId!, synchronizationActionRequest);
                     }

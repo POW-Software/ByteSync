@@ -43,8 +43,6 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
 
     public ByteSyncEndpoint CurrentEndPoint => _connectionService.CurrentEndPoint!;
 
-    // public AbstractSession Session => _sessionService.SessionObservable.Value!;
-
     public async Task RunSynchronizationAction(SharedActionsGroup sharedActionsGroup, CancellationToken cancellationToken = default)
     {
         try
