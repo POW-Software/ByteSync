@@ -11,7 +11,5 @@ public interface ISharedFilesService
 
     Task AssertFilePartIsDownloaded(Client client, TransferParameters transferParameters);
     
-    // Task AssertDownloadIsFinished(SharedFileDefinition sharedFileDefinition, Client client);
-    
     Task ClearSession(string sessionId);
 }

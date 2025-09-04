@@ -204,9 +204,9 @@ public class SynchronizationProgressPushReceiverTests
 
         // Assert
         VerifyLoggerError("Error processing synchronization progress push");
-        _synchronizationApiClientMock.Verify(c => c.AssertSynchronizationActionErrors(
+        _synchronizationApiClientMock.Verify(c => c.InformSynchronizationActionErrors(
             TEST_SESSION_ID, 
-            It.Is<List<string>>(list => list.Count == 2 && list.Contains("group1") && list.Contains("group2"))), 
+            It.Is<SynchronizationActionRequest>(list => list.ActionsGroupIds.Count == 2 && list.ActionsGroupIds.Contains("group1") && list.ActionsGroupIds.Contains("group2"))), 
             Times.Once);
     }
 
@@ -230,7 +230,7 @@ public class SynchronizationProgressPushReceiverTests
 
         // Assert
         VerifyLoggerError("Error processing synchronization progress push");
-        _synchronizationApiClientMock.Verify(c => c.AssertSynchronizationActionErrors(It.IsAny<string>(), It.IsAny<List<string>>()), Times.Never);
+        _synchronizationApiClientMock.Verify(c => c.InformSynchronizationActionErrors(It.IsAny<string>(), It.IsAny<SynchronizationActionRequest>()), Times.Never);
     }
 
     [Test]
@@ -248,7 +248,10 @@ public class SynchronizationProgressPushReceiverTests
         SetupSynchronizationDataTransmittedSuccess();
         _synchronizationServiceMock.Setup(s => s.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()))
             .ThrowsAsync(new Exception("Test exception"));
-        _synchronizationApiClientMock.Setup(c => c.AssertSynchronizationActionErrors(It.IsAny<string>(), It.IsAny<List<string>>()))
+        _synchronizationApiClientMock
+            .Setup(c => c.InformSynchronizationActionErrors(
+                It.IsAny<string>(),
+                It.IsAny<SynchronizationActionRequest>()))
             .ThrowsAsync(new Exception("API exception"));
 
         // Act

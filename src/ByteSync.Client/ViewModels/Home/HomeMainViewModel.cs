@@ -22,14 +22,14 @@ public class HomeMainViewModel : ViewModelBase, IRoutableViewModel
 
     public string? UrlPathSegment { get; } = Guid.NewGuid().ToString().Substring(0, 5);
         
-    public IScreen HostScreen { get; } 
-    
+    public IScreen HostScreen { get; } = null!;
+
     [Reactive]
-    public ViewModelBase CreateCloudSession { get; set; }
-    
+    public ViewModelBase CreateCloudSession { get; set; } = null!;
+
     [Reactive]
-    public ViewModelBase JoinCloudSession { get; set; }
-    
+    public ViewModelBase JoinCloudSession { get; set; } = null!;
+
     [Reactive]
-    internal ProfilesViewModel Profiles { get; set; }
+    internal ProfilesViewModel Profiles { get; set; } = null!;
 }

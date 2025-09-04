@@ -32,5 +32,5 @@ public class SharedSynchronizationStartData
     
     public long TotalVolumeToProcess { get; set; }
     
-    public long TotalActionsToProcess { get; set; }
+    public long TotalAtomicActionsToProcess { get; set; }
 }

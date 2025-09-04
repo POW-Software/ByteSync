@@ -48,7 +48,7 @@ public class SynchronizationStartFactory : ISynchronizationStartFactory
             sharedAtomicActions, sharedActionsGroups, looseSynchronizationRules);
         
         synchronizationStartData.TotalVolumeToProcess = sharedActionsGroups.Sum(ssa => ssa.Size.GetValueOrDefault());
-        synchronizationStartData.TotalActionsToProcess = sharedActionsGroups.Count;
+        synchronizationStartData.TotalAtomicActionsToProcess = sharedAtomicActions.Count;
 
         return synchronizationStartData;
     }

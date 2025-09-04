@@ -23,13 +23,13 @@ namespace ByteSync.ViewModels.Sessions.DataNodes;
 
 public class DataNodeHeaderViewModel : ActivatableViewModelBase
 {
-    private readonly IThemeService _themeService;
-    private readonly ILocalizationService _localizationService;
-    private readonly IDataNodeRepository _dataNodeRepository;
-    private readonly IDataNodeService _dataNodeService;
-    private readonly ISessionService _sessionService;
-    private readonly SessionMember _sessionMember;
-    private readonly DataNode _dataNode;
+    private readonly IThemeService _themeService = null!;
+    private readonly ILocalizationService _localizationService = null!;
+    private readonly IDataNodeRepository _dataNodeRepository = null!;
+    private readonly IDataNodeService _dataNodeService = null!;
+    private readonly ISessionService _sessionService = null!;
+    private readonly SessionMember _sessionMember = null!;
+    private readonly DataNode _dataNode = null!;
 
     private IBrush _currentMemberLetterBackGround = null!;
     private IBrush _otherMemberLetterBackGround = null!;
@@ -122,7 +122,7 @@ public class DataNodeHeaderViewModel : ActivatableViewModelBase
     }
 
     [Reactive]
-    public string ClientInstanceId { get; private set; }
+    public string ClientInstanceId { get; private set; } = null!;
 
     [Reactive]
     public string MachineDescription { get; private set; } = string.Empty;
@@ -150,7 +150,7 @@ public class DataNodeHeaderViewModel : ActivatableViewModelBase
 
     public extern bool ShowRemoveButton { [ObservableAsProperty] get; }
 
-    public ReactiveCommand<Unit, Unit> RemoveDataNodeCommand { get; }
+    public ReactiveCommand<Unit, Unit> RemoveDataNodeCommand { get; } = null!;
 
     private void UpdateCanRemoveDataNode()
     {

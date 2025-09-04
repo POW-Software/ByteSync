@@ -16,14 +16,14 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Results;
 
 public class ContentRepartitionViewModel : ViewModelBase, IDisposable
 {
-    private IThemeService _themeService;
+    private IThemeService _themeService = null!;
 
     private IBrush? _grayBrush;
     private IBrush? _lightGrayBrush;
     private IBrush? _secondaryBackgroundBrush;
     private IBrush? _mainBackgroundBrush;
     private IBrush? _mainForeColorBrush;
-    private readonly IDisposable _subscription;
+    private readonly IDisposable _subscription = null!;
 
     public enum BrushColors
     {
@@ -68,7 +68,7 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
         InitBrushes();
     }
 
-    private ContentRepartitionComputeResult ComputeResult { get; set; }
+    private ContentRepartitionComputeResult ComputeResult { get; set; } = null!;
 
     private IBrush GrayBrush
     {
@@ -141,11 +141,11 @@ public class ContentRepartitionViewModel : ViewModelBase, IDisposable
     [Reactive]
     public bool ShowDirectoryDifferences { get; set; }
 
-    public ContentRepartition ContentRepartition { get; }
-    
-    public ComparisonItem ComparisonItem { get; }
-    
-    public List<Inventory> AllInventories { get; }
+    public ContentRepartition ContentRepartition { get; } = null!;
+
+    public ComparisonItem ComparisonItem { get; } = null!;
+
+    public List<Inventory> AllInventories { get; } = null!;
 
     public ObservableCollection<StatusItemViewModel>? FingerPrintGroups { get; set; }
 

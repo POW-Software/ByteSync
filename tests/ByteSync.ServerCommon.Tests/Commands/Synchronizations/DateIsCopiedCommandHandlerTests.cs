@@ -45,7 +45,7 @@ public class DateIsCopiedCommandHandlerTests
         var client = new Client { ClientInstanceId = "client1" };
         var actionsGroupIds = new List<string> { "group1", "group2" };
 
-        var request = new DateIsCopiedRequest(sessionId, client, actionsGroupIds);
+        var request = new DateIsCopiedRequest(sessionId, client, actionsGroupIds, "testNodeId");
 
         A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(A<SynchronizationEntity>._))
             .Returns(true);
@@ -54,7 +54,11 @@ public class DateIsCopiedCommandHandlerTests
             {
                 var trackingAction = new TrackingActionEntity
                 {
-                    TargetClientInstanceIds = new HashSet<string> { "client1", "client2" }
+                    TargetClientInstanceAndNodeIds =
+                    [
+                        new() { ClientInstanceId = "client1", NodeId = "testNodeId" },
+                        new() { ClientInstanceId = "client2", NodeId = "testNodeId" }
+                    ]
                 };
                 var synchronization = new SynchronizationEntity
                 {
@@ -62,7 +66,7 @@ public class DateIsCopiedCommandHandlerTests
                 };
                 func(trackingAction, synchronization);
             })
-            .Returns(new TrackingActionResult(true, new List<TrackingActionEntity>(), new SynchronizationEntity()));
+            .Returns(new TrackingActionResult(true, [], new SynchronizationEntity()));
         A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(A<TrackingActionResult>._, A<bool>._))
             .Returns(Task.CompletedTask);
 
@@ -84,7 +88,7 @@ public class DateIsCopiedCommandHandlerTests
         var client = new Client { ClientInstanceId = "client1" };
         var actionsGroupIds = new List<string>();
 
-        var request = new DateIsCopiedRequest(sessionId, client, actionsGroupIds);
+        var request = new DateIsCopiedRequest(sessionId, client, actionsGroupIds, "testNodeId");
 
         // Act
         await _dateIsCopiedCommandHandler.Handle(request, CancellationToken.None);
@@ -104,7 +108,7 @@ public class DateIsCopiedCommandHandlerTests
         var client = new Client { ClientInstanceId = "client1" };
         var actionsGroupIds = new List<string> { "group1" };
 
-        var request = new DateIsCopiedRequest(sessionId, client, actionsGroupIds);
+        var request = new DateIsCopiedRequest(sessionId, client, actionsGroupIds, "testNodeId");
         var expectedException = new InvalidOperationException("Test exception");
 
         A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>._))
@@ -116,5 +120,54 @@ public class DateIsCopiedCommandHandlerTests
             .Should().ThrowAsync<InvalidOperationException>();
 
         exception.Which.Should().Be(expectedException);
+    }
+
+    [Test]
+    public async Task Handle_WithNodeIdNull_ShouldNotThrowException()
+    {
+        // Arrange
+        const string sessionId = "session123";
+        var client = new Client { ClientInstanceId = "client1" };
+        var actionsGroupIds = new List<string> { "action1" };
+        
+        // Request with NodeId = null
+        var request = new DateIsCopiedRequest(sessionId, client, actionsGroupIds, null);
+
+        A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>._))
+            .Invokes((string _, List<string> _, Func<TrackingActionEntity, SynchronizationEntity, bool> func) => 
+            {
+                var trackingAction = new TrackingActionEntity
+                {
+                    // Client1 has multiple NodeIds, Client2 has another one
+                    TargetClientInstanceAndNodeIds =
+                    [
+                        new() { ClientInstanceId = "client1", NodeId = "node1" },
+                        new() { ClientInstanceId = "client1", NodeId = "node2" },
+                        new() { ClientInstanceId = "client2", NodeId = "node3" }
+                    ]
+                };
+                
+                var synchronization = new SynchronizationEntity
+                {
+                    Progress = new SynchronizationProgressEntity()
+                };
+                
+                // Cette fonction devrait maintenant réussir au lieu de lancer une exception
+                var result = func(trackingAction, synchronization);
+                result.Should().BeTrue(); // Verifies that the operation succeeded
+            })
+            .Returns(new TrackingActionResult(true, [], new SynchronizationEntity()));
+
+        A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(A<SynchronizationEntity>._))
+            .Returns(true);
+
+        A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(A<TrackingActionResult>._, A<bool>._))
+            .Returns(Task.CompletedTask);
+
+        // Act & Assert
+        // This operation should no longer throw an exception with NodeId = null
+        await FluentActions.Awaiting(() => 
+            _dateIsCopiedCommandHandler.Handle(request, CancellationToken.None))
+            .Should().NotThrowAsync();
     }
 }

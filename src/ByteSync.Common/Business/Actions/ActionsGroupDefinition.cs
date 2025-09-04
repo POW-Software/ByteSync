@@ -12,12 +12,12 @@ public class ActionsGroupDefinition : AbstractActionsGroup
 {
     public ActionsGroupDefinition()
     {
-        Targets = new List<string>();
+        TargetClientInstanceAndNodeIds = new List<ClientInstanceIdAndNodeId>();
     }
 
-    public string? Source { get; set; }
+    public string? SourceClientInstanceId { get; set; }
     
-    public List<string> Targets { get; set; }
+    public List<ClientInstanceIdAndNodeId> TargetClientInstanceAndNodeIds { get; set; }
 
     public FileSystemTypes FileSystemType { get; set; }
 }

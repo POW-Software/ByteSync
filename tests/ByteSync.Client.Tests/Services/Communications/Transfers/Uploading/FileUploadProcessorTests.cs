@@ -78,8 +78,8 @@ public class FileUploadProcessorTests
         {
             File.Delete(_testFilePath);
         }
-        _testMemoryStream?.Dispose();
-        _semaphoreSlim?.Dispose();
+        _testMemoryStream.Dispose();
+        _semaphoreSlim.Dispose();
     }
 
     [Test]

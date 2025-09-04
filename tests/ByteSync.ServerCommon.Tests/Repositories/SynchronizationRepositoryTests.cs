@@ -78,15 +78,15 @@ public class SynchronizationRepositoryTests
             {
                 ActionsGroupId = "group_source_needed",
                 Operator = ActionOperatorTypes.SynchronizeContentOnly,
-                Source = "source-client-1",
-                Targets = new List<string> { "t1" }
+                SourceClientInstanceId = "source-client-1",
+                TargetClientInstanceAndNodeIds = new List<ClientInstanceIdAndNodeId> { new ClientInstanceIdAndNodeId { ClientInstanceId = "t1", NodeId = "n1" } }
             },
             new()
             {
                 ActionsGroupId = "group_source_not_needed",
                 Operator = ActionOperatorTypes.SynchronizeDate,
-                Source = "source-client-2",
-                Targets = new List<string> { "t2" }
+                SourceClientInstanceId = "source-client-2",
+                TargetClientInstanceAndNodeIds = new List<ClientInstanceIdAndNodeId> { new ClientInstanceIdAndNodeId { ClientInstanceId = "t2", NodeId = "n2" } }
             }
         };
 

@@ -17,17 +17,17 @@ namespace ByteSync.ViewModels.Sessions.DataNodes;
 
 public class DataNodeViewModel : ActivatableViewModelBase
 {
-    private readonly IThemeService _themeService;
-    private readonly IDataNodeService _dataNodeService;
-    private readonly IDataNodeRepository _dataNodeRepository;
-    private readonly ISessionService _sessionService;
+    private readonly IThemeService _themeService = null!;
+    private readonly IDataNodeService _dataNodeService = null!;
+    private readonly IDataNodeRepository _dataNodeRepository = null!;
+    private readonly ISessionService _sessionService = null!;
     
     private IBrush _currentMemberBackGround = null!;
     private IBrush _otherMemberBackGround = null!;
 
-    public DataNodeSourcesViewModel SourcesViewModel { get; }
-    public DataNodeHeaderViewModel HeaderViewModel { get; }
-    public DataNodeStatusViewModel StatusViewModel { get; }
+    public DataNodeSourcesViewModel SourcesViewModel { get; } = null!;
+    public DataNodeHeaderViewModel HeaderViewModel { get; } = null!;
+    public DataNodeStatusViewModel StatusViewModel { get; } = null!;
 
     public DataNodeViewModel()
     {
@@ -164,7 +164,7 @@ public class DataNodeViewModel : ActivatableViewModelBase
     
     public extern bool ShowAddButton { [ObservableAsProperty] get; }
     
-    public DataNode DataNode { get; }
-    
-    public ReactiveCommand<Unit, Unit> AddDataNodeCommand { get; }
+    public DataNode DataNode { get; } = null!;
+
+    public ReactiveCommand<Unit, Unit> AddDataNodeCommand { get; } = null!;
 }

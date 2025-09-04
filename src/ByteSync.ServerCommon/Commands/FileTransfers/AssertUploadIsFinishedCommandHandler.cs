@@ -12,21 +12,24 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly ISharedFilesService _sharedFilesService;
-    private readonly ISynchronizationService _synchronizationService;
+    private readonly ITrackingActionRepository _trackingActionRepository;
+    private readonly ISynchronizationStatusCheckerService _synchronizationStatusCheckerService;
     private readonly IInvokeClientsService _invokeClientsService;
     private readonly ITransferLocationService _transferLocationService;
 
     private readonly ILogger<AssertUploadIsFinishedCommandHandler> _logger;
     public AssertUploadIsFinishedCommandHandler(ICloudSessionsRepository cloudSessionsRepository,
         ISharedFilesService sharedFilesService,
-        ISynchronizationService synchronizationService,
+        ITrackingActionRepository trackingActionRepository,
+        ISynchronizationStatusCheckerService synchronizationStatusCheckerService,
         IInvokeClientsService invokeClientsService,
         ITransferLocationService transferLocationService,
         ILogger<AssertUploadIsFinishedCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _sharedFilesService = sharedFilesService;
-        _synchronizationService = synchronizationService;
+        _trackingActionRepository = trackingActionRepository;
+        _synchronizationStatusCheckerService = synchronizationStatusCheckerService;
         _invokeClientsService = invokeClientsService;
         _transferLocationService = transferLocationService;
         _logger = logger;
@@ -47,28 +50,61 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
             {
                 var otherSessionMembers = GetOtherSessionMembers(session!, sessionMemberData);
                 
-                await _sharedFilesService.AssertUploadIsFinished(request.TransferParameters, 
-                    otherSessionMembers.Select(sm => sm.ClientInstanceId).ToList());
-
-                var transferPush = new FileTransferPush
-                {
-                    SessionId = request.SessionId,
-                    SharedFileDefinition = sharedFileDefinition,
-                    TotalParts = totalParts,
-                    ActionsGroupIds = request.TransferParameters.ActionsGroupIds
-                };
-                await _invokeClientsService.Clients(otherSessionMembers).UploadFinished(transferPush);
+                var otherSessionMemberIds = otherSessionMembers.Select(sm => sm.ClientInstanceId).ToList();
+                
+                await _sharedFilesService.AssertUploadIsFinished(request.TransferParameters, otherSessionMemberIds);
+                
+                await InformOtherClients(sharedFileDefinition, totalParts, otherSessionMemberIds);
             }
             else
             {
-                await _synchronizationService.OnUploadIsFinishedAsync(sharedFileDefinition, totalParts, request.Client);
+                HashSet<string> targetInstanceIds = new HashSet<string>();
+                        
+                var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, sharedFileDefinition.ActionsGroupIds!, 
+                    (trackingAction, synchronization) =>
+                {
+                    if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
+                    {
+                        return false;
+                    }
+                    
+                    trackingAction.IsSourceSuccess = true;
+
+                    foreach (var target in trackingAction.TargetClientInstanceAndNodeIds)
+                    {
+                        targetInstanceIds.Add(target.ClientInstanceId);
+                    }
+
+                    return true;
+                });
+
+                if (result.IsSuccess)
+                {
+                    await _sharedFilesService.AssertUploadIsFinished(request.TransferParameters, targetInstanceIds);
+
+                    await InformOtherClients(sharedFileDefinition, totalParts, targetInstanceIds);
+                }
             }
         }
         
         _logger.LogDebug("Upload finished asserted for session {SessionId}, file {FileId}", 
             request.SessionId, request.TransferParameters.SharedFileDefinition.Id);
     }
-    
+
+    private async Task InformOtherClients(SharedFileDefinition sharedFileDefinition, int totalParts,
+        ICollection<string> targetInstanceIds)
+    {
+        var transferPush = new FileTransferPush
+        {
+            SessionId = sharedFileDefinition.SessionId,
+            SharedFileDefinition = sharedFileDefinition,
+            TotalParts = totalParts,
+            ActionsGroupIds = sharedFileDefinition.ActionsGroupIds!
+        };
+
+        await _invokeClientsService.Clients(targetInstanceIds).UploadFinished(transferPush);
+    }
+
     private static List<SessionMemberData> GetOtherSessionMembers(CloudSessionData session, SessionMemberData sessionMemberData)
     {
         var otherSessionMembers = session.SessionMembers

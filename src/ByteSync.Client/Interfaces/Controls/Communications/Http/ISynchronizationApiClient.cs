@@ -9,19 +9,19 @@ public interface ISynchronizationApiClient
 {
     public Task StartSynchronization(SynchronizationStartRequest synchronizationStartRequest);
     
-    public Task AssertLocalCopyIsDone(string sessionId, List<string> actionsGroupIds);
+    public Task AssertLocalCopyIsDone(string sessionId, SynchronizationActionRequest synchronizationActionRequest);
 
-    public Task AssertDateIsCopied(string sessionId, List<string> actionsGroupIds);
+    public Task AssertDateIsCopied(string sessionId, SynchronizationActionRequest synchronizationActionRequest);
 
-    public Task AssertFileOrDirectoryIsDeleted(string sessionId, List<string> actionsGroupIds);
+    public Task AssertFileOrDirectoryIsDeleted(string sessionId, SynchronizationActionRequest synchronizationActionRequest);
 
-    public Task AssertDirectoryIsCreated(string sessionId, List<string> actionsGroupIds);
+    public Task AssertDirectoryIsCreated(string sessionId, SynchronizationActionRequest synchronizationActionRequest);
 
     public Task RequestAbortSynchronization(string sessionId);
     
     Task InformCurrentMemberHasFinishedSynchronization(CloudSession cloudSession);
     
-    Task InformSynchronizationActionError(SharedFileDefinition sharedFileDefinition);
+    Task InformSynchronizationActionError(SharedFileDefinition sharedFileDefinition, string? nodeId);
     
-    Task AssertSynchronizationActionErrors(string sessionId, List<string> actionsGroupIds);
+    Task InformSynchronizationActionErrors(string sessionId, SynchronizationActionRequest synchronizationActionRequest);
 }

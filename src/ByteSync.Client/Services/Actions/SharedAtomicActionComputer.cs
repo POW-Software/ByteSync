@@ -188,12 +188,12 @@ public class SharedAtomicActionComputer : ISharedAtomicActionComputer
             
         SharedDataPart sharedDataPart = new SharedDataPart(
             dataPart.Name,
-            dataPart.GetApplicableInventoryPart().InventoryPartType,
-            inventory.Endpoint.ClientInstanceId,
-            inventory.CodeAndId,
-            inventoryPart.RootPath,
+            inventory,
+            inventoryPart,
             relativePath,
-            signatureGuid, signatureHash, hasAnalysisError);
+            signatureGuid,
+            signatureHash,
+            hasAnalysisError);
 
         return sharedDataPart;
     }

@@ -1,5 +1,4 @@
-﻿using ByteSync.Common.Business.SharedFiles;
-using ByteSync.Common.Business.Synchronizations;
+﻿using ByteSync.Common.Business.Synchronizations;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Entities;
@@ -14,15 +13,13 @@ public class SynchronizationProgressService : ISynchronizationProgressService
     private readonly IInvokeClientsService _invokeClientsService;
     private readonly ITrackingActionMapper _trackingActionMapper;
     private readonly ISynchronizationMapper _synchronizationMapper;
-    private readonly ISharedFilesService _sharedFilesService;
 
     public SynchronizationProgressService(IInvokeClientsService invokeClientsService, ITrackingActionMapper trackingActionMapper, 
-        ISynchronizationMapper synchronizationMapper, ISharedFilesService sharedFilesService)
+        ISynchronizationMapper synchronizationMapper)
     {
         _invokeClientsService = invokeClientsService;
         _trackingActionMapper = trackingActionMapper;
         _synchronizationMapper = synchronizationMapper;
-        _sharedFilesService = sharedFilesService;
     }
 
     public async Task UpdateSynchronizationProgress(TrackingActionResult trackingActionResult, bool needSendSynchronizationUpdated)
@@ -51,49 +48,7 @@ public class SynchronizationProgressService : ISynchronizationProgressService
         await _invokeClientsService.SessionGroup(synchronization.SessionId).SynchronizationStarted(synchronization);
     }
 
-    public async Task UploadIsFinished(SharedFileDefinition sharedFileDefinition, int totalParts, HashSet<string> targetInstanceIds)
-    {
-        var transferParameters = new TransferParameters
-        {
-            SessionId = sharedFileDefinition.SessionId,
-            SharedFileDefinition = sharedFileDefinition,
-            TotalParts = totalParts
-        };
-        await _sharedFilesService.AssertUploadIsFinished(transferParameters, targetInstanceIds);
-
-        var fileTransferPush = new FileTransferPush
-        {
-            SessionId = sharedFileDefinition.SessionId,
-            SharedFileDefinition = sharedFileDefinition,
-            TotalParts = totalParts,
-            ActionsGroupIds = sharedFileDefinition.ActionsGroupIds!
-        };
-        
-        await _invokeClientsService.Clients(targetInstanceIds).UploadFinished(fileTransferPush);
-    }
-
-    public async Task FilePartIsUploaded(SharedFileDefinition sharedFileDefinition, int partNumber, HashSet<string> targetInstanceIds)
-    {
-        var transferParameters = new TransferParameters
-        {
-            SessionId = sharedFileDefinition.SessionId,
-            SharedFileDefinition = sharedFileDefinition,
-            PartNumber = partNumber
-        };
-        await _sharedFilesService.AssertFilePartIsUploaded(transferParameters, targetInstanceIds);
-            
-        var fileTransferPush = new FileTransferPush
-        {
-            SessionId = sharedFileDefinition.SessionId,
-            SharedFileDefinition = sharedFileDefinition,
-            PartNumber = partNumber,
-            ActionsGroupIds = sharedFileDefinition.ActionsGroupIds!
-        };
-        
-        await _invokeClientsService.Clients(targetInstanceIds).FilePartUploaded(fileTransferPush);
-    }
-
-    public Task<Synchronization> MapToSynchronization(SynchronizationEntity synchronizationEntity)
+    private Task<Synchronization> MapToSynchronization(SynchronizationEntity synchronizationEntity)
     {
         var synchronization = _synchronizationMapper.MapToSynchronization(synchronizationEntity);
 
@@ -140,7 +95,7 @@ public class SynchronizationProgressService : ISynchronizationProgressService
             
             ProcessedVolume = synchronizationEntity.Progress.ProcessedVolume,
             ExchangedVolume = synchronizationEntity.Progress.ExchangedVolume,
-            FinishedActionsCount = synchronizationEntity.Progress.FinishedActionsCount,
+            FinishedActionsCount = synchronizationEntity.Progress.FinishedAtomicActionsCount,
             ErrorActionsCount = synchronizationEntity.Progress.ErrorsCount,
             
             Version = DateTimeOffset.UtcNow.Ticks,

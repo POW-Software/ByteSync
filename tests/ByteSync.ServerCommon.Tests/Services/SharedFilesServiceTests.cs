@@ -44,11 +44,11 @@ public class SharedFilesServiceTests
         var preExisting = new SharedFileData(sharedFileDefinition, recipients, storageProvider)
         {
             TotalParts = 2,
-            UploadedPartsNumbers = new HashSet<int> { 1, 2 },
+            UploadedPartsNumbers = [1, 2],
             DownloadedBy = new Dictionary<int, HashSet<string>>
             {
-                { 1, new HashSet<string> { "A" } },
-                { 2, new HashSet<string> { "A", "B" } }
+                { 1, ["A"] },
+                { 2, ["A", "B"] }
             }
         };
 
@@ -109,10 +109,10 @@ public class SharedFilesServiceTests
         var preExisting = new SharedFileData(sharedFileDefinition, recipients, storageProvider)
         {
             TotalParts = 1,
-            UploadedPartsNumbers = new HashSet<int> { 1 },
+            UploadedPartsNumbers = [1],
             DownloadedBy = new Dictionary<int, HashSet<string>>
             {
-                { 1, new HashSet<string> { "A" } }
+                { 1, ["A"] }
             }
         };
 
@@ -165,7 +165,7 @@ public class SharedFilesServiceTests
         var preExisting = new SharedFileData(sharedFileDefinition, recipients, storageProvider)
         {
             TotalParts = 2,
-            UploadedPartsNumbers = new HashSet<int> { 1, 2 },
+            UploadedPartsNumbers = [1, 2],
             DownloadedBy = new Dictionary<int, HashSet<string>>()
         };
 
