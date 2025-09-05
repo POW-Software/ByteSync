@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Functions.Helpers.Misc;
 using ByteSync.ServerCommon.Commands.Synchronizations;
@@ -45,9 +44,9 @@ public class SynchronizationFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var synchronizationActionRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationActionRequest>(req);
 
-        var request = new LocalCopyIsDoneRequest(sessionId, client, actionsGroupIds);
+        var request = new LocalCopyIsDoneRequest(sessionId, client, synchronizationActionRequest.ActionsGroupIds, synchronizationActionRequest.NodeId);
         await _mediator.Send(request);
             
         var response = req.CreateResponse();
@@ -64,9 +63,9 @@ public class SynchronizationFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var synchronizationActionRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationActionRequest>(req);
 
-        var request = new DateIsCopiedRequest(sessionId, client, actionsGroupIds);
+        var request = new DateIsCopiedRequest(sessionId, client, synchronizationActionRequest.ActionsGroupIds, synchronizationActionRequest.NodeId);
         await _mediator.Send(request);
         
         var response = req.CreateResponse();
@@ -83,9 +82,9 @@ public class SynchronizationFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var synchronizationActionRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationActionRequest>(req);
 
-        var request = new FileOrDirectoryIsDeletedRequest(sessionId, client, actionsGroupIds);
+        var request = new FileOrDirectoryIsDeletedRequest(sessionId, client, synchronizationActionRequest.ActionsGroupIds, synchronizationActionRequest.NodeId);
         await _mediator.Send(request);
             
         var response = req.CreateResponse();
@@ -102,9 +101,9 @@ public class SynchronizationFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var synchronizationActionRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationActionRequest>(req);
 
-        var request = new DirectoryIsCreatedRequest(sessionId, client, actionsGroupIds);
+        var request = new DirectoryIsCreatedRequest(sessionId, client, synchronizationActionRequest.ActionsGroupIds, synchronizationActionRequest.NodeId);
         await _mediator.Send(request);
             
         var response = req.CreateResponse();
@@ -149,25 +148,6 @@ public class SynchronizationFunction
         return response;
     }
     
-    [Function("SynchronizationErrorFunction")]
-    public async Task<HttpResponseData> SynchronizationError(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/synchronization/error")] 
-        HttpRequestData req,
-        FunctionContext executionContext, 
-        string sessionId)
-    {
-        var client = FunctionHelper.GetClientFromContext(executionContext);
-        var sharedFileDefinition = await FunctionHelper.DeserializeRequestBody<SharedFileDefinition>(req);
-
-        var request = new SynchronizationErrorRequest(sessionId, client, sharedFileDefinition);
-        await _mediator.Send(request);
-            
-        var response = req.CreateResponse();
-        response.StatusCode = HttpStatusCode.OK;
-
-        return response;
-    }
-    
     [Function("SynchronizationErrorsFunction")]
     public async Task<HttpResponseData> SynchronizationErrors(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/synchronization/errors")] 
@@ -176,9 +156,10 @@ public class SynchronizationFunction
         string sessionId)
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
-        var actionsGroupIds = await FunctionHelper.DeserializeRequestBody<List<string>>(req);
+        var synchronizationActionRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationActionRequest>(req);
 
-        var request = new SynchronizationErrorsRequest(sessionId, client, actionsGroupIds);
+        var request = new SynchronizationErrorsRequest(sessionId, client, synchronizationActionRequest.ActionsGroupIds, 
+            synchronizationActionRequest.NodeId);
         await _mediator.Send(request);
             
         var response = req.CreateResponse();

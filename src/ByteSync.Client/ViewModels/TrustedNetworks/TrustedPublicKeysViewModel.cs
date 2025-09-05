@@ -6,8 +6,8 @@ namespace ByteSync.ViewModels.TrustedNetworks;
 
 public class TrustedPublicKeysViewModel : ActivatableViewModelBase
 {
-    private readonly IPublicKeysManager _publicKeysManager;
-    private readonly ILogger<TrustedPublicKeysViewModel> _logger;
+    private readonly IPublicKeysManager _publicKeysManager = null!;
+    private readonly ILogger<TrustedPublicKeysViewModel> _logger = null!;
 
     public TrustedPublicKeysViewModel()
     {
@@ -29,7 +29,7 @@ public class TrustedPublicKeysViewModel : ActivatableViewModelBase
         Refresh();
     }
     
-    public ObservableCollection<TrustedPublicKeyViewModel> TrustedPublicKeys { get; set; }
+    public ObservableCollection<TrustedPublicKeyViewModel> TrustedPublicKeys { get; set; } = null!;
 
     public void Refresh()
     {

@@ -45,7 +45,7 @@ public class SynchronizationErrorsCommandHandlerTests
         var client = new Client { ClientInstanceId = "client1" };
         var actionsGroupIds = new List<string> { "group1", "group2" };
 
-        var request = new SynchronizationErrorsRequest(sessionId, client, actionsGroupIds);
+        var request = new SynchronizationErrorsRequest(sessionId, client, actionsGroupIds, "testNodeId");
 
         A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(A<SynchronizationEntity>._))
             .Returns(true);
@@ -55,15 +55,73 @@ public class SynchronizationErrorsCommandHandlerTests
                 var trackingAction = new TrackingActionEntity
                 {
                     SourceClientInstanceId = "sourceClient",
-                    TargetClientInstanceIds = new HashSet<string> { "client1", "client2" }
+                    TargetClientInstanceAndNodeIds =
+                    [
+                        new() { ClientInstanceId = "client1", NodeId = "testNodeId" },
+                        new() { ClientInstanceId = "client2", NodeId = "testNodeId" }
+                    ]
                 };
                 var synchronization = new SynchronizationEntity
                 {
                     Progress = new SynchronizationProgressEntity()
                 };
                 func(trackingAction, synchronization);
+
+                synchronization.Progress.ErrorsCount.Should().Be(1);
+                synchronization.Progress.FinishedAtomicActionsCount.Should().Be(1);
             })
-            .Returns(new TrackingActionResult(true, new List<TrackingActionEntity>(), new SynchronizationEntity()));
+            .Returns(new TrackingActionResult(true, [], new SynchronizationEntity()));
+        A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(A<TrackingActionResult>._, A<bool>._))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _synchronizationErrorsCommandHandler.Handle(request, CancellationToken.None);
+
+        // Assert
+        A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>._))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(A<TrackingActionResult>._, A<bool>._))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
+    public async Task Handle_SourceClientReportsError_IncrementsCountsByTargets()
+    {
+        // Arrange
+        var sessionId = "session1";
+        var client = new Client { ClientInstanceId = "client1" };
+        var actionsGroupIds = new List<string> { "group1" };
+
+        var request = new SynchronizationErrorsRequest(sessionId, client, actionsGroupIds, "anyNodeId");
+
+        A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(A<SynchronizationEntity>._))
+            .Returns(true);
+
+        A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>._))
+            .Invokes((string _, List<string> _, Func<TrackingActionEntity, SynchronizationEntity, bool> func) =>
+            {
+                var trackingAction = new TrackingActionEntity
+                {
+                    SourceClientInstanceId = "client1",
+                    TargetClientInstanceAndNodeIds =
+                    [
+                        new() { ClientInstanceId = "targetA", NodeId = "nodeA" },
+                        new() { ClientInstanceId = "targetB", NodeId = "nodeB" }
+                    ]
+                };
+                var synchronization = new SynchronizationEntity
+                {
+                    Progress = new SynchronizationProgressEntity()
+                };
+
+                func(trackingAction, synchronization);
+
+                synchronization.Progress.ErrorsCount.Should().Be(2);
+                synchronization.Progress.FinishedAtomicActionsCount.Should().Be(2);
+                trackingAction.IsSourceSuccess.Should().BeFalse();
+            })
+            .Returns(new TrackingActionResult(true, [], new SynchronizationEntity()));
+
         A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(A<TrackingActionResult>._, A<bool>._))
             .Returns(Task.CompletedTask);
 
@@ -85,7 +143,7 @@ public class SynchronizationErrorsCommandHandlerTests
         var client = new Client { ClientInstanceId = "client1" };
         var actionsGroupIds = new List<string>();
 
-        var request = new SynchronizationErrorsRequest(sessionId, client, actionsGroupIds);
+        var request = new SynchronizationErrorsRequest(sessionId, client, actionsGroupIds, "testNodeId");
 
         // Act
         await _synchronizationErrorsCommandHandler.Handle(request, CancellationToken.None);
@@ -105,7 +163,7 @@ public class SynchronizationErrorsCommandHandlerTests
         var client = new Client { ClientInstanceId = "client1" };
         var actionsGroupIds = new List<string> { "group1" };
 
-        var request = new SynchronizationErrorsRequest(sessionId, client, actionsGroupIds);
+        var request = new SynchronizationErrorsRequest(sessionId, client, actionsGroupIds, "testNodeId");
         var expectedException = new InvalidOperationException("Test exception");
 
         A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>._))

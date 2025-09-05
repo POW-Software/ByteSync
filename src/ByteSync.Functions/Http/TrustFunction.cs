@@ -12,12 +12,10 @@ namespace ByteSync.Functions.Http;
 
 public class TrustFunction
 {
-    private readonly ITrustService _trustService;
     private readonly IMediator _mediator;
 
-    public TrustFunction(ITrustService trustService, IMediator mediator)
+    public TrustFunction(IMediator mediator)
     {
-        _trustService = trustService;
         _mediator = mediator;
     }
     
@@ -84,8 +82,9 @@ public class TrustFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<SetAuthCheckedParameters>(req);
 
-        await _trustService.SetAuthChecked(client, parameters);
-           
+        var request = new SetAuthCheckedRequest(parameters, client);
+        await _mediator.Send(request);
+        
         var response = req.CreateResponse();
         response.StatusCode = HttpStatusCode.OK;
         
@@ -101,7 +100,8 @@ public class TrustFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<RequestTrustProcessParameters>(req);
 
-        await _trustService.RequestTrustPublicKey(client, parameters);
+        var request = new RequestTrustPublicKeyRequest(parameters, client);
+        await _mediator.Send(request);
           
         var response = req.CreateResponse();
         response.StatusCode = HttpStatusCode.OK;
@@ -118,7 +118,8 @@ public class TrustFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<PublicKeyValidationParameters>(req);
 
-        await _trustService.InformPublicKeyValidationIsFinished(client, parameters);
+        var request = new InformPublicKeyValidationIsFinishedRequest(parameters, client);
+        await _mediator.Send(request);
             
         var response = req.CreateResponse();
         response.StatusCode = HttpStatusCode.OK;

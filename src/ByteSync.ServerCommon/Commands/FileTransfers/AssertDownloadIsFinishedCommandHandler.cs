@@ -2,22 +2,32 @@ using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace ByteSync.ServerCommon.Commands.FileTransfers;
 
 public class AssertDownloadIsFinishedCommandHandler : IRequestHandler<AssertDownloadIsFinishedRequest>
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
+    private readonly ITrackingActionRepository _trackingActionRepository;
+    private readonly ISynchronizationProgressService _synchronizationProgressService;
+    private readonly ISynchronizationStatusCheckerService _synchronizationStatusCheckerService;
     private readonly ISynchronizationService _synchronizationService;
     private readonly ITransferLocationService _transferLocationService;
     private readonly ILogger<AssertDownloadIsFinishedCommandHandler> _logger;
 
     public AssertDownloadIsFinishedCommandHandler(ICloudSessionsRepository cloudSessionsRepository,
+        ITrackingActionRepository trackingActionRepository,
+        ISynchronizationProgressService synchronizationProgressService,
+        ISynchronizationStatusCheckerService synchronizationStatusCheckerService,
         ISynchronizationService synchronizationService,
         ITransferLocationService transferLocationService,
         ILogger<AssertDownloadIsFinishedCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
+        _trackingActionRepository = trackingActionRepository;
+        _synchronizationProgressService = synchronizationProgressService;
+        _synchronizationStatusCheckerService = synchronizationStatusCheckerService;
         _synchronizationService = synchronizationService;
         _transferLocationService = transferLocationService;
         _logger = logger;
@@ -36,7 +46,51 @@ public class AssertDownloadIsFinishedCommandHandler : IRequestHandler<AssertDown
 
             if (sharedFileDefinition.IsSynchronization)
             {
-                await _synchronizationService.OnDownloadIsFinishedAsync(sharedFileDefinition, request.Client);
+                var actionsGroupsIds = sharedFileDefinition.ActionsGroupIds;
+
+                bool needSendSynchronizationUpdated = false;
+
+                var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, actionsGroupsIds!, (trackingAction, synchronization) =>
+                {
+                    if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
+                    {
+                        return false;
+                    }
+
+                    bool wasTrackingActionFinished = trackingAction.IsFinished;
+
+                    var targetsForClient = trackingAction.TargetClientInstanceAndNodeIds
+                        .Where(x => x.ClientInstanceId == request.Client.ClientInstanceId)
+                        .ToList();
+                    foreach (var target in targetsForClient)
+                    {
+                        trackingAction.AddSuccessOnTarget(target);
+                        synchronization.Progress.FinishedAtomicActionsCount += 1;
+                    }
+
+                    if (!wasTrackingActionFinished && trackingAction.IsFinished)
+                    {
+                        synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
+                    }
+
+                    if (sharedFileDefinition.IsMultiFileZip)
+                    {
+                        synchronization.Progress.ExchangedVolume += trackingAction.Size ?? 0;
+                    }
+                    else
+                    {
+                        synchronization.Progress.ExchangedVolume += sharedFileDefinition.UploadedFileLength;
+                    }
+
+                    needSendSynchronizationUpdated = _synchronizationService.CheckSynchronizationIsFinished(synchronization);
+
+                    return true;
+                });
+
+                if (result.IsSuccess)
+                {
+                    await _synchronizationProgressService.UpdateSynchronizationProgress(result, needSendSynchronizationUpdated);
+                }
             }
         }
         

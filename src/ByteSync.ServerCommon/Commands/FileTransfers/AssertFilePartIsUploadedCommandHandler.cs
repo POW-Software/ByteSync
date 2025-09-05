@@ -1,5 +1,6 @@
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Sessions;
+using ByteSync.ServerCommon.Exceptions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
@@ -12,7 +13,9 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
 {
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly ISharedFilesService _sharedFilesService;
-    private readonly ISynchronizationService _synchronizationService;
+    private readonly ISynchronizationRepository _synchronizationRepository;
+    private readonly ITrackingActionRepository _trackingActionRepository;
+    private readonly ISynchronizationStatusCheckerService _synchronizationStatusCheckerService;
     private readonly IInvokeClientsService _invokeClientsService;
     private readonly IUsageStatisticsService _usageStatisticsService;
     private readonly ITransferLocationService _transferLocationService;
@@ -21,7 +24,9 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
     public AssertFilePartIsUploadedCommandHandler(
         ICloudSessionsRepository cloudSessionsRepository,
         ISharedFilesService sharedFilesService,
-        ISynchronizationService synchronizationService,
+        ISynchronizationRepository synchronizationRepository,
+        ITrackingActionRepository trackingActionRepository,
+        ISynchronizationStatusCheckerService synchronizationStatusCheckerService,
         IInvokeClientsService invokeClientsService,
         IUsageStatisticsService usageStatisticsService,
         ITransferLocationService transferLocationService,
@@ -29,7 +34,9 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _sharedFilesService = sharedFilesService;
-        _synchronizationService = synchronizationService;
+        _synchronizationRepository = synchronizationRepository;
+        _trackingActionRepository = trackingActionRepository;
+        _synchronizationStatusCheckerService = synchronizationStatusCheckerService;
         _invokeClientsService = invokeClientsService;
         _usageStatisticsService = usageStatisticsService;
         _transferLocationService = transferLocationService;
@@ -65,7 +72,41 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
             }
             else
             {
-                await _synchronizationService.OnFilePartIsUploadedAsync(sharedFileDefinition, partNumber);
+                var synchronization = await _synchronizationRepository.Get(sharedFileDefinition.SessionId);
+
+                if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
+                {
+                    return;
+                }
+                
+                if (sharedFileDefinition.ActionsGroupIds == null || sharedFileDefinition.ActionsGroupIds.Count == 0)
+                {
+                    throw new BadRequestException("sharedFileDefinition.ActionsGroupIds is null or empty");
+                }
+                
+                var actionsGroupsId = sharedFileDefinition.ActionsGroupIds!.First();
+                var trackingAction = await _trackingActionRepository.GetOrThrow(sharedFileDefinition.SessionId, actionsGroupsId);
+
+                var transferParameters = new TransferParameters
+                {
+                    SessionId = sharedFileDefinition.SessionId,
+                    SharedFileDefinition = sharedFileDefinition,
+                    PartNumber = partNumber
+                };
+                var recipientClientIds = trackingAction.TargetClientInstanceAndNodeIds
+                    .Select(x => x.ClientInstanceId)
+                    .Distinct()
+                    .ToList();
+                await _sharedFilesService.AssertFilePartIsUploaded(transferParameters, recipientClientIds);
+                
+                var fileTransferPush = new FileTransferPush
+                {
+                    SessionId = sharedFileDefinition.SessionId,
+                    SharedFileDefinition = sharedFileDefinition,
+                    PartNumber = partNumber,
+                    ActionsGroupIds = sharedFileDefinition.ActionsGroupIds!
+                };
+                await _invokeClientsService.Clients(recipientClientIds).FilePartUploaded(fileTransferPush);
             }
         }
         

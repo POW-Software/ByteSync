@@ -16,6 +16,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.FileSystems;
 using ByteSync.Services.Sessions;
@@ -47,6 +48,10 @@ public class TestSynchronizationActionHandler : IntegrationTest
         contextHelper.GenerateSession();
         _currentEndPoint = contextHelper.GenerateCurrentEndpoint();
         var testDirectory = _testDirectoryService.CreateTestDirectory();
+
+        // Ensure SynchronizationActionHandler sees the expected CurrentEndPoint
+        var mockConnectionService = Container.Resolve<Mock<IConnectionService>>();
+        mockConnectionService.Setup(m => m.CurrentEndPoint).Returns(_currentEndPoint);
 
         var mockEnvironmentService = Container.Resolve<Mock<IEnvironmentService>>();
         mockEnvironmentService.Setup(m => m.AssemblyFullName).Returns(IOUtils.Combine(testDirectory.FullName, "Assembly", "Assembly.exe"));
@@ -101,11 +106,11 @@ public class TestSynchronizationActionHandler : IntegrationTest
         var comparisonResultPreparer = Container.Resolve<ComparisonResultPreparer>();
         _ = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
 
-        var source = new SharedDataPart("fileToCopy1.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
-            "A", sourceA.FullName, fileParentPathComplement + "/fileToCopy1.txt", null, null, false);
+        var source = SharedDataPartTestFactory.Create("fileToCopy1.txt", inventoryDataA.Inventory, _currentEndPoint.ClientInstanceId,
+            FileSystemTypes.Directory, sourceA.FullName, fileParentPathComplement + "/fileToCopy1.txt", null, null, false);
         
-        var target = new SharedDataPart("fileToCopy1.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
-            "B", sourceB.FullName, fileParentPathComplement + "/fileToCopy1.txt", null, null, false);
+        var target = SharedDataPartTestFactory.Create("fileToCopy1.txt", inventoryDataB.Inventory, _currentEndPoint.ClientInstanceId,
+            FileSystemTypes.Directory, sourceB.FullName, fileParentPathComplement + "/fileToCopy1.txt", null, null, false);
         
         var sharedActionsGroup = new SharedActionsGroup
         {
@@ -185,11 +190,11 @@ public class TestSynchronizationActionHandler : IntegrationTest
         var signatureGuidB = fileDescriptionB.SignatureGuid;
         var signatureHashB = contentIdentityB.Core!.SignatureHash;
         
-        var source = new SharedDataPart("fileToCopy1.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
-            inventoryDataA.Inventory.CodeAndId, sourceA.FullName, fileParentPathComplement + "fileToCopy1.txt", signatureGuidA, signatureHashA, false);
+        var source = SharedDataPartTestFactory.Create("fileToCopy1.txt", inventoryDataA.Inventory, _currentEndPoint.ClientInstanceId,
+            FileSystemTypes.Directory, sourceA.FullName, fileParentPathComplement + "fileToCopy1.txt", signatureGuidA, signatureHashA, false);
         
-        var target = new SharedDataPart("fileToCopy1.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
-            inventoryDataB.Inventory.CodeAndId, sourceB.FullName, fileParentPathComplement + "fileToCopy1.txt", signatureGuidB, signatureHashB, false);
+        var target = SharedDataPartTestFactory.Create("fileToCopy1.txt", inventoryDataB.Inventory, _currentEndPoint.ClientInstanceId,
+            FileSystemTypes.Directory, sourceB.FullName, fileParentPathComplement + "fileToCopy1.txt", signatureGuidB, signatureHashB, false);
         
         var sharedActionsGroup = new SharedActionsGroup
         {
@@ -231,10 +236,10 @@ public class TestSynchronizationActionHandler : IntegrationTest
         var originalDateB = DateTime.UtcNow.AddHours(-4);
         fileB.LastWriteTimeUtc = originalDateB;
 
-        var source = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var source = SharedDataPartTestFactory.Create("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "A", sourceA.FullName, "/fileToSync.txt", null, null, false);
         
-        var target = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var target = SharedDataPartTestFactory.Create("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "B", sourceB.FullName, "/fileToSync.txt", null, null, false);
         
         var sharedActionsGroup = new SharedActionsGroup
@@ -283,10 +288,10 @@ public class TestSynchronizationActionHandler : IntegrationTest
         var fileB = new FileInfo(fileBPath);
         fileB.Exists.Should().BeFalse();
 
-        var source = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var source = SharedDataPartTestFactory.Create("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "A", sourceA.FullName, "/fileToSync.txt", null, null, false);
         
-        var target = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var target = SharedDataPartTestFactory.Create("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "B", sourceB.FullName, "/fileToSync.txt", null, null, false);
         
         var sharedActionsGroup = new SharedActionsGroup
@@ -325,7 +330,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         var targetDirectory = new DirectoryInfo(targetDirectoryPath);
         targetDirectory.Exists.Should().BeFalse();
 
-        var target = new SharedDataPart("NewDirectory", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var target = SharedDataPartTestFactory.Create("NewDirectory", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "B", sourceB.FullName, "/NewDirectory", null, null, false);
         
         var sharedActionsGroup = new SharedActionsGroup
@@ -353,7 +358,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         
         existingDirectory.Exists.Should().BeTrue();
 
-        var target = new SharedDataPart("ExistingDirectory", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var target = SharedDataPartTestFactory.Create("ExistingDirectory", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "B", sourceB.FullName, "/ExistingDirectory", null, null, false);
         
         var sharedActionsGroup = new SharedActionsGroup
@@ -382,7 +387,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         
         fileToDelete.Exists.Should().BeTrue();
 
-        var target = new SharedDataPart("fileToDelete.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var target = SharedDataPartTestFactory.Create("fileToDelete.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "B", sourceB.FullName, "/fileToDelete.txt", null, null, false);
         
         var sharedActionsGroup = new SharedActionsGroup
@@ -410,7 +415,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         
         directoryToDelete.Exists.Should().BeTrue();
 
-        var target = new SharedDataPart("DirectoryToDelete", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var target = SharedDataPartTestFactory.Create("DirectoryToDelete", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "B", sourceB.FullName, "/DirectoryToDelete", null, null, false);
         
         var sharedActionsGroup = new SharedActionsGroup
@@ -438,7 +443,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         
         File.Exists(nonExistentFilePath).Should().BeFalse();
 
-        var target = new SharedDataPart("nonExistent.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var target = SharedDataPartTestFactory.Create("nonExistent.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "B", sourceB.FullName, "/nonExistent.txt", null, null, false);
         
         var sharedActionsGroup = new SharedActionsGroup
@@ -464,7 +469,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         
         File.Exists(nonExistentFilePath).Should().BeFalse();
 
-        var target = new SharedDataPart("nonExistent.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var target = SharedDataPartTestFactory.Create("nonExistent.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "B", sourceB.FullName, "/nonExistent.txt", null, null, false);
         
         var sharedActionsGroup = new SharedActionsGroup
@@ -487,7 +492,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         var sourceRoot = _testDirectoryService.CreateSubTestDirectory("Source");
         var sourceB = sourceRoot.CreateSubdirectory("B");
 
-        var target = new SharedDataPart("invalidFile.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var target = SharedDataPartTestFactory.Create("invalidFile.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "B", sourceB.FullName, "/invalidFile.txt", null, null, false);
         
         var sharedActionsGroup = new SharedActionsGroup
@@ -518,7 +523,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         directoryToDelete.Exists.Should().BeTrue();
         directoryToDelete.GetFiles().Length.Should().Be(1);
 
-        var target = new SharedDataPart("DirectoryWithFiles", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var target = SharedDataPartTestFactory.Create("DirectoryWithFiles", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "B", sourceB.FullName, "/DirectoryWithFiles", null, null, false);
         
         var sharedActionsGroup = new SharedActionsGroup
@@ -570,10 +575,10 @@ public class TestSynchronizationActionHandler : IntegrationTest
         // Create a remote target with different ClientInstanceId
         var remoteClientInstanceId = Guid.NewGuid().ToString();
         
-        var source = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var source = SharedDataPartTestFactory.Create("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "A", sourceA.FullName, "/fileToSync.txt", null, null, false);
         
-        var remoteTarget = new SharedDataPart("fileToSync.txt", FileSystemTypes.File, remoteClientInstanceId, 
+        var remoteTarget = SharedDataPartTestFactory.Create("fileToSync.txt", FileSystemTypes.File, remoteClientInstanceId, 
             "RemoteB", "C:\\RemotePath", "/fileToSync.txt", null, null, false);
         
         var sharedActionsGroup = new SharedActionsGroup
@@ -608,13 +613,13 @@ public class TestSynchronizationActionHandler : IntegrationTest
 
         var remoteClientInstanceId = Guid.NewGuid().ToString();
         
-        var source = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var source = SharedDataPartTestFactory.Create("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
             "A", sourceA.FullName, "/fileToSync.txt", null, null, false);
         
-        var localTarget = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var localTarget = SharedDataPartTestFactory.Create("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "B", sourceB.FullName, "/fileToSync.txt", null, null, false);
             
-        var remoteTarget = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, remoteClientInstanceId, 
+        var remoteTarget = SharedDataPartTestFactory.Create("fileToSync.txt", FileSystemTypes.Directory, remoteClientInstanceId, 
             "RemoteC", "C:\\RemotePath", "/fileToSync.txt", null, null, false);
         
         var sharedActionsGroup = new SharedActionsGroup
@@ -652,13 +657,13 @@ public class TestSynchronizationActionHandler : IntegrationTest
         
         var cancellationTokenSource = new CancellationTokenSource();
         
-        var source = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var source = SharedDataPartTestFactory.Create("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "A", sourceA.FullName, "/fileToSync.txt", null, null, false);
         
-        var targetB = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var targetB = SharedDataPartTestFactory.Create("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "B", sourceB.FullName, "/fileToSync.txt", null, null, false);
             
-        var targetC = new SharedDataPart("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId, 
+        var targetC = SharedDataPartTestFactory.Create("fileToSync.txt", FileSystemTypes.Directory, _currentEndPoint.ClientInstanceId,
             "C", sourceC.FullName, "/fileToSync.txt", null, null, false);
         
         var sharedActionsGroup = new SharedActionsGroup

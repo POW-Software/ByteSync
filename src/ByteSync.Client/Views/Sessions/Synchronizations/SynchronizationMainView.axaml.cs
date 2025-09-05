@@ -1,6 +1,5 @@
-﻿using Avalonia.ReactiveUI;
+using Avalonia.ReactiveUI;
 using ByteSync.ViewModels.Sessions.Synchronizations;
-using ReactiveUI;
 
 namespace ByteSync.Views.Sessions.Synchronizations;
 
@@ -9,11 +8,5 @@ public partial class SynchronizationMainView : ReactiveUserControl<Synchronizati
     public SynchronizationMainView()
     {
         InitializeComponent();
-        this.WhenActivated(disposables =>
-        {
-                
-
-            
-        });
     }
 }

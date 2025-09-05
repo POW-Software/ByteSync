@@ -23,14 +23,14 @@ namespace ByteSync.ViewModels.Sessions.DataNodes;
 
 public class DataNodeSourcesViewModel : ActivatableViewModelBase
 {
-    private readonly ISessionService _sessionService;
-    private readonly IDataSourceService _dataSourceService;
-    private readonly IDataSourceProxyFactory _dataSourceProxyFactory;
-    private readonly IDataSourceRepository _dataSourceRepository;
-    private readonly IFileDialogService _fileDialogService;
-    private readonly DataNode _dataNode;
+    private readonly ISessionService _sessionService = null!;
+    private readonly IDataSourceService _dataSourceService = null!;
+    private readonly IDataSourceProxyFactory _dataSourceProxyFactory = null!;
+    private readonly IDataSourceRepository _dataSourceRepository = null!;
+    private readonly IFileDialogService _fileDialogService = null!;
+    private readonly DataNode _dataNode = null!;
 
-    private ReadOnlyObservableCollection<DataSourceProxy> _dataSources;
+    private ReadOnlyObservableCollection<DataSourceProxy> _dataSources = null!;
 
     public DataNodeSourcesViewModel()
     {
@@ -87,11 +87,11 @@ public class DataNodeSourcesViewModel : ActivatableViewModelBase
 
     public ReadOnlyObservableCollection<DataSourceProxy> DataSources => _dataSources;
 
-    public ReactiveCommand<DataSourceProxy, Unit> RemoveDataSourceCommand { get; }
+    public ReactiveCommand<DataSourceProxy, Unit> RemoveDataSourceCommand { get; } = null!;
 
-    public ReactiveCommand<Unit, Unit> AddDirectoryCommand { get; }
+    public ReactiveCommand<Unit, Unit> AddDirectoryCommand { get; } = null!;
 
-    public ReactiveCommand<Unit, Unit> AddFileCommand { get; }
+    public ReactiveCommand<Unit, Unit> AddFileCommand { get; } = null!;
 
     [Reactive]
     public bool IsLocalMachine { get; set; }

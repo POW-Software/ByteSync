@@ -46,14 +46,14 @@ public class MemberHasFinishedCommandHandlerTests
         var request = new MemberHasFinishedRequest(sessionId, client);
 
         A.CallTo(() => _mockSynchronizationRepository.UpdateIfExists(sessionId, A<Func<SynchronizationEntity, bool>>._, A<ITransaction?>._, A<IRedLock?>._))
-            .Invokes((string _, Func<SynchronizationEntity, bool> func, ITransaction? transaction, IRedLock? redisLock) => 
+            .Invokes((string _, Func<SynchronizationEntity, bool> func, ITransaction? _, IRedLock? _) => 
             {
                 var synchronization = new SynchronizationEntity
                 {
                     Progress = new SynchronizationProgressEntity
                     {
-                        Members = new List<string> { "client1", "client2" },
-                        CompletedMembers = new List<string> { "client2" }
+                        Members = ["client1", "client2"],
+                        CompletedMembers = ["client2"]
                     }
                 };
                 func(synchronization);

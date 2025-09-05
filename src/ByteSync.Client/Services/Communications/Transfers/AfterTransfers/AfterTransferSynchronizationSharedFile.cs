@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Common.Business.SharedFiles;
+﻿using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Helpers;
 using ByteSync.Interfaces.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
@@ -33,14 +32,14 @@ public class AfterTransferSynchronizationSharedFile : IAfterTransferSharedFile
     {
         await WaitForSynchronizationDataTransmitted();
         
-        await _synchronizationApiClient.InformSynchronizationActionError(sharedFileDefinition);
+        await _synchronizationApiClient.InformSynchronizationActionError(sharedFileDefinition, null);
     }
 
     public async Task OnUploadFinishedError(SharedFileDefinition sharedFileDefinition, Exception exception)
     {
         await WaitForSynchronizationDataTransmitted();
         
-        await _synchronizationApiClient.InformSynchronizationActionError(sharedFileDefinition);
+        await _synchronizationApiClient.InformSynchronizationActionError(sharedFileDefinition, null);
     }
     
     private async Task WaitForSynchronizationDataTransmitted()

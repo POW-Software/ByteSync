@@ -22,11 +22,11 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Actions;
 
 public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
 {
-    private readonly IDialogService _dialogService;
-    private readonly ISessionService _sessionService;
-    private readonly ILocalizationService _localizationService;
-    private readonly IActionEditViewModelFactory _actionEditViewModelFactory;
-    private readonly ISynchronizationRulesService _synchronizationRulesService;
+    private readonly IDialogService _dialogService = null!;
+    private readonly ISessionService _sessionService = null!;
+    private readonly ILocalizationService _localizationService = null!;
+    private readonly IActionEditViewModelFactory _actionEditViewModelFactory = null!;
+    private readonly ISynchronizationRulesService _synchronizationRulesService = null!;
 
     public SynchronizationRuleGlobalViewModel() 
     {
@@ -93,29 +93,29 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
         });
     }
 
-    public ReactiveCommand<Unit, Unit> AddConditionCommand { get; set; }
-    public ReactiveCommand<Unit, Unit> AddActionCommand { get; set; }
-    public ReactiveCommand<Unit, Unit> SaveCommand { get; set; }
-    public ReactiveCommand<Unit, Unit> ResetCommand { get; set; }
-    public ReactiveCommand<Unit, Unit> CancelCommand { get; set; }
+    public ReactiveCommand<Unit, Unit> AddConditionCommand { get; set; } = null!;
+    public ReactiveCommand<Unit, Unit> AddActionCommand { get; set; } = null!;
+    public ReactiveCommand<Unit, Unit> SaveCommand { get; set; } = null!;
+    public ReactiveCommand<Unit, Unit> ResetCommand { get; set; } = null!;
+    public ReactiveCommand<Unit, Unit> CancelCommand { get; set; } = null!;
 
-    public ObservableCollection<FileSystemTypeViewModel> FileSystemTypes { get; set; }
-        
-    public ObservableCollection<ConditionModeViewModel> ConditionModes { get; set; }
-        
-    public ObservableCollection<AtomicConditionEditViewModel> Conditions { get; }
-        
-    public ObservableCollection<AtomicActionEditViewModel> Actions { get; }
+    public ObservableCollection<FileSystemTypeViewModel> FileSystemTypes { get; set; } = null!;
 
-    [Reactive]
-    public FileSystemTypeViewModel SelectedFileSystemType { get; set; }
-    
-    [Reactive]
-    public ConditionModeViewModel SelectedConditionMode { get; set; }
+    public ObservableCollection<ConditionModeViewModel> ConditionModes { get; set; } = null!;
+
+    public ObservableCollection<AtomicConditionEditViewModel> Conditions { get; } = null!;
+
+    public ObservableCollection<AtomicActionEditViewModel> Actions { get; } = null!;
 
     [Reactive]
-    public string TextAfterConditionModesComboBox { get; set; }
-    
+    public FileSystemTypeViewModel SelectedFileSystemType { get; set; } = null!;
+
+    [Reactive]
+    public ConditionModeViewModel SelectedConditionMode { get; set; } = null!;
+
+    [Reactive]
+    public string TextAfterConditionModesComboBox { get; set; } = null!;
+
     [Reactive]
     public bool ShowFileSystemTypeSelection { get; set; }
     
@@ -123,7 +123,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
     public bool ShowWarning { get; set; }
     
     [Reactive]
-    public string SaveWarning { get; set; }
+    public string SaveWarning { get; set; } = null!;
 
     public SynchronizationRule? BaseAutomaticAction { get; }
     

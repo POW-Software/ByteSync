@@ -45,7 +45,7 @@ public class DirectoryIsCreatedCommandHandlerTests
         var client = new Client { ClientInstanceId = "client1" };
         var actionsGroupIds = new List<string> { "group1", "group2" };
 
-        var request = new DirectoryIsCreatedRequest(sessionId, client, actionsGroupIds);
+        var request = new DirectoryIsCreatedRequest(sessionId, client, actionsGroupIds, "testNodeId");
 
         A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(A<SynchronizationEntity>._))
             .Returns(true);
@@ -54,7 +54,11 @@ public class DirectoryIsCreatedCommandHandlerTests
             {
                 var trackingAction = new TrackingActionEntity
                 {
-                    TargetClientInstanceIds = new HashSet<string> { "client1", "client2" }
+                    TargetClientInstanceAndNodeIds =
+                    [
+                        new() { ClientInstanceId = "client1", NodeId = "testNodeId" },
+                        new() { ClientInstanceId = "client2", NodeId = "testNodeId" }
+                    ]
                 };
                 var synchronization = new SynchronizationEntity
                 {
@@ -62,7 +66,7 @@ public class DirectoryIsCreatedCommandHandlerTests
                 };
                 func(trackingAction, synchronization);
             })
-            .Returns(new TrackingActionResult(true, new List<TrackingActionEntity>(), new SynchronizationEntity()));
+            .Returns(new TrackingActionResult(true, [], new SynchronizationEntity()));
         A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(A<TrackingActionResult>._, A<bool>._))
             .Returns(Task.CompletedTask);
 
@@ -84,7 +88,7 @@ public class DirectoryIsCreatedCommandHandlerTests
         var client = new Client { ClientInstanceId = "client1" };
         var actionsGroupIds = new List<string>();
 
-        var request = new DirectoryIsCreatedRequest(sessionId, client, actionsGroupIds);
+        var request = new DirectoryIsCreatedRequest(sessionId, client, actionsGroupIds, "testNodeId");
 
         // Act
         await _directoryIsCreatedCommandHandler.Handle(request, CancellationToken.None);
@@ -104,7 +108,7 @@ public class DirectoryIsCreatedCommandHandlerTests
         var client = new Client { ClientInstanceId = "client1" };
         var actionsGroupIds = new List<string> { "group1" };
 
-        var request = new DirectoryIsCreatedRequest(sessionId, client, actionsGroupIds);
+        var request = new DirectoryIsCreatedRequest(sessionId, client, actionsGroupIds, "testNodeId");
         var expectedException = new InvalidOperationException("Test exception");
 
         A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>._))

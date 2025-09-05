@@ -53,8 +53,15 @@ Examples:
 - Comments are only allowed when strictly necessary to explain complex or non-obvious logic.
 - Prefer clear and self-explanatory code over adding comments.
 
+### Testing Style & Conventions
+- **Assertions**: use FluentAssertions (`.Should()`). **Do not use** `NUnit.Framework.Legacy` / `ClassicAssert`.
+- **Usings**: remove `using NUnit.Framework.Legacy;` from tests.
+- **Structure**: follow Arrange–Act–Assert. Use clear, English names and messages.
+
+### Coverage Requirements
+- **Target per new unit test class**: ≥ 85% coverage.
+- **PR Quality (Sonar)**: each PR must maintain a minimum coverage of 80%.
+
 ## Build and Test Guidelines
-- Always run build and test as two separate commands to avoid blocking issues.
-- Use `dotnet build --verbosity quiet /property:WarningLevel=0` to build the solution.
-- When running tests, do not use the `--verbosity` modifier.
+- Always run build and test as two separate commands to avoid blocking issues. 
 - If you need to clean the solution, use `dotnet clean --verbosity quiet` before building.

@@ -15,13 +15,13 @@ namespace ByteSync.ViewModels.Sessions.Managing;
 
 public class SessionSettingsEditViewModel : ActivatableViewModelBase
 {
-    private readonly ISessionService _sessionService;
-    private readonly ILocalizationService _localizationService;
-    private readonly IDataInventoryStarter _dataInventoryStarter;
-    private readonly IAnalysisModeViewModelFactory _analysisModeViewModelFactory;
-    private readonly IDataTypeViewModelFactory _dataTypeViewModelFactory;
-    private readonly ILinkingKeyViewModelFactory _linkingKeyViewModelFactory;
-    private readonly ILogger<SessionSettingsEditViewModel> _logger;
+    private readonly ISessionService _sessionService = null!;
+    private readonly ILocalizationService _localizationService = null!;
+    private readonly IDataInventoryStarter _dataInventoryStarter = null!;
+    private readonly IAnalysisModeViewModelFactory _analysisModeViewModelFactory = null!;
+    private readonly IDataTypeViewModelFactory _dataTypeViewModelFactory = null!;
+    private readonly ILinkingKeyViewModelFactory _linkingKeyViewModelFactory = null!;
+    private readonly ILogger<SessionSettingsEditViewModel> _logger = null!;
 
 #if DEBUG
     public SessionSettingsEditViewModel()
@@ -157,12 +157,12 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
     
     private bool IsUpdatingLocale { get; set; }
 
-    public ObservableCollection<AnalysisModeViewModel> AvailableAnalysisModes { get; set; }
-    
-    public ObservableCollection<DataTypeViewModel> AvailableDataTypes { get; set; }
-    
-    public ObservableCollection<LinkingKeyViewModel> AvailableLinkingKeys { get; set; }
-    
+    public ObservableCollection<AnalysisModeViewModel> AvailableAnalysisModes { get; set; } = null!;
+
+    public ObservableCollection<DataTypeViewModel> AvailableDataTypes { get; set; } = null!;
+
+    public ObservableCollection<LinkingKeyViewModel> AvailableLinkingKeys { get; set; } = null!;
+
     public extern bool CanEditSettings { [ObservableAsProperty] get; }
     
     private async void SendUpdate()

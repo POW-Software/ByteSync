@@ -50,7 +50,7 @@ public class SynchronizationRule : ISynchronizationRule
         return SynchronizationRuleId == other.SynchronizationRuleId;
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (ReferenceEquals(null, obj)) return false;
         if (ReferenceEquals(this, obj)) return true;
@@ -60,6 +60,6 @@ public class SynchronizationRule : ISynchronizationRule
 
     public override int GetHashCode()
     {
-        return (SynchronizationRuleId != null ? SynchronizationRuleId.GetHashCode() : 0);
+        return SynchronizationRuleId.GetHashCode();
     }
 }

@@ -7,4 +7,5 @@ public interface IActionErrorRequest : IRequest
 {
     string SessionId { get; }
     Client Client { get; }
+    string? NodeId { get; }
 }

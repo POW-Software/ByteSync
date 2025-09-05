@@ -66,6 +66,10 @@ public class DataNodeService : IDataNodeService
             {
                 _logger.LogWarning("Failed to add DataNode with ID {DataNodeId} to session {SessionId}", dataNode.Id, cloudSession.SessionId);
             }
+            else
+            {
+                _logger.LogInformation("Successfully added DataNode with ID {DataNodeId} to session {SessionId}", dataNode.Id, cloudSession.SessionId);
+            }
         }
 
         if (isAddOK)
@@ -83,7 +87,7 @@ public class DataNodeService : IDataNodeService
             await _counterSemaphore.WaitAsync();
             try
             {
-                nodeId = $"NID_{DateTimeOffset.UtcNow.Ticks}_{++_nodeCounter:D6}";
+                nodeId = $"NID_{DateTimeOffset.UtcNow.Ticks}_{++_nodeCounter:D3}";
             }
             finally
             {
@@ -112,6 +116,10 @@ public class DataNodeService : IDataNodeService
             if (!isRemoveOK)
             {
                 _logger.LogWarning("Failed to remove DataNode with ID {DataNodeId} from session {SessionId}", dataNode.Id, cloudSession.SessionId);
+            }
+            else
+            {
+                _logger.LogInformation("Successfully removed DataNode with ID {DataNodeId} from session {SessionId}", dataNode.Id, cloudSession.SessionId);
             }
         }
         

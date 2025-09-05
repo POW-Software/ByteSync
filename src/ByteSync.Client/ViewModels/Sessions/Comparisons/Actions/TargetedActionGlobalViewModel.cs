@@ -22,14 +22,14 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Actions;
 
 public class TargetedActionGlobalViewModel : FlyoutElementViewModel
 {
-    readonly ObservableAsPropertyHelper<bool> _canEditAction;
+    readonly ObservableAsPropertyHelper<bool> _canEditAction = null!;
 
-    private readonly ILocalizationService _localizationService;
-    private readonly IDialogService _dialogService;
-    private readonly ITargetedActionsService _targetedActionsService;
-    private readonly IAtomicActionConsistencyChecker _atomicActionConsistencyChecker;
-    private readonly IActionEditViewModelFactory _actionEditViewModelFactory;
-    private readonly IAtomicActionValidationFailureReasonService _failureReasonLocalizer;
+    private readonly ILocalizationService _localizationService = null!;
+    private readonly IDialogService _dialogService = null!;
+    private readonly ITargetedActionsService _targetedActionsService = null!;
+    private readonly IAtomicActionConsistencyChecker _atomicActionConsistencyChecker = null!;
+    private readonly IActionEditViewModelFactory _actionEditViewModelFactory = null!;
+    private readonly IAtomicActionValidationFailureReasonService _failureReasonLocalizer = null!;
 
     public TargetedActionGlobalViewModel() 
     {
@@ -95,19 +95,19 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         });
     }
 
-    public List<ComparisonItem> ComparisonItems { get; private set; }
+    public List<ComparisonItem> ComparisonItems { get; private set; } = null!;
 
-    public ReactiveCommand<Unit, Unit> AddActionCommand { get; set; }
+    public ReactiveCommand<Unit, Unit> AddActionCommand { get; set; } = null!;
 
-    public ReactiveCommand<Unit, Unit> SaveCommand { get; set; }
-    public ReactiveCommand<Unit, Unit> ResetCommand { get; set; }
-    public ReactiveCommand<Unit, Unit> CancelCommand { get; set; }
+    public ReactiveCommand<Unit, Unit> SaveCommand { get; set; } = null!;
+    public ReactiveCommand<Unit, Unit> ResetCommand { get; set; } = null!;
+    public ReactiveCommand<Unit, Unit> CancelCommand { get; set; } = null!;
 
-    public ReactiveCommand<Unit, Unit> SaveValidItemsCommand { get; set; }
+    public ReactiveCommand<Unit, Unit> SaveValidItemsCommand { get; set; } = null!;
 
     internal AtomicAction? BaseAtomicAction { get; set; }
-    internal ObservableCollection<AtomicActionEditViewModel> Actions { get; }
-    
+    internal ObservableCollection<AtomicActionEditViewModel> Actions { get; } = null!;
+
     private FileSystemTypes FileSystemType { get; }
     
     public extern bool ShowWarning { [ObservableAsProperty]get; }

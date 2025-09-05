@@ -85,8 +85,13 @@ public class SynchronizationProgressPushReceiver : IPushReceiver
             {
                 try
                 {
-                    await _synchronizationApiClient.AssertSynchronizationActionErrors(sessionId!,
-                        synchronizationProgressPush.TrackingActionSummaries.Select(tas => tas.ActionsGroupId).ToList());
+                    var actionsGroupIds = synchronizationProgressPush.TrackingActionSummaries
+                        .Select(tas => tas.ActionsGroupId)
+                        .ToList();
+
+                    var request = new SynchronizationActionRequest(actionsGroupIds, null);
+
+                    await _synchronizationApiClient.InformSynchronizationActionErrors(sessionId, request);
                 }
                 catch (Exception ex2)
                 {

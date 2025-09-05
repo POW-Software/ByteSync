@@ -1,4 +1,5 @@
 ﻿using ByteSync.Common.Business.Inventories;
+using ByteSync.Models.Inventories;
 
 namespace ByteSync.Business.Actions.Shared;
 
@@ -10,15 +11,15 @@ public class SharedDataPart
 
     }
 
-    public SharedDataPart(string name, FileSystemTypes inventoryPartType, string clientInstanceId, string inventoryCodeAndId, 
-        string rootPath, string? relativePath,
-        string? signatureGuid, string? signatureHash, bool hasAnalysisError)
+    public SharedDataPart(string name, Inventory inventory, InventoryPart inventoryPart,
+        string? relativePath, string? signatureGuid, string? signatureHash, bool hasAnalysisError)
     {
         Name = name;
-        InventoryPartType = inventoryPartType;
-        ClientInstanceId = clientInstanceId;
-        InventoryCodeAndId = inventoryCodeAndId;
-        RootPath = rootPath;
+        InventoryPartType = inventoryPart.InventoryPartType;
+        ClientInstanceId = inventory.Endpoint.ClientInstanceId;
+        InventoryCodeAndId = inventory.CodeAndId;
+        NodeId = inventory.NodeId;
+        RootPath = inventoryPart.RootPath;
         RelativePath = relativePath;
         SignatureGuid = signatureGuid;
         SignatureHash = signatureHash;
@@ -32,6 +33,8 @@ public class SharedDataPart
     public string ClientInstanceId { get; set; } = null!;
         
     public string InventoryCodeAndId { get; set; }  = null!;
+
+    public string? NodeId { get; set; }
 
     public string RootPath { get; set; } = null!;
         

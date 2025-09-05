@@ -1,3 +1,4 @@
+using ByteSync.Common.Business.Actions;
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
@@ -38,7 +39,7 @@ public class StartSynchronizationCommandHandler : IRequestHandler<StartSynchroni
                 SessionId = request.SessionId,
                 Progress = new SynchronizationProgressEntity
                 {
-                    TotalActionsCount = request.ActionsGroupDefinitions.Count,
+                    TotalAtomicActionsCount = GetTotalAtomicActionsCount(request.ActionsGroupDefinitions),
                     Members = session!.SessionMembers.Select(m => m.ClientInstanceId).ToList(),
                 },
                 StartedOn = DateTimeOffset.UtcNow,
@@ -51,5 +52,20 @@ public class StartSynchronizationCommandHandler : IRequestHandler<StartSynchroni
         }
         
         _logger.LogInformation("Synchronization started for session {SessionId}", request.SessionId);
+    }
+
+    private long GetTotalAtomicActionsCount(List<ActionsGroupDefinition> actionsGroupDefinitions)
+    {
+        long total = 0;
+
+        foreach (var actionsGroupDefinition in actionsGroupDefinitions)
+        {
+            if (!actionsGroupDefinition.IsDoNothing)
+            {
+                total += actionsGroupDefinition.TargetClientInstanceAndNodeIds.Distinct().Count();
+            }
+        }
+
+        return total;
     }
 }

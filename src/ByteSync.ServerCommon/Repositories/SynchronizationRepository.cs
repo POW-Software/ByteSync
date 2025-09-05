@@ -34,9 +34,9 @@ public class SynchronizationRepository : BaseRepository<SynchronizationEntity>, 
                 {
                     ActionsGroupId = groupDefinition.ActionsGroupId,
                     SourceClientInstanceId = groupDefinition.IsInitialOperatingOnSourceNeeded 
-                        ? groupDefinition.Source 
+                        ? groupDefinition.SourceClientInstanceId 
                         : null,
-                    TargetClientInstanceIds = [..groupDefinition.Targets],
+                    TargetClientInstanceAndNodeIds = [..groupDefinition.TargetClientInstanceAndNodeIds],
                     Size = groupDefinition.Size,
                 };
         

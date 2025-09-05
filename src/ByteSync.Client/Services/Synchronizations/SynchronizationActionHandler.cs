@@ -43,8 +43,6 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
 
     public ByteSyncEndpoint CurrentEndPoint => _connectionService.CurrentEndPoint!;
 
-    // public AbstractSession Session => _sessionService.SessionObservable.Value!;
-
     public async Task RunSynchronizationAction(SharedActionsGroup sharedActionsGroup, CancellationToken cancellationToken = default)
     {
         try
@@ -131,11 +129,11 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
     {
         var sourceFullName = sharedActionsGroup.GetSourceFullName();
         
-        foreach (var sharedDataPart in localTargets)
+        foreach (var localTarget in localTargets)
         {
             cancellationToken.ThrowIfCancellationRequested();
             
-            var destinationFullName = sharedActionsGroup.GetFullName(sharedDataPart);
+            var destinationFullName = sharedActionsGroup.GetFullName(localTarget);
 
             if (sharedActionsGroup.SynchronizationType == SynchronizationTypes.Full)
             {
@@ -153,11 +151,11 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 
                 File.Copy(sourceFullName, destinationFullName, true);
 
-                await ApplyDatesFromLocalSource(sharedActionsGroup, destinationFullName, sourceFullName);
+                await ApplyDatesFromLocalSource(sharedActionsGroup, destinationFullName);
             }
             else
             {
-                var deltaFullName = await _deltaManager.BuildDelta(sharedActionsGroup, sharedDataPart, sourceFullName);
+                var deltaFullName = await _deltaManager.BuildDelta(sharedActionsGroup, localTarget, sourceFullName);
 
                 try
                 {
@@ -171,12 +169,12 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                     File.Delete(deltaFullName);
                 }
             }
+            
+            await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, localTarget, _synchronizationApiClient.AssertLocalCopyIsDone);
         }
-        
-        await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, _synchronizationApiClient.AssertLocalCopyIsDone);
     }
 
-    private async Task ApplyDatesFromLocalSource(SharedActionsGroup sharedActionsGroup, string destinationFullName, string sourceFullName)
+    private async Task ApplyDatesFromLocalSource(SharedActionsGroup sharedActionsGroup, string destinationFullName)
     {
         if (sharedActionsGroup.IsSynchronizeContentOnly)
         {
@@ -233,16 +231,19 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
 
     private async Task RunCopyDateSynchronizationAction(SharedActionsGroup sharedActionsGroup, CancellationToken cancellationToken)
     {
-        var fullNames = sharedActionsGroup.GetTargetsFullNames(CurrentEndPoint);
-        foreach (var destinationPath in fullNames)
+        var localTargets = GetLocalTargets(sharedActionsGroup);
+        
+        foreach (var localTarget in localTargets)
         {
+            var destinationPath = sharedActionsGroup.GetFullName(localTarget);
+            
             cancellationToken.ThrowIfCancellationRequested();
             
             if (File.Exists(destinationPath))
             {
                 await ApplyDatesFromSharedActionsGroup(sharedActionsGroup, destinationPath);
 
-                await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, 
+                await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, localTarget,
                     _synchronizationApiClient.AssertDateIsCopied);
             }
             else
@@ -250,16 +251,19 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 _logger.LogWarning("{Type:l}: can not apply last write time on {fileInfo}. This file does not exist", 
                     $"Synchronization.{sharedActionsGroup.Operator}", destinationPath);
 
-                await _synchronizationActionServerInformer.HandleCloudActionError(sharedActionsGroup);
+                await _synchronizationActionServerInformer.HandleCloudActionError(sharedActionsGroup, localTarget);
             }
         }
     }
     
     private async Task RunDeleteSynchronizationAction(SharedActionsGroup sharedActionsGroup, CancellationToken cancellationToken)
     {
-        var fullNames = sharedActionsGroup.GetTargetsFullNames(CurrentEndPoint);
-        foreach (var destinationPath in fullNames)
+        var localTargets = GetLocalTargets(sharedActionsGroup);
+        
+        foreach (var localTarget in localTargets)
         {
+            var destinationPath = sharedActionsGroup.GetFullName(localTarget);
+            
             cancellationToken.ThrowIfCancellationRequested();
             
             if (sharedActionsGroup.IsFile && File.Exists(destinationPath))
@@ -286,16 +290,18 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                     $"Synchronization.{sharedActionsGroup.Operator}", destinationPath);
             }
             
-            await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, 
+            await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, localTarget,
                 _synchronizationApiClient.AssertFileOrDirectoryIsDeleted);
         }
     }
     
     private async Task RunCreateSynchronizationAction(SharedActionsGroup sharedActionsGroup, CancellationToken cancellationToken)
     {
-        var fullNames = sharedActionsGroup.GetTargetsFullNames(CurrentEndPoint);
-        foreach (var destinationPath in fullNames)
+        var localTargets = GetLocalTargets(sharedActionsGroup);
+        
+        foreach (var localTarget in localTargets)
         {
+            var destinationPath = sharedActionsGroup.GetFullName(localTarget);
             cancellationToken.ThrowIfCancellationRequested();
             
             if (sharedActionsGroup.PathIdentity.FileSystemType == FileSystemTypes.Directory)
@@ -315,7 +321,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                         $"Synchronization.{sharedActionsGroup.Operator}", directoryInfo.FullName);
                 }
                 
-                await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, 
+                await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, localTarget,
                     _synchronizationApiClient.AssertDirectoryIsCreated);
             }
             else

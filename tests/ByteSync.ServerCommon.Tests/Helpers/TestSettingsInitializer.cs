@@ -12,7 +12,8 @@ public class TestSettingsInitializer
     public IConfiguration InitConfiguration()
     {
         var config = new ConfigurationBuilder()
-            .AddJsonFile("server-common-tests.local.settings.json", optional: false)
+            .AddJsonFile("server-common-tests.local.settings.json", optional: true)
+            .AddEnvironmentVariables()
             .Build();
 
         return config;

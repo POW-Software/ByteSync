@@ -104,7 +104,7 @@ public class AfterTransferSynchronizationSharedFileTests
         // Assert
         await task.WaitAsync(TimeSpan.FromMilliseconds(100));
         task.IsCompletedSuccessfully.Should().BeTrue();
-        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(It.IsAny<SharedFileDefinition>()), Times.Never);
+        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(It.IsAny<SharedFileDefinition>(), It.IsAny<string?>()), Times.Never);
     }
 
     [Test]
@@ -120,7 +120,7 @@ public class AfterTransferSynchronizationSharedFileTests
         // Assert
         await task.WaitAsync(TimeSpan.FromSeconds(1));
         task.IsCompletedSuccessfully.Should().BeTrue();
-        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(It.IsAny<SharedFileDefinition>()), Times.Never);
+        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(It.IsAny<SharedFileDefinition>(), It.IsAny<string?>()), Times.Never);
     }
 
     [Test]
@@ -135,7 +135,7 @@ public class AfterTransferSynchronizationSharedFileTests
         // Assert
         await task.WaitAsync(TimeSpan.FromMilliseconds(100));
         task.IsCompletedSuccessfully.Should().BeTrue();
-        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(It.IsAny<SharedFileDefinition>()), Times.Never);
+        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(It.IsAny<SharedFileDefinition>(), It.IsAny<string?>()), Times.Never);
     }
 
     [Test]
@@ -151,7 +151,7 @@ public class AfterTransferSynchronizationSharedFileTests
         // Assert
         await task.WaitAsync(TimeSpan.FromSeconds(1));
         task.IsCompletedSuccessfully.Should().BeTrue();
-        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(It.IsAny<SharedFileDefinition>()), Times.Never);
+        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(It.IsAny<SharedFileDefinition>(), It.IsAny<string?>()), Times.Never);
     }
 
     [Test]
@@ -167,7 +167,7 @@ public class AfterTransferSynchronizationSharedFileTests
         // Assert
         await task.WaitAsync(TimeSpan.FromMilliseconds(500));
         task.IsCompletedSuccessfully.Should().BeTrue();
-        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(_testSharedFileDefinition), Times.Once);
+        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(_testSharedFileDefinition, It.IsAny<string?>()), Times.Once);
     }
 
     [Test]
@@ -184,7 +184,7 @@ public class AfterTransferSynchronizationSharedFileTests
         // Assert
         await task.WaitAsync(TimeSpan.FromSeconds(1));
         task.IsCompletedSuccessfully.Should().BeTrue();
-        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(_testSharedFileDefinition), Times.Once);
+        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(_testSharedFileDefinition, It.IsAny<string?>()), Times.Once);
     }
 
     [Test]
@@ -200,7 +200,7 @@ public class AfterTransferSynchronizationSharedFileTests
         // Assert
         await task.WaitAsync(TimeSpan.FromMilliseconds(500));
         task.IsCompletedSuccessfully.Should().BeTrue();
-        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(_testSharedFileDefinition), Times.Once);
+        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(_testSharedFileDefinition, It.IsAny<string?>()), Times.Once);
     }
 
     [Test]
@@ -217,7 +217,7 @@ public class AfterTransferSynchronizationSharedFileTests
         // Assert
         await task.WaitAsync(TimeSpan.FromSeconds(1));
         task.IsCompletedSuccessfully.Should().BeTrue();
-        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(_testSharedFileDefinition), Times.Once);
+        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(_testSharedFileDefinition, It.IsAny<string?>()), Times.Once);
     }
 
     [Test]
@@ -273,7 +273,7 @@ public class AfterTransferSynchronizationSharedFileTests
         _synchronizationProcessData.SynchronizationDataTransmitted.OnNext(true);
         var testException = new Exception("Test upload error");
         var apiException = new Exception("API error");
-        _mockSynchronizationApiClient.Setup(x => x.InformSynchronizationActionError(It.IsAny<SharedFileDefinition>()))
+        _mockSynchronizationApiClient.Setup(x => x.InformSynchronizationActionError(It.IsAny<SharedFileDefinition>(), It.IsAny<string?>()))
             .ThrowsAsync(apiException);
 
         // Act & Assert
@@ -288,7 +288,7 @@ public class AfterTransferSynchronizationSharedFileTests
         _synchronizationProcessData.SynchronizationDataTransmitted.OnNext(true);
         var testException = new Exception("Test upload error");
         var apiException = new Exception("API error");
-        _mockSynchronizationApiClient.Setup(x => x.InformSynchronizationActionError(It.IsAny<SharedFileDefinition>()))
+        _mockSynchronizationApiClient.Setup(x => x.InformSynchronizationActionError(It.IsAny<SharedFileDefinition>(), It.IsAny<string?>()))
             .ThrowsAsync(apiException);
 
         // Act & Assert
@@ -337,7 +337,7 @@ public class AfterTransferSynchronizationSharedFileTests
         // Assert
         await task.WaitAsync(TimeSpan.FromMilliseconds(500));
         task.IsCompletedSuccessfully.Should().BeTrue();
-        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(null!), Times.Once);
+        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(null!, It.IsAny<string?>()), Times.Once);
     }
 
     [Test]
@@ -353,6 +353,6 @@ public class AfterTransferSynchronizationSharedFileTests
         // Assert
         await task.WaitAsync(TimeSpan.FromMilliseconds(500));
         task.IsCompletedSuccessfully.Should().BeTrue();
-        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(null!), Times.Once);
+        _mockSynchronizationApiClient.Verify(x => x.InformSynchronizationActionError(null!, It.IsAny<string?>()), Times.Once);
     }
 }
