@@ -99,13 +99,6 @@ public class FileUploadWorker : IFileUploadWorker
                             var elapsedMs = sliceStart.ElapsedMilliseconds;
                             progressState.LastSliceUploadDurationMs = elapsedMs;
                             progressState.LastSliceUploadedBytes = sliceBytes;
-                            progressState.SliceMetrics.Add(new SliceUploadMetric
-                            {
-                                TaskId = Environment.CurrentManagedThreadId,
-                                PartNumber = slice.PartNumber,
-                                Bytes = sliceBytes,
-                                ElapsedtimeMs = elapsedMs,
-                            });
                         }
                         finally
                         {

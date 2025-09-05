@@ -12,6 +12,5 @@ public class UploadProgressState
     public long TotalUploadedBytes { get; set; }
     public long? LastSliceUploadedBytes { get; set; }
     public long? LastSliceUploadDurationMs { get; set; }
-    public List<Exception> Exceptions { get; } = new System.Collections.Generic.List<Exception>();
-    public List<SliceUploadMetric> SliceMetrics { get; } = new System.Collections.Generic.List<SliceUploadMetric>();
+    public List<Exception> Exceptions { get; } = new();
 } 
