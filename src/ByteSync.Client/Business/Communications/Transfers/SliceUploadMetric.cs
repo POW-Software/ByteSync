@@ -1,5 +1,6 @@
 namespace ByteSync.Business.Communications.Transfers;
 
+// TODO usage for this class?
 public class SliceUploadMetric
 {
     public int TaskId { get; set; }
