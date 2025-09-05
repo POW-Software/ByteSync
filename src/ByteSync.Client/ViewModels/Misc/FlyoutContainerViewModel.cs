@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -108,16 +108,16 @@ public class FlyoutContainerViewModel : ActivatableViewModelBase, IDialogView
         if (Dispatcher.UIThread.CheckAccess())
         {
             ShowFlyout(messageBoxViewModel.TitleKey, false, messageBoxViewModel);
-            return await messageBoxViewModel.WaitForResponse();
         }
         else
         {
-            return await Dispatcher.UIThread.InvokeAsync(async () =>
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 ShowFlyout(messageBoxViewModel.TitleKey, false, messageBoxViewModel);
-                return await messageBoxViewModel.WaitForResponse();
             });
         }
+
+        return await messageBoxViewModel.WaitForResponse();
     }
     
     [ExcludeFromCodeCoverage]
