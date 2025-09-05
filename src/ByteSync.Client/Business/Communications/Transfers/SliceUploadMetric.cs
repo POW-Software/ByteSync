@@ -9,7 +9,4 @@ public class SliceUploadMetric
     public long Bytes { get; set; }
     
     public long ElapsedtimeMs { get; set; }
-
 }
-
-
