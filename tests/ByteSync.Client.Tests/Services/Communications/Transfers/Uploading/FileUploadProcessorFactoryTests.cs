@@ -29,7 +29,8 @@ public class FileUploadProcessorFactoryTests
     private Mock<ISessionService> _mockSessionService = null!;
     private Mock<IAdaptiveUploadController> _mockAdaptiveController = null!;
     private Mock<IFileUploadProcessor> _mockProcessor = null!;
-
+    private Mock<IUploadSlicingManager> _mockSlicingManager = null!;
+    
     private FileUploadProcessorFactory _factory = null!;
 
     private SharedFileDefinition _sharedFileDefinition = null!;
@@ -47,6 +48,7 @@ public class FileUploadProcessorFactoryTests
         _mockSessionService = new Mock<ISessionService>();
         _mockAdaptiveController = new Mock<IAdaptiveUploadController>();
         _mockProcessor = new Mock<IFileUploadProcessor>();
+        _mockSlicingManager = new Mock<IUploadSlicingManager>();
 
         _sharedFileDefinition = new SharedFileDefinition
         {
@@ -66,6 +68,7 @@ public class FileUploadProcessorFactoryTests
         builder.RegisterInstance(_mockStrategies.Object).As<IIndex<StorageProvider, IUploadStrategy>>();
         builder.RegisterInstance(_mockSessionService.Object).As<ISessionService>();
         builder.RegisterInstance(_mockAdaptiveController.Object).As<IAdaptiveUploadController>();
+        builder.RegisterInstance(_mockSlicingManager.Object).As<IUploadSlicingManager>();
         // Register the processor as an instance so typed parameters are ignored
         builder.RegisterInstance(_mockProcessor.Object).As<IFileUploadProcessor>();
 

@@ -1,7 +1,11 @@
+using ByteSync.Business.Sessions;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using Microsoft.Extensions.Logging.Abstractions;
 using FluentAssertions;
 using NUnit.Framework;
+using Moq;
+using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Common.Business.Sessions;
 
 namespace ByteSync.Tests.Services.Communications.Transfers.Uploading;
 
@@ -13,7 +17,10 @@ public class AdaptiveUploadControllerTests
     [SetUp]
     public void SetUp()
     {
-        _controller = new AdaptiveUploadController(NullLogger<AdaptiveUploadController>.Instance);
+        var sessionService = new Mock<ISessionService>();
+        sessionService.SetupGet(s => s.SessionObservable).Returns(System.Reactive.Linq.Observable.Return<AbstractSession?>(null));
+        sessionService.SetupGet(s => s.SessionStatusObservable).Returns(System.Reactive.Linq.Observable.Never<SessionStatus>());
+        _controller = new AdaptiveUploadController(NullLogger<AdaptiveUploadController>.Instance, sessionService.Object);
     }
 
     [Test]

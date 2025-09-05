@@ -1,4 +1,7 @@
+using System.Reactive.Linq;
+using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Communications.Transfers.Uploading;
 
@@ -27,15 +30,17 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 	private int _windowSize;
 	private readonly ILogger<AdaptiveUploadController> _logger;
 
-	public AdaptiveUploadController(ILogger<AdaptiveUploadController> logger)
+	public AdaptiveUploadController(ILogger<AdaptiveUploadController> logger, ISessionService sessionService)
 	{
 		_logger = logger;
-		_currentChunkSizeBytes = INITIAL_CHUNK_SIZE_BYTES;
-		_currentParallelism = MIN_PARALLELISM;
 		_recentDurations = new Queue<TimeSpan>();
 		_recentPartNumbers = new Queue<int>();
 		_recentSuccesses = new Queue<bool>();
-		_windowSize = _currentParallelism;
+		ResetState();
+		sessionService.SessionObservable.Subscribe(_ => { ResetState(); });
+		sessionService.SessionStatusObservable
+			.Where(status => status == SessionStatus.Preparation)
+			.Subscribe(_ => { ResetState(); });
 	}
 
 	public int CurrentChunkSizeBytes => _currentChunkSizeBytes;
@@ -99,11 +104,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 		// Downscale path first
 		if (maxElapsed > DownscaleThreshold)
 		{
-			// Adjust chunk size first (incremental), then parallelism in the same evaluation
-			_currentChunkSizeBytes = (int)Math.Max(64 * 1024, _currentChunkSizeBytes * 0.75);
-			_logger.LogInformation(
-				"Adaptive: Downscale. maxElapsedMs={MaxElapsedMs} > {ThresholdMs}. New chunkKB={ChunkKb}.", 
-				maxElapsed.TotalMilliseconds, DownscaleThreshold.TotalMilliseconds, _currentChunkSizeBytes / 1024);
+			// First, reduce the number of parallel upload tasks (minimum = 2)
 			if (_currentParallelism > MIN_PARALLELISM)
 			{
 				_logger.LogInformation(
@@ -111,8 +112,19 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 					_currentParallelism, _currentParallelism - 1);
 				_currentParallelism -= 1;
 				_windowSize = _currentParallelism;
+				ResetWindow();
+				return;
 			}
-			// Logging before resetting window done above; now reset
+
+			// If already at minimum parallelism, reduce chunk size proportionally
+			var reduced = (int)Math.Max(64 * 1024, _currentChunkSizeBytes * 0.75);
+			if (reduced != _currentChunkSizeBytes)
+			{
+				_currentChunkSizeBytes = reduced;
+				_logger.LogInformation(
+					"Adaptive: Downscale. maxElapsedMs={MaxElapsedMs} > {ThresholdMs}. New chunkKB={ChunkKb}.", 
+					maxElapsed.TotalMilliseconds, DownscaleThreshold.TotalMilliseconds, _currentChunkSizeBytes / 1024);
+			}
 			ResetWindow();
 			return;
 		}
@@ -167,5 +179,13 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 			_recentSuccesses.Dequeue();
 		}
 		_successesInWindow = 0;
+	}
+
+	private void ResetState()
+	{
+		_currentChunkSizeBytes = INITIAL_CHUNK_SIZE_BYTES;
+		_currentParallelism = MIN_PARALLELISM;
+		_windowSize = _currentParallelism;
+		ResetWindow();
 	}
 }
