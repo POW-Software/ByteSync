@@ -1,4 +1,4 @@
-﻿using System.Reactive;
+using System.Reactive;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +13,7 @@ namespace ByteSync.ViewModels.Misc;
 public class MessageBoxViewModel : FlyoutElementViewModel
 {
     private MessageBoxResult? _result;
+    private TaskCompletionSource<MessageBoxResult?>? _responseTaskCompletionSource;
     
     public MessageBoxViewModel()
     {
@@ -41,6 +42,7 @@ public class MessageBoxViewModel : FlyoutElementViewModel
         }
 
         ResultSelected = new ManualResetEvent(false);
+        _responseTaskCompletionSource = new TaskCompletionSource<MessageBoxResult?>();
 
         CanExecuteOK = new BehaviorSubject<bool>(true);
         OKButtonCommand = ReactiveCommand.Create(() =>
@@ -51,6 +53,7 @@ public class MessageBoxViewModel : FlyoutElementViewModel
             }
             
             ResultSelected.Set();
+            _responseTaskCompletionSource?.TrySetResult(Result);
             
             RaiseCloseFlyoutRequested();
             
@@ -64,6 +67,7 @@ public class MessageBoxViewModel : FlyoutElementViewModel
             }
 
             ResultSelected.Set();
+            _responseTaskCompletionSource?.TrySetResult(Result);
             
             RaiseCloseFlyoutRequested();
         });
@@ -119,12 +123,12 @@ public class MessageBoxViewModel : FlyoutElementViewModel
 
     public async Task<MessageBoxResult?> WaitForResponse()
     {
-        return await Task.Run(() =>
+        if (_responseTaskCompletionSource == null)
         {
-            ResultSelected.WaitOne();
-
-            return Result;
-        });
+            _responseTaskCompletionSource = new TaskCompletionSource<MessageBoxResult?>();
+        }
+        
+        return await _responseTaskCompletionSource.Task;
     }
 
     public override async Task CancelIfNeeded()
@@ -137,6 +141,7 @@ public class MessageBoxViewModel : FlyoutElementViewModel
             }
 
             ResultSelected.Set();
+            _responseTaskCompletionSource?.TrySetResult(Result);
         });
     }
 }
