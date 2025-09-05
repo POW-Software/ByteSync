@@ -21,6 +21,7 @@ public class FileUploadWorker : IFileUploadWorker
     private readonly IIndex<StorageProvider, IUploadStrategy> _strategies;
     private readonly SemaphoreSlim _semaphoreSlim;
     private readonly IAdaptiveUploadController _adaptiveUploadController;
+    private readonly SemaphoreSlim _uploadSlots;
 
     private CancellationTokenSource CancellationTokenSource { get; }
 
@@ -33,7 +34,8 @@ public class FileUploadWorker : IFileUploadWorker
         IIndex<StorageProvider, IUploadStrategy> strategies,
         ManualResetEvent uploadingIsFinished,
         ILogger<FileUploadWorker> logger,
-        IAdaptiveUploadController adaptiveUploadController)
+        IAdaptiveUploadController adaptiveUploadController,
+        SemaphoreSlim uploadSlots)
     {
         _policyFactory = policyFactory;
         _fileTransferApiClient = fileTransferApiClient;
@@ -44,7 +46,33 @@ public class FileUploadWorker : IFileUploadWorker
         _strategies = strategies;
         _logger = logger;
         _adaptiveUploadController = adaptiveUploadController;
+        _uploadSlots = uploadSlots;
         CancellationTokenSource = new CancellationTokenSource();
+    }
+
+    // Backward-compatible overload for tests and callers not providing uploadSlots
+    public FileUploadWorker(
+        IPolicyFactory policyFactory,
+        IFileTransferApiClient fileTransferApiClient,
+        SharedFileDefinition sharedFileDefinition,
+        SemaphoreSlim semaphoreSlim,
+        ManualResetEvent exceptionOccurred,
+        IIndex<StorageProvider, IUploadStrategy> strategies,
+        ManualResetEvent uploadingIsFinished,
+        ILogger<FileUploadWorker> logger,
+        IAdaptiveUploadController adaptiveUploadController)
+        : this(
+            policyFactory,
+            fileTransferApiClient,
+            sharedFileDefinition,
+            semaphoreSlim,
+            exceptionOccurred,
+            strategies,
+            uploadingIsFinished,
+            logger,
+            adaptiveUploadController,
+            new SemaphoreSlim(Math.Min(Math.Max(1, adaptiveUploadController.CurrentParallelism), 4), 4))
+    {
     }
 
     public async Task UploadAvailableSlicesAdaptiveAsync(Channel<FileUploaderSlice> availableSlices, UploadProgressState progressState)
@@ -59,6 +87,9 @@ public class FileUploadWorker : IFileUploadWorker
             System.Diagnostics.Stopwatch? sliceStart = null;
             try
             {
+                // Concurrency gating: acquire a slot for this upload
+                await _uploadSlots.WaitAsync();
+
                 sliceStart = System.Diagnostics.Stopwatch.StartNew();
 
                 await IncrementConcurrentAsync(progressState);
@@ -78,6 +109,7 @@ public class FileUploadWorker : IFileUploadWorker
             {
                 DisposeSlice(slice);
                 await DecrementConcurrentAsync(progressState);
+                try { _uploadSlots.Release(); } catch { }
             }
         }
 

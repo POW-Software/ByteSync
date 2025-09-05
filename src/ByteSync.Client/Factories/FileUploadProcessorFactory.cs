@@ -34,6 +34,9 @@ public class FileUploadProcessorFactory : IFileUploadProcessorFactory
         
         // Resolve adaptive upload controller
         var adaptiveUploadController = _context.Resolve<IAdaptiveUploadController>();
+        // Create upload slots limiter (adaptive). Max is 4 as per controller limits; clamp initial >=1.
+        var initialSlots = Math.Min(Math.Max(1, adaptiveUploadController.CurrentParallelism), 4);
+        var uploadSlotsLimiter = new SemaphoreSlim(initialSlots, 4);
         
         // Create file upload worker
         var policyFactory = _context.Resolve<IPolicyFactory>();
@@ -41,7 +44,8 @@ public class FileUploadProcessorFactory : IFileUploadProcessorFactory
         var strategies = _context.Resolve<IIndex<StorageProvider, IUploadStrategy>>();
         var fileUploadWorker = new FileUploadWorker(policyFactory, fileTransferApiClient, sharedFileDefinition,
             semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, strategies,
-            fileUploadCoordinator.UploadingIsFinished, _context.Resolve<ILogger<FileUploadWorker>>(), adaptiveUploadController);
+            fileUploadCoordinator.UploadingIsFinished, _context.Resolve<ILogger<FileUploadWorker>>(), adaptiveUploadController,
+            uploadSlotsLimiter);
         
         // Create file part upload asserter
         var sessionService = _context.Resolve<ISessionService>();
@@ -56,7 +60,8 @@ public class FileUploadProcessorFactory : IFileUploadProcessorFactory
             new TypedParameter(typeof(string), localFileToUpload),
             new TypedParameter(typeof(SemaphoreSlim), semaphoreSlim),
             new TypedParameter(typeof(IAdaptiveUploadController), adaptiveUploadController),
-            new TypedParameter(typeof(IUploadSlicingManager), slicingManager)
+            new TypedParameter(typeof(IUploadSlicingManager), slicingManager),
+            new NamedParameter("uploadSlotsLimiter", uploadSlotsLimiter)
         );
         
         return fileUploadProcessor;

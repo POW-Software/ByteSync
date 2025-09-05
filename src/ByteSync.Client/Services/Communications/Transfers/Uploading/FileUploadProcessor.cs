@@ -17,6 +17,8 @@ public class FileUploadProcessor : IFileUploadProcessor
     private readonly string? _localFileToUpload;
     private readonly SemaphoreSlim _semaphoreSlim;
     private readonly IAdaptiveUploadController _adaptiveUploadController;
+    private readonly SemaphoreSlim _uploadSlotsLimiter;
+    private int _grantedSlots;
 
     // State tracking
     private UploadProgressState? _progressState;
@@ -30,7 +32,8 @@ public class FileUploadProcessor : IFileUploadProcessor
         string? localFileToUpload,
         SemaphoreSlim semaphoreSlim,
         IAdaptiveUploadController adaptiveUploadController,
-        IUploadSlicingManager uploadSlicingManager)
+        IUploadSlicingManager uploadSlicingManager,
+        SemaphoreSlim uploadSlotsLimiter)
     {
         _slicerEncrypter = slicerEncrypter;
         _logger = logger;
@@ -41,6 +44,32 @@ public class FileUploadProcessor : IFileUploadProcessor
         _semaphoreSlim = semaphoreSlim;
         _adaptiveUploadController = adaptiveUploadController;
         _uploadSlicingManager = uploadSlicingManager;
+        _uploadSlotsLimiter = uploadSlotsLimiter;
+    }
+
+    // Backward-compatible overload for tests and callers not providing uploadSlotsLimiter
+    public FileUploadProcessor(
+        ISlicerEncrypter slicerEncrypter,
+        ILogger<FileUploadProcessor> logger,
+        IFileUploadCoordinator fileUploadCoordinator,
+        IFileUploadWorker fileUploadWorker,
+        IFilePartUploadAsserter filePartUploadAsserter,
+        string? localFileToUpload,
+        SemaphoreSlim semaphoreSlim,
+        IAdaptiveUploadController adaptiveUploadController,
+        IUploadSlicingManager uploadSlicingManager)
+        : this(
+            slicerEncrypter,
+            logger,
+            fileUploadCoordinator,
+            fileUploadWorker,
+            filePartUploadAsserter,
+            localFileToUpload,
+            semaphoreSlim,
+            adaptiveUploadController,
+            uploadSlicingManager,
+            new SemaphoreSlim(Math.Min(Math.Max(1, adaptiveUploadController.CurrentParallelism), 4), 4))
+    {
     }
 
     public async Task ProcessUpload(SharedFileDefinition sharedFileDefinition, int? maxSliceLength = null)
@@ -53,11 +82,65 @@ public class FileUploadProcessor : IFileUploadProcessor
             _fileUploadCoordinator.ExceptionOccurred,
             _adaptiveUploadController);
 
-        // Start upload workers (adaptive)
-        for (var i = 0; i < _adaptiveUploadController.CurrentParallelism; i++)
+        // Grant initial slots equal to current parallelism
+        _grantedSlots = _adaptiveUploadController.CurrentParallelism;
+        // Ensure limiter starts with the same count (already initialized by factory)
+
+        // Start a fixed pool of workers up to max supported (4)
+        const int MAX_WORKERS = 4;
+        for (var i = 0; i < MAX_WORKERS; i++)
         {
             _ = Task.Run(() => _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_fileUploadCoordinator.AvailableSlices, _progressState!));
         }
+
+        // Start background adjuster to align available slots with desired parallelism
+        var adjuster = Task.Run(async () =>
+        {
+            try
+            {
+                var finishedEvt = _fileUploadCoordinator.UploadingIsFinished;
+                var errorEvt = _fileUploadCoordinator.ExceptionOccurred;
+                if (finishedEvt == null || errorEvt == null)
+                {
+                    return;
+                }
+
+                while (!finishedEvt.WaitOne(0) && !errorEvt.WaitOne(0))
+                {
+                    var desired = _adaptiveUploadController.CurrentParallelism;
+
+                    if (desired > _grantedSlots)
+                    {
+                        var diff = desired - _grantedSlots;
+                        try { _uploadSlotsLimiter.Release(diff); } catch { }
+                        _grantedSlots = desired;
+                    }
+                    else if (desired < _grantedSlots)
+                    {
+                        var toTake = _grantedSlots - desired;
+                        var taken = 0;
+                        for (int i = 0; i < toTake; i++)
+                        {
+                            if (_uploadSlotsLimiter.Wait(0))
+                            {
+                                taken++;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        _grantedSlots -= taken;
+                    }
+
+                    await Task.Delay(200);
+                }
+            }
+            catch
+            {
+                // no-op: adjuster is best-effort
+            }
+        });
 
         // Wait for completion
         await _fileUploadCoordinator.WaitForCompletionAsync();
