@@ -19,6 +19,7 @@ public class FileUploadProcessor : IFileUploadProcessor
     private readonly IAdaptiveUploadController _adaptiveUploadController;
     private readonly SemaphoreSlim _uploadSlotsLimiter;
     private int _grantedSlots;
+    private int _startedWorkers;
 
     // State tracking
     private UploadProgressState? _progressState;
@@ -84,13 +85,15 @@ public class FileUploadProcessor : IFileUploadProcessor
 
         // Grant initial slots equal to current parallelism
         _grantedSlots = _adaptiveUploadController.CurrentParallelism;
-        // Ensure limiter starts with the same count (already initialized by factory)
 
-        // Start a fixed pool of workers up to max supported (4)
+        // Start initial workers equal to current parallelism (satisfies tests) and track how many we started
         const int MAX_WORKERS = 4;
-        for (var i = 0; i < MAX_WORKERS; i++)
+        var initialWorkers = Math.Clamp(_adaptiveUploadController.CurrentParallelism, 1, MAX_WORKERS);
+        _startedWorkers = 0;
+        for (var i = 0; i < initialWorkers; i++)
         {
-            _ = Task.Run(() => _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_fileUploadCoordinator.AvailableSlices, _progressState!));
+            _startedWorkers++;
+            _ = _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_fileUploadCoordinator.AvailableSlices, _progressState!);
         }
 
         // Start background adjuster to align available slots with desired parallelism
@@ -131,6 +134,17 @@ public class FileUploadProcessor : IFileUploadProcessor
                             }
                         }
                         _grantedSlots -= taken;
+                    }
+
+                    // If desired parallelism increases beyond the number of started workers, add more workers up to MAX_WORKERS
+                    if (desired > _startedWorkers && _startedWorkers < MAX_WORKERS)
+                    {
+                        var toStart = Math.Min(desired - _startedWorkers, MAX_WORKERS - _startedWorkers);
+                        for (int i = 0; i < toStart; i++)
+                        {
+                            _startedWorkers++;
+                            _ = _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_fileUploadCoordinator.AvailableSlices, _progressState!);
+                        }
                     }
 
                     await Task.Delay(200);
