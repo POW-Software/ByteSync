@@ -125,16 +125,12 @@ public class UploadSlicingManager : IUploadSlicingManager
         }
         _subscriptions.Clear();
         
-        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.CancelAsync();
         
         _queue.Writer.TryComplete();
         
         await Task.WhenAll(_workers).ConfigureAwait(false);
         
-        
         _cancellationTokenSource.Dispose();
-        
     }
 }
-
-
