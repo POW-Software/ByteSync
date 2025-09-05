@@ -12,12 +12,19 @@ public class FileUploadCoordinator : IFileUploadCoordinator
     private readonly ManualResetEvent _uploadingIsFinished;
     private readonly ManualResetEvent _exceptionOccurred;
     private readonly ILogger<FileUploadCoordinator> _logger;
+    private const int CHANNEL_CAPACITY = 8;
 
     public FileUploadCoordinator(ILogger<FileUploadCoordinator> logger)
     {
         _logger = logger;
         _syncRoot = new object();
-        _availableSlices = Channel.CreateUnbounded<FileUploaderSlice>();
+        var options = new BoundedChannelOptions(CHANNEL_CAPACITY)
+        {
+            FullMode = BoundedChannelFullMode.Wait,
+            SingleWriter = true,
+            SingleReader = false
+        };
+        _availableSlices = Channel.CreateBounded<FileUploaderSlice>(options);
         _uploadingIsFinished = new ManualResetEvent(false);
         _exceptionOccurred = new ManualResetEvent(false);
     }

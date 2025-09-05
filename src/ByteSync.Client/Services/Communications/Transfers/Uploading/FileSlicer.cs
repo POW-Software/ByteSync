@@ -86,6 +86,7 @@ public class FileSlicer : IFileSlicer
                 _semaphoreSlim.Release();   
             }
             _exceptionOccurred.Set();
+            _availableSlices.Writer.TryComplete(ex);
         }
     }
 
@@ -103,35 +104,7 @@ public class FileSlicer : IFileSlicer
                     return;
                 }
 
-                // Pause slicing if pending slices exceed 2 × current upload task count
-                int pending;
-                int threshold;
-                await _semaphoreSlim.WaitAsync();
-                try
-                {
-                    pending = progressState.TotalCreatedSlices - progressState.TotalUploadedSlices;
-                    threshold = 2 * _adaptiveUploadController.CurrentParallelism;
-                }
-                finally
-                {
-                    _semaphoreSlim.Release();
-                }
-
-                while (pending > threshold && !_exceptionOccurred.WaitOne(0))
-                {
-                    await Task.Delay(10);
-
-                    await _semaphoreSlim.WaitAsync();
-                    try
-                    {
-                        pending = progressState.TotalCreatedSlices - progressState.TotalUploadedSlices;
-                        threshold = 2 * _adaptiveUploadController.CurrentParallelism;
-                    }
-                    finally
-                    {
-                        _semaphoreSlim.Release();
-                    }
-                }
+                // Backpressure is handled by a bounded channel; no active polling
 
                 var nextSize = _adaptiveUploadController.GetNextChunkSizeBytes();
                 if (nextSize > 0)
@@ -176,6 +149,7 @@ public class FileSlicer : IFileSlicer
                 _semaphoreSlim.Release();
             }
             _exceptionOccurred.Set();
+            _availableSlices.Writer.TryComplete(ex);
         }
     }
-} 
+}
