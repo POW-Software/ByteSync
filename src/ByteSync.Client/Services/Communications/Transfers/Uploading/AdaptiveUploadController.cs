@@ -1,0 +1,195 @@
+using System.Reactive.Linq;
+using ByteSync.Business.Sessions;
+using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Services.Sessions;
+
+namespace ByteSync.Services.Communications.Transfers.Uploading;
+
+public class AdaptiveUploadController : IAdaptiveUploadController
+{
+	// Initial configuration
+	private const int INITIAL_CHUNK_SIZE_BYTES = 500 * 1024; // 500 KB
+	private const int MIN_CHUNK_SIZE_BYTES = 64 * 1024; // 64 KB
+	private const int MAX_CHUNK_SIZE_BYTES = 16 * 1024 * 1024; // 16 MB
+	private const int MIN_PARALLELISM = 2;
+	private const int MAX_PARALLELISM = 4;
+
+	// Thresholds
+	private static readonly TimeSpan _upscaleThreshold = TimeSpan.FromSeconds(25);
+	private static readonly TimeSpan _downscaleThreshold = TimeSpan.FromSeconds(30);
+
+	// Chunk size thresholds for parallelism increases
+	private const int FOUR_MB = 4 * 1024 * 1024;
+	private const int EIGHT_MB = 8 * 1024 * 1024;
+
+	// State
+	private int _currentChunkSizeBytes;
+	private int _currentParallelism;
+	private readonly Queue<TimeSpan> _recentDurations;
+	private readonly Queue<bool> _recentSuccesses;
+	private int _successesInWindow;
+	private int _windowSize;
+	private readonly ILogger<AdaptiveUploadController> _logger;
+	private readonly object _sync = new object();
+
+	public AdaptiveUploadController(ILogger<AdaptiveUploadController> logger, ISessionService sessionService)
+	{
+		_logger = logger;
+		_recentDurations = new Queue<TimeSpan>();
+		_recentSuccesses = new Queue<bool>();
+		ResetState();
+		sessionService.SessionObservable.Subscribe(_ => { ResetState(); });
+		sessionService.SessionStatusObservable
+			.Where(status => status == SessionStatus.Preparation)
+			.Subscribe(_ => { ResetState(); });
+	}
+
+	public int CurrentChunkSizeBytes
+	{
+		get { lock (_sync) { return _currentChunkSizeBytes; } }
+	}
+
+	public int CurrentParallelism
+	{
+		get { lock (_sync) { return _currentParallelism; } }
+	}
+
+	public int GetNextChunkSizeBytes()
+	{
+		lock (_sync)
+		{
+			return _currentChunkSizeBytes;
+		}
+	}
+
+	public void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null, Exception? exception = null)
+	{
+		lock (_sync)
+		{
+			_recentDurations.Enqueue(elapsed);
+			_recentSuccesses.Enqueue(isSuccess);
+			if (isSuccess) { _successesInWindow += 1; }
+			while (_recentDurations.Count > _windowSize)
+			{
+				_recentDurations.Dequeue();
+				if (_recentSuccesses.Count > 0)
+				{
+					var removedSuccess = _recentSuccesses.Dequeue();
+					if (removedSuccess && _successesInWindow > 0)
+					{
+						_successesInWindow -= 1;
+					}
+				}
+			}
+
+			if (!isSuccess && statusCode != null)
+			{
+				if (statusCode == 429 || statusCode == 503 || statusCode == 507)
+				{
+					_logger.LogWarning("Adaptive: bandwidth error status {Status}. Resetting chunk size to {InitialKb} KB (was {PrevKb} KB)", statusCode, INITIAL_CHUNK_SIZE_BYTES / 1024, _currentChunkSizeBytes / 1024);
+					_currentChunkSizeBytes = Math.Clamp(INITIAL_CHUNK_SIZE_BYTES, MIN_CHUNK_SIZE_BYTES, MAX_CHUNK_SIZE_BYTES);
+					ResetWindow();
+					return;
+				}
+			}
+
+			if (_recentDurations.Count < _windowSize)
+			{
+				return;
+			}
+
+			var maxElapsed = TimeSpan.Zero;
+			foreach (var d in _recentDurations)
+			{
+				if (d > maxElapsed) maxElapsed = d;
+			}
+
+			_logger.LogDebug(
+				"Adaptive: maxElapsedMs={MaxElapsedMs}, parallelism={Parallelism}, chunkKB={ChunkKb}",
+				maxElapsed.TotalMilliseconds, _currentParallelism, _currentChunkSizeBytes / 1024);
+
+			if (maxElapsed > _downscaleThreshold)
+			{
+				if (_currentParallelism > MIN_PARALLELISM)
+				{
+					_logger.LogInformation(
+						"Adaptive: Downscale. Reducing parallelism {Prev} -> {Next}. Resetting window",
+						_currentParallelism, _currentParallelism - 1);
+					_currentParallelism -= 1;
+					_windowSize = _currentParallelism;
+					ResetWindow();
+					return;
+				}
+
+				var reduced = (int)Math.Max(MIN_CHUNK_SIZE_BYTES, _currentChunkSizeBytes * 0.75);
+				if (reduced != _currentChunkSizeBytes)
+				{
+					_currentChunkSizeBytes = reduced;
+					_logger.LogInformation(
+						"Adaptive: Downscale. maxElapsedMs={MaxElapsedMs} > {ThresholdMs}. New chunkKB={ChunkKb}", 
+						maxElapsed.TotalMilliseconds, _downscaleThreshold.TotalMilliseconds, _currentChunkSizeBytes / 1024);
+				}
+				ResetWindow();
+				return;
+			}
+
+			if (maxElapsed <= _upscaleThreshold && _successesInWindow >= _windowSize)
+			{
+				var increased = (int)(_currentChunkSizeBytes * 1.25);
+				_currentChunkSizeBytes = Math.Clamp(increased, MIN_CHUNK_SIZE_BYTES, MAX_CHUNK_SIZE_BYTES);
+				_logger.LogInformation(
+					"Adaptive: Upscale. maxElapsedMs={MaxElapsedMs} <= {ThresholdMs}. New chunkKB={ChunkKb}", 
+					maxElapsed.TotalMilliseconds, _upscaleThreshold.TotalMilliseconds, _currentChunkSizeBytes / 1024);
+
+				if (_currentChunkSizeBytes >= EIGHT_MB)
+				{
+					var prev = _currentParallelism;
+					_currentParallelism = Math.Max(_currentParallelism, 4);
+					if (_currentParallelism != prev)
+					{
+						_logger.LogInformation("Adaptive: Upscale. Increasing parallelism {Prev} -> {Next} due to chunk>=8MB", prev, _currentParallelism);
+					}
+				}
+				else if (_currentChunkSizeBytes >= FOUR_MB)
+				{
+					var prev = _currentParallelism;
+					_currentParallelism = Math.Max(_currentParallelism, 3);
+					if (_currentParallelism != prev)
+					{
+						_logger.LogInformation("Adaptive: Upscale. Increasing parallelism {Prev} -> {Next} due to chunk>=4MB", prev, _currentParallelism);
+					}
+				}
+				_currentParallelism = Math.Min(_currentParallelism, MAX_PARALLELISM);
+				_windowSize = _currentParallelism;
+				ResetWindow();
+			}
+		}
+	}
+
+	private void ResetWindow()
+	{
+		lock (_sync)
+		{
+			while (_recentDurations.Count > 0)
+			{
+				_recentDurations.Dequeue();
+			}
+			while (_recentSuccesses.Count > 0)
+			{
+				_recentSuccesses.Dequeue();
+			}
+			_successesInWindow = 0;
+		}
+	}
+
+	private void ResetState()
+	{
+		lock (_sync)
+		{
+			_currentChunkSizeBytes = Math.Clamp(INITIAL_CHUNK_SIZE_BYTES, MIN_CHUNK_SIZE_BYTES, MAX_CHUNK_SIZE_BYTES);
+			_currentParallelism = MIN_PARALLELISM;
+			_windowSize = _currentParallelism;
+		}
+		ResetWindow();
+	}
+}

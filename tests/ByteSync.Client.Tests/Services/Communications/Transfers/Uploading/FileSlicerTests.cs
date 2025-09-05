@@ -1,6 +1,7 @@
 using System.Threading.Channels;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
+using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
@@ -13,20 +14,22 @@ namespace ByteSync.Tests.Services.Communications.Transfers.Uploading;
 [TestFixture]
 public class FileSlicerTests
 {
-    private Mock<ISlicerEncrypter> _mockSlicerEncrypter;
-    private Mock<ILogger<FileSlicer>> _mockLogger;
-    private Channel<FileUploaderSlice> _availableSlices;
-    private SemaphoreSlim _semaphoreSlim;
-    private ManualResetEvent _exceptionOccurred;
-    private FileSlicer _fileSlicer;
-    private SharedFileDefinition _sharedFileDefinition;
-    private UploadProgressState _progressState;
+    private Mock<ISlicerEncrypter> _mockSlicerEncrypter = null!;
+    private Mock<ILogger<FileSlicer>> _mockLogger = null!;
+    private Mock<IAdaptiveUploadController> _mockAdaptiveController = null!;
+    private Channel<FileUploaderSlice> _availableSlices = null!;
+    private SemaphoreSlim _semaphoreSlim = null!;
+    private ManualResetEvent _exceptionOccurred = null!;
+    private FileSlicer _fileSlicer = null!;
+    private SharedFileDefinition _sharedFileDefinition = null!;
+    private UploadProgressState _progressState = null!;
 
     [SetUp]
     public void SetUp()
     {
         _mockSlicerEncrypter = new Mock<ISlicerEncrypter>();
         _mockLogger = new Mock<ILogger<FileSlicer>>();
+        _mockAdaptiveController = new Mock<IAdaptiveUploadController>();
         _availableSlices = Channel.CreateBounded<FileUploaderSlice>(8);
         _semaphoreSlim = new SemaphoreSlim(1, 1);
         _exceptionOccurred = new ManualResetEvent(false);
@@ -36,7 +39,8 @@ public class FileSlicerTests
             _availableSlices,
             _semaphoreSlim,
             _exceptionOccurred,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockAdaptiveController.Object);
 
         _sharedFileDefinition = new SharedFileDefinition
         {
@@ -51,8 +55,8 @@ public class FileSlicerTests
     [TearDown]
     public void TearDown()
     {
-        _exceptionOccurred?.Dispose();
-        _semaphoreSlim?.Dispose();
+        _exceptionOccurred.Dispose();
+        _semaphoreSlim.Dispose();
     }
 
     [Test]
@@ -212,7 +216,7 @@ public class FileSlicerTests
             .ReturnsAsync((FileUploaderSlice?)null);
 
         // Act
-        await _fileSlicer.SliceAndEncryptAsync(_sharedFileDefinition, _progressState, null);
+        await _fileSlicer.SliceAndEncryptAsync(_sharedFileDefinition, _progressState);
 
         // Assert
         _mockSlicerEncrypter.VerifySet(x => x.MaxSliceLength = It.IsAny<int>(), Times.Never);
