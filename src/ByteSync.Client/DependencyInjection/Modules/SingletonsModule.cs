@@ -37,7 +37,7 @@ public class SingletonsModule : Module
         builder.RegisterType<SynchronizationActionServerInformer>().SingleInstance().AsImplementedInterfaces();
         builder.RegisterType<DownloadManager>().SingleInstance().AsImplementedInterfaces();
 
-        builder.RegisterType<AdaptiveUploadController>().SingleInstance().As<IAdaptiveUploadController>();
-        builder.RegisterType<UploadSlicingManager>().SingleInstance().As<IUploadSlicingManager>();
+        builder.RegisterType<AdaptiveUploadController>().SingleInstance().AsImplementedInterfaces();
+        builder.RegisterType<UploadSlicingManager>().SingleInstance().AsImplementedInterfaces();
     }
 }

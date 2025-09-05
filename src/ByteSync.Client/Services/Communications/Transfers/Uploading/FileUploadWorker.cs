@@ -21,13 +21,19 @@ public class FileUploadWorker : IFileUploadWorker
     private readonly IIndex<StorageProvider, IUploadStrategy> _strategies;
     private readonly SemaphoreSlim _semaphoreSlim;
     private readonly IAdaptiveUploadController _adaptiveUploadController;
-    
+
     private CancellationTokenSource CancellationTokenSource { get; }
-    
-    public FileUploadWorker(IPolicyFactory policyFactory, IFileTransferApiClient fileTransferApiClient,
-        SharedFileDefinition sharedFileDefinition, SemaphoreSlim semaphoreSlim, ManualResetEvent exceptionOccurred,
+
+    public FileUploadWorker(
+        IPolicyFactory policyFactory,
+        IFileTransferApiClient fileTransferApiClient,
+        SharedFileDefinition sharedFileDefinition,
+        SemaphoreSlim semaphoreSlim,
+        ManualResetEvent exceptionOccurred,
         IIndex<StorageProvider, IUploadStrategy> strategies,
-        ManualResetEvent uploadingIsFinished, ILogger<FileUploadWorker> logger, IAdaptiveUploadController adaptiveUploadController)
+        ManualResetEvent uploadingIsFinished,
+        ILogger<FileUploadWorker> logger,
+        IAdaptiveUploadController adaptiveUploadController)
     {
         _policyFactory = policyFactory;
         _fileTransferApiClient = fileTransferApiClient;
@@ -41,143 +47,52 @@ public class FileUploadWorker : IFileUploadWorker
         CancellationTokenSource = new CancellationTokenSource();
     }
 
-    public void StartUploadWorkers(Channel<FileUploaderSlice> availableSlices, int workerCount, UploadProgressState progressState)
-    {
-        for (var i = 0; i < workerCount; i++)
-        {
-            _ = Task.Run(() => UploadAvailableSlicesAsync(availableSlices, progressState));
-        }
-    }
-
-    public async Task UploadAvailableSlicesAsync(Channel<FileUploaderSlice> availableSlices, UploadProgressState progressState)
+    public async Task UploadAvailableSlicesAdaptiveAsync(Channel<FileUploaderSlice> availableSlices, UploadProgressState progressState)
     {
         while (await availableSlices.Reader.WaitToReadAsync())
         {
-            if (availableSlices.Reader.TryRead(out var slice))
+            if (!availableSlices.Reader.TryRead(out var slice))
             {
-                var sliceStart = System.Diagnostics.Stopwatch.StartNew();
+                continue;
+            }
 
-                try
-                {
-                    await _semaphoreSlim.WaitAsync();
-                    try
-                    {
-                        progressState.ConcurrentUploads += 1;
-                        if (progressState.ConcurrentUploads > progressState.MaxConcurrentUploads)
-                        {
-                            progressState.MaxConcurrentUploads = progressState.ConcurrentUploads;
-                        }
-                    }
-                    finally
-                    {
-                        _semaphoreSlim.Release();
-                    }
+            System.Diagnostics.Stopwatch? sliceStart = null;
+            try
+            {
+                sliceStart = System.Diagnostics.Stopwatch.StartNew();
 
-                    var policy = _policyFactory.BuildFileUploadPolicy();
-                    var response = await policy.ExecuteAsync(() => DoUpload(slice));
+                await IncrementConcurrentAsync(progressState);
 
-                    if (response != null && response.IsSuccess)
-                    {
-                        var transferParameters = new TransferParameters
-                        {
-                            SessionId = _sharedFileDefinition.SessionId,
-                            SharedFileDefinition = _sharedFileDefinition,
-                            PartNumber = slice.PartNumber
-                        };
-                        
-                        await policy.ExecuteAsync(async () =>
-                        {
-                            await _fileTransferApiClient.AssertFilePartIsUploaded(transferParameters);
-                            return UploadFileResponse.Success(200);
-                        });
-                        await _semaphoreSlim.WaitAsync();
-                        try
-                        {
-                            progressState.TotalUploadedSlices += 1;
-                            var sliceBytes = slice.MemoryStream?.Length ?? 0L;
-                            progressState.TotalUploadedBytes += sliceBytes;
-                            var elapsedMs = sliceStart.ElapsedMilliseconds;
-                            progressState.LastSliceUploadDurationMs = elapsedMs;
-                            progressState.LastSliceUploadedBytes = sliceBytes;
-                        }
-                        finally
-                        {
-                            _semaphoreSlim.Release();
-                        }
-                        _logger.LogInformation(
-                            "Slice {PartNumber}: {Bytes} bytes in {DurationMs} ms ({Kbps:F2} kbps)",
-                            slice.PartNumber,
-                            slice.MemoryStream?.Length ?? 0L,
-                            sliceStart.ElapsedMilliseconds,
-                            (slice.MemoryStream?.Length ?? 0L) > 0 && sliceStart.ElapsedMilliseconds > 0
-                                ? ((slice.MemoryStream?.Length ?? 0L) * 8.0) / sliceStart.ElapsedMilliseconds
-                                : 0.0);
-                    }
-                    else
-                    {
-                        throw new Exception($"UploadAvailableSlice: unable to get upload url. Status: {response?.StatusCode}, Error: {response?.ErrorMessage}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "UploadAvailableSlice");
-                    
-                    await _semaphoreSlim.WaitAsync();
-                    try
-                    {
-                        progressState.Exceptions.Add(ex);
-                    }
-                    finally
-                    {
-                        _semaphoreSlim.Release();   
-                    }
-                    
-                    _exceptionOccurred.Set();
-                    
-                    return;
-                }
-                finally
-                {
-                // finalize per-slice metrics
+                var response = await UploadSliceAndAssertAsync(slice);
 
-                    var elapsedMs = sliceStart?.ElapsedMilliseconds;
-                    await _semaphoreSlim.WaitAsync();
-                    try
-                    {
-                        if (elapsedMs.HasValue)
-                        {
-                            progressState.LastSliceUploadDurationMs = elapsedMs.Value;
-                            progressState.LastSliceUploadedBytes = slice.MemoryStream?.Length ?? 0L;
-                        }
-                    }
-                    finally
-                    {
-                        _semaphoreSlim.Release();
-                    }
-                
+                EnsureSuccessOrThrow(response);
 
-                    await _semaphoreSlim.WaitAsync();
-                    try
-                    {
-                        if (progressState.ConcurrentUploads > 0)
-                        {
-                            progressState.ConcurrentUploads -= 1;
-                        }
-                    }
-                    finally
-                    {
-                        _semaphoreSlim.Release();
-                    }
-                }
+                await UpdateProgressOnSuccessAsync(progressState, slice, sliceStart);
+            }
+            catch (Exception ex)
+            {
+                await HandleUploadExceptionAsync(progressState, ex);
+                return;
+            }
+            finally
+            {
+                DisposeSlice(slice);
+                await DecrementConcurrentAsync(progressState);
             }
         }
 
+        await CompleteIfFinishedAsync(progressState);
+    }
+
+    private async Task IncrementConcurrentAsync(UploadProgressState progressState)
+    {
         await _semaphoreSlim.WaitAsync();
         try
         {
-            if (progressState.TotalUploadedSlices == progressState.TotalCreatedSlices)
+            progressState.ConcurrentUploads += 1;
+            if (progressState.ConcurrentUploads > progressState.MaxConcurrentUploads)
             {
-                _uploadingIsFinished.Set();
+                progressState.MaxConcurrentUploads = progressState.ConcurrentUploads;
             }
         }
         finally
@@ -186,67 +101,106 @@ public class FileUploadWorker : IFileUploadWorker
         }
     }
 
-    public async Task UploadAvailableSlicesAdaptiveAsync(Channel<FileUploaderSlice> availableSlices, UploadProgressState progressState)
+    private async Task DecrementConcurrentAsync(UploadProgressState progressState)
     {
-        while (await availableSlices.Reader.WaitToReadAsync())
+        await _semaphoreSlim.WaitAsync();
+        try
         {
-            if (availableSlices.Reader.TryRead(out var slice))
+            if (progressState.ConcurrentUploads > 0)
             {
-                try
-                {
-                    var policy = _policyFactory.BuildFileUploadPolicy();
-                    var startedAt = DateTime.UtcNow;
-                    var response = await policy.ExecuteAsync(() => DoUpload(slice));
-
-                    var elapsed = DateTime.UtcNow - startedAt;
-                    _adaptiveUploadController.RecordUploadResult(elapsed, response != null && response.IsSuccess, slice.PartNumber, response?.StatusCode);
-
-                    if (response != null && response.IsSuccess)
-                    {
-                        var transferParameters = new TransferParameters
-                        {
-                            SessionId = _sharedFileDefinition.SessionId,
-                            SharedFileDefinition = _sharedFileDefinition,
-                            PartNumber = slice.PartNumber
-                        };
-
-                        await _fileTransferApiClient.AssertFilePartIsUploaded(transferParameters);
-                        await _semaphoreSlim.WaitAsync();
-                        try
-                        {
-                            progressState.TotalUploadedSlices += 1;
-                        }
-                        finally
-                        {
-                            _semaphoreSlim.Release();
-                        }
-                    }
-                    else
-                    {
-                        throw new Exception($"UploadAvailableSlice: unable to get upload url. Status: {response?.StatusCode}, Error: {response?.ErrorMessage}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "UploadAvailableSlice");
-
-                    await _semaphoreSlim.WaitAsync();
-                    try
-                    {
-                        progressState.Exceptions.Add(ex);
-                    }
-                    finally
-                    {
-                        _semaphoreSlim.Release();
-                    }
-
-                    _exceptionOccurred.Set();
-
-                    return;
-                }
+                progressState.ConcurrentUploads -= 1;
             }
         }
+        finally
+        {
+            _semaphoreSlim.Release();
+        }
+    }
 
+    private async Task<UploadFileResponse?> UploadSliceAndAssertAsync(FileUploaderSlice slice)
+    {
+        var policy = _policyFactory.BuildFileUploadPolicy();
+        var startedAt = DateTime.UtcNow;
+        var response = await policy.ExecuteAsync(() => DoUpload(slice));
+
+        var elapsed = DateTime.UtcNow - startedAt;
+        _adaptiveUploadController.RecordUploadResult(
+            elapsed,
+            response != null && response.IsSuccess,
+            slice.PartNumber,
+            response?.StatusCode);
+
+        if (response != null && response.IsSuccess)
+        {
+            var transferParameters = new TransferParameters
+            {
+                SessionId = _sharedFileDefinition.SessionId,
+                SharedFileDefinition = _sharedFileDefinition,
+                PartNumber = slice.PartNumber
+            };
+
+            await policy.ExecuteAsync(async () =>
+            {
+                await _fileTransferApiClient.AssertFilePartIsUploaded(transferParameters);
+                return UploadFileResponse.Success(200);
+            });
+        }
+
+        return response;
+    }
+
+    private static void EnsureSuccessOrThrow(UploadFileResponse? response)
+    {
+        if (response == null || !response.IsSuccess)
+        {
+            throw new Exception($"UploadAvailableSlice: unable to get upload url. Status: {response?.StatusCode}, Error: {response?.ErrorMessage}");
+        }
+    }
+
+    private async Task UpdateProgressOnSuccessAsync(UploadProgressState progressState, FileUploaderSlice slice, System.Diagnostics.Stopwatch? sliceStart)
+    {
+        await _semaphoreSlim.WaitAsync();
+        try
+        {
+            progressState.TotalUploadedSlices += 1;
+            var sliceBytes = slice.MemoryStream?.Length ?? 0L;
+            progressState.TotalUploadedBytes += sliceBytes;
+            if (sliceStart != null)
+            {
+                progressState.LastSliceUploadDurationMs = sliceStart.ElapsedMilliseconds;
+                progressState.LastSliceUploadedBytes = sliceBytes;
+            }
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
+        }
+    }
+
+    private async Task HandleUploadExceptionAsync(UploadProgressState progressState, Exception ex)
+    {
+        _logger.LogError(ex, "UploadAvailableSlice");
+
+        await _semaphoreSlim.WaitAsync();
+        try
+        {
+            progressState.Exceptions.Add(ex);
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
+        }
+
+        _exceptionOccurred.Set();
+    }
+
+    private static void DisposeSlice(FileUploaderSlice slice)
+    {
+        try { slice.MemoryStream?.Dispose(); } catch { }
+    }
+
+    private async Task CompleteIfFinishedAsync(UploadProgressState progressState)
+    {
         await _semaphoreSlim.WaitAsync();
         try
         {
@@ -271,22 +225,22 @@ public class FileUploadWorker : IFileUploadWorker
                 SharedFileDefinition = _sharedFileDefinition,
                 PartNumber = slice.PartNumber
             };
-            
+
             var uploadLocation = await _fileTransferApiClient.GetUploadFileStorageLocation(transferParameters);
 
-            _logger.LogDebug("UploadAvailableSlice: starting sending slice {number} ({length} KB)", 
+            _logger.LogDebug("UploadAvailableSlice: starting sending slice {number} ({length} KB)",
                 slice.PartNumber, slice.MemoryStream.Length / 1024d);
-            
+
             var uploadStrategy = _strategies[uploadLocation.StorageProvider];
             var response = await uploadStrategy.UploadAsync(slice, uploadLocation, CancellationTokenSource.Token);
-            
+
             return response;
         }
         catch (Exception)
         {
-            _logger.LogError("Error while uploading slice {number}, sharedFileDefinitionId:{sharedFileDefinitionId} ", 
+            _logger.LogError("Error while uploading slice {number}, sharedFileDefinitionId:{sharedFileDefinitionId} ",
                 slice.PartNumber, _sharedFileDefinition.Id);
             throw;
         }
     }
-} 
+}

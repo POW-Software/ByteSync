@@ -83,7 +83,7 @@ public class FileUploadWorkerMetricsTests
     }
 
     [Test]
-    public async Task UploadAvailableSlicesAsync_OnError_ShouldAccumulateExceptions()
+    public async Task UploadAvailableSlicesAdaptiveAsync_OnError_ShouldAccumulateExceptions()
     {
         // Arrange
         var slice = new FileUploaderSlice(1, new MemoryStream(new byte[128]));
@@ -94,7 +94,7 @@ public class FileUploadWorkerMetricsTests
         _availableSlices.Writer.Complete();
 
         // Act
-        await _fileUploadWorker.UploadAvailableSlicesAsync(_availableSlices, _progressState);
+        await _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_availableSlices, _progressState);
 
         // Assert
         _progressState.Exceptions.Should().NotBeNull();
