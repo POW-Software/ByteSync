@@ -86,8 +86,14 @@ public class FileTransferApiClient : IFileTransferApiClient
     {
         try
         {
-            await _apiInvoker.PostAsync($"session/{transferParameters.SessionId}/file/partUploaded", 
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            _logger.LogDebug("ApiClient: AssertFilePartIsUploaded start for file {FileId} part {Part}",
+                transferParameters.SharedFileDefinition.Id, transferParameters.PartNumber);
+            await _apiInvoker.PostAsync($"session/{transferParameters.SessionId}/file/partUploaded",
                 transferParameters);
+            sw.Stop();
+            _logger.LogDebug("ApiClient: AssertFilePartIsUploaded finished for file {FileId} part {Part} in {ElapsedMs} ms",
+                transferParameters.SharedFileDefinition.Id, transferParameters.PartNumber, sw.ElapsedMilliseconds);
         }
         catch (Exception ex)
         {

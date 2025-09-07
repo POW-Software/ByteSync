@@ -24,6 +24,12 @@ public static class DebugArguments
     
     internal const string SET_APPLICATION_VERSION = "--set-application-version=";
 
+    internal const string UPLOAD_FORCE_UPSCALE = "--upload-force-upscale";
+    internal const string UPLOAD_FORCE_DOWNSCALE = "--upload-force-downscale";
+    
+    public static bool UploadForceUpscale => Environment.GetCommandLineArgs().Contains(UPLOAD_FORCE_UPSCALE);
+    
+    public static bool UploadForceDownscale => Environment.GetCommandLineArgs().Contains(UPLOAD_FORCE_DOWNSCALE);
 
     public static bool ForceSlow => Environment.GetCommandLineArgs().Contains(FORCE_SLOW);
 }

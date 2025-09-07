@@ -1,4 +1,6 @@
+using System;
 using System.Reactive.Linq;
+using ByteSync.Business.Arguments;
 using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Services.Sessions;
@@ -26,11 +28,15 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 	private int _currentChunkSizeBytes;
 	private int _currentParallelism;
 	private readonly Queue<TimeSpan> _recentDurations;
-	private readonly Queue<bool> _recentSuccesses;
-	private int _successesInWindow;
-	private int _windowSize;
-	private readonly ILogger<AdaptiveUploadController> _logger;
-	private readonly object _sync = new object();
+    private readonly Queue<bool> _recentSuccesses;
+    private int _successesInWindow;
+    private int _windowSize;
+    private readonly ILogger<AdaptiveUploadController> _logger;
+    private readonly object _sync = new object();
+    
+    private static readonly bool FORCE_UPSCALE = DebugArguments.UploadForceUpscale;
+    private static readonly bool FORCE_DOWNSCALE = DebugArguments.UploadForceDownscale;
+    private bool _forceDownscaleApplied = false;
 
 	public AdaptiveUploadController(ILogger<AdaptiveUploadController> logger, ISessionService sessionService)
 	{
@@ -62,10 +68,48 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 		}
 	}
 
-	public void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null, Exception? exception = null, string? fileId = null)
-	{
-		lock (_sync)
-		{
+    public void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null, Exception? exception = null, string? fileId = null)
+    {
+        lock (_sync)
+        {
+            // Forced downscale (once), only after several upscales: trigger when chunk >= 4 MB, drop to 512 KB
+            if (FORCE_DOWNSCALE && !_forceDownscaleApplied && _currentChunkSizeBytes >= FOUR_MB)
+            {
+                var prevKb = _currentChunkSizeBytes / 1024;
+                _currentChunkSizeBytes = Math.Max(512 * 1024, MIN_CHUNK_SIZE_BYTES);
+                _forceDownscaleApplied = true;
+                _logger.LogInformation(
+                    "Adaptive: file {FileId} FORCE Downscale (>=4MB): chunkKB {PrevKb}->{NewKb}. Resetting window",
+                    fileId ?? "-", prevKb, _currentChunkSizeBytes / 1024);
+                ResetWindow();
+                return;
+            }
+
+            if (FORCE_UPSCALE)
+            {
+                var prevKb = _currentChunkSizeBytes / 1024;
+                var prevPar = _currentParallelism;
+                var increased = (int)Math.Round(_currentChunkSizeBytes * 1.6);
+                _currentChunkSizeBytes = Math.Clamp(increased, MIN_CHUNK_SIZE_BYTES, MAX_CHUNK_SIZE_BYTES);
+
+                if (_currentChunkSizeBytes >= EIGHT_MB)
+                {
+                    _currentParallelism = Math.Max(_currentParallelism, 4);
+                }
+                else if (_currentChunkSizeBytes >= FOUR_MB)
+                {
+                    _currentParallelism = Math.Max(_currentParallelism, 3);
+                }
+                _currentParallelism = Math.Min(_currentParallelism, MAX_PARALLELISM);
+                _windowSize = _currentParallelism;
+
+                _logger.LogInformation(
+                    "Adaptive: file {FileId} FORCE Upscale enabled. chunkKB {PrevKb}->{NewKb}, parallelism {PrevPar}->{NewPar}",
+                    fileId ?? "-", prevKb, _currentChunkSizeBytes / 1024, prevPar, _currentParallelism);
+
+                ResetWindow();
+                return;
+            }
 			_recentDurations.Enqueue(elapsed);
 			_recentSuccesses.Enqueue(isSuccess);
 			if (isSuccess) { _successesInWindow += 1; }
@@ -84,7 +128,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 
 			if (!isSuccess && statusCode != null)
 			{
-				if (statusCode == 429 || statusCode == 503 || statusCode == 507)
+				if (statusCode == 429 || statusCode == 500 || statusCode == 503 || statusCode == 507)
 				{
 					_logger.LogWarning("Adaptive: bandwidth error status {Status}. Resetting chunk size to {InitialKb} KB (was {PrevKb} KB)", statusCode, INITIAL_CHUNK_SIZE_BYTES / 1024, _currentChunkSizeBytes / 1024);
 					_currentChunkSizeBytes = Math.Clamp(INITIAL_CHUNK_SIZE_BYTES, MIN_CHUNK_SIZE_BYTES, MAX_CHUNK_SIZE_BYTES);
@@ -191,14 +235,15 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 		}
 	}
 
-	private void ResetState()
-	{
-		lock (_sync)
-		{
-			_currentChunkSizeBytes = Math.Clamp(INITIAL_CHUNK_SIZE_BYTES, MIN_CHUNK_SIZE_BYTES, MAX_CHUNK_SIZE_BYTES);
-			_currentParallelism = MIN_PARALLELISM;
-			_windowSize = _currentParallelism;
-		}
-		ResetWindow();
-	}
+    private void ResetState()
+    {
+        lock (_sync)
+        {
+            _currentChunkSizeBytes = Math.Clamp(INITIAL_CHUNK_SIZE_BYTES, MIN_CHUNK_SIZE_BYTES, MAX_CHUNK_SIZE_BYTES);
+            _currentParallelism = MIN_PARALLELISM;
+            _windowSize = _currentParallelism;
+            _forceDownscaleApplied = false;
+        }
+        ResetWindow();
+    }
 }
