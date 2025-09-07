@@ -62,7 +62,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 		}
 	}
 
-	public void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null, Exception? exception = null)
+	public void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null, Exception? exception = null, string? fileId = null)
 	{
 		lock (_sync)
 		{
@@ -104,17 +104,24 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 				if (d > maxElapsed) maxElapsed = d;
 			}
 
+
 			_logger.LogDebug(
-				"Adaptive: maxElapsedMs={MaxElapsedMs}, parallelism={Parallelism}, chunkKB={ChunkKb}",
-				maxElapsed.TotalMilliseconds, _currentParallelism, _currentChunkSizeBytes / 1024);
+				"Adaptive: file {FileId} maxElapsedMs={MaxElapsedMs}, window={Window}, parallelism={Parallelism}, chunkKB={ChunkKb}",
+				fileId ?? "-",
+				maxElapsed.TotalMilliseconds,
+				_windowSize,
+				_currentParallelism,
+				_currentChunkSizeBytes / 1024);
 
 			if (maxElapsed > _downscaleThreshold)
 			{
 				if (_currentParallelism > MIN_PARALLELISM)
 				{
 					_logger.LogInformation(
-						"Adaptive: Downscale. Reducing parallelism {Prev} -> {Next}. Resetting window",
-						_currentParallelism, _currentParallelism - 1);
+						"Adaptive: file {FileId} Downscale. Reducing parallelism {Prev} -> {Next}. Resetting window (window before {WindowBefore})",
+						fileId ?? "-",
+						_currentParallelism, _currentParallelism - 1,
+						_windowSize);
 					_currentParallelism -= 1;
 					_windowSize = _currentParallelism;
 					ResetWindow();
@@ -126,7 +133,8 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 				{
 					_currentChunkSizeBytes = reduced;
 					_logger.LogInformation(
-						"Adaptive: Downscale. maxElapsedMs={MaxElapsedMs} > {ThresholdMs}. New chunkKB={ChunkKb}", 
+						"Adaptive: file {FileId} Downscale. maxElapsedMs={MaxElapsedMs} > {ThresholdMs}. New chunkKB={ChunkKb}", 
+						fileId ?? "-",
 						maxElapsed.TotalMilliseconds, _downscaleThreshold.TotalMilliseconds, _currentChunkSizeBytes / 1024);
 				}
 				ResetWindow();
@@ -138,7 +146,8 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 				var increased = (int)(_currentChunkSizeBytes * 1.25);
 				_currentChunkSizeBytes = Math.Clamp(increased, MIN_CHUNK_SIZE_BYTES, MAX_CHUNK_SIZE_BYTES);
 				_logger.LogInformation(
-					"Adaptive: Upscale. maxElapsedMs={MaxElapsedMs} <= {ThresholdMs}. New chunkKB={ChunkKb}", 
+					"Adaptive: file {FileId} Upscale. maxElapsedMs={MaxElapsedMs} <= {ThresholdMs}. New chunkKB={ChunkKb}", 
+					fileId ?? "-",
 					maxElapsed.TotalMilliseconds, _upscaleThreshold.TotalMilliseconds, _currentChunkSizeBytes / 1024);
 
 				if (_currentChunkSizeBytes >= EIGHT_MB)
@@ -147,7 +156,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 					_currentParallelism = Math.Max(_currentParallelism, 4);
 					if (_currentParallelism != prev)
 					{
-						_logger.LogInformation("Adaptive: Upscale. Increasing parallelism {Prev} -> {Next} due to chunk>=8MB", prev, _currentParallelism);
+						_logger.LogInformation("Adaptive: file {FileId} Upscale. Increasing parallelism {Prev} -> {Next} due to chunk>=8MB", fileId ?? "-", prev, _currentParallelism);
 					}
 				}
 				else if (_currentChunkSizeBytes >= FOUR_MB)
@@ -156,7 +165,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 					_currentParallelism = Math.Max(_currentParallelism, 3);
 					if (_currentParallelism != prev)
 					{
-						_logger.LogInformation("Adaptive: Upscale. Increasing parallelism {Prev} -> {Next} due to chunk>=4MB", prev, _currentParallelism);
+						_logger.LogInformation("Adaptive: file {FileId} Upscale. Increasing parallelism {Prev} -> {Next} due to chunk>=4MB", fileId ?? "-", prev, _currentParallelism);
 					}
 				}
 				_currentParallelism = Math.Min(_currentParallelism, MAX_PARALLELISM);

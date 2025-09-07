@@ -22,6 +22,7 @@ public class FileUploadProcessor : IFileUploadProcessor
     private int _startedWorkers;
     private const int MAX_WORKERS = 4;
     private const int ADJUSTER_INTERVAL_MS = 200;
+    private string? _sharedFileId;
 
     // State tracking
     private UploadProgressState? _progressState;
@@ -77,6 +78,7 @@ public class FileUploadProcessor : IFileUploadProcessor
 
     public async Task ProcessUpload(SharedFileDefinition sharedFileDefinition, int? maxSliceLength = null)
     {
+        _sharedFileId = sharedFileDefinition.Id;
         _progressState = await _uploadSlicingManager.Enqueue(
             sharedFileDefinition,
             _slicerEncrypter,
@@ -166,7 +168,7 @@ public class FileUploadProcessor : IFileUploadProcessor
             var diff = desired - _grantedSlots;
             try { _uploadSlotsLimiter.Release(diff); } catch { }
             _grantedSlots = desired;
-            _logger.LogDebug("UploadAdjuster: slots increased {Prev}->{Now} (desired {Desired})", prev, _grantedSlots, desired);
+            _logger.LogDebug("UploadAdjuster: file {FileId} slots increased {Prev}->{Now} (desired {Desired})", _sharedFileId, prev, _grantedSlots, desired);
         }
         else if (desired < _grantedSlots)
         {
@@ -187,7 +189,12 @@ public class FileUploadProcessor : IFileUploadProcessor
             _grantedSlots -= taken;
             if (taken > 0)
             {
-                _logger.LogDebug("UploadAdjuster: slots decreased {Prev}->{Now} (desired {Desired})", prev, _grantedSlots, desired);
+                _logger.LogDebug("UploadAdjuster: file {FileId} slots decreased {Prev}->{Now} (desired {Desired})", _sharedFileId, prev, _grantedSlots, desired);
+            }
+            else
+            {
+                _logger.LogDebug("UploadAdjuster: file {FileId} requested decrease but no slot available to take (prev {Prev}, desired {Desired}, current {Current})",
+                    _sharedFileId, prev, desired, _grantedSlots);
             }
         }
     }
@@ -202,7 +209,7 @@ public class FileUploadProcessor : IFileUploadProcessor
                 _startedWorkers++;
                 _ = _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_fileUploadCoordinator.AvailableSlices, _progressState!);
             }
-            _logger.LogDebug("UploadAdjuster: workers started +{Added}, total {Total}, desired {Desired}", toStart, _startedWorkers, desired);
+            _logger.LogDebug("UploadAdjuster: file {FileId} workers started +{Added}, total {Total}, desired {Desired}", _sharedFileId, toStart, _startedWorkers, desired);
         }
     }
 
