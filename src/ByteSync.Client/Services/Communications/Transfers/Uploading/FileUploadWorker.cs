@@ -118,16 +118,27 @@ public class FileUploadWorker : IFileUploadWorker
                     try
                     {
                         var uploadTask = DoUpload(slice, workerId, attemptCts.Token);
-                        // Heartbeat while uploading
+                        // Heartbeat while uploading (avoid using cancelled token with Delay to prevent tight loop)
+                        var heartbeat = TimeSpan.FromSeconds(30);
                         while (!uploadTask.IsCompleted)
                         {
-                            var completed = await Task.WhenAny(uploadTask, Task.Delay(TimeSpan.FromSeconds(30), attemptCts.Token));
-                            if (completed != uploadTask)
+                            var completed = await Task.WhenAny(uploadTask, Task.Delay(heartbeat));
+                            if (completed == uploadTask)
                             {
-                                var fileNameHb = _sharedFileDefinition.GetFileName(slice.PartNumber);
-                                _logger.LogDebug(
-                                    "UploadAvailableSlice: worker {WorkerId} uploading slice {Number} for {FileName}... attempt {Attempt}, elapsed {ElapsedMs} ms",
-                                    workerId, slice.PartNumber, fileNameHb, attempt, (DateTime.UtcNow - attemptStart).TotalMilliseconds);
+                                break;
+                            }
+
+                            var fileNameHb = _sharedFileDefinition.GetFileName(slice.PartNumber);
+                            _logger.LogDebug(
+                                "UploadAvailableSlice: worker {WorkerId} uploading slice {Number} for {FileName}... attempt {Attempt}, elapsed {ElapsedMs} ms",
+                                workerId, slice.PartNumber, fileNameHb, attempt, (DateTime.UtcNow - attemptStart).TotalMilliseconds);
+
+                            if (attemptCts.IsCancellationRequested)
+                            {
+                                _logger.LogWarning(
+                                    "UploadAvailableSlice: worker {WorkerId} upload attempt {Attempt} timed out after ~{TimeoutSec}s; waiting for cancellation...",
+                                    workerId, attempt, timeoutSec);
+                                break;
                             }
                         }
 
