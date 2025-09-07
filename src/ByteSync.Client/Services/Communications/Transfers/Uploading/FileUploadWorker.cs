@@ -147,11 +147,11 @@ public class FileUploadWorker : IFileUploadWorker
                         var elapsed = DateTime.UtcNow - attemptStart;
                         if (attemptResponse != null && attemptResponse.IsSuccess)
                         {
-                            _adaptiveUploadController.RecordUploadResult(elapsed, true, slice.PartNumber, attemptResponse.StatusCode, null, _sharedFileDefinition.Id);
+                            _adaptiveUploadController.RecordUploadResult(elapsed, true, slice.PartNumber, attemptResponse.StatusCode, null, _sharedFileDefinition.Id, slice.MemoryStream?.Length ?? -1);
                         }
                         else
                         {
-                            _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, attemptResponse?.StatusCode ?? 500, null, _sharedFileDefinition.Id);
+                            _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, attemptResponse?.StatusCode ?? 500, null, _sharedFileDefinition.Id, slice.MemoryStream?.Length ?? -1);
                         }
 
                         return attemptResponse;
@@ -159,7 +159,7 @@ public class FileUploadWorker : IFileUploadWorker
                     catch (Exception ex)
                     {
                         var elapsed = DateTime.UtcNow - attemptStart;
-                        _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, 500, ex, _sharedFileDefinition.Id);
+                        _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, 500, ex, _sharedFileDefinition.Id, slice.MemoryStream?.Length ?? -1);
                         throw;
                     }
                     finally
@@ -280,7 +280,8 @@ public class FileUploadWorker : IFileUploadWorker
             slice.PartNumber,
             response?.StatusCode,
             null,
-            _sharedFileDefinition.Id);
+            _sharedFileDefinition.Id,
+            slice.MemoryStream?.Length ?? -1);
 
         if (response != null && response.IsSuccess)
         {
@@ -404,3 +405,4 @@ public class FileUploadWorker : IFileUploadWorker
         }
     }
 }
+

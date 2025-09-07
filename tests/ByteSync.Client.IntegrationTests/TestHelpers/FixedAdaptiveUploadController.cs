@@ -18,7 +18,7 @@ public class FixedAdaptiveUploadController : IAdaptiveUploadController
         return CurrentChunkSizeBytes;
     }
 
-    public void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null, Exception? exception = null, string? fileId = null)
+    public void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null, Exception? exception = null, string? fileId = null, long actualBytes = -1)
     {
         // no-op: fixed behavior for tests
     }

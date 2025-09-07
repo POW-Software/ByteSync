@@ -27,8 +27,9 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 	// State
 	private int _currentChunkSizeBytes;
 	private int _currentParallelism;
-	private readonly Queue<TimeSpan> _recentDurations;
+    private readonly Queue<TimeSpan> _recentDurations;
     private readonly Queue<bool> _recentSuccesses;
+    private readonly Queue<long> _recentBytes;
     private int _successesInWindow;
     private int _windowSize;
     private readonly ILogger<AdaptiveUploadController> _logger;
@@ -41,8 +42,9 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 	public AdaptiveUploadController(ILogger<AdaptiveUploadController> logger, ISessionService sessionService)
 	{
 		_logger = logger;
-		_recentDurations = new Queue<TimeSpan>();
-		_recentSuccesses = new Queue<bool>();
+        _recentDurations = new Queue<TimeSpan>();
+        _recentSuccesses = new Queue<bool>();
+        _recentBytes = new Queue<long>();
 		ResetState();
 		sessionService.SessionObservable.Subscribe(_ => { ResetState(); });
 		sessionService.SessionStatusObservable
@@ -68,7 +70,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 		}
 	}
 
-    public void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null, Exception? exception = null, string? fileId = null)
+    public void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null, Exception? exception = null, string? fileId = null, long actualBytes = -1)
     {
         lock (_sync)
         {
@@ -110,21 +112,26 @@ public class AdaptiveUploadController : IAdaptiveUploadController
                 ResetWindow();
                 return;
             }
-			_recentDurations.Enqueue(elapsed);
-			_recentSuccesses.Enqueue(isSuccess);
-			if (isSuccess) { _successesInWindow += 1; }
-			while (_recentDurations.Count > _windowSize)
-			{
-				_recentDurations.Dequeue();
-				if (_recentSuccesses.Count > 0)
-				{
-					var removedSuccess = _recentSuccesses.Dequeue();
-					if (removedSuccess && _successesInWindow > 0)
-					{
-						_successesInWindow -= 1;
-					}
-				}
-			}
+            _recentDurations.Enqueue(elapsed);
+            _recentSuccesses.Enqueue(isSuccess);
+            _recentBytes.Enqueue(actualBytes);
+            if (isSuccess) { _successesInWindow += 1; }
+            while (_recentDurations.Count > _windowSize)
+            {
+                _recentDurations.Dequeue();
+                if (_recentSuccesses.Count > 0)
+                {
+                    var removedSuccess = _recentSuccesses.Dequeue();
+                    if (removedSuccess && _successesInWindow > 0)
+                    {
+                        _successesInWindow -= 1;
+                    }
+                }
+                if (_recentBytes.Count > 0)
+                {
+                    _recentBytes.Dequeue();
+                }
+            }
 
 			if (!isSuccess && statusCode != null)
 			{
@@ -185,39 +192,68 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 				return;
 			}
 
-			if (maxElapsed <= _upscaleThreshold && _successesInWindow >= _windowSize)
-			{
-				var increased = (int)(_currentChunkSizeBytes * 1.25);
-				_currentChunkSizeBytes = Math.Clamp(increased, MIN_CHUNK_SIZE_BYTES, MAX_CHUNK_SIZE_BYTES);
-				_logger.LogInformation(
-					"Adaptive: file {FileId} Upscale. maxElapsedMs={MaxElapsedMs} <= {ThresholdMs}. New chunkKB={ChunkKb}", 
-					fileId ?? "-",
-					maxElapsed.TotalMilliseconds, _upscaleThreshold.TotalMilliseconds, _currentChunkSizeBytes / 1024);
+            // Upscale: only consider samples with size >= ~current chunk size
+            var durationsArr = _recentDurations.ToArray();
+            var successesArr = _recentSuccesses.ToArray();
+            var bytesArr = _recentBytes.ToArray();
+            var minEligibleBytes = (long)Math.Floor(_currentChunkSizeBytes * 0.9);
+            var eligibleIdx = new List<int>();
+            for (int i = 0; i < durationsArr.Length && i < successesArr.Length && i < bytesArr.Length; i++)
+            {
+                var b = bytesArr[i];
+                if (b < 0) b = _currentChunkSizeBytes; // unknown -> assume eligible
+                if (b >= minEligibleBytes)
+                {
+                    eligibleIdx.Add(i);
+                }
+            }
+            if (eligibleIdx.Count >= _windowSize)
+            {
+                var start = eligibleIdx.Count - _windowSize;
+                var maxElapsedEligible = TimeSpan.Zero;
+                var eligibleSuccesses = 0;
+                for (int k = start; k < eligibleIdx.Count; k++)
+                {
+                    var idx = eligibleIdx[k];
+                    var d = durationsArr[idx];
+                    if (d > maxElapsedEligible) maxElapsedEligible = d;
+                    if (successesArr[idx]) eligibleSuccesses++;
+                }
 
-				if (_currentChunkSizeBytes >= EIGHT_MB)
-				{
-					var prev = _currentParallelism;
-					_currentParallelism = Math.Max(_currentParallelism, 4);
-					if (_currentParallelism != prev)
-					{
-						_logger.LogInformation("Adaptive: file {FileId} Upscale. Increasing parallelism {Prev} -> {Next} due to chunk>=8MB", fileId ?? "-", prev, _currentParallelism);
-					}
-				}
-				else if (_currentChunkSizeBytes >= FOUR_MB)
-				{
-					var prev = _currentParallelism;
-					_currentParallelism = Math.Max(_currentParallelism, 3);
-					if (_currentParallelism != prev)
-					{
-						_logger.LogInformation("Adaptive: file {FileId} Upscale. Increasing parallelism {Prev} -> {Next} due to chunk>=4MB", fileId ?? "-", prev, _currentParallelism);
-					}
-				}
-				_currentParallelism = Math.Min(_currentParallelism, MAX_PARALLELISM);
-				_windowSize = _currentParallelism;
-				ResetWindow();
-			}
-		}
-	}
+                if (maxElapsedEligible <= _upscaleThreshold && eligibleSuccesses >= _windowSize)
+                {
+                    var increased = (int)(_currentChunkSizeBytes * 1.25);
+                    _currentChunkSizeBytes = Math.Clamp(increased, MIN_CHUNK_SIZE_BYTES, MAX_CHUNK_SIZE_BYTES);
+                    _logger.LogInformation(
+                        "Adaptive: file {FileId} Upscale. maxElapsedMs={MaxElapsedMs} <= {ThresholdMs}. New chunkKB={ChunkKb}", 
+                        fileId ?? "-",
+                        maxElapsedEligible.TotalMilliseconds, _upscaleThreshold.TotalMilliseconds, _currentChunkSizeBytes / 1024);
+
+                    if (_currentChunkSizeBytes >= EIGHT_MB)
+                    {
+                        var prev = _currentParallelism;
+                        _currentParallelism = Math.Max(_currentParallelism, 4);
+                        if (_currentParallelism != prev)
+                        {
+                            _logger.LogInformation("Adaptive: file {FileId} Upscale. Increasing parallelism {Prev} -> {Next} due to chunk>=8MB", fileId ?? "-", prev, _currentParallelism);
+                        }
+                    }
+                    else if (_currentChunkSizeBytes >= FOUR_MB)
+                    {
+                        var prev = _currentParallelism;
+                        _currentParallelism = Math.Max(_currentParallelism, 3);
+                        if (_currentParallelism != prev)
+                        {
+                            _logger.LogInformation("Adaptive: file {FileId} Upscale. Increasing parallelism {Prev} -> {Next} due to chunk>=4MB", fileId ?? "-", prev, _currentParallelism);
+                        }
+                    }
+                    _currentParallelism = Math.Min(_currentParallelism, MAX_PARALLELISM);
+                    _windowSize = _currentParallelism;
+                    ResetWindow();
+                }
+            }
+        }
+    }
 
 	private void ResetWindow()
 	{
@@ -227,13 +263,17 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 			{
 				_recentDurations.Dequeue();
 			}
-			while (_recentSuccesses.Count > 0)
-			{
-				_recentSuccesses.Dequeue();
-			}
-			_successesInWindow = 0;
-		}
-	}
+            while (_recentSuccesses.Count > 0)
+            {
+                _recentSuccesses.Dequeue();
+            }
+            while (_recentBytes.Count > 0)
+            {
+                _recentBytes.Dequeue();
+            }
+            _successesInWindow = 0;
+        }
+    }
 
     private void ResetState()
     {
