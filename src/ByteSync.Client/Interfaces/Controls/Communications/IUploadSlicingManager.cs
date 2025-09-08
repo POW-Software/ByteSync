@@ -13,8 +13,5 @@ public interface IUploadSlicingManager
         ISlicerEncrypter slicerEncrypter,
         Channel<FileUploaderSlice> availableSlices,
         SemaphoreSlim semaphoreSlim,
-        ManualResetEvent exceptionOccurred,
-        IAdaptiveUploadController adaptiveUploadController);
+        ManualResetEvent exceptionOccurred);
 }
-
-

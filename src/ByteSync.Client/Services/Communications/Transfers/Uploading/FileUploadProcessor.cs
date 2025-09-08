@@ -84,8 +84,7 @@ public class FileUploadProcessor : IFileUploadProcessor
             _slicerEncrypter,
             _fileUploadCoordinator.AvailableSlices,
             _semaphoreSlim,
-            _fileUploadCoordinator.ExceptionOccurred,
-            _adaptiveUploadController);
+            _fileUploadCoordinator.ExceptionOccurred);
 
         // Grant initial slots equal to current parallelism
         _grantedSlots = _adaptiveUploadController.CurrentParallelism;

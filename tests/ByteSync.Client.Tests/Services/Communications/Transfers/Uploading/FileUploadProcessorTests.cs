@@ -70,8 +70,7 @@ public class FileUploadProcessorTests
                 It.IsAny<ISlicerEncrypter>(),
                 It.IsAny<Channel<FileUploaderSlice>>(),
                 It.IsAny<SemaphoreSlim>(),
-                It.IsAny<ManualResetEvent>(),
-                It.IsAny<IAdaptiveUploadController>()))
+                It.IsAny<ManualResetEvent>()))
             .ReturnsAsync(new UploadProgressState());
         
         _fileUploadProcessor = new FileUploadProcessor(
@@ -153,8 +152,7 @@ public class FileUploadProcessorTests
             It.IsAny<ISlicerEncrypter>(),
             It.IsAny<Channel<FileUploaderSlice>>(),
             It.IsAny<SemaphoreSlim>(),
-            It.IsAny<ManualResetEvent>(),
-            It.IsAny<IAdaptiveUploadController>()), Times.Once);
+            It.IsAny<ManualResetEvent>()), Times.Once);
     }
 
     [Test]
@@ -176,8 +174,7 @@ public class FileUploadProcessorTests
             It.IsAny<ISlicerEncrypter>(),
             It.IsAny<Channel<FileUploaderSlice>>(),
             It.IsAny<SemaphoreSlim>(),
-            It.IsAny<ManualResetEvent>(),
-            It.IsAny<IAdaptiveUploadController>()), Times.Once);
+            It.IsAny<ManualResetEvent>()), Times.Once);
     }
 
     [Test]
@@ -239,8 +236,7 @@ public class FileUploadProcessorTests
                 It.IsAny<ISlicerEncrypter>(),
                 It.IsAny<Channel<FileUploaderSlice>>(),
                 It.IsAny<SemaphoreSlim>(),
-                It.IsAny<ManualResetEvent>(),
-                It.IsAny<IAdaptiveUploadController>()))
+                It.IsAny<ManualResetEvent>()))
             .ReturnsAsync(new UploadProgressState { Exceptions = { expectedException } });
 
         // Act & Assert
@@ -271,8 +267,7 @@ public class FileUploadProcessorTests
                 It.IsAny<ISlicerEncrypter>(),
                 It.IsAny<Channel<FileUploaderSlice>>(),
                 It.IsAny<SemaphoreSlim>(),
-                It.IsAny<ManualResetEvent>(),
-                It.IsAny<IAdaptiveUploadController>()))
+                It.IsAny<ManualResetEvent>()))
             .ReturnsAsync(new UploadProgressState { Exceptions = { expectedException } });
 
         // Act & Assert

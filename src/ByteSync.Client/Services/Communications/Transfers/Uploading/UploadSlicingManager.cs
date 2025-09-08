@@ -68,8 +68,7 @@ public class UploadSlicingManager : IUploadSlicingManager
         ISlicerEncrypter slicerEncrypter,
         Channel<FileUploaderSlice> availableSlices,
         SemaphoreSlim semaphoreSlim,
-        ManualResetEvent exceptionOccurred,
-        IAdaptiveUploadController adaptiveUploadController)
+        ManualResetEvent exceptionOccurred)
     {
         var enqueuedGeneration = _generation;
         var progressState = new UploadProgressState();
@@ -84,13 +83,6 @@ public class UploadSlicingManager : IUploadSlicingManager
             
             var fileSlicer = _fileSlicerFactory.Create(slicerEncrypter, availableSlices, semaphoreSlim, exceptionOccurred);
             
-            // var slicer = new FileSlicer(
-            //     slicerEncrypter,
-            //     availableSlices,
-            //     semaphoreSlim,
-            //     exceptionOccurred,
-            //     _fileSlicerLogger,
-            //     adaptiveUploadController);
             await fileSlicer.SliceAndEncryptAdaptiveAsync(sharedFileDefinition, progressState);
             
         }).AsTask().ContinueWith(_ => progressState);
