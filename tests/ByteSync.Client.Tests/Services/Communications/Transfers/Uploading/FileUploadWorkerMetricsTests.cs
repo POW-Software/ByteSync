@@ -101,5 +101,3 @@ public class FileUploadWorkerMetricsTests
         _progressState.Exceptions.Count.Should().Be(1);
     }
 }
-
-

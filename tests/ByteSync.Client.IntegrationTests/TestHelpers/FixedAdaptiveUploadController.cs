@@ -23,5 +23,3 @@ public class FixedAdaptiveUploadController : IAdaptiveUploadController
         // no-op: fixed behavior for tests
     }
 }
-
-
