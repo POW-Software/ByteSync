@@ -33,7 +33,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
     private int _successesInWindow;
     private int _windowSize;
     private readonly ILogger<AdaptiveUploadController> _logger;
-    private readonly object _sync = new object();
+    private readonly object _syncRoot = new();
 
 	public AdaptiveUploadController(ILogger<AdaptiveUploadController> logger, ISessionService sessionService)
 	{
@@ -50,30 +50,34 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 
 	public int CurrentChunkSizeBytes
 	{
-		get { lock (_sync) { return _currentChunkSizeBytes; } }
+		get { lock (_syncRoot) { return _currentChunkSizeBytes; } }
 	}
 
 	public int CurrentParallelism
 	{
-		get { lock (_sync) { return _currentParallelism; } }
+		get { lock (_syncRoot) { return _currentParallelism; } }
 	}
 
 	public int GetNextChunkSizeBytes()
 	{
-		lock (_sync)
+		lock (_syncRoot)
 		{
 			return _currentChunkSizeBytes;
 		}
 	}
 
-    public void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null, Exception? exception = null, string? fileId = null, long actualBytes = -1)
+    public void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null, 
+	    Exception? exception = null, string? fileId = null, long actualBytes = -1)
     {
-        lock (_sync)
+        lock (_syncRoot)
         {
             _recentDurations.Enqueue(elapsed);
             _recentSuccesses.Enqueue(isSuccess);
             _recentBytes.Enqueue(actualBytes);
-            if (isSuccess) { _successesInWindow += 1; }
+            if (isSuccess)
+            {
+	            _successesInWindow += 1;
+            }
             while (_recentDurations.Count > _windowSize)
             {
                 _recentDurations.Dequeue();
@@ -159,7 +163,10 @@ public class AdaptiveUploadController : IAdaptiveUploadController
             for (int i = 0; i < durationsArr.Length && i < successesArr.Length && i < bytesArr.Length; i++)
             {
                 var b = bytesArr[i];
-                if (b < 0) b = _currentChunkSizeBytes; // unknown -> assume eligible
+                if (b < 0) 
+                {
+	                b = _currentChunkSizeBytes; // unknown -> assume eligible
+                }
                 if (b >= minEligibleBytes)
                 {
                     eligibleIdx.Add(i);
@@ -174,8 +181,15 @@ public class AdaptiveUploadController : IAdaptiveUploadController
                 {
                     var idx = eligibleIdx[k];
                     var d = durationsArr[idx];
-                    if (d > maxElapsedEligible) maxElapsedEligible = d;
-                    if (successesArr[idx]) eligibleSuccesses++;
+                    if (d > maxElapsedEligible)
+                    {
+	                    maxElapsedEligible = d;
+                    }
+
+                    if (successesArr[idx])
+                    {
+	                    eligibleSuccesses++;
+                    }
                 }
 
                 if (maxElapsedEligible <= _upscaleThreshold && eligibleSuccesses >= _windowSize)
@@ -215,7 +229,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 
 	private void ResetWindow()
 	{
-		lock (_sync)
+		lock (_syncRoot)
 		{
 			while (_recentDurations.Count > 0)
 			{
@@ -235,7 +249,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 
     private void ResetState()
     {
-        lock (_sync)
+        lock (_syncRoot)
         {
             _currentChunkSizeBytes = Math.Clamp(INITIAL_CHUNK_SIZE_BYTES, MIN_CHUNK_SIZE_BYTES, MAX_CHUNK_SIZE_BYTES);
             _currentParallelism = MIN_PARALLELISM;
