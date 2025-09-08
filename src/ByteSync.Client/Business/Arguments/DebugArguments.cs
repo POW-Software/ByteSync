@@ -24,5 +24,6 @@ public static class DebugArguments
     
     internal const string SET_APPLICATION_VERSION = "--set-application-version=";
 
+   
     public static bool ForceSlow => Environment.GetCommandLineArgs().Contains(FORCE_SLOW);
 }
