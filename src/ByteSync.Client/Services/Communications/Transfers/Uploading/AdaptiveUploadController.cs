@@ -204,12 +204,12 @@ public class AdaptiveUploadController : IAdaptiveUploadController
         var eligibleIndexes = new List<int>();
         for (int i = 0; i < recentDurations.Length && i < recentSuccesses.Length && i < recentBytes.Length; i++)
         {
-            var chunckBytes = recentBytes[i];
-            if (chunckBytes < 0)
+            var chunkBytes = recentBytes[i];
+            if (chunkBytes < 0)
             {
-                chunckBytes = _currentChunkSizeBytes;
+                chunkBytes = _currentChunkSizeBytes;
             }
-            if (chunckBytes >= minEligibleBytes)
+            if (chunkBytes >= minEligibleBytes)
             {
                 eligibleIndexes.Add(i);
             }
