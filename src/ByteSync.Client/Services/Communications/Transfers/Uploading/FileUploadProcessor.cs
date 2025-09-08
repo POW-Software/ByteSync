@@ -100,16 +100,12 @@ public class FileUploadProcessor : IFileUploadProcessor
         }
 
         // Start background adjuster to align available slots with desired parallelism
-        var adjuster = Task.Run(async () =>
+        _ = Task.Run(async () =>
         {
             try
             {
                 var finishedEvt = _fileUploadCoordinator.UploadingIsFinished;
                 var errorEvt = _fileUploadCoordinator.ExceptionOccurred;
-                if (finishedEvt == null || errorEvt == null)
-                {
-                    return;
-                }
 
                 while (!finishedEvt.WaitOne(0) && !errorEvt.WaitOne(0))
                 {
@@ -133,10 +129,10 @@ public class FileUploadProcessor : IFileUploadProcessor
 
         _slicerEncrypter.Dispose();
 
-        if (_progressState.Exceptions != null && _progressState.Exceptions.Count > 0)
+        if (_progressState.Exceptions.Count > 0)
         {
             var source = _localFileToUpload ?? "a stream";
-            var lastException = _progressState.Exceptions[_progressState.Exceptions.Count - 1];
+            var lastException = _progressState.Exceptions[^1];
             throw new InvalidOperationException($"An error occured while uploading '{source}' / sharedFileDefinition.Id:{sharedFileDefinition.Id}",
                 lastException);
         }
@@ -157,7 +153,7 @@ public class FileUploadProcessor : IFileUploadProcessor
             Math.Round(totalBytes / 1024d),
             _progressState.MaxConcurrentUploads,
             bandwidthKbps,
-            _progressState.Exceptions!.Count);
+            _progressState.Exceptions.Count);
     }
 
     private void AdjustSlots(int desired)
@@ -166,7 +162,15 @@ public class FileUploadProcessor : IFileUploadProcessor
         {
             var prev = _grantedSlots;
             var diff = desired - _grantedSlots;
-            try { _uploadSlotsLimiter.Release(diff); } catch { }
+            try
+            {
+                _uploadSlotsLimiter.Release(diff);
+            }
+            catch
+            {
+                // ignored
+            }
+
             _grantedSlots = desired;
             _logger.LogDebug("UploadAdjuster: file {FileId} slots increased {Prev}->{Now} (desired {Desired})", _sharedFileId, prev, _grantedSlots, desired);
         }
