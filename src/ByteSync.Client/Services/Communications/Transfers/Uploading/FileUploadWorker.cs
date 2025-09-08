@@ -7,6 +7,7 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
+using Polly.Retry;
 
 namespace ByteSync.Services.Communications.Transfers.Uploading;
 
@@ -93,96 +94,15 @@ public class FileUploadWorker : IFileUploadWorker
                 await IncrementConcurrentAsync(progressState);
                 var policy = _policyFactory.BuildFileUploadPolicy();
                 var attempt = 0;
-                // Upload with attempt-scoped slot gating and timeout per attempt
+
                 var response = await policy.ExecuteAsync(async () =>
                 {
                     attempt++;
-                    // Acquire slot for this attempt only
-                    var beforeWait = _uploadSlots.CurrentCount;
-                    _logger.LogDebug("UploadAvailableSlice: worker {WorkerId} waiting for upload slot (available {Available})",
-                        workerId, beforeWait);
-                    await _uploadSlots.WaitAsync();
-                    var afterWait = _uploadSlots.CurrentCount;
-                    _logger.LogDebug("UploadAvailableSlice: worker {WorkerId} acquired upload slot (available now {Available}), attempt {Attempt}",
-                        workerId, afterWait, attempt);
-
-                    var attemptStart = DateTime.UtcNow;
-                    // Compute attempt timeout based on slice size (3s/MB) bounded to [30s, 90s]
-                    var sizeMb = Math.Max(1, (int)Math.Ceiling((slice.MemoryStream.Length) / (1024d * 1024d)));
-                    var timeoutSec = Math.Clamp(3 * sizeMb, 30, 90);
-                    using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(CancellationTokenSource.Token);
-                    attemptCts.CancelAfter(TimeSpan.FromSeconds(timeoutSec));
-
-                    try
-                    {
-                        var uploadTask = DoUpload(slice, workerId, attemptCts.Token);
-                        // Heartbeat while uploading (avoid using cancelled token with Delay to prevent tight loop)
-                        var heartbeat = TimeSpan.FromSeconds(30);
-                        while (!uploadTask.IsCompleted)
-                        {
-                            var completed = await Task.WhenAny(uploadTask, Task.Delay(heartbeat, attemptCts.Token));
-                            if (completed == uploadTask)
-                            {
-                                break;
-                            }
-
-                            var fileNameHb = _sharedFileDefinition.GetFileName(slice.PartNumber);
-                            _logger.LogDebug(
-                                "UploadAvailableSlice: worker {WorkerId} uploading slice {Number} for {FileName}... attempt {Attempt}, elapsed {ElapsedMs} ms",
-                                workerId, slice.PartNumber, fileNameHb, attempt, (DateTime.UtcNow - attemptStart).TotalMilliseconds);
-
-                            if (attemptCts.IsCancellationRequested)
-                            {
-                                _logger.LogWarning(
-                                    "UploadAvailableSlice: worker {WorkerId} upload attempt {Attempt} timed out after ~{TimeoutSec}s; waiting for cancellation...",
-                                    workerId, attempt, timeoutSec);
-                                break;
-                            }
-                        }
-
-                        var attemptResponse = await uploadTask;
-
-                        var elapsed = DateTime.UtcNow - attemptStart;
-                        if (attemptResponse.IsSuccess)
-                        {
-                            _adaptiveUploadController.RecordUploadResult(elapsed, true, slice.PartNumber, attemptResponse.StatusCode, null, _sharedFileDefinition.Id, slice.MemoryStream.Length);
-                        }
-                        else
-                        {
-                            _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, attemptResponse.StatusCode, null, _sharedFileDefinition.Id, slice.MemoryStream.Length);
-                        }
-
-                        return attemptResponse;
-                    }
-                    catch (Exception ex)
-                    {
-                        var elapsed = DateTime.UtcNow - attemptStart;
-                        _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, 500, ex, _sharedFileDefinition.Id, slice.MemoryStream.Length);
-                        throw;
-                    }
-                    finally
-                    {
-                        // Release the slot at the end of this attempt
-                        try
-                        {
-                            var beforeRelease = _uploadSlots.CurrentCount;
-                            _uploadSlots.Release();
-                            var afterRelease = _uploadSlots.CurrentCount;
-                            _logger.LogDebug(
-                                "UploadAvailableSlice: worker {WorkerId} released upload slot after attempt {Attempt} (available {Before}->{After})",
-                                workerId, attempt, beforeRelease, afterRelease);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning(ex, "UploadAvailableSlice: worker {WorkerId} error releasing upload slot after attempt {Attempt}",
-                                workerId, attempt);
-                        }
-                    }
+                    return await ExecuteUploadAttemptAsync(slice, workerId, attempt, CancellationTokenSource.Token);
                 });
 
                 EnsureSuccessOrThrow(response);
-
-                // 2) Assert on server (outside of upload slot)
+                
                 var fileName = _sharedFileDefinition.GetFileName(slice.PartNumber);
                 var assertSw = System.Diagnostics.Stopwatch.StartNew();
                 _logger.LogDebug("UploadAvailableSlice: worker {WorkerId} start asserting slice {Number} for {FileName}",
@@ -195,25 +115,7 @@ public class FileUploadWorker : IFileUploadWorker
                     PartNumber = slice.PartNumber
                 };
 
-                var assertTask = policy.ExecuteAsync(async () =>
-                {
-                    await _fileTransferApiClient.AssertFilePartIsUploaded(transferParameters);
-                    return UploadFileResponse.Success(200);
-                });
-
-                // Heartbeat while asserting
-                while (!assertTask.IsCompleted)
-                {
-                    var completed = await Task.WhenAny(assertTask, Task.Delay(TimeSpan.FromSeconds(30)));
-                    if (completed != assertTask)
-                    {
-                        _logger.LogDebug(
-                            "UploadAvailableSlice: worker {WorkerId} asserting slice {Number} for {FileName}... elapsed {ElapsedMs} ms",
-                            workerId, slice.PartNumber, fileName, assertSw.ElapsedMilliseconds);
-                    }
-                }
-
-                await assertTask;
+                await AssertSliceUploadedAsync(policy, transferParameters, workerId, slice.PartNumber, fileName, assertSw);
                 assertSw.Stop();
                 _logger.LogDebug("UploadAvailableSlice: worker {WorkerId} finished asserting slice {Number} for {FileName} in {ElapsedMs} ms",
                     workerId, slice.PartNumber, fileName, assertSw.ElapsedMilliseconds);
@@ -235,6 +137,112 @@ public class FileUploadWorker : IFileUploadWorker
         }
 
         await CompleteIfFinishedAsync(progressState);
+    }
+
+    private async Task<UploadFileResponse> ExecuteUploadAttemptAsync(FileUploaderSlice slice, int workerId, int attempt, CancellationToken globalToken)
+    {
+        var beforeWait = _uploadSlots.CurrentCount;
+        _logger.LogDebug("UploadAvailableSlice: worker {WorkerId} waiting for upload slot (available {Available})",
+            workerId, beforeWait);
+        await _uploadSlots.WaitAsync();
+        var afterWait = _uploadSlots.CurrentCount;
+        _logger.LogDebug("UploadAvailableSlice: worker {WorkerId} acquired upload slot (available now {Available}), attempt {Attempt}",
+            workerId, afterWait, attempt);
+
+        var attemptStart = DateTime.UtcNow;
+        var timeoutSec = ComputeAttemptTimeoutSeconds(slice);
+        using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(globalToken);
+        attemptCts.CancelAfter(TimeSpan.FromSeconds(timeoutSec));
+
+        try
+        {
+            var uploadTask = DoUpload(slice, workerId, attemptCts.Token);
+            var heartbeat = TimeSpan.FromSeconds(30);
+            while (!uploadTask.IsCompleted)
+            {
+                var completed = await Task.WhenAny(uploadTask, Task.Delay(heartbeat, attemptCts.Token));
+                if (completed == uploadTask)
+                {
+                    break;
+                }
+
+                var fileNameHb = _sharedFileDefinition.GetFileName(slice.PartNumber);
+                _logger.LogDebug(
+                    "UploadAvailableSlice: worker {WorkerId} uploading slice {Number} for {FileName}... attempt {Attempt}, elapsed {ElapsedMs} ms",
+                    workerId, slice.PartNumber, fileNameHb, attempt, (DateTime.UtcNow - attemptStart).TotalMilliseconds);
+
+                if (attemptCts.IsCancellationRequested)
+                {
+                    _logger.LogWarning(
+                        "UploadAvailableSlice: worker {WorkerId} upload attempt {Attempt} timed out after ~{TimeoutSec}s; waiting for cancellation...",
+                        workerId, attempt, timeoutSec);
+                    break;
+                }
+            }
+
+            var attemptResponse = await uploadTask;
+            var elapsed = DateTime.UtcNow - attemptStart;
+            _adaptiveUploadController.RecordUploadResult(elapsed, attemptResponse.IsSuccess, slice.PartNumber, attemptResponse.StatusCode, null, _sharedFileDefinition.Id, slice.MemoryStream.Length);
+            return attemptResponse;
+        }
+        catch (Exception ex)
+        {
+            var elapsed = DateTime.UtcNow - attemptStart;
+            _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, 500, ex, _sharedFileDefinition.Id, slice.MemoryStream.Length);
+            throw;
+        }
+        finally
+        {
+            try
+            {
+                var beforeRelease = _uploadSlots.CurrentCount;
+                _uploadSlots.Release();
+                var afterRelease = _uploadSlots.CurrentCount;
+                _logger.LogDebug(
+                    "UploadAvailableSlice: worker {WorkerId} released upload slot after attempt {Attempt} (available {Before}->{After})",
+                    workerId, attempt, beforeRelease, afterRelease);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "UploadAvailableSlice: worker {WorkerId} error releasing upload slot after attempt {Attempt}",
+                    workerId, attempt);
+            }
+        }
+    }
+
+    private static int ComputeAttemptTimeoutSeconds(FileUploaderSlice slice)
+    {
+        var sizeMb = Math.Max(1, (int)Math.Ceiling((slice.MemoryStream.Length) / (1024d * 1024d)));
+        var timeoutSec = Math.Clamp(3 * sizeMb, 30, 90);
+        return timeoutSec;
+    }
+
+    private async Task AssertSliceUploadedAsync(
+        AsyncRetryPolicy<UploadFileResponse> policy,
+        TransferParameters transferParameters,
+        int workerId,
+        int partNumber,
+        string fileName,
+        System.Diagnostics.Stopwatch assertSw)
+    {
+        var assertTask = policy.ExecuteAsync(async () =>
+        {
+            await _fileTransferApiClient.AssertFilePartIsUploaded(transferParameters);
+            return UploadFileResponse.Success(200);
+        });
+
+        while (!assertTask.IsCompleted)
+        {
+            var completed = await Task.WhenAny(assertTask, Task.Delay(TimeSpan.FromSeconds(30)));
+            if (completed != assertTask)
+            {
+                _logger.LogDebug(
+                    "UploadAvailableSlice: worker {WorkerId} asserting slice {Number} for {FileName}... elapsed {ElapsedMs} ms",
+                    workerId, partNumber, fileName, assertSw.ElapsedMilliseconds);
+            }
+        }
+
+        await assertTask;
     }
 
     private async Task IncrementConcurrentAsync(UploadProgressState progressState)
@@ -380,4 +388,3 @@ public class FileUploadWorker : IFileUploadWorker
         }
     }
 }
-
