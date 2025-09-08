@@ -51,7 +51,8 @@ public class FileUploadWorkerTests
         {
             Id = "test-file-id",
             SessionId = "test-session-id",
-            UploadedFileLength = 1024
+            UploadedFileLength = 1024,
+            SharedFileType = SharedFileTypes.FullSynchronization
         };
 
         _semaphoreSlim = new SemaphoreSlim(1, 1);
