@@ -1,6 +1,4 @@
-using System;
 using System.Reactive.Linq;
-using ByteSync.Business.Arguments;
 using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Services.Sessions;
@@ -17,7 +15,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 	private const int MAX_PARALLELISM = 4;
 
 	// Thresholds
-	private static readonly TimeSpan _upscaleThreshold = TimeSpan.FromSeconds(25);
+	private static readonly TimeSpan _upscaleThreshold = TimeSpan.FromSeconds(22);
 	private static readonly TimeSpan _downscaleThreshold = TimeSpan.FromSeconds(30);
 
 	// Chunk size thresholds for parallelism increases
@@ -196,7 +194,25 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 
                 if (maxElapsedEligible <= _upscaleThreshold && eligibleSuccesses >= _windowSize)
                 {
-                    var increased = (int)(_currentChunkSizeBytes * 1.25);
+                    double multiplier;
+                    if (maxElapsedEligible < TimeSpan.FromSeconds(1))
+                    {
+                        multiplier = 2.0;
+                    }
+                    else if (maxElapsedEligible < TimeSpan.FromSeconds(3))
+                    {
+                        multiplier = 1.75;
+                    }
+                    else if (maxElapsedEligible < TimeSpan.FromSeconds(10))
+                    {
+                        multiplier = 1.5;
+                    }
+                    else
+                    {
+                        multiplier = 1.25;
+                    }
+
+                    var increased = (int)Math.Round(_currentChunkSizeBytes * multiplier);
                     _currentChunkSizeBytes = Math.Clamp(increased, MIN_CHUNK_SIZE_BYTES, MAX_CHUNK_SIZE_BYTES);
                     _logger.LogInformation(
                         "Adaptive: file {FileId} Upscale. maxElapsed={MaxElapsedMs} ms <= {ThresholdMs} ms. New chunkSize={ChunkKb} KB", 
