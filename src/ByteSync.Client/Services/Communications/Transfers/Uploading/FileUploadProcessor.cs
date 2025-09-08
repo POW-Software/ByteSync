@@ -22,6 +22,7 @@ public class FileUploadProcessor : IFileUploadProcessor
     private int _startedWorkers;
     private const int MAX_WORKERS = 4;
     private const int ADJUSTER_INTERVAL_MS = 200;
+    private string? _sharedFileId;
 
     // State tracking
     private UploadProgressState? _progressState;
@@ -77,6 +78,7 @@ public class FileUploadProcessor : IFileUploadProcessor
 
     public async Task ProcessUpload(SharedFileDefinition sharedFileDefinition, int? maxSliceLength = null)
     {
+        _sharedFileId = sharedFileDefinition.Id;
         _progressState = await _uploadSlicingManager.Enqueue(
             sharedFileDefinition,
             _slicerEncrypter,
@@ -98,16 +100,12 @@ public class FileUploadProcessor : IFileUploadProcessor
         }
 
         // Start background adjuster to align available slots with desired parallelism
-        var adjuster = Task.Run(async () =>
+        _ = Task.Run(async () =>
         {
             try
             {
                 var finishedEvt = _fileUploadCoordinator.UploadingIsFinished;
                 var errorEvt = _fileUploadCoordinator.ExceptionOccurred;
-                if (finishedEvt == null || errorEvt == null)
-                {
-                    return;
-                }
 
                 while (!finishedEvt.WaitOne(0) && !errorEvt.WaitOne(0))
                 {
@@ -131,10 +129,10 @@ public class FileUploadProcessor : IFileUploadProcessor
 
         _slicerEncrypter.Dispose();
 
-        if (_progressState.Exceptions != null && _progressState.Exceptions.Count > 0)
+        if (_progressState.Exceptions.Count > 0)
         {
             var source = _localFileToUpload ?? "a stream";
-            var lastException = _progressState.Exceptions[_progressState.Exceptions.Count - 1];
+            var lastException = _progressState.Exceptions[^1];
             throw new InvalidOperationException($"An error occured while uploading '{source}' / sharedFileDefinition.Id:{sharedFileDefinition.Id}",
                 lastException);
         }
@@ -152,10 +150,10 @@ public class FileUploadProcessor : IFileUploadProcessor
             "FileUploadProcessor: E2EE upload of {SharedFileDefinitionId} is finished in {DurationMs} ms, uploaded {UploadedKB} KB, max concurrency {MaxConc}, approx bandwidth {Kbps:F2} kbps, {Errors} error(s)",
             sharedFileDefinition.Id,
             durationMs,
-            totalBytes / 1024d,
+            Math.Round(totalBytes / 1024d),
             _progressState.MaxConcurrentUploads,
             bandwidthKbps,
-            _progressState.Exceptions!.Count);
+            _progressState.Exceptions.Count);
     }
 
     private void AdjustSlots(int desired)
@@ -164,9 +162,17 @@ public class FileUploadProcessor : IFileUploadProcessor
         {
             var prev = _grantedSlots;
             var diff = desired - _grantedSlots;
-            try { _uploadSlotsLimiter.Release(diff); } catch { }
+            try
+            {
+                _uploadSlotsLimiter.Release(diff);
+            }
+            catch
+            {
+                // ignored
+            }
+
             _grantedSlots = desired;
-            _logger.LogDebug("UploadAdjuster: slots increased {Prev}->{Now} (desired {Desired})", prev, _grantedSlots, desired);
+            _logger.LogDebug("UploadAdjuster: file {FileId} slots increased {Prev}->{Now} (desired {Desired})", _sharedFileId, prev, _grantedSlots, desired);
         }
         else if (desired < _grantedSlots)
         {
@@ -187,7 +193,12 @@ public class FileUploadProcessor : IFileUploadProcessor
             _grantedSlots -= taken;
             if (taken > 0)
             {
-                _logger.LogDebug("UploadAdjuster: slots decreased {Prev}->{Now} (desired {Desired})", prev, _grantedSlots, desired);
+                _logger.LogDebug("UploadAdjuster: file {FileId} slots decreased {Prev}->{Now} (desired {Desired})", _sharedFileId, prev, _grantedSlots, desired);
+            }
+            else
+            {
+                _logger.LogDebug("UploadAdjuster: file {FileId} requested decrease but no slot available to take (prev {Prev}, desired {Desired}, current {Current})",
+                    _sharedFileId, prev, desired, _grantedSlots);
             }
         }
     }
@@ -202,7 +213,7 @@ public class FileUploadProcessor : IFileUploadProcessor
                 _startedWorkers++;
                 _ = _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_fileUploadCoordinator.AvailableSlices, _progressState!);
             }
-            _logger.LogDebug("UploadAdjuster: workers started +{Added}, total {Total}, desired {Desired}", toStart, _startedWorkers, desired);
+            _logger.LogDebug("UploadAdjuster: file {FileId} workers started +{Added}, total {Total}, desired {Desired}", _sharedFileId, toStart, _startedWorkers, desired);
         }
     }
 

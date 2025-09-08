@@ -82,6 +82,28 @@ public class AdaptiveUploadControllerTests
     }
 
     [Test]
+    public void Downscale_ReducesParallelism_WhenAboveMin()
+    {
+        // Arrange: scale up to reach >=4MB so parallelism increases to at least 3
+        var safety = 100;
+        while (_controller.CurrentChunkSizeBytes < 4 * 1024 * 1024 && safety-- > 0)
+        {
+            FeedFastWindow(_controller);
+        }
+
+        _controller.CurrentParallelism.Should().BeGreaterThan(2);
+        var beforeParallelism = _controller.CurrentParallelism;
+        var beforeChunk = _controller.CurrentChunkSizeBytes;
+
+        // Act: feed a slow window to trigger downscale-by-parallelism branch
+        FeedWindow(_controller, TimeSpan.FromSeconds(31), successes: true);
+
+        // Assert: parallelism decreased by 1, chunk size unchanged
+        _controller.CurrentParallelism.Should().Be(beforeParallelism - 1);
+        _controller.CurrentChunkSizeBytes.Should().Be(beforeChunk);
+    }
+
+    [Test]
     public void Downscale_ReducesChunkSize_WhenAtMinParallelism()
     {
         // Arrange
