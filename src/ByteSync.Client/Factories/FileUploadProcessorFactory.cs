@@ -28,17 +28,14 @@ public class FileUploadProcessorFactory : IFileUploadProcessorFactory
         MemoryStream? memoryStream,
         SharedFileDefinition sharedFileDefinition)
     {
-        // Create coordination components
         var fileUploadCoordinator = new FileUploadCoordinator(_context.Resolve<ILogger<FileUploadCoordinator>>());
         var semaphoreSlim = new SemaphoreSlim(1, 1);
         
-        // Resolve adaptive upload controller
         var adaptiveUploadController = _context.Resolve<IAdaptiveUploadController>();
-        // Create upload slots limiter (adaptive). Max is 4 as per controller limits; clamp initial >=1.
+
         var initialSlots = Math.Min(Math.Max(1, adaptiveUploadController.CurrentParallelism), 4);
         var uploadSlotsLimiter = new SemaphoreSlim(initialSlots, 4);
         
-        // Create file upload worker
         var policyFactory = _context.Resolve<IPolicyFactory>();
         var fileTransferApiClient = _context.Resolve<IFileTransferApiClient>();
         var strategies = _context.Resolve<IIndex<StorageProvider, IUploadStrategy>>();
@@ -47,7 +44,6 @@ public class FileUploadProcessorFactory : IFileUploadProcessorFactory
             fileUploadCoordinator.UploadingIsFinished, _context.Resolve<ILogger<FileUploadWorker>>(), adaptiveUploadController,
             uploadSlotsLimiter);
         
-        // Create file part upload asserter
         var sessionService = _context.Resolve<ISessionService>();
         var filePartUploadAsserter = new FilePartUploadAsserter(fileTransferApiClient, sessionService);
         
