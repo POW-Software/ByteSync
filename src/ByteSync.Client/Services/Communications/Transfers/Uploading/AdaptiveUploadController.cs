@@ -119,12 +119,12 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 
 
 			_logger.LogDebug(
-				"Adaptive: file {FileId} maxElapsedMs={MaxElapsedMs}, window={Window}, parallelism={Parallelism}, chunkKB={ChunkKb}",
+				"Adaptive: file {FileId} maxElapsed={MaxElapsedMs} ms, window={Window}, parallelism={Parallelism}, chunkSize={ChunkKb} KB",
 				fileId ?? "-",
 				maxElapsed.TotalMilliseconds,
 				_windowSize,
 				_currentParallelism,
-				_currentChunkSizeBytes / 1024);
+			    Math.Round(_currentChunkSizeBytes / 1024d));
 
 			if (maxElapsed > _downscaleThreshold)
 			{
@@ -146,9 +146,11 @@ public class AdaptiveUploadController : IAdaptiveUploadController
 				{
 					_currentChunkSizeBytes = reduced;
 					_logger.LogInformation(
-						"Adaptive: file {FileId} Downscale. maxElapsedMs={MaxElapsedMs} > {ThresholdMs}. New chunkKB={ChunkKb}", 
+						"Adaptive: file {FileId} Downscale. maxElapsed={MaxElapsedMs} ms > {ThresholdMs} ms. New chunkSize={ChunkKb} KB", 
 						fileId ?? "-",
-						maxElapsed.TotalMilliseconds, _downscaleThreshold.TotalMilliseconds, _currentChunkSizeBytes / 1024);
+						maxElapsed.TotalMilliseconds, 
+						_downscaleThreshold.TotalMilliseconds, 
+						Math.Round(_currentChunkSizeBytes / 1024d));
 				}
 				ResetWindow();
 				return;
@@ -197,9 +199,11 @@ public class AdaptiveUploadController : IAdaptiveUploadController
                     var increased = (int)(_currentChunkSizeBytes * 1.25);
                     _currentChunkSizeBytes = Math.Clamp(increased, MIN_CHUNK_SIZE_BYTES, MAX_CHUNK_SIZE_BYTES);
                     _logger.LogInformation(
-                        "Adaptive: file {FileId} Upscale. maxElapsedMs={MaxElapsedMs} <= {ThresholdMs}. New chunkKB={ChunkKb}", 
+                        "Adaptive: file {FileId} Upscale. maxElapsed={MaxElapsedMs} ms <= {ThresholdMs} ms. New chunkSize={ChunkKb} KB", 
                         fileId ?? "-",
-                        maxElapsedEligible.TotalMilliseconds, _upscaleThreshold.TotalMilliseconds, _currentChunkSizeBytes / 1024);
+                        maxElapsedEligible.TotalMilliseconds, 
+                        _upscaleThreshold.TotalMilliseconds, 
+                        Math.Round(_currentChunkSizeBytes / 1024d));
 
                     if (_currentChunkSizeBytes >= EIGHT_MB)
                     {

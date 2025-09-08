@@ -154,7 +154,7 @@ public class FileUploadProcessor : IFileUploadProcessor
             "FileUploadProcessor: E2EE upload of {SharedFileDefinitionId} is finished in {DurationMs} ms, uploaded {UploadedKB} KB, max concurrency {MaxConc}, approx bandwidth {Kbps:F2} kbps, {Errors} error(s)",
             sharedFileDefinition.Id,
             durationMs,
-            totalBytes / 1024d,
+            Math.Round(totalBytes / 1024d),
             _progressState.MaxConcurrentUploads,
             bandwidthKbps,
             _progressState.Exceptions!.Count);
