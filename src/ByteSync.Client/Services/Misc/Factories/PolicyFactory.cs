@@ -18,7 +18,7 @@ public class PolicyFactory : IPolicyFactory
         _logger = logger;
     }
     
-    private const int MAX_RETRIES = 5; // 2s,4s,8s,16s,32s
+    private const int MAX_RETRIES = 5;
     
     private TimeSpan SleepDurationProvider(int retryAttempt)
     {
