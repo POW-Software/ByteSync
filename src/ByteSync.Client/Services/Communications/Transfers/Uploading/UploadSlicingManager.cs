@@ -6,26 +6,32 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Encryptions;
+using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Communications.Transfers.Uploading;
 
 public class UploadSlicingManager : IUploadSlicingManager
 {
+    private readonly ISessionService _sessionService;
+    private readonly IFileSlicerFactory _fileSlicerFactory;
+    private readonly ILogger<UploadSlicingManager> _logger;
+    
     private readonly Channel<Func<Task>> _queue;
     private readonly List<Task> _workers;
     private readonly List<IDisposable> _subscriptions = new();
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private readonly ILogger<UploadSlicingManager> _logger;
-    private readonly ILogger<FileSlicer> _fileSlicerLogger;
+
     private const int MAX_CONCURRENT_SLICES = 2;
     private int _generation;
-    private readonly ISessionService _sessionService;
 
-    public UploadSlicingManager(ILogger<UploadSlicingManager> logger, ILogger<FileSlicer> fileSlicerLogger, ISessionService sessionService)
+
+    public UploadSlicingManager(IFileSlicerFactory fileSlicerFactory, 
+        ISessionService sessionService,
+        ILogger<UploadSlicingManager> logger)
     {
         _logger = logger;
-        _fileSlicerLogger = fileSlicerLogger;
+        _fileSlicerFactory = fileSlicerFactory;
         _queue = Channel.CreateUnbounded<Func<Task>>();
         _workers = new List<Task>();
         _generation = 0;
@@ -75,14 +81,18 @@ public class UploadSlicingManager : IUploadSlicingManager
             {
                 return;
             }
-            var slicer = new FileSlicer(
-                slicerEncrypter,
-                availableSlices,
-                semaphoreSlim,
-                exceptionOccurred,
-                _fileSlicerLogger,
-                adaptiveUploadController);
-            await slicer.SliceAndEncryptAdaptiveAsync(sharedFileDefinition, progressState);
+            
+            var fileSlicer = _fileSlicerFactory.Create(slicerEncrypter, availableSlices, semaphoreSlim, exceptionOccurred);
+            
+            // var slicer = new FileSlicer(
+            //     slicerEncrypter,
+            //     availableSlices,
+            //     semaphoreSlim,
+            //     exceptionOccurred,
+            //     _fileSlicerLogger,
+            //     adaptiveUploadController);
+            await fileSlicer.SliceAndEncryptAdaptiveAsync(sharedFileDefinition, progressState);
+            
         }).AsTask().ContinueWith(_ => progressState);
     }
 
