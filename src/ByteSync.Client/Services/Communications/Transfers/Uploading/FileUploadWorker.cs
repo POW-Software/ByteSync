@@ -108,7 +108,7 @@ public class FileUploadWorker : IFileUploadWorker
 
                     var attemptStart = DateTime.UtcNow;
                     // Compute attempt timeout based on slice size (3s/MB) bounded to [30s, 90s]
-                    var sizeMb = Math.Max(1, (int)Math.Ceiling((slice.MemoryStream?.Length ?? 0L) / (1024d * 1024d)));
+                    var sizeMb = Math.Max(1, (int)Math.Ceiling((slice.MemoryStream.Length) / (1024d * 1024d)));
                     var timeoutSec = Math.Clamp(3 * sizeMb, 30, 90);
                     using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(CancellationTokenSource.Token);
                     attemptCts.CancelAfter(TimeSpan.FromSeconds(timeoutSec));
@@ -120,7 +120,7 @@ public class FileUploadWorker : IFileUploadWorker
                         var heartbeat = TimeSpan.FromSeconds(30);
                         while (!uploadTask.IsCompleted)
                         {
-                            var completed = await Task.WhenAny(uploadTask, Task.Delay(heartbeat));
+                            var completed = await Task.WhenAny(uploadTask, Task.Delay(heartbeat, attemptCts.Token));
                             if (completed == uploadTask)
                             {
                                 break;
@@ -145,11 +145,11 @@ public class FileUploadWorker : IFileUploadWorker
                         var elapsed = DateTime.UtcNow - attemptStart;
                         if (attemptResponse.IsSuccess)
                         {
-                            _adaptiveUploadController.RecordUploadResult(elapsed, true, slice.PartNumber, attemptResponse.StatusCode, null, _sharedFileDefinition.Id, slice.MemoryStream?.Length ?? -1);
+                            _adaptiveUploadController.RecordUploadResult(elapsed, true, slice.PartNumber, attemptResponse.StatusCode, null, _sharedFileDefinition.Id, slice.MemoryStream.Length);
                         }
                         else
                         {
-                            _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, attemptResponse.StatusCode, null, _sharedFileDefinition.Id, slice.MemoryStream?.Length ?? -1);
+                            _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, attemptResponse.StatusCode, null, _sharedFileDefinition.Id, slice.MemoryStream.Length);
                         }
 
                         return attemptResponse;
@@ -157,7 +157,7 @@ public class FileUploadWorker : IFileUploadWorker
                     catch (Exception ex)
                     {
                         var elapsed = DateTime.UtcNow - attemptStart;
-                        _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, 500, ex, _sharedFileDefinition.Id, slice.MemoryStream?.Length ?? -1);
+                        _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, 500, ex, _sharedFileDefinition.Id, slice.MemoryStream.Length);
                         throw;
                     }
                     finally
