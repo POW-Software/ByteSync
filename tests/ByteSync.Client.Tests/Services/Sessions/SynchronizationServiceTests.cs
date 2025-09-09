@@ -19,12 +19,12 @@ namespace ByteSync.Tests.Services.Sessions;
 [TestFixture]
 public class SynchronizationServiceTests
 {
-    private Mock<ISessionService> _sessionServiceMock;
-    private Mock<ISessionMemberService> _sessionMemberServiceMock;
-    private Mock<ISynchronizationApiClient> _synchronizationApiClientMock;
-    private Mock<ISynchronizationLooperFactory> _synchronizationLooperFactoryMock;
-    private Mock<ITimeTrackingCache> _timeTrackingCacheMock;
-    private Mock<ILogger<SynchronizationService>> _loggerMock;
+    private Mock<ISessionService> _sessionServiceMock = null!;
+    private Mock<ISessionMemberService> _sessionMemberServiceMock = null!;
+    private Mock<ISynchronizationApiClient> _synchronizationApiClientMock = null!;
+    private Mock<ISynchronizationLooperFactory> _synchronizationLooperFactoryMock = null!;
+    private Mock<ITimeTrackingCache> _timeTrackingCacheMock = null!;
+    private Mock<ILogger<SynchronizationService>> _loggerMock = null!;
     
     [SetUp]
     public void Setup()
@@ -36,7 +36,164 @@ public class SynchronizationServiceTests
         _timeTrackingCacheMock = new Mock<ITimeTrackingCache>();
         _loggerMock = new Mock<ILogger<SynchronizationService>>();
     }
-    
+
+    [Test]
+    public async Task OnSynchronizationStarted_SetsStatus_StartsTimer_PublishesStart()
+    {
+        var sessionObservable = new BehaviorSubject<AbstractSession?>(new CloudSession());
+        var sessionStatusObservable = new BehaviorSubject<SessionStatus>(SessionStatus.Preparation);
+        _sessionServiceMock.SetupGet(x => x.SessionObservable).Returns(sessionObservable);
+        _sessionServiceMock.SetupGet(x => x.SessionStatusObservable).Returns(sessionStatusObservable);
+        _sessionServiceMock.SetupGet(x => x.SessionId).Returns("sid-1");
+
+        var timeComputer = new Mock<ITimeTrackingComputer>();
+        _timeTrackingCacheMock
+            .Setup(x => x.GetTimeTrackingComputer("sid-1", ByteSync.Business.Misc.TimeTrackingComputerType.Synchronization))
+            .ReturnsAsync(timeComputer.Object);
+
+        var svc = new SynchronizationService(_sessionServiceMock.Object, _sessionMemberServiceMock.Object,
+            _synchronizationApiClientMock.Object, _synchronizationLooperFactoryMock.Object,
+            _timeTrackingCacheMock.Object, _loggerMock.Object);
+
+        var startedAt = DateTimeOffset.UtcNow.AddMinutes(-1);
+        var sync = new Synchronization { SessionId = "sid-1", Started = startedAt };
+
+        await svc.OnSynchronizationStarted(sync);
+
+        _sessionServiceMock.Verify(x => x.SetSessionStatus(SessionStatus.Synchronization), Times.Once);
+        timeComputer.Verify(x => x.Start(startedAt), Times.Once);
+        svc.SynchronizationProcessData.SynchronizationStart.Value.Should().Be(sync);
+        _sessionMemberServiceMock.Verify(x => x.UpdateCurrentMemberGeneralStatus(SessionMemberGeneralStatus.SynchronizationRunning), Times.Once);
+    }
+
+    [Test]
+    public async Task OnSynchronizationUpdated_WhenEnded_StopsTimer_PublishesEnd_UpdatesMemberStatus()
+    {
+        var sessionObservable = new BehaviorSubject<AbstractSession?>(new CloudSession());
+        var sessionStatusObservable = new BehaviorSubject<SessionStatus>(SessionStatus.Preparation);
+        _sessionServiceMock.SetupGet(x => x.SessionObservable).Returns(sessionObservable);
+        _sessionServiceMock.SetupGet(x => x.SessionStatusObservable).Returns(sessionStatusObservable);
+        _sessionServiceMock.SetupGet(x => x.SessionId).Returns("sid-end");
+
+        var timeComputer = new Mock<ITimeTrackingComputer>();
+        _timeTrackingCacheMock
+            .Setup(x => x.GetTimeTrackingComputer("sid-end", ByteSync.Business.Misc.TimeTrackingComputerType.Synchronization))
+            .ReturnsAsync(timeComputer.Object);
+
+        var svc = new SynchronizationService(_sessionServiceMock.Object, _sessionMemberServiceMock.Object,
+            _synchronizationApiClientMock.Object, _synchronizationLooperFactoryMock.Object,
+            _timeTrackingCacheMock.Object, _loggerMock.Object);
+
+        var endedAt = DateTimeOffset.UtcNow;
+        var sync = new Synchronization { SessionId = "sid-end", Ended = endedAt, EndStatus = SynchronizationEndStatuses.Regular };
+
+        await svc.OnSynchronizationUpdated(sync);
+
+        timeComputer.Verify(x => x.Stop(), Times.Once);
+        var end = svc.SynchronizationProcessData.SynchronizationEnd.Value;
+        end.Should().NotBeNull();
+        end.SessionId.Should().Be("sid-end");
+        end.FinishedOn.Should().Be(endedAt);
+        end.Status.Should().Be(SynchronizationEndStatuses.Regular);
+        _sessionMemberServiceMock.Verify(x => x.UpdateCurrentMemberGeneralStatus(SessionMemberGeneralStatus.SynchronizationFinished), Times.Once);
+    }
+
+    [Test]
+    public async Task OnSynchronizationUpdated_WhenAbortRequested_PublishesAbortRequest()
+    {
+        var sessionObservable = new BehaviorSubject<AbstractSession?>(new CloudSession());
+        var sessionStatusObservable = new BehaviorSubject<SessionStatus>(SessionStatus.Preparation);
+        _sessionServiceMock.SetupGet(x => x.SessionObservable).Returns(sessionObservable);
+        _sessionServiceMock.SetupGet(x => x.SessionStatusObservable).Returns(sessionStatusObservable);
+        _sessionServiceMock.SetupGet(x => x.SessionId).Returns("sid-abort");
+
+        var svc = new SynchronizationService(_sessionServiceMock.Object, _sessionMemberServiceMock.Object,
+            _synchronizationApiClientMock.Object, _synchronizationLooperFactoryMock.Object,
+            _timeTrackingCacheMock.Object, _loggerMock.Object);
+
+        var when = DateTimeOffset.UtcNow;
+        var by = new List<string> { "c1", "c2" };
+        var sync = new Synchronization { SessionId = "sid-abort", AbortRequestedOn = when, AbortRequestedBy = by };
+
+        await svc.OnSynchronizationUpdated(sync);
+
+        var abort = svc.SynchronizationProcessData.SynchronizationAbortRequest.Value;
+        abort.Should().NotBeNull();
+        abort.SessionId.Should().Be("sid-abort");
+        abort.RequestedOn.Should().Be(when);
+        abort.RequestedBy.Should().BeEquivalentTo(by);
+    }
+
+    [Test]
+    public async Task OnSynchronizationDataTransmitted_SetsTotals_AndSignalsTransmitted()
+    {
+        var sessionObservable = new BehaviorSubject<AbstractSession?>(new CloudSession());
+        var sessionStatusObservable = new BehaviorSubject<SessionStatus>(SessionStatus.Preparation);
+        _sessionServiceMock.SetupGet(x => x.SessionObservable).Returns(sessionObservable);
+        _sessionServiceMock.SetupGet(x => x.SessionStatusObservable).Returns(sessionStatusObservable);
+
+        var svc = new SynchronizationService(_sessionServiceMock.Object, _sessionMemberServiceMock.Object,
+            _synchronizationApiClientMock.Object, _synchronizationLooperFactoryMock.Object,
+            _timeTrackingCacheMock.Object, _loggerMock.Object);
+
+        var data = new ByteSync.Business.Actions.Shared.SharedSynchronizationStartData { TotalVolumeToProcess = 123, TotalAtomicActionsToProcess = 45 };
+
+        await svc.OnSynchronizationDataTransmitted(data);
+
+        svc.SynchronizationProcessData.TotalVolumeToProcess.Should().Be(123);
+        svc.SynchronizationProcessData.TotalActionsToProcess.Should().Be(45);
+        svc.SynchronizationProcessData.SynchronizationDataTransmitted.Value.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task OnSynchronizationProgressChanged_UpdatesWhenNewerVersion_AndIgnoresOlder()
+    {
+        var sessionObservable = new BehaviorSubject<AbstractSession?>(new CloudSession());
+        var sessionStatusObservable = new BehaviorSubject<SessionStatus>(SessionStatus.Preparation);
+        _sessionServiceMock.SetupGet(x => x.SessionObservable).Returns(sessionObservable);
+        _sessionServiceMock.SetupGet(x => x.SessionStatusObservable).Returns(sessionStatusObservable);
+
+        var svc = new SynchronizationService(_sessionServiceMock.Object, _sessionMemberServiceMock.Object,
+            _synchronizationApiClientMock.Object, _synchronizationLooperFactoryMock.Object,
+            _timeTrackingCacheMock.Object, _loggerMock.Object);
+
+        svc.SynchronizationProcessData.TotalVolumeToProcess = 999;
+
+        var pushV1 = new SynchronizationProgressPush
+        {
+            Version = 10,
+            ExchangedVolume = 1,
+            ProcessedVolume = 2,
+            ActualUploadedVolume = 3,
+            ActualDownloadedVolume = 4,
+            LocalCopyTransferredVolume = 5,
+            SynchronizedVolume = 6,
+            FinishedActionsCount = 7,
+            ErrorActionsCount = 8
+        };
+
+        await svc.OnSynchronizationProgressChanged(pushV1);
+
+        var p1 = svc.SynchronizationProcessData.SynchronizationProgress.Value;
+        p1.Should().NotBeNull();
+        p1.Version.Should().Be(10);
+        p1.TotalVolumeToProcess.Should().Be(999);
+        p1.ExchangedVolume.Should().Be(1);
+        p1.ProcessedVolume.Should().Be(2);
+        p1.ActualUploadedVolume.Should().Be(3);
+        p1.ActualDownloadedVolume.Should().Be(4);
+        p1.LocalCopyTransferredVolume.Should().Be(5);
+        p1.SynchronizedVolume.Should().Be(6);
+        p1.FinishedActionsCount.Should().Be(7);
+        p1.ErrorActionsCount.Should().Be(8);
+
+        var pushOld = new SynchronizationProgressPush { Version = 9, ExchangedVolume = 100 };
+        await svc.OnSynchronizationProgressChanged(pushOld);
+
+        var p2 = svc.SynchronizationProcessData.SynchronizationProgress.Value;
+        p2!.Version.Should().Be(10);
+        p2.ExchangedVolume.Should().Be(1);
+    }
     [Test]
     public async Task AbortSynchronization_CloudSession_AbortsSynchronization()
     {
@@ -103,7 +260,7 @@ public class SynchronizationServiceTests
     }
     
     [Test]
-    public async Task SynchronizationStart_WhenDataTransmitted_ShouldRunInSeparateTask()
+    public void SynchronizationStart_WhenDataTransmitted_ShouldRunInSeparateTask()
     {
         // Arrange
         var cloudSession = new CloudSession();
