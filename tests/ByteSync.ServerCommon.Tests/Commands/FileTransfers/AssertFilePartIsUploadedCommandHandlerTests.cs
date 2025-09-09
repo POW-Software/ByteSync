@@ -136,4 +136,83 @@ public class AssertFilePartIsUploadedCommandHandlerTests
 
         exception.Which.Should().Be(expectedException);
     }
-} 
+
+    [Test]
+    public async Task Handle_WhenActionsGroupIdsMissing_ThrowsBadRequestException()
+    {
+        // Arrange
+        const string sessionId = "session1";
+        var client = new Client { ClientInstanceId = "client1" };
+        var transferParameters = new TransferParameters
+        {
+            SessionId = sessionId,
+            SharedFileDefinition = new SharedFileDefinition { Id = "file1", SessionId = sessionId },
+            PartNumber = 2
+        };
+
+        var request = new AssertFilePartIsUploadedRequest(sessionId, client, transferParameters);
+
+        var mockSession = new CloudSessionData();
+        var mockSessionMember = new SessionMemberData { ClientInstanceId = client.ClientInstanceId };
+        mockSession.SessionMembers.Add(mockSessionMember);
+        A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId)).Returns(mockSession);
+
+        A.CallTo(() => _mockTransferLocationService.IsSharedFileDefinitionAllowed(mockSessionMember, transferParameters.SharedFileDefinition))
+            .Returns(true);
+
+        A.CallTo(() => _mockUsageStatisticsService.RegisterUploadUsage(client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+            .Returns(Task.CompletedTask);
+
+        var synchronizationEntity = new SynchronizationEntity();
+        A.CallTo(() => _mockSynchronizationRepository.Get(sessionId)).Returns(synchronizationEntity);
+        A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
+            .Returns(true);
+
+        // Act & Assert
+        await FluentActions.Awaiting(() =>
+                _assertFilePartIsUploadedCommandHandler.Handle(request, CancellationToken.None))
+            .Should().ThrowAsync<ByteSync.ServerCommon.Exceptions.BadRequestException>();
+
+        A.CallTo(() => _mockUsageStatisticsService.RegisterUploadUsage(client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
+    public async Task Handle_WhenSynchronizationCannotBeUpdated_ReturnsEarly()
+    {
+        // Arrange
+        const string sessionId = "session1";
+        var client = new Client { ClientInstanceId = "client1" };
+        var transferParameters = new TransferParameters
+        {
+            SessionId = sessionId,
+            SharedFileDefinition = new SharedFileDefinition { Id = "file1", SessionId = sessionId, ActionsGroupIds = ["ag1"] },
+            PartNumber = 3
+        };
+
+        var request = new AssertFilePartIsUploadedRequest(sessionId, client, transferParameters);
+
+        var mockSession = new CloudSessionData();
+        var mockSessionMember = new SessionMemberData { ClientInstanceId = client.ClientInstanceId };
+        mockSession.SessionMembers.Add(mockSessionMember);
+        A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId)).Returns(mockSession);
+
+        A.CallTo(() => _mockTransferLocationService.IsSharedFileDefinitionAllowed(mockSessionMember, transferParameters.SharedFileDefinition))
+            .Returns(true);
+
+        A.CallTo(() => _mockUsageStatisticsService.RegisterUploadUsage(client, transferParameters.SharedFileDefinition, transferParameters.PartNumber!.Value))
+            .Returns(Task.CompletedTask);
+
+        var synchronizationEntity = new SynchronizationEntity();
+        A.CallTo(() => _mockSynchronizationRepository.Get(sessionId)).Returns(synchronizationEntity);
+        A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronizationEntity))
+            .Returns(false); // triggers early return
+
+        // Act
+        await _assertFilePartIsUploadedCommandHandler.Handle(request, CancellationToken.None);
+
+        // Assert
+        A.CallTo(() => _mockSharedFilesService.AssertFilePartIsUploaded(A<TransferParameters>._, A<ICollection<string>>._))
+            .MustNotHaveHappened();
+    }
+}
