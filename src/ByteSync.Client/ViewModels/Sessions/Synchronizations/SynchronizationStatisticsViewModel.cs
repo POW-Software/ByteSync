@@ -38,6 +38,26 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
         _sharedActionsGroupRepository = sharedActionsGroupRepository;
         _timeTrackingCache = timeTrackingCache;
 
+        // Initialize new volume tracking properties
+        ActualUploadedVolume = 0;
+        ActualDownloadedVolume = 0;
+        LocalCopyTransferredVolume = 0;
+        SynchronizedVolume = 0;
+
+        // Observable pour EfficiencyRatio
+        this.WhenAnyValue(x => x.SynchronizedVolume, x => x.ActualUploadedVolume, x => x.ActualDownloadedVolume)
+            .Select(x => 
+            {
+                var total = x.Item2 + x.Item3;
+                return total > 0 ? (double)x.Item1 / total : 0;
+            })
+            .ToPropertyEx(this, x => x.EfficiencyRatio);
+
+        // Observable pour LocalCopyPercentage
+        this.WhenAnyValue(x => x.LocalCopyTransferredVolume, x => x.SynchronizedVolume)
+            .Select(x => x.Item2 > 0 ? (double)x.Item1 / x.Item2 * 100 : 0)
+            .ToPropertyEx(this, x => x.LocalCopyPercentage);
+
         this.WhenActivated(disposables =>
         {
             _synchronizationService.SynchronizationProcessData.SynchronizationStart
@@ -126,6 +146,22 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
     public long ExchangedVolume { get; set; }
 
     [Reactive]
+    public long ActualUploadedVolume { get; set; }
+
+    [Reactive]
+    public long ActualDownloadedVolume { get; set; }
+
+    [Reactive]
+    public long LocalCopyTransferredVolume { get; set; }
+
+    [Reactive]
+    public long SynchronizedVolume { get; set; }
+
+    // Propriétés calculées pour les ratios
+    public extern double EfficiencyRatio { [ObservableAsProperty] get; }  // SynchronizedVolume / (ActualUploaded + ActualDownloaded)
+    public extern double LocalCopyPercentage { [ObservableAsProperty] get; }  // LocalCopyTransferred / SynchronizedVolume * 100
+
+    [Reactive]
     public bool IsCloudSession { get; set; }
 
     private void OnSynchronizationStarted(Synchronization synchronizationStart)
@@ -165,6 +201,10 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
         Errors = synchronizationProgress.ErrorActionsCount;
         ProcessedVolume = synchronizationProgress.ProcessedVolume;
         ExchangedVolume = synchronizationProgress.ExchangedVolume;
+        ActualUploadedVolume = synchronizationProgress.ActualUploadedVolume;
+        ActualDownloadedVolume = synchronizationProgress.ActualDownloadedVolume;
+        LocalCopyTransferredVolume = synchronizationProgress.LocalCopyTransferredVolume;
+        SynchronizedVolume = synchronizationProgress.SynchronizedVolume;
         LastVersion = synchronizationProgress.Version;
     }
 }

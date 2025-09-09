@@ -493,6 +493,24 @@ Voulez-vous continuer ?</value>
 	<data name="SynchronizationMain_ExchangedVolume" xml:space="preserve">
 		<value>Volume échangé :</value>
 	</data>
+	<data name="SynchronizationMain_SynchronizedVolume" xml:space="preserve">
+		<value>Volume synchronisé :</value>
+	</data>
+	<data name="SynchronizationMain_UploadedVolume" xml:space="preserve">
+		<value>Téléversé :</value>
+	</data>
+	<data name="SynchronizationMain_DownloadedVolume" xml:space="preserve">
+		<value>Téléchargé :</value>
+	</data>
+	<data name="SynchronizationMain_LocalCopyVolume" xml:space="preserve">
+		<value>Copie locale :</value>
+	</data>
+	<data name="SynchronizationMain_EfficiencyRatio" xml:space="preserve">
+		<value>Efficacité transfert :</value>
+	</data>
+	<data name="SynchronizationMain_LocalCopyPercentage" xml:space="preserve">
+		<value>% copie locale :</value>
+	</data>
 	<data name="Status_OK" xml:space="preserve">
 		<value>OK</value>
 	</data>

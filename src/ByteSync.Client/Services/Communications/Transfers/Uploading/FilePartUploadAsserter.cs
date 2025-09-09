@@ -16,13 +16,14 @@ public class FilePartUploadAsserter : IFilePartUploadAsserter
         _sessionService = sessionService;
     }
 
-    public async Task AssertFilePartIsUploaded(SharedFileDefinition sharedFileDefinition, int partNumber)
+    public async Task AssertFilePartIsUploaded(SharedFileDefinition sharedFileDefinition, int partNumber, long? partSizeInBytes = null)
     {
         var transferParameters = new TransferParameters
         {
             SessionId = sharedFileDefinition.SessionId,
             SharedFileDefinition = sharedFileDefinition,
-            PartNumber = partNumber
+            PartNumber = partNumber,
+            PartSizeInBytes = partSizeInBytes
         };
         
         await _fileTransferApiClient.AssertFilePartIsUploaded(transferParameters);

@@ -490,6 +490,24 @@ Would you like to continue ?</value>
 	<data name="SynchronizationMain_ExchangedVolume" xml:space="preserve">
 		<value>Volume exchanged:</value>
 	</data>
+	<data name="SynchronizationMain_SynchronizedVolume" xml:space="preserve">
+		<value>Synchronized volume:</value>
+	</data>
+	<data name="SynchronizationMain_UploadedVolume" xml:space="preserve">
+		<value>Uploaded:</value>
+	</data>
+	<data name="SynchronizationMain_DownloadedVolume" xml:space="preserve">
+		<value>Downloaded:</value>
+	</data>
+	<data name="SynchronizationMain_LocalCopyVolume" xml:space="preserve">
+		<value>Local copy:</value>
+	</data>
+	<data name="SynchronizationMain_EfficiencyRatio" xml:space="preserve">
+		<value>Transfer efficiency:</value>
+	</data>
+	<data name="SynchronizationMain_LocalCopyPercentage" xml:space="preserve">
+		<value>Local copy %:</value>
+	</data>
 	<data name="Status_OK" xml:space="preserve">
 		<value>OK</value>
 	</data>
