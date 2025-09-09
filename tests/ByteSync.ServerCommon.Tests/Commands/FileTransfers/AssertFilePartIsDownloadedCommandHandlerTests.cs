@@ -15,6 +15,8 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
 {
     private ICloudSessionsRepository _mockCloudSessionsRepository;
     private ISharedFilesService _mockSharedFilesService;
+    private ISynchronizationRepository _mockSynchronizationRepository;
+    private ISynchronizationStatusCheckerService _mockSynchronizationStatusCheckerService;
     private ILogger<AssertFilePartIsDownloadedCommandHandler> _mockLogger;
     private AssertFilePartIsDownloadedCommandHandler _assertFilePartIsDownloadedCommandHandler;
     private ITransferLocationService _mockTransferLocationService;
@@ -24,13 +26,18 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
     {
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
         _mockSharedFilesService = A.Fake<ISharedFilesService>();
+        _mockSynchronizationRepository = A.Fake<ISynchronizationRepository>();
+        _mockSynchronizationStatusCheckerService = A.Fake<ISynchronizationStatusCheckerService>();
         _mockLogger = A.Fake<ILogger<AssertFilePartIsDownloadedCommandHandler>>();
         _mockTransferLocationService = A.Fake<ITransferLocationService>();
         
         _assertFilePartIsDownloadedCommandHandler = new AssertFilePartIsDownloadedCommandHandler(
             _mockCloudSessionsRepository,
             _mockSharedFilesService,
-            _mockTransferLocationService, _mockLogger);
+            _mockSynchronizationRepository,
+            _mockSynchronizationStatusCheckerService,
+            _mockTransferLocationService,
+            _mockLogger);
     }
 
     [Test]

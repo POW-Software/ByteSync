@@ -144,6 +144,10 @@ public class SynchronizationService : ISynchronizationService
         {
             synchronizationProgress.ExchangedVolume = synchronizationProgressPush.ExchangedVolume;
             synchronizationProgress.ProcessedVolume = synchronizationProgressPush.ProcessedVolume;
+            synchronizationProgress.ActualUploadedVolume = synchronizationProgressPush.ActualUploadedVolume;
+            synchronizationProgress.ActualDownloadedVolume = synchronizationProgressPush.ActualDownloadedVolume;
+            synchronizationProgress.LocalCopyTransferredVolume = synchronizationProgressPush.LocalCopyTransferredVolume;
+            synchronizationProgress.SynchronizedVolume = synchronizationProgressPush.SynchronizedVolume;
             synchronizationProgress.TotalVolumeToProcess = SynchronizationProcessData.TotalVolumeToProcess;
             synchronizationProgress.FinishedActionsCount = synchronizationProgressPush.FinishedActionsCount;
             synchronizationProgress.ErrorActionsCount = synchronizationProgressPush.ErrorActionsCount;

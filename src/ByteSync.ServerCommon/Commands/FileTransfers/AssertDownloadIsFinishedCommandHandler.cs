@@ -70,9 +70,16 @@ public class AssertDownloadIsFinishedCommandHandler : IRequestHandler<AssertDown
 
                     if (!wasTrackingActionFinished && trackingAction.IsFinished)
                     {
-                        synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
+                        var volumeToAdd = trackingAction.Size ?? 0;
+                        
+                        // New tracking
+                        synchronization.Progress.SynchronizedVolume += volumeToAdd;
+                        
+                        // Keep for compatibility
+                        synchronization.Progress.ProcessedVolume += volumeToAdd;
                     }
 
+                    // Legacy: Keep ExchangedVolume logic for compatibility
                     if (sharedFileDefinition.IsMultiFileZip)
                     {
                         synchronization.Progress.ExchangedVolume += trackingAction.Size ?? 0;

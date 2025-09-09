@@ -142,7 +142,8 @@ public class FileDownloader : IFileDownloader
                 });
                 if (downloadResponse.IsSuccess)
                 {
-                    await AssertFilePartIsDownloaded(partNumber, storageProvider);
+                    var downloadedPartSize = DownloadTarget.GetMemoryStream(partNumber)?.Length ?? 0;
+                    await AssertFilePartIsDownloaded(partNumber, storageProvider, downloadedPartSize);
                     await _semaphoreSlim.WaitAsync();
                     try
                     {
@@ -182,14 +183,15 @@ public class FileDownloader : IFileDownloader
         }
     }
 
-    private async Task AssertFilePartIsDownloaded(int partNumber, StorageProvider storageProvider)
+    private async Task AssertFilePartIsDownloaded(int partNumber, StorageProvider storageProvider, long partSizeInBytes)
     {
         var transferParameters = new TransferParameters
         {
             SessionId = SharedFileDefinition.SessionId,
             SharedFileDefinition = SharedFileDefinition,
             PartNumber = partNumber,
-            StorageProvider = storageProvider
+            StorageProvider = storageProvider,
+            PartSizeInBytes = partSizeInBytes
         };
         
         await _filePartDownloadAsserter.AssertAsync(transferParameters);

@@ -93,6 +93,12 @@ public class SynchronizationProgressService : ISynchronizationProgressService
         {
             SessionId = synchronizationEntity.SessionId,
             
+            // New volume tracking
+            ActualUploadedVolume = synchronizationEntity.Progress.ActualUploadedVolume,
+            ActualDownloadedVolume = synchronizationEntity.Progress.ActualDownloadedVolume,
+            LocalCopyTransferredVolume = synchronizationEntity.Progress.LocalCopyTransferredVolume,
+            SynchronizedVolume = synchronizationEntity.Progress.SynchronizedVolume,
+            
             ProcessedVolume = synchronizationEntity.Progress.ProcessedVolume,
             ExchangedVolume = synchronizationEntity.Progress.ExchangedVolume,
             FinishedActionsCount = synchronizationEntity.Progress.FinishedAtomicActionsCount,

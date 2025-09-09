@@ -27,6 +27,13 @@ public class LocalCopyIsDoneCommandHandler : ActionCompletedHandlerBase<LocalCop
 
     protected override void UpdateProgress(SynchronizationEntity synchronization, TrackingActionEntity trackingAction, LocalCopyIsDoneRequest request)
     {
-        synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
+        var volumeToAdd = trackingAction.Size ?? 0;
+        
+        // New tracking
+        synchronization.Progress.LocalCopyTransferredVolume += volumeToAdd;
+        synchronization.Progress.SynchronizedVolume += volumeToAdd;
+        
+        // Keep for compatibility
+        synchronization.Progress.ProcessedVolume += volumeToAdd;
     }
 }

@@ -8,9 +8,19 @@ public class SynchronizationProgressEntity
         CompletedMembers = new List<string>();
     }
     
-    public long ProcessedVolume { get; set; }
+    // New volume tracking properties
+    public long ActualUploadedVolume { get; set; }      // Bytes uploaded to cloud storage
     
-    public long ExchangedVolume { get; set; }
+    public long ActualDownloadedVolume { get; set; }    // Bytes downloaded from cloud storage
+    
+    public long LocalCopyTransferredVolume { get; set; } // Bytes copied locally on same machine
+    
+    public long SynchronizedVolume { get; set; }        // Total size of synchronized files (final result)
+    
+    // Existing properties (kept for compatibility)
+    public long ProcessedVolume { get; set; }            // DEPRECATED - Will be migrated to SynchronizedVolume
+    
+    public long ExchangedVolume { get; set; }            // DEPRECATED - Will be migrated to Actual*Volume
     
     public long TotalAtomicActionsCount { get; set; }
     

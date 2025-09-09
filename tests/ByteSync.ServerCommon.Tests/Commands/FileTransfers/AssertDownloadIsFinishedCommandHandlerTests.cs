@@ -192,8 +192,9 @@ public class AssertDownloadIsFinishedCommandHandlerTests
                 A<ByteSync.ServerCommon.Business.Repositories.TrackingActionResult>.That.Matches(r =>
                     r.IsSuccess &&
                     r.SynchronizationEntity.Progress.FinishedAtomicActionsCount == 1 && // only current client target counted
-                    r.SynchronizationEntity.Progress.ProcessedVolume == 123 &&
-                    r.SynchronizationEntity.Progress.ExchangedVolume == 123
+                    r.SynchronizationEntity.Progress.SynchronizedVolume == 123 && // New tracking: volume synchronized
+                    r.SynchronizationEntity.Progress.ProcessedVolume == 123 && // Legacy: still updated for compatibility
+                    r.SynchronizationEntity.Progress.ExchangedVolume == 123 // Legacy: still updated for compatibility
                 ),
                 A<bool>.That.IsEqualTo(true)))
             .MustHaveHappenedOnceExactly();
@@ -242,8 +243,9 @@ public class AssertDownloadIsFinishedCommandHandlerTests
         A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(
                 A<ByteSync.ServerCommon.Business.Repositories.TrackingActionResult>.That.Matches(r =>
                     r.SynchronizationEntity.Progress.FinishedAtomicActionsCount == 1 &&
-                    r.SynchronizationEntity.Progress.ProcessedVolume == 0 &&
-                    r.SynchronizationEntity.Progress.ExchangedVolume == 777
+                    r.SynchronizationEntity.Progress.SynchronizedVolume == 0 && // New tracking: no volume synchronized since already finished
+                    r.SynchronizationEntity.Progress.ProcessedVolume == 0 && // Legacy: should not increment (already finished)
+                    r.SynchronizationEntity.Progress.ExchangedVolume == 777 // Legacy: still updated from UploadedFileLength
                 ),
                 A<bool>.That.IsEqualTo(false)))
             .MustHaveHappenedOnceExactly();
