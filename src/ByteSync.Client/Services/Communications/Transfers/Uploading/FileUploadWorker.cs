@@ -141,21 +141,25 @@ public class FileUploadWorker : IFileUploadWorker
 
     private async Task<UploadFileResponse> ExecuteUploadAttemptAsync(FileUploaderSlice slice, int workerId, int attempt, CancellationToken globalToken)
     {
-        var beforeWait = _uploadSlots.CurrentCount;
-        _logger.LogDebug("UploadAvailableSlice: worker {WorkerId} waiting for upload slot (available {Available})",
-            workerId, beforeWait);
-        await _uploadSlots.WaitAsync();
-        var afterWait = _uploadSlots.CurrentCount;
-        _logger.LogDebug("UploadAvailableSlice: worker {WorkerId} acquired upload slot (available now {Available}), attempt {Attempt}",
-            workerId, afterWait, attempt);
-
         var attemptStart = DateTime.UtcNow;
         var timeoutSec = ComputeAttemptTimeoutSeconds(slice);
         using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(globalToken);
         attemptCts.CancelAfter(TimeSpan.FromSeconds(timeoutSec));
 
+        var beforeWait = _uploadSlots.CurrentCount;
+        _logger.LogDebug("UploadAvailableSlice: worker {WorkerId} waiting for upload slot (available {Available})",
+            workerId, beforeWait);
+
+        var acquired = false;
         try
         {
+            await _uploadSlots.WaitAsync(attemptCts.Token);
+            acquired = true;
+
+            var afterWait = _uploadSlots.CurrentCount;
+            _logger.LogDebug("UploadAvailableSlice: worker {WorkerId} acquired upload slot (available now {Available}), attempt {Attempt}",
+                workerId, afterWait, attempt);
+
             var uploadTask = DoUpload(slice, workerId, attemptCts.Token);
             var heartbeat = TimeSpan.FromSeconds(30);
             while (!uploadTask.IsCompleted)
@@ -185,6 +189,12 @@ public class FileUploadWorker : IFileUploadWorker
             _adaptiveUploadController.RecordUploadResult(elapsed, attemptResponse.IsSuccess, slice.PartNumber, attemptResponse.StatusCode, null, _sharedFileDefinition.Id, slice.MemoryStream.Length);
             return attemptResponse;
         }
+        catch (OperationCanceledException oce)
+        {
+            var elapsed = DateTime.UtcNow - attemptStart;
+            _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, null, oce, _sharedFileDefinition.Id, slice.MemoryStream.Length);
+            throw new TaskCanceledException("Upload attempt canceled during slot wait or upload.", oce);
+        }
         catch (Exception ex)
         {
             var elapsed = DateTime.UtcNow - attemptStart;
@@ -195,12 +205,19 @@ public class FileUploadWorker : IFileUploadWorker
         {
             try
             {
-                var beforeRelease = _uploadSlots.CurrentCount;
-                _uploadSlots.Release();
-                var afterRelease = _uploadSlots.CurrentCount;
-                _logger.LogDebug(
-                    "UploadAvailableSlice: worker {WorkerId} released upload slot after attempt {Attempt} (available {Before}->{After})",
-                    workerId, attempt, beforeRelease, afterRelease);
+                if (acquired)
+                {
+                    var beforeRelease = _uploadSlots.CurrentCount;
+                    _uploadSlots.Release();
+                    var afterRelease = _uploadSlots.CurrentCount;
+                    _logger.LogDebug(
+                        "UploadAvailableSlice: worker {WorkerId} released upload slot after attempt {Attempt} (available {Before}->{After})",
+                        workerId, attempt, beforeRelease, afterRelease);
+                }
+                else
+                {
+                    _logger.LogDebug("UploadAvailableSlice: worker {WorkerId} did not acquire upload slot (canceled before acquire) for attempt {Attempt}", workerId, attempt);
+                }
             }
             catch (Exception ex)
             {
