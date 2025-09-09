@@ -23,41 +23,41 @@ public class FileUploadProcessorFactory : IFileUploadProcessorFactory
     }
 
     public IFileUploadProcessor Create(
+        ISlicerEncrypter slicerEncrypter,
         string? localFileToUpload,
         MemoryStream? memoryStream,
         SharedFileDefinition sharedFileDefinition)
     {
-        // Create the slicer encrypter
-        var slicerEncrypter = _context.Resolve<ISlicerEncrypter>();
-        
-        // Create coordination components
         var fileUploadCoordinator = new FileUploadCoordinator(_context.Resolve<ILogger<FileUploadCoordinator>>());
         var semaphoreSlim = new SemaphoreSlim(1, 1);
         
-        // Create file slicer
-        var fileSlicer = new FileSlicer(slicerEncrypter, fileUploadCoordinator.AvailableSlices, 
-            semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, _context.Resolve<ILogger<FileSlicer>>());
+        var adaptiveUploadController = _context.Resolve<IAdaptiveUploadController>();
+
+        var initialSlots = Math.Min(Math.Max(1, adaptiveUploadController.CurrentParallelism), 4);
+        var uploadSlotsLimiter = new SemaphoreSlim(initialSlots, 4);
         
-        // Create file upload worker
         var policyFactory = _context.Resolve<IPolicyFactory>();
         var fileTransferApiClient = _context.Resolve<IFileTransferApiClient>();
         var strategies = _context.Resolve<IIndex<StorageProvider, IUploadStrategy>>();
         var fileUploadWorker = new FileUploadWorker(policyFactory, fileTransferApiClient, sharedFileDefinition,
             semaphoreSlim, fileUploadCoordinator.ExceptionOccurred, strategies,
-            fileUploadCoordinator.UploadingIsFinished, _context.Resolve<ILogger<FileUploadWorker>>());
+            fileUploadCoordinator.UploadingIsFinished, _context.Resolve<ILogger<FileUploadWorker>>(), adaptiveUploadController,
+            uploadSlotsLimiter);
         
-        // Create file part upload asserter
         var sessionService = _context.Resolve<ISessionService>();
         var filePartUploadAsserter = new FilePartUploadAsserter(fileTransferApiClient, sessionService);
         
+        var slicingManager = _context.Resolve<IUploadSlicingManager>();
         var fileUploadProcessor = _context.Resolve<IFileUploadProcessor>(
             new TypedParameter(typeof(ISlicerEncrypter), slicerEncrypter),
             new TypedParameter(typeof(IFileUploadCoordinator), fileUploadCoordinator),
-            new TypedParameter(typeof(IFileSlicer), fileSlicer),
             new TypedParameter(typeof(IFileUploadWorker), fileUploadWorker),
             new TypedParameter(typeof(IFilePartUploadAsserter), filePartUploadAsserter),
             new TypedParameter(typeof(string), localFileToUpload),
-            new TypedParameter(typeof(SemaphoreSlim), semaphoreSlim)
+            new TypedParameter(typeof(SemaphoreSlim), semaphoreSlim),
+            new TypedParameter(typeof(IAdaptiveUploadController), adaptiveUploadController),
+            new TypedParameter(typeof(IUploadSlicingManager), slicingManager),
+            new NamedParameter("uploadSlotsLimiter", uploadSlotsLimiter)
         );
         
         return fileUploadProcessor;

@@ -48,7 +48,7 @@ jobs:
           /k:"POW-Software_ByteSync"
           /o:"pow-software"
           /d:sonar.host.url="https://sonarcloud.io"
-          /d:sonar.login="$SONAR_TOKEN"
+          /d:sonar.token="$SONAR_TOKEN"
           /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
           /d:sonar.cs.vstest.reportsPaths="**/*.trx"
 
@@ -61,7 +61,7 @@ jobs:
       - name: SonarCloud End (publish)
         run: >
           dotnet sonarscanner end
-          /d:sonar.login="$SONAR_TOKEN"
+          /d:sonar.token="$SONAR_TOKEN"
 
   discover-tests:
     runs-on: ubuntu-latest

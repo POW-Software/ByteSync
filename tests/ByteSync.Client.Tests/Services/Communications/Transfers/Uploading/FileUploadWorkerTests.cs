@@ -28,9 +28,10 @@ public class FileUploadWorkerTests
     private ManualResetEvent _exceptionOccurred = null!;
     private ManualResetEvent _uploadingIsFinished = null!;
     private FileUploadWorker _fileUploadWorker = null!;
-    private Channel<FileUploaderSlice> _availableSlices= null!;
-    private UploadProgressState _progressState= null!;
-    private SemaphoreSlim _semaphoreSlim= null!;
+    private Channel<FileUploaderSlice> _availableSlices = null!;
+    private UploadProgressState _progressState = null!;
+    private SemaphoreSlim _semaphoreSlim = null!;
+    private Mock<IAdaptiveUploadController> _mockAdaptiveController = null!;
     
     [SetUp]
     public void SetUp()
@@ -50,7 +51,8 @@ public class FileUploadWorkerTests
         {
             Id = "test-file-id",
             SessionId = "test-session-id",
-            UploadedFileLength = 1024
+            UploadedFileLength = 1024,
+            SharedFileType = SharedFileTypes.FullSynchronization
         };
 
         _semaphoreSlim = new SemaphoreSlim(1, 1);
@@ -58,6 +60,7 @@ public class FileUploadWorkerTests
         _uploadingIsFinished = new ManualResetEvent(false);
         _availableSlices = Channel.CreateBounded<FileUploaderSlice>(8);
         _progressState = new UploadProgressState();
+        _mockAdaptiveController = new Mock<IAdaptiveUploadController>();
 
         _fileUploadWorker = new FileUploadWorker(
             _mockPolicyFactory.Object,
@@ -67,7 +70,8 @@ public class FileUploadWorkerTests
             _exceptionOccurred,
             _mockStrategies.Object,
             _uploadingIsFinished,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockAdaptiveController.Object);
 
         _mockPolicyFactory.Setup(x => x.BuildFileUploadPolicy()).Returns(_policy);
     }
@@ -86,20 +90,7 @@ public class FileUploadWorkerTests
         _fileUploadWorker.Should().NotBeNull();
     }
 
-    [Test]
-    public void StartUploadWorkers_ShouldStartSpecifiedNumberOfWorkers()
-    {
-        // Arrange
-        var workerCount = 3;
-
-        // Act
-        _fileUploadWorker.StartUploadWorkers(_availableSlices, workerCount, _progressState);
-
-        // Assert
-        // Note: This test verifies the method doesn't throw, but actual worker behavior
-        // would need integration testing with real channels and async operations
-        Assert.Pass("StartUploadWorkers completed without throwing");
-    }
+    
 
     [Test]
     public async Task UploadAvailableSlicesAsync_WhenUploadThrowsException_ShouldHandleError()
@@ -111,7 +102,7 @@ public class FileUploadWorkerTests
         _availableSlices.Writer.Complete();
 
         // Act
-        await _fileUploadWorker.UploadAvailableSlicesAsync(_availableSlices, _progressState);
+        await _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_availableSlices, _progressState);
 
         // Assert
         _mockLogger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.AtLeastOnce);
@@ -121,7 +112,7 @@ public class FileUploadWorkerTests
     [Test]
     [TestCase(StorageProvider.AzureBlobStorage, "https://test.blob.core.windows.net/test/upload")]
     [TestCase(StorageProvider.CloudflareR2, "https://test-bucket.r2.cloudflarestorage.com/test/upload")]
-    public async Task UploadAvailableSlicesAsync_WhenAllSlicesUploaded_ShouldSetUploadingFinished(StorageProvider storageProvider, string uploadUrl)
+    public async Task UploadAvailableSlicesAdaptiveAsync_WhenAllSlicesUploaded_ShouldSetUploadingFinished(StorageProvider storageProvider, string uploadUrl)
     {
         // Arrange
         var slice = new FileUploaderSlice(1, new MemoryStream());
@@ -144,7 +135,7 @@ public class FileUploadWorkerTests
         _availableSlices.Writer.Complete();
 
         // Act
-        await _fileUploadWorker.UploadAvailableSlicesAsync(_availableSlices, _progressState);
+        await _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_availableSlices, _progressState);
 
         // Assert
         // The upload should succeed and set uploading finished
@@ -158,7 +149,7 @@ public class FileUploadWorkerTests
     [Test]
     [TestCase(StorageProvider.AzureBlobStorage)]
     [TestCase(StorageProvider.CloudflareR2)]
-    public async Task UploadAvailableSlicesAsync_WhenUploadFails_ShouldHandleError(StorageProvider storageProvider)
+    public async Task UploadAvailableSlicesAdaptiveAsync_WhenUploadFails_ShouldHandleError(StorageProvider storageProvider)
     {
         // Arrange
         var slice = new FileUploaderSlice(1, new MemoryStream());
@@ -176,7 +167,7 @@ public class FileUploadWorkerTests
         _availableSlices.Writer.Complete();
 
         // Act
-        await _fileUploadWorker.UploadAvailableSlicesAsync(_availableSlices, _progressState);
+        await _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_availableSlices, _progressState);
 
         // Assert
         _mockLogger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.AtLeastOnce);
@@ -184,18 +175,18 @@ public class FileUploadWorkerTests
     }
 
     [Test]
-    public async Task UploadAvailableSlicesAsync_WithEmptyChannel_ShouldCompleteNormally()
+    public async Task UploadAvailableSlicesAdaptiveAsync_WithEmptyChannel_ShouldCompleteNormally()
     {
         // Arrange
         _availableSlices.Writer.Complete();
 
         // Act & Assert
-        var action = async () => await _fileUploadWorker.UploadAvailableSlicesAsync(_availableSlices, _progressState);
+        var action = async () => await _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_availableSlices, _progressState);
         await action.Should().NotThrowAsync();
     }
     
     [Test]
-    public async Task UploadAvailableSlicesAsync_WithNullResponse_ShouldThrowException()
+    public async Task UploadAvailableSlicesAdaptiveAsync_WithNullResponse_ShouldThrowException()
     {
         // Arrange
         var slice = new FileUploaderSlice(1, new MemoryStream());
@@ -204,7 +195,7 @@ public class FileUploadWorkerTests
         _availableSlices.Writer.Complete();
 
         // Act
-        await _fileUploadWorker.UploadAvailableSlicesAsync(_availableSlices, _progressState);
+        await _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_availableSlices, _progressState);
 
         // Assert
         _mockLogger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.AtLeastOnce);
@@ -212,33 +203,9 @@ public class FileUploadWorkerTests
     }
     
     [Test]
-    public void StartUploadWorkers_WithZeroWorkerCount_ShouldNotStartAnyWorkers()
-    {
-        // Act & Assert
-        var action = () => _fileUploadWorker.StartUploadWorkers(_availableSlices, 0, _progressState);
-        action.Should().NotThrow();
-    }
-
-    [Test]
-    public void StartUploadWorkers_WithNegativeWorkerCount_ShouldNotStartAnyWorkers()
-    {
-        // Act & Assert
-        var action = () => _fileUploadWorker.StartUploadWorkers(_availableSlices, -1, _progressState);
-        action.Should().NotThrow();
-    }
-
-    [Test]
-    public void StartUploadWorkers_WithLargeWorkerCount_ShouldStartWorkers()
-    {
-        // Act & Assert
-        var action = () => _fileUploadWorker.StartUploadWorkers(_availableSlices, 100, _progressState);
-        action.Should().NotThrow();
-    }
-
-    [Test]
     [TestCase(StorageProvider.AzureBlobStorage)]
     [TestCase(StorageProvider.CloudflareR2)]
-    public async Task UploadAvailableSlicesAsync_ShouldUseCorrectStrategyForStorageProvider(StorageProvider storageProvider)
+    public async Task UploadAvailableSlicesAdaptiveAsync_ShouldUseCorrectStrategyForStorageProvider(StorageProvider storageProvider)
     {
         // Arrange
         var slice = new FileUploaderSlice(1, new MemoryStream());
@@ -258,7 +225,7 @@ public class FileUploadWorkerTests
         _availableSlices.Writer.Complete();
 
         // Act
-        await _fileUploadWorker.UploadAvailableSlicesAsync(_availableSlices, _progressState);
+        await _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_availableSlices, _progressState);
 
         // Assert
         _mockStrategies.Verify(x => x[storageProvider], Times.Once);

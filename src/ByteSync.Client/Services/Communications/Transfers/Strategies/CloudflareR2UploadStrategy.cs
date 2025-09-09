@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.IO;
 using System.Threading;
 using ByteSync.Business.Communications.Transfers;
@@ -27,12 +29,35 @@ public class CloudflareR2UploadStrategy : IUploadStrategy
             slice.MemoryStream.Position = 0;
             
             using var httpClient = _httpClientFactory.CreateClient();
-            httpClient.Timeout = TimeSpan.FromMinutes(10);
+            httpClient.Timeout = TimeSpan.FromMinutes(1);
+            httpClient.DefaultRequestHeaders.ExpectContinue = false;
             
-            // Create a per-attempt copy so disposing the content won't close the original slice stream
-            using var attemptStream = new MemoryStream(slice.MemoryStream.ToArray(), writable: false);
-            using var content = new StreamContent(attemptStream);
-            using var response = await httpClient.PutAsync(storageLocation.Url, content, cancellationToken);
+            // Build ReadOnlyMemory without copying when possible; fallback to ToArray otherwise
+            ReadOnlyMemory<byte> rom;
+            if (slice.MemoryStream.TryGetBuffer(out var segment))
+            {
+                rom = new ReadOnlyMemory<byte>(segment.Array!, segment.Offset, segment.Count);
+            }
+            else
+            {
+                var copy = slice.MemoryStream.ToArray();
+                rom = copy.AsMemory();
+            }
+
+            using var content = new ReadOnlyMemoryContent(rom);
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            content.Headers.ContentLength = rom.Length;
+
+            using var request = new HttpRequestMessage(HttpMethod.Put, storageLocation.Url)
+            {
+                Content = content
+            };
+            request.Headers.ExpectContinue = false;
+
+            _logger.LogDebug("R2 PUT start: part {Part} sizeKB {SizeKb} host {Host}",
+                slice.PartNumber, Math.Round(rom.Length / 1024d), new Uri(storageLocation.Url).Host);
+
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
             if (response.IsSuccessStatusCode)
             {
@@ -42,6 +67,9 @@ public class CloudflareR2UploadStrategy : IUploadStrategy
             }
             else
             {
+                string? body = null;
+                try { body = await response.Content.ReadAsStringAsync(cancellationToken); } catch { }
+                _logger.LogError("R2 PUT failed: status {Status} body: {BodySnippet}", (int)response.StatusCode, body != null ? body.Substring(0, Math.Min(body.Length, 256)) : "<empty>");
                 return UploadFileResponse.Failure(
                     statusCode: (int)response.StatusCode,
                     errorMessage: $"Upload failed with status code: {response.StatusCode}"
