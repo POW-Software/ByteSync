@@ -29,14 +29,24 @@ public class CloudflareR2UploadStrategy : IUploadStrategy
             slice.MemoryStream.Position = 0;
             
             using var httpClient = _httpClientFactory.CreateClient();
-            httpClient.Timeout = TimeSpan.FromMinutes(10);
+            httpClient.Timeout = TimeSpan.FromMinutes(1);
             httpClient.DefaultRequestHeaders.ExpectContinue = false;
             
-            // Create a per-attempt copy so disposing the content won't close the original slice stream
-            using var attemptStream = new MemoryStream(slice.MemoryStream.ToArray(), writable: false);
-            using var content = new StreamContent(attemptStream);
+            // Build ReadOnlyMemory without copying when possible; fallback to ToArray otherwise
+            ReadOnlyMemory<byte> rom;
+            if (slice.MemoryStream.TryGetBuffer(out var segment))
+            {
+                rom = new ReadOnlyMemory<byte>(segment.Array!, segment.Offset, segment.Count);
+            }
+            else
+            {
+                var copy = slice.MemoryStream.ToArray();
+                rom = copy.AsMemory();
+            }
+
+            using var content = new ReadOnlyMemoryContent(rom);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-            content.Headers.ContentLength = attemptStream.Length;
+            content.Headers.ContentLength = rom.Length;
 
             using var request = new HttpRequestMessage(HttpMethod.Put, storageLocation.Url)
             {
@@ -45,7 +55,7 @@ public class CloudflareR2UploadStrategy : IUploadStrategy
             request.Headers.ExpectContinue = false;
 
             _logger.LogDebug("R2 PUT start: part {Part} sizeKB {SizeKb} host {Host}",
-                slice.PartNumber, Math.Round(attemptStream.Length / 1024d), new Uri(storageLocation.Url).Host);
+                slice.PartNumber, Math.Round(rom.Length / 1024d), new Uri(storageLocation.Url).Host);
 
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
