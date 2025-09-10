@@ -13,7 +13,7 @@ public class SynchronizationProgress
         SynchronizedVolume = 0;
     }
 
-    public string CloudSessionId { get; set; }
+    public string SessionId { get; set; }
 
     public long Version { get; set; }
         
@@ -21,10 +21,12 @@ public class SynchronizationProgress
     
     public long ExchangedVolume { get; set; }
     
-    // New volume tracking properties
     public long ActualUploadedVolume { get; set; }
+    
     public long ActualDownloadedVolume { get; set; }
+    
     public long LocalCopyTransferredVolume { get; set; }
+    
     public long SynchronizedVolume { get; set; }
     
     public long FinishedActionsCount { get; set; }

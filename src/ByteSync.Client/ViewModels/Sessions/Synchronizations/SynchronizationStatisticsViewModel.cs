@@ -196,6 +196,11 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
         {
             return;
         }
+        
+        if (synchronizationProgress.SessionId != _sessionService.SessionId)
+        {
+            return;
+        }
 
         HandledActions = synchronizationProgress.FinishedActionsCount;
         Errors = synchronizationProgress.ErrorActionsCount;

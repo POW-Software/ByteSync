@@ -142,6 +142,7 @@ public class SynchronizationService : ISynchronizationService
         
         if (synchronizationProgressPush.Version > synchronizationProgress.Version)
         {
+            synchronizationProgress.SessionId = synchronizationProgressPush.SessionId;
             synchronizationProgress.ExchangedVolume = synchronizationProgressPush.ExchangedVolume;
             synchronizationProgress.ProcessedVolume = synchronizationProgressPush.ProcessedVolume;
             synchronizationProgress.ActualUploadedVolume = synchronizationProgressPush.ActualUploadedVolume;
