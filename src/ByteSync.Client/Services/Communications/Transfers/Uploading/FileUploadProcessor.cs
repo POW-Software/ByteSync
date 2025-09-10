@@ -2,7 +2,9 @@ using System.Threading;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
+using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Communications.Transfers.Uploading;
 
@@ -13,7 +15,8 @@ public class FileUploadProcessor : IFileUploadProcessor
     private readonly IFileUploadCoordinator _fileUploadCoordinator;
     private readonly IUploadSlicingManager _uploadSlicingManager;
     private readonly IFileUploadWorker _fileUploadWorker;
-    private readonly IFilePartUploadAsserter _filePartUploadAsserter;
+    private readonly IFileTransferApiClient _fileTransferApiClient;
+    private readonly ISessionService _sessionService;
     private readonly string? _localFileToUpload;
     private readonly SemaphoreSlim _semaphoreSlim;
     private readonly IAdaptiveUploadController _adaptiveUploadController;
@@ -32,7 +35,8 @@ public class FileUploadProcessor : IFileUploadProcessor
         ILogger<FileUploadProcessor> logger,
         IFileUploadCoordinator fileUploadCoordinator,
         IFileUploadWorker fileUploadWorker,
-        IFilePartUploadAsserter filePartUploadAsserter,
+        IFileTransferApiClient fileTransferApiClient,
+        ISessionService sessionService,
         string? localFileToUpload,
         SemaphoreSlim semaphoreSlim,
         IAdaptiveUploadController adaptiveUploadController,
@@ -43,7 +47,8 @@ public class FileUploadProcessor : IFileUploadProcessor
         _logger = logger;
         _fileUploadCoordinator = fileUploadCoordinator;
         _fileUploadWorker = fileUploadWorker;
-        _filePartUploadAsserter = filePartUploadAsserter;
+        _fileTransferApiClient = fileTransferApiClient;
+        _sessionService = sessionService;
         _localFileToUpload = localFileToUpload;
         _semaphoreSlim = semaphoreSlim;
         _adaptiveUploadController = adaptiveUploadController;
@@ -57,7 +62,8 @@ public class FileUploadProcessor : IFileUploadProcessor
         ILogger<FileUploadProcessor> logger,
         IFileUploadCoordinator fileUploadCoordinator,
         IFileUploadWorker fileUploadWorker,
-        IFilePartUploadAsserter filePartUploadAsserter,
+        IFileTransferApiClient fileTransferApiClient,
+        ISessionService sessionService,
         string? localFileToUpload,
         SemaphoreSlim semaphoreSlim,
         IAdaptiveUploadController adaptiveUploadController,
@@ -67,7 +73,8 @@ public class FileUploadProcessor : IFileUploadProcessor
             logger,
             fileUploadCoordinator,
             fileUploadWorker,
-            filePartUploadAsserter,
+            fileTransferApiClient,
+            sessionService,
             localFileToUpload,
             semaphoreSlim,
             adaptiveUploadController,
@@ -132,13 +139,24 @@ public class FileUploadProcessor : IFileUploadProcessor
         {
             var source = _localFileToUpload ?? "a stream";
             var lastException = _progressState.Exceptions[^1];
-            throw new InvalidOperationException($"An error occured while uploading '{source}' / sharedFileDefinition.Id:{sharedFileDefinition.Id}",
+
+            throw new InvalidOperationException(
+                $"An error occured while uploading '{source}' / sharedFileDefinition.Id:{sharedFileDefinition.Id}",
                 lastException);
         }
 
         var totalCreatedSlices = GetTotalCreatedSlices();
-        await _filePartUploadAsserter.AssertUploadIsFinished(sharedFileDefinition, totalCreatedSlices);
-        
+        var sessionId = !string.IsNullOrWhiteSpace(_sessionService.SessionId)
+            ? _sessionService.SessionId
+            : sharedFileDefinition.SessionId;
+        var transferParameters = new TransferParameters
+        {
+            SessionId = sessionId,
+            SharedFileDefinition = sharedFileDefinition,
+            TotalParts = totalCreatedSlices
+        };
+        await _fileTransferApiClient.AssertUploadIsFinished(transferParameters);
+
         _progressState.EndTimeUtc = DateTimeOffset.UtcNow;
         var durationMs = (_progressState.EndTimeUtc - _progressState.StartTimeUtc)?.TotalMilliseconds;
         var totalBytes = _progressState.TotalUploadedBytes;
@@ -171,7 +189,8 @@ public class FileUploadProcessor : IFileUploadProcessor
             }
 
             _grantedSlots = desired;
-            _logger.LogDebug("UploadAdjuster: file {FileId} slots increased {Prev}->{Now} (desired {Desired})", _sharedFileId, prev, _grantedSlots, desired);
+            _logger.LogDebug("UploadAdjuster: file {FileId} slots increased {Prev}->{Now} (desired {Desired})", _sharedFileId, prev,
+                _grantedSlots, desired);
         }
         else if (desired < _grantedSlots)
         {
@@ -189,14 +208,17 @@ public class FileUploadProcessor : IFileUploadProcessor
                     break;
                 }
             }
+
             _grantedSlots -= taken;
             if (taken > 0)
             {
-                _logger.LogDebug("UploadAdjuster: file {FileId} slots decreased {Prev}->{Now} (desired {Desired})", _sharedFileId, prev, _grantedSlots, desired);
+                _logger.LogDebug("UploadAdjuster: file {FileId} slots decreased {Prev}->{Now} (desired {Desired})", _sharedFileId, prev,
+                    _grantedSlots, desired);
             }
             else
             {
-                _logger.LogDebug("UploadAdjuster: file {FileId} requested decrease but no slot available to take (prev {Prev}, desired {Desired}, current {Current})",
+                _logger.LogDebug(
+                    "UploadAdjuster: file {FileId} requested decrease but no slot available to take (prev {Prev}, desired {Desired}, current {Current})",
                     _sharedFileId, prev, desired, _grantedSlots);
             }
         }
@@ -212,7 +234,9 @@ public class FileUploadProcessor : IFileUploadProcessor
                 _startedWorkers++;
                 _ = _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_fileUploadCoordinator.AvailableSlices, _progressState!);
             }
-            _logger.LogDebug("UploadAdjuster: file {FileId} workers started +{Added}, total {Total}, desired {Desired}", _sharedFileId, toStart, _startedWorkers, desired);
+
+            _logger.LogDebug("UploadAdjuster: file {FileId} workers started +{Added}, total {Total}, desired {Desired}", _sharedFileId,
+                toStart, _startedWorkers, desired);
         }
     }
 
@@ -241,4 +265,4 @@ public class FileUploadProcessor : IFileUploadProcessor
             _semaphoreSlim.Release();
         }
     }
-} 
+}
