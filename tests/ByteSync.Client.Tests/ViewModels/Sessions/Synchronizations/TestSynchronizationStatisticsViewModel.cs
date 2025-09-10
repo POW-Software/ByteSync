@@ -1,7 +1,8 @@
+using System.Reactive.Subjects;
 using ByteSync.Business.Actions.Shared;
+using ByteSync.Business.Misc;
 using ByteSync.Business.Synchronizations;
 using ByteSync.Common.Business.Synchronizations;
-using ByteSync.Business.Misc;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Interfaces.Repositories;
@@ -9,10 +10,9 @@ using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.TestsCommon;
 using ByteSync.ViewModels.Sessions.Synchronizations;
 using DynamicData;
+using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using FluentAssertions;
-using System.Reactive.Subjects;
 
 namespace ByteSync.Tests.ViewModels.Sessions.Synchronizations;
 
@@ -91,6 +91,7 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
 
         var progress = new SynchronizationProgress
         {
+            SessionId = "id",
             Version = 1,
             FinishedActionsCount = 5,
             ErrorActionsCount = 1,
@@ -99,6 +100,8 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
         };
         _processData.SynchronizationProgress.OnNext(progress);
 
+        // Allow reactive pipeline (ObserveOn MainThread) to process
+        SpinWait.SpinUntil(() => _viewModel.HandledActions == 5, TimeSpan.FromSeconds(1));
         _viewModel.HandledActions.Should().Be(5);
         _viewModel.Errors.Should().Be(1);
         _viewModel.ProcessedVolume.Should().Be(10);
