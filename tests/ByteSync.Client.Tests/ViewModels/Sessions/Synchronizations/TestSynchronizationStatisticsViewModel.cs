@@ -66,10 +66,10 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
         var start = new Synchronization { Started = DateTimeOffset.Now };
         _processData.SynchronizationStart.OnNext(start);
 
-        _viewModel.StartDateTime.Should().Be(start.Started.LocalDateTime);
-        _viewModel.HandledActions.Should().Be(0);
-        _viewModel.Errors.Should().Be(0);
-        _viewModel.ElapsedTime.Should().Be(TimeSpan.Zero);
+        _viewModel.ShouldEventuallyBe(vm => vm.StartDateTime, start.Started.LocalDateTime);
+        _viewModel.ShouldEventuallyBe(vm => vm.HandledActions, 0L);
+        _viewModel.ShouldEventuallyBe(vm => vm.Errors, 0L);
+        _viewModel.ShouldEventuallyBe(vm => vm.ElapsedTime, TimeSpan.Zero);
     }
 
     [Test]
@@ -80,7 +80,7 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
         _processData.TotalActionsToProcess = 42;
         _processData.SynchronizationDataTransmitted.OnNext(true);
 
-        _viewModel.TreatableActions.Should().Be(42);
+        _viewModel.ShouldEventuallyBe(vm => vm.TreatableActions, 42L);
     }
 
     [Test]
