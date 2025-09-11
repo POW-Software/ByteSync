@@ -1,3 +1,4 @@
+using System.Reactive.Linq;
 using ByteSync.Business;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Synchronizations;
@@ -5,14 +6,14 @@ using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Tests.Helpers;
 using ByteSync.TestsCommon;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Sessions.Synchronizations;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
-using FluentAssertions;
-using System.Reactive.Linq;
-using Microsoft.Extensions.Logging;
 
 namespace ByteSync.Tests.ViewModels.Sessions.Synchronizations;
 
@@ -38,7 +39,7 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
         _dialogService = new Mock<IDialogService>();
         _logger = new Mock<ILogger<SynchronizationMainStatusViewModel>>();
 
-        _viewModel = new SynchronizationMainStatusViewModel(sessionService.Object, _synchronizationService.Object, 
+        _viewModel = new SynchronizationMainStatusViewModel(sessionService.Object, _synchronizationService.Object,
             _dialogService.Object, _logger.Object);
     }
 
@@ -55,10 +56,10 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
 
         _processData.SynchronizationStart.OnNext(new Synchronization { Started = DateTimeOffset.Now });
 
-        _viewModel.IsSynchronizationRunning.Should().BeTrue();
-        _viewModel.IsMainProgressRingVisible.Should().BeTrue();
-        _viewModel.IsMainCheckVisible.Should().BeFalse();
-        _viewModel.MainStatus.Should().Be("Synchronization running");
+        _viewModel.ShouldEventuallyBe(vm => vm.IsSynchronizationRunning, true);
+        _viewModel.ShouldEventuallyBe(vm => vm.IsMainProgressRingVisible, true);
+        _viewModel.ShouldEventuallyBe(vm => vm.IsMainCheckVisible, false);
+        _viewModel.ShouldEventuallyBe(vm => vm.MainStatus, "Synchronization running");
     }
 
     [Test]
@@ -73,11 +74,11 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
             Status = SynchronizationEndStatuses.Abortion
         });
 
-        _viewModel.IsSynchronizationRunning.Should().BeFalse();
-        _viewModel.MainStatus.Should().Be("Synchronization aborted");
-        _viewModel.MainIcon.Should().Be("SolidXCircle");
-        _viewModel.IsMainProgressRingVisible.Should().BeFalse();
-        _viewModel.IsMainCheckVisible.Should().BeTrue();
+        _viewModel.ShouldEventuallyBe(vm => vm.IsSynchronizationRunning, false);
+        _viewModel.ShouldEventuallyBe(vm => vm.MainStatus, "Synchronization aborted");
+        _viewModel.ShouldEventuallyBe(vm => vm.MainIcon, "SolidXCircle");
+        _viewModel.ShouldEventuallyBe(vm => vm.IsMainProgressRingVisible, false);
+        _viewModel.ShouldEventuallyBe(vm => vm.IsMainCheckVisible, true);
     }
 
     [Test]
@@ -88,7 +89,7 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
         _processData.SynchronizationStart.OnNext(new Synchronization { Started = DateTimeOffset.Now });
         _processData.SynchronizationAbortRequest.OnNext(new SynchronizationAbortRequest());
 
-        _viewModel.MainStatus.Should().Be("Synchronization abort requested");
+        _viewModel.ShouldEventuallyBe(vm => vm.MainStatus, "Synchronization abort requested");
     }
 
     [Test]
@@ -103,8 +104,8 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
             Status = SynchronizationEndStatuses.Error
         });
 
-        _viewModel.MainStatus.Should().Be("Error during synchronization");
-        _viewModel.MainIcon.Should().Be("SolidXCircle");
+        _viewModel.ShouldEventuallyBe(vm => vm.MainStatus, "Error during synchronization");
+        _viewModel.ShouldEventuallyBe(vm => vm.MainIcon, "SolidXCircle");
     }
 
     [Test]
@@ -119,15 +120,16 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
             Status = SynchronizationEndStatuses.Regular
         });
 
-        _viewModel.MainStatus.Should().Be("Synchronization done!");
-        _viewModel.MainIcon.Should().Be("SolidCheckCircle");
+        _viewModel.ShouldEventuallyBe(vm => vm.MainStatus, "Synchronization done!");
+        _viewModel.ShouldEventuallyBe(vm => vm.MainIcon, "SolidCheckCircle");
     }
 
     [Test]
     public async Task AbortSynchronizationCommand_ShouldAbort_WhenConfirmed()
     {
         var messageBox = new MessageBoxViewModel();
-        _dialogService.Setup(d => d.CreateMessageBoxViewModel(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string[]>())).Returns(messageBox);
+        _dialogService.Setup(d => d.CreateMessageBoxViewModel(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string[]>()))
+            .Returns(messageBox);
         _dialogService.Setup(d => d.ShowMessageBoxAsync(messageBox)).ReturnsAsync(MessageBoxResult.Yes);
 
         await _viewModel.AbortSynchronizationCommand.Execute();
@@ -139,7 +141,8 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
     public async Task AbortSynchronizationCommand_ShouldNotAbort_WhenCancelled()
     {
         var messageBox = new MessageBoxViewModel();
-        _dialogService.Setup(d => d.CreateMessageBoxViewModel(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string[]>())).Returns(messageBox);
+        _dialogService.Setup(d => d.CreateMessageBoxViewModel(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string[]>()))
+            .Returns(messageBox);
         _dialogService.Setup(d => d.ShowMessageBoxAsync(messageBox)).ReturnsAsync(MessageBoxResult.No);
 
         await _viewModel.AbortSynchronizationCommand.Execute();

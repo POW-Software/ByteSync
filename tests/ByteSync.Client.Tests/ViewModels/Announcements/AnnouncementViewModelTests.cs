@@ -6,6 +6,7 @@ using ByteSync.Common.Business.Announcements;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Localizations;
+using ByteSync.Tests.Helpers;
 using ByteSync.TestsCommon;
 using ByteSync.ViewModels.Announcements;
 using DynamicData;
@@ -104,11 +105,11 @@ public class AnnouncementViewModelTests : AbstractTester
         var changeSet = new ChangeSet<Announcement, string>();
         changeSet.Add(new Change<Announcement, string>(ChangeReason.Add, "1", announcements[0]));
         changeSet.Add(new Change<Announcement, string>(ChangeReason.Add, "2", announcements[1]));
-        
+
         mockObservableCache
             .Setup(x => x.Connect(It.IsAny<Func<Announcement, bool>>(), It.IsAny<bool>()))
             .Returns(Observable.Return(changeSet));
-        
+
         _mockAnnouncementRepository.Setup(x => x.ObservableCache)
             .Returns(mockObservableCache.Object);
 
@@ -153,11 +154,11 @@ public class AnnouncementViewModelTests : AbstractTester
         var changeSet = new ChangeSet<Announcement, string>();
         changeSet.Add(new Change<Announcement, string>(ChangeReason.Add, "1", announcements[0]));
         changeSet.Add(new Change<Announcement, string>(ChangeReason.Add, "2", announcements[1]));
-        
+
         mockObservableCache
             .Setup(x => x.Connect(It.IsAny<Func<Announcement, bool>>(), It.IsAny<bool>()))
             .Returns(Observable.Return(changeSet));
-        
+
         _mockAnnouncementRepository.Setup(x => x.ObservableCache)
             .Returns(mockObservableCache.Object);
 
@@ -204,11 +205,11 @@ public class AnnouncementViewModelTests : AbstractTester
         changeSet.Add(new Change<Announcement, string>(ChangeReason.Add, "1", announcements[0]));
         changeSet.Add(new Change<Announcement, string>(ChangeReason.Add, "2", announcements[1]));
         changeSet.Add(new Change<Announcement, string>(ChangeReason.Add, "3", announcements[2]));
-        
+
         mockObservableCache
             .Setup(x => x.Connect(It.IsAny<Func<Announcement, bool>>(), It.IsAny<bool>()))
             .Returns(Observable.Return(changeSet));
-        
+
         _mockAnnouncementRepository.Setup(x => x.ObservableCache)
             .Returns(mockObservableCache.Object);
 
@@ -239,8 +240,8 @@ public class AnnouncementViewModelTests : AbstractTester
             new()
             {
                 Id = "1",
-                Message = new Dictionary<string, string> 
-                { 
+                Message = new Dictionary<string, string>
+                {
                     { "en", "English message" },
                     { "fr", "Message français" }
                 }
@@ -251,11 +252,11 @@ public class AnnouncementViewModelTests : AbstractTester
         var mockObservableCache = new Mock<IObservableCache<Announcement, string>>();
         var changeSet = new ChangeSet<Announcement, string>();
         changeSet.Add(new Change<Announcement, string>(ChangeReason.Add, "1", announcements[0]));
-        
+
         mockObservableCache
             .Setup(x => x.Connect(It.IsAny<Func<Announcement, bool>>(), It.IsAny<bool>()))
             .Returns(Observable.Return(changeSet));
-        
+
         _mockAnnouncementRepository.Setup(x => x.ObservableCache)
             .Returns(mockObservableCache.Object);
 
@@ -286,8 +287,8 @@ public class AnnouncementViewModelTests : AbstractTester
             new()
             {
                 Id = "1",
-                Message = new Dictionary<string, string> 
-                { 
+                Message = new Dictionary<string, string>
+                {
                     { "en", "English message" },
                     { "de", "Deutsche Nachricht" }
                 }
@@ -298,11 +299,11 @@ public class AnnouncementViewModelTests : AbstractTester
         var mockObservableCache = new Mock<IObservableCache<Announcement, string>>();
         var changeSet = new ChangeSet<Announcement, string>();
         changeSet.Add(new Change<Announcement, string>(ChangeReason.Add, "1", announcements[0]));
-        
+
         mockObservableCache
             .Setup(x => x.Connect(It.IsAny<Func<Announcement, bool>>(), It.IsAny<bool>()))
             .Returns(Observable.Return(changeSet));
-        
+
         _mockAnnouncementRepository.Setup(x => x.ObservableCache)
             .Returns(mockObservableCache.Object);
 
@@ -333,8 +334,8 @@ public class AnnouncementViewModelTests : AbstractTester
             new()
             {
                 Id = "1",
-                Message = new Dictionary<string, string> 
-                { 
+                Message = new Dictionary<string, string>
+                {
                     { "en", "" },
                     { "fr", "Message français" }
                 }
@@ -345,11 +346,11 @@ public class AnnouncementViewModelTests : AbstractTester
         var mockObservableCache = new Mock<IObservableCache<Announcement, string>>();
         var changeSet = new ChangeSet<Announcement, string>();
         changeSet.Add(new Change<Announcement, string>(ChangeReason.Add, "1", announcements[0]));
-        
+
         mockObservableCache
             .Setup(x => x.Connect(It.IsAny<Func<Announcement, bool>>(), It.IsAny<bool>()))
             .Returns(Observable.Return(changeSet));
-        
+
         _mockAnnouncementRepository.Setup(x => x.ObservableCache)
             .Returns(mockObservableCache.Object);
 
@@ -385,11 +386,11 @@ public class AnnouncementViewModelTests : AbstractTester
         var mockObservableCache = new Mock<IObservableCache<Announcement, string>>();
         var changeSet = new ChangeSet<Announcement, string>();
         changeSet.Add(new Change<Announcement, string>(ChangeReason.Add, "1", announcements[0]));
-        
+
         mockObservableCache
             .Setup(x => x.Connect(It.IsAny<Func<Announcement, bool>>(), It.IsAny<bool>()))
             .Returns(Observable.Return(changeSet));
-        
+
         _mockAnnouncementRepository.Setup(x => x.ObservableCache)
             .Returns(mockObservableCache.Object);
 
@@ -425,11 +426,11 @@ public class AnnouncementViewModelTests : AbstractTester
         var mockObservableCache = new Mock<IObservableCache<Announcement, string>>();
         var changeSet = new ChangeSet<Announcement, string>();
         changeSet.Add(new Change<Announcement, string>(ChangeReason.Add, "1", announcements[0]));
-        
+
         mockObservableCache
             .Setup(x => x.Connect(It.IsAny<Func<Announcement, bool>>(), It.IsAny<bool>()))
             .Returns(Observable.Return(changeSet));
-        
+
         _mockAnnouncementRepository.Setup(x => x.ObservableCache)
             .Returns(mockObservableCache.Object);
 
@@ -459,7 +460,7 @@ public class AnnouncementViewModelTests : AbstractTester
         mockObservableCache
             .Setup(x => x.Connect(It.IsAny<Func<Announcement, bool>>(), It.IsAny<bool>()))
             .Returns(Observable.Empty<IChangeSet<Announcement, string>>());
-        
+
         _mockAnnouncementRepository.Setup(x => x.ObservableCache)
             .Returns(mockObservableCache.Object);
 
@@ -510,11 +511,11 @@ public class AnnouncementViewModelTests : AbstractTester
         var mockObservableCache = new Mock<IObservableCache<Announcement, string>>();
         var initialChangeSet = new ChangeSet<Announcement, string>();
         initialChangeSet.Add(new Change<Announcement, string>(ChangeReason.Add, "1", announcements[0]));
-        
+
         mockObservableCache
             .Setup(x => x.Connect(It.IsAny<Func<Announcement, bool>>(), It.IsAny<bool>()))
             .Returns(Observable.Return(initialChangeSet));
-        
+
         _mockAnnouncementRepository.Setup(x => x.ObservableCache)
             .Returns(mockObservableCache.Object);
 
@@ -542,7 +543,7 @@ public class AnnouncementViewModelTests : AbstractTester
         var updatedChangeSet = new ChangeSet<Announcement, string>();
         updatedChangeSet.Add(new Change<Announcement, string>(ChangeReason.Remove, "1", announcements[0]));
         updatedChangeSet.Add(new Change<Announcement, string>(ChangeReason.Add, "2", newAnnouncements[0]));
-        
+
         mockObservableCache
             .Setup(x => x.Connect(It.IsAny<Func<Announcement, bool>>(), It.IsAny<bool>()))
             .Returns(Observable.Return(updatedChangeSet));
@@ -554,8 +555,8 @@ public class AnnouncementViewModelTests : AbstractTester
         // Trigger a refresh by simulating a culture change
         _cultureSubject.OnNext(new CultureDefinition { Code = "en" });
 
-        // Assert
-        _announcementViewModel.Announcements.Should().HaveCount(1);
+        // Assert (reactive update)
+        _announcementViewModel.ShouldEventuallyBe(vm => vm.Announcements.Count, 1);
         _announcementViewModel.Announcements[0].Id.Should().Be("2");
         _announcementViewModel.Announcements[0].Message.Should().Be("New message");
     }
@@ -569,8 +570,8 @@ public class AnnouncementViewModelTests : AbstractTester
             new()
             {
                 Id = "1",
-                Message = new Dictionary<string, string> 
-                { 
+                Message = new Dictionary<string, string>
+                {
                     { "en", "English message" },
                     { "fr", "Message français" }
                 }
@@ -581,11 +582,11 @@ public class AnnouncementViewModelTests : AbstractTester
         var mockObservableCache = new Mock<IObservableCache<Announcement, string>>();
         var changeSet = new ChangeSet<Announcement, string>();
         changeSet.Add(new Change<Announcement, string>(ChangeReason.Add, "1", announcements[0]));
-        
+
         mockObservableCache
             .Setup(x => x.Connect(It.IsAny<Func<Announcement, bool>>(), It.IsAny<bool>()))
             .Returns(Observable.Return(changeSet));
-        
+
         _mockAnnouncementRepository.Setup(x => x.ObservableCache)
             .Returns(mockObservableCache.Object);
 
@@ -605,8 +606,8 @@ public class AnnouncementViewModelTests : AbstractTester
             .Returns(new CultureDefinition { Code = "fr" });
         _cultureSubject.OnNext(new CultureDefinition { Code = "fr" });
 
-        // Assert
-        _announcementViewModel.Announcements.Should().HaveCount(1);
+        // Assert (reactive update)
+        _announcementViewModel.ShouldEventuallyBe(vm => vm.Announcements.Count, 1);
         _announcementViewModel.Announcements[0].Message.Should().Be("Message français");
     }
 
@@ -719,11 +720,11 @@ public class AnnouncementViewModelTests : AbstractTester
         var mockObservableCache = new Mock<IObservableCache<Announcement, string>>();
         var changeSet = new ChangeSet<Announcement, string>();
         changeSet.Add(new Change<Announcement, string>(ChangeReason.Add, "1", announcements[0]));
-        
+
         mockObservableCache
             .Setup(x => x.Connect(It.IsAny<Func<Announcement, bool>>(), It.IsAny<bool>()))
             .Returns(Observable.Return(changeSet));
-        
+
         _mockAnnouncementRepository.Setup(x => x.ObservableCache)
             .Returns(mockObservableCache.Object);
 
@@ -738,4 +739,4 @@ public class AnnouncementViewModelTests : AbstractTester
         _announcementViewModel.IsVisible.Should().BeTrue();
         _announcementViewModel.Announcements.Should().HaveCount(1);
     }
-} 
+}
