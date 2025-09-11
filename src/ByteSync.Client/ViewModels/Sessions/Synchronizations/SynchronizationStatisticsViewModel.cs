@@ -1,16 +1,16 @@
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using ByteSync.Assets.Resources;
+using ByteSync.Business.Misc;
 using ByteSync.Business.Synchronizations;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
+using DynamicData;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using DynamicData;
-using ByteSync.Business.Misc;
 
 namespace ByteSync.ViewModels.Sessions.Synchronizations;
 
@@ -18,8 +18,8 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
 {
     private readonly ISynchronizationService _synchronizationService = null!;
     private readonly ISessionService _sessionService = null!;
-    private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository= null!;
-    private readonly ITimeTrackingCache _timeTrackingCache= null!;
+    private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository = null!;
+    private readonly ITimeTrackingCache _timeTrackingCache = null!;
 
     private long? LastVersion { get; set; }
 
@@ -46,9 +46,10 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
 
         // Observable pour EfficiencyRatio
         this.WhenAnyValue(x => x.SynchronizedVolume, x => x.ActualUploadedVolume, x => x.ActualDownloadedVolume)
-            .Select(x => 
+            .Select(x =>
             {
                 var total = x.Item2 + x.Item3;
+
                 return total > 0 ? (double)x.Item1 / total : 0;
             })
             .ToPropertyEx(this, x => x.EfficiencyRatio);
@@ -163,8 +164,9 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
     public long SynchronizedVolume { get; set; }
 
     // Propriétés calculées pour les ratios
-    public extern double EfficiencyRatio { [ObservableAsProperty] get; }  // SynchronizedVolume / (ActualUploaded + ActualDownloaded)
-    public extern double LocalCopyPercentage { [ObservableAsProperty] get; }  // LocalCopyTransferred / SynchronizedVolume * 100
+    public extern double EfficiencyRatio { [ObservableAsProperty] get; } // SynchronizedVolume / (ActualUploaded + ActualDownloaded)
+
+    public extern double LocalCopyPercentage { [ObservableAsProperty] get; } // LocalCopyTransferred / SynchronizedVolume * 100
 
     public extern long Successes { [ObservableAsProperty] get; }
 
@@ -203,7 +205,7 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
         {
             return;
         }
-        
+
         if (synchronizationProgress.SessionId != _sessionService.SessionId)
         {
             return;

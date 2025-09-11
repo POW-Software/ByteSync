@@ -3,7 +3,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:synchronizations="clr-namespace:ByteSync.ViewModels.Sessions.Synchronizations"
-             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
              xmlns:converters="clr-namespace:ByteSync.Services.Converters"
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="200"
@@ -19,8 +18,8 @@
 
     <UserControl.Styles>
         <Style Selector="Label.Description">
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Margin" Value="0 0 24 0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Margin" Value="0 0 24 0" />
         </Style>
     </UserControl.Styles>
 
