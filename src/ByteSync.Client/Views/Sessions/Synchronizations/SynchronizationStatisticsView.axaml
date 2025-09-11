@@ -24,110 +24,90 @@
         </Style>
     </UserControl.Styles>
 
-    <Grid HorizontalAlignment="Left" Margin="3 12 3 0" VerticalAlignment="Center">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="75"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
+    <WrapPanel HorizontalAlignment="Left" Margin="3 0 3 0" VerticalAlignment="Center" Orientation="Horizontal">
+        <!-- Column 1: Time info -->
+        <Grid Margin="0 12 36 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_Start}" Classes="Description" />
+            <Label Grid.Row="0" Grid.Column="1" Content="{Binding StartDateTime, StringFormat={}{0:G}}" HorizontalContentAlignment="Right" />
 
+            <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_ElapsedTime}" Classes="Description" />
+            <Label Grid.Row="1" Grid.Column="1" Content="{Binding ElapsedTime, StringFormat={}{0:c}}" HorizontalContentAlignment="Right" />
 
-        <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_Start}" Classes="Description" />
-        <Label Grid.Row="1" Grid.Column="1" Content="{Binding StartDateTime, StringFormat={}{0:G}}" HorizontalContentAlignment="Right" />
+            <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_RemainingTime}" Classes="Description" />
+            <Label Grid.Row="2" Grid.Column="1" Content="{Binding RemainingTime, StringFormat={}{0:c}}" HorizontalContentAlignment="Right" />
 
-        <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_ElapsedTime}" Classes="Description" />
-        <Label Grid.Row="2" Grid.Column="1" Content="{Binding ElapsedTime, StringFormat={}{0:c}}" HorizontalContentAlignment="Right" />
+            <Label Grid.Row="3" Grid.Column="0" Content="{Binding EstimatedEndDateTimeLabel}" Classes="Description" />
+            <Label Grid.Row="3" Grid.Column="1" Content="{Binding EstimatedEndDateTime, StringFormat={}{0:G}}"
+                   HorizontalContentAlignment="Right" />
+        </Grid>
 
-        <Label Grid.Row="3" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_RemainingTime}" Classes="Description" />
-        <Label Grid.Row="3" Grid.Column="1" Content="{Binding RemainingTime, StringFormat={}{0:c}}" HorizontalContentAlignment="Right" />
+        <!-- Column 2: Actions -->
+        <Grid Margin="0 12 36 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <Label Grid.Row="4" Grid.Column="0" Content="{Binding EstimatedEndDateTimeLabel}" Classes="Description" />
-        <Label Grid.Row="4" Grid.Column="1" Content="{Binding EstimatedEndDateTime, StringFormat={}{0:G}}" HorizontalContentAlignment="Right" />
+            <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_HandledActions}" Classes="Description" />
+            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Label Content="{Binding HandledActions}" HorizontalContentAlignment="Left" />
+                <Label Content="/" HorizontalContentAlignment="Left" />
+                <Label Content="{Binding TreatableActions}" HorizontalContentAlignment="Left" />
+            </StackPanel>
 
-        <Label Grid.Row="1" Grid.Column="3" Content="{localizations:Loc SynchronizationMain_HandledActions}" Classes="Description" />
-        <StackPanel Grid.Row="1" Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Label Content="{Binding HandledActions}" HorizontalContentAlignment="Left"/>
-            <Label Content="/" HorizontalContentAlignment="Left"/>
-            <Label Content="{Binding TreatableActions}" HorizontalContentAlignment="Left"/>
-        </StackPanel>
+            <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_Successes}" Classes="Description" />
+            <Label Grid.Row="1" Grid.Column="1" Content="{Binding Successes}" HorizontalContentAlignment="Right" />
 
-        <Label Grid.Row="2" Grid.Column="3" Name="LabelErrorsDescription"
-               Content="{localizations:Loc SynchronizationMain_Errors}" Classes="Description" />
-        <Label Grid.Row="2" Grid.Column="4" Name="LabelErrorsValue"
-               Content="{Binding Errors}" HorizontalContentAlignment="Right" />
+            <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_Errors}" Classes="Description" />
+            <Label Grid.Row="2" Grid.Column="1" Content="{Binding Errors}" HorizontalContentAlignment="Right" />
+        </Grid>
 
-        <Label Grid.Row="3" Grid.Column="3" Content="{localizations:Loc SynchronizationMain_ProcessedVolume}" Classes="Description" />
-        <StackPanel Grid.Row="3" Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Label Content="{Binding ProcessedVolume, Converter={StaticResource FormatKbSizeConverter}}" HorizontalContentAlignment="Left"/>
-            <Label Content="/" HorizontalContentAlignment="Left"/>
-            <Label Content="{Binding TotalVolume, Converter={StaticResource FormatKbSizeConverter}}" HorizontalContentAlignment="Left"/>
-        </StackPanel>
+        <!-- Column 3: Volumes -->
+        <Grid Margin="0 12 0 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <Label Grid.Row="4" Grid.Column="3" IsVisible="{Binding IsCloudSession}"
-               Content="{localizations:Loc SynchronizationMain_ExchangedVolume}" Classes="Description" />
-        <Label Grid.Row="4" Grid.Column="4" IsVisible="{Binding IsCloudSession}"
-               Content="{Binding ExchangedVolume, Converter={StaticResource FormatKbSizeConverter}}" HorizontalContentAlignment="Right" />
+            <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_SynchronizedVolume}" Classes="Description" />
+            <Label Grid.Row="0" Grid.Column="1" Content="{Binding SynchronizedVolume, Converter={StaticResource FormatKbSizeConverter}}"
+                   HorizontalContentAlignment="Right" />
 
-        <!-- New Volume Tracking Section -->
-        <Label Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5" 
-               Content="Volume Details" FontWeight="Bold" Margin="0,10,0,5"/>
+            <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_UploadedVolume}" Classes="Description" />
+            <Label Grid.Row="1" Grid.Column="1" Content="{Binding ActualUploadedVolume, Converter={StaticResource FormatKbSizeConverter}}"
+                   HorizontalContentAlignment="Right" />
 
-        <!-- Synchronized Volume -->
-        <Label Grid.Row="6" Grid.Column="1" 
-               Content="{localizations:Loc SynchronizationMain_SynchronizedVolume}" Classes="Description" />
-        <Label Grid.Row="6" Grid.Column="2" 
-               Content="{Binding SynchronizedVolume, Converter={StaticResource FormatKbSizeConverter}}" 
-               HorizontalContentAlignment="Right" />
+            <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_DownloadedVolume}" Classes="Description" />
+            <Label Grid.Row="2" Grid.Column="1"
+                   Content="{Binding ActualDownloadedVolume, Converter={StaticResource FormatKbSizeConverter}}"
+                   HorizontalContentAlignment="Right" />
 
-        <!-- Uploaded Volume -->
-        <Label Grid.Row="7" Grid.Column="1" IsVisible="{Binding IsCloudSession}"
-               Content="{localizations:Loc SynchronizationMain_UploadedVolume}" Classes="Description" />
-        <Label Grid.Row="7" Grid.Column="2" IsVisible="{Binding IsCloudSession}"
-               Content="{Binding ActualUploadedVolume, Converter={StaticResource FormatKbSizeConverter}}" 
-               HorizontalContentAlignment="Right" />
-
-        <!-- Downloaded Volume -->
-        <Label Grid.Row="8" Grid.Column="1" IsVisible="{Binding IsCloudSession}"
-               Content="{localizations:Loc SynchronizationMain_DownloadedVolume}" Classes="Description" />
-        <Label Grid.Row="8" Grid.Column="2" IsVisible="{Binding IsCloudSession}"
-               Content="{Binding ActualDownloadedVolume, Converter={StaticResource FormatKbSizeConverter}}" 
-               HorizontalContentAlignment="Right" />
-
-        <!-- Local Copy Volume -->
-        <Label Grid.Row="9" Grid.Column="1" 
-               Content="{localizations:Loc SynchronizationMain_LocalCopyVolume}" Classes="Description" />
-        <Label Grid.Row="9" Grid.Column="2" 
-               Content="{Binding LocalCopyTransferredVolume, Converter={StaticResource FormatKbSizeConverter}}" 
-               HorizontalContentAlignment="Right" />
-
-        <!-- Efficiency Metrics -->
-        <Label Grid.Row="6" Grid.Column="3" IsVisible="{Binding IsCloudSession}"
-               Content="{localizations:Loc SynchronizationMain_EfficiencyRatio}" Classes="Description" />
-        <Label Grid.Row="6" Grid.Column="4" IsVisible="{Binding IsCloudSession}"
-               Content="{Binding EfficiencyRatio, StringFormat='{}{0:P1}'}" 
-               HorizontalContentAlignment="Right" />
-
-        <Label Grid.Row="7" Grid.Column="3" 
-               Content="{localizations:Loc SynchronizationMain_LocalCopyPercentage}" Classes="Description" />
-        <Label Grid.Row="7" Grid.Column="4" 
-               Content="{Binding LocalCopyPercentage, StringFormat='{}{0:F1}%'}" 
-               HorizontalContentAlignment="Right" />
-
-    </Grid>
+            <Label Grid.Row="3" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_LocalCopyVolume}" Classes="Description" />
+            <Label Grid.Row="3" Grid.Column="1"
+                   Content="{Binding LocalCopyTransferredVolume, Converter={StaticResource FormatKbSizeConverter}}"
+                   HorizontalContentAlignment="Right" />
+        </Grid>
+    </WrapPanel>
 </UserControl>

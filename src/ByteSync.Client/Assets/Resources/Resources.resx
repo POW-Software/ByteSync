@@ -472,6 +472,9 @@ Would you like to continue ?</value>
 	<data name="SynchronizationMain_HandledActions" xml:space="preserve">
 		<value>Handled actions:</value>
 	</data>
+    <data name="SynchronizationMain_Successes" xml:space="preserve">
+		<value>Successes:</value>
+	</data>
 	<data name="SynchronizationMain_ProcessedVolume" xml:space="preserve">
 		<value>Volume processed:</value>
 	</data>

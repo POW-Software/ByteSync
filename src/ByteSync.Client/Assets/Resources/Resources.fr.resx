@@ -1305,6 +1305,9 @@ Acceptez-vous d'enregistrer ce Profil de Session de Synchronisation sur votre ma
 	<data name="SynchronizationMain_Errors" xml:space="preserve">
 		<value>Erreurs :</value>
 	</data>
+    <data name="SynchronizationMain_Successes" xml:space="preserve">
+		<value>Succès :</value>
+	</data>
 	<data name="Shell_ImportRulesFromProfile" xml:space="preserve">
 		<value>Importer des Règles de Synchronisation depuis un Profil de Sesion</value>
 	</data>

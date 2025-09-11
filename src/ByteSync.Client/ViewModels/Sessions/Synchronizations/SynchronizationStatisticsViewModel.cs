@@ -58,6 +58,11 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
             .Select(x => x.Item2 > 0 ? (double)x.Item1 / x.Item2 * 100 : 0)
             .ToPropertyEx(this, x => x.LocalCopyPercentage);
 
+        // Successes = HandledActions - Errors
+        this.WhenAnyValue(x => x.HandledActions, x => x.Errors)
+            .Select(x => x.Item1 - x.Item2)
+            .ToPropertyEx(this, x => x.Successes);
+
         this.WhenActivated(disposables =>
         {
             _synchronizationService.SynchronizationProcessData.SynchronizationStart
@@ -160,6 +165,8 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
     // Propriétés calculées pour les ratios
     public extern double EfficiencyRatio { [ObservableAsProperty] get; }  // SynchronizedVolume / (ActualUploaded + ActualDownloaded)
     public extern double LocalCopyPercentage { [ObservableAsProperty] get; }  // LocalCopyTransferred / SynchronizedVolume * 100
+
+    public extern long Successes { [ObservableAsProperty] get; }
 
     [Reactive]
     public bool IsCloudSession { get; set; }
