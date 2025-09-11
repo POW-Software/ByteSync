@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using ByteSync.Business;
 using ByteSync.Business.DataNodes;
 using ByteSync.Business.Inventories;
@@ -23,7 +23,6 @@ using FluentAssertions;
 using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NUnit.Framework.Legacy;
 
 #pragma warning disable 168
 
@@ -90,10 +89,10 @@ public class TestInventoryBuilder : IntegrationTest
         await inventoryBuilder.BuildBaseInventoryAsync(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, Guid.NewGuid().ToString() + ".inv"));
         inventory = inventoryBuilder.Inventory;
 
-        Assert.That(inventory.InventoryParts.Count, Is.EqualTo(1));
-        Assert.That(inventory.InventoryParts.Count, Is.EqualTo(1));
-        Assert.That(inventory.InventoryParts[0].RootPath, Is.EqualTo(rootA.FullName));
-        Assert.That(inventory.InventoryParts[0].InventoryPartType, Is.EqualTo(FileSystemTypes.Directory));
+        inventory.InventoryParts.Count.Should().Be(1);
+        inventory.InventoryParts.Count.Should().Be(1);
+        inventory.InventoryParts[0].RootPath.Should().Be(rootA.FullName);
+        inventory.InventoryParts[0].InventoryPartType.Should().Be(FileSystemTypes.Directory);
 
     }
 
@@ -116,7 +115,7 @@ public class TestInventoryBuilder : IntegrationTest
         bool isException;
         try
         {
-            // todo Ici, avant, ca plantait car le répertoire n'existe pas et n'est donc pas trouvé
+            // todo Here, before, it used to crash because the directory doesn't exist and therefore isn't found
 
             inventoryBuilder.AddInventoryPart(rootA.FullName);
             await inventoryBuilder.BuildBaseInventoryAsync(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, Guid.NewGuid().ToString() + ".inv"));
@@ -127,7 +126,7 @@ public class TestInventoryBuilder : IntegrationTest
             isException = true;
         }
 
-        ClassicAssert.IsTrue(isException);        
+        isException.Should().BeTrue();        
     }
 
     [Test]
@@ -162,26 +161,26 @@ public class TestInventoryBuilder : IntegrationTest
         inventoryBuilder.AddInventoryPart(rootA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryFilePath);
 
-        ClassicAssert.IsTrue(File.Exists(inventoryFilePath));
+        File.Exists(inventoryFilePath).Should().BeTrue();
 
         unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
         unzipDir.Create();
 
-        FastZip fastZip = new FastZip();
+        var fastZip = new FastZip();
         fastZip.ExtractZip(inventoryFilePath, unzipDir.FullName, null);
 
-        ClassicAssert.AreEqual(1, unzipDir.GetFiles("*", SearchOption.AllDirectories).Length);
-        ClassicAssert.IsTrue(File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")));
+        unzipDir.GetFiles("*", SearchOption.AllDirectories).Length.Should().Be(1);
+        File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")).Should().BeTrue();
 
         inventory = inventoryBuilder.Inventory;
-        ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
-        ClassicAssert.AreEqual(2, inventory.InventoryParts[0].DirectoryDescriptions.Count);
-        ClassicAssert.AreEqual(4, inventory.InventoryParts[0].FileDescriptions.Count);
+        inventory.InventoryParts.Count.Should().Be(1);
+        inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(2);
+        inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(4);
 
         fileDescription = inventory.InventoryParts[0].FileDescriptions.First(fd => fd.Name.Equals("fileAa1.txt"));
-        ClassicAssert.AreEqual(@"/rootAa/fileAa1.txt", fileDescription.RelativePath);
-        ClassicAssert.AreEqual("FileAa1Content_special".Length, fileDescription.Size);
-        ClassicAssert.IsTrue(DateTime.UtcNow - fileDescription.LastWriteTimeUtc < TimeSpan.FromSeconds(5)); // todo CreationTimeUtc
+        fileDescription.RelativePath.Should().Be(@"/rootAa/fileAa1.txt");
+        fileDescription.Size.Should().Be("FileAa1Content_special".Length);
+        (DateTime.UtcNow - fileDescription.LastWriteTimeUtc < TimeSpan.FromSeconds(5)).Should().BeTrue(); // todo CreationTimeUtc
 
         //bool isException;
         //try
@@ -195,7 +194,7 @@ public class TestInventoryBuilder : IntegrationTest
         //    isException = true;
         //}
 
-        //ClassicAssert.IsTrue(isException);
+        //isException.Should().BeTrue();
     }
 
     [Test]
@@ -213,31 +212,31 @@ public class TestInventoryBuilder : IntegrationTest
         fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(dir1.FullName, "file1.txt", "file1Content").FullName);
         fileInfo.LastWriteTimeUtc = new DateTime(2021, 1, 2);
 
-        // Source : fichier fileInfo file2.txt
+        // Source: fileInfo file2.txt file
         string inventoryBFilePath = IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, $"inventoryB.zip");
         inventoryBuilder = BuildInventoryBuilder();
         inventoryBuilder.AddInventoryPart(fileInfo.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryBFilePath);
 
-        ClassicAssert.IsTrue(File.Exists(inventoryBFilePath));
+        File.Exists(inventoryBFilePath).Should().BeTrue();
 
         unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
         unzipDir.Create();
 
-        FastZip fastZip = new FastZip();
+        var fastZip = new FastZip();
         fastZip.ExtractZip(inventoryBFilePath, unzipDir.FullName, null);
 
-        ClassicAssert.AreEqual(1, unzipDir.GetFiles("*", SearchOption.AllDirectories).Length);
-        ClassicAssert.IsTrue(File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")));
+        unzipDir.GetFiles("*", SearchOption.AllDirectories).Length.Should().Be(1);
+        File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")).Should().BeTrue();
 
         inventory = inventoryBuilder.Inventory;
-        ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
-        ClassicAssert.AreEqual(0, inventory.InventoryParts[0].DirectoryDescriptions.Count);
-        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].FileDescriptions.Count);
-        ClassicAssert.AreEqual("/file1.txt", inventory.InventoryParts[0].FileDescriptions[0].RelativePath);
-        ClassicAssert.AreEqual("file1.txt", inventory.InventoryParts[0].FileDescriptions[0].Name); 
-        ClassicAssert.AreEqual("file1Content".Length, inventory.InventoryParts[0].FileDescriptions[0].Size); 
-        ClassicAssert.AreEqual(new DateTime(2021, 1, 2), inventory.InventoryParts[0].FileDescriptions[0].LastWriteTimeUtc);
+        inventory.InventoryParts.Count.Should().Be(1);
+        inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(0);
+        inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(1);
+        inventory.InventoryParts[0].FileDescriptions[0].RelativePath.Should().Be("/file1.txt");
+        inventory.InventoryParts[0].FileDescriptions[0].Name.Should().Be("file1.txt"); 
+        inventory.InventoryParts[0].FileDescriptions[0].Size.Should().Be("file1Content".Length); 
+        inventory.InventoryParts[0].FileDescriptions[0].LastWriteTimeUtc.Should().Be(new DateTime(2021, 1, 2));
     }
         
     [Test]
@@ -263,29 +262,29 @@ public class TestInventoryBuilder : IntegrationTest
         inventoryBuilder = BuildInventoryBuilder(sessionSettings);
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
 
-        ClassicAssert.ThrowsAsync<TaskCanceledException>(() => inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath, new CancellationToken(true)));
+        await FluentActions.Invoking(() => inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath, new CancellationToken(true))).Should().ThrowAsync<TaskCanceledException>();
         // try
         // {
         //     await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath, new CancellationToken(true));
         // }
 
-        ClassicAssert.IsFalse(File.Exists(inventoryAFilePath));
+        File.Exists(inventoryAFilePath).Should().BeFalse();
         
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath, new CancellationToken(false));
 
         unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
         unzipDir.Create();
         
-        FastZip fastZip = new FastZip();
+        var fastZip = new FastZip();
         fastZip.ExtractZip(inventoryAFilePath, unzipDir.FullName, null);
         
-        ClassicAssert.AreEqual(1, unzipDir.GetFiles("*", SearchOption.AllDirectories).Length);
-        ClassicAssert.IsTrue(File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")));
+        unzipDir.GetFiles("*", SearchOption.AllDirectories).Length.Should().Be(1);
+        File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")).Should().BeTrue();
         
         inventory = inventoryBuilder.Inventory!;
-        ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
-        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
-        ClassicAssert.AreEqual(2, inventory.InventoryParts[0].FileDescriptions.Count);
+        inventory.InventoryParts.Count.Should().Be(1);
+        inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(1);
+        inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(2);
     }
 
     [Test]
@@ -321,21 +320,21 @@ public class TestInventoryBuilder : IntegrationTest
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
 
-        ClassicAssert.IsTrue(File.Exists(inventoryAFilePath));
+        File.Exists(inventoryAFilePath).Should().BeTrue();
 
         unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
         unzipDir.Create();
 
-        FastZip fastZip = new FastZip();
+        var fastZip = new FastZip();
         fastZip.ExtractZip(inventoryAFilePath, unzipDir.FullName, null);
 
-        ClassicAssert.AreEqual(1, unzipDir.GetFiles("*", SearchOption.AllDirectories).Length);
-        ClassicAssert.IsTrue(File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")));
+        unzipDir.GetFiles("*", SearchOption.AllDirectories).Length.Should().Be(1);
+        File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")).Should().BeTrue();
 
         inventory = inventoryBuilder.Inventory!;
-        ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
-        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
-        ClassicAssert.AreEqual(2 + expectedHiddenFiles, inventory.InventoryParts[0].FileDescriptions.Count);
+        inventory.InventoryParts.Count.Should().Be(1);
+        inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(1);
+        inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(2 + expectedHiddenFiles);
     }
     
     [Test]
@@ -369,21 +368,21 @@ public class TestInventoryBuilder : IntegrationTest
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
 
-        ClassicAssert.IsTrue(File.Exists(inventoryAFilePath));
+        File.Exists(inventoryAFilePath).Should().BeTrue();
 
         unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
         unzipDir.Create();
 
-        FastZip fastZip = new FastZip();
+        var fastZip = new FastZip();
         fastZip.ExtractZip(inventoryAFilePath, unzipDir.FullName, null);
 
-        ClassicAssert.AreEqual(1, unzipDir.GetFiles("*", SearchOption.AllDirectories).Length);
-        ClassicAssert.IsTrue(File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")));
+        unzipDir.GetFiles("*", SearchOption.AllDirectories).Length.Should().Be(1);
+        File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")).Should().BeTrue();
 
         inventory = inventoryBuilder.Inventory!;
-        ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
-        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
-        ClassicAssert.AreEqual(2 + expectedHiddenFiles, inventory.InventoryParts[0].FileDescriptions.Count);
+        inventory.InventoryParts.Count.Should().Be(1);
+        inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(1);
+        inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(2 + expectedHiddenFiles);
     }
         
     /*
@@ -422,24 +421,23 @@ public class TestInventoryBuilder : IntegrationTest
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
 
-        ClassicAssert.IsTrue(File.Exists(inventoryAFilePath));
+        File.Exists(inventoryAFilePath).Should().BeTrue();
 
         unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
         unzipDir.Create();
 
-        FastZip fastZip = new FastZip();
+        var fastZip = new FastZip();
         fastZip.ExtractZip(inventoryAFilePath, unzipDir.FullName, null);
 
-        ClassicAssert.AreEqual(1, unzipDir.GetFiles("*", SearchOption.AllDirectories).Length);
-        ClassicAssert.IsTrue(File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")));
+        unzipDir.GetFiles("*", SearchOption.AllDirectories).Length.Should().Be(1);
+        File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")).Should().BeTrue();
 
         inventory = inventoryBuilder.Inventory!;
-        ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
-        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
-        ClassicAssert.AreEqual(expectedSystemFiles, inventory.InventoryParts[0].FileDescriptions.Count);
+        inventory.InventoryParts.Count.Should().Be(1);
+        inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(1);
+        inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(expectedSystemFiles);
             
-        ClassicAssert.AreEqual(expectedDesktopIniFiles, 
-            inventory.InventoryParts[0].FileDescriptions.Count(fd => fd.Name.Equals("desktop.ini")));
+        inventory.InventoryParts[0].FileDescriptions.Count(fd => fd.Name.Equals("desktop.ini")).Should().Be(expectedDesktopIniFiles);
     }
     */
         
@@ -488,21 +486,21 @@ public class TestInventoryBuilder : IntegrationTest
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
 
-        ClassicAssert.IsTrue(File.Exists(inventoryAFilePath));
+        File.Exists(inventoryAFilePath).Should().BeTrue();
 
         unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
         unzipDir.Create();
 
-        FastZip fastZip = new FastZip();
+        var fastZip = new FastZip();
         fastZip.ExtractZip(inventoryAFilePath, unzipDir.FullName, null);
 
-        ClassicAssert.AreEqual(1, unzipDir.GetFiles("*", SearchOption.AllDirectories).Length);
-        ClassicAssert.IsTrue(File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")));
+        unzipDir.GetFiles("*", SearchOption.AllDirectories).Length.Should().Be(1);
+        File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")).Should().BeTrue();
 
         inventory = inventoryBuilder.Inventory!;
-        ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
-        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
-        ClassicAssert.AreEqual(2 + expectedAdditionalFiles, inventory.InventoryParts[0].FileDescriptions.Count);
+        inventory.InventoryParts.Count.Should().Be(1);
+        inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(1);
+        inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(2 + expectedAdditionalFiles);
     }
     
     [Test]
@@ -549,21 +547,21 @@ public class TestInventoryBuilder : IntegrationTest
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
 
-        ClassicAssert.IsTrue(File.Exists(inventoryAFilePath));
+        File.Exists(inventoryAFilePath).Should().BeTrue();
 
         unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
         unzipDir.Create();
 
-        FastZip fastZip = new FastZip();
+        var fastZip = new FastZip();
         fastZip.ExtractZip(inventoryAFilePath, unzipDir.FullName, null);
 
-        ClassicAssert.AreEqual(1, unzipDir.GetFiles("*", SearchOption.AllDirectories).Length);
-        ClassicAssert.IsTrue(File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")));
+        unzipDir.GetFiles("*", SearchOption.AllDirectories).Length.Should().Be(1);
+        File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")).Should().BeTrue();
 
         inventory = inventoryBuilder.Inventory!;
-        ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
-        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
-        ClassicAssert.AreEqual(2 + expectedAdditionalFiles, inventory.InventoryParts[0].FileDescriptions.Count);
+        inventory.InventoryParts.Count.Should().Be(1);
+        inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(1);
+        inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(2 + expectedAdditionalFiles);
     }
         
     [Test]
@@ -583,8 +581,8 @@ public class TestInventoryBuilder : IntegrationTest
         var symLinkDest = _testDirectoryService.CreateSubTestDirectory("symLinkDest");
     
         // https://stackoverflow.com/questions/58038683/allow-mklink-for-a-non-admin-user
-        // Sur Windows, il faut passer l'ordi en mode développeur pour que CreateSymbolicLink fonctionne
-        // Paramètres => Mode développeur
+        // On Windows, you need to put the computer in developer mode for CreateSymbolicLink to work
+        // Settings => Developer mode
             
         fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(sourceA.FullName, "fileA.txt", "file1Content").FullName);
         File.CreateSymbolicLink(IOUtils.Combine(sourceA.FullName, "fileA_reparsePoint.txt"), symLinkDest.FullName);
@@ -602,21 +600,21 @@ public class TestInventoryBuilder : IntegrationTest
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
     
-        ClassicAssert.IsTrue(File.Exists(inventoryAFilePath));
+        File.Exists(inventoryAFilePath).Should().BeTrue();
     
         unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
         unzipDir.Create();
     
-        FastZip fastZip = new FastZip();
+        var fastZip = new FastZip();
         fastZip.ExtractZip(inventoryAFilePath, unzipDir.FullName, null);
     
-        ClassicAssert.AreEqual(1, unzipDir.GetFiles("*", SearchOption.AllDirectories).Length);
-        ClassicAssert.IsTrue(File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")));
+        unzipDir.GetFiles("*", SearchOption.AllDirectories).Length.Should().Be(1);
+        File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")).Should().BeTrue();
     
         inventory = inventoryBuilder.Inventory!;
-        ClassicAssert.AreEqual(1, inventory.InventoryParts.Count);
-        ClassicAssert.AreEqual(1, inventory.InventoryParts[0].DirectoryDescriptions.Count);
-        ClassicAssert.AreEqual(2, inventory.InventoryParts[0].FileDescriptions.Count);
+        inventory.InventoryParts.Count.Should().Be(1);
+        inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(1);
+        inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(2);
     }
         
     [Test]
@@ -643,12 +641,12 @@ public class TestInventoryBuilder : IntegrationTest
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
 
-        ClassicAssert.IsTrue(File.Exists(inventoryAFilePath));
+        File.Exists(inventoryAFilePath).Should().BeTrue();
 
         unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
         unzipDir.Create();
 
-        FastZip fastZip = new FastZip();
+        var fastZip = new FastZip();
         fastZip.ExtractZip(inventoryAFilePath, unzipDir.FullName, null);
 
         unzipDir.GetFiles("*", SearchOption.AllDirectories).Length.Should().Be(1);
@@ -686,11 +684,11 @@ public class TestInventoryBuilder : IntegrationTest
         dir1 = sourceA.CreateSubdirectory("Dir1");
         fileA1Info = new FileInfo(_testDirectoryService.CreateFileInDirectory(dir1.FullName, "fileA1.txt", "fileA1ContentOnB").FullName);
     
-        InventoryData inventoryDataA = new InventoryData(sourceA);
-        InventoryData inventoryDataB = new InventoryData(sourceB);
+        var inventoryDataA = new InventoryData(sourceA);
+        var inventoryDataB = new InventoryData(sourceB);
         
         
-        SessionSettings sessionSettings = SessionSettings.BuildDefault();
+        var sessionSettings = SessionSettings.BuildDefault();
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
         sessionSettings.DataType = DataTypes.Files;
         sessionSettings.LinkingKey = LinkingKeys.RelativePath;
@@ -761,7 +759,7 @@ public class TestInventoryBuilder : IntegrationTest
             Code = "Code"
         };
         
-        Mock<ILogger<InventoryBuilder>> loggerMock = new Mock<ILogger<InventoryBuilder>>();
+        var loggerMock = new Mock<ILogger<InventoryBuilder>>();
 
         return new InventoryBuilder(sessionMemberInfo, dataNode, sessionSettings, inventoryProcessData,
             osPlatform, FingerprintModes.Rsync, loggerMock.Object);

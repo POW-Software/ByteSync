@@ -1,4 +1,4 @@
-﻿using System.Reactive.Subjects;
+using System.Reactive.Subjects;
 using ByteSync.Business;
 using ByteSync.Business.Navigations;
 using ByteSync.Common.Business.Versions;
@@ -12,9 +12,9 @@ using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Updates;
 using ByteSync.ViewModels.Headers;
 using DynamicData;
+using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 
 namespace ByteSync.Tests.ViewModels.Headers;
 
@@ -73,8 +73,8 @@ public class HeaderViewModelTests
         headerViewModel.Activator.Activate();
 
         // Assert
-        ClassicAssert.True(headerViewModel.IsAVersionMandatory);
-        ClassicAssert.True(headerViewModel.ShowUpdateObservable);
+        headerViewModel.IsAVersionMandatory.Should().BeTrue();
+        headerViewModel.ShowUpdateObservable.Should().BeTrue();
     }
     
     [Test]
@@ -112,8 +112,8 @@ public class HeaderViewModelTests
         headerViewModel.Activator.Activate();
 
         // Assert
-        ClassicAssert.False(headerViewModel.IsAVersionMandatory);
-        ClassicAssert.True(headerViewModel.ShowUpdateObservable);
+        headerViewModel.IsAVersionMandatory.Should().BeFalse();
+        headerViewModel.ShowUpdateObservable.Should().BeTrue();
     }
     
     [Test]
@@ -151,14 +151,14 @@ public class HeaderViewModelTests
         headerViewModel.Activator.Activate();
 
         // Assert
-        ClassicAssert.True(headerViewModel.IsAVersionMandatory);
-        ClassicAssert.True(headerViewModel.ShowUpdateObservable);
+        headerViewModel.IsAVersionMandatory.Should().BeTrue();
+        headerViewModel.ShowUpdateObservable.Should().BeTrue();
         
         // POST : Empty
         sourceCache.Remove(testSoftwareVersion);
         // Assert
-        ClassicAssert.False(headerViewModel.IsAVersionMandatory);
-        ClassicAssert.False(headerViewModel.ShowUpdateObservable);
+        headerViewModel.IsAVersionMandatory.Should().BeFalse();
+        headerViewModel.ShowUpdateObservable.Should().BeFalse();
         
     }
 }
