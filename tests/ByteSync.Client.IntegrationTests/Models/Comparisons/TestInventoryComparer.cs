@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using ByteSync.Business.Sessions;
 using ByteSync.Client.IntegrationTests.TestHelpers;
 using ByteSync.Client.IntegrationTests.TestHelpers.Business;
@@ -13,7 +13,6 @@ using ByteSync.Services.Sessions;
 using ByteSync.TestsCommon;
 using FluentAssertions;
 using Moq;
-using NUnit.Framework.Legacy;
 
 namespace ByteSync.Client.IntegrationTests.Models.Comparisons;
 
@@ -50,11 +49,11 @@ public class TestInventoryComparer : IntegrationTest
         var dataA = _testDirectoryService.CreateSubTestDirectory("dataA");
         var dataB = _testDirectoryService.CreateSubTestDirectory("dataB");
 
-        InventoryData inventoryDataA = new InventoryData(dataA);
-        InventoryData inventoryDataB = new InventoryData(dataB);
+        var inventoryDataA = new InventoryData(dataA);
+        var inventoryDataB = new InventoryData(dataB);
             
         // Test
-        SessionSettings sessionSettings = new SessionSettings();
+        var sessionSettings = new SessionSettings();
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
         sessionSettings.DataType = DataTypes.FilesDirectories;
         sessionSettings.LinkingKey = LinkingKeys.RelativePath;
@@ -100,15 +99,15 @@ public class TestInventoryComparer : IntegrationTest
         ComparisonResult comparisonResult;
         
         var dataA = _testDirectoryService.CreateSubTestDirectory("dataA");
-        FileInfo file1 = _testDirectoryService.CreateFileInDirectory(dataA, "file1.txt", "contentA");
+        var file1 = _testDirectoryService.CreateFileInDirectory(dataA, "file1.txt", "contentA");
         var dataB = _testDirectoryService.CreateSubTestDirectory("dataB");
         file1.CopyTo(dataB.Combine(file1.Name));
 
-        InventoryData inventoryDataA = new InventoryData(dataA);
-        InventoryData inventoryDataB = new InventoryData(dataB);
+        var inventoryDataA = new InventoryData(dataA);
+        var inventoryDataB = new InventoryData(dataB);
             
         // Test
-        SessionSettings sessionSettings = new SessionSettings();
+        var sessionSettings = new SessionSettings();
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
         sessionSettings.DataType = DataTypes.FilesDirectories;
         sessionSettings.LinkingKey = LinkingKeys.RelativePath;
@@ -188,11 +187,11 @@ public class TestInventoryComparer : IntegrationTest
         var dataB = _testDirectoryService.CreateSubTestDirectory("dataB");
         _testDirectoryService.CreateFileInDirectory(dataB, "file1.txt", "contentB_"); // taille différente car lastwritetime peut être identique
 
-        InventoryData inventoryDataA = new InventoryData(dataA);
-        InventoryData inventoryDataB = new InventoryData(dataB);
+        var inventoryDataA = new InventoryData(dataA);
+        var inventoryDataB = new InventoryData(dataB);
 
         // Test
-        SessionSettings sessionSettings = new SessionSettings();
+        var sessionSettings = new SessionSettings();
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
         sessionSettings.DataType = DataTypes.FilesDirectories;
         sessionSettings.LinkingKey = LinkingKeys.RelativePath;
@@ -275,11 +274,11 @@ public class TestInventoryComparer : IntegrationTest
         var dataB = _testDirectoryService.CreateSubTestDirectory("dataB");
         dataB.CreateSubdirectory("Dir1");
 
-        InventoryData inventoryDataA = new InventoryData(dataA);
-        InventoryData inventoryDataB = new InventoryData(dataB);
+        var inventoryDataA = new InventoryData(dataA);
+        var inventoryDataB = new InventoryData(dataB);
 
         // Test
-        SessionSettings sessionSettings = new SessionSettings();
+        var sessionSettings = new SessionSettings();
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
         sessionSettings.DataType = DataTypes.FilesDirectories;
         sessionSettings.LinkingKey = LinkingKeys.RelativePath;
@@ -364,11 +363,11 @@ public class TestInventoryComparer : IntegrationTest
             fileInfo.LastWriteTime = DateTime.Today.AddDays(-1).AddHours(i);
         }
 
-        InventoryData inventoryDataA = new InventoryData(dataA);
-        InventoryData inventoryDataB = new InventoryData(dataB);
+        var inventoryDataA = new InventoryData(dataA);
+        var inventoryDataB = new InventoryData(dataB);
 
         // Test
-        SessionSettings sessionSettings = new SessionSettings();
+        var sessionSettings = new SessionSettings();
         sessionSettings.AnalysisMode = analysisMode;
         sessionSettings.DataType = DataTypes.Files;
         sessionSettings.LinkingKey = LinkingKeys.RelativePath;
@@ -426,11 +425,11 @@ public class TestInventoryComparer : IntegrationTest
             fileInfo.LastWriteTime = DateTime.Today.AddDays(-1).AddHours(i);
         }
 
-        InventoryData inventoryDataA = new InventoryData(dataA);
-        InventoryData inventoryDataB = new InventoryData(dataB);
+        var inventoryDataA = new InventoryData(dataA);
+        var inventoryDataB = new InventoryData(dataB);
 
         // Test
-        SessionSettings sessionSettings = new SessionSettings();
+        var sessionSettings = new SessionSettings();
         sessionSettings.AnalysisMode = analysisMode;
         sessionSettings.DataType = DataTypes.Files;
         sessionSettings.LinkingKey = LinkingKeys.RelativePath;
@@ -439,26 +438,26 @@ public class TestInventoryComparer : IntegrationTest
         sessionSettings.ExcludeSystemFiles = true;
         comparisonResult = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
 
-        ClassicAssert.AreEqual(10, comparisonResult.ComparisonItems.Count);
+        comparisonResult.ComparisonItems.Should().HaveCount(10);
         foreach (var comparisonItem in comparisonResult.ComparisonItems)
         {
-            ClassicAssert.AreEqual(1, comparisonItem.ContentIdentities.Count);
+            comparisonItem.ContentIdentities.Should().HaveCount(1);
             var contentIdentity = comparisonItem.ContentIdentities.Single();
 
-            ClassicAssert.AreEqual(2, contentIdentity.FileSystemDescriptions.Count);
+            contentIdentity.FileSystemDescriptions.Should().HaveCount(2);
             foreach (var fileSystemDescription in contentIdentity.FileSystemDescriptions)
             {
                 var fileDescription = (FileDescription)fileSystemDescription;
 
-                ClassicAssert.IsTrue(fileDescription.SignatureGuid.IsNotEmpty(true));
+                fileDescription.SignatureGuid.IsNotEmpty(true).Should().BeTrue();
             }
 
             // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsOK);
             // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsSuccessStatus);
             // ClassicAssert.AreEqual(false, comparisonItem.ContentRepartition.IsErrorStatus);
 
-            ClassicAssert.IsTrue(comparisonItem.PathIdentity.FileName.StartsWith("file_"));
-            ClassicAssert.IsTrue(comparisonItem.PathIdentity.FileName.EndsWith(".txt"));
+            comparisonItem.PathIdentity.FileName.Should().StartWith("file_");
+            comparisonItem.PathIdentity.FileName.Should().EndWith(".txt");
         }
     }
 
@@ -476,11 +475,11 @@ public class TestInventoryComparer : IntegrationTest
         var dirB1 = dataB.CreateSubdirectory("Dir1");
         _testDirectoryService.CreateFileInDirectory(dirB1, $"file_1.txt", $"contents of file_1.txt");
 
-        InventoryData inventoryDataA = new InventoryData(dataA);
-        InventoryData inventoryDataB = new InventoryData(dataB);
+        var inventoryDataA = new InventoryData(dataA);
+        var inventoryDataB = new InventoryData(dataB);
 
         // Test
-        SessionSettings sessionSettings = new SessionSettings();
+        var sessionSettings = new SessionSettings();
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
         sessionSettings.DataType = DataTypes.Files;
         sessionSettings.LinkingKey = LinkingKeys.RelativePath;
@@ -489,13 +488,13 @@ public class TestInventoryComparer : IntegrationTest
         sessionSettings.ExcludeSystemFiles = true;
         comparisonResult = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
 
-        ClassicAssert.AreEqual(1, comparisonResult.ComparisonItems.Count);
+        comparisonResult.ComparisonItems.Should().HaveCount(1);
         var comparisonItem = comparisonResult.ComparisonItems.Single();
         var pathIdentity = comparisonItem.PathIdentity;
-        ClassicAssert.AreEqual("file_1.txt", pathIdentity.FileName);
-        ClassicAssert.AreEqual("/dir1/file_1.txt", pathIdentity.LinkingData);
-        ClassicAssert.AreEqual("/Dir1/file_1.txt", pathIdentity.LinkingKeyValue);
-        ClassicAssert.AreEqual(FileSystemTypes.File, pathIdentity.FileSystemType);
+        pathIdentity.FileName.Should().Be("file_1.txt");
+        pathIdentity.LinkingData.Should().Be("/dir1/file_1.txt");
+        pathIdentity.LinkingKeyValue.Should().Be("/Dir1/file_1.txt");
+        pathIdentity.FileSystemType.Should().Be(FileSystemTypes.File);
     }
 
     [Test]
@@ -514,11 +513,11 @@ public class TestInventoryComparer : IntegrationTest
         var dirB1 = dataB.CreateSubdirectory("Dir1");
         _testDirectoryService.CreateFileInDirectory(dirB1, $"file_1.txt", $"contents of file_1.txt");
 
-        InventoryData inventoryDataA = new InventoryData(dataA);
-        InventoryData inventoryDataB = new InventoryData(dataB);
+        var inventoryDataA = new InventoryData(dataA);
+        var inventoryDataB = new InventoryData(dataB);
 
         // Test
-        SessionSettings sessionSettings = new SessionSettings();
+        var sessionSettings = new SessionSettings();
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
         sessionSettings.DataType = DataTypes.Files;
         sessionSettings.LinkingKey = LinkingKeys.RelativePath;
@@ -527,20 +526,20 @@ public class TestInventoryComparer : IntegrationTest
         sessionSettings.ExcludeSystemFiles = true;
         comparisonResult = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
 
-        ClassicAssert.AreEqual(1, comparisonResult.ComparisonItems.Count);
+        comparisonResult.ComparisonItems.Should().HaveCount(1);
         var comparisonItem = comparisonResult.ComparisonItems.Single();
         var pathIdentity = comparisonItem.PathIdentity;
-        ClassicAssert.AreEqual("file_1.txt", pathIdentity.FileName);
+        pathIdentity.FileName.Should().Be("file_1.txt");
         if (linkingCase == LinkingCases.Insensitive)
         {
-            ClassicAssert.AreEqual("/dir1/file_1.txt", pathIdentity.LinkingData);
+            pathIdentity.LinkingData.Should().Be("/dir1/file_1.txt");
         }
         else
         {
-            ClassicAssert.AreEqual("/Dir1/file_1.txt", pathIdentity.LinkingData);
+            pathIdentity.LinkingData.Should().Be("/Dir1/file_1.txt");
         }
-        ClassicAssert.AreEqual("/Dir1/file_1.txt", pathIdentity.LinkingKeyValue);
-        ClassicAssert.AreEqual(FileSystemTypes.File, pathIdentity.FileSystemType);
+        pathIdentity.LinkingKeyValue.Should().Be("/Dir1/file_1.txt");
+        pathIdentity.FileSystemType.Should().Be(FileSystemTypes.File);
     }
 
     [Test]
@@ -559,11 +558,11 @@ public class TestInventoryComparer : IntegrationTest
         var dirB1 = dataB.CreateSubdirectory("dir1");
         _testDirectoryService.CreateFileInDirectory(dirB1, $"file_1.txt", $"contents of file_1.txt");
 
-        InventoryData inventoryDataA = new InventoryData(dataA);
-        InventoryData inventoryDataB = new InventoryData(dataB);
+        var inventoryDataA = new InventoryData(dataA);
+        var inventoryDataB = new InventoryData(dataB);
 
         // Test
-        SessionSettings sessionSettings = new SessionSettings();
+        var sessionSettings = new SessionSettings();
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
         sessionSettings.DataType = DataTypes.Files;
         sessionSettings.LinkingKey = LinkingKeys.RelativePath;
@@ -574,27 +573,27 @@ public class TestInventoryComparer : IntegrationTest
 
         if (linkingCase == LinkingCases.Sensitive)
         {
-            ClassicAssert.AreEqual(2, comparisonResult.ComparisonItems.Count);
+            comparisonResult.ComparisonItems.Should().HaveCount(2);
 
             var pathIdentity1 = comparisonResult.ComparisonItems.Select(c => c.PathIdentity).Single(p => p.LinkingData.Equals("/dir1/file_1.txt"));
-            ClassicAssert.AreEqual("file_1.txt", pathIdentity1.FileName);
-            ClassicAssert.AreEqual("/dir1/file_1.txt", pathIdentity1.LinkingKeyValue);
-            ClassicAssert.AreEqual(FileSystemTypes.File, pathIdentity1.FileSystemType);
+            pathIdentity1.FileName.Should().Be("file_1.txt");
+            pathIdentity1.LinkingKeyValue.Should().Be("/dir1/file_1.txt");
+            pathIdentity1.FileSystemType.Should().Be(FileSystemTypes.File);
 
             var pathIdentity2 = comparisonResult.ComparisonItems.Select(c => c.PathIdentity).Single(p => p.LinkingData.Equals("/Dir1/file_1.txt"));
-            ClassicAssert.AreEqual("file_1.txt", pathIdentity2.FileName);
-            ClassicAssert.AreEqual("/Dir1/file_1.txt", pathIdentity2.LinkingKeyValue);
-            ClassicAssert.AreEqual(FileSystemTypes.File, pathIdentity2.FileSystemType);
+            pathIdentity2.FileName.Should().Be("file_1.txt");
+            pathIdentity2.LinkingKeyValue.Should().Be("/Dir1/file_1.txt");
+            pathIdentity2.FileSystemType.Should().Be(FileSystemTypes.File);
         }
         else
         {
-            ClassicAssert.AreEqual(1, comparisonResult.ComparisonItems.Count);
+            comparisonResult.ComparisonItems.Should().HaveCount(1);
             var comparisonItem = comparisonResult.ComparisonItems.Single();
             var pathIdentity = comparisonItem.PathIdentity;
-            ClassicAssert.AreEqual("file_1.txt", pathIdentity.FileName);
-            ClassicAssert.AreEqual("/dir1/file_1.txt", pathIdentity.LinkingData);
-            ClassicAssert.AreEqual("/Dir1/file_1.txt", pathIdentity.LinkingKeyValue);
-            ClassicAssert.AreEqual(FileSystemTypes.File, pathIdentity.FileSystemType);
+            pathIdentity.FileName.Should().Be("file_1.txt");
+            pathIdentity.LinkingData.Should().Be("/dir1/file_1.txt");
+            pathIdentity.LinkingKeyValue.Should().Be("/Dir1/file_1.txt");
+            pathIdentity.FileSystemType.Should().Be(FileSystemTypes.File);
         }
     }
 
@@ -616,11 +615,11 @@ public class TestInventoryComparer : IntegrationTest
         var dirB1 = dataB.CreateSubdirectory("Dir1");
         _testDirectoryService.CreateFileInDirectory(dirB1, $"File_1.txt", $"contents of file_1.txt");
 
-        InventoryData inventoryDataA = new InventoryData(dataA);
-        InventoryData inventoryDataB = new InventoryData(dataB);
+        var inventoryDataA = new InventoryData(dataA);
+        var inventoryDataB = new InventoryData(dataB);
 
         // Test
-        SessionSettings sessionSettings = new SessionSettings();
+        var sessionSettings = new SessionSettings();
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
         sessionSettings.DataType = DataTypes.Files;
         sessionSettings.LinkingKey = LinkingKeys.Name;
@@ -629,20 +628,20 @@ public class TestInventoryComparer : IntegrationTest
         sessionSettings.ExcludeSystemFiles = true;
         comparisonResult = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
 
-        ClassicAssert.AreEqual(1, comparisonResult.ComparisonItems.Count);
+        comparisonResult.ComparisonItems.Should().HaveCount(1);
         var comparisonItem = comparisonResult.ComparisonItems.Single();
         var pathIdentity = comparisonItem.PathIdentity;
-        ClassicAssert.AreEqual("File_1.txt", pathIdentity.FileName);
+        pathIdentity.FileName.Should().Be("File_1.txt");
         if (linkingCase == LinkingCases.Insensitive)
         {
-            ClassicAssert.AreEqual("file_1.txt", pathIdentity.LinkingData);
+            pathIdentity.LinkingData.Should().Be("file_1.txt");
         }
         else
         {
-            ClassicAssert.AreEqual("File_1.txt", pathIdentity.LinkingData);
+            pathIdentity.LinkingData.Should().Be("File_1.txt");
         }
-        ClassicAssert.AreEqual("File_1.txt", pathIdentity.LinkingKeyValue);
-        ClassicAssert.AreEqual(FileSystemTypes.File, pathIdentity.FileSystemType);
+        pathIdentity.LinkingKeyValue.Should().Be("File_1.txt");
+        pathIdentity.FileSystemType.Should().Be(FileSystemTypes.File);
     }
 
     [Test]
@@ -661,11 +660,11 @@ public class TestInventoryComparer : IntegrationTest
         var dirB1 = dataB.CreateSubdirectory("dir1");
         _testDirectoryService.CreateFileInDirectory(dirB1, $"file_1.txt", $"contents of file_1.txt");
 
-        InventoryData inventoryDataA = new InventoryData(dataA);
-        InventoryData inventoryDataB = new InventoryData(dataB);
+        var inventoryDataA = new InventoryData(dataA);
+        var inventoryDataB = new InventoryData(dataB);
 
         // Test
-        SessionSettings sessionSettings = new SessionSettings();
+        var sessionSettings = new SessionSettings();
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
         sessionSettings.DataType = DataTypes.Files;
         sessionSettings.LinkingKey = LinkingKeys.Name;
@@ -676,27 +675,27 @@ public class TestInventoryComparer : IntegrationTest
 
         if (linkingCase == LinkingCases.Sensitive)
         {
-            ClassicAssert.AreEqual(2, comparisonResult.ComparisonItems.Count);
+            comparisonResult.ComparisonItems.Should().HaveCount(2);
 
             var pathIdentity1 = comparisonResult.ComparisonItems.Select(c => c.PathIdentity).Single(p => p.LinkingData.Equals("file_1.txt"));
-            ClassicAssert.AreEqual("file_1.txt", pathIdentity1.FileName);
-            ClassicAssert.AreEqual("file_1.txt", pathIdentity1.LinkingKeyValue);
-            ClassicAssert.AreEqual(FileSystemTypes.File, pathIdentity1.FileSystemType);
+            pathIdentity1.FileName.Should().Be("file_1.txt");
+            pathIdentity1.LinkingKeyValue.Should().Be("file_1.txt");
+            pathIdentity1.FileSystemType.Should().Be(FileSystemTypes.File);
 
             var pathIdentity2 = comparisonResult.ComparisonItems.Select(c => c.PathIdentity).Single(p => p.LinkingData.Equals("File_1.txt"));
-            ClassicAssert.AreEqual("File_1.txt", pathIdentity2.FileName);
-            ClassicAssert.AreEqual("File_1.txt", pathIdentity2.LinkingKeyValue);
-            ClassicAssert.AreEqual(FileSystemTypes.File, pathIdentity2.FileSystemType);
+            pathIdentity2.FileName.Should().Be("File_1.txt");
+            pathIdentity2.LinkingKeyValue.Should().Be("File_1.txt");
+            pathIdentity2.FileSystemType.Should().Be(FileSystemTypes.File);
         }
         else
         {
-            ClassicAssert.AreEqual(1, comparisonResult.ComparisonItems.Count);
+            comparisonResult.ComparisonItems.Should().HaveCount(1);
             var comparisonItem = comparisonResult.ComparisonItems.Single();
             var pathIdentity = comparisonItem.PathIdentity;
-            ClassicAssert.AreEqual("File_1.txt", pathIdentity.FileName);
-            ClassicAssert.AreEqual("file_1.txt", pathIdentity.LinkingData);
-            ClassicAssert.AreEqual("File_1.txt", pathIdentity.LinkingKeyValue);
-            ClassicAssert.AreEqual(FileSystemTypes.File, pathIdentity.FileSystemType);
+            pathIdentity.FileName.Should().Be("File_1.txt");
+            pathIdentity.LinkingData.Should().Be("file_1.txt");
+            pathIdentity.LinkingKeyValue.Should().Be("File_1.txt");
+            pathIdentity.FileSystemType.Should().Be(FileSystemTypes.File);
         }
     }
 
@@ -716,11 +715,11 @@ public class TestInventoryComparer : IntegrationTest
         var dirB1 = dataB.CreateSubdirectory("Dir1");
         dirB1.CreateSubdirectory(subDirBName);
 
-        InventoryData inventoryDataA = new InventoryData(dataA);
-        InventoryData inventoryDataB = new InventoryData(dataB);
+        var inventoryDataA = new InventoryData(dataA);
+        var inventoryDataB = new InventoryData(dataB);
 
         // Test
-        SessionSettings sessionSettings = new SessionSettings();
+        var sessionSettings = new SessionSettings();
         sessionSettings.AnalysisMode = AnalysisModes.Smart;
         sessionSettings.DataType = DataTypes.Directories;
         sessionSettings.LinkingKey = LinkingKeys.RelativePath;
@@ -729,17 +728,17 @@ public class TestInventoryComparer : IntegrationTest
         sessionSettings.ExcludeSystemFiles = true;
         comparisonResult = await comparisonResultPreparer.BuildAndCompare(sessionSettings, inventoryDataA, inventoryDataB);
 
-        ClassicAssert.AreEqual(2, comparisonResult.ComparisonItems.Count);
+        comparisonResult.ComparisonItems.Should().HaveCount(2);
         var comparisonItem = comparisonResult.ComparisonItems.Single(ci => ci.PathIdentity.FileName.Equals("Dir1"));
         var pathIdentity = comparisonItem.PathIdentity;
-        ClassicAssert.AreEqual("/dir1", pathIdentity.LinkingData);
-        ClassicAssert.AreEqual("/Dir1", pathIdentity.LinkingKeyValue);
-        ClassicAssert.AreEqual(FileSystemTypes.Directory, pathIdentity.FileSystemType);
+        pathIdentity.LinkingData.Should().Be("/dir1");
+        pathIdentity.LinkingKeyValue.Should().Be("/Dir1");
+        pathIdentity.FileSystemType.Should().Be(FileSystemTypes.Directory);
 
         comparisonItem = comparisonResult.ComparisonItems.Single(ci => ci.PathIdentity.FileName.Equals("subDirA"));
         pathIdentity = comparisonItem.PathIdentity;
-        ClassicAssert.AreEqual("/dir1/subdira", pathIdentity.LinkingData);
-        ClassicAssert.AreEqual("/Dir1/subDirA", pathIdentity.LinkingKeyValue);
-        ClassicAssert.AreEqual(FileSystemTypes.Directory, pathIdentity.FileSystemType);
+        pathIdentity.LinkingData.Should().Be("/dir1/subdira");
+        pathIdentity.LinkingKeyValue.Should().Be("/Dir1/subDirA");
+        pathIdentity.FileSystemType.Should().Be(FileSystemTypes.Directory);
     }
 }
