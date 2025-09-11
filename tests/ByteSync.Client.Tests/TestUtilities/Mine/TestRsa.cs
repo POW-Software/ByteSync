@@ -18,13 +18,13 @@ public class TestRsa
 
         for (int i = 0; i < 100; i++)
         {
-            var rsaBob = RSA.Create(); // Alice peut encrypter, Bob peut décrypter
+            var rsaBob = RSA.Create(); // Alice can encrypt, Bob can decrypt
 
             
             var rsaAliceImported = RSA.Create();
             var rsaBobPublicKey = rsaBob.ExportRSAPublicKey();
 
-            publicKeys.Any(pk => pk.SequenceEqual(rsaBobPublicKey)).Should().BeFalse(); // On ne doit pas encore avoir eu affaire à cette publicKey
+            publicKeys.Any(pk => pk.SequenceEqual(rsaBobPublicKey)).Should().BeFalse(); // We should not have encountered this publicKey yet
             publicKeys.Add(rsaBobPublicKey);
 
             rsaAliceImported.ImportRSAPublicKey(rsaBobPublicKey, out _);
@@ -33,7 +33,7 @@ public class TestRsa
             var bytes = Encoding.UTF8.GetBytes(aliceMessage);
             var encryptedMessage = rsaAliceImported.Encrypt(bytes, RSAEncryptionPadding.Pkcs1);
 
-            encryptedMessages.Any(em => em.SequenceEqual(encryptedMessage)).Should().BeFalse(); // On ne doit pas encore avoir eu affaire à cette publicKey
+            encryptedMessages.Any(em => em.SequenceEqual(encryptedMessage)).Should().BeFalse(); // We should not have encountered this publicKey yet
             encryptedMessages.Add(encryptedMessage);
 
             var decryptedBytes = rsaBob.Decrypt(encryptedMessage, RSAEncryptionPadding.Pkcs1);
@@ -45,7 +45,7 @@ public class TestRsa
         publicKeys.Count.Should().Be(100);
         encryptedMessages.Count.Should().Be(100);
             
-        // On vérifie que le contrôle qu'on appliquait fonctionne correctement
+        // We verify that the control we were applying works correctly
         publicKeys.Any(pk => pk.SequenceEqual(publicKeys[50])).Should().BeTrue();
         encryptedMessages.Any(em => em.SequenceEqual(encryptedMessages[50])).Should().BeTrue();
     }
@@ -58,13 +58,13 @@ public class TestRsa
 
         for (int i = 0; i < 100; i++)
         {
-            var rsaBob = RSA.Create(); // Alice peut encrypter, Bob peut décrypter
+            var rsaBob = RSA.Create(); // Alice can encrypt, Bob can decrypt
 
             
             var rsaAliceImported = RSA.Create();
             var rsaBobPublicKey = rsaBob.ExportRSAPublicKey();
 
-            publicKeys.Any(pk => pk.SequenceEqual(rsaBobPublicKey)).Should().BeFalse(); // On ne doit pas encore avoir eu affaire à cette publicKey
+            publicKeys.Any(pk => pk.SequenceEqual(rsaBobPublicKey)).Should().BeFalse(); // We should not have encountered this publicKey yet
             publicKeys.Add(rsaBobPublicKey);
 
             rsaAliceImported.ImportRSAPublicKey(rsaBobPublicKey, out _);
@@ -73,7 +73,7 @@ public class TestRsa
             var bytes = Encoding.UTF8.GetBytes(aliceMessage);
             var encryptedMessage = rsaAliceImported.Encrypt(bytes, RSAEncryptionPadding.Pkcs1);
 
-            encryptedMessages.Any(em => em.SequenceEqual(encryptedMessage)).Should().BeFalse(); // On ne doit pas encore avoir eu affaire à cette publicKey
+            encryptedMessages.Any(em => em.SequenceEqual(encryptedMessage)).Should().BeFalse(); // We should not have encountered this publicKey yet
             encryptedMessages.Add(encryptedMessage);
 
             var decryptedBytes = rsaBob.Decrypt(encryptedMessage, RSAEncryptionPadding.Pkcs1);
@@ -85,7 +85,7 @@ public class TestRsa
         publicKeys.Count.Should().Be(100);
         encryptedMessages.Count.Should().Be(100);
             
-        // On vérifie que le contrôle qu'on appliquait fonctionne correctement
+        // We verify that the control we were applying works correctly
         publicKeys.Any(pk => pk.SequenceEqual(publicKeys[50])).Should().BeTrue();
         encryptedMessages.Any(em => em.SequenceEqual(encryptedMessages[50])).Should().BeTrue();
     }
@@ -95,7 +95,7 @@ public class TestRsa
     {
         for (int i = 0; i < 100; i++)
         {
-            var rsaBob = RSA.Create(); // Alice peut encrypter, Bob peut décrypter
+            var rsaBob = RSA.Create(); // Alice can encrypt, Bob can decrypt
                 
             var rsaBobPublicKey = rsaBob.ExportRSAPublicKey();
             var rsaBobPublicKey2 = rsaBob.ExportRSAPublicKey();
@@ -109,7 +109,7 @@ public class TestRsa
     {
         for (int i = 0; i < 100; i++)
         {
-            var rsaBob = RSA.Create(); // Alice peut encrypter, Bob peut décrypter
+            var rsaBob = RSA.Create(); // Alice can encrypt, Bob can decrypt
 
             
             var rsaAliceImported = RSA.Create();
