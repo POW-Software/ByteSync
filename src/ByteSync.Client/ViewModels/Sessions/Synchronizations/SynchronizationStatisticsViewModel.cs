@@ -59,6 +59,40 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
             .Select(x => x.Item2 > 0 ? (double)x.Item1 / x.Item2 * 100 : 0)
             .ToPropertyEx(this, x => x.LocalCopyPercentage);
 
+        // TransferEfficiency = SynchronizedVolume / (ActualUploaded + LocalCopyTransferred)
+        this.WhenAnyValue(x => x.SynchronizedVolume, x => x.ActualUploadedVolume, x => x.LocalCopyTransferredVolume)
+            .Select(x =>
+            {
+                var denom = x.Item2 + x.Item3;
+                if (denom <= 0)
+                {
+                    return x.Item1 > 0 ? double.PositiveInfinity : 0d;
+                }
+
+                return (double)x.Item1 / denom;
+            })
+            .ToPropertyEx(this, x => x.TransferEfficiency);
+
+        // DataReduction = 1 - (ActualUploaded + LocalCopyTransferred) / SynchronizedVolume, clamped to [0, 1]
+        this.WhenAnyValue(x => x.SynchronizedVolume, x => x.ActualUploadedVolume, x => x.LocalCopyTransferredVolume)
+            .Select(x =>
+            {
+                var sync = x.Item1;
+                if (sync <= 0)
+                {
+                    return 0d;
+                }
+
+                var transferred = (double)(x.Item2 + x.Item3);
+                var reduction = 1d - transferred / sync;
+
+                if (reduction < 0d) return 0d;
+                if (reduction > 1d) return 1d;
+
+                return reduction;
+            })
+            .ToPropertyEx(this, x => x.DataReduction);
+
         // Successes = HandledActions - Errors
         this.WhenAnyValue(x => x.HandledActions, x => x.Errors)
             .Select(x => x.Item1 - x.Item2)
@@ -169,6 +203,10 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
     public extern double LocalCopyPercentage { [ObservableAsProperty] get; } // LocalCopyTransferred / SynchronizedVolume * 100
 
     public extern long Successes { [ObservableAsProperty] get; }
+
+    public extern double TransferEfficiency { [ObservableAsProperty] get; }
+
+    public extern double DataReduction { [ObservableAsProperty] get; }
 
     [Reactive]
     public bool IsCloudSession { get; set; }

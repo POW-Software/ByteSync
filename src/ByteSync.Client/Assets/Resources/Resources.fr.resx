@@ -505,6 +505,12 @@ Voulez-vous continuer ?</value>
 	<data name="SynchronizationMain_LocalCopyVolume" xml:space="preserve">
 		<value>Copie locale :</value>
 	</data>
+    <data name="SynchronizationMain_TransferEfficiency" xml:space="preserve">
+		<value>Efficacité de transfert :</value>
+	</data>
+    <data name="SynchronizationMain_DataReduction" xml:space="preserve">
+		<value>Réduction de données :</value>
+	</data>
 	<data name="SynchronizationMain_EfficiencyRatio" xml:space="preserve">
 		<value>Efficacité transfert :</value>
 	</data>

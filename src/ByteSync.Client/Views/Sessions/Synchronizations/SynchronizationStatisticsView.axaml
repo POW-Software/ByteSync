@@ -88,6 +88,8 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_SynchronizedVolume}" Classes="Description" />
@@ -107,6 +109,13 @@
             <Label Grid.Row="3" Grid.Column="1"
                    Content="{Binding LocalCopyTransferredVolume, Converter={StaticResource FormatKbSizeConverter}}"
                    HorizontalContentAlignment="Right" />
+
+            <Label Grid.Row="4" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_TransferEfficiency}" Classes="Description" />
+            <Label Grid.Row="4" Grid.Column="1" Content="{Binding TransferEfficiency, StringFormat={}{0:N1}×}"
+                   HorizontalContentAlignment="Right" />
+
+            <Label Grid.Row="5" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_DataReduction}" Classes="Description" />
+            <Label Grid.Row="5" Grid.Column="1" Content="{Binding DataReduction, StringFormat={}{0:P2}}" HorizontalContentAlignment="Right" />
         </Grid>
     </WrapPanel>
 </UserControl>
