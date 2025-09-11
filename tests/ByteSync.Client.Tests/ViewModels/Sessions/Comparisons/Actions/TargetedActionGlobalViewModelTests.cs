@@ -1,5 +1,7 @@
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reflection;
 using ByteSync.Business;
 using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
@@ -10,6 +12,7 @@ using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Models.Comparisons.Result;
+using ByteSync.Tests.Helpers;
 using ByteSync.TestsCommon;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions;
 using FluentAssertions;
@@ -48,7 +51,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             .Returns("The action cannot be applied to some items:");
         _mockLocalizationService.Setup(x => x["TargetedActionEditionGlobal_AffectedItemsTooltip"])
             .Returns("Affected items:");
-        
+
         _mockFailureReasonService.Setup(x => x.GetLocalizedMessage(It.IsAny<AtomicActionValidationFailureReason>()))
             .Returns("Test failure message");
 
@@ -71,6 +74,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         // Create a real ComparisonItem instance since it cannot be mocked (no parameterless constructor)
         var pathIdentity = new PathIdentity(fileSystemType, "test-file", "test-file", "test-file");
         var comparisonItem = new ComparisonItem(pathIdentity);
+
         return comparisonItem;
     }
 
@@ -93,7 +97,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         viewModel.ComparisonItems.Should().HaveCount(2);
         viewModel.FailureSummaries.Should().NotBeNull();
         viewModel.FailureSummaries.Should().BeEmpty();
-        
+
         viewModel.AddActionCommand.Should().NotBeNull();
         viewModel.SaveCommand.Should().NotBeNull();
         viewModel.ResetCommand.Should().NotBeNull();
@@ -102,7 +106,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
 
         viewModel.ActionIssuesHeaderMessage.Should().Be("The action cannot be applied to some items:");
         viewModel.AffectedItemsTooltipHeader.Should().Be("Affected items:");
-        
+
         viewModel.ShowWarning.Should().BeFalse();
         viewModel.AreMissingFields.Should().BeFalse();
         viewModel.IsInconsistentWithValidItems.Should().BeNull();
@@ -124,7 +128,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         );
 
         // Act
-        viewModel.AddActionCommand.Execute(System.Reactive.Unit.Default).Subscribe();
+        viewModel.AddActionCommand.Execute(Unit.Default).Subscribe();
 
         // Assert
         // The constructor calls the factory once during initialization, and AddActionCommand calls it again
@@ -133,7 +137,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
     }
 
     [Test]
-    public async Task OnLocaleChanged_ShouldUpdateLocalizedMessages()
+    public void OnLocaleChanged_ShouldUpdateLocalizedMessages()
     {
         // Arrange
         var viewModel = new TargetedActionGlobalViewModel(
@@ -157,13 +161,10 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
 
         // Act
         _cultureSubject.OnNext(new CultureDefinition { Code = "fr" });
-        
-        // Allow time for the observable to process
-        await Task.Delay(100);
 
         // Assert
-        viewModel.ActionIssuesHeaderMessage.Should().Be("Updated message");
-        viewModel.AffectedItemsTooltipHeader.Should().Be("Updated tooltip");
+        viewModel.ShouldEventuallyBe(vm => vm.ActionIssuesHeaderMessage, "Updated message");
+        viewModel.ShouldEventuallyBe(vm => vm.AffectedItemsTooltipHeader, "Updated tooltip");
     }
 
     [Test]
@@ -198,7 +199,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
 
         // Act
         _cultureSubject.OnNext(new CultureDefinition { Code = "fr" });
-        
+
         // Allow time for the observable to process
         await Task.Delay(100);
 
@@ -231,7 +232,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
 
         // Use reflection or expose method for testing
         var resetWarningMethod = typeof(TargetedActionGlobalViewModel)
-            .GetMethod("ResetWarning", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            .GetMethod("ResetWarning", BindingFlags.NonPublic | BindingFlags.Instance);
 
         // Act
         resetWarningMethod?.Invoke(viewModel, null);
@@ -243,7 +244,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         viewModel.IsInconsistentWithNoValidItems.Should().BeFalse();
     }
 
-        [Test]
+    [Test]
     public void ShowConsistencyWarning_WithValidAndInvalidItems_ShouldSetCorrectProperties()
     {
         // Arrange
@@ -260,11 +261,12 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         // Create real instance instead of mock
         var result = new AtomicActionConsistencyCheckCanAddResult(_comparisonItems);
         result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[0], true)); // Valid
-        result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[1], AtomicActionValidationFailureReason.InvalidSourceCount)); // Invalid
+        result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[1],
+            AtomicActionValidationFailureReason.InvalidSourceCount)); // Invalid
 
         // Use reflection to access private method
         var showConsistencyWarningMethod = typeof(TargetedActionGlobalViewModel)
-            .GetMethod("ShowConsistencyWarning", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            .GetMethod("ShowConsistencyWarning", BindingFlags.NonPublic | BindingFlags.Instance);
 
         // Act
         showConsistencyWarningMethod?.Invoke(viewModel, [result]);
@@ -300,12 +302,14 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
 
         // Create real instance instead of mock - all items fail validation
         var result = new AtomicActionConsistencyCheckCanAddResult(_comparisonItems);
-        result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[0], AtomicActionValidationFailureReason.InvalidSourceCount)); // Invalid
-        result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[1], AtomicActionValidationFailureReason.InvalidSourceCount)); // Invalid
+        result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[0],
+            AtomicActionValidationFailureReason.InvalidSourceCount)); // Invalid
+        result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[1],
+            AtomicActionValidationFailureReason.InvalidSourceCount)); // Invalid
 
         // Use reflection to access private method
         var showConsistencyWarningMethod = typeof(TargetedActionGlobalViewModel)
-            .GetMethod("ShowConsistencyWarning", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            .GetMethod("ShowConsistencyWarning", BindingFlags.NonPublic | BindingFlags.Instance);
 
         // Act
         showConsistencyWarningMethod?.Invoke(viewModel, [result]);
@@ -334,27 +338,30 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
 
         // Create real instance instead of mock with multiple failure reasons
         var result = new AtomicActionConsistencyCheckCanAddResult(_comparisonItems);
-        result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[0], AtomicActionValidationFailureReason.InvalidSourceCount)); // First InvalidSourceCount
-        result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[1], AtomicActionValidationFailureReason.CreateOperationOnFileNotAllowed)); // Different reason
-        result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[0], AtomicActionValidationFailureReason.InvalidSourceCount)); // Duplicate InvalidSourceCount
+        result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[0],
+            AtomicActionValidationFailureReason.InvalidSourceCount)); // First InvalidSourceCount
+        result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[1],
+            AtomicActionValidationFailureReason.CreateOperationOnFileNotAllowed)); // Different reason
+        result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[0],
+            AtomicActionValidationFailureReason.InvalidSourceCount)); // Duplicate InvalidSourceCount
 
         _mockFailureReasonService.Setup(x => x.GetLocalizedMessage(AtomicActionValidationFailureReason.CreateOperationOnFileNotAllowed))
             .Returns("Cannot create files");
 
         // Use reflection to access private method
         var showConsistencyWarningMethod = typeof(TargetedActionGlobalViewModel)
-            .GetMethod("ShowConsistencyWarning", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            .GetMethod("ShowConsistencyWarning", BindingFlags.NonPublic | BindingFlags.Instance);
 
         // Act
         showConsistencyWarningMethod?.Invoke(viewModel, [result]);
 
         // Assert
         viewModel.FailureSummaries.Should().HaveCount(2);
-        
+
         // Should be ordered by count (most frequent first)
         viewModel.FailureSummaries[0].Count.Should().Be(2); // InvalidSourceCount appears twice
         viewModel.FailureSummaries[0].Reason.Should().Be(AtomicActionValidationFailureReason.InvalidSourceCount);
-        
+
         viewModel.FailureSummaries[1].Count.Should().Be(1); // CreateOperationOnFileNotAllowed appears once
         viewModel.FailureSummaries[1].Reason.Should().Be(AtomicActionValidationFailureReason.CreateOperationOnFileNotAllowed);
         viewModel.FailureSummaries[1].LocalizedMessage.Should().Be("Cannot create files");
@@ -384,7 +391,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
 
         // Use reflection to access private method
         var showMissingFieldsWarningMethod = typeof(TargetedActionGlobalViewModel)
-            .GetMethod("ShowMissingFieldsWarning", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            .GetMethod("ShowMissingFieldsWarning", BindingFlags.NonPublic | BindingFlags.Instance);
 
         // Act
         showMissingFieldsWarningMethod?.Invoke(viewModel, null);
@@ -411,7 +418,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         );
 
         // Act
-        viewModel.ResetCommand.Execute(System.Reactive.Unit.Default).Subscribe();
+        viewModel.ResetCommand.Execute(Unit.Default).Subscribe();
 
         // Assert
         // Should call factory to create action edit view model (ResetToCreation behavior)
@@ -434,7 +441,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         );
 
         // Act
-        viewModel.CancelCommand.Execute(System.Reactive.Unit.Default).Subscribe();
+        viewModel.CancelCommand.Execute(Unit.Default).Subscribe();
 
         // Assert
         // Should call factory to create action edit view model (reset behavior)
