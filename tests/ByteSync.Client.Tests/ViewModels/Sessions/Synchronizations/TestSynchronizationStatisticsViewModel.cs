@@ -100,11 +100,10 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
             ExchangedVolume = 20
         };
         _processData.SynchronizationProgress.OnNext(progress);
-        ReactiveViewModelTestHelpers.ShouldEventuallyBe(_viewModel, vm => vm.HandledActions, 5L, TimeSpan.FromSeconds(1));
-        _viewModel.HandledActions.Should().Be(5);
-        _viewModel.Errors.Should().Be(1);
-        _viewModel.ProcessedVolume.Should().Be(10);
-        _viewModel.ExchangedVolume.Should().Be(20);
+        _viewModel.ShouldEventuallyBe(vm => vm.HandledActions, 5L);
+        _viewModel.ShouldEventuallyBe(vm => vm.Errors, 1L);
+        _viewModel.ShouldEventuallyBe(vm => vm.ProcessedVolume, 10L);
+        _viewModel.ShouldEventuallyBe(vm => vm.ExchangedVolume, 20L);
     }
 
     [Test]
@@ -120,8 +119,8 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
             Status = SynchronizationEndStatuses.Regular
         });
 
-        _viewModel.EstimatedEndDateTimeLabel.Should().Be("End:");
-        _viewModel.HandledActions.Should().Be(3);
-        _viewModel.Errors.Should().Be(1);
+        _viewModel.ShouldEventuallyBe(vm => vm.EstimatedEndDateTimeLabel, "End:");
+        _viewModel.ShouldEventuallyBe(vm => vm.HandledActions, 3L);
+        _viewModel.ShouldEventuallyBe(vm => vm.Errors, 1L);
     }
 }
