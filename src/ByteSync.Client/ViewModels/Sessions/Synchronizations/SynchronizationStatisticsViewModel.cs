@@ -59,17 +59,19 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
             .Select(x => x.Item2 > 0 ? (double)x.Item1 / x.Item2 * 100 : 0)
             .ToPropertyEx(this, x => x.LocalCopyPercentage);
 
-        // TransferEfficiency = SynchronizedVolume / (ActualUploaded + LocalCopyTransferred)
+        // TransferEfficiency = SynchronizedVolume / (ActualUploaded + LocalCopyTransferred), clamped to [1, +∞)
         this.WhenAnyValue(x => x.SynchronizedVolume, x => x.ActualUploadedVolume, x => x.LocalCopyTransferredVolume)
             .Select(x =>
             {
                 var denom = x.Item2 + x.Item3;
                 if (denom <= 0)
                 {
-                    return x.Item1 > 0 ? double.PositiveInfinity : 0d;
+                    return x.Item1 > 0 ? double.PositiveInfinity : 1d;
                 }
 
-                return (double)x.Item1 / denom;
+                var eff = (double)x.Item1 / denom;
+
+                return eff < 1d ? 1d : eff;
             })
             .ToPropertyEx(this, x => x.TransferEfficiency);
 
