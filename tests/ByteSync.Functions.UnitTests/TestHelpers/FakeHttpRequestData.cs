@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Moq;
 
 namespace ByteSync.Functions.UnitTests.TestHelpers;
 
@@ -27,6 +28,12 @@ public class FakeHttpRequestData : HttpRequestData
 
     public override HttpResponseData CreateResponse()
     {
-        throw new NotImplementedException();
+        var responseMock = new Mock<HttpResponseData>(FunctionContext);
+        responseMock.SetupProperty(r => r.StatusCode);
+        responseMock.SetupGet(r => r.Headers).Returns(new HttpHeadersCollection());
+        responseMock.SetupProperty(r => r.Body, new MemoryStream());
+        responseMock.SetupGet(r => r.Cookies).Returns(new Mock<HttpCookies>().Object);
+
+        return responseMock.Object;
     }
 }
