@@ -44,21 +44,6 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
         LocalCopyTransferredVolume = 0;
         SynchronizedVolume = 0;
 
-        // Observable pour EfficiencyRatio
-        this.WhenAnyValue(x => x.SynchronizedVolume, x => x.ActualUploadedVolume, x => x.ActualDownloadedVolume)
-            .Select(x =>
-            {
-                var total = x.Item2 + x.Item3;
-
-                return total > 0 ? (double)x.Item1 / total : 0;
-            })
-            .ToPropertyEx(this, x => x.EfficiencyRatio);
-
-        // Observable pour LocalCopyPercentage
-        this.WhenAnyValue(x => x.LocalCopyTransferredVolume, x => x.SynchronizedVolume)
-            .Select(x => x.Item2 > 0 ? (double)x.Item1 / x.Item2 * 100 : 0)
-            .ToPropertyEx(this, x => x.LocalCopyPercentage);
-
         // TransferEfficiency = SynchronizedVolume / (ActualUploaded + LocalCopyTransferred), clamped to [1, +∞)
         this.WhenAnyValue(x => x.SynchronizedVolume, x => x.ActualUploadedVolume, x => x.LocalCopyTransferredVolume)
             .Select(x =>
@@ -88,10 +73,7 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
                 var transferred = (double)(x.Item2 + x.Item3);
                 var reduction = 1d - transferred / sync;
 
-                if (reduction < 0d) return 0d;
-                if (reduction > 1d) return 1d;
-
-                return reduction;
+                return Math.Clamp(reduction, 0d, 1d);
             })
             .ToPropertyEx(this, x => x.DataReduction);
 
@@ -198,11 +180,6 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
 
     [Reactive]
     public long SynchronizedVolume { get; set; }
-
-    // Propriétés calculées pour les ratios
-    public extern double EfficiencyRatio { [ObservableAsProperty] get; } // SynchronizedVolume / (ActualUploaded + ActualDownloaded)
-
-    public extern double LocalCopyPercentage { [ObservableAsProperty] get; } // LocalCopyTransferred / SynchronizedVolume * 100
 
     public extern long Successes { [ObservableAsProperty] get; }
 
