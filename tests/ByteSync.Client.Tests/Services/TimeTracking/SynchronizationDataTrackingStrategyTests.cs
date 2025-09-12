@@ -1,7 +1,9 @@
+using System.Reactive.Concurrency;
 using ByteSync.Business.Synchronizations;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Services.TimeTracking;
 using FluentAssertions;
+using Microsoft.Reactive.Testing;
 using Moq;
 using NUnit.Framework;
 
@@ -10,23 +12,25 @@ namespace ByteSync.Tests.Services.TimeTracking;
 [TestFixture]
 public class SynchronizationDataTrackingStrategyTests
 {
-    private static (SynchronizationDataTrackingStrategy Sut, SynchronizationProcessData Data) CreateSut()
+    private static (SynchronizationDataTrackingStrategy Sut, SynchronizationProcessData Data, IScheduler Scheduler) CreateSut(
+        IScheduler? scheduler = null)
     {
         var data = new SynchronizationProcessData();
 
         var syncServiceMock = new Mock<ISynchronizationService>();
         syncServiceMock.SetupGet(x => x.SynchronizationProcessData).Returns(data);
 
-        var sut = new SynchronizationDataTrackingStrategy(syncServiceMock.Object);
+        var usedScheduler = scheduler ?? new TestScheduler();
+        var sut = new SynchronizationDataTrackingStrategy(syncServiceMock.Object, usedScheduler);
 
-        return (sut, data);
+        return (sut, data, usedScheduler);
     }
 
     [Test]
     public void GetDataObservable_InitialEmission_IsZeroTuple()
     {
         // Arrange
-        var (sut, data) = CreateSut();
+        var (sut, data, _) = CreateSut();
         var evt = new AutoResetEvent(false);
         (long Identified, long Processed)? captured = null;
         Exception? error = null;
@@ -57,7 +61,7 @@ public class SynchronizationDataTrackingStrategyTests
     public void GetDataObservable_RunningWithZeroProgress_EmitsImmediately()
     {
         // Arrange
-        var (sut, data) = CreateSut();
+        var (sut, data, _) = CreateSut();
         var results = new List<(long Identified, long Processed)>();
         using var sub = sut.GetDataObservable().Subscribe(results.Add);
 
@@ -69,8 +73,6 @@ public class SynchronizationDataTrackingStrategyTests
         });
         data.SynchronizationMainStatus.OnNext(SynchronizationProcessStatuses.Running);
 
-        Thread.Sleep(200);
-
         // Assert: should include the emitted data (non-skippable path)
         results.Should().Contain((1234L, 0L));
     }
@@ -79,7 +81,7 @@ public class SynchronizationDataTrackingStrategyTests
     public void GetDataObservable_RunningWithNonZeroProgress_IsSampled()
     {
         // Arrange
-        var (sut, data) = CreateSut();
+        var (sut, data, scheduler) = CreateSut();
 
         var results = new List<(long Identified, long Processed)>();
         using var subscription = sut.GetDataObservable().Subscribe(x => results.Add(x));
@@ -87,13 +89,13 @@ public class SynchronizationDataTrackingStrategyTests
         // Act: Push a few non-zero updates in quick succession (< 0.5s)
         data.SynchronizationMainStatus.OnNext(SynchronizationProcessStatuses.Running);
         data.SynchronizationProgress.OnNext(new SynchronizationProgress { TotalVolumeToProcess = 1000, SynchronizedVolume = 10 });
-        Thread.Sleep(100);
+        (scheduler as TestScheduler)!.AdvanceBy(TimeSpan.FromMilliseconds(100).Ticks);
         data.SynchronizationProgress.OnNext(new SynchronizationProgress { TotalVolumeToProcess = 1000, SynchronizedVolume = 20 });
-        Thread.Sleep(100);
+        (scheduler as TestScheduler)!.AdvanceBy(TimeSpan.FromMilliseconds(100).Ticks);
         data.SynchronizationProgress.OnNext(new SynchronizationProgress { TotalVolumeToProcess = 1000, SynchronizedVolume = 30 });
 
-        // Wait sufficiently long for Sample(0.5s) to produce an emission
-        Thread.Sleep(1500);
+        // Advance virtual time beyond 0.5s to trigger Sample(0.5s)
+        (scheduler as TestScheduler)!.AdvanceBy(TimeSpan.FromSeconds(1).Ticks);
 
         // Assert: we should have at least one sampled emission with the latest values
         results.Should().Contain((1000L, 30L));

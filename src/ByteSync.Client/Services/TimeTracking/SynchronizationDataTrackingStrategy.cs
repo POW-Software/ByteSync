@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using ByteSync.Business.Synchronizations;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Controls.TimeTracking;
@@ -8,10 +9,18 @@ namespace ByteSync.Services.TimeTracking;
 public class SynchronizationDataTrackingStrategy : IDataTrackingStrategy
 {
     private readonly ISynchronizationService _synchronizationService;
+    private readonly IScheduler _scheduler;
 
     public SynchronizationDataTrackingStrategy(ISynchronizationService synchronizationService)
     {
         _synchronizationService = synchronizationService;
+        _scheduler = Scheduler.Default;
+    }
+
+    public SynchronizationDataTrackingStrategy(ISynchronizationService synchronizationService, IScheduler scheduler)
+    {
+        _synchronizationService = synchronizationService;
+        _scheduler = scheduler;
     }
 
     public IObservable<(long IdentifiedSize, long ProcessedSize)> GetDataObservable()
@@ -36,7 +45,7 @@ public class SynchronizationDataTrackingStrategy : IDataTrackingStrategy
         // Sample the source observable every 0.5 seconds, but only for values that can be skipped
         var sampled = sharedSource
             .Where(canSkip)
-            .Sample(TimeSpan.FromSeconds(0.5));
+            .Sample(TimeSpan.FromSeconds(0.5), _scheduler);
 
         // Get the values from the shared source that can not be skipped
         var notSkipped = sharedSource
