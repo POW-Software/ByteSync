@@ -18,4 +18,6 @@ public class SynchronizationActionRequest
     public List<string> ActionsGroupIds { get; set; }
     
     public string? NodeId { get; set; }
+
+    public Dictionary<string, SynchronizationActionMetrics>? ActionMetricsByActionId { get; set; }
 }

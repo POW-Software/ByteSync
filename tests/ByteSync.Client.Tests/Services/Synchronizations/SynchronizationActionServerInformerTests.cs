@@ -8,6 +8,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using ByteSync.Common.Business.Synchronizations;
 
 namespace ByteSync.Tests.Services.Synchronizations;
 
@@ -82,6 +83,68 @@ public class SynchronizationActionServerInformerTests
                     req.ActionsGroupIds.Contains("test-group-id") && 
                     req.NodeId == "test-node-id")), 
             Times.Once);
+    }
+
+    [Test]
+    public async Task HandleCloudActionDone_WithMetrics_ShouldPropagateMetricsInRequest()
+    {
+        // Arrange
+        SynchronizationActionRequest? captured = null;
+        _cloudActionCallerMock
+            .Setup(x => x.Invoke(It.IsAny<string>(), It.IsAny<SynchronizationActionRequest>()))
+            .Callback<string, SynchronizationActionRequest>((_, req) => captured = req)
+            .Returns(Task.CompletedTask);
+
+        var metrics = new Dictionary<string, SynchronizationActionMetrics>
+        {
+            [_testSharedActionsGroup.ActionsGroupId] = new SynchronizationActionMetrics { TransferredBytes = 1234 }
+        };
+
+        // Act
+        await _synchronizationActionServerInformer.HandleCloudActionDone(
+            _testSharedActionsGroup,
+            _testSharedDataPart,
+            _cloudActionCallerMock.Object,
+            metrics);
+
+        await _synchronizationActionServerInformer.HandlePendingActions();
+
+        // Assert
+        captured.Should().NotBeNull();
+        captured!.ActionsGroupIds.Should().Contain(_testSharedActionsGroup.ActionsGroupId);
+        captured.ActionMetricsByActionId.Should().NotBeNull();
+        captured.ActionMetricsByActionId!.Should().ContainKey(_testSharedActionsGroup.ActionsGroupId);
+        captured.ActionMetricsByActionId![_testSharedActionsGroup.ActionsGroupId].TransferredBytes.Should().Be(1234);
+    }
+
+    [Test]
+    public async Task HandleCloudActionDone_WithMetricsForOtherIds_ShouldNotAllocateMetricsDictionary()
+    {
+        // Arrange
+        SynchronizationActionRequest? captured = null;
+        _cloudActionCallerMock
+            .Setup(x => x.Invoke(It.IsAny<string>(), It.IsAny<SynchronizationActionRequest>()))
+            .Callback<string, SynchronizationActionRequest>((_, req) => captured = req)
+            .Returns(Task.CompletedTask);
+
+        var metrics = new Dictionary<string, SynchronizationActionMetrics>
+        {
+            ["some-other-id"] = new SynchronizationActionMetrics { TransferredBytes = 42 }
+        };
+
+        // Act
+        await _synchronizationActionServerInformer.HandleCloudActionDone(
+            _testSharedActionsGroup,
+            _testSharedDataPart,
+            _cloudActionCallerMock.Object,
+            metrics);
+
+        await _synchronizationActionServerInformer.HandlePendingActions();
+
+        // Assert
+        captured.Should().NotBeNull();
+        captured!.ActionsGroupIds.Should().Contain(_testSharedActionsGroup.ActionsGroupId);
+        captured.ActionMetricsByActionId.Should().BeNull("no metrics matched chunk ids so dictionary should not be created");
     }
 
     [Test]

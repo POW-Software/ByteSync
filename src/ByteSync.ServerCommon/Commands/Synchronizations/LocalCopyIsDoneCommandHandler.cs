@@ -30,9 +30,17 @@ public class LocalCopyIsDoneCommandHandler : ActionCompletedHandlerBase<LocalCop
     protected override void UpdateProgress(SynchronizationEntity synchronization, TrackingActionEntity trackingAction,
         LocalCopyIsDoneRequest request)
     {
-        var volumeToAdd = trackingAction.Size ?? 0;
+        var actionId = trackingAction.ActionsGroupId;
+        var localCopyTransferred = trackingAction.Size ?? 0;
 
-        synchronization.Progress.LocalCopyTransferredVolume += volumeToAdd;
-        synchronization.Progress.SynchronizedVolume += volumeToAdd;
+        if (request.ActionMetricsByActionId != null
+            && request.ActionMetricsByActionId.TryGetValue(actionId, out var metrics)
+            && metrics.TransferredBytes.HasValue)
+        {
+            localCopyTransferred = metrics.TransferredBytes.Value;
+        }
+
+        synchronization.Progress.LocalCopyTransferredVolume += localCopyTransferred;
+        synchronization.Progress.SynchronizedVolume += (trackingAction.Size ?? 0);
     }
 }
