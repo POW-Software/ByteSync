@@ -475,9 +475,6 @@ Voulez-vous continuer ?</value>
 	<data name="SynchronizationMain_HandledActions" xml:space="preserve">
 		<value>Actions traitées :</value>
 	</data>
-	<data name="SynchronizationMain_ProcessedVolume" xml:space="preserve">
-		<value>Volume traité :</value>
-	</data>
 	<data name="SynchronizationMain_EstimatedEnd" xml:space="preserve">
 		<value>Fin estimée :</value>
 	</data>
@@ -489,9 +486,6 @@ Voulez-vous continuer ?</value>
 	</data>
 	<data name="SynchronizationMain_SynchronizationRunning" xml:space="preserve">
 		<value>Synchronisation en cours</value>
-	</data>
-	<data name="SynchronizationMain_ExchangedVolume" xml:space="preserve">
-		<value>Volume échangé :</value>
 	</data>
 	<data name="SynchronizationMain_SynchronizedVolume" xml:space="preserve">
 		<value>Volume synchronisé :</value>
@@ -510,12 +504,6 @@ Voulez-vous continuer ?</value>
 	</data>
     <data name="SynchronizationMain_DataReduction" xml:space="preserve">
 		<value>Réduction de données :</value>
-	</data>
-	<data name="SynchronizationMain_EfficiencyRatio" xml:space="preserve">
-		<value>Efficacité transfert :</value>
-	</data>
-	<data name="SynchronizationMain_LocalCopyPercentage" xml:space="preserve">
-		<value>% copie locale :</value>
 	</data>
 	<data name="Status_OK" xml:space="preserve">
 		<value>OK</value>
