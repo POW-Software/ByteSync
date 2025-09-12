@@ -78,11 +78,24 @@ public class ServerInformerData
         var ids = batch.ActionsGroupIds.ToList();
         foreach (var chunk in ids.Chunk(chunkSize))
         {
-            var request = new SynchronizationActionRequest(chunk.ToList(), batch.NodeId)
+            var chunkList = chunk.ToList();
+            Dictionary<string, SynchronizationActionMetrics>? filteredMetrics = null;
+
+            if (batch.ActionMetricsByActionId.Count > 0)
             {
-                ActionMetricsByActionId = batch.ActionMetricsByActionId
-                    .Where(kvp => chunk.Contains(kvp.Key))
-                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
+                foreach (var id in chunkList)
+                {
+                    if (batch.ActionMetricsByActionId.TryGetValue(id, out var metrics))
+                    {
+                        filteredMetrics ??= new Dictionary<string, SynchronizationActionMetrics>();
+                        filteredMetrics[id] = metrics;
+                    }
+                }
+            }
+
+            var request = new SynchronizationActionRequest(chunkList, batch.NodeId)
+            {
+                ActionMetricsByActionId = filteredMetrics
             };
             slice.SynchronizationActionRequests.Add(request);
         }
