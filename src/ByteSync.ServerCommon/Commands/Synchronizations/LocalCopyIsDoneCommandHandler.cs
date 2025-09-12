@@ -31,9 +31,9 @@ public class LocalCopyIsDoneCommandHandler : ActionCompletedHandlerBase<LocalCop
         LocalCopyIsDoneRequest request)
     {
         var actionId = trackingAction.ActionsGroupId;
-        long localCopyTransferred = trackingAction.Size ?? 0;
+        var localCopyTransferred = trackingAction.Size ?? 0;
 
-        if (request.ActionMetricsByActionId != null && actionId != null
+        if (request.ActionMetricsByActionId != null
             && request.ActionMetricsByActionId.TryGetValue(actionId, out var metrics)
             && metrics.TransferredBytes.HasValue)
         {
