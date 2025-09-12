@@ -36,7 +36,6 @@ public static class ReactiveViewModelTestHelpers
         ok.Should().BeTrue();
     }
 
-    // Extension-style helpers for concise call-sites: viewModel.ShouldEventuallyBe(vm => vm.Prop, expected)
     public static void ShouldEventuallyBe<TViewModel, TProp>(
         this TViewModel viewModel,
         Expression<Func<TViewModel, TProp>> selector,
