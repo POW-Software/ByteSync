@@ -46,13 +46,13 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
         this.WhenAnyValue(x => x.SynchronizedVolume, x => x.ActualUploadedVolume, x => x.LocalCopyTransferredVolume)
             .Select(x =>
             {
-                var denom = x.Item2 + x.Item3;
-                if (denom <= 0)
+                var denominator = x.Item2 + x.Item3;
+                if (denominator <= 0)
                 {
                     return x.Item1 > 0 ? double.PositiveInfinity : 1d;
                 }
 
-                var eff = (double)x.Item1 / denom;
+                var eff = (double)x.Item1 / denominator;
 
                 return eff < 1d ? 1d : eff;
             })
@@ -62,14 +62,14 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
         this.WhenAnyValue(x => x.SynchronizedVolume, x => x.ActualUploadedVolume, x => x.LocalCopyTransferredVolume)
             .Select(x =>
             {
-                var sync = x.Item1;
-                if (sync <= 0)
+                var synchronizedBytes = x.Item1;
+                if (synchronizedBytes <= 0)
                 {
                     return 0d;
                 }
 
-                var transferred = (double)(x.Item2 + x.Item3);
-                var reduction = 1d - transferred / sync;
+                var transferredBytes = (double)(x.Item2 + x.Item3);
+                var reduction = 1d - transferredBytes / synchronizedBytes;
 
                 return Math.Clamp(reduction, 0d, 1d);
             })
