@@ -23,8 +23,10 @@ public class SynchronizationService : ISynchronizationService
     private readonly ITimeTrackingCache _timeTrackingCache;
     private readonly ILogger<SynchronizationService> _logger;
 
-    public SynchronizationService(ISessionService sessionService, ISessionMemberService sessionMemberService, ISynchronizationApiClient synchronizationApiClient, 
-        ISynchronizationLooperFactory synchronizationLooperFactory, ITimeTrackingCache timeTrackingCache, ILogger<SynchronizationService> logger)
+    public SynchronizationService(ISessionService sessionService, ISessionMemberService sessionMemberService,
+        ISynchronizationApiClient synchronizationApiClient,
+        ISynchronizationLooperFactory synchronizationLooperFactory, ITimeTrackingCache timeTrackingCache,
+        ILogger<SynchronizationService> logger)
     {
         _sessionService = sessionService;
         _sessionMemberService = sessionMemberService;
@@ -32,9 +34,9 @@ public class SynchronizationService : ISynchronizationService
         _synchronizationLooperFactory = synchronizationLooperFactory;
         _timeTrackingCache = timeTrackingCache;
         _logger = logger;
-        
+
         SynchronizationProcessData = new SynchronizationProcessData();
-        
+
         SynchronizationProcessData.SynchronizationStart.CombineLatest(SynchronizationProcessData.SynchronizationDataTransmitted)
             .Where(tuple => tuple is { First: not null, Second: true })
             .Subscribe(_ =>
@@ -46,22 +48,22 @@ public class SynchronizationService : ISynchronizationService
                     await synchronizationLooper.DisposeAsync();
                 });
             });
-        
+
         _sessionService.SessionStatusObservable
             .Where(x => x == SessionStatus.Preparation)
             .Subscribe(_ => SynchronizationProcessData.Reset());
     }
 
     public SynchronizationProcessData SynchronizationProcessData { get; }
-    
+
     public async Task AbortSynchronization()
     {
         _logger.LogInformation("synchronization aborted on user request");
 
         SynchronizationProcessData.RequestSynchronizationAbort();
-        
+
         var session = await _sessionService.SessionObservable.FirstOrDefaultAsync();
-        
+
         if (session is CloudSession cloudSession)
         {
             await _synchronizationApiClient.RequestAbortSynchronization(cloudSession.SessionId);
@@ -79,16 +81,16 @@ public class SynchronizationService : ISynchronizationService
             var timeTrackingComputer = await _timeTrackingCache
                 .GetTimeTrackingComputer(_sessionService.SessionId!, TimeTrackingComputerType.Synchronization);
             timeTrackingComputer.Stop();
-            
+
             var synchronizationEnd = new SynchronizationEnd
             {
                 SessionId = synchronization.SessionId,
                 FinishedOn = synchronization.Ended!.Value,
                 Status = synchronization.EndStatus!.Value,
             };
-        
+
             SynchronizationProcessData.SynchronizationEnd.OnNext(synchronizationEnd);
-            
+
             _ = _sessionMemberService.UpdateCurrentMemberGeneralStatus(SessionMemberGeneralStatus.SynchronizationFinished);
         }
 
@@ -100,7 +102,7 @@ public class SynchronizationService : ISynchronizationService
                 RequestedOn = synchronization.AbortRequestedOn!.Value,
                 RequestedBy = synchronization.AbortRequestedBy,
             };
-            
+
             SynchronizationProcessData.SynchronizationAbortRequest.OnNext(sar);
         }
     }
@@ -111,11 +113,11 @@ public class SynchronizationService : ISynchronizationService
         {
             await _sessionService.SetSessionStatus(SessionStatus.Synchronization);
             SynchronizationProcessData.SynchronizationMainStatus.OnNext(SynchronizationProcessStatuses.Running);
-            
+
             var timeTrackingComputer = await _timeTrackingCache
                 .GetTimeTrackingComputer(_sessionService.SessionId!, TimeTrackingComputerType.Synchronization);
             timeTrackingComputer.Start(synchronization.Started);
-            
+
             SynchronizationProcessData.SynchronizationStart.OnNext(synchronization);
 
             _ = _sessionMemberService.UpdateCurrentMemberGeneralStatus(SessionMemberGeneralStatus.SynchronizationRunning);
@@ -130,21 +132,19 @@ public class SynchronizationService : ISynchronizationService
     {
         SynchronizationProcessData.TotalVolumeToProcess = sharedSynchronizationStartData.TotalVolumeToProcess;
         SynchronizationProcessData.TotalActionsToProcess = sharedSynchronizationStartData.TotalAtomicActionsToProcess;
-        
+
         SynchronizationProcessData.SynchronizationDataTransmitted.OnNext(true);
-        
+
         return Task.CompletedTask;
     }
 
     public Task OnSynchronizationProgressChanged(SynchronizationProgressPush synchronizationProgressPush)
     {
         var synchronizationProgress = SynchronizationProcessData.SynchronizationProgress.Value ?? new SynchronizationProgress();
-        
+
         if (synchronizationProgressPush.Version > synchronizationProgress.Version)
         {
             synchronizationProgress.SessionId = synchronizationProgressPush.SessionId;
-            synchronizationProgress.ExchangedVolume = synchronizationProgressPush.ExchangedVolume;
-            synchronizationProgress.ProcessedVolume = synchronizationProgressPush.ProcessedVolume;
             synchronizationProgress.ActualUploadedVolume = synchronizationProgressPush.ActualUploadedVolume;
             synchronizationProgress.ActualDownloadedVolume = synchronizationProgressPush.ActualDownloadedVolume;
             synchronizationProgress.LocalCopyTransferredVolume = synchronizationProgressPush.LocalCopyTransferredVolume;
@@ -153,7 +153,7 @@ public class SynchronizationService : ISynchronizationService
             synchronizationProgress.FinishedActionsCount = synchronizationProgressPush.FinishedActionsCount;
             synchronizationProgress.ErrorActionsCount = synchronizationProgressPush.ErrorActionsCount;
             synchronizationProgress.Version = synchronizationProgressPush.Version;
-            
+
             SynchronizationProcessData.SynchronizationProgress.OnNext(synchronizationProgress);
         }
 

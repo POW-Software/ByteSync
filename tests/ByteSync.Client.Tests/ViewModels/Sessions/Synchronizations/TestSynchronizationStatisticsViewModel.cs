@@ -96,14 +96,10 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
             Version = 1,
             FinishedActionsCount = 5,
             ErrorActionsCount = 1,
-            ProcessedVolume = 10,
-            ExchangedVolume = 20
         };
         _processData.SynchronizationProgress.OnNext(progress);
         _viewModel.ShouldEventuallyBe(vm => vm.HandledActions, 5L);
         _viewModel.ShouldEventuallyBe(vm => vm.Errors, 1L);
-        _viewModel.ShouldEventuallyBe(vm => vm.ProcessedVolume, 10L);
-        _viewModel.ShouldEventuallyBe(vm => vm.ExchangedVolume, 20L);
     }
 
     [Test]

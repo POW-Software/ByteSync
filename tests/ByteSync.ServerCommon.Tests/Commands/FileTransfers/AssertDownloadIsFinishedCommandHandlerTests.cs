@@ -1,7 +1,10 @@
+using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Auth;
+using ByteSync.ServerCommon.Business.Repositories;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Commands.FileTransfers;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using FakeItEasy;
@@ -21,7 +24,7 @@ public class AssertDownloadIsFinishedCommandHandlerTests
     private ILogger<AssertDownloadIsFinishedCommandHandler> _mockLogger;
     private AssertDownloadIsFinishedCommandHandler _assertDownloadIsFinishedCommandHandler;
     private ITransferLocationService _mockTransferLocationService;
-    
+
     [SetUp]
     public void Setup()
     {
@@ -90,20 +93,21 @@ public class AssertDownloadIsFinishedCommandHandlerTests
             .Throws(expectedException);
 
         // Act & Assert
-        var exception = await FluentActions.Awaiting(() => 
-            _assertDownloadIsFinishedCommandHandler.Handle(request, CancellationToken.None))
+        var exception = await FluentActions.Awaiting(() =>
+                _assertDownloadIsFinishedCommandHandler.Handle(request, CancellationToken.None))
             .Should().ThrowAsync<InvalidOperationException>();
 
         exception.Which.Should().Be(expectedException);
     }
-    
+
     [Test]
     public async Task Handle_WhenSharedFileDefinitionNotAllowed_DoesNotUpdateTracking()
     {
         // Arrange
         var sessionId = "session1";
         var client = new Client { ClientInstanceId = "client1" };
-        var sharedFileDefinition = new SharedFileDefinition { Id = "file1", SessionId = sessionId, SharedFileType = SharedFileTypes.FullSynchronization };
+        var sharedFileDefinition = new SharedFileDefinition
+            { Id = "file1", SessionId = sessionId, SharedFileType = SharedFileTypes.FullSynchronization };
         var transferParameters = new TransferParameters { SessionId = sessionId, SharedFileDefinition = sharedFileDefinition };
         var request = new AssertDownloadIsFinishedRequest(sessionId, client, transferParameters);
 
@@ -115,9 +119,11 @@ public class AssertDownloadIsFinishedCommandHandlerTests
         await _assertDownloadIsFinishedCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(A<string>._, A<List<string>>._, A<Func<ByteSync.ServerCommon.Entities.TrackingActionEntity, ByteSync.ServerCommon.Entities.SynchronizationEntity, bool>>._))
+        A.CallTo(() =>
+                _mockTrackingActionRepository.AddOrUpdate(A<string>._, A<List<string>>._,
+                    A<Func<TrackingActionEntity, SynchronizationEntity, bool>>._))
             .MustNotHaveHappened();
-        A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(A<ByteSync.ServerCommon.Business.Repositories.TrackingActionResult>._, A<bool>._))
+        A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(A<TrackingActionResult>._, A<bool>._))
             .MustNotHaveHappened();
     }
 
@@ -127,7 +133,8 @@ public class AssertDownloadIsFinishedCommandHandlerTests
         // Arrange
         var sessionId = "session1";
         var client = new Client { ClientInstanceId = "client1" };
-        var sharedFileDefinition = new SharedFileDefinition { Id = "file1", SessionId = sessionId, SharedFileType = SharedFileTypes.ProfileDetails };
+        var sharedFileDefinition = new SharedFileDefinition
+            { Id = "file1", SessionId = sessionId, SharedFileType = SharedFileTypes.ProfileDetails };
         var transferParameters = new TransferParameters { SessionId = sessionId, SharedFileDefinition = sharedFileDefinition };
         var request = new AssertDownloadIsFinishedRequest(sessionId, client, transferParameters);
 
@@ -139,9 +146,11 @@ public class AssertDownloadIsFinishedCommandHandlerTests
         await _assertDownloadIsFinishedCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(A<string>._, A<List<string>>._, A<Func<ByteSync.ServerCommon.Entities.TrackingActionEntity, ByteSync.ServerCommon.Entities.SynchronizationEntity, bool>>._))
+        A.CallTo(() =>
+                _mockTrackingActionRepository.AddOrUpdate(A<string>._, A<List<string>>._,
+                    A<Func<TrackingActionEntity, SynchronizationEntity, bool>>._))
             .MustNotHaveHappened();
-        A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(A<ByteSync.ServerCommon.Business.Repositories.TrackingActionResult>._, A<bool>._))
+        A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(A<TrackingActionResult>._, A<bool>._))
             .MustNotHaveHappened();
     }
 
@@ -167,34 +176,37 @@ public class AssertDownloadIsFinishedCommandHandlerTests
         A.CallTo(() => _mockCloudSessionsRepository.GetSessionMember(sessionId, client)).Returns(mockSessionMember);
         A.CallTo(() => _mockTransferLocationService.IsSharedFileDefinitionAllowed(mockSessionMember, sharedFileDefinition)).Returns(true);
 
-        var trackingAction = new ByteSync.ServerCommon.Entities.TrackingActionEntity { Size = 123 };
+        var trackingAction = new TrackingActionEntity { Size = 123 };
+
         // Add one target for current client so the action becomes finished
-        trackingAction.TargetClientInstanceAndNodeIds.Add(new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId { ClientInstanceId = client.ClientInstanceId, NodeId = "n1" });
-        var synchronization = new ByteSync.ServerCommon.Entities.SynchronizationEntity();
+        trackingAction.TargetClientInstanceAndNodeIds.Add(new ClientInstanceIdAndNodeId
+            { ClientInstanceId = client.ClientInstanceId, NodeId = "n1" });
+        var synchronization = new SynchronizationEntity();
 
         // Status can be updated, and finalization check returns true to propagate 'needSendSynchronizationUpdated=true'
         A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization)).Returns(true);
         A.CallTo(() => _mockSynchronizationService.CheckSynchronizationIsFinished(synchronization)).Returns(true);
 
-        A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, sharedFileDefinition.ActionsGroupIds, A<Func<ByteSync.ServerCommon.Entities.TrackingActionEntity, ByteSync.ServerCommon.Entities.SynchronizationEntity, bool>>._))
-            .Invokes((string _, List<string> _, Func<ByteSync.ServerCommon.Entities.TrackingActionEntity, ByteSync.ServerCommon.Entities.SynchronizationEntity, bool> updater) => updater(trackingAction, synchronization))
-            .Returns(new ByteSync.ServerCommon.Business.Repositories.TrackingActionResult(true, [trackingAction], synchronization));
+        A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, sharedFileDefinition.ActionsGroupIds,
+                A<Func<TrackingActionEntity, SynchronizationEntity, bool>>._))
+            .Invokes((string _, List<string> _, Func<TrackingActionEntity, SynchronizationEntity, bool> updater) =>
+                updater(trackingAction, synchronization))
+            .Returns(new TrackingActionResult(true, [trackingAction], synchronization));
 
         // Act
         await _assertDownloadIsFinishedCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert the repository is called
-        A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, sharedFileDefinition.ActionsGroupIds, A<Func<ByteSync.ServerCommon.Entities.TrackingActionEntity, ByteSync.ServerCommon.Entities.SynchronizationEntity, bool>>._))
+        A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, sharedFileDefinition.ActionsGroupIds,
+                A<Func<TrackingActionEntity, SynchronizationEntity, bool>>._))
             .MustHaveHappenedOnceExactly();
 
         // Assert progress update called with correct increments
         A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(
-                A<ByteSync.ServerCommon.Business.Repositories.TrackingActionResult>.That.Matches(r =>
+                A<TrackingActionResult>.That.Matches(r =>
                     r.IsSuccess &&
                     r.SynchronizationEntity.Progress.FinishedAtomicActionsCount == 1 && // only current client target counted
-                    r.SynchronizationEntity.Progress.SynchronizedVolume == 123 && // New tracking: volume synchronized
-                    r.SynchronizationEntity.Progress.ProcessedVolume == 123 && // Legacy: still updated for compatibility
-                    r.SynchronizationEntity.Progress.ExchangedVolume == 123 // Legacy: still updated for compatibility
+                    r.SynchronizationEntity.Progress.SynchronizedVolume == 123
                 ),
                 A<bool>.That.IsEqualTo(true)))
             .MustHaveHappenedOnceExactly();
@@ -222,30 +234,31 @@ public class AssertDownloadIsFinishedCommandHandlerTests
         A.CallTo(() => _mockCloudSessionsRepository.GetSessionMember(sessionId, client)).Returns(mockSessionMember);
         A.CallTo(() => _mockTransferLocationService.IsSharedFileDefinitionAllowed(mockSessionMember, sharedFileDefinition)).Returns(true);
 
-        var trackingAction = new ByteSync.ServerCommon.Entities.TrackingActionEntity { Size = 456 };
-        var target = new ByteSync.Common.Business.Actions.ClientInstanceIdAndNodeId { ClientInstanceId = client.ClientInstanceId, NodeId = "n1" };
+        var trackingAction = new TrackingActionEntity { Size = 456 };
+        var target = new ClientInstanceIdAndNodeId { ClientInstanceId = client.ClientInstanceId, NodeId = "n1" };
         trackingAction.TargetClientInstanceAndNodeIds.Add(target);
+
         // Already finished before update: mark as success already
         trackingAction.SuccessTargetClientInstanceAndNodeIds.Add(target);
-        var synchronization = new ByteSync.ServerCommon.Entities.SynchronizationEntity();
+        var synchronization = new SynchronizationEntity();
 
         A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization)).Returns(true);
         A.CallTo(() => _mockSynchronizationService.CheckSynchronizationIsFinished(synchronization)).Returns(false);
 
-        A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, sharedFileDefinition.ActionsGroupIds, A<Func<ByteSync.ServerCommon.Entities.TrackingActionEntity, ByteSync.ServerCommon.Entities.SynchronizationEntity, bool>>._))
-            .Invokes((string _, List<string> _, Func<ByteSync.ServerCommon.Entities.TrackingActionEntity, ByteSync.ServerCommon.Entities.SynchronizationEntity, bool> updater) => updater(trackingAction, synchronization))
-            .Returns(new ByteSync.ServerCommon.Business.Repositories.TrackingActionResult(true, [trackingAction], synchronization));
+        A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, sharedFileDefinition.ActionsGroupIds,
+                A<Func<TrackingActionEntity, SynchronizationEntity, bool>>._))
+            .Invokes((string _, List<string> _, Func<TrackingActionEntity, SynchronizationEntity, bool> updater) =>
+                updater(trackingAction, synchronization))
+            .Returns(new TrackingActionResult(true, [trackingAction], synchronization));
 
         // Act
         await _assertDownloadIsFinishedCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert: ProcessedVolume should not increment (already finished), ExchangedVolume from UploadedFileLength, and needSendSynchronizationUpdated = false
         A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(
-                A<ByteSync.ServerCommon.Business.Repositories.TrackingActionResult>.That.Matches(r =>
+                A<TrackingActionResult>.That.Matches(r =>
                     r.SynchronizationEntity.Progress.FinishedAtomicActionsCount == 1 &&
-                    r.SynchronizationEntity.Progress.SynchronizedVolume == 0 && // New tracking: no volume synchronized since already finished
-                    r.SynchronizationEntity.Progress.ProcessedVolume == 0 && // Legacy: should not increment (already finished)
-                    r.SynchronizationEntity.Progress.ExchangedVolume == 777 // Legacy: still updated from UploadedFileLength
+                    r.SynchronizationEntity.Progress.SynchronizedVolume == 0
                 ),
                 A<bool>.That.IsEqualTo(false)))
             .MustHaveHappenedOnceExactly();
@@ -271,20 +284,22 @@ public class AssertDownloadIsFinishedCommandHandlerTests
         A.CallTo(() => _mockCloudSessionsRepository.GetSessionMember(sessionId, client)).Returns(mockSessionMember);
         A.CallTo(() => _mockTransferLocationService.IsSharedFileDefinitionAllowed(mockSessionMember, sharedFileDefinition)).Returns(true);
 
-        var trackingAction = new ByteSync.ServerCommon.Entities.TrackingActionEntity();
-        var synchronization = new ByteSync.ServerCommon.Entities.SynchronizationEntity();
+        var trackingAction = new TrackingActionEntity();
+        var synchronization = new SynchronizationEntity();
 
         A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization)).Returns(false);
 
-        A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, sharedFileDefinition.ActionsGroupIds, A<Func<ByteSync.ServerCommon.Entities.TrackingActionEntity, ByteSync.ServerCommon.Entities.SynchronizationEntity, bool>>._))
-            .Invokes((string _, List<string> _, Func<ByteSync.ServerCommon.Entities.TrackingActionEntity, ByteSync.ServerCommon.Entities.SynchronizationEntity, bool> updater) => updater(trackingAction, synchronization))
-            .Returns(new ByteSync.ServerCommon.Business.Repositories.TrackingActionResult(false, [trackingAction], synchronization));
+        A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, sharedFileDefinition.ActionsGroupIds,
+                A<Func<TrackingActionEntity, SynchronizationEntity, bool>>._))
+            .Invokes((string _, List<string> _, Func<TrackingActionEntity, SynchronizationEntity, bool> updater) =>
+                updater(trackingAction, synchronization))
+            .Returns(new TrackingActionResult(false, [trackingAction], synchronization));
 
         // Act
         await _assertDownloadIsFinishedCommandHandler.Handle(request, CancellationToken.None);
 
         // Assert: no progress update when repository signals failure
-        A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(A<ByteSync.ServerCommon.Business.Repositories.TrackingActionResult>._, A<bool>._))
+        A.CallTo(() => _mockSynchronizationProgressService.UpdateSynchronizationProgress(A<TrackingActionResult>._, A<bool>._))
             .MustNotHaveHappened();
     }
 }

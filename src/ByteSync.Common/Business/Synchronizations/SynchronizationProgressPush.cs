@@ -4,23 +4,21 @@ namespace ByteSync.Common.Business.Synchronizations;
 
 public class SynchronizationProgressPush
 {
-    public List<TrackingActionSummary>? TrackingActionSummaries { get; set; }
-    
-    public string SessionId { get; set; } = null!;
-    
-    // New volume tracking properties
-    public long ActualUploadedVolume { get; set; }
-    public long ActualDownloadedVolume { get; set; }
-    public long LocalCopyTransferredVolume { get; set; }
-    public long SynchronizedVolume { get; set; }
-    
-    public long ProcessedVolume { get; set; }
-    
-    public long ExchangedVolume { get; set; }
-    
-    public long FinishedActionsCount { get; set; }
-    
-    public long ErrorActionsCount { get; set; }
+    public List<TrackingActionSummary>? TrackingActionSummaries { get; init; }
 
-    public long Version { get; set; }
+    public string SessionId { get; init; } = null!;
+
+    public long ActualUploadedVolume { get; init; }
+
+    public long ActualDownloadedVolume { get; init; }
+
+    public long LocalCopyTransferredVolume { get; init; }
+
+    public long SynchronizedVolume { get; init; }
+
+    public long FinishedActionsCount { get; init; }
+
+    public long ErrorActionsCount { get; init; }
+
+    public long Version { get; init; }
 }

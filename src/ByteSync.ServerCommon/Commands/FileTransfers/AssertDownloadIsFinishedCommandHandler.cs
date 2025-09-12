@@ -76,19 +76,6 @@ public class AssertDownloadIsFinishedCommandHandler : IRequestHandler<AssertDown
 
                             // New tracking
                             synchronization.Progress.SynchronizedVolume += volumeToAdd;
-
-                            // Keep for compatibility
-                            synchronization.Progress.ProcessedVolume += volumeToAdd;
-                        }
-
-                        // Legacy: Keep ExchangedVolume logic for compatibility
-                        if (sharedFileDefinition.IsMultiFileZip)
-                        {
-                            synchronization.Progress.ExchangedVolume += trackingAction.Size ?? 0;
-                        }
-                        else
-                        {
-                            synchronization.Progress.ExchangedVolume += sharedFileDefinition.UploadedFileLength;
                         }
 
                         needSendSynchronizationUpdated = _synchronizationService.CheckSynchronizationIsFinished(synchronization);

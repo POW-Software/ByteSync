@@ -25,7 +25,7 @@ public class SynchronizationProgressPushReceiverTests
     private Mock<ISynchronizationApiClient> _synchronizationApiClientMock = null!;
     private Mock<ILogger<SynchronizationProgressPushReceiver>> _loggerMock = null!;
     private SynchronizationProcessData _synchronizationProcessData = null!;
-    
+
     // ReSharper disable once NotAccessedField.Local
     private SynchronizationProgressPushReceiver _synchronizationProgressPushReceiver = null!;
 
@@ -35,7 +35,7 @@ public class SynchronizationProgressPushReceiverTests
     public void SetUp()
     {
         _synchronizationProgressUpdatedSubject = new Subject<SynchronizationProgressPush>();
-        
+
         _hubPushHandlerMock = new Mock<IHubPushHandler2>();
         _sessionServiceMock = new Mock<ISessionService>();
         _synchronizationServiceMock = new Mock<ISynchronizationService>();
@@ -81,7 +81,8 @@ public class SynchronizationProgressPushReceiverTests
         // Assert
         VerifyLoggerWarning("Received a synchronization progress push but there is no current session");
         _synchronizationServiceMock.Verify(s => s.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()), Times.Never);
-        _sharedActionsGroupRepositoryMock.Verify(r => r.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()), Times.Never);
+        _sharedActionsGroupRepositoryMock.Verify(r => r.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()),
+            Times.Never);
     }
 
     [Test]
@@ -102,7 +103,8 @@ public class SynchronizationProgressPushReceiverTests
         // Assert
         VerifyLoggerWarning("Received a synchronization progress push for a different session than the current one");
         _synchronizationServiceMock.Verify(s => s.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()), Times.Never);
-        _sharedActionsGroupRepositoryMock.Verify(r => r.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()), Times.Never);
+        _sharedActionsGroupRepositoryMock.Verify(r => r.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()),
+            Times.Never);
     }
 
     [Test]
@@ -112,7 +114,7 @@ public class SynchronizationProgressPushReceiverTests
         var currentSession = new CloudSession { SessionId = TEST_SESSION_ID };
         _sessionServiceMock.SetupGet(s => s.CurrentSession).Returns(currentSession);
         var synchronizationProgressPush = CreateSynchronizationProgressPush(TEST_SESSION_ID);
-        
+
         SetupSynchronizationDataTransmittedSuccess();
 
         // Act
@@ -133,7 +135,7 @@ public class SynchronizationProgressPushReceiverTests
         var currentSession = new CloudSession { SessionId = TEST_SESSION_ID };
         _sessionServiceMock.SetupGet(s => s.CurrentSession).Returns(currentSession);
         var synchronizationProgressPush = CreateSynchronizationProgressPush(TEST_SESSION_ID);
-        
+
         // Create a testable receiver with short timeout
         var testableReceiver = new TestableProgressPushReceiver(
             _hubPushHandlerMock.Object,
@@ -142,7 +144,7 @@ public class SynchronizationProgressPushReceiverTests
             _sharedActionsGroupRepositoryMock.Object,
             _synchronizationApiClientMock.Object,
             _loggerMock.Object);
-        
+
         SetupSynchronizationDataTransmittedTimeout();
 
         // Act
@@ -152,9 +154,11 @@ public class SynchronizationProgressPushReceiverTests
         await Task.Delay(200);
 
         // Assert
-        VerifyLoggerError($"Timeout waiting for synchronization data transmission ({testableReceiver.TimeoutForTest}) for session {TEST_SESSION_ID}");
+        VerifyLoggerError(
+            $"Timeout waiting for synchronization data transmission ({testableReceiver.TimeoutForTest}) for session {TEST_SESSION_ID}");
         _synchronizationServiceMock.Verify(s => s.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()), Times.Never);
-        _sharedActionsGroupRepositoryMock.Verify(r => r.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()), Times.Never);
+        _sharedActionsGroupRepositoryMock.Verify(r => r.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()),
+            Times.Never);
     }
 
     [Test]
@@ -164,7 +168,7 @@ public class SynchronizationProgressPushReceiverTests
         var currentSession = new CloudSession { SessionId = TEST_SESSION_ID };
         _sessionServiceMock.SetupGet(s => s.CurrentSession).Returns(currentSession);
         var synchronizationProgressPush = CreateSynchronizationProgressPush(TEST_SESSION_ID);
-        
+
         SetupSynchronizationDataTransmittedCancellation();
 
         // Act
@@ -176,7 +180,8 @@ public class SynchronizationProgressPushReceiverTests
         // Assert
         VerifyLoggerInformation($"Synchronization progress processing cancelled for session {TEST_SESSION_ID}");
         _synchronizationServiceMock.Verify(s => s.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()), Times.Never);
-        _sharedActionsGroupRepositoryMock.Verify(r => r.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()), Times.Never);
+        _sharedActionsGroupRepositoryMock.Verify(r => r.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()),
+            Times.Never);
     }
 
     [Test]
@@ -191,7 +196,7 @@ public class SynchronizationProgressPushReceiverTests
             new TrackingActionSummary { ActionsGroupId = "group2" }
         };
         var synchronizationProgressPush = CreateSynchronizationProgressPush(TEST_SESSION_ID, trackingActionSummaries);
-        
+
         SetupSynchronizationDataTransmittedSuccess();
         _synchronizationServiceMock.Setup(s => s.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()))
             .ThrowsAsync(new Exception("Test exception"));
@@ -205,19 +210,21 @@ public class SynchronizationProgressPushReceiverTests
         // Assert
         VerifyLoggerError("Error processing synchronization progress push");
         _synchronizationApiClientMock.Verify(c => c.InformSynchronizationActionErrors(
-            TEST_SESSION_ID, 
-            It.Is<SynchronizationActionRequest>(list => list.ActionsGroupIds.Count == 2 && list.ActionsGroupIds.Contains("group1") && list.ActionsGroupIds.Contains("group2"))), 
+                TEST_SESSION_ID,
+                It.Is<SynchronizationActionRequest>(list =>
+                    list.ActionsGroupIds.Count == 2 && list.ActionsGroupIds.Contains("group1") && list.ActionsGroupIds.Contains("group2"))),
             Times.Once);
     }
 
     [Test]
-    public async Task SynchronizationProgressChanged_WhenExceptionThrownWithoutTrackingActionSummaries_ShouldLogErrorButNotCallAssertSynchronizationActionErrors()
+    public async Task
+        SynchronizationProgressChanged_WhenExceptionThrownWithoutTrackingActionSummaries_ShouldLogErrorButNotCallAssertSynchronizationActionErrors()
     {
         // Arrange
         var currentSession = new CloudSession { SessionId = TEST_SESSION_ID };
         _sessionServiceMock.SetupGet(s => s.CurrentSession).Returns(currentSession);
         var synchronizationProgressPush = CreateSynchronizationProgressPush(TEST_SESSION_ID);
-        
+
         SetupSynchronizationDataTransmittedSuccess();
         _synchronizationServiceMock.Setup(s => s.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()))
             .ThrowsAsync(new Exception("Test exception"));
@@ -230,7 +237,8 @@ public class SynchronizationProgressPushReceiverTests
 
         // Assert
         VerifyLoggerError("Error processing synchronization progress push");
-        _synchronizationApiClientMock.Verify(c => c.InformSynchronizationActionErrors(It.IsAny<string>(), It.IsAny<SynchronizationActionRequest>()), Times.Never);
+        _synchronizationApiClientMock.Verify(
+            c => c.InformSynchronizationActionErrors(It.IsAny<string>(), It.IsAny<SynchronizationActionRequest>()), Times.Never);
     }
 
     [Test]
@@ -244,7 +252,7 @@ public class SynchronizationProgressPushReceiverTests
             new TrackingActionSummary { ActionsGroupId = "group1" }
         };
         var synchronizationProgressPush = CreateSynchronizationProgressPush(TEST_SESSION_ID, trackingActionSummaries);
-        
+
         SetupSynchronizationDataTransmittedSuccess();
         _synchronizationServiceMock.Setup(s => s.OnSynchronizationProgressChanged(It.IsAny<SynchronizationProgressPush>()))
             .ThrowsAsync(new Exception("Test exception"));
@@ -265,13 +273,12 @@ public class SynchronizationProgressPushReceiverTests
         VerifyLoggerError("Error asserting synchronization action errors");
     }
 
-    private SynchronizationProgressPush CreateSynchronizationProgressPush(string sessionId, List<TrackingActionSummary>? trackingActionSummaries = null)
+    private SynchronizationProgressPush CreateSynchronizationProgressPush(string sessionId,
+        List<TrackingActionSummary>? trackingActionSummaries = null)
     {
         return new SynchronizationProgressPush
         {
             SessionId = sessionId,
-            ProcessedVolume = 1000,
-            ExchangedVolume = 500,
             FinishedActionsCount = 10,
             ErrorActionsCount = 1,
             Version = DateTimeOffset.UtcNow.Ticks,
@@ -336,7 +343,7 @@ public class SynchronizationProgressPushReceiverTests
 internal class TestableProgressPushReceiver : SynchronizationProgressPushReceiver
 {
     protected override TimeSpan SynchronizationDataTransmissionTimeout => TimeSpan.FromMilliseconds(50);
-    
+
     // Public property for test assertion
     public TimeSpan TimeoutForTest => SynchronizationDataTransmissionTimeout;
 
@@ -346,6 +353,7 @@ internal class TestableProgressPushReceiver : SynchronizationProgressPushReceive
         ISynchronizationService synchronizationService,
         ISharedActionsGroupRepository sharedActionsGroupRepository,
         ISynchronizationApiClient synchronizationApiClient,
+
         // ReSharper disable once ContextualLoggerProblem
         ILogger<SynchronizationProgressPushReceiver> logger)
         : base(hubPushHandler2, sessionService, synchronizationService, sharedActionsGroupRepository, synchronizationApiClient, logger)

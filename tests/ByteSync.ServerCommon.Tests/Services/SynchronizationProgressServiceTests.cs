@@ -42,8 +42,6 @@ public class SynchronizationProgressServiceTests
                 ActualDownloadedVolume = 200,
                 LocalCopyTransferredVolume = 50,
                 SynchronizedVolume = 300,
-                ProcessedVolume = 10,
-                ExchangedVolume = 20,
                 FinishedAtomicActionsCount = 4,
                 ErrorsCount = 1
             }
@@ -57,6 +55,7 @@ public class SynchronizationProgressServiceTests
             .ReturnsLazily(call =>
             {
                 var e = call.GetArgument<TrackingActionEntity>(0);
+
                 return new TrackingActionSummary { ActionsGroupId = e!.ActionsGroupId, IsSuccess = true };
             });
 
@@ -75,8 +74,6 @@ public class SynchronizationProgressServiceTests
                 push.ActualDownloadedVolume.Should().Be(200);
                 push.LocalCopyTransferredVolume.Should().Be(50);
                 push.SynchronizedVolume.Should().Be(300);
-                push.ProcessedVolume.Should().Be(10);
-                push.ExchangedVolume.Should().Be(20);
                 push.FinishedActionsCount.Should().Be(4);
                 push.ErrorActionsCount.Should().Be(1);
                 push.Version.Should().BeGreaterThan(0);
@@ -117,8 +114,6 @@ public class SynchronizationProgressServiceTests
                 ActualDownloadedVolume = 2,
                 LocalCopyTransferredVolume = 3,
                 SynchronizedVolume = 4,
-                ProcessedVolume = 5,
-                ExchangedVolume = 6,
                 FinishedAtomicActionsCount = 7,
                 ErrorsCount = 0
             }
@@ -175,4 +170,3 @@ public class SynchronizationProgressServiceTests
         A.CallTo(() => hub.SynchronizationStarted(A<Synchronization>._)).MustHaveHappenedOnceExactly();
     }
 }
-

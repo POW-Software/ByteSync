@@ -1,6 +1,5 @@
 ﻿using System.Reactive.Linq;
 using ByteSync.Business.Synchronizations;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Controls.TimeTracking;
 
@@ -18,7 +17,7 @@ public class SynchronizationDataTrackingStrategy : IDataTrackingStrategy
     public IObservable<(long IdentifiedSize, long ProcessedSize)> GetDataObservable()
     {
         var synchronizationProcessData = _synchronizationService.SynchronizationProcessData;
-                
+
         var source = synchronizationProcessData.SynchronizationProgress.CombineLatest(synchronizationProcessData.SynchronizationMainStatus);
 
         Func<(SynchronizationProgress?, SynchronizationProcessStatuses), bool> canSkip =
@@ -46,8 +45,8 @@ public class SynchronizationDataTrackingStrategy : IDataTrackingStrategy
         // Merge the sampled and notSkipped sequences
         var merged = sampled.Merge(notSkipped);
 
-        return merged.Select(tuple => 
-            (tuple.Item1?.TotalVolumeToProcess ?? 0, 
-                tuple.Item1?.ProcessedVolume ?? 0));
+        return merged.Select(tuple =>
+            (tuple.Item1?.TotalVolumeToProcess ?? 0,
+                tuple.Item1?.SynchronizedVolume ?? 0));
     }
 }

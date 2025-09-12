@@ -1,4 +1,6 @@
 ﻿using System.Reactive.Subjects;
+using ByteSync.Business.Actions.Shared;
+using ByteSync.Business.Misc;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
@@ -25,7 +27,7 @@ public class SynchronizationServiceTests
     private Mock<ISynchronizationLooperFactory> _synchronizationLooperFactoryMock = null!;
     private Mock<ITimeTrackingCache> _timeTrackingCacheMock = null!;
     private Mock<ILogger<SynchronizationService>> _loggerMock = null!;
-    
+
     [SetUp]
     public void Setup()
     {
@@ -48,7 +50,7 @@ public class SynchronizationServiceTests
 
         var timeComputer = new Mock<ITimeTrackingComputer>();
         _timeTrackingCacheMock
-            .Setup(x => x.GetTimeTrackingComputer("sid-1", ByteSync.Business.Misc.TimeTrackingComputerType.Synchronization))
+            .Setup(x => x.GetTimeTrackingComputer("sid-1", TimeTrackingComputerType.Synchronization))
             .ReturnsAsync(timeComputer.Object);
 
         var svc = new SynchronizationService(_sessionServiceMock.Object, _sessionMemberServiceMock.Object,
@@ -63,7 +65,8 @@ public class SynchronizationServiceTests
         _sessionServiceMock.Verify(x => x.SetSessionStatus(SessionStatus.Synchronization), Times.Once);
         timeComputer.Verify(x => x.Start(startedAt), Times.Once);
         svc.SynchronizationProcessData.SynchronizationStart.Value.Should().Be(sync);
-        _sessionMemberServiceMock.Verify(x => x.UpdateCurrentMemberGeneralStatus(SessionMemberGeneralStatus.SynchronizationRunning), Times.Once);
+        _sessionMemberServiceMock.Verify(x => x.UpdateCurrentMemberGeneralStatus(SessionMemberGeneralStatus.SynchronizationRunning),
+            Times.Once);
     }
 
     [Test]
@@ -77,7 +80,7 @@ public class SynchronizationServiceTests
 
         var timeComputer = new Mock<ITimeTrackingComputer>();
         _timeTrackingCacheMock
-            .Setup(x => x.GetTimeTrackingComputer("sid-end", ByteSync.Business.Misc.TimeTrackingComputerType.Synchronization))
+            .Setup(x => x.GetTimeTrackingComputer("sid-end", TimeTrackingComputerType.Synchronization))
             .ReturnsAsync(timeComputer.Object);
 
         var svc = new SynchronizationService(_sessionServiceMock.Object, _sessionMemberServiceMock.Object,
@@ -95,7 +98,8 @@ public class SynchronizationServiceTests
         end.SessionId.Should().Be("sid-end");
         end.FinishedOn.Should().Be(endedAt);
         end.Status.Should().Be(SynchronizationEndStatuses.Regular);
-        _sessionMemberServiceMock.Verify(x => x.UpdateCurrentMemberGeneralStatus(SessionMemberGeneralStatus.SynchronizationFinished), Times.Once);
+        _sessionMemberServiceMock.Verify(x => x.UpdateCurrentMemberGeneralStatus(SessionMemberGeneralStatus.SynchronizationFinished),
+            Times.Once);
     }
 
     [Test]
@@ -136,7 +140,7 @@ public class SynchronizationServiceTests
             _synchronizationApiClientMock.Object, _synchronizationLooperFactoryMock.Object,
             _timeTrackingCacheMock.Object, _loggerMock.Object);
 
-        var data = new ByteSync.Business.Actions.Shared.SharedSynchronizationStartData { TotalVolumeToProcess = 123, TotalAtomicActionsToProcess = 45 };
+        var data = new SharedSynchronizationStartData { TotalVolumeToProcess = 123, TotalAtomicActionsToProcess = 45 };
 
         await svc.OnSynchronizationDataTransmitted(data);
 
@@ -162,8 +166,6 @@ public class SynchronizationServiceTests
         var pushV1 = new SynchronizationProgressPush
         {
             Version = 10,
-            ExchangedVolume = 1,
-            ProcessedVolume = 2,
             ActualUploadedVolume = 3,
             ActualDownloadedVolume = 4,
             LocalCopyTransferredVolume = 5,
@@ -178,8 +180,6 @@ public class SynchronizationServiceTests
         p1.Should().NotBeNull();
         p1.Version.Should().Be(10);
         p1.TotalVolumeToProcess.Should().Be(999);
-        p1.ExchangedVolume.Should().Be(1);
-        p1.ProcessedVolume.Should().Be(2);
         p1.ActualUploadedVolume.Should().Be(3);
         p1.ActualDownloadedVolume.Should().Be(4);
         p1.LocalCopyTransferredVolume.Should().Be(5);
@@ -187,13 +187,14 @@ public class SynchronizationServiceTests
         p1.FinishedActionsCount.Should().Be(7);
         p1.ErrorActionsCount.Should().Be(8);
 
-        var pushOld = new SynchronizationProgressPush { Version = 9, ExchangedVolume = 100 };
+        var pushOld = new SynchronizationProgressPush { Version = 9, SynchronizedVolume = 100 };
         await svc.OnSynchronizationProgressChanged(pushOld);
 
         var p2 = svc.SynchronizationProcessData.SynchronizationProgress.Value;
         p2!.Version.Should().Be(10);
-        p2.ExchangedVolume.Should().Be(1);
+        p2.SynchronizedVolume.Should().Be(6);
     }
+
     [Test]
     public async Task AbortSynchronization_CloudSession_AbortsSynchronization()
     {
@@ -203,19 +204,20 @@ public class SynchronizationServiceTests
         _sessionServiceMock
             .SetupGet(x => x.SessionObservable)
             .Returns(sessionObservable);
-        
+
         var sessionStatusObservable = new BehaviorSubject<SessionStatus>(SessionStatus.Preparation);
         _sessionServiceMock
             .SetupGet(x => x.SessionStatusObservable)
             .Returns(sessionStatusObservable);
-        
-        var synchronizationService = new SynchronizationService(_sessionServiceMock.Object, _sessionMemberServiceMock.Object, _synchronizationApiClientMock.Object, 
+
+        var synchronizationService = new SynchronizationService(_sessionServiceMock.Object, _sessionMemberServiceMock.Object,
+            _synchronizationApiClientMock.Object,
             _synchronizationLooperFactoryMock.Object, _timeTrackingCacheMock.Object, _loggerMock.Object);
-    
+
         // Act
         await synchronizationService.AbortSynchronization();
     }
-    
+
     [Test]
     public void SynchronizationStart_WhenDataTransmitted_ShouldStartSynchronizationLoop()
     {
@@ -225,7 +227,7 @@ public class SynchronizationServiceTests
         _sessionServiceMock
             .SetupGet(x => x.SessionObservable)
             .Returns(sessionObservable);
-    
+
         var sessionStatusObservable = new BehaviorSubject<SessionStatus>(SessionStatus.Preparation);
         _sessionServiceMock
             .SetupGet(x => x.SessionStatusObservable)
@@ -237,11 +239,11 @@ public class SynchronizationServiceTests
             .Returns(mockSynchronizationLooper.Object);
 
         var synchronizationService = new SynchronizationService(
-            _sessionServiceMock.Object, 
-            _sessionMemberServiceMock.Object, 
-            _synchronizationApiClientMock.Object, 
-            _synchronizationLooperFactoryMock.Object, 
-            _timeTrackingCacheMock.Object, 
+            _sessionServiceMock.Object,
+            _sessionMemberServiceMock.Object,
+            _synchronizationApiClientMock.Object,
+            _synchronizationLooperFactoryMock.Object,
+            _timeTrackingCacheMock.Object,
             _loggerMock.Object
         );
 
@@ -258,7 +260,7 @@ public class SynchronizationServiceTests
         _synchronizationLooperFactoryMock.Verify(x => x.CreateSynchronizationLooper(), Times.Once);
         mockSynchronizationLooper.Verify(x => x.CloudSessionSynchronizationLoop(), Times.Once);
     }
-    
+
     [Test]
     public void SynchronizationStart_WhenDataTransmitted_ShouldRunInSeparateTask()
     {
@@ -277,15 +279,16 @@ public class SynchronizationServiceTests
         // Setup un ManualResetEvent pour capturer l'exécution de la méthode
         var executionCaptured = new ManualResetEventSlim(false);
         var executionThreadId = 0;
-        
+
         var mockSynchronizationLooper = new Mock<ISynchronizationLooper>();
         mockSynchronizationLooper
             .Setup(x => x.CloudSessionSynchronizationLoop())
-            .Callback(() => {
+            .Callback(() =>
+            {
                 executionThreadId = Environment.CurrentManagedThreadId;
                 executionCaptured.Set();
             });
-        
+
         _synchronizationLooperFactoryMock
             .Setup(x => x.CreateSynchronizationLooper())
             .Returns(mockSynchronizationLooper.Object);
@@ -312,10 +315,11 @@ public class SynchronizationServiceTests
         // Assert
         executed.Should().BeTrue();
         currentThreadId.Should().NotBe(executionThreadId);
+
         // Assert.IsTrue(executed, "La méthode CloudSessionSynchronizationLoop n'a pas été exécutée");
         // Assert.AreNotEqual(currentThreadId, executionThreadId, 
         //     "La méthode CloudSessionSynchronizationLoop a été exécutée sur le même thread, elle devrait être dans un Task séparé");
-        
+
         _synchronizationLooperFactoryMock.Verify(x => x.CreateSynchronizationLooper(), Times.Once);
         mockSynchronizationLooper.Verify(x => x.CloudSessionSynchronizationLoop(), Times.Once);
     }

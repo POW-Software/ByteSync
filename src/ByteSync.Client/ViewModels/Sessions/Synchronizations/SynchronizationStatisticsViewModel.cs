@@ -25,8 +25,6 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
 
     public SynchronizationStatisticsViewModel()
     {
-        ProcessedVolume = 0;
-        ExchangedVolume = 0;
         EstimatedEndDateTimeLabel = Resources.SynchronizationMain_EstimatedEnd;
     }
 
@@ -161,13 +159,7 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
     [Reactive]
     public long Errors { get; set; }
 
-    [Reactive]
-    public long ProcessedVolume { get; set; }
-
     public extern long TotalVolume { [ObservableAsProperty] get; }
-
-    [Reactive]
-    public long ExchangedVolume { get; set; }
 
     [Reactive]
     public long ActualUploadedVolume { get; set; }
@@ -230,8 +222,6 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
 
         HandledActions = synchronizationProgress.FinishedActionsCount;
         Errors = synchronizationProgress.ErrorActionsCount;
-        ProcessedVolume = synchronizationProgress.ProcessedVolume;
-        ExchangedVolume = synchronizationProgress.ExchangedVolume;
         ActualUploadedVolume = synchronizationProgress.ActualUploadedVolume;
         ActualDownloadedVolume = synchronizationProgress.ActualDownloadedVolume;
         LocalCopyTransferredVolume = synchronizationProgress.LocalCopyTransferredVolume;
