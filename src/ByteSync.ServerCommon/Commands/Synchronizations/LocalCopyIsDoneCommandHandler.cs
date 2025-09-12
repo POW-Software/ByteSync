@@ -8,6 +8,7 @@ namespace ByteSync.ServerCommon.Commands.Synchronizations;
 public class LocalCopyIsDoneCommandHandler : ActionCompletedHandlerBase<LocalCopyIsDoneRequest>
 {
     protected override string EmptyIdsLog => "LocalCopyIsDone: no action group IDs were provided";
+
     protected override string DoneLogTemplate => "Local copy is done for session {SessionId} with {ActionCount} actions";
 
     public LocalCopyIsDoneCommandHandler(
@@ -16,7 +17,8 @@ public class LocalCopyIsDoneCommandHandler : ActionCompletedHandlerBase<LocalCop
         ISynchronizationProgressService synchronizationProgressService,
         ISynchronizationService synchronizationService,
         ILogger<LocalCopyIsDoneCommandHandler> logger)
-        : base(trackingActionRepository, synchronizationStatusCheckerService, synchronizationProgressService, synchronizationService, logger)
+        : base(trackingActionRepository, synchronizationStatusCheckerService, synchronizationProgressService, synchronizationService,
+            logger)
     {
     }
 
@@ -25,8 +27,12 @@ public class LocalCopyIsDoneCommandHandler : ActionCompletedHandlerBase<LocalCop
         trackingAction.IsSourceSuccess = true;
     }
 
-    protected override void UpdateProgress(SynchronizationEntity synchronization, TrackingActionEntity trackingAction, LocalCopyIsDoneRequest request)
+    protected override void UpdateProgress(SynchronizationEntity synchronization, TrackingActionEntity trackingAction,
+        LocalCopyIsDoneRequest request)
     {
-        synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
+        var volumeToAdd = trackingAction.Size ?? 0;
+
+        synchronization.Progress.LocalCopyTransferredVolume += volumeToAdd;
+        synchronization.Progress.SynchronizedVolume += volumeToAdd;
     }
 }

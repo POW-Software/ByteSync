@@ -14,7 +14,7 @@ public class SynchronizationProgressService : ISynchronizationProgressService
     private readonly ITrackingActionMapper _trackingActionMapper;
     private readonly ISynchronizationMapper _synchronizationMapper;
 
-    public SynchronizationProgressService(IInvokeClientsService invokeClientsService, ITrackingActionMapper trackingActionMapper, 
+    public SynchronizationProgressService(IInvokeClientsService invokeClientsService, ITrackingActionMapper trackingActionMapper,
         ISynchronizationMapper synchronizationMapper)
     {
         _invokeClientsService = invokeClientsService;
@@ -25,17 +25,17 @@ public class SynchronizationProgressService : ISynchronizationProgressService
     public async Task UpdateSynchronizationProgress(TrackingActionResult trackingActionResult, bool needSendSynchronizationUpdated)
     {
         await SendSynchronizationProgressUpdated(trackingActionResult);
-        
+
         if (needSendSynchronizationUpdated)
         {
             await SendSynchronizationUpdated(trackingActionResult.SynchronizationEntity);
         }
     }
-    
+
     public async Task UpdateSynchronizationProgress(SynchronizationEntity synchronizationEntity, bool needSendSynchronizationUpdated)
     {
         await SendSynchronizationProgressUpdated(synchronizationEntity);
-        
+
         if (needSendSynchronizationUpdated)
         {
             await SendSynchronizationUpdated(synchronizationEntity);
@@ -58,14 +58,14 @@ public class SynchronizationProgressService : ISynchronizationProgressService
     private async Task SendSynchronizationUpdated(SynchronizationEntity synchronizationEntity)
     {
         var synchronization = await MapToSynchronization(synchronizationEntity);
-        
+
         await _invokeClientsService.Clients(synchronizationEntity.Progress.Members).SynchronizationUpdated(synchronization);
     }
 
     private async Task SendSynchronizationProgressUpdated(SynchronizationEntity synchronizationEntity)
     {
         var synchronizationProgressPush = CreateSynchronizationProgressPush(synchronizationEntity, null);
-        
+
         await _invokeClientsService.Clients(synchronizationEntity.Progress.Members)
             .SynchronizationProgressUpdated(synchronizationProgressPush);
     }
@@ -76,32 +76,36 @@ public class SynchronizationProgressService : ISynchronizationProgressService
         foreach (var trackingActionEntity in trackingActionResult.TrackingActionEntities)
         {
             var trackingActionSummary = _trackingActionMapper.MapToTrackingActionSummary(trackingActionEntity);
-            
+
             trackingActionSummaries.Add(trackingActionSummary);
         }
-        
-        var synchronizationProgressPush = CreateSynchronizationProgressPush(trackingActionResult.SynchronizationEntity, trackingActionSummaries);
-        
+
+        var synchronizationProgressPush =
+            CreateSynchronizationProgressPush(trackingActionResult.SynchronizationEntity, trackingActionSummaries);
+
         await _invokeClientsService.Clients(trackingActionResult.SynchronizationEntity.Progress.Members)
             .SynchronizationProgressUpdated(synchronizationProgressPush);
     }
 
-    private static SynchronizationProgressPush CreateSynchronizationProgressPush(SynchronizationEntity synchronizationEntity, 
+    private static SynchronizationProgressPush CreateSynchronizationProgressPush(SynchronizationEntity synchronizationEntity,
         List<TrackingActionSummary>? trackingActionSummaries)
     {
         var synchronizationProgressPush = new SynchronizationProgressPush
         {
             SessionId = synchronizationEntity.SessionId,
-            
-            ProcessedVolume = synchronizationEntity.Progress.ProcessedVolume,
-            ExchangedVolume = synchronizationEntity.Progress.ExchangedVolume,
+
+            ActualUploadedVolume = synchronizationEntity.Progress.ActualUploadedVolume,
+            ActualDownloadedVolume = synchronizationEntity.Progress.ActualDownloadedVolume,
+            LocalCopyTransferredVolume = synchronizationEntity.Progress.LocalCopyTransferredVolume,
+            SynchronizedVolume = synchronizationEntity.Progress.SynchronizedVolume,
             FinishedActionsCount = synchronizationEntity.Progress.FinishedAtomicActionsCount,
             ErrorActionsCount = synchronizationEntity.Progress.ErrorsCount,
-            
+
             Version = DateTimeOffset.UtcNow.Ticks,
-            
+
             TrackingActionSummaries = trackingActionSummaries,
         };
+
         return synchronizationProgressPush;
     }
 }

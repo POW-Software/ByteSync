@@ -3,7 +3,9 @@ using System.Threading.Channels;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -19,7 +21,8 @@ public class FileUploadProcessorAdjusterTests
     private Mock<ILogger<FileUploadProcessor>> _mockLogger = null!;
     private Mock<IFileUploadCoordinator> _mockCoordinator = null!;
     private Mock<IFileUploadWorker> _mockWorker = null!;
-    private Mock<IFilePartUploadAsserter> _mockAsserter = null!;
+    private Mock<IFileTransferApiClient> _mockApi = null!;
+    private Mock<ISessionService> _mockSessionService = null!;
     private Mock<IAdaptiveUploadController> _mockAdaptive = null!;
     private Mock<IUploadSlicingManager> _mockSlicingManager = null!;
 
@@ -33,7 +36,8 @@ public class FileUploadProcessorAdjusterTests
         _mockLogger = new Mock<ILogger<FileUploadProcessor>>();
         _mockCoordinator = new Mock<IFileUploadCoordinator>();
         _mockWorker = new Mock<IFileUploadWorker>();
-        _mockAsserter = new Mock<IFilePartUploadAsserter>();
+        _mockApi = new Mock<IFileTransferApiClient>();
+        _mockSessionService = new Mock<ISessionService>();
         _mockAdaptive = new Mock<IAdaptiveUploadController>();
         _mockSlicingManager = new Mock<IUploadSlicingManager>();
 
@@ -56,6 +60,7 @@ public class FileUploadProcessorAdjusterTests
     {
         var fi = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
         fi.Should().NotBeNull();
+
         return (T)fi!.GetValue(target)!;
     }
 
@@ -77,7 +82,8 @@ public class FileUploadProcessorAdjusterTests
             _mockLogger.Object,
             _mockCoordinator.Object,
             _mockWorker.Object,
-            _mockAsserter.Object,
+            _mockApi.Object,
+            _mockSessionService.Object,
             "path",
             _stateSemaphore,
             _mockAdaptive.Object,
@@ -104,7 +110,8 @@ public class FileUploadProcessorAdjusterTests
             _mockLogger.Object,
             _mockCoordinator.Object,
             _mockWorker.Object,
-            _mockAsserter.Object,
+            _mockApi.Object,
+            _mockSessionService.Object,
             "path",
             _stateSemaphore,
             _mockAdaptive.Object,
@@ -131,7 +138,8 @@ public class FileUploadProcessorAdjusterTests
             _mockLogger.Object,
             _mockCoordinator.Object,
             _mockWorker.Object,
-            _mockAsserter.Object,
+            _mockApi.Object,
+            _mockSessionService.Object,
             "path",
             _stateSemaphore,
             _mockAdaptive.Object,
@@ -146,7 +154,8 @@ public class FileUploadProcessorAdjusterTests
         InvokePrivate(proc, "EnsureWorkers", 3);
 
         // Assert: should start 2 additional workers
-        _mockWorker.Verify(x => x.UploadAvailableSlicesAdaptiveAsync(It.IsAny<Channel<FileUploaderSlice>>(), It.IsAny<UploadProgressState>()), Times.Exactly(2));
+        _mockWorker.Verify(
+            x => x.UploadAvailableSlicesAdaptiveAsync(It.IsAny<Channel<FileUploaderSlice>>(), It.IsAny<UploadProgressState>()),
+            Times.Exactly(2));
     }
 }
-

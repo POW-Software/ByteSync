@@ -18,6 +18,7 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
     private readonly ITransferLocationService _transferLocationService;
 
     private readonly ILogger<AssertUploadIsFinishedCommandHandler> _logger;
+
     public AssertUploadIsFinishedCommandHandler(ICloudSessionsRepository cloudSessionsRepository,
         ISharedFilesService sharedFilesService,
         ITrackingActionRepository trackingActionRepository,
@@ -34,7 +35,7 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
         _transferLocationService = transferLocationService;
         _logger = logger;
     }
-    
+
     public async Task Handle(AssertUploadIsFinishedRequest request, CancellationToken cancellationToken)
     {
         var session = await _cloudSessionsRepository.Get(request.SessionId);
@@ -44,39 +45,42 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
 
         if (sessionMemberData != null && _transferLocationService.IsSharedFileDefinitionAllowed(sessionMemberData, sharedFileDefinition))
         {
-            _logger.LogInformation("AssertUploadIsFinished: {cloudSession} {sharedFileDefinition}", request.SessionId, sharedFileDefinition.Id);
+            _logger.LogInformation("AssertUploadIsFinished: {cloudSession} {sharedFileDefinition}", request.SessionId,
+                sharedFileDefinition.Id);
 
-            if (sharedFileDefinition.IsInventory || sharedFileDefinition.IsSynchronizationStartData || sharedFileDefinition.IsProfileDetails)
+            if (sharedFileDefinition.IsInventory || sharedFileDefinition.IsSynchronizationStartData ||
+                sharedFileDefinition.IsProfileDetails)
             {
                 var otherSessionMembers = GetOtherSessionMembers(session!, sessionMemberData);
-                
+
                 var otherSessionMemberIds = otherSessionMembers.Select(sm => sm.ClientInstanceId).ToList();
-                
+
                 await _sharedFilesService.AssertUploadIsFinished(request.TransferParameters, otherSessionMemberIds);
-                
+
                 await InformOtherClients(sharedFileDefinition, totalParts, otherSessionMemberIds);
             }
             else
             {
-                HashSet<string> targetInstanceIds = new HashSet<string>();
-                        
-                var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, sharedFileDefinition.ActionsGroupIds!, 
+                var targetInstanceIds = new HashSet<string>();
+
+                var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId,
+                    sharedFileDefinition.ActionsGroupIds!,
                     (trackingAction, synchronization) =>
-                {
-                    if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
                     {
-                        return false;
-                    }
-                    
-                    trackingAction.IsSourceSuccess = true;
+                        if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
+                        {
+                            return false;
+                        }
 
-                    foreach (var target in trackingAction.TargetClientInstanceAndNodeIds)
-                    {
-                        targetInstanceIds.Add(target.ClientInstanceId);
-                    }
+                        trackingAction.IsSourceSuccess = true;
 
-                    return true;
-                });
+                        foreach (var target in trackingAction.TargetClientInstanceAndNodeIds)
+                        {
+                            targetInstanceIds.Add(target.ClientInstanceId);
+                        }
+
+                        return true;
+                    });
 
                 if (result.IsSuccess)
                 {
@@ -86,8 +90,8 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
                 }
             }
         }
-        
-        _logger.LogDebug("Upload finished asserted for session {SessionId}, file {FileId}", 
+
+        _logger.LogDebug("Upload finished asserted for session {SessionId}, file {FileId}",
             request.SessionId, request.TransferParameters.SharedFileDefinition.Id);
     }
 
@@ -110,7 +114,7 @@ public class AssertUploadIsFinishedCommandHandler : IRequestHandler<AssertUpload
         var otherSessionMembers = session.SessionMembers
             .Where(sm => !Equals(sm.ClientInstanceId, sessionMemberData.ClientInstanceId))
             .ToList();
-        
+
         return otherSessionMembers;
     }
-} 
+}

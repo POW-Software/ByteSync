@@ -7,6 +7,9 @@ using ByteSync.ServerCommon.Interfaces.Services;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using ByteSync.ServerCommon.Entities;
+using RedLockNet;
+using StackExchange.Redis;
 
 namespace ByteSync.ServerCommon.Tests.Commands.FileTransfers;
 
@@ -15,6 +18,8 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
 {
     private ICloudSessionsRepository _mockCloudSessionsRepository;
     private ISharedFilesService _mockSharedFilesService;
+    private ISynchronizationRepository _mockSynchronizationRepository;
+    private ISynchronizationStatusCheckerService _mockSynchronizationStatusCheckerService;
     private ILogger<AssertFilePartIsDownloadedCommandHandler> _mockLogger;
     private AssertFilePartIsDownloadedCommandHandler _assertFilePartIsDownloadedCommandHandler;
     private ITransferLocationService _mockTransferLocationService;
@@ -24,13 +29,18 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
     {
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
         _mockSharedFilesService = A.Fake<ISharedFilesService>();
+        _mockSynchronizationRepository = A.Fake<ISynchronizationRepository>();
+        _mockSynchronizationStatusCheckerService = A.Fake<ISynchronizationStatusCheckerService>();
         _mockLogger = A.Fake<ILogger<AssertFilePartIsDownloadedCommandHandler>>();
         _mockTransferLocationService = A.Fake<ITransferLocationService>();
         
         _assertFilePartIsDownloadedCommandHandler = new AssertFilePartIsDownloadedCommandHandler(
             _mockCloudSessionsRepository,
             _mockSharedFilesService,
-            _mockTransferLocationService, _mockLogger);
+            _mockSynchronizationRepository,
+            _mockSynchronizationStatusCheckerService,
+            _mockTransferLocationService,
+            _mockLogger);
     }
 
     [Test]
@@ -108,6 +118,72 @@ public class AssertFilePartIsDownloadedCommandHandlerTests
             .Should().ThrowAsync<InvalidOperationException>();
 
         exception.Which.Should().Be(expectedException);
+    }
+
+    [Test]
+    public async Task Handle_WithPartSizeAndSynchronization_UpdatesDownloadedVolume()
+    {
+        // Arrange
+        const string sessionId = "session-sync";
+        var client = new Client { ClientInstanceId = "client-sync" };
+        var sharedFileDefinition = new SharedFileDefinition
+        {
+            Id = "file-sync",
+            SessionId = sessionId,
+            SharedFileType = SharedFileTypes.FullSynchronization
+        }; // IsSynchronization == true
+
+        const long partSize = 1234;
+        var transferParameters = new TransferParameters
+        {
+            SessionId = sessionId,
+            SharedFileDefinition = sharedFileDefinition,
+            PartNumber = 2,
+            PartSizeInBytes = partSize,
+            StorageProvider = StorageProvider.AzureBlobStorage
+        };
+        var request = new AssertFilePartIsDownloadedRequest(sessionId, client, transferParameters);
+
+        var mockSessionMember = new SessionMemberData { ClientInstanceId = client.ClientInstanceId };
+        A.CallTo(() => _mockCloudSessionsRepository.GetSessionMember(sessionId, client)).Returns(mockSessionMember);
+        A.CallTo(() => _mockTransferLocationService.IsSharedFileDefinitionAllowed(mockSessionMember, sharedFileDefinition))
+            .Returns(true);
+
+        A.CallTo(() => _mockSharedFilesService.AssertFilePartIsDownloaded(client, transferParameters))
+            .Returns(Task.CompletedTask);
+
+        // Ensure status checker allows update and validate the increment happens
+        A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(A<SynchronizationEntity>._))
+            .Returns(true);
+
+        A.CallTo(() => _mockSynchronizationRepository.UpdateIfExists(
+                sessionId,
+                A<Func<SynchronizationEntity, bool>>._,
+                A<ITransaction?>._,
+                A<IRedLock?>._))
+            .Invokes(call =>
+            {
+                var updater = call.GetArgument<Func<SynchronizationEntity, bool>>(1);
+                var sync = new SynchronizationEntity { SessionId = sessionId };
+                var before = sync.Progress.ActualDownloadedVolume;
+                var result = updater(sync);
+
+                result.Should().BeTrue();
+                sync.Progress.ActualDownloadedVolume.Should().Be(before + partSize);
+            })
+            .Returns(Task.FromResult(new ByteSync.ServerCommon.Business.Repositories.UpdateEntityResult<SynchronizationEntity>(
+                null, ByteSync.ServerCommon.Business.Repositories.UpdateEntityStatus.Saved)));
+
+        // Act
+        await _assertFilePartIsDownloadedCommandHandler.Handle(request, CancellationToken.None);
+
+        // Assert
+        A.CallTo(() => _mockSynchronizationRepository.UpdateIfExists(
+                sessionId,
+                A<Func<SynchronizationEntity, bool>>._,
+                A<ITransaction?>._,
+                A<IRedLock?>._))
+            .MustHaveHappenedOnceExactly();
     }
     
 } 

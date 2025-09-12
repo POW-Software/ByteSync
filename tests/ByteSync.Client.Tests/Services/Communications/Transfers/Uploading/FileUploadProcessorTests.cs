@@ -2,7 +2,9 @@ using System.Threading.Channels;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -19,7 +21,8 @@ public class FileUploadProcessorTests
     private Mock<IFileUploadCoordinator> _mockFileUploadCoordinator = null!;
     private Mock<IFileSlicer> _mockFileSlicer = null!;
     private Mock<IFileUploadWorker> _mockFileUploadWorker = null!;
-    private Mock<IFilePartUploadAsserter> _mockFilePartUploadAsserter = null!;
+    private Mock<IFileTransferApiClient> _mockFileTransferApiClient = null!;
+    private Mock<ISessionService> _mockSessionService = null!;
     private Mock<IAdaptiveUploadController> _mockAdaptiveController = null!;
     private Mock<IUploadSlicingManager> _mockSlicingManager = null!;
     private SharedFileDefinition _sharedFileDefinition = null!;
@@ -36,7 +39,8 @@ public class FileUploadProcessorTests
         _mockFileUploadCoordinator = new Mock<IFileUploadCoordinator>();
         _mockFileSlicer = new Mock<IFileSlicer>();
         _mockFileUploadWorker = new Mock<IFileUploadWorker>();
-        _mockFilePartUploadAsserter = new Mock<IFilePartUploadAsserter>();
+        _mockFileTransferApiClient = new Mock<IFileTransferApiClient>();
+        _mockSessionService = new Mock<ISessionService>();
         _mockAdaptiveController = new Mock<IAdaptiveUploadController>();
         _mockSlicingManager = new Mock<IUploadSlicingManager>();
 
@@ -72,13 +76,14 @@ public class FileUploadProcessorTests
                 It.IsAny<SemaphoreSlim>(),
                 It.IsAny<ManualResetEvent>()))
             .ReturnsAsync(new UploadProgressState());
-        
+
         _fileUploadProcessor = new FileUploadProcessor(
             _mockSlicerEncrypter.Object,
             _mockLogger.Object,
             _mockFileUploadCoordinator.Object,
             _mockFileUploadWorker.Object,
-            _mockFilePartUploadAsserter.Object,
+            _mockFileTransferApiClient.Object,
+            _mockSessionService.Object,
             _testFilePath,
             _semaphoreSlim,
             _mockAdaptiveController.Object,
@@ -92,6 +97,7 @@ public class FileUploadProcessorTests
         {
             File.Delete(_testFilePath);
         }
+
         _testMemoryStream.Dispose();
         _semaphoreSlim.Dispose();
     }
@@ -105,7 +111,8 @@ public class FileUploadProcessorTests
             _mockLogger.Object,
             _mockFileUploadCoordinator.Object,
             _mockFileUploadWorker.Object,
-            _mockFilePartUploadAsserter.Object,
+            _mockFileTransferApiClient.Object,
+            _mockSessionService.Object,
             _testFilePath,
             _semaphoreSlim,
             _mockAdaptiveController.Object,
@@ -122,7 +129,7 @@ public class FileUploadProcessorTests
         // Arrange
         _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
             .Returns(Task.CompletedTask);
-        _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
+        _mockFileTransferApiClient.Setup(x => x.AssertUploadIsFinished(It.IsAny<TransferParameters>()))
             .Returns(Task.CompletedTask);
         _mockFileUploadCoordinator.Setup(x => x.WaitForCompletionAsync())
             .Returns(Task.Delay(150)); // Small delay to let tasks start
@@ -131,7 +138,9 @@ public class FileUploadProcessorTests
         await _fileUploadProcessor.ProcessUpload(_sharedFileDefinition);
 
         // Assert
-        _mockFileUploadWorker.Verify(x => x.UploadAvailableSlicesAdaptiveAsync(It.IsAny<Channel<FileUploaderSlice>>(), It.IsAny<UploadProgressState>()), Times.Exactly(2));
+        _mockFileUploadWorker.Verify(
+            x => x.UploadAvailableSlicesAdaptiveAsync(It.IsAny<Channel<FileUploaderSlice>>(), It.IsAny<UploadProgressState>()),
+            Times.Exactly(2));
     }
 
     [Test]
@@ -140,7 +149,7 @@ public class FileUploadProcessorTests
         // Arrange
         _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
             .Returns(Task.CompletedTask);
-        _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
+        _mockFileTransferApiClient.Setup(x => x.AssertUploadIsFinished(It.IsAny<TransferParameters>()))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -162,7 +171,7 @@ public class FileUploadProcessorTests
         var maxSliceLength = 1024 * 1024; // 1MB
         _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
             .Returns(Task.CompletedTask);
-        _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
+        _mockFileTransferApiClient.Setup(x => x.AssertUploadIsFinished(It.IsAny<TransferParameters>()))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -183,7 +192,7 @@ public class FileUploadProcessorTests
         // Arrange
         _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
             .Returns(Task.CompletedTask);
-        _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
+        _mockFileTransferApiClient.Setup(x => x.AssertUploadIsFinished(It.IsAny<TransferParameters>()))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -199,7 +208,7 @@ public class FileUploadProcessorTests
         // Arrange
         _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
             .Returns(Task.CompletedTask);
-        _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
+        _mockFileTransferApiClient.Setup(x => x.AssertUploadIsFinished(It.IsAny<TransferParameters>()))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -215,14 +224,14 @@ public class FileUploadProcessorTests
         // Arrange
         _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
             .Returns(Task.CompletedTask);
-        _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
+        _mockFileTransferApiClient.Setup(x => x.AssertUploadIsFinished(It.IsAny<TransferParameters>()))
             .Returns(Task.CompletedTask);
 
         // Act
         await _fileUploadProcessor.ProcessUpload(_sharedFileDefinition);
 
         // Assert
-        _mockFilePartUploadAsserter.Verify(x => x.AssertUploadIsFinished(_sharedFileDefinition, It.IsAny<int>()), Times.Once);
+        _mockFileTransferApiClient.Verify(x => x.AssertUploadIsFinished(It.IsAny<TransferParameters>()), Times.Once);
     }
 
     [Test]
@@ -242,7 +251,8 @@ public class FileUploadProcessorTests
         // Act & Assert
         var action = async () => await _fileUploadProcessor.ProcessUpload(_sharedFileDefinition);
         await action.Should().ThrowAsync<Exception>()
-            .Where(ex => ex.Message.Contains(_testFilePath) && ex.Message.Contains(_sharedFileDefinition.Id) && ex.InnerException == expectedException);
+            .Where(ex => ex.Message.Contains(_testFilePath) && ex.Message.Contains(_sharedFileDefinition.Id) &&
+                         ex.InnerException == expectedException);
     }
 
     [Test]
@@ -254,7 +264,8 @@ public class FileUploadProcessorTests
             _mockLogger.Object,
             _mockFileUploadCoordinator.Object,
             _mockFileUploadWorker.Object,
-            _mockFilePartUploadAsserter.Object,
+            _mockFileTransferApiClient.Object,
+            _mockSessionService.Object,
             null,
             _semaphoreSlim,
             _mockAdaptiveController.Object,
@@ -273,7 +284,8 @@ public class FileUploadProcessorTests
         // Act & Assert
         var action = async () => await processorWithMemoryStream.ProcessUpload(_sharedFileDefinition);
         await action.Should().ThrowAsync<Exception>()
-            .Where(ex => ex.Message.Contains("a stream") && ex.Message.Contains(_sharedFileDefinition.Id) && ex.InnerException == expectedException);
+            .Where(ex => ex.Message.Contains("a stream") && ex.Message.Contains(_sharedFileDefinition.Id) &&
+                         ex.InnerException == expectedException);
     }
 
     [Test]
@@ -302,7 +314,7 @@ public class FileUploadProcessorTests
         // Arrange
         _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
             .Returns(Task.CompletedTask);
-        _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
+        _mockFileTransferApiClient.Setup(x => x.AssertUploadIsFinished(It.IsAny<TransferParameters>()))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -319,7 +331,7 @@ public class FileUploadProcessorTests
         // Arrange
         _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
             .Returns(Task.CompletedTask);
-        _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
+        _mockFileTransferApiClient.Setup(x => x.AssertUploadIsFinished(It.IsAny<TransferParameters>()))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -336,17 +348,17 @@ public class FileUploadProcessorTests
         // Arrange
         _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
             .Returns(Task.CompletedTask);
-        _mockFilePartUploadAsserter.Setup(x => x.AssertUploadIsFinished(It.IsAny<SharedFileDefinition>(), It.IsAny<int>()))
+        _mockFileTransferApiClient.Setup(x => x.AssertUploadIsFinished(It.IsAny<TransferParameters>()))
             .Returns(Task.CompletedTask);
 
         // Act
         await _fileUploadProcessor.ProcessUpload(_sharedFileDefinition);
 
         // Assert
-        _mockLogger.Verify(x => x.Log(It.Is<LogLevel>(l => l == LogLevel.Information), 
-            It.IsAny<EventId>(), 
-            It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("E2EE upload") && v.ToString()!.Contains("is finished")), 
-            It.IsAny<Exception>(), 
+        _mockLogger.Verify(x => x.Log(It.Is<LogLevel>(l => l == LogLevel.Information),
+            It.IsAny<EventId>(),
+            It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("E2EE upload") && v.ToString()!.Contains("is finished")),
+            It.IsAny<Exception>(),
             It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
     }
-} 
+}

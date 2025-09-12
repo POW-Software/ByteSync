@@ -12,6 +12,8 @@ public class TransferParameters
     
     public int? TotalParts { get; set; }
     
+    public long? PartSizeInBytes { get; set; }  // Size of the transferred part in bytes
+    
     public List<string>? ActionsGroupIds { get; set; }
     
     public StorageProvider StorageProvider { get; set; }

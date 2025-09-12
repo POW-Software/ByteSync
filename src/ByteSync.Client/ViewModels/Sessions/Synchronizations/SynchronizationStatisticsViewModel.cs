@@ -1,16 +1,16 @@
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using ByteSync.Assets.Resources;
+using ByteSync.Business.Misc;
 using ByteSync.Business.Synchronizations;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
+using DynamicData;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using DynamicData;
-using ByteSync.Business.Misc;
 
 namespace ByteSync.ViewModels.Sessions.Synchronizations;
 
@@ -18,15 +18,13 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
 {
     private readonly ISynchronizationService _synchronizationService = null!;
     private readonly ISessionService _sessionService = null!;
-    private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository= null!;
-    private readonly ITimeTrackingCache _timeTrackingCache= null!;
+    private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository = null!;
+    private readonly ITimeTrackingCache _timeTrackingCache = null!;
 
     private long? LastVersion { get; set; }
 
     public SynchronizationStatisticsViewModel()
     {
-        ProcessedVolume = 0;
-        ExchangedVolume = 0;
         EstimatedEndDateTimeLabel = Resources.SynchronizationMain_EstimatedEnd;
     }
 
@@ -37,6 +35,50 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
         _sessionService = sessionService;
         _sharedActionsGroupRepository = sharedActionsGroupRepository;
         _timeTrackingCache = timeTrackingCache;
+
+        // Initialize new volume tracking properties
+        ActualUploadedVolume = 0;
+        ActualDownloadedVolume = 0;
+        LocalCopyTransferredVolume = 0;
+        SynchronizedVolume = 0;
+
+        // TransferEfficiency = SynchronizedVolume / (ActualUploaded + LocalCopyTransferred), clamped to [1, +∞)
+        this.WhenAnyValue(x => x.SynchronizedVolume, x => x.ActualUploadedVolume, x => x.LocalCopyTransferredVolume)
+            .Select(x =>
+            {
+                var denominator = x.Item2 + x.Item3;
+                if (denominator <= 0)
+                {
+                    return x.Item1 > 0 ? double.PositiveInfinity : 1d;
+                }
+
+                var eff = (double)x.Item1 / denominator;
+
+                return eff < 1d ? 1d : eff;
+            })
+            .ToPropertyEx(this, x => x.TransferEfficiency);
+
+        // DataReduction = 1 - (ActualUploaded + LocalCopyTransferred) / SynchronizedVolume, clamped to [0, 1]
+        this.WhenAnyValue(x => x.SynchronizedVolume, x => x.ActualUploadedVolume, x => x.LocalCopyTransferredVolume)
+            .Select(x =>
+            {
+                var synchronizedBytes = x.Item1;
+                if (synchronizedBytes <= 0)
+                {
+                    return 0d;
+                }
+
+                var transferredBytes = (double)(x.Item2 + x.Item3);
+                var reduction = 1d - transferredBytes / synchronizedBytes;
+
+                return Math.Clamp(reduction, 0d, 1d);
+            })
+            .ToPropertyEx(this, x => x.DataReduction);
+
+        // Successes = HandledActions - Errors
+        this.WhenAnyValue(x => x.HandledActions, x => x.Errors)
+            .Select(x => x.Item1 - x.Item2)
+            .ToPropertyEx(this, x => x.Successes);
 
         this.WhenActivated(disposables =>
         {
@@ -117,13 +159,25 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
     [Reactive]
     public long Errors { get; set; }
 
-    [Reactive]
-    public long ProcessedVolume { get; set; }
-
     public extern long TotalVolume { [ObservableAsProperty] get; }
 
     [Reactive]
-    public long ExchangedVolume { get; set; }
+    public long ActualUploadedVolume { get; set; }
+
+    [Reactive]
+    public long ActualDownloadedVolume { get; set; }
+
+    [Reactive]
+    public long LocalCopyTransferredVolume { get; set; }
+
+    [Reactive]
+    public long SynchronizedVolume { get; set; }
+
+    public extern long Successes { [ObservableAsProperty] get; }
+
+    public extern double TransferEfficiency { [ObservableAsProperty] get; }
+
+    public extern double DataReduction { [ObservableAsProperty] get; }
 
     [Reactive]
     public bool IsCloudSession { get; set; }
@@ -161,10 +215,17 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
             return;
         }
 
+        if (synchronizationProgress.SessionId != _sessionService.SessionId)
+        {
+            return;
+        }
+
         HandledActions = synchronizationProgress.FinishedActionsCount;
         Errors = synchronizationProgress.ErrorActionsCount;
-        ProcessedVolume = synchronizationProgress.ProcessedVolume;
-        ExchangedVolume = synchronizationProgress.ExchangedVolume;
+        ActualUploadedVolume = synchronizationProgress.ActualUploadedVolume;
+        ActualDownloadedVolume = synchronizationProgress.ActualDownloadedVolume;
+        LocalCopyTransferredVolume = synchronizationProgress.LocalCopyTransferredVolume;
+        SynchronizedVolume = synchronizationProgress.SynchronizedVolume;
         LastVersion = synchronizationProgress.Version;
     }
 }

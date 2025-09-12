@@ -2,7 +2,6 @@ using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System.Linq;
 
 namespace ByteSync.ServerCommon.Commands.FileTransfers;
 
@@ -32,7 +31,7 @@ public class AssertDownloadIsFinishedCommandHandler : IRequestHandler<AssertDown
         _transferLocationService = transferLocationService;
         _logger = logger;
     }
-    
+
     public async Task Handle(AssertDownloadIsFinishedRequest request, CancellationToken cancellationToken)
     {
         var sessionMemberData = await _cloudSessionsRepository.GetSessionMember(request.SessionId, request.Client);
@@ -48,44 +47,41 @@ public class AssertDownloadIsFinishedCommandHandler : IRequestHandler<AssertDown
             {
                 var actionsGroupsIds = sharedFileDefinition.ActionsGroupIds;
 
-                bool needSendSynchronizationUpdated = false;
+                var needSendSynchronizationUpdated = false;
 
-                var result = await _trackingActionRepository.AddOrUpdate(sharedFileDefinition.SessionId, actionsGroupsIds!, (trackingAction, synchronization) =>
-                {
-                    if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
+                var result = await _trackingActionRepository.AddOrUpdate(
+                    sharedFileDefinition.SessionId,
+                    actionsGroupsIds!,
+                    (trackingAction, synchronization) =>
                     {
-                        return false;
-                    }
+                        if (!_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
+                        {
+                            return false;
+                        }
 
-                    bool wasTrackingActionFinished = trackingAction.IsFinished;
+                        var wasTrackingActionFinished = trackingAction.IsFinished;
 
-                    var targetsForClient = trackingAction.TargetClientInstanceAndNodeIds
-                        .Where(x => x.ClientInstanceId == request.Client.ClientInstanceId)
-                        .ToList();
-                    foreach (var target in targetsForClient)
-                    {
-                        trackingAction.AddSuccessOnTarget(target);
-                        synchronization.Progress.FinishedAtomicActionsCount += 1;
-                    }
+                        var targetsForClient = trackingAction.TargetClientInstanceAndNodeIds
+                            .Where(x => x.ClientInstanceId == request.Client.ClientInstanceId)
+                            .ToList();
+                        foreach (var target in targetsForClient)
+                        {
+                            trackingAction.AddSuccessOnTarget(target);
+                            synchronization.Progress.FinishedAtomicActionsCount += 1;
+                        }
 
-                    if (!wasTrackingActionFinished && trackingAction.IsFinished)
-                    {
-                        synchronization.Progress.ProcessedVolume += trackingAction.Size ?? 0;
-                    }
+                        if (!wasTrackingActionFinished && trackingAction.IsFinished)
+                        {
+                            var volumeToAdd = trackingAction.Size ?? 0;
 
-                    if (sharedFileDefinition.IsMultiFileZip)
-                    {
-                        synchronization.Progress.ExchangedVolume += trackingAction.Size ?? 0;
-                    }
-                    else
-                    {
-                        synchronization.Progress.ExchangedVolume += sharedFileDefinition.UploadedFileLength;
-                    }
+                            // New tracking
+                            synchronization.Progress.SynchronizedVolume += volumeToAdd;
+                        }
 
-                    needSendSynchronizationUpdated = _synchronizationService.CheckSynchronizationIsFinished(synchronization);
+                        needSendSynchronizationUpdated = _synchronizationService.CheckSynchronizationIsFinished(synchronization);
 
-                    return true;
-                });
+                        return true;
+                    });
 
                 if (result.IsSuccess)
                 {
@@ -93,8 +89,8 @@ public class AssertDownloadIsFinishedCommandHandler : IRequestHandler<AssertDown
                 }
             }
         }
-        
-        _logger.LogDebug("Download finished asserted for session {SessionId}, file {FileId}", 
+
+        _logger.LogDebug("Download finished asserted for session {SessionId}, file {FileId}",
             request.SessionId, sharedFileDefinition.Id);
     }
-} 
+}

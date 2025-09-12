@@ -50,6 +50,20 @@ public class AssertFilePartIsUploadedCommandHandler : IRequestHandler<AssertFile
         var sharedFileDefinition = request.TransferParameters.SharedFileDefinition;
         var partNumber = request.TransferParameters.PartNumber!.Value;
         
+        // Track uploaded volume if part size is provided
+        if (request.TransferParameters.PartSizeInBytes.HasValue && sharedFileDefinition.IsSynchronization)
+        {
+            await _synchronizationRepository.UpdateIfExists(sharedFileDefinition.SessionId, synchronization =>
+            {
+                if (_synchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(synchronization))
+                {
+                    synchronization.Progress.ActualUploadedVolume += request.TransferParameters.PartSizeInBytes.Value;
+                    return true;
+                }
+                return false;
+            });
+        }
+        
         _ = _usageStatisticsService.RegisterUploadUsage(request.Client, sharedFileDefinition, partNumber);
 
         if (sessionMemberData != null && _transferLocationService.IsSharedFileDefinitionAllowed(sessionMemberData, sharedFileDefinition))

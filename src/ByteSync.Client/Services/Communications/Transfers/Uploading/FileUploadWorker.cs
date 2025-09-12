@@ -112,7 +112,8 @@ public class FileUploadWorker : IFileUploadWorker
                 {
                     SessionId = _sharedFileDefinition.SessionId,
                     SharedFileDefinition = _sharedFileDefinition,
-                    PartNumber = slice.PartNumber
+                    PartNumber = slice.PartNumber,
+                    PartSizeInBytes = slice.MemoryStream.Length
                 };
 
                 await AssertSliceUploadedAsync(policy, transferParameters, workerId, slice.PartNumber, fileName, assertSw);

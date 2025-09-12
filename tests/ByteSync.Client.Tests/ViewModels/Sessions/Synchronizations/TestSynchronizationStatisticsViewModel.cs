@@ -1,18 +1,19 @@
+using System.Reactive.Subjects;
 using ByteSync.Business.Actions.Shared;
+using ByteSync.Business.Misc;
 using ByteSync.Business.Synchronizations;
 using ByteSync.Common.Business.Synchronizations;
-using ByteSync.Business.Misc;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Tests.Helpers;
 using ByteSync.TestsCommon;
 using ByteSync.ViewModels.Sessions.Synchronizations;
 using DynamicData;
+using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using FluentAssertions;
-using System.Reactive.Subjects;
 
 namespace ByteSync.Tests.ViewModels.Sessions.Synchronizations;
 
@@ -65,10 +66,10 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
         var start = new Synchronization { Started = DateTimeOffset.Now };
         _processData.SynchronizationStart.OnNext(start);
 
-        _viewModel.StartDateTime.Should().Be(start.Started.LocalDateTime);
-        _viewModel.HandledActions.Should().Be(0);
-        _viewModel.Errors.Should().Be(0);
-        _viewModel.ElapsedTime.Should().Be(TimeSpan.Zero);
+        _viewModel.ShouldEventuallyBe(vm => vm.StartDateTime, start.Started.LocalDateTime);
+        _viewModel.ShouldEventuallyBe(vm => vm.HandledActions, 0L);
+        _viewModel.ShouldEventuallyBe(vm => vm.Errors, 0L);
+        _viewModel.ShouldEventuallyBe(vm => vm.ElapsedTime, TimeSpan.Zero);
     }
 
     [Test]
@@ -79,7 +80,7 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
         _processData.TotalActionsToProcess = 42;
         _processData.SynchronizationDataTransmitted.OnNext(true);
 
-        _viewModel.TreatableActions.Should().Be(42);
+        _viewModel.ShouldEventuallyBe(vm => vm.TreatableActions, 42L);
     }
 
     [Test]
@@ -91,18 +92,14 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
 
         var progress = new SynchronizationProgress
         {
+            SessionId = "id",
             Version = 1,
             FinishedActionsCount = 5,
             ErrorActionsCount = 1,
-            ProcessedVolume = 10,
-            ExchangedVolume = 20
         };
         _processData.SynchronizationProgress.OnNext(progress);
-
-        _viewModel.HandledActions.Should().Be(5);
-        _viewModel.Errors.Should().Be(1);
-        _viewModel.ProcessedVolume.Should().Be(10);
-        _viewModel.ExchangedVolume.Should().Be(20);
+        _viewModel.ShouldEventuallyBe(vm => vm.HandledActions, 5L);
+        _viewModel.ShouldEventuallyBe(vm => vm.Errors, 1L);
     }
 
     [Test]
@@ -118,8 +115,8 @@ public class TestSynchronizationStatisticsViewModel : AbstractTester
             Status = SynchronizationEndStatuses.Regular
         });
 
-        _viewModel.EstimatedEndDateTimeLabel.Should().Be("End:");
-        _viewModel.HandledActions.Should().Be(3);
-        _viewModel.Errors.Should().Be(1);
+        _viewModel.ShouldEventuallyBe(vm => vm.EstimatedEndDateTimeLabel, "End:");
+        _viewModel.ShouldEventuallyBe(vm => vm.HandledActions, 3L);
+        _viewModel.ShouldEventuallyBe(vm => vm.Errors, 1L);
     }
 }

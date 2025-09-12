@@ -1726,15 +1726,6 @@ namespace ByteSync.Assets.Resources {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à Processed size:.
-        /// </summary>
-        internal static string SynchronizationMain_ProcessedVolume {
-            get {
-                return ResourceManager.GetString("SynchronizationMain_ProcessedVolume", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Recherche une chaîne localisée semblable à Remaining time:.
         /// </summary>
         internal static string SynchronizationMain_RemainingTime {
@@ -1776,15 +1767,6 @@ namespace ByteSync.Assets.Resources {
         internal static string SynchronizationMain_SynchronizationRunning {
             get {
                 return ResourceManager.GetString("SynchronizationMain_SynchronizationRunning", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Total size:.
-        /// </summary>
-        internal static string SynchronizationMain_ExchangedVolume {
-            get {
-                return ResourceManager.GetString("SynchronizationMain_ExchangedVolume", resourceCulture);
             }
         }
 
