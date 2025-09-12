@@ -7,7 +7,7 @@ namespace ByteSync.Tests.Helpers;
 
 public static class ReactiveViewModelTestHelpers
 {
-    private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(1);
 
     public static bool WaitForProperty<TViewModel, TProp>(
         TViewModel viewModel,
@@ -42,7 +42,7 @@ public static class ReactiveViewModelTestHelpers
         Expression<Func<TViewModel, TProp>> selector,
         TProp expected)
         where TViewModel : class
-        => ShouldEventuallyBe(viewModel, selector, expected, DefaultTimeout);
-
-    // If a custom timeout is needed, call the non-extension overload explicitly.
+    {
+        ShouldEventuallyBe(viewModel, selector, expected, _defaultTimeout);
+    }
 }
