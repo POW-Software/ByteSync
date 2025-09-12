@@ -7,6 +7,7 @@ using ByteSync.ServerCommon.Interfaces.Services;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using ByteSync.Common.Business.Synchronizations;
 
 namespace ByteSync.ServerCommon.Tests.Commands.Synchronizations;
 
@@ -121,5 +122,50 @@ public class LocalCopyIsDoneCommandHandlerTests
             .Should().ThrowAsync<InvalidOperationException>();
 
         exception.Which.Should().Be(expectedException);
+    }
+
+    [Test]
+    public async Task Handle_UsesMetricsForLocalCopyTransferredVolume_WhenProvided()
+    {
+        // Arrange
+        var sessionId = "session-metrics";
+        var client = new Client { ClientInstanceId = "clientX" };
+        var actionId = "group-metrics";
+        var actionsGroupIds = new List<string> { actionId };
+
+        var transferredBytes = 1_234L;
+        var fileSize = 5_000L;
+
+        var request = new LocalCopyIsDoneRequest(sessionId, client, actionsGroupIds, "node-1",
+            new Dictionary<string, SynchronizationActionMetrics>
+            {
+                [actionId] = new SynchronizationActionMetrics { TransferredBytes = transferredBytes }
+            });
+
+        A.CallTo(() => _mockSynchronizationStatusCheckerService.CheckSynchronizationCanBeUpdated(A<SynchronizationEntity>._))
+            .Returns(true);
+
+        var trackingAction = new TrackingActionEntity
+        {
+            ActionsGroupId = actionId,
+            TargetClientInstanceAndNodeIds =
+            [ new() { ClientInstanceId = client.ClientInstanceId, NodeId = request.NodeId! } ],
+            Size = fileSize
+        };
+        var synchronization = new SynchronizationEntity { Progress = new SynchronizationProgressEntity() };
+
+        A.CallTo(() => _mockTrackingActionRepository.AddOrUpdate(sessionId, actionsGroupIds, A<Func<TrackingActionEntity, SynchronizationEntity, bool>>._))
+            .Invokes((string _, List<string> _, Func<TrackingActionEntity, SynchronizationEntity, bool> func) =>
+            {
+                func(trackingAction, synchronization);
+            })
+            .Returns(new TrackingActionResult(true, [trackingAction], synchronization));
+
+        // Act
+        await _localCopyIsDoneCommandHandler.Handle(request, CancellationToken.None);
+
+        // Assert
+        synchronization.Progress.LocalCopyTransferredVolume.Should().Be(transferredBytes);
+        synchronization.Progress.SynchronizedVolume.Should().Be(fileSize);
     }
 }
