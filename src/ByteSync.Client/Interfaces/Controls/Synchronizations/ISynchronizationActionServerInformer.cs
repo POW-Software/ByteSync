@@ -10,6 +10,9 @@ public interface ISynchronizationActionServerInformer
     
     Task HandleCloudActionDone(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget, CloudActionCaller cloudActionCaller);
 
+    Task HandleCloudActionDone(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget, CloudActionCaller cloudActionCaller,
+        Dictionary<string, SynchronizationActionMetrics>? actionMetricsByActionId);
+
     Task HandleCloudActionError(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget);
 
     Task HandleCloudActionError(SharedActionsGroup sharedActionsGroup);

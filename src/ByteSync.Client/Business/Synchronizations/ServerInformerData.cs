@@ -18,7 +18,7 @@ public class ServerInformerData
 
     public List<SynchronizationActionRequest> SynchronizationActionRequests { get; }
 
-    public void Add(List<string> actionsGroupIds, string? nodeId)
+    public void Add(List<string> actionsGroupIds, string? nodeId, Dictionary<string, SynchronizationActionMetrics>? actionMetricsByActionId)
     {
         var key = nodeId ?? string.Empty;
         if (!_batches.TryGetValue(key, out var batch))
@@ -30,6 +30,10 @@ public class ServerInformerData
         foreach (var id in actionsGroupIds)
         {
             batch.ActionsGroupIds.Add(id);
+            if (actionMetricsByActionId != null && actionMetricsByActionId.TryGetValue(id, out var metrics))
+            {
+                batch.ActionMetricsByActionId[id] = metrics;
+            }
         }
     }
 
@@ -74,7 +78,13 @@ public class ServerInformerData
         var ids = batch.ActionsGroupIds.ToList();
         foreach (var chunk in ids.Chunk(chunkSize))
         {
-            slice.SynchronizationActionRequests.Add(new SynchronizationActionRequest(chunk.ToList(), batch.NodeId));
+            var request = new SynchronizationActionRequest(chunk.ToList(), batch.NodeId)
+            {
+                ActionMetricsByActionId = batch.ActionMetricsByActionId
+                    .Where(kvp => chunk.Contains(kvp.Key))
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
+            };
+            slice.SynchronizationActionRequests.Add(request);
         }
         return slice;
     }

@@ -3,6 +3,7 @@ using ByteSync.Business.Synchronizations;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Common.Business.Synchronizations;
 
 namespace ByteSync.Services.Synchronizations;
 
@@ -35,22 +36,28 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
 
     public async Task HandleCloudActionDone(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget, ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
     {
-        await DoHandleCloudAction(sharedActionsGroup, localTarget, cloudActionCaller);
+        await DoHandleCloudAction(sharedActionsGroup, localTarget, cloudActionCaller, null);
+    }
+
+    public async Task HandleCloudActionDone(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget, ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller,
+        Dictionary<string, SynchronizationActionMetrics>? actionMetricsByActionId)
+    {
+        await DoHandleCloudAction(sharedActionsGroup, localTarget, cloudActionCaller, actionMetricsByActionId);
     }
     
     public async Task HandleCloudActionError(SharedActionsGroup sharedActionsGroup, SharedDataPart localTarget)
     {
-        await DoHandleCloudAction(sharedActionsGroup, localTarget, _synchronizationApiClient.InformSynchronizationActionErrors);
+        await DoHandleCloudAction(sharedActionsGroup, localTarget, _synchronizationApiClient.InformSynchronizationActionErrors, null);
     }
 
     public async Task HandleCloudActionError(SharedActionsGroup sharedActionsGroup)
     {
-        await DoHandleCloudAction(sharedActionsGroup, null, _synchronizationApiClient.InformSynchronizationActionErrors);
+        await DoHandleCloudAction(sharedActionsGroup, null, _synchronizationApiClient.InformSynchronizationActionErrors, null);
     }
 
     public async Task HandleCloudActionError(List<string> actionsGroupIds)
     {
-        await DoHandleCloudAction(actionsGroupIds, null, _synchronizationApiClient.InformSynchronizationActionErrors);
+        await DoHandleCloudAction(actionsGroupIds, null, _synchronizationApiClient.InformSynchronizationActionErrors, null);
     }
 
     public async Task HandlePendingActions()
@@ -87,24 +94,27 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
     }
 
     private async Task DoHandleCloudAction(SharedActionsGroup sharedActionsGroup, SharedDataPart? localTarget,
-        ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
+        ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller,
+        Dictionary<string, SynchronizationActionMetrics>? actionMetricsByActionId)
     {
-        await DoHandleCloudAction([sharedActionsGroup.ActionsGroupId], localTarget, cloudActionCaller);
+        await DoHandleCloudAction([sharedActionsGroup.ActionsGroupId], localTarget, cloudActionCaller, actionMetricsByActionId);
     }
     
     private void RegisterTargetCloudAction(List<string> actionsGroupIds, SharedDataPart? localTarget,
-        ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
+        ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller,
+        Dictionary<string, SynchronizationActionMetrics>? actionMetricsByActionId)
     {
         if (!ServerInformerOperatorInfos.ContainsKey(cloudActionCaller))
         {
             ServerInformerOperatorInfos.Add(cloudActionCaller, new ServerInformerData(cloudActionCaller));
         }
 
-        ServerInformerOperatorInfos[cloudActionCaller].Add(actionsGroupIds, localTarget?.NodeId);
+        ServerInformerOperatorInfos[cloudActionCaller].Add(actionsGroupIds, localTarget?.NodeId, actionMetricsByActionId);
     }
 
     private async Task DoHandleCloudAction(List<string> actionsGroupIds, SharedDataPart? localTarget,
-        ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller)
+        ISynchronizationActionServerInformer.CloudActionCaller cloudActionCaller,
+        Dictionary<string, SynchronizationActionMetrics>? actionMetricsByActionId)
     {
         if (_sessionService.IsCloudSession)
         {
@@ -112,7 +122,7 @@ public class SynchronizationActionServerInformer : ISynchronizationActionServerI
             
             lock (SyncRoot)
             {
-                RegisterTargetCloudAction(actionsGroupIds, localTarget, cloudActionCaller);
+                RegisterTargetCloudAction(actionsGroupIds, localTarget, cloudActionCaller, actionMetricsByActionId);
 
                 GetServerInformerOperatorInfosToHandle(serverInformerOperatorInfosToHandle);
             }

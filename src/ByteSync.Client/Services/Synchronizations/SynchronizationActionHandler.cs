@@ -135,6 +135,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
             
             var destinationFullName = sharedActionsGroup.GetFullName(localTarget);
 
+            long? transferredBytes = null;
             if (sharedActionsGroup.SynchronizationType == SynchronizationTypes.Full)
             {
                 var destinationFileInfo = new FileInfo(destinationFullName);
@@ -149,6 +150,8 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 _logger.LogInformation("{Type:l}: copying from {source} to {destination}", 
                     $"Synchronization.{sharedActionsGroup.Operator}", sourceFullName, destinationFullName);
                 
+                // For full copy, the transferred volume equals the file size
+                transferredBytes = new FileInfo(sourceFullName).Length;
                 File.Copy(sourceFullName, destinationFullName, true);
 
                 await ApplyDatesFromLocalSource(sharedActionsGroup, destinationFullName);
@@ -159,6 +162,8 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
 
                 try
                 {
+                    // For delta copy, the transferred volume equals the delta size
+                    transferredBytes = new FileInfo(deltaFullName).Length;
                     await _deltaManager.ApplyDelta(destinationFullName, deltaFullName);
 
                     await ApplyDatesFromSharedActionsGroup(sharedActionsGroup, destinationFullName);
@@ -170,7 +175,16 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 }
             }
             
-            await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, localTarget, _synchronizationApiClient.AssertLocalCopyIsDone);
+            var metrics = new Dictionary<string, Common.Business.Synchronizations.SynchronizationActionMetrics>
+            {
+                [sharedActionsGroup.ActionsGroupId] = new Common.Business.Synchronizations.SynchronizationActionMetrics
+                {
+                    TransferredBytes = transferredBytes
+                }
+            };
+
+            await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, localTarget, 
+                _synchronizationApiClient.AssertLocalCopyIsDone, metrics);
         }
     }
 

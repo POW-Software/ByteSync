@@ -46,7 +46,8 @@ public class SynchronizationFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var synchronizationActionRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationActionRequest>(req);
 
-        var request = new LocalCopyIsDoneRequest(sessionId, client, synchronizationActionRequest.ActionsGroupIds, synchronizationActionRequest.NodeId);
+        var request = new LocalCopyIsDoneRequest(sessionId, client, synchronizationActionRequest.ActionsGroupIds, synchronizationActionRequest.NodeId,
+            synchronizationActionRequest.ActionMetricsByActionId);
         await _mediator.Send(request);
             
         var response = req.CreateResponse();
