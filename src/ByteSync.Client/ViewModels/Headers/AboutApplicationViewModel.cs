@@ -87,7 +87,7 @@ public class AboutApplicationViewModel : FlyoutElementViewModel
 
     private async Task ExploreAppData()
     {
-        await _fileSystemAccessor.OpenDirectory(_localApplicationDataManager.ShellApplicationDataPath);
+        await _fileSystemAccessor.OpenDirectory(_localApplicationDataManager.ApplicationDataPath);
     }
 
     private async Task OpenLogAsync()
@@ -101,8 +101,7 @@ public class AboutApplicationViewModel : FlyoutElementViewModel
 
         if (logFilePath != null)
         {
-            var shellPath = _localApplicationDataManager.GetShellPath(logFilePath);
-            await _fileSystemAccessor.OpenFile(shellPath);
+            await _fileSystemAccessor.OpenFile(logFilePath);
         }
         else
         {

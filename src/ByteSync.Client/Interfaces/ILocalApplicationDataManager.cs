@@ -7,8 +7,4 @@ public interface ILocalApplicationDataManager
     string? LogFilePath { get; }
 
     string? DebugLogFilePath { get; }
-
-    string ShellApplicationDataPath { get; }
-
-    string GetShellPath(string path);
 }

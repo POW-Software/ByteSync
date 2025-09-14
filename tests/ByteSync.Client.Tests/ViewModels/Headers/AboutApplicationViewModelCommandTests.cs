@@ -22,14 +22,14 @@ public class AboutApplicationViewModelCommandTests
         var ladm = new Mock<ILocalApplicationDataManager>();
         var logger = new Mock<ILogger<AboutApplicationViewModel>>();
 
-        ladm.SetupGet(l => l.ShellApplicationDataPath).Returns("SHELL_PATH");
-        fs.Setup(f => f.OpenDirectory("SHELL_PATH")).Returns(Task.CompletedTask).Verifiable();
+        ladm.SetupGet(l => l.ApplicationDataPath).Returns("APPDATA_PATH");
+        fs.Setup(f => f.OpenDirectory("APPDATA_PATH")).Returns(Task.CompletedTask).Verifiable();
 
         var vm = new AboutApplicationViewModel(env.Object, web.Object, fs.Object, ladm.Object, logger.Object);
 
         await vm.ExploreAppDataCommand.Execute().ToTask();
 
-        fs.Verify(f => f.OpenDirectory("SHELL_PATH"), Times.Once);
+        fs.Verify(f => f.OpenDirectory("APPDATA_PATH"), Times.Once);
     }
 
     [Test]
@@ -41,15 +41,14 @@ public class AboutApplicationViewModelCommandTests
         var ladm = new Mock<ILocalApplicationDataManager>();
         var logger = new Mock<ILogger<AboutApplicationViewModel>>();
 
-        ladm.SetupGet(l => l.DebugLogFilePath).Returns((string)null);
-        ladm.SetupGet(l => l.LogFilePath).Returns("LOGICAL_LOG_PATH");
-        ladm.Setup(l => l.GetShellPath("LOGICAL_LOG_PATH")).Returns("SHELL_LOG_PATH");
-        fs.Setup(f => f.OpenFile("SHELL_LOG_PATH")).Returns(Task.CompletedTask).Verifiable();
+        ladm.SetupGet(l => l.DebugLogFilePath).Returns((string)null!);
+        ladm.SetupGet(l => l.LogFilePath).Returns("LOG_PATH");
+        fs.Setup(f => f.OpenFile("LOG_PATH")).Returns(Task.CompletedTask).Verifiable();
 
         var vm = new AboutApplicationViewModel(env.Object, web.Object, fs.Object, ladm.Object, logger.Object);
 
         await vm.OpenLogCommand.Execute().ToTask();
 
-        fs.Verify(f => f.OpenFile("SHELL_LOG_PATH"), Times.Once);
+        fs.Verify(f => f.OpenFile("LOG_PATH"), Times.Once);
     }
 }
