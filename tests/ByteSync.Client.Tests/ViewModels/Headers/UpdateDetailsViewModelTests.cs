@@ -206,6 +206,9 @@ public class UpdateDetailsViewModelTests
         _localizationServiceMock
             .Setup(x => x["UpdateDetails_AvailableUpdate"])
             .Returns("1 update available");
+        _localizationServiceMock
+            .Setup(x => x["UpdateDetails_AutoUpdateNotSupported"])
+            .Returns("Auto-update not supported");
 
         // Act
         var viewModel = CreateViewModel();
@@ -213,7 +216,15 @@ public class UpdateDetailsViewModelTests
         _sourceCache.AddOrUpdate(softwareVersion);
 
         // Assert
-        viewModel.AvailableUpdatesMessage.Should().Be("1 update available");
+        var expectedBase = "1 update available";
+        if (viewModel.CanAutoUpdate)
+        {
+            viewModel.AvailableUpdatesMessage.Should().Be(expectedBase);
+        }
+        else
+        {
+            viewModel.AvailableUpdatesMessage.Should().Be(expectedBase + Environment.NewLine + "Auto-update not supported");
+        }
     }
 
     [Test]
@@ -235,6 +246,9 @@ public class UpdateDetailsViewModelTests
         _localizationServiceMock
             .Setup(x => x["UpdateDetails_AvailableUpdates"])
             .Returns("{0} updates available");
+        _localizationServiceMock
+            .Setup(x => x["UpdateDetails_AutoUpdateNotSupported"])
+            .Returns("Auto-update not supported");
 
         // Act
         var viewModel = CreateViewModel();
@@ -243,7 +257,15 @@ public class UpdateDetailsViewModelTests
         _sourceCache.AddOrUpdate(softwareVersion2);
 
         // Assert
-        viewModel.AvailableUpdatesMessage.Should().Be("2 updates available");
+        var expectedBase = "2 updates available";
+        if (viewModel.CanAutoUpdate)
+        {
+            viewModel.AvailableUpdatesMessage.Should().Be(expectedBase);
+        }
+        else
+        {
+            viewModel.AvailableUpdatesMessage.Should().Be(expectedBase + Environment.NewLine + "Auto-update not supported");
+        }
     }
 
     [Test]
