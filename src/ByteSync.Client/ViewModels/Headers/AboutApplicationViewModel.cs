@@ -1,5 +1,6 @@
 ﻿using System.Reactive;
 using System.Runtime.InteropServices;
+using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Interfaces;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
@@ -60,7 +61,7 @@ public class AboutApplicationViewModel : FlyoutElementViewModel
 
     public string ApplicationVersion => VersionHelper.GetVersionString(_environmentService.ApplicationVersion);
 
-    public bool DeploymentMode => _environmentService.IsPortableApplication;
+    public DeploymentMode DeploymentMode => _environmentService.DeploymentMode;
 
     public string ClientId => _environmentService.ClientId;
 
