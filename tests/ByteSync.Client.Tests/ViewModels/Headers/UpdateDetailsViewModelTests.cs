@@ -11,6 +11,7 @@ using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Repositories.Updates;
 using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Updates;
+using ByteSync.Tests.Helpers;
 using ByteSync.ViewModels.Headers;
 using ByteSync.ViewModels.Misc;
 using DynamicData;
@@ -85,7 +86,7 @@ public class UpdateDetailsViewModelTests
     [TearDown]
     public void TearDown()
     {
-        _sourceCache?.Dispose();
+        _sourceCache.Dispose();
     }
 
     private UpdateDetailsViewModel CreateViewModel()
@@ -388,7 +389,7 @@ public class UpdateDetailsViewModelTests
         TriggerProgress(updateProgress);
 
         // Assert
-        viewModel.Progress.Should().Be("Downloading the update - 50%");
+        viewModel.ShouldEventuallyBe(vm => vm.Progress, "Downloading the update - 50%");
     }
 
     [Test]
@@ -407,7 +408,7 @@ public class UpdateDetailsViewModelTests
         TriggerProgress(updateProgress);
 
         // Assert
-        viewModel.Progress.Should().Be("Extracting new files");
+        viewModel.ShouldEventuallyBe(vm => vm.Progress, "Extracting new files");
     }
 
     [Test]
@@ -426,7 +427,7 @@ public class UpdateDetailsViewModelTests
         TriggerProgress(updateProgress);
 
         // Assert
-        viewModel.Progress.Should().Be("Restarting the application");
+        viewModel.ShouldEventuallyBe(vm => vm.Progress, "Restarting the application");
     }
 
     [Test]
@@ -445,7 +446,7 @@ public class UpdateDetailsViewModelTests
         TriggerProgress(updateProgress);
 
         // Assert
-        viewModel.Progress.Should().Be("Updating files - 75%");
+        viewModel.ShouldEventuallyBe(vm => vm.Progress, "Updating files - 75%");
     }
 
     [Test]
@@ -464,7 +465,7 @@ public class UpdateDetailsViewModelTests
         TriggerProgress(updateProgress);
 
         // Assert
-        viewModel.Progress.Should().Be("Backing up existing files");
+        viewModel.ShouldEventuallyBe(vm => vm.Progress, "Backing up existing files");
     }
 
     [Test]
@@ -483,7 +484,7 @@ public class UpdateDetailsViewModelTests
         TriggerProgress(updateProgress);
 
         // Assert
-        viewModel.Progress.Should().Be("Moving new files - 90%");
+        viewModel.ShouldEventuallyBe(vm => vm.Progress, "Moving new files - 90%");
     }
 
     [Test]
@@ -502,6 +503,6 @@ public class UpdateDetailsViewModelTests
 
     private void TriggerProgress(UpdateProgress updateProgress)
     {
-        _updateRepositoryMock.Object.ReportProgress(updateProgress);
+        ((IProgress<UpdateProgress>)_progress).Report(updateProgress);
     }
 }
