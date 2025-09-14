@@ -12,15 +12,15 @@ namespace ByteSync.Tests.Services.Configurations;
 [TestFixture]
 public class LocalApplicationDataManagerTests
 {
-    private Mock<IEnvironmentService> _envMock = null!;
+    private Mock<IEnvironmentService> _environmentServiceMock = null!;
 
     [SetUp]
     public void SetUp()
     {
-        _envMock = new Mock<IEnvironmentService>();
-        _envMock.SetupGet(e => e.IsPortableApplication).Returns(false);
-        _envMock.SetupGet(e => e.ExecutionMode).Returns(ExecutionMode.Regular);
-        _envMock.SetupProperty(e => e.Arguments, Array.Empty<string>());
+        _environmentServiceMock = new Mock<IEnvironmentService>();
+        _environmentServiceMock.SetupGet(e => e.IsPortableApplication).Returns(false);
+        _environmentServiceMock.SetupGet(e => e.ExecutionMode).Returns(ExecutionMode.Regular);
+        _environmentServiceMock.SetupProperty(e => e.Arguments, []);
     }
 
     [Test]
@@ -32,13 +32,13 @@ public class LocalApplicationDataManagerTests
         }
 
         // Arrange
-        _envMock.SetupGet(e => e.AssemblyFullName)
+        _environmentServiceMock.SetupGet(e => e.AssemblyFullName)
             .Returns(@"C:\\Program Files\\WindowsApps\\POWSoftware.ByteSync_2025.7.2.0_neutral__f852479tj7xda\\ByteSync.exe");
-        _envMock.SetupGet(e => e.DeploymentMode).Returns(DeploymentMode.MsixInstallation);
-        _envMock.SetupGet(e => e.MsixPackageFamilyName).Returns("POWSoftware.ByteSync_f852479tj7xda");
+        _environmentServiceMock.SetupGet(e => e.DeploymentMode).Returns(DeploymentMode.MsixInstallation);
+        _environmentServiceMock.SetupGet(e => e.MsixPackageFamilyName).Returns("POWSoftware.ByteSync_f852479tj7xda");
 
         // Act
-        var ladm = new LocalApplicationDataManager(_envMock.Object);
+        var ladm = new LocalApplicationDataManager(_environmentServiceMock.Object);
 
         // Assert
         var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -51,12 +51,12 @@ public class LocalApplicationDataManagerTests
     public void ApplicationDataPath_Should_Be_Logical_When_Not_Store()
     {
         // Arrange
-        _envMock.SetupGet(e => e.AssemblyFullName)
+        _environmentServiceMock.SetupGet(e => e.AssemblyFullName)
             .Returns(@"C:\\Program Files\\ByteSync\\ByteSync.exe");
-        _envMock.SetupGet(e => e.DeploymentMode).Returns(DeploymentMode.SetupInstallation);
+        _environmentServiceMock.SetupGet(e => e.DeploymentMode).Returns(DeploymentMode.SetupInstallation);
 
         // Act
-        var ladm = new LocalApplicationDataManager(_envMock.Object);
+        var ladm = new LocalApplicationDataManager(_environmentServiceMock.Object);
 
         // Assert: logical path under %LOCALAPPDATA% (or %APPDATA% if roaming)
         var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
