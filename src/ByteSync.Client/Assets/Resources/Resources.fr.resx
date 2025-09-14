@@ -482,7 +482,7 @@ Voulez-vous continuer ?</value>
 		<value>Fin :</value>
 	</data>
 	<data name="SynchronizationMain_SynchronizationDone" xml:space="preserve">
-		<value>Synchronisation terminée !</value>
+		<value>Synchronisation terminée</value>
 	</data>
 	<data name="SynchronizationMain_SynchronizationRunning" xml:space="preserve">
 		<value>Synchronisation en cours</value>

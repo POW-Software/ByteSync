@@ -389,28 +389,28 @@ Would you like to continue ?</value>
 		<value>Is after</value>
 	</data>
 	<data name="InventoryProcess_IdentifiedFiles" xml:space="preserve">
-		<value>Identified files:</value>
+		<value>Identified Files:</value>
 	</data>
 	<data name="InventoryProcess_IdentifiedDirectories" xml:space="preserve">
-		<value>Identified directories:</value>
+		<value>Identified Directories:</value>
 	</data>
 	<data name="InventoryProcess_Start" xml:space="preserve">
 		<value>Start:</value>
 	</data>
 	<data name="InventoryProcess_ElapsedTime" xml:space="preserve">
-		<value>Elapsed time:</value>
+		<value>Elapsed Time:</value>
 	</data>
 	<data name="InventoryProcess_RemainingTime" xml:space="preserve">
-		<value>Remaining time:</value>
+		<value>Remaining Time:</value>
 	</data>
 	<data name="InventoryProcess_EstimatedEnd" xml:space="preserve">
-		<value>Estimated end:</value>
+		<value>Estimated End:</value>
 	</data>
 	<data name="InventoryProcess_AnalyzedFiles" xml:space="preserve">
-		<value>Analyzed files:</value>
+		<value>Analyzed Files:</value>
 	</data>
 	<data name="InventoryProcess_ProcessedSize" xml:space="preserve">
-		<value>Analyzed volume:</value>
+		<value>Analyzed Volume:</value>
 	</data>
 	<data name="InventoryProcess_InventoryRunning" xml:space="preserve">
 		<value>Data Inventory running</value>
@@ -422,7 +422,7 @@ Would you like to continue ?</value>
 		<value>Local Analysis running</value>
 	</data>
 	<data name="InventoryProcess_TotalSize" xml:space="preserve">
-		<value>Total volume:</value>
+		<value>Total Volume:</value>
 	</data>
 	<data name="InventoryProcess_IdentificationSuccess" xml:space="preserve">
 		<value>Local Identification done!</value>
@@ -458,37 +458,37 @@ Would you like to continue ?</value>
 		<value>START LOCAL INVENTORY</value>
 	</data>
 	<data name="SessionMachine_Status_Finished" xml:space="preserve">
-		<value>Inventory done</value>
+		<value>Inventory Done</value>
 	</data>
 	<data name="SynchronizationMain_Start" xml:space="preserve">
 		<value>Start:</value>
 	</data>
 	<data name="SynchronizationMain_ElapsedTime" xml:space="preserve">
-		<value>Elapsed time:</value>
+		<value>Elapsed Time:</value>
 	</data>
 	<data name="SynchronizationMain_RemainingTime" xml:space="preserve">
 		<value>Remaining time:</value>
 	</data>
 	<data name="SynchronizationMain_HandledActions" xml:space="preserve">
-		<value>Handled actions:</value>
+		<value>Handled Actions:</value>
 	</data>
     <data name="SynchronizationMain_Successes" xml:space="preserve">
 		<value>Successes:</value>
 	</data>
 	<data name="SynchronizationMain_EstimatedEnd" xml:space="preserve">
-		<value>Estimated end:</value>
+		<value>Estimated End:</value>
 	</data>
 	<data name="SynchronizationMain_End" xml:space="preserve">
 		<value>End:</value>
 	</data>
 	<data name="SynchronizationMain_SynchronizationDone" xml:space="preserve">
-		<value>Synchronization done!</value>
+		<value>Synchronization Done</value>
 	</data>
 	<data name="SynchronizationMain_SynchronizationRunning" xml:space="preserve">
 		<value>Synchronization running</value>
 	</data>
 	<data name="SynchronizationMain_SynchronizedVolume" xml:space="preserve">
-		<value>Synchronized volume:</value>
+		<value>Synchronized Volume:</value>
 	</data>
 	<data name="SynchronizationMain_UploadedVolume" xml:space="preserve">
 		<value>Uploaded:</value>
@@ -497,13 +497,13 @@ Would you like to continue ?</value>
 		<value>Downloaded:</value>
 	</data>
 	<data name="SynchronizationMain_LocalCopyVolume" xml:space="preserve">
-		<value>Local copy:</value>
+		<value>Local Copy:</value>
 	</data>
     <data name="SynchronizationMain_TransferEfficiency" xml:space="preserve">
-		<value>Transfer efficiency:</value>
+		<value>Transfer Efficiency:</value>
 	</data>
     <data name="SynchronizationMain_DataReduction" xml:space="preserve">
-		<value>Data reduction:</value>
+		<value>Data Reduction:</value>
 	</data>
 	<data name="Status_OK" xml:space="preserve">
 		<value>OK</value>
