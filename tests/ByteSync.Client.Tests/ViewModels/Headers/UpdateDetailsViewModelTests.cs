@@ -36,7 +36,6 @@ public class UpdateDetailsViewModelTests
     private ErrorViewModel _errorViewModel = null!;
     private SourceCache<SoftwareVersion, string> _sourceCache = null!;
     private Progress<UpdateProgress> _progress = null!;
-    private Action<UpdateProgress>? _progressHandler;
 
     [SetUp]
     public void SetUp()
@@ -55,7 +54,7 @@ public class UpdateDetailsViewModelTests
         var observable = _sourceCache.Connect().AsObservableCache();
 
         // Create a Progress<T> that we can control in tests
-        _progress = new Progress<UpdateProgress>(progress => _progressHandler?.Invoke(progress));
+        _progress = new Progress<UpdateProgress>();
 
         _availableUpdateRepositoryMock
             .Setup(x => x.ObservableCache)
@@ -65,10 +64,10 @@ public class UpdateDetailsViewModelTests
             .Setup(x => x.Progress)
             .Returns(_progress);
 
-        // Set up a way to trigger progress events directly on the ViewModel
+        // Also support reporting via repository mock → forward to the same Progress instance
         _updateRepositoryMock
             .Setup(x => x.ReportProgress(It.IsAny<UpdateProgress>()))
-            .Callback<UpdateProgress>(progress => _progressHandler?.Invoke(progress));
+            .Callback<UpdateProgress>(progress => ((IProgress<UpdateProgress>)_progress).Report(progress));
 
         _localizationServiceMock
             .Setup(x => x[It.IsAny<string>()])
