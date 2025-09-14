@@ -15,7 +15,7 @@ public class EnvironmentService : IEnvironmentService
         Arguments = Environment.GetCommandLineArgs();
 
         // ReSharper disable once RedundantAssignment
-        bool isDebug = false;
+        var isDebug = false;
     #if DEBUG
         isDebug = true;
     #endif
@@ -94,7 +94,7 @@ public class EnvironmentService : IEnvironmentService
             }
         }
 
-        bool installedInPrograms = false;
+        var installedInPrograms = false;
         foreach (var candidate in programsDirectoriesCandidates)
         {
             if (IOUtils.IsSubPathOf(applicationLauncherFullName, candidate))
@@ -139,7 +139,7 @@ public class EnvironmentService : IEnvironmentService
     {
         get
         {
-            bool operateCommandLine = false;
+            var operateCommandLine = false;
 
             if (Arguments.Contains(RegularArguments.UPDATE) || Arguments.Contains(RegularArguments.VERSION))
             {
@@ -186,8 +186,8 @@ public class EnvironmentService : IEnvironmentService
 
     public bool IsAutoLogin()
     {
-        bool isAutoLogin = Arguments.Contains(RegularArguments.JOIN) || Arguments.Contains(RegularArguments.INVENTORY)
-                                                                     || Arguments.Contains(RegularArguments.SYNCHRONIZE);
+        var isAutoLogin = Arguments.Contains(RegularArguments.JOIN) || Arguments.Contains(RegularArguments.INVENTORY)
+                                                                    || Arguments.Contains(RegularArguments.SYNCHRONIZE);
 
         return isAutoLogin;
     }
