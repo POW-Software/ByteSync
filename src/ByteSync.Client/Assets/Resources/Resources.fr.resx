@@ -509,7 +509,7 @@ Voulez-vous continuer ?</value>
 		<value>OK</value>
 	</data>
 	<data name="Status_Done" xml:space="preserve">
-		<value>Traité !</value>
+		<value>Traité</value>
 	</data>
 	<data name="General_Colon" xml:space="preserve">
 		<value> :</value>

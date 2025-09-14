@@ -458,7 +458,7 @@ Would you like to continue ?</value>
 		<value>START LOCAL INVENTORY</value>
 	</data>
 	<data name="SessionMachine_Status_Finished" xml:space="preserve">
-		<value>Inventory Done</value>
+		<value>Inventory done</value>
 	</data>
 	<data name="SynchronizationMain_Start" xml:space="preserve">
 		<value>Start:</value>
@@ -482,7 +482,7 @@ Would you like to continue ?</value>
 		<value>End:</value>
 	</data>
 	<data name="SynchronizationMain_SynchronizationDone" xml:space="preserve">
-		<value>Synchronization Done</value>
+		<value>Synchronization done</value>
 	</data>
 	<data name="SynchronizationMain_SynchronizationRunning" xml:space="preserve">
 		<value>Synchronization running</value>
@@ -509,7 +509,7 @@ Would you like to continue ?</value>
 		<value>OK</value>
 	</data>
 	<data name="Status_Done" xml:space="preserve">
-		<value>Done!</value>
+		<value>Done</value>
 	</data>
 	<data name="General_Colon" xml:space="preserve">
 		<value>:</value>
