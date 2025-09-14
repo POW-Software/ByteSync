@@ -6,20 +6,19 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Updates;
-using ByteSync.Interfaces;
+using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Factories.Proxies;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Repositories.Updates;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Updates;
 using ByteSync.ViewModels.Misc;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using ByteSync.Helpers;
-using ByteSync.Interfaces.Services.Localizations;
 
 namespace ByteSync.ViewModels.Headers;
 
@@ -33,18 +32,17 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
     private readonly ISoftwareVersionProxyFactory _softwareVersionProxyFactory;
     private readonly IEnvironmentService _environmentService;
     private readonly ILogger<UpdateDetailsViewModel> _logger;
-    
+
     private ReadOnlyObservableCollection<SoftwareVersionProxy> _bindingData;
 
 
     public UpdateDetailsViewModel()
     {
-
     }
 
-    public UpdateDetailsViewModel(IUpdateService updateService, IAvailableUpdateRepository availableAvailableUpdateRepository, 
+    public UpdateDetailsViewModel(IUpdateService updateService, IAvailableUpdateRepository availableAvailableUpdateRepository,
         ILocalizationService localizationService, IWebAccessor webAccessor, IUpdateRepository updateRepository,
-        ISoftwareVersionProxyFactory softwareVersionProxyFactory, IEnvironmentService environmentService, 
+        ISoftwareVersionProxyFactory softwareVersionProxyFactory, IEnvironmentService environmentService,
         ErrorViewModel errorViewModel, ILogger<UpdateDetailsViewModel> logger)
     {
         AvailableUpdatesMessage = "";
@@ -62,10 +60,10 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         _logger = logger;
 
         Error = errorViewModel;
-        
+
         SelectedVersion = null;
         IsAutoUpdating = false;
-        
+
         ShowReleaseNotesCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(ShowReleaseNotes);
         RunUpdateCommand = ReactiveCommand.CreateFromTask<SoftwareVersionProxy>(RunUpdate);
 
@@ -77,13 +75,13 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
             .Bind(out _bindingData)
             .DisposeMany()
             .Subscribe();
-        
+
         this.WhenActivated(disposables =>
         {
             this.WhenAnyValue(x => x.SoftwareVersions, x => x.SoftwareVersions.Count)
                 .Subscribe(_ => SetAvailableUpdate())
                 .DisposeWith(disposables);
-            
+
             _updateRepository.Progress.ProgressChanged += UpdateManager_ProgressReported;
         });
     }
@@ -91,23 +89,23 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
     private CancellationTokenSource CancellationTokenSource { get; }
 
     public ReactiveCommand<SoftwareVersionProxy, Unit> ShowReleaseNotesCommand { get; }
-    
+
     public ReactiveCommand<SoftwareVersionProxy, Unit> RunUpdateCommand { get; }
-    
+
     public ReadOnlyObservableCollection<SoftwareVersionProxy> SoftwareVersions => _bindingData;
-        
+
     [Reactive]
     public string AvailableUpdatesMessage { get; set; }
-        
+
     [Reactive]
     public SoftwareVersionProxy? SelectedVersion { get; set; }
-    
+
     [Reactive]
     public string Progress { get; set; }
 
     [Reactive]
     public ErrorViewModel Error { get; set; }
-    
+
     [Reactive]
     public bool IsAutoUpdating { get; set; }
 
@@ -115,7 +113,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
     {
         get
         {
-            if (_environmentService.IsInstalledFromWindowsStore())
+            if (_environmentService.DeploymentMode == DeploymentMode.MsixInstallation)
             {
                 return false;
             }
@@ -133,16 +131,17 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
         }
         else
         {
-            AvailableUpdatesMessage = String.Format(_localizationService[nameof(Resources.UpdateDetails_AvailableUpdates)], SoftwareVersions.Count);
+            AvailableUpdatesMessage = String.Format(_localizationService[nameof(Resources.UpdateDetails_AvailableUpdates)],
+                SoftwareVersions.Count);
         }
 
         if (!CanAutoUpdate)
         {
-            AvailableUpdatesMessage += Environment.NewLine + 
+            AvailableUpdatesMessage += Environment.NewLine +
                                        _localizationService[nameof(Resources.UpdateDetails_AutoUpdateNotSupported)];
         }
     }
-    
+
     private async Task ShowReleaseNotes(SoftwareVersionProxy softwareVersionProxy)
     {
         try
@@ -157,12 +156,12 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
             Error.SetException(ex);
         }
     }
-        
+
     private async Task RunUpdate(SoftwareVersionProxy? softwareVersionViewModel)
     {
         IsAutoUpdating = true;
         Container.CanCloseCurrentFlyout = false;
-        
+
         SelectedVersion = softwareVersionViewModel;
 
         try
@@ -184,16 +183,18 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
             Container.CanCloseCurrentFlyout = true;
         }
     }
-        
+
     private void UpdateManager_ProgressReported(object? sender, UpdateProgress e)
     {
         var progress = e.Status switch
         {
             UpdateProgressStatus.Downloading => _localizationService[nameof(Resources.UpdateDetails_Downloading)].UppercaseFirst(),
             UpdateProgressStatus.Extracting => _localizationService[nameof(Resources.UpdateDetails_Extracting)].UppercaseFirst(),
-            UpdateProgressStatus.RestartingApplication => _localizationService[nameof(Resources.UpdateDetails_RestartingApplication)].UppercaseFirst(),
+            UpdateProgressStatus.RestartingApplication => _localizationService[nameof(Resources.UpdateDetails_RestartingApplication)]
+                .UppercaseFirst(),
             UpdateProgressStatus.UpdatingFiles => _localizationService[nameof(Resources.UpdateDetails_UpdatingFiles)].UppercaseFirst(),
-            UpdateProgressStatus.BackingUpExistingFiles => _localizationService[nameof(Resources.UpdateDetails_BackingUpExistingFiles)].UppercaseFirst(),
+            UpdateProgressStatus.BackingUpExistingFiles => _localizationService[nameof(Resources.UpdateDetails_BackingUpExistingFiles)]
+                .UppercaseFirst(),
             UpdateProgressStatus.MovingNewFiles => _localizationService[nameof(Resources.UpdateDetails_MovingNewFiles)].UppercaseFirst(),
             _ => throw new ArgumentOutOfRangeException(nameof(e.Status), e.Status, null)
         };
@@ -209,7 +210,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
     public override Task CancelIfNeeded()
     {
         CancellationTokenSource.Cancel();
-        
+
         return Task.CompletedTask;
     }
 }
