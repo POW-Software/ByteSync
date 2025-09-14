@@ -1,4 +1,4 @@
-﻿<root>
+<root>
 	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
 		<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
 		<xsd:element name="root" msdata:IsDataSet="true">
@@ -1659,4 +1659,7 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	<data name="ValidationFailure_ItemPlural" xml:space="preserve">
 		<value>éléments :</value>
 	</data>
+    <data name="DeploymentMode_MSIX" xml:space="preserve">
+        <value>MSIX</value>
+    </data>
 </root>

@@ -10,7 +10,7 @@ namespace ByteSync.Services.Converters;
 
 public class DeploymentModeToStringConverter : IValueConverter
 {
-    private ILocalizationService _localizationService;
+    private ILocalizationService _localizationService = null!;
 
     public DeploymentModeToStringConverter()
     {
@@ -46,7 +46,7 @@ public class DeploymentModeToStringConverter : IValueConverter
         };
     }
 
-    public object? ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         return null;
     }
