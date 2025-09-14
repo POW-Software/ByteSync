@@ -13,42 +13,51 @@ namespace ByteSync.Tests.ViewModels.Headers;
 [TestFixture]
 public class AboutApplicationViewModelCommandTests
 {
-    [Test]
-    public async Task ExploreAppDataCommand_Should_Open_ShellApplicationDataPath()
+    private Mock<IEnvironmentService> _envMock = null!;
+    private Mock<IWebAccessor> _webMock = null!;
+    private Mock<IFileSystemAccessor> _fsMock = null!;
+    private Mock<ILocalApplicationDataManager> _ladmMock = null!;
+    private Mock<ILogger<AboutApplicationViewModel>> _loggerMock = null!;
+    private AboutApplicationViewModel _vm = null!;
+
+    [SetUp]
+    public void SetUp()
     {
-        var env = new Mock<IEnvironmentService>();
-        var web = new Mock<IWebAccessor>();
-        var fs = new Mock<IFileSystemAccessor>();
-        var ladm = new Mock<ILocalApplicationDataManager>();
-        var logger = new Mock<ILogger<AboutApplicationViewModel>>();
+        _envMock = new Mock<IEnvironmentService>();
+        _webMock = new Mock<IWebAccessor>();
+        _fsMock = new Mock<IFileSystemAccessor>();
+        _ladmMock = new Mock<ILocalApplicationDataManager>();
+        _loggerMock = new Mock<ILogger<AboutApplicationViewModel>>();
 
-        ladm.SetupGet(l => l.ApplicationDataPath).Returns("APPDATA_PATH");
-        fs.Setup(f => f.OpenDirectory("APPDATA_PATH")).Returns(Task.CompletedTask).Verifiable();
-
-        var vm = new AboutApplicationViewModel(env.Object, web.Object, fs.Object, ladm.Object, logger.Object);
-
-        await vm.ExploreAppDataCommand.Execute().ToTask();
-
-        fs.Verify(f => f.OpenDirectory("APPDATA_PATH"), Times.Once);
+        _vm = new AboutApplicationViewModel(_envMock.Object, _webMock.Object, _fsMock.Object, _ladmMock.Object, _loggerMock.Object);
     }
 
     [Test]
-    public async Task OpenLogCommand_Should_Open_Shell_Log_Path()
+    public async Task ExploreAppDataCommand_Should_Open_AppData_Path()
     {
-        var env = new Mock<IEnvironmentService>();
-        var web = new Mock<IWebAccessor>();
-        var fs = new Mock<IFileSystemAccessor>();
-        var ladm = new Mock<ILocalApplicationDataManager>();
-        var logger = new Mock<ILogger<AboutApplicationViewModel>>();
+        // Arrange
+        _ladmMock.SetupGet(l => l.ApplicationDataPath).Returns("APPDATA_PATH");
+        _fsMock.Setup(f => f.OpenDirectory("APPDATA_PATH")).Returns(Task.CompletedTask).Verifiable();
 
-        ladm.SetupGet(l => l.DebugLogFilePath).Returns((string)null!);
-        ladm.SetupGet(l => l.LogFilePath).Returns("LOG_PATH");
-        fs.Setup(f => f.OpenFile("LOG_PATH")).Returns(Task.CompletedTask).Verifiable();
+        // Act
+        await _vm.ExploreAppDataCommand.Execute().ToTask();
 
-        var vm = new AboutApplicationViewModel(env.Object, web.Object, fs.Object, ladm.Object, logger.Object);
+        // Assert
+        _fsMock.Verify(f => f.OpenDirectory("APPDATA_PATH"), Times.Once);
+    }
 
-        await vm.OpenLogCommand.Execute().ToTask();
+    [Test]
+    public async Task OpenLogCommand_Should_Open_Log_Path()
+    {
+        // Arrange
+        _ladmMock.SetupGet(l => l.DebugLogFilePath).Returns((string)null!);
+        _ladmMock.SetupGet(l => l.LogFilePath).Returns("LOG_PATH");
+        _fsMock.Setup(f => f.OpenFile("LOG_PATH")).Returns(Task.CompletedTask).Verifiable();
 
-        fs.Verify(f => f.OpenFile("LOG_PATH"), Times.Once);
+        // Act
+        await _vm.OpenLogCommand.Execute().ToTask();
+
+        // Assert
+        _fsMock.Verify(f => f.OpenFile("LOG_PATH"), Times.Once);
     }
 }
