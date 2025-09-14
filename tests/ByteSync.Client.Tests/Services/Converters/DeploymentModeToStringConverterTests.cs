@@ -32,7 +32,7 @@ public class DeploymentModeToStringConverterTests
     [Test]
     public void Convert_Should_Return_Portable_Text_For_Portable_Mode()
     {
-        var result = _converter.Convert(DeploymentMode.Portable, typeof(string), null, CultureInfo.InvariantCulture);
+        var result = _converter.Convert(DeploymentModes.Portable, typeof(string), null, CultureInfo.InvariantCulture);
 
         result.Should().Be("Portable-Loc");
     }
@@ -40,7 +40,7 @@ public class DeploymentModeToStringConverterTests
     [Test]
     public void Convert_Should_Return_Installation_Text_For_Setup_Mode()
     {
-        var result = _converter.Convert(DeploymentMode.SetupInstallation, typeof(string), null, CultureInfo.InvariantCulture);
+        var result = _converter.Convert(DeploymentModes.SetupInstallation, typeof(string), null, CultureInfo.InvariantCulture);
 
         result.Should().Be("Installation-Loc");
     }
@@ -48,7 +48,7 @@ public class DeploymentModeToStringConverterTests
     [Test]
     public void Convert_Should_Return_MSIX_Text_For_Msix_Mode()
     {
-        var result = _converter.Convert(DeploymentMode.MsixInstallation, typeof(string), null, CultureInfo.InvariantCulture);
+        var result = _converter.Convert(DeploymentModes.MsixInstallation, typeof(string), null, CultureInfo.InvariantCulture);
 
         result.Should().Be("MSIX-Loc");
     }
@@ -64,7 +64,7 @@ public class DeploymentModeToStringConverterTests
     [Test]
     public void ConvertBack_Is_Not_Supported_And_Returns_Null()
     {
-        var result = _converter.ConvertBack("any", typeof(DeploymentMode), null, CultureInfo.InvariantCulture);
+        var result = _converter.ConvertBack("any", typeof(DeploymentModes), null, CultureInfo.InvariantCulture);
 
         result.Should().BeNull();
     }

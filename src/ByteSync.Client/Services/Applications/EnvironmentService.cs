@@ -88,7 +88,6 @@ public class EnvironmentService : IEnvironmentService
                 }
 
                 DeploymentMode = DeploymentModes.MsixInstallation;
-                IsPortableApplication = false;
 
                 return;
             }
@@ -112,7 +111,6 @@ public class EnvironmentService : IEnvironmentService
         }
 
         DeploymentMode = installedInPrograms ? DeploymentModes.SetupInstallation : DeploymentModes.Portable;
-        IsPortableApplication = DeploymentMode == DeploymentModes.Portable;
     }
 
     private HashSet<string> BuildProgramsDirectoriesCandidates(params Environment.SpecialFolder[] specialFolders)
@@ -197,7 +195,7 @@ public class EnvironmentService : IEnvironmentService
         return IsAutoLogin();
     }
 
-    public bool IsPortableApplication { get; private set; }
+    public bool IsPortableApplication => DeploymentMode == DeploymentModes.Portable;
 
     public string AssemblyFullName { get; private set; } = null!;
 
