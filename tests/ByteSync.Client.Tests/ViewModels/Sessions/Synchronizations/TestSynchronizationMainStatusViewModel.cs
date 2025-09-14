@@ -120,7 +120,7 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
             Status = SynchronizationEndStatuses.Regular
         });
 
-        _viewModel.ShouldEventuallyBe(vm => vm.MainStatus, "Synchronization done!");
+        _viewModel.ShouldEventuallyBe(vm => vm.MainStatus, "Synchronization done");
         _viewModel.ShouldEventuallyBe(vm => vm.MainIcon, "SolidCheckCircle");
     }
 
