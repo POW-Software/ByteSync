@@ -34,7 +34,7 @@ public class LocalApplicationDataManagerTests
         // Arrange
         _environmentServiceMock.SetupGet(e => e.AssemblyFullName)
             .Returns(@"C:\\Program Files\\WindowsApps\\POWSoftware.ByteSync_2025.7.2.0_neutral__f852479tj7xda\\ByteSync.exe");
-        _environmentServiceMock.SetupGet(e => e.DeploymentMode).Returns(DeploymentMode.MsixInstallation);
+        _environmentServiceMock.SetupGet(e => e.DeploymentMode).Returns(DeploymentModes.MsixInstallation);
         _environmentServiceMock.SetupGet(e => e.MsixPackageFamilyName).Returns("POWSoftware.ByteSync_f852479tj7xda");
 
         // Act
@@ -53,7 +53,7 @@ public class LocalApplicationDataManagerTests
         // Arrange
         _environmentServiceMock.SetupGet(e => e.AssemblyFullName)
             .Returns(@"C:\\Program Files\\ByteSync\\ByteSync.exe");
-        _environmentServiceMock.SetupGet(e => e.DeploymentMode).Returns(DeploymentMode.SetupInstallation);
+        _environmentServiceMock.SetupGet(e => e.DeploymentMode).Returns(DeploymentModes.SetupInstallation);
 
         // Act
         var ladm = new LocalApplicationDataManager(_environmentServiceMock.Object);

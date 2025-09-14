@@ -27,7 +27,7 @@ public interface IEnvironmentService
 
     public bool IsPortableApplication { get; }
 
-    public DeploymentMode DeploymentMode { get; }
+    public DeploymentModes DeploymentMode { get; }
 
     string? MsixPackageFamilyName { get; }
 

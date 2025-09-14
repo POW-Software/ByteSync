@@ -32,16 +32,16 @@ public class DeploymentModeToStringConverter : IValueConverter
             return new object();
         }
 
-        if (value is not DeploymentMode mode)
+        if (value is not DeploymentModes deploymentMode)
         {
             return string.Empty;
         }
 
-        return mode switch
+        return deploymentMode switch
         {
-            DeploymentMode.Portable => _localizationService[nameof(Resources.DeploymentMode_Portable)],
-            DeploymentMode.SetupInstallation => _localizationService[nameof(Resources.DeploymentMode_Installation)],
-            DeploymentMode.MsixInstallation => _localizationService["DeploymentMode_MSIX"],
+            DeploymentModes.Portable => _localizationService[nameof(Resources.DeploymentMode_Portable)],
+            DeploymentModes.SetupInstallation => _localizationService[nameof(Resources.DeploymentMode_Installation)],
+            DeploymentModes.MsixInstallation => _localizationService["DeploymentMode_MSIX"],
             _ => string.Empty
         };
     }

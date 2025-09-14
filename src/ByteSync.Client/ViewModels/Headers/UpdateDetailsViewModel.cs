@@ -113,7 +113,7 @@ public class UpdateDetailsViewModel : FlyoutElementViewModel
     {
         get
         {
-            if (_environmentService.DeploymentMode == DeploymentMode.MsixInstallation)
+            if (_environmentService.DeploymentMode == DeploymentModes.MsixInstallation)
             {
                 return false;
             }

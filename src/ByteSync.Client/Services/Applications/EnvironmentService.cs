@@ -35,7 +35,7 @@ public class EnvironmentService : IEnvironmentService
         AssemblyFullName = Arguments[0];
     }
 
-    public DeploymentMode DeploymentMode { get; private set; }
+    public DeploymentModes DeploymentMode { get; private set; }
 
     public string? MsixPackageFamilyName { get; private set; }
 
@@ -87,7 +87,7 @@ public class EnvironmentService : IEnvironmentService
                     MsixPackageFamilyName = $"{name}_{publisherId}";
                 }
 
-                DeploymentMode = DeploymentMode.MsixInstallation;
+                DeploymentMode = DeploymentModes.MsixInstallation;
                 IsPortableApplication = false;
 
                 return;
@@ -111,8 +111,8 @@ public class EnvironmentService : IEnvironmentService
             installedInPrograms = true;
         }
 
-        DeploymentMode = installedInPrograms ? DeploymentMode.SetupInstallation : DeploymentMode.Portable;
-        IsPortableApplication = DeploymentMode == DeploymentMode.Portable;
+        DeploymentMode = installedInPrograms ? DeploymentModes.SetupInstallation : DeploymentModes.Portable;
+        IsPortableApplication = DeploymentMode == DeploymentModes.Portable;
     }
 
     private HashSet<string> BuildProgramsDirectoriesCandidates(params Environment.SpecialFolder[] specialFolders)

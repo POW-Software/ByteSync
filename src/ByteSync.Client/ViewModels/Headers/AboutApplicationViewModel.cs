@@ -61,7 +61,7 @@ public class AboutApplicationViewModel : FlyoutElementViewModel
 
     public string ApplicationVersion => VersionHelper.GetVersionString(_environmentService.ApplicationVersion);
 
-    public DeploymentMode DeploymentMode => _environmentService.DeploymentMode;
+    public DeploymentModes DeploymentMode => _environmentService.DeploymentMode;
 
     public string ClientId => _environmentService.ClientId;
 

@@ -1,6 +1,6 @@
 namespace ByteSync.Common.Business.Misc;
 
-public enum DeploymentMode
+public enum DeploymentModes
 {
     Portable = 0,
     SetupInstallation = 1,

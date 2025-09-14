@@ -35,7 +35,7 @@ public class LocalApplicationDataManager : ILocalApplicationDataManager
         {
             switch (_environmentService.DeploymentMode)
             {
-                case DeploymentMode.Portable:
+                case DeploymentModes.Portable:
                 {
                     var fileInfo = new FileInfo(_environmentService.AssemblyFullName);
                     var parent = fileInfo.Directory!;
@@ -43,7 +43,7 @@ public class LocalApplicationDataManager : ILocalApplicationDataManager
 
                     break;
                 }
-                case DeploymentMode.MsixInstallation:
+                case DeploymentModes.MsixInstallation:
                 {
                     var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
                     var pfn = _environmentService.MsixPackageFamilyName ?? "";
