@@ -54,7 +54,10 @@ public class UpdateDetailsViewModelTests
         var observable = _sourceCache.Connect().AsObservableCache();
         
         // Create a Progress<T> without capturing any SynchronizationContext (prevents dead posts on CI)
-        _progress = ReactiveViewModelTestHelpers.WithoutSynchronizationContext(() => new Progress<UpdateProgress>());
+        var previousCtx = SynchronizationContext.Current;
+        SynchronizationContext.SetSynchronizationContext(null);
+        _progress = new Progress<UpdateProgress>();
+        SynchronizationContext.SetSynchronizationContext(previousCtx);
         
         _availableUpdateRepositoryMock
             .Setup(x => x.ObservableCache)
@@ -524,7 +527,6 @@ public class UpdateDetailsViewModelTests
     
     private void TriggerProgress(UpdateProgress updateProgress)
     {
-        // Report via repository facade to mirror production code path
-        _updateRepositoryMock.Object.ReportProgress(updateProgress);
+        ((IProgress<UpdateProgress>)_progress).Report(updateProgress);
     }
 }
