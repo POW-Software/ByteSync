@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using ByteSync.Business.Misc;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Services.Applications;
+using FluentAssertions;
 
 namespace ByteSync.Client.IntegrationTests.Services.Applications;
 
@@ -12,19 +13,63 @@ public class EnvironmentService_Tests
     [Platform(Include = "Win")]
     public void SetDeploymentMode_detects_msix_and_parses_pfn_on_windowsapps_path()
     {
+        // Arrange
         var service = new EnvironmentService();
-        
         var containerDir = "POWSoftware.ByteSync_2025.7.2.0_neutral__f852479tj7xda";
         var exeFullPath = $"C:\\Program Files\\WindowsApps\\{containerDir}\\ByteSync.exe";
         
         service.Arguments = [exeFullPath];
         
+        // Act
         typeof(EnvironmentService)
             .GetMethod("SetDeploymentMode", BindingFlags.Instance | BindingFlags.NonPublic)!
             .Invoke(service, null);
         
-        Assert.That(service.DeploymentMode, Is.EqualTo(DeploymentModes.MsixInstallation));
-        Assert.That(service.MsixPackageFamilyName, Is.EqualTo("POWSoftware.ByteSync_f852479tj7xda"));
+        // Assert
+        service.DeploymentMode.Should().Be(DeploymentModes.MsixInstallation);
+        service.MsixPackageFamilyName.Should().Be("POWSoftware.ByteSync_f852479tj7xda");
+    }
+    
+    [Test]
+    [Platform(Include = "Win")]
+    public void SetDeploymentMode_detects_msix_even_when_pfn_parse_fails_and_keeps_null_pfn()
+    {
+        // Arrange - container folder without expected "__" separator
+        var service = new EnvironmentService();
+        var containerDir = "SomeApp_1.0.0.0_neutral_x64";
+        var exeFullPath = $"C:\\Program Files\\WindowsApps\\{containerDir}\\SomeApp.exe";
+        
+        service.Arguments = [exeFullPath];
+        
+        // Act
+        typeof(EnvironmentService)
+            .GetMethod("SetDeploymentMode", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .Invoke(service, null);
+        
+        // Assert
+        service.DeploymentMode.Should().Be(DeploymentModes.MsixInstallation);
+        service.MsixPackageFamilyName.Should().BeNull();
+    }
+    
+    [Test]
+    [Platform(Include = "Win")]
+    public void SetDeploymentMode_detects_msix_from_x86_windowsapps_path()
+    {
+        // Arrange
+        var service = new EnvironmentService();
+        var containerDir = "Vendor.Product_2.0.0.0_neutral__abc123xyz";
+        var exeFullPath = $"C:\\Program Files (x86)\\WindowsApps\\{containerDir}\\Product.exe";
+        
+        service.Arguments = [exeFullPath];
+        
+        // Act
+        typeof(EnvironmentService)
+            .GetMethod("SetDeploymentMode", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .Invoke(service, null);
+        
+        // Assert
+        service.DeploymentMode.Should().Be(DeploymentModes.MsixInstallation);
+        service.MsixPackageFamilyName.Should().Be("Vendor.Product_abc123xyz");
     }
     
     [Test]
@@ -38,7 +83,7 @@ public class EnvironmentService_Tests
             .GetMethod("SetDeploymentMode", BindingFlags.Instance | BindingFlags.NonPublic)!
             .Invoke(service, null);
         
-        Assert.That(service.DeploymentMode, Is.EqualTo(DeploymentModes.SetupInstallation));
+        service.DeploymentMode.Should().Be(DeploymentModes.SetupInstallation);
         
         service.Arguments = ["/linuxbrew/Cellar/bytesync/1.0/bin/bytesync"];
         
@@ -46,7 +91,7 @@ public class EnvironmentService_Tests
             .GetMethod("SetDeploymentMode", BindingFlags.Instance | BindingFlags.NonPublic)!
             .Invoke(service, null);
         
-        Assert.That(service.DeploymentMode, Is.EqualTo(DeploymentModes.SetupInstallation));
+        service.DeploymentMode.Should().Be(DeploymentModes.SetupInstallation);
     }
     
     [Test]
@@ -55,10 +100,10 @@ public class EnvironmentService_Tests
         var service = new EnvironmentService();
         
         service.Arguments = ["--update"];
-        Assert.That(service.OperateCommandLine, Is.True);
+        service.OperateCommandLine.Should().BeTrue();
         
         service.Arguments = ["--version"];
-        Assert.That(service.OperateCommandLine, Is.True);
+        service.OperateCommandLine.Should().BeTrue();
     }
     
     [Test]
@@ -67,16 +112,16 @@ public class EnvironmentService_Tests
         var service = new EnvironmentService();
         
         service.Arguments = ["--join", "--no-gui"];
-        Assert.That(service.OperateCommandLine, Is.True);
+        service.OperateCommandLine.Should().BeTrue();
         
         service.Arguments = ["--inventory", "--no-gui"];
-        Assert.That(service.OperateCommandLine, Is.True);
+        service.OperateCommandLine.Should().BeTrue();
         
         service.Arguments = ["--synchronize", "--no-gui"];
-        Assert.That(service.OperateCommandLine, Is.True);
+        service.OperateCommandLine.Should().BeTrue();
         
         service.Arguments = ["--join"];
-        Assert.That(service.OperateCommandLine, Is.False);
+        service.OperateCommandLine.Should().BeFalse();
     }
     
     [Test]
@@ -86,19 +131,19 @@ public class EnvironmentService_Tests
         
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            Assert.That(service.OSPlatform, Is.EqualTo(OSPlatforms.Windows));
+            service.OSPlatform.Should().Be(OSPlatforms.Windows);
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            Assert.That(service.OSPlatform, Is.EqualTo(OSPlatforms.Linux));
+            service.OSPlatform.Should().Be(OSPlatforms.Linux);
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            Assert.That(service.OSPlatform, Is.EqualTo(OSPlatforms.MacOs));
+            service.OSPlatform.Should().Be(OSPlatforms.MacOs);
         }
         else
         {
-            Assert.That(service.OSPlatform, Is.EqualTo(OSPlatforms.Undefined));
+            service.OSPlatform.Should().Be(OSPlatforms.Undefined);
         }
     }
     
@@ -108,22 +153,22 @@ public class EnvironmentService_Tests
         var service = new EnvironmentService();
         
         service.Arguments = [];
-        Assert.That(service.OperateCommandLine, Is.False);
-        Assert.That(service.OperationMode, Is.EqualTo(OperationMode.GraphicalUserInterface));
-        Assert.That(service.IsAutoLogin(), Is.False);
-        Assert.That(service.IsAutoRunProfile(), Is.False);
+        service.OperateCommandLine.Should().BeFalse();
+        service.OperationMode.Should().Be(OperationMode.GraphicalUserInterface);
+        service.IsAutoLogin().Should().BeFalse();
+        service.IsAutoRunProfile().Should().BeFalse();
         
         service.Arguments = ["--join", "--no-gui"];
-        Assert.That(service.OperateCommandLine, Is.True);
-        Assert.That(service.OperationMode, Is.EqualTo(OperationMode.CommandLine));
-        Assert.That(service.IsAutoLogin(), Is.True);
-        Assert.That(service.IsAutoRunProfile(), Is.True);
+        service.OperateCommandLine.Should().BeTrue();
+        service.OperationMode.Should().Be(OperationMode.CommandLine);
+        service.IsAutoLogin().Should().BeTrue();
+        service.IsAutoRunProfile().Should().BeTrue();
         
         service.Arguments = ["--synchronize"];
-        Assert.That(service.OperateCommandLine, Is.False);
-        Assert.That(service.OperationMode, Is.EqualTo(OperationMode.GraphicalUserInterface));
-        Assert.That(service.IsAutoLogin(), Is.True);
-        Assert.That(service.IsAutoRunProfile(), Is.True);
+        service.OperateCommandLine.Should().BeFalse();
+        service.OperationMode.Should().Be(OperationMode.GraphicalUserInterface);
+        service.IsAutoLogin().Should().BeTrue();
+        service.IsAutoRunProfile().Should().BeTrue();
     }
     
     [Test]
@@ -133,11 +178,11 @@ public class EnvironmentService_Tests
         
         var expectedEnvMachineName = Environment.MachineName;
         service.Arguments = [];
-        Assert.That(service.MachineName, Is.EqualTo(expectedEnvMachineName));
+        service.MachineName.Should().Be(expectedEnvMachineName);
         
         var custom = "TestMachine-XYZ";
         service.Arguments = ["--set-machine-name=" + custom];
-        Assert.That(service.MachineName, Is.EqualTo(custom));
+        service.MachineName.Should().Be(custom);
     }
     
     [Test]
@@ -147,11 +192,11 @@ public class EnvironmentService_Tests
         
         service.Arguments = [];
         var asmVersion = Assembly.GetExecutingAssembly().GetName().Version!;
-        Assert.That(service.ApplicationVersion, Is.EqualTo(asmVersion));
+        service.ApplicationVersion.Should().Be(asmVersion);
         
         var overrideVersion = new Version(3, 2, 1, 0);
         service.Arguments = ["--set-application-version=" + overrideVersion];
-        Assert.That(service.ApplicationVersion, Is.EqualTo(overrideVersion));
+        service.ApplicationVersion.Should().Be(overrideVersion);
     }
     
     [Test]
@@ -162,10 +207,10 @@ public class EnvironmentService_Tests
         var clientId = "client-123";
         service.SetClientId(clientId);
         
-        Assert.That(service.ClientId, Is.EqualTo(clientId));
-        Assert.That(service.ClientInstanceId, Does.StartWith(clientId + "_"));
+        service.ClientId.Should().Be(clientId);
+        service.ClientInstanceId.Should().StartWith(clientId + "_");
         
         var suffix = service.ClientInstanceId.Substring(clientId.Length + 1);
-        Assert.That(Guid.TryParse(suffix, out _), Is.True);
+        Guid.TryParse(suffix, out _).Should().BeTrue();
     }
 }
