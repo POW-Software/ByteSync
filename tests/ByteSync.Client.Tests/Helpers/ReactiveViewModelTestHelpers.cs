@@ -71,4 +71,32 @@ public static class ReactiveViewModelTestHelpers
     {
         return selector.Body is MemberExpression m ? m.Member.Name : selector.ToString();
     }
+
+    public static T WithoutSynchronizationContext<T>(Func<T> factory)
+    {
+        var previous = SynchronizationContext.Current;
+        SynchronizationContext.SetSynchronizationContext(null);
+        try
+        {
+            return factory();
+        }
+        finally
+        {
+            SynchronizationContext.SetSynchronizationContext(previous);
+        }
+    }
+
+    public static void WithoutSynchronizationContext(Action action)
+    {
+        var previous = SynchronizationContext.Current;
+        SynchronizationContext.SetSynchronizationContext(null);
+        try
+        {
+            action();
+        }
+        finally
+        {
+            SynchronizationContext.SetSynchronizationContext(previous);
+        }
+    }
 }
