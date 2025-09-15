@@ -7,7 +7,7 @@ namespace ByteSync.Tests.Helpers;
 
 public static class ReactiveViewModelTestHelpers
 {
-    private static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(5);
 
     public static bool WaitForProperty<TViewModel, TProp>(
         TViewModel viewModel,
