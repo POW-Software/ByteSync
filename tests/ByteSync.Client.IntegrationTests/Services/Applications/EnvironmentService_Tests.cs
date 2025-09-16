@@ -20,7 +20,7 @@ public class EnvironmentService_Tests
             .GetMethod("SetDeploymentMode", BindingFlags.Instance | BindingFlags.NonPublic)!
             .Invoke(service, null);
         
-        service.DeploymentMode.Should().Be(DeploymentModes.SetupInstallation);
+        service.DeploymentMode.Should().Be(DeploymentModes.HomebrewInstallation);
         
         service.Arguments = ["/linuxbrew/Cellar/bytesync/1.0/bin/bytesync"];
         
@@ -28,7 +28,7 @@ public class EnvironmentService_Tests
             .GetMethod("SetDeploymentMode", BindingFlags.Instance | BindingFlags.NonPublic)!
             .Invoke(service, null);
         
-        service.DeploymentMode.Should().Be(DeploymentModes.SetupInstallation);
+        service.DeploymentMode.Should().Be(DeploymentModes.HomebrewInstallation);
     }
     
     [Test]

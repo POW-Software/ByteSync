@@ -96,9 +96,10 @@ public class EnvironmentService : IEnvironmentService
         if (applicationLauncherFullName.Contains("/homebrew/", StringComparison.OrdinalIgnoreCase) ||
             applicationLauncherFullName.Contains("/linuxbrew/", StringComparison.OrdinalIgnoreCase))
         {
-            installedInPrograms = true;
+            DeploymentMode = DeploymentModes.HomebrewInstallation;
+            return;
         }
-        
+
         DeploymentMode = installedInPrograms ? DeploymentModes.SetupInstallation : DeploymentModes.Portable;
     }
     

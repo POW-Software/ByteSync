@@ -23,8 +23,10 @@ public class DeploymentModeToStringConverterTests
             .Returns("Portable-Loc");
         _mockLocalizationService.Setup(x => x["DeploymentMode_Installation"])
             .Returns("Installation-Loc");
-        _mockLocalizationService.Setup(x => x["DeploymentMode_MSIX"])
+        _mockLocalizationService.Setup(x => x["DeploymentMode_MSIX"]) 
             .Returns("MSIX-Loc");
+        _mockLocalizationService.Setup(x => x["DeploymentMode_Homebrew"]) 
+            .Returns("Homebrew-Loc");
 
         _converter = new DeploymentModeToStringConverter(_mockLocalizationService.Object);
     }
@@ -51,6 +53,14 @@ public class DeploymentModeToStringConverterTests
         var result = _converter.Convert(DeploymentModes.MsixInstallation, typeof(string), null, CultureInfo.InvariantCulture);
 
         result.Should().Be("MSIX-Loc");
+    }
+
+    [Test]
+    public void Convert_Should_Return_Homebrew_Text_For_Homebrew_Mode()
+    {
+        var result = _converter.Convert(DeploymentModes.HomebrewInstallation, typeof(string), null, CultureInfo.InvariantCulture);
+
+        result.Should().Be("Homebrew-Loc");
     }
 
     [Test]
