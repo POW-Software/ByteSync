@@ -1,5 +1,3 @@
-using System.IO;
-
 namespace ByteSync.Services.Applications;
 
 public class MsixPfnParser : IMsixPfnParser
@@ -37,20 +35,26 @@ public class MsixPfnParser : IMsixPfnParser
         msixPackageFamilyName = null;
         
         // MSIX container path detection (path-based)
-        var normalized = applicationLauncherFullName.Replace('/', '\\');
-        if (normalized.Contains("WindowsApps", StringComparison.OrdinalIgnoreCase))
+        var normalized = applicationLauncherFullName.Replace('\\', '/');
+        const string windowsAppsMarker = "/windowsapps/";
+        var markerIndex = normalized.IndexOf(windowsAppsMarker, StringComparison.OrdinalIgnoreCase);
+        
+        if (markerIndex < 0)
         {
-            var exeDirectory = new FileInfo(normalized).Directory;
-            var containerDirName = exeDirectory!.Name;
-            
-            if (TryParse(containerDirName, out var pfn))
-            {
-                msixPackageFamilyName = pfn;
-            }
-            
-            return true;
+            return false;
         }
         
-        return false;
+        var startIndex = markerIndex + windowsAppsMarker.Length;
+        var endIndex = normalized.IndexOf('/', startIndex);
+        var containerDirName = endIndex >= 0
+            ? normalized.Substring(startIndex, endIndex - startIndex)
+            : normalized.Substring(startIndex);
+        
+        if (!string.IsNullOrEmpty(containerDirName) && TryParse(containerDirName, out var pfn))
+        {
+            msixPackageFamilyName = pfn;
+        }
+        
+        return true;
     }
 }
