@@ -15,6 +15,41 @@ public class MsixPfnParserTests
     }
     
     [Test]
+    public void TryDetectMsix_ReturnsTrue_And_SetsPfn_When_PathContains_WindowsApps()
+    {
+        const string container = "POWSoftware.ByteSync_2025.7.2.0_neutral__f852479tj7xda";
+        var exeFullPath = $"C:/Program Files/WindowsApps/{container}/ByteSync.exe"; // forward slashes covered by normalization
+        
+        var ok = _parser.TryDetectMsix(exeFullPath, out var pfn);
+        
+        ok.Should().BeTrue();
+        pfn.Should().Be("POWSoftware.ByteSync_f852479tj7xda");
+    }
+    
+    [Test]
+    public void TryDetectMsix_ReturnsFalse_When_PathDoesNotContain_WindowsApps()
+    {
+        var exeFullPath = "/usr/bin/bytesync";
+        
+        var ok = _parser.TryDetectMsix(exeFullPath, out var pfn);
+        
+        ok.Should().BeFalse();
+        pfn.Should().BeNull();
+    }
+    
+    [Test]
+    public void TryDetectMsix_ReturnsTrue_WithNullPfn_When_ContainerNameNotParsable()
+    {
+        const string container = "SomeApp_1.0.0.0_neutral_x64"; // missing "__" for publisher part
+        var exeFullPath = $"C:/Program Files/WindowsApps/{container}/SomeApp.exe";
+        
+        var ok = _parser.TryDetectMsix(exeFullPath, out var pfn);
+        
+        ok.Should().BeTrue();
+        pfn.Should().BeNull();
+    }
+    
+    [Test]
     public void TryParse_ReturnsTrue_And_ComposesPfn_On_ValidContainerName()
     {
         const string container = "POWSoftware.ByteSync_2025.7.2.0_neutral__f852479tj7xda";
