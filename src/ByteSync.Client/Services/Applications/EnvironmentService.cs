@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.InteropServices;
 using ByteSync.Business.Arguments;
 using ByteSync.Business.Misc;
@@ -11,23 +10,6 @@ namespace ByteSync.Services.Applications;
 public class EnvironmentService : IEnvironmentService
 {
     private readonly IMsixPfnParser _msixPfnParser;
-    
-    public EnvironmentService()
-    {
-        _msixPfnParser = new MsixPfnParser();
-        Arguments = Environment.GetCommandLineArgs();
-        
-        // ReSharper disable once RedundantAssignment
-        var isDebug = false;
-    #if DEBUG
-        isDebug = true;
-    #endif
-        
-        ExecutionMode = isDebug ? ExecutionMode.Debug : ExecutionMode.Regular;
-        
-        SetAssemblyFullName();
-        SetDeploymentMode();
-    }
     
     public EnvironmentService(IMsixPfnParser msixPfnParser)
     {
@@ -89,44 +71,14 @@ public class EnvironmentService : IEnvironmentService
         }
         
         // Detect MSIX on Windows by install path
-        if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+        if (_msixPfnParser.TryDetect(applicationLauncherFullName, programsDirectoriesCandidates,
+                out var mode, out var pfnOut))
         {
-            if (applicationLauncherFullName.Contains("\\Program Files\\WindowsApps\\", StringComparison.OrdinalIgnoreCase) ||
-                applicationLauncherFullName.Contains("\\Program Files (x86)\\WindowsApps\\", StringComparison.OrdinalIgnoreCase))
-            {
-                // Parse PFN from container directory name
-                var exeDirectory = new FileInfo(applicationLauncherFullName).Directory;
-                var containerDirName = exeDirectory!.Name; // e.g. POWSoftware.ByteSync_2025.7.2.0_neutral__f852479tj7xda
-                
-                if (_msixPfnParser.TryParse(containerDirName, out var pfn))
-                {
-                    MsixPackageFamilyName = pfn;
-                }
-                
-                DeploymentMode = DeploymentModes.MsixInstallation;
-                
-                return;
-            }
+            MsixPackageFamilyName = pfnOut;
+            DeploymentMode = mode;
+            
+            return;
         }
-        
-        var installedInPrograms = false;
-        foreach (var candidate in programsDirectoriesCandidates)
-        {
-            if (IOUtils.IsSubPathOf(applicationLauncherFullName, candidate))
-            {
-                installedInPrograms = true;
-                
-                break;
-            }
-        }
-        
-        if (applicationLauncherFullName.Contains("/homebrew/", StringComparison.OrdinalIgnoreCase) ||
-            applicationLauncherFullName.Contains("/linuxbrew/", StringComparison.OrdinalIgnoreCase))
-        {
-            installedInPrograms = true;
-        }
-        
-        DeploymentMode = installedInPrograms ? DeploymentModes.SetupInstallation : DeploymentModes.Portable;
     }
     
     private HashSet<string> BuildProgramsDirectoriesCandidates(params Environment.SpecialFolder[] specialFolders)

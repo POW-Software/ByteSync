@@ -11,11 +11,7 @@ public class EnvironmentModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        // Register PFN parser and environment service
-        var msixPfnParser = new MsixPfnParser();
-        builder.RegisterInstance(msixPfnParser).As<IMsixPfnParser>();
-        
-        var environmentService = new EnvironmentService(msixPfnParser);
+        var environmentService = new EnvironmentService(new MsixPfnParser());
         builder.RegisterInstance(environmentService).As<IEnvironmentService>();
         
         builder.RegisterType<LocalApplicationDataManager>()
