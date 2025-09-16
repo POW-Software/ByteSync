@@ -1,5 +1,4 @@
 using System.IO;
-using ByteSync.Common.Business.Misc;
 
 namespace ByteSync.Services.Applications;
 
@@ -33,14 +32,11 @@ public class MsixPfnParser : IMsixPfnParser
         return false;
     }
     
-    public bool TryDetect(string applicationLauncherFullName,
-        IEnumerable<string> programsDirectoriesCandidates,
-        out DeploymentModes deploymentMode,
-        out string? msixPackageFamilyName)
+    public bool TryDetectMsix(string applicationLauncherFullName, out string? msixPackageFamilyName)
     {
         msixPackageFamilyName = null;
         
-        // MSIX container path detection (path-based, not OS-gated)
+        // MSIX container path detection (path-based)
         var normalized = applicationLauncherFullName.Replace('/', '\\');
         if (normalized.Contains("WindowsApps", StringComparison.OrdinalIgnoreCase))
         {
@@ -52,30 +48,9 @@ public class MsixPfnParser : IMsixPfnParser
                 msixPackageFamilyName = pfn;
             }
             
-            deploymentMode = DeploymentModes.MsixInstallation;
-            
             return true;
         }
         
-        var installedInPrograms = false;
-        foreach (var candidate in programsDirectoriesCandidates)
-        {
-            if (IOUtils.IsSubPathOf(applicationLauncherFullName, candidate))
-            {
-                installedInPrograms = true;
-                
-                break;
-            }
-        }
-        
-        if (applicationLauncherFullName.Contains("/homebrew/", StringComparison.OrdinalIgnoreCase) ||
-            applicationLauncherFullName.Contains("/linuxbrew/", StringComparison.OrdinalIgnoreCase))
-        {
-            installedInPrograms = true;
-        }
-        
-        deploymentMode = installedInPrograms ? DeploymentModes.SetupInstallation : DeploymentModes.Portable;
-        
-        return true;
+        return false;
     }
 }

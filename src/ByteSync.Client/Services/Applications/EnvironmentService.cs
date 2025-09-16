@@ -71,14 +71,35 @@ public class EnvironmentService : IEnvironmentService
         }
         
         // Detect MSIX on Windows by install path
-        if (_msixPfnParser.TryDetect(applicationLauncherFullName, programsDirectoriesCandidates,
-                out var mode, out var pfnOut))
+        if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
         {
-            MsixPackageFamilyName = pfnOut;
-            DeploymentMode = mode;
-            
-            return;
+            if (_msixPfnParser.TryDetectMsix(applicationLauncherFullName, out var pfnOut))
+            {
+                MsixPackageFamilyName = pfnOut;
+                DeploymentMode = DeploymentModes.MsixInstallation;
+                
+                return;
+            }
         }
+        
+        var installedInPrograms = false;
+        foreach (var candidate in programsDirectoriesCandidates)
+        {
+            if (IOUtils.IsSubPathOf(applicationLauncherFullName, candidate))
+            {
+                installedInPrograms = true;
+                
+                break;
+            }
+        }
+        
+        if (applicationLauncherFullName.Contains("/homebrew/", StringComparison.OrdinalIgnoreCase) ||
+            applicationLauncherFullName.Contains("/linuxbrew/", StringComparison.OrdinalIgnoreCase))
+        {
+            installedInPrograms = true;
+        }
+        
+        DeploymentMode = installedInPrograms ? DeploymentModes.SetupInstallation : DeploymentModes.Portable;
     }
     
     private HashSet<string> BuildProgramsDirectoriesCandidates(params Environment.SpecialFolder[] specialFolders)
