@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.InteropServices;
 using ByteSync.Business.Configurations;
 using ByteSync.Business.Misc;
 using ByteSync.Common.Business.Misc;
@@ -84,17 +85,29 @@ public class LocalApplicationDataManagerTests
         
         using var commandLineOverride = OverrideCommandLineArgs(["ByteSync.exe", overrideArg]);
         
+        string? appDataPath = null;
+        
         try
         {
             // Act
             var ladm = new LocalApplicationDataManager(_environmentServiceMock.Object);
+            appDataPath = ladm.ApplicationDataPath;
             
             // Assert
-            var expectedBase = Path.Combine(assemblyDirectory, "ApplicationData");
-            ladm.ApplicationDataPath.Should().Be(expectedBase + $" {argumentValue}");
+            var expectedBase = ResolveExpectedBasePath(assemblyPath, DeploymentModes.Portable);
+            var expectedPath = expectedBase + $" {argumentValue}";
+            ladm.ApplicationDataPath.Should().Be(expectedPath);
+            Directory.Exists(ladm.ApplicationDataPath).Should().BeTrue();
         }
         finally
         {
+            _environmentServiceMock.Object.Arguments = Array.Empty<string>();
+            
+            if (appDataPath != null && Directory.Exists(appDataPath))
+            {
+                Directory.Delete(appDataPath, true);
+            }
+            
             if (Directory.Exists(tempRoot))
             {
                 Directory.Delete(tempRoot, true);
@@ -115,15 +128,18 @@ public class LocalApplicationDataManagerTests
         _environmentServiceMock.SetupGet(e => e.DeploymentMode).Returns(DeploymentModes.Portable);
         _environmentServiceMock.SetupGet(e => e.ExecutionMode).Returns(ExecutionMode.Debug);
         
-        _environmentServiceMock.Object.Arguments = Array.Empty<string>();
+        using var commandLineOverride = OverrideCommandLineArgs(["ByteSync.exe"]);
+        
+        string? appDataPath = null;
         
         try
         {
             // Act
             var ladm = new LocalApplicationDataManager(_environmentServiceMock.Object);
+            appDataPath = ladm.ApplicationDataPath;
             
             // Assert
-            var basePath = Path.Combine(assemblyDirectory, "ApplicationData");
+            var basePath = ResolveExpectedBasePath(assemblyPath, DeploymentModes.Portable);
             var debugRoot = basePath + " Debug";
             ladm.ApplicationDataPath.Should().StartWith(debugRoot);
             Path.GetDirectoryName(ladm.ApplicationDataPath).Should().Be(debugRoot);
@@ -131,6 +147,15 @@ public class LocalApplicationDataManagerTests
         }
         finally
         {
+            if (appDataPath != null)
+            {
+                var parent = Path.GetDirectoryName(appDataPath);
+                if (!string.IsNullOrEmpty(parent) && Directory.Exists(parent))
+                {
+                    Directory.Delete(parent, true);
+                }
+            }
+            
             if (Directory.Exists(tempRoot))
             {
                 Directory.Delete(tempRoot, true);
@@ -149,10 +174,20 @@ public class LocalApplicationDataManagerTests
         
         _environmentServiceMock.SetupGet(e => e.AssemblyFullName).Returns(assemblyPath);
         _environmentServiceMock.SetupGet(e => e.DeploymentMode).Returns(DeploymentModes.Portable);
+        _environmentServiceMock.SetupGet(e => e.ExecutionMode).Returns(ExecutionMode.Debug);
+        
+        var uniqueSuffix = $"tests-{Guid.NewGuid():N}";
+        var overrideArg = $"--ladm-use-appdata={uniqueSuffix}";
+        _environmentServiceMock.Object.Arguments = new[] { overrideArg };
+        
+        using var commandLineOverride = OverrideCommandLineArgs(["ByteSync.exe", overrideArg]);
+        
+        string? appDataPath = null;
         
         try
         {
             var ladm = new LocalApplicationDataManager(_environmentServiceMock.Object);
+            appDataPath = ladm.ApplicationDataPath;
             
             var logsDirectory = Path.Combine(ladm.ApplicationDataPath, LocalApplicationDataConstants.LOGS_DIRECTORY);
             Directory.CreateDirectory(logsDirectory);
@@ -177,6 +212,13 @@ public class LocalApplicationDataManagerTests
         }
         finally
         {
+            _environmentServiceMock.Object.Arguments = Array.Empty<string>();
+            
+            if (appDataPath != null && Directory.Exists(appDataPath))
+            {
+                Directory.Delete(appDataPath, true);
+            }
+            
             if (Directory.Exists(tempRoot))
             {
                 Directory.Delete(tempRoot, true);
@@ -195,10 +237,20 @@ public class LocalApplicationDataManagerTests
         
         _environmentServiceMock.SetupGet(e => e.AssemblyFullName).Returns(assemblyPath);
         _environmentServiceMock.SetupGet(e => e.DeploymentMode).Returns(DeploymentModes.Portable);
+        _environmentServiceMock.SetupGet(e => e.ExecutionMode).Returns(ExecutionMode.Debug);
+        
+        var uniqueSuffix = $"tests-{Guid.NewGuid():N}";
+        var overrideArg = $"--ladm-use-appdata={uniqueSuffix}";
+        _environmentServiceMock.Object.Arguments = new[] { overrideArg };
+        
+        using var commandLineOverride = OverrideCommandLineArgs(["ByteSync.exe", overrideArg]);
+        
+        string? appDataPath = null;
         
         try
         {
             var ladm = new LocalApplicationDataManager(_environmentServiceMock.Object);
+            appDataPath = ladm.ApplicationDataPath;
             
             var logsDirectory = Path.Combine(ladm.ApplicationDataPath, LocalApplicationDataConstants.LOGS_DIRECTORY);
             Directory.CreateDirectory(logsDirectory);
@@ -223,6 +275,13 @@ public class LocalApplicationDataManagerTests
         }
         finally
         {
+            _environmentServiceMock.Object.Arguments = Array.Empty<string>();
+            
+            if (appDataPath != null && Directory.Exists(appDataPath))
+            {
+                Directory.Delete(appDataPath, true);
+            }
+            
             if (Directory.Exists(tempRoot))
             {
                 Directory.Delete(tempRoot, true);
@@ -242,6 +301,28 @@ public class LocalApplicationDataManagerTests
         field.SetValue(null, args);
         
         return new DelegateDisposable(() => field.SetValue(null, original));
+    }
+    
+    private static string ResolveExpectedBasePath(string assemblyFullName, DeploymentModes deploymentMode)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            var globalAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            
+            return IOUtils.Combine(globalAppData, "POW Software", "ByteSync");
+        }
+        
+        if (deploymentMode == DeploymentModes.Portable)
+        {
+            var fileInfo = new FileInfo(assemblyFullName);
+            var parent = fileInfo.Directory!.FullName;
+            
+            return IOUtils.Combine(parent, "ApplicationData");
+        }
+        
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        
+        return IOUtils.Combine(localAppData, "POW Software", "ByteSync");
     }
     
     private sealed class DelegateDisposable : IDisposable
