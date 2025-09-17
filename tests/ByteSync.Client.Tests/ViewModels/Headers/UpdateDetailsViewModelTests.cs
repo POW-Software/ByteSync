@@ -53,9 +53,9 @@ public class UpdateDetailsViewModelTests
         _sourceCache = new SourceCache<SoftwareVersion, string>(sv => sv.Version);
         var observable = _sourceCache.Connect().AsObservableCache();
         
-        // Create a Progress<T> without capturing any SynchronizationContext (prevents dead posts on CI)
+        // Use an immediate synchronization context so Progress reports inline during tests
         var previousCtx = SynchronizationContext.Current;
-        SynchronizationContext.SetSynchronizationContext(null);
+        SynchronizationContext.SetSynchronizationContext(new ImmediateSynchronizationContext());
         _progress = new Progress<UpdateProgress>();
         SynchronizationContext.SetSynchronizationContext(previousCtx);
         
