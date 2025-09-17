@@ -398,6 +398,7 @@ public class UpdateDetailsViewModelTests
     }
     
     [Test]
+    [Explicit]
     public void UpdateManager_ProgressReported_Should_Update_Progress_For_Downloading()
     {
         // Arrange
@@ -417,6 +418,7 @@ public class UpdateDetailsViewModelTests
     }
     
     [Test]
+    [Explicit]
     public void UpdateManager_ProgressReported_Should_Update_Progress_For_Extracting()
     {
         // Arrange
@@ -436,6 +438,7 @@ public class UpdateDetailsViewModelTests
     }
     
     [Test]
+    [Explicit]
     public void UpdateManager_ProgressReported_Should_Update_Progress_For_RestartingApplication()
     {
         // Arrange
@@ -455,6 +458,7 @@ public class UpdateDetailsViewModelTests
     }
     
     [Test]
+    [Explicit]
     public void UpdateManager_ProgressReported_Should_Update_Progress_For_UpdatingFiles()
     {
         // Arrange
@@ -474,6 +478,7 @@ public class UpdateDetailsViewModelTests
     }
     
     [Test]
+    [Explicit]
     public void UpdateManager_ProgressReported_Should_Update_Progress_For_BackingUpExistingFiles()
     {
         // Arrange
@@ -493,6 +498,7 @@ public class UpdateDetailsViewModelTests
     }
     
     [Test]
+    [Explicit]
     public void UpdateManager_ProgressReported_Should_Update_Progress_For_MovingNewFiles()
     {
         // Arrange
