@@ -6,8 +6,8 @@ namespace ByteSync.Tests.Helpers;
 
 public static class ReactiveViewModelTestHelpers
 {
-    private static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(5);
-
+    private static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(2);
+    
     public static bool WaitForProperty<TViewModel, TProp>(
         TViewModel viewModel,
         Expression<Func<TViewModel, TProp>> selector,
@@ -17,7 +17,7 @@ public static class ReactiveViewModelTestHelpers
     {
         return WaitForProperty(viewModel, selector, predicate, timeout, out _);
     }
-
+    
     public static bool WaitForProperty<TViewModel, TProp>(
         TViewModel viewModel,
         Expression<Func<TViewModel, TProp>> selector,
@@ -38,13 +38,13 @@ public static class ReactiveViewModelTestHelpers
                     evt.Set();
                 }
             });
-
+        
         var signaled = evt.Wait(timeout);
         lastValue = latest;
-
+        
         return signaled;
     }
-
+    
     public static void ShouldEventuallyBe<TViewModel, TProp>(
         TViewModel viewModel,
         Expression<Func<TViewModel, TProp>> selector,
@@ -57,7 +57,7 @@ public static class ReactiveViewModelTestHelpers
         ok.Should().BeTrue(
             $"Expected {member} to become '{expected}' within {timeout}, but last value was '{lastValue}'");
     }
-
+    
     public static void ShouldEventuallyBe<TViewModel, TProp>(
         this TViewModel viewModel,
         Expression<Func<TViewModel, TProp>> selector,
@@ -66,37 +66,9 @@ public static class ReactiveViewModelTestHelpers
     {
         ShouldEventuallyBe(viewModel, selector, expected, _defaultTimeout);
     }
-
+    
     private static string GetMemberName<TViewModel, TProp>(Expression<Func<TViewModel, TProp>> selector)
     {
         return selector.Body is MemberExpression m ? m.Member.Name : selector.ToString();
-    }
-
-    public static T WithoutSynchronizationContext<T>(Func<T> factory)
-    {
-        var previous = SynchronizationContext.Current;
-        SynchronizationContext.SetSynchronizationContext(null);
-        try
-        {
-            return factory();
-        }
-        finally
-        {
-            SynchronizationContext.SetSynchronizationContext(previous);
-        }
-    }
-
-    public static void WithoutSynchronizationContext(Action action)
-    {
-        var previous = SynchronizationContext.Current;
-        SynchronizationContext.SetSynchronizationContext(null);
-        try
-        {
-            action();
-        }
-        finally
-        {
-            SynchronizationContext.SetSynchronizationContext(previous);
-        }
     }
 }
