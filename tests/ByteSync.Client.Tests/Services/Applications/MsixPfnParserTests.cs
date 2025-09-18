@@ -2,7 +2,7 @@ using ByteSync.Services.Applications;
 using FluentAssertions;
 using NUnit.Framework;
 
-namespace ByteSync.Client.Tests.Services.Applications;
+namespace ByteSync.Tests.Services.Applications;
 
 public class MsixPfnParserTests
 {

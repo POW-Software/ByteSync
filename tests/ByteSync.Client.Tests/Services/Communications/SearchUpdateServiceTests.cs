@@ -198,7 +198,7 @@ public class SearchUpdateServiceTests
         _mockAvailableUpdatesLister.Setup(m => m.GetAvailableUpdates())
             .ReturnsAsync(availableUpdates);
         
-        List<SoftwareVersion> persistedUpdates = null;
+        List<SoftwareVersion>? persistedUpdates = null;
         _mockAvailableUpdateRepository.Setup(m => m.UpdateAvailableUpdates(It.IsAny<List<SoftwareVersion>>()))
             .Callback<List<SoftwareVersion>>(list => persistedUpdates = list);
         
@@ -249,14 +249,14 @@ public class SearchUpdateServiceTests
     
     private sealed class TestLogger<T> : ILogger<T>
     {
-        private static readonly NullScope Scope = new();
+        private static readonly NullScope _scope = new();
         private readonly List<(LogLevel Level, string Message, Exception? Exception)> _entries = new();
         
         public IReadOnlyList<(LogLevel Level, string Message, Exception? Exception)> LogEntries => _entries;
         
-        public IDisposable BeginScope<TState>(TState state)
+        public IDisposable BeginScope<TState>(TState state) where TState : notnull
         {
-            return Scope;
+            return _scope;
         }
         
         public bool IsEnabled(LogLevel logLevel)
@@ -265,7 +265,7 @@ public class SearchUpdateServiceTests
         }
         
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
-            Func<TState, Exception?, string> formatter)
+            Func<TState, Exception?, string>? formatter)
         {
             var message = formatter != null ? formatter(state, exception) : state?.ToString() ?? string.Empty;
             _entries.Add((logLevel, message, exception));
