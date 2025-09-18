@@ -29,11 +29,6 @@ public class LocalApplicationDataManagerTests
     [Test]
     public void ApplicationDataPath_Should_Be_MSIX_LocalCache_When_Installed_From_Store()
     {
-        if (!OperatingSystem.IsWindows())
-        {
-            Assert.Ignore("Windows-only behavior");
-        }
-        
         // Arrange
         _environmentServiceMock.SetupGet(e => e.AssemblyFullName)
             .Returns(@"C:\\Program Files\\WindowsApps\\POWSoftware.ByteSync_2025.7.2.0_neutral__f852479tj7xda\\ByteSync.exe");
