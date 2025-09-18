@@ -15,7 +15,7 @@ namespace ByteSync.Tests.Services.Converters;
 [TestFixture]
 public class DeploymentModeToStringConverterTests
 {
-    private static readonly PropertyInfo DesignModeProperty =
+    private static readonly PropertyInfo _designModeProperty =
         typeof(Design).GetProperty("IsDesignMode", BindingFlags.Static | BindingFlags.Public)!;
     
     private Mock<ILocalizationService> _mockLocalizationService = null!;
@@ -144,12 +144,12 @@ public class DeploymentModeToStringConverterTests
     
     private static bool GetDesignMode()
     {
-        return (bool)DesignModeProperty.GetValue(null)!;
+        return (bool)_designModeProperty.GetValue(null)!;
     }
     
     private static void SetDesignMode(bool value)
     {
-        DesignModeProperty.SetValue(null, value);
+        _designModeProperty.SetValue(null, value);
     }
     
     private sealed class RevertAction : IDisposable
