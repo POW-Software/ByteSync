@@ -7,8 +7,6 @@ using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 
-// using System.Runtime.InteropServices;
-
 namespace ByteSync.Services.Configurations;
 
 public class LocalApplicationDataManager : ILocalApplicationDataManager

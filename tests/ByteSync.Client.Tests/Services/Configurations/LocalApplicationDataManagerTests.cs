@@ -21,8 +21,8 @@ public class LocalApplicationDataManagerTests
     public void SetUp()
     {
         _environmentServiceMock = new Mock<IEnvironmentService>();
-        _environmentServiceMock.SetupGet(e => e.IsPortableApplication).Returns(false);
         _environmentServiceMock.SetupGet(e => e.ExecutionMode).Returns(ExecutionMode.Regular);
+        _environmentServiceMock.SetupGet(e => e.OSPlatform).Returns(OSPlatforms.Windows);
         _environmentServiceMock.SetupProperty(e => e.Arguments, []);
     }
     
@@ -44,6 +44,23 @@ public class LocalApplicationDataManagerTests
         var expectedRoot = IOUtils.Combine(local, "Packages", "POWSoftware.ByteSync_f852479tj7xda", "LocalCache", "Local");
         var expectedAppData = IOUtils.Combine(expectedRoot, "POW Software", "ByteSync");
         ladm.ApplicationDataPath.Should().Be(expectedAppData);
+    }
+    
+    [Test]
+    public void ApplicationDataPath_Should_Be_Mac_Path_When_OSPlatformIsMac()
+    {
+        // Arrange
+        _environmentServiceMock.SetupGet(e => e.OSPlatform).Returns(OSPlatforms.MacOs);
+        _environmentServiceMock.SetupGet(e => e.DeploymentMode).Returns(DeploymentModes.SetupInstallation);
+        
+        var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var expectedPath = IOUtils.Combine(local, "POW Software", "ByteSync");
+        
+        // Act
+        var ladm = new LocalApplicationDataManager(_environmentServiceMock.Object);
+        
+        // Assert
+        ladm.ApplicationDataPath.Should().Be(expectedPath);
     }
     
     [Test]
