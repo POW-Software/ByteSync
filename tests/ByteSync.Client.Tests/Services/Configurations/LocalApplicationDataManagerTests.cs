@@ -32,6 +32,7 @@ public class LocalApplicationDataManagerTests
         // Arrange
         _environmentServiceMock.SetupGet(e => e.AssemblyFullName)
             .Returns(@"C:\\Program Files\\WindowsApps\\POWSoftware.ByteSync_2025.7.2.0_neutral__f852479tj7xda\\ByteSync.exe");
+        _environmentServiceMock.SetupGet(e => e.OSPlatform).Returns(OSPlatforms.Windows);
         _environmentServiceMock.SetupGet(e => e.DeploymentMode).Returns(DeploymentModes.MsixInstallation);
         _environmentServiceMock.SetupGet(e => e.MsixPackageFamilyName).Returns("POWSoftware.ByteSync_f852479tj7xda");
         
@@ -76,7 +77,7 @@ public class LocalApplicationDataManagerTests
         
         var argumentValue = "CustomSuffix";
         var overrideArg = $"--ladm-use-appdata={argumentValue}";
-        _environmentServiceMock.Object.Arguments = new[] { overrideArg };
+        _environmentServiceMock.Object.Arguments = [overrideArg];
         
         using var commandLineOverride = OverrideCommandLineArgs(["ByteSync.exe", overrideArg]);
         
@@ -96,7 +97,7 @@ public class LocalApplicationDataManagerTests
         }
         finally
         {
-            _environmentServiceMock.Object.Arguments = Array.Empty<string>();
+            _environmentServiceMock.Object.Arguments = [];
             
             if (appDataPath != null && Directory.Exists(appDataPath))
             {
@@ -173,7 +174,7 @@ public class LocalApplicationDataManagerTests
         
         var uniqueSuffix = $"tests-{Guid.NewGuid():N}";
         var overrideArg = $"--ladm-use-appdata={uniqueSuffix}";
-        _environmentServiceMock.Object.Arguments = new[] { overrideArg };
+        _environmentServiceMock.Object.Arguments = [overrideArg];
         
         using var commandLineOverride = OverrideCommandLineArgs(["ByteSync.exe", overrideArg]);
         
@@ -207,7 +208,7 @@ public class LocalApplicationDataManagerTests
         }
         finally
         {
-            _environmentServiceMock.Object.Arguments = Array.Empty<string>();
+            _environmentServiceMock.Object.Arguments = [];
             
             if (appDataPath != null && Directory.Exists(appDataPath))
             {
@@ -236,7 +237,7 @@ public class LocalApplicationDataManagerTests
         
         var uniqueSuffix = $"tests-{Guid.NewGuid():N}";
         var overrideArg = $"--ladm-use-appdata={uniqueSuffix}";
-        _environmentServiceMock.Object.Arguments = new[] { overrideArg };
+        _environmentServiceMock.Object.Arguments = [overrideArg];
         
         using var commandLineOverride = OverrideCommandLineArgs(["ByteSync.exe", overrideArg]);
         
@@ -270,7 +271,7 @@ public class LocalApplicationDataManagerTests
         }
         finally
         {
-            _environmentServiceMock.Object.Arguments = Array.Empty<string>();
+            _environmentServiceMock.Object.Arguments = [];
             
             if (appDataPath != null && Directory.Exists(appDataPath))
             {
