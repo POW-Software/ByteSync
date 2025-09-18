@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Runtime.InteropServices;
 using ByteSync.Business.Configurations;
 using ByteSync.Business.Misc;
 using ByteSync.Common.Business.Misc;
@@ -22,7 +21,6 @@ public class LocalApplicationDataManagerTests
     {
         _environmentServiceMock = new Mock<IEnvironmentService>();
         _environmentServiceMock.SetupGet(e => e.ExecutionMode).Returns(ExecutionMode.Regular);
-        _environmentServiceMock.SetupGet(e => e.OSPlatform).Returns(OSPlatforms.Windows);
         _environmentServiceMock.SetupProperty(e => e.Arguments, []);
     }
     
@@ -79,8 +77,8 @@ public class LocalApplicationDataManagerTests
         ladm.ApplicationDataPath.Should().StartWith(IOUtils.Combine(local, "POW Software", "ByteSync"));
     }
     
-    [Test]
-    public void ApplicationDataPath_Should_Append_CustomSuffix_When_DebugArgumentProvided()
+    [Theory]
+    public void ApplicationDataPath_Should_Append_CustomSuffix_When_DebugArgumentProvided(OSPlatforms osPlatform)
     {
         // Arrange
         var tempRoot = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -91,6 +89,7 @@ public class LocalApplicationDataManagerTests
         _environmentServiceMock.SetupGet(e => e.AssemblyFullName).Returns(assemblyPath);
         _environmentServiceMock.SetupGet(e => e.DeploymentMode).Returns(DeploymentModes.Portable);
         _environmentServiceMock.SetupGet(e => e.ExecutionMode).Returns(ExecutionMode.Debug);
+        _environmentServiceMock.SetupGet(e => e.OSPlatform).Returns(osPlatform);
         
         var argumentValue = "CustomSuffix";
         var overrideArg = $"--ladm-use-appdata={argumentValue}";
@@ -107,7 +106,7 @@ public class LocalApplicationDataManagerTests
             appDataPath = ladm.ApplicationDataPath;
             
             // Assert
-            var expectedBase = ResolveExpectedBasePath(assemblyPath, DeploymentModes.Portable);
+            var expectedBase = ResolveExpectedBasePath(assemblyPath, DeploymentModes.Portable, osPlatform);
             var expectedPath = expectedBase + $" {argumentValue}";
             ladm.ApplicationDataPath.Should().Be(expectedPath);
             Directory.Exists(ladm.ApplicationDataPath).Should().BeTrue();
@@ -128,8 +127,8 @@ public class LocalApplicationDataManagerTests
         }
     }
     
-    [Test]
-    public void ApplicationDataPath_Should_Create_DebugDirectory_When_DebugModeWithoutOverride()
+    [Theory]
+    public void ApplicationDataPath_Should_Create_DebugDirectory_When_DebugModeWithoutOverride(OSPlatforms osPlatform)
     {
         // Arrange
         var tempRoot = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -140,6 +139,7 @@ public class LocalApplicationDataManagerTests
         _environmentServiceMock.SetupGet(e => e.AssemblyFullName).Returns(assemblyPath);
         _environmentServiceMock.SetupGet(e => e.DeploymentMode).Returns(DeploymentModes.Portable);
         _environmentServiceMock.SetupGet(e => e.ExecutionMode).Returns(ExecutionMode.Debug);
+        _environmentServiceMock.SetupGet(e => e.OSPlatform).Returns(osPlatform);
         
         using var commandLineOverride = OverrideCommandLineArgs(["ByteSync.exe"]);
         
@@ -152,7 +152,7 @@ public class LocalApplicationDataManagerTests
             appDataPath = ladm.ApplicationDataPath;
             
             // Assert
-            var basePath = ResolveExpectedBasePath(assemblyPath, DeploymentModes.Portable);
+            var basePath = ResolveExpectedBasePath(assemblyPath, DeploymentModes.Portable, osPlatform);
             var debugRoot = basePath + " Debug";
             ladm.ApplicationDataPath.Should().StartWith(debugRoot);
             Path.GetDirectoryName(ladm.ApplicationDataPath).Should().Be(debugRoot);
@@ -316,9 +316,9 @@ public class LocalApplicationDataManagerTests
         return new DelegateDisposable(() => field.SetValue(null, original));
     }
     
-    private static string ResolveExpectedBasePath(string assemblyFullName, DeploymentModes deploymentMode)
+    private static string ResolveExpectedBasePath(string assemblyFullName, DeploymentModes deploymentMode, OSPlatforms osPlatform)
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        if (osPlatform == OSPlatforms.MacOs)
         {
             var globalAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             
