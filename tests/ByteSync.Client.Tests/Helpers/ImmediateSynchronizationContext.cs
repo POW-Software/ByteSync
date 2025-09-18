@@ -2,14 +2,14 @@ namespace ByteSync.Tests.Helpers;
 
 public sealed class ImmediateSynchronizationContext : SynchronizationContext
 {
-    public override void Post(SendOrPostCallback d, object? state)
+    public override void Post(SendOrPostCallback callback, object? state)
     {
-        d(state);
+        callback(state);
     }
     
-    public override void Send(SendOrPostCallback d, object? state)
+    public override void Send(SendOrPostCallback callback, object? state)
     {
-        d(state);
+        callback(state);
     }
     
     public override SynchronizationContext CreateCopy()
