@@ -1533,11 +1533,11 @@ Do you want to save this new Session Profile with this name?</value>
 		<value>Installation</value>
 	</data>
     <data name="DeploymentMode_MSIX" xml:space="preserve">
-    <value>MSIX</value>
-  </data>
+        <value>MSIX</value>
+    </data>
     <data name="DeploymentMode_Homebrew" xml:space="preserve">
-    <value>Homebrew</value>
-  </data>
+        <value>Homebrew</value>
+    </data>
 	<data name="UpdateDetails_AutoUpdateNotSupported" xml:space="preserve">
 		<value>Please use the original deployment system to update the software.</value>
 	</data>
