@@ -11,17 +11,17 @@ public class EnvironmentModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        var environmentService = new EnvironmentService();
+        var environmentService = new EnvironmentService(new MsixPfnParser());
         builder.RegisterInstance(environmentService).As<IEnvironmentService>();
         
         builder.RegisterType<LocalApplicationDataManager>()
             .As<ILocalApplicationDataManager>()
             .SingleInstance()
             .WithParameter("environmentService", environmentService);
-
+        
         var localApplicationDataManager = new LocalApplicationDataManager(environmentService);
         builder.RegisterInstance(localApplicationDataManager).As<ILocalApplicationDataManager>().SingleInstance();
-
+        
         var loggerService = new SerilogConfigurationFactory(localApplicationDataManager, environmentService);
         var loggerConfiguration = loggerService.BuildLoggerConfiguration();
         builder.RegisterSerilog(loggerConfiguration);

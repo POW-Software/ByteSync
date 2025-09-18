@@ -1,15 +1,14 @@
-﻿using ByteSync.Business.Arguments;
+﻿using Avalonia;
+using ByteSync.Business.Arguments;
 using ByteSync.Business.Communications;
+using ByteSync.Business.Configurations;
+using ByteSync.Common.Business.EndPoints;
+using ByteSync.Common.Controls.Serilog;
+using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.ViewModels.TrustedNetworks;
 using Serilog;
 using Serilog.Events;
-using Avalonia;
-using ByteSync.Business.Configurations;
-using ByteSync.Common.Business.EndPoints;
-using ByteSync.Common.Controls.Serilog;
-using ByteSync.Common.Helpers;
-using ByteSync.Interfaces;
 
 namespace ByteSync.Services.Applications;
 
@@ -23,21 +22,21 @@ public class SerilogConfigurationFactory
         _localApplicationDataManager = localApplicationDataManager;
         _environmentService = environmentService;
     }
-    
+
     public LoggerConfiguration BuildLoggerConfiguration()
     {
-        LogEventLevel logEventLevel = LogEventLevel.Information;
+        var logEventLevel = LogEventLevel.Information;
         if (_environmentService.Arguments.Contains(RegularArguments.LOG_DEBUG))
         {
             logEventLevel = LogEventLevel.Debug;
         }
 
         var loggerConfiguration = new LoggerConfiguration()
-    #if DEBUG
+        #if DEBUG
             .MinimumLevel.Debug()
-    #else
+        #else
             .MinimumLevel.Information()
-    #endif
+        #endif
             .MinimumLevel.Override("Quartz", LogEventLevel.Warning)
             .MinimumLevel.Override("Splat", LogEventLevel.Warning)
             .MinimumLevel.Override("ReactiveUI", LogEventLevel.Warning)
@@ -47,10 +46,10 @@ public class SerilogConfigurationFactory
             .Enrich.FromLogContext()
             .Enrich.With<ExceptionEnricher>()
             .WriteTo.Async(a => a.File(new ConditionalFormatter(),
-                IOUtils.Combine(_localApplicationDataManager.ApplicationDataPath, LocalApplicationDataConstants.LOGS_DIRECTORY, 
+                IOUtils.Combine(_localApplicationDataManager.ApplicationDataPath, LocalApplicationDataConstants.LOGS_DIRECTORY,
                     "ByteSync_.log"),
                 rollingInterval: RollingInterval.Day,
-                restrictedToMinimumLevel: logEventLevel));                  
+                restrictedToMinimumLevel: logEventLevel));
 
         if (logEventLevel == LogEventLevel.Debug)
         {
@@ -73,11 +72,11 @@ public class SerilogConfigurationFactory
                 PublicKeyHash = new PublicKeyFormatter().Format(x.PublicKey)
             });
 
-        bool writeToConsole = false;
+        var writeToConsole = false;
     #if DEBUG
         writeToConsole = true;
     #endif
-        
+
         // Mode Console / Command Line si Application.Current == null
         if (Application.Current == null)
         {
@@ -89,13 +88,14 @@ public class SerilogConfigurationFactory
         #if DEBUG
             loggerConfiguration = loggerConfiguration.WriteTo.Async(a => a.Console());
         #else
-            loggerConfiguration = loggerConfiguration.WriteTo.Async(a => a.Console(theme:Serilog.Sinks.SystemConsole.Themes.ConsoleTheme.None));
+            loggerConfiguration =
+ loggerConfiguration.WriteTo.Async(a => a.Console(theme:Serilog.Sinks.SystemConsole.Themes.ConsoleTheme.None));
         #endif
         }
     #if DEBUG
         loggerConfiguration = loggerConfiguration
             .WriteTo.Async(a => a.File(new ConditionalFormatter(),
-                IOUtils.Combine(_localApplicationDataManager.ApplicationDataPath, LocalApplicationDataConstants.LOGS_DIRECTORY, 
+                IOUtils.Combine(_localApplicationDataManager.ApplicationDataPath, LocalApplicationDataConstants.LOGS_DIRECTORY,
                     "ByteSync_debug_.log"),
                 rollingInterval: RollingInterval.Day));
     #endif

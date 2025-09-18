@@ -3,7 +3,6 @@ using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Updates;
-using ByteSync.Helpers;
 
 namespace ByteSync.Services.Updates;
 
@@ -22,7 +21,7 @@ public class SearchUpdateService : ISearchUpdateService
         _availableUpdateRepository = availableUpdateRepository;
         _logger = logger;
     }
-    
+
     public async Task SearchNextAvailableVersionsAsync()
     {
         try
@@ -30,13 +29,13 @@ public class SearchUpdateService : ISearchUpdateService
             // Check if the application is installed from the Windows Store. This condition is used for logging purposes
             // and does not affect the subsequent code execution. Auto-update is disabled for store installations, but
             // other parts of the method will still execute to log available updates and update the repository.
-            if (_environmentService.IsInstalledFromWindowsStore())
+            if (_environmentService.DeploymentMode == DeploymentModes.MsixInstallation)
             {
                 _logger.LogInformation("UpdateSystem: Application is installed from store, auto-update is disabled");
             }
-            
+
             var updates = await _availableUpdatesLister.GetAvailableUpdates();
-                
+
             var applicableUpdates = new List<SoftwareVersion>();
             foreach (var softwareUpdate in updates)
             {
@@ -52,9 +51,9 @@ public class SearchUpdateService : ISearchUpdateService
                 .OrderBy(u => new Version(u.Version))
                 .ThenBy(u => u.Level)
                 .ToList();
-            
+
             nextAvailableVersions = DeduplicateVersions(nextAvailableVersions);
-            
+
             if (nextAvailableVersions.Count == 0)
             {
                 _logger.LogInformation("UpdateSystem: No available update found");
@@ -65,17 +64,17 @@ public class SearchUpdateService : ISearchUpdateService
 
                 foreach (var softwareVersion in nextAvailableVersions)
                 {
-                    _logger.LogInformation("UpdateSystem: - {version}, {level}", 
+                    _logger.LogInformation("UpdateSystem: - {version}, {level}",
                         softwareVersion.Version, softwareVersion.Level);
                 }
             }
-            
+
             _availableUpdateRepository.UpdateAvailableUpdates(nextAvailableVersions);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "UpdateSystem");
-            
+
             _availableUpdateRepository.Clear();
         }
     }
@@ -83,7 +82,7 @@ public class SearchUpdateService : ISearchUpdateService
     private List<SoftwareVersion> DeduplicateVersions(List<SoftwareVersion> nextAvailableVersions)
     {
         var deduplicatedVersions = new List<SoftwareVersion>();
-        
+
         foreach (var softwareVersion in nextAvailableVersions)
         {
             if (deduplicatedVersions.All(v => v.Version != softwareVersion.Version))
@@ -91,7 +90,7 @@ public class SearchUpdateService : ISearchUpdateService
                 deduplicatedVersions.Add(softwareVersion);
             }
         }
-        
+
         return deduplicatedVersions;
     }
 }
