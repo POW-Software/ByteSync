@@ -16,7 +16,7 @@
         <misc:ActivityIndicator Width="120" Height="100" Margin="6"
                                 IsVisible="{Binding IsInventoryRunning}" />
 
-        <StackPanel Height="100" HorizontalAlignment="Center" Margin="6"
+        <StackPanel Height="100" HorizontalAlignment="Center" Margin="12"
                     IsVisible="{Binding !IsInventoryRunning}">
 
             <misc:Icon FontSize="100"
