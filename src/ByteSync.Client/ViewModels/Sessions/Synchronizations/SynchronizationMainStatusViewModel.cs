@@ -179,16 +179,18 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
         }
         else
         {
-            MainStatus = Resources.SynchronizationMain_SynchronizationDone;
             var synchronizationProgress = _synchronizationService.SynchronizationProcessData.SynchronizationProgress.Value;
             var errors = synchronizationProgress?.ErrorActionsCount ?? 0;
             if (errors > 0)
             {
+                MainStatus = Resources.ResourceManager.GetString("SynchronizationMain_SynchronizationDoneWithErrors", Resources.Culture)
+                             ?? Resources.SynchronizationMain_SynchronizationDone;
                 MainIcon = "RegularError";
-                MainIconBrush = _themeService?.GetBrush("StatusSecondaryBackGroundBrush"); // StatusSecondaryBackGroundBrush
+                MainIconBrush = _themeService?.GetBrush("SecondaryButtonBackGround");
             }
             else
             {
+                MainStatus = Resources.SynchronizationMain_SynchronizationDone;
                 MainIcon = "SolidCheckCircle";
                 MainIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
             }
