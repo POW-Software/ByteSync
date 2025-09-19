@@ -186,13 +186,13 @@
     <!-- Badge styles -->
     <Style Selector="Border.Badge">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Padding" Value="0" />
-        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Padding" Value="6 0" />
+        <Setter Property="CornerRadius" Value="8" />
     </Style>
     <Style Selector="Border.Badge.Secondary">
         <Setter Property="Background" Value="{DynamicResource SecondaryButtonBackGround}" />
-        <Setter Property="CornerRadius" Value="10" />
         <Setter Property="Padding" Value="6 0" />
+        <Setter Property="CornerRadius" Value="8" />
     </Style>
     <Style Selector="Border.Badge.Secondary TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource SystemBaseHighColor}" />
