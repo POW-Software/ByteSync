@@ -21,8 +21,8 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
     private readonly ISessionService _sessionService = null!;
     private readonly ISynchronizationService _synchronizationService = null!;
     private readonly IDialogService _dialogService = null!;
-    private readonly ILogger<SynchronizationMainStatusViewModel> _logger = null!;
     private readonly IThemeService _themeService = null!;
+    private readonly ILogger<SynchronizationMainStatusViewModel> _logger = null!;
     
     public SynchronizationMainStatusViewModel()
     {
@@ -78,25 +78,14 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
         });
     }
     
-    public SynchronizationMainStatusViewModel(ISessionService sessionService, ISynchronizationService synchronizationService,
-        IDialogService dialogService, ILogger<SynchronizationMainStatusViewModel> logger, IThemeService themeService) : this()
-    {
-        _sessionService = sessionService;
-        _synchronizationService = synchronizationService;
-        _dialogService = dialogService;
-        _logger = logger;
-        _themeService = themeService;
-        
-        MainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
-    }
     
-    // Backward-compatible constructor (without IThemeService)
     public SynchronizationMainStatusViewModel(ISessionService sessionService, ISynchronizationService synchronizationService,
-        IDialogService dialogService, ILogger<SynchronizationMainStatusViewModel> logger) : this()
+        IDialogService dialogService, IThemeService themeService, ILogger<SynchronizationMainStatusViewModel> logger) : this()
     {
         _sessionService = sessionService;
         _synchronizationService = synchronizationService;
         _dialogService = dialogService;
+        _themeService = themeService;
         _logger = logger;
     }
     
@@ -146,9 +135,8 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
     private void OnSynchronizationStarted(Synchronization _)
     {
         IsSynchronizationRunning = true;
-        HandledActionsReset();
         IsMainCheckVisible = false;
-        MainIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
+        MainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
         IsMainProgressRingVisible = true;
         MainStatus = Resources.SynchronizationMain_SynchronizationRunning;
     }
@@ -169,13 +157,13 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
         {
             MainStatus = Resources.SynchronizationMain_SynchronizationAborted;
             MainIcon = "SolidXCircle";
-            MainIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
+            MainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
         }
         else if (synchronizationEnd.Status == SynchronizationEndStatuses.Error)
         {
             MainStatus = Resources.SynchronizationMain_SynchronizationError;
             MainIcon = "SolidXCircle";
-            MainIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
+            MainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
         }
         else
         {
@@ -186,21 +174,17 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
                 MainStatus = Resources.ResourceManager.GetString("SynchronizationMain_SynchronizationDoneWithErrors", Resources.Culture)
                              ?? Resources.SynchronizationMain_SynchronizationDone;
                 MainIcon = "RegularError";
-                MainIconBrush = _themeService?.GetBrush("SecondaryButtonBackGround");
+                MainIconBrush = _themeService.GetBrush("SecondaryButtonBackGround");
             }
             else
             {
                 MainStatus = Resources.SynchronizationMain_SynchronizationDone;
                 MainIcon = "SolidCheckCircle";
-                MainIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
+                MainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
             }
         }
         
         IsMainProgressRingVisible = false;
         IsMainCheckVisible = true;
-    }
-    
-    private void HandledActionsReset()
-    {
     }
 }
