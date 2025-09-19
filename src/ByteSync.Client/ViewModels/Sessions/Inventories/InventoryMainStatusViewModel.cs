@@ -61,6 +61,12 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                     GlobalAnalyzeErrors = s?.Errors;
                 })
                 .DisposeWith(disposables);
+            
+            this.WhenAnyValue(x => x.GlobalAnalyzeErrors)
+                .Select(e => (e ?? 0) > 0)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .ToPropertyEx(this, x => x.HasErrors)
+                .DisposeWith(disposables);
         });
     }
     
@@ -122,6 +128,8 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
     
     [Reactive]
     public int? GlobalAnalyzeErrors { get; set; }
+    
+    public extern bool HasErrors { [ObservableAsProperty] get; }
     
     private async Task AbortInventory()
     {
