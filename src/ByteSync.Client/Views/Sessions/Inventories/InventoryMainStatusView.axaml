@@ -13,14 +13,18 @@
     </Design.DataContext>
 
     <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 6 0 6">
-        <misc:ActivityIndicator Width="120" Height="100"
+        <misc:ActivityIndicator Width="120" Height="100" Margin="6"
                                 IsVisible="{Binding IsInventoryRunning}" />
 
-        <misc:Icon FontSize="100"
-                   Value="{Binding MainStatus, Converter={StaticResource InventoryProcessStatusToIconConverter}}"
-                   Foreground="{DynamicResource HomeCloudSynchronizationBackGround}"
-                   IsVisible="{Binding !IsInventoryRunning}" Margin="6"
-                   VerticalAlignment="Center" HorizontalAlignment="Center" />
+        <StackPanel Height="100" HorizontalAlignment="Center" Margin="6"
+                    IsVisible="{Binding !IsInventoryRunning}">
+
+            <misc:Icon FontSize="100"
+                       Value="{Binding MainStatus, Converter={StaticResource InventoryProcessStatusToIconConverter}}"
+                       Foreground="{DynamicResource HomeCloudSynchronizationBackGround}"
+                       VerticalAlignment="Center" HorizontalAlignment="Center" />
+
+        </StackPanel>
 
         <TextBlock Height="30"
                    Text="{Binding MainStatus, Converter={StaticResource InventoryProcessStatusToTextConverter}, 
@@ -51,6 +55,10 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
+
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_Start}"
@@ -78,32 +86,34 @@
             <Label Grid.Row="3" Grid.Column="1"
                    Content="{Binding EstimatedEndDateTime, StringFormat={}{0:G}}"
                    HorizontalContentAlignment="Right" />
-        </Grid>
+            <!-- </Grid> -->
+            <!-- -->
+            <!-- <Grid HorizontalAlignment="Center" Margin="3 12 3 0" IsVisible="{Binding ShowGlobalStatistics}"> -->
+            <!--     <Grid.ColumnDefinitions> -->
+            <!--         <ColumnDefinition Width="Auto"></ColumnDefinition> -->
+            <!--         <ColumnDefinition Width="Auto"></ColumnDefinition> -->
+            <!--     </Grid.ColumnDefinitions> -->
+            <!--     <Grid.RowDefinitions> -->
+            <!--         <RowDefinition Height="Auto"></RowDefinition> -->
+            <!--         <RowDefinition Height="Auto"></RowDefinition> -->
+            <!--         <RowDefinition Height="Auto"></RowDefinition> -->
+            <!--     </Grid.RowDefinitions> -->
 
-        <Grid HorizontalAlignment="Center" Margin="3 12 3 0" IsVisible="{Binding ShowGlobalStatistics}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-            </Grid.RowDefinitions>
+            <Label Grid.Row="4" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzedFiles}"
+                   Classes="InventoryStatusDescription"
+                   Margin="0 18 0 0" />
+            <Label Grid.Row="4" Grid.Column="1" Content="{Binding GlobalTotalAnalyzed, FallbackValue=''}"
+                   HorizontalContentAlignment="Right"
+                   Margin="0 18 0 0" />
 
-            <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzedFiles}"
+            <Label Grid.Row="5" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzeSuccess}"
                    Classes="InventoryStatusDescription" />
-            <Label Grid.Row="0" Grid.Column="1" Content="{Binding GlobalTotalAnalyzed, FallbackValue=''}"
+            <Label Grid.Row="5" Grid.Column="1" Content="{Binding GlobalAnalyzeSuccess, FallbackValue=''}"
                    HorizontalContentAlignment="Right" />
 
-            <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzeSuccess}"
+            <Label Grid.Row="6" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzeErrors}"
                    Classes="InventoryStatusDescription" />
-            <Label Grid.Row="1" Grid.Column="1" Content="{Binding GlobalAnalyzeSuccess, FallbackValue=''}"
-                   HorizontalContentAlignment="Right" />
-
-            <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzeErrors}"
-                   Classes="InventoryStatusDescription" />
-            <Label Grid.Row="2" Grid.Column="1" Content="{Binding GlobalAnalyzeErrors, FallbackValue=''}"
+            <Label Grid.Row="6" Grid.Column="1" Content="{Binding GlobalAnalyzeErrors, FallbackValue=''}"
                    HorizontalContentAlignment="Right" />
         </Grid>
     </StackPanel>
