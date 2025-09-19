@@ -22,24 +22,7 @@ public class InventoryAnalysisViewModel : ActivatableViewModelBase
         this.WhenActivated(HandleActivation);
     }
     
-    public InventoryAnalysisViewModel(IInventoryService inventoryService, IInventoryStatisticsService inventoryStatisticsService)
-    {
-        _inventoryService = inventoryService;
-        
-        this.WhenActivated(disposables =>
-        {
-            HandleActivation(disposables);
-            
-            inventoryStatisticsService.Statistics
-                .Subscribe(s =>
-                {
-                    GlobalTotalAnalyzed = s.TotalAnalyzed;
-                    GlobalAnalyzeSuccess = s.Success;
-                    GlobalAnalyzeErrors = s.Errors;
-                })
-                .DisposeWith(disposables);
-        });
-    }
+    // Keep this view focused on local analysis only.
     
     private void HandleActivation(CompositeDisposable disposables)
     {
@@ -86,13 +69,4 @@ public class InventoryAnalysisViewModel : ActivatableViewModelBase
     public long AnalyzableFiles { get; set; }
     
     public long ProcessedSize { get; set; }
-    
-    [Reactive]
-    public int GlobalTotalAnalyzed { get; set; }
-    
-    [Reactive]
-    public int GlobalAnalyzeSuccess { get; set; }
-    
-    [Reactive]
-    public int GlobalAnalyzeErrors { get; set; }
 }

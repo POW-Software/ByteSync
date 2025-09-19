@@ -21,14 +21,14 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
     private readonly ITimeTrackingCache _timeTrackingCache = null!;
     private readonly IDialogService _dialogService = null!;
     private readonly ILogger<InventoryMainStatusViewModel> _logger = null!;
-
+    
     public InventoryMainStatusViewModel()
     {
-        
-    } 
+    }
     
-    public InventoryMainStatusViewModel(IInventoryService inventoryService, ISessionService sessionService, 
-        ITimeTrackingCache timeTrackingCache, IDialogService dialogService, ILogger<InventoryMainStatusViewModel> logger)
+    public InventoryMainStatusViewModel(IInventoryService inventoryService, ISessionService sessionService,
+        ITimeTrackingCache timeTrackingCache, IDialogService dialogService, ILogger<InventoryMainStatusViewModel> logger,
+        IInventoryStatisticsService inventoryStatisticsService)
     {
         _inventoryService = inventoryService;
         _sessionService = sessionService;
@@ -40,7 +40,28 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
         
         EstimatedProcessEndName = Resources.InventoryProcess_EstimatedEnd;
         
-        this.WhenActivated(HandleActivation);
+        this.WhenActivated(disposables =>
+        {
+            HandleActivation(disposables);
+            
+            _inventoryService.InventoryProcessData.AnalysisStatus
+                .ToPropertyEx(this, x => x.AnalysisStatus)
+                .DisposeWith(disposables);
+            
+            _inventoryService.InventoryProcessData.AnalysisStatus
+                .Select(ms => ms == LocalInventoryPartStatus.Success)
+                .ToPropertyEx(this, x => x.ShowGlobalStatistics)
+                .DisposeWith(disposables);
+            
+            inventoryStatisticsService.Statistics
+                .Subscribe(s =>
+                {
+                    GlobalTotalAnalyzed = s.TotalAnalyzed;
+                    GlobalAnalyzeSuccess = s.Success;
+                    GlobalAnalyzeErrors = s.Errors;
+                })
+                .DisposeWith(disposables);
+        });
     }
     
     private void HandleActivation(CompositeDisposable disposables)
@@ -53,7 +74,7 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
             .Select(ms => ms == LocalInventoryPartStatus.Running)
             .ToPropertyEx(this, x => x.IsInventoryRunning)
             .DisposeWith(disposables);
-
+        
         var timeTrackingComputer = _timeTrackingCache
             .GetTimeTrackingComputer(_sessionService.SessionId!, TimeTrackingComputerType.Inventory)
             .Result;
@@ -69,25 +90,38 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
     }
     
     public ReactiveCommand<Unit, Unit> AbortIventoryCommand { get; set; } = null!;
-
+    
     public extern LocalInventoryPartStatus MainStatus { [ObservableAsProperty] get; }
     
     public extern bool IsInventoryRunning { [ObservableAsProperty] get; }
     
+    public extern LocalInventoryPartStatus AnalysisStatus { [ObservableAsProperty] get; }
+    
+    public extern bool ShowGlobalStatistics { [ObservableAsProperty] get; }
+    
     [Reactive]
     public string EstimatedProcessEndName { get; set; } = null!;
-
+    
     [Reactive]
     public DateTime? StartDateTime { get; set; }
     
     [Reactive]
     public TimeSpan ElapsedTime { get; set; }
-        
+    
     [Reactive]
     public DateTime? EstimatedEndDateTime { get; set; }
     
     [Reactive]
     public TimeSpan? RemainingTime { get; set; }
+    
+    [Reactive]
+    public int GlobalTotalAnalyzed { get; set; }
+    
+    [Reactive]
+    public int GlobalAnalyzeSuccess { get; set; }
+    
+    [Reactive]
+    public int GlobalAnalyzeErrors { get; set; }
     
     private async Task AbortInventory()
     {
@@ -95,7 +129,7 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
             nameof(Resources.InventoryProcess_AbortInventory_Title), nameof(Resources.InventoryProcess_AbortInventory_Message));
         messageBoxViewModel.ShowYesNo = true;
         var result = await _dialogService.ShowMessageBoxAsync(messageBoxViewModel);
-
+        
         if (result == MessageBoxResult.Yes)
         {
             _logger.LogInformation("inventory aborted on user request");
