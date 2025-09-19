@@ -174,7 +174,7 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
                 MainStatus = Resources.ResourceManager.GetString("SynchronizationMain_SynchronizationDoneWithErrors", Resources.Culture)
                              ?? Resources.SynchronizationMain_SynchronizationDone;
                 MainIcon = "RegularError";
-                MainIconBrush = _themeService.GetBrush("SecondaryButtonBackGround");
+                MainIconBrush = _themeService.GetBrush("MainSecondaryColor");
             }
             else
             {
