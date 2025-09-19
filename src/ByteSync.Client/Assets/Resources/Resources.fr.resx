@@ -61,12 +61,6 @@
             PublicKeyToken=b77a5c561934e089
         </value>
 	</resheader>
-    <data name="SynchronizationMain_ErrorsEncounteredTemplate" xml:space="preserve">
-		<value>{0} erreurs rencontrées</value>
-	</data>
-    <data name="SynchronizationMain_ErrorEncounteredTemplate" xml:space="preserve">
-		<value>{0} erreur rencontrée</value>
-	</data>
 	<data name="Shell_Account" xml:space="preserve">
 		<value>Détails de votre compte</value>
 	</data>

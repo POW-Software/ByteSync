@@ -1007,14 +1007,8 @@ Please stop the inventory or synchronization first.</value>
 		<value>moving new files</value>
 	</data>
     <data name="UpdateDetails_UpdatingToVersion" xml:space="preserve">
-    <value>Updating to version</value>
-  </data>
-    <data name="SynchronizationMain_ErrorsEncounteredTemplate" xml:space="preserve">
-    <value>{0} errors encountered</value>
-  </data>
-    <data name="SynchronizationMain_ErrorEncounteredTemplate" xml:space="preserve">
-    <value>{0} error encountered</value>
-  </data>
+        <value>Updating to version</value>
+    </data>
 	<data name="ErrorView_ErrorMessage" xml:space="preserve">
 		<value>An error of type "{0}" has occurred. Check the log for more information.</value>
 	</data>
