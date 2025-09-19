@@ -1007,8 +1007,8 @@ Please stop the inventory or synchronization first.</value>
 		<value>moving new files</value>
 	</data>
     <data name="UpdateDetails_UpdatingToVersion" xml:space="preserve">
-        <value>Updating to version</value>
-    </data>
+		<value>Updating to version</value>
+	</data>
 	<data name="ErrorView_ErrorMessage" xml:space="preserve">
 		<value>An error of type "{0}" has occurred. Check the log for more information.</value>
 	</data>
@@ -1687,9 +1687,9 @@ Do you want to save this new Session Profile with this name?</value>
 		<value>item:</value>
 	</data>
     <data name="ValidationFailure_ItemPlural" xml:space="preserve">
-    <value>items:</value>
-  </data>
+		<value>items:</value>
+	</data>
     <data name="SynchronizationMain_SynchronizationDoneWithErrors" xml:space="preserve">
-    <value>Synchronization finished with errors</value>
-  </data>
+    	<value>Synchronization finished with errors</value>
+	</data>
 </root>
