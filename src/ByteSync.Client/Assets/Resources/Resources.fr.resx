@@ -643,9 +643,18 @@ Voulez-vous continuer ?</value>
 	<data name="InventoryProcess_AnalysisNotLaunched" xml:space="preserve">
 		<value>Analyse Locale non lancée</value>
 	</data>
-	<data name="InventoryProcess_AnalyzeErrors" xml:space="preserve">
-		<value>Erreurs d'analyse :</value>
-	</data>
+    <data name="InventoryProcess_AnalyzeErrors" xml:space="preserve">
+    <value>Erreurs d'analyse :</value>
+  </data>
+    <data name="InventoryProcess_GlobalAnalyzedFiles" xml:space="preserve">
+    <value>Total des fichiers analysés :</value>
+  </data>
+    <data name="InventoryProcess_GlobalAnalyzeSuccess" xml:space="preserve">
+    <value>Analyses avec succès :</value>
+  </data>
+    <data name="InventoryProcess_GlobalAnalyzeErrors" xml:space="preserve">
+    <value>Analyses en échec :</value>
+  </data>
 	<data name="ContentIdentity_AnErrorOccured" xml:space="preserve">
 		<value>Une erreur est survenue durant l'analyse</value>
 	</data>

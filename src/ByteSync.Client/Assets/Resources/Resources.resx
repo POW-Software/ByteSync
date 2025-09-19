@@ -652,9 +652,18 @@ Would you like to continue ?</value>
 	<data name="InventoryProcess_AnalysisNotLaunched" xml:space="preserve">
 		<value>Local Analysis not launched</value>
 	</data>
-	<data name="InventoryProcess_AnalyzeErrors" xml:space="preserve">
-		<value>Analyze errors:</value>
-	</data>
+    <data name="InventoryProcess_AnalyzeErrors" xml:space="preserve">
+    <value>Analyze errors:</value>
+  </data>
+    <data name="InventoryProcess_GlobalAnalyzedFiles" xml:space="preserve">
+    <value>Total analyzed files:</value>
+  </data>
+    <data name="InventoryProcess_GlobalAnalyzeSuccess" xml:space="preserve">
+    <value>Successful analyses:</value>
+  </data>
+    <data name="InventoryProcess_GlobalAnalyzeErrors" xml:space="preserve">
+    <value>Failed analyses:</value>
+  </data>
 	<data name="ContentIdentity_AnErrorOccured" xml:space="preserve">
 		<value>An error has occurred during the analysis</value>
 	</data>

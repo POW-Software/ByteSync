@@ -7,11 +7,11 @@
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ByteSync.Views.Sessions.Inventories.InventoryAnalysisView">
-    
+
     <Design.DataContext>
         <inventories:InventoryAnalysisViewModel />
     </Design.DataContext>
-    
+
     <StackPanel Orientation="Vertical" VerticalAlignment="Center">
         <StackPanel Orientation="Vertical" Height="60"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -102,5 +102,32 @@
 
             </Grid>
         </StackPanel>
+
+        <Grid HorizontalAlignment="Center" Margin="3 0 3 0" IsVisible="{Binding !IsAnalysisRunning}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzedFiles}"
+                   Classes="InventoryStatusDescription" />
+            <Label Grid.Row="0" Grid.Column="1" Content="{Binding GlobalTotalAnalyzed, FallbackValue=''}"
+                   HorizontalContentAlignment="Right" />
+
+            <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzeSuccess}"
+                   Classes="InventoryStatusDescription" />
+            <Label Grid.Row="1" Grid.Column="1" Content="{Binding GlobalAnalyzeSuccess, FallbackValue=''}"
+                   HorizontalContentAlignment="Right" />
+
+            <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzeErrors}"
+                   Classes="InventoryStatusDescription" />
+            <Label Grid.Row="2" Grid.Column="1" Content="{Binding GlobalAnalyzeErrors, FallbackValue=''}"
+                   HorizontalContentAlignment="Right" />
+        </Grid>
     </StackPanel>
 </UserControl>

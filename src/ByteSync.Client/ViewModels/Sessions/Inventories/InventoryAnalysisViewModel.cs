@@ -10,11 +10,10 @@ namespace ByteSync.ViewModels.Sessions.Inventories;
 public class InventoryAnalysisViewModel : ActivatableViewModelBase
 {
     private readonly IInventoryService _inventoryService;
-
+    
     public InventoryAnalysisViewModel()
     {
-        
-    } 
+    }
     
     public InventoryAnalysisViewModel(IInventoryService inventoryService)
     {
@@ -22,7 +21,26 @@ public class InventoryAnalysisViewModel : ActivatableViewModelBase
         
         this.WhenActivated(HandleActivation);
     }
-
+    
+    public InventoryAnalysisViewModel(IInventoryService inventoryService, IInventoryStatisticsService inventoryStatisticsService)
+    {
+        _inventoryService = inventoryService;
+        
+        this.WhenActivated(disposables =>
+        {
+            HandleActivation(disposables);
+            
+            inventoryStatisticsService.Statistics
+                .Subscribe(s =>
+                {
+                    GlobalTotalAnalyzed = s.TotalAnalyzed;
+                    GlobalAnalyzeSuccess = s.Success;
+                    GlobalAnalyzeErrors = s.Errors;
+                })
+                .DisposeWith(disposables);
+        });
+    }
+    
     private void HandleActivation(CompositeDisposable disposables)
     {
         _inventoryService.InventoryProcessData.AnalysisStatus
@@ -35,7 +53,7 @@ public class InventoryAnalysisViewModel : ActivatableViewModelBase
             .DisposeWith(disposables);
         
         _inventoryService.InventoryProcessData.AnalysisStatus
-            .Select(ms => ms == LocalInventoryPartStatus.Running && ! HasAnalysisStarted)
+            .Select(ms => ms == LocalInventoryPartStatus.Running && !HasAnalysisStarted)
             .Where(b => b is true)
             .ToPropertyEx(this, x => x.HasAnalysisStarted)
             .DisposeWith(disposables);
@@ -68,4 +86,13 @@ public class InventoryAnalysisViewModel : ActivatableViewModelBase
     public long AnalyzableFiles { get; set; }
     
     public long ProcessedSize { get; set; }
+    
+    [Reactive]
+    public int GlobalTotalAnalyzed { get; set; }
+    
+    [Reactive]
+    public int GlobalAnalyzeSuccess { get; set; }
+    
+    [Reactive]
+    public int GlobalAnalyzeErrors { get; set; }
 }
