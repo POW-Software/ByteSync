@@ -51,6 +51,12 @@ public class InventoryAnalysisViewModel : ActivatableViewModelBase
                 ProcessedSize = m.ProcessedSize;
             })
             .DisposeWith(disposables);
+        
+        this.WhenAnyValue(x => x.AnalyzeErrors)
+            .Select(e => e > 0)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .ToPropertyEx(this, x => x.HasErrors)
+            .DisposeWith(disposables);
     }
     
     public extern LocalInventoryPartStatus AnalysisStatus { [ObservableAsProperty] get; }
@@ -61,6 +67,8 @@ public class InventoryAnalysisViewModel : ActivatableViewModelBase
     
     [Reactive]
     public int AnalyzeErrors { get; set; }
+    
+    public extern bool HasErrors { [ObservableAsProperty] get; }
     
     [Reactive]
     public int AnalyzedFiles { get; set; }

@@ -77,28 +77,33 @@
                 <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_AnalyzedFiles}"
                        Classes="InventoryStatusDescription" />
 
-                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Label
-                        Content="{Binding AnalyzedFiles, FallbackValue=''}"
-                        HorizontalContentAlignment="Left" />
-                    <Label Content="/" HorizontalContentAlignment="Left" />
-                    <Label
-                        Content="{Binding AnalyzableFiles, FallbackValue=''}"
-                        HorizontalContentAlignment="Left" />
-                </StackPanel>
+                <Border Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                    <StackPanel Orientation="Horizontal">
+                        <Label
+                            Content="{Binding AnalyzedFiles, FallbackValue=''}"
+                            HorizontalContentAlignment="Left" />
+                        <Label Content="/" HorizontalContentAlignment="Left" />
+                        <Label
+                            Content="{Binding AnalyzableFiles, FallbackValue=''}"
+                            HorizontalContentAlignment="Left" />
+                    </StackPanel>
+                </Border>
 
                 <Label Grid.Row="1" Grid.Column="0" Name="LabelAnalysisErrorDescription"
                        Content="{localizations:Loc InventoryProcess_AnalyzeErrors}" Classes="InventoryStatusDescription" />
-                <Label Grid.Row="1" Grid.Column="1" Name="LabelAnalysisErrorValue"
-                       Content="{Binding AnalyzeErrors, FallbackValue=''}"
-                       HorizontalContentAlignment="Right" />
+                <Border Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right"
+                        Classes="Badge"
+                        Classes.Secondary="{Binding HasErrors}">
+                    <Label Name="LabelAnalysisErrorValue"
+                           Content="{Binding AnalyzeErrors, FallbackValue=''}"
+                           HorizontalContentAlignment="Right" />
+                </Border>
 
                 <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc InventoryProcess_ProcessedSize}"
                        Classes="InventoryStatusDescription" />
-                <Label Grid.Row="2" Grid.Column="1"
-                       Content="{Binding ProcessedSize, FallbackValue='', 
-                                Converter={StaticResource FormatKbSizeConverter}}"
-                       HorizontalContentAlignment="Right" />
+                <Border Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                    <TextBlock Text="{Binding ProcessedSize, FallbackValue='', Converter={StaticResource FormatKbSizeConverter}}" />
+                </Border>
 
             </Grid>
         </StackPanel>
