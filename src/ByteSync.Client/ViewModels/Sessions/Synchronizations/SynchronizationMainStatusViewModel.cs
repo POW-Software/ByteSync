@@ -44,6 +44,14 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
         
         this.WhenActivated(disposables =>
         {
+            if (_themeService != null)
+            {
+                _themeService.SelectedTheme
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .Subscribe(_ => { ErrorOverlayBrush = _themeService.GetBrush("StatusSecondaryBackGroundBrush"); })
+                    .DisposeWith(disposables);
+            }
+            
             _synchronizationService.SynchronizationProcessData.SynchronizationStart
                 .CombineLatest(_synchronizationService.SynchronizationProcessData.SynchronizationAbortRequest,
                     _synchronizationService.SynchronizationProcessData.SynchronizationEnd)
@@ -84,6 +92,16 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
         _themeService = themeService;
         
         ErrorOverlayBrush = _themeService.GetBrush("StatusSecondaryBackGroundBrush");
+    }
+    
+    // Backward-compatible constructor (without IThemeService)
+    public SynchronizationMainStatusViewModel(ISessionService sessionService, ISynchronizationService synchronizationService,
+        IDialogService dialogService, ILogger<SynchronizationMainStatusViewModel> logger) : this()
+    {
+        _sessionService = sessionService;
+        _synchronizationService = synchronizationService;
+        _dialogService = dialogService;
+        _logger = logger;
     }
     
     public ReactiveCommand<Unit, Unit> AbortSynchronizationCommand { get; }
@@ -178,7 +196,18 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
             var synchronizationProgress = _synchronizationService.SynchronizationProcessData.SynchronizationProgress.Value;
             var errors = synchronizationProgress?.ErrorActionsCount ?? 0;
             IsErrorOverlayVisible = errors > 0;
-            ErrorOverlayTooltip = errors > 0 ? $"{Resources.SynchronizationMain_Errors} {errors}" : null;
+            if (errors > 0)
+            {
+                var key = errors == 1
+                    ? "SynchronizationMain_ErrorEncounteredTemplate"
+                    : "SynchronizationMain_ErrorsEncounteredTemplate";
+                var template = Resources.ResourceManager.GetString(key, Resources.Culture);
+                ErrorOverlayTooltip = string.Format(template ?? "{0}", errors);
+            }
+            else
+            {
+                ErrorOverlayTooltip = null;
+            }
         }
         
         IsMainProgressRingVisible = false;
