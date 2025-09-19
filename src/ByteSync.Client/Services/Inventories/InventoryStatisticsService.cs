@@ -13,7 +13,7 @@ public class InventoryStatisticsService : IInventoryStatisticsService
     private readonly IInventoryFileRepository _inventoryFileRepository;
     private readonly ILogger<InventoryStatisticsService> _logger;
     
-    private readonly BehaviorSubject<InventoryStatistics> _statisticsSubject;
+    private readonly BehaviorSubject<InventoryStatistics?> _statisticsSubject;
     
     public InventoryStatisticsService(IInventoryService inventoryService, IInventoryFileRepository inventoryFileRepository,
         ILogger<InventoryStatisticsService> logger)
@@ -22,8 +22,7 @@ public class InventoryStatisticsService : IInventoryStatisticsService
         _inventoryFileRepository = inventoryFileRepository;
         _logger = logger;
         
-        _statisticsSubject =
-            new BehaviorSubject<InventoryStatistics>(new InventoryStatistics { TotalAnalyzed = 0, Success = 0, Errors = 0 });
+        _statisticsSubject = new BehaviorSubject<InventoryStatistics?>(null);
         
         _inventoryService.InventoryProcessData.AreFullInventoriesComplete
             .DistinctUntilChanged()
@@ -42,12 +41,12 @@ public class InventoryStatisticsService : IInventoryStatisticsService
                 }
                 else
                 {
-                    _statisticsSubject.OnNext(new InventoryStatistics { TotalAnalyzed = 0, Success = 0, Errors = 0 });
+                    _statisticsSubject.OnNext(null);
                 }
             });
     }
     
-    public IObservable<InventoryStatistics> Statistics => _statisticsSubject.AsObservable();
+    public IObservable<InventoryStatistics?> Statistics => _statisticsSubject.AsObservable();
     
     public Task Compute()
     {

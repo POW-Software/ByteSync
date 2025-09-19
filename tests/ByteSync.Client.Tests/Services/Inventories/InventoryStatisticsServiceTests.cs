@@ -133,7 +133,7 @@ public class InventoryStatisticsServiceTests
             var service = new InventoryStatisticsService(invService.Object, repo.Object, logger.Object);
             
             var tcs = new TaskCompletionSource<InventoryStatistics>();
-            using var sub = service.Statistics.Skip(1).Take(1).Subscribe(s => tcs.TrySetResult(s));
+            using var sub = service.Statistics.Where(s => s != null).Take(1).Select(s => s!).Subscribe(s => tcs.TrySetResult(s));
             
             ipd.AreFullInventoriesComplete.OnNext(true);
             
@@ -191,7 +191,7 @@ public class InventoryStatisticsServiceTests
             var service = new InventoryStatisticsService(invService.Object, repo.Object, logger.Object);
             
             var tcs = new TaskCompletionSource<InventoryStatistics>();
-            using var sub = service.Statistics.Skip(1).Take(1).Subscribe(s => tcs.TrySetResult(s));
+            using var sub = service.Statistics.Where(s => s != null).Take(1).Select(s => s!).Subscribe(s => tcs.TrySetResult(s));
             
             ipd.AreFullInventoriesComplete.OnNext(true);
             

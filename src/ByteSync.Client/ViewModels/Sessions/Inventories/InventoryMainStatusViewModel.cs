@@ -56,9 +56,9 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
             inventoryStatisticsService.Statistics
                 .Subscribe(s =>
                 {
-                    GlobalTotalAnalyzed = s.TotalAnalyzed;
-                    GlobalAnalyzeSuccess = s.Success;
-                    GlobalAnalyzeErrors = s.Errors;
+                    GlobalTotalAnalyzed = s?.TotalAnalyzed;
+                    GlobalAnalyzeSuccess = s?.Success;
+                    GlobalAnalyzeErrors = s?.Errors;
                 })
                 .DisposeWith(disposables);
         });
@@ -115,13 +115,13 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
     public TimeSpan? RemainingTime { get; set; }
     
     [Reactive]
-    public int GlobalTotalAnalyzed { get; set; }
+    public int? GlobalTotalAnalyzed { get; set; }
     
     [Reactive]
-    public int GlobalAnalyzeSuccess { get; set; }
+    public int? GlobalAnalyzeSuccess { get; set; }
     
     [Reactive]
-    public int GlobalAnalyzeErrors { get; set; }
+    public int? GlobalAnalyzeErrors { get; set; }
     
     private async Task AbortInventory()
     {

@@ -4,7 +4,7 @@ namespace ByteSync.Interfaces.Controls.Inventories;
 
 public interface IInventoryStatisticsService
 {
-    IObservable<InventoryStatistics> Statistics { get; }
+    IObservable<InventoryStatistics?> Statistics { get; }
     
     Task Compute();
 }
