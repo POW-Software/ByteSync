@@ -44,10 +44,7 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
         
         this.WhenActivated(disposables =>
         {
-            _themeService.SelectedTheme
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => { ErrorOverlayBrush = _themeService.GetBrush("SecondaryButtonBackGround"); })
-                .DisposeWith(disposables);
+            // No overlay; icon brush will be updated on state changes
             
             _synchronizationService.SynchronizationProcessData.SynchronizationStart
                 .CombineLatest(_synchronizationService.SynchronizationProcessData.SynchronizationAbortRequest,
@@ -59,11 +56,13 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
             
             _synchronizationService.SynchronizationProcessData.SynchronizationAbortRequest.DistinctUntilChanged()
                 .Where(synchronizationAbortRequest => synchronizationAbortRequest != null)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(synchronizationAbortRequest => OnSynchronizationAbortRequested(synchronizationAbortRequest!))
                 .DisposeWith(disposables);
             
             _synchronizationService.SynchronizationProcessData.SynchronizationEnd.DistinctUntilChanged()
                 .Where(synchronizationEnd => synchronizationEnd != null)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(synchronizationEnd => OnSynchronizationEnded(synchronizationEnd!))
                 .DisposeWith(disposables);
             
@@ -88,7 +87,7 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
         _logger = logger;
         _themeService = themeService;
         
-        ErrorOverlayBrush = _themeService.GetBrush("StatusSecondaryBackGroundBrush");
+        MainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
     }
     
     // Backward-compatible constructor (without IThemeService)
@@ -113,13 +112,7 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
     public bool IsMainCheckVisible { get; set; }
     
     [Reactive]
-    public bool IsErrorOverlayVisible { get; set; }
-    
-    [Reactive]
-    public IBrush? ErrorOverlayBrush { get; set; }
-    
-    [Reactive]
-    public string? ErrorOverlayTooltip { get; set; }
+    public IBrush? MainIconBrush { get; set; }
     
     [Reactive]
     public string MainIcon { get; set; }
@@ -155,8 +148,7 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
         IsSynchronizationRunning = true;
         HandledActionsReset();
         IsMainCheckVisible = false;
-        IsErrorOverlayVisible = false;
-        ErrorOverlayTooltip = null;
+        MainIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
         IsMainProgressRingVisible = true;
         MainStatus = Resources.SynchronizationMain_SynchronizationRunning;
     }
@@ -177,33 +169,28 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
         {
             MainStatus = Resources.SynchronizationMain_SynchronizationAborted;
             MainIcon = "SolidXCircle";
-            IsErrorOverlayVisible = false;
+            MainIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
         }
         else if (synchronizationEnd.Status == SynchronizationEndStatuses.Error)
         {
             MainStatus = Resources.SynchronizationMain_SynchronizationError;
             MainIcon = "SolidXCircle";
-            IsErrorOverlayVisible = false;
-            ErrorOverlayTooltip = null;
+            MainIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
         }
         else
         {
             MainStatus = Resources.SynchronizationMain_SynchronizationDone;
-            MainIcon = "SolidCheckCircle";
             var synchronizationProgress = _synchronizationService.SynchronizationProcessData.SynchronizationProgress.Value;
             var errors = synchronizationProgress?.ErrorActionsCount ?? 0;
-            IsErrorOverlayVisible = errors > 0;
             if (errors > 0)
             {
-                var key = errors == 1
-                    ? "SynchronizationMain_ErrorEncounteredTemplate"
-                    : "SynchronizationMain_ErrorsEncounteredTemplate";
-                var template = Resources.ResourceManager.GetString(key, Resources.Culture);
-                ErrorOverlayTooltip = string.Format(template ?? "{0}", errors);
+                MainIcon = "RegularError";
+                MainIconBrush = _themeService?.GetBrush("StatusSecondaryBackGroundBrush"); // StatusSecondaryBackGroundBrush
             }
             else
             {
-                ErrorOverlayTooltip = null;
+                MainIcon = "SolidCheckCircle";
+                MainIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
             }
         }
         

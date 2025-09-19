@@ -17,21 +17,10 @@
                                 Margin="10,20,0,0" HorizontalAlignment="Center" VerticalAlignment="Top"
                                 IsVisible="{Binding IsMainProgressRingVisible}" />
 
-        <Grid IsVisible="{Binding IsMainCheckVisible}" Margin="6"
-              VerticalAlignment="Center" HorizontalAlignment="Center">
-            <!-- Main completion icon -->
-            <misc:Icon FontSize="100" Value="{Binding MainIcon}"
-                       Foreground="{DynamicResource HomeCloudSynchronizationBackGround}"
-                       VerticalAlignment="Center" HorizontalAlignment="Center" />
-
-            <!-- Error overlay icon (bottom-right) -->
-            <misc:Icon FontSize="50" Value="SolidXCircle"
-                       IsVisible="{Binding IsErrorOverlayVisible}"
-                       Foreground="{Binding ErrorOverlayBrush}"
-                       ToolTip.Tip="{Binding ErrorOverlayTooltip}"
-                       VerticalAlignment="Bottom" HorizontalAlignment="Right"
-                       Margin="0" />
-        </Grid>
+        <misc:Icon FontSize="100" Value="{Binding MainIcon}"
+                   Foreground="{Binding MainIconBrush}"
+                   IsVisible="{Binding IsMainCheckVisible}" Margin="6"
+                   VerticalAlignment="Center" HorizontalAlignment="Center" />
 
         <TextBlock Text="{Binding MainStatus}" TextAlignment="Center"
                    FontSize="17" FontWeight="Bold" Margin="6" />
