@@ -44,13 +44,10 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
         
         this.WhenActivated(disposables =>
         {
-            if (_themeService != null)
-            {
-                _themeService.SelectedTheme
-                    .ObserveOn(RxApp.MainThreadScheduler)
-                    .Subscribe(_ => { ErrorOverlayBrush = _themeService.GetBrush("StatusSecondaryBackGroundBrush"); })
-                    .DisposeWith(disposables);
-            }
+            _themeService.SelectedTheme
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ => { ErrorOverlayBrush = _themeService.GetBrush("SecondaryButtonBackGround"); })
+                .DisposeWith(disposables);
             
             _synchronizationService.SynchronizationProcessData.SynchronizationStart
                 .CombineLatest(_synchronizationService.SynchronizationProcessData.SynchronizationAbortRequest,

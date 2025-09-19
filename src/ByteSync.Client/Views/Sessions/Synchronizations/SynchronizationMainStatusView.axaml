@@ -25,7 +25,7 @@
                        VerticalAlignment="Center" HorizontalAlignment="Center" />
 
             <!-- Error overlay icon (bottom-right) -->
-            <misc:Icon FontSize="36" Value="SolidXCircle"
+            <misc:Icon FontSize="50" Value="SolidXCircle"
                        IsVisible="{Binding IsErrorOverlayVisible}"
                        Foreground="{Binding ErrorOverlayBrush}"
                        ToolTip.Tip="{Binding ErrorOverlayTooltip}"
