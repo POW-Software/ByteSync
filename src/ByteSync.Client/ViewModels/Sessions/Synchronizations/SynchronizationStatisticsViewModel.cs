@@ -20,14 +20,14 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
     private readonly ISessionService _sessionService = null!;
     private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository = null!;
     private readonly ITimeTrackingCache _timeTrackingCache = null!;
-
+    
     private long? LastVersion { get; set; }
-
+    
     public SynchronizationStatisticsViewModel()
     {
         EstimatedEndDateTimeLabel = Resources.SynchronizationMain_EstimatedEnd;
     }
-
+    
     public SynchronizationStatisticsViewModel(ISynchronizationService synchronizationService, ISessionService sessionService,
         ISharedActionsGroupRepository sharedActionsGroupRepository, ITimeTrackingCache timeTrackingCache) : this()
     {
@@ -35,13 +35,13 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
         _sessionService = sessionService;
         _sharedActionsGroupRepository = sharedActionsGroupRepository;
         _timeTrackingCache = timeTrackingCache;
-
+        
         // Initialize new volume tracking properties
         ActualUploadedVolume = 0;
         ActualDownloadedVolume = 0;
         LocalCopyTransferredVolume = 0;
         SynchronizedVolume = 0;
-
+        
         // TransferEfficiency = SynchronizedVolume / (ActualUploaded + LocalCopyTransferred), clamped to [1, +∞)
         this.WhenAnyValue(x => x.SynchronizedVolume, x => x.ActualUploadedVolume, x => x.LocalCopyTransferredVolume)
             .Select(x =>
@@ -51,13 +51,13 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
                 {
                     return x.Item1 > 0 ? double.PositiveInfinity : 1d;
                 }
-
+                
                 var eff = (double)x.Item1 / denominator;
-
+                
                 return eff < 1d ? 1d : eff;
             })
             .ToPropertyEx(this, x => x.TransferEfficiency);
-
+        
         // DataReduction = 1 - (ActualUploaded + LocalCopyTransferred) / SynchronizedVolume, clamped to [0, 1]
         this.WhenAnyValue(x => x.SynchronizedVolume, x => x.ActualUploadedVolume, x => x.LocalCopyTransferredVolume)
             .Select(x =>
@@ -67,19 +67,24 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
                 {
                     return 0d;
                 }
-
+                
                 var transferredBytes = (double)(x.Item2 + x.Item3);
                 var reduction = 1d - transferredBytes / synchronizedBytes;
-
+                
                 return Math.Clamp(reduction, 0d, 1d);
             })
             .ToPropertyEx(this, x => x.DataReduction);
-
+        
         // Successes = HandledActions - Errors
         this.WhenAnyValue(x => x.HandledActions, x => x.Errors)
             .Select(x => x.Item1 - x.Item2)
             .ToPropertyEx(this, x => x.Successes);
-
+        
+        // HasErrors = Errors > 0
+        this.WhenAnyValue(x => x.Errors)
+            .Select(e => e > 0)
+            .ToPropertyEx(this, x => x.HasErrors);
+        
         this.WhenActivated(disposables =>
         {
             _synchronizationService.SynchronizationProcessData.SynchronizationStart
@@ -89,7 +94,7 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(tuple => OnSynchronizationStarted(tuple.First!))
                 .DisposeWith(disposables);
-
+            
             _synchronizationService.SynchronizationProcessData.SynchronizationDataTransmitted
                 .CombineLatest(_synchronizationService.SynchronizationProcessData.SynchronizationAbortRequest,
                     _synchronizationService.SynchronizationProcessData.SynchronizationEnd)
@@ -97,19 +102,19 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(tuple => OnSynchronizationDataTransmitted(tuple.First))
                 .DisposeWith(disposables);
-
+            
             _synchronizationService.SynchronizationProcessData.SynchronizationEnd.DistinctUntilChanged()
                 .Where(synchronizationEnd => synchronizationEnd != null)
                 .Subscribe(synchronizationEnd => OnSynchronizationEnded(synchronizationEnd!))
                 .DisposeWith(disposables);
-
+            
             _sharedActionsGroupRepository.ObservableCache.Connect().ToCollection()
                 .Select(query => query.Sum(ssa => ssa.Size.GetValueOrDefault()))
                 .StartWith(0L)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .ToPropertyEx(this, x => x.TotalVolume)
                 .DisposeWith(disposables);
-
+            
             _synchronizationService.SynchronizationProcessData.SynchronizationProgress
                 .CombineLatest(_synchronizationService.SynchronizationProcessData.SynchronizationStart)
                 .Where(tuple => tuple.First != null && tuple.Second != null)
@@ -117,7 +122,7 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
                 .Select(tuple => tuple.First!)
                 .Subscribe(OnSynchronizationProgressChanged)
                 .DisposeWith(disposables);
-
+            
             var timeTrackingComputer = _timeTrackingCache
                 .GetTimeTrackingComputer(_sessionService.SessionId!, TimeTrackingComputerType.Synchronization)
                 .Result;
@@ -131,57 +136,59 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
                 })
                 .DisposeWith(disposables);
         });
-
+        
         IsCloudSession = _sessionService.IsCloudSession;
     }
-
+    
     [Reactive]
     public DateTime? StartDateTime { get; set; }
-
+    
     [Reactive]
     public TimeSpan ElapsedTime { get; set; }
-
+    
     [Reactive]
     public TimeSpan? RemainingTime { get; set; }
-
+    
     [Reactive]
     public string EstimatedEndDateTimeLabel { get; set; }
-
+    
     [Reactive]
     public DateTime? EstimatedEndDateTime { get; set; }
-
+    
     [Reactive]
     public long HandledActions { get; set; }
-
+    
     [Reactive]
     public long? TreatableActions { get; set; }
-
+    
     [Reactive]
     public long Errors { get; set; }
-
+    
     public extern long TotalVolume { [ObservableAsProperty] get; }
-
+    
     [Reactive]
     public long ActualUploadedVolume { get; set; }
-
+    
     [Reactive]
     public long ActualDownloadedVolume { get; set; }
-
+    
     [Reactive]
     public long LocalCopyTransferredVolume { get; set; }
-
+    
     [Reactive]
     public long SynchronizedVolume { get; set; }
-
+    
     public extern long Successes { [ObservableAsProperty] get; }
-
+    
     public extern double TransferEfficiency { [ObservableAsProperty] get; }
-
+    
     public extern double DataReduction { [ObservableAsProperty] get; }
-
+    
     [Reactive]
     public bool IsCloudSession { get; set; }
-
+    
+    public extern bool HasErrors { [ObservableAsProperty] get; }
+    
     private void OnSynchronizationStarted(Synchronization synchronizationStart)
     {
         StartDateTime = synchronizationStart.Started.LocalDateTime;
@@ -189,12 +196,12 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
         Errors = 0;
         ElapsedTime = TimeSpan.Zero;
     }
-
+    
     private void OnSynchronizationDataTransmitted(bool _)
     {
         TreatableActions = _synchronizationService.SynchronizationProcessData.TotalActionsToProcess;
     }
-
+    
     private void OnSynchronizationEnded(SynchronizationEnd _)
     {
         EstimatedEndDateTimeLabel = Resources.SynchronizationMain_End;
@@ -202,24 +209,24 @@ public class SynchronizationStatisticsViewModel : ActivatableViewModelBase
         HandledActions = synchronizationProgress?.FinishedActionsCount ?? 0;
         Errors = synchronizationProgress?.ErrorActionsCount ?? 0;
     }
-
+    
     private void OnSynchronizationProgressChanged(SynchronizationProgress? synchronizationProgress)
     {
         if (synchronizationProgress == null)
         {
             return;
         }
-
+        
         if (LastVersion != null && LastVersion > synchronizationProgress.Version)
         {
             return;
         }
-
+        
         if (synchronizationProgress.SessionId != _sessionService.SessionId)
         {
             return;
         }
-
+        
         HandledActions = synchronizationProgress.FinishedActionsCount;
         Errors = synchronizationProgress.ErrorActionsCount;
         ActualUploadedVolume = synchronizationProgress.ActualUploadedVolume;

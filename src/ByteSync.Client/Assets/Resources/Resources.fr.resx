@@ -425,13 +425,13 @@ Voulez-vous continuer ?</value>
 		<value>Volume total :</value>
 	</data>
 	<data name="InventoryProcess_IdentificationSuccess" xml:space="preserve">
-		<value>Identification Locale terminée !</value>
+		<value>Identification Locale terminée</value>
 	</data>
 	<data name="InventoryProcess_InventorySuccess" xml:space="preserve">
-		<value>Inventaire des Données terminé !</value>
+		<value>Inventaire des Données terminé</value>
 	</data>
 	<data name="InventoryProcess_AnalysisSuccess" xml:space="preserve">
-		<value>Analyse Locale terminée !</value>
+		<value>Analyse Locale terminée</value>
 	</data>
 	<data name="InventoryProcess_End" xml:space="preserve">
 		<value>Fin :</value>
@@ -640,12 +640,24 @@ Voulez-vous continuer ?</value>
 	<data name="InventoryProcess_AnalysisError" xml:space="preserve">
 		<value>Erreur durant l'Analyse Locale</value>
 	</data>
-	<data name="InventoryProcess_AnalysisNotLaunched" xml:space="preserve">
-		<value>Analyse Locale non lancée</value>
-	</data>
-	<data name="InventoryProcess_AnalyzeErrors" xml:space="preserve">
-		<value>Erreurs d'analyse :</value>
-	</data>
+    <data name="InventoryProcess_AnalysisNotLaunched" xml:space="preserve">
+			<value>Analyse Locale non lancée</value>
+		</data>
+    <data name="InventoryProcess_AnalysisSuccessWithErrors" xml:space="preserve">
+			<value>Analyse terminée avec erreurs</value>
+		</data>
+    <data name="InventoryProcess_AnalyzeErrors" xml:space="preserve">
+    <value>Erreurs d'analyse :</value>
+  </data>
+    <data name="InventoryProcess_GlobalAnalyzedFiles" xml:space="preserve">
+    <value>Total des fichiers analysés :</value>
+  </data>
+    <data name="InventoryProcess_GlobalAnalyzeSuccess" xml:space="preserve">
+    <value>Analyses avec succès :</value>
+  </data>
+    <data name="InventoryProcess_GlobalAnalyzeErrors" xml:space="preserve">
+    <value>Analyses en échec :</value>
+  </data>
 	<data name="ContentIdentity_AnErrorOccured" xml:space="preserve">
 		<value>Une erreur est survenue durant l'analyse</value>
 	</data>
@@ -1664,5 +1676,8 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
     </data>
     <data name="DeploymentMode_Homebrew" xml:space="preserve">
         <value>Homebrew</value>
+    </data>
+    <data name="SynchronizationMain_SynchronizationDoneWithErrors" xml:space="preserve">
+        <value>Synchronisation terminée avec erreurs</value>
     </data>
 </root>

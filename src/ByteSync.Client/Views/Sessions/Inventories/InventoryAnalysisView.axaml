@@ -7,11 +7,11 @@
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ByteSync.Views.Sessions.Inventories.InventoryAnalysisView">
-    
+
     <Design.DataContext>
         <inventories:InventoryAnalysisViewModel />
     </Design.DataContext>
-    
+
     <StackPanel Orientation="Vertical" VerticalAlignment="Center">
         <StackPanel Orientation="Vertical" Height="60"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -27,17 +27,15 @@
             </ProgressBar>
 
             <misc:Icon FontSize="60"
-                       Value="{Binding AnalysisStatus, 
-                                    Converter={StaticResource InventoryProcessStatusToIconConverter}}"
-                       Foreground="{DynamicResource HomeCloudSynchronizationBackGround}"
+                       Value="{Binding AnalysisIcon}"
+                       Foreground="{Binding AnalysisIconBrush}"
                        IsVisible="{Binding !IsAnalysisRunning}"
                        Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center" />
         </StackPanel>
 
 
         <Label Height="30" VerticalContentAlignment="Center"
-               Content="{Binding AnalysisStatus, Converter={StaticResource InventoryProcessStatusToTextConverter}, 
-                                ConverterParameter='InventoryProcess_Analysis'}"
+               Content="{Binding AnalysisStatusText}"
                HorizontalContentAlignment="Center" FontWeight="Bold" Margin="6" />
 
         <StackPanel HorizontalAlignment="Center" Margin="3 12 3 0" Height="100">
@@ -77,30 +75,36 @@
                 <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_AnalyzedFiles}"
                        Classes="InventoryStatusDescription" />
 
-                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Label
-                        Content="{Binding AnalyzedFiles, FallbackValue=''}"
-                        HorizontalContentAlignment="Left" />
-                    <Label Content="/" HorizontalContentAlignment="Left" />
-                    <Label
-                        Content="{Binding AnalyzableFiles, FallbackValue=''}"
-                        HorizontalContentAlignment="Left" />
-                </StackPanel>
+                <Border Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                    <StackPanel Orientation="Horizontal">
+                        <Label
+                            Content="{Binding AnalyzedFiles, FallbackValue=''}"
+                            HorizontalContentAlignment="Left" />
+                        <Label Content="/" HorizontalContentAlignment="Left" />
+                        <Label
+                            Content="{Binding AnalyzableFiles, FallbackValue=''}"
+                            HorizontalContentAlignment="Left" />
+                    </StackPanel>
+                </Border>
 
                 <Label Grid.Row="1" Grid.Column="0" Name="LabelAnalysisErrorDescription"
                        Content="{localizations:Loc InventoryProcess_AnalyzeErrors}" Classes="InventoryStatusDescription" />
-                <Label Grid.Row="1" Grid.Column="1" Name="LabelAnalysisErrorValue"
-                       Content="{Binding AnalyzeErrors, FallbackValue=''}"
-                       HorizontalContentAlignment="Right" />
+                <Border Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right"
+                        Classes="Badge"
+                        Classes.Secondary="{Binding HasErrors}">
+                    <Label Name="LabelAnalysisErrorValue"
+                           Content="{Binding AnalyzeErrors, FallbackValue=''}"
+                           HorizontalContentAlignment="Right" />
+                </Border>
 
                 <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc InventoryProcess_ProcessedSize}"
                        Classes="InventoryStatusDescription" />
-                <Label Grid.Row="2" Grid.Column="1"
-                       Content="{Binding ProcessedSize, FallbackValue='', 
-                                Converter={StaticResource FormatKbSizeConverter}}"
-                       HorizontalContentAlignment="Right" />
+                <Border Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                    <TextBlock Text="{Binding ProcessedSize, FallbackValue='', Converter={StaticResource FormatKbSizeConverter}}" />
+                </Border>
 
             </Grid>
         </StackPanel>
+
     </StackPanel>
 </UserControl>
