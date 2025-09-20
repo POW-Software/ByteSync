@@ -11,8 +11,9 @@ public class BaseInventoryRunner : IBaseInventoryRunner
     private readonly ICloudSessionLocalDataManager _cloudSessionLocalDataManager;
     private readonly IInventoryService _inventoryService;
     private readonly ILogger<BaseInventoryRunner> _logger;
-
-    public BaseInventoryRunner(IInventoryFinishedService inventoryFinishedService, ICloudSessionLocalDataManager cloudSessionLocalDataManager, 
+    
+    public BaseInventoryRunner(IInventoryFinishedService inventoryFinishedService,
+        ICloudSessionLocalDataManager cloudSessionLocalDataManager,
         IInventoryService inventoryService, ILogger<BaseInventoryRunner> logger)
     {
         _inventoryFinishedService = inventoryFinishedService;
@@ -23,30 +24,27 @@ public class BaseInventoryRunner : IBaseInventoryRunner
     
     private InventoryProcessData InventoryProcessData
     {
-        get
-        {
-            return _inventoryService.InventoryProcessData;
-        }
+        get { return _inventoryService.InventoryProcessData; }
     }
-
+    
     public async Task<bool> RunBaseInventory()
     {
         bool isOK;
         try
         {
-            await Parallel.ForEachAsync(InventoryProcessData.InventoryBuilders!, 
-                new ParallelOptions { MaxDegreeOfParallelism = 2, CancellationToken = InventoryProcessData.CancellationTokenSource.Token}, 
+            await Parallel.ForEachAsync(InventoryProcessData.InventoryBuilders!,
+                new ParallelOptions { MaxDegreeOfParallelism = 2, CancellationToken = InventoryProcessData.CancellationTokenSource.Token },
                 async (builder, token) =>
                 {
                     var baseInventoryFullName = _cloudSessionLocalDataManager
                         .GetCurrentMachineInventoryPath(builder.Inventory, LocalInventoryModes.Base);
-
+                    
                     await builder.BuildBaseInventoryAsync(baseInventoryFullName, token);
                 });
-
+            
             if (!InventoryProcessData.CancellationTokenSource.Token.IsCancellationRequested)
             {
-                InventoryProcessData.IdentificationStatus.OnNext(LocalInventoryPartStatus.Success);
+                InventoryProcessData.IdentificationStatus.OnNext(InventoryTaskStatus.Success);
                 
                 await _inventoryFinishedService.SetLocalInventoryFinished(InventoryProcessData.Inventories!, LocalInventoryModes.Base);
             }
@@ -62,10 +60,10 @@ public class BaseInventoryRunner : IBaseInventoryRunner
         {
             _logger.LogError(ex, "BaseInventoryRunner");
             isOK = false;
-
+            
             InventoryProcessData.SetError(ex);
         }
-
+        
         return isOK;
     }
 }

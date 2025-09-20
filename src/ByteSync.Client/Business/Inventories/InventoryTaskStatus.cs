@@ -1,6 +1,6 @@
-﻿namespace ByteSync.Business.Inventories;
+namespace ByteSync.Business.Inventories;
 
-public enum LocalInventoryPartStatus
+public enum InventoryTaskStatus
 {
     Pending = 0,
     Running = 1,

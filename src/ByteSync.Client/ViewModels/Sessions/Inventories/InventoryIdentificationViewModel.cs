@@ -10,13 +10,12 @@ namespace ByteSync.ViewModels.Sessions.Inventories;
 public class InventoryIdentificationViewModel : ActivatableViewModelBase
 {
     private readonly IInventoryService _inventoryService;
-
+    
     public InventoryIdentificationViewModel()
     {
-        
-    } 
+    }
     
-    public InventoryIdentificationViewModel(IInventoryService inventoryService )
+    public InventoryIdentificationViewModel(IInventoryService inventoryService)
     {
         _inventoryService = inventoryService;
         
@@ -30,7 +29,7 @@ public class InventoryIdentificationViewModel : ActivatableViewModelBase
             .DisposeWith(disposables);
         
         _inventoryService.InventoryProcessData.IdentificationStatus
-            .Select(ms => ms == LocalInventoryPartStatus.Running)
+            .Select(ms => ms == InventoryTaskStatus.Running)
             .ToPropertyEx(this, x => x.IsIdentificationRunning)
             .DisposeWith(disposables);
         
@@ -45,7 +44,7 @@ public class InventoryIdentificationViewModel : ActivatableViewModelBase
             .DisposeWith(disposables);
     }
     
-    public extern LocalInventoryPartStatus IdentificationStatus { [ObservableAsProperty] get; }
+    public extern InventoryTaskStatus IdentificationStatus { [ObservableAsProperty] get; }
     
     public extern bool IsIdentificationRunning { [ObservableAsProperty] get; }
     

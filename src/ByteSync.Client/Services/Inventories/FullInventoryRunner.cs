@@ -13,9 +13,10 @@ public class FullInventoryRunner : IFullInventoryRunner
     private readonly ICloudSessionLocalDataManager _cloudSessionLocalDataManager;
     private readonly IInventoryComparerFactory _inventoryComparerFactory;
     private readonly ILogger<FullInventoryRunner> _logger;
-
-    public FullInventoryRunner(IInventoryFinishedService inventoryFinishedService, IInventoryService inventoryService, 
-        ICloudSessionLocalDataManager cloudSessionLocalDataManager, IInventoryComparerFactory inventoryComparerFactory, ILogger<FullInventoryRunner> logger)
+    
+    public FullInventoryRunner(IInventoryFinishedService inventoryFinishedService, IInventoryService inventoryService,
+        ICloudSessionLocalDataManager cloudSessionLocalDataManager, IInventoryComparerFactory inventoryComparerFactory,
+        ILogger<FullInventoryRunner> logger)
     {
         _inventoryFinishedService = inventoryFinishedService;
         _inventoryService = inventoryService;
@@ -26,10 +27,7 @@ public class FullInventoryRunner : IFullInventoryRunner
     
     private InventoryProcessData InventoryProcessData
     {
-        get
-        {
-            return _inventoryService.InventoryProcessData;
-        }
+        get { return _inventoryService.InventoryProcessData; }
     }
     
     public async Task<bool> RunFullInventory()
@@ -38,36 +36,39 @@ public class FullInventoryRunner : IFullInventoryRunner
         
         try
         {
-            InventoryProcessData.AnalysisStatus.OnNext(LocalInventoryPartStatus.Running);
-
+            InventoryProcessData.AnalysisStatus.OnNext(InventoryTaskStatus.Running);
+            
             var inventoriesBuildersAndItems = new List<Tuple<IInventoryBuilder, HashSet<IndexedItem>>>();
             foreach (var inventoryBuilder in InventoryProcessData.InventoryBuilders!)
             {
-                using var inventoryComparer = _inventoryComparerFactory.CreateInventoryComparer(LocalInventoryModes.Base, inventoryBuilder.Indexer);
+                using var inventoryComparer =
+                    _inventoryComparerFactory.CreateInventoryComparer(LocalInventoryModes.Base, inventoryBuilder.Indexer);
                 var comparisonResult = inventoryComparer.Compare();
                 
-                var filesIdentifier = new FilesIdentifier(inventoryBuilder.Inventory, inventoryBuilder.SessionSettings!, inventoryBuilder.Indexer);
+                var filesIdentifier = new FilesIdentifier(inventoryBuilder.Inventory, inventoryBuilder.SessionSettings!,
+                    inventoryBuilder.Indexer);
                 HashSet<IndexedItem> items = filesIdentifier.Identify(comparisonResult);
                 InventoryProcessData.UpdateMonitorData(monitorData => monitorData.AnalyzableFiles += items.Count);
                 
-                inventoriesBuildersAndItems.Add(new (inventoryBuilder, items));
+                inventoriesBuildersAndItems.Add(new(inventoryBuilder, items));
             }
-
-            await Parallel.ForEachAsync(inventoriesBuildersAndItems, 
-                new ParallelOptions { MaxDegreeOfParallelism = 2, CancellationToken = InventoryProcessData.CancellationTokenSource.Token}, 
+            
+            await Parallel.ForEachAsync(inventoriesBuildersAndItems,
+                new ParallelOptions { MaxDegreeOfParallelism = 2, CancellationToken = InventoryProcessData.CancellationTokenSource.Token },
                 async (tuple, token) =>
                 {
                     var inventoryBuilder = tuple.Item1;
                     var items = tuple.Item2;
-
-                    var fullInventoryFullName = _cloudSessionLocalDataManager.GetCurrentMachineInventoryPath(inventoryBuilder.Inventory, LocalInventoryModes.Full);
+                    
+                    var fullInventoryFullName =
+                        _cloudSessionLocalDataManager.GetCurrentMachineInventoryPath(inventoryBuilder.Inventory, LocalInventoryModes.Full);
                     await inventoryBuilder.RunAnalysisAsync(fullInventoryFullName, items, token);
                 });
             
             if (!InventoryProcessData.CancellationTokenSource.Token.IsCancellationRequested)
             {
-                InventoryProcessData.AnalysisStatus.OnNext(LocalInventoryPartStatus.Success);
-                InventoryProcessData.MainStatus.OnNext(LocalInventoryPartStatus.Success);
+                InventoryProcessData.AnalysisStatus.OnNext(InventoryTaskStatus.Success);
+                InventoryProcessData.MainStatus.OnNext(InventoryTaskStatus.Success);
                 
                 await _inventoryFinishedService.SetLocalInventoryFinished(InventoryProcessData.Inventories!, LocalInventoryModes.Full);
             }
@@ -81,7 +82,7 @@ public class FullInventoryRunner : IFullInventoryRunner
             
             InventoryProcessData.SetError(ex);
         }
-
+        
         return isOK;
     }
 }

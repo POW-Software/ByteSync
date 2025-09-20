@@ -49,7 +49,7 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                 .DisposeWith(disposables);
             
             _inventoryService.InventoryProcessData.AnalysisStatus
-                .Select(ms => ms == LocalInventoryPartStatus.Success)
+                .Select(ms => ms == InventoryTaskStatus.Success)
                 .ToPropertyEx(this, x => x.ShowGlobalStatistics)
                 .DisposeWith(disposables);
             
@@ -72,12 +72,12 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
     
     private void HandleActivation(CompositeDisposable disposables)
     {
-        _inventoryService.InventoryProcessData.MainStatus
-            .ToPropertyEx(this, x => x.MainStatus)
+        _inventoryService.InventoryProcessData.GlobalMainStatus
+            .ToPropertyEx(this, x => x.GlobalMainStatus)
             .DisposeWith(disposables);
         
-        _inventoryService.InventoryProcessData.MainStatus
-            .Select(ms => ms == LocalInventoryPartStatus.Running)
+        _inventoryService.InventoryProcessData.GlobalMainStatus
+            .Select(ms => ms == InventoryTaskStatus.Running)
             .ToPropertyEx(this, x => x.IsInventoryRunning)
             .DisposeWith(disposables);
         
@@ -97,11 +97,11 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
     
     public ReactiveCommand<Unit, Unit> AbortIventoryCommand { get; set; } = null!;
     
-    public extern LocalInventoryPartStatus MainStatus { [ObservableAsProperty] get; }
+    public extern InventoryTaskStatus GlobalMainStatus { [ObservableAsProperty] get; }
     
     public extern bool IsInventoryRunning { [ObservableAsProperty] get; }
     
-    public extern LocalInventoryPartStatus AnalysisStatus { [ObservableAsProperty] get; }
+    public extern InventoryTaskStatus AnalysisStatus { [ObservableAsProperty] get; }
     
     public extern bool ShowGlobalStatistics { [ObservableAsProperty] get; }
     

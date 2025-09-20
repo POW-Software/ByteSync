@@ -42,12 +42,12 @@ public class InventoryAnalysisViewModel : ActivatableViewModelBase
             .DisposeWith(disposables);
         
         _inventoryService.InventoryProcessData.AnalysisStatus
-            .Select(ms => ms == LocalInventoryPartStatus.Running)
+            .Select(ms => ms == InventoryTaskStatus.Running)
             .ToPropertyEx(this, x => x.IsAnalysisRunning)
             .DisposeWith(disposables);
         
         _inventoryService.InventoryProcessData.AnalysisStatus
-            .Select(ms => ms == LocalInventoryPartStatus.Running && !HasAnalysisStarted)
+            .Select(ms => ms == InventoryTaskStatus.Running && !HasAnalysisStarted)
             .Where(b => b is true)
             .ToPropertyEx(this, x => x.HasAnalysisStarted)
             .DisposeWith(disposables);
@@ -78,22 +78,22 @@ public class InventoryAnalysisViewModel : ActivatableViewModelBase
                 
                 switch (status)
                 {
-                    case LocalInventoryPartStatus.Error:
-                    case LocalInventoryPartStatus.Cancelled:
-                    case LocalInventoryPartStatus.NotLaunched:
+                    case InventoryTaskStatus.Error:
+                    case InventoryTaskStatus.Cancelled:
+                    case InventoryTaskStatus.NotLaunched:
                         AnalysisIcon = "SolidXCircle";
                         AnalysisIconBrush = _themeService?.GetBrush("MainSecondaryColor");
                         
                         break;
-                    case LocalInventoryPartStatus.Success:
+                    case InventoryTaskStatus.Success:
                         AnalysisIcon = errors > 0 ? "RegularError" : "SolidCheckCircle";
                         AnalysisIconBrush = errors > 0
                             ? _themeService?.GetBrush("MainSecondaryColor")
                             : _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
                         
                         break;
-                    case LocalInventoryPartStatus.Pending:
-                    case LocalInventoryPartStatus.Running:
+                    case InventoryTaskStatus.Pending:
+                    case InventoryTaskStatus.Running:
                         AnalysisIcon = "None";
                         AnalysisIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
                         
@@ -105,36 +105,22 @@ public class InventoryAnalysisViewModel : ActivatableViewModelBase
                         break;
                 }
                 
-                if (status == LocalInventoryPartStatus.Success && errors > 0)
+                if (status == InventoryTaskStatus.Success && errors > 0)
                 {
                     AnalysisStatusText =
                         Resources.ResourceManager.GetString("InventoryProcess_AnalysisSuccessWithErrors", Resources.Culture)
                         ?? Resources.InventoryProcess_AnalysisSuccess;
-                    
-                    // AnalysisIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
                 }
                 else
                 {
                     var key = $"InventoryProcess_Analysis{status}";
                     AnalysisStatusText = Resources.ResourceManager.GetString(key, Resources.Culture) ?? string.Empty;
-                    
-                    // AnalysisIconBrush = _themeService?.GetBrush("MainSecondaryColor");
                 }
-                
-                // // Brush by status
-                // if (status is LocalInventoryPartStatus.Success or LocalInventoryPartStatus.Pending or LocalInventoryPartStatus.Running)
-                // {
-                //     AnalysisIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
-                // }
-                // else
-                // {
-                //     AnalysisIconBrush = _themeService?.GetBrush("MainSecondaryColor");
-                // }
             })
             .DisposeWith(disposables);
     }
     
-    public extern LocalInventoryPartStatus AnalysisStatus { [ObservableAsProperty] get; }
+    public extern InventoryTaskStatus AnalysisStatus { [ObservableAsProperty] get; }
     
     public extern bool IsAnalysisRunning { [ObservableAsProperty] get; }
     
