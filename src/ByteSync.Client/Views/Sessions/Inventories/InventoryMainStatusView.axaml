@@ -14,10 +14,10 @@
 
     <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 6 0 6">
         <misc:ActivityIndicator Width="120" Height="100" Margin="6"
-                                IsVisible="{Binding IsInventoryRunning}" />
+                                IsVisible="{Binding IsInventoryInProgress}" />
 
         <StackPanel Height="100" HorizontalAlignment="Center" Margin="12"
-                    IsVisible="{Binding !IsInventoryRunning}">
+                    IsVisible="{Binding !IsInventoryInProgress}">
 
             <misc:Icon FontSize="100"
                        Value="{Binding GlobalMainStatus, Converter={StaticResource InventoryProcessStatusToIconConverter}}"

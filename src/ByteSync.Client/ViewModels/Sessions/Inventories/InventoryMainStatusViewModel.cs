@@ -81,6 +81,12 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
             .ToPropertyEx(this, x => x.IsInventoryRunning)
             .DisposeWith(disposables);
         
+        // Visible while global inventory is not in a terminal state
+        _inventoryService.InventoryProcessData.GlobalMainStatus
+            .Select(ms => ms is InventoryTaskStatus.Pending or InventoryTaskStatus.Running)
+            .ToPropertyEx(this, x => x.IsInventoryInProgress)
+            .DisposeWith(disposables);
+        
         var timeTrackingComputer = _timeTrackingCache
             .GetTimeTrackingComputer(_sessionService.SessionId!, TimeTrackingComputerType.Inventory)
             .Result;
@@ -102,6 +108,8 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
     public extern bool IsInventoryRunning { [ObservableAsProperty] get; }
     
     public extern InventoryTaskStatus AnalysisStatus { [ObservableAsProperty] get; }
+    
+    public extern bool IsInventoryInProgress { [ObservableAsProperty] get; }
     
     public extern bool ShowGlobalStatistics { [ObservableAsProperty] get; }
     
