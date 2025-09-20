@@ -640,9 +640,12 @@ Voulez-vous continuer ?</value>
 	<data name="InventoryProcess_AnalysisError" xml:space="preserve">
 		<value>Erreur durant l'Analyse Locale</value>
 	</data>
-	<data name="InventoryProcess_AnalysisNotLaunched" xml:space="preserve">
-		<value>Analyse Locale non lancée</value>
-	</data>
+    <data name="InventoryProcess_AnalysisNotLaunched" xml:space="preserve">
+			<value>Analyse Locale non lancée</value>
+		</data>
+    <data name="InventoryProcess_AnalysisSuccessWithErrors" xml:space="preserve">
+			<value>Analyse terminée avec erreurs</value>
+		</data>
     <data name="InventoryProcess_AnalyzeErrors" xml:space="preserve">
     <value>Erreurs d'analyse :</value>
   </data>

@@ -157,13 +157,13 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
         {
             MainStatus = Resources.SynchronizationMain_SynchronizationAborted;
             MainIcon = "SolidXCircle";
-            MainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+            MainIconBrush = _themeService.GetBrush("MainSecondaryColor");
         }
         else if (synchronizationEnd.Status == SynchronizationEndStatuses.Error)
         {
             MainStatus = Resources.SynchronizationMain_SynchronizationError;
             MainIcon = "SolidXCircle";
-            MainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+            MainIconBrush = _themeService.GetBrush("MainSecondaryColor");
         }
         else
         {

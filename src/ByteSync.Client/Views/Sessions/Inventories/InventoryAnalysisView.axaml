@@ -27,17 +27,15 @@
             </ProgressBar>
 
             <misc:Icon FontSize="60"
-                       Value="{Binding AnalysisStatus, 
-                                    Converter={StaticResource InventoryProcessStatusToIconConverter}}"
-                       Foreground="{DynamicResource HomeCloudSynchronizationBackGround}"
+                       Value="{Binding AnalysisIcon}"
+                       Foreground="{Binding AnalysisIconBrush}"
                        IsVisible="{Binding !IsAnalysisRunning}"
                        Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center" />
         </StackPanel>
 
 
         <Label Height="30" VerticalContentAlignment="Center"
-               Content="{Binding AnalysisStatus, Converter={StaticResource InventoryProcessStatusToTextConverter}, 
-                                ConverterParameter='InventoryProcess_Analysis'}"
+               Content="{Binding AnalysisStatusText}"
                HorizontalContentAlignment="Center" FontWeight="Bold" Margin="6" />
 
         <StackPanel HorizontalAlignment="Center" Margin="3 12 3 0" Height="100">
