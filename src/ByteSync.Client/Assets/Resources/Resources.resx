@@ -425,13 +425,13 @@ Would you like to continue ?</value>
 		<value>Total Volume:</value>
 	</data>
 	<data name="InventoryProcess_IdentificationSuccess" xml:space="preserve">
-		<value>Local Identification done!</value>
+		<value>Local Identification done</value>
 	</data>
 	<data name="InventoryProcess_InventorySuccess" xml:space="preserve">
-		<value>Data Inventory done!</value>
+		<value>Data Inventory done</value>
 	</data>
 	<data name="InventoryProcess_AnalysisSuccess" xml:space="preserve">
-		<value>Local Analysis done!</value>
+		<value>Local Analysis done</value>
 	</data>
 	<data name="InventoryProcess_End" xml:space="preserve">
 		<value>End:</value>

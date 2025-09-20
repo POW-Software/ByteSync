@@ -425,13 +425,13 @@ Voulez-vous continuer ?</value>
 		<value>Volume total :</value>
 	</data>
 	<data name="InventoryProcess_IdentificationSuccess" xml:space="preserve">
-		<value>Identification Locale terminée !</value>
+		<value>Identification Locale terminée</value>
 	</data>
 	<data name="InventoryProcess_InventorySuccess" xml:space="preserve">
-		<value>Inventaire des Données terminé !</value>
+		<value>Inventaire des Données terminé</value>
 	</data>
 	<data name="InventoryProcess_AnalysisSuccess" xml:space="preserve">
-		<value>Analyse Locale terminée !</value>
+		<value>Analyse Locale terminée</value>
 	</data>
 	<data name="InventoryProcess_End" xml:space="preserve">
 		<value>Fin :</value>
