@@ -2,6 +2,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.Misc;
+using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Interfaces.Dialogs;
@@ -19,6 +20,7 @@ public class InventoryMainStatusViewModelTests
 {
     private InventoryProcessData _processData = null!;
     private Subject<InventoryStatistics?> _statsSubject = null!;
+    private Subject<SessionStatus> _sessionStatusSubject = null!;
     private Mock<IInventoryService> _inventoryService = null!;
     private Mock<IInventoryStatisticsService> _statsService = null!;
     private Mock<ISessionService> _sessionService = null!;
@@ -40,6 +42,8 @@ public class InventoryMainStatusViewModelTests
         
         _sessionService = new Mock<ISessionService>();
         _sessionService.SetupGet(x => x.SessionId).Returns("test-session");
+        _sessionStatusSubject = new Subject<SessionStatus>();
+        _sessionService.SetupGet(x => x.SessionStatusObservable).Returns(_sessionStatusSubject.AsObservable());
         
         var mockComputer = new Mock<ITimeTrackingComputer>();
         mockComputer.SetupGet(x => x.RemainingTime).Returns(Observable.Empty<TimeTrack>());
@@ -201,5 +205,26 @@ public class InventoryMainStatusViewModelTests
         
         _statsSubject.OnNext(new InventoryStatistics { Errors = 0, Success = 10, TotalAnalyzed = 10 });
         vm.HasErrors.Should().BeFalse();
+    }
+    
+    [Test]
+    public void SessionPreparation_ResetsStatisticsAndVisuals()
+    {
+        var vm = CreateVm();
+        
+        _statsSubject.OnNext(new InventoryStatistics { Errors = 1, Success = 2, TotalAnalyzed = 3 });
+        vm.GlobalAnalyzeErrors.Should().Be(1);
+        
+        vm.GlobalMainIcon = "SolidCheckCircle";
+        vm.GlobalMainStatusText = "dummy";
+        vm.GlobalMainIconBrush = null; // not asserting specific brush here
+        
+        _sessionStatusSubject.OnNext(SessionStatus.Preparation);
+        
+        vm.GlobalTotalAnalyzed.Should().Be(0);
+        vm.GlobalAnalyzeSuccess.Should().Be(0);
+        vm.GlobalAnalyzeErrors.Should().Be(0);
+        vm.GlobalMainIcon.Should().Be("None");
+        vm.GlobalMainStatusText.Should().BeEmpty();
     }
 }

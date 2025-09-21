@@ -8,6 +8,7 @@ using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.Misc;
+using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Controls.TimeTracking;
@@ -78,14 +79,16 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                 .DistinctUntilChanged()
                 .Publish()
                 .RefCount();
-            var statsStream = inventoryStatisticsService.Statistics
+            var sessionPreparation = _sessionService.SessionStatusObservable
+                .Where(ss => ss == SessionStatus.Preparation)
+                .Publish()
+                .RefCount();
+            var statsStream = sessionPreparation
+                .Select(_ => (InventoryStatistics?)null)
+                .Merge(inventoryStatisticsService.Statistics)
                 .Replay(1)
                 .RefCount();
-            
-            // Warm-up subscription so replay captures stats as soon as they arrive
-            statsStream
-                .Subscribe(_ => { })
-                .DisposeWith(disposables);
+            statsStream.Subscribe(_ => { }).DisposeWith(disposables);
             
             // Waiting flag: on Success, stay true until the first stats emission; otherwise false
             var waitingFinalStats = statusStream
@@ -160,6 +163,19 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                     GlobalMainIcon = v.Icon;
                     GlobalMainStatusText = v.Text;
                     GlobalMainIconBrush = GetBrushSafe(v.BrushKey);
+                })
+                .DisposeWith(disposables);
+            
+            sessionPreparation
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ =>
+                {
+                    GlobalTotalAnalyzed = 0;
+                    GlobalAnalyzeSuccess = 0;
+                    GlobalAnalyzeErrors = 0;
+                    GlobalMainIcon = "None";
+                    GlobalMainStatusText = string.Empty;
+                    GlobalMainIconBrush = null;
                 })
                 .DisposeWith(disposables);
         });
