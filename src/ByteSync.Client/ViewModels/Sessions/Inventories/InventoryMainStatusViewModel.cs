@@ -99,6 +99,23 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                 .Subscribe(v => IsWaitingFinalStats = v)
                 .DisposeWith(disposables);
             
+            // IsInventoryRunning directly from status stream
+            statusStream
+                .Select(st => st == InventoryTaskStatus.Running)
+                .DistinctUntilChanged()
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .ToPropertyEx(this, x => x.IsInventoryRunning)
+                .DisposeWith(disposables);
+            
+            // IsInventoryInProgress computed from status + waiting flag
+            statusStream
+                .Select(st => st is InventoryTaskStatus.Pending or InventoryTaskStatus.Running)
+                .CombineLatest(waitingFinalStats, (rp, wait) => rp || wait)
+                .DistinctUntilChanged()
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .ToPropertyEx(this, x => x.IsInventoryInProgress)
+                .DisposeWith(disposables);
+            
             // Map to final UI visuals: immediate for non-success; gated on stats for success
             var nonSuccessVisual = statusStream
                 .Where(st => st is InventoryTaskStatus.Error or InventoryTaskStatus.Cancelled or InventoryTaskStatus.NotLaunched)
@@ -162,20 +179,6 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
     {
         _inventoryService.InventoryProcessData.GlobalMainStatus
             .ToPropertyEx(this, x => x.GlobalMainStatus)
-            .DisposeWith(disposables);
-        
-        _inventoryService.InventoryProcessData.GlobalMainStatus
-            .Select(ms => ms == InventoryTaskStatus.Running)
-            .ToPropertyEx(this, x => x.IsInventoryRunning)
-            .DisposeWith(disposables);
-        
-        // Visible while global inventory is not in a terminal state
-        var runningOrPending = _inventoryService.InventoryProcessData.GlobalMainStatus
-            .Select(ms => ms is InventoryTaskStatus.Pending or InventoryTaskStatus.Running);
-        runningOrPending
-            .CombineLatest(this.WhenAnyValue(x => x.IsWaitingFinalStats).StartWith(false), (rp, wait) => rp || wait)
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .ToPropertyEx(this, x => x.IsInventoryInProgress)
             .DisposeWith(disposables);
         
         var timeTrackingComputer = _timeTrackingCache

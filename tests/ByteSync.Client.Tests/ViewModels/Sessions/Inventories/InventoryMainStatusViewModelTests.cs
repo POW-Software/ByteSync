@@ -80,6 +80,30 @@ public class InventoryMainStatusViewModelTests
     }
     
     [Test]
+    public void Cancelled_ShowsErrorIcon_AndNoSpinner()
+    {
+        var vm = CreateVm();
+        
+        _processData.GlobalMainStatus.OnNext(InventoryTaskStatus.Cancelled);
+        
+        vm.GlobalMainIcon.Should().Be("SolidXCircle");
+        vm.IsInventoryInProgress.Should().BeFalse();
+        vm.GlobalMainStatusText.Should().NotBeNull();
+    }
+    
+    [Test]
+    public void NotLaunched_ShowsErrorIcon_AndNoSpinner()
+    {
+        var vm = CreateVm();
+        
+        _processData.GlobalMainStatus.OnNext(InventoryTaskStatus.NotLaunched);
+        
+        vm.GlobalMainIcon.Should().Be("SolidXCircle");
+        vm.IsInventoryInProgress.Should().BeFalse();
+        vm.GlobalMainStatusText.Should().NotBeNull();
+    }
+    
+    [Test]
     public void SuccessThenStatsWithErrors_ShowsRegularError_AndStopsSpinner()
     {
         var vm = CreateVm();
@@ -120,5 +144,62 @@ public class InventoryMainStatusViewModelTests
         vm.GlobalMainIcon.Should().Be("RegularError");
         vm.IsInventoryInProgress.Should().BeFalse();
         vm.GlobalMainStatusText.Should().NotBeNull();
+    }
+    
+    [Test]
+    public void StatsBeforeSuccessWithoutErrors_RendersCheckImmediatelyOnSuccess()
+    {
+        var vm = CreateVm();
+        
+        _statsSubject.OnNext(new InventoryStatistics { Errors = 0, Success = 5, TotalAnalyzed = 5 });
+        _processData.GlobalMainStatus.OnNext(InventoryTaskStatus.Success);
+        
+        vm.GlobalMainIcon.Should().Be("SolidCheckCircle");
+        vm.IsInventoryInProgress.Should().BeFalse();
+        vm.GlobalMainStatusText.Should().NotBeNull();
+    }
+    
+    [Test]
+    public void StatsNullBeforeSuccessThenNonNullAfter_GatesUntilNonNull()
+    {
+        var vm = CreateVm();
+        
+        _statsSubject.OnNext(null);
+        _processData.GlobalMainStatus.OnNext(InventoryTaskStatus.Success);
+        
+        vm.IsInventoryInProgress.Should().BeTrue("waiting for first non-null statistics");
+        
+        _statsSubject.OnNext(new InventoryStatistics { Errors = 0, Success = 3, TotalAnalyzed = 3 });
+        
+        vm.GlobalMainIcon.Should().Be("SolidCheckCircle");
+        vm.IsInventoryInProgress.Should().BeFalse();
+    }
+    
+    [Test]
+    public void SuccessThenCancelled_BeforeStats_StopsSpinnerAndRendersNonSuccess()
+    {
+        var vm = CreateVm();
+        
+        _processData.GlobalMainStatus.OnNext(InventoryTaskStatus.Success);
+        
+        vm.IsInventoryInProgress.Should().BeTrue();
+        
+        _processData.GlobalMainStatus.OnNext(InventoryTaskStatus.Cancelled);
+        
+        vm.IsInventoryInProgress.Should().BeFalse();
+        vm.GlobalMainIcon.Should().Be("SolidXCircle");
+        vm.GlobalMainStatusText.Should().NotBeNull();
+    }
+    
+    [Test]
+    public void HasErrors_ComputedFromGlobalAnalyzeErrors()
+    {
+        var vm = CreateVm();
+        
+        _statsSubject.OnNext(new InventoryStatistics { Errors = 4, Success = 0, TotalAnalyzed = 4 });
+        vm.HasErrors.Should().BeTrue();
+        
+        _statsSubject.OnNext(new InventoryStatistics { Errors = 0, Success = 10, TotalAnalyzed = 10 });
+        vm.HasErrors.Should().BeFalse();
     }
 }
