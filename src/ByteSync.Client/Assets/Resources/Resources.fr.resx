@@ -631,9 +631,12 @@ Voulez-vous continuer ?</value>
 	<data name="SessionMachine_Status_WaitingForAnalysis" xml:space="preserve">
 		<value>Analyse en attente</value>
 	</data>
-	<data name="InventoryProcess_InventoryError" xml:space="preserve">
-		<value>Erreur durant l'Inventaire des Données</value>
-	</data>
+    <data name="InventoryProcess_InventoryError" xml:space="preserve">
+			<value>Erreur durant l'Inventaire des Données</value>
+		</data>
+    <data name="InventoryProcess_InventorySuccessWithErrors" xml:space="preserve">
+			<value>Inventaire terminé avec erreurs</value>
+		</data>
 	<data name="InventoryProcess_IdentificationError" xml:space="preserve">
 		<value>Erreur durant l'Identification Locale</value>
 	</data>

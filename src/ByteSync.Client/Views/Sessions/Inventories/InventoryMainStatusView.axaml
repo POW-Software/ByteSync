@@ -20,15 +20,14 @@
                     IsVisible="{Binding !IsInventoryInProgress}">
 
             <misc:Icon FontSize="100"
-                       Value="{Binding GlobalMainStatus, Converter={StaticResource InventoryProcessStatusToIconConverter}}"
-                       Foreground="{DynamicResource HomeCloudSynchronizationBackGround}"
+                       Value="{Binding GlobalMainIcon}"
+                       Foreground="{Binding GlobalMainIconBrush}"
                        VerticalAlignment="Center" HorizontalAlignment="Center" />
 
         </StackPanel>
 
         <TextBlock Height="30"
-                   Text="{Binding GlobalMainStatus, Converter={StaticResource InventoryProcessStatusToTextConverter}, 
-                                    ConverterParameter='InventoryProcess_Inventory'}"
+                   Text="{Binding GlobalMainStatusText}"
                    TextAlignment="Center" FontSize="17" FontWeight="Bold" Margin="6" />
 
         <StackPanel Height="30" Orientation="Horizontal" HorizontalAlignment="Center" Margin="6"
