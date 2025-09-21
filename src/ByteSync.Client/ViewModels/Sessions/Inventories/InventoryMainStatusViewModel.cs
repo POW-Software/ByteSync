@@ -1,7 +1,9 @@
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using Avalonia;
 using Avalonia.Media;
+using Avalonia.Styling;
 using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Business.Inventories;
@@ -71,60 +73,76 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                 .ToPropertyEx(this, x => x.HasErrors)
                 .DisposeWith(disposables);
             
-            // Use shared streams and combine for clean gating
+            // Shared streams
             var statusStream = _inventoryService.InventoryProcessData.GlobalMainStatus
                 .DistinctUntilChanged()
                 .Publish()
                 .RefCount();
             var statsStream = inventoryStatisticsService.Statistics
-                .Publish()
+                .Replay(1)
                 .RefCount();
             
-            // Immediate render for non-success terminal statuses
-            statusStream
+            // Warm-up subscription so replay captures stats as soon as they arrive
+            statsStream
+                .Subscribe(_ => { })
+                .DisposeWith(disposables);
+            
+            // Waiting flag: on Success, stay true until the first stats emission; otherwise false
+            var waitingFinalStats = statusStream
+                .Select(st => st == InventoryTaskStatus.Success
+                    ? statsStream.Where(s => s != null).Take(1).Select(_ => false).StartWith(true)
+                    : Observable.Return(false))
+                .Switch()
+                .DistinctUntilChanged();
+            waitingFinalStats
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(v => IsWaitingFinalStats = v)
+                .DisposeWith(disposables);
+            
+            // Map to final UI visuals: immediate for non-success; gated on stats for success
+            var nonSuccessVisual = statusStream
                 .Where(st => st is InventoryTaskStatus.Error or InventoryTaskStatus.Cancelled or InventoryTaskStatus.NotLaunched)
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(st =>
+                .Select(st =>
                 {
-                    GlobalMainIcon = "SolidXCircle";
                     var key = $"InventoryProcess_Inventory{st}";
-                    GlobalMainStatusText = Resources.ResourceManager.GetString(key, Resources.Culture) ?? string.Empty;
-                    GlobalMainIconBrush = _themeService?.GetBrush("MainSecondaryColor");
-                    IsWaitingFinalStats = false;
-                })
-                .DisposeWith(disposables);
+                    var text = Resources.ResourceManager.GetString(key, Resources.Culture) ?? string.Empty;
+                    
+                    return (Icon: "SolidXCircle", Text: text, BrushKey: "MainSecondaryColor");
+                });
             
-            // On Success, wait (via CombineLatest) until statistics are available, then render once
-            statusStream
+            var successVisual = statusStream
                 .Where(st => st == InventoryTaskStatus.Success)
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => IsWaitingFinalStats = true)
-                .DisposeWith(disposables);
-            
-            statusStream
-                .Where(st => st == InventoryTaskStatus.Success)
-                .CombineLatest(statsStream, (_, s) => s)
-                .Take(1)
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(s =>
+                .Select(_ => statsStream.Where(s => s != null).Take(1))
+                .Switch()
+                .Select(s =>
                 {
-                    var errors = s?.Errors ?? 0;
+                    var stats = s!;
+                    var errors = stats.Errors;
                     if (errors > 0)
                     {
-                        GlobalMainIcon = "RegularError";
-                        GlobalMainStatusText =
-                            Resources.ResourceManager.GetString("InventoryProcess_InventorySuccessWithErrors", Resources.Culture)
-                            ?? Resources.InventoryProcess_InventorySuccess;
-                        GlobalMainIconBrush = _themeService?.GetBrush("MainSecondaryColor");
+                        _logger.LogWarning("DEBUG - inventory completed with {Errors} errors", errors);
+                        var text = Resources.ResourceManager.GetString("InventoryProcess_InventorySuccessWithErrors", Resources.Culture)
+                                   ?? Resources.InventoryProcess_InventorySuccess;
+                        
+                        return (Icon: "RegularError", Text: text, BrushKey: "MainSecondaryColor");
                     }
                     else
                     {
-                        GlobalMainIcon = "SolidCheckCircle";
-                        GlobalMainStatusText = Resources.InventoryProcess_InventorySuccess;
-                        GlobalMainIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
+                        _logger.LogInformation("DEBUG - inventory completed successfully with no errors");
+                        
+                        return (Icon: "SolidCheckCircle", Text: Resources.InventoryProcess_InventorySuccess,
+                            BrushKey: "HomeCloudSynchronizationBackGround");
                     }
-                    
-                    IsWaitingFinalStats = false;
+                });
+            
+            var visuals = Observable.Merge(nonSuccessVisual, successVisual)
+                .ObserveOn(RxApp.MainThreadScheduler);
+            visuals
+                .Subscribe(v =>
+                {
+                    GlobalMainIcon = v.Icon;
+                    GlobalMainStatusText = v.Text;
+                    GlobalMainIconBrush = GetBrushSafe(v.BrushKey);
                 })
                 .DisposeWith(disposables);
         });
@@ -237,5 +255,27 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
             
             await _inventoryService.AbortInventory();
         }
+    }
+    
+    private IBrush? GetBrushSafe(string resourceName)
+    {
+        var brush = _themeService?.GetBrush(resourceName);
+        
+        if (brush != null) return brush;
+        
+        var themeVariant = Application.Current?.RequestedThemeVariant ?? ThemeVariant.Default;
+        if (Application.Current?.Styles.TryGetResource(resourceName, themeVariant, out var res) == true)
+        {
+            if (res is IBrush b) return b;
+            if (res is Color c) return new SolidColorBrush(c);
+        }
+        
+        if (Application.Current?.Styles.TryGetResource(resourceName, ThemeVariant.Default, out var res2) == true)
+        {
+            if (res2 is IBrush b2) return b2;
+            if (res2 is Color c2) return new SolidColorBrush(c2);
+        }
+        
+        return null;
     }
 }
