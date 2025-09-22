@@ -221,9 +221,9 @@ public class InventoryMainStatusViewModelTests
         
         _sessionStatusSubject.OnNext(SessionStatus.Preparation);
         
-        vm.GlobalTotalAnalyzed.Should().Be(0);
-        vm.GlobalAnalyzeSuccess.Should().Be(0);
-        vm.GlobalAnalyzeErrors.Should().Be(0);
+        vm.GlobalTotalAnalyzed.Should().Be(null);
+        vm.GlobalAnalyzeSuccess.Should().Be(null);
+        vm.GlobalAnalyzeErrors.Should().Be(null);
         vm.GlobalMainIcon.Should().Be("None");
         vm.GlobalMainStatusText.Should().BeEmpty();
     }

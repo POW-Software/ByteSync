@@ -170,9 +170,9 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ =>
                 {
-                    GlobalTotalAnalyzed = 0;
-                    GlobalAnalyzeSuccess = 0;
-                    GlobalAnalyzeErrors = 0;
+                    GlobalTotalAnalyzed = null;
+                    GlobalAnalyzeSuccess = null;
+                    GlobalAnalyzeErrors = null;
                     GlobalMainIcon = "None";
                     GlobalMainStatusText = string.Empty;
                     GlobalMainIconBrush = null;
