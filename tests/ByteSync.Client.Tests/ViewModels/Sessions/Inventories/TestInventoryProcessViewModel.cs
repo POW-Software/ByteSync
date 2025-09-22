@@ -3,6 +3,7 @@ using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.TestsCommon;
 using ByteSync.ViewModels.Sessions.Inventories;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 
@@ -18,7 +19,10 @@ public class TestInventoryProcessViewModel : AbstractTester
     private Mock<ISessionService> _mockSessionService;
     private Mock<IInventoryService> _mockInventoryService;
     private Mock<IDialogService> _mockDialogService;
+    private Mock<ILogger<InventoryProcessViewModel>> _mockLogger;
+    
     private InventoryProcessViewModel _inventoryProcessViewModel;
+    
     
     [SetUp]
     public void SetUp()
@@ -30,14 +34,16 @@ public class TestInventoryProcessViewModel : AbstractTester
         _mockSessionService = new Mock<ISessionService>();
         _mockInventoryService = new Mock<IInventoryService>();
         _mockDialogService = new Mock<IDialogService>();
-
+        _mockLogger = new Mock<ILogger<InventoryProcessViewModel>>();
+        
         _inventoryProcessViewModel = new InventoryProcessViewModel(
             _mockInventoryMainStatusViewModel.Object,
             _mockInventoryIdentificationViewModel.Object,
             _mockInventoryAnalysisViewModel.Object,
             _mockInventoryBeforeStartViewModel.Object,
             _mockInventoryService.Object,
-            _mockDialogService.Object
+            _mockDialogService.Object,
+            _mockLogger.Object
         );
     }
     
@@ -58,7 +64,7 @@ public class TestInventoryProcessViewModel : AbstractTester
     //             Mock.Of<ICloudSessionEventsHub>(), Mock.Of<IDialogService>());
     //     });
     // }
-
+    
     // [Test]
     // public void Test_IsRunning()
     // {
