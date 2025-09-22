@@ -849,30 +849,15 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Analysis done!.
-        /// </summary>
-        internal static string InventoryProcess_AnalysisSuccess {
+        internal static string InventoryProcess_DeltaGeneration_Success {
             get {
-                return ResourceManager.GetString("InventoryProcess_AnalysisSuccess", resourceCulture);
+                return ResourceManager.GetString("InventoryProcess_DeltaGeneration_Success", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Analysis running....
-        /// </summary>
-        internal static string InventoryProcess_AnalysisRunning {
+
+        internal static string InventoryProcess_DeltaGeneration_Running {
             get {
-                return ResourceManager.GetString("InventoryProcess_AnalysisRunning", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Analyzed files:.
-        /// </summary>
-        internal static string InventoryProcess_AnalyzedFiles {
-            get {
-                return ResourceManager.GetString("InventoryProcess_AnalyzedFiles", resourceCulture);
+                return ResourceManager.GetString("InventoryProcess_DeltaGeneration_Running", resourceCulture);
             }
         }
         
@@ -1770,9 +1755,9 @@ namespace ByteSync.Assets.Resources {
             }
         }
 
-        public static string InventoryProcess_AnalysisPending {
+        public static string InventoryProcess_DeltaGeneration_Pending {
             get {
-                return ResourceManager.GetString("InventoryProcess_AnalysisPending", resourceCulture);
+                return ResourceManager.GetString("InventoryProcess_DeltaGeneration_Pending", resourceCulture);
             }
         }
         
@@ -1806,9 +1791,9 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
-        public static string InventoryProcess_AnalysisCancelled {
+        public static string InventoryProcess_DeltaGeneration_Cancelled {
             get {
-                return ResourceManager.GetString("InventoryProcess_AnalysisCancelled", resourceCulture);
+                return ResourceManager.GetString("InventoryProcess_DeltaGeneration_Cancelled", resourceCulture);
             }
         }
         
@@ -1854,21 +1839,15 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
-        public static string InventoryProcess_AnalysisError {
+        public static string InventoryProcess_DeltaGeneration_Error {
             get {
-                return ResourceManager.GetString("InventoryProcess_AnalysisError", resourceCulture);
+                return ResourceManager.GetString("InventoryProcess_DeltaGeneration_Error", resourceCulture);
             }
         }
         
-        public static string InventoryProcess_AnalysisNotLaunched {
+        public static string InventoryProcess_DeltaGeneration_NotLaunched {
             get {
-                return ResourceManager.GetString("InventoryProcess_AnalysisNotLaunched", resourceCulture);
-            }
-        }
-        
-        public static string InventoryProcess_AnalyzeErrors {
-            get {
-                return ResourceManager.GetString("InventoryProcess_AnalyzeErrors", resourceCulture);
+                return ResourceManager.GetString("InventoryProcess_DeltaGeneration_NotLaunched", resourceCulture);
             }
         }
         

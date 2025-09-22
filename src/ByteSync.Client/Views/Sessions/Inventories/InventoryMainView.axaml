@@ -35,7 +35,7 @@
                 <local:InventoryIdentificationView Grid.Column="1" DataContext="{Binding InventoryIdentificationViewModel}" />
 
                 <!-- Analysis -->
-                <local:InventoryLocalAnalysisView Grid.Column="2" DataContext="{Binding InventoryLocalAnalysisViewModel}" />
+                <local:InventoryDeltaGenerationView Grid.Column="2" DataContext="{Binding InventoryDeltaGenerationViewModel}" />
             </Grid>
 
         </StackPanel>

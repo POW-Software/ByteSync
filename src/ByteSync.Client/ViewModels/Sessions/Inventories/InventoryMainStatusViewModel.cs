@@ -139,7 +139,6 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                     var errors = stats.Errors;
                     if (errors > 0)
                     {
-                        _logger.LogWarning("DEBUG - inventory completed with {Errors} errors", errors);
                         var text = Resources.ResourceManager.GetString("InventoryProcess_InventorySuccessWithErrors", Resources.Culture)
                                    ?? Resources.InventoryProcess_InventorySuccess;
                         
@@ -147,8 +146,6 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                     }
                     else
                     {
-                        _logger.LogInformation("DEBUG - inventory completed successfully with no errors");
-                        
                         return (Icon: "SolidCheckCircle", Text: Resources.InventoryProcess_InventorySuccess,
                             BrushKey: "HomeCloudSynchronizationBackGround");
                     }

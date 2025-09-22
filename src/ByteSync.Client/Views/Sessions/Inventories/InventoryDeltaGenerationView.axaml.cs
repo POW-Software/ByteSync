@@ -3,9 +3,9 @@ using ByteSync.ViewModels.Sessions.Inventories;
 
 namespace ByteSync.Views.Sessions.Inventories;
 
-public partial class InventoryLocalAnalysisView : ReactiveUserControl<InventoryLocalAnalysisViewModel>
+public partial class InventoryDeltaGenerationView : ReactiveUserControl<InventoryDeltaGenerationViewModel>
 {
-    public InventoryLocalAnalysisView()
+    public InventoryDeltaGenerationView()
     {
         InitializeComponent();
     }

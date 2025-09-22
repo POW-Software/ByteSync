@@ -10,23 +10,23 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Inventories;
 
-public class InventoryLocalAnalysisViewModel : ActivatableViewModelBase
+public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
 {
     private readonly IInventoryService _inventoryService = null!;
     private readonly IThemeService _themeService = null!;
     
-    public InventoryLocalAnalysisViewModel()
+    public InventoryDeltaGenerationViewModel()
     {
     }
     
-    public InventoryLocalAnalysisViewModel(IInventoryService inventoryService)
+    public InventoryDeltaGenerationViewModel(IInventoryService inventoryService)
     {
         _inventoryService = inventoryService;
         
         this.WhenActivated(HandleActivation);
     }
     
-    public InventoryLocalAnalysisViewModel(IInventoryService inventoryService, IThemeService themeService)
+    public InventoryDeltaGenerationViewModel(IInventoryService inventoryService, IThemeService themeService)
         : this(inventoryService)
     {
         _themeService = themeService;
@@ -108,12 +108,12 @@ public class InventoryLocalAnalysisViewModel : ActivatableViewModelBase
                 if (status == InventoryTaskStatus.Success && errors > 0)
                 {
                     AnalysisStatusText =
-                        Resources.ResourceManager.GetString("InventoryProcess_AnalysisSuccessWithErrors", Resources.Culture)
-                        ?? Resources.InventoryProcess_AnalysisSuccess;
+                        Resources.ResourceManager.GetString("InventoryProcess_DeltaGeneration_SuccessWithErrors", Resources.Culture)
+                        ?? Resources.InventoryProcess_DeltaGeneration_Success;
                 }
                 else
                 {
-                    var key = $"InventoryProcess_Analysis{status}";
+                    var key = $"InventoryProcess_DeltaGeneration_{status}";
                     AnalysisStatusText = Resources.ResourceManager.GetString(key, Resources.Culture) ?? string.Empty;
                 }
             })

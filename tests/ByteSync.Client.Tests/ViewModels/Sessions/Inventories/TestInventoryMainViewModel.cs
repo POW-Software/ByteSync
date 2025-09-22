@@ -11,7 +11,7 @@ public class TestInventoryMainViewModel : AbstractTester
 {
     private Mock<InventoryMainStatusViewModel> _mockInventoryMainStatusViewModel;
     private Mock<InventoryIdentificationViewModel> _mockInventoryIdentificationViewModel;
-    private Mock<InventoryLocalAnalysisViewModel> _mockInventoryAnalysisViewModel;
+    private Mock<InventoryDeltaGenerationViewModel> _mockInventoryAnalysisViewModel;
     private Mock<InventoryBeforeStartViewModel> _mockInventoryBeforeStartViewModel;
     private Mock<IInventoryService> _mockInventoryService;
     
@@ -23,7 +23,7 @@ public class TestInventoryMainViewModel : AbstractTester
     {
         _mockInventoryMainStatusViewModel = new Mock<InventoryMainStatusViewModel>();
         _mockInventoryIdentificationViewModel = new Mock<InventoryIdentificationViewModel>();
-        _mockInventoryAnalysisViewModel = new Mock<InventoryLocalAnalysisViewModel>();
+        _mockInventoryAnalysisViewModel = new Mock<InventoryDeltaGenerationViewModel>();
         _mockInventoryBeforeStartViewModel = new Mock<InventoryBeforeStartViewModel>();
         _mockInventoryService = new Mock<IInventoryService>();
         

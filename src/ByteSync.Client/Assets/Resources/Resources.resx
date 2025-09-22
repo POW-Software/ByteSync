@@ -406,11 +406,11 @@ Would you like to continue ?</value>
 	<data name="InventoryProcess_EstimatedEnd" xml:space="preserve">
 		<value>Estimated End:</value>
 	</data>
-	<data name="InventoryProcess_AnalyzedFiles" xml:space="preserve">
-		<value>Analyzed Files:</value>
+    <data name="InventoryProcess_DeltaGeneration_AnalyzedFiles" xml:space="preserve">
+		<value>Files Processed:</value>
 	</data>
-	<data name="InventoryProcess_ProcessedSize" xml:space="preserve">
-		<value>Analyzed Volume:</value>
+    <data name="InventoryProcess_DeltaGeneration_ProcessedSize" xml:space="preserve">
+		<value>Processed Volume:</value>
 	</data>
 	<data name="InventoryProcess_InventoryRunning" xml:space="preserve">
 		<value>Data Inventory running</value>
@@ -418,7 +418,7 @@ Would you like to continue ?</value>
 	<data name="InventoryProcess_IdentificationRunning" xml:space="preserve">
 		<value>Local Identification running</value>
 	</data>
-	<data name="InventoryProcess_AnalysisRunning" xml:space="preserve">
+    <data name="InventoryProcess_DeltaGeneration_Running" xml:space="preserve">
 		<value>Local Analysis running</value>
 	</data>
 	<data name="InventoryProcess_TotalSize" xml:space="preserve">
@@ -430,7 +430,7 @@ Would you like to continue ?</value>
 	<data name="InventoryProcess_InventorySuccess" xml:space="preserve">
 		<value>Data Inventory done</value>
 	</data>
-	<data name="InventoryProcess_AnalysisSuccess" xml:space="preserve">
+    <data name="InventoryProcess_DeltaGeneration_Success" xml:space="preserve">
 		<value>Local Analysis done</value>
 	</data>
 	<data name="InventoryProcess_End" xml:space="preserve">
@@ -610,7 +610,7 @@ Would you like to continue ?</value>
 	<data name="AnalysisMode_Checksum" xml:space="preserve">
 		<value>Checksum</value>
 	</data>
-	<data name="InventoryProcess_AnalysisPending" xml:space="preserve">
+    <data name="InventoryProcess_DeltaGeneration_Pending" xml:space="preserve">
 		<value>Local Analysis pending</value>
 	</data>
 	<data name="InventoryProcess_AbortInventory" xml:space="preserve">
@@ -622,7 +622,7 @@ Would you like to continue ?</value>
 	<data name="InventoryProcess_InventoryCancelled" xml:space="preserve">
 		<value>Data Inventory cancelled</value>
 	</data>
-	<data name="InventoryProcess_AnalysisCancelled" xml:space="preserve">
+    <data name="InventoryProcess_DeltaGeneration_Cancelled" xml:space="preserve">
 		<value>Local Analysis cancelled</value>
 	</data>
 	<data name="SessionMachine_Status_RunningIdentification" xml:space="preserve">
@@ -649,17 +649,17 @@ Would you like to continue ?</value>
 	<data name="InventoryProcess_IdentificationError" xml:space="preserve">
 		<value>Error during the Local Identification</value>
 	</data>
-	<data name="InventoryProcess_AnalysisError" xml:space="preserve">
+    <data name="InventoryProcess_DeltaGeneration_Error" xml:space="preserve">
 		<value>Error during the Local Analysis</value>
 	</data>
-    <data name="InventoryProcess_AnalysisNotLaunched" xml:space="preserve">
+    <data name="InventoryProcess_DeltaGeneration_NotLaunched" xml:space="preserve">
 			<value>Local Analysis not launched</value>
 		</data>
-    <data name="InventoryProcess_AnalysisSuccessWithErrors" xml:space="preserve">
+    <data name="InventoryProcess_DeltaGeneration_SuccessWithErrors" xml:space="preserve">
 			<value>Analysis finished with errors</value>
 		</data>
-    <data name="InventoryProcess_AnalyzeErrors" xml:space="preserve">
-    <value>Analyze errors:</value>
+    <data name="InventoryProcess_DeltaGeneration_AnalyzeErrors" xml:space="preserve">
+    <value>Calculation Errors:</value>
   </data>
     <data name="InventoryProcess_GlobalAnalyzedFiles" xml:space="preserve">
     <value>Total analyzed files:</value>
