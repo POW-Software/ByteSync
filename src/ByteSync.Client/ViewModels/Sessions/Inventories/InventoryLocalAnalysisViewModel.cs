@@ -143,6 +143,7 @@ public class InventoryLocalAnalysisViewModel : ActivatableViewModelBase
     [Reactive]
     public long AnalyzableFiles { get; set; }
     
+    [Reactive]
     public long ProcessedSize { get; set; }
     
     [Reactive]
