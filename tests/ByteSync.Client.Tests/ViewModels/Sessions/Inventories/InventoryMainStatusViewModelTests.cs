@@ -4,6 +4,7 @@ using ByteSync.Business.Inventories;
 using ByteSync.Business.Misc;
 using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Services.Sessions;
@@ -26,6 +27,7 @@ public class InventoryMainStatusViewModelTests
     private Mock<ISessionService> _sessionService = null!;
     private Mock<ITimeTrackingCache> _timeTrackingCache = null!;
     private Mock<IDialogService> _dialogService = null!;
+    private Mock<IThemeService> _themeService = null!;
     private Mock<ILogger<InventoryMainStatusViewModel>> _logger = null!;
     
     [SetUp]
@@ -39,6 +41,8 @@ public class InventoryMainStatusViewModelTests
         
         _statsService = new Mock<IInventoryStatisticsService>();
         _statsService.SetupGet(x => x.Statistics).Returns(_statsSubject.AsObservable());
+        
+        _themeService = new Mock<IThemeService>();
         
         _sessionService = new Mock<ISessionService>();
         _sessionService.SetupGet(x => x.SessionId).Returns("test-session");
@@ -64,8 +68,9 @@ public class InventoryMainStatusViewModelTests
             _sessionService.Object,
             _timeTrackingCache.Object,
             _dialogService.Object,
-            _logger.Object,
-            _statsService.Object);
+            _themeService.Object,
+            _statsService.Object,
+            _logger.Object);
         vm.Activator.Activate();
         
         return vm;

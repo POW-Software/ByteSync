@@ -8,7 +8,6 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Dialogs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Serilog;
 
 namespace ByteSync.ViewModels.Sessions.Inventories;
 
@@ -16,6 +15,7 @@ public class InventoryProcessViewModel : ActivatableViewModelBase
 {
     private readonly IInventoryService _inventoryService;
     private readonly IDialogService _dialogService;
+    private readonly ILogger<InventoryProcessViewModel> _logger;
     
     public InventoryProcessViewModel()
     {
@@ -23,10 +23,12 @@ public class InventoryProcessViewModel : ActivatableViewModelBase
     
     public InventoryProcessViewModel(InventoryMainStatusViewModel inventoryMainStatusViewModel,
         InventoryIdentificationViewModel inventoryIdentificationViewModel, InventoryAnalysisViewModel inventoryAnalysisViewModel,
-        InventoryBeforeStartViewModel inventoryBeforeStartViewModel, IInventoryService inventoryService, IDialogService dialogService)
+        InventoryBeforeStartViewModel inventoryBeforeStartViewModel, IInventoryService inventoryService, IDialogService dialogService,
+        ILogger<InventoryProcessViewModel> logger)
     {
         _inventoryService = inventoryService;
         _dialogService = dialogService;
+        _logger = logger;
         
         InventoryMainStatusViewModel = inventoryMainStatusViewModel;
         InventoryIdentificationViewModel = inventoryIdentificationViewModel;
@@ -48,45 +50,7 @@ public class InventoryProcessViewModel : ActivatableViewModelBase
             .DisposeWith(disposables);
     }
     
-    private IObservable<(InventoryMonitorData, InventoryTaskStatus)> SampledMonitorData
-    {
-        get
-        {
-            var source = InventoryProcessData.InventoryMonitorObservable.CombineLatest(InventoryProcessData.IdentificationStatus);
-            
-            Func<(InventoryMonitorData, InventoryTaskStatus), bool> canSkip =
-                tuple =>
-                {
-                    var inventoryMonitorData = tuple.Item1;
-                    var localInventoryPartStatus = tuple.Item2;
-                    
-                    return inventoryMonitorData.HasNonZeroProperty() &&
-                           localInventoryPartStatus.In(InventoryTaskStatus.Running);
-                };
-            
-            // Share the source so that it's not subscribed multiple times
-            var sharedSource = source.Publish().RefCount();
-            
-            // Sample the source observable every 0.52 seconds, but only for values that can be skipped
-            var sampled = sharedSource
-                .Where(canSkip)
-                .Sample(TimeSpan.FromSeconds(0.5));
-            
-            // Get the values from the shared source that can not be skipped
-            var notSkipped = sharedSource
-                .Where(value => !canSkip(value));
-            
-            // Merge the sampled and notSkipped sequences
-            var merged = sampled.Merge(notSkipped);
-            
-            return merged;
-        }
-    }
-    
     public extern bool HasLocalInventoryStarted { [ObservableAsProperty] get; }
-    
-    [Reactive]
-    public InventoryMonitorData MonitorData { get; set; }
     
     [Reactive]
     public InventoryProcessData InventoryProcessData { get; set; }
@@ -110,9 +74,9 @@ public class InventoryProcessViewModel : ActivatableViewModelBase
         
         if (result == MessageBoxResult.Yes)
         {
-            Log.Information("inventory aborted on user request");
+            _logger.LogInformation("inventory aborted on user request");
             
-            _inventoryService.InventoryProcessData?.RequestInventoryAbort();
+            _inventoryService.InventoryProcessData.RequestInventoryAbort();
             
             await _inventoryService.AbortInventory();
         }

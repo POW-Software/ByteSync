@@ -12,7 +12,7 @@ namespace ByteSync.ViewModels.Sessions.Inventories;
 
 public class InventoryAnalysisViewModel : ActivatableViewModelBase
 {
-    private readonly IInventoryService _inventoryService;
+    private readonly IInventoryService _inventoryService = null!;
     private readonly IThemeService _themeService = null!;
     
     public InventoryAnalysisViewModel()
@@ -82,25 +82,25 @@ public class InventoryAnalysisViewModel : ActivatableViewModelBase
                     case InventoryTaskStatus.Cancelled:
                     case InventoryTaskStatus.NotLaunched:
                         AnalysisIcon = "SolidXCircle";
-                        AnalysisIconBrush = _themeService?.GetBrush("MainSecondaryColor");
+                        AnalysisIconBrush = _themeService.GetBrush("MainSecondaryColor");
                         
                         break;
                     case InventoryTaskStatus.Success:
                         AnalysisIcon = errors > 0 ? "RegularError" : "SolidCheckCircle";
                         AnalysisIconBrush = errors > 0
-                            ? _themeService?.GetBrush("MainSecondaryColor")
-                            : _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
+                            ? _themeService.GetBrush("MainSecondaryColor")
+                            : _themeService.GetBrush("HomeCloudSynchronizationBackGround");
                         
                         break;
                     case InventoryTaskStatus.Pending:
                     case InventoryTaskStatus.Running:
                         AnalysisIcon = "None";
-                        AnalysisIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
+                        AnalysisIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
                         
                         break;
                     default:
                         AnalysisIcon = "None";
-                        AnalysisIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
+                        AnalysisIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
                         
                         break;
                 }

@@ -1,9 +1,7 @@
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Avalonia;
 using Avalonia.Media;
-using Avalonia.Styling;
 using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Business.Inventories;
@@ -33,13 +31,14 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
     }
     
     public InventoryMainStatusViewModel(IInventoryService inventoryService, ISessionService sessionService,
-        ITimeTrackingCache timeTrackingCache, IDialogService dialogService, ILogger<InventoryMainStatusViewModel> logger,
-        IInventoryStatisticsService inventoryStatisticsService)
+        ITimeTrackingCache timeTrackingCache, IDialogService dialogService, IThemeService themeService,
+        IInventoryStatisticsService inventoryStatisticsService, ILogger<InventoryMainStatusViewModel> logger)
     {
         _inventoryService = inventoryService;
         _sessionService = sessionService;
         _timeTrackingCache = timeTrackingCache;
         _dialogService = dialogService;
+        _themeService = themeService;
         _logger = logger;
         
         AbortIventoryCommand = ReactiveCommand.CreateFromTask(AbortInventory);
@@ -162,7 +161,7 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                 {
                     GlobalMainIcon = v.Icon;
                     GlobalMainStatusText = v.Text;
-                    GlobalMainIconBrush = GetBrushSafe(v.BrushKey);
+                    GlobalMainIconBrush = themeService.GetBrush(v.BrushKey);
                 })
                 .DisposeWith(disposables);
             
@@ -180,16 +179,6 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                 .DisposeWith(disposables);
         });
     }
-    
-    // // Overload with theme service for color selection
-    // public InventoryMainStatusViewModel(IInventoryService inventoryService, ISessionService sessionService,
-    //     ITimeTrackingCache timeTrackingCache, IDialogService dialogService, ILogger<InventoryMainStatusViewModel> logger,
-    //     IInventoryStatisticsService inventoryStatisticsService, IThemeService themeService)
-    //     : this(inventoryService, sessionService, timeTrackingCache, dialogService, logger, inventoryStatisticsService)
-    // {
-    //     _themeService = themeService;
-    //     GlobalMainIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
-    // }
     
     private void HandleActivation(CompositeDisposable disposables)
     {
@@ -274,27 +263,5 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
             
             await _inventoryService.AbortInventory();
         }
-    }
-    
-    private IBrush? GetBrushSafe(string resourceName)
-    {
-        var brush = _themeService?.GetBrush(resourceName);
-        
-        if (brush != null) return brush;
-        
-        var themeVariant = Application.Current?.RequestedThemeVariant ?? ThemeVariant.Default;
-        if (Application.Current?.Styles.TryGetResource(resourceName, themeVariant, out var res) == true)
-        {
-            if (res is IBrush b) return b;
-            if (res is Color c) return new SolidColorBrush(c);
-        }
-        
-        if (Application.Current?.Styles.TryGetResource(resourceName, ThemeVariant.Default, out var res2) == true)
-        {
-            if (res2 is IBrush b2) return b2;
-            if (res2 is Color c2) return new SolidColorBrush(c2);
-        }
-        
-        return null;
     }
 }
