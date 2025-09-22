@@ -1,9 +1,6 @@
 ﻿using ByteSync.Interfaces.Controls.Inventories;
-using ByteSync.Interfaces.Dialogs;
-using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.TestsCommon;
 using ByteSync.ViewModels.Sessions.Inventories;
-using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 
@@ -16,10 +13,7 @@ public class TestInventoryMainViewModel : AbstractTester
     private Mock<InventoryIdentificationViewModel> _mockInventoryIdentificationViewModel;
     private Mock<InventoryLocalAnalysisViewModel> _mockInventoryAnalysisViewModel;
     private Mock<InventoryBeforeStartViewModel> _mockInventoryBeforeStartViewModel;
-    private Mock<ISessionService> _mockSessionService;
     private Mock<IInventoryService> _mockInventoryService;
-    private Mock<IDialogService> _mockDialogService;
-    private Mock<ILogger<InventoryMainViewModel>> _mockLogger;
     
     private InventoryMainViewModel _inventoryMainViewModel;
     
@@ -31,19 +25,14 @@ public class TestInventoryMainViewModel : AbstractTester
         _mockInventoryIdentificationViewModel = new Mock<InventoryIdentificationViewModel>();
         _mockInventoryAnalysisViewModel = new Mock<InventoryLocalAnalysisViewModel>();
         _mockInventoryBeforeStartViewModel = new Mock<InventoryBeforeStartViewModel>();
-        _mockSessionService = new Mock<ISessionService>();
         _mockInventoryService = new Mock<IInventoryService>();
-        _mockDialogService = new Mock<IDialogService>();
-        _mockLogger = new Mock<ILogger<InventoryMainViewModel>>();
         
         _inventoryMainViewModel = new InventoryMainViewModel(
             _mockInventoryMainStatusViewModel.Object,
             _mockInventoryIdentificationViewModel.Object,
             _mockInventoryAnalysisViewModel.Object,
             _mockInventoryBeforeStartViewModel.Object,
-            _mockInventoryService.Object,
-            _mockDialogService.Object,
-            _mockLogger.Object
+            _mockInventoryService.Object
         );
     }
     
