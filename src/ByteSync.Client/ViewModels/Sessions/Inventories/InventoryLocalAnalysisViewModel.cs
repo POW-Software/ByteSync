@@ -10,23 +10,23 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Inventories;
 
-public class InventoryAnalysisViewModel : ActivatableViewModelBase
+public class InventoryLocalAnalysisViewModel : ActivatableViewModelBase
 {
     private readonly IInventoryService _inventoryService = null!;
     private readonly IThemeService _themeService = null!;
     
-    public InventoryAnalysisViewModel()
+    public InventoryLocalAnalysisViewModel()
     {
     }
     
-    public InventoryAnalysisViewModel(IInventoryService inventoryService)
+    public InventoryLocalAnalysisViewModel(IInventoryService inventoryService)
     {
         _inventoryService = inventoryService;
         
         this.WhenActivated(HandleActivation);
     }
     
-    public InventoryAnalysisViewModel(IInventoryService inventoryService, IThemeService themeService)
+    public InventoryLocalAnalysisViewModel(IInventoryService inventoryService, IThemeService themeService)
         : this(inventoryService)
     {
         _themeService = themeService;

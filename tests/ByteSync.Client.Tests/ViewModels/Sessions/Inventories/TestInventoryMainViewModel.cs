@@ -10,18 +10,18 @@ using NUnit.Framework;
 namespace ByteSync.Tests.ViewModels.Sessions.Inventories;
 
 [TestFixture]
-public class TestInventoryProcessViewModel : AbstractTester
+public class TestInventoryMainViewModel : AbstractTester
 {
     private Mock<InventoryMainStatusViewModel> _mockInventoryMainStatusViewModel;
     private Mock<InventoryIdentificationViewModel> _mockInventoryIdentificationViewModel;
-    private Mock<InventoryAnalysisViewModel> _mockInventoryAnalysisViewModel;
+    private Mock<InventoryLocalAnalysisViewModel> _mockInventoryAnalysisViewModel;
     private Mock<InventoryBeforeStartViewModel> _mockInventoryBeforeStartViewModel;
     private Mock<ISessionService> _mockSessionService;
     private Mock<IInventoryService> _mockInventoryService;
     private Mock<IDialogService> _mockDialogService;
-    private Mock<ILogger<InventoryProcessViewModel>> _mockLogger;
+    private Mock<ILogger<InventoryMainViewModel>> _mockLogger;
     
-    private InventoryProcessViewModel _inventoryProcessViewModel;
+    private InventoryMainViewModel _inventoryMainViewModel;
     
     
     [SetUp]
@@ -29,14 +29,14 @@ public class TestInventoryProcessViewModel : AbstractTester
     {
         _mockInventoryMainStatusViewModel = new Mock<InventoryMainStatusViewModel>();
         _mockInventoryIdentificationViewModel = new Mock<InventoryIdentificationViewModel>();
-        _mockInventoryAnalysisViewModel = new Mock<InventoryAnalysisViewModel>();
+        _mockInventoryAnalysisViewModel = new Mock<InventoryLocalAnalysisViewModel>();
         _mockInventoryBeforeStartViewModel = new Mock<InventoryBeforeStartViewModel>();
         _mockSessionService = new Mock<ISessionService>();
         _mockInventoryService = new Mock<IInventoryService>();
         _mockDialogService = new Mock<IDialogService>();
-        _mockLogger = new Mock<ILogger<InventoryProcessViewModel>>();
+        _mockLogger = new Mock<ILogger<InventoryMainViewModel>>();
         
-        _inventoryProcessViewModel = new InventoryProcessViewModel(
+        _inventoryMainViewModel = new InventoryMainViewModel(
             _mockInventoryMainStatusViewModel.Object,
             _mockInventoryIdentificationViewModel.Object,
             _mockInventoryAnalysisViewModel.Object,

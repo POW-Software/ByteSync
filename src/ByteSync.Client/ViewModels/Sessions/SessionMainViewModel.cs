@@ -19,12 +19,12 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions;
 
-public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivatableViewModel 
+public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivatableViewModel
 {
     public string? UrlPathSegment { get; }
-        
+    
     public IScreen HostScreen { get; }
-
+    
     public ViewModelActivator Activator { get; }
     
     private readonly ISessionService _sessionService;
@@ -33,22 +33,22 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
     private readonly IDataNodeViewModelFactory _dataNodeViewModelFactory;
     private readonly IDataNodeRepository _dataNodeRepository;
     private readonly ISessionMemberRepository _sessionMemberRepository;
-
-    public SessionMainViewModel(IScreen screen, ISessionService sessionService, InventoryProcessViewModel inventoryProcessViewModel, 
-        ComparisonResultViewModel comparisonResultViewModel, CurrentCloudSessionViewModel currentCloudSessionViewModel, 
-        SynchronizationMainViewModel synchronizationMainViewModel, IDataNodeViewModelFactory dataNodeViewModelFactory, 
+    
+    public SessionMainViewModel(IScreen screen, ISessionService sessionService, InventoryMainViewModel inventoryMainViewModel,
+        ComparisonResultViewModel comparisonResultViewModel, CurrentCloudSessionViewModel currentCloudSessionViewModel,
+        SynchronizationMainViewModel synchronizationMainViewModel, IDataNodeViewModelFactory dataNodeViewModelFactory,
         IDataNodeRepository dataNodeRepository, ISessionMemberRepository sessionMemberRepository)
     {
         HostScreen = screen;
         Activator = new ViewModelActivator();
-
+        
         _sessionService = sessionService;
         _dataNodeViewModelFactory = dataNodeViewModelFactory;
         _dataNodeRepository = dataNodeRepository;
         _sessionMemberRepository = sessionMemberRepository;
         
         CloudSessionManagement = currentCloudSessionViewModel;
-        InventoryProcess = inventoryProcessViewModel;
+        InventoryMain = inventoryMainViewModel;
         ComparisonResult = comparisonResultViewModel;
         SynchronizationProcess = synchronizationMainViewModel;
         
@@ -61,7 +61,7 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
             .Bind(out _dataNodes)
             .DisposeMany()
             .Subscribe();
-
+        
         this.WhenActivated(disposables =>
         {
             dataNodesCache.DisposeWith(disposables);
@@ -71,7 +71,7 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
                 .Select(x => x == SessionModes.Cloud)
                 .ToPropertyEx(this, x => x.IsCloudSessionMode)
                 .DisposeWith(disposables);
-                
+            
             _sessionService.SessionObservable
                 .Where(x => x != null)
                 .Select(x => x is CloudSession)
@@ -80,10 +80,10 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
             
             _sessionService.SessionStatusObservable.CombineLatest(_sessionMemberRepository.SortedSessionMembersObservable)
                 .Select(s => (s.First == SessionStatus.Preparation && s.Second.Count > 0)
-                                || (s.First == SessionStatus.Inventory 
-                                || s.First == SessionStatus.Comparison
-                                || s.First == SessionStatus.Synchronization)
-                             )
+                             || (s.First == SessionStatus.Inventory
+                                 || s.First == SessionStatus.Comparison
+                                 || s.First == SessionStatus.Synchronization)
+                )
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .ToPropertyEx(this, x => x.IsInventoryVisible)
                 .DisposeWith(disposables);
@@ -103,7 +103,7 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
     }
     
     public ReadOnlyObservableCollection<DataNodeViewModel> DataNodes => _dataNodes;
-
+    
     [Reactive]
     public ViewModelBase? CloudSessionManagement { get; set; }
     
@@ -113,19 +113,19 @@ public class SessionMainViewModel : ViewModelBase, IRoutableViewModel, IActivata
     public extern bool IsCloudSessionMode { [ObservableAsProperty] get; }
     
     public extern bool IsCloudSession { [ObservableAsProperty] get; }
-
+    
     public extern bool IsInventoryVisible { [ObservableAsProperty] get; }
-        
+    
     public extern bool IsComparisonVisible { [ObservableAsProperty] get; }
     
     public extern bool IsSynchronizationVisible { [ObservableAsProperty] get; }
     
     [Reactive]
-    public ViewModelBase InventoryProcess { get; set; }
-        
+    public ViewModelBase InventoryMain { get; set; }
+    
     [Reactive]
     public ComparisonResultViewModel ComparisonResult { get; set; }
-        
+    
     [Reactive]
     public ViewModelBase SynchronizationProcess { get; set; }
 }

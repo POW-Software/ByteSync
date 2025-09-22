@@ -6,51 +6,52 @@
              xmlns:dataNodes="clr-namespace:ByteSync.Views.Sessions.DataNodes"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ByteSync.Views.Sessions.SessionMainView">
-    
+
     <Design.DataContext>
         <sessions:SessionMainViewModel />
     </Design.DataContext>
-    
+
     <Grid RowDefinitions="Auto,*,Auto" Background="{DynamicResource VeryLightGray}">
         <Grid Grid.Row="1" Background="{DynamicResource VeryLightGray}">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" >
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical">
 
-                    <StackPanel Orientation="Vertical" Margin="0 0 0 6" >
-                        <Grid Background="{DynamicResource SettingsHeaderColor}" MinHeight="88" IsVisible="{Binding IsCloudSessionMode}"> 
+                    <StackPanel Orientation="Vertical" Margin="0 0 0 6">
+                        <Grid Background="{DynamicResource SettingsHeaderColor}" MinHeight="88" IsVisible="{Binding IsCloudSessionMode}">
                             <ContentControl Margin="15 0" VerticalAlignment="Center"
                                             Content="{Binding CloudSessionManagement}" />
                         </Grid>
-                        
-                        <Grid Background="{DynamicResource SettingsHeaderColor}" MinHeight="88" IsVisible="{Binding !IsCloudSessionMode}"> 
+
+                        <Grid Background="{DynamicResource SettingsHeaderColor}" MinHeight="88" IsVisible="{Binding !IsCloudSessionMode}">
                             <ContentControl Margin="15 0" VerticalAlignment="Center"
                                             Content="{Binding LocalSessionManagement}" />
                         </Grid>
-                        
+
                     </StackPanel>
-                    
+
                     <ItemsControl IsVisible="{Binding IsCloudSession}" Margin="6" Background="{DynamicResource BlockBackColor}"
                                   ItemsSource="{Binding DataNodes}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <WrapPanel  Orientation="Horizontal"/>
+                                <WrapPanel Orientation="Horizontal" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <dataNodes:DataNodeView/>
+                                <dataNodes:DataNodeView />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    
-                    <ContentControl Content="{Binding InventoryProcess}" Background="{DynamicResource BlockBackColor}"
+
+                    <ContentControl Content="{Binding InventoryMain}" Background="{DynamicResource BlockBackColor}"
                                     IsVisible="{Binding IsInventoryVisible}" MinHeight="320" Margin="6" />
-                    
+
                     <ContentControl Content="{Binding ComparisonResult}" Background="{DynamicResource BlockBackColor}"
                                     IsVisible="{Binding IsComparisonVisible}" Margin="6" />
-                    
+
                     <ContentControl Content="{Binding SynchronizationProcess}" Background="{DynamicResource BlockBackColor}"
-                                    IsVisible="{Binding ComparisonResult.AreResultsLoaded}" MinHeight="185" Margin="6" /> <!--IsVisible="{Binding IsSynchronizationVisible}"-->
+                                    IsVisible="{Binding ComparisonResult.AreResultsLoaded}" MinHeight="185" Margin="6" />
+                    <!--IsVisible="{Binding IsSynchronizationVisible}"-->
 
                 </StackPanel>
             </ScrollViewer>

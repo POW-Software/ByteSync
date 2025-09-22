@@ -4,13 +4,12 @@ using ReactiveUI;
 
 namespace ByteSync.Views.Sessions.Inventories;
 
-public partial class InventoryProcessView : ReactiveUserControl<InventoryProcessViewModel>
+public partial class InventoryMainView : ReactiveUserControl<InventoryMainViewModel>
 {
-    public InventoryProcessView()
+    public InventoryMainView()
     {
         InitializeComponent();
         
         this.WhenActivated(disposables => { });
-        
     }
 }
