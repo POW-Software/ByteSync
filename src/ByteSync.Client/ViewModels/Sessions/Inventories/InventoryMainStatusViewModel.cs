@@ -41,7 +41,7 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
         _themeService = themeService;
         _logger = logger;
         
-        AbortIventoryCommand = ReactiveCommand.CreateFromTask(AbortInventory);
+        AbortInventoryCommand = ReactiveCommand.CreateFromTask(AbortInventory);
         
         EstimatedProcessEndName = Resources.InventoryProcess_EstimatedEnd;
         
@@ -210,7 +210,7 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
             .DisposeWith(disposables);
     }
     
-    public ReactiveCommand<Unit, Unit> AbortIventoryCommand { get; set; } = null!;
+    public ReactiveCommand<Unit, Unit> AbortInventoryCommand { get; set; } = null!;
     
     public extern InventoryTaskStatus GlobalMainStatus { [ObservableAsProperty] get; }
     

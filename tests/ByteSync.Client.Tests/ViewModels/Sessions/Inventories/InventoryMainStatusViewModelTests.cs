@@ -248,7 +248,7 @@ public class InventoryMainStatusViewModelTests
         
         var vm = CreateVm();
         
-        await vm.AbortIventoryCommand.Execute().ToTask();
+        await vm.AbortInventoryCommand.Execute().ToTask();
         
         messageBoxViewModel.ShowYesNo.Should().BeTrue();
         _dialogService.Verify(x => x.ShowMessageBoxAsync(messageBoxViewModel), Times.Once);
@@ -266,7 +266,7 @@ public class InventoryMainStatusViewModelTests
         
         var vm = CreateVm();
         
-        await vm.AbortIventoryCommand.Execute().ToTask();
+        await vm.AbortInventoryCommand.Execute().ToTask();
         
         messageBoxViewModel.ShowYesNo.Should().BeTrue();
         _inventoryService.Verify(x => x.AbortInventory(), Times.Never);
