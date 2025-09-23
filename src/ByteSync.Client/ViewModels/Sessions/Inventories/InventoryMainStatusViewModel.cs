@@ -162,6 +162,17 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                 })
                 .DisposeWith(disposables);
             
+            // Ensure text is visible while spinner is active
+            var inProgressCombined = statusStream
+                .Select(st => st is InventoryTaskStatus.Pending or InventoryTaskStatus.Running)
+                .CombineLatest(waitingFinalStats, (rp, wait) => rp || wait)
+                .DistinctUntilChanged();
+            inProgressCombined
+                .Where(x => x)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ => { GlobalMainStatusText = Resources.InventoryProcess_InventoryRunning; })
+                .DisposeWith(disposables);
+            
             sessionPreparation
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ =>
