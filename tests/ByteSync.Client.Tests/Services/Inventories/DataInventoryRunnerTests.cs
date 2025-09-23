@@ -186,7 +186,7 @@ public class DataInventoryRunnerTests
     [Test]
     public void Constructor_StopsTimer_OnMainStatusNotRunning()
     {
-        var sut = CreateSut();
+        _ = CreateSut();
         
         _processData.MainStatus.OnNext(InventoryTaskStatus.Pending);
         
@@ -196,7 +196,8 @@ public class DataInventoryRunnerTests
     [Test]
     public void Constructor_StopsTimer_OnSessionPreparation()
     {
-        var sut = CreateSut();
+        _ = CreateSut();
+        
         _timeTrackingComputer.Invocations.Clear();
         _sessionStatusSubject.OnNext(SessionStatus.Preparation);
         _timeTrackingComputer.Verify(x => x.Stop(), Times.AtLeastOnce());
