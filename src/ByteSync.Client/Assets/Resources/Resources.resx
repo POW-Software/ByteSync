@@ -659,19 +659,22 @@ Would you like to continue ?</value>
 		<value>Delta Generation finished with errors</value>
 	</data>
     <data name="InventoryProcess_DeltaGeneration_AnalyzeSuccess" xml:space="preserve">
-    <value>Successful Calculations:</value>
+        <value>Successful Calculations:</value>
     </data>
     <data name="InventoryProcess_DeltaGeneration_AnalyzeErrors" xml:space="preserve">
-    <value>Calculation Errors:</value>
+        <value>Calculation Errors:</value>
     </data>
     <data name="InventoryProcess_GlobalAnalyzedFiles" xml:space="preserve">
-    <value>Total analyzed files:</value>
+        <value>Total files processed:</value>
+    </data>
+    <data name="InventoryProcess_GlobalProcessedSize" xml:space="preserve">
+        <value>Total processed volume:</value>
     </data>
     <data name="InventoryProcess_GlobalAnalyzeSuccess" xml:space="preserve">
-        <value>Successful analyses:</value>
+        <value>Total successful calculations:</value>
     </data>
     <data name="InventoryProcess_GlobalAnalyzeErrors" xml:space="preserve">
-        <value>Failed analyses:</value>
+        <value>Total calculation errors:</value>
     </data>
 	<data name="ContentIdentity_AnErrorOccured" xml:space="preserve">
 		<value>An error has occurred during the analysis</value>

@@ -60,6 +60,7 @@ public class InventoryStatisticsService : IInventoryStatisticsService
         var totalAnalyzed = 0;
         var success = 0;
         var errors = 0;
+        long processedSize = 0;
         
         foreach (var inventoryFile in inventoryFiles)
         {
@@ -87,6 +88,7 @@ public class InventoryStatisticsService : IInventoryStatisticsService
                         if (hasError || hasFingerprint)
                         {
                             totalAnalyzed += 1;
+                            processedSize += fd.Size;
                         }
                     }
                 }
@@ -100,6 +102,7 @@ public class InventoryStatisticsService : IInventoryStatisticsService
         var stats = new InventoryStatistics
         {
             TotalAnalyzed = totalAnalyzed,
+            ProcessedSize = processedSize,
             Success = success,
             Errors = errors
         };

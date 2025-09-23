@@ -58,6 +58,7 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_Start}"
@@ -93,15 +94,21 @@
                 <TextBlock Text="{Binding GlobalTotalAnalyzed, FallbackValue=''}" />
             </Border>
 
-            <Label Grid.Row="5" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzeSuccess}"
+            <Label Grid.Row="5" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalProcessedSize}"
                    Classes="InventoryStatusDescription" />
             <Border Grid.Row="5" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                <TextBlock Text="{Binding GlobalProcessedSize, FallbackValue='', Converter={StaticResource FormatKbSizeConverter}}" />
+            </Border>
+
+            <Label Grid.Row="6" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzeSuccess}"
+                   Classes="InventoryStatusDescription" />
+            <Border Grid.Row="6" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
                 <TextBlock Text="{Binding GlobalAnalyzeSuccess, FallbackValue=''}" />
             </Border>
 
-            <Label Grid.Row="6" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzeErrors}"
+            <Label Grid.Row="7" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzeErrors}"
                    Classes="InventoryStatusDescription" />
-            <Border Grid.Row="6" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge" Classes.Secondary="{Binding HasErrors}">
+            <Border Grid.Row="7" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge" Classes.Secondary="{Binding HasErrors}">
                 <TextBlock Text="{Binding GlobalAnalyzeErrors, FallbackValue=''}" />
             </Border>
         </Grid>

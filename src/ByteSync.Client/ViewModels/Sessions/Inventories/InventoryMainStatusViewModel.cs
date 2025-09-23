@@ -62,6 +62,7 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                 .Subscribe(s =>
                 {
                     GlobalTotalAnalyzed = s?.TotalAnalyzed;
+                    GlobalProcessedSize = s?.ProcessedSize;
                     GlobalAnalyzeSuccess = s?.Success;
                     GlobalAnalyzeErrors = s?.Errors;
                 })
@@ -178,6 +179,7 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                 .Subscribe(_ =>
                 {
                     GlobalTotalAnalyzed = null;
+                    GlobalProcessedSize = null;
                     GlobalAnalyzeSuccess = null;
                     GlobalAnalyzeErrors = null;
                     GlobalMainIcon = "None";
@@ -237,6 +239,9 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
     
     [Reactive]
     public int? GlobalTotalAnalyzed { get; set; }
+    
+    [Reactive]
+    public long? GlobalProcessedSize { get; set; }
     
     [Reactive]
     public int? GlobalAnalyzeSuccess { get; set; }

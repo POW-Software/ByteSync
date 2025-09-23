@@ -650,19 +650,22 @@ Voulez-vous continuer ?</value>
 		<value>Génération des Delta terminée avec erreurs</value>
 	</data>
     <data name="InventoryProcess_DeltaGeneration_AnalyzeSuccess" xml:space="preserve">
-    <value>Calculs réussis :</value>
+        <value>Calculs réussis :</value>
     </data>
     <data name="InventoryProcess_DeltaGeneration_AnalyzeErrors" xml:space="preserve">
-    <value>Erreurs de calcul :</value>
+        <value>Erreurs de calcul :</value>
     </data>
     <data name="InventoryProcess_GlobalAnalyzedFiles" xml:space="preserve">
-    <value>Total des fichiers analysés :</value>
+        <value>Total des fichiers traités :</value>
+    </data>
+    <data name="InventoryProcess_GlobalProcessedSize" xml:space="preserve">
+        <value>Total du volume traité :</value>
     </data>
     <data name="InventoryProcess_GlobalAnalyzeSuccess" xml:space="preserve">
-    <value>Analyses avec succès :</value>
+        <value>Total des calculs réussis :</value>
     </data>
     <data name="InventoryProcess_GlobalAnalyzeErrors" xml:space="preserve">
-        <value>Analyses en échec :</value>
+        <value>Total des erreurs de calcul :</value>
     </data>
 	<data name="ContentIdentity_AnErrorOccured" xml:space="preserve">
 		<value>Une erreur est survenue durant l'analyse</value>
