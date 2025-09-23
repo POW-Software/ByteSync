@@ -79,13 +79,11 @@ public class InventoryDeltaGenerationViewModelTests
         });
         
         vm.ShouldEventuallyBe(x => x.AnalyzedFiles, 5);
-        
-        vm.AnalyzedFiles.Should().Be(5);
-        vm.AnalyzeErrors.Should().Be(2);
-        vm.AnalyzableFiles.Should().Be(8);
-        vm.ProcessedSize.Should().Be(42);
-        vm.AnalyzeSuccess.Should().Be(3);
-        vm.HasErrors.Should().BeTrue();
+        vm.ShouldEventuallyBe(x => x.AnalyzeErrors, 2);
+        vm.ShouldEventuallyBe(x => x.AnalyzableFiles, 8);
+        vm.ShouldEventuallyBe(x => x.ProcessedSize, 42);
+        vm.ShouldEventuallyBe(x => x.AnalyzeSuccess, 3);
+        vm.ShouldEventuallyBe(x => x.HasErrors, true);
         
         _processData.UpdateMonitorData(m =>
         {
@@ -94,11 +92,9 @@ public class InventoryDeltaGenerationViewModelTests
         });
         
         vm.ShouldEventuallyBe(x => x.HasErrors, false);
-        
-        vm.AnalyzedFiles.Should().Be(9);
-        vm.AnalyzeErrors.Should().Be(0);
-        vm.AnalyzeSuccess.Should().Be(9);
-        vm.HasErrors.Should().BeFalse();
+        vm.ShouldEventuallyBe(x => x.AnalyzedFiles, 9);
+        vm.ShouldEventuallyBe(x => x.AnalyzeErrors, 0);
+        vm.ShouldEventuallyBe(x => x.AnalyzeSuccess, 9);
     }
     
     [Test]
