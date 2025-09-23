@@ -5,22 +5,22 @@
              xmlns:inventories="clr-namespace:ByteSync.ViewModels.Sessions.Inventories"
              xmlns:local="clr-namespace:ByteSync.Views.Sessions.Inventories"
              mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="450"
-             x:Class="ByteSync.Views.Sessions.Inventories.InventoryProcessView">
-    
+             x:Class="ByteSync.Views.Sessions.Inventories.InventoryMainView">
+
     <Design.DataContext>
-        <inventories:InventoryProcessViewModel />
+        <inventories:InventoryMainViewModel />
     </Design.DataContext>
-    
+
     <Grid Margin="6">
         <StackPanel Orientation="Vertical" VerticalAlignment="Center">
 
-            <!--Before HasLocalInventoryStarted--> 
+            <!--Before HasLocalInventoryStarted-->
             <Grid IsVisible="{Binding !HasLocalInventoryStarted}">
-                <local:InventoryBeforeStartView DataContext="{Binding InventoryBeforeStartViewModel}"/>
+                <local:InventoryBeforeStartView DataContext="{Binding InventoryBeforeStartViewModel}" />
             </Grid>
 
 
-            <!--Details, after HasLocalInventoryStarted-->      
+            <!--Details, after HasLocalInventoryStarted-->
             <Grid IsVisible="{Binding HasLocalInventoryStarted}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" MaxWidth="600"></ColumnDefinition>
@@ -29,13 +29,13 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Main Status -->
-                <local:InventoryMainStatusView Grid.Column="0" DataContext="{Binding InventoryMainStatusViewModel}"/>
+                <local:InventoryMainStatusView Grid.Column="0" DataContext="{Binding InventoryMainStatusViewModel}" />
 
                 <!-- Identification -->
-                <local:InventoryIdentificationView Grid.Column="1" DataContext="{Binding InventoryIdentificationViewModel}"/>
+                <local:InventoryIdentificationView Grid.Column="1" DataContext="{Binding InventoryIdentificationViewModel}" />
 
                 <!-- Analysis -->
-                <local:InventoryAnalysisView Grid.Column="2" DataContext="{Binding InventoryAnalysisViewModel}"/>
+                <local:InventoryDeltaGenerationView Grid.Column="2" DataContext="{Binding InventoryDeltaGenerationViewModel}" />
             </Grid>
 
         </StackPanel>

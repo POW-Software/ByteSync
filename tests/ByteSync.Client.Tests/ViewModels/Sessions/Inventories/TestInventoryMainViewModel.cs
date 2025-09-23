@@ -1,6 +1,4 @@
 ﻿using ByteSync.Interfaces.Controls.Inventories;
-using ByteSync.Interfaces.Dialogs;
-using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.TestsCommon;
 using ByteSync.ViewModels.Sessions.Inventories;
 using Moq;
@@ -9,35 +7,32 @@ using NUnit.Framework;
 namespace ByteSync.Tests.ViewModels.Sessions.Inventories;
 
 [TestFixture]
-public class TestInventoryProcessViewModel : AbstractTester
+public class TestInventoryMainViewModel : AbstractTester
 {
     private Mock<InventoryMainStatusViewModel> _mockInventoryMainStatusViewModel;
     private Mock<InventoryIdentificationViewModel> _mockInventoryIdentificationViewModel;
-    private Mock<InventoryAnalysisViewModel> _mockInventoryAnalysisViewModel;
+    private Mock<InventoryDeltaGenerationViewModel> _mockInventoryAnalysisViewModel;
     private Mock<InventoryBeforeStartViewModel> _mockInventoryBeforeStartViewModel;
-    private Mock<ISessionService> _mockSessionService;
     private Mock<IInventoryService> _mockInventoryService;
-    private Mock<IDialogService> _mockDialogService;
-    private InventoryProcessViewModel _inventoryProcessViewModel;
+    
+    private InventoryMainViewModel _inventoryMainViewModel;
+    
     
     [SetUp]
     public void SetUp()
     {
         _mockInventoryMainStatusViewModel = new Mock<InventoryMainStatusViewModel>();
         _mockInventoryIdentificationViewModel = new Mock<InventoryIdentificationViewModel>();
-        _mockInventoryAnalysisViewModel = new Mock<InventoryAnalysisViewModel>();
+        _mockInventoryAnalysisViewModel = new Mock<InventoryDeltaGenerationViewModel>();
         _mockInventoryBeforeStartViewModel = new Mock<InventoryBeforeStartViewModel>();
-        _mockSessionService = new Mock<ISessionService>();
         _mockInventoryService = new Mock<IInventoryService>();
-        _mockDialogService = new Mock<IDialogService>();
-
-        _inventoryProcessViewModel = new InventoryProcessViewModel(
+        
+        _inventoryMainViewModel = new InventoryMainViewModel(
             _mockInventoryMainStatusViewModel.Object,
             _mockInventoryIdentificationViewModel.Object,
             _mockInventoryAnalysisViewModel.Object,
             _mockInventoryBeforeStartViewModel.Object,
-            _mockInventoryService.Object,
-            _mockDialogService.Object
+            _mockInventoryService.Object
         );
     }
     
@@ -58,7 +53,7 @@ public class TestInventoryProcessViewModel : AbstractTester
     //             Mock.Of<ICloudSessionEventsHub>(), Mock.Of<IDialogService>());
     //     });
     // }
-
+    
     // [Test]
     // public void Test_IsRunning()
     // {

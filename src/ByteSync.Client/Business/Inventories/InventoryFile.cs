@@ -10,33 +10,27 @@ public class InventoryFile : IEquatable<InventoryFile>
         SharedFileDefinition = sharedFileDefinition;
         FullName = fullName;
     }
-
+    
     public InventoryFile(LocalSharedFile localSharedFile)
     {
         SharedFileDefinition = localSharedFile.SharedFileDefinition;
         FullName = localSharedFile.LocalPath;
     }
-
+    
     public SharedFileDefinition SharedFileDefinition { get; }
     
     public string FullName { get; }
-
+    
     public bool IsBaseInventory
     {
-        get
-        {
-            return SharedFileDefinition.SharedFileType == SharedFileTypes.BaseInventory;
-        }
+        get { return SharedFileDefinition.SharedFileType == SharedFileTypes.BaseInventory; }
     }
     
     public bool IsFullInventory
     {
-        get
-        {
-            return SharedFileDefinition.SharedFileType == SharedFileTypes.FullInventory;
-        }
+        get { return SharedFileDefinition.SharedFileType == SharedFileTypes.FullInventory; }
     }
-
+    
     public LocalInventoryModes LocalInventoryMode
     {
         get
@@ -51,20 +45,32 @@ public class InventoryFile : IEquatable<InventoryFile>
             }
         }
     }
-
+    
     public bool Equals(InventoryFile? other)
     {
         return FullName == other?.FullName;
     }
-
+    
     public override bool Equals(object? obj)
     {
-        if (ReferenceEquals(null, obj)) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != this.GetType()) return false;
+        if (ReferenceEquals(null, obj))
+        {
+            return false;
+        }
+        
+        if (ReferenceEquals(this, obj))
+        {
+            return true;
+        }
+        
+        if (obj.GetType() != this.GetType())
+        {
+            return false;
+        }
+        
         return Equals((InventoryFile)obj);
     }
-
+    
     public override int GetHashCode()
     {
         return FullName.GetHashCode();

@@ -1,12 +1,12 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:misc="clr-namespace:ByteSync.Views.Misc">
-    
+
     <Style Selector="Button.LinkButton">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderThickness" Value="0"/>
-		<Setter Property="Padding" Value="0"/>
-		<Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
 
         <Setter Property="Template">
             <ControlTemplate>
@@ -40,83 +40,83 @@
         <Setter Property="Padding" Value="0" />
     </Style>
 
-	<Style Selector="Button.LinkButton TextBlock">
-		<Setter Property="TextDecorations" Value="{x:Null}" />
-		<!-- <Setter Property="Foreground" Value="{DynamicResource SystemAccentColor}" /> -->
-		<Setter Property="Foreground" Value="{DynamicResource SystemBaseMediumHighColor}" />
-		<Setter Property="FontWeight" Value="DemiBold" />
-		<Setter Property="Cursor" Value="Hand"/>
-		<Setter Property="Margin" Value="0"/>
-	</Style>
-
-	<Style Selector="Button.LinkButton:pointerover TextBlock">
-		<Setter Property="TextDecorations" Value="{x:Null}" />
-		<!-- <Setter Property="TextDecorations" Value="Underline" /> -->
-		<Setter Property="Foreground" Value="{DynamicResource AccentTextForeGround}" />
-		<Setter Property="FontWeight" Value="DemiBold" />
-		<Setter Property="Margin" Value="0"/>
-	</Style>
-    
-    <!-- SEPARATOR -->
-    <!-- SEPARATOR -->
-    <!-- SEPARATOR -->
-    
-    <Style Selector="Button.LinkButtonLight">
-	    <Setter Property="Background" Value="Transparent"/>
-	    <Setter Property="BorderThickness" Value="0"/>
-	    <Setter Property="Padding" Value="0"/>
-	    <Setter Property="Cursor" Value="Hand"/>
-
-	    <Setter Property="Template">
-		    <ControlTemplate>
-			    <ContentPresenter x:Name="PART_ContentPresenter2"
-			                      Background="{TemplateBinding Background}"
-			                      BorderBrush="{TemplateBinding BorderBrush}"
-			                      BorderThickness="{TemplateBinding BorderThickness}"
-			                      CornerRadius="{TemplateBinding CornerRadius}"
-			                      Content="{TemplateBinding Content}"
-			                      ContentTemplate="{TemplateBinding ContentTemplate}"
-			                      Padding="{TemplateBinding Padding}"
-			                      RecognizesAccessKey="True"
-			                      HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-			                      VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
-		    </ControlTemplate>
-	    </Setter>
+    <Style Selector="Button.LinkButton TextBlock">
+        <Setter Property="TextDecorations" Value="{x:Null}" />
+        <!-- <Setter Property="Foreground" Value="{DynamicResource SystemAccentColor}" /> -->
+        <Setter Property="Foreground" Value="{DynamicResource SystemBaseMediumHighColor}" />
+        <Setter Property="FontWeight" Value="DemiBold" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Margin" Value="0" />
     </Style>
-    
+
+    <Style Selector="Button.LinkButton:pointerover TextBlock">
+        <Setter Property="TextDecorations" Value="{x:Null}" />
+        <!-- <Setter Property="TextDecorations" Value="Underline" /> -->
+        <Setter Property="Foreground" Value="{DynamicResource AccentTextForeGround}" />
+        <Setter Property="FontWeight" Value="DemiBold" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <!-- SEPARATOR -->
+    <!-- SEPARATOR -->
+    <!-- SEPARATOR -->
+
+    <Style Selector="Button.LinkButtonLight">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
+
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter x:Name="PART_ContentPresenter2"
+                                  Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  CornerRadius="{TemplateBinding CornerRadius}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  Padding="{TemplateBinding Padding}"
+                                  RecognizesAccessKey="True"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
     <Style Selector="Button.LinkButtonLight:pointerover ContentPresenter#PART_ContentPresenter2">
-	    <Setter Property="Background" Value="Transparent" />
-	    <Setter Property="BorderThickness" Value="0" />
-	    <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
     </Style>
 
     <Style Selector="Button.LinkButtonLight:pressed ContentPresenter#PART_ContentPresenter2">
-	    <Setter Property="Background" Value="Transparent" />
-	    <Setter Property="BorderThickness" Value="0" />
-	    <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
     </Style>
 
     <Style Selector="Button.LinkButtonLight TextBlock">
-	    <Setter Property="TextDecorations" Value="{x:Null}" />
-	    <Setter Property="Cursor" Value="Hand"/>
-	    <Setter Property="Margin" Value="0"/>
+        <Setter Property="TextDecorations" Value="{x:Null}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Margin" Value="0" />
     </Style>
 
     <Style Selector="Button.LinkButtonLight:pointerover TextBlock">
-	    <Setter Property="TextDecorations" Value="{x:Null}" />
-	    <Setter Property="Foreground" Value="{DynamicResource SystemBaseMediumHighColor}" />
-	    <!-- <Setter Property="FontWeight" Value="DemiBold" /> -->
-	    <Setter Property="Margin" Value="0"/>
+        <Setter Property="TextDecorations" Value="{x:Null}" />
+        <Setter Property="Foreground" Value="{DynamicResource SystemBaseMediumHighColor}" />
+        <!-- <Setter Property="FontWeight" Value="DemiBold" /> -->
+        <Setter Property="Margin" Value="0" />
     </Style>
-    
+
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
-    
+
     <Style Selector="Button.GenericButton">
-        <Setter Property="Background" Value="{DynamicResource VeryLightGray}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource GenericButtonBorder}"/>
+        <Setter Property="Background" Value="{DynamicResource VeryLightGray}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource GenericButtonBorder}" />
         <Setter Property="TextBlock.Foreground" Value="{DynamicResource SystemBaseHighColor}" />
         <Setter Property="TextBlock.FontWeight" Value="Bold" />
 
@@ -136,67 +136,82 @@
             </ControlTemplate>
         </Setter>
     </Style>
-    
+
     <Style Selector="Button.GenericButton:pointerover ContentPresenter#PART_ContentPresenter2">
-	    <Setter Property="Background" Value="{DynamicResource Gray8}" />
-	    <Setter Property="TextBlock.Foreground" Value="{DynamicResource ButtonForegroundPointerOver}" />
+        <Setter Property="Background" Value="{DynamicResource Gray8}" />
+        <Setter Property="TextBlock.Foreground" Value="{DynamicResource ButtonForegroundPointerOver}" />
     </Style>
-    
+
     <Style Selector="Button.GenericButton:disabled ContentPresenter#PART_ContentPresenter2">
-	    <Setter Property="Background" Value="{DynamicResource Gray8}" />
-	    <Setter Property="TextBlock.Foreground" Value="{DynamicResource Gray2}" />
+        <Setter Property="Background" Value="{DynamicResource Gray8}" />
+        <Setter Property="TextBlock.Foreground" Value="{DynamicResource Gray2}" />
     </Style>
-    
+
     <Style Selector="Button.GenericButton TextBlock">
-	    <Setter Property="VerticalAlignment" Value="Center" />
-	    <Setter Property="Margin" Value="6 0 0 0" />
-	    <Setter Property="FontSize" Value="12" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Margin" Value="6 0 0 0" />
+        <Setter Property="FontSize" Value="12" />
     </Style>
-    
+
     <Style Selector="Button.GenericButton misc|Icon">
-	    <Setter Property="Foreground" Value="{DynamicResource SystemBaseHighColor}" />
-	    <Setter Property="VerticalAlignment" Value="Center" />
-	    <Setter Property="Margin" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource SystemBaseHighColor}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Margin" Value="0" />
     </Style>
-    
+
     <Style Selector="Button.GenericButton:disabled misc|Icon">
-	    <Setter Property="Foreground" Value="{DynamicResource Gray2}" />
+        <Setter Property="Foreground" Value="{DynamicResource Gray2}" />
     </Style>
-    
+
     <!-- SEPARATOR -->
-    <!-- SEPARATOR --> 
     <!-- SEPARATOR -->
-    
+    <!-- SEPARATOR -->
+
     <Style Selector="Button.Accent">
-	    <Setter Property="Background" Value="{DynamicResource BsAccentButtonBackGround}"/>
+        <Setter Property="Background" Value="{DynamicResource BsAccentButtonBackGround}" />
     </Style>
-    
+
     <Style Selector="Button.Accent:pointerover > ContentPresenter#PART_ContentPresenter2">
-	    <Setter Property="Background" Value="{DynamicResource BsAccentButtonPointerOverBackGround}" />
+        <Setter Property="Background" Value="{DynamicResource BsAccentButtonPointerOverBackGround}" />
     </Style>
-    
+
     <Style Selector="Button.Secondary">
-	    <Setter Property="Background" Value="{DynamicResource SecondaryButtonBackGround}"/>
+        <Setter Property="Background" Value="{DynamicResource SecondaryButtonBackGround}" />
     </Style>
-    
+
     <Style Selector="Button.Secondary:pointerover > ContentPresenter#PART_ContentPresenter2">
-	    <Setter Property="Background" Value="{DynamicResource SecondaryButtonPointerOverBackGround}" />
+        <Setter Property="Background" Value="{DynamicResource SecondaryButtonPointerOverBackGround}" />
     </Style>
-    
+
+    <!-- Badge styles -->
+    <Style Selector="Border.Badge">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Padding" Value="6 0" />
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="Border.Badge.Secondary">
+        <Setter Property="Background" Value="{DynamicResource SecondaryButtonBackGround}" />
+        <Setter Property="Padding" Value="6 0" />
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="Border.Badge.Secondary TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource SystemBaseHighColor}" />
+    </Style>
+
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
-    
+
     <!--SystemAccentColor  CurrentMemberBackGround-->
-    
+
     <Style Selector="Button.AccentButton">
-        <Setter Property="Background" Value="{DynamicResource BsAccentButtonBackGround}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource GenericButtonBorder}"/>
-        <Setter Property="Padding" Value="4 2"/>
+        <Setter Property="Background" Value="{DynamicResource BsAccentButtonBackGround}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource GenericButtonBorder}" />
+        <Setter Property="Padding" Value="4 2" />
         <Setter Property="TextBlock.Foreground" Value="{DynamicResource SystemBaseHighColor}" />
         <Setter Property="TextBlock.FontWeight" Value="Bold" />
-    
+
         <Setter Property="Template">
             <ControlTemplate>
                 <ContentPresenter x:Name="PART_ContentPresenter2"
@@ -213,125 +228,133 @@
             </ControlTemplate>
         </Setter>
     </Style>
-    
+
     <Style Selector="Button.AccentButton:pointerover ContentPresenter#PART_ContentPresenter2">
-	    <Setter Property="Background" Value="{DynamicResource BsAccentButtonPointerOverBackGround}" />
-	    <!-- <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushPointerOver}" /> -->
-	    <!-- <Setter Property="TextBlock.Foreground" Value="{DynamicResource ButtonForegroundPointerOver}" /> -->
+        <Setter Property="Background" Value="{DynamicResource BsAccentButtonPointerOverBackGround}" />
+        <!-- <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushPointerOver}" /> -->
+        <!-- <Setter Property="TextBlock.Foreground" Value="{DynamicResource ButtonForegroundPointerOver}" /> -->
     </Style>
-    
+
     <Style Selector="Button.AccentButton:disabled ContentPresenter#PART_ContentPresenter2">
-	    <Setter Property="Background" Value="{DynamicResource VeryLightGray}" />
-	    <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushDisabled}" />
-	    <Setter Property="TextBlock.Foreground" Value="{DynamicResource ButtonForegroundDisabled}" />
-	    <!-- <Setter Property="misc:Icon.Foreground" Value="{DynamicResource ButtonForegroundDisabled}" /> -->
+        <Setter Property="Background" Value="{DynamicResource VeryLightGray}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushDisabled}" />
+        <Setter Property="TextBlock.Foreground" Value="{DynamicResource ButtonForegroundDisabled}" />
+        <!-- <Setter Property="misc:Icon.Foreground" Value="{DynamicResource ButtonForegroundDisabled}" /> -->
     </Style>
-    
+
     <Style Selector="Button.AccentButton TextBlock">
-	    <Setter Property="VerticalAlignment" Value="Center" />
-	    <Setter Property="Margin" Value="4 2 2 2" />
-	    <Setter Property="FontSize" Value="12" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Margin" Value="4 2 2 2" />
+        <Setter Property="FontSize" Value="12" />
     </Style>
-    
+
     <Style Selector="Button.AccentButton misc|Icon">
-	    <Setter Property="Foreground" Value="{DynamicResource SystemBaseHighColor}" />
-	    <Setter Property="VerticalAlignment" Value="Center" />
-	    <Setter Property="Margin" Value="0" />
-	    <Setter Property="FontSize" Value="18" />
+        <Setter Property="Foreground" Value="{DynamicResource SystemBaseHighColor}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="FontSize" Value="18" />
     </Style>
-    
+
     <!-- Doit être mis après le style précédent pour fonctionner correctement -->
     <Style Selector="Button.AccentButton:disabled misc|Icon">
-	    <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundDisabled}" />
+        <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundDisabled}" />
     </Style>
-    
+
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
-    
+
     <!-- Pour masquer le séparateur lorsqu'il n'y a pas de header -->
     <Style Selector="DataGrid.NoHeaders Rectangle#PART_ColumnHeadersAndRowsSeparator">
-	    <Setter Property="IsVisible" Value="False" />
+        <Setter Property="IsVisible" Value="False" />
     </Style>
-    
+
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
-    
+
     <Style Selector="TextBlock.GroupBoxHeader">
-	    <Setter Property="Background" Value="{DynamicResource CurrentMemberBackGround}"/>
-	    <Setter Property="MinHeight" Value="30"/>
-	    <Setter Property="VerticalAlignment" Value="Center"/>
-	    <Setter Property="Padding" Value="6" />
-	    <Setter Property="Margin" Value="0 0 0 6"/>
+        <Setter Property="Background" Value="{DynamicResource CurrentMemberBackGround}" />
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Padding" Value="6" />
+        <Setter Property="Margin" Value="0 0 0 6" />
     </Style>
-    
+
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
-    
+
     <Style Selector="ComboBox.BsComboBox">
-	    <Setter Property="PlaceholderForeground" Value="Gray"/>
-	    <Setter Property="Background" Value="{DynamicResource BlockBackColor}"/>
+        <Setter Property="PlaceholderForeground" Value="Gray" />
+        <Setter Property="Background" Value="{DynamicResource BlockBackColor}" />
     </Style>
-    
+
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
-    
+
     <Style Selector="TimePicker.Bs">
-	    <Setter Property="Background" Value="{DynamicResource BlockBackColor}"/>
+        <Setter Property="Background" Value="{DynamicResource BlockBackColor}" />
     </Style>
-    
+
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
-    
+
     <Style Selector="DatePicker.Bs">
-	    <Setter Property="Background" Value="{DynamicResource BlockBackColor}"/>
+        <Setter Property="Background" Value="{DynamicResource BlockBackColor}" />
     </Style>
-    
+
     <Style Selector="ToggleSwitch.Bs Grid#MovingKnobs">
-	    <Setter Property="Transitions">
-		    <Transitions>
-			    <DoubleTransition Property="Canvas.Left" Duration="0:0:0" Easing="CubicEaseOut"/>
-		    </Transitions>
-	    </Setter>
+        <Setter Property="Transitions">
+            <Transitions>
+                <DoubleTransition Property="Canvas.Left" Duration="0:0:0" Easing="CubicEaseOut" />
+            </Transitions>
+        </Setter>
     </Style>
-    
+
     <Style Selector="TextBlock.BsDataGridHeader">
-	    <Setter Property="Foreground" Value="{DynamicResource AccentTextForeGround}" />
-	    <Setter Property="FontSize" Value="14" />
-	    <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentTextForeGround}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
-    
-    
+
+
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
-    
+
     <!-- <Style Selector="StackPanel.ByteSyncToolTip TextBlock:nth-child(0)"> -->
     <!-- <Style Selector="StackPanel.ByteSyncToolTip TextBlock"> -->
     <Style Selector="StackPanel.ByteSyncToolTip > TextBlock">
-	    <Setter Property="TextWrapping" Value="Wrap" />
-	    <Setter Property="MaxWidth" Value="440" />
-	    <Setter Property="FontSize" Value="14" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="MaxWidth" Value="440" />
+        <Setter Property="FontSize" Value="14" />
     </Style>
-    
+
     <Style Selector="StackPanel.ByteSyncToolTip > TextBlock:nth-child(1)">
-	    <Setter Property="FontWeight" Value="Bold" />
-	    <Setter Property="FontSize" Value="15" />
-	    <Setter Property="Margin" Value="0,0,0,5" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="Margin" Value="0,0,0,5" />
     </Style>
-    
-    
+
+
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
     <!-- SEPARATOR -->
-    
-    
+
+
     <Style Selector="Label.InventoryStatusDescription">
-	    <Setter Property="HorizontalContentAlignment" Value="Left"/>
-	    <Setter Property="Margin" Value="0 0 24 0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="Margin" Value="0 0 24 0" />
+    </Style>
+
+    <Style Selector="Label.IsBold">
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+
+    <Style Selector="TextBlock.IsBold">
+        <Setter Property="FontWeight" Value="Bold" />
     </Style>
 </Styles>

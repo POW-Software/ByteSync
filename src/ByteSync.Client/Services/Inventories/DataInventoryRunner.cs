@@ -22,9 +22,10 @@ public class DataInventoryRunner : IDataInventoryRunner
     private readonly IFullInventoryRunner _fullInventoryRunner;
     private readonly IDataNodeRepository _dataNodeRepository;
     private readonly ILogger<DataInventoryRunner> _logger;
-
-    public DataInventoryRunner(ISessionService sessionService, IInventoryService inventoryService, ITimeTrackingCache timeTrackingCache, 
-        ISessionMemberService sessionMemberService, IInventoryBuilderFactory inventoryBuilderFactory, IBaseInventoryRunner baseInventoryRunner, 
+    
+    public DataInventoryRunner(ISessionService sessionService, IInventoryService inventoryService, ITimeTrackingCache timeTrackingCache,
+        ISessionMemberService sessionMemberService, IInventoryBuilderFactory inventoryBuilderFactory,
+        IBaseInventoryRunner baseInventoryRunner,
         IFullInventoryRunner fullInventoryRunner, IDataNodeRepository dataNodeRepository, ILogger<DataInventoryRunner> logger)
     {
         _sessionService = sessionService;
@@ -38,18 +39,18 @@ public class DataInventoryRunner : IDataInventoryRunner
         _logger = logger;
         
         InventoryProcessData.MainStatus.DistinctUntilChanged()
-            .Where(status => status != LocalInventoryPartStatus.Running)
+            .Where(status => status != InventoryTaskStatus.Running)
             .Subscribe(_ => StopRemainingTimeComputer());
-
+        
         _sessionService.SessionStatusObservable.DistinctUntilChanged()
             .Where(ss => ss.In(SessionStatus.Preparation))
             .Subscribe(_ => StopRemainingTimeComputer());
     }
-
+    
     private void StopRemainingTimeComputer()
     {
         var sessionId = _sessionService.SessionId;
-
+        
         if (sessionId != null)
         {
             var timeTrackingComputer = _timeTrackingCache
@@ -58,20 +59,20 @@ public class DataInventoryRunner : IDataInventoryRunner
             timeTrackingComputer.Stop();
         }
     }
-
+    
     private InventoryProcessData InventoryProcessData => _inventoryService.InventoryProcessData;
-
+    
     public async Task RunDataInventory()
     {
         await Task.Run(DoRunDataInventory);
     }
-
+    
     private async Task DoRunDataInventory()
     {
         await _sessionService.SetSessionStatus(SessionStatus.Inventory);
         
         InventoryProcessData.InventoryStart = DateTimeOffset.Now;
-
+        
         var isOK = await StartDataInventoryInitialization();
         if (!isOK)
         {
@@ -79,15 +80,16 @@ public class DataInventoryRunner : IDataInventoryRunner
             
             return;
         }
-
+        
         var timeTrackingComputer = await _timeTrackingCache
             .GetTimeTrackingComputer(_sessionService.SessionId!, TimeTrackingComputerType.Inventory);
         timeTrackingComputer.Start(InventoryProcessData.InventoryStart);
-
+        
         await _baseInventoryRunner.RunBaseInventory();
         
-        var baseInventoryResult = await Observable.CombineLatest(InventoryProcessData.AreBaseInventoriesComplete, 
-                InventoryProcessData.InventoryAbortionRequested, InventoryProcessData.ErrorEvent, InventoryProcessData.InventoryTransferError, 
+        var baseInventoryResult = await Observable.CombineLatest(InventoryProcessData.AreBaseInventoriesComplete,
+                InventoryProcessData.InventoryAbortionRequested, InventoryProcessData.ErrorEvent,
+                InventoryProcessData.InventoryTransferError,
                 _sessionService.SessionEnded)
             .Where(list => list.Any(e => e is true))
             .FirstAsync()
@@ -97,27 +99,30 @@ public class DataInventoryRunner : IDataInventoryRunner
         if (!baseInventoryResult.IsOK)
         {
             await HandleInventoryProblem(baseInventoryResult);
+            
             return;
         }
-
-
+        
+        
         await _fullInventoryRunner.RunFullInventory();
         
-        var fullInventoryResult = await Observable.CombineLatest(InventoryProcessData.AreFullInventoriesComplete, 
-                InventoryProcessData.InventoryAbortionRequested, InventoryProcessData.ErrorEvent, InventoryProcessData.InventoryTransferError, 
+        var fullInventoryResult = await Observable.CombineLatest(InventoryProcessData.AreFullInventoriesComplete,
+                InventoryProcessData.InventoryAbortionRequested, InventoryProcessData.ErrorEvent,
+                InventoryProcessData.InventoryTransferError,
                 _sessionService.SessionEnded)
             .Where(list => list.Any(e => e is true))
             .FirstAsync()
             .Select(list => (IsOK: list[0], IsCancellationRequested: list[1], IsInventoryError: list[2] || list[3],
                 Details: list));
-
+        
         if (!fullInventoryResult.IsOK)
         {
             await HandleInventoryProblem(baseInventoryResult);
         }
     }
-
-    private async Task HandleInventoryProblem((bool IsOK, bool IsCancellationRequested, bool IsInventoryError, IList<bool> Details) inventoryResult)
+    
+    private async Task HandleInventoryProblem(
+        (bool IsOK, bool IsCancellationRequested, bool IsInventoryError, IList<bool> Details) inventoryResult)
     {
         if (inventoryResult.IsCancellationRequested)
         {
@@ -128,30 +133,30 @@ public class DataInventoryRunner : IDataInventoryRunner
             await HandleInventoryError();
         }
     }
-
+    
     private async Task HandleInventoryCancelled()
     {
         await _sessionMemberService.UpdateCurrentMemberGeneralStatus(SessionMemberGeneralStatus.InventoryCancelled);
-
-        InventoryProcessData.MainStatus.OnNext(LocalInventoryPartStatus.Cancelled);
+        
+        InventoryProcessData.MainStatus.OnNext(InventoryTaskStatus.Cancelled);
     }
-
+    
     private async Task HandleInventoryError()
     {
         await _sessionMemberService.UpdateCurrentMemberGeneralStatus(SessionMemberGeneralStatus.InventoryError);
-
-        InventoryProcessData.MainStatus.OnNext(LocalInventoryPartStatus.Error);
+        
+        InventoryProcessData.MainStatus.OnNext(InventoryTaskStatus.Error);
     }
-
+    
     private async Task<bool> StartDataInventoryInitialization()
     {
         await _sessionMemberService.UpdateCurrentMemberGeneralStatus(SessionMemberGeneralStatus.InventoryRunningIdentification);
         
         try
         {
-            InventoryProcessData.MainStatus.OnNext(LocalInventoryPartStatus.Running);
-            InventoryProcessData.IdentificationStatus.OnNext(LocalInventoryPartStatus.Running);
-            InventoryProcessData.AnalysisStatus.OnNext(LocalInventoryPartStatus.Pending);
+            InventoryProcessData.MainStatus.OnNext(InventoryTaskStatus.Running);
+            InventoryProcessData.IdentificationStatus.OnNext(InventoryTaskStatus.Running);
+            InventoryProcessData.AnalysisStatus.OnNext(InventoryTaskStatus.Pending);
             
             var localDataNodes = _dataNodeRepository.SortedCurrentMemberDataNodes
                 .OrderBy(n => n.OrderIndex)
@@ -173,17 +178,17 @@ public class DataInventoryRunner : IDataInventoryRunner
             }
             
             InventoryProcessData.InventoryBuilders = inventoryBuilders;
-
+            
             return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "StartDataInventoryInitialization");
-
+            
             InventoryProcessData.LastException = ex;
             
             await _sessionMemberService.UpdateCurrentMemberGeneralStatus(SessionMemberGeneralStatus.InventoryError);
-
+            
             return false;
         }
     }

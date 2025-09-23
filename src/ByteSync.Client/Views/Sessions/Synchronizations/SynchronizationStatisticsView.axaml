@@ -64,17 +64,28 @@
             </Grid.RowDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_HandledActions}" Classes="Description" />
-            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Label Content="{Binding HandledActions}" HorizontalContentAlignment="Left" />
-                <Label Content="/" HorizontalContentAlignment="Left" />
-                <Label Content="{Binding TreatableActions}" HorizontalContentAlignment="Left" />
-            </StackPanel>
+            <Border Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="{Binding HandledActions}" HorizontalContentAlignment="Left" />
+                    <Label Content="/" HorizontalContentAlignment="Left" />
+                    <Label Content="{Binding TreatableActions}" HorizontalContentAlignment="Left" />
+                </StackPanel>
+            </Border>
 
             <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_Successes}" Classes="Description" />
-            <Label Grid.Row="1" Grid.Column="1" Content="{Binding Successes}" HorizontalContentAlignment="Right" />
+            <Border Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                <Label Content="{Binding Successes}" HorizontalContentAlignment="Right" />
+            </Border>
 
-            <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_Errors}" Classes="Description" />
-            <Label Grid.Row="2" Grid.Column="1" Content="{Binding Errors}" HorizontalContentAlignment="Right" />
+            <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_Errors}"
+                   Classes="Description"
+                   Classes.IsBold="{Binding HasErrors}" />
+            <Border Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right"
+                    Classes="Badge"
+                    Classes.Secondary="{Binding HasErrors}">
+                <Label Content="{Binding Errors}" HorizontalContentAlignment="Right"
+                       Classes.IsBold="{Binding HasErrors}" />
+            </Border>
         </Grid>
 
         <!-- Column 3: Volumes -->

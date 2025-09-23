@@ -11,8 +11,8 @@
             <converters:DeploymentModeToStringConverter x:Key="DeploymentModeToStringConverter" />
             <converters:ProfileTypeConverter x:Key="ProfileTypeConverter" />
             <converters:ExecutionModeConverter x:Key="ExecutionModeConverter" />
-            <converters:LocalInventoryPartStatusToIconConverter x:Key="InventoryProcessStatusToIconConverter" />
-            <converters:LocalInventoryPartStatusToTextConverter x:Key="InventoryProcessStatusToTextConverter" />
+            <converters:InventoryTaskStatusToIconConverter x:Key="InventoryProcessStatusToIconConverter" />
+            <converters:InventoryTaskStatusToTextConverter x:Key="InventoryProcessStatusToTextConverter" />
             <converters:IntToLetterConverter x:Key="IntToLetterConverter" />
         </ResourceDictionary>
     </Application.Resources>

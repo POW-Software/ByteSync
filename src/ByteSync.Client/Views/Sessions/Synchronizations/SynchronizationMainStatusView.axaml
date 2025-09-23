@@ -14,17 +14,19 @@
 
     <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 6">
         <misc:ActivityIndicator Width="120" Height="100"
-                                 Margin="10,20,0,0" HorizontalAlignment="Center" VerticalAlignment="Top"
-                                 IsVisible="{Binding IsMainProgressRingVisible}" />
+                                Margin="10,20,0,0" HorizontalAlignment="Center" VerticalAlignment="Top"
+                                IsVisible="{Binding IsMainProgressRingVisible}" />
 
-        <misc:Icon FontSize="100" Value="{Binding MainIcon}" Foreground="{DynamicResource HomeCloudSynchronizationBackGround}"
+        <misc:Icon FontSize="100" Value="{Binding MainIcon}"
+                   Foreground="{Binding MainIconBrush}"
                    IsVisible="{Binding IsMainCheckVisible}" Margin="6"
-                   VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                   VerticalAlignment="Center" HorizontalAlignment="Center" />
 
         <TextBlock Text="{Binding MainStatus}" TextAlignment="Center"
-                   FontSize="17" FontWeight="Bold" Margin="6"/>
+                   FontSize="17" FontWeight="Bold" Margin="6" />
 
-        <StackPanel Height="30" Orientation="Horizontal" HorizontalAlignment="Center" Margin="6" IsVisible="{Binding IsSynchronizationRunning}">
+        <StackPanel Height="30" Orientation="Horizontal" HorizontalAlignment="Center" Margin="6"
+                    IsVisible="{Binding IsSynchronizationRunning}">
             <Button Classes="GenericButton" IsVisible="{Binding IsSynchronizationRunning}"
                     Command="{Binding Path=AbortSynchronizationCommand}" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">

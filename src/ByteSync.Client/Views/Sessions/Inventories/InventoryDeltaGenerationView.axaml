@@ -1,0 +1,103 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             xmlns:inventories="clr-namespace:ByteSync.ViewModels.Sessions.Inventories"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ByteSync.Views.Sessions.Inventories.InventoryDeltaGenerationView">
+
+    <Design.DataContext>
+        <inventories:InventoryDeltaGenerationViewModel />
+    </Design.DataContext>
+
+    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+        <StackPanel Orientation="Vertical" Height="60"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+            <ProgressBar Width="250" Height="20" Margin="0 20"
+                         IsVisible="{Binding IsAnalysisRunning}"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                         Maximum="{Binding AnalyzableFiles, FallbackValue=0}"
+                         Minimum="0"
+                         Value="{Binding AnalyzableFiles, FallbackValue=0}"
+                         Foreground="{DynamicResource SystemAccentColorLight1}"
+                         BorderBrush="{DynamicResource SystemAccentColor}"
+                         BorderThickness="2">
+            </ProgressBar>
+
+            <misc:Icon FontSize="60"
+                       Value="{Binding AnalysisIcon}"
+                       Foreground="{Binding AnalysisIconBrush}"
+                       IsVisible="{Binding !IsAnalysisRunning}"
+                       Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center" />
+        </StackPanel>
+
+
+        <Label Height="30" VerticalContentAlignment="Center"
+               Content="{Binding AnalysisStatusText}"
+               HorizontalContentAlignment="Center" FontWeight="Bold" Margin="6" />
+
+        <StackPanel HorizontalAlignment="Center" Margin="3 12 3 0" Height="100">
+
+            <Grid IsVisible="{Binding HasAnalysisStarted}">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_DeltaGeneration_AnalyzedFiles}"
+                       Classes="InventoryStatusDescription" />
+
+                <Border Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                    <StackPanel Orientation="Horizontal">
+                        <Label
+                            Content="{Binding AnalyzedFiles, FallbackValue=''}"
+                            HorizontalContentAlignment="Left" />
+                        <Label Content="/" HorizontalContentAlignment="Left" />
+                        <Label
+                            Content="{Binding AnalyzableFiles, FallbackValue=''}"
+                            HorizontalContentAlignment="Left" />
+                    </StackPanel>
+                </Border>
+
+                <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc InventoryProcess_DeltaGeneration_ProcessedSize}"
+                       Classes="InventoryStatusDescription" />
+                <Border Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                    <TextBlock Text="{Binding ProcessedSize, FallbackValue='', Converter={StaticResource FormatKbSizeConverter}}" />
+                </Border>
+
+                <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc InventoryProcess_DeltaGeneration_AnalyzeSuccess}"
+                       Classes="InventoryStatusDescription" />
+                <Border Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                    <Label
+                        Content="{Binding AnalyzeSuccess, FallbackValue=''}"
+                        HorizontalContentAlignment="Right" />
+                </Border>
+
+                <Label Grid.Row="3" Grid.Column="0"
+                       Content="{localizations:Loc InventoryProcess_DeltaGeneration_AnalyzeErrors}"
+                       Classes="InventoryStatusDescription"
+                       Classes.IsBold="{Binding HasErrors}" />
+                <Border Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right"
+                        Classes="Badge"
+                        Classes.Secondary="{Binding HasErrors}">
+                    <Label
+                        Content="{Binding AnalyzeErrors, FallbackValue=''}"
+                        HorizontalContentAlignment="Right"
+                        Classes.IsBold="{Binding HasErrors}" />
+                </Border>
+
+            </Grid>
+        </StackPanel>
+
+    </StackPanel>
+</UserControl>

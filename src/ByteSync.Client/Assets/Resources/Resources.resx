@@ -406,11 +406,11 @@ Would you like to continue ?</value>
 	<data name="InventoryProcess_EstimatedEnd" xml:space="preserve">
 		<value>Estimated End:</value>
 	</data>
-	<data name="InventoryProcess_AnalyzedFiles" xml:space="preserve">
-		<value>Analyzed Files:</value>
+    <data name="InventoryProcess_DeltaGeneration_AnalyzedFiles" xml:space="preserve">
+		<value>Files Processed:</value>
 	</data>
-	<data name="InventoryProcess_ProcessedSize" xml:space="preserve">
-		<value>Analyzed Volume:</value>
+    <data name="InventoryProcess_DeltaGeneration_ProcessedSize" xml:space="preserve">
+		<value>Processed Volume:</value>
 	</data>
 	<data name="InventoryProcess_InventoryRunning" xml:space="preserve">
 		<value>Data Inventory running</value>
@@ -418,20 +418,20 @@ Would you like to continue ?</value>
 	<data name="InventoryProcess_IdentificationRunning" xml:space="preserve">
 		<value>Local Identification running</value>
 	</data>
-	<data name="InventoryProcess_AnalysisRunning" xml:space="preserve">
-		<value>Local Analysis running</value>
+    <data name="InventoryProcess_DeltaGeneration_Running" xml:space="preserve">
+		<value>Delta Generation running</value>
 	</data>
 	<data name="InventoryProcess_TotalSize" xml:space="preserve">
 		<value>Total Volume:</value>
 	</data>
 	<data name="InventoryProcess_IdentificationSuccess" xml:space="preserve">
-		<value>Local Identification done!</value>
+		<value>Local Identification done</value>
 	</data>
 	<data name="InventoryProcess_InventorySuccess" xml:space="preserve">
-		<value>Data Inventory done!</value>
+		<value>Data Inventory done</value>
 	</data>
-	<data name="InventoryProcess_AnalysisSuccess" xml:space="preserve">
-		<value>Local Analysis done!</value>
+    <data name="InventoryProcess_DeltaGeneration_Success" xml:space="preserve">
+		<value>Delta Generation done</value>
 	</data>
 	<data name="InventoryProcess_End" xml:space="preserve">
 		<value>End:</value>
@@ -610,8 +610,8 @@ Would you like to continue ?</value>
 	<data name="AnalysisMode_Checksum" xml:space="preserve">
 		<value>Checksum</value>
 	</data>
-	<data name="InventoryProcess_AnalysisPending" xml:space="preserve">
-		<value>Local Analysis pending</value>
+    <data name="InventoryProcess_DeltaGeneration_Pending" xml:space="preserve">
+		<value>Delta Generation pending</value>
 	</data>
 	<data name="InventoryProcess_AbortInventory" xml:space="preserve">
 		<value>ABORT</value>
@@ -622,8 +622,8 @@ Would you like to continue ?</value>
 	<data name="InventoryProcess_InventoryCancelled" xml:space="preserve">
 		<value>Data Inventory cancelled</value>
 	</data>
-	<data name="InventoryProcess_AnalysisCancelled" xml:space="preserve">
-		<value>Local Analysis cancelled</value>
+    <data name="InventoryProcess_DeltaGeneration_Cancelled" xml:space="preserve">
+		<value>Delta Generation cancelled</value>
 	</data>
 	<data name="SessionMachine_Status_RunningIdentification" xml:space="preserve">
 		<value>Identification in progress</value>
@@ -640,21 +640,42 @@ Would you like to continue ?</value>
 	<data name="SessionMachine_Status_InventoryError" xml:space="preserve">
 		<value>Error during inventory</value>
 	</data>
-	<data name="InventoryProcess_InventoryError" xml:space="preserve">
-		<value>Error during the Data Inventory</value>
+    <data name="InventoryProcess_InventoryError" xml:space="preserve">
+	    <value>Error during the Data Inventory</value>
+	</data>
+    <data name="InventoryProcess_InventorySuccessWithErrors" xml:space="preserve">
+	    <value>Data Inventory finished with errors</value>
 	</data>
 	<data name="InventoryProcess_IdentificationError" xml:space="preserve">
 		<value>Error during the Local Identification</value>
 	</data>
-	<data name="InventoryProcess_AnalysisError" xml:space="preserve">
-		<value>Error during the Local Analysis</value>
+    <data name="InventoryProcess_DeltaGeneration_Error" xml:space="preserve">
+		<value>Error during the Delta Generation</value>
 	</data>
-	<data name="InventoryProcess_AnalysisNotLaunched" xml:space="preserve">
-		<value>Local Analysis not launched</value>
+    <data name="InventoryProcess_DeltaGeneration_NotLaunched" xml:space="preserve">
+		<value>Delta Generation not launched</value>
 	</data>
-	<data name="InventoryProcess_AnalyzeErrors" xml:space="preserve">
-		<value>Analyze errors:</value>
+    <data name="InventoryProcess_DeltaGeneration_SuccessWithErrors" xml:space="preserve">
+		<value>Delta Generation finished with errors</value>
 	</data>
+    <data name="InventoryProcess_DeltaGeneration_AnalyzeSuccess" xml:space="preserve">
+        <value>Successful Calculations:</value>
+    </data>
+    <data name="InventoryProcess_DeltaGeneration_AnalyzeErrors" xml:space="preserve">
+        <value>Calculation Errors:</value>
+    </data>
+    <data name="InventoryProcess_GlobalAnalyzedFiles" xml:space="preserve">
+        <value>Total Files Processed:</value>
+    </data>
+    <data name="InventoryProcess_GlobalProcessedSize" xml:space="preserve">
+        <value>Total Processed Volume:</value>
+    </data>
+    <data name="InventoryProcess_GlobalAnalyzeSuccess" xml:space="preserve">
+        <value>Total Successful Calculations:</value>
+    </data>
+    <data name="InventoryProcess_GlobalAnalyzeErrors" xml:space="preserve">
+        <value>Total Calculation Errors:</value>
+    </data>
 	<data name="ContentIdentity_AnErrorOccured" xml:space="preserve">
 		<value>An error has occurred during the analysis</value>
 	</data>
@@ -1006,7 +1027,7 @@ Please stop the inventory or synchronization first.</value>
 	<data name="UpdateDetails_MovingNewFiles" xml:space="preserve">
 		<value>moving new files</value>
 	</data>
-	<data name="UpdateDetails_UpdatingToVersion" xml:space="preserve">
+    <data name="UpdateDetails_UpdatingToVersion" xml:space="preserve">
 		<value>Updating to version</value>
 	</data>
 	<data name="ErrorView_ErrorMessage" xml:space="preserve">
@@ -1686,7 +1707,10 @@ Do you want to save this new Session Profile with this name?</value>
 	<data name="ValidationFailure_ItemSingular" xml:space="preserve">
 		<value>item:</value>
 	</data>
-	<data name="ValidationFailure_ItemPlural" xml:space="preserve">
+    <data name="ValidationFailure_ItemPlural" xml:space="preserve">
 		<value>items:</value>
+	</data>
+    <data name="SynchronizationMain_SynchronizationDoneWithErrors" xml:space="preserve">
+    	<value>Synchronization finished with errors</value>
 	</data>
 </root>
