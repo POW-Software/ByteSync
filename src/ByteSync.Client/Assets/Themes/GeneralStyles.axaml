@@ -353,4 +353,8 @@
     <Style Selector="Label.IsBold">
         <Setter Property="FontWeight" Value="Bold" />
     </Style>
+
+    <Style Selector="TextBlock.IsBold">
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
 </Styles>
