@@ -25,16 +25,17 @@ public class InventoryStatisticsServiceTests
     {
         var temp = Path.GetTempFileName();
         var zipPath = Path.ChangeExtension(temp, ".zip");
-        if (File.Exists(zipPath)) File.Delete(zipPath);
-        
-        using (var zip = ZipFile.Open(zipPath, ZipArchiveMode.Create))
+        if (File.Exists(zipPath))
         {
-            var entry = zip.CreateEntry("inventory.json");
-            using var entryStream = entry.Open();
-            using var writer = new StreamWriter(entryStream);
-            var json = JsonHelper.Serialize(inventory);
-            writer.Write(json);
+            File.Delete(zipPath);
         }
+        
+        using var zip = ZipFile.Open(zipPath, ZipArchiveMode.Create);
+        var entry = zip.CreateEntry("inventory.json");
+        using var entryStream = entry.Open();
+        using var writer = new StreamWriter(entryStream);
+        var json = JsonHelper.Serialize(inventory);
+        writer.Write(json);
         
         return zipPath;
     }
@@ -66,7 +67,7 @@ public class InventoryStatisticsServiceTests
         
         inv.InventoryParts.Add(part);
         
-        for (int i = 0; i < successCount; i++)
+        for (var i = 0; i < successCount; i++)
         {
             var fd = new FileDescription
             {
@@ -77,7 +78,7 @@ public class InventoryStatisticsServiceTests
             part.FileDescriptions.Add(fd);
         }
         
-        for (int i = 0; i < errorCount; i++)
+        for (var i = 0; i < errorCount; i++)
         {
             var fd = new FileDescription
             {
@@ -89,7 +90,7 @@ public class InventoryStatisticsServiceTests
             part.FileDescriptions.Add(fd);
         }
         
-        for (int i = 0; i < neutralCount; i++)
+        for (var i = 0; i < neutralCount; i++)
         {
             var fd = new FileDescription
             {
@@ -122,7 +123,7 @@ public class InventoryStatisticsServiceTests
             
             var repo = new Mock<IInventoryFileRepository>();
             repo.Setup(r => r.GetAllInventoriesFiles(LocalInventoryModes.Full))
-                .Returns(new List<InventoryFile> { inventoryFile });
+                .Returns([inventoryFile]);
             
             var ipd = new InventoryProcessData();
             var invService = new Mock<IInventoryService>();
@@ -145,7 +146,10 @@ public class InventoryStatisticsServiceTests
         }
         finally
         {
-            if (File.Exists(zip)) File.Delete(zip);
+            if (File.Exists(zip))
+            {
+                File.Delete(zip);
+            }
         }
     }
     
@@ -180,7 +184,7 @@ public class InventoryStatisticsServiceTests
             
             var repo = new Mock<IInventoryFileRepository>();
             repo.Setup(r => r.GetAllInventoriesFiles(LocalInventoryModes.Full))
-                .Returns(new List<InventoryFile> { inventoryFile1, inventoryFile2 });
+                .Returns([inventoryFile1, inventoryFile2]);
             
             var ipd = new InventoryProcessData();
             var invService = new Mock<IInventoryService>();
@@ -203,8 +207,15 @@ public class InventoryStatisticsServiceTests
         }
         finally
         {
-            if (File.Exists(zip1)) File.Delete(zip1);
-            if (File.Exists(zip2)) File.Delete(zip2);
+            if (File.Exists(zip1))
+            {
+                File.Delete(zip1);
+            }
+            
+            if (File.Exists(zip2))
+            {
+                File.Delete(zip2);
+            }
         }
     }
 }

@@ -86,7 +86,7 @@ public class DataInventoryRunnerTests
     {
         var nodeA = new DataNode { Id = "nA", ClientInstanceId = "c1", OrderIndex = 2 };
         var nodeB = new DataNode { Id = "nB", ClientInstanceId = "c2", OrderIndex = 1 };
-        _dataNodeRepository.SetupGet(x => x.SortedCurrentMemberDataNodes).Returns(new[] { nodeA, nodeB });
+        _dataNodeRepository.SetupGet(x => x.SortedCurrentMemberDataNodes).Returns([nodeA, nodeB]);
         
         var builderA = new Mock<IInventoryBuilder>().Object;
         var builderB = new Mock<IInventoryBuilder>().Object;
@@ -207,7 +207,7 @@ public class DataInventoryRunnerTests
     {
         var nodeOk = new DataNode { Id = "ok", ClientInstanceId = "c1", OrderIndex = 1 };
         var nodeBad = new DataNode { Id = "bad", ClientInstanceId = "c2", OrderIndex = 2 };
-        _dataNodeRepository.SetupGet(x => x.SortedCurrentMemberDataNodes).Returns(new[] { nodeOk, nodeBad });
+        _dataNodeRepository.SetupGet(x => x.SortedCurrentMemberDataNodes).Returns([nodeOk, nodeBad]);
         
         _inventoryBuilderFactory.Setup(x => x.CreateInventoryBuilder(nodeOk)).Returns(new Mock<IInventoryBuilder>().Object);
         _inventoryBuilderFactory.Setup(x => x.CreateInventoryBuilder(nodeBad)).Throws(new Exception("factory failed"));
