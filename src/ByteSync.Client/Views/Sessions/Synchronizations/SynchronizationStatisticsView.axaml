@@ -77,11 +77,14 @@
                 <Label Content="{Binding Successes}" HorizontalContentAlignment="Right" />
             </Border>
 
-            <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_Errors}" Classes="Description" />
+            <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc SynchronizationMain_Errors}"
+                   Classes="Description"
+                   Classes.IsBold="{Binding HasErrors}" />
             <Border Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right"
                     Classes="Badge"
                     Classes.Secondary="{Binding HasErrors}">
-                <Label Content="{Binding Errors}" HorizontalContentAlignment="Right" />
+                <Label Content="{Binding Errors}" HorizontalContentAlignment="Right"
+                       Classes.IsBold="{Binding HasErrors}" />
             </Border>
         </Grid>
 
