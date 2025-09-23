@@ -63,6 +63,12 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
             })
             .DisposeWith(disposables);
         
+        // AnalyzeSuccess = AnalyzedFiles - AnalyzeErrors
+        this.WhenAnyValue(x => x.AnalyzedFiles, x => x.AnalyzeErrors)
+            .Select(x => x.Item1 - x.Item2)
+            .ToPropertyEx(this, x => x.AnalyzeSuccess)
+            .DisposeWith(disposables);
+        
         this.WhenAnyValue(x => x.AnalyzeErrors)
             .Select(e => e > 0)
             .ObserveOn(RxApp.MainThreadScheduler)
@@ -142,6 +148,8 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
     
     [Reactive]
     public long AnalyzableFiles { get; set; }
+    
+    public extern int AnalyzeSuccess { [ObservableAsProperty] get; }
     
     [Reactive]
     public long ProcessedSize { get; set; }

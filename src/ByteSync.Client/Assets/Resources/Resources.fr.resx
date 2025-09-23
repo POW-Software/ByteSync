@@ -649,6 +649,9 @@ Voulez-vous continuer ?</value>
     <data name="InventoryProcess_DeltaGeneration_SuccessWithErrors" xml:space="preserve">
 		<value>Génération des Delta terminée avec erreurs</value>
 	</data>
+    <data name="InventoryProcess_DeltaGeneration_AnalyzeSuccess" xml:space="preserve">
+    <value>Calculs réussis :</value>
+    </data>
     <data name="InventoryProcess_DeltaGeneration_AnalyzeErrors" xml:space="preserve">
     <value>Erreurs de calcul :</value>
     </data>

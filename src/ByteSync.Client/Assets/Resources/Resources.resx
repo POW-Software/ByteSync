@@ -419,7 +419,7 @@ Would you like to continue ?</value>
 		<value>Local Identification running</value>
 	</data>
     <data name="InventoryProcess_DeltaGeneration_Running" xml:space="preserve">
-		<value>Local Analysis running</value>
+		<value>Delta Generation running</value>
 	</data>
 	<data name="InventoryProcess_TotalSize" xml:space="preserve">
 		<value>Total Volume:</value>
@@ -431,7 +431,7 @@ Would you like to continue ?</value>
 		<value>Data Inventory done</value>
 	</data>
     <data name="InventoryProcess_DeltaGeneration_Success" xml:space="preserve">
-		<value>Local Analysis done</value>
+		<value>Delta Generation done</value>
 	</data>
 	<data name="InventoryProcess_End" xml:space="preserve">
 		<value>End:</value>
@@ -611,7 +611,7 @@ Would you like to continue ?</value>
 		<value>Checksum</value>
 	</data>
     <data name="InventoryProcess_DeltaGeneration_Pending" xml:space="preserve">
-		<value>Local Analysis pending</value>
+		<value>Delta Generation pending</value>
 	</data>
 	<data name="InventoryProcess_AbortInventory" xml:space="preserve">
 		<value>ABORT</value>
@@ -623,7 +623,7 @@ Would you like to continue ?</value>
 		<value>Data Inventory cancelled</value>
 	</data>
     <data name="InventoryProcess_DeltaGeneration_Cancelled" xml:space="preserve">
-		<value>Local Analysis cancelled</value>
+		<value>Delta Generation cancelled</value>
 	</data>
 	<data name="SessionMachine_Status_RunningIdentification" xml:space="preserve">
 		<value>Identification in progress</value>
@@ -641,35 +641,38 @@ Would you like to continue ?</value>
 		<value>Error during inventory</value>
 	</data>
     <data name="InventoryProcess_InventoryError" xml:space="preserve">
-			<value>Error during the Data Inventory</value>
-		</data>
+	    <value>Error during the Data Inventory</value>
+	</data>
     <data name="InventoryProcess_InventorySuccessWithErrors" xml:space="preserve">
-			<value>Inventory finished with errors</value>
-		</data>
+	    <value>Inventory finished with errors</value>
+	</data>
 	<data name="InventoryProcess_IdentificationError" xml:space="preserve">
 		<value>Error during the Local Identification</value>
 	</data>
     <data name="InventoryProcess_DeltaGeneration_Error" xml:space="preserve">
-		<value>Error during the Local Analysis</value>
+		<value>Error during the Delta Generation</value>
 	</data>
     <data name="InventoryProcess_DeltaGeneration_NotLaunched" xml:space="preserve">
-			<value>Local Analysis not launched</value>
-		</data>
+		<value>Delta Generation not launched</value>
+	</data>
     <data name="InventoryProcess_DeltaGeneration_SuccessWithErrors" xml:space="preserve">
-			<value>Analysis finished with errors</value>
-		</data>
+		<value>Delta Generation finished with errors</value>
+	</data>
+    <data name="InventoryProcess_DeltaGeneration_AnalyzeSuccess" xml:space="preserve">
+    <value>Successful Calculations:</value>
+    </data>
     <data name="InventoryProcess_DeltaGeneration_AnalyzeErrors" xml:space="preserve">
     <value>Calculation Errors:</value>
-  </data>
+    </data>
     <data name="InventoryProcess_GlobalAnalyzedFiles" xml:space="preserve">
     <value>Total analyzed files:</value>
-  </data>
+    </data>
     <data name="InventoryProcess_GlobalAnalyzeSuccess" xml:space="preserve">
-    <value>Successful analyses:</value>
-  </data>
+        <value>Successful analyses:</value>
+    </data>
     <data name="InventoryProcess_GlobalAnalyzeErrors" xml:space="preserve">
-    <value>Failed analyses:</value>
-  </data>
+        <value>Failed analyses:</value>
+    </data>
 	<data name="ContentIdentity_AnErrorOccured" xml:space="preserve">
 		<value>An error has occurred during the analysis</value>
 	</data>
