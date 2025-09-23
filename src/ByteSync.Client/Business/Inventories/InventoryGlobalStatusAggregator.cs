@@ -18,16 +18,24 @@ public static class InventoryGlobalStatusAggregator
         
         // Pragmatic ordering with special rule: Pending dominates when mixed with Cancelled/Error and no Running
         if (taskStatuses.Any(s => s == InventoryTaskStatus.Running))
+        {
             return InventoryTaskStatus.Running;
+        }
         
         if (taskStatuses.Any(s => s == InventoryTaskStatus.Pending))
+        {
             return InventoryTaskStatus.Pending;
+        }
         
         if (taskStatuses.Any(s => s == InventoryTaskStatus.Error || s == InventoryTaskStatus.NotLaunched))
+        {
             return InventoryTaskStatus.Error;
+        }
         
         if (taskStatuses.Any(s => s == InventoryTaskStatus.Cancelled))
+        {
             return InventoryTaskStatus.Cancelled;
+        }
         
         return InventoryTaskStatus.Success;
     }
