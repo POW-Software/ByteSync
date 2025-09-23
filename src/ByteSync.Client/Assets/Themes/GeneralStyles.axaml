@@ -349,4 +349,8 @@
         <Setter Property="HorizontalContentAlignment" Value="Left" />
         <Setter Property="Margin" Value="0 0 24 0" />
     </Style>
+
+    <Style Selector="Label.IsBold">
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
 </Styles>
