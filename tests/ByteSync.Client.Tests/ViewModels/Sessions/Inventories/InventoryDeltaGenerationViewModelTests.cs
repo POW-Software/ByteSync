@@ -2,6 +2,7 @@ using Avalonia.Media;
 using ByteSync.Business.Inventories;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Themes;
+using ByteSync.Tests.Helpers;
 using ByteSync.ViewModels.Sessions.Inventories;
 using FluentAssertions;
 using Moq;
@@ -77,7 +78,7 @@ public class InventoryDeltaGenerationViewModelTests
             m.ProcessedSize = 42;
         });
         
-        WaitUntil(() => vm.AnalyzedFiles == 5, "view model should project latest monitor data");
+        vm.ShouldEventuallyBe(x => x.AnalyzedFiles, 5);
         
         vm.AnalyzedFiles.Should().Be(5);
         vm.AnalyzeErrors.Should().Be(2);
@@ -92,7 +93,7 @@ public class InventoryDeltaGenerationViewModelTests
             m.AnalyzedFiles = 9;
         });
         
-        WaitUntil(() => vm.HasErrors == false, "errors flag should follow monitor data");
+        vm.ShouldEventuallyBe(x => x.HasErrors, false);
         
         vm.AnalyzedFiles.Should().Be(9);
         vm.AnalyzeErrors.Should().Be(0);
@@ -160,10 +161,5 @@ public class InventoryDeltaGenerationViewModelTests
         vm.Activator.Activate();
         
         return vm;
-    }
-    
-    private static void WaitUntil(Func<bool> condition, string because)
-    {
-        SpinWait.SpinUntil(condition, TimeSpan.FromSeconds(2)).Should().BeTrue(because);
     }
 }
