@@ -1,5 +1,7 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
+using ByteSync.Business;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.Misc;
 using ByteSync.Business.Sessions;
@@ -8,6 +10,7 @@ using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Sessions.Inventories;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -231,5 +234,41 @@ public class InventoryMainStatusViewModelTests
         vm.GlobalAnalyzeErrors.Should().Be(null);
         vm.GlobalMainIcon.Should().Be("None");
         vm.GlobalMainStatusText.Should().BeEmpty();
+    }
+    
+    [Test]
+    public async Task AbortCommand_UserConfirms_RequestsAbort()
+    {
+        var messageBoxViewModel = new MessageBoxViewModel();
+        _dialogService.Setup(x => x.CreateMessageBoxViewModel(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string[]?>()))
+            .Returns(messageBoxViewModel);
+        _dialogService.Setup(x => x.ShowMessageBoxAsync(messageBoxViewModel))
+            .ReturnsAsync(MessageBoxResult.Yes);
+        _inventoryService.Setup(x => x.AbortInventory()).Returns(Task.CompletedTask).Verifiable();
+        
+        var vm = CreateVm();
+        
+        await vm.AbortIventoryCommand.Execute().ToTask();
+        
+        messageBoxViewModel.ShowYesNo.Should().BeTrue();
+        _dialogService.Verify(x => x.ShowMessageBoxAsync(messageBoxViewModel), Times.Once);
+        _inventoryService.Verify(x => x.AbortInventory(), Times.Once);
+    }
+    
+    [Test]
+    public async Task AbortCommand_UserDeclines_DoesNotAbort()
+    {
+        var messageBoxViewModel = new MessageBoxViewModel();
+        _dialogService.Setup(x => x.CreateMessageBoxViewModel(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string[]?>()))
+            .Returns(messageBoxViewModel);
+        _dialogService.Setup(x => x.ShowMessageBoxAsync(messageBoxViewModel))
+            .ReturnsAsync(MessageBoxResult.No);
+        
+        var vm = CreateVm();
+        
+        await vm.AbortIventoryCommand.Execute().ToTask();
+        
+        messageBoxViewModel.ShowYesNo.Should().BeTrue();
+        _inventoryService.Verify(x => x.AbortInventory(), Times.Never);
     }
 }
