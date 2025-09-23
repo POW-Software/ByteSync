@@ -1,3 +1,4 @@
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ByteSync.Business;
@@ -26,24 +27,18 @@ public class InventoryStatisticsService : IInventoryStatisticsService
         
         _inventoryService.InventoryProcessData.AreFullInventoriesComplete
             .DistinctUntilChanged()
-            .Subscribe(async isComplete =>
-            {
-                if (isComplete)
-                {
-                    try
-                    {
-                        await Compute();
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "InventoryStatisticsService.Compute on AreFullInventoriesComplete");
-                    }
-                }
-                else
-                {
-                    _statisticsSubject.OnNext(null);
-                }
-            });
+            .SelectMany(isComplete =>
+                isComplete
+                    ? Observable
+                        .FromAsync(Compute)
+                        .Catch<Unit, Exception>(ex =>
+                        {
+                            _logger.LogError(ex, "InventoryStatisticsService.Compute on AreFullInventoriesComplete");
+                            
+                            return Observable.Return(Unit.Default);
+                        })
+                    : Observable.Start(() => { _statisticsSubject.OnNext(null); }))
+            .Subscribe();
     }
     
     public IObservable<InventoryStatistics?> Statistics => _statisticsSubject.AsObservable();
