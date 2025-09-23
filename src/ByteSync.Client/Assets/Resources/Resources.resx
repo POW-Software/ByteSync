@@ -644,7 +644,7 @@ Would you like to continue ?</value>
 	    <value>Error during the Data Inventory</value>
 	</data>
     <data name="InventoryProcess_InventorySuccessWithErrors" xml:space="preserve">
-	    <value>Inventory finished with errors</value>
+	    <value>Data Inventory finished with errors</value>
 	</data>
 	<data name="InventoryProcess_IdentificationError" xml:space="preserve">
 		<value>Error during the Local Identification</value>

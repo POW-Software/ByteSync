@@ -635,7 +635,7 @@ Voulez-vous continuer ?</value>
         <value>Erreur durant l'Inventaire des Données</value>
     </data>
     <data name="InventoryProcess_InventorySuccessWithErrors" xml:space="preserve">
-        <value>Inventaire terminé avec erreurs</value>
+        <value>Inventaire des Données terminé avec erreurs</value>
     </data>
 	<data name="InventoryProcess_IdentificationError" xml:space="preserve">
 		<value>Erreur durant l'Identification Locale</value>
