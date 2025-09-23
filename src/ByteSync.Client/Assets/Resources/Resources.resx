@@ -665,16 +665,16 @@ Would you like to continue ?</value>
         <value>Calculation Errors:</value>
     </data>
     <data name="InventoryProcess_GlobalAnalyzedFiles" xml:space="preserve">
-        <value>Total files processed:</value>
+        <value>Total Files Processed:</value>
     </data>
     <data name="InventoryProcess_GlobalProcessedSize" xml:space="preserve">
-        <value>Total processed volume:</value>
+        <value>Total Processed Volume:</value>
     </data>
     <data name="InventoryProcess_GlobalAnalyzeSuccess" xml:space="preserve">
-        <value>Total successful calculations:</value>
+        <value>Total Successful Calculations:</value>
     </data>
     <data name="InventoryProcess_GlobalAnalyzeErrors" xml:space="preserve">
-        <value>Total calculation errors:</value>
+        <value>Total Calculation Errors:</value>
     </data>
 	<data name="ContentIdentity_AnErrorOccured" xml:space="preserve">
 		<value>An error has occurred during the analysis</value>
