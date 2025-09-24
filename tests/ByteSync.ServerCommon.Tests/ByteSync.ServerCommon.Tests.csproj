@@ -11,11 +11,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AWSSDK.S3" Version="4.0.6.6" />
-        <PackageReference Include="Azure.Identity" Version="1.15.0" />
+        <PackageReference Include="AWSSDK.S3" Version="4.0.7.4"/>
+        <PackageReference Include="Azure.Identity" Version="1.16.0"/>
         <PackageReference Include="FakeItEasy" Version="8.3.0" />
         <PackageReference Include="AwesomeAssertions" Version="8.0.1" />
-        <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.1.2" />
+        <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.4.0"/>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
