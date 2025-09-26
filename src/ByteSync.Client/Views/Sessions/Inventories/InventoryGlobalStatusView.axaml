@@ -12,35 +12,39 @@
         <inventories:InventoryGlobalStatusViewModel />
     </Design.DataContext>
 
-    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 6 0 6">
-        <misc:ActivityIndicator Width="120" Height="100" Margin="6"
-                                IsVisible="{Binding IsInventoryInProgress}" />
+    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 6" MaxWidth="1300">
+        <!-- Left pane: status -->
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="6,0" MaxWidth="600">
+            <misc:ActivityIndicator Width="120" Height="100" Margin="6"
+                                    IsVisible="{Binding IsInventoryInProgress}" />
 
-        <StackPanel Height="100" HorizontalAlignment="Center" Margin="12"
-                    IsVisible="{Binding !IsInventoryInProgress}">
-            <misc:Icon FontSize="100"
-                       Value="{Binding GlobalMainIcon}"
-                       Foreground="{Binding GlobalMainIconBrush}"
-                       VerticalAlignment="Center" HorizontalAlignment="Center" />
+            <StackPanel Height="100" HorizontalAlignment="Center" Margin="12"
+                        IsVisible="{Binding !IsInventoryInProgress}">
+                <misc:Icon FontSize="100"
+                           Value="{Binding GlobalMainIcon}"
+                           Foreground="{Binding GlobalMainIconBrush}"
+                           VerticalAlignment="Center" HorizontalAlignment="Center" />
+            </StackPanel>
+
+            <TextBlock Height="30"
+                       Text="{Binding GlobalMainStatusText}"
+                       TextAlignment="Center" FontSize="17" FontWeight="Bold" Margin="6" />
+
+            <StackPanel Height="30" Orientation="Horizontal" HorizontalAlignment="Center" Margin="6"
+                        IsVisible="{Binding IsInventoryRunning}">
+                <Button Classes="GenericButton" IsVisible="{Binding IsInventoryRunning}"
+                        Command="{Binding Path=AbortInventoryCommand}" HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <misc:Icon FontSize="12" Value="RegularX" />
+                        <TextBlock Text="{localizations:Loc InventoryProcess_AbortInventory}" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </StackPanel>
 
-        <TextBlock Height="30"
-                   Text="{Binding GlobalMainStatusText}"
-                   TextAlignment="Center" FontSize="17" FontWeight="Bold" Margin="6" />
-
-        <StackPanel Height="30" Orientation="Horizontal" HorizontalAlignment="Center" Margin="6"
-                    IsVisible="{Binding IsInventoryRunning}">
-            <Button Classes="GenericButton" IsVisible="{Binding IsInventoryRunning}"
-                    Command="{Binding Path=AbortInventoryCommand}" HorizontalAlignment="Center"
-                    VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal">
-                    <misc:Icon FontSize="12" Value="RegularX" />
-                    <TextBlock Text="{localizations:Loc InventoryProcess_AbortInventory}" />
-                </StackPanel>
-            </Button>
-        </StackPanel>
-
-        <Grid HorizontalAlignment="Center" Margin="3 12 3 0">
+        <!-- Right pane: statistics -->
+        <Grid HorizontalAlignment="Center" Margin="6,12,6,0" MaxWidth="600">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -82,5 +86,5 @@
                            Classes.IsBold="{Binding HasErrors}" />
             </Border>
         </Grid>
-    </StackPanel>
+    </WrapPanel>
 </UserControl>
