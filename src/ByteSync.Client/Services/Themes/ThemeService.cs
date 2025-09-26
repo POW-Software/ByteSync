@@ -4,9 +4,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Styling;
-using Avalonia.Themes.Fluent;
+using Avalonia.Threading;
 using ByteSync.Business.Themes;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Themes;
 
@@ -19,25 +18,25 @@ class ThemeService : IThemeService
     
     private readonly BehaviorSubject<Theme> _selectedTheme;
     private ResourceDictionary? _customThemeResources;
-
+    
     public ThemeService(IApplicationSettingsRepository applicationSettingsRepository, ILogger<ThemeService> logger)
     {
         _applicationSettingsRepository = applicationSettingsRepository;
         _logger = logger;
-
+        
         AvailableThemes = new List<Theme>();
         
         _selectedTheme = new BehaviorSubject<Theme>(new Theme(
-            "undefined", 
+            "undefined",
             ThemeModes.Light,
-            new ThemeColor("#094177"), 
+            new ThemeColor("#094177"),
             new ThemeColor("#b88746")));
     }
     
     public IObservable<Theme> SelectedTheme => _selectedTheme.AsObservable();
-
+    
     public List<Theme> AvailableThemes { get; }
-
+    
     public void OnThemesRegistered()
     {
         Theme? theme = null;
@@ -67,35 +66,43 @@ class ThemeService : IThemeService
             currentTheme.IsDarkMode != isDarkMode)
         {
             var theme = AvailableThemes.Single(t => t.Name.Equals(name) && t.IsDarkMode == isDarkMode);
-        
+            
             SelectTheme(theme);
             UpdateSettings();
         }
     }
-
+    
     public void RegisterTheme(Theme theme)
     {
         AvailableThemes.Add(theme);
     }
-
+    
     private void SelectTheme(Theme theme)
     {
-        if (_customThemeResources == null)
+        void ApplyThemeOnUi()
         {
-            _customThemeResources = new ResourceDictionary();
-            Application.Current!.Resources.MergedDictionaries.Add(_customThemeResources);
+            if (_customThemeResources == null)
+            {
+                _customThemeResources = new ResourceDictionary();
+                Application.Current!.Resources.MergedDictionaries.Add(_customThemeResources);
+            }
+            
+            try
+            {
+                Application.Current!.RequestedThemeVariant = theme.IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
+                
+                ApplyThemeColorsToCustomResources(theme);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to apply theme {ThemeName}", theme.Key);
+            }
         }
         
-        try
-        {
-            Application.Current!.RequestedThemeVariant = theme.IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
-                
-            ApplyThemeColorsToCustomResources(theme);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to apply theme {ThemeName}", theme.Key);
-        }
+        if (Dispatcher.UIThread.CheckAccess())
+            ApplyThemeOnUi();
+        else
+            Dispatcher.UIThread.InvokeAsync(ApplyThemeOnUi).GetAwaiter().GetResult();
         
         _selectedTheme.OnNext(theme);
     }
@@ -112,14 +119,15 @@ class ThemeService : IThemeService
     private void ApplyColorSchemeProperties(object colorScheme)
     {
         var properties = colorScheme.GetType().GetProperties();
-
+        
         foreach (var property in properties)
         {
             try
             {
                 var value = property.GetValue(colorScheme);
+                
                 if (value == null) continue;
-
+                
                 if (property.PropertyType == typeof(Color))
                 {
                     var color = (Color)value;
@@ -142,9 +150,10 @@ class ThemeService : IThemeService
             }
         }
     }
+    
     private void UseDefaultTheme()
     {
-        var defaultTheme = AvailableThemes.Single(t => 
+        var defaultTheme = AvailableThemes.Single(t =>
             (t.Name.Equals(ThemeConstants.BLUE) || t.Name.Equals(ThemeConstants.BLUE + "1"))
             && t.Mode == ThemeModes.Light);
         
@@ -153,39 +162,46 @@ class ThemeService : IThemeService
     
     private void UpdateSettings()
     {
-        _applicationSettingsRepository.UpdateCurrentApplicationSettings(
-            settings => settings.Theme = _selectedTheme.Value.Key);
+        _applicationSettingsRepository.UpdateCurrentApplicationSettings(settings => settings.Theme = _selectedTheme.Value.Key);
     }
     
     public IBrush? GetBrush(string resourceName)
     {
-        var themeVariant = Application.Current?.RequestedThemeVariant ?? ThemeVariant.Default;
+        IBrush? GetBrushInternal()
+        {
+            var themeVariant = Application.Current?.RequestedThemeVariant ?? ThemeVariant.Default;
+            
+            object? styleResource = null;
+            Application.Current?.Styles.TryGetResource(resourceName, themeVariant, out styleResource);
+            
+            if (styleResource == null)
+            {
+                Application.Current?.Styles.TryGetResource(resourceName, ThemeVariant.Default, out styleResource);
+            }
+            
+            if (styleResource == null)
+            {
+                _customThemeResources?.TryGetResource(resourceName, ThemeVariant.Default, out styleResource);
+            }
+            
+            if (styleResource is IBrush brush)
+            {
+                return brush;
+            }
+            else if (styleResource is Color color)
+            {
+                return new SolidColorBrush(color);
+            }
+            else
+            {
+                _logger.LogWarning("Resource {ResourceName} not found", resourceName);
+                
+                return null;
+            }
+        }
         
-        object? styleResource = null;
-        Application.Current?.Styles.TryGetResource(resourceName, themeVariant, out styleResource);
-
-        if (styleResource == null)
-        {
-            Application.Current?.Styles.TryGetResource(resourceName, ThemeVariant.Default, out styleResource);
-        }
-
-        if (styleResource == null)
-        {
-            _customThemeResources?.TryGetResource(resourceName, ThemeVariant.Default, out styleResource);
-        }
-
-        if (styleResource is IBrush brush)
-        {
-            return brush;
-        }
-        else if (styleResource is Color color)
-        {
-            return new SolidColorBrush(color);
-        }
-        else
-        {
-            _logger.LogWarning("Resource {ResourceName} not found", resourceName);
-            return null;
-        }
+        return Dispatcher.UIThread.CheckAccess()
+            ? GetBrushInternal()
+            : Dispatcher.UIThread.InvokeAsync(GetBrushInternal).GetAwaiter().GetResult();
     }
 }

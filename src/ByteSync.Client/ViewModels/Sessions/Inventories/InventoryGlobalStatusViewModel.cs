@@ -67,16 +67,13 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 .RefCount();
             statsStream.Subscribe(_ => { }).DisposeWith(disposables);
             
-            var waitingFinalStats = statusStream
-                .Select(st => st == InventoryTaskStatus.Success
-                    ? statsStream.Where(s => s != null).Take(1).Select(_ => false).StartWith(true)
-                    : Observable.Return(false))
-                .Switch()
-                .DistinctUntilChanged();
-            waitingFinalStats
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(v => IsWaitingFinalStats = v)
-                .DisposeWith(disposables);
+            var statsReady = statsStream
+                .Select(s => s != null)
+                .StartWith(false)
+                .DistinctUntilChanged()
+                .Replay(1)
+                .RefCount();
+            statsReady.Subscribe(_ => { }).DisposeWith(disposables);
             
             statusStream
                 .Select(st => st == InventoryTaskStatus.Running)
@@ -85,12 +82,21 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 .ToPropertyEx(this, x => x.IsInventoryRunning)
                 .DisposeWith(disposables);
             
-            statusStream
-                .Select(st => st is InventoryTaskStatus.Pending or InventoryTaskStatus.Running)
-                .CombineLatest(waitingFinalStats, (rp, wait) => rp || wait)
-                .DistinctUntilChanged()
+            var inProgressCombined = statusStream
+                .CombineLatest(statsReady,
+                    (st, ready) => st is InventoryTaskStatus.Pending or InventoryTaskStatus.Running ||
+                                   (st == InventoryTaskStatus.Success && !ready))
+                .DistinctUntilChanged();
+            inProgressCombined
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .ToPropertyEx(this, x => x.IsInventoryInProgress)
+                .DisposeWith(disposables);
+            
+            statusStream
+                .CombineLatest(statsReady, (st, ready) => st == InventoryTaskStatus.Success && !ready)
+                .DistinctUntilChanged()
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(v => IsWaitingFinalStats = v)
                 .DisposeWith(disposables);
             
             statusStream
@@ -185,10 +191,6 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 })
                 .DisposeWith(disposables);
             
-            var inProgressCombined = statusStream
-                .Select(st => st is InventoryTaskStatus.Pending or InventoryTaskStatus.Running)
-                .CombineLatest(waitingFinalStats, (rp, wait) => rp || wait)
-                .DistinctUntilChanged();
             inProgressCombined
                 .Where(x => x)
                 .Subscribe(_ => { GlobalMainStatusText = Resources.InventoryProcess_InventoryRunning; })
