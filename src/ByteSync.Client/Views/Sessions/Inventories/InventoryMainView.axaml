@@ -30,11 +30,11 @@
 
                     <!-- Bottom row: Local status + Identification + Analysis -->
                     <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,6,0,0" MaxWidth="1800">
-                        <local:InventoryLocalStatusView DataContext="{Binding InventoryLocalStatusViewModel}" MaxWidth="600" Margin="6,0" />
+                        <local:InventoryLocalStatusView DataContext="{Binding InventoryLocalStatusViewModel}" MaxWidth="600" Margin="24,6" />
                         <local:InventoryLocalIdentificationView DataContext="{Binding InventoryLocalIdentificationViewModel}"
-                                                                MaxWidth="600" Margin="6,0" />
+                                                                MaxWidth="600" Margin="24,6" />
                         <local:InventoryDeltaGenerationView DataContext="{Binding InventoryDeltaGenerationViewModel}" MaxWidth="600"
-                                                            Margin="6,0" />
+                                                            Margin="24,6" />
                     </WrapPanel>
                 </StackPanel>
             </Grid>

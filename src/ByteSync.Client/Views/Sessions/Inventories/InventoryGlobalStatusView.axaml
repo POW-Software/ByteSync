@@ -14,7 +14,7 @@
 
     <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 6" MaxWidth="1300">
         <!-- Left pane: status -->
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="6,0" MaxWidth="600">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="24,6" MaxWidth="600">
             <misc:ActivityIndicator Width="120" Height="100" Margin="6"
                                     IsVisible="{Binding IsInventoryInProgress}" />
 
@@ -44,7 +44,8 @@
         </StackPanel>
 
         <!-- Right pane: statistics -->
-        <Grid HorizontalAlignment="Center" Margin="6,12,6,0" MaxWidth="600">
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center"
+              Margin="24,6" MaxWidth="600">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
