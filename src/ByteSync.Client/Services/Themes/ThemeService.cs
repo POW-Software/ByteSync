@@ -4,7 +4,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Styling;
-using Avalonia.Threading;
 using ByteSync.Business.Themes;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Themes;
@@ -79,30 +78,22 @@ class ThemeService : IThemeService
     
     private void SelectTheme(Theme theme)
     {
-        void ApplyThemeOnUi()
+        if (_customThemeResources == null)
         {
-            if (_customThemeResources == null)
-            {
-                _customThemeResources = new ResourceDictionary();
-                Application.Current!.Resources.MergedDictionaries.Add(_customThemeResources);
-            }
-            
-            try
-            {
-                Application.Current!.RequestedThemeVariant = theme.IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
-                
-                ApplyThemeColorsToCustomResources(theme);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to apply theme {ThemeName}", theme.Key);
-            }
+            _customThemeResources = new ResourceDictionary();
+            Application.Current!.Resources.MergedDictionaries.Add(_customThemeResources);
         }
         
-        if (Dispatcher.UIThread.CheckAccess())
-            ApplyThemeOnUi();
-        else
-            Dispatcher.UIThread.InvokeAsync(ApplyThemeOnUi).GetAwaiter().GetResult();
+        try
+        {
+            Application.Current!.RequestedThemeVariant = theme.IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
+            
+            ApplyThemeColorsToCustomResources(theme);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to apply theme {ThemeName}", theme.Key);
+        }
         
         _selectedTheme.OnNext(theme);
     }
@@ -167,41 +158,34 @@ class ThemeService : IThemeService
     
     public IBrush? GetBrush(string resourceName)
     {
-        IBrush? GetBrushInternal()
+        var themeVariant = Application.Current?.RequestedThemeVariant ?? ThemeVariant.Default;
+        
+        object? styleResource = null;
+        Application.Current?.Styles.TryGetResource(resourceName, themeVariant, out styleResource);
+        
+        if (styleResource == null)
         {
-            var themeVariant = Application.Current?.RequestedThemeVariant ?? ThemeVariant.Default;
-            
-            object? styleResource = null;
-            Application.Current?.Styles.TryGetResource(resourceName, themeVariant, out styleResource);
-            
-            if (styleResource == null)
-            {
-                Application.Current?.Styles.TryGetResource(resourceName, ThemeVariant.Default, out styleResource);
-            }
-            
-            if (styleResource == null)
-            {
-                _customThemeResources?.TryGetResource(resourceName, ThemeVariant.Default, out styleResource);
-            }
-            
-            if (styleResource is IBrush brush)
-            {
-                return brush;
-            }
-            else if (styleResource is Color color)
-            {
-                return new SolidColorBrush(color);
-            }
-            else
-            {
-                _logger.LogWarning("Resource {ResourceName} not found", resourceName);
-                
-                return null;
-            }
+            Application.Current?.Styles.TryGetResource(resourceName, ThemeVariant.Default, out styleResource);
         }
         
-        return Dispatcher.UIThread.CheckAccess()
-            ? GetBrushInternal()
-            : Dispatcher.UIThread.InvokeAsync(GetBrushInternal).GetAwaiter().GetResult();
+        if (styleResource == null)
+        {
+            _customThemeResources?.TryGetResource(resourceName, ThemeVariant.Default, out styleResource);
+        }
+        
+        if (styleResource is IBrush brush)
+        {
+            return brush;
+        }
+        else if (styleResource is Color color)
+        {
+            return new SolidColorBrush(color);
+        }
+        else
+        {
+            _logger.LogWarning("Resource {ResourceName} not found", resourceName);
+            
+            return null;
+        }
     }
 }

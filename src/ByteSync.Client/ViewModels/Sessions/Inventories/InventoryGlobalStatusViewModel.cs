@@ -100,6 +100,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 .DisposeWith(disposables);
             
             statusStream
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(st => _lastGlobalStatus = st)
                 .DisposeWith(disposables);
             
@@ -153,6 +154,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
             
             var visuals = Observable.Merge(nonSuccessVisual, successVisual, successOnStats);
             visuals
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(v =>
                 {
                     GlobalMainIcon = v.Icon;
@@ -163,6 +165,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
             
             inventoryStatisticsService.Statistics
                 .WithLatestFrom(statusStream, (s, st) => (s, st))
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(tuple =>
                 {
                     var s = tuple.s;
@@ -193,6 +196,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
             
             inProgressCombined
                 .Where(x => x)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => { GlobalMainStatusText = Resources.InventoryProcess_InventoryRunning; })
                 .DisposeWith(disposables);
             
@@ -200,6 +204,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 .Where(x => !x)
                 .WithLatestFrom(statusStream, (_, st) => st)
                 .Where(st => st == InventoryTaskStatus.Success)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ =>
                 {
                     var errors = GlobalAnalyzeErrors ?? 0;
@@ -221,6 +226,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 .DisposeWith(disposables);
             
             sessionPreparation
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ =>
                 {
                     GlobalTotalAnalyzed = null;
@@ -237,6 +243,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 .Where(e => e != null)
                 .WithLatestFrom(statusStream, (e, st) => (e: e!.Value, st))
                 .Where(t => t.st == InventoryTaskStatus.Success)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(t =>
                 {
                     if (t.e > 0)
