@@ -32,7 +32,7 @@
                 <local:InventoryMainStatusView Grid.Column="0" DataContext="{Binding InventoryMainStatusViewModel}" />
 
                 <!-- Identification -->
-                <local:InventoryIdentificationView Grid.Column="1" DataContext="{Binding InventoryIdentificationViewModel}" />
+                <local:InventoryLocalIdentificationView Grid.Column="1" DataContext="{Binding InventoryLocalIdentificationViewModel}" />
 
                 <!-- Analysis -->
                 <local:InventoryDeltaGenerationView Grid.Column="2" DataContext="{Binding InventoryDeltaGenerationViewModel}" />

@@ -16,7 +16,7 @@ public class InventoryMainViewModel : ActivatableViewModelBase
     }
     
     public InventoryMainViewModel(InventoryMainStatusViewModel inventoryMainStatusViewModel,
-        InventoryIdentificationViewModel inventoryIdentificationViewModel,
+        InventoryLocalIdentificationViewModel inventoryLocalIdentificationViewModel,
         InventoryDeltaGenerationViewModel inventoryDeltaGenerationViewModel,
         InventoryBeforeStartViewModel inventoryBeforeStartViewModel,
         IInventoryService inventoryService)
@@ -24,7 +24,7 @@ public class InventoryMainViewModel : ActivatableViewModelBase
         _inventoryService = inventoryService;
         
         InventoryMainStatusViewModel = inventoryMainStatusViewModel;
-        InventoryIdentificationViewModel = inventoryIdentificationViewModel;
+        InventoryLocalIdentificationViewModel = inventoryLocalIdentificationViewModel;
         InventoryDeltaGenerationViewModel = inventoryDeltaGenerationViewModel;
         InventoryBeforeStartViewModel = inventoryBeforeStartViewModel;
         
@@ -48,7 +48,7 @@ public class InventoryMainViewModel : ActivatableViewModelBase
     
     public InventoryMainStatusViewModel InventoryMainStatusViewModel { get; set; }
     
-    public InventoryIdentificationViewModel InventoryIdentificationViewModel { get; set; }
+    public InventoryLocalIdentificationViewModel InventoryLocalIdentificationViewModel { get; set; }
     
     public InventoryDeltaGenerationViewModel InventoryDeltaGenerationViewModel { get; set; }
     

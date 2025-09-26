@@ -23,12 +23,12 @@ public class InventoryMainViewModelTests
     
     private InventoryMainViewModel CreateVm(
         InventoryMainStatusViewModel? statusVm = null,
-        InventoryIdentificationViewModel? idVm = null,
+        InventoryLocalIdentificationViewModel? idVm = null,
         InventoryDeltaGenerationViewModel? deltaVm = null,
         InventoryBeforeStartViewModel? beforeVm = null)
     {
         statusVm ??= new InventoryMainStatusViewModel();
-        idVm ??= new InventoryIdentificationViewModel();
+        idVm ??= new InventoryLocalIdentificationViewModel();
         deltaVm ??= new InventoryDeltaGenerationViewModel();
         beforeVm ??= new InventoryBeforeStartViewModel();
         
@@ -83,14 +83,14 @@ public class InventoryMainViewModelTests
     public void Constructor_AssignsDependencies_AndProcessData()
     {
         var statusVm = new InventoryMainStatusViewModel();
-        var idVm = new InventoryIdentificationViewModel();
+        var idVm = new InventoryLocalIdentificationViewModel();
         var deltaVm = new InventoryDeltaGenerationViewModel();
         var beforeVm = new InventoryBeforeStartViewModel();
         
         var vm = CreateVm(statusVm, idVm, deltaVm, beforeVm);
         
         vm.InventoryMainStatusViewModel.Should().BeSameAs(statusVm);
-        vm.InventoryIdentificationViewModel.Should().BeSameAs(idVm);
+        vm.InventoryLocalIdentificationViewModel.Should().BeSameAs(idVm);
         vm.InventoryDeltaGenerationViewModel.Should().BeSameAs(deltaVm);
         vm.InventoryBeforeStartViewModel.Should().BeSameAs(beforeVm);
         vm.InventoryProcessData.Should().BeSameAs(_processData);

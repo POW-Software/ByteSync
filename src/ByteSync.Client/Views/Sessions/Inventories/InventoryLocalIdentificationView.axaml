@@ -6,17 +6,17 @@
              xmlns:inventories="clr-namespace:ByteSync.ViewModels.Sessions.Inventories"
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="ByteSync.Views.Sessions.Inventories.InventoryIdentificationView">
+             x:Class="ByteSync.Views.Sessions.Inventories.InventoryLocalIdentificationView">
 
     <Design.DataContext>
-        <inventories:InventoryIdentificationViewModel />
+        <inventories:InventoryLocalIdentificationViewModel />
     </Design.DataContext>
 
     <StackPanel Orientation="Vertical" VerticalAlignment="Center">
         <StackPanel Orientation="Vertical" Height="60"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
             <misc:ActivityIndicator Width="80" Height="60"
-                                 IsVisible="{Binding IsIdentificationRunning}" />
+                                    IsVisible="{Binding IsIdentificationRunning}" />
 
             <misc:Icon FontSize="60"
                        Value="{Binding IdentificationStatus, 
@@ -56,7 +56,8 @@
 
             <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc InventoryProcess_TotalSize}"
                    Classes="InventoryStatusDescription" />
-            <Label Grid.Row="2" Grid.Column="1" Content="{Binding IdentifiedSize, FallbackValue=0, 
+            <Label Grid.Row="2" Grid.Column="1"
+                   Content="{Binding IdentifiedSize, FallbackValue=0, 
                         Converter={StaticResource FormatKbSizeConverter}}"
                    HorizontalContentAlignment="Right" />
         </Grid>

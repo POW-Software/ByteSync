@@ -7,15 +7,15 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Inventories;
 
-public class InventoryIdentificationViewModel : ActivatableViewModelBase
+public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
 {
     private readonly IInventoryService _inventoryService;
     
-    public InventoryIdentificationViewModel()
+    public InventoryLocalIdentificationViewModel()
     {
     }
     
-    public InventoryIdentificationViewModel(IInventoryService inventoryService)
+    public InventoryLocalIdentificationViewModel(IInventoryService inventoryService)
     {
         _inventoryService = inventoryService;
         
