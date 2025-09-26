@@ -22,18 +22,21 @@ public class InventoryMainViewModelTests
     }
     
     private InventoryMainViewModel CreateVm(
-        InventoryMainStatusViewModel? statusVm = null,
+        InventoryGlobalStatusViewModel? globalVm = null,
+        InventoryLocalStatusViewModel? localVm = null,
         InventoryLocalIdentificationViewModel? idVm = null,
         InventoryDeltaGenerationViewModel? deltaVm = null,
         InventoryBeforeStartViewModel? beforeVm = null)
     {
-        statusVm ??= new InventoryMainStatusViewModel();
+        globalVm ??= new InventoryGlobalStatusViewModel();
+        localVm ??= new InventoryLocalStatusViewModel();
         idVm ??= new InventoryLocalIdentificationViewModel();
         deltaVm ??= new InventoryDeltaGenerationViewModel();
         beforeVm ??= new InventoryBeforeStartViewModel();
         
         var vm = new InventoryMainViewModel(
-            statusVm,
+            globalVm,
+            localVm,
             idVm,
             deltaVm,
             beforeVm,
@@ -82,14 +85,16 @@ public class InventoryMainViewModelTests
     [Test]
     public void Constructor_AssignsDependencies_AndProcessData()
     {
-        var statusVm = new InventoryMainStatusViewModel();
+        var globalVm = new InventoryGlobalStatusViewModel();
+        var localVm = new InventoryLocalStatusViewModel();
         var idVm = new InventoryLocalIdentificationViewModel();
         var deltaVm = new InventoryDeltaGenerationViewModel();
         var beforeVm = new InventoryBeforeStartViewModel();
         
-        var vm = CreateVm(statusVm, idVm, deltaVm, beforeVm);
+        var vm = CreateVm(globalVm, localVm, idVm, deltaVm, beforeVm);
         
-        vm.InventoryMainStatusViewModel.Should().BeSameAs(statusVm);
+        vm.InventoryGlobalStatusViewModel.Should().BeSameAs(globalVm);
+        vm.InventoryLocalStatusViewModel.Should().BeSameAs(localVm);
         vm.InventoryLocalIdentificationViewModel.Should().BeSameAs(idVm);
         vm.InventoryDeltaGenerationViewModel.Should().BeSameAs(deltaVm);
         vm.InventoryBeforeStartViewModel.Should().BeSameAs(beforeVm);

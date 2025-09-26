@@ -15,7 +15,8 @@ public class InventoryMainViewModel : ActivatableViewModelBase
     {
     }
     
-    public InventoryMainViewModel(InventoryMainStatusViewModel inventoryMainStatusViewModel,
+    public InventoryMainViewModel(InventoryGlobalStatusViewModel inventoryGlobalStatusViewModel,
+        InventoryLocalStatusViewModel inventoryLocalStatusViewModel,
         InventoryLocalIdentificationViewModel inventoryLocalIdentificationViewModel,
         InventoryDeltaGenerationViewModel inventoryDeltaGenerationViewModel,
         InventoryBeforeStartViewModel inventoryBeforeStartViewModel,
@@ -23,7 +24,8 @@ public class InventoryMainViewModel : ActivatableViewModelBase
     {
         _inventoryService = inventoryService;
         
-        InventoryMainStatusViewModel = inventoryMainStatusViewModel;
+        InventoryGlobalStatusViewModel = inventoryGlobalStatusViewModel;
+        InventoryLocalStatusViewModel = inventoryLocalStatusViewModel;
         InventoryLocalIdentificationViewModel = inventoryLocalIdentificationViewModel;
         InventoryDeltaGenerationViewModel = inventoryDeltaGenerationViewModel;
         InventoryBeforeStartViewModel = inventoryBeforeStartViewModel;
@@ -46,7 +48,9 @@ public class InventoryMainViewModel : ActivatableViewModelBase
     [Reactive]
     public InventoryProcessData InventoryProcessData { get; set; }
     
-    public InventoryMainStatusViewModel InventoryMainStatusViewModel { get; set; }
+    public InventoryGlobalStatusViewModel InventoryGlobalStatusViewModel { get; set; }
+    
+    public InventoryLocalStatusViewModel InventoryLocalStatusViewModel { get; set; }
     
     public InventoryLocalIdentificationViewModel InventoryLocalIdentificationViewModel { get; set; }
     

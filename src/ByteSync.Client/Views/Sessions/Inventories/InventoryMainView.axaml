@@ -28,8 +28,11 @@
                     <ColumnDefinition Width="*" MaxWidth="600"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
 
-                <!-- Main Status -->
-                <local:InventoryMainStatusView Grid.Column="0" DataContext="{Binding InventoryMainStatusViewModel}" />
+                <!-- Main Status: Global + Local stacked -->
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <local:InventoryGlobalStatusView DataContext="{Binding InventoryGlobalStatusViewModel}" />
+                    <local:InventoryLocalStatusView DataContext="{Binding InventoryLocalStatusViewModel}" />
+                </StackPanel>
 
                 <!-- Identification -->
                 <local:InventoryLocalIdentificationView Grid.Column="1" DataContext="{Binding InventoryLocalIdentificationViewModel}" />

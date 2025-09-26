@@ -5,11 +5,9 @@ using Avalonia.Media;
 using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Business.Inventories;
-using ByteSync.Business.Misc;
 using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Themes;
-using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Services.Sessions;
 using ReactiveUI;
@@ -17,67 +15,46 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Inventories;
 
-public class InventoryMainStatusViewModel : ActivatableViewModelBase
+public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
 {
     private readonly IInventoryService _inventoryService = null!;
     private readonly ISessionService _sessionService = null!;
-    private readonly ITimeTrackingCache _timeTrackingCache = null!;
     private readonly IDialogService _dialogService = null!;
-    private readonly ILogger<InventoryMainStatusViewModel> _logger = null!;
     private readonly IThemeService _themeService = null!;
+    private readonly ILogger<InventoryGlobalStatusViewModel> _logger = null!;
+    private InventoryTaskStatus _lastGlobalStatus;
     
-    public InventoryMainStatusViewModel()
+    public InventoryGlobalStatusViewModel()
     {
     }
     
-    public InventoryMainStatusViewModel(IInventoryService inventoryService, ISessionService sessionService,
-        ITimeTrackingCache timeTrackingCache, IDialogService dialogService, IThemeService themeService,
-        IInventoryStatisticsService inventoryStatisticsService, ILogger<InventoryMainStatusViewModel> logger)
+    public InventoryGlobalStatusViewModel(IInventoryService inventoryService, ISessionService sessionService,
+        IDialogService dialogService, IThemeService themeService,
+        IInventoryStatisticsService inventoryStatisticsService, ILogger<InventoryGlobalStatusViewModel> logger)
     {
         _inventoryService = inventoryService;
         _sessionService = sessionService;
-        _timeTrackingCache = timeTrackingCache;
         _dialogService = dialogService;
         _themeService = themeService;
         _logger = logger;
         
         AbortInventoryCommand = ReactiveCommand.CreateFromTask(AbortInventory);
         
-        EstimatedProcessEndName = Resources.InventoryProcess_EstimatedEnd;
-        
         this.WhenActivated(disposables =>
         {
-            HandleActivation(disposables);
-            
-            _inventoryService.InventoryProcessData.AnalysisStatus
-                .ToPropertyEx(this, x => x.AnalysisStatus)
-                .DisposeWith(disposables);
-            
             _inventoryService.InventoryProcessData.AnalysisStatus
                 .Select(ms => ms == InventoryTaskStatus.Success)
                 .ToPropertyEx(this, x => x.ShowGlobalStatistics)
                 .DisposeWith(disposables);
             
-            inventoryStatisticsService.Statistics
-                .Subscribe(s =>
-                {
-                    GlobalTotalAnalyzed = s?.TotalAnalyzed;
-                    GlobalProcessedSize = s?.ProcessedSize;
-                    GlobalAnalyzeSuccess = s?.Success;
-                    GlobalAnalyzeErrors = s?.Errors;
-                })
-                .DisposeWith(disposables);
-            
             this.WhenAnyValue(x => x.GlobalAnalyzeErrors)
                 .Select(e => (e ?? 0) > 0)
-                .ObserveOn(RxApp.MainThreadScheduler)
                 .ToPropertyEx(this, x => x.HasErrors)
                 .DisposeWith(disposables);
             
-            // Shared streams
             var statusStream = _inventoryService.InventoryProcessData.GlobalMainStatus
                 .DistinctUntilChanged()
-                .Publish()
+                .Replay(1)
                 .RefCount();
             var sessionPreparation = _sessionService.SessionStatusObservable
                 .Where(ss => ss == SessionStatus.Preparation)
@@ -90,7 +67,6 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                 .RefCount();
             statsStream.Subscribe(_ => { }).DisposeWith(disposables);
             
-            // Waiting flag: on Success, stay true until the first stats emission; otherwise false
             var waitingFinalStats = statusStream
                 .Select(st => st == InventoryTaskStatus.Success
                     ? statsStream.Where(s => s != null).Take(1).Select(_ => false).StartWith(true)
@@ -102,7 +78,6 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                 .Subscribe(v => IsWaitingFinalStats = v)
                 .DisposeWith(disposables);
             
-            // IsInventoryRunning directly from status stream
             statusStream
                 .Select(st => st == InventoryTaskStatus.Running)
                 .DistinctUntilChanged()
@@ -110,7 +85,6 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                 .ToPropertyEx(this, x => x.IsInventoryRunning)
                 .DisposeWith(disposables);
             
-            // IsInventoryInProgress computed from status + waiting flag
             statusStream
                 .Select(st => st is InventoryTaskStatus.Pending or InventoryTaskStatus.Running)
                 .CombineLatest(waitingFinalStats, (rp, wait) => rp || wait)
@@ -119,41 +93,59 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                 .ToPropertyEx(this, x => x.IsInventoryInProgress)
                 .DisposeWith(disposables);
             
-            // Map to final UI visuals: immediate for non-success; gated on stats for success
+            statusStream
+                .Subscribe(st => _lastGlobalStatus = st)
+                .DisposeWith(disposables);
+            
+            
+            var themeService = _themeService;
+            
             var nonSuccessVisual = statusStream
-                .Where(st => st is InventoryTaskStatus.Error or InventoryTaskStatus.Cancelled or InventoryTaskStatus.NotLaunched)
-                .Select(st =>
+                .Where(st => st is InventoryTaskStatus.Cancelled or InventoryTaskStatus.Error or InventoryTaskStatus.NotLaunched)
+                .Select(st => (Icon: "SolidXCircle", Text: st switch
                 {
-                    var key = $"InventoryProcess_Inventory{st}";
-                    var text = Resources.ResourceManager.GetString(key, Resources.Culture) ?? string.Empty;
-                    
-                    return (Icon: "SolidXCircle", Text: text, BrushKey: "MainSecondaryColor");
-                });
+                    InventoryTaskStatus.Cancelled => Resources.InventoryProcess_InventoryCancelled,
+                    InventoryTaskStatus.Error => Resources.InventoryProcess_InventoryError,
+                    _ => Resources.InventoryProcess_InventoryError
+                }, BrushKey: "MainSecondaryColor"));
             
             var successVisual = statusStream
-                .Where(st => st == InventoryTaskStatus.Success)
-                .Select(_ => statsStream.Where(s => s != null).Take(1))
-                .Switch()
-                .Select(s =>
+                .Select(st => st == InventoryTaskStatus.Success
+                    ? statsStream.Where(s => s != null).Take(1).Select(s =>
+                    {
+                        if (s!.Errors is > 0)
+                        {
+                            var text = Resources.ResourceManager.GetString("InventoryProcess_InventorySuccessWithErrors", Resources.Culture)
+                                       ?? Resources.InventoryProcess_InventorySuccess;
+                            
+                            return (Icon: "RegularError", Text: text, BrushKey: "MainSecondaryColor");
+                        }
+                        
+                        return (Icon: "SolidCheckCircle", Text: Resources.InventoryProcess_InventorySuccess,
+                            BrushKey: "HomeCloudSynchronizationBackGround");
+                    })
+                    : Observable.Empty<(string Icon, string Text, string BrushKey)>())
+                .Switch();
+            
+            var successOnStats = statsStream
+                .Where(s => s != null)
+                .WithLatestFrom(statusStream, (s, st) => (s: s!, st))
+                .Where(t => t.st == InventoryTaskStatus.Success)
+                .Select(t =>
                 {
-                    var stats = s!;
-                    var errors = stats.Errors;
-                    if (errors > 0)
+                    if (t.s.Errors is > 0)
                     {
                         var text = Resources.ResourceManager.GetString("InventoryProcess_InventorySuccessWithErrors", Resources.Culture)
                                    ?? Resources.InventoryProcess_InventorySuccess;
                         
                         return (Icon: "RegularError", Text: text, BrushKey: "MainSecondaryColor");
                     }
-                    else
-                    {
-                        return (Icon: "SolidCheckCircle", Text: Resources.InventoryProcess_InventorySuccess,
-                            BrushKey: "HomeCloudSynchronizationBackGround");
-                    }
+                    
+                    return (Icon: "SolidCheckCircle", Text: Resources.InventoryProcess_InventorySuccess,
+                        BrushKey: "HomeCloudSynchronizationBackGround");
                 });
             
-            var visuals = Observable.Merge(nonSuccessVisual, successVisual)
-                .ObserveOn(RxApp.MainThreadScheduler);
+            var visuals = Observable.Merge(nonSuccessVisual, successVisual, successOnStats);
             visuals
                 .Subscribe(v =>
                 {
@@ -163,19 +155,70 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                 })
                 .DisposeWith(disposables);
             
-            // Ensure text is visible while spinner is active
+            inventoryStatisticsService.Statistics
+                .WithLatestFrom(statusStream, (s, st) => (s, st))
+                .Subscribe(tuple =>
+                {
+                    var s = tuple.s;
+                    GlobalTotalAnalyzed = s?.TotalAnalyzed;
+                    GlobalProcessedSize = s?.ProcessedSize;
+                    GlobalAnalyzeSuccess = s?.Success;
+                    GlobalAnalyzeErrors = s?.Errors;
+                    
+                    if (tuple.st == InventoryTaskStatus.Success && s != null)
+                    {
+                        if (s.Errors is > 0)
+                        {
+                            var text = Resources.ResourceManager.GetString("InventoryProcess_InventorySuccessWithErrors", Resources.Culture)
+                                       ?? Resources.InventoryProcess_InventorySuccess;
+                            GlobalMainIcon = "RegularError";
+                            GlobalMainStatusText = text;
+                            GlobalMainIconBrush = _themeService.GetBrush("MainSecondaryColor");
+                        }
+                        else
+                        {
+                            GlobalMainIcon = "SolidCheckCircle";
+                            GlobalMainStatusText = Resources.InventoryProcess_InventorySuccess;
+                            GlobalMainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                        }
+                    }
+                })
+                .DisposeWith(disposables);
+            
             var inProgressCombined = statusStream
                 .Select(st => st is InventoryTaskStatus.Pending or InventoryTaskStatus.Running)
                 .CombineLatest(waitingFinalStats, (rp, wait) => rp || wait)
                 .DistinctUntilChanged();
             inProgressCombined
                 .Where(x => x)
-                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => { GlobalMainStatusText = Resources.InventoryProcess_InventoryRunning; })
                 .DisposeWith(disposables);
             
+            inProgressCombined
+                .Where(x => !x)
+                .WithLatestFrom(statusStream, (_, st) => st)
+                .Where(st => st == InventoryTaskStatus.Success)
+                .Subscribe(_ =>
+                {
+                    var errors = GlobalAnalyzeErrors ?? 0;
+                    if (errors > 0)
+                    {
+                        var text = Resources.ResourceManager.GetString("InventoryProcess_InventorySuccessWithErrors", Resources.Culture)
+                                   ?? Resources.InventoryProcess_InventorySuccess;
+                        GlobalMainIcon = "RegularError";
+                        GlobalMainStatusText = text;
+                        GlobalMainIconBrush = _themeService.GetBrush("MainSecondaryColor");
+                    }
+                    else
+                    {
+                        GlobalMainIcon = "SolidCheckCircle";
+                        GlobalMainStatusText = Resources.InventoryProcess_InventorySuccess;
+                        GlobalMainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                    }
+                })
+                .DisposeWith(disposables);
+            
             sessionPreparation
-                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ =>
                 {
                     GlobalTotalAnalyzed = null;
@@ -187,32 +230,33 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
                     GlobalMainIconBrush = null;
                 })
                 .DisposeWith(disposables);
+            
+            this.WhenAnyValue(x => x.GlobalAnalyzeErrors)
+                .Where(e => e != null)
+                .WithLatestFrom(statusStream, (e, st) => (e: e!.Value, st))
+                .Where(t => t.st == InventoryTaskStatus.Success)
+                .Subscribe(t =>
+                {
+                    if (t.e > 0)
+                    {
+                        var text = Resources.ResourceManager.GetString("InventoryProcess_InventorySuccessWithErrors", Resources.Culture)
+                                   ?? Resources.InventoryProcess_InventorySuccess;
+                        GlobalMainIcon = "RegularError";
+                        GlobalMainStatusText = text;
+                        GlobalMainIconBrush = _themeService.GetBrush("MainSecondaryColor");
+                    }
+                    else
+                    {
+                        GlobalMainIcon = "SolidCheckCircle";
+                        GlobalMainStatusText = Resources.InventoryProcess_InventorySuccess;
+                        GlobalMainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                    }
+                })
+                .DisposeWith(disposables);
         });
     }
     
-    private void HandleActivation(CompositeDisposable disposables)
-    {
-        _inventoryService.InventoryProcessData.GlobalMainStatus
-            .ToPropertyEx(this, x => x.GlobalMainStatus)
-            .DisposeWith(disposables);
-        
-        var timeTrackingComputer = _timeTrackingCache
-            .GetTimeTrackingComputer(_sessionService.SessionId!, TimeTrackingComputerType.Inventory)
-            .Result;
-        timeTrackingComputer.RemainingTime
-            .Subscribe(remainingTime =>
-            {
-                RemainingTime = remainingTime.RemainingTime;
-                ElapsedTime = remainingTime.ElapsedTime;
-                EstimatedEndDateTime = remainingTime.EstimatedEndDateTime;
-                StartDateTime = remainingTime.StartDateTime;
-            })
-            .DisposeWith(disposables);
-    }
-    
     public ReactiveCommand<Unit, Unit> AbortInventoryCommand { get; set; } = null!;
-    
-    public extern InventoryTaskStatus GlobalMainStatus { [ObservableAsProperty] get; }
     
     public extern bool IsInventoryRunning { [ObservableAsProperty] get; }
     
@@ -221,21 +265,6 @@ public class InventoryMainStatusViewModel : ActivatableViewModelBase
     public extern bool IsInventoryInProgress { [ObservableAsProperty] get; }
     
     public extern bool ShowGlobalStatistics { [ObservableAsProperty] get; }
-    
-    [Reactive]
-    public string EstimatedProcessEndName { get; set; } = null!;
-    
-    [Reactive]
-    public DateTime? StartDateTime { get; set; }
-    
-    [Reactive]
-    public TimeSpan ElapsedTime { get; set; }
-    
-    [Reactive]
-    public DateTime? EstimatedEndDateTime { get; set; }
-    
-    [Reactive]
-    public TimeSpan? RemainingTime { get; set; }
     
     [Reactive]
     public int? GlobalTotalAnalyzed { get; set; }

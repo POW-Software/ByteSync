@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -6,10 +6,10 @@
              xmlns:inventories="clr-namespace:ByteSync.ViewModels.Sessions.Inventories"
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="ByteSync.Views.Sessions.Inventories.InventoryMainStatusView">
+             x:Class="ByteSync.Views.Sessions.Inventories.InventoryGlobalStatusView">
 
     <Design.DataContext>
-        <inventories:InventoryMainStatusViewModel />
+        <inventories:InventoryGlobalStatusViewModel />
     </Design.DataContext>
 
     <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 6 0 6">
@@ -18,12 +18,10 @@
 
         <StackPanel Height="100" HorizontalAlignment="Center" Margin="12"
                     IsVisible="{Binding !IsInventoryInProgress}">
-
             <misc:Icon FontSize="100"
                        Value="{Binding GlobalMainIcon}"
                        Foreground="{Binding GlobalMainIconBrush}"
                        VerticalAlignment="Center" HorizontalAlignment="Center" />
-
         </StackPanel>
 
         <TextBlock Height="30"
@@ -42,7 +40,6 @@
             </Button>
         </StackPanel>
 
-
         <Grid HorizontalAlignment="Center" Margin="3 12 3 0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -54,62 +51,31 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
-
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_Start}"
-                   Classes="InventoryStatusDescription" />
-            <Border Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
-                <TextBlock Text="{Binding StartDateTime, FallbackValue='', StringFormat={}{0:G}}" />
-            </Border>
-
-            <!-- StringFormat={}{0:hh\\:mm\\:ss} OK --> <!-- StringFormat={}{0:\\[d\\.\\]hh\\:mm\\:ss} with day: does not work
-                            because you have to retype the [], which makes them appear. So we sort out the milliseconds before -->
-            <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc InventoryProcess_ElapsedTime}"
-                   Classes="InventoryStatusDescription" />
-            <Border Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
-                <TextBlock Text="{Binding ElapsedTime, StringFormat={}{0:c}}" />
-            </Border>
-
-            <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc InventoryProcess_RemainingTime}"
-                   Classes="InventoryStatusDescription" />
-            <Border Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
-                <TextBlock Text="{Binding RemainingTime, StringFormat={}{0:c}}" />
-            </Border>
-
-            <Label Grid.Row="3" Grid.Column="0" Content="{Binding EstimatedProcessEndName}"
-                   Classes="InventoryStatusDescription" />
-            <Border Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
-                <TextBlock Text="{Binding EstimatedEndDateTime, StringFormat={}{0:G}}" />
-            </Border>
-
-            <Label Grid.Row="4" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzedFiles}"
+            <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzedFiles}"
                    Classes="InventoryStatusDescription"
                    Margin="0 18 0 0" />
-            <Border Grid.Row="4" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge" Margin="0 18 0 0">
+            <Border Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge" Margin="0 18 0 0">
                 <TextBlock Text="{Binding GlobalTotalAnalyzed, FallbackValue=''}" />
             </Border>
 
-            <Label Grid.Row="5" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalProcessedSize}"
+            <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalProcessedSize}"
                    Classes="InventoryStatusDescription" />
-            <Border Grid.Row="5" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+            <Border Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
                 <TextBlock Text="{Binding GlobalProcessedSize, FallbackValue='', Converter={StaticResource FormatKbSizeConverter}}" />
             </Border>
 
-            <Label Grid.Row="6" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzeSuccess}"
+            <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzeSuccess}"
                    Classes="InventoryStatusDescription" />
-            <Border Grid.Row="6" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+            <Border Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
                 <TextBlock Text="{Binding GlobalAnalyzeSuccess, FallbackValue=''}" />
             </Border>
 
-            <Label Grid.Row="7" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzeErrors}"
+            <Label Grid.Row="3" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzeErrors}"
                    Classes="InventoryStatusDescription"
                    Classes.IsBold="{Binding HasErrors}" />
-            <Border Grid.Row="7" Grid.Column="1" HorizontalAlignment="Right"
+            <Border Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right"
                     Classes="Badge"
                     Classes.Secondary="{Binding HasErrors}">
                 <TextBlock Text="{Binding GlobalAnalyzeErrors, FallbackValue=''}"

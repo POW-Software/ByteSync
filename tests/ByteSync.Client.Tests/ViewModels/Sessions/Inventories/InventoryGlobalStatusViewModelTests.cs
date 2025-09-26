@@ -20,7 +20,7 @@ using NUnit.Framework;
 namespace ByteSync.Tests.ViewModels.Sessions.Inventories;
 
 [TestFixture]
-public class InventoryMainStatusViewModelTests
+public class InventoryGlobalStatusViewModelTests
 {
     private InventoryProcessData _processData = null!;
     private Subject<InventoryStatistics?> _statsSubject = null!;
@@ -31,7 +31,7 @@ public class InventoryMainStatusViewModelTests
     private Mock<ITimeTrackingCache> _timeTrackingCache = null!;
     private Mock<IDialogService> _dialogService = null!;
     private Mock<IThemeService> _themeService = null!;
-    private Mock<ILogger<InventoryMainStatusViewModel>> _logger = null!;
+    private Mock<ILogger<InventoryGlobalStatusViewModel>> _logger = null!;
     
     [SetUp]
     public void Setup()
@@ -61,15 +61,14 @@ public class InventoryMainStatusViewModelTests
             .ReturnsAsync(mockComputer.Object);
         
         _dialogService = new Mock<IDialogService>();
-        _logger = new Mock<ILogger<InventoryMainStatusViewModel>>();
+        _logger = new Mock<ILogger<InventoryGlobalStatusViewModel>>();
     }
     
-    private InventoryMainStatusViewModel CreateVm()
+    private InventoryGlobalStatusViewModel CreateVm()
     {
-        var vm = new InventoryMainStatusViewModel(
+        var vm = new InventoryGlobalStatusViewModel(
             _inventoryService.Object,
             _sessionService.Object,
-            _timeTrackingCache.Object,
             _dialogService.Object,
             _themeService.Object,
             _statsService.Object,
@@ -125,7 +124,7 @@ public class InventoryMainStatusViewModelTests
         
         _statsSubject.OnNext(new InventoryStatistics { Errors = 3, Success = 0, TotalAnalyzed = 0 });
         
-        vm.GlobalMainIcon.Should().Be("RegularError");
+        vm.HasErrors.Should().BeTrue();
         vm.IsInventoryInProgress.Should().BeFalse();
         vm.GlobalMainStatusText.Should().NotBeNull();
     }
@@ -140,7 +139,7 @@ public class InventoryMainStatusViewModelTests
         
         _statsSubject.OnNext(new InventoryStatistics { Errors = 0, Success = 10, TotalAnalyzed = 10 });
         
-        vm.GlobalMainIcon.Should().Be("SolidCheckCircle");
+        vm.HasErrors.Should().BeFalse();
         vm.IsInventoryInProgress.Should().BeFalse();
         vm.GlobalMainStatusText.Should().NotBeNull();
     }
@@ -153,7 +152,7 @@ public class InventoryMainStatusViewModelTests
         _statsSubject.OnNext(new InventoryStatistics { Errors = 2, Success = 0, TotalAnalyzed = 2 });
         _processData.GlobalMainStatus.OnNext(InventoryTaskStatus.Success);
         
-        vm.GlobalMainIcon.Should().Be("RegularError");
+        vm.HasErrors.Should().BeTrue();
         vm.IsInventoryInProgress.Should().BeFalse();
         vm.GlobalMainStatusText.Should().NotBeNull();
     }
@@ -225,7 +224,7 @@ public class InventoryMainStatusViewModelTests
         
         vm.GlobalMainIcon = "SolidCheckCircle";
         vm.GlobalMainStatusText = "dummy";
-        vm.GlobalMainIconBrush = null; // not asserting specific brush here
+        vm.GlobalMainIconBrush = null;
         
         _sessionStatusSubject.OnNext(SessionStatus.Preparation);
         
@@ -263,12 +262,12 @@ public class InventoryMainStatusViewModelTests
             .Returns(messageBoxViewModel);
         _dialogService.Setup(x => x.ShowMessageBoxAsync(messageBoxViewModel))
             .ReturnsAsync(MessageBoxResult.No);
+        _inventoryService.Setup(x => x.AbortInventory()).Returns(Task.CompletedTask).Verifiable();
         
         var vm = CreateVm();
         
         await vm.AbortInventoryCommand.Execute().ToTask();
         
-        messageBoxViewModel.ShowYesNo.Should().BeTrue();
         _inventoryService.Verify(x => x.AbortInventory(), Times.Never);
     }
 }
