@@ -14,22 +14,22 @@
 
     <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="0 6" MaxWidth="1300">
         <!-- Status block -->
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="24,6" MaxWidth="600">
-            <misc:ActivityIndicator Width="120" Height="100" Margin="6"
+        <StackPanel Orientation="Vertical" Height="60"
+                    HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24,6" MaxWidth="600">
+            <misc:ActivityIndicator Width="80" Height="60" Margin="0"
                                     IsVisible="{Binding IsLocalInventoryInProgress}" />
 
-            <StackPanel Height="100" HorizontalAlignment="Center" Margin="12"
-                        IsVisible="{Binding !IsLocalInventoryInProgress}">
-                <misc:Icon FontSize="100"
-                           Value="{Binding LocalMainIcon}"
-                           Foreground="{Binding LocalMainIconBrush}"
-                           VerticalAlignment="Center" HorizontalAlignment="Center" />
-            </StackPanel>
+            <misc:Icon FontSize="60"
+                       Value="{Binding LocalMainIcon}"
+                       Foreground="{Binding LocalMainIconBrush}"
+                       IsVisible="{Binding !IsLocalInventoryInProgress}"
+                       Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center" />
 
-            <TextBlock Height="30"
-                       Text="{Binding LocalMainStatusText}"
-                       TextAlignment="Center" FontSize="17" FontWeight="Bold" Margin="6" />
         </StackPanel>
+
+        <Label Height="30" VerticalContentAlignment="Center"
+               Content="{Binding LocalMainStatusText}"
+               HorizontalContentAlignment="Center" FontWeight="Bold" Margin="6" />
 
         <!-- Times grid -->
         <Grid HorizontalAlignment="Center" Margin="3 12 3 0">
