@@ -26,7 +26,7 @@
                     <local:InventoryGlobalStatusView DataContext="{Binding InventoryGlobalStatusViewModel}" />
 
                     <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}"
-                               StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="60,6" />
+                               StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="36,6" />
 
                     <!-- Bottom row: Local status + Identification + Analysis -->
                     <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,6,0,0" MaxWidth="1800">
