@@ -12,11 +12,11 @@
         <inventories:InventoryLocalStatusViewModel />
     </Design.DataContext>
 
-    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="0 6" MaxWidth="1300">
+    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
         <!-- Status block -->
         <StackPanel Orientation="Vertical" Height="60"
-                    HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24,6" MaxWidth="600">
-            <misc:ActivityIndicator Width="80" Height="60" Margin="0"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+            <misc:ActivityIndicator Width="80" Height="60"
                                     IsVisible="{Binding IsLocalInventoryInProgress}" />
 
             <misc:Icon FontSize="60"
