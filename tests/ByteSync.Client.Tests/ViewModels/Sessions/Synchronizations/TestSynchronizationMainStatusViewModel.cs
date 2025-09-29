@@ -2,6 +2,7 @@ using System.Reactive.Linq;
 using ByteSync.Business;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Synchronizations;
+using ByteSync.Business.Themes;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Controls.Themes;
@@ -40,6 +41,8 @@ public class TestSynchronizationMainStatusViewModel : AbstractTester
         
         _dialogService = new Mock<IDialogService>();
         _themeService = new Mock<IThemeService>();
+        _themeService.SetupGet(t => t.SelectedTheme)
+            .Returns(Observable.Never<Theme>());
         
         _logger = new Mock<ILogger<SynchronizationMainStatusViewModel>>();
         
