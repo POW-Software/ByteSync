@@ -1,5 +1,7 @@
+using System.Reactive.Linq;
 using Avalonia.Media;
 using ByteSync.Business.Inventories;
+using ByteSync.Business.Themes;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Tests.Helpers;
@@ -33,6 +35,8 @@ public class InventoryDeltaGenerationViewModelTests
         _themeService = new Mock<IThemeService>(MockBehavior.Strict);
         _themeService.Setup(x => x.GetBrush("HomeCloudSynchronizationBackGround")).Returns(_backgroundBrush);
         _themeService.Setup(x => x.GetBrush("MainSecondaryColor")).Returns(_secondaryBrush);
+        _themeService.SetupGet(x => x.SelectedTheme)
+            .Returns(Observable.Never<Theme>());
     }
     
     [Test]

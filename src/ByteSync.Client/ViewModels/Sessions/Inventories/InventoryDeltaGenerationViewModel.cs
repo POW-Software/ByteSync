@@ -95,29 +95,27 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
                     case InventoryTaskStatus.Cancelled:
                     case InventoryTaskStatus.NotLaunched:
                         AnalysisIcon = "SolidXCircle";
-                        AnalysisIconBrush = _themeService.GetBrush("MainSecondaryColor");
+                        SetAnalysisBrush(status, errors);
                         
                         break;
                     case InventoryTaskStatus.Success:
                         AnalysisIcon = errors > 0 ? "RegularError" : "SolidCheckCircle";
-                        AnalysisIconBrush = errors > 0
-                            ? _themeService.GetBrush("MainSecondaryColor")
-                            : _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                        SetAnalysisBrush(status, errors);
                         
                         break;
                     case InventoryTaskStatus.Pending:
-                        AnalysisIcon = "RegularPauseCircle";
-                        AnalysisIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                        AnalysisIcon = "None";
+                        SetAnalysisBrush(status, errors);
                         
                         break;
                     case InventoryTaskStatus.Running:
                         AnalysisIcon = "None";
-                        AnalysisIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                        SetAnalysisBrush(status, errors);
                         
                         break;
                     default:
                         AnalysisIcon = "None";
-                        AnalysisIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                        SetAnalysisBrush(status, errors);
                         
                         break;
                 }
@@ -134,6 +132,13 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
                     AnalysisStatusText = Resources.ResourceManager.GetString(key, Resources.Culture) ?? string.Empty;
                 }
             })
+            .DisposeWith(disposables);
+        
+        // Update the icon brush when the theme changes to keep in sync
+        _themeService.SelectedTheme
+            .Skip(1)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(_ => { SetAnalysisBrush(AnalysisStatus, AnalyzeErrors); })
             .DisposeWith(disposables);
     }
     
@@ -169,4 +174,29 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
     
     [Reactive]
     public IBrush? AnalysisIconBrush { get; set; }
+    
+    private void SetAnalysisBrush(InventoryTaskStatus status, int errors)
+    {
+        switch (status)
+        {
+            case InventoryTaskStatus.Error:
+            case InventoryTaskStatus.Cancelled:
+            case InventoryTaskStatus.NotLaunched:
+                AnalysisIconBrush = _themeService.GetBrush("MainSecondaryColor");
+                
+                break;
+            case InventoryTaskStatus.Success:
+                AnalysisIconBrush = errors > 0
+                    ? _themeService.GetBrush("MainSecondaryColor")
+                    : _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                
+                break;
+            case InventoryTaskStatus.Pending:
+            case InventoryTaskStatus.Running:
+            default:
+                AnalysisIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                
+                break;
+        }
+    }
 }
