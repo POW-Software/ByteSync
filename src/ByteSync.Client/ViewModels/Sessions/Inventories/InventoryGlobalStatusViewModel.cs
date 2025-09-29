@@ -23,7 +23,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
     private readonly IThemeService _themeService = null!;
     private readonly ILogger<InventoryGlobalStatusViewModel> _logger = null!;
     
-    // private InventoryTaskStatus _lastGlobalStatus;
+    private InventoryTaskStatus _lastGlobalStatus;
     
     public InventoryGlobalStatusViewModel()
     {
@@ -100,11 +100,16 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 .Subscribe(v => IsWaitingFinalStats = v)
                 .DisposeWith(disposables);
             
-            // statusStream
-            //     .ObserveOn(RxApp.MainThreadScheduler)
-            //     .Subscribe(st => _lastGlobalStatus = st)
-            //     .DisposeWith(disposables);
-            //
+            statusStream
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(st => _lastGlobalStatus = st)
+                .DisposeWith(disposables);
+            
+            _themeService.SelectedTheme
+                .Skip(1)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ => { UpdateGlobalMainIconBrush(); })
+                .DisposeWith(disposables);
             
             // var themeService = _themeService;
             
@@ -235,7 +240,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                     GlobalAnalyzeSuccess = null;
                     GlobalAnalyzeErrors = null;
                     GlobalMainIcon = "None";
-                    
+                    GlobalMainStatusText = string.Empty;
                     GlobalMainIconBrush = null;
                 })
                 .DisposeWith(disposables);
@@ -301,6 +306,32 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
     
     [Reactive]
     public bool IsWaitingFinalStats { get; set; }
+    
+    private void UpdateGlobalMainIconBrush()
+    {
+        switch (_lastGlobalStatus)
+        {
+            case InventoryTaskStatus.Error:
+            case InventoryTaskStatus.Cancelled:
+            case InventoryTaskStatus.NotLaunched:
+                GlobalMainIconBrush = _themeService.GetBrush("MainSecondaryColor");
+                
+                break;
+            case InventoryTaskStatus.Success:
+                var errors = GlobalAnalyzeErrors ?? 0;
+                GlobalMainIconBrush = errors > 0
+                    ? _themeService.GetBrush("MainSecondaryColor")
+                    : _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                
+                break;
+            case InventoryTaskStatus.Pending:
+            case InventoryTaskStatus.Running:
+            default:
+                GlobalMainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                
+                break;
+        }
+    }
     
     private async Task AbortInventory()
     {

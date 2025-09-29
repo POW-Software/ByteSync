@@ -5,6 +5,7 @@ using ByteSync.Business;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.Misc;
 using ByteSync.Business.Sessions;
+using ByteSync.Business.Themes;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Controls.TimeTracking;
@@ -46,6 +47,8 @@ public class InventoryGlobalStatusViewModelTests
         _statsService.SetupGet(x => x.Statistics).Returns(_statsSubject.AsObservable());
         
         _themeService = new Mock<IThemeService>();
+        _themeService.SetupGet(t => t.SelectedTheme)
+            .Returns(Observable.Never<Theme>());
         
         _sessionService = new Mock<ISessionService>();
         _sessionService.SetupGet(x => x.SessionId).Returns("test-session");
