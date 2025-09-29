@@ -1,4 +1,4 @@
-﻿using System.Reactive.Disposables;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Media;
 using ByteSync.Assets.Resources;
@@ -99,6 +99,10 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
                         
                         break;
                     case InventoryTaskStatus.Pending:
+                        AnalysisIcon = "RegularPauseCircle";
+                        AnalysisIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                        
+                        break;
                     case InventoryTaskStatus.Running:
                         AnalysisIcon = "None";
                         AnalysisIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
