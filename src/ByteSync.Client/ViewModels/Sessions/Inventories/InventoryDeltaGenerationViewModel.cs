@@ -47,6 +47,13 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
             .DisposeWith(disposables);
         
         _inventoryService.InventoryProcessData.AnalysisStatus
+            .Select(ms => ms != InventoryTaskStatus.Pending && ms != InventoryTaskStatus.NotLaunched)
+            .StartWith(false)
+            .DistinctUntilChanged()
+            .ToPropertyEx(this, x => x.ShowAnalysisValues)
+            .DisposeWith(disposables);
+        
+        _inventoryService.InventoryProcessData.AnalysisStatus
             .Select(ms => ms == InventoryTaskStatus.Running && !HasAnalysisStarted)
             .Where(b => b is true)
             .ToPropertyEx(this, x => x.HasAnalysisStarted)
@@ -133,6 +140,8 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
     public extern InventoryTaskStatus AnalysisStatus { [ObservableAsProperty] get; }
     
     public extern bool IsAnalysisRunning { [ObservableAsProperty] get; }
+    
+    public extern bool ShowAnalysisValues { [ObservableAsProperty] get; }
     
     public extern bool HasAnalysisStarted { [ObservableAsProperty] get; }
     

@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -41,7 +41,7 @@
 
         <StackPanel HorizontalAlignment="Center" Margin="3 12 3 0" Height="100">
 
-            <Grid IsVisible="{Binding HasAnalysisStarted}">
+            <Grid>
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -58,7 +58,7 @@
                 <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_DeltaGeneration_AnalyzedFiles}"
                        Classes="InventoryStatusDescription" />
 
-                <Border Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                <Border Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge" IsVisible="{Binding ShowAnalysisValues}">
                     <StackPanel Orientation="Horizontal">
                         <Label
                             Content="{Binding AnalyzedFiles, FallbackValue=''}"
@@ -72,13 +72,13 @@
 
                 <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc InventoryProcess_DeltaGeneration_ProcessedSize}"
                        Classes="InventoryStatusDescription" />
-                <Border Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                <Border Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge" IsVisible="{Binding ShowAnalysisValues}">
                     <TextBlock Text="{Binding ProcessedSize, FallbackValue='', Converter={StaticResource FormatKbSizeConverter}}" />
                 </Border>
 
                 <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc InventoryProcess_DeltaGeneration_AnalyzeSuccess}"
                        Classes="InventoryStatusDescription" />
-                <Border Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                <Border Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge" IsVisible="{Binding ShowAnalysisValues}">
                     <Label
                         Content="{Binding AnalyzeSuccess, FallbackValue=''}"
                         HorizontalContentAlignment="Right" />
@@ -90,7 +90,7 @@
                        Classes.IsBold="{Binding HasErrors}" />
                 <Border Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right"
                         Classes="Badge"
-                        Classes.Secondary="{Binding HasErrors}">
+                        Classes.Secondary="{Binding HasErrors}" IsVisible="{Binding ShowAnalysisValues}">
                     <Label
                         Content="{Binding AnalyzeErrors, FallbackValue=''}"
                         HorizontalContentAlignment="Right"
