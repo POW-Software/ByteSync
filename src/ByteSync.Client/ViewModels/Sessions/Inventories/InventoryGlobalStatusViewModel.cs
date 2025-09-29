@@ -22,7 +22,8 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
     private readonly IDialogService _dialogService = null!;
     private readonly IThemeService _themeService = null!;
     private readonly ILogger<InventoryGlobalStatusViewModel> _logger = null!;
-    private InventoryTaskStatus _lastGlobalStatus;
+    
+    // private InventoryTaskStatus _lastGlobalStatus;
     
     public InventoryGlobalStatusViewModel()
     {
@@ -99,13 +100,13 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 .Subscribe(v => IsWaitingFinalStats = v)
                 .DisposeWith(disposables);
             
-            statusStream
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(st => _lastGlobalStatus = st)
-                .DisposeWith(disposables);
+            // statusStream
+            //     .ObserveOn(RxApp.MainThreadScheduler)
+            //     .Subscribe(st => _lastGlobalStatus = st)
+            //     .DisposeWith(disposables);
+            //
             
-            
-            var themeService = _themeService;
+            // var themeService = _themeService;
             
             var nonSuccessVisual = statusStream
                 .Where(st => st is InventoryTaskStatus.Cancelled or InventoryTaskStatus.Error or InventoryTaskStatus.NotLaunched)
@@ -159,7 +160,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 {
                     GlobalMainIcon = v.Icon;
                     GlobalMainStatusText = v.Text;
-                    GlobalMainIconBrush = themeService.GetBrush(v.BrushKey);
+                    GlobalMainIconBrush = _themeService.GetBrush(v.BrushKey);
                 })
                 .DisposeWith(disposables);
             
