@@ -14,7 +14,8 @@
 
     <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 6" MaxWidth="1300">
         <!-- Left pane: status -->
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="24,6" MaxWidth="600">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center"
+                    Margin="24,6" MaxWidth="600" MinWidth="280">
             <misc:ActivityIndicator Width="120" Height="100" Margin="6"
                                     IsVisible="{Binding IsInventoryInProgress}" />
 
@@ -30,8 +31,7 @@
                        Text="{Binding GlobalMainStatusText}"
                        TextAlignment="Center" FontSize="17" FontWeight="Bold" Margin="6" />
 
-            <StackPanel Height="30" Orientation="Horizontal" HorizontalAlignment="Center" Margin="6"
-                        IsVisible="{Binding IsInventoryRunning}">
+            <StackPanel Height="30" Orientation="Horizontal" HorizontalAlignment="Center" Margin="6">
                 <Button Classes="GenericButton" IsVisible="{Binding IsInventoryRunning}"
                         Command="{Binding Path=AbortInventoryCommand}" HorizontalAlignment="Center"
                         VerticalAlignment="Center">
@@ -45,7 +45,7 @@
 
         <!-- Right pane: statistics -->
         <Grid HorizontalAlignment="Center" VerticalAlignment="Center"
-              Margin="24,6" MaxWidth="600">
+              Margin="24,6" MaxWidth="600" MinWidth="280">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>

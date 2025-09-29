@@ -234,7 +234,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                     GlobalAnalyzeSuccess = null;
                     GlobalAnalyzeErrors = null;
                     GlobalMainIcon = "None";
-                    GlobalMainStatusText = string.Empty;
+                    
                     GlobalMainIconBrush = null;
                 })
                 .DisposeWith(disposables);
