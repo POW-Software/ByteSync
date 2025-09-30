@@ -236,10 +236,6 @@ public class InventoryBuilder : IInventoryBuilder
             DebugUtils.DebugSleep(0.1d);
         }
     #endif
-        if (DebugUtils.IsRandom(0.2m))
-        {
-            throw new Exception("Test");
-        }
         
         if (cancellationToken.IsCancellationRequested)
         {
