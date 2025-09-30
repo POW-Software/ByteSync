@@ -106,7 +106,7 @@ public class InventoryDeltaGenerationViewModelTests
     {
         var vm = CreateVm();
         
-        vm.AnalysisIcon.Should().Be("None");
+        vm.AnalysisIcon.Should().Be("RegularPauseCircle");
         vm.AnalysisIconBrush.Should().BeSameAs(_backgroundBrush);
         vm.AnalysisStatusText.Should().NotBeNullOrWhiteSpace();
         
