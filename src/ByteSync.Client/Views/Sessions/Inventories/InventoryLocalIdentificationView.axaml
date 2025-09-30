@@ -20,17 +20,15 @@
                                     IsVisible="{Binding IsIdentificationRunning}" />
 
             <misc:Icon FontSize="60"
-                       Value="{Binding IdentificationStatus, 
-                                        Converter={StaticResource InventoryProcessStatusToIconConverter}}"
-                       Foreground="{DynamicResource HomeCloudSynchronizationBackGround}"
+                       Value="{Binding IdentificationIcon}"
+                       Foreground="{Binding IdentificationIconBrush}"
                        IsVisible="{Binding !IsIdentificationRunning}"
                        Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center" />
 
         </StackPanel>
 
         <Label Height="30" VerticalContentAlignment="Center"
-               Content="{Binding IdentificationStatus, Converter={StaticResource InventoryProcessStatusToTextConverter}, 
-                                    ConverterParameter='InventoryProcess_Identification'}"
+               Content="{Binding IdentificationStatusText}"
                HorizontalContentAlignment="Center" FontWeight="Bold" Margin="6" />
 
         <Grid HorizontalAlignment="Center" Margin="3 12 3 0" Height="100">

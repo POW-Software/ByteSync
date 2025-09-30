@@ -42,7 +42,9 @@ public class InventoryProcessData : ReactiveObject
                 }
                 else if (v.Identification == InventoryTaskStatus.Running)
                 {
-                    IdentificationStatus.OnNext(InventoryTaskStatus.Cancelled);
+                    IdentificationStatus.OnNext(v.Main == InventoryTaskStatus.Error
+                        ? InventoryTaskStatus.Error
+                        : InventoryTaskStatus.Cancelled);
                 }
             });
         
@@ -57,7 +59,9 @@ public class InventoryProcessData : ReactiveObject
                 }
                 else if (v.Analysis == InventoryTaskStatus.Running)
                 {
-                    AnalysisStatus.OnNext(InventoryTaskStatus.Cancelled);
+                    AnalysisStatus.OnNext(v.Main == InventoryTaskStatus.Error
+                        ? InventoryTaskStatus.Error
+                        : InventoryTaskStatus.Cancelled);
                 }
             });
         

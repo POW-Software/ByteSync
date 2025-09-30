@@ -19,6 +19,7 @@ public class InventoryLocalStatusViewModel : ActivatableViewModelBase
     private readonly ITimeTrackingCache _timeTrackingCache = null!;
     private readonly IInventoryService _inventoryService = null!;
     private readonly IThemeService? _themeService;
+    private InventoryTaskStatus _currentLocalStatus;
     
     public InventoryLocalStatusViewModel()
     {
@@ -81,6 +82,7 @@ public class InventoryLocalStatusViewModel : ActivatableViewModelBase
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(st =>
                 {
+                    _currentLocalStatus = st;
                     switch (st)
                     {
                         case InventoryTaskStatus.Pending:
@@ -122,6 +124,33 @@ public class InventoryLocalStatusViewModel : ActivatableViewModelBase
                             LocalMainStatusText =
                                 Resources.ResourceManager.GetString("InventoryProcess_LocalInventory_NotLaunched", Resources.Culture)
                                 ?? Resources.InventoryProcess_InventoryError;
+                            LocalMainIconBrush = _themeService?.GetBrush("MainSecondaryColor");
+                            
+                            break;
+                    }
+                })
+                .DisposeWith(disposables);
+            
+            _themeService?.SelectedTheme
+                .Skip(1)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ =>
+                {
+                    switch (_currentLocalStatus)
+                    {
+                        case InventoryTaskStatus.Success:
+                            LocalMainIconBrush = _themeService?.GetBrush("HomeCloudSynchronizationBackGround");
+                            
+                            break;
+                        case InventoryTaskStatus.Pending:
+                        case InventoryTaskStatus.Running:
+                            LocalMainIconBrush = null;
+                            
+                            break;
+                        case InventoryTaskStatus.Error:
+                        case InventoryTaskStatus.Cancelled:
+                        case InventoryTaskStatus.NotLaunched:
+                        default:
                             LocalMainIconBrush = _themeService?.GetBrush("MainSecondaryColor");
                             
                             break;
