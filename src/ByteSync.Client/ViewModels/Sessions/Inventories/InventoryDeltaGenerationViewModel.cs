@@ -104,7 +104,7 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
                         
                         break;
                     case InventoryTaskStatus.Pending:
-                        AnalysisIcon = "None";
+                        AnalysisIcon = "RegularPauseCircle";
                         SetAnalysisBrush(status, errors);
                         
                         break;
