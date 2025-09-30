@@ -83,12 +83,12 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 .ToPropertyEx(this, x => x.IsInventoryRunning)
                 .DisposeWith(disposables);
             
-            var inProgressCombined = statusStream
+            var inProgressUiStream = statusStream
                 .CombineLatest(statsReady,
                     (st, ready) => st is InventoryTaskStatus.Pending or InventoryTaskStatus.Running ||
                                    (st == InventoryTaskStatus.Success && !ready))
                 .DistinctUntilChanged();
-            inProgressCombined
+            inProgressUiStream
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .ToPropertyEx(this, x => x.IsInventoryInProgress)
                 .DisposeWith(disposables);
@@ -110,8 +110,6 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => { UpdateGlobalMainIconBrush(); })
                 .DisposeWith(disposables);
-            
-            // var themeService = _themeService;
             
             var nonSuccessVisual = statusStream
                 .Where(st => st is InventoryTaskStatus.Cancelled or InventoryTaskStatus.Error or InventoryTaskStatus.NotLaunched)
@@ -200,13 +198,13 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 })
                 .DisposeWith(disposables);
             
-            inProgressCombined
-                .Where(x => x)
+            statusStream
+                .Where(st => st == InventoryTaskStatus.Running)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => { GlobalMainStatusText = Resources.InventoryProcess_InventoryRunning; })
                 .DisposeWith(disposables);
             
-            inProgressCombined
+            inProgressUiStream
                 .Where(x => !x)
                 .WithLatestFrom(statusStream, (_, st) => st)
                 .Where(st => st == InventoryTaskStatus.Success)
