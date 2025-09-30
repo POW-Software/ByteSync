@@ -93,8 +93,13 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
                 {
                     case InventoryTaskStatus.Error:
                     case InventoryTaskStatus.Cancelled:
-                    case InventoryTaskStatus.NotLaunched:
                         AnalysisIcon = "SolidXCircle";
+                        SetAnalysisBrush(status, errors);
+                        
+                        break;
+                    
+                    case InventoryTaskStatus.NotLaunched:
+                        AnalysisIcon = "SolidMinusCircle";
                         SetAnalysisBrush(status, errors);
                         
                         break;
