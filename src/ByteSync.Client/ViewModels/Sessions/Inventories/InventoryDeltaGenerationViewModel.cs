@@ -1,4 +1,4 @@
-﻿using System.Reactive.Disposables;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Media;
 using ByteSync.Assets.Resources;
@@ -47,6 +47,13 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
             .DisposeWith(disposables);
         
         _inventoryService.InventoryProcessData.AnalysisStatus
+            .Select(ms => ms != InventoryTaskStatus.Pending && ms != InventoryTaskStatus.NotLaunched)
+            .StartWith(false)
+            .DistinctUntilChanged()
+            .ToPropertyEx(this, x => x.ShowAnalysisValues)
+            .DisposeWith(disposables);
+        
+        _inventoryService.InventoryProcessData.AnalysisStatus
             .Select(ms => ms == InventoryTaskStatus.Running && !HasAnalysisStarted)
             .Where(b => b is true)
             .ToPropertyEx(this, x => x.HasAnalysisStarted)
@@ -86,27 +93,34 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
                 {
                     case InventoryTaskStatus.Error:
                     case InventoryTaskStatus.Cancelled:
-                    case InventoryTaskStatus.NotLaunched:
                         AnalysisIcon = "SolidXCircle";
-                        AnalysisIconBrush = _themeService.GetBrush("MainSecondaryColor");
+                        SetAnalysisBrush(status, errors);
+                        
+                        break;
+                    
+                    case InventoryTaskStatus.NotLaunched:
+                        AnalysisIcon = "SolidMinusCircle";
+                        SetAnalysisBrush(status, errors);
                         
                         break;
                     case InventoryTaskStatus.Success:
                         AnalysisIcon = errors > 0 ? "RegularError" : "SolidCheckCircle";
-                        AnalysisIconBrush = errors > 0
-                            ? _themeService.GetBrush("MainSecondaryColor")
-                            : _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                        SetAnalysisBrush(status, errors);
                         
                         break;
                     case InventoryTaskStatus.Pending:
+                        AnalysisIcon = "RegularPauseCircle";
+                        SetAnalysisBrush(status, errors);
+                        
+                        break;
                     case InventoryTaskStatus.Running:
                         AnalysisIcon = "None";
-                        AnalysisIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                        SetAnalysisBrush(status, errors);
                         
                         break;
                     default:
                         AnalysisIcon = "None";
-                        AnalysisIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                        SetAnalysisBrush(status, errors);
                         
                         break;
                 }
@@ -124,11 +138,20 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
                 }
             })
             .DisposeWith(disposables);
+        
+        // Update the icon brush when the theme changes to keep in sync
+        _themeService.SelectedTheme
+            .Skip(1)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(_ => { SetAnalysisBrush(AnalysisStatus, AnalyzeErrors); })
+            .DisposeWith(disposables);
     }
     
     public extern InventoryTaskStatus AnalysisStatus { [ObservableAsProperty] get; }
     
     public extern bool IsAnalysisRunning { [ObservableAsProperty] get; }
+    
+    public extern bool ShowAnalysisValues { [ObservableAsProperty] get; }
     
     public extern bool HasAnalysisStarted { [ObservableAsProperty] get; }
     
@@ -156,4 +179,29 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
     
     [Reactive]
     public IBrush? AnalysisIconBrush { get; set; }
+    
+    private void SetAnalysisBrush(InventoryTaskStatus status, int errors)
+    {
+        switch (status)
+        {
+            case InventoryTaskStatus.Error:
+            case InventoryTaskStatus.Cancelled:
+            case InventoryTaskStatus.NotLaunched:
+                AnalysisIconBrush = _themeService.GetBrush("MainSecondaryColor");
+                
+                break;
+            case InventoryTaskStatus.Success:
+                AnalysisIconBrush = errors > 0
+                    ? _themeService.GetBrush("MainSecondaryColor")
+                    : _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                
+                break;
+            case InventoryTaskStatus.Pending:
+            case InventoryTaskStatus.Running:
+            default:
+                AnalysisIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                
+                break;
+        }
+    }
 }

@@ -1711,6 +1711,26 @@ Do you want to save this new Session Profile with this name?</value>
 		<value>items:</value>
 	</data>
     <data name="SynchronizationMain_SynchronizationDoneWithErrors" xml:space="preserve">
-    	<value>Synchronization finished with errors</value>
+		<value>Synchronization finished with errors</value>
 	</data>
+
+    <!-- Local Inventory main status (all states) -->
+    <data name="InventoryProcess_LocalInventory_Pending" xml:space="preserve">
+        <value>Local Inventory pending</value>
+    </data>
+    <data name="InventoryProcess_LocalInventory_Running" xml:space="preserve">
+        <value>Local Inventory running</value>
+    </data>
+    <data name="InventoryProcess_LocalInventory_Success" xml:space="preserve">
+        <value>Local Inventory done</value>
+    </data>
+    <data name="InventoryProcess_LocalInventory_Cancelled" xml:space="preserve">
+        <value>Local Inventory cancelled</value>
+    </data>
+    <data name="InventoryProcess_LocalInventory_Error" xml:space="preserve">
+        <value>Local Inventory error</value>
+    </data>
+    <data name="InventoryProcess_LocalInventory_NotLaunched" xml:space="preserve">
+        <value>Local Inventory not launched</value>
+    </data>
 </root>

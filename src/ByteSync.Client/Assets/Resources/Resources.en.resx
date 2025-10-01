@@ -19,4 +19,24 @@ You must select a maximum of 5 data nodes.</value>
     <value>Unable to start the Data Inventory:
 You must select at least 2 data nodes.</value>
   </data>
+
+    <!-- Local Inventory main status (all states) -->
+    <data name="InventoryProcess_LocalInventory_Pending" xml:space="preserve">
+    <value>Local Inventory pending</value>
+  </data>
+    <data name="InventoryProcess_LocalInventory_Running" xml:space="preserve">
+    <value>Local Inventory running</value>
+  </data>
+    <data name="InventoryProcess_LocalInventory_Success" xml:space="preserve">
+    <value>Local Inventory done</value>
+  </data>
+    <data name="InventoryProcess_LocalInventory_Cancelled" xml:space="preserve">
+    <value>Local Inventory cancelled</value>
+  </data>
+    <data name="InventoryProcess_LocalInventory_Error" xml:space="preserve">
+    <value>Local Inventory error</value>
+  </data>
+    <data name="InventoryProcess_LocalInventory_NotLaunched" xml:space="preserve">
+    <value>Local Inventory not launched</value>
+  </data>
 </root>

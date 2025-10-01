@@ -20,9 +20,10 @@ public class InventoryBuilder : IInventoryBuilder
 {
     private readonly ILogger<InventoryBuilder> _logger;
     
-    private const int FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 4194304; 
-        
-    public InventoryBuilder(SessionMember sessionMember, DataNode dataNode, SessionSettings sessionSettings, InventoryProcessData inventoryProcessData, 
+    private const int FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 4194304;
+    
+    public InventoryBuilder(SessionMember sessionMember, DataNode dataNode, SessionSettings sessionSettings,
+        InventoryProcessData inventoryProcessData,
         OSPlatforms osPlatform, FingerprintModes fingerprintMode, ILogger<InventoryBuilder> logger)
     {
         _logger = logger;
@@ -36,79 +37,73 @@ public class InventoryBuilder : IInventoryBuilder
         
         InventoryFileAnalyzer = new InventoryFileAnalyzer(this, RaiseFileAnalyzed, RaiseFileAnalyzeError);
         InventorySaver = new InventorySaver(this);
-
+        
         Indexer = new InventoryIndexer();
-
+        
         Inventory = InstantiateInventory();
     }
-
+    
     private Inventory InstantiateInventory()
     {
         var id = $"IID_{Guid.NewGuid()}";
         var inventory = new Inventory();
         inventory.InventoryId = id;
-                    
+        
         _logger.LogDebug("InventoryBuilder.AddInventoryPart: Creating inventory {InventoryId}", id);
-            
+        
         inventory.Endpoint = SessionMember.Endpoint;
         inventory.MachineName = SessionMember.MachineName;
         inventory.Code = InventoryCode;
         inventory.NodeId = DataNode.Id;
-
+        
         return inventory;
     }
     
     private SessionMember SessionMember { get; }
     
     private DataNode DataNode { get; }
-
+    
     public Inventory Inventory { get; }
-        
+    
     private InventoryProcessData InventoryProcessData { get; }
-
+    
     public FingerprintModes FingerprintMode { get; }
-        
+    
     public SessionSettings? SessionSettings { get; }
-
+    
     public string InventoryCode => DataNode.Code;
-
+    
     private InventoryFileAnalyzer InventoryFileAnalyzer { get; }
-
+    
     internal InventorySaver InventorySaver { get; }
-        
+    
     public InventoryIndexer Indexer { get; }
     
     private OSPlatforms OSPlatform { get; set; }
-
+    
     private bool IgnoreHidden
     {
-        get
-        {
-            return SessionSettings is { ExcludeHiddenFiles: true };
-        }
+        get { return SessionSettings is { ExcludeHiddenFiles: true }; }
     }
-        
+    
     private bool IgnoreSystem
     {
-        get
-        {
-            return SessionSettings is { ExcludeSystemFiles: true };
-        }
+        get { return SessionSettings is { ExcludeSystemFiles: true }; }
     }
-
+    
     public InventoryPart AddInventoryPart(DataSource dataSource)
     {
         var inventoryPart = AddInventoryPart(dataSource.Path);
-
+        
         inventoryPart.Code = dataSource.Code;
-
+        
         return inventoryPart;
     }
-
+    
     public InventoryPart AddInventoryPart(string fullName)
     {
         InventoryPart inventoryPart;
-
+        
         if (Directory.Exists(fullName))
         {
             inventoryPart = new InventoryPart(Inventory, fullName, FileSystemTypes.Directory);
@@ -124,15 +119,15 @@ public class InventoryBuilder : IInventoryBuilder
             throw new ArgumentOutOfRangeException(nameof(fullName),
                 $"Directory or file '{fullName}' does not exist");
         }
-
+        
         return inventoryPart;
     }
-
+    
     public async Task BuildBaseInventoryAsync(string inventoryFullName, CancellationToken cancellationToken = new())
     {
         await Task.Run(() => BuildBaseInventory(inventoryFullName, cancellationToken), cancellationToken);
     }
-
+    
     private void BuildBaseInventory(string inventoryFullName, CancellationToken cancellationToken)
     {
         _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory started", InventoryCode);
@@ -140,28 +135,30 @@ public class InventoryBuilder : IInventoryBuilder
         _logger.LogInformation("Local Inventory parts:");
         foreach (var inventoryPart in Inventory.InventoryParts)
         {
-            _logger.LogInformation(" - {@letter:l}: {@path} ({type})", inventoryPart.Code, inventoryPart.RootPath, inventoryPart.InventoryPartType);
+            _logger.LogInformation(" - {@letter:l}: {@path} ({type})", inventoryPart.Code, inventoryPart.RootPath,
+                inventoryPart.InventoryPartType);
         }
-
+        
         try
         {
             InventoryFileAnalyzer.Start();
             InventorySaver.Start(inventoryFullName);
-
+            
             Inventory.StartDateTime = DateTimeOffset.Now;
-
-            List<InventoryPart> inventoryPartsToAnalyze = Inventory.InventoryParts.ToList();
-                
+            
+            var inventoryPartsToAnalyze = Inventory.InventoryParts.ToList();
+            
             foreach (var inventoryPart in inventoryPartsToAnalyze)
             {
-                _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Identification started on part {Code:l} {Path}", 
+                _logger.LogInformation(
+                    "InventoryBuilder {Letter:l}: Local Inventory - Files Identification started on part {Code:l} {Path}",
                     InventoryCode, inventoryPart.Code, inventoryPart.RootPath);
-                    
+                
                 if (cancellationToken.IsCancellationRequested)
                 {
                     break;
                 }
-
+                
                 if (inventoryPart.InventoryPartType == FileSystemTypes.Directory)
                 {
                     var directoryInfo = new DirectoryInfo(inventoryPart.RootPath);
@@ -172,16 +169,17 @@ public class InventoryBuilder : IInventoryBuilder
                     var fileInfo = new FileInfo(inventoryPart.RootPath);
                     DoAnalyze(inventoryPart, fileInfo, cancellationToken);
                 }
-                    
-                _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Identification completed on {Code:l} {Path}", 
+                
+                _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Identification completed on {Code:l} {Path}",
                     InventoryCode, inventoryPart.Code, inventoryPart.RootPath);
             }
             
             Inventory.EndDateTime = DateTimeOffset.Now;
-
+            
             InventorySaver.WriteInventory();
-                
-            _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Identification completed ({ItemsCount} files found)", 
+            
+            _logger.LogInformation(
+                "InventoryBuilder {Letter:l}: Local Inventory - Files Identification completed ({ItemsCount} files found)",
                 InventoryCode, Inventory.InventoryParts.Sum(ip => ip.FileDescriptions.Count));
         }
         finally
@@ -189,38 +187,38 @@ public class InventoryBuilder : IInventoryBuilder
             InventorySaver.Stop();
         }
     }
-
+    
     public async Task RunAnalysisAsync(string inventoryFullName, HashSet<IndexedItem> items, CancellationToken cancellationToken)
     {
         await Task.Run(() => RunAnalysis(inventoryFullName, items, cancellationToken), cancellationToken);
     }
-
+    
     internal void RunAnalysis(string inventoryFullName, HashSet<IndexedItem> items, CancellationToken cancellationToken)
     {
         _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Analysis started", InventoryCode);
-            
+        
         try
         {
             InventorySaver.Start(inventoryFullName);
-                
+            
             foreach (var item in items.Where(i => i.FileSystemDescription is FileDescription))
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
                     break;
                 }
-                    
+                
                 InventoryFileAnalyzer.RegisterFile(
-                    (item.FileSystemDescription as FileDescription)!, 
+                    (item.FileSystemDescription as FileDescription)!,
                     (item.FileSystemInfo as FileInfo)!);
             }
-                
+            
             InventoryFileAnalyzer.IsAllIdentified = true;
-                
+            
             InventoryFileAnalyzer.HasFinished.WaitOne();
-                
+            
             InventorySaver.WriteInventory();
-
+            
             _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Analysis completed ({ItemsCount} files analyzed)",
                 InventoryCode, items.Count);
         }
@@ -229,7 +227,7 @@ public class InventoryBuilder : IInventoryBuilder
             InventorySaver.Stop();
         }
     }
-
+    
     private void DoAnalyze(InventoryPart inventoryPart, DirectoryInfo directoryInfo, CancellationToken cancellationToken)
     {
     #if DEBUG
@@ -238,58 +236,61 @@ public class InventoryBuilder : IInventoryBuilder
             DebugUtils.DebugSleep(0.1d);
         }
     #endif
+        
         if (cancellationToken.IsCancellationRequested)
         {
             return;
         }
-
+        
         if (IgnoreHidden)
         {
             if (directoryInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
                 (OSPlatform == OSPlatforms.Linux && directoryInfo.Name.StartsWith(".")))
             {
                 _logger.LogInformation("Directory {Directory} is ignored because considered as hidden", directoryInfo.FullName);
+                
                 return;
             }
         }
-
+        
         var directoryDescription = IdentityBuilder.BuildDirectoryDescription(inventoryPart, directoryInfo);
-
+        
         AddFileSystemDescription(inventoryPart, directoryDescription);
-            
+        
         Indexer.Register(directoryDescription, directoryInfo);
-
+        
         foreach (var subDirectory in directoryInfo.GetDirectories())
         {
             if (cancellationToken.IsCancellationRequested)
             {
                 break;
             }
-                
+            
             // https://stackoverflow.com/questions/1485155/check-if-a-file-is-real-or-a-symbolic-link
             // Example to create a symlink :
             //  - Windows: New-Item -ItemType SymbolicLink -Path \path\to\symlink -Target \path\to\target
             if (subDirectory.Attributes.HasFlag(FileAttributes.ReparsePoint))
             {
                 _logger.LogWarning("Directory {Directory} is ignored because it has flag 'ReparsePoint'", subDirectory.FullName);
+                
                 continue;
             }
-                
+            
             DoAnalyze(inventoryPart, subDirectory, cancellationToken);
         }
-
-        foreach (var subFile in directoryInfo.GetFiles())    
+        
+        foreach (var subFile in directoryInfo.GetFiles())
         {
             if (cancellationToken.IsCancellationRequested)
             {
                 break;
             }
-                
+            
             DoAnalyze(inventoryPart, subFile, cancellationToken);
         }
     }
-
-    private void DoAnalyze(InventoryPart inventoryPart, FileInfo fileInfo, CancellationToken cancellationToken = new ())
+    
+    private void DoAnalyze(InventoryPart inventoryPart, FileInfo fileInfo, CancellationToken cancellationToken = new())
     {
     #if DEBUG
         if (DebugArguments.ForceSlow)
@@ -297,52 +298,55 @@ public class InventoryBuilder : IInventoryBuilder
             DebugUtils.DebugSleep(0.1d);
         }
     #endif
-            
+        
         if (cancellationToken.IsCancellationRequested)
         {
             return;
         }
-
+        
         if (IgnoreHidden)
         {
-            if (fileInfo.Attributes.HasFlag(FileAttributes.Hidden) || 
+            if (fileInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
                 (OSPlatform == OSPlatforms.Linux && fileInfo.Name.StartsWith(".")))
             {
                 _logger.LogInformation("File {File} is ignored because considered as hidden", fileInfo.FullName);
+                
                 return;
             }
         }
-
-
+        
+        
         if (IgnoreSystem)
         {
             if (fileInfo.Name.In("desktop.ini", "thumbs.db", ".desktop.ini", ".thumbs.db", ".DS_Store")
                 || fileInfo.Attributes.HasFlag(FileAttributes.System))
             {
                 _logger.LogInformation("File {File} is ignored because considered as system", fileInfo.FullName);
+                
                 return;
             }
         }
-            
+        
         // https://stackoverflow.com/questions/1485155/check-if-a-file-is-real-or-a-symbolic-link
         // Example to create a symlink :
         //  - Windows: New-Item -ItemType SymbolicLink -Path \path\to\symlink -Target \path\to\target
         if (fileInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
         {
             _logger.LogWarning("File {File} is ignored because it has flag 'ReparsePoint'. It might be a symbolic link", fileInfo.FullName);
+            
             return;
         }
-
+        
         if (!fileInfo.Exists)
         {
             return;
         }
-            
+        
         if (fileInfo.Attributes.HasFlag(FileAttributes.Offline))
         {
             return;
         }
-            
+        
         // Non-Local OneDrive Files (not GoogleDrive)
         // https://docs.microsoft.com/en-gb/windows/win32/fileio/file-attribute-constants?redirectedfrom=MSDN
         // https://stackoverflow.com/questions/49301958/how-to-detect-onedrive-online-only-files
@@ -351,21 +355,21 @@ public class InventoryBuilder : IInventoryBuilder
         {
             return;
         }
-
+        
         var fileDescription = IdentityBuilder.BuildFileDescription(inventoryPart, fileInfo);
-
+        
         AddFileSystemDescription(inventoryPart, fileDescription);
-
+        
         Indexer.Register(fileDescription, fileInfo);
     }
-
+    
     private void AddFileSystemDescription(InventoryPart inventoryPart, FileSystemDescription fileSystemDescription)
     {
-        if (fileSystemDescription.RelativePath.IsNotEmpty() 
+        if (fileSystemDescription.RelativePath.IsNotEmpty()
             && !fileSystemDescription.RelativePath.Equals(IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR.ToString()))
         {
             inventoryPart.AddFileSystemDescription(fileSystemDescription);
-
+            
             if (fileSystemDescription is FileDescription fileDescription)
             {
                 InventoryProcessData.UpdateMonitorData(imd =>
@@ -380,7 +384,7 @@ public class InventoryBuilder : IInventoryBuilder
             }
         }
     }
-
+    
     private void RaiseFileAnalyzed(FileDescription fileDescription)
     {
         InventoryProcessData.UpdateMonitorData(inventoryMonitorData =>
@@ -389,7 +393,7 @@ public class InventoryBuilder : IInventoryBuilder
             inventoryMonitorData.ProcessedSize += fileDescription.Size;
         });
     }
-        
+    
     private void RaiseFileAnalyzeError(FileDescription fileDescription)
     {
         InventoryProcessData.UpdateMonitorData(imd => imd.AnalyzeErrors += 1);

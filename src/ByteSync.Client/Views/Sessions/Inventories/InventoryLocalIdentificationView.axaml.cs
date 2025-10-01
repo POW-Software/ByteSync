@@ -3,9 +3,9 @@ using ByteSync.ViewModels.Sessions.Inventories;
 
 namespace ByteSync.Views.Sessions.Inventories;
 
-public partial class InventoryMainStatusView : ReactiveUserControl<InventoryMainStatusViewModel>
+public partial class InventoryLocalIdentificationView : ReactiveUserControl<InventoryLocalIdentificationViewModel>
 {
-    public InventoryMainStatusView()
+    public InventoryLocalIdentificationView()
     {
         InitializeComponent();
     }

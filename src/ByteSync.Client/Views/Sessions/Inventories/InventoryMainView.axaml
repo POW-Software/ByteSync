@@ -19,23 +19,28 @@
                 <local:InventoryBeforeStartView DataContext="{Binding InventoryBeforeStartViewModel}" />
             </Grid>
 
-
             <!--Details, after HasLocalInventoryStarted-->
             <Grid IsVisible="{Binding HasLocalInventoryStarted}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" MaxWidth="600"></ColumnDefinition>
-                    <ColumnDefinition Width="*" MaxWidth="600"></ColumnDefinition>
-                    <ColumnDefinition Width="*" MaxWidth="600"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                    <!-- Top: Global status -->
+                    <local:InventoryGlobalStatusView DataContext="{Binding InventoryGlobalStatusViewModel}" />
 
-                <!-- Main Status -->
-                <local:InventoryMainStatusView Grid.Column="0" DataContext="{Binding InventoryMainStatusViewModel}" />
+                    <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}"
+                               StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="36,6" />
 
-                <!-- Identification -->
-                <local:InventoryIdentificationView Grid.Column="1" DataContext="{Binding InventoryIdentificationViewModel}" />
-
-                <!-- Analysis -->
-                <local:InventoryDeltaGenerationView Grid.Column="2" DataContext="{Binding InventoryDeltaGenerationViewModel}" />
+                    <!-- Bottom row: Local status + Identification + Analysis -->
+                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,6,0,0" MaxWidth="1800">
+                        <local:InventoryLocalStatusView
+                            DataContext="{Binding InventoryLocalStatusViewModel}"
+                            MaxWidth="600" MinWidth="300" Margin="30,6" />
+                        <local:InventoryLocalIdentificationView
+                            DataContext="{Binding InventoryLocalIdentificationViewModel}"
+                            MaxWidth="600" MinWidth="250" Margin="30,6" />
+                        <local:InventoryDeltaGenerationView
+                            DataContext="{Binding InventoryDeltaGenerationViewModel}"
+                            MaxWidth="600" MinWidth="250" Margin="30,6" />
+                    </WrapPanel>
+                </StackPanel>
             </Grid>
 
         </StackPanel>

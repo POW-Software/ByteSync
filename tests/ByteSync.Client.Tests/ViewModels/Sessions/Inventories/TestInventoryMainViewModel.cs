@@ -9,8 +9,9 @@ namespace ByteSync.Tests.ViewModels.Sessions.Inventories;
 [TestFixture]
 public class TestInventoryMainViewModel : AbstractTester
 {
-    private Mock<InventoryMainStatusViewModel> _mockInventoryMainStatusViewModel;
-    private Mock<InventoryIdentificationViewModel> _mockInventoryIdentificationViewModel;
+    private Mock<InventoryGlobalStatusViewModel> _mockInventoryGlobalStatusViewModel;
+    private Mock<InventoryLocalStatusViewModel> _mockInventoryLocalStatusViewModel;
+    private Mock<InventoryLocalIdentificationViewModel> _mockInventoryIdentificationViewModel;
     private Mock<InventoryDeltaGenerationViewModel> _mockInventoryAnalysisViewModel;
     private Mock<InventoryBeforeStartViewModel> _mockInventoryBeforeStartViewModel;
     private Mock<IInventoryService> _mockInventoryService;
@@ -21,14 +22,16 @@ public class TestInventoryMainViewModel : AbstractTester
     [SetUp]
     public void SetUp()
     {
-        _mockInventoryMainStatusViewModel = new Mock<InventoryMainStatusViewModel>();
-        _mockInventoryIdentificationViewModel = new Mock<InventoryIdentificationViewModel>();
+        _mockInventoryGlobalStatusViewModel = new Mock<InventoryGlobalStatusViewModel>();
+        _mockInventoryLocalStatusViewModel = new Mock<InventoryLocalStatusViewModel>();
+        _mockInventoryIdentificationViewModel = new Mock<InventoryLocalIdentificationViewModel>();
         _mockInventoryAnalysisViewModel = new Mock<InventoryDeltaGenerationViewModel>();
         _mockInventoryBeforeStartViewModel = new Mock<InventoryBeforeStartViewModel>();
         _mockInventoryService = new Mock<IInventoryService>();
         
         _inventoryMainViewModel = new InventoryMainViewModel(
-            _mockInventoryMainStatusViewModel.Object,
+            _mockInventoryGlobalStatusViewModel.Object,
+            _mockInventoryLocalStatusViewModel.Object,
             _mockInventoryIdentificationViewModel.Object,
             _mockInventoryAnalysisViewModel.Object,
             _mockInventoryBeforeStartViewModel.Object,

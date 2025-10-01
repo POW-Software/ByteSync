@@ -24,6 +24,9 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
     private readonly IThemeService _themeService = null!;
     private readonly ILogger<SynchronizationMainStatusViewModel> _logger = null!;
     
+    private SynchronizationEndStatuses? _lastEndStatus;
+    private bool _lastEndHadErrors;
+    
     public SynchronizationMainStatusViewModel()
     {
     #if DEBUG
@@ -74,6 +77,12 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
                     && tuple.Second != null)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .ToPropertyEx(this, x => x.HasSynchronizationStarted)
+                .DisposeWith(disposables);
+            
+            _themeService.SelectedTheme
+                .Skip(1)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ => UpdateMainIconBrush())
                 .DisposeWith(disposables);
         });
     }
@@ -136,7 +145,9 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
     {
         IsSynchronizationRunning = true;
         IsMainCheckVisible = false;
-        MainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+        _lastEndStatus = null;
+        _lastEndHadErrors = false;
+        UpdateMainIconBrush();
         IsMainProgressRingVisible = true;
         MainStatus = Resources.SynchronizationMain_SynchronizationRunning;
     }
@@ -157,13 +168,17 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
         {
             MainStatus = Resources.SynchronizationMain_SynchronizationAborted;
             MainIcon = "SolidXCircle";
-            MainIconBrush = _themeService.GetBrush("MainSecondaryColor");
+            _lastEndStatus = SynchronizationEndStatuses.Abortion;
+            _lastEndHadErrors = true;
+            UpdateMainIconBrush();
         }
         else if (synchronizationEnd.Status == SynchronizationEndStatuses.Error)
         {
             MainStatus = Resources.SynchronizationMain_SynchronizationError;
             MainIcon = "SolidXCircle";
-            MainIconBrush = _themeService.GetBrush("MainSecondaryColor");
+            _lastEndStatus = SynchronizationEndStatuses.Error;
+            _lastEndHadErrors = true;
+            UpdateMainIconBrush();
         }
         else
         {
@@ -174,17 +189,50 @@ public class SynchronizationMainStatusViewModel : ActivatableViewModelBase
                 MainStatus = Resources.ResourceManager.GetString("SynchronizationMain_SynchronizationDoneWithErrors", Resources.Culture)
                              ?? Resources.SynchronizationMain_SynchronizationDone;
                 MainIcon = "RegularError";
-                MainIconBrush = _themeService.GetBrush("MainSecondaryColor");
+                _lastEndStatus = SynchronizationEndStatuses.Regular;
+                _lastEndHadErrors = true;
+                UpdateMainIconBrush();
             }
             else
             {
                 MainStatus = Resources.SynchronizationMain_SynchronizationDone;
                 MainIcon = "SolidCheckCircle";
-                MainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                _lastEndStatus = SynchronizationEndStatuses.Regular;
+                _lastEndHadErrors = false;
+                UpdateMainIconBrush();
             }
         }
         
         IsMainProgressRingVisible = false;
         IsMainCheckVisible = true;
+    }
+    
+    private void UpdateMainIconBrush()
+    {
+        if (IsSynchronizationRunning)
+        {
+            MainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+            
+            return;
+        }
+        
+        switch (_lastEndStatus)
+        {
+            case SynchronizationEndStatuses.Abortion:
+            case SynchronizationEndStatuses.Error:
+                MainIconBrush = _themeService.GetBrush("MainSecondaryColor");
+                
+                break;
+            case SynchronizationEndStatuses.Regular:
+                MainIconBrush = _lastEndHadErrors
+                    ? _themeService.GetBrush("MainSecondaryColor")
+                    : _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                
+                break;
+            default:
+                MainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                
+                break;
+        }
     }
 }
