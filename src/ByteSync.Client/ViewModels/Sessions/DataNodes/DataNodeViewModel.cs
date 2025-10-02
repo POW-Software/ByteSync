@@ -5,13 +5,13 @@ using Avalonia.Media;
 using ByteSync.Business.DataNodes;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
-using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
+using DynamicData;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using DynamicData;
 
 namespace ByteSync.ViewModels.Sessions.DataNodes;
 
@@ -24,16 +24,17 @@ public class DataNodeViewModel : ActivatableViewModelBase
     
     private IBrush _currentMemberBackGround = null!;
     private IBrush _otherMemberBackGround = null!;
-
+    
     public DataNodeSourcesViewModel SourcesViewModel { get; } = null!;
+    
     public DataNodeHeaderViewModel HeaderViewModel { get; } = null!;
+    
     public DataNodeStatusViewModel StatusViewModel { get; } = null!;
-
+    
     public DataNodeViewModel()
     {
-
     }
-
+    
     public DataNodeViewModel(SessionMember sessionMember, DataNode dataNode, bool isLocalMachine,
         DataNodeSourcesViewModel dataNodeSourcesViewModel, DataNodeHeaderViewModel dataNodeHeaderViewModel,
         DataNodeStatusViewModel dataNodeStatusViewModel,
@@ -48,7 +49,7 @@ public class DataNodeViewModel : ActivatableViewModelBase
         SourcesViewModel = dataNodeSourcesViewModel;
         HeaderViewModel = dataNodeHeaderViewModel;
         StatusViewModel = dataNodeStatusViewModel;
-
+        
         IsLocalMachine = isLocalMachine;
         JoinedSessionOn = sessionMember.JoinedSessionOn;
         OrderIndex = dataNode.OrderIndex;
@@ -58,7 +59,7 @@ public class DataNodeViewModel : ActivatableViewModelBase
         var canAddDataNode = _sessionService.SessionStatusObservable
             .Select(status => status == SessionStatus.Preparation)
             .CombineLatest(this.WhenAnyValue(x => x.IsLocalMachine, x => x.IsLastDataNode),
-                (isSessionInPreparation, localAndLast) => 
+                (isSessionInPreparation, localAndLast) =>
                     isSessionInPreparation && localAndLast.Item1 && localAndLast.Item2)
             .ObserveOn(RxApp.MainThreadScheduler);
         
@@ -68,7 +69,7 @@ public class DataNodeViewModel : ActivatableViewModelBase
         {
             SourcesViewModel.Activator.Activate()
                 .DisposeWith(disposables);
-
+            
             HeaderViewModel.Activator.Activate()
                 .DisposeWith(disposables);
             
@@ -94,16 +95,18 @@ public class DataNodeViewModel : ActivatableViewModelBase
             UpdateIsLastDataNode();
             
             this.WhenAnyValue(x => x.IsLocalMachine, x => x.IsLastDataNode)
-                .Select(tuple => tuple.Item1 && tuple.Item2)
+                .CombineLatest(
+                    _sessionService.SessionStatusObservable.Select(status => status == SessionStatus.Preparation),
+                    (tuple, isPreparation) => tuple.Item1 && tuple.Item2 && isPreparation)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .ToPropertyEx(this, x => x.ShowAddButton)
                 .DisposeWith(disposables);
         });
-
+        
         InitializeBrushes();
         SetMainGridBrush();
     }
-
+    
     private void SetMainGridBrush()
     {
         MainGridBrush = IsLocalMachine switch
@@ -120,7 +123,7 @@ public class DataNodeViewModel : ActivatableViewModelBase
     }
     
     private IBrush CurrentMemberBackGround => _currentMemberBackGround;
-
+    
     private IBrush OtherMemberBackGround => _otherMemberBackGround;
     
     private void UpdateIsLastDataNode()
@@ -128,6 +131,7 @@ public class DataNodeViewModel : ActivatableViewModelBase
         if (!IsLocalMachine)
         {
             IsLastDataNode = false;
+            
             return;
         }
         
@@ -135,6 +139,7 @@ public class DataNodeViewModel : ActivatableViewModelBase
         if (currentMemberDataNodes.Count == 0)
         {
             IsLastDataNode = false;
+            
             return;
         }
         
@@ -146,13 +151,13 @@ public class DataNodeViewModel : ActivatableViewModelBase
     {
         await _dataNodeService.CreateAndTryAddDataNode();
     }
-        
+    
     [Reactive]
     public bool IsLocalMachine { get; set; }
     
     [Reactive]
     public IBrush MainGridBrush { get; set; } = null!;
-        
+    
     [Reactive]
     public DateTimeOffset JoinedSessionOn { get; set; }
     
@@ -165,6 +170,6 @@ public class DataNodeViewModel : ActivatableViewModelBase
     public extern bool ShowAddButton { [ObservableAsProperty] get; }
     
     public DataNode DataNode { get; } = null!;
-
+    
     public ReactiveCommand<Unit, Unit> AddDataNodeCommand { get; } = null!;
 }

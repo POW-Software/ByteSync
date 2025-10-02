@@ -46,7 +46,7 @@
                 Command="{Binding AddDataNodeCommand}"
                 IsVisible="{Binding ShowAddButton}">
             <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                <misc:Icon FontSize="30" Value="RegularLayerPlus" Margin="6" Width="30" Height="30" />
+                <misc:Icon FontSize="26" Value="RegularLayerPlus" Margin="6" Width="26" Height="26" />
                 <TextBlock VerticalAlignment="Center" FontSize="13" Margin="6"
                            Text="{localizations:Loc DataNodeView_AddLocalDataNode, True}" />
             </StackPanel>
