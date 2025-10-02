@@ -863,11 +863,11 @@ You must select a maximum of 5 data sources.</value>
 	</data>
 	<data name="InventoryProcess_MoreThan5DataNodes" xml:space="preserve">
 		<value>Unable to start the Data Inventory:
-You must select a maximum of 5 data nodes.</value>
+You must select a maximum of 5 Data Nodes.</value>
 	</data>
 	<data name="InventoryProcess_LessThan2DataNodes" xml:space="preserve">
 		<value>Unable to start the Data Inventory:
-You must select at least 2 data nodes.</value>
+You must select at least 2 Data Nodes.</value>
 	</data>
 	<data name="SessionQuitChecker_QuitLocalActivated_Title" xml:space="preserve">
 		<value>Quit the session</value>
@@ -1605,13 +1605,16 @@ Do you want to save this new Session Profile with this name?</value>
 		<value>Remove Data Node</value>
 	</data>
 	<data name="DataNodeHeaderView_Tooltip_Content_Remove" xml:space="preserve">
-		<value>Remove this data node from the synchronization session.</value>
+		<value>Remove this Data Node from the synchronization session.</value>
 	</data>
 	<data name="DataNodeView_Tooltip_Header_Add" xml:space="preserve">
-		<value>Add Data Node</value>
+		<value>Add a local Data Node</value>
 	</data>
 	<data name="DataNodeView_Tooltip_Content_Add" xml:space="preserve">
-		<value>Add a new data node to the synchronization session.</value>
+		<value>Add a new Data Node to the synchronization session.</value>
+	</data>
+    <data name="DataNodeView_AddLocalDataNode" xml:space="preserve">
+		<value>Add a local Data Node</value>
 	</data>
 	<!-- Atomic Action Validation Failure Reasons -->
 	<!-- Basic Consistency - Operation Type Compatibility -->
