@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ByteSync.Common", "src\Byte
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ByteSync.Client", "src\ByteSync.Client\ByteSync.Client.csproj", "{30FA85F0-F1F2-46A4-80CE-C1EA7459AD09}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ByteSync.Client.Tests", "tests\ByteSync.Client.Tests\ByteSync.Client.Tests.csproj", "{7E612A21-60DA-4B58-999B-58A4F53E381C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ByteSync.Client.UnitTests", "tests\ByteSync.Client.UnitTests\ByteSync.Client.UnitTests.csproj", "{7E612A21-60DA-4B58-999B-58A4F53E381C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ByteSync.Common.Tests", "tests\ByteSync.Common.Tests\ByteSync.Common.Tests.csproj", "{7422B09D-D571-4365-9878-EDD889FFFACB}"
 EndProject
