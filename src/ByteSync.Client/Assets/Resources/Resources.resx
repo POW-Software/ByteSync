@@ -766,6 +766,18 @@ Would you like to continue ?</value>
 	<data name="CurrentCloudSession_FatalError" xml:space="preserve">
 		<value>A fatal error occurred during the session. The session is terminated.</value>
 	</data>
+    <data name="CurrentCloudSessionView_Tooltip_Header_CopySessionId" xml:space="preserve">
+		<value>Copy Session ID</value>
+	</data>
+    <data name="CurrentCloudSessionView_Tooltip_Content_CopySessionId" xml:space="preserve">
+		<value>Copy the session ID to the clipboard to share with participants.</value>
+	</data>
+    <data name="CurrentCloudSessionView_Tooltip_Header_CopySessionPassword" xml:space="preserve">
+		<value>Copy Session Password</value>
+	</data>
+    <data name="CurrentCloudSessionView_Tooltip_Content_CopySessionPassword" xml:space="preserve">
+		<value>Copy the session password to the clipboard to share with participants.</value>
+	</data>
 	<data name="MessageBox_OK" xml:space="preserve">
 		<value>OK</value>
 	</data>

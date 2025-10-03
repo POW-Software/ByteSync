@@ -1711,4 +1711,16 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
     <data name="InventoryProcess_LocalInventory_NotLaunched" xml:space="preserve">
         <value>Inventaire Local non démarré</value>
     </data>
+    <data name="CurrentCloudSessionView_Tooltip_Header_CopySessionId" xml:space="preserve">
+        <value>Copier l’identifiant de session</value>
+    </data>
+    <data name="CurrentCloudSessionView_Tooltip_Content_CopySessionId" xml:space="preserve">
+        <value>Copier l’identifiant de session dans le presse-papiers pour le partager avec les participants.</value>
+    </data>
+    <data name="CurrentCloudSessionView_Tooltip_Header_CopySessionPassword" xml:space="preserve">
+        <value>Copier le mot de passe de session</value>
+    </data>
+    <data name="CurrentCloudSessionView_Tooltip_Content_CopySessionPassword" xml:space="preserve">
+        <value>Copier le mot de passe de session dans le presse-papiers pour le partager avec les participants.</value>
+    </data>
 </root>
