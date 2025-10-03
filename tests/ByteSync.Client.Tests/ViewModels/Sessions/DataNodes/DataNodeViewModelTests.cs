@@ -203,7 +203,7 @@ public class DataNodeViewModelTests
         
         // Add dn2 and make it the last in sorted list
         sorted.Clear();
-        sorted.AddRange(new[] { dn1, dn2 });
+        sorted.AddRange([dn1, dn2]);
         cache.AddOrUpdate(dn2); // triggers repository change
         
         ReactiveViewModelTestHelpers.ShouldEventuallyBe(vm, x => x.ShowAddButton, false);
