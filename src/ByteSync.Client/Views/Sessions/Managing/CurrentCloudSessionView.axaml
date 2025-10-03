@@ -8,13 +8,13 @@
              xmlns:managing1="clr-namespace:ByteSync.Views.Sessions.Managing"
              mc:Ignorable="d" d:DesignWidth="1500" d:DesignHeight="450"
              x:Class="ByteSync.Views.Sessions.Managing.CurrentCloudSessionView">
-    
+
     <Design.DataContext>
         <managing:CurrentCloudSessionViewModel />
     </Design.DataContext>
-    
+
     <Grid>
-        
+
         <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" DockPanel.Dock="Left">
             <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 3 0 9">
 
@@ -22,40 +22,53 @@
                 <StackPanel Orientation="Vertical" Margin="6 3 3 3">
                     <Label Content="{localizations:Loc JoinCloudSession_SessionId}"></Label>
                     <StackPanel Orientation="Horizontal">
-                        <TextBox Text="{Binding SessionId}" MinWidth="180" IsReadOnly="True" CaretBrush="Transparent"/>
-                        
+                        <TextBox Text="{Binding SessionId}" MinWidth="180" IsReadOnly="True" CaretBrush="Transparent" />
+
                         <Button Classes="GenericButton" Margin="6 0"
-                                Command="{Binding Path=CopyCommand}" CommandParameter="{Binding SessionId}" HorizontalAlignment="Left"  >
+                                Command="{Binding Path=CopyCommand}" CommandParameter="{Binding SessionId}" HorizontalAlignment="Left">
                             <StackPanel Orientation="Horizontal">
                                 <misc:Icon FontSize="14" Value="RegularCopy" />
                             </StackPanel>
+                            <ToolTip.Tip>
+                                <StackPanel Classes="ByteSyncToolTip">
+                                    <TextBlock Text="{localizations:Loc CurrentCloudSessionView_Tooltip_Header_CopySessionId}" />
+                                    <TextBlock Text="{localizations:Loc CurrentCloudSessionView_Tooltip_Content_CopySessionId}" />
+                                </StackPanel>
+                            </ToolTip.Tip>
                         </Button>
                     </StackPanel>
                 </StackPanel>
 
                 <!-- Session Password -->
                 <StackPanel Orientation="Vertical" Margin="18,3,3,3">
-                    <Label Content="{localizations:Loc JoinCloudSession_SessionPassword}" ></Label>
+                    <Label Content="{localizations:Loc JoinCloudSession_SessionPassword}"></Label>
                     <StackPanel Orientation="Horizontal">
-                        <TextBox Text="{Binding SessionPassword}" MinWidth="180" IsReadOnly="True" CaretBrush="Transparent"/>
-                        
+                        <TextBox Text="{Binding SessionPassword}" MinWidth="180" IsReadOnly="True" CaretBrush="Transparent" />
+
                         <Button Classes="GenericButton" Margin="6 0"
-                                Command="{Binding Path=CopyCommand}" CommandParameter="{Binding SessionPassword}" HorizontalAlignment="Left"  >
+                                Command="{Binding Path=CopyCommand}" CommandParameter="{Binding SessionPassword}"
+                                HorizontalAlignment="Left">
                             <StackPanel Orientation="Horizontal">
                                 <misc:Icon FontSize="14" Value="RegularCopy" />
                             </StackPanel>
+                            <ToolTip.Tip>
+                                <StackPanel Classes="ByteSyncToolTip">
+                                    <TextBlock Text="{localizations:Loc CurrentCloudSessionView_Tooltip_Header_CopySessionPassword}" />
+                                    <TextBlock Text="{localizations:Loc CurrentCloudSessionView_Tooltip_Content_CopySessionPassword}" />
+                                </StackPanel>
+                            </ToolTip.Tip>
                         </Button>
                     </StackPanel>
                 </StackPanel>
-                
+
                 <!-- Session Profile Name -->
                 <StackPanel Orientation="Vertical" Margin="18,3,3,3" IsVisible="False">
-                    <Label Content="{localizations:Loc StartComparison_SessionProfile}" ></Label>
+                    <Label Content="{localizations:Loc StartComparison_SessionProfile}"></Label>
                     <StackPanel Orientation="Horizontal">
-                        <TextBox Text="{Binding ProfileName}" MaxWidth="240" IsReadOnly="True"/>
+                        <TextBox Text="{Binding ProfileName}" MaxWidth="240" IsReadOnly="True" />
                     </StackPanel>
                 </StackPanel>
-                
+
                 <!-- Reset Session -->
                 <Button Classes="GenericButton" Margin="18,3,3,5"
                         Command="{Binding Path=RestartSessionCommand}" HorizontalAlignment="Left" VerticalAlignment="Bottom"
@@ -75,7 +88,7 @@
                         <TextBlock Text="{localizations:Loc CloudSession_SaveProfile}" />
                     </StackPanel>
                 </Button>
-                
+
                 <!-- Quit Session -->
                 <Button Classes="GenericButton" Margin="18,3,6,5"
                         Command="{Binding Path=QuitSessionCommand}" HorizontalAlignment="Left" VerticalAlignment="Bottom">
@@ -84,24 +97,25 @@
                         <TextBlock Text="{localizations:Loc CloudSession_QuitSession}" />
                     </StackPanel>
                 </Button>
-                
+
                 <StackPanel Orientation="Horizontal" Height="32" Margin="10" VerticalAlignment="Bottom"
-                            IsVisible="{Binding IsCloudSessionFatalError}"> 
+                            IsVisible="{Binding IsCloudSessionFatalError}">
                     <misc:Icon FontSize="24" Value="RegularErrorCircle" Foreground="{DynamicResource SystemAccentColor}"
                                VerticalAlignment="Center" Margin="6 0" />
-                    <TextBlock Text="{localizations:Loc CurrentCloudSession_FatalError}" 
-                               VerticalAlignment="Center" Margin="0" FontWeight="Bold" FontSize="16"/>
+                    <TextBlock Text="{localizations:Loc CurrentCloudSession_FatalError}"
+                               VerticalAlignment="Center" Margin="0" FontWeight="Bold" FontSize="16" />
                 </StackPanel>
 
             </WrapPanel>
-            
+
             <!-- Can be used to make dividers with Dash, replaces empty Borders with a thickness of 2 in Avalonia -->
-            <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}" 
-                       StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6"/>
-            
+            <Rectangle Height="1" StrokeThickness="1" Stroke="{DynamicResource SystemBaseLowColor}"
+                       StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="6,6" />
+
             <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 9 0 3">
-                <managing1:SessionSettingsEditView DockPanel.Dock="Right" DataContext="{Binding SessionSettingsEditViewModel}" HorizontalContentAlignment="Right"
-                                                  Margin="24 0"/>
+                <managing1:SessionSettingsEditView DockPanel.Dock="Right" DataContext="{Binding SessionSettingsEditViewModel}"
+                                                   HorizontalContentAlignment="Right"
+                                                   Margin="24 0" />
             </WrapPanel>
         </StackPanel>
     </Grid>

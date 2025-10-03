@@ -8,15 +8,15 @@
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ByteSync.Views.Sessions.DataNodes.DataNodeView">
-    
+
     <Design.DataContext>
         <dataNodes:DataNodeViewModel />
     </Design.DataContext>
 
     <StackPanel Orientation="Horizontal">
-        <Border Width="600" Margin="6" Height="320" Background="{Binding MainGridBrush}" 
+        <Border Width="600" Margin="6" Height="320" Background="{Binding MainGridBrush}"
                 CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource Gray8}">
-            <Grid Name="MainGrid" >
+            <Grid Name="MainGrid">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
@@ -39,14 +39,18 @@
 
             </Grid>
         </Border>
-        
+
         <!-- Add DataNode Button -->
-        <Button Classes="AccentButton" Margin="6 0 24 0 " Height="48" Width="48"
+        <Button Classes="AccentButton" Margin="6 0 24 0 "
                 VerticalAlignment="Center"
-                Command="{Binding AddDataNodeCommand}" 
+                Command="{Binding AddDataNodeCommand}"
                 IsVisible="{Binding ShowAddButton}">
-            <misc:Icon FontSize="24" Value="RegularPlus" Margin="0" Width="24" Height="24" />
-            
+            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                <misc:Icon FontSize="26" Value="RegularLayerPlus" Margin="6" Width="26" Height="26" />
+                <TextBlock VerticalAlignment="Center" FontSize="13" Margin="6"
+                           Text="{localizations:Loc DataNodeView_AddLocalDataNode, True}" />
+            </StackPanel>
+
             <ToolTip.Tip>
                 <StackPanel Classes="ByteSyncToolTip">
                     <TextBlock Text="{localizations:Loc DataNodeView_Tooltip_Header_Add}" />

@@ -851,11 +851,11 @@ Vous devez sélectionner au maximum 5 sources de données.</value>
 	</data>
 	<data name="InventoryProcess_MoreThan5DataNodes" xml:space="preserve">
 		<value>Impossible de démarrer l'Inventaire des Données :
-Vous devez sélectionner au maximum 5 nœuds de données.</value>
+Vous devez sélectionner au maximum 5 Nœuds de Données.</value>
 	</data>
 	<data name="InventoryProcess_LessThan2DataNodes" xml:space="preserve">
 		<value>Impossible de démarrer l'Inventaire des Données :
-Vous devez sélectionner au minimum 2 nœuds de données.</value>
+Vous devez sélectionner au minimum 2 Nœuds de Données.</value>
 	</data>
 	<data name="SessionQuitChecker_QuitLocalActivated_Title" xml:space="preserve">
 		<value>Quitter la session</value>
@@ -1572,16 +1572,19 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 		<value>Syntaxe de filtrage</value>
 	</data>
 	<data name="DataNodeHeaderView_Tooltip_Header_Remove" xml:space="preserve">
-		<value>Supprimer le nœud de données</value>
+		<value>Supprimer le Nœud de Données</value>
 	</data>
 	<data name="DataNodeHeaderView_Tooltip_Content_Remove" xml:space="preserve">
-		<value>Supprimer ce nœud de données de la session de synchronisation.</value>
+		<value>Supprimer ce Nœud de Données de la session de synchronisation.</value>
 	</data>
 	<data name="DataNodeView_Tooltip_Header_Add" xml:space="preserve">
-		<value>Ajouter un nœud de données</value>
+		<value>Ajouter un Nœud de Données local</value>
 	</data>
 	<data name="DataNodeView_Tooltip_Content_Add" xml:space="preserve">
-		<value>Ajouter un nouveau nœud de données à la session de synchronisation.</value>
+		<value>Ajouter un nouveau Nœud de Données à la session de synchronisation.</value>
+	</data>
+    <data name="DataNodeView_AddLocalDataNode" xml:space="preserve">
+		<value>Ajouter un Nœud de Données local</value>
 	</data>
 	<!-- Atomic Action Validation Failure Reasons -->
 	<!-- Basic Consistency - Operation Type Compatibility -->
@@ -1707,5 +1710,17 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
     </data>
     <data name="InventoryProcess_LocalInventory_NotLaunched" xml:space="preserve">
         <value>Inventaire Local non démarré</value>
+    </data>
+    <data name="CurrentCloudSessionView_Tooltip_Header_CopySessionId" xml:space="preserve">
+        <value>Copier l’identifiant de session</value>
+    </data>
+    <data name="CurrentCloudSessionView_Tooltip_Content_CopySessionId" xml:space="preserve">
+        <value>Copier l’identifiant de session dans le presse-papiers pour le partager avec les participants.</value>
+    </data>
+    <data name="CurrentCloudSessionView_Tooltip_Header_CopySessionPassword" xml:space="preserve">
+        <value>Copier le mot de passe de session</value>
+    </data>
+    <data name="CurrentCloudSessionView_Tooltip_Content_CopySessionPassword" xml:space="preserve">
+        <value>Copier le mot de passe de session dans le presse-papiers pour le partager avec les participants.</value>
     </data>
 </root>
