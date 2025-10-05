@@ -2,15 +2,10 @@
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Avalonia.Controls.Mixins;
 using ByteSync.Assets.Resources;
-using ByteSync.Business.Arguments;
 using ByteSync.Business.Sessions;
-using ByteSync.Common.Business.Inventories;
-using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Inventories;
-using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
@@ -27,7 +22,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Results;
 
-public class ComparisonResultViewModel : ActivatableViewModelBase 
+public class ComparisonResultViewModel : ActivatableViewModelBase
 {
     private readonly ISessionService _sessionService;
     private readonly ILocalizationService _localizationService;
@@ -41,19 +36,20 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     private readonly IFilterService _filterService;
     private readonly IWebAccessor _webAccessor;
     private readonly ILogger<ComparisonResultViewModel> _logger;
-
+    
     private const int PAGE_SIZE = 10;
-
-
+    
+    
     public ComparisonResultViewModel()
     {
     }
-
-    public ComparisonResultViewModel(ISessionService sessionService, ILocalizationService localizationService, 
-        IDialogService dialogService, IInventoryService inventoriesService, IComparisonItemsService comparisonItemsService,  
-        IComparisonItemViewModelFactory comparisonItemViewModelFactory, ISessionMemberRepository sessionMemberRepository, 
-        IFlyoutElementViewModelFactory flyoutElementViewModelFactory, ManageSynchronizationRulesViewModel manageSynchronizationRulesViewModel,
-        IComparisonItemRepository comparisonItemRepository, IFilterService filterService, IWebAccessor webAccessor, 
+    
+    public ComparisonResultViewModel(ISessionService sessionService, ILocalizationService localizationService,
+        IDialogService dialogService, IInventoryService inventoriesService, IComparisonItemsService comparisonItemsService,
+        IComparisonItemViewModelFactory comparisonItemViewModelFactory, ISessionMemberRepository sessionMemberRepository,
+        IFlyoutElementViewModelFactory flyoutElementViewModelFactory,
+        ManageSynchronizationRulesViewModel manageSynchronizationRulesViewModel,
+        IComparisonItemRepository comparisonItemRepository, IFilterService filterService, IWebAccessor webAccessor,
         ILogger<ComparisonResultViewModel> logger)
     {
         _sessionService = sessionService;
@@ -70,7 +66,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         _logger = logger;
         
         ManageSynchronizationRules = manageSynchronizationRulesViewModel;
-
+        
         IsResultLoadingError = false;
         AreResultsLoaded = false;
         
@@ -79,15 +75,15 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         IsColumn4Visible = true;
         
         SelectedItems = new ObservableCollection<ComparisonItemViewModel>();
-
+        
         var canAddOrDeleteManualAction = this
             .WhenAnyValue(
-                x => x.SelectedItems.Count, x=> x.HasSynchronizationStarted,
-                (selected, isSyncStard) => !isSyncStard && selected > 0 
+                x => x.SelectedItems.Count, x => x.HasSynchronizationStarted,
+                (selected, isSyncStard) => !isSyncStard && selected > 0
                                                         && Enumerable.ToHashSet(SelectedItems.Select(i => i.FileSystemType)
-                                                                .ToList()).Count == 1)
+                                                            .ToList()).Count == 1)
             .ObserveOn(RxApp.MainThreadScheduler);
-
+        
         AddManualActionCommand = ReactiveCommand.Create(AddManualAction, canAddOrDeleteManualAction);
         DeleteManualActionsCommand = ReactiveCommand.Create(DeleteManualActions, canAddOrDeleteManualAction);
         OpenSyntaxDocumentationCommand = ReactiveCommand.CreateFromTask(OpenSyntaxDocumentation);
@@ -105,7 +101,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
             .Throttle(TimeSpan.FromMilliseconds(100))
             .ObserveOn(RxApp.MainThreadScheduler)
             .Select(_ => BuildFilter());
-
+        
         PageParameters.WhenAnyValue(vm => vm.PageCount)
             .Subscribe(pageCount =>
             {
@@ -121,12 +117,12 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
                 }
             });
         
-        var pager = PageParameters.WhenAnyValue(vm => vm.CurrentPage, vm => vm.PageSize, 
+        var pager = PageParameters.WhenAnyValue(vm => vm.CurrentPage, vm => vm.PageSize,
                 (currentPage, pageSize) => new PageRequest(currentPage, pageSize))
             .StartWith(new PageRequest(1, PAGE_SIZE))
             .DistinctUntilChanged()
             .Sample(TimeSpan.FromMilliseconds(100));
-
+        
         _comparisonItemRepository.ObservableCache
             .Connect() // make the source an observable change set
             .Filter(filter)
@@ -140,7 +136,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _bindingData)
             .Subscribe();
-
+        
         this.WhenActivated(disposables =>
         {
             _comparisonItemsService.ComparisonResult.DistinctUntilChanged()
@@ -153,80 +149,80 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => OnSessionReset())
                 .DisposeWith(disposables);
-
-            this.HandleActivation(disposables);
-
+            
+            HandleActivation(disposables);
+            
             IsEditionEnabled = true;
         });
     }
     
     private ReadOnlyObservableCollection<ComparisonItemViewModel> _bindingData;
-
-    public PageParameterData PageParameters { get; } = new PageParameterData(1, PAGE_SIZE);
+    
+    public PageParameterData PageParameters { get; } = new(1, PAGE_SIZE);
     
     public ViewModelBase? ManageSynchronizationRules { get; }
-
-    private void HandleActivation(System.Reactive.Disposables.CompositeDisposable compositeDisposable)
+    
+    private void HandleActivation(CompositeDisposable compositeDisposable)
     {
         _inventoryService.InventoryProcessData.AreFullInventoriesComplete
             .Where(b => b)
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(_ =>
             {
-                CanManageActions = ! _sessionService.IsCloudSession || _sessionMemberRepository.IsCurrentUserFirstSessionMemberCurrentValue;
-
+                CanManageActions = !_sessionService.IsCloudSession || _sessionMemberRepository.IsCurrentUserFirstSessionMemberCurrentValue;
+                
                 IsCloudProfileSession = _sessionService is { IsProfileSession: true, IsCloudSession: true };
             })
             .DisposeWith(compositeDisposable);
     }
     
     public ReadOnlyObservableCollection<ComparisonItemViewModel> ComparisonItems => _bindingData;
-
+    
     public ReactiveCommand<Unit, Unit> AddManualActionCommand { get; set; }
-
+    
     public ReactiveCommand<Unit, Unit> DeleteManualActionsCommand { get; set; }
     
     public ReactiveCommand<Unit, Unit> OpenSyntaxDocumentationCommand { get; }
     
     [Reactive]
     public string? PathHeader { get; set; }
-
+    
     [Reactive]
     public string? Inventory1Name { get; set; }
-
+    
     [Reactive]
     public string? Inventory2Name { get; set; }
-
+    
     [Reactive]
     public string? Inventory3Name { get; set; }
-
+    
     [Reactive]
     public string? Inventory4Name { get; set; }
-
+    
     [Reactive]
     public string? Inventory5Name { get; set; }
-
+    
     [Reactive]
     public bool IsColumn2Visible { get; set; }
     
     [Reactive]
     public bool IsColumn3Visible { get; set; }
-
+    
     [Reactive]
     public bool IsColumn4Visible { get; set; }
-
+    
     [Reactive]
     public bool IsColumn5Visible { get; set; }
-
+    
     [Reactive]
     public bool IsEditionEnabled { get; set; }
-        
+    
     [Reactive]
     internal ObservableCollection<ComparisonItemViewModel> SelectedItems { get; set; }
-
+    
     [Reactive]
     public bool HasSynchronizationStarted { get; set; }
-
+    
     [Reactive]
     public int? GridMinHeight { get; set; }
     
@@ -241,15 +237,12 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     
     [Reactive]
     public bool IsResultLoadingError { get; set; }
-
+    
     private List<ComparisonItemViewModel> SelectedComparisonItemViews
     {
-        get
-        {
-            return SelectedItems.ToList();
-        }
+        get { return SelectedItems.ToList(); }
     }
-
+    
     private async void HandleOnInventoriesComparisonDone(ComparisonResult? comparisonResult)
     {
         try
@@ -257,7 +250,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
             IsResultLoadingError = false;
             
             SetColumnsNameAndVisibility(comparisonResult!);
-
+            
             AreResultsLoaded = true;
         }
         catch (Exception ex)
@@ -267,7 +260,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
             _logger.LogError(ex, "ComparisonResultViewModel.HandleOnInventoriesComparisonDone");
         }
     }
-
+    
     private void SetColumnsNameAndVisibility(ComparisonResult comparisonResult)
     {
         var pathHeader = _sessionService.CurrentSessionSettings!.DataType switch
@@ -278,27 +271,27 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
                  $"{_localizationService[nameof(Resources.General_or)]} {_localizationService[nameof(Resources.General_Directory)]}"
         };
         PathHeader = pathHeader.ToUpper();
-
+        
         Inventory1Name = ComputeColumnInventoryDescription(0, comparisonResult);
-
+        
         IsColumn2Visible = comparisonResult.Inventories.Count > 1;
         if (comparisonResult.Inventories.Count > 1)
         {
             Inventory2Name = ComputeColumnInventoryDescription(1, comparisonResult);
         }
-
+        
         IsColumn3Visible = comparisonResult.Inventories.Count > 2;
         if (comparisonResult.Inventories.Count > 2)
         {
             Inventory3Name = ComputeColumnInventoryDescription(2, comparisonResult);
         }
-
+        
         IsColumn4Visible = comparisonResult.Inventories.Count > 3;
         if (comparisonResult.Inventories.Count > 3)
         {
             Inventory4Name = ComputeColumnInventoryDescription(3, comparisonResult);
         }
-
+        
         IsColumn5Visible = comparisonResult.Inventories.Count > 4;
         if (comparisonResult.Inventories.Count > 4)
         {
@@ -313,7 +306,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         var inventory = comparisonResult.Inventories[inventoryIndex];
         var description = comparisonResult.Inventories.Count == 1 ? string.Empty : inventory.MachineName;
         
-        return string.IsNullOrEmpty(description) 
+        return string.IsNullOrEmpty(description)
             ? $"{inventoryWord} {inventory.Code}"
             : $"{inventoryWord} {inventory.Code} ({description})";
     }
@@ -324,7 +317,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
             _flyoutElementViewModelFactory.BuildTargetedActionGlobalViewModel(
                 SelectedComparisonItemViews.Select(civm => civm.ComparisonItem).ToList()));
     }
-
+    
     private void DeleteManualActions()
     {
         foreach (var comparisonItemView in SelectedComparisonItemViews)
@@ -349,10 +342,10 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         IsResultLoadingError = false;
         AreResultsLoaded = false;
         HasSynchronizationStarted = false;
-
+        
         IsEditionEnabled = true;
     }
-
+    
     private Func<ComparisonItem, bool> BuildFilter()
     {
         if (FilterTags.Count == 0)
@@ -360,7 +353,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
             return _ => true;
         }
         
-        List<string> tags = FilterTags
+        var tags = FilterTags
             .Select(t => t.Text)
             .Where(t => !string.IsNullOrWhiteSpace(t))
             .ToList();
@@ -370,7 +363,7 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     
     [Reactive]
     public ObservableCollection<TagItem> FilterTags { get; set; }
-
+    
     // Property to configure the tag autocomplete
     [Reactive]
     public Func<string, bool> TagFilterValidator { get; set; }
