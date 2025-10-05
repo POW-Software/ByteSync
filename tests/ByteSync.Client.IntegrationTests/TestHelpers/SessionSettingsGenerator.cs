@@ -5,11 +5,11 @@ namespace ByteSync.Client.IntegrationTests.TestHelpers;
 public static class SessionSettingsGenerator
 {
     public static SessionSettings GenerateSessionSettings(
-        DataTypes dataType = DataTypes.FilesDirectories, 
+        DataTypes dataType = DataTypes.FilesDirectories,
         LinkingKeys linkingKey = LinkingKeys.RelativePath,
         AnalysisModes analysisMode = AnalysisModes.Smart)
     {
-        SessionSettings sessionSettings = new SessionSettings();
+        var sessionSettings = new SessionSettings();
         sessionSettings.AnalysisMode = analysisMode;
         sessionSettings.DataType = dataType;
         sessionSettings.LinkingKey = linkingKey;
