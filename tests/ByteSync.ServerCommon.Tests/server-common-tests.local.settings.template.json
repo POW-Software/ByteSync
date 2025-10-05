@@ -1,7 +1,8 @@
 ﻿{
   "Redis": {
     "ConnectionString": "",
-    "Prefix": ""
+    "Prefix": "",
+    "UseSsl": true
   },
   "AzureBlobStorage": {
     "Endpoint": "",

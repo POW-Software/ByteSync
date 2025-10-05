@@ -35,6 +35,17 @@ public class R2DownloadResume_Tests
             ServiceRegistrar.RegisterComponents();
         }
 
+        var cloudflareSettings = GlobalTestSetup.Container
+            .Resolve<Microsoft.Extensions.Options.IOptions<CloudflareR2Settings>>().Value;
+
+        if (string.IsNullOrWhiteSpace(cloudflareSettings.Endpoint)
+            || string.IsNullOrWhiteSpace(cloudflareSettings.AccessKeyId)
+            || string.IsNullOrWhiteSpace(cloudflareSettings.SecretAccessKey)
+            || string.IsNullOrWhiteSpace(cloudflareSettings.BucketName))
+        {
+            Assert.Ignore("Cloudflare R2 settings are not configured for integration tests.");
+        }
+
         _clientScope = ByteSync.Services.ContainerProvider.Container!.BeginLifetimeScope(b =>
         {
             // Simulate one GET 500 during download by replacing IHttpClientFactory used by strategies
@@ -57,7 +68,7 @@ public class R2DownloadResume_Tests
     [TearDown]
     public void TearDown()
     {
-        _clientScope.Dispose();
+        _clientScope?.Dispose();
     }
 
     [Test]

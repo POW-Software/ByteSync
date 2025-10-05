@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Configurations;
 using ContainerBuilder = DotNet.Testcontainers.Builders.ContainerBuilder;
 using IContainer = DotNet.Testcontainers.Containers.IContainer;
 using FluentAssertions;
+using NUnit.Framework;
 
 namespace ByteSync.Functions.IntegrationTests.End2End;
 
@@ -14,6 +16,11 @@ public class E2E_Environment_Setup
 
     public async Task InitializeAsync()
     {
+        if (TestcontainersSettings.OS.DockerEndpointAuthConfig == null)
+        {
+            Assert.Ignore("Docker endpoint is not available for Testcontainers.");
+        }
+
         Azurite = new ContainerBuilder()
             .WithImage("mcr.microsoft.com/azure-storage/azurite")
             .WithName($"bytesync-azurite-e2e-{Guid.NewGuid():N}")

@@ -28,10 +28,22 @@ public class E2E_Auth_Session_Tests
     [OneTimeTearDown]
     public async Task OneTimeTeardown()
     {
-        await _initializer.Functions.DisposeAsync();
-        await _initializer.Azurite.DisposeAsync();
-        _initializer.Http.Dispose();
-        _api.Dispose();
+        if (_initializer != null)
+        {
+            if (_initializer.Functions != null)
+            {
+                await _initializer.Functions.DisposeAsync();
+            }
+
+            if (_initializer.Azurite != null)
+            {
+                await _initializer.Azurite.DisposeAsync();
+            }
+
+            _initializer.Http?.Dispose();
+        }
+
+        _api?.Dispose();
     }
 
     [Test]

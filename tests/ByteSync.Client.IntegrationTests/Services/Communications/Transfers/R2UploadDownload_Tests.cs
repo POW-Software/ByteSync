@@ -32,6 +32,17 @@ public class R2UploadDownload_Tests
             ServiceRegistrar.RegisterComponents();
         }
 
+        var cloudflareSettings = GlobalTestSetup.Container
+            .Resolve<Microsoft.Extensions.Options.IOptions<ByteSync.ServerCommon.Business.Settings.CloudflareR2Settings>>().Value;
+
+        if (string.IsNullOrWhiteSpace(cloudflareSettings.Endpoint)
+            || string.IsNullOrWhiteSpace(cloudflareSettings.AccessKeyId)
+            || string.IsNullOrWhiteSpace(cloudflareSettings.SecretAccessKey)
+            || string.IsNullOrWhiteSpace(cloudflareSettings.BucketName))
+        {
+            Assert.Ignore("Cloudflare R2 settings are not configured for integration tests.");
+        }
+
         _clientScope = ByteSync.Services.ContainerProvider.Container!.BeginLifetimeScope(b =>
         {
             b.RegisterType<CloudflareR2ClientFactory>().As<ICloudflareR2ClientFactory>().SingleInstance();
@@ -50,7 +61,7 @@ public class R2UploadDownload_Tests
     [TearDown]
     public void TearDown()
     {
-        _clientScope.Dispose();
+        _clientScope?.Dispose();
     }
 
     [Test]

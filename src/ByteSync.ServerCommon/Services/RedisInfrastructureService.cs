@@ -19,6 +19,7 @@ public class RedisInfrastructureService : IRedisInfrastructureService
     private readonly ICacheKeyFactory _cacheKeyFactory;
     private readonly RedLockFactory _redLockFactory;
     private static string? _cachedConnectionString;
+    private static bool? _cachedUseSsl;
     private readonly ConnectionMultiplexer _connectionMultiplexer;
 
     public RedisInfrastructureService(IOptions<RedisSettings> redisSettings, ICacheKeyFactory cacheKeyFactory, ILoggerFactory loggerFactory)
@@ -27,6 +28,7 @@ public class RedisInfrastructureService : IRedisInfrastructureService
         _cacheKeyFactory = cacheKeyFactory;
         
         _cachedConnectionString ??= _redisSettings.ConnectionString;
+        _cachedUseSsl ??= _redisSettings.UseSsl;
 
         _connectionMultiplexer = _lazyMultiplexer.Value;
 
@@ -42,8 +44,8 @@ public class RedisInfrastructureService : IRedisInfrastructureService
     private static readonly Lazy<ConnectionMultiplexer> _lazyMultiplexer = new(() =>
     {
         var options = ConfigurationOptions.Parse(_cachedConnectionString!);
-        
-        options.Ssl = true;
+
+        options.Ssl = _cachedUseSsl ?? true;
         options.AbortOnConnectFail = false;
         
         if (options.ConnectTimeout < 10000)

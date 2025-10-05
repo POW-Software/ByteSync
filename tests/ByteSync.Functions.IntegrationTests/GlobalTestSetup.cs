@@ -21,14 +21,29 @@ public class GlobalTestSetup
     public void RunBeforeAnyTests()
     {
         ByteSyncServerCommonAssembly = GetReferencedAssemblyByName("ByteSync.ServerCommon");
-        
+
         Configuration = new ConfigurationBuilder()
             .AddJsonFile("functions-integration-tests.local.settings.json", optional: true)
             .AddEnvironmentVariables()
             .Build();
-        
+
+        bool hasAzureStorage = !string.IsNullOrWhiteSpace(Configuration["AzureBlobStorage:AccountKey"]) &&
+            !string.IsNullOrWhiteSpace(Configuration["AzureBlobStorage:AccountName"]) &&
+            !string.IsNullOrWhiteSpace(Configuration["AzureBlobStorage:Endpoint"]) &&
+            !string.IsNullOrWhiteSpace(Configuration["AzureBlobStorage:Container"]);
+
+        bool hasCloudflare = !string.IsNullOrWhiteSpace(Configuration["CloudflareR2:AccessKeyId"]) &&
+            !string.IsNullOrWhiteSpace(Configuration["CloudflareR2:SecretAccessKey"]) &&
+            !string.IsNullOrWhiteSpace(Configuration["CloudflareR2:Endpoint"]) &&
+            !string.IsNullOrWhiteSpace(Configuration["CloudflareR2:BucketName"]);
+
+        if (!hasAzureStorage || !hasCloudflare)
+        {
+            Assert.Ignore("Functions integration tests require Azure Blob Storage and Cloudflare R2 settings.");
+        }
+
         var builder = new ContainerBuilder();
-        
+
         var serviceCollection = new ServiceCollection();
         ConfigureServices(serviceCollection);
         
@@ -43,7 +58,7 @@ public class GlobalTestSetup
     [OneTimeTearDown]
     public void RunAfterAllTests()
     {
-        Container.Dispose();
+        Container?.Dispose();
     }
     
     private void ConfigureServices(IServiceCollection services)
