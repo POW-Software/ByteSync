@@ -16,10 +16,10 @@ public class ContentIdentityViewModel : ViewModelBase
 {
     private readonly ISessionService _sessionService;
     private readonly IDateAndInventoryPartsViewModelFactory _dateAndInventoryPartsViewModelFactory;
-
+    
     public ContentIdentityViewModel()
     {
-#if DEBUG
+    #if DEBUG
         var contentIdentityCore = new ContentIdentityCore();
         contentIdentityCore.SignatureHash = "SignatureHash";
         contentIdentityCore.Size = DateTime.Now.Millisecond;
@@ -30,20 +30,20 @@ public class ContentIdentityViewModel : ViewModelBase
         FillDateAndInventoryParts();
         FillStringData();
         SetHashOrWarnIcon();
-#endif
+    #endif
     }
-
-    public ContentIdentityViewModel(ComparisonItemViewModel comparisonItemViewModel, 
+    
+    public ContentIdentityViewModel(ComparisonItemViewModel comparisonItemViewModel,
         ContentIdentity contentIdentity, Inventory inventory, ISessionService sessionService,
         IDateAndInventoryPartsViewModelFactory dateAndInventoryPartsViewModelFactory)
     {
         ComparisonItemViewModel = comparisonItemViewModel;
         ContentIdentity = contentIdentity;
         Inventory = inventory;
-
+        
         IsFile = ComparisonItemViewModel.FileSystemType == FileSystemTypes.File;
         IsDirectory = !IsFile;
-
+        
         _sessionService = sessionService;
         _dateAndInventoryPartsViewModelFactory = dateAndInventoryPartsViewModelFactory;
         
@@ -52,9 +52,9 @@ public class ContentIdentityViewModel : ViewModelBase
         FillDateAndInventoryParts();
         FillStringData();
         SetHashOrWarnIcon();
-
+        
         ShowInventoryParts = _sessionService.IsCloudSession;
-
+        
         HasAnalysisError = ContentIdentity.HasAnalysisError;
         if (HasAnalysisError)
         {
@@ -69,16 +69,16 @@ public class ContentIdentityViewModel : ViewModelBase
             ShowToolTipDelay = int.MaxValue;
         }
     }
-
+    
     public ComparisonItemViewModel ComparisonItemViewModel { get; }
     
     public ContentIdentity ContentIdentity { get; }
-
+    
     public Inventory Inventory { get; }
-
+    
     [Reactive]
     public string? SignatureHash { get; set; }
-        
+    
     [Reactive]
     public string? HashOrWarnIcon { get; set; }
     
@@ -107,18 +107,15 @@ public class ContentIdentityViewModel : ViewModelBase
     public string PresenceParts { get; set; }
     
     public ObservableCollection<DateAndInventoryPartsViewModel> DateAndInventoryParts { get; private set; }
-
+    
     public long? Size
     {
-        get
-        {
-            return ContentIdentity.Core?.Size;
-        }
+        get { return ContentIdentity.Core?.Size; }
     }
-
+    
     [Reactive]
     public string? LinkingKeyNameTooltip { get; set; }
-
+    
     private void FillStringData()
     {
         if (IsFile)
@@ -128,7 +125,7 @@ public class ContentIdentityViewModel : ViewModelBase
                 var onErrorFileDescription = ContentIdentity.FileSystemDescriptions
                         .First(fsd => fsd is FileDescription { HasAnalysisError: true })
                     as FileDescription;
-
+                
                 SignatureHash = onErrorFileDescription!.AnalysisErrorType.Truncate(32);
                 ErrorType = onErrorFileDescription.AnalysisErrorType;
                 ErrorDescription = onErrorFileDescription.AnalysisErrorDescription;
@@ -144,7 +141,7 @@ public class ContentIdentityViewModel : ViewModelBase
                     if (ContentIdentity.Core.SignatureHash!.Length > 32)
                     {
                         SignatureHash = ContentIdentity.Core.SignatureHash.Substring(0, 8) + "...";
-
+                        
                         var lastIndexOfSlash = ContentIdentity.Core.SignatureHash.LastIndexOf("/", StringComparison.Ordinal);
                         if (lastIndexOfSlash == -1 || lastIndexOfSlash <= 56)
                         {
@@ -162,13 +159,13 @@ public class ContentIdentityViewModel : ViewModelBase
                 }
             }
         }
-
+        
         if (_sessionService.CurrentSessionSettings!.LinkingKey == LinkingKeys.Name
             || ContentIdentity.HasManyFileSystemDescriptionOnAnInventoryPart)
         {
             LinkingKeyNameTooltip = ComparisonItemViewModel.LinkingKeyNameTooltip;
         }
-
+        
         if (IsDirectory)
         {
             PresenceParts = ContentIdentity.GetInventoryParts()
@@ -179,7 +176,7 @@ public class ContentIdentityViewModel : ViewModelBase
                 .JoinToString(", ");
         }
     }
-        
+    
     private void SetHashOrWarnIcon()
     {
         if (ContentIdentity.HasAnalysisError)
@@ -191,20 +188,22 @@ public class ContentIdentityViewModel : ViewModelBase
             HashOrWarnIcon = "RegularHash";
         }
     }
-
+    
     private void FillDateAndInventoryParts()
     {
         DateAndInventoryParts.Clear();
-
+        
         foreach (var pair in ContentIdentity.InventoryPartsByLastWriteTimes)
         {
-            HashSet<InventoryPart> inventoryPartsOK =
+            var inventoryPartsOK =
                 Enumerable.ToHashSet(pair.Value.Where(ip => ip.Inventory.Equals(Inventory)).ToList());
-
+            
             if (inventoryPartsOK.Count > 0)
             {
-                var dateAndInventoryPartsViewModel = _dateAndInventoryPartsViewModelFactory.CreateDateAndInventoryPartsViewModel(this, pair.Key.ToLocalTime(), inventoryPartsOK);
-
+                var dateAndInventoryPartsViewModel =
+                    _dateAndInventoryPartsViewModelFactory.CreateDateAndInventoryPartsViewModel(this, pair.Key.ToLocalTime(),
+                        inventoryPartsOK);
+                
                 DateAndInventoryParts.Add(dateAndInventoryPartsViewModel);
             }
         }

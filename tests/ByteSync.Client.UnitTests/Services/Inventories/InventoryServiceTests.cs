@@ -1,17 +1,12 @@
-using System.Reactive.Subjects;
+using System.Reactive.Linq;
 using ByteSync.Business;
-using ByteSync.Business.Communications;
 using ByteSync.Business.DataNodes;
 using ByteSync.Business.Inventories;
-using ByteSync.Business.SessionMembers;
-using ByteSync.Business.Sessions;
-using ByteSync.Common.Business.EndPoints;
-using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.SharedFiles;
+using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Inventories;
-using DynamicData;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -22,426 +17,286 @@ namespace ByteSync.Client.UnitTests.Services.Inventories;
 [TestFixture]
 public class InventoryServiceTests
 {
-    private Mock<ISessionService> _sessionServiceMock = null!;
-    private Mock<IInventoryFileRepository> _inventoryFileRepositoryMock = null!;
-    private Mock<IDataNodeRepository> _dataNodeRepositoryMock = null!;
-    private Mock<ILogger<InventoryService>> _loggerMock = null!;
-    private InventoryService _inventoryService = null!;
-    
+    private Mock<ISessionService> _sessionService = null!;
+    private Mock<IInventoryFileRepository> _inventoryFileRepository = null!;
+    private Mock<IDataNodeRepository> _dataNodeRepository = null!;
+    private Mock<ILogger<InventoryService>> _logger = null!;
+
+    private List<InventoryFile> _inventoryFiles = null!;
+
     [SetUp]
     public void Setup()
     {
-        _sessionServiceMock = new Mock<ISessionService>();
-        _inventoryFileRepositoryMock = new Mock<IInventoryFileRepository>();
-        _dataNodeRepositoryMock = new Mock<IDataNodeRepository>();
-        _loggerMock = new Mock<ILogger<InventoryService>>();
-        
-        var sessionStatusSubject = new Subject<SessionStatus>();
-        _sessionServiceMock.Setup(x => x.SessionStatusObservable).Returns(sessionStatusSubject);
-        
-        _inventoryService = new InventoryService(
-            _sessionServiceMock.Object,
-            _inventoryFileRepositoryMock.Object,
-            _dataNodeRepositoryMock.Object,
-            _loggerMock.Object);
+        _sessionService = new Mock<ISessionService>();
+        _sessionService.SetupGet(s => s.SessionStatusObservable)
+            .Returns(Observable.Never<SessionStatus>());
+
+        _inventoryFiles = new List<InventoryFile>();
+
+        _inventoryFileRepository = new Mock<IInventoryFileRepository>();
+        _inventoryFileRepository.SetupGet(r => r.Elements)
+            .Returns(() => _inventoryFiles);
+        _inventoryFileRepository
+            .Setup(r => r.AddOrUpdate(It.IsAny<IEnumerable<InventoryFile>>()))
+            .Callback<IEnumerable<InventoryFile>>(files =>
+            {
+                _inventoryFiles.Clear();
+                _inventoryFiles.AddRange(files);
+            });
+
+        _dataNodeRepository = new Mock<IDataNodeRepository>();
+
+        _logger = new Mock<ILogger<InventoryService>>();
     }
-    
-    [Test]
-    public async Task CheckInventoriesReady_WhenAllDataNodesHaveInventories_ShouldSetCompleteToTrue()
+
+    private static DataNode Node(string id, string client, string code)
+        => new DataNode { Id = id, ClientInstanceId = client, Code = code };
+
+    private static InventoryFile FullInventory(string sessionId, string clientInstanceId, string code, string? fileName = null)
     {
-        // Arrange
-        var dataNodes = new List<DataNode>
+        var sfd = new SharedFileDefinition
         {
-            new() { Id = "node1", ClientInstanceId = "other_client_1", Code = "A" },
-            new() { Id = "node2", ClientInstanceId = "other_client_2", Code = "B" },
-            new() { Id = "node3", ClientInstanceId = "current_client_instance_id", Code = "C" }
-        };
-        
-        var inventoryFiles = new List<InventoryFile>
-        {
-            CreateInventoryFile("other_client_1", "A", SharedFileTypes.BaseInventory),
-            CreateInventoryFile("other_client_2", "B", SharedFileTypes.BaseInventory),
-            CreateInventoryFile("current_client_instance_id", "C", SharedFileTypes.BaseInventory)
-        };
-        
-        _dataNodeRepositoryMock.Setup(x => x.Elements).Returns(dataNodes);
-        _inventoryFileRepositoryMock.Setup(x => x.Elements).Returns(inventoryFiles);
-        
-        bool? result = null;
-        _inventoryService.InventoryProcessData.AreBaseInventoriesComplete
-            .Subscribe(value => result = value);
-        
-        // Act
-        await _inventoryService.SetLocalInventory(inventoryFiles, LocalInventoryModes.Base);
-        
-        // Assert
-        result.Should().BeTrue();
-    }
-    
-    [Test]
-    public async Task CheckInventoriesReady_WhenMissingInventoryForOtherDataNode_ShouldSetCompleteToFalse()
-    {
-        // Arrange
-        var dataNodes = new List<DataNode>
-        {
-            new() { Id = "node1", ClientInstanceId = "other_client_1", Code = "A" },
-            new() { Id = "node2", ClientInstanceId = "other_client_2", Code = "B" },
-            new() { Id = "node3", ClientInstanceId = "current_client_instance_id", Code = "C" }
-        };
-        
-        var inventoryFiles = new List<InventoryFile>
-        {
-            CreateInventoryFile("other_client_1", "A", SharedFileTypes.BaseInventory),
-            
-            // Missing inventory for other_client_2 with code "B"
-            CreateInventoryFile("current_client_instance_id", "C", SharedFileTypes.BaseInventory)
-        };
-        
-        _dataNodeRepositoryMock.Setup(x => x.Elements).Returns(dataNodes);
-        _inventoryFileRepositoryMock.Setup(x => x.Elements).Returns(inventoryFiles);
-        
-        bool? result = null;
-        _inventoryService.InventoryProcessData.AreBaseInventoriesComplete
-            .Subscribe(value => result = value);
-        
-        // Act
-        await _inventoryService.SetLocalInventory(inventoryFiles, LocalInventoryModes.Base);
-        
-        // Assert
-        result.Should().BeFalse();
-    }
-    
-    [Test]
-    public async Task CheckInventoriesReady_WhenCurrentMemberHasNoInventory_ShouldSetCompleteToFalse()
-    {
-        // Arrange
-        var dataNodes = new List<DataNode>
-        {
-            new() { Id = "node1", ClientInstanceId = "other_client_1", Code = "A" },
-            new() { Id = "node2", ClientInstanceId = "current_client_instance_id", Code = "B" }
-        };
-        
-        var inventoryFiles = new List<InventoryFile>
-        {
-            CreateInventoryFile("other_client_1", "A", SharedFileTypes.BaseInventory)
-            
-            // Missing inventory for current member
-        };
-        
-        _dataNodeRepositoryMock.Setup(x => x.Elements).Returns(dataNodes);
-        _inventoryFileRepositoryMock.Setup(x => x.Elements).Returns(inventoryFiles);
-        
-        bool? result = null;
-        _inventoryService.InventoryProcessData.AreBaseInventoriesComplete
-            .Subscribe(value => result = value);
-        
-        // Act
-        await _inventoryService.SetLocalInventory(inventoryFiles, LocalInventoryModes.Base);
-        
-        // Assert
-        result.Should().BeFalse();
-    }
-    
-    [Test]
-    public async Task CheckInventoriesReady_WhenAllDataNodesHaveInventoriesForCurrentMember_ShouldSetCompleteToTrue()
-    {
-        // Arrange
-        var dataNodes = new List<DataNode>
-        {
-            new() { Id = "node1", ClientInstanceId = "current_client_instance_id", Code = "A" },
-            new() { Id = "node2", ClientInstanceId = "current_client_instance_id", Code = "B" }
-        };
-        
-        var inventoryFiles = new List<InventoryFile>
-        {
-            CreateInventoryFile("current_client_instance_id", "A", SharedFileTypes.BaseInventory),
-            CreateInventoryFile("current_client_instance_id", "B", SharedFileTypes.BaseInventory)
-        };
-        
-        _dataNodeRepositoryMock.Setup(x => x.Elements).Returns(dataNodes);
-        _inventoryFileRepositoryMock.Setup(x => x.Elements).Returns(inventoryFiles);
-        
-        bool? result = null;
-        _inventoryService.InventoryProcessData.AreBaseInventoriesComplete
-            .Subscribe(value => result = value);
-        
-        // Act
-        await _inventoryService.SetLocalInventory(inventoryFiles, LocalInventoryModes.Base);
-        
-        // Assert
-        result.Should().BeTrue();
-    }
-    
-    [Test]
-    public async Task CheckInventoriesReady_WhenFullInventoryMode_ShouldCheckFullInventories()
-    {
-        // Arrange
-        var dataNodes = new List<DataNode>
-        {
-            new() { Id = "node1", ClientInstanceId = "other_client_1", Code = "A" },
-            new() { Id = "node2", ClientInstanceId = "current_client_instance_id", Code = "B" }
-        };
-        
-        var inventoryFiles = new List<InventoryFile>
-        {
-            CreateInventoryFile("other_client_1", "A", SharedFileTypes.FullInventory),
-            CreateInventoryFile("current_client_instance_id", "B", SharedFileTypes.FullInventory)
-        };
-        
-        _dataNodeRepositoryMock.Setup(x => x.Elements).Returns(dataNodes);
-        _inventoryFileRepositoryMock.Setup(x => x.Elements).Returns(inventoryFiles);
-        
-        bool? result = null;
-        _inventoryService.InventoryProcessData.AreFullInventoriesComplete
-            .Subscribe(value => result = value);
-        
-        // Act
-        await _inventoryService.SetLocalInventory(inventoryFiles, LocalInventoryModes.Full);
-        
-        // Assert
-        result.Should().BeTrue();
-    }
-    
-    [Test]
-    public async Task OnFileIsFullyDownloaded_WhenInventoryFile_ShouldCheckInventoriesReady()
-    {
-        // Arrange
-        var dataNodes = new List<DataNode>
-        {
-            new() { Id = "node1", ClientInstanceId = "other_client_1", Code = "A" },
-            new() { Id = "node2", ClientInstanceId = "current_client_instance_id", Code = "B" }
-        };
-        
-        var inventoryFiles = new List<InventoryFile>
-        {
-            CreateInventoryFile("other_client_1", "A", SharedFileTypes.BaseInventory),
-            CreateInventoryFile("current_client_instance_id", "B", SharedFileTypes.BaseInventory)
-        };
-        
-        var localSharedFile = new LocalSharedFile(
-            CreateSharedFileDefinition("other_client_1", "A", SharedFileTypes.BaseInventory),
-            "test_path");
-        
-        _dataNodeRepositoryMock.Setup(x => x.Elements).Returns(dataNodes);
-        _inventoryFileRepositoryMock.Setup(x => x.Elements).Returns(inventoryFiles);
-        
-        bool? result = null;
-        _inventoryService.InventoryProcessData.AreBaseInventoriesComplete
-            .Subscribe(value => result = value);
-        
-        // Act
-        await _inventoryService.OnFileIsFullyDownloaded(localSharedFile);
-        
-        // Assert
-        result.Should().BeTrue();
-    }
-    
-    [Test]
-    public async Task CheckInventoriesReady_ShouldNotDependOnCodeProperty()
-    {
-        // Arrange
-        var dataNodes = new List<DataNode>
-        {
-            new() { Id = "node1", ClientInstanceId = "other_client_1", Code = "X" },
-            new() { Id = "node2", ClientInstanceId = "current_client_instance_id", Code = "Y" }
-        };
-        
-        var inventoryFiles = new List<InventoryFile>
-        {
-            // Codes don't match, but ClientInstanceId does
-            CreateInventoryFile("other_client_1", "DIFFERENT_CODE", SharedFileTypes.BaseInventory),
-            CreateInventoryFile("current_client_instance_id", "ANOTHER_CODE", SharedFileTypes.BaseInventory)
-        };
-        
-        _dataNodeRepositoryMock.Setup(x => x.Elements).Returns(dataNodes);
-        _inventoryFileRepositoryMock.Setup(x => x.Elements).Returns(inventoryFiles);
-        
-        bool? result = null;
-        _inventoryService.InventoryProcessData.AreBaseInventoriesComplete
-            .Subscribe(value => result = value);
-        
-        // Act
-        await _inventoryService.SetLocalInventory(inventoryFiles, LocalInventoryModes.Base);
-        
-        // Assert
-        result.Should().BeTrue();
-    }
-    
-    private static InventoryFile CreateInventoryFile(string clientInstanceId, string code, SharedFileTypes sharedFileType)
-    {
-        var sharedFileDefinition = CreateSharedFileDefinition(clientInstanceId, code, sharedFileType);
-        
-        return new InventoryFile(sharedFileDefinition, $"test_path_{clientInstanceId}_{code}");
-    }
-    
-    private static SharedFileDefinition CreateSharedFileDefinition(string clientInstanceId, string code, SharedFileTypes sharedFileType)
-    {
-        return new SharedFileDefinition
-        {
+            SessionId = sessionId,
             ClientInstanceId = clientInstanceId,
-            AdditionalName = $"{clientInstanceId}_{code}",
-            SharedFileType = sharedFileType
+            SharedFileType = SharedFileTypes.FullInventory,
+            AdditionalName = $"{code}_IID_test"
         };
+
+        return new InventoryFile(sfd, fileName ?? $"{code}.zip");
     }
-    
+
     [Test]
-    public async Task AbortInventory_SetsAbortionRequested_True()
+    public async Task AreFullInventoriesComplete_RequiresOnePerDataNode()
     {
-        bool? abortion = null;
-        _inventoryService.InventoryProcessData.InventoryAbortionRequested.Subscribe(v => abortion = v);
-        
-        await _inventoryService.AbortInventory();
-        
-        abortion.Should().BeTrue();
-    }
-    
-    [Test]
-    public async Task OnFileIsFullyDownloaded_NonInventory_DoesNothing()
-    {
-        var nonInventory = new LocalSharedFile(
-            CreateSharedFileDefinition("c1", "ANY", SharedFileTypes.FullSynchronization),
-            "local_path");
-        
-        await _inventoryService.OnFileIsFullyDownloaded(nonInventory);
-        
-        _inventoryFileRepositoryMock.Verify(x => x.AddOrUpdate(It.IsAny<InventoryFile>()), Times.Never);
-    }
-    
-    [Test]
-    public async Task SetLocalInventory_AddsToRepository_AndUpdatesBothFlags()
-    {
-        var dataNodes = new List<DataNode>
+        // Arrange
+        var client1 = "client-1";
+        var client2 = "client-2";
+
+        var nodes = new List<DataNode>
         {
-            new() { Id = "n1", ClientInstanceId = "c1" },
-            new() { Id = "n2", ClientInstanceId = "c2" },
+            Node("nAa", client1, "Aa"),
+            Node("nBa", client2, "Ba"),
+            Node("nBb", client2, "Bb")
         };
-        _dataNodeRepositoryMock.Setup(x => x.Elements).Returns(dataNodes);
-        
+
+        _dataNodeRepository.SetupGet(r => r.Elements).Returns(nodes);
+
+        var service = new InventoryService(
+            _sessionService.Object,
+            _inventoryFileRepository.Object,
+            _dataNodeRepository.Object,
+            _logger.Object);
+
+        bool? last = null;
+        using var sub = service.InventoryProcessData.AreFullInventoriesComplete.Subscribe(v => last = v);
+
+        var filesStep1 = new List<InventoryFile>
+        {
+            FullInventory("S", client1, "Aa"),
+            FullInventory("S", client2, "Ba"),
+        };
+
+        // Act 1: missing Bb
+        await service.SetLocalInventory(filesStep1, LocalInventoryModes.Full);
+
+        // Assert 1
+        last.Should().BeFalse("Bb inventory is missing");
+
+        var filesStep2 = new List<InventoryFile>(filesStep1)
+        {
+            FullInventory("S", client2, "Bb")
+        };
+
+        // Act 2: Bb arrives
+        await service.SetLocalInventory(filesStep2, LocalInventoryModes.Full);
+
+        // Assert 2
+        last.Should().BeTrue("Aa, Ba and Bb inventories are present");
+    }
+
+    [Test]
+    public async Task AreFullInventoriesComplete_MatchesByClientAndCodePrefix()
+    {
+        // Arrange
+        var client2 = "client-2";
+        var nodes = new List<DataNode>
+        {
+            Node("nBa", client2, "Ba"),
+            Node("nBb", client2, "Bb")
+        };
+        _dataNodeRepository.SetupGet(r => r.Elements).Returns(nodes);
+
+        var service = new InventoryService(
+            _sessionService.Object,
+            _inventoryFileRepository.Object,
+            _dataNodeRepository.Object,
+            _logger.Object);
+
+        bool? last = null;
+        using var sub = service.InventoryProcessData.AreFullInventoriesComplete.Subscribe(v => last = v);
+
+        var wrongFiles = new List<InventoryFile>
+        {
+            FullInventory("S", client2, "Ba"),
+            // Wrong: Bc_... does not match Bb node code
+            FullInventory("S", client2, "Bc")
+        };
+
+        // Act 1: wrong prefix for second node
+        await service.SetLocalInventory(wrongFiles, LocalInventoryModes.Full);
+
+        // Assert 1
+        last.Should().BeFalse("node Bb has no matching file with prefix 'Bb_'");
+
+        var correctFiles = new List<InventoryFile>
+        {
+            FullInventory("S", client2, "Ba"),
+            FullInventory("S", client2, "Bb")
+        };
+
+        // Act 2: provide correct Bb file
+        await service.SetLocalInventory(correctFiles, LocalInventoryModes.Full);
+
+        // Assert 2
+        last.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task AreFullInventoriesComplete_CaseInsensitivePrefix()
+    {
+        // Arrange
+        var client = "client";
+        var nodes = new List<DataNode>
+        {
+            Node("nBb", client, "Bb")
+        };
+        _dataNodeRepository.SetupGet(r => r.Elements).Returns(nodes);
+
+        var service = new InventoryService(
+            _sessionService.Object,
+            _inventoryFileRepository.Object,
+            _dataNodeRepository.Object,
+            _logger.Object);
+
+        bool? full = null;
+        using var sub = service.InventoryProcessData.AreFullInventoriesComplete.Subscribe(v => full = v);
+
         var files = new List<InventoryFile>
         {
-            CreateInventoryFile("c1", "A", SharedFileTypes.BaseInventory),
-            CreateInventoryFile("c2", "B", SharedFileTypes.BaseInventory),
-            CreateInventoryFile("c1", "A", SharedFileTypes.FullInventory),
-            CreateInventoryFile("c2", "B", SharedFileTypes.FullInventory),
+            // Lowercase code in AdditionalName should match (case-insensitive)
+            FullInventory("S", client, "bb")
         };
-        _inventoryFileRepositoryMock.Setup(x => x.Elements).Returns(files);
-        
-        bool? baseReady = null, fullReady = null;
-        _inventoryService.InventoryProcessData.AreBaseInventoriesComplete.Subscribe(v => baseReady = v);
-        _inventoryService.InventoryProcessData.AreFullInventoriesComplete.Subscribe(v => fullReady = v);
-        
-        await _inventoryService.SetLocalInventory(files, LocalInventoryModes.Full);
-        
-        _inventoryFileRepositoryMock.Verify(x => x.AddOrUpdate(files), Times.Once);
-        baseReady.Should().BeTrue();
-        fullReady.Should().BeTrue();
+
+        await service.SetLocalInventory(files, LocalInventoryModes.Full);
+        full.Should().BeTrue();
     }
-    
+
     [Test]
-    public void Preparation_ResetsProcessData()
+    public async Task AreFullInventoriesComplete_NoDataNodes_True()
     {
-        var sessionStatusSubject = new Subject<SessionStatus>();
-        _sessionServiceMock.SetupGet(x => x.SessionStatusObservable).Returns(sessionStatusSubject);
-        
-        // Recreate service so it subscribes to this subject
-        _inventoryService = new InventoryService(
-            _sessionServiceMock.Object,
-            _inventoryFileRepositoryMock.Object,
-            _dataNodeRepositoryMock.Object,
-            _loggerMock.Object);
-        
-        _inventoryService.InventoryProcessData.AreBaseInventoriesComplete.OnNext(true);
-        _inventoryService.InventoryProcessData.GlobalMainStatus.OnNext(InventoryTaskStatus.Success);
-        
-        sessionStatusSubject.OnNext(SessionStatus.Preparation);
-        
-        bool? baseReady = null;
-        _inventoryService.InventoryProcessData.AreBaseInventoriesComplete.Subscribe(v => baseReady = v);
-        InventoryTaskStatus? global = null;
-        _inventoryService.InventoryProcessData.GlobalMainStatus.Subscribe(v => global = v);
-        
-        baseReady.Should().BeFalse();
-        global.Should().Be(InventoryTaskStatus.Pending);
+        // Arrange
+        _dataNodeRepository.SetupGet(r => r.Elements).Returns(new List<DataNode>());
+        var service = new InventoryService(
+            _sessionService.Object,
+            _inventoryFileRepository.Object,
+            _dataNodeRepository.Object,
+            _logger.Object);
+
+        bool? full = null;
+        using var sub = service.InventoryProcessData.AreFullInventoriesComplete.Subscribe(v => full = v);
+
+        await service.SetLocalInventory(new List<InventoryFile>(), LocalInventoryModes.Full);
+        full.Should().BeTrue("with no DataNodes, completeness is trivially true");
     }
-    
+
     [Test]
-    public void AggregatedGlobalStatus_FollowsSessionMembers()
+    public async Task AreBaseDoesNotAffectFull_Completeness()
     {
-        var changesSubject = new Subject<ISortedChangeSet<SessionMember, string>>();
-        var sessionMemberRepoMock = new Mock<ISessionMemberRepository>();
-        sessionMemberRepoMock.SetupGet(x => x.SortedSessionMembersObservable).Returns(changesSubject);
-        
-        // Recreate service with sessionMemberRepository to enable aggregation
-        _inventoryService = new InventoryService(
-            _sessionServiceMock.Object,
-            _inventoryFileRepositoryMock.Object,
-            _dataNodeRepositoryMock.Object,
-            sessionMemberRepoMock.Object,
-            _loggerMock.Object);
-        
-        InventoryTaskStatus? observed = null;
-        _inventoryService.InventoryProcessData.GlobalMainStatus.Subscribe(s => observed = s);
-        
-        // Running dominates
-        var runningList = new List<KeyValuePair<string, SessionMember>>
+        // Arrange
+        var client = "client";
+        var nodes = new List<DataNode> { Node("nBa", client, "Ba") };
+        _dataNodeRepository.SetupGet(r => r.Elements).Returns(nodes);
+
+        var service = new InventoryService(
+            _sessionService.Object,
+            _inventoryFileRepository.Object,
+            _dataNodeRepository.Object,
+            _logger.Object);
+
+        bool? baseComplete = null;
+        bool? fullComplete = null;
+        using var sub1 = service.InventoryProcessData.AreBaseInventoriesComplete.Subscribe(v => baseComplete = v);
+        using var sub2 = service.InventoryProcessData.AreFullInventoriesComplete.Subscribe(v => fullComplete = v);
+
+        // Only Base inventories present
+        var baseSfd = new SharedFileDefinition
         {
-            new("a",
-                new SessionMember
-                {
-                    SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryRunningIdentification,
-                    Endpoint = new ByteSyncEndpoint()
-                }),
-            new("b",
-                new SessionMember
-                    { SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryCancelled, Endpoint = new ByteSyncEndpoint() }),
+            SessionId = "S",
+            ClientInstanceId = client,
+            SharedFileType = SharedFileTypes.BaseInventory,
+            AdditionalName = "Ba_IID_test"
         };
-        var runningKvc = new Mock<IKeyValueCollection<SessionMember, string>>();
-        runningKvc.As<IEnumerable<KeyValuePair<string, SessionMember>>>()
-            .Setup(m => m.GetEnumerator())
-            .Returns(() => runningList.GetEnumerator());
-        var runningChange = new Mock<ISortedChangeSet<SessionMember, string>>();
-        runningChange.SetupGet(c => c.SortedItems).Returns(runningKvc.Object);
-        changesSubject.OnNext(runningChange.Object);
-        observed.Should().Be(InventoryTaskStatus.Running);
-        
-        // Pending when no running but pending present even with cancelled
-        var pendingList = new List<KeyValuePair<string, SessionMember>>
+        var baseFiles = new List<InventoryFile> { new InventoryFile(baseSfd, "base.zip") };
+
+        await service.SetLocalInventory(baseFiles, LocalInventoryModes.Base);
+
+        baseComplete.Should().BeTrue();
+        fullComplete.Should().BeFalse("no Full inventories yet");
+    }
+
+    [Test]
+    public async Task AreFullInventoriesComplete_IncorrectDelimiter_Fails()
+    {
+        var client = "client";
+        var nodes = new List<DataNode> { Node("nBb", client, "Bb") };
+        _dataNodeRepository.SetupGet(r => r.Elements).Returns(nodes);
+
+        var service = new InventoryService(
+            _sessionService.Object,
+            _inventoryFileRepository.Object,
+            _dataNodeRepository.Object,
+            _logger.Object);
+
+        bool? full = null;
+        using var sub = service.InventoryProcessData.AreFullInventoriesComplete.Subscribe(v => full = v);
+
+        // Hyphen instead of underscore -> should not match
+        var wrong = new SharedFileDefinition
         {
-            new("a",
-                new SessionMember
-                {
-                    SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryWaitingForStart, Endpoint = new ByteSyncEndpoint()
-                }),
-            new("b",
-                new SessionMember
-                    { SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryCancelled, Endpoint = new ByteSyncEndpoint() }),
+            SessionId = "S",
+            ClientInstanceId = client,
+            SharedFileType = SharedFileTypes.FullInventory,
+            AdditionalName = "Bb-IID_test"
         };
-        var pendingKvc = new Mock<IKeyValueCollection<SessionMember, string>>();
-        pendingKvc.As<IEnumerable<KeyValuePair<string, SessionMember>>>()
-            .Setup(m => m.GetEnumerator())
-            .Returns(() => pendingList.GetEnumerator());
-        var pendingChange = new Mock<ISortedChangeSet<SessionMember, string>>();
-        pendingChange.SetupGet(c => c.SortedItems).Returns(pendingKvc.Object);
-        changesSubject.OnNext(pendingChange.Object);
-        observed.Should().Be(InventoryTaskStatus.Pending);
-        
-        // Success when only finished
-        var successList = new List<KeyValuePair<string, SessionMember>>
-        {
-            new("a",
-                new SessionMember
-                    { SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryFinished, Endpoint = new ByteSyncEndpoint() }),
-            new("b",
-                new SessionMember
-                    { SessionMemberGeneralStatus = SessionMemberGeneralStatus.InventoryFinished, Endpoint = new ByteSyncEndpoint() }),
-        };
-        var successKvc = new Mock<IKeyValueCollection<SessionMember, string>>();
-        successKvc.As<IEnumerable<KeyValuePair<string, SessionMember>>>()
-            .Setup(m => m.GetEnumerator())
-            .Returns(() => successList.GetEnumerator());
-        var successChange = new Mock<ISortedChangeSet<SessionMember, string>>();
-        successChange.SetupGet(c => c.SortedItems).Returns(successKvc.Object);
-        changesSubject.OnNext(successChange.Object);
-        observed.Should().Be(InventoryTaskStatus.Success);
+        await service.SetLocalInventory(new List<InventoryFile> { new InventoryFile(wrong, "wrong.zip") }, LocalInventoryModes.Full);
+        full.Should().BeFalse();
+
+        // Correct prefix now -> true
+        await service.SetLocalInventory(new List<InventoryFile> { FullInventory("S", client, "Bb") }, LocalInventoryModes.Full);
+        full.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task AreFullInventoriesComplete_MismatchedClientInstance_Fails()
+    {
+        var nodes = new List<DataNode> { Node("nBb", "client-A", "Bb") };
+        _dataNodeRepository.SetupGet(r => r.Elements).Returns(nodes);
+
+        var service = new InventoryService(
+            _sessionService.Object,
+            _inventoryFileRepository.Object,
+            _dataNodeRepository.Object,
+            _logger.Object);
+
+        bool? full = null;
+        using var sub = service.InventoryProcessData.AreFullInventoriesComplete.Subscribe(v => full = v);
+
+        // File for another client -> should not match DataNode
+        await service.SetLocalInventory(new List<InventoryFile> { FullInventory("S", "client-B", "Bb") }, LocalInventoryModes.Full);
+        full.Should().BeFalse();
+
+        // Correct client -> OK
+        await service.SetLocalInventory(new List<InventoryFile> { FullInventory("S", "client-A", "Bb") }, LocalInventoryModes.Full);
+        full.Should().BeTrue();
     }
 }

@@ -97,11 +97,15 @@ public class InventoryService : IInventoryService
         List<DataNode> allDataNodes,
         LocalInventoryModes inventoryMode)
     {
+        var files = inventoriesFilesCache
+            .Where(inventoryFile => inventoryFile.LocalInventoryMode == inventoryMode)
+            .ToList();
+
+        // Require one inventory per DataNode: match by client instance AND node code prefix in AdditionalName
         return allDataNodes.All(dataNode =>
-            inventoriesFilesCache
-                .Where(inventoryFile => inventoryFile.LocalInventoryMode == inventoryMode)
-                .Any(inventoryFile =>
-                    inventoryFile.SharedFileDefinition.ClientInstanceId == dataNode.ClientInstanceId));
+            files.Any(inventoryFile =>
+                inventoryFile.SharedFileDefinition.ClientInstanceId == dataNode.ClientInstanceId &&
+                inventoryFile.SharedFileDefinition.AdditionalName.StartsWith(dataNode.Code + "_", StringComparison.OrdinalIgnoreCase)));
     }
     
     public Task AbortInventory()
