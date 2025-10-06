@@ -10,6 +10,32 @@ public enum MatchingModes
     Tree = 2,
 }
 
+internal static class MatchingModeJsonHelper
+{
+    public static MatchingModes Read(ref Utf8JsonReader reader, string contextName)
+    {
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            var value = reader.GetString();
+            if (MatchingModeMapper.TryFromString(value, out var mode))
+            {
+                return mode;
+            }
+            
+            throw new JsonException($"Unsupported {contextName} value: '{value}'");
+        }
+        
+        if (reader.TokenType == JsonTokenType.Number)
+        {
+            var number = reader.GetInt32();
+            
+            return MatchingModeMapper.FromNumber(number);
+        }
+        
+        throw new JsonException($"Unexpected token parsing {contextName}: {reader.TokenType}");
+    }
+}
+
 internal static class MatchingModeMapper
 {
     public static bool TryFromString(string? value, out MatchingModes mode)
@@ -66,25 +92,7 @@ public class MatchingModesJsonConverter : JsonConverter<MatchingModes>
 {
     public override MatchingModes Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (reader.TokenType == JsonTokenType.String)
-        {
-            var value = reader.GetString();
-            if (MatchingModeMapper.TryFromString(value, out var mode))
-            {
-                return mode;
-            }
-            
-            throw new JsonException($"Unsupported MatchingMode value: '{value}'");
-        }
-        
-        if (reader.TokenType == JsonTokenType.Number)
-        {
-            var number = reader.GetInt32();
-            
-            return MatchingModeMapper.FromNumber(number);
-        }
-        
-        throw new JsonException($"Unexpected token parsing MatchingModes: {reader.TokenType}");
+        return MatchingModeJsonHelper.Read(ref reader, "MatchingMode");
     }
     
     public override void Write(Utf8JsonWriter writer, MatchingModes value, JsonSerializerOptions options)
@@ -98,25 +106,7 @@ public class LegacyLinkingKeyJsonConverter : JsonConverter<MatchingModes>
 {
     public override MatchingModes Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (reader.TokenType == JsonTokenType.String)
-        {
-            var value = reader.GetString();
-            if (MatchingModeMapper.TryFromString(value, out var mode))
-            {
-                return mode;
-            }
-            
-            throw new JsonException($"Unsupported LinkingKey value: '{value}'");
-        }
-        
-        if (reader.TokenType == JsonTokenType.Number)
-        {
-            var number = reader.GetInt32();
-            
-            return MatchingModeMapper.FromNumber(number);
-        }
-        
-        throw new JsonException($"Unexpected token parsing LinkingKey: {reader.TokenType}");
+        return MatchingModeJsonHelper.Read(ref reader, "LinkingKey");
     }
     
     public override void Write(Utf8JsonWriter writer, MatchingModes value, JsonSerializerOptions options)
