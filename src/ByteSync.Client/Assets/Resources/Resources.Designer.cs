@@ -2360,6 +2360,24 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
+        public static string MatchingModes_Flat {
+            get {
+                return ResourceManager.GetString("MatchingModes_Flat", resourceCulture);
+            }
+        }
+        
+        public static string MatchingModes_Tree {
+            get {
+                return ResourceManager.GetString("MatchingModes_Tree", resourceCulture);
+            }
+        }
+
+        public static string SessionSettings_MatchingMode {
+            get {
+                return ResourceManager.GetString("SessionSettings_MatchingMode", resourceCulture);
+            }
+        }
+        
         public static string SynchronizationActionView_Letter_Targeted {
             get {
                 return ResourceManager.GetString("SynchronizationActionView_Letter_Targeted", resourceCulture);

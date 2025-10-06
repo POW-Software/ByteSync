@@ -6,13 +6,13 @@ public static class SessionSettingsGenerator
 {
     public static SessionSettings GenerateSessionSettings(
         DataTypes dataType = DataTypes.FilesDirectories,
-        LinkingKeys linkingKey = LinkingKeys.RelativePath,
+        MatchingModes matchingMode = MatchingModes.Tree,
         AnalysisModes analysisMode = AnalysisModes.Smart)
     {
         var sessionSettings = new SessionSettings();
         sessionSettings.AnalysisMode = analysisMode;
         sessionSettings.DataType = dataType;
-        sessionSettings.LinkingKey = linkingKey;
+        sessionSettings.MatchingMode = matchingMode;
         sessionSettings.LinkingCase = LinkingCases.Insensitive;
         sessionSettings.ExcludeHiddenFiles = true;
         sessionSettings.ExcludeSystemFiles = true;

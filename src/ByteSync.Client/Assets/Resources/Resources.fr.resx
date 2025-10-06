@@ -888,14 +888,14 @@ Soit cet élément, soit un parent, soit un descendant est déjà présent.</val
 	<data name="SessionSettings_DataType" xml:space="preserve">
 		<value>Type de données :</value>
 	</data>
-	<data name="LinkingKeys_Name" xml:space="preserve">
-		<value>Nom</value>
+    <data name="MatchingModes_Flat" xml:space="preserve">
+		<value>Plat</value>
 	</data>
-	<data name="LinkingKeys_RelativePath" xml:space="preserve">
-		<value>Chemin relatif</value>
+    <data name="MatchingModes_Tree" xml:space="preserve">
+		<value>Arborescence</value>
 	</data>
-	<data name="SessionSettings_LinkingKey" xml:space="preserve">
-		<value>Liaison :</value>
+    <data name="SessionSettings_MatchingMode" xml:space="preserve">
+		<value>Mode de correspondance :</value>
 	</data>
 	<data name="SessionSettings_LinkingCase" xml:space="preserve">
 		<value>Casse de liaison :</value>

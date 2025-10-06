@@ -33,7 +33,7 @@ public class IdentityBuilderTests : AbstractTester
         
         var inventoryBuilder = GetInventoryBuilder(dataA);
         
-        var fileDescription = IdentityBuilder.BuildFileDescription(inventoryBuilder.Inventory!.InventoryParts.Single(), file1);
+        var fileDescription = IdentityBuilder.BuildFileDescription(inventoryBuilder.Inventory.InventoryParts.Single(), file1);
         
         fileDescription.Size.Should().Be("file1Content".Length);
         fileDescription.FingerprintMode.Should().BeNull();
@@ -58,7 +58,7 @@ public class IdentityBuilderTests : AbstractTester
         
         var inventoryBuilder = GetInventoryBuilder(file1);
         
-        var fileDescription = IdentityBuilder.BuildFileDescription(inventoryBuilder.Inventory!.InventoryParts.Single(), file1);
+        var fileDescription = IdentityBuilder.BuildFileDescription(inventoryBuilder.Inventory.InventoryParts.Single(), file1);
         
         fileDescription.Size.Should().Be("file1Content".Length);
         fileDescription.FingerprintMode.Should().BeNull();
@@ -86,7 +86,7 @@ public class IdentityBuilderTests : AbstractTester
         
         var inventoryBuilder = GetInventoryBuilder(dataA);
         
-        var fileDescription = IdentityBuilder.BuildDirectoryDescription(inventoryBuilder.Inventory!.InventoryParts.Single(), subDirectory);
+        var fileDescription = IdentityBuilder.BuildDirectoryDescription(inventoryBuilder.Inventory.InventoryParts.Single(), subDirectory);
         
         fileDescription.FileSystemType.Should().Be(FileSystemTypes.Directory);
         fileDescription.Inventory.Should().Be(inventoryBuilder.Inventory);
@@ -103,7 +103,7 @@ public class IdentityBuilderTests : AbstractTester
         
         // Test with directory inventory part - RootPath with trailing slash
         var inventoryBuilder1 = GetInventoryBuilder(dataA);
-        var inventoryPart1 = inventoryBuilder1.Inventory!.InventoryParts.Single();
+        var inventoryPart1 = inventoryBuilder1.Inventory.InventoryParts.Single();
         inventoryPart1.RootPath = dataA.FullName + Path.DirectorySeparatorChar; // Ensure trailing slash
         
         var file1 = CreateFileInDirectory(dataA, "test1.txt", "content1");
@@ -117,7 +117,7 @@ public class IdentityBuilderTests : AbstractTester
         
         // Test with directory inventory part - RootPath without trailing slash
         var inventoryBuilder2 = GetInventoryBuilder(dataA);
-        var inventoryPart2 = inventoryBuilder2.Inventory!.InventoryParts.Single();
+        var inventoryPart2 = inventoryBuilder2.Inventory.InventoryParts.Single();
         inventoryPart2.RootPath = dataA.FullName.TrimEnd(Path.DirectorySeparatorChar); // Remove trailing slash
         
         var file2 = CreateFileInDirectory(dataA, "test2.txt", "content2");
@@ -132,7 +132,7 @@ public class IdentityBuilderTests : AbstractTester
         // Test with file inventory part
         var file3 = CreateFileInDirectory(dataA, "test3.txt", "content3");
         var inventoryBuilder3 = GetInventoryBuilder(file3);
-        var inventoryPart3 = inventoryBuilder3.Inventory!.InventoryParts.Single();
+        var inventoryPart3 = inventoryBuilder3.Inventory.InventoryParts.Single();
         
         var fileDescription3 = IdentityBuilder.BuildFileDescription(inventoryPart3, file3);
         fileDescription3.RelativePath.Should().StartWith("/");
@@ -141,7 +141,7 @@ public class IdentityBuilderTests : AbstractTester
     
     private static InventoryBuilder GetInventoryBuilder(FileSystemInfo dataSourceRoot)
     {
-        DataSource dataSource = new DataSource();
+        var dataSource = new DataSource();
         dataSource.Path = dataSourceRoot.FullName;
         if (dataSourceRoot is DirectoryInfo)
         {
@@ -156,7 +156,7 @@ public class IdentityBuilderTests : AbstractTester
             Assert.Fail("unknown type " + dataSourceRoot.GetType().Name);
         }
         
-        Mock<ILogger<InventoryBuilder>> loggerMock = new Mock<ILogger<InventoryBuilder>>();
+        var loggerMock = new Mock<ILogger<InventoryBuilder>>();
         
         var endpoint = new ByteSyncEndpoint
         {
@@ -180,8 +180,8 @@ public class IdentityBuilderTests : AbstractTester
             ClientInstanceId = endpoint.ClientInstanceId
         };
         
-        InventoryBuilder inventoryBuilder = new InventoryBuilder(sessionMemberInfo, dataNode,
-            SessionSettingsHelper.BuildDefaultSessionSettings(DataTypes.FilesDirectories, LinkingKeys.RelativePath),
+        var inventoryBuilder = new InventoryBuilder(sessionMemberInfo, dataNode,
+            SessionSettingsHelper.BuildDefaultSessionSettings(DataTypes.FilesDirectories, MatchingModes.Tree),
             new InventoryProcessData(), OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object);
         
         inventoryBuilder.AddInventoryPart(dataSource);

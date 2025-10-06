@@ -1,9 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Avalonia.Controls.Mixins;
 using ByteSync.Business.Sessions;
-using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Services.Localizations;
@@ -20,26 +18,28 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
     private readonly IDataInventoryStarter _dataInventoryStarter = null!;
     private readonly IAnalysisModeViewModelFactory _analysisModeViewModelFactory = null!;
     private readonly IDataTypeViewModelFactory _dataTypeViewModelFactory = null!;
-    private readonly ILinkingKeyViewModelFactory _linkingKeyViewModelFactory = null!;
+    private readonly IMatchingModeViewModelFactory _matchingModeViewModelFactory = null!;
     private readonly ILogger<SessionSettingsEditViewModel> _logger = null!;
-
+    
 #if DEBUG
     public SessionSettingsEditViewModel()
     {
-        
     }
 #endif
-
-    public SessionSettingsEditViewModel(ISessionService sessionService, ILocalizationService localizationService, IDataInventoryStarter dataInventoryStarter,
-        IAnalysisModeViewModelFactory analysisModeViewModelFactory, IDataTypeViewModelFactory dataTypeViewModelFactory, 
-        ILinkingKeyViewModelFactory linkingKeyViewModelFactory, SessionSettings? sessionSettings, ILogger<SessionSettingsEditViewModel> logger)
+    
+    public SessionSettingsEditViewModel(ISessionService sessionService, ILocalizationService localizationService,
+        IDataInventoryStarter dataInventoryStarter,
+        IAnalysisModeViewModelFactory analysisModeViewModelFactory, IDataTypeViewModelFactory dataTypeViewModelFactory,
+        IMatchingModeViewModelFactory matchingModeViewModelFactory, SessionSettings? sessionSettings,
+        ILogger<SessionSettingsEditViewModel> logger)
     {
         _sessionService = sessionService;
         _localizationService = localizationService;
         _dataInventoryStarter = dataInventoryStarter;
-        _analysisModeViewModelFactory = analysisModeViewModelFactory ?? throw new ArgumentNullException(nameof(analysisModeViewModelFactory));
+        _analysisModeViewModelFactory =
+            analysisModeViewModelFactory ?? throw new ArgumentNullException(nameof(analysisModeViewModelFactory));
         _dataTypeViewModelFactory = dataTypeViewModelFactory;
-        _linkingKeyViewModelFactory = linkingKeyViewModelFactory;
+        _matchingModeViewModelFactory = matchingModeViewModelFactory;
         _logger = logger;
         
         AvailableAnalysisModes =
@@ -47,24 +47,24 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
             _analysisModeViewModelFactory.CreateAnalysisModeViewModel(AnalysisModes.Smart),
             _analysisModeViewModelFactory.CreateAnalysisModeViewModel(AnalysisModes.Checksum)
         ];
-
+        
         AvailableDataTypes =
         [
             _dataTypeViewModelFactory.CreateDataTypeViewModel(DataTypes.FilesDirectories),
             _dataTypeViewModelFactory.CreateDataTypeViewModel(DataTypes.Files),
             _dataTypeViewModelFactory.CreateDataTypeViewModel(DataTypes.Directories)
         ];
-
-        AvailableLinkingKeys =
+        
+        AvailableMatchingModes =
         [
-            _linkingKeyViewModelFactory.CreateLinkingKeyViewModel(LinkingKeys.RelativePath),
-            _linkingKeyViewModelFactory.CreateLinkingKeyViewModel(LinkingKeys.Name)
+            _matchingModeViewModelFactory.CreateMatchingModeViewModel(MatchingModes.Tree),
+            _matchingModeViewModelFactory.CreateMatchingModeViewModel(MatchingModes.Flat)
         ];
-
+        
         Extensions = "";
         
         ListenEvents = true;
-
+        
         this.WhenActivated(disposables =>
         {
             if (!ListenEvents)
@@ -78,7 +78,8 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
                 .DisposeWith(disposables);
             
             _dataInventoryStarter.CanCurrentUserStartInventory().CombineLatest(_sessionService.SessionStatusObservable,
-                    (canCurrentUserStartInventory, sessionStatus) => canCurrentUserStartInventory && sessionStatus == SessionStatus.Preparation)
+                    (canCurrentUserStartInventory, sessionStatus) =>
+                        canCurrentUserStartInventory && sessionStatus == SessionStatus.Preparation)
                 .ToPropertyEx(this, x => x.CanEditSettings)
                 .DisposeWith(disposables);
             
@@ -86,10 +87,10 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => OnLocaleUpdated())
                 .DisposeWith(disposables);
-
+            
             ImportSettings(sessionSettings);
             
-            this.WhenAnyValue(x => x.ExcludeHiddenFiles, x => x.ExcludeSystemFiles, x => x.LinkingKey,
+            this.WhenAnyValue(x => x.ExcludeHiddenFiles, x => x.ExcludeSystemFiles, x => x.MatchingMode,
                     x => x.DataType,
                     x => x.AnalysisMode, x => x.Extensions)
                 .Skip(1)
@@ -97,7 +98,7 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
                 .Subscribe(_ => SendUpdate());
         });
     }
-
+    
     private void OnLocaleUpdated()
     {
         // comboBoxes don't update the SelectedText when you change the Description of one of the Items
@@ -109,24 +110,27 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
         {
             dataTypeViewModel.UpdateDescription();
         }
+        
         // Force to refresh the combo
         var dataType = DataType;
         DataType = null;
         DataType = dataType;
         
-        foreach (var linkingKeyViewModel in AvailableLinkingKeys)
+        foreach (var linkingKeyViewModel in AvailableMatchingModes)
         {
             linkingKeyViewModel.UpdateDescription();
         }
+        
         // Force to refresh the combo
-        var linkingKey = LinkingKey;
-        LinkingKey = null;
-        LinkingKey = linkingKey;
-
+        var matchingMode = MatchingMode;
+        MatchingMode = null;
+        MatchingMode = matchingMode;
+        
         foreach (var analysisModeViewModel in AvailableAnalysisModes)
         {
             analysisModeViewModel.UpdateDescription();
         }
+        
         // Force to refresh the combo
         var analysisMode = AnalysisMode;
         AnalysisMode = null;
@@ -134,9 +138,9 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
         
         IsUpdatingLocale = false;
     }
-
+    
     private bool ListenEvents { get; set; }
-
+    
     [Reactive]
     public bool ExcludeHiddenFiles { get; set; }
     
@@ -150,19 +154,19 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
     public DataTypeViewModel? DataType { get; set; }
     
     [Reactive]
-    public LinkingKeyViewModel? LinkingKey { get; set; }
-
+    public MatchingModeViewModel? MatchingMode { get; set; }
+    
     [Reactive]
     public string? Extensions { get; set; }
     
     private bool IsUpdatingLocale { get; set; }
-
+    
     public ObservableCollection<AnalysisModeViewModel> AvailableAnalysisModes { get; set; } = null!;
-
+    
     public ObservableCollection<DataTypeViewModel> AvailableDataTypes { get; set; } = null!;
-
-    public ObservableCollection<LinkingKeyViewModel> AvailableLinkingKeys { get; set; } = null!;
-
+    
+    public ObservableCollection<MatchingModeViewModel> AvailableMatchingModes { get; set; } = null!;
+    
     public extern bool CanEditSettings { [ObservableAsProperty] get; }
     
     private async void SendUpdate()
@@ -185,22 +189,23 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
             }
         }
     }
-
+    
     public SessionSettings ExportSettings()
     {
         var settings = new SessionSettings();
-
+        
         settings.DataType = DataType!.DataType;
-        settings.LinkingKey = LinkingKey!.LinkingKey;
+        settings.MatchingMode = MatchingMode!.MatchingMode;
+        
         // settings.LinkingCase = LinkingCase!.LinkingCase;
         
         settings.ExcludeHiddenFiles = ExcludeHiddenFiles;
         settings.ExcludeSystemFiles = ExcludeSystemFiles;
-
+        
         settings.AnalysisMode = AnalysisMode!.AnalysisMode;
-
+        
         settings.Extensions = Extensions;
-
+        
         return settings;
     }
     
@@ -208,44 +213,44 @@ public class SessionSettingsEditViewModel : ActivatableViewModelBase
     {
         ImportSettings(sessionSettings);
     }
-
+    
     public void ImportSettings(SessionSettings? cloudSessionSettings)
     {
         if (cloudSessionSettings == null)
         {
             return;
         }
-
+        
         if (ExcludeHiddenFiles != cloudSessionSettings.ExcludeHiddenFiles)
         {
             ExcludeHiddenFiles = cloudSessionSettings.ExcludeHiddenFiles;
         }
-
+        
         if (ExcludeSystemFiles != cloudSessionSettings.ExcludeSystemFiles)
         {
             ExcludeSystemFiles = cloudSessionSettings.ExcludeSystemFiles;
         }
-
+        
         var newAnalysisMode = AvailableAnalysisModes.Single(aam => aam.AnalysisMode == cloudSessionSettings.AnalysisMode);
         if (!Equals(AnalysisMode, newAnalysisMode))
         {
             AnalysisMode = newAnalysisMode;
         }
-
+        
         var newDataType = AvailableDataTypes.SingleOrDefault(aam => aam.DataType == cloudSessionSettings.DataType);
         if (!Equals(DataType, newDataType))
         {
             DataType = newDataType ?? AvailableDataTypes.SingleOrDefault(aam => aam.DataType == DataTypes.FilesDirectories);
         }
         
-        var newLinkingKey = AvailableLinkingKeys.SingleOrDefault(abm => abm.LinkingKey == cloudSessionSettings.LinkingKey);
-        if (!Equals(LinkingKey, newLinkingKey))
+        var newMatchingMode = AvailableMatchingModes.SingleOrDefault(abm => abm.MatchingMode == cloudSessionSettings.MatchingMode);
+        if (!Equals(MatchingMode, newMatchingMode))
         {
-            LinkingKey = newLinkingKey ?? AvailableLinkingKeys.SingleOrDefault(abm => abm.LinkingKey == LinkingKeys.Name);
+            MatchingMode = newMatchingMode ?? AvailableMatchingModes.SingleOrDefault(abm => abm.MatchingMode == MatchingModes.Flat);
         }
-
+        
         if (Extensions.IsNotEmpty() && cloudSessionSettings.Extensions.IsNotEmpty()
-                                    && ! Extensions!.Equals(cloudSessionSettings.Extensions, StringComparison.InvariantCultureIgnoreCase))
+                                    && !Extensions!.Equals(cloudSessionSettings.Extensions, StringComparison.InvariantCultureIgnoreCase))
         {
             Extensions = cloudSessionSettings.Extensions;
         }
