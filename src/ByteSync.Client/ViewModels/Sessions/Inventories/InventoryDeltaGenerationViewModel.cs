@@ -120,10 +120,6 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
                         
                         break;
                     case InventoryTaskStatus.Running:
-                        AnalysisIcon = "None";
-                        SetAnalysisBrush(status, errors);
-                        
-                        break;
                     default:
                         AnalysisIcon = "None";
                         SetAnalysisBrush(status, errors);
