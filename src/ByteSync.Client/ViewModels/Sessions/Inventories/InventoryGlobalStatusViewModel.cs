@@ -76,12 +76,12 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 .RefCount();
             statsReady.Subscribe(_ => { }).DisposeWith(disposables);
             
-            statusStream
-                .Select(st => st == InventoryTaskStatus.Running)
-                .DistinctUntilChanged()
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .ToPropertyEx(this, x => x.IsInventoryRunning)
-                .DisposeWith(disposables);
+            // statusStream
+            //     .Select(st => st == InventoryTaskStatus.Running)
+            //     .DistinctUntilChanged()
+            //     .ObserveOn(RxApp.MainThreadScheduler)
+            //     .ToPropertyEx(this, x => x.IsInventoryRunning)
+            //     .DisposeWith(disposables);
             
             var inProgressUiStream = statusStream
                 .CombineLatest(statsReady,
@@ -271,9 +271,9 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
     
     public ReactiveCommand<Unit, Unit> AbortInventoryCommand { get; set; } = null!;
     
-    public extern bool IsInventoryRunning { [ObservableAsProperty] get; }
-    
-    public extern InventoryTaskStatus AnalysisStatus { [ObservableAsProperty] get; }
+    // public extern bool IsInventoryRunning { [ObservableAsProperty] get; }
+    //
+    // public extern InventoryTaskStatus AnalysisStatus { [ObservableAsProperty] get; }
     
     public extern bool IsInventoryInProgress { [ObservableAsProperty] get; }
     

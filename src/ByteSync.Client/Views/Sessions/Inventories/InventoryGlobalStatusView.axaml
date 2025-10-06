@@ -32,7 +32,7 @@
                        TextAlignment="Center" FontSize="17" FontWeight="Bold" Margin="6" />
 
             <StackPanel Height="30" Orientation="Horizontal" HorizontalAlignment="Center" Margin="6">
-                <Button Classes="GenericButton" IsVisible="{Binding IsInventoryRunning}"
+                <Button Classes="GenericButton" IsVisible="{Binding IsInventoryInProgress}"
                         Command="{Binding Path=AbortInventoryCommand}" HorizontalAlignment="Center"
                         VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
