@@ -25,10 +25,13 @@ public class SessionSettings
     
     public MatchingModes MatchingMode { get; set; }
     
-    // Backward-compat: accept legacy JSON property name "LinkingKey"
+    // Backward + forward compat: read and write legacy JSON property name "LinkingKey"
+    // Write: emits legacy names ("Name"/"RelativePath") for older clients
     [JsonPropertyName("LinkingKey")]
+    [JsonConverter(typeof(LegacyLinkingKeyJsonConverter))]
     public MatchingModes LinkingKey
     {
+        get => MatchingMode;
         set => MatchingMode = value;
     }
     

@@ -160,7 +160,7 @@ public class ContentIdentityViewModel : ViewModelBase
             }
         }
         
-        if (_sessionService.CurrentSessionSettings!.LinkingKey == LinkingKeys.Name
+        if (_sessionService.CurrentSessionSettings!.MatchingMode == MatchingModes.Flat
             || ContentIdentity.HasManyFileSystemDescriptionOnAnInventoryPart)
         {
             LinkingKeyNameTooltip = ComparisonItemViewModel.LinkingKeyNameTooltip;
