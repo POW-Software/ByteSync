@@ -19,9 +19,9 @@
             <ProgressBar Width="250" Height="20" Margin="0 20"
                          IsVisible="{Binding IsAnalysisRunning}"
                          HorizontalAlignment="Center" VerticalAlignment="Center"
-                         Maximum="{Binding AnalyzableFiles, FallbackValue=0}"
+                         Maximum="1"
                          Minimum="0"
-                         Value="{Binding AnalyzableFiles, FallbackValue=0}"
+                         Value="{Binding Progress, FallbackValue=0}"
                          Foreground="{DynamicResource SystemAccentColorLight1}"
                          BorderBrush="{DynamicResource SystemAccentColor}"
                          BorderThickness="2">
