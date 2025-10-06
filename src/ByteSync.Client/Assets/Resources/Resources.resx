@@ -912,14 +912,14 @@ Either this element, or a parent, or a descendant is already present.</value>
 	<data name="SessionSettings_DataType" xml:space="preserve">
 		<value>Data type:</value>
 	</data>
-	<data name="LinkingKeys_Name" xml:space="preserve">
-		<value>Name</value>
+    <data name="MatchingModes_Flat" xml:space="preserve">
+		<value>Flat</value>
 	</data>
-	<data name="LinkingKeys_RelativePath" xml:space="preserve">
-		<value>Relative path</value>
+    <data name="MatchingModes_Tree" xml:space="preserve">
+		<value>Tree</value>
 	</data>
-	<data name="SessionSettings_LinkingKey" xml:space="preserve">
-		<value>Binding:</value>
+    <data name="SessionSettings_MatchingMode" xml:space="preserve">
+		<value>Matching mode:</value>
 	</data>
 	<data name="SessionSettings_LinkingCase" xml:space="preserve">
 		<value>Linking case:</value>

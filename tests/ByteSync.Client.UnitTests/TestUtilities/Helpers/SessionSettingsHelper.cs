@@ -5,13 +5,13 @@ namespace ByteSync.Client.UnitTests.TestUtilities.Helpers;
 public static class SessionSettingsHelper
 {
     public static SessionSettings BuildDefaultSessionSettings(
-        DataTypes dataType, LinkingKeys linkingKey,
+        DataTypes dataType, MatchingModes matchingMode,
         AnalysisModes analysisMode = AnalysisModes.Smart)
     {
-        SessionSettings sessionSettings = new SessionSettings();
+        var sessionSettings = new SessionSettings();
         sessionSettings.AnalysisMode = analysisMode;
         sessionSettings.DataType = dataType;
-        sessionSettings.LinkingKey = linkingKey;
+        sessionSettings.MatchingMode = matchingMode;
         sessionSettings.LinkingCase = LinkingCases.Insensitive;
         sessionSettings.ExcludeHiddenFiles = true;
         sessionSettings.ExcludeSystemFiles = true;

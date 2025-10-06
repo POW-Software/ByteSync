@@ -68,7 +68,7 @@ public class TestDataEncrypter : AbstractTester
         sessionSettings.AnalysisMode.Should().Be(sessionSettings1.AnalysisMode);
         sessionSettings.DataType.Should().Be(sessionSettings1.DataType);
         sessionSettings.LinkingCase.Should().Be(sessionSettings1.LinkingCase);
-        sessionSettings.LinkingKey.Should().Be(sessionSettings1.LinkingKey);
+        sessionSettings.MatchingMode.Should().Be(sessionSettings1.MatchingMode);
         sessionSettings.ForbiddenExtensions.Should().BeEquivalentTo(sessionSettings1.ForbiddenExtensions);
         sessionSettings.ForbiddenExtensions.HaveSameContent(sessionSettings1.ForbiddenExtensions).Should().BeTrue();
         
@@ -79,7 +79,7 @@ public class TestDataEncrypter : AbstractTester
         sessionSettings.AnalysisMode.Should().Be(sessionSettings2.AnalysisMode);
         sessionSettings.DataType.Should().Be(sessionSettings2.DataType);
         sessionSettings.LinkingCase.Should().Be(sessionSettings2.LinkingCase);
-        sessionSettings.LinkingKey.Should().Be(sessionSettings2.LinkingKey);
+        sessionSettings.MatchingMode.Should().Be(sessionSettings2.MatchingMode);
         sessionSettings.ForbiddenExtensions.Should().BeEquivalentTo(sessionSettings2.ForbiddenExtensions);
         sessionSettings.ForbiddenExtensions.HaveSameContent(sessionSettings2.ForbiddenExtensions).Should().BeTrue();
     }

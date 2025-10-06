@@ -1,4 +1,6 @@
-﻿namespace ByteSync.Business.Sessions;
+using System.Text.Json.Serialization;
+
+namespace ByteSync.Business.Sessions;
 
 public class SessionSettings
 {
@@ -6,10 +8,10 @@ public class SessionSettings
     {
         AllowedExtensions = new List<string>();
         ForbiddenExtensions = new List<string>();
-
+        
         AnalysisMode = AnalysisModes.Smart;
         DataType = DataTypes.Files;
-        LinkingKey = LinkingKeys.RelativePath;
+        MatchingMode = MatchingModes.Tree;
         LinkingCase = LinkingCases.Insensitive;
     }
     
@@ -21,7 +23,14 @@ public class SessionSettings
     
     public DataTypes DataType { get; set; }
     
-    public LinkingKeys LinkingKey { get; set; }
+    public MatchingModes MatchingMode { get; set; }
+    
+    // Backward-compat: accept legacy JSON property name "LinkingKey"
+    [JsonPropertyName("LinkingKey")]
+    public MatchingModes LinkingKey
+    {
+        set => MatchingMode = value;
+    }
     
     public LinkingCases LinkingCase { get; set; }
     
@@ -30,17 +39,17 @@ public class SessionSettings
     public List<string> AllowedExtensions { get; set; }
     
     public List<string> ForbiddenExtensions { get; set; }
-
+    
     public static SessionSettings BuildDefault()
     {
         var cloudSessionSettings = new SessionSettings();
         cloudSessionSettings.DataType = DataTypes.Files;
-        cloudSessionSettings.LinkingKey = LinkingKeys.RelativePath;
+        cloudSessionSettings.MatchingMode = MatchingModes.Tree;
         cloudSessionSettings.LinkingCase = LinkingCases.Insensitive;
         cloudSessionSettings.ExcludeHiddenFiles = true;
         cloudSessionSettings.ExcludeSystemFiles = true;
         cloudSessionSettings.AnalysisMode = AnalysisModes.Smart;
-
+        
         return cloudSessionSettings;
     }
 }

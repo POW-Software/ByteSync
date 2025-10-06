@@ -25,7 +25,7 @@ public class SessionSettingsEditViewModelTests
         var inventoryStarter = new Mock<IDataInventoryStarter>();
         var analysisFactory = new Mock<IAnalysisModeViewModelFactory>();
         var dataTypeFactory = new Mock<IDataTypeViewModelFactory>();
-        var linkingKeyFactory = new Mock<ILinkingKeyViewModelFactory>();
+        var matchingModeFactory = new Mock<IMatchingModeViewModelFactory>();
         var logger = new Mock<ILogger<SessionSettingsEditViewModel>>();
         
         localizationService.Setup(l => l[It.IsAny<string>()])
@@ -45,15 +45,15 @@ public class SessionSettingsEditViewModelTests
         dataTypeFactory.Setup(f => f.CreateDataTypeViewModel(DataTypes.Directories))
             .Returns(new DataTypeViewModel(DataTypes.Directories, localizationService.Object));
         
-        linkingKeyFactory.Setup(f => f.CreateLinkingKeyViewModel(LinkingKeys.RelativePath))
-            .Returns(new LinkingKeyViewModel(LinkingKeys.RelativePath, localizationService.Object));
-        linkingKeyFactory.Setup(f => f.CreateLinkingKeyViewModel(LinkingKeys.Name))
-            .Returns(new LinkingKeyViewModel(LinkingKeys.Name, localizationService.Object));
+        matchingModeFactory.Setup(f => f.CreateMatchingModeViewModel(MatchingModes.Tree))
+            .Returns(new MatchingModeViewModel(MatchingModes.Tree, localizationService.Object));
+        matchingModeFactory.Setup(f => f.CreateMatchingModeViewModel(MatchingModes.Flat))
+            .Returns(new MatchingModeViewModel(MatchingModes.Flat, localizationService.Object));
         
         var initialSettings = new SessionSettings
         {
             DataType = DataTypes.FilesDirectories,
-            LinkingKey = LinkingKeys.Name,
+            MatchingMode = MatchingModes.Flat,
             AnalysisMode = AnalysisModes.Smart
         };
         
@@ -64,7 +64,7 @@ public class SessionSettingsEditViewModelTests
             inventoryStarter.Object,
             analysisFactory.Object,
             dataTypeFactory.Object,
-            linkingKeyFactory.Object,
+            matchingModeFactory.Object,
             initialSettings,
             logger.Object);
         
@@ -72,6 +72,6 @@ public class SessionSettingsEditViewModelTests
         vm.Should().NotBeNull();
         vm.AvailableAnalysisModes.Should().HaveCount(2);
         vm.AvailableDataTypes.Should().HaveCount(3);
-        vm.AvailableLinkingKeys.Should().HaveCount(2);
+        vm.AvailableMatchingModes.Should().HaveCount(2);
     }
 }
