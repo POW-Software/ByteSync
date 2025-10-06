@@ -70,6 +70,12 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
             })
             .DisposeWith(disposables);
         
+        this.WhenAnyValue(x => x.AnalyzedFiles, x => x.AnalyzableFiles)
+            .Select(t => t.Item2 > 0 ? t.Item1 / (double)t.Item2 : 0d)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .ToPropertyEx(this, x => x.Progress)
+            .DisposeWith(disposables);
+        
         // AnalyzeSuccess = AnalyzedFiles - AnalyzeErrors
         this.WhenAnyValue(x => x.AnalyzedFiles, x => x.AnalyzeErrors)
             .Select(x => x.Item1 - x.Item2)
@@ -175,6 +181,8 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
     
     [Reactive]
     public IBrush? AnalysisIconBrush { get; set; }
+    
+    public extern double Progress { [ObservableAsProperty] get; }
     
     private void SetAnalysisBrush(InventoryTaskStatus status, int errors)
     {
