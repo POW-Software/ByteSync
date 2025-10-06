@@ -10,6 +10,58 @@ public enum MatchingModes
     Tree = 2,
 }
 
+internal static class MatchingModeMapper
+{
+    public static bool TryFromString(string? value, out MatchingModes mode)
+    {
+        if (value == null)
+        {
+            mode = default;
+            
+            return false;
+        }
+        
+        if (value.Equals("Flat", StringComparison.OrdinalIgnoreCase) || value.Equals("Name", StringComparison.OrdinalIgnoreCase))
+        {
+            mode = MatchingModes.Flat;
+            
+            return true;
+        }
+        
+        if (value.Equals("Tree", StringComparison.OrdinalIgnoreCase) || value.Equals("RelativePath", StringComparison.OrdinalIgnoreCase))
+        {
+            mode = MatchingModes.Tree;
+            
+            return true;
+        }
+        
+        mode = default;
+        
+        return false;
+    }
+    
+    public static MatchingModes FromNumber(int number) => number switch
+    {
+        1 => MatchingModes.Flat,
+        2 => MatchingModes.Tree,
+        _ => throw new JsonException($"Unsupported MatchingMode numeric value: {number}")
+    };
+    
+    public static string ToNewName(MatchingModes value) => value switch
+    {
+        MatchingModes.Flat => "Flat",
+        MatchingModes.Tree => "Tree",
+        _ => value.ToString()
+    };
+    
+    public static string ToLegacyName(MatchingModes value) => value switch
+    {
+        MatchingModes.Flat => "Name",
+        MatchingModes.Tree => "RelativePath",
+        _ => value.ToString()
+    };
+}
+
 public class MatchingModesJsonConverter : JsonConverter<MatchingModes>
 {
     public override MatchingModes Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -17,16 +69,9 @@ public class MatchingModesJsonConverter : JsonConverter<MatchingModes>
         if (reader.TokenType == JsonTokenType.String)
         {
             var value = reader.GetString();
-            if (string.Equals(value, "Flat", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(value, "Name", StringComparison.OrdinalIgnoreCase))
+            if (MatchingModeMapper.TryFromString(value, out var mode))
             {
-                return MatchingModes.Flat;
-            }
-            
-            if (string.Equals(value, "Tree", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(value, "RelativePath", StringComparison.OrdinalIgnoreCase))
-            {
-                return MatchingModes.Tree;
+                return mode;
             }
             
             throw new JsonException($"Unsupported MatchingMode value: '{value}'");
@@ -36,12 +81,7 @@ public class MatchingModesJsonConverter : JsonConverter<MatchingModes>
         {
             var number = reader.GetInt32();
             
-            return number switch
-            {
-                1 => MatchingModes.Flat,
-                2 => MatchingModes.Tree,
-                _ => throw new JsonException($"Unsupported MatchingMode numeric value: {number}")
-            };
+            return MatchingModeMapper.FromNumber(number);
         }
         
         throw new JsonException($"Unexpected token parsing MatchingModes: {reader.TokenType}");
@@ -50,12 +90,7 @@ public class MatchingModesJsonConverter : JsonConverter<MatchingModes>
     public override void Write(Utf8JsonWriter writer, MatchingModes value, JsonSerializerOptions options)
     {
         // Always emit new names
-        writer.WriteStringValue(value switch
-        {
-            MatchingModes.Flat => "Flat",
-            MatchingModes.Tree => "Tree",
-            _ => value.ToString()
-        });
+        writer.WriteStringValue(MatchingModeMapper.ToNewName(value));
     }
 }
 
@@ -66,16 +101,9 @@ public class LegacyLinkingKeyJsonConverter : JsonConverter<MatchingModes>
         if (reader.TokenType == JsonTokenType.String)
         {
             var value = reader.GetString();
-            if (string.Equals(value, "Name", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(value, "Flat", StringComparison.OrdinalIgnoreCase))
+            if (MatchingModeMapper.TryFromString(value, out var mode))
             {
-                return MatchingModes.Flat;
-            }
-            
-            if (string.Equals(value, "RelativePath", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(value, "Tree", StringComparison.OrdinalIgnoreCase))
-            {
-                return MatchingModes.Tree;
+                return mode;
             }
             
             throw new JsonException($"Unsupported LinkingKey value: '{value}'");
@@ -85,12 +113,7 @@ public class LegacyLinkingKeyJsonConverter : JsonConverter<MatchingModes>
         {
             var number = reader.GetInt32();
             
-            return number switch
-            {
-                1 => MatchingModes.Flat,
-                2 => MatchingModes.Tree,
-                _ => throw new JsonException($"Unsupported LinkingKey numeric value: {number}")
-            };
+            return MatchingModeMapper.FromNumber(number);
         }
         
         throw new JsonException($"Unexpected token parsing LinkingKey: {reader.TokenType}");
@@ -99,11 +122,6 @@ public class LegacyLinkingKeyJsonConverter : JsonConverter<MatchingModes>
     public override void Write(Utf8JsonWriter writer, MatchingModes value, JsonSerializerOptions options)
     {
         // Emit legacy names so older clients keep working
-        writer.WriteStringValue(value switch
-        {
-            MatchingModes.Flat => "Name",
-            MatchingModes.Tree => "RelativePath",
-            _ => value.ToString()
-        });
+        writer.WriteStringValue(MatchingModeMapper.ToLegacyName(value));
     }
 }
