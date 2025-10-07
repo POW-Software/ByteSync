@@ -199,12 +199,16 @@ public class InventoryBuilder : IInventoryBuilder
         
         try
         {
+            using var _ = cancellationToken.Register(() => { InventoryFileAnalyzer.Stop(); });
+            
             InventorySaver.Start(inventoryFullName);
             
             foreach (var item in items.Where(i => i.FileSystemDescription is FileDescription))
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
+                    InventoryFileAnalyzer.Stop();
+                    
                     break;
                 }
                 
@@ -214,6 +218,10 @@ public class InventoryBuilder : IInventoryBuilder
             }
             
             InventoryFileAnalyzer.IsAllIdentified = true;
+            if (cancellationToken.IsCancellationRequested)
+            {
+                InventoryFileAnalyzer.Stop();
+            }
             
             InventoryFileAnalyzer.HasFinished.WaitOne();
             

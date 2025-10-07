@@ -69,7 +69,12 @@ public class FullInventoryRunner : IFullInventoryRunner
                     await inventoryBuilder.RunAnalysisAsync(fullInventoryFullName, items, token);
                 });
             
-            if (!InventoryProcessData.CancellationTokenSource.Token.IsCancellationRequested)
+            if (InventoryProcessData.CancellationTokenSource.Token.IsCancellationRequested)
+            {
+                // Make sure UI leaves the running state immediately on abort
+                InventoryProcessData.AnalysisStatus.OnNext(InventoryTaskStatus.Cancelled);
+            }
+            else
             {
                 InventoryProcessData.AnalysisStatus.OnNext(InventoryTaskStatus.Success);
                 InventoryProcessData.MainStatus.OnNext(InventoryTaskStatus.Success);
