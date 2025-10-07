@@ -9,7 +9,7 @@ namespace ByteSync.Client.UnitTests.Business.Inventories;
 public class InventoryGlobalStatusAggregatorTests
 {
     [Test]
-    public void All_Pending_returns_Pending()
+    public void WaitingForStart_and_WaitingForAnalysis_returns_Running()
     {
         var statuses = new[]
         {
@@ -18,7 +18,7 @@ public class InventoryGlobalStatusAggregatorTests
         };
         
         var result = InventoryGlobalStatusAggregator.Aggregate(statuses);
-        result.Should().Be(InventoryTaskStatus.Pending);
+        result.Should().Be(InventoryTaskStatus.Running);
     }
     
     [Test]

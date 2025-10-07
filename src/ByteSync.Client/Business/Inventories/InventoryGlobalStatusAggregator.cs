@@ -45,9 +45,9 @@ public static class InventoryGlobalStatusAggregator
         switch (status)
         {
             case SessionMemberGeneralStatus.InventoryWaitingForStart:
-            case SessionMemberGeneralStatus.InventoryWaitingForAnalysis:
                 return InventoryTaskStatus.Pending;
             
+            case SessionMemberGeneralStatus.InventoryWaitingForAnalysis:
             case SessionMemberGeneralStatus.InventoryRunningIdentification:
             case SessionMemberGeneralStatus.InventoryRunningAnalysis:
                 return InventoryTaskStatus.Running;
