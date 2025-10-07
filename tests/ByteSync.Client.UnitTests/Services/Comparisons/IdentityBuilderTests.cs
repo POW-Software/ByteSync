@@ -9,6 +9,7 @@ using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Helpers;
+using ByteSync.Factories;
 using ByteSync.Services.Comparisons;
 using ByteSync.Services.Inventories;
 using ByteSync.TestsCommon;
@@ -182,7 +183,10 @@ public class IdentityBuilderTests : AbstractTester
         
         var inventoryBuilder = new InventoryBuilder(sessionMemberInfo, dataNode,
             SessionSettingsHelper.BuildDefaultSessionSettings(DataTypes.FilesDirectories, MatchingModes.Tree),
-            new InventoryProcessData(), OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object);
+            new InventoryProcessData(), OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object,
+            new InventoryFileAnalyzerFactory(),
+            new InventorySaverFactory(),
+            new InventoryIndexerFactory());
         
         inventoryBuilder.AddInventoryPart(dataSource);
         

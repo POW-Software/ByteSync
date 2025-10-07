@@ -10,6 +10,7 @@ using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Interfaces.Factories;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Comparisons;
@@ -24,7 +25,10 @@ public class InventoryBuilder : IInventoryBuilder
     
     public InventoryBuilder(SessionMember sessionMember, DataNode dataNode, SessionSettings sessionSettings,
         InventoryProcessData inventoryProcessData,
-        OSPlatforms osPlatform, FingerprintModes fingerprintMode, ILogger<InventoryBuilder> logger)
+        OSPlatforms osPlatform, FingerprintModes fingerprintMode, ILogger<InventoryBuilder> logger,
+        IInventoryFileAnalyzerFactory inventoryFileAnalyzerFactory,
+        IInventorySaverFactory inventorySaverFactory,
+        IInventoryIndexerFactory inventoryIndexerFactory)
     {
         _logger = logger;
         
@@ -35,10 +39,10 @@ public class InventoryBuilder : IInventoryBuilder
         FingerprintMode = fingerprintMode;
         OSPlatform = osPlatform;
         
-        InventoryFileAnalyzer = new InventoryFileAnalyzer(this, RaiseFileAnalyzed, RaiseFileAnalyzeError);
-        InventorySaver = new InventorySaver(this);
+        InventoryFileAnalyzer = inventoryFileAnalyzerFactory.Create(this, RaiseFileAnalyzed, RaiseFileAnalyzeError);
+        InventorySaver = inventorySaverFactory.Create(this);
         
-        Indexer = new InventoryIndexer();
+        Indexer = inventoryIndexerFactory.Create();
         
         Inventory = InstantiateInventory();
     }
@@ -73,9 +77,9 @@ public class InventoryBuilder : IInventoryBuilder
     
     public string InventoryCode => DataNode.Code;
     
-    private InventoryFileAnalyzer InventoryFileAnalyzer { get; }
+    private IInventoryFileAnalyzer InventoryFileAnalyzer { get; }
     
-    internal InventorySaver InventorySaver { get; }
+    internal IInventorySaver InventorySaver { get; }
     
     public InventoryIndexer Indexer { get; }
     

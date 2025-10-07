@@ -3,13 +3,14 @@ using System.Threading;
 using ByteSync.Business;
 using ByteSync.Business.Arguments;
 using ByteSync.Common.Business.Misc;
+using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.FileSystems;
 using FastRsync.Signature;
 using Serilog;
 
 namespace ByteSync.Services.Inventories;
 
-class InventoryFileAnalyzer
+public class InventoryFileAnalyzer : IInventoryFileAnalyzer
 {
     private bool _isAllIdentified;
     
@@ -39,7 +40,7 @@ class InventoryFileAnalyzer
     
     private ManualResetSyncEvents ManualResetSyncEvents { get; }
     
-    internal ManualResetEvent HasFinished { get; }
+    public ManualResetEvent HasFinished { get; }
     
     public bool IsAllIdentified
     {
