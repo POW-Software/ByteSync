@@ -7,8 +7,6 @@ public interface IInventorySaver
 {
     void Start(string inventoryFullName);
     void AddSignature(string guid, MemoryStream memoryStream);
-    void WriteInventory();
+    void WriteInventory(Inventory inventory);
     void Stop();
-    
-    void Initialize(Func<Inventory> getInventory);
 }

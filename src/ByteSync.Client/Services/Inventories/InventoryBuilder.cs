@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Threading;
 using ByteSync.Business;
 using ByteSync.Business.Arguments;
@@ -43,7 +43,6 @@ public class InventoryBuilder : IInventoryBuilder
         Inventory = InstantiateInventory();
         
         InventorySaver = inventorySaver;
-        InventorySaver.Initialize(() => Inventory);
         
         InventoryFileAnalyzer = inventoryFileAnalyzer;
         InventoryFileAnalyzer.Initialize(FingerprintMode, InventorySaver, RaiseFileAnalyzed, RaiseFileAnalyzeError);
@@ -81,7 +80,7 @@ public class InventoryBuilder : IInventoryBuilder
     
     private IInventoryFileAnalyzer InventoryFileAnalyzer { get; }
     
-    internal IInventorySaver InventorySaver { get; }
+    private IInventorySaver InventorySaver { get; }
     
     public InventoryIndexer Indexer { get; }
     
@@ -182,7 +181,7 @@ public class InventoryBuilder : IInventoryBuilder
             
             Inventory.EndDateTime = DateTimeOffset.Now;
             
-            InventorySaver.WriteInventory();
+            InventorySaver.WriteInventory(Inventory);
             
             _logger.LogInformation(
                 "InventoryBuilder {Letter:l}: Local Inventory - Files Identification completed ({ItemsCount} files found)",
@@ -231,7 +230,7 @@ public class InventoryBuilder : IInventoryBuilder
             
             InventoryFileAnalyzer.HasFinished.WaitOne();
             
-            InventorySaver.WriteInventory();
+            InventorySaver.WriteInventory(Inventory);
             
             _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Analysis completed ({ItemsCount} files analyzed)",
                 InventoryCode, items.Count);

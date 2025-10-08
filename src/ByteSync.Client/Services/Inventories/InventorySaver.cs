@@ -9,8 +9,6 @@ namespace ByteSync.Services.Inventories;
 
 public class InventorySaver : IInventorySaver
 {
-    private Func<Inventory>? _getInventory;
-    
     public InventorySaver()
     {
         CountByDirectory = new Dictionary<string, int>();
@@ -29,11 +27,6 @@ public class InventorySaver : IInventorySaver
         ZipArchive = ZipFile.Open(inventoryFullName, ZipArchiveMode.Create);
         
         CountByDirectory.Clear();
-    }
-    
-    public void Initialize(Func<Inventory> getInventory)
-    {
-        _getInventory = getInventory;
     }
     
     private ZipArchive? ZipArchive { get; set; }
@@ -97,10 +90,9 @@ public class InventorySaver : IInventorySaver
         return candidate;
     }
     
-    public void WriteInventory()
+    public void WriteInventory(Inventory inventory)
     {
-        var inventory = _getInventory?.Invoke();
-        var json = JsonHelper.Serialize(inventory!);
+        var json = JsonHelper.Serialize(inventory);
         
         if (ZipArchive != null)
         {
