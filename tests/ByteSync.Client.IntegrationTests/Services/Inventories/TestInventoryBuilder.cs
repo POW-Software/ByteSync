@@ -10,7 +10,6 @@ using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Helpers;
-using ByteSync.Factories;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Services.Sessions;
@@ -778,8 +777,8 @@ public class TestInventoryBuilder : IntegrationTest
         
         return new InventoryBuilder(sessionMemberInfo, dataNode, sessionSettings, inventoryProcessData,
             osPlatform, FingerprintModes.Rsync, loggerMock.Object,
-            new InventoryFileAnalyzerFactory(),
-            new InventorySaverFactory(),
-            new InventoryIndexerFactory());
+            new InventoryFileAnalyzer(),
+            new InventorySaver(),
+            new InventoryIndexer());
     }
 }

@@ -13,26 +13,27 @@ namespace ByteSync.Services.Inventories;
 public class InventoryFileAnalyzer : IInventoryFileAnalyzer
 {
     private bool _isAllIdentified;
+    private FingerprintModes _fingerprintMode;
+    private IInventorySaver _saver = null!;
+    private Action<FileDescription> _onAnalyzed = null!;
+    private Action<FileDescription> _onError = null!;
     
-    public InventoryFileAnalyzer(InventoryBuilder inventoryBuilder, Action<FileDescription> raiseFileAnalyzedHandler,
-        Action<FileDescription> raiseFileAnalyzeErrorHandle)
+    public InventoryFileAnalyzer()
     {
-        InventoryBuilder = inventoryBuilder;
-        RaiseFileAnalyzedHandler = raiseFileAnalyzedHandler;
-        RaiseFileAnalyzeErrorHandler = raiseFileAnalyzeErrorHandle;
-        
         ManualResetSyncEvents = new ManualResetSyncEvents();
         SyncRoot = new object();
         FilesToAnalyze = new List<Tuple<FileDescription, FileInfo>>();
-        
         HasFinished = new ManualResetEvent(false);
     }
     
-    private InventoryBuilder InventoryBuilder { get; }
-    
-    private Action<FileDescription> RaiseFileAnalyzedHandler { get; set; }
-    
-    private Action<FileDescription> RaiseFileAnalyzeErrorHandler { get; set; }
+    public void Initialize(FingerprintModes mode, IInventorySaver saver, Action<FileDescription> onAnalyzed,
+        Action<FileDescription> onError)
+    {
+        _fingerprintMode = mode;
+        _saver = saver;
+        _onAnalyzed = onAnalyzed;
+        _onError = onError;
+    }
     
     private List<Tuple<FileDescription, FileInfo>> FilesToAnalyze { get; }
     
@@ -121,7 +122,7 @@ public class InventoryFileAnalyzer : IInventoryFileAnalyzer
                 }
             }
             
-            tuple.Item1.FingerprintMode = InventoryBuilder.FingerprintMode;
+            tuple.Item1.FingerprintMode = _fingerprintMode;
             
             try
             {
@@ -134,10 +135,10 @@ public class InventoryFileAnalyzer : IInventoryFileAnalyzer
                 tuple.Item1.AnalysisErrorType = ex.GetType().Name;
                 tuple.Item1.AnalysisErrorDescription = ex.Message;
                 
-                RaiseFileAnalyzeErrorHandler.Invoke(tuple.Item1);
+                _onError.Invoke(tuple.Item1);
             }
             
-            RaiseFileAnalyzedHandler.Invoke(tuple.Item1);
+            _onAnalyzed.Invoke(tuple.Item1);
         }
         
         HasFinished.Set();
@@ -163,7 +164,7 @@ public class InventoryFileAnalyzer : IInventoryFileAnalyzer
             
             var guid = Guid.NewGuid().ToString();
             
-            InventoryBuilder.InventorySaver.AddSignature(guid, memoryStream);
+            _saver.AddSignature(guid, memoryStream);
             
             tuple.Item1.SignatureGuid = guid;
         }

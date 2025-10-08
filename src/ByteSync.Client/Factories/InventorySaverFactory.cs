@@ -8,6 +8,9 @@ public class InventorySaverFactory : IInventorySaverFactory
 {
     public IInventorySaver Create(InventoryBuilder builder)
     {
-        return new InventorySaver(builder);
+        var saver = new InventorySaver();
+        saver.Initialize(() => builder.Inventory);
+        
+        return saver;
     }
 }

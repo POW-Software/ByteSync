@@ -2,16 +2,17 @@
 using System.IO.Compression;
 using ByteSync.Common.Controls.Json;
 using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Models.Inventories;
 using Serilog;
 
 namespace ByteSync.Services.Inventories;
 
 public class InventorySaver : IInventorySaver
 {
-    public InventorySaver(InventoryBuilder inventoryBuilder)
+    private Func<Inventory>? _getInventory;
+    
+    public InventorySaver()
     {
-        InventoryBuilder = inventoryBuilder;
-        
         CountByDirectory = new Dictionary<string, int>();
     }
     
@@ -30,7 +31,10 @@ public class InventorySaver : IInventorySaver
         CountByDirectory.Clear();
     }
     
-    private InventoryBuilder InventoryBuilder { get; }
+    public void Initialize(Func<Inventory> getInventory)
+    {
+        _getInventory = getInventory;
+    }
     
     private ZipArchive? ZipArchive { get; set; }
     
@@ -95,7 +99,8 @@ public class InventorySaver : IInventorySaver
     
     public void WriteInventory()
     {
-        var json = JsonHelper.Serialize(InventoryBuilder.Inventory);
+        var inventory = _getInventory?.Invoke();
+        var json = JsonHelper.Serialize(inventory!);
         
         if (ZipArchive != null)
         {

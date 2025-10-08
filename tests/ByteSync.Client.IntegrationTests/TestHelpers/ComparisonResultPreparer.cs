@@ -6,7 +6,6 @@ using ByteSync.Business.Sessions;
 using ByteSync.Client.IntegrationTests.TestHelpers.Business;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Misc;
-using ByteSync.Factories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Services.Comparisons;
@@ -99,9 +98,9 @@ public class ComparisonResultPreparer
             
             var inventoryBuilder = new InventoryBuilder(sessionMemberInfo, dataNode, SessionSettings, new InventoryProcessData(),
                 OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object,
-                new InventoryFileAnalyzerFactory(),
-                new InventorySaverFactory(),
-                new InventoryIndexerFactory());
+                new InventoryFileAnalyzer(),
+                new InventorySaver(),
+                new InventoryIndexer());
             
             foreach (var dataSource in inventoryData.DataSources)
             {

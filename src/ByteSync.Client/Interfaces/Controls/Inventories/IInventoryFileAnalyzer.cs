@@ -1,5 +1,6 @@
 using System.IO;
 using System.Threading;
+using ByteSync.Business;
 using ByteSync.Models.FileSystems;
 
 namespace ByteSync.Interfaces.Controls.Inventories;
@@ -13,4 +14,6 @@ public interface IInventoryFileAnalyzer
     void Start();
     void Stop();
     void RegisterFile(FileDescription fileDescription, FileInfo fileInfo);
+    
+    void Initialize(FingerprintModes mode, IInventorySaver saver, Action<FileDescription> onAnalyzed, Action<FileDescription> onError);
 }

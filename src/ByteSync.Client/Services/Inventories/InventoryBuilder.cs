@@ -10,7 +10,6 @@ using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Controls.Inventories;
-using ByteSync.Interfaces.Factories;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Comparisons;
@@ -26,9 +25,9 @@ public class InventoryBuilder : IInventoryBuilder
     public InventoryBuilder(SessionMember sessionMember, DataNode dataNode, SessionSettings sessionSettings,
         InventoryProcessData inventoryProcessData,
         OSPlatforms osPlatform, FingerprintModes fingerprintMode, ILogger<InventoryBuilder> logger,
-        IInventoryFileAnalyzerFactory inventoryFileAnalyzerFactory,
-        IInventorySaverFactory inventorySaverFactory,
-        IInventoryIndexerFactory inventoryIndexerFactory)
+        IInventoryFileAnalyzer inventoryFileAnalyzer,
+        IInventorySaver inventorySaver,
+        InventoryIndexer indexer)
     {
         _logger = logger;
         
@@ -39,12 +38,15 @@ public class InventoryBuilder : IInventoryBuilder
         FingerprintMode = fingerprintMode;
         OSPlatform = osPlatform;
         
-        InventoryFileAnalyzer = inventoryFileAnalyzerFactory.Create(this, RaiseFileAnalyzed, RaiseFileAnalyzeError);
-        InventorySaver = inventorySaverFactory.Create(this);
-        
-        Indexer = inventoryIndexerFactory.Create();
+        Indexer = indexer;
         
         Inventory = InstantiateInventory();
+        
+        InventorySaver = inventorySaver;
+        InventorySaver.Initialize(() => Inventory);
+        
+        InventoryFileAnalyzer = inventoryFileAnalyzer;
+        InventoryFileAnalyzer.Initialize(FingerprintMode, InventorySaver, RaiseFileAnalyzed, RaiseFileAnalyzeError);
     }
     
     private Inventory InstantiateInventory()
