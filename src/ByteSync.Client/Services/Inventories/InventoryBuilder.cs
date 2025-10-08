@@ -45,7 +45,6 @@ public class InventoryBuilder : IInventoryBuilder
         InventorySaver = inventorySaver;
         
         InventoryFileAnalyzer = inventoryFileAnalyzer;
-        InventoryFileAnalyzer.Initialize(FingerprintMode, InventorySaver, RaiseFileAnalyzed, RaiseFileAnalyzeError);
     }
     
     private Inventory InstantiateInventory()
@@ -398,17 +397,17 @@ public class InventoryBuilder : IInventoryBuilder
         }
     }
     
-    private void RaiseFileAnalyzed(FileDescription fileDescription)
-    {
-        InventoryProcessData.UpdateMonitorData(inventoryMonitorData =>
-        {
-            inventoryMonitorData.AnalyzedFiles += 1;
-            inventoryMonitorData.ProcessedSize += fileDescription.Size;
-        });
-    }
-    
-    private void RaiseFileAnalyzeError(FileDescription fileDescription)
-    {
-        InventoryProcessData.UpdateMonitorData(imd => imd.AnalyzeErrors += 1);
-    }
+    // private void RaiseFileAnalyzed(FileDescription fileDescription)
+    // {
+    //     InventoryProcessData.UpdateMonitorData(inventoryMonitorData =>
+    //     {
+    //         inventoryMonitorData.AnalyzedFiles += 1;
+    //         inventoryMonitorData.ProcessedSize += fileDescription.Size;
+    //     });
+    // }
+    //
+    // private void RaiseFileAnalyzeError(FileDescription fileDescription)
+    // {
+    //     InventoryProcessData.UpdateMonitorData(imd => imd.AnalyzeErrors += 1);
+    // }
 }

@@ -96,10 +96,13 @@ public class ComparisonResultPreparer
             
             var loggerMock = new Mock<ILogger<InventoryBuilder>>();
             
-            var inventoryBuilder = new InventoryBuilder(sessionMemberInfo, dataNode, SessionSettings, new InventoryProcessData(),
+            var processData = new InventoryProcessData();
+            var saver = new InventorySaver();
+            var analyzer = new InventoryFileAnalyzer(saver, FingerprintModes.Rsync, processData);
+            var inventoryBuilder = new InventoryBuilder(sessionMemberInfo, dataNode, SessionSettings, processData,
                 OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object,
-                new InventoryFileAnalyzer(),
-                new InventorySaver(),
+                analyzer,
+                saver,
                 new InventoryIndexer());
             
             foreach (var dataSource in inventoryData.DataSources)

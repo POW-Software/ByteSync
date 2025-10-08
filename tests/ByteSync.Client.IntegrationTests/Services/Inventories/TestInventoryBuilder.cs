@@ -775,10 +775,13 @@ public class TestInventoryBuilder : IntegrationTest
         
         var loggerMock = new Mock<ILogger<InventoryBuilder>>();
         
+        var saver = new InventorySaver();
+        var analyzer = new InventoryFileAnalyzer(saver, FingerprintModes.Rsync, inventoryProcessData);
+        
         return new InventoryBuilder(sessionMemberInfo, dataNode, sessionSettings, inventoryProcessData,
             osPlatform, FingerprintModes.Rsync, loggerMock.Object,
-            new InventoryFileAnalyzer(),
-            new InventorySaver(),
+            analyzer,
+            saver,
             new InventoryIndexer());
     }
 }

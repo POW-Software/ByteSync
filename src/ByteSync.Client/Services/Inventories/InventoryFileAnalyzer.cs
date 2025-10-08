@@ -2,6 +2,7 @@
 using System.Threading;
 using ByteSync.Business;
 using ByteSync.Business.Arguments;
+using ByteSync.Business.Inventories;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.FileSystems;
@@ -13,26 +14,19 @@ namespace ByteSync.Services.Inventories;
 public class InventoryFileAnalyzer : IInventoryFileAnalyzer
 {
     private bool _isAllIdentified;
-    private FingerprintModes _fingerprintMode;
-    private IInventorySaver _saver = null!;
-    private Action<FileDescription> _onAnalyzed = null!;
-    private Action<FileDescription> _onError = null!;
+    private readonly FingerprintModes _fingerprintMode;
+    private readonly IInventorySaver _saver;
+    private readonly InventoryProcessData _processData;
     
-    public InventoryFileAnalyzer()
+    public InventoryFileAnalyzer(IInventorySaver saver, FingerprintModes fingerprintMode, InventoryProcessData processData)
     {
+        _saver = saver;
+        _fingerprintMode = fingerprintMode;
+        _processData = processData;
         ManualResetSyncEvents = new ManualResetSyncEvents();
         SyncRoot = new object();
         FilesToAnalyze = new List<Tuple<FileDescription, FileInfo>>();
         HasFinished = new ManualResetEvent(false);
-    }
-    
-    public void Initialize(FingerprintModes mode, IInventorySaver saver, Action<FileDescription> onAnalyzed,
-        Action<FileDescription> onError)
-    {
-        _fingerprintMode = mode;
-        _saver = saver;
-        _onAnalyzed = onAnalyzed;
-        _onError = onError;
     }
     
     private List<Tuple<FileDescription, FileInfo>> FilesToAnalyze { get; }
@@ -135,10 +129,14 @@ public class InventoryFileAnalyzer : IInventoryFileAnalyzer
                 tuple.Item1.AnalysisErrorType = ex.GetType().Name;
                 tuple.Item1.AnalysisErrorDescription = ex.Message;
                 
-                _onError.Invoke(tuple.Item1);
+                _processData.UpdateMonitorData(imd => imd.AnalyzeErrors += 1);
             }
             
-            _onAnalyzed.Invoke(tuple.Item1);
+            _processData.UpdateMonitorData(inventoryMonitorData =>
+            {
+                inventoryMonitorData.AnalyzedFiles += 1;
+                inventoryMonitorData.ProcessedSize += tuple.Item1.Size;
+            });
         }
         
         HasFinished.Set();
