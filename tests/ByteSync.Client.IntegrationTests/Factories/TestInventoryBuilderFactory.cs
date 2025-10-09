@@ -62,9 +62,9 @@ public class TestInventoryBuilderFactory : IntegrationTest
         RegisterType<CloudSessionLocalDataManager, ICloudSessionLocalDataManager>();
         
         _builder.RegisterGeneric(typeof(Mock<>)).SingleInstance();
-        _builder.Register(c => new Mock<ILogger<InventoryBuilder>>().Object).As<ILogger<InventoryBuilder>>();
-        _builder.Register(c => new Mock<ILogger<InventoryFileAnalyzer>>().Object).As<ILogger<InventoryFileAnalyzer>>();
-        _builder.Register(c => new Mock<ILogger<InventoryService>>().Object).As<ILogger<InventoryService>>();
+        _builder.Register(_ => new Mock<ILogger<InventoryBuilder>>().Object).As<ILogger<InventoryBuilder>>();
+        _builder.Register(_ => new Mock<ILogger<InventoryFileAnalyzer>>().Object).As<ILogger<InventoryFileAnalyzer>>();
+        _builder.Register(_ => new Mock<ILogger<InventoryService>>().Object).As<ILogger<InventoryService>>();
         
         _builder.Register(ctx =>
         {
