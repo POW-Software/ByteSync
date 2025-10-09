@@ -11,4 +11,6 @@ public interface IInventoryIndexer
     void Register(DirectoryDescription directoryDescription, DirectoryInfo directoryInfo);
     
     void Register(FileSystemDescription fileSystemDescription, PathIdentity pathIdentity);
+    
+    HashSet<IndexedItem>? GetItemsBy(PathIdentity pathIdentity);
 }

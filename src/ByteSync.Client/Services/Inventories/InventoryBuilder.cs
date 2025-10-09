@@ -27,7 +27,7 @@ public class InventoryBuilder : IInventoryBuilder
         OSPlatforms osPlatform, FingerprintModes fingerprintMode, ILogger<InventoryBuilder> logger,
         IInventoryFileAnalyzer inventoryFileAnalyzer,
         IInventorySaver inventorySaver,
-        InventoryIndexer indexer)
+        IInventoryIndexer indexer)
     {
         _logger = logger;
         
@@ -81,7 +81,7 @@ public class InventoryBuilder : IInventoryBuilder
     
     private IInventorySaver InventorySaver { get; }
     
-    public InventoryIndexer Indexer { get; }
+    public IInventoryIndexer Indexer { get; }
     
     private OSPlatforms OSPlatform { get; set; }
     

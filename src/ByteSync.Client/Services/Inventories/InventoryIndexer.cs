@@ -54,18 +54,7 @@ public class InventoryIndexer : IInventoryIndexer
         }
     }
     
-    private string BuildFileDescriptionIndex(FileSystemDescription fileSystemDescription)
-    {
-        return
-            $"{fileSystemDescription.InventoryPart.GetHashCode()}_{fileSystemDescription.FileSystemType}_{fileSystemDescription.RelativePath}";
-    }
-    
-    private string BuildPathIdentityIndex(PathIdentity pathIdentity)
-    {
-        return $"{pathIdentity.GetHashCode()}";
-    }
-    
-    internal HashSet<IndexedItem>? GetItemsBy(PathIdentity pathIdentity)
+    public HashSet<IndexedItem>? GetItemsBy(PathIdentity pathIdentity)
     {
         var pathIdentityIndex = BuildPathIdentityIndex(pathIdentity);
         
@@ -77,5 +66,16 @@ public class InventoryIndexer : IInventoryIndexer
         {
             return null;
         }
+    }
+    
+    private string BuildFileDescriptionIndex(FileSystemDescription fileSystemDescription)
+    {
+        return
+            $"{fileSystemDescription.InventoryPart.GetHashCode()}_{fileSystemDescription.FileSystemType}_{fileSystemDescription.RelativePath}";
+    }
+    
+    private string BuildPathIdentityIndex(PathIdentity pathIdentity)
+    {
+        return $"{pathIdentity.GetHashCode()}";
     }
 }

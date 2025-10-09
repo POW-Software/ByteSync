@@ -49,7 +49,7 @@ public class InventoryComparer : IInventoryComparer
     
     private ComparisonResult ComparisonResult { get; set; }
     
-    public InventoryIndexer? Indexer { get; set; }
+    public IInventoryIndexer? Indexer { get; set; }
     
     public ComparisonResult Compare()
     {

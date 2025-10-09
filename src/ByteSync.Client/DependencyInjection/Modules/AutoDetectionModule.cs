@@ -49,8 +49,7 @@ public class AutoDetectionModule : Module
         builder.RegisterAssemblyTypes(executingAssembly)
             .Where(t => t.Name.EndsWith("Indexer"))
             .SingleInstance()
-            .AsImplementedInterfaces()
-            .AsSelf();
+            .AsImplementedInterfaces();
         
         builder.RegisterAssemblyTypes(executingAssembly)
             .Where(t => t.Name.EndsWith("Cache"))
