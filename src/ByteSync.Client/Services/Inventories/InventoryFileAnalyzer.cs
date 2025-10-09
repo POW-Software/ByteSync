@@ -7,22 +7,28 @@ using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.FileSystems;
 using FastRsync.Signature;
-using Serilog;
 
 namespace ByteSync.Services.Inventories;
 
 public class InventoryFileAnalyzer : IInventoryFileAnalyzer
 {
     private bool _isAllIdentified;
+    
     private readonly FingerprintModes _fingerprintMode;
-    private readonly IInventorySaver _saver;
     private readonly InventoryProcessData _processData;
     
-    public InventoryFileAnalyzer(IInventorySaver saver, FingerprintModes fingerprintMode, InventoryProcessData processData)
+    private readonly IInventorySaver _saver;
+    private readonly ILogger<InventoryFileAnalyzer> _logger;
+    
+    public InventoryFileAnalyzer(FingerprintModes fingerprintMode, InventoryProcessData processData, IInventorySaver saver,
+        ILogger<InventoryFileAnalyzer> logger)
     {
-        _saver = saver;
         _fingerprintMode = fingerprintMode;
         _processData = processData;
+        
+        _saver = saver;
+        _logger = logger;
+        
         ManualResetSyncEvents = new ManualResetSyncEvents();
         SyncRoot = new object();
         FilesToAnalyze = new List<Tuple<FileDescription, FileInfo>>();
@@ -124,7 +130,7 @@ public class InventoryFileAnalyzer : IInventoryFileAnalyzer
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "InventoryFileAnalyzer.HandleFilesAnalysis");
+                _logger.LogError(ex, "InventoryFileAnalyzer.HandleFilesAnalysis");
                 
                 tuple.Item1.AnalysisErrorType = ex.GetType().Name;
                 tuple.Item1.AnalysisErrorDescription = ex.Message;
@@ -153,7 +159,7 @@ public class InventoryFileAnalyzer : IInventoryFileAnalyzer
         }
         else
         {
-            Log.Information("Analyzing file {FullName}", tuple.Item2.FullName);
+            _logger.LogInformation("Analyzing file {FullName}", tuple.Item2.FullName);
             
             using var basisStream = new FileStream(tuple.Item2.FullName, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var memoryStream = new MemoryStream();

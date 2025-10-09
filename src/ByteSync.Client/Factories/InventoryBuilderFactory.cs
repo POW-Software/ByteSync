@@ -10,7 +10,6 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
-using ByteSync.Services.Inventories;
 
 namespace ByteSync.Factories;
 
@@ -37,9 +36,13 @@ public class InventoryBuilderFactory : IInventoryBuilderFactory
             .Where(ds => ds.DataNodeId == dataNode.Id)
             .ToList();
         
-        var saver = new InventorySaver();
-        var analyzer = new InventoryFileAnalyzer(saver, FingerprintModes.Rsync, inventoryService.InventoryProcessData);
-        var indexer = new InventoryIndexer();
+        var saver = _context.Resolve<IInventorySaver>();
+        var analyzer = _context.Resolve<IInventoryFileAnalyzer>(
+            new TypedParameter(typeof(FingerprintModes), FingerprintModes.Rsync),
+            new TypedParameter(typeof(InventoryProcessData), inventoryService.InventoryProcessData),
+            new TypedParameter(typeof(IInventorySaver), saver));
+        
+        // var indexer = _context.Resolve<IInventoryIndexer>();
         
         var inventoryBuilder = _context.Resolve<IInventoryBuilder>(
             new TypedParameter(typeof(SessionMember), sessionMember),
@@ -49,8 +52,7 @@ public class InventoryBuilderFactory : IInventoryBuilderFactory
             new TypedParameter(typeof(OSPlatforms), environmentService.OSPlatform),
             new TypedParameter(typeof(FingerprintModes), FingerprintModes.Rsync),
             new TypedParameter(typeof(IInventoryFileAnalyzer), analyzer),
-            new TypedParameter(typeof(IInventorySaver), saver),
-            new TypedParameter(typeof(InventoryIndexer), indexer));
+            new TypedParameter(typeof(IInventorySaver), saver));
         
         foreach (var dataSource in myDataSources)
         {

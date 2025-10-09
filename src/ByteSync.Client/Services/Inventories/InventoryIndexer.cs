@@ -1,10 +1,11 @@
 ﻿using System.IO;
 using ByteSync.Business.Inventories;
+using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.FileSystems;
 
 namespace ByteSync.Services.Inventories;
 
-public class InventoryIndexer
+public class InventoryIndexer : IInventoryIndexer
 {
     public InventoryIndexer()
     {
@@ -16,7 +17,7 @@ public class InventoryIndexer
     
     private Dictionary<string, HashSet<IndexedItem>> IndexedItemsByPathIdentity { get; }
     
-    internal void Register(FileDescription fileDescription, FileInfo fileInfo)
+    public void Register(FileDescription fileDescription, FileInfo fileInfo)
     {
         var indexedItem = new IndexedItem(fileDescription, fileInfo);
         
@@ -25,7 +26,7 @@ public class InventoryIndexer
         IndexedItemsByFileDescription.Add(index, indexedItem);
     }
     
-    internal void Register(DirectoryDescription directoryDescription, DirectoryInfo directoryInfo)
+    public void Register(DirectoryDescription directoryDescription, DirectoryInfo directoryInfo)
     {
         var indexedItem = new IndexedItem(directoryDescription, directoryInfo);
         
@@ -34,7 +35,7 @@ public class InventoryIndexer
         IndexedItemsByFileDescription.Add(index, indexedItem);
     }
     
-    internal void Register(FileSystemDescription fileSystemDescription, PathIdentity pathIdentity)
+    public void Register(FileSystemDescription fileSystemDescription, PathIdentity pathIdentity)
     {
         var index = BuildFileDescriptionIndex(fileSystemDescription);
         

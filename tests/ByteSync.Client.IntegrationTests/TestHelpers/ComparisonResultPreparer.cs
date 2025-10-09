@@ -94,13 +94,14 @@ public class ComparisonResultPreparer
                 Code = inventoryData.Letter + "1"
             };
             
-            var loggerMock = new Mock<ILogger<InventoryBuilder>>();
+            var inventoryBuilderloggerMock = new Mock<ILogger<InventoryBuilder>>();
+            var InventoryFileAnalyzerLoggerMock = new Mock<ILogger<InventoryFileAnalyzer>>();
             
             var processData = new InventoryProcessData();
             var saver = new InventorySaver();
-            var analyzer = new InventoryFileAnalyzer(saver, FingerprintModes.Rsync, processData);
+            var analyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, processData, saver, InventoryFileAnalyzerLoggerMock.Object);
             var inventoryBuilder = new InventoryBuilder(sessionMemberInfo, dataNode, SessionSettings, processData,
-                OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object,
+                OSPlatforms.Windows, FingerprintModes.Rsync, inventoryBuilderloggerMock.Object,
                 analyzer,
                 saver,
                 new InventoryIndexer());
