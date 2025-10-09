@@ -42,8 +42,6 @@ public class InventoryBuilderFactory : IInventoryBuilderFactory
             new TypedParameter(typeof(InventoryProcessData), inventoryService.InventoryProcessData),
             new TypedParameter(typeof(IInventorySaver), saver));
         
-        // var indexer = _context.Resolve<IInventoryIndexer>();
-        
         var inventoryBuilder = _context.Resolve<IInventoryBuilder>(
             new TypedParameter(typeof(SessionMember), sessionMember),
             new TypedParameter(typeof(DataNode), dataNode),
