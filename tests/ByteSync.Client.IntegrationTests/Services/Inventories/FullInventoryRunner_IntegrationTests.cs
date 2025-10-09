@@ -39,7 +39,6 @@ public class FullInventoryRunner_IntegrationTests : IntegrationTest
     private ISessionService _sessionService = null!;
     private IDataNodeRepository _dataNodeRepository = null!;
     private IDataSourceRepository _dataSourceRepository = null!;
-    private IInventoryFileRepository _inventoryFileRepository = null!;
     private ISessionMemberRepository _sessionMemberRepository = null!;
     private Mock<ISessionMemberService> _sessionMemberServiceMock = null!;
     private Mock<IInventoryFinishedService> _inventoryFinishedServiceMock = null!;
@@ -114,7 +113,6 @@ public class FullInventoryRunner_IntegrationTests : IntegrationTest
         _cloudSessionLocalDataManager = Container.Resolve<ICloudSessionLocalDataManager>();
         _dataNodeRepository = Container.Resolve<IDataNodeRepository>();
         _dataSourceRepository = Container.Resolve<IDataSourceRepository>();
-        _inventoryFileRepository = Container.Resolve<IInventoryFileRepository>();
         _sessionMemberRepository = Container.Resolve<ISessionMemberRepository>();
         
         _sessionMemberServiceMock = Container.Resolve<Mock<ISessionMemberService>>();
@@ -140,25 +138,25 @@ public class FullInventoryRunner_IntegrationTests : IntegrationTest
         _testDirectoryService.CreateFileInDirectory(sourceDir.FullName, "file1.txt", "same content");
         
         var dataNode = CreateDataNode("node1", "A");
-        _dataNodeRepository.AddOrUpdate(new[] { dataNode });
+        _dataNodeRepository.AddOrUpdate([dataNode]);
         
         var dataSource = new DataSource
             { Id = Guid.NewGuid().ToString(), DataNodeId = dataNode.Id, Path = sourceDir.FullName, Code = "A1" };
-        _dataSourceRepository.AddOrUpdate(new[] { dataSource });
+        _dataSourceRepository.AddOrUpdate([dataSource]);
         
-        var inventoryBuilder = CreateInventoryBuilder(dataNode, new[] { dataSource });
+        var inventoryBuilder = CreateInventoryBuilder(dataNode, [dataSource]);
         
         var baseInventoryPath = _cloudSessionLocalDataManager.GetCurrentMachineInventoryPath(
             inventoryBuilder.Inventory, LocalInventoryModes.Base);
         await inventoryBuilder.BuildBaseInventoryAsync(baseInventoryPath);
         
         await _inventoryService.SetLocalInventory(
-            new[] { new InventoryFile(BuildSharedFileDefinition(inventoryBuilder.Inventory, LocalInventoryModes.Base), baseInventoryPath) },
+            [new InventoryFile(BuildSharedFileDefinition(inventoryBuilder.Inventory, LocalInventoryModes.Base), baseInventoryPath)],
             LocalInventoryModes.Base);
         
-        SetupInventoryComparerMock(inventoryBuilder, new List<string>());
+        SetupInventoryComparerMock(inventoryBuilder, []);
         
-        _inventoryProcessData.InventoryBuilders = new List<IInventoryBuilder> { inventoryBuilder };
+        _inventoryProcessData.InventoryBuilders = [inventoryBuilder];
         
         var result = await _fullInventoryRunner.RunFullInventory();
         
@@ -197,7 +195,7 @@ public class FullInventoryRunner_IntegrationTests : IntegrationTest
             var contentIdentity1 = new ContentIdentity(new ContentIdentityCore { Size = 100 });
             var contentIdentity2 = new ContentIdentity(new ContentIdentityCore { Size = 200 });
             
-            contentIdentity1.InventoryPartsByLastWriteTimes[DateTime.UtcNow] = new HashSet<InventoryPart> { inventoryPart };
+            contentIdentity1.InventoryPartsByLastWriteTimes[DateTime.UtcNow] = [inventoryPart];
             
             comparisonItem.AddContentIdentity(contentIdentity1);
             comparisonItem.AddContentIdentity(contentIdentity2);
