@@ -77,8 +77,6 @@ public class InventoryFileAnalyzer : IInventoryFileAnalyzer
     {
         lock (SyncRoot)
         {
-            // Clear any remaining queued files and signal termination
-            // FilesToAnalyze.Clear();
             ManualResetSyncEvents.ResetEvent();
             ManualResetSyncEvents.SetEnd();
         }

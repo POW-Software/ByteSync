@@ -396,18 +396,4 @@ public class InventoryBuilder : IInventoryBuilder
             }
         }
     }
-    
-    // private void RaiseFileAnalyzed(FileDescription fileDescription)
-    // {
-    //     InventoryProcessData.UpdateMonitorData(inventoryMonitorData =>
-    //     {
-    //         inventoryMonitorData.AnalyzedFiles += 1;
-    //         inventoryMonitorData.ProcessedSize += fileDescription.Size;
-    //     });
-    // }
-    //
-    // private void RaiseFileAnalyzeError(FileDescription fileDescription)
-    // {
-    //     InventoryProcessData.UpdateMonitorData(imd => imd.AnalyzeErrors += 1);
-    // }
 }
