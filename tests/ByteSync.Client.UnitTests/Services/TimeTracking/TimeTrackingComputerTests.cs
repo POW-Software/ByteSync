@@ -49,12 +49,17 @@ public class TimeTrackingComputerTests
         var sut = CreateSut();
         var startDateTime = DateTimeOffset.Now;
         TimeTrack? capturedTimeTrack = null;
+        var emissionReceived = new ManualResetEvent(false);
         
         sut.Start(startDateTime);
         
-        using var subscription = sut.RemainingTime.Subscribe(tt => capturedTimeTrack = tt);
+        using var subscription = sut.RemainingTime.Subscribe(tt =>
+        {
+            capturedTimeTrack = tt;
+            emissionReceived.Set();
+        });
         
-        Thread.Sleep(1100);
+        emissionReceived.WaitOne(TimeSpan.FromSeconds(2)).Should().BeTrue("observable should emit at least once");
         
         capturedTimeTrack.Should().NotBeNull();
         capturedTimeTrack!.StartDateTime.Should().BeCloseTo(startDateTime.LocalDateTime, TimeSpan.FromSeconds(1));
@@ -66,6 +71,7 @@ public class TimeTrackingComputerTests
         var sut = CreateSut();
         var firstStart = DateTimeOffset.Now.AddMinutes(-10);
         var secondStart = DateTimeOffset.Now;
+        var emissionReceived = new ManualResetEvent(false);
         
         sut.Start(firstStart);
         _dataSubject.OnNext((1000, 500));
@@ -74,9 +80,13 @@ public class TimeTrackingComputerTests
         sut.Start(secondStart);
         
         TimeTrack? capturedTimeTrack = null;
-        using var subscription = sut.RemainingTime.Subscribe(tt => capturedTimeTrack = tt);
+        using var subscription = sut.RemainingTime.Subscribe(tt =>
+        {
+            capturedTimeTrack = tt;
+            emissionReceived.Set();
+        });
         
-        Thread.Sleep(1100);
+        emissionReceived.WaitOne(TimeSpan.FromSeconds(2)).Should().BeTrue("observable should emit at least once");
         
         capturedTimeTrack.Should().NotBeNull();
         capturedTimeTrack!.StartDateTime.Should().BeCloseTo(secondStart.LocalDateTime, TimeSpan.FromSeconds(1));
@@ -110,12 +120,17 @@ public class TimeTrackingComputerTests
         var sut = CreateSut();
         var startDateTime = DateTimeOffset.Now;
         TimeTrack? capturedTimeTrack = null;
+        var emissionReceived = new ManualResetEvent(false);
         
         sut.Start(startDateTime);
         
-        using var subscription = sut.RemainingTime.Subscribe(tt => capturedTimeTrack = tt);
+        using var subscription = sut.RemainingTime.Subscribe(tt =>
+        {
+            capturedTimeTrack = tt;
+            emissionReceived.Set();
+        });
         
-        Thread.Sleep(1100);
+        emissionReceived.WaitOne(TimeSpan.FromSeconds(2)).Should().BeTrue("observable should emit at least once");
         
         sut.Stop();
         
@@ -168,14 +183,19 @@ public class TimeTrackingComputerTests
         var sut = CreateSut();
         var startDateTime = DateTimeOffset.Now.AddSeconds(-10);
         TimeTrack? capturedTimeTrack = null;
+        var emissionReceived = new ManualResetEvent(false);
         
         sut.Start(startDateTime);
         
         _dataSubject.OnNext((1000, 100));
         
-        using var subscription = sut.RemainingTime.Subscribe(tt => capturedTimeTrack = tt);
+        using var subscription = sut.RemainingTime.Subscribe(tt =>
+        {
+            capturedTimeTrack = tt;
+            emissionReceived.Set();
+        });
         
-        Thread.Sleep(1100);
+        emissionReceived.WaitOne(TimeSpan.FromSeconds(2)).Should().BeTrue("observable should emit at least once");
         
         capturedTimeTrack.Should().NotBeNull();
         capturedTimeTrack!.EstimatedEndDateTime.Should().NotBeNull();
@@ -188,14 +208,19 @@ public class TimeTrackingComputerTests
         var sut = CreateSut();
         var startDateTime = DateTimeOffset.Now;
         TimeTrack? capturedTimeTrack = null;
+        var emissionReceived = new ManualResetEvent(false);
         
         sut.Start(startDateTime);
         
         _dataSubject.OnNext((0, 0));
         
-        using var subscription = sut.RemainingTime.Subscribe(tt => capturedTimeTrack = tt);
+        using var subscription = sut.RemainingTime.Subscribe(tt =>
+        {
+            capturedTimeTrack = tt;
+            emissionReceived.Set();
+        });
         
-        Thread.Sleep(1100);
+        emissionReceived.WaitOne(TimeSpan.FromSeconds(2)).Should().BeTrue("observable should emit at least once");
         
         capturedTimeTrack.Should().NotBeNull();
         capturedTimeTrack!.EstimatedEndDateTime.Should().BeNull();
@@ -207,14 +232,19 @@ public class TimeTrackingComputerTests
         var sut = CreateSut();
         var startDateTime = DateTimeOffset.Now;
         TimeTrack? capturedTimeTrack = null;
+        var emissionReceived = new ManualResetEvent(false);
         
         sut.Start(startDateTime);
         
         _dataSubject.OnNext((1000, 0));
         
-        using var subscription = sut.RemainingTime.Subscribe(tt => capturedTimeTrack = tt);
+        using var subscription = sut.RemainingTime.Subscribe(tt =>
+        {
+            capturedTimeTrack = tt;
+            emissionReceived.Set();
+        });
         
-        Thread.Sleep(1100);
+        emissionReceived.WaitOne(TimeSpan.FromSeconds(2)).Should().BeTrue("observable should emit at least once");
         
         capturedTimeTrack.Should().NotBeNull();
         capturedTimeTrack!.EstimatedEndDateTime.Should().BeNull();
@@ -226,14 +256,19 @@ public class TimeTrackingComputerTests
         var sut = CreateSut();
         var startDateTime = DateTimeOffset.Now;
         TimeTrack? capturedTimeTrack = null;
+        var emissionReceived = new ManualResetEvent(false);
         
         sut.Start(startDateTime);
         
         _dataSubject.OnNext((1000, 1500));
         
-        using var subscription = sut.RemainingTime.Subscribe(tt => capturedTimeTrack = tt);
+        using var subscription = sut.RemainingTime.Subscribe(tt =>
+        {
+            capturedTimeTrack = tt;
+            emissionReceived.Set();
+        });
         
-        Thread.Sleep(1100);
+        emissionReceived.WaitOne(TimeSpan.FromSeconds(2)).Should().BeTrue("observable should emit at least once");
         
         capturedTimeTrack.Should().NotBeNull();
         capturedTimeTrack!.EstimatedEndDateTime.Should().BeNull();
@@ -307,14 +342,19 @@ public class TimeTrackingComputerTests
         var sut = CreateSut();
         var startDateTime = DateTimeOffset.Now.AddSeconds(-10);
         TimeTrack? capturedTimeTrack = null;
+        var emissionReceived = new ManualResetEvent(false);
         
         sut.Start(startDateTime);
         
         _dataSubject.OnNext((1000, 500));
         
-        using var subscription = sut.RemainingTime.Subscribe(tt => capturedTimeTrack = tt);
+        using var subscription = sut.RemainingTime.Subscribe(tt =>
+        {
+            capturedTimeTrack = tt;
+            emissionReceived.Set();
+        });
         
-        Thread.Sleep(1100);
+        emissionReceived.WaitOne(TimeSpan.FromSeconds(2)).Should().BeTrue("observable should emit at least once");
         
         capturedTimeTrack.Should().NotBeNull();
         capturedTimeTrack!.EstimatedEndDateTime.Should().NotBeNull();
@@ -418,14 +458,17 @@ public class TimeTrackingComputerTests
         var sut = CreateSut();
         var startDateTime = DateTimeOffset.Now;
         var emissions = new List<TimeTrack>();
+        var expectedEmissions = new ManualResetEvent(false);
         
         sut.Start(startDateTime);
         
-        using var subscription = sut.RemainingTime.Take(2).Subscribe(emissions.Add);
+        using var subscription = sut.RemainingTime.Take(2).Subscribe(
+            onNext: tt => emissions.Add(tt),
+            onCompleted: () => expectedEmissions.Set());
         
-        Thread.Sleep(2100);
+        expectedEmissions.WaitOne(TimeSpan.FromSeconds(3)).Should().BeTrue("observable should complete after 2 emissions");
         
-        emissions.Should().NotBeEmpty();
+        emissions.Should().HaveCount(2);
         emissions.All(tt => tt.EstimatedEndDateTime == null).Should().BeTrue();
     }
     
