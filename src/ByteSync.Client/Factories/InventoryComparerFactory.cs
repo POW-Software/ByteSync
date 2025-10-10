@@ -26,6 +26,8 @@ public class InventoryComparerFactory : IInventoryComparerFactory
         var inventoryFileRepository = _context.Resolve<IInventoryFileRepository>();
         var inventoriesFiles = inventoryFileRepository.GetAllInventoriesFiles(localInventoryMode);
         
+        // inventoryIndexer is required for full inventory analysis to identify files needing checksum.
+        // It's null when comparing already-complete inventories (e.g., from ComparisonItemsService).
         var inventoryComparer = _context.Resolve<IInventoryComparer>(
             new TypedParameter(typeof(SessionSettings), cloudSessionSettings),
             new TypedParameter(typeof(InventoryIndexer), inventoryIndexer));

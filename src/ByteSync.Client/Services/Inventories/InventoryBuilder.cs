@@ -146,7 +146,6 @@ public class InventoryBuilder : IInventoryBuilder
         try
         {
             InventoryFileAnalyzer.Start();
-            InventoryIndexer.Reset();
             InventorySaver.Start(inventoryFullName);
             
             Inventory.StartDateTime = DateTimeOffset.Now;

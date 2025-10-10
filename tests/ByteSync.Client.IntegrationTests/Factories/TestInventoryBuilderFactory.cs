@@ -58,7 +58,7 @@ public class TestInventoryBuilderFactory : IntegrationTest
         _builder.RegisterType<InventoryBuilder>().As<IInventoryBuilder>().InstancePerDependency();
         _builder.RegisterType<InventoryFileAnalyzer>().As<IInventoryFileAnalyzer>().InstancePerDependency();
         RegisterType<InventorySaver, IInventorySaver>();
-        RegisterType<InventoryIndexer, IInventoryIndexer>();
+        _builder.RegisterType<InventoryIndexer>().As<IInventoryIndexer>().InstancePerDependency();
         RegisterType<CloudSessionLocalDataManager, ICloudSessionLocalDataManager>();
         
         _builder.RegisterGeneric(typeof(Mock<>)).SingleInstance();

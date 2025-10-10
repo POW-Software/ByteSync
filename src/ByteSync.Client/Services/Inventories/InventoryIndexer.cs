@@ -17,12 +17,6 @@ public class InventoryIndexer : IInventoryIndexer
     
     private Dictionary<string, HashSet<IndexedItem>> IndexedItemsByPathIdentity { get; }
     
-    public void Reset()
-    {
-        IndexedItemsByFileDescription.Clear();
-        IndexedItemsByPathIdentity.Clear();
-    }
-    
     public void Register(FileDescription fileDescription, FileInfo fileInfo)
     {
         var indexedItem = new IndexedItem(fileDescription, fileInfo);
