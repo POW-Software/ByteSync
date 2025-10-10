@@ -53,7 +53,7 @@ public class InventoryDeltaGenerationViewModelTests
         vm.AnalyzedFiles.Should().Be(0);
         vm.AnalyzableFiles.Should().Be(0);
         vm.AnalyzeSuccess.Should().Be(0);
-        vm.ProcessedSize.Should().Be(0);
+        vm.ProcessedVolume.Should().Be(0);
         vm.AnalysisIconBrush.Should().BeSameAs(_backgroundBrush);
         
         _processData.AnalysisStatus.OnNext(InventoryTaskStatus.Running);
@@ -79,13 +79,13 @@ public class InventoryDeltaGenerationViewModelTests
             m.AnalyzeErrors = 2;
             m.AnalyzedFiles = 5;
             m.AnalyzableFiles = 8;
-            m.ProcessedSize = 42;
+            m.ProcessedVolume = 42;
         });
         
         vm.ShouldEventuallyBe(x => x.AnalyzedFiles, 5);
         vm.ShouldEventuallyBe(x => x.AnalyzeErrors, 2);
         vm.ShouldEventuallyBe(x => x.AnalyzableFiles, 8);
-        vm.ShouldEventuallyBe(x => x.ProcessedSize, 42);
+        vm.ShouldEventuallyBe(x => x.ProcessedVolume, 42);
         vm.ShouldEventuallyBe(x => x.AnalyzeSuccess, 3);
         vm.ShouldEventuallyBe(x => x.HasErrors, true);
         

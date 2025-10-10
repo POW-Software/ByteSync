@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Threading;
 using ByteSync.Business;
 using ByteSync.Business.Arguments;
@@ -386,7 +386,7 @@ public class InventoryBuilder : IInventoryBuilder
             {
                 InventoryProcessData.UpdateMonitorData(imd =>
                 {
-                    imd.IdentifiedSize += fileDescription.Size;
+                    imd.IdentifiedVolume += fileDescription.Size;
                     imd.IdentifiedFiles += 1;
                 });
             }

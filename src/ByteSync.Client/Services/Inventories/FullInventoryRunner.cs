@@ -4,6 +4,7 @@ using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Models.FileSystems;
 
 namespace ByteSync.Services.Inventories;
 
@@ -52,7 +53,16 @@ public class FullInventoryRunner : IFullInventoryRunner
                 var filesIdentifier = new FilesIdentifier(inventoryBuilder.Inventory, inventoryBuilder.SessionSettings!,
                     inventoryBuilder.InventoryIndexer);
                 var items = filesIdentifier.Identify(comparisonResult);
-                InventoryProcessData.UpdateMonitorData(monitorData => monitorData.AnalyzableFiles += items.Count);
+                
+                var analyzableVolume = items
+                    .Where(i => i.FileSystemDescription is FileDescription)
+                    .Sum(i => ((FileDescription)i.FileSystemDescription).Size);
+                
+                InventoryProcessData.UpdateMonitorData(monitorData =>
+                {
+                    monitorData.AnalyzableFiles += items.Count;
+                    monitorData.AnalyzableVolume += analyzableVolume;
+                });
                 
                 inventoriesBuildersAndItems.Add(new(inventoryBuilder, items));
             }

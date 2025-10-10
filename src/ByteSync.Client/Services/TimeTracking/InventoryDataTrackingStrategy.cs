@@ -14,7 +14,7 @@ public class InventoryDataTrackingStrategy : IDataTrackingStrategy
         _inventoryService = inventoryService;
     }
     
-    public IObservable<(long IdentifiedSize, long ProcessedSize)> GetDataObservable()
+    public IObservable<(long IdentifiedVolume, long ProcessedVolume)> GetDataObservable()
     {
         var inventoryProcessData = _inventoryService.InventoryProcessData;
         
@@ -46,6 +46,6 @@ public class InventoryDataTrackingStrategy : IDataTrackingStrategy
         var merged = sampled.Merge(notSkipped);
         
         return merged.Select(tuple =>
-            (tuple.Item1.IdentifiedSize, tuple.Item1.ProcessedSize));
+            (tuple.Item1.AnalyzableVolume, tuple.Item1.ProcessedVolume));
     }
 }

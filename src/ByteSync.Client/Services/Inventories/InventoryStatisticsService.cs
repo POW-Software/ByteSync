@@ -97,7 +97,7 @@ public class InventoryStatisticsService : IInventoryStatisticsService
         var stats = new InventoryStatistics
         {
             TotalAnalyzed = totalAnalyzed,
-            ProcessedSize = processedSize,
+            ProcessedVolume = processedSize,
             Success = success,
             Errors = errors
         };
