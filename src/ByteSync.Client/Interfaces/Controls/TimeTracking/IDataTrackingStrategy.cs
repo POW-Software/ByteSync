@@ -2,5 +2,5 @@
 
 public interface IDataTrackingStrategy
 {
-    IObservable<(long IdentifiedSize, long ProcessedSize)> GetDataObservable();
+    IObservable<(long IdentifiedVolume, long ProcessedVolume)> GetDataObservable();
 }

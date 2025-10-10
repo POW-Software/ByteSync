@@ -5,6 +5,7 @@ using ByteSync.Business;
 using ByteSync.Business.Inventories;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Models.FileSystems;
 
 namespace ByteSync.Services.Inventories;
 
@@ -52,56 +53,79 @@ public class InventoryStatisticsService : IInventoryStatisticsService
     {
         var inventoryFiles = _inventoryFileRepository.GetAllInventoriesFiles(LocalInventoryModes.Full);
         
-        var totalAnalyzed = 0;
-        var success = 0;
-        var errors = 0;
-        long processedSize = 0;
+        var statsCollector = new StatisticsCollector();
         
         foreach (var inventoryFile in inventoryFiles)
         {
-            try
-            {
-                using var loader = new InventoryLoader(inventoryFile.FullName);
-                var inventory = loader.Inventory;
-                
-                foreach (var part in inventory.InventoryParts)
-                {
-                    foreach (var fd in part.FileDescriptions)
-                    {
-                        var hasError = fd.HasAnalysisError;
-                        var hasFingerprint = !string.IsNullOrEmpty(fd.Sha256) || !string.IsNullOrEmpty(fd.SignatureGuid);
-                        
-                        if (hasError)
-                        {
-                            errors += 1;
-                        }
-                        else if (hasFingerprint)
-                        {
-                            success += 1;
-                        }
-                        
-                        if (hasError || hasFingerprint)
-                        {
-                            totalAnalyzed += 1;
-                            processedSize += fd.Size;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to load inventory file {InventoryFile}", inventoryFile.FullName);
-            }
+            ProcessInventoryFile(inventoryFile, statsCollector);
         }
         
         var stats = new InventoryStatistics
         {
-            TotalAnalyzed = totalAnalyzed,
-            ProcessedSize = processedSize,
-            Success = success,
-            Errors = errors
+            TotalAnalyzed = statsCollector.TotalAnalyzed,
+            ProcessedVolume = statsCollector.ProcessedSize,
+            Success = statsCollector.Success,
+            Errors = statsCollector.Errors
         };
         
         _statisticsSubject.OnNext(stats);
+    }
+    
+    private void ProcessInventoryFile(InventoryFile inventoryFile, StatisticsCollector collector)
+    {
+        try
+        {
+            using var loader = new InventoryLoader(inventoryFile.FullName);
+            var inventory = loader.Inventory;
+            
+            foreach (var part in inventory.InventoryParts)
+            {
+                foreach (var fd in part.FileDescriptions)
+                {
+                    ProcessFileDescription(fd, collector);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load inventory file {InventoryFile}", inventoryFile.FullName);
+        }
+    }
+    
+    private static void ProcessFileDescription(FileDescription fd, StatisticsCollector collector)
+    {
+        var hasError = fd.HasAnalysisError;
+        var hasFingerprint = HasValidFingerprint(fd);
+        
+        if (hasError)
+        {
+            collector.Errors += 1;
+        }
+        else if (hasFingerprint)
+        {
+            collector.Success += 1;
+        }
+        
+        if (hasError || hasFingerprint)
+        {
+            collector.TotalAnalyzed += 1;
+            collector.ProcessedSize += fd.Size;
+        }
+    }
+    
+    private static bool HasValidFingerprint(FileDescription fd)
+    {
+        return !string.IsNullOrEmpty(fd.Sha256) || !string.IsNullOrEmpty(fd.SignatureGuid);
+    }
+    
+    private class StatisticsCollector
+    {
+        public int TotalAnalyzed { get; set; }
+        
+        public int Success { get; set; }
+        
+        public int Errors { get; set; }
+        
+        public long ProcessedSize { get; set; }
     }
 }

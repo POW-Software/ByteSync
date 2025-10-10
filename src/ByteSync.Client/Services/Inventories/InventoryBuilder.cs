@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Threading;
 using ByteSync.Business;
 using ByteSync.Business.Arguments;
@@ -254,15 +254,9 @@ public class InventoryBuilder : IInventoryBuilder
             return;
         }
         
-        if (IgnoreHidden)
+        if (ShouldIgnoreHiddenDirectory(directoryInfo))
         {
-            if (directoryInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
-                (OSPlatform == OSPlatforms.Linux && directoryInfo.Name.StartsWith(".")))
-            {
-                _logger.LogInformation("Directory {Directory} is ignored because considered as hidden", directoryInfo.FullName);
-                
-                return;
-            }
+            return;
         }
         
         var directoryDescription = IdentityBuilder.BuildDirectoryDescription(inventoryPart, directoryInfo);
@@ -300,6 +294,24 @@ public class InventoryBuilder : IInventoryBuilder
             
             DoAnalyze(inventoryPart, subFile, cancellationToken);
         }
+    }
+    
+    private bool ShouldIgnoreHiddenDirectory(DirectoryInfo directoryInfo)
+    {
+        if (!IgnoreHidden)
+        {
+            return false;
+        }
+        
+        if (directoryInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
+            (OSPlatform == OSPlatforms.Linux && directoryInfo.Name.StartsWith(".")))
+        {
+            _logger.LogInformation("Directory {Directory} is ignored because considered as hidden", directoryInfo.FullName);
+            
+            return true;
+        }
+        
+        return false;
     }
     
     private void DoAnalyze(InventoryPart inventoryPart, FileInfo fileInfo, CancellationToken cancellationToken = new())
@@ -386,7 +398,7 @@ public class InventoryBuilder : IInventoryBuilder
             {
                 InventoryProcessData.UpdateMonitorData(imd =>
                 {
-                    imd.IdentifiedSize += fileDescription.Size;
+                    imd.IdentifiedVolume += fileDescription.Size;
                     imd.IdentifiedFiles += 1;
                 });
             }

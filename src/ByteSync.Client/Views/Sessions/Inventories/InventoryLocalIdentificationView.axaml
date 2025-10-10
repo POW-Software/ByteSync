@@ -56,7 +56,7 @@
             <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc InventoryProcess_TotalSize}"
                    Classes="InventoryStatusDescription" />
             <Label Grid.Row="2" Grid.Column="1"
-                   Content="{Binding IdentifiedSize, FallbackValue=0, 
+                   Content="{Binding IdentifiedVolume, FallbackValue=0, 
                         Converter={StaticResource FormatKbSizeConverter}}"
                    HorizontalContentAlignment="Right" />
         </Grid>

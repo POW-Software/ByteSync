@@ -73,7 +73,7 @@
                 <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc InventoryProcess_DeltaGeneration_ProcessedSize}"
                        Classes="InventoryStatusDescription" />
                 <Border Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge" IsVisible="{Binding ShowAnalysisValues}">
-                    <TextBlock Text="{Binding ProcessedSize, FallbackValue='', Converter={StaticResource FormatKbSizeConverter}}" />
+                    <TextBlock Text="{Binding ProcessedVolume, FallbackValue='', Converter={StaticResource FormatKbSizeConverter}}" />
                 </Border>
 
                 <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc InventoryProcess_DeltaGeneration_AnalyzeSuccess}"

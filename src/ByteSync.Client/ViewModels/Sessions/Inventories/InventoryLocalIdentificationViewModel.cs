@@ -50,7 +50,7 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
             {
                 IdentifiedFiles = m.IdentifiedFiles;
                 IdentifiedDirectories = m.IdentifiedDirectories;
-                IdentifiedSize = m.IdentifiedSize;
+                IdentifiedVolume = m.IdentifiedVolume;
             })
             .DisposeWith(disposables);
         
@@ -123,7 +123,7 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
     public int IdentifiedDirectories { get; set; }
     
     [Reactive]
-    public long IdentifiedSize { get; set; }
+    public long IdentifiedVolume { get; set; }
     
     [Reactive]
     public string IdentificationIcon { get; set; } = "None";

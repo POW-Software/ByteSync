@@ -66,7 +66,7 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
                 AnalyzeErrors = m.AnalyzeErrors;
                 AnalyzedFiles = m.AnalyzedFiles;
                 AnalyzableFiles = m.AnalyzableFiles;
-                ProcessedSize = m.ProcessedSize;
+                ProcessedVolume = m.ProcessedVolume;
             })
             .DisposeWith(disposables);
         
@@ -177,7 +177,7 @@ public class InventoryDeltaGenerationViewModel : ActivatableViewModelBase
     public extern int AnalyzeSuccess { [ObservableAsProperty] get; }
     
     [Reactive]
-    public long ProcessedSize { get; set; }
+    public long ProcessedVolume { get; set; }
     
     [Reactive]
     public IBrush? AnalysisIconBrush { get; set; }

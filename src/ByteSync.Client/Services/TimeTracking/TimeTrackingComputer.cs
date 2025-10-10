@@ -29,8 +29,8 @@ public class TimeTrackingComputer : ITimeTrackingComputer
                 var timeTracking = (TimeTrack)_timeTrack.Value.Clone();
                 
                 var (_, data) = tuple;
-                SetDataToHandle(data.IdentifiedSize);
-                SetDataHandled(data.ProcessedSize);
+                SetDataToHandle(data.IdentifiedVolume);
+                SetDataHandled(data.ProcessedVolume);
                 
                 UpdateTimeTracking(timeTracking);
                 

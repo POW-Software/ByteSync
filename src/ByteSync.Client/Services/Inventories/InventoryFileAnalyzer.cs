@@ -86,8 +86,6 @@ public class InventoryFileAnalyzer : IInventoryFileAnalyzer
     {
         lock (SyncRoot)
         {
-            _logger.LogInformation("RegisterFile: {FullName}", fileInfo.FullName);
-            
             FilesToAnalyze.Add(new Tuple<FileDescription, FileInfo>(fileDescription, fileInfo));
             
             ManualResetSyncEvents.SetEvent();
@@ -141,7 +139,7 @@ public class InventoryFileAnalyzer : IInventoryFileAnalyzer
             _processData.UpdateMonitorData(inventoryMonitorData =>
             {
                 inventoryMonitorData.AnalyzedFiles += 1;
-                inventoryMonitorData.ProcessedSize += tuple.Item1.Size;
+                inventoryMonitorData.ProcessedVolume += tuple.Item1.Size;
             });
         }
         
