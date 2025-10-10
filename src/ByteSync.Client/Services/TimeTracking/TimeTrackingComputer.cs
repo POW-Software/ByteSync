@@ -5,7 +5,7 @@ using ByteSync.Interfaces.Controls.TimeTracking;
 
 namespace ByteSync.Services.TimeTracking;
 
-class TimeTrackingComputer : ITimeTrackingComputer
+public class TimeTrackingComputer : ITimeTrackingComputer
 {
     private readonly BehaviorSubject<TimeTrack> _timeTrack;
     private readonly BehaviorSubject<bool> _isStarted;
