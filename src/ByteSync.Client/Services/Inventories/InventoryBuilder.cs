@@ -27,7 +27,7 @@ public class InventoryBuilder : IInventoryBuilder
         OSPlatforms osPlatform, FingerprintModes fingerprintMode, ILogger<InventoryBuilder> logger,
         IInventoryFileAnalyzer inventoryFileAnalyzer,
         IInventorySaver inventorySaver,
-        IInventoryIndexer indexer)
+        IInventoryIndexer inventoryIndexer)
     {
         _logger = logger;
         
@@ -38,7 +38,7 @@ public class InventoryBuilder : IInventoryBuilder
         FingerprintMode = fingerprintMode;
         OSPlatform = osPlatform;
         
-        Indexer = indexer;
+        InventoryIndexer = inventoryIndexer;
         
         Inventory = InstantiateInventory();
         
@@ -81,7 +81,7 @@ public class InventoryBuilder : IInventoryBuilder
     
     private IInventorySaver InventorySaver { get; }
     
-    public IInventoryIndexer Indexer { get; }
+    public IInventoryIndexer InventoryIndexer { get; }
     
     private OSPlatforms OSPlatform { get; set; }
     
@@ -146,6 +146,7 @@ public class InventoryBuilder : IInventoryBuilder
         try
         {
             InventoryFileAnalyzer.Start();
+            InventoryIndexer.Reset();
             InventorySaver.Start(inventoryFullName);
             
             Inventory.StartDateTime = DateTimeOffset.Now;
@@ -269,7 +270,7 @@ public class InventoryBuilder : IInventoryBuilder
         
         AddFileSystemDescription(inventoryPart, directoryDescription);
         
-        Indexer.Register(directoryDescription, directoryInfo);
+        InventoryIndexer.Register(directoryDescription, directoryInfo);
         
         foreach (var subDirectory in directoryInfo.GetDirectories())
         {
@@ -372,7 +373,7 @@ public class InventoryBuilder : IInventoryBuilder
         
         AddFileSystemDescription(inventoryPart, fileDescription);
         
-        Indexer.Register(fileDescription, fileInfo);
+        InventoryIndexer.Register(fileDescription, fileInfo);
     }
     
     private void AddFileSystemDescription(InventoryPart inventoryPart, FileSystemDescription fileSystemDescription)

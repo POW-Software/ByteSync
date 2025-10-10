@@ -6,6 +6,8 @@ namespace ByteSync.Interfaces.Controls.Inventories;
 
 public interface IInventoryIndexer
 {
+    void Reset();
+    
     void Register(FileDescription fileDescription, FileInfo fileInfo);
     
     void Register(DirectoryDescription directoryDescription, DirectoryInfo directoryInfo);

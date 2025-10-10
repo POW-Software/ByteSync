@@ -124,7 +124,7 @@ public class ComparisonResultPreparer
         {
             var initialStatusBuilder = new InitialStatusBuilder();
             using var inventoryComparer = new InventoryComparer(SessionSettings, initialStatusBuilder);
-            inventoryComparer.Indexer = inventoryData.InventoryBuilder.Indexer;
+            inventoryComparer.Indexer = inventoryData.InventoryBuilder.InventoryIndexer;
             
             foreach (var inventoryBaseFile in BaseInventoryFiles)
             {

@@ -17,6 +17,12 @@ public class InventoryIndexer : IInventoryIndexer
     
     private Dictionary<string, HashSet<IndexedItem>> IndexedItemsByPathIdentity { get; }
     
+    public void Reset()
+    {
+        IndexedItemsByFileDescription.Clear();
+        IndexedItemsByPathIdentity.Clear();
+    }
+    
     public void Register(FileDescription fileDescription, FileInfo fileInfo)
     {
         var indexedItem = new IndexedItem(fileDescription, fileInfo);
@@ -39,10 +45,8 @@ public class InventoryIndexer : IInventoryIndexer
     {
         var index = BuildFileDescriptionIndex(fileSystemDescription);
         
-        if (IndexedItemsByFileDescription.ContainsKey(index))
+        if (IndexedItemsByFileDescription.TryGetValue(index, out var indexedItem))
         {
-            var indexedItem = IndexedItemsByFileDescription[index];
-            
             var pathIdentityIndex = BuildPathIdentityIndex(pathIdentity);
             
             if (!IndexedItemsByPathIdentity.ContainsKey(pathIdentityIndex))
@@ -58,14 +62,7 @@ public class InventoryIndexer : IInventoryIndexer
     {
         var pathIdentityIndex = BuildPathIdentityIndex(pathIdentity);
         
-        if (IndexedItemsByPathIdentity.ContainsKey(pathIdentityIndex))
-        {
-            return IndexedItemsByPathIdentity[pathIdentityIndex];
-        }
-        else
-        {
-            return null;
-        }
+        return IndexedItemsByPathIdentity.GetValueOrDefault(pathIdentityIndex);
     }
     
     private string BuildFileDescriptionIndex(FileSystemDescription fileSystemDescription)

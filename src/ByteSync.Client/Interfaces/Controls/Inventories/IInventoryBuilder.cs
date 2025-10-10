@@ -12,7 +12,7 @@ public interface IInventoryBuilder
     
     public string InventoryCode { get; }
     
-    public IInventoryIndexer Indexer { get; }
+    public IInventoryIndexer InventoryIndexer { get; }
     
     public SessionSettings? SessionSettings { get; }
     

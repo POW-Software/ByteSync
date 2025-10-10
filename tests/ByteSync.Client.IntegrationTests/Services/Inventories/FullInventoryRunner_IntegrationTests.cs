@@ -188,7 +188,7 @@ public class FullInventoryRunner_IntegrationTests : IntegrationTest
                 RelativePath = fileRelativePath,
                 Size = fileInfo.Exists ? fileInfo.Length : 0
             };
-            inventoryBuilder.Indexer.Register(fileDescription, pathIdentity);
+            inventoryBuilder.InventoryIndexer.Register(fileDescription, pathIdentity);
             
             var comparisonItem = new ComparisonItem(pathIdentity);
             

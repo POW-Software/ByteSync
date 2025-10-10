@@ -46,11 +46,11 @@ public class FullInventoryRunner : IFullInventoryRunner
             foreach (var inventoryBuilder in InventoryProcessData.InventoryBuilders!)
             {
                 using var inventoryComparer =
-                    _inventoryComparerFactory.CreateInventoryComparer(LocalInventoryModes.Base, inventoryBuilder.Indexer);
+                    _inventoryComparerFactory.CreateInventoryComparer(LocalInventoryModes.Base, inventoryBuilder.InventoryIndexer);
                 var comparisonResult = inventoryComparer.Compare();
                 
                 var filesIdentifier = new FilesIdentifier(inventoryBuilder.Inventory, inventoryBuilder.SessionSettings!,
-                    inventoryBuilder.Indexer);
+                    inventoryBuilder.InventoryIndexer);
                 var items = filesIdentifier.Identify(comparisonResult);
                 InventoryProcessData.UpdateMonitorData(monitorData => monitorData.AnalyzableFiles += items.Count);
                 

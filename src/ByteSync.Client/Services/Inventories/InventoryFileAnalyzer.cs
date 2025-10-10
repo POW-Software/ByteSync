@@ -86,6 +86,8 @@ public class InventoryFileAnalyzer : IInventoryFileAnalyzer
     {
         lock (SyncRoot)
         {
+            _logger.LogInformation("RegisterFile: {FullName}", fileInfo.FullName);
+            
             FilesToAnalyze.Add(new Tuple<FileDescription, FileInfo>(fileDescription, fileInfo));
             
             ManualResetSyncEvents.SetEvent();

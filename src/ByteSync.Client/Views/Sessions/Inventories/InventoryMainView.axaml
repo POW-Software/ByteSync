@@ -29,7 +29,7 @@
                                StrokeDashArray="1, 4" StrokeDashOffset="0" Margin="36,6" />
 
                     <!-- Bottom row: Local status + Identification + Analysis -->
-                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,6,0,0" MaxWidth="1800">
+                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,6,0,6" MaxWidth="1800">
                         <local:InventoryLocalStatusView
                             DataContext="{Binding InventoryLocalStatusViewModel}"
                             MaxWidth="600" MinWidth="300" Margin="30,6" />
