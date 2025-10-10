@@ -2,45 +2,47 @@
 using System.Threading;
 using ByteSync.Business;
 using ByteSync.Business.Arguments;
+using ByteSync.Business.Inventories;
 using ByteSync.Common.Business.Misc;
+using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.FileSystems;
 using FastRsync.Signature;
-using Serilog;
 
 namespace ByteSync.Services.Inventories;
 
-class InventoryFileAnalyzer
+public class InventoryFileAnalyzer : IInventoryFileAnalyzer
 {
     private bool _isAllIdentified;
-
-    public InventoryFileAnalyzer(InventoryBuilder inventoryBuilder, Action<FileDescription> raiseFileAnalyzedHandler,
-        Action<FileDescription> raiseFileAnalyzeErrorHandle)
+    
+    private readonly FingerprintModes _fingerprintMode;
+    private readonly InventoryProcessData _processData;
+    
+    private readonly IInventorySaver _saver;
+    private readonly ILogger<InventoryFileAnalyzer> _logger;
+    
+    public InventoryFileAnalyzer(FingerprintModes fingerprintMode, InventoryProcessData processData, IInventorySaver saver,
+        ILogger<InventoryFileAnalyzer> logger)
     {
-        InventoryBuilder = inventoryBuilder;
-        RaiseFileAnalyzedHandler = raiseFileAnalyzedHandler;
-        RaiseFileAnalyzeErrorHandler = raiseFileAnalyzeErrorHandle;
-
+        _fingerprintMode = fingerprintMode;
+        _processData = processData;
+        
+        _saver = saver;
+        _logger = logger;
+        
         ManualResetSyncEvents = new ManualResetSyncEvents();
         SyncRoot = new object();
         FilesToAnalyze = new List<Tuple<FileDescription, FileInfo>>();
-
         HasFinished = new ManualResetEvent(false);
     }
-
-    private InventoryBuilder InventoryBuilder { get; }
-
-    private Action<FileDescription> RaiseFileAnalyzedHandler { get; set; }
     
-    private Action<FileDescription> RaiseFileAnalyzeErrorHandler { get; set; }
-
     private List<Tuple<FileDescription, FileInfo>> FilesToAnalyze { get; }
-
+    
     private object SyncRoot { get; }
-
+    
     private ManualResetSyncEvents ManualResetSyncEvents { get; }
-
-    internal ManualResetEvent HasFinished { get; }
-
+    
+    public ManualResetEvent HasFinished { get; }
+    
     public bool IsAllIdentified
     {
         get
@@ -49,14 +51,13 @@ class InventoryFileAnalyzer
             {
                 return _isAllIdentified;
             }
-
         }
         set
         {
             lock (SyncRoot)
             {
                 _isAllIdentified = value;
-
+                
                 if (FilesToAnalyze.Count == 0 && _isAllIdentified)
                 {
                     ManualResetSyncEvents.SetEnd();
@@ -64,29 +65,35 @@ class InventoryFileAnalyzer
             }
         }
     }
-
+    
     public void Start()
     {
         HasFinished.Reset();
         
         Task.Run(HandleFilesAnalysis);
     }
-
+    
     public void Stop()
     {
-            
+        lock (SyncRoot)
+        {
+            ManualResetSyncEvents.ResetEvent();
+            ManualResetSyncEvents.SetEnd();
+        }
     }
-
+    
     public void RegisterFile(FileDescription fileDescription, FileInfo fileInfo)
     {
         lock (SyncRoot)
         {
+            _logger.LogInformation("RegisterFile: {FullName}", fileInfo.FullName);
+            
             FilesToAnalyze.Add(new Tuple<FileDescription, FileInfo>(fileDescription, fileInfo));
-
+            
             ManualResetSyncEvents.SetEvent();
         }
     }
-
+    
     private void HandleFilesAnalysis()
     {
         while (ManualResetSyncEvents.WaitForEvent())
@@ -97,46 +104,50 @@ class InventoryFileAnalyzer
                 DebugUtils.DebugSleep(2);
             }
         #endif
-
+            
             Tuple<FileDescription, FileInfo> tuple;
             lock (SyncRoot)
             {
                 tuple = FilesToAnalyze[0];
                 FilesToAnalyze.RemoveAt(0);
-
+                
                 if (FilesToAnalyze.Count == 0)
                 {
                     ManualResetSyncEvents.ResetEvent();
-
+                    
                     if (IsAllIdentified)
                     {
                         ManualResetSyncEvents.SetEnd();
                     }
                 }
             }
-
-            tuple.Item1.FingerprintMode = InventoryBuilder.FingerprintMode;
-                
+            
+            tuple.Item1.FingerprintMode = _fingerprintMode;
+            
             try
             {
                 ComputeFingerPrint(tuple);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "InventoryFileAnalyzer.HandleFilesAnalysis");
+                _logger.LogError(ex, "InventoryFileAnalyzer.HandleFilesAnalysis");
                 
                 tuple.Item1.AnalysisErrorType = ex.GetType().Name;
                 tuple.Item1.AnalysisErrorDescription = ex.Message;
                 
-                RaiseFileAnalyzeErrorHandler.Invoke(tuple.Item1);
+                _processData.UpdateMonitorData(imd => imd.AnalyzeErrors += 1);
             }
             
-            RaiseFileAnalyzedHandler.Invoke(tuple.Item1);
+            _processData.UpdateMonitorData(inventoryMonitorData =>
+            {
+                inventoryMonitorData.AnalyzedFiles += 1;
+                inventoryMonitorData.ProcessedSize += tuple.Item1.Size;
+            });
         }
-
+        
         HasFinished.Set();
     }
-
+    
     private void ComputeFingerPrint(Tuple<FileDescription, FileInfo> tuple)
     {
         if (tuple.Item1.FingerprintMode == FingerprintModes.Sha256)
@@ -148,17 +159,17 @@ class InventoryFileAnalyzer
         }
         else
         {
-            Log.Information("Analyzing file {FullName}", tuple.Item2.FullName);
+            _logger.LogInformation("Analyzing file {FullName}", tuple.Item2.FullName);
             
             using var basisStream = new FileStream(tuple.Item2.FullName, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var memoryStream = new MemoryStream();
             var signatureBuilder = new SignatureBuilder();
             signatureBuilder.Build(basisStream, new SignatureWriter(memoryStream));
-
+            
             var guid = Guid.NewGuid().ToString();
-
-            InventoryBuilder.InventorySaver.AddSignature(guid, memoryStream);
-
+            
+            _saver.AddSignature(guid, memoryStream);
+            
             tuple.Item1.SignatureGuid = guid;
         }
     }

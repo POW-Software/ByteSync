@@ -5,10 +5,10 @@ using ByteSync.Services.Bootstrappers;
 using ByteSync.Services.Communications;
 using ByteSync.Services.Communications.SignalR;
 using ByteSync.Services.Communications.Transfers.Downloading;
-using ByteSync.Services.Inventories;
 using ByteSync.Services.Communications.Transfers.Uploading;
-using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Services.Inventories;
 using ByteSync.Services.Navigations;
+using ByteSync.Services.Sessions;
 using ByteSync.Services.Sessions.Connecting;
 using ByteSync.Services.Synchronizations;
 
@@ -36,8 +36,10 @@ public class SingletonsModule : Module
         builder.RegisterType<SynchronizationStarter>().SingleInstance().AsImplementedInterfaces();
         builder.RegisterType<SynchronizationActionServerInformer>().SingleInstance().AsImplementedInterfaces();
         builder.RegisterType<DownloadManager>().SingleInstance().AsImplementedInterfaces();
-
+        
         builder.RegisterType<AdaptiveUploadController>().SingleInstance().AsImplementedInterfaces();
         builder.RegisterType<UploadSlicingManager>().SingleInstance().AsImplementedInterfaces();
+        
+        builder.RegisterType<DataPartIndexer>().SingleInstance().AsImplementedInterfaces();
     }
 }

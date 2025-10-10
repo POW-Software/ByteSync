@@ -1,5 +1,6 @@
 ﻿using ByteSync.Business.Inventories;
 using ByteSync.Business.Sessions;
+using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.Inventories;
 
@@ -7,7 +8,7 @@ namespace ByteSync.Services.Inventories;
 
 public class FilesIdentifier
 {
-    public FilesIdentifier(Inventory inventory, SessionSettings sessionSettings, InventoryIndexer inventoryIndexer)
+    public FilesIdentifier(Inventory inventory, SessionSettings sessionSettings, IInventoryIndexer inventoryIndexer)
     {
         Inventory = inventory;
         SessionSettings = sessionSettings;
@@ -18,17 +19,15 @@ public class FilesIdentifier
     
     internal SessionSettings SessionSettings { get; }
     
-    internal InventoryIndexer InventoryIndexer { get; }
-
+    internal IInventoryIndexer InventoryIndexer { get; }
+    
     public HashSet<IndexedItem> Identify(ComparisonResult comparisonResult)
     {
         var comparisonItems = comparisonResult.ComparisonItems
             .Where(item => item.ContentIdentities
-                .Any(ident => ident.InventoryPartsByLastWriteTimes.Any(
-                    pair => pair.Value.Any(
-                        ip => ip.Inventory.Equals(Inventory)))));
-
-        HashSet<ComparisonItem> comparisonItemsToAnalyse = new HashSet<ComparisonItem>();
+                .Any(ident => ident.InventoryPartsByLastWriteTimes.Any(pair => pair.Value.Any(ip => ip.Inventory.Equals(Inventory)))));
+        
+        var comparisonItemsToAnalyse = new HashSet<ComparisonItem>();
         
         foreach (var comparisonItem in comparisonItems)
         {
@@ -45,7 +44,7 @@ public class FilesIdentifier
                     comparisonItemsToAnalyse.Add(comparisonItem);
                 }
             }
-
+            
             if (SessionSettings.AnalysisMode == AnalysisModes.Checksum)
             {
                 if (contentIdentity != null)
@@ -55,7 +54,7 @@ public class FilesIdentifier
                     {
                         sum += pair.Value.Count;
                     }
-
+                    
                     if (sum > 1)
                     {
                         comparisonItemsToAnalyse.Add(comparisonItem);
@@ -63,15 +62,15 @@ public class FilesIdentifier
                 }
             }
         }
-
+        
         var result = new HashSet<IndexedItem>();
         foreach (var comparisonItem in comparisonItemsToAnalyse)
         {
             var items = InventoryIndexer.GetItemsBy(comparisonItem.PathIdentity)!;
-
+            
             result.AddAll(items);
         }
-
+        
         return result;
     }
 }

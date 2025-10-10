@@ -1,8 +1,8 @@
 ﻿using System.Threading;
 using ByteSync.Business.DataSources;
+using ByteSync.Business.Inventories;
 using ByteSync.Business.Sessions;
 using ByteSync.Models.Inventories;
-using ByteSync.Services.Inventories;
 
 namespace ByteSync.Interfaces.Controls.Inventories;
 
@@ -12,15 +12,15 @@ public interface IInventoryBuilder
     
     public string InventoryCode { get; }
     
-    public InventoryIndexer Indexer { get; }
+    public IInventoryIndexer InventoryIndexer { get; }
     
     public SessionSettings? SessionSettings { get; }
     
     InventoryPart AddInventoryPart(DataSource dataSource);
-
+    
     InventoryPart AddInventoryPart(string fullName);
     
     Task BuildBaseInventoryAsync(string inventoryFullName, CancellationToken cancellationToken = default);
-
-    Task RunAnalysisAsync(string inventoryFullName, HashSet<ByteSync.Business.Inventories.IndexedItem> items, CancellationToken cancellationToken);
+    
+    Task RunAnalysisAsync(string inventoryFullName, HashSet<IndexedItem> items, CancellationToken cancellationToken);
 }

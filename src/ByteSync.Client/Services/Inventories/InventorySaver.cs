@@ -1,52 +1,51 @@
 ﻿using System.IO;
 using System.IO.Compression;
 using ByteSync.Common.Controls.Json;
+using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Models.Inventories;
 using Serilog;
 
 namespace ByteSync.Services.Inventories;
 
-class InventorySaver
+public class InventorySaver : IInventorySaver
 {
-    public InventorySaver(InventoryBuilder inventoryBuilder)
+    public InventorySaver()
     {
-        InventoryBuilder = inventoryBuilder;
-
         CountByDirectory = new Dictionary<string, int>();
     }
-
+    
     public void Start(string inventoryFullName)
     {
         if (File.Exists(inventoryFullName))
         {
             Log.Information("Deleting {FileFullName}", inventoryFullName);
             File.Delete(inventoryFullName);
+            
             // throw new Exception("file already exists");
         }
-
+        
         ZipArchive = ZipFile.Open(inventoryFullName, ZipArchiveMode.Create);
-
+        
         CountByDirectory.Clear();
     }
-
-    private InventoryBuilder InventoryBuilder { get; }
-
+    
     private ZipArchive? ZipArchive { get; set; }
-
+    
     private Dictionary<string, int> CountByDirectory { get; }
-
+    
     public void AddSignature(string guid, MemoryStream memoryStream)
     {
         var directoryName = GetDirectoryName(guid);
-
+        
         if (ZipArchive != null)
         {
             var signatureFile = ZipArchive.CreateEntry($"{directoryName}/{guid}.sign");
-
+            
             using (var entryStream = signatureFile.Open())
             {
                 memoryStream.Position = 0;
                 memoryStream.CopyTo(entryStream);
-
+                
                 //using (var streamWriter = new StreamWriter(entryStream))
                 //{
                 //    streamWriter.Write(json);
@@ -54,19 +53,19 @@ class InventorySaver
             }
         }
     }
-
+    
     private string GetDirectoryName(string guid)
     {
         // On doit déterminer le chemin
-
+        
         // on répartit par clé pour éviter qu'il n'y ait trop de fichiers signatures dans le même répertoire
         // ex : si guid = fa7dbd6f-eefc-474f-9a09-7fc2c5de2718
         //      => première clé : f (première lettre du guid)
         //      => dès qu'on atteint 1000 fichiers dans f\, on prend 2 lettres => fa
         //      => ainsi de suite, dès qu'on atteint 1000 fichiers, on ajoute une lettre => fa7, fa7d
-
+        
         var len = 1;
-
+        
         var candidate = guid.Substring(0, len);
         var isOK = false;
         while (!isOK)
@@ -87,18 +86,18 @@ class InventorySaver
                 candidate = guid.Substring(0, len);
             }
         }
-
+        
         return candidate;
     }
-
-    public void WriteInventory()
+    
+    public void WriteInventory(Inventory inventory)
     {
-        var json = JsonHelper.Serialize(InventoryBuilder.Inventory);
-
+        var json = JsonHelper.Serialize(inventory);
+        
         if (ZipArchive != null)
         {
             var inventoryFile = ZipArchive.CreateEntry("inventory.json");
-
+            
             using (var entryStream = inventoryFile.Open())
             {
                 using (var streamWriter = new StreamWriter(entryStream))
@@ -108,8 +107,8 @@ class InventorySaver
             }
         }
     }
-
-
+    
+    
     public void Stop()
     {
         try

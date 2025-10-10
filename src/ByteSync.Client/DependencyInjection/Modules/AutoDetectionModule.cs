@@ -47,11 +47,6 @@ public class AutoDetectionModule : Module
             .AsImplementedInterfaces();
         
         builder.RegisterAssemblyTypes(executingAssembly)
-            .Where(t => t.Name.EndsWith("Indexer"))
-            .SingleInstance()
-            .AsImplementedInterfaces();
-        
-        builder.RegisterAssemblyTypes(executingAssembly)
             .Where(t => t.Name.EndsWith("Cache"))
             .SingleInstance()
             .AsImplementedInterfaces();
@@ -75,11 +70,11 @@ public class AutoDetectionModule : Module
             .AssignableTo<IPushReceiver>()
             .As<IPushReceiver>()
             .SingleInstance();
-
+        
         builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
             .Where(t => t.Name.EndsWith("ViewModel"))
             .AsSelf();
-
+        
         builder.RegisterAssemblyTypes(executingAssembly)
             .Where(t => t.Name.EndsWith("Proxy"));
     }

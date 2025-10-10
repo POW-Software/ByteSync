@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Threading;
 using ByteSync.Business;
 using ByteSync.Business.Arguments;
@@ -24,7 +24,10 @@ public class InventoryBuilder : IInventoryBuilder
     
     public InventoryBuilder(SessionMember sessionMember, DataNode dataNode, SessionSettings sessionSettings,
         InventoryProcessData inventoryProcessData,
-        OSPlatforms osPlatform, FingerprintModes fingerprintMode, ILogger<InventoryBuilder> logger)
+        OSPlatforms osPlatform, FingerprintModes fingerprintMode, ILogger<InventoryBuilder> logger,
+        IInventoryFileAnalyzer inventoryFileAnalyzer,
+        IInventorySaver inventorySaver,
+        IInventoryIndexer inventoryIndexer)
     {
         _logger = logger;
         
@@ -35,12 +38,13 @@ public class InventoryBuilder : IInventoryBuilder
         FingerprintMode = fingerprintMode;
         OSPlatform = osPlatform;
         
-        InventoryFileAnalyzer = new InventoryFileAnalyzer(this, RaiseFileAnalyzed, RaiseFileAnalyzeError);
-        InventorySaver = new InventorySaver(this);
-        
-        Indexer = new InventoryIndexer();
+        InventoryIndexer = inventoryIndexer;
         
         Inventory = InstantiateInventory();
+        
+        InventorySaver = inventorySaver;
+        
+        InventoryFileAnalyzer = inventoryFileAnalyzer;
     }
     
     private Inventory InstantiateInventory()
@@ -73,11 +77,11 @@ public class InventoryBuilder : IInventoryBuilder
     
     public string InventoryCode => DataNode.Code;
     
-    private InventoryFileAnalyzer InventoryFileAnalyzer { get; }
+    private IInventoryFileAnalyzer InventoryFileAnalyzer { get; }
     
-    internal InventorySaver InventorySaver { get; }
+    private IInventorySaver InventorySaver { get; }
     
-    public InventoryIndexer Indexer { get; }
+    public IInventoryIndexer InventoryIndexer { get; }
     
     private OSPlatforms OSPlatform { get; set; }
     
@@ -176,7 +180,7 @@ public class InventoryBuilder : IInventoryBuilder
             
             Inventory.EndDateTime = DateTimeOffset.Now;
             
-            InventorySaver.WriteInventory();
+            InventorySaver.WriteInventory(Inventory);
             
             _logger.LogInformation(
                 "InventoryBuilder {Letter:l}: Local Inventory - Files Identification completed ({ItemsCount} files found)",
@@ -199,12 +203,16 @@ public class InventoryBuilder : IInventoryBuilder
         
         try
         {
+            using var _ = cancellationToken.Register(() => { InventoryFileAnalyzer.Stop(); });
+            
             InventorySaver.Start(inventoryFullName);
             
             foreach (var item in items.Where(i => i.FileSystemDescription is FileDescription))
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
+                    InventoryFileAnalyzer.Stop();
+                    
                     break;
                 }
                 
@@ -214,10 +222,14 @@ public class InventoryBuilder : IInventoryBuilder
             }
             
             InventoryFileAnalyzer.IsAllIdentified = true;
+            if (cancellationToken.IsCancellationRequested)
+            {
+                InventoryFileAnalyzer.Stop();
+            }
             
             InventoryFileAnalyzer.HasFinished.WaitOne();
             
-            InventorySaver.WriteInventory();
+            InventorySaver.WriteInventory(Inventory);
             
             _logger.LogInformation("InventoryBuilder {Letter:l}: Local Inventory - Files Analysis completed ({ItemsCount} files analyzed)",
                 InventoryCode, items.Count);
@@ -257,7 +269,7 @@ public class InventoryBuilder : IInventoryBuilder
         
         AddFileSystemDescription(inventoryPart, directoryDescription);
         
-        Indexer.Register(directoryDescription, directoryInfo);
+        InventoryIndexer.Register(directoryDescription, directoryInfo);
         
         foreach (var subDirectory in directoryInfo.GetDirectories())
         {
@@ -360,7 +372,7 @@ public class InventoryBuilder : IInventoryBuilder
         
         AddFileSystemDescription(inventoryPart, fileDescription);
         
-        Indexer.Register(fileDescription, fileInfo);
+        InventoryIndexer.Register(fileDescription, fileInfo);
     }
     
     private void AddFileSystemDescription(InventoryPart inventoryPart, FileSystemDescription fileSystemDescription)
@@ -383,19 +395,5 @@ public class InventoryBuilder : IInventoryBuilder
                 InventoryProcessData.UpdateMonitorData(imd => imd.IdentifiedDirectories += 1);
             }
         }
-    }
-    
-    private void RaiseFileAnalyzed(FileDescription fileDescription)
-    {
-        InventoryProcessData.UpdateMonitorData(inventoryMonitorData =>
-        {
-            inventoryMonitorData.AnalyzedFiles += 1;
-            inventoryMonitorData.ProcessedSize += fileDescription.Size;
-        });
-    }
-    
-    private void RaiseFileAnalyzeError(FileDescription fileDescription)
-    {
-        InventoryProcessData.UpdateMonitorData(imd => imd.AnalyzeErrors += 1);
     }
 }

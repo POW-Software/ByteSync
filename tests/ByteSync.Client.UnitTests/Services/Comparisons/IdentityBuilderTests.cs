@@ -180,9 +180,17 @@ public class IdentityBuilderTests : AbstractTester
             ClientInstanceId = endpoint.ClientInstanceId
         };
         
+        var inventoryFileAnalyzerLoggerMock = new Mock<ILogger<InventoryFileAnalyzer>>();
+        
+        var processData = new InventoryProcessData();
+        var saver = new InventorySaver();
+        var analyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, processData, saver, inventoryFileAnalyzerLoggerMock.Object);
         var inventoryBuilder = new InventoryBuilder(sessionMemberInfo, dataNode,
             SessionSettingsHelper.BuildDefaultSessionSettings(DataTypes.FilesDirectories, MatchingModes.Tree),
-            new InventoryProcessData(), OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object);
+            processData, OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object,
+            analyzer,
+            saver,
+            new InventoryIndexer());
         
         inventoryBuilder.AddInventoryPart(dataSource);
         

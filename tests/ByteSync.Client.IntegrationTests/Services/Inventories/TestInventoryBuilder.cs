@@ -773,9 +773,17 @@ public class TestInventoryBuilder : IntegrationTest
             Code = "Code"
         };
         
-        var loggerMock = new Mock<ILogger<InventoryBuilder>>();
+        var inventoryBuilderloggerMock = new Mock<ILogger<InventoryBuilder>>();
+        var inventoryFileAnalyzerLoggerMock = new Mock<ILogger<InventoryFileAnalyzer>>();
+        
+        var saver = new InventorySaver();
+        var analyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, inventoryProcessData, saver,
+            inventoryFileAnalyzerLoggerMock.Object);
         
         return new InventoryBuilder(sessionMemberInfo, dataNode, sessionSettings, inventoryProcessData,
-            osPlatform, FingerprintModes.Rsync, loggerMock.Object);
+            osPlatform, FingerprintModes.Rsync, inventoryBuilderloggerMock.Object,
+            analyzer,
+            saver,
+            new InventoryIndexer());
     }
 }

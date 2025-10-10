@@ -18,7 +18,7 @@ public class InventoryComparerFactory : IInventoryComparerFactory
         _context = context;
     }
     
-    public IInventoryComparer CreateInventoryComparer(LocalInventoryModes localInventoryMode, InventoryIndexer? inventoryIndexer = null)
+    public IInventoryComparer CreateInventoryComparer(LocalInventoryModes localInventoryMode, IInventoryIndexer? inventoryIndexer = null)
     {
         var sessionService = _context.Resolve<ISessionService>();
         var cloudSessionSettings = sessionService.CurrentSessionSettings!;
@@ -26,10 +26,12 @@ public class InventoryComparerFactory : IInventoryComparerFactory
         var inventoryFileRepository = _context.Resolve<IInventoryFileRepository>();
         var inventoriesFiles = inventoryFileRepository.GetAllInventoriesFiles(localInventoryMode);
         
+        // inventoryIndexer is required for full inventory analysis to identify files needing checksum.
+        // It's null when comparing already-complete inventories (e.g., from ComparisonItemsService).
         var inventoryComparer = _context.Resolve<IInventoryComparer>(
             new TypedParameter(typeof(SessionSettings), cloudSessionSettings),
             new TypedParameter(typeof(InventoryIndexer), inventoryIndexer));
-
+        
         inventoryComparer.AddInventories(inventoriesFiles);
         
         return inventoryComparer;

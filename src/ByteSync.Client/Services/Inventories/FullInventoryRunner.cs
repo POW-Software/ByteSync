@@ -1,5 +1,6 @@
 ﻿using ByteSync.Business;
 using ByteSync.Business.Inventories;
+using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Services.Sessions;
@@ -12,16 +13,18 @@ public class FullInventoryRunner : IFullInventoryRunner
     private readonly IInventoryService _inventoryService;
     private readonly ICloudSessionLocalDataManager _cloudSessionLocalDataManager;
     private readonly IInventoryComparerFactory _inventoryComparerFactory;
+    private readonly ISessionMemberService _sessionMemberService;
     private readonly ILogger<FullInventoryRunner> _logger;
     
     public FullInventoryRunner(IInventoryFinishedService inventoryFinishedService, IInventoryService inventoryService,
         ICloudSessionLocalDataManager cloudSessionLocalDataManager, IInventoryComparerFactory inventoryComparerFactory,
-        ILogger<FullInventoryRunner> logger)
+        ISessionMemberService sessionMemberService, ILogger<FullInventoryRunner> logger)
     {
         _inventoryFinishedService = inventoryFinishedService;
         _inventoryService = inventoryService;
         _cloudSessionLocalDataManager = cloudSessionLocalDataManager;
         _inventoryComparerFactory = inventoryComparerFactory;
+        _sessionMemberService = sessionMemberService;
         _logger = logger;
     }
     
@@ -37,17 +40,18 @@ public class FullInventoryRunner : IFullInventoryRunner
         try
         {
             InventoryProcessData.AnalysisStatus.OnNext(InventoryTaskStatus.Running);
+            await _sessionMemberService.UpdateCurrentMemberGeneralStatus(SessionMemberGeneralStatus.InventoryRunningAnalysis);
             
             var inventoriesBuildersAndItems = new List<Tuple<IInventoryBuilder, HashSet<IndexedItem>>>();
             foreach (var inventoryBuilder in InventoryProcessData.InventoryBuilders!)
             {
                 using var inventoryComparer =
-                    _inventoryComparerFactory.CreateInventoryComparer(LocalInventoryModes.Base, inventoryBuilder.Indexer);
+                    _inventoryComparerFactory.CreateInventoryComparer(LocalInventoryModes.Base, inventoryBuilder.InventoryIndexer);
                 var comparisonResult = inventoryComparer.Compare();
                 
                 var filesIdentifier = new FilesIdentifier(inventoryBuilder.Inventory, inventoryBuilder.SessionSettings!,
-                    inventoryBuilder.Indexer);
-                HashSet<IndexedItem> items = filesIdentifier.Identify(comparisonResult);
+                    inventoryBuilder.InventoryIndexer);
+                var items = filesIdentifier.Identify(comparisonResult);
                 InventoryProcessData.UpdateMonitorData(monitorData => monitorData.AnalyzableFiles += items.Count);
                 
                 inventoriesBuildersAndItems.Add(new(inventoryBuilder, items));
@@ -65,7 +69,12 @@ public class FullInventoryRunner : IFullInventoryRunner
                     await inventoryBuilder.RunAnalysisAsync(fullInventoryFullName, items, token);
                 });
             
-            if (!InventoryProcessData.CancellationTokenSource.Token.IsCancellationRequested)
+            if (InventoryProcessData.CancellationTokenSource.Token.IsCancellationRequested)
+            {
+                // Make sure UI leaves the running state immediately on abort
+                InventoryProcessData.AnalysisStatus.OnNext(InventoryTaskStatus.Cancelled);
+            }
+            else
             {
                 InventoryProcessData.AnalysisStatus.OnNext(InventoryTaskStatus.Success);
                 InventoryProcessData.MainStatus.OnNext(InventoryTaskStatus.Success);
