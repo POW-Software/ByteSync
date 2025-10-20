@@ -27,7 +27,7 @@ public class FileUploadProcessor : IFileUploadProcessor
     private const int MAX_WORKERS = 4;
     private const int ADJUSTER_INTERVAL_MS = 200;
     private string? _sharedFileId;
-    private readonly IInventoryService? _inventoryService;
+    private readonly IInventoryService _inventoryService;
 
     // State tracking
     private UploadProgressState? _progressState;
@@ -44,7 +44,7 @@ public class FileUploadProcessor : IFileUploadProcessor
         IAdaptiveUploadController adaptiveUploadController,
         IUploadSlicingManager uploadSlicingManager,
         SemaphoreSlim uploadSlotsLimiter,
-        IInventoryService? inventoryService = null)
+        IInventoryService inventoryService)
     {
         _slicerEncrypter = slicerEncrypter;
         _logger = logger;
@@ -58,34 +58,6 @@ public class FileUploadProcessor : IFileUploadProcessor
         _uploadSlicingManager = uploadSlicingManager;
         _uploadSlotsLimiter = uploadSlotsLimiter;
         _inventoryService = inventoryService;
-    }
-
-    // Backward-compatible overload for tests and callers not providing uploadSlotsLimiter
-    public FileUploadProcessor(
-        ISlicerEncrypter slicerEncrypter,
-        ILogger<FileUploadProcessor> logger,
-        IFileUploadCoordinator fileUploadCoordinator,
-        IFileUploadWorker fileUploadWorker,
-        IFileTransferApiClient fileTransferApiClient,
-        ISessionService sessionService,
-        string? localFileToUpload,
-        SemaphoreSlim semaphoreSlim,
-        IAdaptiveUploadController adaptiveUploadController,
-        IUploadSlicingManager uploadSlicingManager)
-        : this(
-            slicerEncrypter,
-            logger,
-            fileUploadCoordinator,
-            fileUploadWorker,
-            fileTransferApiClient,
-            sessionService,
-            localFileToUpload,
-            semaphoreSlim,
-            adaptiveUploadController,
-            uploadSlicingManager,
-            new SemaphoreSlim(Math.Min(Math.Max(1, adaptiveUploadController.CurrentParallelism), 4), 4),
-            null)
-    {
     }
 
     public async Task ProcessUpload(SharedFileDefinition sharedFileDefinition, int? maxSliceLength = null)
@@ -127,7 +99,7 @@ public class FileUploadProcessor : IFileUploadProcessor
                     AdjustSlots(desired);
                     EnsureWorkers(desired);
 
-                    if (sharedFileDefinition.IsInventory && _inventoryService != null && _progressState != null)
+                    if (sharedFileDefinition.IsInventory && _progressState != null)
                     {
                         long current = 0;
                         await _semaphoreSlim.WaitAsync();
@@ -162,7 +134,7 @@ public class FileUploadProcessor : IFileUploadProcessor
 
         _slicerEncrypter.Dispose();
 
-        if (sharedFileDefinition.IsInventory && _inventoryService != null && _progressState != null)
+        if (sharedFileDefinition.IsInventory && _progressState != null)
         {
             long current;
             _semaphoreSlim.Wait();

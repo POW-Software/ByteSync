@@ -5,6 +5,7 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
+using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
@@ -25,6 +26,7 @@ public class FileUploadProcessorAdjusterTests
     private Mock<ISessionService> _mockSessionService = null!;
     private Mock<IAdaptiveUploadController> _mockAdaptive = null!;
     private Mock<IUploadSlicingManager> _mockSlicingManager = null!;
+    private Mock<IInventoryService> _mockInventoryService = null!;
     
     private SemaphoreSlim _stateSemaphore = null!;
     private SharedFileDefinition _file = null!;
@@ -40,6 +42,7 @@ public class FileUploadProcessorAdjusterTests
         _mockSessionService = new Mock<ISessionService>();
         _mockAdaptive = new Mock<IAdaptiveUploadController>();
         _mockSlicingManager = new Mock<IUploadSlicingManager>();
+        _mockInventoryService = new Mock<IInventoryService>();
         
         _file = new SharedFileDefinition { Id = "f1", SessionId = "s1", UploadedFileLength = 1024 };
         _stateSemaphore = new SemaphoreSlim(1, 1);
@@ -88,7 +91,8 @@ public class FileUploadProcessorAdjusterTests
             _stateSemaphore,
             _mockAdaptive.Object,
             _mockSlicingManager.Object,
-            limiter);
+            limiter,
+            _mockInventoryService.Object);
         
         // Act: increase desired slots to 3
         InvokePrivate(proc, "AdjustSlots", 3);
@@ -116,7 +120,8 @@ public class FileUploadProcessorAdjusterTests
             _stateSemaphore,
             _mockAdaptive.Object,
             _mockSlicingManager.Object,
-            limiter);
+            limiter,
+            _mockInventoryService.Object);
         
         SetPrivateField(proc, "_grantedSlots", 3);
         
@@ -144,7 +149,8 @@ public class FileUploadProcessorAdjusterTests
             _stateSemaphore,
             _mockAdaptive.Object,
             _mockSlicingManager.Object,
-            limiter);
+            limiter,
+            _mockInventoryService.Object);
         
         // Set progress state and current started workers
         SetPrivateField(proc, "_progressState", new UploadProgressState());

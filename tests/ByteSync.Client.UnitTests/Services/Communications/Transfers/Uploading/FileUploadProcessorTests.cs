@@ -5,6 +5,7 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -30,6 +31,7 @@ public class FileUploadProcessorTests
     private MemoryStream _testMemoryStream = null!;
     private FileUploadProcessor _fileUploadProcessor = null!;
     private SemaphoreSlim _semaphoreSlim = null!;
+    private Mock<IInventoryService> _mockInventoryService = null!;
     
     [SetUp]
     public void SetUp()
@@ -43,6 +45,7 @@ public class FileUploadProcessorTests
         _mockSessionService = new Mock<ISessionService>();
         _mockAdaptiveController = new Mock<IAdaptiveUploadController>();
         _mockSlicingManager = new Mock<IUploadSlicingManager>();
+        _mockInventoryService = new Mock<IInventoryService>();
         
         _sharedFileDefinition = new SharedFileDefinition
         {
@@ -87,7 +90,9 @@ public class FileUploadProcessorTests
             _testFilePath,
             _semaphoreSlim,
             _mockAdaptiveController.Object,
-            _mockSlicingManager.Object);
+            _mockSlicingManager.Object,
+            new SemaphoreSlim(Math.Min(Math.Max(1, _mockAdaptiveController.Object.CurrentParallelism), 4), 4),
+            _mockInventoryService.Object);
     }
     
     [TearDown]
@@ -116,7 +121,9 @@ public class FileUploadProcessorTests
             _testFilePath,
             _semaphoreSlim,
             _mockAdaptiveController.Object,
-            _mockSlicingManager.Object);
+            _mockSlicingManager.Object,
+            new SemaphoreSlim(Math.Min(Math.Max(1, _mockAdaptiveController.Object.CurrentParallelism), 4), 4),
+            _mockInventoryService.Object);
         
         // Assert
         processor.Should().NotBeNull();
@@ -269,7 +276,9 @@ public class FileUploadProcessorTests
             null,
             _semaphoreSlim,
             _mockAdaptiveController.Object,
-            _mockSlicingManager.Object);
+            _mockSlicingManager.Object,
+            new SemaphoreSlim(Math.Min(Math.Max(1, _mockAdaptiveController.Object.CurrentParallelism), 4), 4),
+            _mockInventoryService.Object);
         
         var expectedException = new Exception("Test exception");
         _mockSlicingManager

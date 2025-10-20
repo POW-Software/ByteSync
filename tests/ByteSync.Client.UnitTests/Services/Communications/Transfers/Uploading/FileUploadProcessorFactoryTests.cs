@@ -7,6 +7,7 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -30,6 +31,7 @@ public class FileUploadProcessorFactoryTests
     private Mock<IAdaptiveUploadController> _mockAdaptiveController = null!;
     private Mock<IFileUploadProcessor> _mockProcessor = null!;
     private Mock<IUploadSlicingManager> _mockSlicingManager = null!;
+    private Mock<IInventoryService> _mockInventoryService = null!;
     
     private FileUploadProcessorFactory _factory = null!;
     
@@ -49,6 +51,7 @@ public class FileUploadProcessorFactoryTests
         _mockAdaptiveController = new Mock<IAdaptiveUploadController>();
         _mockProcessor = new Mock<IFileUploadProcessor>();
         _mockSlicingManager = new Mock<IUploadSlicingManager>();
+        _mockInventoryService = new Mock<IInventoryService>();
         
         _sharedFileDefinition = new SharedFileDefinition
         {
@@ -70,6 +73,7 @@ public class FileUploadProcessorFactoryTests
         builder.RegisterInstance(_mockSessionService.Object).As<ISessionService>();
         builder.RegisterInstance(_mockAdaptiveController.Object).As<IAdaptiveUploadController>();
         builder.RegisterInstance(_mockSlicingManager.Object).As<IUploadSlicingManager>();
+        builder.RegisterInstance(_mockInventoryService.Object).As<IInventoryService>();
         
         // Register the processor as an instance so typed parameters are ignored
         builder.RegisterInstance(_mockProcessor.Object).As<IFileUploadProcessor>();
