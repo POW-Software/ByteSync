@@ -57,7 +57,7 @@ public class FileUploadProcessorFactory : IFileUploadProcessorFactory
             new TypedParameter(typeof(IAdaptiveUploadController), adaptiveUploadController),
             new TypedParameter(typeof(IUploadSlicingManager), slicingManager),
             new NamedParameter("uploadSlotsLimiter", uploadSlotsLimiter),
-            new TypedParameter(typeof(IInventoryService), _context.Resolve<IInventoryService>())
+            new TypedParameter(typeof(IInventoryService), _context.ResolveOptional<IInventoryService>())
         );
 
         return fileUploadProcessor;
