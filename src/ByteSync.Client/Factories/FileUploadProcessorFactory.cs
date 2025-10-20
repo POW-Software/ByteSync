@@ -7,6 +7,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
+using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Communications.Transfers.Uploading;
@@ -55,7 +56,8 @@ public class FileUploadProcessorFactory : IFileUploadProcessorFactory
             new TypedParameter(typeof(SemaphoreSlim), semaphoreSlim),
             new TypedParameter(typeof(IAdaptiveUploadController), adaptiveUploadController),
             new TypedParameter(typeof(IUploadSlicingManager), slicingManager),
-            new NamedParameter("uploadSlotsLimiter", uploadSlotsLimiter)
+            new NamedParameter("uploadSlotsLimiter", uploadSlotsLimiter),
+            new TypedParameter(typeof(IInventoryService), _context.Resolve<IInventoryService>())
         );
 
         return fileUploadProcessor;

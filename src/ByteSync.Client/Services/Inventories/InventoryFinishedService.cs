@@ -1,5 +1,6 @@
 ﻿using ByteSync.Business;
 using ByteSync.Business.Inventories;
+using System.IO;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Inventories;
@@ -34,6 +35,27 @@ public class InventoryFinishedService : IInventoryFinishedService
 
         if (_sessionService.CurrentSession is CloudSession)
         {
+            try
+            {
+                long totalBytes = 0;
+                foreach (var localSharedFile in inventoriesFiles)
+                {
+                    var fi = new FileInfo(localSharedFile.FullName);
+                    if (fi.Exists)
+                    {
+                        totalBytes += fi.Length;
+                    }
+                }
+
+                _inventoryService.InventoryProcessData.UpdateMonitorData(m =>
+                {
+                    m.UploadTotalVolume += totalBytes;
+                });
+            }
+            catch
+            {
+            }
+
             foreach (var localSharedFile in inventoriesFiles)
             {
                 var fileUploader = _fileUploaderFactory.Build(localSharedFile.FullName, localSharedFile.SharedFileDefinition);
