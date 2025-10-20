@@ -5,10 +5,11 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Media;
 using ByteSync.Assets.Resources;
+using ByteSync.Business.Arguments;
 using ByteSync.Business.DataNodes;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
-using ByteSync.Interfaces;
+using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Repositories;
@@ -28,19 +29,19 @@ public class DataNodeHeaderViewModel : ActivatableViewModelBase
     private readonly IDataNodeRepository _dataNodeRepository = null!;
     private readonly IDataNodeService _dataNodeService = null!;
     private readonly ISessionService _sessionService = null!;
+    private readonly IEnvironmentService? _environmentService;
     private readonly SessionMember _sessionMember = null!;
     private readonly DataNode _dataNode = null!;
-
+    
     private IBrush _currentMemberLetterBackGround = null!;
     private IBrush _otherMemberLetterBackGround = null!;
     private IBrush _currentMemberLetterBorder = null!;
     private IBrush _otherMemberLetterBorder = null!;
-
+    
     public DataNodeHeaderViewModel()
     {
-
     }
-
+    
     public DataNodeHeaderViewModel(SessionMember sessionMember,
         DataNode dataNode,
         bool isLocalMachine,
@@ -49,7 +50,8 @@ public class DataNodeHeaderViewModel : ActivatableViewModelBase
         IDataNodeRepository dataNodeRepository,
         IDataNodeService dataNodeService,
         ISessionService sessionService,
-        ErrorViewModel errorViewModel)
+        ErrorViewModel errorViewModel,
+        IEnvironmentService? environmentService = null)
     {
         _sessionMember = sessionMember;
         _dataNode = dataNode;
@@ -58,32 +60,33 @@ public class DataNodeHeaderViewModel : ActivatableViewModelBase
         _dataNodeRepository = dataNodeRepository;
         _dataNodeService = dataNodeService;
         _sessionService = sessionService;
-
+        _environmentService = environmentService;
+        
         IsLocalMachine = isLocalMachine;
         ClientInstanceId = sessionMember.ClientInstanceId;
         Code = dataNode.Code;
         RemoveDataNodeError = errorViewModel;
-
+        
         // Create command with canExecute based on session status
         var canRemoveDataNode = _sessionService.SessionStatusObservable
             .Select(status => status == SessionStatus.Preparation)
             .CombineLatest(this.WhenAnyValue(x => x.IsLocalMachine, x => x.CanRemoveDataNode),
-                (isSessionInPreparation, localAndCanRemove) => 
+                (isSessionInPreparation, localAndCanRemove) =>
                     isSessionInPreparation && localAndCanRemove.Item1 && localAndCanRemove.Item2)
             .ObserveOn(RxApp.MainThreadScheduler);
         
         RemoveDataNodeCommand = ReactiveCommand.CreateFromTask(RemoveDataNode, canRemoveDataNode);
-
+        
         InitializeBrushes();
         SetLetterBrushes();
         UpdateMachineDescription();
-
+        
         this.WhenAnyValue(x => x.IsLocalMachine)
             .Subscribe(_ => SetLetterBrushes());
-
+        
         this.WhenAnyValue(x => x.IsLocalMachine, x => x.HasQuittedSessionAfterActivation)
             .Subscribe(_ => UpdateMachineDescription());
-
+        
         this.WhenActivated(disposables =>
         {
             var codeSubscription = _dataNode
@@ -91,11 +94,11 @@ public class DataNodeHeaderViewModel : ActivatableViewModelBase
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(newCode => Code = newCode);
             codeSubscription.DisposeWith(disposables);
-
+            
             Observable.FromEventPattern<PropertyChangedEventArgs>(_localizationService, nameof(_localizationService.PropertyChanged))
                 .Subscribe(_ => UpdateMachineDescription())
                 .DisposeWith(disposables);
-
+            
             _themeService.SelectedTheme.Skip(1)
                 .Subscribe(_ =>
                 {
@@ -103,16 +106,16 @@ public class DataNodeHeaderViewModel : ActivatableViewModelBase
                     SetLetterBrushes();
                 })
                 .DisposeWith(disposables);
-
+            
             // Watch for DataNode changes to update CanRemoveDataNode
             _dataNodeRepository.ObservableCache.Connect()
                 .WhereReasonsAre(ChangeReason.Add, ChangeReason.Remove)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => UpdateCanRemoveDataNode())
                 .DisposeWith(disposables);
-
+            
             UpdateCanRemoveDataNode();
-
+            
             this.WhenAnyValue(x => x.IsLocalMachine, x => x.CanRemoveDataNode)
                 .Select(tuple => tuple.Item1 && tuple.Item2)
                 .ObserveOn(RxApp.MainThreadScheduler)
@@ -120,50 +123,51 @@ public class DataNodeHeaderViewModel : ActivatableViewModelBase
                 .DisposeWith(disposables);
         });
     }
-
+    
     [Reactive]
     public string ClientInstanceId { get; private set; } = null!;
-
+    
     [Reactive]
     public string MachineDescription { get; private set; } = string.Empty;
-
+    
     [Reactive]
     public bool IsLocalMachine { get; private set; }
-
+    
     [Reactive]
     public bool HasQuittedSessionAfterActivation { get; set; }
-
+    
     [Reactive]
     public IBrush LetterBackBrush { get; private set; } = null!;
-
+    
     [Reactive]
     public IBrush LetterBorderBrush { get; private set; } = null!;
-
+    
     [Reactive]
     public string Code { get; set; } = string.Empty;
-
+    
     [Reactive]
     public bool CanRemoveDataNode { get; private set; }
-
+    
     [Reactive]
     public ErrorViewModel RemoveDataNodeError { get; set; } = null!;
-
+    
     public extern bool ShowRemoveButton { [ObservableAsProperty] get; }
-
+    
     public ReactiveCommand<Unit, Unit> RemoveDataNodeCommand { get; } = null!;
-
+    
     private void UpdateCanRemoveDataNode()
     {
         if (!IsLocalMachine)
         {
             CanRemoveDataNode = false;
+            
             return;
         }
-
+        
         var currentMemberDataNodes = _dataNodeRepository.SortedCurrentMemberDataNodes;
         CanRemoveDataNode = currentMemberDataNodes.Count > 1;
     }
-
+    
     private async Task RemoveDataNode()
     {
         try
@@ -184,7 +188,7 @@ public class DataNodeHeaderViewModel : ActivatableViewModelBase
             RemoveDataNodeError.SetException(ex);
         }
     }
-
+    
     private void InitializeBrushes()
     {
         _currentMemberLetterBackGround = _themeService.GetBrush("ConnectedMemberLetterBackGround")!;
@@ -192,34 +196,60 @@ public class DataNodeHeaderViewModel : ActivatableViewModelBase
         _currentMemberLetterBorder = _themeService.GetBrush("ConnectedMemberLetterBorder")!;
         _otherMemberLetterBorder = _themeService.GetBrush("DisabledMemberLetterBorder")!;
     }
-
+    
     private void SetLetterBrushes()
     {
         LetterBackBrush = IsLocalMachine ? _currentMemberLetterBackGround : _otherMemberLetterBackGround;
         LetterBorderBrush = IsLocalMachine ? _currentMemberLetterBorder : _otherMemberLetterBorder;
     }
-
+    
     private void UpdateMachineDescription()
     {
         string machineDescription;
+        var ipAddress = _sessionMember.IpAddress;
+        var maskIpAddress = _environmentService?.Arguments.Contains(RegularArguments.MASK_IP_ADDRESS) == true;
+        if (maskIpAddress)
+        {
+            ipAddress = MaskIpAddress(ipAddress);
+        }
+        
         if (IsLocalMachine)
         {
             machineDescription = $"{_localizationService[nameof(Resources.SessionMachineView_ThisComputer)]} " +
-                                 $"({_sessionMember.MachineName}, {_sessionMember.IpAddress})";
-#if DEBUG
+                                 $"({_sessionMember.MachineName}, {ipAddress})";
+        #if DEBUG
             machineDescription += " - PID:" + Process.GetCurrentProcess().Id;
-#endif
+        #endif
         }
         else
         {
-            machineDescription = $"{_sessionMember.MachineName}, {_sessionMember.IpAddress}";
+            machineDescription = $"{_sessionMember.MachineName}, {ipAddress}";
         }
-
+        
         if (HasQuittedSessionAfterActivation)
         {
             machineDescription += " - " + _localizationService[nameof(Resources.SessionMachineView_LeftSession)];
         }
-
+        
         MachineDescription = machineDescription;
     }
-} 
+    
+    private static string MaskIpAddress(string ipAddress)
+    {
+        if (string.IsNullOrWhiteSpace(ipAddress))
+        {
+            return ipAddress;
+        }
+        
+        var parts = ipAddress.Split('.');
+        if (parts.Length == 4)
+        {
+            parts[2] = "***";
+            parts[3] = "***";
+            
+            return string.Join('.', parts);
+        }
+        
+        return ipAddress;
+    }
+}
