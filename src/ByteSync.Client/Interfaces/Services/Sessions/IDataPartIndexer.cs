@@ -7,13 +7,11 @@ namespace ByteSync.Interfaces.Services.Sessions;
 
 public interface IDataPartIndexer
 {
-    public void BuildMap(List<Inventory> inventories);
-
-    public ReadOnlyCollection<DataPart> GetAllDataParts();
+    void BuildMap(List<Inventory> inventories);
     
-    public DataPart? GetDataPart(DataPart? dataPart);
-
-    public DataPart? GetDataPart(string? dataPartName);
-
+    ReadOnlyCollection<DataPart> GetAllDataParts();
+    
+    DataPart? GetDataPart(string? dataPartName);
+    
     void Remap(ICollection<SynchronizationRule> synchronizationRules);
 }
