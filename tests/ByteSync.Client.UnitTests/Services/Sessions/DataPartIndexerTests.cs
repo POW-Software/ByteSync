@@ -236,4 +236,67 @@ public class DataPartIndexerTests
             dataPart.Inventory.Should().Be(inventory);
         }
     }
+    
+    [Test]
+    public void GetDataPart_ShouldBeCaseInsensitive_ForMultiPartInventories()
+    {
+        // Arrange
+        var inventory = new Inventory
+        {
+            Code = "A",
+            InventoryParts =
+            [
+                new InventoryPart { Code = "A1" },
+                new InventoryPart { Code = "A2" }
+            ]
+        };
+        
+        _dataPartIndexer.BuildMap([inventory]);
+        
+        // Act
+        var lowerA1 = _dataPartIndexer.GetDataPart("a1");
+        var mixedA2 = _dataPartIndexer.GetDataPart("a2");
+        
+        // Assert
+        lowerA1.Should().NotBeNull();
+        lowerA1.Name.Should().Be("A1");
+        mixedA2.Should().NotBeNull();
+        mixedA2.Name.Should().Be("A2");
+    }
+    
+    [Test]
+    public void GetDataPart_ShouldBeCaseInsensitive_ForSinglePartInventories_And_AliasNumberedName()
+    {
+        // Arrange
+        var inventoryA = new Inventory
+        {
+            Code = "A",
+            InventoryParts = [new InventoryPart { Code = "A" }]
+        };
+        var inventoryB = new Inventory
+        {
+            Code = "B",
+            InventoryParts = [new InventoryPart { Code = "B" }]
+        };
+        
+        _dataPartIndexer.BuildMap([inventoryA, inventoryB]);
+        
+        // Act
+        var lowerA = _dataPartIndexer.GetDataPart("a");
+        var lowerB = _dataPartIndexer.GetDataPart("b");
+        var aliasA1Lower = _dataPartIndexer.GetDataPart("a1");
+        var aliasB1Upper = _dataPartIndexer.GetDataPart("B1");
+        
+        // Assert
+        lowerA.Should().NotBeNull();
+        lowerA.Name.Should().Be("A");
+        lowerB.Should().NotBeNull();
+        lowerB.Name.Should().Be("B");
+        
+        // When all inventories are single-part, "A1" (any case) should resolve to "A"
+        aliasA1Lower.Should().NotBeNull();
+        aliasA1Lower.Name.Should().Be("A");
+        aliasB1Upper.Should().NotBeNull();
+        aliasB1Upper.Name.Should().Be("B");
+    }
 }

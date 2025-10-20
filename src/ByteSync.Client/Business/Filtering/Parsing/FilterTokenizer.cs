@@ -6,13 +6,13 @@ public class FilterTokenizer : IFilterTokenizer
 {
     private string _filterText = null!;
     private int _position;
-
+    
     public void Initialize(string? filterText)
     {
         _filterText = filterText ?? string.Empty;
         _position = 0;
     }
-
+    
     public FilterToken GetNextToken()
     {
         // Skip whitespace
@@ -20,7 +20,7 @@ public class FilterTokenizer : IFilterTokenizer
         {
             _position++;
         }
-
+        
         if (_position >= _filterText.Length)
         {
             return new FilterToken
@@ -29,12 +29,13 @@ public class FilterTokenizer : IFilterTokenizer
                 Type = FilterTokenType.End
             };
         }
-
+        
         var c = _filterText[_position];
-
+        
         if (c == '(')
         {
             _position++;
+            
             return new FilterToken
             {
                 Token = "(",
@@ -44,6 +45,7 @@ public class FilterTokenizer : IFilterTokenizer
         else if (c == ')')
         {
             _position++;
+            
             return new FilterToken
             {
                 Token = ")",
@@ -53,6 +55,7 @@ public class FilterTokenizer : IFilterTokenizer
         else if (c == '.')
         {
             _position++;
+            
             return new FilterToken
             {
                 Token = ".",
@@ -62,6 +65,7 @@ public class FilterTokenizer : IFilterTokenizer
         else if (c == ':')
         {
             _position++;
+            
             return new FilterToken
             {
                 Token = ":",
@@ -78,7 +82,7 @@ public class FilterTokenizer : IFilterTokenizer
             {
                 _position++;
             }
-
+            
             string tokenValue;
             if (_position < _filterText.Length)
             {
@@ -89,7 +93,7 @@ public class FilterTokenizer : IFilterTokenizer
             {
                 tokenValue = _filterText.Substring(start);
             }
-
+            
             return new FilterToken
             {
                 Token = tokenValue,
@@ -100,34 +104,36 @@ public class FilterTokenizer : IFilterTokenizer
         {
             string tokenValue;
             var start = _position;
-
+            
             // Parse initial digits
             while (_position < _filterText.Length && char.IsDigit(_filterText[_position]))
             {
                 _position++;
             }
-
+            
             // Check for potential DateTime format
             if (_position < _filterText.Length && _filterText[_position] == '-')
             {
                 var dateTimeStart = _position;
                 _position++;
-
-                int segmentCount = 1;
-                while (_position < _filterText.Length && 
+                
+                var segmentCount = 1;
+                while (_position < _filterText.Length &&
                        (char.IsDigit(_filterText[_position]) || _filterText[_position] == '-'))
                 {
                     if (_filterText[_position] == '-')
                     {
                         segmentCount++;
                     }
+                    
                     _position++;
                 }
-
+                
                 // Validate DateTime format
                 if (segmentCount == 2 || segmentCount == 5)
                 {
                     tokenValue = _filterText.Substring(start, _position - start);
+                    
                     return new FilterToken
                     {
                         Token = tokenValue,
@@ -140,21 +146,21 @@ public class FilterTokenizer : IFilterTokenizer
                     _position = dateTimeStart; // Reset position
                 }
             }
-
+            
             // Parse as Number if not DateTime
             while (_position < _filterText.Length &&
                    (char.IsDigit(_filterText[_position]) || _filterText[_position] == '.'))
             {
                 _position++;
             }
-
+            
             while (_position < _filterText.Length && char.IsLetter(_filterText[_position]))
             {
                 _position++;
             }
-
+            
             tokenValue = _filterText.Substring(start, _position - start);
-
+            
             return new FilterToken
             {
                 Token = tokenValue,
@@ -165,13 +171,13 @@ public class FilterTokenizer : IFilterTokenizer
         {
             var start = _position;
             _position++;
-
+            
             if (_position < _filterText.Length &&
                 (_filterText[_position] == '=' || _filterText[_position] == '~' || _filterText[_position] == '>'))
             {
                 _position++;
             }
-
+            
             return new FilterToken
             {
                 Token = _filterText.Substring(start, _position - start),
@@ -181,10 +187,10 @@ public class FilterTokenizer : IFilterTokenizer
         else
         {
             var start = _position;
-
+            
             while (_position < _filterText.Length &&
-                   (char.IsLetterOrDigit(_filterText[_position]) 
-                    || _filterText[_position] == '-' || _filterText[_position] == '_' 
+                   (char.IsLetterOrDigit(_filterText[_position])
+                    || _filterText[_position] == '-' || _filterText[_position] == '_'
                     || _filterText[_position] == '\\' || _filterText[_position] == '/'
                     || _filterText[_position] == '*' || _filterText[_position] == '+' || _filterText[_position] == '?'
                     || _filterText[_position] == '^' || _filterText[_position] == '$'
@@ -193,9 +199,10 @@ public class FilterTokenizer : IFilterTokenizer
             {
                 _position++;
             }
+            
             var currentToken = _filterText.Substring(start, _position - start);
             FilterTokenType currentTokenType;
-
+            
             if (IsLogicalOperator(currentToken))
             {
                 currentTokenType = FilterTokenType.LogicalOperator;
@@ -212,7 +219,7 @@ public class FilterTokenizer : IFilterTokenizer
                     currentTokenType = FilterTokenType.String;
                 }
             }
-
+            
             return new FilterToken
             {
                 Token = currentToken,
@@ -235,17 +242,17 @@ public class FilterTokenizer : IFilterTokenizer
         {
             return false;
         }
-
+        
         if (!char.IsLetter(token[0]))
         {
             return false;
         }
-
+        
         if (token.Length == 1)
         {
             return true;
         }
-
+        
         if (token.Length == 2)
         {
             return char.IsLetter(token[1]) || char.IsDigit(token[1]);

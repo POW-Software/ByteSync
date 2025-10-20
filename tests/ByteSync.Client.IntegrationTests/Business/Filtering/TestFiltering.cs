@@ -17,7 +17,7 @@ public class TestFiltering : BaseTestFiltering
     {
         SetupBase();
     }
-
+    
     [Test]
     public void TestParse_Complete_Expression()
     {
@@ -110,7 +110,7 @@ public class TestFiltering : BaseTestFiltering
         var filterText = "A1.contents==";
         
         ConfigureDataPartIndexer();
-
+        
         // Act
         var parseResult = _filterParser.TryParse(filterText);
         
@@ -127,7 +127,7 @@ public class TestFiltering : BaseTestFiltering
         var filterText = "A1.unknown==";
         
         ConfigureDataPartIndexer();
-
+        
         // Act
         var parseResult = _filterParser.TryParse(filterText);
         
@@ -136,7 +136,7 @@ public class TestFiltering : BaseTestFiltering
         parseResult.ErrorMessage.Should().NotBeNull();
         parseResult.ErrorMessage.Should().Contain("Expected property name after dot");
     }
-
+    
     [Test]
     public void TestParse_Incomplete_DotExpression()
     {
@@ -228,7 +228,8 @@ public class TestFiltering : BaseTestFiltering
         // Assert
         parseResult.IsComplete.Should().BeFalse();
         parseResult.ErrorMessage.Should().NotBeNull();
-        parseResult.ErrorMessage.Should().Contain("Incomplete right operand for AND expression: Expected data source identifier after 'on:'");
+        parseResult.ErrorMessage.Should()
+            .Contain("Incomplete right operand for AND expression: Expected data source identifier after 'on:'");
     }
     
     [Test]
@@ -266,19 +267,19 @@ public class TestFiltering : BaseTestFiltering
         // Arrange
         var filterService = new FilterService(_filterParser, _evaluatorFactory, _logger);
         var comparisonItem = CreateBasicComparisonItem();
-
+        
         // A complete expression and an incomplete one
         var filterTexts = new List<string>
         {
             "A1.content==B1.content", // complete
-            "A1.content=="           // incomplete
+            "A1.content==" // incomplete
         };
-
+        
         ConfigureDataPartIndexer();
-
+        
         // Act
         var filter = filterService.BuildFilter(filterTexts);
-
+        
         // Assert
         // The filter should apply the complete expression and ignore the incomplete one
         // Here, we assume that CreateBasicComparisonItem() does not check content equality,
@@ -286,7 +287,7 @@ public class TestFiltering : BaseTestFiltering
         // For the example, we simply verify that the filter does not throw an exception.
         filter.Should().NotBeNull();
         filter(comparisonItem); // Should not throw an exception
-
+        
         // If no complete expression, the filter should accept everything
         var onlyIncomplete = new List<string> { "A1.content==" };
         var filter2 = filterService.BuildFilter(onlyIncomplete);
@@ -328,32 +329,33 @@ public class TestFiltering : BaseTestFiltering
     
     private void ConfigureDataPartIndexer(string inventoryACode = "A", string inventoryBCode = "B")
     {
-        inventoryACode = inventoryACode.ToUpperInvariant();
-        inventoryBCode = inventoryBCode.ToUpperInvariant();
-        
         var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
         var inventoryA = new Inventory
         {
-            InventoryId = $"Id_{inventoryACode}", 
+            InventoryId = $"Id_{inventoryACode}",
             Code = inventoryACode
         };
         var inventoryB = new Inventory
         {
-            InventoryId = $"Id_{inventoryBCode}", 
+            InventoryId = $"Id_{inventoryBCode}",
             Code = inventoryBCode
         };
-    
-        var inventoryPartA = new InventoryPart(inventoryA, $"/testRoot{inventoryACode}", 
+        
+        var inventoryPartA = new InventoryPart(inventoryA, $"/testRoot{inventoryACode}",
             FileSystemTypes.Directory);
-        var inventoryPartB = new InventoryPart(inventoryB, $"/testRoot{inventoryBCode}", 
+        var inventoryPartB = new InventoryPart(inventoryB, $"/testRoot{inventoryBCode}",
             FileSystemTypes.Directory);
-    
+        
         var dataPartAName = $"{inventoryACode}1";
         var dataPartBName = $"{inventoryBCode}1";
         var dataPartA = new DataPart(dataPartAName, inventoryPartA);
         var dataPartB = new DataPart(dataPartBName, inventoryPartB);
-    
+        
         mockDataPartIndexer.Setup(m => m.GetDataPart(dataPartAName)).Returns(dataPartA);
+        mockDataPartIndexer.Setup(m => m.GetDataPart(dataPartAName.ToLower())).Returns(dataPartA);
+        mockDataPartIndexer.Setup(m => m.GetDataPart(dataPartAName.ToUpper())).Returns(dataPartA);
         mockDataPartIndexer.Setup(m => m.GetDataPart(dataPartBName)).Returns(dataPartB);
+        mockDataPartIndexer.Setup(m => m.GetDataPart(dataPartBName.ToLower())).Returns(dataPartB);
+        mockDataPartIndexer.Setup(m => m.GetDataPart(dataPartBName.ToUpper())).Returns(dataPartB);
     }
 }
