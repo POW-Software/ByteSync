@@ -11,14 +11,14 @@ public class DataPartIndexer : IDataPartIndexer
     public DataPartIndexer()
     {
         Inventories = new List<Inventory>();
-
+        
         DataPartsByNames = new Dictionary<string, DataPart>();
     }
-
+    
     private List<Inventory> Inventories { get; }
     
     private Dictionary<string, DataPart> DataPartsByNames { get; set; }
-
+    
     public void BuildMap(List<Inventory> inventories)
     {
         Inventories.Clear();
@@ -26,31 +26,31 @@ public class DataPartIndexer : IDataPartIndexer
         
         DataPartsByNames.Clear();
         
-        bool useSinglePartDataPartNames = Inventories.All(i => i.InventoryParts.Count == 1);
+        var useSinglePartDataPartNames = Inventories.All(i => i.InventoryParts.Count == 1);
         
         foreach (var inventory in Inventories)
         {
             if (useSinglePartDataPartNames)
             {
                 var dataPart = new DataPart(inventory.Code, inventory);
-                DataPartsByNames.Add(dataPart.Name, dataPart);
+                DataPartsByNames.Add(dataPart.Name.ToUpper(), dataPart);
             }
             else
             {
                 foreach (var inventoryPart in inventory.InventoryParts)
                 {
                     var dataPart = new DataPart(inventoryPart.Code, inventoryPart);
-                    DataPartsByNames.Add(dataPart.Name, dataPart);
+                    DataPartsByNames.Add(dataPart.Name.ToUpper(), dataPart);
                 }
             }
         }
     }
-
+    
     public ReadOnlyCollection<DataPart> GetAllDataParts()
     {
         return DataPartsByNames.Values.ToList().AsReadOnly();
     }
-
+    
     public DataPart? GetDataPart(DataPart? dataPart)
     {
         return GetDataPart(dataPart?.Name);
@@ -68,24 +68,24 @@ public class DataPartIndexer : IDataPartIndexer
             return null;
         }
         
-        var result = DataPartsByNames.GetValueOrDefault(dataPartName);
-
+        var result = DataPartsByNames.GetValueOrDefault(dataPartName.ToUpper());
+        
         if (result == null)
         {
-            bool areAllSinglePartInventories = Inventories.All(i => i.InventoryParts.Count == 1);
-
+            var areAllSinglePartInventories = Inventories.All(i => i.InventoryParts.Count == 1);
+            
             if (areAllSinglePartInventories)
             {
                 if (IsSinglePartDataPartName(dataPartName))
                 {
-                    result = DataPartsByNames.GetValueOrDefault(dataPartName[0].ToString());
+                    result = DataPartsByNames.GetValueOrDefault(dataPartName[0].ToString().ToUpper());
                 }
             }
         }
         
         return result;
     }
-
+    
     private bool IsSinglePartDataPartName(string dataPartName)
     {
         return dataPartName.Length == 2 && char.IsLetter(dataPartName[0]) && dataPartName[1] == '1';
@@ -98,14 +98,14 @@ public class DataPartIndexer : IDataPartIndexer
             foreach (var action in synchronizationRule.Actions)
             {
                 action.Source = GetDataPart(action.Source);
-                    
+                
                 action.Destination = GetDataPart(action.Destination);
             }
-                
+            
             foreach (var condition in synchronizationRule.Conditions)
             {
                 condition.Source = GetDataPart(condition.Source)!;
-                    
+                
                 condition.Destination = GetDataPart(condition.Destination);
             }
         }
