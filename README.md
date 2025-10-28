@@ -70,7 +70,9 @@ ByteSync automatically detects the best route between endpoints:
 
 This hybrid model makes ByteSync ideal for distributed setups, multi-site businesses, or personal backups.
 
-<img src="/assets/gallery/2025-10-local-and-remote-sync.png" width="360" alt="ByteSync Logo" />
+<div align="center">
+    <img src="/assets/gallery/2025-10-local-and-remote-sync.png" width="540" alt="ByteSync Logo" />
+</div>
 
 ---
 
