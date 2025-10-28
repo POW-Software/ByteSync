@@ -1,46 +1,90 @@
 <div align="center">
-  <img src="assets/logo_bytesync_1280x640.png" width="320" />
-  <p>
-    <!-- License Badge -->
+  <img src="/assets/logo_bytesync_1280x640.png" width="360" alt="ByteSync Logo" />
+
+<h3>Sync, Backup & Deduplication — Cross-platform, LAN & WAN</h3>
+
+  <p align="center">
+    <!-- License -->
     <a href="https://github.com/POW-Software/ByteSync/blob/master/LICENSE">
-      <img alt="GitHub License" src="https://img.shields.io/github/license/POW-Software/ByteSync" />
+      <img alt="License: MIT" src="https://img.shields.io/github/license/POW-Software/ByteSync?color=brightgreen" />
     </a>
-    <!-- Last Commit Badge -->
+    <!-- Last commit -->
     <a href="https://github.com/POW-Software/ByteSync/commits/master">
-      <img alt="Last commit" src="https://img.shields.io/github/last-commit/POW-Software/ByteSync" />
+      <img alt="Last commit" src="https://img.shields.io/github/last-commit/POW-Software/ByteSync?color=blue" />
     </a>
+    <!-- GitHub stars -->
+    <a href="https://github.com/POW-Software/ByteSync/stargazers">
+      <img alt="GitHub stars" src="https://img.shields.io/github/stars/POW-Software/ByteSync?color=gold" />
+    </a>
+    <!-- Platform -->
+    <img alt="Platforms" src="https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux-blueviolet" />
+    <!-- Language -->
+    <img alt="Language" src="https://img.shields.io/badge/language-C%23-blue" />
+  </p>
+
+  <p align="center">
+    <a href="https://www.bytesyncapp.com/">Website</a> •
+    <a href="https://www.bytesyncapp.com/documentation">Documentation</a> •
+    <a href="https://www.bytesyncapp.com/blog">Blog</a> •
+    <a href="https://github.com/POW-Software/ByteSync/discussions">Community</a>
   </p>
 </div>
 
-# ByteSync
+# 🌀 ByteSync
 
-**ByteSync** is an open-source, on-demand file synchronization software designed for fast, secure, and efficient remote sync & backup. With end-to-end encryption, your data stays private and protected. By transferring only the differences between files and leveraging optimized batching, compression, and delta transfers, ByteSync minimizes resource usage while maximizing speed. Supporting up to 5 remote locations per session, it offers a smart, self-orchestrated alternative to traditional FTP/SFTP and sync solutions.
-
----
-
-## Table of Contents
-- [Features](#features)
-- [Gallery](#gallery)
-- [Installation](#installation)
-- [Support](#support)
-- [License](#license)
+**Free, open-source software for file synchronization, backup & deduplication — local or remote, secure, and cross-platform.**  
+No VPN. No setup. Full control.
 
 ---
 
-## Features  
+## 🔍 Overview
 
-- 🔒 **End-to-end encryption** – Keep your data **secure and private** during transfers.  
-- ⚡ **Smart synchronization** – Transfers **only the differences** between files, **compresses data**, groups small files to reduce overhead, and uploads a file **only once** when syncing with multiple recipients.  
-- 🌍 **Multi-device sync** – Seamlessly synchronize files **across up to 5 remote machines** in a single session.  
-- 🎯 **Customizable sync rules** – Set up rules based on **content, date, size, or presence** to automate synchronization.  
-- ☁️ **Easy deployment** – The **server runs in the cloud**, eliminating the need for complex infrastructure or manual FTP configurations. ByteSync ensures **quick and seamless setup** for hassle-free synchronization.  
-- 💻 **Cross-platform compatibility** – Works on **Windows, Linux and macOS** for a smooth experience everywhere.  
-- 🛠 **Open-source and flexible** – Fully **customizable** to adapt to your workflow and needs.  
+**ByteSync** is an **on-demand file synchronization, backup and deduplication tool** designed for professionals, teams, and individuals.  
+It works **locally or across remote sites** with **no VPN, firewall, or manual configuration** required.
 
+ByteSync compares files using a **block-level delta engine** and transfers only modified parts, saving time and bandwidth.  
+All data is protected with **end-to-end encryption (E2EE)**, ensuring privacy even when synchronization passes through remote connections.
 
 ---
 
-## Gallery
+## 🧠 Key Features
+
+- ⚡ **Hybrid synchronization** — works across LAN and remote endpoints automatically.
+- 🔒 **End-to-end encryption** — no data ever leaves your devices unencrypted.
+- 📦 **Delta-based transfers** — only modified data blocks are exchanged.
+- 🧩 **Backup & deduplication** — compare, clean, and consolidate datasets easily.
+- 💻 **Cross-platform** — runs on **Windows, Linux, and macOS**.
+- 🚫 **Zero network configuration** — no VPN, no port forwarding, no hassle.
+- ⚙️ **Rule-based control** — define granular synchronization conditions and actions.
+- 🧾 **Transparent results** — full comparison and report before applying changes.
+
+---
+
+## 🌍 How It Works
+
+ByteSync automatically detects the best route between endpoints:
+
+- **Local peers** communicate directly through LAN for maximum speed.
+- **Remote peers** connect securely through encrypted relay channels.
+- You can mix **local and remote endpoints** in the same session effortlessly.
+
+This hybrid model makes ByteSync ideal for distributed setups, multi-site businesses, or personal backups.
+
+<img src="/assets/gallery/2025-10-local-and-remote-sync.png" width="360" alt="ByteSync Logo" />
+
+---
+
+## 🧰 Use Cases
+
+- 🏢 **Small Business:** synchronize local servers and remote backup sites.
+- 💾 **IT Teams:** keep distributed datasets consistent across multiple environments.
+- 🏠 **Home Users:** sync between PC, NAS, and cloud backup targets.
+- 🧹 **Deduplication:** identify and remove duplicate files using filtering and rule-based actions.
+- 🎬 **Creative Studios:** collaborate efficiently on large media files with delta-based transfers.
+
+---
+
+## 📷 Gallery
 
 <div style="display: flex; flex-wrap: wrap; justify-content: center;">
   <div style="flex: 1 0 400px; text-align: center; margin: 10px 10px 30px 10px;">
@@ -67,7 +111,7 @@
 
 ---
 
-## Installation
+## 🧩 Installation
 
 ### Download the Precompiled Client 
 1. Visit our [official website](https://www.bytesyncapp.com#download).
@@ -81,10 +125,10 @@ If you prefer to build ByteSync from source or want to deploy specific component
 
 ---
 
-## Support
+## 🧑‍💻 Support
 If you encounter any issues or if you have feature requests, please open an [issue](https://github.com/POW-Software/ByteSync/issues) on GitHub.
 
 ---
 
-## License
+## 🛡️ License
 This project is licensed under the [MIT License](https://github.com/POW-Software/ByteSync/blob/master/LICENSE).
