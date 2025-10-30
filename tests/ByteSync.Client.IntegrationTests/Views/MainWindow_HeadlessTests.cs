@@ -52,21 +52,41 @@ public class MainWindow_HeadlessTests : HeadlessIntegrationTest
     }
     
     [Test]
-    public async Task MainWindow_FileDialogMethods_AreAccessible()
+    public async Task ShowOpenFileDialogAsync_InHeadlessMode_ReturnsNullWithoutCrashing()
     {
-        // Verify that the file dialog methods we modified are accessible
+        // This test validates that the method using TryGetLocalPath() handles
+        // the headless scenario gracefully without throwing exceptions
         await ExecuteOnUiThread(async () =>
         {
             var mainWindow = new MainWindow();
-            var fileDialogService = (ByteSync.Interfaces.IFileDialogService)mainWindow;
             
-            // Verify methods exist and are callable (even if we can't test them directly without user interaction)
-            // This ensures the methods using TryGetLocalPath() are properly compiled and accessible
-            fileDialogService.Should().NotBeNull();
+            // Act - Call the actual method we fixed
+            var result = await mainWindow.ShowOpenFileDialogAsync("Select Files", allowMultiple: true);
             
-            // The fact that this compiles and the window instantiates successfully
-            // validates that our TryGetLocalPath() implementation is correct
+            // Assert - In headless mode, no dialog can be shown so it returns null
+            // The important part is that it doesn't crash with InvalidOperationException
+            result.Should().BeNull("StorageProvider is not available in headless mode");
+        });
+    }
+    
+    [Test]
+    public async Task ShowOpenFolderDialogAsync_InHeadlessMode_ReturnsNullWithoutCrashing()
+    {
+        // This test validates that the method using TryGetLocalPath() handles
+        // the headless scenario gracefully without throwing exceptions
+        await ExecuteOnUiThread(async () =>
+        {
+            var mainWindow = new MainWindow();
+            
+            // Act - Call the actual method we fixed (this was the one that crashed with c:\)
+            var result = await mainWindow.ShowOpenFolderDialogAsync("Select Folder");
+            
+            // Assert - In headless mode, no dialog can be shown so it returns null
+            // The important part is that it doesn't crash with InvalidOperationException
+            // which was the original bug when selecting root directories like c:\
+            result.Should().BeNull("StorageProvider is not available in headless mode");
         });
     }
 }
+
 
