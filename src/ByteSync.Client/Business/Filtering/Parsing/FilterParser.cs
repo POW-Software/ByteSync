@@ -53,7 +53,7 @@ public class FilterParser : IFilterParser
     private bool IsComplexExpression(string filterText)
     {
         // Split by whitespace to analyze individual terms
-        var terms = filterText.Split([' '], StringSplitOptions.RemoveEmptyEntries);
+        var terms = filterText.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
         
         return terms.Any(term =>
             
@@ -93,7 +93,7 @@ public class FilterParser : IFilterParser
     /// </summary>
     private ParseResult CreateTextSearchExpression(string filterText)
     {
-        var terms = filterText.Split([' '], StringSplitOptions.RemoveEmptyEntries);
+        var terms = filterText.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
         
         FilterExpression compositeExpression = new TrueExpression();
         foreach (var term in terms)
