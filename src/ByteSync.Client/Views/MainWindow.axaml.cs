@@ -171,7 +171,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (files != null && files.Count > 0)
         {
-            return files.Select(file => file.Path.LocalPath).ToArray();
+            return files.Select(file => file.TryGetLocalPath()).Where(path => path != null).ToArray()!;
         }
     
         return null;
@@ -196,7 +196,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (folders != null && folders.Count > 0)
         {
-            return folders[0].Path.LocalPath;
+            return folders[0].TryGetLocalPath();
         }
 
         return null;
