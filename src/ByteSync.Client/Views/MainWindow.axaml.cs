@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -152,6 +153,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
         }
     }
     
+    [ExcludeFromCodeCoverage]
     public async Task<string[]?> ShowOpenFileDialogAsync(string title, bool allowMultiple)
     {
         var storageProvider = GetTopLevel(this)?.StorageProvider;
@@ -172,12 +174,13 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
         if (files != null && files.Count > 0)
         {
             return files.Select(file => file.TryGetLocalPath()).Where(path => path != null)
-                .ToArray()!; // NOSONAR
+                .ToArray()!;
         }
         
         return null;
     }
     
+    [ExcludeFromCodeCoverage]
     public async Task<string?> ShowOpenFolderDialogAsync(string title)
     {
         var storageProvider = GetTopLevel(this)?.StorageProvider;
@@ -197,7 +200,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (folders != null && folders.Count > 0)
         {
-            return folders[0].TryGetLocalPath(); // NOSONAR
+            return folders[0].TryGetLocalPath();
         }
         
         return null;
