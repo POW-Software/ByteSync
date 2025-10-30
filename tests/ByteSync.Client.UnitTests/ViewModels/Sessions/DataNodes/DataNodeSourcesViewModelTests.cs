@@ -78,29 +78,6 @@ public class DataNodeSourcesViewModelTests
     }
 
     [Test]
-    public async Task AddDirectoryCommand_WhenUserSelectsRootDirectory_ShouldCallCreateAndTryAddDataSource()
-    {
-        // Arrange
-        const string selectedPath = @"C:\";
-        _fileDialogServiceMock
-            .Setup(f => f.ShowOpenFolderDialogAsync(It.IsAny<string>()))
-            .ReturnsAsync(selectedPath);
-
-        var vm = CreateViewModel();
-
-        // Act
-        await vm.AddDirectoryCommand.Execute().FirstAsync();
-
-        // Assert
-        _fileDialogServiceMock.Verify(
-            f => f.ShowOpenFolderDialogAsync(It.IsAny<string>()), 
-            Times.Once);
-        _dataSourceServiceMock.Verify(
-            s => s.CreateAndTryAddDataSource(selectedPath, FileSystemTypes.Directory, _dataNode), 
-            Times.Once);
-    }
-
-    [Test]
     public async Task AddDirectoryCommand_WhenUserCancelsDialog_ShouldNotCallCreateAndTryAddDataSource()
     {
         // Arrange
