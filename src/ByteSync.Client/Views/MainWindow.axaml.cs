@@ -172,7 +172,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
         if (files != null && files.Count > 0)
         {
             return files.Select(file => file.TryGetLocalPath()).Where(path => path != null)
-                .ToArray()!; // Coverage: Extension method not mockable
+                .ToArray()!; // NOSONAR
         }
         
         return null;
@@ -197,7 +197,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IFileDial
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (folders != null && folders.Count > 0)
         {
-            return folders[0].TryGetLocalPath(); // Coverage: Extension method not mockable
+            return folders[0].TryGetLocalPath(); // NOSONAR
         }
         
         return null;
