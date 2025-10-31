@@ -2,6 +2,7 @@ using System.Threading;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
+using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Services.Sessions;
@@ -26,6 +27,7 @@ public class FileUploadProcessor : IFileUploadProcessor
     private const int MAX_WORKERS = 4;
     private const int ADJUSTER_INTERVAL_MS = 200;
     private string? _sharedFileId;
+    private readonly IInventoryService _inventoryService;
 
     // State tracking
     private UploadProgressState? _progressState;
@@ -41,7 +43,8 @@ public class FileUploadProcessor : IFileUploadProcessor
         SemaphoreSlim semaphoreSlim,
         IAdaptiveUploadController adaptiveUploadController,
         IUploadSlicingManager uploadSlicingManager,
-        SemaphoreSlim uploadSlotsLimiter)
+        SemaphoreSlim uploadSlotsLimiter,
+        IInventoryService inventoryService)
     {
         _slicerEncrypter = slicerEncrypter;
         _logger = logger;
@@ -54,33 +57,7 @@ public class FileUploadProcessor : IFileUploadProcessor
         _adaptiveUploadController = adaptiveUploadController;
         _uploadSlicingManager = uploadSlicingManager;
         _uploadSlotsLimiter = uploadSlotsLimiter;
-    }
-
-    // Backward-compatible overload for tests and callers not providing uploadSlotsLimiter
-    public FileUploadProcessor(
-        ISlicerEncrypter slicerEncrypter,
-        ILogger<FileUploadProcessor> logger,
-        IFileUploadCoordinator fileUploadCoordinator,
-        IFileUploadWorker fileUploadWorker,
-        IFileTransferApiClient fileTransferApiClient,
-        ISessionService sessionService,
-        string? localFileToUpload,
-        SemaphoreSlim semaphoreSlim,
-        IAdaptiveUploadController adaptiveUploadController,
-        IUploadSlicingManager uploadSlicingManager)
-        : this(
-            slicerEncrypter,
-            logger,
-            fileUploadCoordinator,
-            fileUploadWorker,
-            fileTransferApiClient,
-            sessionService,
-            localFileToUpload,
-            semaphoreSlim,
-            adaptiveUploadController,
-            uploadSlicingManager,
-            new SemaphoreSlim(Math.Min(Math.Max(1, adaptiveUploadController.CurrentParallelism), 4), 4))
-    {
+        _inventoryService = inventoryService;
     }
 
     public async Task ProcessUpload(SharedFileDefinition sharedFileDefinition, int? maxSliceLength = null)
@@ -106,6 +83,7 @@ public class FileUploadProcessor : IFileUploadProcessor
         }
 
         // Start background adjuster to align available slots with desired parallelism
+        long lastReported = 0;
         _ = Task.Run(async () =>
         {
             try
@@ -121,6 +99,27 @@ public class FileUploadProcessor : IFileUploadProcessor
                     AdjustSlots(desired);
                     EnsureWorkers(desired);
 
+                    if (sharedFileDefinition.IsInventory && _progressState != null)
+                    {
+                        long current = 0;
+                        await _semaphoreSlim.WaitAsync();
+                        try
+                        {
+                            current = _progressState.TotalUploadedBytes;
+                        }
+                        finally
+                        {
+                            _semaphoreSlim.Release();
+                        }
+
+                        var delta = current - lastReported;
+                        if (delta > 0)
+                        {
+                            _inventoryService.InventoryProcessData.UpdateMonitorData(m => { m.UploadedVolume += delta; });
+                            lastReported = current;
+                        }
+                    }
+
                     await Task.Delay(ADJUSTER_INTERVAL_MS);
                 }
             }
@@ -134,6 +133,26 @@ public class FileUploadProcessor : IFileUploadProcessor
         await _fileUploadCoordinator.WaitForCompletionAsync();
 
         _slicerEncrypter.Dispose();
+
+        if (sharedFileDefinition.IsInventory && _progressState != null)
+        {
+            long current;
+            _semaphoreSlim.Wait();
+            try
+            {
+                current = _progressState.TotalUploadedBytes;
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
+            var delta = current - lastReported;
+            if (delta > 0)
+            {
+                _inventoryService.InventoryProcessData.UpdateMonitorData(m => { m.UploadedVolume += delta; });
+                lastReported = current;
+            }
+        }
 
         if (_progressState.Exceptions.Count > 0)
         {

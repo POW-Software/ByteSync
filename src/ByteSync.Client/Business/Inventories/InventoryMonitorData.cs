@@ -17,6 +17,10 @@ public record InventoryMonitorData
     public long AnalyzableVolume { get; set; }
     
     public long IdentifiedVolume { get; set; }
+
+    public long UploadTotalVolume { get; set; }
+
+    public long UploadedVolume { get; set; }
     
     public bool HasNonZeroProperty()
     {
@@ -27,6 +31,8 @@ public record InventoryMonitorData
                || AnalyzeErrors != 0
                || AnalyzableFiles != 0
                || AnalyzableVolume != 0
-               || IdentifiedVolume != 0;
+               || IdentifiedVolume != 0
+               || UploadTotalVolume != 0
+               || UploadedVolume != 0;
     }
 }
