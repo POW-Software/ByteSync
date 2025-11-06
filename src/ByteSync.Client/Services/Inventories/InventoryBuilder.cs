@@ -265,34 +265,70 @@ public class InventoryBuilder : IInventoryBuilder
         
         InventoryIndexer.Register(directoryDescription, directoryInfo);
         
-        foreach (var subDirectory in directoryInfo.GetDirectories())
+        try
         {
-            if (cancellationToken.IsCancellationRequested)
+            foreach (var subDirectory in directoryInfo.GetDirectories())
             {
-                break;
-            }
-            
-            // https://stackoverflow.com/questions/1485155/check-if-a-file-is-real-or-a-symbolic-link
-            // Example to create a symlink :
-            //  - Windows: New-Item -ItemType SymbolicLink -Path \path\to\symlink -Target \path\to\target
-            if (subDirectory.Attributes.HasFlag(FileAttributes.ReparsePoint))
-            {
-                _logger.LogWarning("Directory {Directory} is ignored because it has flag 'ReparsePoint'", subDirectory.FullName);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
                 
-                continue;
+                // https://stackoverflow.com/questions/1485155/check-if-a-file-is-real-or-a-symbolic-link
+                // Example to create a symlink :
+                //  - Windows: New-Item -ItemType SymbolicLink -Path \path\to\symlink -Target \path\to\target
+                if (subDirectory.Attributes.HasFlag(FileAttributes.ReparsePoint))
+                {
+                    _logger.LogWarning("Directory {Directory} is ignored because it has flag 'ReparsePoint'", subDirectory.FullName);
+                    
+                    continue;
+                }
+                
+                DoAnalyze(inventoryPart, subDirectory, cancellationToken);
             }
-            
-            DoAnalyze(inventoryPart, subDirectory, cancellationToken);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Access denied when scanning subdirectories of {Directory}", directoryInfo.FullName);
+            directoryDescription.IsAccessible = false;
+        }
+        catch (DirectoryNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Directory not found when scanning subdirectories of {Directory}", directoryInfo.FullName);
+            directoryDescription.IsAccessible = false;
+        }
+        catch (IOException ex)
+        {
+            _logger.LogWarning(ex, "I/O error when scanning subdirectories of {Directory}", directoryInfo.FullName);
+            directoryDescription.IsAccessible = false;
         }
         
-        foreach (var subFile in directoryInfo.GetFiles())
+        try
         {
-            if (cancellationToken.IsCancellationRequested)
+            foreach (var subFile in directoryInfo.GetFiles())
             {
-                break;
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                
+                DoAnalyze(inventoryPart, subFile, cancellationToken);
             }
-            
-            DoAnalyze(inventoryPart, subFile, cancellationToken);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Access denied when scanning files in {Directory}", directoryInfo.FullName);
+            directoryDescription.IsAccessible = false;
+        }
+        catch (DirectoryNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Directory not found when scanning files in {Directory}", directoryInfo.FullName);
+            directoryDescription.IsAccessible = false;
+        }
+        catch (IOException ex)
+        {
+            _logger.LogWarning(ex, "I/O error when scanning files in {Directory}", directoryInfo.FullName);
+            directoryDescription.IsAccessible = false;
         }
     }
     

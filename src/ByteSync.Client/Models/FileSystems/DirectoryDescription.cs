@@ -23,4 +23,6 @@ public class DirectoryDescription : FileSystemDescription
             return FileSystemTypes.Directory;
         }
     }
+
+    public bool IsAccessible { get; set; } = true;
 }

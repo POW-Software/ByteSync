@@ -737,6 +737,35 @@ public class TestInventoryBuilder : IntegrationTest
         blockingStream.Dispose();
     }
     
+    [Test]
+    public async Task Test_AccessibleDirectories_ShouldBeMarkedAsAccessible()
+    {
+        var sourceA = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "sourceA"));
+        sourceA.Create();
+        
+        _testDirectoryService.CreateFileInDirectory(sourceA.FullName, "fileA1.txt", "FileA1Content");
+        _testDirectoryService.CreateFileInDirectory(sourceA.FullName, "fileA2.txt", "FileA2Content");
+        
+        var subDir1 = sourceA.CreateSubdirectory("subDir1");
+        _testDirectoryService.CreateFileInDirectory(subDir1.FullName, "fileB1.txt", "FileB1Content");
+        
+        var subDir2 = sourceA.CreateSubdirectory("subDir2");
+        _testDirectoryService.CreateFileInDirectory(subDir2.FullName, "fileC1.txt", "FileC1Content");
+        
+        var inventoryFilePath = IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, $"inventory_{Guid.NewGuid()}.zip");
+        var inventoryBuilder = BuildInventoryBuilder();
+        
+        inventoryBuilder.AddInventoryPart(sourceA.FullName);
+        await inventoryBuilder.BuildBaseInventoryAsync(inventoryFilePath);
+        
+        var inventory = inventoryBuilder.Inventory;
+        inventory.InventoryParts.Count.Should().Be(1);
+        inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(2);
+        inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(4);
+        
+        inventory.InventoryParts[0].DirectoryDescriptions.Should().AllSatisfy(dd => dd.IsAccessible.Should().BeTrue());
+    }
+    
     private InventoryBuilder BuildInventoryBuilder(SessionSettings? sessionSettings = null,
         InventoryProcessData? inventoryProcessData = null, ByteSyncEndpoint? byteSyncEndpoint = null,
         OSPlatforms osPlatform = OSPlatforms.Windows)
