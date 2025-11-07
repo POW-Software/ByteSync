@@ -74,7 +74,7 @@ public class InventoryFinishedService : IInventoryFinishedService
     {
         var session = _sessionService.CurrentSession!;
         
-        List<InventoryFile> result = new List<InventoryFile>();
+        var result = new List<InventoryFile>();
         foreach (var inventory in inventories)
         {
             var inventoryFullName = _cloudSessionLocalDataManager.GetCurrentMachineInventoryPath(inventory, localInventoryMode);

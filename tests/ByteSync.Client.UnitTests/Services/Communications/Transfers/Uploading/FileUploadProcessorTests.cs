@@ -32,6 +32,8 @@ public class FileUploadProcessorTests
     private FileUploadProcessor _fileUploadProcessor = null!;
     private SemaphoreSlim _semaphoreSlim = null!;
     private Mock<IInventoryService> _mockInventoryService = null!;
+    private ManualResetEvent _uploadingIsFinishedEvent = null!;
+    private ManualResetEvent _exceptionOccurredEvent = null!;
     
     [SetUp]
     public void SetUp()
@@ -68,8 +70,10 @@ public class FileUploadProcessorTests
         _mockFileUploadCoordinator.Setup(x => x.AvailableSlices).Returns(Channel.CreateBounded<FileUploaderSlice>(8));
         _mockFileUploadCoordinator.Setup(x => x.WaitForCompletionAsync()).Returns(Task.CompletedTask);
         _mockFileUploadCoordinator.Setup(x => x.SyncRoot).Returns(new object());
-        _mockFileUploadCoordinator.Setup(x => x.UploadingIsFinished).Returns(new ManualResetEvent(false));
-        _mockFileUploadCoordinator.Setup(x => x.ExceptionOccurred).Returns(new ManualResetEvent(false));
+        _uploadingIsFinishedEvent = new ManualResetEvent(false);
+        _exceptionOccurredEvent = new ManualResetEvent(false);
+        _mockFileUploadCoordinator.Setup(x => x.UploadingIsFinished).Returns(_uploadingIsFinishedEvent);
+        _mockFileUploadCoordinator.Setup(x => x.ExceptionOccurred).Returns(_exceptionOccurredEvent);
         
         _semaphoreSlim = new SemaphoreSlim(1, 1);
         _mockSlicingManager
@@ -115,6 +119,8 @@ public class FileUploadProcessorTests
         
         _testMemoryStream.Dispose();
         _semaphoreSlim.Dispose();
+        _uploadingIsFinishedEvent.Dispose();
+        _exceptionOccurredEvent.Dispose();
     }
     
     [Test]
