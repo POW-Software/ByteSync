@@ -104,7 +104,7 @@ public class FileUploadProcessor : IFileUploadProcessor
             var lastException = _progressState.Exceptions[^1];
             
             throw new InvalidOperationException(
-                $"An error occured while uploading '{source}' / sharedFileDefinition.Id:{sharedFileDefinition.Id}",
+                $"An error occurred while uploading '{source}' / sharedFileDefinition.Id:{sharedFileDefinition.Id}",
                 lastException);
         }
         
