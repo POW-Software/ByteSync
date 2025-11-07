@@ -89,9 +89,17 @@ public class UploadParallelismManager : IUploadParallelismManager
             {
                 _uploadSlotsLimiter.Release(diff);
             }
-            catch
+            catch (SemaphoreFullException ex)
             {
-                // ignored
+                _logger.LogWarning(ex,
+                    "UploadAdjuster: file {FileId} failed to release slots because the semaphore would exceed its maximum count (diff={Diff})",
+                    _sharedFileId, diff);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                _logger.LogWarning(ex,
+                    "UploadAdjuster: file {FileId} failed to release slots due to invalid argument (diff={Diff})",
+                    _sharedFileId, diff);
             }
             
             _grantedSlots = desired;
