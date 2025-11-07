@@ -6,6 +6,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
+using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
@@ -23,6 +24,8 @@ public class FileUploadProcessorFactoryTests
     private Mock<ILogger<FileUploadCoordinator>> _mockCoordinatorLogger = null!;
     private Mock<ILogger<FileSlicer>> _mockSlicerLogger = null!;
     private Mock<ILogger<FileUploadWorker>> _mockWorkerLogger = null!;
+    private Mock<ILogger<UploadParallelismManager>> _mockParallelismLogger = null!;
+    private Mock<ILogger<UploadProgressMonitor>> _mockProgressMonitorLogger = null!;
     private Mock<IPolicyFactory> _mockPolicyFactory = null!;
     private Mock<IFileTransferApiClient> _mockFileTransferApiClient = null!;
     private Mock<IIndex<StorageProvider, IUploadStrategy>> _mockStrategies = null!;
@@ -30,6 +33,7 @@ public class FileUploadProcessorFactoryTests
     private Mock<IAdaptiveUploadController> _mockAdaptiveController = null!;
     private Mock<IFileUploadProcessor> _mockProcessor = null!;
     private Mock<IUploadSlicingManager> _mockSlicingManager = null!;
+    private Mock<IInventoryService> _mockInventoryService = null!;
     
     private FileUploadProcessorFactory _factory = null!;
     
@@ -42,6 +46,8 @@ public class FileUploadProcessorFactoryTests
         _mockCoordinatorLogger = new Mock<ILogger<FileUploadCoordinator>>();
         _mockSlicerLogger = new Mock<ILogger<FileSlicer>>();
         _mockWorkerLogger = new Mock<ILogger<FileUploadWorker>>();
+        _mockParallelismLogger = new Mock<ILogger<UploadParallelismManager>>();
+        _mockProgressMonitorLogger = new Mock<ILogger<UploadProgressMonitor>>();
         _mockPolicyFactory = new Mock<IPolicyFactory>();
         _mockFileTransferApiClient = new Mock<IFileTransferApiClient>();
         _mockStrategies = new Mock<IIndex<StorageProvider, IUploadStrategy>>();
@@ -49,6 +55,7 @@ public class FileUploadProcessorFactoryTests
         _mockAdaptiveController = new Mock<IAdaptiveUploadController>();
         _mockProcessor = new Mock<IFileUploadProcessor>();
         _mockSlicingManager = new Mock<IUploadSlicingManager>();
+        _mockInventoryService = new Mock<IInventoryService>();
         
         _sharedFileDefinition = new SharedFileDefinition
         {
@@ -64,12 +71,15 @@ public class FileUploadProcessorFactoryTests
         builder.RegisterInstance(_mockCoordinatorLogger.Object).As<ILogger<FileUploadCoordinator>>();
         builder.RegisterInstance(_mockSlicerLogger.Object).As<ILogger<FileSlicer>>();
         builder.RegisterInstance(_mockWorkerLogger.Object).As<ILogger<FileUploadWorker>>();
+        builder.RegisterInstance(_mockParallelismLogger.Object).As<ILogger<UploadParallelismManager>>();
+        builder.RegisterInstance(_mockProgressMonitorLogger.Object).As<ILogger<UploadProgressMonitor>>();
         builder.RegisterInstance(_mockPolicyFactory.Object).As<IPolicyFactory>();
         builder.RegisterInstance(_mockFileTransferApiClient.Object).As<IFileTransferApiClient>();
         builder.RegisterInstance(_mockStrategies.Object).As<IIndex<StorageProvider, IUploadStrategy>>();
         builder.RegisterInstance(_mockSessionService.Object).As<ISessionService>();
         builder.RegisterInstance(_mockAdaptiveController.Object).As<IAdaptiveUploadController>();
         builder.RegisterInstance(_mockSlicingManager.Object).As<IUploadSlicingManager>();
+        builder.RegisterInstance(_mockInventoryService.Object).As<IInventoryService>();
         
         // Register the processor as an instance so typed parameters are ignored
         builder.RegisterInstance(_mockProcessor.Object).As<IFileUploadProcessor>();

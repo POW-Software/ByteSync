@@ -17,7 +17,7 @@ public class InventoryDataTrackingStrategy : IDataTrackingStrategy
     public IObservable<(long IdentifiedVolume, long ProcessedVolume)> GetDataObservable()
     {
         var inventoryProcessData = _inventoryService.InventoryProcessData;
-        
+
         var source = inventoryProcessData.InventoryMonitorObservable.CombineLatest(inventoryProcessData.IdentificationStatus);
         
         Func<(InventoryMonitorData, InventoryTaskStatus), bool> canSkip =
@@ -46,6 +46,11 @@ public class InventoryDataTrackingStrategy : IDataTrackingStrategy
         var merged = sampled.Merge(notSkipped);
         
         return merged.Select(tuple =>
-            (tuple.Item1.AnalyzableVolume, tuple.Item1.ProcessedVolume));
+        {
+            var monitor = tuple.Item1;
+            var total = monitor.AnalyzableVolume + monitor.UploadTotalVolume;
+            var done = monitor.ProcessedVolume + monitor.UploadedVolume;
+            return (total, done);
+        });
     }
 }
