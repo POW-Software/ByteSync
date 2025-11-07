@@ -9,7 +9,7 @@ namespace ByteSync.Factories;
 public class ContentRepartitionGroupsComputerFactory : IContentRepartitionGroupsComputerFactory
 {
     private readonly IComponentContext _context;
-
+    
     public ContentRepartitionGroupsComputerFactory(IComponentContext context)
     {
         _context = context;
@@ -17,9 +17,7 @@ public class ContentRepartitionGroupsComputerFactory : IContentRepartitionGroups
     
     public IContentRepartitionGroupsComputer Build(ContentRepartitionViewModel contentRepartitionViewModel)
     {
-        var inventoryService = _context.Resolve<IInventoryService>();
-        var allInventories = inventoryService.InventoryProcessData.Inventories!;
-        
+        var allInventories = contentRepartitionViewModel.AllInventories;
         var result = _context.Resolve<IContentRepartitionGroupsComputer>(
             new TypedParameter(typeof(ContentRepartitionViewModel), contentRepartitionViewModel),
             new TypedParameter(typeof(List<Inventory>), allInventories));
