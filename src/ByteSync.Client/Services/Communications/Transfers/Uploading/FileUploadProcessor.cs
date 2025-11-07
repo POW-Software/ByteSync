@@ -2,9 +2,9 @@ using System.Threading;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
-using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
+using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Services.Sessions;
 
 namespace ByteSync.Services.Communications.Transfers.Uploading;
@@ -28,10 +28,10 @@ public class FileUploadProcessor : IFileUploadProcessor
     private const int ADJUSTER_INTERVAL_MS = 200;
     private string? _sharedFileId;
     private readonly IInventoryService _inventoryService;
-
+    
     // State tracking
     private UploadProgressState? _progressState;
-
+    
     public FileUploadProcessor(
         ISlicerEncrypter slicerEncrypter,
         ILogger<FileUploadProcessor> logger,
@@ -59,8 +59,22 @@ public class FileUploadProcessor : IFileUploadProcessor
         _uploadSlotsLimiter = uploadSlotsLimiter;
         _inventoryService = inventoryService;
     }
-
+    
     public async Task ProcessUpload(SharedFileDefinition sharedFileDefinition, int? maxSliceLength = null)
+    {
+        await InitializeUploadAsync(sharedFileDefinition);
+        
+        var initialWorkers = GetDesiredParallelism();
+        StartInitialWorkers(initialWorkers);
+        
+        var adjusterTask = StartParallelismAdjusterAsync(sharedFileDefinition);
+        var lastReported = await adjusterTask;
+        
+        await FinalizeUploadAsync(sharedFileDefinition, lastReported);
+        LogCompletion(sharedFileDefinition);
+    }
+    
+    private async Task InitializeUploadAsync(SharedFileDefinition sharedFileDefinition)
     {
         _sharedFileId = sharedFileDefinition.Id;
         _progressState = await _uploadSlicingManager.Enqueue(
@@ -69,49 +83,40 @@ public class FileUploadProcessor : IFileUploadProcessor
             _fileUploadCoordinator.AvailableSlices,
             _semaphoreSlim,
             _fileUploadCoordinator.ExceptionOccurred);
-
+        
         // Grant initial slots equal to current parallelism
         _grantedSlots = _adaptiveUploadController.CurrentParallelism;
-
-        // Start initial workers equal to current parallelism (satisfies tests) and track how many we started
-        var initialWorkers = Math.Clamp(_adaptiveUploadController.CurrentParallelism, 1, MAX_WORKERS);
+    }
+    
+    private void StartInitialWorkers(int initialWorkers)
+    {
         _startedWorkers = 0;
         for (var i = 0; i < initialWorkers; i++)
         {
             _startedWorkers++;
             _ = _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_fileUploadCoordinator.AvailableSlices, _progressState!);
         }
-
-        // Start background adjuster to align available slots with desired parallelism
-        long lastReported = 0;
-        _ = Task.Run(async () =>
+    }
+    
+    private Task<long> StartParallelismAdjusterAsync(SharedFileDefinition sharedFileDefinition)
+    {
+        return Task.Run(async () =>
         {
+            long lastReported = 0;
             try
             {
                 var finishedEvt = _fileUploadCoordinator.UploadingIsFinished;
                 var errorEvt = _fileUploadCoordinator.ExceptionOccurred;
-
+                
                 while (!finishedEvt.WaitOne(0) && !errorEvt.WaitOne(0))
                 {
-                    var desiredRaw = _adaptiveUploadController.CurrentParallelism;
-                    var desired = Math.Clamp(desiredRaw, 1, MAX_WORKERS);
-
+                    var desired = GetDesiredParallelism();
                     AdjustSlots(desired);
                     EnsureWorkers(desired);
-
+                    
                     if (sharedFileDefinition.IsInventory && _progressState != null)
                     {
-                        long current = 0;
-                        await _semaphoreSlim.WaitAsync();
-                        try
-                        {
-                            current = _progressState.TotalUploadedBytes;
-                        }
-                        finally
-                        {
-                            _semaphoreSlim.Release();
-                        }
-
+                        var current = GetTotalUploadedBytes();
                         var delta = current - lastReported;
                         if (delta > 0)
                         {
@@ -119,7 +124,7 @@ public class FileUploadProcessor : IFileUploadProcessor
                             lastReported = current;
                         }
                     }
-
+                    
                     await Task.Delay(ADJUSTER_INTERVAL_MS);
                 }
             }
@@ -127,43 +132,37 @@ public class FileUploadProcessor : IFileUploadProcessor
             {
                 // no-op: adjuster is best-effort
             }
+            
+            return lastReported;
         });
-
-        // Wait for completion
+    }
+    
+    private async Task FinalizeUploadAsync(SharedFileDefinition sharedFileDefinition, long lastReported)
+    {
         await _fileUploadCoordinator.WaitForCompletionAsync();
-
+        
         _slicerEncrypter.Dispose();
-
+        
         if (sharedFileDefinition.IsInventory && _progressState != null)
         {
-            long current;
-            _semaphoreSlim.Wait();
-            try
-            {
-                current = _progressState.TotalUploadedBytes;
-            }
-            finally
-            {
-                _semaphoreSlim.Release();
-            }
+            var current = GetTotalUploadedBytes();
             var delta = current - lastReported;
             if (delta > 0)
             {
                 _inventoryService.InventoryProcessData.UpdateMonitorData(m => { m.UploadedVolume += delta; });
-                lastReported = current;
             }
         }
-
-        if (_progressState.Exceptions.Count > 0)
+        
+        if (_progressState!.Exceptions.Count > 0)
         {
             var source = _localFileToUpload ?? "a stream";
             var lastException = _progressState.Exceptions[^1];
-
+            
             throw new InvalidOperationException(
                 $"An error occured while uploading '{source}' / sharedFileDefinition.Id:{sharedFileDefinition.Id}",
                 lastException);
         }
-
+        
         var totalCreatedSlices = GetTotalCreatedSlices();
         var sessionId = !string.IsNullOrWhiteSpace(_sessionService.SessionId)
             ? _sessionService.SessionId
@@ -175,10 +174,14 @@ public class FileUploadProcessor : IFileUploadProcessor
             TotalParts = totalCreatedSlices
         };
         await _fileTransferApiClient.AssertUploadIsFinished(transferParameters);
-
+        
         _progressState.EndTimeUtc = DateTimeOffset.UtcNow;
-        var durationMs = (_progressState.EndTimeUtc - _progressState.StartTimeUtc)?.TotalMilliseconds;
-        var totalBytes = _progressState.TotalUploadedBytes;
+    }
+    
+    private void LogCompletion(SharedFileDefinition sharedFileDefinition)
+    {
+        var durationMs = (_progressState!.EndTimeUtc - _progressState.StartTimeUtc)?.TotalMilliseconds;
+        var totalBytes = GetTotalUploadedBytes();
         var bandwidthKbps = durationMs.HasValue && durationMs.Value > 0
             ? (totalBytes * 8.0) / durationMs.Value
             : 0.0;
@@ -191,7 +194,20 @@ public class FileUploadProcessor : IFileUploadProcessor
             bandwidthKbps,
             _progressState.Exceptions.Count);
     }
-
+    
+    private long GetTotalUploadedBytes()
+    {
+        _semaphoreSlim.Wait();
+        try
+        {
+            return _progressState?.TotalUploadedBytes ?? 0L;
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
+        }
+    }
+    
     private void AdjustSlots(int desired)
     {
         if (desired > _grantedSlots)
@@ -206,7 +222,7 @@ public class FileUploadProcessor : IFileUploadProcessor
             {
                 // ignored
             }
-
+            
             _grantedSlots = desired;
             _logger.LogDebug("UploadAdjuster: file {FileId} slots increased {Prev}->{Now} (desired {Desired})", _sharedFileId, prev,
                 _grantedSlots, desired);
@@ -216,7 +232,7 @@ public class FileUploadProcessor : IFileUploadProcessor
             var prev = _grantedSlots;
             var toTake = _grantedSlots - desired;
             var taken = 0;
-            for (int i = 0; i < toTake; i++)
+            for (var i = 0; i < toTake; i++)
             {
                 if (_uploadSlotsLimiter.Wait(0))
                 {
@@ -227,7 +243,7 @@ public class FileUploadProcessor : IFileUploadProcessor
                     break;
                 }
             }
-
+            
             _grantedSlots -= taken;
             if (taken > 0)
             {
@@ -242,23 +258,23 @@ public class FileUploadProcessor : IFileUploadProcessor
             }
         }
     }
-
+    
     private void EnsureWorkers(int desired)
     {
         if (desired > _startedWorkers && _startedWorkers < MAX_WORKERS)
         {
             var toStart = Math.Min(desired - _startedWorkers, MAX_WORKERS - _startedWorkers);
-            for (int i = 0; i < toStart; i++)
+            for (var i = 0; i < toStart; i++)
             {
                 _startedWorkers++;
                 _ = _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_fileUploadCoordinator.AvailableSlices, _progressState!);
             }
-
+            
             _logger.LogDebug("UploadAdjuster: file {FileId} workers started +{Added}, total {Total}, desired {Desired}", _sharedFileId,
                 toStart, _startedWorkers, desired);
         }
     }
-
+    
     public int GetTotalCreatedSlices()
     {
         _semaphoreSlim.Wait();
@@ -271,7 +287,7 @@ public class FileUploadProcessor : IFileUploadProcessor
             _semaphoreSlim.Release();
         }
     }
-
+    
     public int GetMaxConcurrentUploads()
     {
         _semaphoreSlim.Wait();
@@ -283,5 +299,12 @@ public class FileUploadProcessor : IFileUploadProcessor
         {
             _semaphoreSlim.Release();
         }
+    }
+    
+    private int GetDesiredParallelism()
+    {
+        var desiredRaw = _adaptiveUploadController.CurrentParallelism;
+        
+        return Math.Clamp(desiredRaw, 1, MAX_WORKERS);
     }
 }
