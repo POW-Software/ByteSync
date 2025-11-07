@@ -4,8 +4,8 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Controls.Encryptions;
-using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -21,11 +21,11 @@ public class FileUploadProcessorTests
     private Mock<ILogger<FileUploadProcessor>> _mockLogger = null!;
     private Mock<IFileUploadCoordinator> _mockFileUploadCoordinator = null!;
     private Mock<IFileSlicer> _mockFileSlicer = null!;
-    private Mock<IFileUploadWorker> _mockFileUploadWorker = null!;
     private Mock<IFileTransferApiClient> _mockFileTransferApiClient = null!;
     private Mock<ISessionService> _mockSessionService = null!;
-    private Mock<IAdaptiveUploadController> _mockAdaptiveController = null!;
     private Mock<IUploadSlicingManager> _mockSlicingManager = null!;
+    private Mock<IUploadParallelismManager> _mockParallelismManager = null!;
+    private Mock<IUploadProgressMonitor> _mockProgressMonitor = null!;
     private SharedFileDefinition _sharedFileDefinition = null!;
     private string _testFilePath = null!;
     private MemoryStream _testMemoryStream = null!;
@@ -40,11 +40,11 @@ public class FileUploadProcessorTests
         _mockLogger = new Mock<ILogger<FileUploadProcessor>>();
         _mockFileUploadCoordinator = new Mock<IFileUploadCoordinator>();
         _mockFileSlicer = new Mock<IFileSlicer>();
-        _mockFileUploadWorker = new Mock<IFileUploadWorker>();
         _mockFileTransferApiClient = new Mock<IFileTransferApiClient>();
         _mockSessionService = new Mock<ISessionService>();
-        _mockAdaptiveController = new Mock<IAdaptiveUploadController>();
         _mockSlicingManager = new Mock<IUploadSlicingManager>();
+        _mockParallelismManager = new Mock<IUploadParallelismManager>();
+        _mockProgressMonitor = new Mock<IUploadProgressMonitor>();
         _mockInventoryService = new Mock<IInventoryService>();
         
         _sharedFileDefinition = new SharedFileDefinition
@@ -68,9 +68,10 @@ public class FileUploadProcessorTests
         _mockFileUploadCoordinator.Setup(x => x.AvailableSlices).Returns(Channel.CreateBounded<FileUploaderSlice>(8));
         _mockFileUploadCoordinator.Setup(x => x.WaitForCompletionAsync()).Returns(Task.CompletedTask);
         _mockFileUploadCoordinator.Setup(x => x.SyncRoot).Returns(new object());
+        _mockFileUploadCoordinator.Setup(x => x.UploadingIsFinished).Returns(new ManualResetEvent(false));
+        _mockFileUploadCoordinator.Setup(x => x.ExceptionOccurred).Returns(new ManualResetEvent(false));
         
         _semaphoreSlim = new SemaphoreSlim(1, 1);
-        _mockAdaptiveController.Setup(x => x.CurrentParallelism).Returns(2);
         _mockSlicingManager
             .Setup(m => m.Enqueue(
                 It.IsAny<SharedFileDefinition>(),
@@ -80,18 +81,27 @@ public class FileUploadProcessorTests
                 It.IsAny<ManualResetEvent>()))
             .ReturnsAsync(new UploadProgressState());
         
+        _mockProgressMonitor
+            .Setup(m => m.MonitorProgressAsync(
+                It.IsAny<SharedFileDefinition>(),
+                It.IsAny<UploadProgressState>(),
+                It.IsAny<IUploadParallelismManager>(),
+                It.IsAny<ManualResetEvent>(),
+                It.IsAny<ManualResetEvent>(),
+                It.IsAny<SemaphoreSlim>()))
+            .ReturnsAsync(0);
+        
         _fileUploadProcessor = new FileUploadProcessor(
             _mockSlicerEncrypter.Object,
             _mockLogger.Object,
             _mockFileUploadCoordinator.Object,
-            _mockFileUploadWorker.Object,
             _mockFileTransferApiClient.Object,
             _mockSessionService.Object,
             _testFilePath,
             _semaphoreSlim,
-            _mockAdaptiveController.Object,
             _mockSlicingManager.Object,
-            new SemaphoreSlim(Math.Min(Math.Max(1, _mockAdaptiveController.Object.CurrentParallelism), 4), 4),
+            _mockParallelismManager.Object,
+            _mockProgressMonitor.Object,
             _mockInventoryService.Object);
     }
     
@@ -115,14 +125,13 @@ public class FileUploadProcessorTests
             _mockSlicerEncrypter.Object,
             _mockLogger.Object,
             _mockFileUploadCoordinator.Object,
-            _mockFileUploadWorker.Object,
             _mockFileTransferApiClient.Object,
             _mockSessionService.Object,
             _testFilePath,
             _semaphoreSlim,
-            _mockAdaptiveController.Object,
             _mockSlicingManager.Object,
-            new SemaphoreSlim(Math.Min(Math.Max(1, _mockAdaptiveController.Object.CurrentParallelism), 4), 4),
+            _mockParallelismManager.Object,
+            _mockProgressMonitor.Object,
             _mockInventoryService.Object);
         
         // Assert
@@ -131,23 +140,28 @@ public class FileUploadProcessorTests
     }
     
     [Test]
-    public async Task ProcessUpload_ShouldStartUploadWorkers()
+    public async Task ProcessUpload_ShouldStartUploadWorkersAndMonitoring()
     {
         // Arrange
-        _mockFileSlicer.Setup(x => x.SliceAndEncryptAdaptiveAsync(It.IsAny<SharedFileDefinition>(), It.IsAny<UploadProgressState>()))
-            .Returns(Task.CompletedTask);
         _mockFileTransferApiClient.Setup(x => x.AssertUploadIsFinished(It.IsAny<TransferParameters>()))
             .Returns(Task.CompletedTask);
-        _mockFileUploadCoordinator.Setup(x => x.WaitForCompletionAsync())
-            .Returns(Task.Delay(150)); // Small delay to let tasks start
         
         // Act
         await _fileUploadProcessor.ProcessUpload(_sharedFileDefinition);
         
         // Assert
-        _mockFileUploadWorker.Verify(
-            x => x.UploadAvailableSlicesAdaptiveAsync(It.IsAny<Channel<FileUploaderSlice>>(), It.IsAny<UploadProgressState>()),
-            Times.Exactly(2));
+        _mockParallelismManager.Verify(
+            x => x.StartInitialWorkers(It.IsAny<int>(), It.IsAny<Channel<FileUploaderSlice>>(), It.IsAny<UploadProgressState>()),
+            Times.Once);
+        _mockProgressMonitor.Verify(
+            x => x.MonitorProgressAsync(
+                _sharedFileDefinition,
+                It.IsAny<UploadProgressState>(),
+                _mockParallelismManager.Object,
+                It.IsAny<ManualResetEvent>(),
+                It.IsAny<ManualResetEvent>(),
+                It.IsAny<SemaphoreSlim>()),
+            Times.Once);
     }
     
     [Test]
@@ -270,14 +284,13 @@ public class FileUploadProcessorTests
             _mockSlicerEncrypter.Object,
             _mockLogger.Object,
             _mockFileUploadCoordinator.Object,
-            _mockFileUploadWorker.Object,
             _mockFileTransferApiClient.Object,
             _mockSessionService.Object,
             null,
             _semaphoreSlim,
-            _mockAdaptiveController.Object,
             _mockSlicingManager.Object,
-            new SemaphoreSlim(Math.Min(Math.Max(1, _mockAdaptiveController.Object.CurrentParallelism), 4), 4),
+            _mockParallelismManager.Object,
+            _mockProgressMonitor.Object,
             _mockInventoryService.Object);
         
         var expectedException = new Exception("Test exception");
