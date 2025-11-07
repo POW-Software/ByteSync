@@ -98,7 +98,7 @@ public class FileUploadProcessor : IFileUploadProcessor
             }
         }
         
-        if (_progressState!.Exceptions.Count > 0)
+        if (_progressState is { Exceptions.Count: > 0 })
         {
             var source = _localFileToUpload ?? "a stream";
             var lastException = _progressState.Exceptions[^1];
