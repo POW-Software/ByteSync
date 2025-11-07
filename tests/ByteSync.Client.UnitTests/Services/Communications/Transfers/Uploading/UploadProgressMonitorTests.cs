@@ -43,9 +43,9 @@ public class UploadProgressMonitorTests
     [TearDown]
     public void TearDown()
     {
-        _finishedEvent?.Dispose();
-        _errorEvent?.Dispose();
-        _stateSemaphore?.Dispose();
+        _finishedEvent.Dispose();
+        _errorEvent.Dispose();
+        _stateSemaphore.Dispose();
     }
     
     [Test]
@@ -70,7 +70,7 @@ public class UploadProgressMonitorTests
             });
         
         // Act
-        var result = await monitor.MonitorProgressAsync(
+        await monitor.MonitorProgressAsync(
             sharedFile,
             progressState,
             _mockParallelismManager.Object,
