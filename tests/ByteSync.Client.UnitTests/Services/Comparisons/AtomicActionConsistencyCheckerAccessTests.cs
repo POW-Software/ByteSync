@@ -1,0 +1,93 @@
+using ByteSync.Business.Actions.Local;
+using ByteSync.Business.Comparisons;
+using ByteSync.Interfaces.Repositories;
+using ByteSync.Models.Comparisons.Result;
+using ByteSync.Models.FileSystems;
+using ByteSync.Models.Inventories;
+using ByteSync.Services.Comparisons;
+using FluentAssertions;
+using Moq;
+using NUnit.Framework;
+
+namespace ByteSync.Client.UnitTests.Services.Comparisons;
+
+[TestFixture]
+public class AtomicActionConsistencyCheckerAccessTests
+{
+    private static ComparisonItem BuildComparisonItem(InventoryPart src, InventoryPart dst, bool sourceAccessible, bool targetAccessible)
+    {
+        var item = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/p", "p", "/p"));
+
+        // Source identity
+        var srcCi = new ContentIdentity(null);
+        var srcFd = new FileDescription { InventoryPart = src, RelativePath = "/p", Size = 1, CreationTimeUtc = DateTime.UtcNow, LastWriteTimeUtc = DateTime.UtcNow };
+        srcFd.IsAccessible = sourceAccessible;
+        srcCi.Add(srcFd);
+        item.AddContentIdentity(srcCi);
+
+        // Target identity
+        var dstCi = new ContentIdentity(null);
+        var dstFd = new FileDescription { InventoryPart = dst, RelativePath = "/p", Size = 1, CreationTimeUtc = DateTime.UtcNow, LastWriteTimeUtc = DateTime.UtcNow };
+        dstFd.IsAccessible = targetAccessible;
+        dstCi.Add(dstFd);
+        item.AddContentIdentity(dstCi);
+
+        return item;
+    }
+
+    private static (InventoryPart src, InventoryPart dst) BuildParts()
+    {
+        var invA = new Inventory { InventoryId = "INV_A", Code = "A", Endpoint = new(), MachineName = "M" };
+        var invB = new Inventory { InventoryId = "INV_B", Code = "B", Endpoint = new(), MachineName = "M" };
+        var src = new InventoryPart(invA, "c:/a", FileSystemTypes.Directory) { Code = "A1" };
+        var dst = new InventoryPart(invB, "c:/b", FileSystemTypes.Directory) { Code = "B1" };
+        return (src, dst);
+    }
+
+    [Test]
+    public void Synchronize_Fails_When_Source_Not_Accessible()
+    {
+        var (src, dst) = BuildParts();
+        var item = BuildComparisonItem(src, dst, sourceAccessible: false, targetAccessible: true);
+
+        var action = new AtomicAction
+        {
+            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Source = new DataPart("A", src),
+            Destination = new DataPart("B", dst),
+            PathIdentity = item.PathIdentity,
+            ComparisonItem = item
+        };
+
+        var checker = new AtomicActionConsistencyChecker(new Mock<IAtomicActionRepository>().Object);
+        var result = checker.CheckCanAdd(action, item);
+
+        result.ValidationResults.Should().HaveCount(1);
+        result.ValidationResults[0].IsValid.Should().BeFalse();
+        result.ValidationResults[0].FailureReason.Should().Be(AtomicActionValidationFailureReason.SourceNotAccessible);
+    }
+
+    [Test]
+    public void Synchronize_Fails_When_AtLeastOne_Target_Not_Accessible()
+    {
+        var (src, dst) = BuildParts();
+        var item = BuildComparisonItem(src, dst, sourceAccessible: true, targetAccessible: false);
+
+        var action = new AtomicAction
+        {
+            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Source = new DataPart("A", src),
+            Destination = new DataPart("B", dst),
+            PathIdentity = item.PathIdentity,
+            ComparisonItem = item
+        };
+
+        var checker = new AtomicActionConsistencyChecker(new Mock<IAtomicActionRepository>().Object);
+        var result = checker.CheckCanAdd(action, item);
+
+        result.ValidationResults.Should().HaveCount(1);
+        result.ValidationResults[0].IsValid.Should().BeFalse();
+        result.ValidationResults[0].FailureReason.Should().Be(AtomicActionValidationFailureReason.AtLeastOneTargetsNotAccessible);
+    }
+}
+
