@@ -5,6 +5,7 @@ using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
+using ByteSync.Models.FileSystems;
 
 namespace ByteSync.Services.Comparisons;
 
@@ -44,7 +45,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
 
     public List<AtomicAction> GetApplicableActions(ICollection<SynchronizationRule> synchronizationRules)
     {
-        List<AtomicAction> applicableActions = new List<AtomicAction>();
+        var applicableActions = new List<AtomicAction>();
 
         var allActions = new List<AtomicAction>();
         foreach (var synchronizationRule in synchronizationRules)
@@ -179,6 +180,12 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
                 {
                     return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.SourceHasAnalysisError);
                 }
+                // Block if source is present but inaccessible
+                var sourceFsd = contentIdentitySource.GetFileSystemDescriptions(sourceInventoryPart);
+                if (sourceFsd.Any(fsd => fsd is FileDescription && !fsd.IsAccessible))
+                {
+                    return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.SourceNotAccessible);
+                }
                 
                 var targetInventoryPart = atomicAction.Destination!.GetApplicableInventoryPart();
                 var contentIdentityViewsTargets = comparisonItem.GetContentIdentities(targetInventoryPart);
@@ -202,6 +209,12 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
                 {
                     return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.AtLeastOneTargetsHasAnalysisError);
                 }
+                // Block if at least one target is present but inaccessible
+                if (contentIdentityViewsTargets.Count > 0 && contentIdentityViewsTargets
+                        .Any(t => t.GetFileSystemDescriptions(targetInventoryPart).Any(fsd => fsd is FileDescription && !fsd.IsAccessible)))
+                {
+                    return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.AtLeastOneTargetsNotAccessible);
+                }
                 
                 if (atomicAction.IsSynchronizeContentOnly && contentIdentityViewsTargets.Count != 0 &&
                     contentIdentityViewsTargets.All(t => contentIdentitySource.Core!.Equals(t.Core!)))
@@ -219,6 +232,11 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
             if (contentIdentitiesTargets.Count == 0)
             {
                 return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.TargetRequiredForSynchronizeDateOrDelete);
+            }
+            // Block if any target is inaccessible
+            if (contentIdentitiesTargets.Any(t => t.GetFileSystemDescriptions(targetInventoryPart).Any(fsd => fsd is FileDescription && !fsd.IsAccessible)))
+            {
+                return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.AtLeastOneTargetsNotAccessible);
             }
         }
             
@@ -244,7 +262,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
 
     private AtomicActionValidationResult CheckConsistencyAgainstAlreadySetActions(AtomicAction atomicAction, ComparisonItem comparisonItem)
     {
-        List<AtomicAction> alreadySetAtomicActions = _atomicActionRepository.GetAtomicActions(comparisonItem);
+        var alreadySetAtomicActions = _atomicActionRepository.GetAtomicActions(comparisonItem);
 
         if (atomicAction.IsTargeted)
         {

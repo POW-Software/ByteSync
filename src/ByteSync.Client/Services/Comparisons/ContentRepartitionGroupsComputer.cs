@@ -34,7 +34,7 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
         ContentRepartitionViewModel.LastWriteTimeGroups!.Clear();
         ContentRepartitionViewModel.PresenceGroups!.Clear();
 
-        ContentRepartitionComputeResult result = new ContentRepartitionComputeResult(ContentRepartitionViewModel.FileSystemType);
+        var result = new ContentRepartitionComputeResult(ContentRepartitionViewModel.FileSystemType);
 
         if (ContentRepartitionViewModel.FileSystemType == FileSystemTypes.File)
         {
@@ -144,7 +144,7 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
         return result;
     }
         
-    private List<ContentRepartitionGroupMember> ComputePresenceMembers(Dictionary<ContentIdentityCore, HashSet<InventoryPart>> statusFingerPrintGroups)
+    private List<ContentRepartitionGroupMember> ComputePresenceMembers(Dictionary<ContentIdentityCore, HashSet<InventoryPart>> _)
     {
         var result = new List<ContentRepartitionGroupMember>();
 

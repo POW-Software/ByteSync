@@ -191,7 +191,7 @@ public class InventoryBuilder : IInventoryBuilder
             InventorySaver.Stop();
         }
     }
-    
+        
     public async Task RunAnalysisAsync(string inventoryFullName, HashSet<IndexedItem> items, CancellationToken cancellationToken)
     {
         await Task.Run(() => RunAnalysis(inventoryFullName, items, cancellationToken), cancellationToken);
@@ -265,34 +265,81 @@ public class InventoryBuilder : IInventoryBuilder
         
         InventoryIndexer.Register(directoryDescription, directoryInfo);
         
-        foreach (var subDirectory in directoryInfo.GetDirectories())
+        try
         {
-            if (cancellationToken.IsCancellationRequested)
+            foreach (var subDirectory in directoryInfo.EnumerateDirectories())
             {
-                break;
-            }
-            
-            // https://stackoverflow.com/questions/1485155/check-if-a-file-is-real-or-a-symbolic-link
-            // Example to create a symlink :
-            //  - Windows: New-Item -ItemType SymbolicLink -Path \path\to\symlink -Target \path\to\target
-            if (subDirectory.Attributes.HasFlag(FileAttributes.ReparsePoint))
-            {
-                _logger.LogWarning("Directory {Directory} is ignored because it has flag 'ReparsePoint'", subDirectory.FullName);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
                 
-                continue;
+                // https://stackoverflow.com/questions/1485155/check-if-a-file-is-real-or-a-symbolic-link
+                // Example to create a symlink :
+                //  - Windows: New-Item -ItemType SymbolicLink -Path \path\to\symlink -Target \path\to\target
+                try
+                {
+                    if (subDirectory.Attributes.HasFlag(FileAttributes.ReparsePoint))
+                    {
+                        _logger.LogWarning("Directory {Directory} is ignored because it has flag 'ReparsePoint'", subDirectory.FullName);
+                        continue;
+                    }
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    var subDirectoryDescription = IdentityBuilder.BuildDirectoryDescription(inventoryPart, subDirectory);
+                    subDirectoryDescription.IsAccessible = false;
+                    AddFileSystemDescription(inventoryPart, subDirectoryDescription);
+                    _logger.LogWarning(ex, "Directory {Directory} is inaccessible and will be skipped", subDirectory.FullName);
+                    continue;
+                }
+                catch (DirectoryNotFoundException ex)
+                {
+                    var subDirectoryDescription = IdentityBuilder.BuildDirectoryDescription(inventoryPart, subDirectory);
+                    subDirectoryDescription.IsAccessible = false;
+                    AddFileSystemDescription(inventoryPart, subDirectoryDescription);
+                    _logger.LogWarning(ex, "Directory {Directory} not found during enumeration and will be skipped", subDirectory.FullName);
+                    continue;
+                }
+                catch (IOException ex)
+                {
+                    var subDirectoryDescription = IdentityBuilder.BuildDirectoryDescription(inventoryPart, subDirectory);
+                    subDirectoryDescription.IsAccessible = false;
+                    AddFileSystemDescription(inventoryPart, subDirectoryDescription);
+                    _logger.LogWarning(ex, "Directory {Directory} IO error and will be skipped", subDirectory.FullName);
+                    continue;
+                }
+                
+                DoAnalyze(inventoryPart, subDirectory, cancellationToken);
             }
             
-            DoAnalyze(inventoryPart, subDirectory, cancellationToken);
-        }
-        
-        foreach (var subFile in directoryInfo.GetFiles())
-        {
-            if (cancellationToken.IsCancellationRequested)
+            foreach (var subFile in directoryInfo.EnumerateFiles())
             {
-                break;
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                
+                DoAnalyze(inventoryPart, subFile, cancellationToken);
             }
-            
-            DoAnalyze(inventoryPart, subFile, cancellationToken);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            directoryDescription.IsAccessible = false;
+            _logger.LogWarning(ex, "Directory {Directory} is inaccessible and will be skipped", directoryInfo.FullName);
+            return;
+        }
+        catch (DirectoryNotFoundException ex)
+        {
+            directoryDescription.IsAccessible = false;
+            _logger.LogWarning(ex, "Directory {Directory} not found during enumeration and will be skipped", directoryInfo.FullName);
+            return;
+        }
+        catch (IOException ex)
+        {
+            directoryDescription.IsAccessible = false;
+            _logger.LogWarning(ex, "Directory {Directory} IO error and will be skipped", directoryInfo.FullName);
+            return;
         }
     }
     
@@ -328,63 +375,141 @@ public class InventoryBuilder : IInventoryBuilder
             return;
         }
         
-        if (IgnoreHidden)
+        try
         {
-            if (fileInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
-                (OSPlatform == OSPlatforms.Linux && fileInfo.Name.StartsWith(".")))
+            if (IgnoreHidden)
             {
-                _logger.LogInformation("File {File} is ignored because considered as hidden", fileInfo.FullName);
-                
-                return;
+                if (fileInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
+                    (OSPlatform == OSPlatforms.Linux && fileInfo.Name.StartsWith(".")))
+                {
+                    _logger.LogInformation("File {File} is ignored because considered as hidden", fileInfo.FullName);
+                    
+                    return;
+                }
             }
-        }
-        
-        
-        if (IgnoreSystem)
-        {
-            if (fileInfo.Name.In("desktop.ini", "thumbs.db", ".desktop.ini", ".thumbs.db", ".DS_Store")
-                || fileInfo.Attributes.HasFlag(FileAttributes.System))
-            {
-                _logger.LogInformation("File {File} is ignored because considered as system", fileInfo.FullName);
-                
-                return;
-            }
-        }
-        
-        // https://stackoverflow.com/questions/1485155/check-if-a-file-is-real-or-a-symbolic-link
-        // Example to create a symlink :
-        //  - Windows: New-Item -ItemType SymbolicLink -Path \path\to\symlink -Target \path\to\target
-        if (fileInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
-        {
-            _logger.LogWarning("File {File} is ignored because it has flag 'ReparsePoint'. It might be a symbolic link", fileInfo.FullName);
             
-            return;
+            
+            if (IgnoreSystem)
+            {
+                if (fileInfo.Name.In("desktop.ini", "thumbs.db", ".desktop.ini", ".thumbs.db", ".DS_Store")
+                    || fileInfo.Attributes.HasFlag(FileAttributes.System))
+                {
+                    _logger.LogInformation("File {File} is ignored because considered as system", fileInfo.FullName);
+                    
+                    return;
+                }
+            }
+            
+            // https://stackoverflow.com/questions/1485155/check-if-a-file-is-real-or-a-symbolic-link
+            // Example to create a symlink :
+            //  - Windows: New-Item -ItemType SymbolicLink -Path \path\to\symlink -Target \path\to\target
+            if (fileInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
+            {
+                _logger.LogWarning("File {File} is ignored because it has flag 'ReparsePoint'. It might be a symbolic link", fileInfo.FullName);
+                
+                return;
+            }
+            
+            if (!fileInfo.Exists)
+            {
+                return;
+            }
+            
+            if (fileInfo.Attributes.HasFlag(FileAttributes.Offline))
+            {
+                return;
+            }
+            
+            // Non-Local OneDrive Files (not GoogleDrive)
+            // https://docs.microsoft.com/en-gb/windows/win32/fileio/file-attribute-constants?redirectedfrom=MSDN
+            // https://stackoverflow.com/questions/49301958/how-to-detect-onedrive-online-only-files
+            // https://stackoverflow.com/questions/54560454/getting-full-file-attributes-for-files-managed-by-microsoft-onedrive
+            if (((int)fileInfo.Attributes & FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS) == FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS)
+            {
+                return;
+            }
+            
+            var fileDescription = IdentityBuilder.BuildFileDescription(inventoryPart, fileInfo);
+            
+            AddFileSystemDescription(inventoryPart, fileDescription);
+            
+            InventoryIndexer.Register(fileDescription, fileInfo);
         }
-        
-        if (!fileInfo.Exists)
+        catch (UnauthorizedAccessException ex)
         {
+            string relativePath;
+            if (inventoryPart.InventoryPartType == FileSystemTypes.Directory)
+            {
+                var rawRelativePath = ByteSync.Common.Helpers.IOUtils.ExtractRelativePath(fileInfo.FullName, inventoryPart.RootPath);
+                relativePath = OSPlatform == OSPlatforms.Windows
+                    ? rawRelativePath.Replace(Path.DirectorySeparatorChar, IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR)
+                    : rawRelativePath;
+                if (!relativePath.StartsWith(IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR))
+                {
+                    relativePath = IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR + relativePath;
+                }
+            }
+            else
+            {
+                relativePath = "/" + fileInfo.Name;
+            }
+
+            var fileDescription = new FileDescription(inventoryPart, relativePath);
+            fileDescription.IsAccessible = false;
+            AddFileSystemDescription(inventoryPart, fileDescription);
+            _logger.LogWarning(ex, "File {File} is inaccessible and will be skipped", fileInfo.FullName);
             return;
         }
-        
-        if (fileInfo.Attributes.HasFlag(FileAttributes.Offline))
+        catch (DirectoryNotFoundException ex)
         {
+            string relativePath;
+            if (inventoryPart.InventoryPartType == FileSystemTypes.Directory)
+            {
+                var rawRelativePath = ByteSync.Common.Helpers.IOUtils.ExtractRelativePath(fileInfo.FullName, inventoryPart.RootPath);
+                relativePath = OSPlatform == OSPlatforms.Windows
+                    ? rawRelativePath.Replace(Path.DirectorySeparatorChar, IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR)
+                    : rawRelativePath;
+                if (!relativePath.StartsWith(IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR))
+                {
+                    relativePath = IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR + relativePath;
+                }
+            }
+            else
+            {
+                relativePath = "/" + fileInfo.Name;
+            }
+
+            var fileDescription = new FileDescription(inventoryPart, relativePath);
+            fileDescription.IsAccessible = false;
+            AddFileSystemDescription(inventoryPart, fileDescription);
+            _logger.LogWarning(ex, "File {File} parent directory not found and will be skipped", fileInfo.FullName);
             return;
         }
-        
-        // Non-Local OneDrive Files (not GoogleDrive)
-        // https://docs.microsoft.com/en-gb/windows/win32/fileio/file-attribute-constants?redirectedfrom=MSDN
-        // https://stackoverflow.com/questions/49301958/how-to-detect-onedrive-online-only-files
-        // https://stackoverflow.com/questions/54560454/getting-full-file-attributes-for-files-managed-by-microsoft-onedrive
-        if (((int)fileInfo.Attributes & FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS) == FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS)
+        catch (IOException ex)
         {
+            string relativePath;
+            if (inventoryPart.InventoryPartType == FileSystemTypes.Directory)
+            {
+                var rawRelativePath = ByteSync.Common.Helpers.IOUtils.ExtractRelativePath(fileInfo.FullName, inventoryPart.RootPath);
+                relativePath = OSPlatform == OSPlatforms.Windows
+                    ? rawRelativePath.Replace(Path.DirectorySeparatorChar, IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR)
+                    : rawRelativePath;
+                if (!relativePath.StartsWith(IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR))
+                {
+                    relativePath = IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR + relativePath;
+                }
+            }
+            else
+            {
+                relativePath = "/" + fileInfo.Name;
+            }
+
+            var fileDescription = new FileDescription(inventoryPart, relativePath);
+            fileDescription.IsAccessible = false;
+            AddFileSystemDescription(inventoryPart, fileDescription);
+            _logger.LogWarning(ex, "File {File} IO error and will be skipped", fileInfo.FullName);
             return;
         }
-        
-        var fileDescription = IdentityBuilder.BuildFileDescription(inventoryPart, fileInfo);
-        
-        AddFileSystemDescription(inventoryPart, fileDescription);
-        
-        InventoryIndexer.Register(fileDescription, fileInfo);
     }
     
     private void AddFileSystemDescription(InventoryPart inventoryPart, FileSystemDescription fileSystemDescription)
@@ -398,7 +523,10 @@ public class InventoryBuilder : IInventoryBuilder
             {
                 InventoryProcessData.UpdateMonitorData(imd =>
                 {
-                    imd.IdentifiedVolume += fileDescription.Size;
+                    if (fileDescription.IsAccessible)
+                    {
+                        imd.IdentifiedVolume += fileDescription.Size;
+                    }
                     imd.IdentifiedFiles += 1;
                 });
             }

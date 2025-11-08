@@ -46,14 +46,14 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
         var actionsToRemove = initialAtomicActions.Where(a => a.IsFromSynchronizationRule).ToList();
         _atomicActionRepository.Remove(actionsToRemove);
         
-        HashSet<AtomicAction> atomicActions = GetApplicableActions(comparisonItem, synchronizationRules);
+        var atomicActions = GetApplicableActions(comparisonItem, synchronizationRules);
         return atomicActions;
     }
 
     private HashSet<AtomicAction> GetApplicableActions(ComparisonItem comparisonItem, 
         ICollection<SynchronizationRule> synchronizationRules)
     {
-        HashSet<AtomicAction> result = new HashSet<AtomicAction>();
+        var result = new HashSet<AtomicAction>();
 
         var matchingSynchronizationRules = synchronizationRules.Where(sr => ConditionsMatch(sr, comparisonItem)).ToList();
         
@@ -143,8 +143,8 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
         var contentIdentitySource = ExtractContentIdentity(condition.Source, comparisonItem);
         var contentIdentityDestination = ExtractContentIdentity(condition.Destination, comparisonItem);
 
-        if (contentIdentitySource != null && contentIdentitySource.HasAnalysisError
-            || contentIdentityDestination != null && contentIdentityDestination.HasAnalysisError)
+        if ((contentIdentitySource != null && (contentIdentitySource.HasAnalysisError || contentIdentitySource.HasAccessIssue))
+            || (contentIdentityDestination != null && (contentIdentityDestination.HasAnalysisError || contentIdentityDestination.HasAccessIssue)))
         {
             return false;
         }
@@ -201,7 +201,8 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
 
         if (comparisonItem.FileSystemType == FileSystemTypes.File)
         {
-            return contentIdentity?.Core != null;
+            // Consider present even if not analyzable (e.g., inaccessible)
+            return contentIdentity != null;
         }
         else
         {
@@ -369,7 +370,7 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
         var name = comparisonItem.PathIdentity.FileName;
         var pattern = condition.NamePattern!;
 
-        bool result = false;
+        var result = false;
 
         if (pattern.Contains("*") &&
             condition.ConditionOperator.In(ConditionOperatorTypes.Equals, ConditionOperatorTypes.NotEquals))

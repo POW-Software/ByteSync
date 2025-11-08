@@ -1708,9 +1708,21 @@ Do you want to save this new Session Profile with this name?</value>
 		<value>Cannot operate on item being deleted</value>
 	</data>
 	<!-- Consistency Against Already Set Actions - Duplicate Actions -->
-	<data name="ValidationFailure_DuplicateActionNotAllowed" xml:space="preserve">
-		<value>Duplicate action not allowed</value>
-	</data>
+  <data name="ValidationFailure_DuplicateActionNotAllowed" xml:space="preserve">
+    <value>Duplicate action not allowed</value>
+  </data>
+  <data name="ValidationFailure_SourceNotAccessible" xml:space="preserve">
+    <value>Source item is inaccessible</value>
+  </data>
+  <data name="ValidationFailure_AtLeastOneTargetsNotAccessible" xml:space="preserve">
+    <value>At least one target item is inaccessible</value>
+  </data>
+  <data name="ContentIdentity_AccessIssueTitle" xml:space="preserve">
+    <value>Access issue</value>
+  </data>
+  <data name="ContentIdentity_AccessIssueDescription" xml:space="preserve">
+    <value>This item is present but inaccessible on this endpoint. Synchronization is not allowed.</value>
+  </data>
 	<!-- UI Messages -->
 	<data name="TargetedActionEditionGlobal_ActionIssues" xml:space="preserve">
 		<value>The action cannot be applied to some items:</value>

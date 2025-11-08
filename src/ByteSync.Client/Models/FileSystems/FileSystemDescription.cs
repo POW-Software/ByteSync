@@ -20,6 +20,9 @@ public abstract class FileSystemDescription
 
     public string RelativePath { get; set; }
 
+    // Indicates if this item was accessible during inventory identification
+    public bool IsAccessible { get; set; } = true;
+
     public abstract FileSystemTypes FileSystemType { get; }
 
     public Inventory Inventory
