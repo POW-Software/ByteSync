@@ -262,7 +262,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
 
     private AtomicActionValidationResult CheckConsistencyAgainstAlreadySetActions(AtomicAction atomicAction, ComparisonItem comparisonItem)
     {
-        var alreadySetAtomicActions = _atomicActionRepository.GetAtomicActions(comparisonItem);
+        var alreadySetAtomicActions = _atomicActionRepository.GetAtomicActions(comparisonItem) ?? new List<AtomicAction>();
 
         if (atomicAction.IsTargeted)
         {

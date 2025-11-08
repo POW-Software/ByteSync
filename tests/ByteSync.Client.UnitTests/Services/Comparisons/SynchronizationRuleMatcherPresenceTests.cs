@@ -1,5 +1,7 @@
 using System.Reflection;
 using ByteSync.Business.Comparisons;
+using ByteSync.Business.Inventories;
+using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
@@ -58,4 +60,3 @@ public class SynchronizationRuleMatcherPresenceTests
         result.Should().BeTrue();
     }
 }
-
