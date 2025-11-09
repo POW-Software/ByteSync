@@ -191,7 +191,7 @@ public class InventoryBuilder : IInventoryBuilder
             InventorySaver.Stop();
         }
     }
-        
+    
     public async Task RunAnalysisAsync(string inventoryFullName, HashSet<IndexedItem> items, CancellationToken cancellationToken)
     {
         await Task.Run(() => RunAnalysis(inventoryFullName, items, cancellationToken), cancellationToken);
@@ -274,14 +274,12 @@ public class InventoryBuilder : IInventoryBuilder
                     break;
                 }
                 
-                // https://stackoverflow.com/questions/1485155/check-if-a-file-is-real-or-a-symbolic-link
-                // Example to create a symlink :
-                //  - Windows: New-Item -ItemType SymbolicLink -Path \path\to\symlink -Target \path\to\target
                 try
                 {
                     if (subDirectory.Attributes.HasFlag(FileAttributes.ReparsePoint))
                     {
                         _logger.LogWarning("Directory {Directory} is ignored because it has flag 'ReparsePoint'", subDirectory.FullName);
+                        
                         continue;
                     }
                 }
@@ -291,6 +289,7 @@ public class InventoryBuilder : IInventoryBuilder
                     subDirectoryDescription.IsAccessible = false;
                     AddFileSystemDescription(inventoryPart, subDirectoryDescription);
                     _logger.LogWarning(ex, "Directory {Directory} is inaccessible and will be skipped", subDirectory.FullName);
+                    
                     continue;
                 }
                 catch (DirectoryNotFoundException ex)
@@ -299,6 +298,7 @@ public class InventoryBuilder : IInventoryBuilder
                     subDirectoryDescription.IsAccessible = false;
                     AddFileSystemDescription(inventoryPart, subDirectoryDescription);
                     _logger.LogWarning(ex, "Directory {Directory} not found during enumeration and will be skipped", subDirectory.FullName);
+                    
                     continue;
                 }
                 catch (IOException ex)
@@ -307,6 +307,7 @@ public class InventoryBuilder : IInventoryBuilder
                     subDirectoryDescription.IsAccessible = false;
                     AddFileSystemDescription(inventoryPart, subDirectoryDescription);
                     _logger.LogWarning(ex, "Directory {Directory} IO error and will be skipped", subDirectory.FullName);
+                    
                     continue;
                 }
                 
@@ -327,18 +328,21 @@ public class InventoryBuilder : IInventoryBuilder
         {
             directoryDescription.IsAccessible = false;
             _logger.LogWarning(ex, "Directory {Directory} is inaccessible and will be skipped", directoryInfo.FullName);
+            
             return;
         }
         catch (DirectoryNotFoundException ex)
         {
             directoryDescription.IsAccessible = false;
             _logger.LogWarning(ex, "Directory {Directory} not found during enumeration and will be skipped", directoryInfo.FullName);
+            
             return;
         }
         catch (IOException ex)
         {
             directoryDescription.IsAccessible = false;
             _logger.LogWarning(ex, "Directory {Directory} IO error and will be skipped", directoryInfo.FullName);
+            
             return;
         }
     }
@@ -405,7 +409,8 @@ public class InventoryBuilder : IInventoryBuilder
             //  - Windows: New-Item -ItemType SymbolicLink -Path \path\to\symlink -Target \path\to\target
             if (fileInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
             {
-                _logger.LogWarning("File {File} is ignored because it has flag 'ReparsePoint'. It might be a symbolic link", fileInfo.FullName);
+                _logger.LogWarning("File {File} is ignored because it has flag 'ReparsePoint'. It might be a symbolic link",
+                    fileInfo.FullName);
                 
                 return;
             }
@@ -440,7 +445,7 @@ public class InventoryBuilder : IInventoryBuilder
             string relativePath;
             if (inventoryPart.InventoryPartType == FileSystemTypes.Directory)
             {
-                var rawRelativePath = ByteSync.Common.Helpers.IOUtils.ExtractRelativePath(fileInfo.FullName, inventoryPart.RootPath);
+                var rawRelativePath = IOUtils.ExtractRelativePath(fileInfo.FullName, inventoryPart.RootPath);
                 relativePath = OSPlatform == OSPlatforms.Windows
                     ? rawRelativePath.Replace(Path.DirectorySeparatorChar, IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR)
                     : rawRelativePath;
@@ -453,11 +458,12 @@ public class InventoryBuilder : IInventoryBuilder
             {
                 relativePath = "/" + fileInfo.Name;
             }
-
+            
             var fileDescription = new FileDescription(inventoryPart, relativePath);
             fileDescription.IsAccessible = false;
             AddFileSystemDescription(inventoryPart, fileDescription);
             _logger.LogWarning(ex, "File {File} is inaccessible and will be skipped", fileInfo.FullName);
+            
             return;
         }
         catch (DirectoryNotFoundException ex)
@@ -465,7 +471,7 @@ public class InventoryBuilder : IInventoryBuilder
             string relativePath;
             if (inventoryPart.InventoryPartType == FileSystemTypes.Directory)
             {
-                var rawRelativePath = ByteSync.Common.Helpers.IOUtils.ExtractRelativePath(fileInfo.FullName, inventoryPart.RootPath);
+                var rawRelativePath = IOUtils.ExtractRelativePath(fileInfo.FullName, inventoryPart.RootPath);
                 relativePath = OSPlatform == OSPlatforms.Windows
                     ? rawRelativePath.Replace(Path.DirectorySeparatorChar, IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR)
                     : rawRelativePath;
@@ -478,11 +484,12 @@ public class InventoryBuilder : IInventoryBuilder
             {
                 relativePath = "/" + fileInfo.Name;
             }
-
+            
             var fileDescription = new FileDescription(inventoryPart, relativePath);
             fileDescription.IsAccessible = false;
             AddFileSystemDescription(inventoryPart, fileDescription);
             _logger.LogWarning(ex, "File {File} parent directory not found and will be skipped", fileInfo.FullName);
+            
             return;
         }
         catch (IOException ex)
@@ -490,7 +497,7 @@ public class InventoryBuilder : IInventoryBuilder
             string relativePath;
             if (inventoryPart.InventoryPartType == FileSystemTypes.Directory)
             {
-                var rawRelativePath = ByteSync.Common.Helpers.IOUtils.ExtractRelativePath(fileInfo.FullName, inventoryPart.RootPath);
+                var rawRelativePath = IOUtils.ExtractRelativePath(fileInfo.FullName, inventoryPart.RootPath);
                 relativePath = OSPlatform == OSPlatforms.Windows
                     ? rawRelativePath.Replace(Path.DirectorySeparatorChar, IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR)
                     : rawRelativePath;
@@ -503,11 +510,12 @@ public class InventoryBuilder : IInventoryBuilder
             {
                 relativePath = "/" + fileInfo.Name;
             }
-
+            
             var fileDescription = new FileDescription(inventoryPart, relativePath);
             fileDescription.IsAccessible = false;
             AddFileSystemDescription(inventoryPart, fileDescription);
             _logger.LogWarning(ex, "File {File} IO error and will be skipped", fileInfo.FullName);
+            
             return;
         }
     }
@@ -527,6 +535,7 @@ public class InventoryBuilder : IInventoryBuilder
                     {
                         imd.IdentifiedVolume += fileDescription.Size;
                     }
+                    
                     imd.IdentifiedFiles += 1;
                 });
             }
