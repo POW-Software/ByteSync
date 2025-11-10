@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using ByteSync.Business;
 using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Profiles;

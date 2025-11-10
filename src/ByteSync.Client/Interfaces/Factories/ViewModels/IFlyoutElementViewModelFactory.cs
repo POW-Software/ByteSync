@@ -1,4 +1,4 @@
-﻿using ByteSync.Business;
+using ByteSync.Business;
 using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Profiles;
 using ByteSync.Common.Business.EndPoints;
@@ -15,7 +15,7 @@ namespace ByteSync.Interfaces.Factories.ViewModels;
 public interface IFlyoutElementViewModelFactory
 {
     AddTrustedClientViewModel BuilAddTrustedClientViewModel(PublicKeyCheckData publicKeyCheckData, TrustDataParameters trustDataParameters);
-
+    
     SynchronizationRuleGlobalViewModel BuilSynchronizationRuleGlobalViewModel(SynchronizationRule synchronizationRule, bool isCloneMode);
     
     CreateSessionProfileViewModel BuildCreateSessionProfileViewModel(ProfileTypes profileType);
@@ -30,8 +30,8 @@ public interface IFlyoutElementViewModelFactory
     
     GeneralSettingsViewModel BuildGeneralSettingsViewModel();
     
-    SynchronizationRuleGlobalViewModel BuildSynchronizationRuleGlobalViewModel(SynchronizationRule? baseAutomaticAction = null, 
+    SynchronizationRuleGlobalViewModel BuildSynchronizationRuleGlobalViewModel(SynchronizationRule? baseAutomaticAction = null,
         bool isCloneMode = false);
-
+    
     FlyoutElementViewModel BuildAboutApplicationViewModel();
 }
