@@ -33,6 +33,14 @@ public class ContentIdentity
         }
     }
 
+    public bool HasAccessIssue
+    {
+        get
+        {
+            return FileSystemDescriptions.Any(fsd => fsd is FileDescription && !fsd.IsAccessible);
+        }
+    }
+
     public bool HasManyFileSystemDescriptionOnAnInventoryPart
     {
         get
@@ -46,11 +54,23 @@ public class ContentIdentity
         return Equals(Core, other.Core);
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
-        if (ReferenceEquals(null, obj)) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
+        if (ReferenceEquals(null, obj))
+        {
+            return false;
+        }
+        
+        if (ReferenceEquals(this, obj))
+        {
+            return true;
+        }
+        
+        if (obj.GetType() != GetType())
+        {
+            return false;
+        }
+        
         return Equals((ContentIdentity) obj);
     }
 
@@ -62,7 +82,7 @@ public class ContentIdentity
     public override string ToString()
     {
     #if DEBUG
-        string toString = $"ContentIdentity {Core?.SignatureHash} {Core?.Size}";
+        var toString = $"ContentIdentity {Core?.SignatureHash} {Core?.Size}";
 
         foreach (var inventoryPartsByDate in InventoryPartsByLastWriteTimes)
         {
@@ -105,7 +125,7 @@ public class ContentIdentity
         
     public HashSet<Inventory> GetInventories()
     {
-        HashSet<Inventory> inventories = new HashSet<Inventory>();
+        var inventories = new HashSet<Inventory>();
 
         foreach (var pair in FileSystemDescriptionsByInventoryParts)
         {
@@ -117,7 +137,7 @@ public class ContentIdentity
         
     public HashSet<InventoryPart> GetInventoryParts()
     {
-        HashSet<InventoryPart> result = new HashSet<InventoryPart>();
+        var result = new HashSet<InventoryPart>();
             
         foreach (var pair in FileSystemDescriptionsByInventoryParts)
         {

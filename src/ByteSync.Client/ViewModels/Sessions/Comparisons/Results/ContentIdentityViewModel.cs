@@ -56,7 +56,12 @@ public class ContentIdentityViewModel : ViewModelBase
         ShowInventoryParts = _sessionService.IsCloudSession;
         
         HasAnalysisError = ContentIdentity.HasAnalysisError;
+        HasAccessIssue = ContentIdentity.HasAccessIssue;
         if (HasAnalysisError)
+        {
+            ShowToolTipDelay = 400;
+        }
+        else if (HasAccessIssue)
         {
             ShowToolTipDelay = 400;
         }
@@ -90,6 +95,9 @@ public class ContentIdentityViewModel : ViewModelBase
     
     [Reactive]
     public bool HasAnalysisError { get; set; }
+    
+    [Reactive]
+    public bool HasAccessIssue { get; set; }
     
     [Reactive]
     public int ShowToolTipDelay { get; set; }
@@ -126,7 +134,7 @@ public class ContentIdentityViewModel : ViewModelBase
                         .First(fsd => fsd is FileDescription { HasAnalysisError: true })
                     as FileDescription;
                 
-                SignatureHash = onErrorFileDescription!.AnalysisErrorType.Truncate(32);
+                SignatureHash = onErrorFileDescription!.AnalysisErrorType!.Truncate(32);
                 ErrorType = onErrorFileDescription.AnalysisErrorType;
                 ErrorDescription = onErrorFileDescription.AnalysisErrorDescription;
             }
@@ -179,7 +187,7 @@ public class ContentIdentityViewModel : ViewModelBase
     
     private void SetHashOrWarnIcon()
     {
-        if (ContentIdentity.HasAnalysisError)
+        if (ContentIdentity.HasAnalysisError || ContentIdentity.HasAccessIssue)
         {
             HashOrWarnIcon = "RegularError";
         }

@@ -19,6 +19,7 @@ public enum AtomicActionValidationFailureReason
     // Advanced Consistency - Source Issues
     InvalidSourceCount = 30,
     SourceHasAnalysisError = 31,
+    SourceNotAccessible = 32,
     
     // Advanced Consistency - Target Issues
     TargetFileNotPresent = 40,
@@ -26,6 +27,7 @@ public enum AtomicActionValidationFailureReason
     TargetRequiredForSynchronizeDateOrDelete = 42,
     CreateOperationRequiresDirectoryTarget = 43,
     TargetAlreadyExistsForCreateOperation = 44,
+    AtLeastOneTargetsNotAccessible = 45,
     
     // Advanced Consistency - Content Analysis
     NothingToCopyContentAndDateIdentical = 50,

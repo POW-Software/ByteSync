@@ -1,0 +1,79 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:synchronizations="clr-namespace:ByteSync.ViewModels.Sessions.Synchronizations"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             xmlns:shared="clr-namespace:ByteSync.Business.Actions.Shared"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
+             x:Class="ByteSync.Views.Sessions.Synchronizations.SynchronizationConfirmationView">
+    <Design.DataContext>
+        <synchronizations:SynchronizationConfirmationViewModel />
+    </Design.DataContext>
+    <Grid Background="{DynamicResource MahApps.Brushes.Gray7}">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" MinWidth="500" Margin="12 0 12 0">
+            <TextBlock Text="Summary" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0 12" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 8">
+                <TextBlock Text="{localizations:Loc SynchronizationConfirmation_TotalActions}" FontWeight="SemiBold" />
+                <TextBlock Text=": " />
+                <TextBlock Text="{Binding TotalActionsCount}" FontWeight="Bold" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 4 0 16">
+                <TextBlock Text="{localizations:Loc SynchronizationConfirmation_TotalSize}" FontWeight="SemiBold" />
+                <TextBlock Text=": " />
+                <TextBlock Text="{Binding TotalDataSize}" FontWeight="Bold" />
+            </StackPanel>
+            <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8,0,12" />
+            <ItemsControl Items="{Binding DestinationsSummaries}" Margin="0 8">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="shared:DestinationActionsSummary">
+                        <Border Background="{DynamicResource MahApps.Brushes.Gray8}" BorderBrush="{DynamicResource MahApps.Brushes.Gray5}"
+                                BorderThickness="1" CornerRadius="4" Padding="12" Margin="0 4">
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Horizontal" Margin="0 0 0 8">
+                                    <TextBlock Text="{localizations:Loc SynchronizationConfirmation_ToDestination}" FontWeight="SemiBold" />
+                                    <TextBlock Text=" " />
+                                    <TextBlock Text="{Binding DestinationCode}" FontWeight="Bold" />
+                                    <TextBlock Text=" (" />
+                                    <TextBlock Text="{Binding MachineName}" />
+                                    <TextBlock Text=")" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="16 2" IsVisible="{Binding CreateCount}">
+                                    <TextBlock Text="• " />
+                                    <TextBlock Text="{Binding CreateCount}" />
+                                    <TextBlock Text=" " />
+                                    <TextBlock Text="{localizations:Loc SynchronizationConfirmation_CreateCount}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="16 2" IsVisible="{Binding SynchronizeContentCount}">
+                                    <TextBlock Text="• " />
+                                    <TextBlock Text="{Binding SynchronizeContentCount}" />
+                                    <TextBlock Text=" " />
+                                    <TextBlock Text="{localizations:Loc SynchronizationConfirmation_SyncContentCount}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="16 2" IsVisible="{Binding SynchronizeDateCount}">
+                                    <TextBlock Text="• " />
+                                    <TextBlock Text="{Binding SynchronizeDateCount}" />
+                                    <TextBlock Text=" " />
+                                    <TextBlock Text="{localizations:Loc SynchronizationConfirmation_SyncDateCount}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="16 2" IsVisible="{Binding DeleteCount}">
+                                    <TextBlock Text="• " />
+                                    <TextBlock Text="{Binding DeleteCount}" />
+                                    <TextBlock Text=" " />
+                                    <TextBlock Text="{localizations:Loc SynchronizationConfirmation_DeleteCount}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,12,0,8" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="6">
+                <Button Classes="GenericButton" Height="32" Command="{Binding ConfirmCommand}" Margin="3"
+                        Content="{localizations:Loc SynchronizationConfirmation_Confirm}" MinWidth="100" />
+                <Button Classes="GenericButton" Height="32" Command="{Binding CancelCommand}" Margin="3"
+                        Content="{localizations:Loc SynchronizationConfirmation_Cancel}" MinWidth="100" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

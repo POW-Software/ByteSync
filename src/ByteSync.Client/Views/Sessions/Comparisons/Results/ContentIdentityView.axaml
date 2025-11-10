@@ -94,6 +94,10 @@
                                 <TextBlock Text="{Binding ErrorDescription}" TextWrapping="Wrap" MaxWidth="435"/>
                             </StackPanel>
                         </StackPanel>
+                        <StackPanel IsVisible="{Binding HasAccessIssue}" MaxWidth="445">
+                            <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5" Text="{localizations:Loc ContentIdentity_AccessIssueTitle}"/>
+                            <TextBlock Text="{localizations:Loc ContentIdentity_AccessIssueDescription}" TextWrapping="Wrap" MaxWidth="435"/>
+                        </StackPanel>
                         <StackPanel IsVisible="{Binding !HasAnalysisError}" MaxWidth="445" >
                             <TextBlock Margin="3" Text="{Binding LinkingKeyNameTooltip}" MaxWidth="439" TextWrapping="Wrap"/>
                         </StackPanel>
