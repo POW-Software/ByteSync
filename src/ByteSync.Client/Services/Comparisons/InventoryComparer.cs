@@ -199,22 +199,20 @@ public class InventoryComparer : IInventoryComparer
                 continue;
             }
             
-            // Check which inventories are present in existing ContentIdentities
-            var inventoriesWithContent = item.ContentIdentities
-                .SelectMany(ci => ci.GetInventories())
+            // Check which inventory parts are present in existing ContentIdentities
+            var partsWithContent = item.ContentIdentities
+                .SelectMany(ci => ci.GetInventoryParts())
                 .ToHashSet();
             
-            // For files, create a virtual ContentIdentity for inventories missing due to inaccessible ancestor
+            // For files, create a virtual ContentIdentity for parts missing due to inaccessible ancestor
             if (item.FileSystemType == FileSystemTypes.File)
             {
                 foreach (var part in partsWithInaccessibleAncestor)
                 {
-                    var inventory = part.Inventory;
+                    // Check if this specific part already has content for this item
+                    var hasExistingContentForPart = partsWithContent.Contains(part);
                     
-                    // Check if this inventory already has content for this item
-                    var hasExistingContent = inventoriesWithContent.Contains(inventory);
-                    
-                    if (!hasExistingContent)
+                    if (!hasExistingContentForPart)
                     {
                         // Create a virtual ContentIdentity for this inaccessible file
                         var virtualContentIdentity = new ContentIdentity(null);
@@ -230,17 +228,8 @@ public class InventoryComparer : IInventoryComparer
                         
                         item.AddContentIdentity(virtualContentIdentity);
                     }
-                    else
-                    {
-                        // Mark existing ContentIdentities with access issue for this part
-                        foreach (var ci in item.ContentIdentities)
-                        {
-                            if (ci.IsPresentIn(inventory))
-                            {
-                                ci.AddAccessIssue(part);
-                            }
-                        }
-                    }
+                    
+                    // If the part already exists (which shouldn't happen for inaccessible ancestors), skip it
                 }
             }
             else
