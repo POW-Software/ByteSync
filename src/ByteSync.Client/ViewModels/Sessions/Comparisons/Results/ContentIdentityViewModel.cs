@@ -183,7 +183,8 @@ public class ContentIdentityViewModel : ViewModelBase
             LinkingKeyNameTooltip = ComparisonItemViewModel.LinkingKeyNameTooltip;
         }
         
-        if (IsDirectory)
+        // Show inventory parts (B1, B2, etc.) for directories OR for inaccessible files
+        if (IsDirectory || (IsFile && ContentIdentity.HasAccessIssueFor(Inventory)))
         {
             PresenceParts = ContentIdentity.GetInventoryParts()
                 .Where(ip => ip.Inventory.Equals(Inventory))
@@ -209,6 +210,12 @@ public class ContentIdentityViewModel : ViewModelBase
     private void FillDateAndInventoryParts()
     {
         DateAndInventoryParts.Clear();
+        
+        // Don't show dates for inaccessible files
+        if (ContentIdentity.HasAccessIssueFor(Inventory))
+        {
+            return;
+        }
         
         foreach (var pair in ContentIdentity.InventoryPartsByLastWriteTimes)
         {

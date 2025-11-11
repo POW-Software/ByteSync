@@ -7,15 +7,15 @@
              xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ByteSync.Views.Sessions.Comparisons.Results.ContentIdentityView">
-   
+
     <Design.DataContext>
         <results:ContentIdentityViewModel />
     </Design.DataContext>
 
     <Grid>
-        <Border BorderThickness="0" CornerRadius="4" Margin="4"> 
+        <Border BorderThickness="0" CornerRadius="4" Margin="4">
             <StackPanel Orientation="Vertical" Margin="3" VerticalAlignment="Center" Background="Transparent"
-                        ToolTip.ShowDelay="{Binding ShowToolTipDelay}" >
+                        ToolTip.ShowDelay="{Binding ShowToolTipDelay}">
 
 
                 <Grid IsVisible="{Binding IsFile}">
@@ -24,25 +24,27 @@
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left"
+                                IsVisible="{Binding !HasAccessIssue}">
                         <misc:Icon FontSize="14" Value="RegularSave" Foreground="{DynamicResource SystemBaseHighColor}"
-                                   Margin="3 0 0 0" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding Size, Converter={StaticResource FormatKbSizeConverter}}" HorizontalAlignment="Left" 
-                                   Margin="4 0" Foreground="{DynamicResource SystemBaseHighColor}"/>
+                                   Margin="3 0 0 0" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Size, Converter={StaticResource FormatKbSizeConverter}}" HorizontalAlignment="Left"
+                                   Margin="4 0" Foreground="{DynamicResource SystemBaseHighColor}" />
                     </StackPanel>
-                    
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" IsVisible="{Binding SignatureHash, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                IsVisible="{Binding SignatureHash, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                         <misc:Icon FontSize="14" Value="{Binding HashOrWarnIcon}" Foreground="{DynamicResource SystemBaseHighColor}"
-                                   Margin="15 0 0 0" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding SignatureHash}" HorizontalAlignment="Left" VerticalAlignment="Center" 
-                                   Margin="4 0" Foreground="{DynamicResource SystemBaseHighColor}"/>
+                                   Margin="15 0 0 0" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding SignatureHash}" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                   Margin="4 0" Foreground="{DynamicResource SystemBaseHighColor}" />
                     </StackPanel>
                 </Grid>
 
                 <ItemsControl ItemsSource="{Binding DateAndInventoryParts}" IsVisible="{Binding IsFile}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <StackPanel Orientation="Vertical"/>
+                            <StackPanel Orientation="Vertical" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
 
@@ -51,61 +53,80 @@
                             <DockPanel HorizontalAlignment="Stretch">
                                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
                                     <misc:Icon FontSize="14" Value="RegularTime" Foreground="{DynamicResource SystemBaseHighColor}"
-                                               Margin="3 0 0 0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding LastWriteTimeUtc}"  HorizontalAlignment="Left" VerticalAlignment="Center" 
-                                               Margin="4 0" Foreground="{DynamicResource SystemBaseHighColor}"/>
-                                </StackPanel> 
+                                               Margin="3 0 0 0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding LastWriteTimeUtc}" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                               Margin="4 0" Foreground="{DynamicResource SystemBaseHighColor}" />
+                                </StackPanel>
 
                                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right">
-                                    <misc:Icon IsVisible="{Binding DataContext.ShowInventoryParts,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
-                                               FontSize="14" Value="RegularData" Foreground="{DynamicResource SystemBaseHighColor}"
-                                               Margin="15 0 0 0" VerticalAlignment="Center"/>
-                                    <TextBlock IsVisible="{Binding DataContext.ShowInventoryParts,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
-                                               Text="{Binding InventoryParts}" HorizontalAlignment="Left" VerticalAlignment="Center" 
-                                               Margin="4 0" Foreground="{DynamicResource SystemBaseHighColor}"></TextBlock>
-                                </StackPanel> 
+                                    <misc:Icon
+                                        IsVisible="{Binding DataContext.ShowInventoryParts,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                        FontSize="14" Value="RegularData" Foreground="{DynamicResource SystemBaseHighColor}"
+                                        Margin="15 0 0 0" VerticalAlignment="Center" />
+                                    <TextBlock
+                                        IsVisible="{Binding DataContext.ShowInventoryParts,RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                        Text="{Binding InventoryParts}" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                        Margin="4 0" Foreground="{DynamicResource SystemBaseHighColor}">
+                                    </TextBlock>
+                                </StackPanel>
                             </DockPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                
+
+                <!-- Show PresenceParts (B1) for inaccessible files -->
+                <StackPanel IsVisible="{Binding HasAccessIssue}" Orientation="Horizontal" Margin="0 3 0 0"
+                            HorizontalAlignment="Right" VerticalAlignment="Bottom">
+
+                    <misc:Icon FontSize="14" Value="RegularData" Foreground="{DynamicResource SystemBaseHighColor}"
+                               Margin="15 0 0 0" VerticalAlignment="Center" />
+
+                    <TextBlock Text="{Binding PresenceParts}" HorizontalAlignment="Left" VerticalAlignment="Center"
+                               Margin="4 0" Foreground="{DynamicResource SystemBaseHighColor}">
+                    </TextBlock>
+
+                </StackPanel>
+
                 <StackPanel IsVisible="{Binding IsDirectory}" Orientation="Horizontal" Margin="0 16 0 0"
                             HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                    
+
                     <misc:Icon FontSize="14" Value="RegularData" Foreground="{DynamicResource SystemBaseHighColor}"
-                               Margin="15 0 0 0" VerticalAlignment="Center"/>
-                    
-                    <TextBlock Text="{Binding PresenceParts}" HorizontalAlignment="Left" VerticalAlignment="Center" 
-                               Margin="4 0" Foreground="{DynamicResource SystemBaseHighColor}"></TextBlock>
-                    
+                               Margin="15 0 0 0" VerticalAlignment="Center" />
+
+                    <TextBlock Text="{Binding PresenceParts}" HorizontalAlignment="Left" VerticalAlignment="Center"
+                               Margin="4 0" Foreground="{DynamicResource SystemBaseHighColor}">
+                    </TextBlock>
+
                 </StackPanel>
-                
+
                 <ToolTip.Tip>
                     <!-- https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Themes.Fluent/Controls/ToolTip.xaml => MaxWidth="320" -->
                     <StackPanel Orientation="Vertical" MaxWidth="445">
-                        <StackPanel IsVisible="{Binding HasAnalysisError}" MaxWidth="445"> 
-                            <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5" Text="{localizations:Loc ContentIdentity_AnErrorOccured}"/>
+                        <StackPanel IsVisible="{Binding HasAnalysisError}" MaxWidth="445">
+                            <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"
+                                       Text="{localizations:Loc ContentIdentity_AnErrorOccured}" />
                             <StackPanel Orientation="Vertical" Margin="0,0,0,3">
-                                <TextBlock Text="{localizations:Loc ContentIdentity_ErrorType}"/>
-                                <TextBlock Text="{Binding ErrorType}"/>
+                                <TextBlock Text="{localizations:Loc ContentIdentity_ErrorType}" />
+                                <TextBlock Text="{Binding ErrorType}" />
                             </StackPanel>
                             <StackPanel Orientation="Vertical">
-                                <TextBlock Text="{localizations:Loc ContentIdentity_ErrorDescription}"/>
-                                <TextBlock Text="{Binding ErrorDescription}" TextWrapping="Wrap" MaxWidth="435"/>
+                                <TextBlock Text="{localizations:Loc ContentIdentity_ErrorDescription}" />
+                                <TextBlock Text="{Binding ErrorDescription}" TextWrapping="Wrap" MaxWidth="435" />
                             </StackPanel>
                         </StackPanel>
                         <StackPanel IsVisible="{Binding HasAccessIssue}" MaxWidth="445">
-                            <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5" Text="{localizations:Loc ContentIdentity_AccessIssueTitle}"/>
-                            <TextBlock Text="{localizations:Loc ContentIdentity_AccessIssueDescription}" TextWrapping="Wrap" MaxWidth="435"/>
+                            <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"
+                                       Text="{localizations:Loc ContentIdentity_AccessIssueTitle}" />
+                            <TextBlock Text="{localizations:Loc ContentIdentity_AccessIssueDescription}" TextWrapping="Wrap" MaxWidth="435" />
                         </StackPanel>
-                        <StackPanel IsVisible="{Binding !HasAnalysisError}" MaxWidth="445" >
-                            <TextBlock Margin="3" Text="{Binding LinkingKeyNameTooltip}" MaxWidth="439" TextWrapping="Wrap"/>
+                        <StackPanel IsVisible="{Binding !HasAnalysisError}" MaxWidth="445">
+                            <TextBlock Margin="3" Text="{Binding LinkingKeyNameTooltip}" MaxWidth="439" TextWrapping="Wrap" />
                         </StackPanel>
                     </StackPanel>
                 </ToolTip.Tip>
-                
+
             </StackPanel>
         </Border>
-        
+
     </Grid>
 </UserControl>
