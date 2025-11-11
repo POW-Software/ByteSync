@@ -171,7 +171,7 @@ public class InventoryComparer : IInventoryComparer
             }
         }
         
-        // For each item, for each inventory part: if an ancestor is inaccessible, mark access issue
+        // For each item, check if it's under an inaccessible ancestor
         foreach (var item in ComparisonResult.ComparisonItems)
         {
             var relative = item.PathIdentity.LinkingKeyValue; // e.g., "/a/b/c.txt"
@@ -180,16 +180,77 @@ public class InventoryComparer : IInventoryComparer
                 continue;
             }
             
+            // Track which inventory parts have the item under an inaccessible ancestor
+            var partsWithInaccessibleAncestor = new HashSet<InventoryPart>();
+            
             foreach (var loader in InventoryLoaders)
             {
                 foreach (var part in loader.Inventory.InventoryParts)
                 {
                     if (IsUnderInaccessibleAncestor(relative, inaccessibleByPart[part]))
                     {
+                        partsWithInaccessibleAncestor.Add(part);
+                    }
+                }
+            }
+            
+            if (partsWithInaccessibleAncestor.Count == 0)
+            {
+                continue;
+            }
+            
+            // Check which inventories are present in existing ContentIdentities
+            var inventoriesWithContent = item.ContentIdentities
+                .SelectMany(ci => ci.GetInventories())
+                .ToHashSet();
+            
+            // For files, create a virtual ContentIdentity for inventories missing due to inaccessible ancestor
+            if (item.FileSystemType == FileSystemTypes.File)
+            {
+                foreach (var part in partsWithInaccessibleAncestor)
+                {
+                    var inventory = part.Inventory;
+                    
+                    // Check if this inventory already has content for this item
+                    var hasExistingContent = inventoriesWithContent.Contains(inventory);
+                    
+                    if (!hasExistingContent)
+                    {
+                        // Create a virtual ContentIdentity for this inaccessible file
+                        var virtualContentIdentity = new ContentIdentity(null);
+                        
+                        // Create a minimal FileDescription marked as inaccessible
+                        var virtualFileDescription = new FileDescription(part, relative)
+                        {
+                            IsAccessible = false
+                        };
+                        
+                        virtualContentIdentity.Add(virtualFileDescription);
+                        virtualContentIdentity.AddAccessIssue(part);
+                        
+                        item.AddContentIdentity(virtualContentIdentity);
+                    }
+                    else
+                    {
+                        // Mark existing ContentIdentities with access issue for this part
                         foreach (var ci in item.ContentIdentities)
                         {
-                            ci.AddAccessIssue(part);
+                            if (ci.IsPresentIn(inventory))
+                            {
+                                ci.AddAccessIssue(part);
+                            }
                         }
+                    }
+                }
+            }
+            else
+            {
+                // For directories, just mark existing ContentIdentities
+                foreach (var part in partsWithInaccessibleAncestor)
+                {
+                    foreach (var ci in item.ContentIdentities)
+                    {
+                        ci.AddAccessIssue(part);
                     }
                 }
             }

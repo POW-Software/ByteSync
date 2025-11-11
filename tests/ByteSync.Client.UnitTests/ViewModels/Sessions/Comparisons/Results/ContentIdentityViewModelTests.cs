@@ -122,6 +122,7 @@ public class ContentIdentityViewModelTests
             ci,
             _inventory,
             _sessionService.Object,
+            _localizationService.Object,
             _factory.Object);
         
         civm.SignatureHash.Should().Be("");
@@ -147,6 +148,7 @@ public class ContentIdentityViewModelTests
             ci,
             _inventory,
             _sessionService.Object,
+            _localizationService.Object,
             _factory.Object);
         
         vm.SignatureHash.Should().NotBeNull();
@@ -176,6 +178,7 @@ public class ContentIdentityViewModelTests
             ci,
             _inventory,
             _sessionService.Object,
+            _localizationService.Object,
             _factory.Object);
         
         vm.HasAnalysisError.Should().BeTrue();
@@ -186,7 +189,7 @@ public class ContentIdentityViewModelTests
         vm.SignatureHash!.Length.Should().Be(35);
         vm.ShowToolTipDelay.Should().Be(400);
     }
-
+    
     [Test]
     public void File_identity_with_access_issue_sets_error_icon_and_tooltip_delay()
     {
@@ -201,14 +204,15 @@ public class ContentIdentityViewModelTests
         };
         file.IsAccessible = false;
         ci.Add(file);
-
+        
         var vm = new ContentIdentityViewModel(
             BuildComparisonItemViewModel(FileSystemTypes.File),
             ci,
             _inventory,
             _sessionService.Object,
+            _localizationService.Object,
             _factory.Object);
-
+        
         vm.HasAnalysisError.Should().BeFalse();
         vm.HashOrWarnIcon.Should().Be("RegularError");
         vm.ShowToolTipDelay.Should().Be(400);
@@ -229,6 +233,7 @@ public class ContentIdentityViewModelTests
             ci,
             _inventory,
             _sessionService.Object,
+            _localizationService.Object,
             _factory.Object);
         
         vm.IsDirectory.Should().BeTrue();
