@@ -4,6 +4,7 @@ using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
+using ByteSync.Models.Inventories;
 using ByteSync.Services.Inventories;
 
 namespace ByteSync.Services.Comparisons;
@@ -85,6 +86,12 @@ public class InventoryComparer : IInventoryComparer
             _initialStatusBuilder.BuildStatus(comparisonItem, InventoryLoaders.Select(il => il.Inventory));
         }
         
+        // Propagate access issues from inaccessible ancestor directories (Tree mode only)
+        if (SessionSettings.MatchingMode == MatchingModes.Tree)
+        {
+            PropagateAccessIssuesFromAncestors();
+        }
+        
         return ComparisonResult;
     }
     
@@ -141,6 +148,72 @@ public class InventoryComparer : IInventoryComparer
         }
         
         contentIdentity.Add(directoryDescription);
+    }
+    
+    private void PropagateAccessIssuesFromAncestors()
+    {
+        // Build a table of inaccessible directories per inventory part (relative paths)
+        var inaccessibleByPart = new Dictionary<InventoryPart, HashSet<string>>();
+        foreach (var loader in InventoryLoaders)
+        {
+            foreach (var part in loader.Inventory.InventoryParts)
+            {
+                var set = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var dir in part.DirectoryDescriptions)
+                {
+                    if (!dir.IsAccessible)
+                    {
+                        set.Add(dir.RelativePath);
+                    }
+                }
+                
+                inaccessibleByPart[part] = set;
+            }
+        }
+        
+        // For each item, for each inventory part: if an ancestor is inaccessible, mark access issue
+        foreach (var item in ComparisonResult.ComparisonItems)
+        {
+            var relative = item.PathIdentity.LinkingKeyValue; // e.g., "/a/b/c.txt"
+            if (string.IsNullOrWhiteSpace(relative) || relative == "/")
+            {
+                continue;
+            }
+            
+            foreach (var loader in InventoryLoaders)
+            {
+                foreach (var part in loader.Inventory.InventoryParts)
+                {
+                    if (IsUnderInaccessibleAncestor(relative, inaccessibleByPart[part]))
+                    {
+                        foreach (var ci in item.ContentIdentities)
+                        {
+                            ci.AddAccessIssue(part);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private static bool IsUnderInaccessibleAncestor(string relativePath, HashSet<string> inaccessibleDirs)
+    {
+        // Walk parents: /a/b/c.txt -> /a/b -> /a
+        var path = relativePath;
+        while (true)
+        {
+            var idx = path.LastIndexOf('/');
+            if (idx <= 0)
+            {
+                return false;
+            }
+            
+            path = path.Substring(0, idx); // drop last segment
+            if (inaccessibleDirs.Contains(path))
+            {
+                return true;
+            }
+        }
     }
     
     private PathIdentity BuildPathIdentity(FileSystemDescription fileSystemDescription)

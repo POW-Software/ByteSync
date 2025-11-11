@@ -1,7 +1,9 @@
 ﻿using System.Collections.ObjectModel;
+using ByteSync.Assets.Resources;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Factories.ViewModels;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
@@ -15,6 +17,7 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Results;
 public class ContentIdentityViewModel : ViewModelBase
 {
     private readonly ISessionService _sessionService;
+    private readonly ILocalizationService _localizationService;
     private readonly IDateAndInventoryPartsViewModelFactory _dateAndInventoryPartsViewModelFactory;
     
     public ContentIdentityViewModel()
@@ -35,6 +38,7 @@ public class ContentIdentityViewModel : ViewModelBase
     
     public ContentIdentityViewModel(ComparisonItemViewModel comparisonItemViewModel,
         ContentIdentity contentIdentity, Inventory inventory, ISessionService sessionService,
+        ILocalizationService localizationService,
         IDateAndInventoryPartsViewModelFactory dateAndInventoryPartsViewModelFactory)
     {
         ComparisonItemViewModel = comparisonItemViewModel;
@@ -45,6 +49,7 @@ public class ContentIdentityViewModel : ViewModelBase
         IsDirectory = !IsFile;
         
         _sessionService = sessionService;
+        _localizationService = localizationService;
         _dateAndInventoryPartsViewModelFactory = dateAndInventoryPartsViewModelFactory;
         
         DateAndInventoryParts = new ObservableCollection<DateAndInventoryPartsViewModel>();
@@ -56,7 +61,7 @@ public class ContentIdentityViewModel : ViewModelBase
         ShowInventoryParts = _sessionService.IsCloudSession;
         
         HasAnalysisError = ContentIdentity.HasAnalysisError;
-        HasAccessIssue = ContentIdentity.HasAccessIssue;
+        HasAccessIssue = ContentIdentity.HasAccessIssueFor(Inventory) || ContentIdentity.HasAccessIssue;
         if (HasAnalysisError)
         {
             ShowToolTipDelay = 400;
@@ -140,7 +145,11 @@ public class ContentIdentityViewModel : ViewModelBase
             }
             else
             {
-                if (ContentIdentity.Core == null || ContentIdentity.Core.SignatureHash.IsNullOrEmpty())
+                if (ContentIdentity.HasAccessIssueFor(Inventory))
+                {
+                    SignatureHash = _localizationService[nameof(Resources.ContentIdentity_AccessIssueShortLabel)];
+                }
+                else if (ContentIdentity.Core == null || ContentIdentity.Core.SignatureHash.IsNullOrEmpty())
                 {
                     SignatureHash = "";
                 }
@@ -187,7 +196,7 @@ public class ContentIdentityViewModel : ViewModelBase
     
     private void SetHashOrWarnIcon()
     {
-        if (ContentIdentity.HasAnalysisError || ContentIdentity.HasAccessIssue)
+        if (ContentIdentity.HasAnalysisError || ContentIdentity.HasAccessIssueFor(Inventory))
         {
             HashOrWarnIcon = "RegularError";
         }
