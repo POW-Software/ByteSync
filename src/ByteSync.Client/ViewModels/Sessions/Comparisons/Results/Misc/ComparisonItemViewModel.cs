@@ -47,11 +47,11 @@ public class ComparisonItemViewModel : IDisposable
         _synchronizationActionViewModelFactory = synchronizationActionViewModelFactory;
         _formatKbSizeConverter = formatKbSizeConverter;
         
-        ContentIdentitiesA = new HashSet<ContentIdentityViewModel>();
-        ContentIdentitiesB = new HashSet<ContentIdentityViewModel>();
-        ContentIdentitiesC = new HashSet<ContentIdentityViewModel>();
-        ContentIdentitiesD = new HashSet<ContentIdentityViewModel>();
-        ContentIdentitiesE = new HashSet<ContentIdentityViewModel>();
+        ContentIdentitiesA = new List<ContentIdentityViewModel>();
+        ContentIdentitiesB = new List<ContentIdentityViewModel>();
+        ContentIdentitiesC = new List<ContentIdentityViewModel>();
+        ContentIdentitiesD = new List<ContentIdentityViewModel>();
+        ContentIdentitiesE = new List<ContentIdentityViewModel>();
         
         ContentIdentitiesList =
         [
@@ -77,6 +77,7 @@ public class ComparisonItemViewModel : IDisposable
         
         BuildLinkingKeyNameTooltip();
         
+        // Create all ContentIdentityViewModels
         foreach (var contentIdentity in ComparisonItem.ContentIdentities)
         {
             foreach (var inventory in contentIdentity.GetInventories())
@@ -87,6 +88,22 @@ public class ComparisonItemViewModel : IDisposable
                 
                 collection.Add(contentIdentityView);
             }
+        }
+        
+        // Sort each collection by inventory part codes (A1, A2, B1, B2, etc.)
+        foreach (var contentIdentitiesCollection in ContentIdentitiesList)
+        {
+            contentIdentitiesCollection.Sort((a, b) =>
+            {
+                var aMinCode = a.ContentIdentity.GetInventoryParts()
+                    .Where(ip => ip.Inventory.Equals(a.Inventory))
+                    .Min(ip => ip.Code);
+                var bMinCode = b.ContentIdentity.GetInventoryParts()
+                    .Where(ip => ip.Inventory.Equals(b.Inventory))
+                    .Min(ip => ip.Code);
+                
+                return string.Compare(aMinCode, bMinCode, StringComparison.Ordinal);
+            });
         }
         
         ContentRepartitionViewModel = _contentRepartitionViewModelFactory.CreateContentRepartitionViewModel(ComparisonItem, inventories);
@@ -103,17 +120,17 @@ public class ComparisonItemViewModel : IDisposable
     
     internal PathIdentity PathIdentity { get; }
     
-    internal HashSet<ContentIdentityViewModel> ContentIdentitiesA { get; }
+    internal List<ContentIdentityViewModel> ContentIdentitiesA { get; }
     
-    internal HashSet<ContentIdentityViewModel> ContentIdentitiesB { get; }
+    internal List<ContentIdentityViewModel> ContentIdentitiesB { get; }
     
-    internal HashSet<ContentIdentityViewModel> ContentIdentitiesC { get; }
+    internal List<ContentIdentityViewModel> ContentIdentitiesC { get; }
     
-    internal HashSet<ContentIdentityViewModel> ContentIdentitiesD { get; }
+    internal List<ContentIdentityViewModel> ContentIdentitiesD { get; }
     
-    internal HashSet<ContentIdentityViewModel> ContentIdentitiesE { get; }
+    internal List<ContentIdentityViewModel> ContentIdentitiesE { get; }
     
-    internal List<HashSet<ContentIdentityViewModel>> ContentIdentitiesList { get; set; }
+    internal List<List<ContentIdentityViewModel>> ContentIdentitiesList { get; set; }
     
     public ReadOnlyObservableCollection<SynchronizationActionViewModel> SynchronizationActions => _data;
     
@@ -130,7 +147,7 @@ public class ComparisonItemViewModel : IDisposable
         get { return PathIdentity.FileSystemType; }
     }
     
-    internal HashSet<ContentIdentityViewModel> GetContentIdentityViews(Inventory inventory)
+    internal List<ContentIdentityViewModel> GetContentIdentityViews(Inventory inventory)
     {
         var index = Inventories.IndexOf(inventory);
         
@@ -168,8 +185,13 @@ public class ComparisonItemViewModel : IDisposable
         
         var linkingKeyNameTooltip = new StringBuilder();
         
+        // Sort ContentIdentities by inventory parts codes (A1, A2, B1, B2, etc.)
+        var sortedContentIdentities = ComparisonItem.ContentIdentities
+            .OrderBy(ci => ci.GetInventoryParts().Min(ip => ip.Code))
+            .ToList();
+        
         var isFirst = true;
-        foreach (var contentIdentity in ComparisonItem.ContentIdentities)
+        foreach (var contentIdentity in sortedContentIdentities)
         {
             if (isFirst)
             {
