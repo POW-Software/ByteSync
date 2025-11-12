@@ -24,6 +24,42 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
 {
     private InventoryProcessData _inventoryProcessData = null!;
     
+    private static bool CanAccessFile(string filePath)
+    {
+        try
+        {
+            using var _ = File.OpenRead(filePath);
+            
+            return true;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return false;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+    }
+    
+    private static bool CanAccessDirectory(string dirPath)
+    {
+        try
+        {
+            Directory.EnumerateFileSystemEntries(dirPath).Any();
+            
+            return true;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return false;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+    }
+    
     [SetUp]
     public void Setup()
     {
@@ -157,6 +193,11 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
             {
                 File.SetUnixFileMode(inaccessibleDir.FullName, UnixFileMode.None);
+                
+                if (CanAccessDirectory(inaccessibleDir.FullName))
+                {
+                    Assert.Ignore("Cannot test inaccessible directory - running with elevated permissions that bypass access restrictions");
+                }
             }
             
             var sessionMember = new SessionMember
@@ -339,6 +380,11 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
             {
                 File.SetUnixFileMode(inaccessibleFile, UnixFileMode.None);
+                
+                if (CanAccessFile(inaccessibleFile))
+                {
+                    Assert.Ignore("Cannot test inaccessible file - running with elevated permissions that bypass access restrictions");
+                }
             }
             
             var sessionMember = new SessionMember
@@ -440,6 +486,11 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             {
                 originalMode = File.GetUnixFileMode(inaccessibleFile);
                 File.SetUnixFileMode(inaccessibleFile, UnixFileMode.None);
+                
+                if (CanAccessFile(inaccessibleFile))
+                {
+                    Assert.Ignore("Cannot test inaccessible file - running with elevated permissions that bypass access restrictions");
+                }
             }
             
             var sessionMember = new SessionMember
@@ -548,6 +599,11 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             {
                 originalMode = File.GetUnixFileMode(dir2.FullName);
                 File.SetUnixFileMode(dir2.FullName, UnixFileMode.None);
+                
+                if (CanAccessDirectory(dir2.FullName))
+                {
+                    Assert.Ignore("Cannot test inaccessible directory - running with elevated permissions that bypass access restrictions");
+                }
             }
             
             var sessionMember = new SessionMember
