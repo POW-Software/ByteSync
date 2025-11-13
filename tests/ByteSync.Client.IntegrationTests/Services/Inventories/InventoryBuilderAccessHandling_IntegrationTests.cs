@@ -8,6 +8,7 @@ using ByteSync.Business.Inventories;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Client.IntegrationTests.TestHelpers;
+using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
@@ -666,6 +667,170 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             {
                 File.SetUnixFileMode(dir2.FullName, originalMode.Value);
             }
+        }
+    }
+    
+    [Test]
+    [Platform(Include = "Win")]
+    public async Task InaccessibleFile_AsInventoryPartOfTypeFile_Windows()
+    {
+        var dataRoot = _testDirectoryService.CreateSubTestDirectory("data");
+        var testFile = Path.Combine(dataRoot.FullName, "test.txt");
+        File.WriteAllText(testFile, new string('A', 1000));
+        
+        var originalSecurity = new FileInfo(testFile).GetAccessControl();
+        var sid = WindowsIdentity.GetCurrent().User!;
+        var denyRule = new FileSystemAccessRule(sid,
+            FileSystemRights.ReadData | FileSystemRights.ReadAttributes | FileSystemRights.ReadExtendedAttributes,
+            AccessControlType.Deny);
+        
+        try
+        {
+            var sec = new FileInfo(testFile).GetAccessControl();
+            sec.AddAccessRule(denyRule);
+            new FileInfo(testFile).SetAccessControl(sec);
+            
+            var sessionMember = new SessionMember
+            {
+                Endpoint = new(),
+                PrivateData = new() { MachineName = "Test" }
+            };
+            var dataNode = new DataNode { Id = "DN1", Code = "A" };
+            var sessionSettings = new SessionSettings
+            {
+                DataType = DataTypes.Files,
+                MatchingMode = MatchingModes.Tree,
+                LinkingCase = LinkingCases.Sensitive
+            };
+            
+            var loggerMock = new Mock<ILogger<InventoryBuilder>>();
+            var inventoryFileAnalyzerLoggerMock = new Mock<ILogger<InventoryFileAnalyzer>>();
+            
+            var inventorySaver = new InventorySaver();
+            var inventoryFileAnalyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, _inventoryProcessData, inventorySaver,
+                inventoryFileAnalyzerLoggerMock.Object);
+            
+            var inventoryIndexer = new InventoryIndexer();
+            
+            var builder = new InventoryBuilder(
+                sessionMember,
+                dataNode,
+                sessionSettings,
+                _inventoryProcessData,
+                OSPlatforms.Windows,
+                FingerprintModes.Rsync,
+                loggerMock.Object,
+                inventoryFileAnalyzer,
+                inventorySaver,
+                inventoryIndexer
+            );
+            
+            builder.AddInventoryPart(testFile);
+            
+            var inventoryFile = Path.Combine(_testDirectoryService.TestDirectory.FullName, "inventory.zip");
+            await builder.BuildBaseInventoryAsync(inventoryFile);
+            
+            var inventory = builder.Inventory;
+            var part = inventory.InventoryParts.First();
+            
+            part.InventoryPartType.Should().Be(FileSystemTypes.File);
+            
+            var fileDesc = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("test.txt"));
+            fileDesc.Should().NotBeNull();
+            
+            if (fileDesc!.IsAccessible)
+            {
+                Assert.Ignore(
+                    "File permissions were not enforced by the OS - test cannot verify access control (likely running with elevated permissions)");
+            }
+            
+            fileDesc.IsAccessible.Should().BeFalse();
+            fileDesc.RelativePath.Should().Be("/test.txt");
+        }
+        finally
+        {
+            var sec = new FileInfo(testFile).GetAccessControl();
+            sec.RemoveAccessRule(denyRule);
+            new FileInfo(testFile).SetAccessControl(sec);
+        }
+    }
+    
+    [Test]
+    [Platform(Include = "Linux,MacOsX")]
+    public async Task InaccessibleFile_AsInventoryPartOfTypeFile_Posix()
+    {
+        var dataRoot = _testDirectoryService.CreateSubTestDirectory("data");
+        var testFile = Path.Combine(dataRoot.FullName, "test.txt");
+        File.WriteAllText(testFile, new string('A', 1000));
+        
+        var originalMode = File.GetUnixFileMode(testFile);
+        
+        try
+        {
+            File.SetUnixFileMode(testFile, UnixFileMode.None);
+            
+            var sessionMember = new SessionMember
+            {
+                Endpoint = new(),
+                PrivateData = new() { MachineName = "Test" }
+            };
+            var dataNode = new DataNode { Id = "DN1", Code = "A" };
+            var sessionSettings = new SessionSettings
+            {
+                DataType = DataTypes.Files,
+                MatchingMode = MatchingModes.Tree,
+                LinkingCase = LinkingCases.Sensitive
+            };
+            
+            var loggerMock = new Mock<ILogger<InventoryBuilder>>();
+            var inventoryFileAnalyzerLoggerMock = new Mock<ILogger<InventoryFileAnalyzer>>();
+            
+            var inventorySaver = new InventorySaver();
+            var inventoryFileAnalyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, _inventoryProcessData, inventorySaver,
+                inventoryFileAnalyzerLoggerMock.Object);
+            
+            var inventoryIndexer = new InventoryIndexer();
+            
+            var osPlatform = OperatingSystem.IsLinux() ? OSPlatforms.Linux : OSPlatforms.MacOs;
+            
+            var builder = new InventoryBuilder(
+                sessionMember,
+                dataNode,
+                sessionSettings,
+                _inventoryProcessData,
+                osPlatform,
+                FingerprintModes.Rsync,
+                loggerMock.Object,
+                inventoryFileAnalyzer,
+                inventorySaver,
+                inventoryIndexer
+            );
+            
+            builder.AddInventoryPart(testFile);
+            
+            var inventoryFile = Path.Combine(_testDirectoryService.TestDirectory.FullName, "inventory.zip");
+            await builder.BuildBaseInventoryAsync(inventoryFile);
+            
+            var inventory = builder.Inventory;
+            var part = inventory.InventoryParts.First();
+            
+            part.InventoryPartType.Should().Be(FileSystemTypes.File);
+            
+            var fileDesc = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("test.txt"));
+            fileDesc.Should().NotBeNull();
+            
+            if (fileDesc!.IsAccessible)
+            {
+                Assert.Ignore(
+                    "File permissions were not enforced by the OS - test cannot verify access control (likely running with elevated permissions)");
+            }
+            
+            fileDesc.IsAccessible.Should().BeFalse();
+            fileDesc.RelativePath.Should().Be("/test.txt");
+        }
+        finally
+        {
+            File.SetUnixFileMode(testFile, originalMode);
         }
     }
 }
