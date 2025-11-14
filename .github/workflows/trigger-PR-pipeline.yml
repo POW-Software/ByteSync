@@ -138,16 +138,30 @@ jobs:
             is_integration=false
           fi
 
-          if [[ "$is_integration" == "true" ]]; then
-            # Run without coverage for IntegrationTests across all OS
+          if [[ "$is_integration" == "true" && "${{ matrix.os }}" == "macos-latest" ]]; then
+            # macOS IntegrationTests: run without coverage but with diagnostics to find hangs
             dotnet test "$project" \
               --no-restore \
               --no-build \
               $extra_filter \
               --logger "trx;LogFileName=$safe_name.trx" \
-              --results-directory ./TestResults
+              --results-directory ./TestResults \
+              --blame-hang --blame-hang-timeout 5m --blame-hang-dump-type full \
+              --diag ./TestResults/vstest-$safe_name.log \
+              -- NUnit.NumberOfTestWorkers=1
+          elif [[ "$is_integration" == "true" ]]; then
+            # IntegrationTests on Linux/Windows: include coverage for Sonar
+            dotnet test "$project" \
+              --no-restore \
+              --no-build \
+              $extra_filter \
+              --logger "trx;LogFileName=$safe_name.trx" \
+              --results-directory ./TestResults \
+              --collect:"XPlat Code Coverage" \
+              -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover \
+                 DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.OutputDirectory=./TestResults/${{ matrix.os }}/$safe_name
           else
-            # Run with coverage for UnitTests on all OS (including macOS)
+            # UnitTests on all OS (including macOS): include coverage
             dotnet test "$project" \
               --no-restore \
               --no-build \
