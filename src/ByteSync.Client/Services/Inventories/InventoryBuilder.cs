@@ -27,7 +27,8 @@ public class InventoryBuilder : IInventoryBuilder
         OSPlatforms osPlatform, FingerprintModes fingerprintMode, ILogger<InventoryBuilder> logger,
         IInventoryFileAnalyzer inventoryFileAnalyzer,
         IInventorySaver inventorySaver,
-        IInventoryIndexer inventoryIndexer)
+        IInventoryIndexer inventoryIndexer,
+        IFileSystemInspector? fileSystemInspector = null)
     {
         _logger = logger;
         
@@ -45,6 +46,7 @@ public class InventoryBuilder : IInventoryBuilder
         InventorySaver = inventorySaver;
         
         InventoryFileAnalyzer = inventoryFileAnalyzer;
+        FileSystemInspector = fileSystemInspector ?? new FileSystemInspector();
     }
     
     private Inventory InstantiateInventory()
@@ -84,6 +86,8 @@ public class InventoryBuilder : IInventoryBuilder
     public IInventoryIndexer InventoryIndexer { get; }
     
     private OSPlatforms OSPlatform { get; set; }
+    
+    private IFileSystemInspector FileSystemInspector { get; }
     
     private bool IgnoreHidden
     {
@@ -310,8 +314,7 @@ public class InventoryBuilder : IInventoryBuilder
             return false;
         }
         
-        if (directoryInfo.Attributes.HasFlag(FileAttributes.Hidden) ||
-            (OSPlatform == OSPlatforms.Linux && directoryInfo.Name.StartsWith('.')))
+        if (FileSystemInspector.IsHidden(directoryInfo, OSPlatform))
         {
             _logger.LogInformation("Directory {Directory} is ignored because considered as hidden", directoryInfo.FullName);
             
@@ -352,7 +355,7 @@ public class InventoryBuilder : IInventoryBuilder
                 return;
             }
             
-            if (!fileInfo.Exists || fileInfo.Attributes.HasFlag(FileAttributes.Offline) || IsRecallOnDataAccess(fileInfo))
+            if (!FileSystemInspector.Exists(fileInfo) || FileSystemInspector.IsOffline(fileInfo) || IsRecallOnDataAccess(fileInfo))
             {
                 return;
             }
@@ -435,9 +438,7 @@ public class InventoryBuilder : IInventoryBuilder
             return false;
         }
         
-        var isHiddenAttr = fileInfo.Attributes.HasFlag(FileAttributes.Hidden);
-        var isDotFileOnLinux = OSPlatform == OSPlatforms.Linux && fileInfo.Name.StartsWith('.');
-        if (isHiddenAttr || isDotFileOnLinux)
+        if (FileSystemInspector.IsHidden(fileInfo, OSPlatform))
         {
             _logger.LogInformation("File {File} is ignored because considered as hidden", fileInfo.FullName);
             
@@ -454,9 +455,7 @@ public class InventoryBuilder : IInventoryBuilder
             return false;
         }
         
-        var isCommonSystemName = fileInfo.Name.In("desktop.ini", "thumbs.db", ".desktop.ini", ".thumbs.db", ".DS_Store");
-        var isSystemAttr = fileInfo.Attributes.HasFlag(FileAttributes.System);
-        if (isCommonSystemName || isSystemAttr)
+        if (FileSystemInspector.IsSystem(fileInfo))
         {
             _logger.LogInformation("File {File} is ignored because considered as system", fileInfo.FullName);
             
@@ -468,7 +467,7 @@ public class InventoryBuilder : IInventoryBuilder
     
     private bool IsReparsePoint(FileInfo fileInfo)
     {
-        if (fileInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
+        if (FileSystemInspector.IsReparsePoint(fileInfo))
         {
             _logger.LogWarning(
                 "File {File} is ignored because it has flag 'ReparsePoint'. It might be a symbolic link",
@@ -482,7 +481,7 @@ public class InventoryBuilder : IInventoryBuilder
     
     private bool IsReparsePoint(DirectoryInfo directoryInfo)
     {
-        if (directoryInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
+        if (FileSystemInspector.IsReparsePoint(directoryInfo))
         {
             _logger.LogWarning("Directory {Directory} is ignored because it has flag 'ReparsePoint'", directoryInfo.FullName);
             
@@ -492,9 +491,9 @@ public class InventoryBuilder : IInventoryBuilder
         return false;
     }
     
-    private static bool IsRecallOnDataAccess(FileInfo fileInfo)
+    private bool IsRecallOnDataAccess(FileInfo fileInfo)
     {
-        return ((int)fileInfo.Attributes & FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS) == FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS;
+        return FileSystemInspector.IsRecallOnDataAccess(fileInfo);
     }
     
     private void AddInaccessibleFileAndLog(InventoryPart inventoryPart, FileInfo fileInfo, Exception ex, string message)
