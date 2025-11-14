@@ -127,25 +127,31 @@ jobs:
             extra_filter="--filter FullyQualifiedName!~E2E_Auth_Session_Tests"
           fi
 
-          # Disable coverage on macOS to avoid CI hangs
-          coverage_args=""
-          if [[ "${{ matrix.os }}" != "macos-latest" ]]; then
-            coverage_args='--collect:"XPlat Code Coverage" \
-              -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover \
-                 DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.OutputDirectory=./TestResults'
-          fi
-
           mkdir -p TestResults
           project="${{ matrix.testProject }}"
           safe_name=$(basename "$project" .csproj)
           echo "Running test project: $project"
-          dotnet test "$project" \
-            --no-restore \
-            --no-build \
-            $extra_filter \
-            --logger "trx;LogFileName=$safe_name.trx" \
-            --results-directory ./TestResults \
-            $coverage_args
+
+          if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            # Run without coverage on macOS to avoid CI hangs
+            dotnet test "$project" \
+              --no-restore \
+              --no-build \
+              $extra_filter \
+              --logger "trx;LogFileName=$safe_name.trx" \
+              --results-directory ./TestResults
+          else
+            # Run with coverage on Linux/Windows
+            dotnet test "$project" \
+              --no-restore \
+              --no-build \
+              $extra_filter \
+              --logger "trx;LogFileName=$safe_name.trx" \
+              --results-directory ./TestResults \
+              --collect:"XPlat Code Coverage" \
+              -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover \
+                 DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.OutputDirectory=./TestResults
+          fi
         shell: bash
 
       - name: Upload Test Results
