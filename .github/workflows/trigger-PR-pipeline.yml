@@ -156,7 +156,7 @@ jobs:
               --results-directory ./TestResults \
               --collect:"XPlat Code Coverage" \
               -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover \
-                 DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.OutputDirectory=./TestResults
+                 DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.OutputDirectory=./TestResults/${{ matrix.os }}/$safe_name
           fi
         shell: bash
 
