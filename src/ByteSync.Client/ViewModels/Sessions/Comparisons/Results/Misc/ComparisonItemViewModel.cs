@@ -120,17 +120,17 @@ public class ComparisonItemViewModel : IDisposable
     
     internal PathIdentity PathIdentity { get; }
     
-    internal List<ContentIdentityViewModel> ContentIdentitiesA { get; }
+    public List<ContentIdentityViewModel> ContentIdentitiesA { get; }
     
-    internal List<ContentIdentityViewModel> ContentIdentitiesB { get; }
+    public List<ContentIdentityViewModel> ContentIdentitiesB { get; }
     
-    internal List<ContentIdentityViewModel> ContentIdentitiesC { get; }
+    public List<ContentIdentityViewModel> ContentIdentitiesC { get; }
     
-    internal List<ContentIdentityViewModel> ContentIdentitiesD { get; }
+    public List<ContentIdentityViewModel> ContentIdentitiesD { get; }
     
-    internal List<ContentIdentityViewModel> ContentIdentitiesE { get; }
+    public List<ContentIdentityViewModel> ContentIdentitiesE { get; }
     
-    internal List<List<ContentIdentityViewModel>> ContentIdentitiesList { get; set; }
+    public List<List<ContentIdentityViewModel>> ContentIdentitiesList { get; set; }
     
     public ReadOnlyObservableCollection<SynchronizationActionViewModel> SynchronizationActions => _data;
     
@@ -147,7 +147,7 @@ public class ComparisonItemViewModel : IDisposable
         get { return PathIdentity.FileSystemType; }
     }
     
-    internal List<ContentIdentityViewModel> GetContentIdentityViews(Inventory inventory)
+    public List<ContentIdentityViewModel> GetContentIdentityViews(Inventory inventory)
     {
         var index = Inventories.IndexOf(inventory);
         
