@@ -188,6 +188,105 @@ public class InventoryBuilderInspectorTests
     }
     
     [Test]
+    public async Task DirectoryNotFound_Adds_Inaccessible_FileDescription()
+    {
+        var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>()))
+            .Throws(new DirectoryNotFoundException("parent missing"));
+        insp.Setup(i => i.IsSystem(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
+        insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
+        insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsRecallOnDataAccess(It.IsAny<FileInfo>())).Returns(false);
+        
+        var builder = CreateBuilder(insp.Object);
+        
+        var root = Directory.CreateDirectory(Path.Combine(_rootTemp, "root_df"));
+        var filePath = Path.Combine(root.FullName, "df.txt");
+        await File.WriteAllTextAsync(filePath, "x");
+        
+        builder.AddInventoryPart(root.FullName);
+        var invPath = Path.Combine(_rootTemp, "inv_df.zip");
+        await builder.BuildBaseInventoryAsync(invPath);
+        
+        var part = builder.Inventory.InventoryParts.Single();
+        part.FileDescriptions.Should().ContainSingle();
+        var fd = part.FileDescriptions.Single();
+        fd.IsAccessible.Should().BeFalse();
+        fd.RelativePath.Should().Be("/df.txt");
+    }
+    
+    [Test]
+    public async Task IOException_Adds_Inaccessible_FileDescription()
+    {
+        var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>()))
+            .Throws(new IOException("io error"));
+        insp.Setup(i => i.IsSystem(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
+        insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
+        insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsRecallOnDataAccess(It.IsAny<FileInfo>())).Returns(false);
+        
+        var builder = CreateBuilder(insp.Object);
+        
+        var root = Directory.CreateDirectory(Path.Combine(_rootTemp, "root_io"));
+        var filePath = Path.Combine(root.FullName, "io.txt");
+        await File.WriteAllTextAsync(filePath, "x");
+        
+        builder.AddInventoryPart(root.FullName);
+        var invPath = Path.Combine(_rootTemp, "inv_io.zip");
+        await builder.BuildBaseInventoryAsync(invPath);
+        
+        var part = builder.Inventory.InventoryParts.Single();
+        part.FileDescriptions.Should().ContainSingle();
+        var fd = part.FileDescriptions.Single();
+        fd.IsAccessible.Should().BeFalse();
+        fd.RelativePath.Should().Be("/io.txt");
+    }
+    
+    [Test]
+    public async Task Directory_IOException_Marked_Inaccessible_And_Skipped()
+    {
+        var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        insp.Setup(i => i.IsHidden(It.IsAny<FileSystemInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystem(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
+        insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsRecallOnDataAccess(It.IsAny<FileInfo>())).Returns(false);
+        
+        var builder = CreateBuilder(insp.Object);
+        
+        var root = Directory.CreateDirectory(Path.Combine(_rootTemp, "root_dir_io"));
+        var sub = Directory.CreateDirectory(Path.Combine(root.FullName, "BadSub"));
+        
+        // Throw IOException for this specific subdirectory when checking reparse
+        insp.Setup(i => i.IsReparsePoint(It.Is<FileSystemInfo>(fsi => fsi.FullName == sub.FullName)))
+            .Throws(new IOException("dir io error"));
+        
+        // Default to not reparse otherwise
+        insp.Setup(i => i.IsReparsePoint(It.Is<FileSystemInfo>(fsi => fsi.FullName != sub.FullName)))
+            .Returns(false);
+        
+        var okFile = Path.Combine(root.FullName, "ok.txt");
+        await File.WriteAllTextAsync(okFile, "x");
+        
+        builder.AddInventoryPart(root.FullName);
+        var invPath = Path.Combine(_rootTemp, "inv_dir_io.zip");
+        await builder.BuildBaseInventoryAsync(invPath);
+        
+        var part = builder.Inventory.InventoryParts.Single();
+        
+        // An inaccessible directory entry should exist for BadSub
+        part.DirectoryDescriptions.Any(d => d.RelativePath.EndsWith("/BadSub") && !d.IsAccessible).Should().BeTrue();
+        
+        // Root file still processed
+        part.FileDescriptions.Any(f => f.RelativePath == "/ok.txt").Should().BeTrue();
+    }
+    
+    [Test]
     public async Task Directory_ReparsePoint_Is_Skipped()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
