@@ -152,96 +152,107 @@ public class InventoryComparer : IInventoryComparer
     
     private void PropagateAccessIssuesFromAncestors()
     {
-        // Build a table of inaccessible directories per inventory part (relative paths)
-        var inaccessibleByPart = new Dictionary<InventoryPart, HashSet<string>>();
-        foreach (var loader in InventoryLoaders)
-        {
-            foreach (var part in loader.Inventory.InventoryParts)
-            {
-                var set = new HashSet<string>(StringComparer.Ordinal);
-                foreach (var dir in part.DirectoryDescriptions)
-                {
-                    if (!dir.IsAccessible)
-                    {
-                        set.Add(dir.RelativePath);
-                    }
-                }
-                
-                inaccessibleByPart[part] = set;
-            }
-        }
+        var inaccessibleByPart = BuildInaccessibleDirectoriesByPart();
         
-        // For each item, check if it's under an inaccessible ancestor
         foreach (var item in ComparisonResult.ComparisonItems)
         {
-            var relative = item.PathIdentity.LinkingKeyValue; // e.g., "/a/b/c.txt"
+            var relative = item.PathIdentity.LinkingKeyValue;
             if (string.IsNullOrWhiteSpace(relative) || relative == "/")
             {
                 continue;
             }
             
-            // Track which inventory parts have the item under an inaccessible ancestor
-            var partsWithInaccessibleAncestor = new HashSet<InventoryPart>();
-            
-            foreach (var loader in InventoryLoaders)
-            {
-                foreach (var part in loader.Inventory.InventoryParts)
-                {
-                    if (IsUnderInaccessibleAncestor(relative, inaccessibleByPart[part]))
-                    {
-                        partsWithInaccessibleAncestor.Add(part);
-                    }
-                }
-            }
-            
+            var partsWithInaccessibleAncestor = FindPartsWithInaccessibleAncestor(relative, inaccessibleByPart);
             if (partsWithInaccessibleAncestor.Count == 0)
             {
                 continue;
             }
             
-            // Check which inventory parts are present in existing ContentIdentities
-            var partsWithContent = item.ContentIdentities
-                .SelectMany(ci => ci.GetInventoryParts())
-                .ToHashSet();
-            
-            // For files, create a virtual ContentIdentity for parts missing due to inaccessible ancestor
             if (item.FileSystemType == FileSystemTypes.File)
             {
-                foreach (var part in partsWithInaccessibleAncestor)
-                {
-                    // Check if this specific part already has content for this item
-                    var hasExistingContentForPart = partsWithContent.Contains(part);
-                    
-                    if (!hasExistingContentForPart)
-                    {
-                        // Create a virtual ContentIdentity for this inaccessible file
-                        var virtualContentIdentity = new ContentIdentity(null);
-                        
-                        // Create a minimal FileDescription marked as inaccessible
-                        var virtualFileDescription = new FileDescription(part, relative)
-                        {
-                            IsAccessible = false
-                        };
-                        
-                        virtualContentIdentity.Add(virtualFileDescription);
-                        virtualContentIdentity.AddAccessIssue(part);
-                        
-                        item.AddContentIdentity(virtualContentIdentity);
-                    }
-                    
-                    // If the part already exists (which shouldn't happen for inaccessible ancestors), skip it
-                }
+                HandleFileWithInaccessibleAncestor(item, relative, partsWithInaccessibleAncestor);
             }
             else
             {
-                // For directories, just mark existing ContentIdentities
-                foreach (var part in partsWithInaccessibleAncestor)
+                HandleDirectoryWithInaccessibleAncestor(item, partsWithInaccessibleAncestor);
+            }
+        }
+    }
+    
+    private Dictionary<InventoryPart, HashSet<string>> BuildInaccessibleDirectoriesByPart()
+    {
+        var inaccessibleByPart = new Dictionary<InventoryPart, HashSet<string>>();
+        
+        foreach (var loader in InventoryLoaders)
+        {
+            foreach (var part in loader.Inventory.InventoryParts)
+            {
+                var inaccessibleDirs = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var dir in part.DirectoryDescriptions)
                 {
-                    foreach (var ci in item.ContentIdentities)
+                    if (!dir.IsAccessible)
                     {
-                        ci.AddAccessIssue(part);
+                        inaccessibleDirs.Add(dir.RelativePath);
                     }
                 }
+                
+                inaccessibleByPart[part] = inaccessibleDirs;
+            }
+        }
+        
+        return inaccessibleByPart;
+    }
+    
+    private HashSet<InventoryPart> FindPartsWithInaccessibleAncestor(string relativePath,
+        Dictionary<InventoryPart, HashSet<string>> inaccessibleByPart)
+    {
+        var partsWithInaccessibleAncestor = new HashSet<InventoryPart>();
+        
+        foreach (var loader in InventoryLoaders)
+        {
+            foreach (var part in loader.Inventory.InventoryParts)
+            {
+                if (IsUnderInaccessibleAncestor(relativePath, inaccessibleByPart[part]))
+                {
+                    partsWithInaccessibleAncestor.Add(part);
+                }
+            }
+        }
+        
+        return partsWithInaccessibleAncestor;
+    }
+    
+    private void HandleFileWithInaccessibleAncestor(ComparisonItem item, string relativePath,
+        HashSet<InventoryPart> partsWithInaccessibleAncestor)
+    {
+        var partsWithContent = item.ContentIdentities
+            .SelectMany(ci => ci.GetInventoryParts())
+            .ToHashSet();
+        
+        foreach (var part in partsWithInaccessibleAncestor)
+        {
+            if (!partsWithContent.Contains(part))
+            {
+                var virtualContentIdentity = new ContentIdentity(null);
+                var virtualFileDescription = new FileDescription(part, relativePath)
+                {
+                    IsAccessible = false
+                };
+                
+                virtualContentIdentity.Add(virtualFileDescription);
+                virtualContentIdentity.AddAccessIssue(part);
+                item.AddContentIdentity(virtualContentIdentity);
+            }
+        }
+    }
+    
+    private static void HandleDirectoryWithInaccessibleAncestor(ComparisonItem item, HashSet<InventoryPart> partsWithInaccessibleAncestor)
+    {
+        foreach (var part in partsWithInaccessibleAncestor)
+        {
+            foreach (var ci in item.ContentIdentities)
+            {
+                ci.AddAccessIssue(part);
             }
         }
     }
