@@ -131,9 +131,15 @@ jobs:
           project="${{ matrix.testProject }}"
           safe_name=$(basename "$project" .csproj)
           echo "Running test project: $project"
+          # Determine whether this is an IntegrationTests project
+          if [[ "$project" == *IntegrationTests* ]]; then
+            is_integration=true
+          else
+            is_integration=false
+          fi
 
-          if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            # Run without coverage on macOS to avoid CI hangs
+          if [[ "$is_integration" == "true" ]]; then
+            # Run without coverage for IntegrationTests across all OS
             dotnet test "$project" \
               --no-restore \
               --no-build \
@@ -141,7 +147,7 @@ jobs:
               --logger "trx;LogFileName=$safe_name.trx" \
               --results-directory ./TestResults
           else
-            # Run with coverage on Linux/Windows
+            # Run with coverage for UnitTests on all OS (including macOS)
             dotnet test "$project" \
               --no-restore \
               --no-build \
