@@ -76,7 +76,7 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
         return result;
     }
     
-    internal bool ConditionsMatch(SynchronizationRule synchronizationRule, ComparisonItem comparisonItem)
+    public bool ConditionsMatch(SynchronizationRule synchronizationRule, ComparisonItem comparisonItem)
     {
         if (synchronizationRule.Conditions.Count == 0)
         {

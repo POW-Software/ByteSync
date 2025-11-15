@@ -257,7 +257,4 @@
     </Compile>
   </ItemGroup>
 
-    <ItemGroup>
-        <InternalsVisibleTo Include="ByteSync.Client.UnitTests"/>
-    </ItemGroup>
 </Project>
