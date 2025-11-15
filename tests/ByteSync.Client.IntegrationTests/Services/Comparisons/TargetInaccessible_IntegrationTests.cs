@@ -57,16 +57,18 @@ public class TargetInaccessible_IntegrationTests : IntegrationTest
     
     [Test]
     [Platform(Include = "Win")]
+#pragma warning disable CA1416
     public async Task Synchronize_Fails_When_Target_File_Inaccessible_Windows()
     {
         var dataA = _testDirectoryService.CreateSubTestDirectory("dataA");
         var dataB = _testDirectoryService.CreateSubTestDirectory("dataB");
         
-        var fileA = _testDirectoryService.CreateFileInDirectory(dataA, "file.txt", "source");
+        _ = _testDirectoryService.CreateFileInDirectory(dataA, "file.txt", "source");
         var fileB = _testDirectoryService.CreateFileInDirectory(dataB, "file.txt", "target");
         
         // Deny read access on target file for current user, then restore
-        var original = fileB.GetAccessControl();
+        
+        _ = fileB.GetAccessControl();
         var sid = WindowsIdentity.GetCurrent().User!;
         var denyRule = new FileSystemAccessRule(sid,
             FileSystemRights.ReadData | FileSystemRights.ReadAttributes | FileSystemRights.ReadExtendedAttributes,
@@ -112,6 +114,7 @@ public class TargetInaccessible_IntegrationTests : IntegrationTest
             fileB.SetAccessControl(sec);
         }
     }
+#pragma warning restore CA1416
     
     [Test]
     [Platform(Include = "Linux,MacOsX")]
