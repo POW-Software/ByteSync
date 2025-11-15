@@ -7,6 +7,7 @@ using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Services.Comparisons;
+using ByteSync.Services.Comparisons.ConditionMatchers;
 using Moq;
 using NUnit.Framework;
 
@@ -24,7 +25,19 @@ public class SynchronizationRuleMatcherMakeMatchesTests
     {
         _consistencyCheckerMock = new Mock<IAtomicActionConsistencyChecker>();
         _repositoryMock = new Mock<IAtomicActionRepository>();
-        _matcher = new SynchronizationRuleMatcher(_consistencyCheckerMock.Object, _repositoryMock.Object);
+        
+        var extractor = new ContentIdentityExtractor();
+        var matchers = new IConditionMatcher[]
+        {
+            new ContentConditionMatcher(extractor),
+            new SizeConditionMatcher(extractor),
+            new DateConditionMatcher(extractor),
+            new PresenceConditionMatcher(extractor),
+            new NameConditionMatcher()
+        };
+        var factory = new ConditionMatcherFactory(matchers);
+        
+        _matcher = new SynchronizationRuleMatcher(_consistencyCheckerMock.Object, _repositoryMock.Object, factory);
     }
     
     [Test]

@@ -1,15 +1,11 @@
-using System.Reflection;
 using ByteSync.Business.Comparisons;
 using ByteSync.Business.Inventories;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Interfaces.Controls.Comparisons;
-using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Comparisons;
 using FluentAssertions;
-using Moq;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Comparisons;
@@ -17,16 +13,12 @@ namespace ByteSync.Client.UnitTests.Services.Comparisons;
 [TestFixture]
 public class SynchronizationRuleMatcherLocalizeTests
 {
-    private Mock<IAtomicActionConsistencyChecker> _consistencyCheckerMock;
-    private Mock<IAtomicActionRepository> _repositoryMock;
-    private SynchronizationRuleMatcher _matcher;
+    private ContentIdentityExtractor _extractor;
     
     [SetUp]
     public void SetUp()
     {
-        _consistencyCheckerMock = new Mock<IAtomicActionConsistencyChecker>();
-        _repositoryMock = new Mock<IAtomicActionRepository>();
-        _matcher = new SynchronizationRuleMatcher(_consistencyCheckerMock.Object, _repositoryMock.Object);
+        _extractor = new ContentIdentityExtractor();
     }
     
     [Test]
@@ -48,9 +40,7 @@ public class SynchronizationRuleMatcherLocalizeTests
         
         var dataPart = new DataPart("A", inventoryA);
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("LocalizeContentIdentity", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (ContentIdentity?)method.Invoke(_matcher, new object[] { dataPart, comparisonItem });
+        var result = _extractor.LocalizeContentIdentity(dataPart, comparisonItem);
         
         result.Should().Be(contentIdentityA);
     }
@@ -73,9 +63,7 @@ public class SynchronizationRuleMatcherLocalizeTests
         
         var dataPart = new DataPart("A", partA);
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("LocalizeContentIdentity", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (ContentIdentity?)method.Invoke(_matcher, new object[] { dataPart, comparisonItem });
+        var result = _extractor.LocalizeContentIdentity(dataPart, comparisonItem);
         
         result.Should().Be(contentIdentityA);
     }
@@ -95,9 +83,7 @@ public class SynchronizationRuleMatcherLocalizeTests
         
         var dataPart = new DataPart("A", part);
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("LocalizeContentIdentity", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (ContentIdentity?)method.Invoke(_matcher, new object[] { dataPart, comparisonItem });
+        var result = _extractor.LocalizeContentIdentity(dataPart, comparisonItem);
         
         result.Should().BeNull();
     }
@@ -107,9 +93,7 @@ public class SynchronizationRuleMatcherLocalizeTests
     {
         var comparisonItem = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/file.txt", "file.txt", "/file.txt"));
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ExtractContentIdentity", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (ContentIdentity?)method.Invoke(_matcher, new object[] { null, comparisonItem });
+        var result = _extractor.ExtractContentIdentity(null, comparisonItem);
         
         result.Should().BeNull();
     }
@@ -128,9 +112,7 @@ public class SynchronizationRuleMatcherLocalizeTests
         
         var dataPart = new DataPart("A", part);
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ExtractSize", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (long?)method.Invoke(_matcher, new object[] { dataPart, comparisonItem });
+        var result = _extractor.ExtractSize(dataPart, comparisonItem);
         
         result.Should().Be(1024);
     }
@@ -145,9 +127,7 @@ public class SynchronizationRuleMatcherLocalizeTests
         
         var dataPart = new DataPart("A", part);
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ExtractSize", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (long?)method.Invoke(_matcher, new object[] { dataPart, comparisonItem });
+        var result = _extractor.ExtractSize(dataPart, comparisonItem);
         
         result.Should().BeNull();
     }
@@ -173,9 +153,7 @@ public class SynchronizationRuleMatcherLocalizeTests
         
         var dataPart = new DataPart("A", part);
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ExtractDate", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (DateTime?)method.Invoke(_matcher, new object[] { dataPart, comparisonItem });
+        var result = _extractor.ExtractDate(dataPart, comparisonItem);
         
         result.Should().Be(date);
     }
@@ -190,9 +168,7 @@ public class SynchronizationRuleMatcherLocalizeTests
         
         var dataPart = new DataPart("A", part);
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ExtractDate", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (DateTime?)method.Invoke(_matcher, new object[] { dataPart, comparisonItem });
+        var result = _extractor.ExtractDate(dataPart, comparisonItem);
         
         result.Should().BeNull();
     }
@@ -219,9 +195,7 @@ public class SynchronizationRuleMatcherLocalizeTests
         
         var dataPart = new DataPart("A", partB);
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ExtractDate", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (DateTime?)method.Invoke(_matcher, new object[] { dataPart, comparisonItem });
+        var result = _extractor.ExtractDate(dataPart, comparisonItem);
         
         result.Should().BeNull();
     }

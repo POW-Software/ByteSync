@@ -1,16 +1,13 @@
-using System.Reflection;
 using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
 using ByteSync.Business.Inventories;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Interfaces.Controls.Comparisons;
-using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Comparisons;
+using ByteSync.Services.Comparisons.ConditionMatchers;
 using FluentAssertions;
-using Moq;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Comparisons;
@@ -18,16 +15,13 @@ namespace ByteSync.Client.UnitTests.Services.Comparisons;
 [TestFixture]
 public class SynchronizationRuleMatcherContentTests
 {
-    private Mock<IAtomicActionConsistencyChecker> _consistencyCheckerMock;
-    private Mock<IAtomicActionRepository> _repositoryMock;
-    private SynchronizationRuleMatcher _matcher;
+    private ContentConditionMatcher _matcher;
     
     [SetUp]
     public void SetUp()
     {
-        _consistencyCheckerMock = new Mock<IAtomicActionConsistencyChecker>();
-        _repositoryMock = new Mock<IAtomicActionRepository>();
-        _matcher = new SynchronizationRuleMatcher(_consistencyCheckerMock.Object, _repositoryMock.Object);
+        var extractor = new ContentIdentityExtractor();
+        _matcher = new ContentConditionMatcher(extractor);
     }
     
     [Test]
@@ -41,9 +35,7 @@ public class SynchronizationRuleMatcherContentTests
         };
         var comparisonItem = new ComparisonItem(new PathIdentity(FileSystemTypes.Directory, "/dir", "dir", "/dir"));
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatchesContent", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { condition, comparisonItem })!;
+        var result = _matcher.Matches(condition, comparisonItem);
         
         result.Should().BeFalse();
     }
@@ -72,9 +64,7 @@ public class SynchronizationRuleMatcherContentTests
             ConditionOperator = ConditionOperatorTypes.Equals
         };
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatchesContent", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { condition, comparisonItem })!;
+        var result = _matcher.Matches(condition, comparisonItem);
         
         result.Should().BeFalse();
     }
@@ -98,9 +88,7 @@ public class SynchronizationRuleMatcherContentTests
             ConditionOperator = ConditionOperatorTypes.Equals
         };
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatchesContent", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { condition, comparisonItem })!;
+        var result = _matcher.Matches(condition, comparisonItem);
         
         result.Should().BeFalse();
     }
@@ -117,9 +105,7 @@ public class SynchronizationRuleMatcherContentTests
             ConditionOperator = ConditionOperatorTypes.Equals
         };
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatchesContent", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { condition, comparisonItem })!;
+        var result = _matcher.Matches(condition, comparisonItem);
         
         result.Should().BeTrue();
     }
@@ -144,9 +130,7 @@ public class SynchronizationRuleMatcherContentTests
             ConditionOperator = ConditionOperatorTypes.Equals
         };
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatchesContent", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { condition, comparisonItem })!;
+        var result = _matcher.Matches(condition, comparisonItem);
         
         result.Should().BeFalse();
     }
@@ -171,9 +155,7 @@ public class SynchronizationRuleMatcherContentTests
             ConditionOperator = ConditionOperatorTypes.Equals
         };
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatchesContent", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { condition, comparisonItem })!;
+        var result = _matcher.Matches(condition, comparisonItem);
         
         result.Should().BeFalse();
     }
@@ -202,9 +184,7 @@ public class SynchronizationRuleMatcherContentTests
             ConditionOperator = ConditionOperatorTypes.Equals
         };
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatchesContent", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { condition, comparisonItem })!;
+        var result = _matcher.Matches(condition, comparisonItem);
         
         result.Should().BeTrue();
     }
@@ -233,9 +213,7 @@ public class SynchronizationRuleMatcherContentTests
             ConditionOperator = ConditionOperatorTypes.Equals
         };
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatchesContent", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { condition, comparisonItem })!;
+        var result = _matcher.Matches(condition, comparisonItem);
         
         result.Should().BeFalse();
     }
@@ -259,9 +237,7 @@ public class SynchronizationRuleMatcherContentTests
             ConditionOperator = ConditionOperatorTypes.NotEquals
         };
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatchesContent", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { condition, comparisonItem })!;
+        var result = _matcher.Matches(condition, comparisonItem);
         
         result.Should().BeTrue();
     }
@@ -290,9 +266,7 @@ public class SynchronizationRuleMatcherContentTests
             ConditionOperator = ConditionOperatorTypes.NotEquals
         };
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatchesContent", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { condition, comparisonItem })!;
+        var result = _matcher.Matches(condition, comparisonItem);
         
         result.Should().BeTrue();
     }
@@ -308,12 +282,9 @@ public class SynchronizationRuleMatcherContentTests
             ConditionOperator = (ConditionOperatorTypes)999
         };
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatchesContent", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var act = () => method.Invoke(_matcher, new object[] { condition, comparisonItem });
+        var act = () => _matcher.Matches(condition, comparisonItem);
         
-        act.Should().Throw<TargetInvocationException>()
-            .WithInnerException<ArgumentOutOfRangeException>()
+        act.Should().Throw<ArgumentOutOfRangeException>()
             .WithMessage("*ConditionMatchesContent*");
     }
 }

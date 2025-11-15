@@ -1,4 +1,3 @@
-using System.Reflection;
 using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
 using ByteSync.Business.Inventories;
@@ -7,6 +6,7 @@ using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Services.Comparisons;
+using ByteSync.Services.Comparisons.ConditionMatchers;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
@@ -25,7 +25,19 @@ public class SynchronizationRuleMatcherConditionsMatchTests
     {
         _consistencyCheckerMock = new Mock<IAtomicActionConsistencyChecker>();
         _repositoryMock = new Mock<IAtomicActionRepository>();
-        _matcher = new SynchronizationRuleMatcher(_consistencyCheckerMock.Object, _repositoryMock.Object);
+        
+        var extractor = new ContentIdentityExtractor();
+        var matchers = new IConditionMatcher[]
+        {
+            new ContentConditionMatcher(extractor),
+            new SizeConditionMatcher(extractor),
+            new DateConditionMatcher(extractor),
+            new PresenceConditionMatcher(extractor),
+            new NameConditionMatcher()
+        };
+        var factory = new ConditionMatcherFactory(matchers);
+        
+        _matcher = new SynchronizationRuleMatcher(_consistencyCheckerMock.Object, _repositoryMock.Object, factory);
     }
     
     [Test]
@@ -34,9 +46,7 @@ public class SynchronizationRuleMatcherConditionsMatchTests
         var rule = new SynchronizationRule(FileSystemTypes.File, ConditionModes.All);
         var comparisonItem = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/file.txt", "file.txt", "/file.txt"));
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionsMatch", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { rule, comparisonItem })!;
+        var result = _matcher.ConditionsMatch(rule, comparisonItem);
         
         result.Should().BeFalse();
     }
@@ -56,9 +66,7 @@ public class SynchronizationRuleMatcherConditionsMatchTests
         
         var comparisonItem = new ComparisonItem(new PathIdentity(FileSystemTypes.Directory, "/dir", "dir", "/dir"));
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionsMatch", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { rule, comparisonItem })!;
+        var result = _matcher.ConditionsMatch(rule, comparisonItem);
         
         result.Should().BeFalse();
     }
@@ -86,9 +94,7 @@ public class SynchronizationRuleMatcherConditionsMatchTests
         
         var comparisonItem = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/file.txt", "file.txt", "/file.txt"));
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionsMatch", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { rule, comparisonItem })!;
+        var result = _matcher.ConditionsMatch(rule, comparisonItem);
         
         result.Should().BeTrue();
     }
@@ -116,9 +122,7 @@ public class SynchronizationRuleMatcherConditionsMatchTests
         
         var comparisonItem = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/file.txt", "file.txt", "/file.txt"));
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionsMatch", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { rule, comparisonItem })!;
+        var result = _matcher.ConditionsMatch(rule, comparisonItem);
         
         result.Should().BeFalse();
     }
@@ -146,9 +150,7 @@ public class SynchronizationRuleMatcherConditionsMatchTests
         
         var comparisonItem = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/file.txt", "file.txt", "/file.txt"));
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionsMatch", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { rule, comparisonItem })!;
+        var result = _matcher.ConditionsMatch(rule, comparisonItem);
         
         result.Should().BeTrue();
     }
@@ -176,9 +178,7 @@ public class SynchronizationRuleMatcherConditionsMatchTests
         
         var comparisonItem = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/file.txt", "file.txt", "/file.txt"));
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionsMatch", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { rule, comparisonItem })!;
+        var result = _matcher.ConditionsMatch(rule, comparisonItem);
         
         result.Should().BeFalse();
     }
@@ -194,9 +194,9 @@ public class SynchronizationRuleMatcherConditionsMatchTests
         };
         var comparisonItem = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/file.txt", "file.txt", "/file.txt"));
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatches", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { condition, comparisonItem })!;
+        var factory = SynchronizationRuleMatcherTestHelper.CreateConditionMatcherFactory();
+        var matcher = factory.GetMatcher(condition.ComparisonProperty);
+        var result = matcher.Matches(condition, comparisonItem);
         
         result.Should().BeFalse();
     }

@@ -1,16 +1,13 @@
-using System.Reflection;
 using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
 using ByteSync.Business.Inventories;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Interfaces.Controls.Comparisons;
-using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Comparisons;
+using ByteSync.Services.Comparisons.ConditionMatchers;
 using FluentAssertions;
-using Moq;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Comparisons;
@@ -18,16 +15,14 @@ namespace ByteSync.Client.UnitTests.Services.Comparisons;
 [TestFixture]
 public class SynchronizationRuleMatcherPresenceExtendedTests
 {
-    private Mock<IAtomicActionConsistencyChecker> _consistencyCheckerMock;
-    private Mock<IAtomicActionRepository> _repositoryMock;
-    private SynchronizationRuleMatcher _matcher;
+    private PresenceConditionMatcher _matcher;
+    private ContentIdentityExtractor _extractor;
     
     [SetUp]
     public void SetUp()
     {
-        _consistencyCheckerMock = new Mock<IAtomicActionConsistencyChecker>();
-        _repositoryMock = new Mock<IAtomicActionRepository>();
-        _matcher = new SynchronizationRuleMatcher(_consistencyCheckerMock.Object, _repositoryMock.Object);
+        _extractor = new ContentIdentityExtractor();
+        _matcher = new PresenceConditionMatcher(_extractor);
     }
     
     [Test]
@@ -52,9 +47,7 @@ public class SynchronizationRuleMatcherPresenceExtendedTests
             ConditionOperator = ConditionOperatorTypes.ExistsOn
         };
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatchesPresence", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { condition, comparisonItem })!;
+        var result = _matcher.Matches(condition, comparisonItem);
         
         result.Should().BeTrue();
     }
@@ -80,9 +73,7 @@ public class SynchronizationRuleMatcherPresenceExtendedTests
             ConditionOperator = ConditionOperatorTypes.ExistsOn
         };
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatchesPresence", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { condition, comparisonItem })!;
+        var result = _matcher.Matches(condition, comparisonItem);
         
         result.Should().BeFalse();
     }
@@ -108,9 +99,7 @@ public class SynchronizationRuleMatcherPresenceExtendedTests
             ConditionOperator = ConditionOperatorTypes.NotExistsOn
         };
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatchesPresence", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { condition, comparisonItem })!;
+        var result = _matcher.Matches(condition, comparisonItem);
         
         result.Should().BeTrue();
     }
@@ -137,9 +126,7 @@ public class SynchronizationRuleMatcherPresenceExtendedTests
             ConditionOperator = ConditionOperatorTypes.NotExistsOn
         };
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatchesPresence", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { condition, comparisonItem })!;
+        var result = _matcher.Matches(condition, comparisonItem);
         
         result.Should().BeFalse();
     }
@@ -155,12 +142,9 @@ public class SynchronizationRuleMatcherPresenceExtendedTests
             ConditionOperator = (ConditionOperatorTypes)999
         };
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ConditionMatchesPresence", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var act = () => method.Invoke(_matcher, new object[] { condition, comparisonItem });
+        var act = () => _matcher.Matches(condition, comparisonItem);
         
-        act.Should().Throw<TargetInvocationException>()
-            .WithInnerException<ArgumentOutOfRangeException>()
+        act.Should().Throw<ArgumentOutOfRangeException>()
             .WithMessage("*ConditionMatchesPresence*");
     }
     
@@ -169,9 +153,7 @@ public class SynchronizationRuleMatcherPresenceExtendedTests
     {
         var comparisonItem = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/file.txt", "file.txt", "/file.txt"));
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ExistsOn", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { null, comparisonItem })!;
+        var result = _extractor.ExistsOn(null, comparisonItem);
         
         result.Should().BeFalse();
     }
@@ -189,9 +171,7 @@ public class SynchronizationRuleMatcherPresenceExtendedTests
         
         var dataPart = new DataPart("A", part);
         
-        var method = typeof(SynchronizationRuleMatcher)
-            .GetMethod("ExistsOn", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var result = (bool)method.Invoke(_matcher, new object[] { dataPart, comparisonItem })!;
+        var result = _extractor.ExistsOn(dataPart, comparisonItem);
         
         result.Should().BeTrue();
     }
