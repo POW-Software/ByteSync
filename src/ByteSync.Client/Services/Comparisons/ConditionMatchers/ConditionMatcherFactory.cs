@@ -10,7 +10,9 @@ public class ConditionMatcherFactory
     
     public ConditionMatcherFactory(IEnumerable<IConditionMatcher> matchers)
     {
-        _matchers = matchers.ToDictionary(m => m.SupportedProperty);
+        _matchers = matchers
+            .GroupBy(m => m.SupportedProperty)
+            .ToDictionary(g => g.Key, g => g.First());
     }
     
     public IConditionMatcher GetMatcher(ComparisonProperty property)
