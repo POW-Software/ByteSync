@@ -44,12 +44,10 @@ public class ContentIdentityExtractor
     {
         if (dataPart.Inventory != null)
         {
-            foreach (var contentIdentity in comparisonItem.ContentIdentities)
+            foreach (var contentIdentity in comparisonItem.ContentIdentities
+                .Where(ci => ci.GetInventories().Contains(dataPart.Inventory)))
             {
-                if (contentIdentity.GetInventories().Contains(dataPart.Inventory))
-                {
-                    return contentIdentity;
-                }
+                return contentIdentity;
             }
         }
         else if (dataPart.InventoryPart != null)
