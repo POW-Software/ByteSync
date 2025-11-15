@@ -58,14 +58,12 @@ public class ContentIdentity
         }
         
         // Or present FileDescriptions are marked inaccessible for this inventory
-        foreach (var pair in FileSystemDescriptionsByInventoryParts)
+        foreach (var pair in FileSystemDescriptionsByInventoryParts
+            .Where(pair => pair.Key.Inventory.Equals(inventory)))
         {
-            if (pair.Key.Inventory.Equals(inventory))
+            if (pair.Value.Any(fsd => fsd is FileDescription fd && !fd.IsAccessible))
             {
-                if (pair.Value.Any(fsd => fsd is FileDescription fd && !fd.IsAccessible))
-                {
-                    return true;
-                }
+                return true;
             }
         }
         
