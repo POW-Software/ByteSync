@@ -2313,6 +2313,12 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
+        public static string ContentIdentity_AccessIssueShortLabel {
+            get {
+                return ResourceManager.GetString("ContentIdentity_AccessIssueShortLabel", resourceCulture);
+            }
+        }
+        
         public static string UpdateDetails_Extracting {
             get {
                 return ResourceManager.GetString("UpdateDetails_Extracting", resourceCulture);
