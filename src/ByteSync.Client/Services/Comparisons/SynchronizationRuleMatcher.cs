@@ -1,11 +1,11 @@
-﻿using ByteSync.Business.Actions.Local;
+﻿using System.Text.RegularExpressions;
+using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
-using System.Text.RegularExpressions;
 
 namespace ByteSync.Services.Comparisons;
 
@@ -13,14 +13,14 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
 {
     private readonly IAtomicActionConsistencyChecker _atomicActionConsistencyChecker;
     private readonly IAtomicActionRepository _atomicActionRepository;
-
-    public SynchronizationRuleMatcher(IAtomicActionConsistencyChecker atomicActionConsistencyChecker, 
+    
+    public SynchronizationRuleMatcher(IAtomicActionConsistencyChecker atomicActionConsistencyChecker,
         IAtomicActionRepository atomicActionRepository)
     {
         _atomicActionConsistencyChecker = atomicActionConsistencyChecker;
         _atomicActionRepository = atomicActionRepository;
     }
-
+    
     public void MakeMatches(ICollection<ComparisonItem> comparisonItems, ICollection<SynchronizationRule> synchronizationRules)
     {
         var allAtomicActions = new HashSet<AtomicAction>();
@@ -32,14 +32,14 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
         
         _atomicActionRepository.AddOrUpdate(allAtomicActions);
     }
-
+    
     public void MakeMatches(ComparisonItem comparisonItem, ICollection<SynchronizationRule> synchronizationRules)
     {
         var atomicActions = DoMakeMatches(comparisonItem, synchronizationRules);
         
         _atomicActionRepository.AddOrUpdate(atomicActions);
     }
-
+    
     private HashSet<AtomicAction> DoMakeMatches(ComparisonItem comparisonItem, ICollection<SynchronizationRule> synchronizationRules)
     {
         var initialAtomicActions = _atomicActionRepository.GetAtomicActions(comparisonItem);
@@ -47,14 +47,15 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
         _atomicActionRepository.Remove(actionsToRemove);
         
         var atomicActions = GetApplicableActions(comparisonItem, synchronizationRules);
+        
         return atomicActions;
     }
-
-    private HashSet<AtomicAction> GetApplicableActions(ComparisonItem comparisonItem, 
+    
+    private HashSet<AtomicAction> GetApplicableActions(ComparisonItem comparisonItem,
         ICollection<SynchronizationRule> synchronizationRules)
     {
         var result = new HashSet<AtomicAction>();
-
+        
         var matchingSynchronizationRules = synchronizationRules.Where(sr => ConditionsMatch(sr, comparisonItem)).ToList();
         
         var atomicActions = _atomicActionConsistencyChecker.GetApplicableActions(matchingSynchronizationRules);
@@ -69,29 +70,29 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
                 result.Add(clonedAtomicAction);
             }
         }
-
+        
         return result;
     }
-
+    
     private bool ConditionsMatch(SynchronizationRule synchronizationRule, ComparisonItem comparisonItem)
     {
         if (synchronizationRule.Conditions.Count == 0)
         {
             return false;
         }
-
+        
         if (synchronizationRule.FileSystemType != comparisonItem.FileSystemType)
         {
             return false;
         }
-            
+        
         var areAllConditionsOK = true;
         var isOneConditionOK = false;
-
+        
         foreach (var condition in synchronizationRule.Conditions)
         {
             var isConditionOK = ConditionMatches(condition, comparisonItem);
-
+            
             if (!isConditionOK)
             {
                 areAllConditionsOK = false;
@@ -101,7 +102,7 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
                 isOneConditionOK = true;
             }
         }
-
+        
         if (synchronizationRule.ConditionMode == ConditionModes.All)
         {
             return areAllConditionsOK;
@@ -111,7 +112,7 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
             return isOneConditionOK;
         }
     }
-
+    
     private bool ConditionMatches(AtomicCondition condition, ComparisonItem comparisonItem)
     {
         switch (condition.ComparisonProperty)
@@ -130,25 +131,26 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
                 return false;
         }
     }
-
+    
     private bool ConditionMatchesContent(AtomicCondition condition, ComparisonItem comparisonItem)
     {
         bool? result = null;
-
+        
         if (comparisonItem.FileSystemType == FileSystemTypes.Directory)
         {
             return false;
         }
-            
+        
         var contentIdentitySource = ExtractContentIdentity(condition.Source, comparisonItem);
         var contentIdentityDestination = ExtractContentIdentity(condition.Destination, comparisonItem);
-
+        
         if ((contentIdentitySource != null && (contentIdentitySource.HasAnalysisError || contentIdentitySource.HasAccessIssue))
-            || (contentIdentityDestination != null && (contentIdentityDestination.HasAnalysisError || contentIdentityDestination.HasAccessIssue)))
+            || (contentIdentityDestination != null &&
+                (contentIdentityDestination.HasAnalysisError || contentIdentityDestination.HasAccessIssue)))
         {
             return false;
         }
-
+        
         switch (condition.ConditionOperator)
         {
             case ConditionOperatorTypes.Equals:
@@ -164,7 +166,7 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
                 {
                     result = Equals(contentIdentitySource?.Core!.SignatureHash, contentIdentityDestination?.Core!.SignatureHash);
                 }
-                    
+                
                 break;
             case ConditionOperatorTypes.NotEquals:
                 if (contentIdentitySource == null && contentIdentityDestination != null)
@@ -177,56 +179,50 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
                 }
                 else
                 {
-                    result = ! Equals(contentIdentitySource?.Core!.SignatureHash, contentIdentityDestination?.Core!.SignatureHash);
+                    result = !Equals(contentIdentitySource?.Core!.SignatureHash, contentIdentityDestination?.Core!.SignatureHash);
                 }
+                
                 break;
         }
-            
+        
         if (result == null)
         {
             throw new ArgumentOutOfRangeException("ConditionMatchesContent " + condition.ConditionOperator);
         }
-
+        
         return result.Value;
     }
-        
+    
     private bool ExistsOn(DataPart? dataPart, ComparisonItem comparisonItem)
     {
         if (dataPart == null)
         {
             return false;
         }
-            
+        
         var contentIdentity = LocalizeContentIdentity(dataPart, comparisonItem);
-
-        if (comparisonItem.FileSystemType == FileSystemTypes.File)
-        {
-            // Consider present even if not analyzable (e.g., inaccessible)
-            return contentIdentity != null;
-        }
-        else
-        {
-            return contentIdentity != null;
-        }
+        
+        return contentIdentity != null;
     }
-
+    
     private ContentIdentity? ExtractContentIdentity(DataPart? dataPart, ComparisonItem comparisonItem)
     {
         if (dataPart == null)
         {
             return null;
         }
-            
+        
         var contentIdentity = LocalizeContentIdentity(dataPart, comparisonItem);
+        
         return contentIdentity;
     }
-        
+    
     private bool ConditionMatchesSize(AtomicCondition condition, ComparisonItem comparisonItem)
     {
         var sizeSource = ExtractSize(condition.Source, comparisonItem);
-
+        
         long? sizeDestination;
-        if (condition.Destination is { IsVirtual: false })   
+        if (condition.Destination is { IsVirtual: false })
         {
             sizeDestination = ExtractSize(condition.Destination, comparisonItem);
         }
@@ -234,45 +230,50 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
         {
             var size = (long)condition.Size!;
             var sizeUnitPower = (int)condition.SizeUnit! - 1;
-
+            
             sizeDestination = size * (long)Math.Pow(1024, sizeUnitPower);
         }
-
+        
         if (sizeSource == null || sizeDestination == null)
         {
             return false;
         }
-
+        
         var result = false;
         switch (condition.ConditionOperator)
         {
             case ConditionOperatorTypes.Equals:
                 result = sizeSource == sizeDestination;
+                
                 break;
             case ConditionOperatorTypes.NotEquals:
                 result = sizeSource != sizeDestination;
+                
                 break;
             case ConditionOperatorTypes.IsSmallerThan:
                 result = sizeSource < sizeDestination;
+                
                 break;
             case ConditionOperatorTypes.IsBiggerThan:
                 result = sizeSource > sizeDestination;
+                
                 break;
         }
-
+        
         return result;
     }
-
+    
     private long? ExtractSize(DataPart dataPart, ComparisonItem comparisonItem)
     {
         var contentIdentity = LocalizeContentIdentity(dataPart, comparisonItem);
+        
         return contentIdentity?.Core?.Size;
     }
-
+    
     private bool ConditionMatchesDate(AtomicCondition condition, ComparisonItem comparisonItem)
     {
         var lastWriteTimeSource = ExtractDate(condition.Source, comparisonItem);
-
+        
         DateTime? lastWriteTimeDestination;
         if (condition.Destination is { IsVirtual: false })
         {
@@ -287,37 +288,41 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
                 lastWriteTimeSource = lastWriteTimeSource.Value.Trim(TimeSpan.TicksPerMinute);
             }
         }
-
+        
         if (lastWriteTimeSource == null)
         {
             return false;
         }
-
+        
         var result = false;
         switch (condition.ConditionOperator)
         {
             case ConditionOperatorTypes.Equals:
                 result = lastWriteTimeDestination != null && lastWriteTimeSource == lastWriteTimeDestination;
+                
                 break;
             case ConditionOperatorTypes.NotEquals:
                 result = lastWriteTimeDestination != null && lastWriteTimeSource != lastWriteTimeDestination;
+                
                 break;
-            case ConditionOperatorTypes.IsNewerThan: 
-                result = (condition.Destination is { IsVirtual: false } && lastWriteTimeDestination == null) || 
+            case ConditionOperatorTypes.IsNewerThan:
+                result = (condition.Destination is { IsVirtual: false } && lastWriteTimeDestination == null) ||
                          (lastWriteTimeDestination != null && lastWriteTimeSource > lastWriteTimeDestination);
+                
                 break;
             case ConditionOperatorTypes.IsOlderThan:
                 result = lastWriteTimeDestination != null && lastWriteTimeSource < lastWriteTimeDestination;
+                
                 break;
         }
-
+        
         return result;
     }
-
+    
     private DateTime? ExtractDate(DataPart dataPart, ComparisonItem comparisonItem)
     {
         var contentIdentity = LocalizeContentIdentity(dataPart, comparisonItem);
-            
+        
         if (contentIdentity != null)
         {
             foreach (var pair in contentIdentity.InventoryPartsByLastWriteTimes)
@@ -328,55 +333,57 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
                 }
             }
         }
-
+        
         return null;
     }
-        
+    
     private bool ConditionMatchesPresence(AtomicCondition condition, ComparisonItem comparisonItem)
     {
         bool? result = null;
-            
+        
         if (condition.ConditionOperator.In(ConditionOperatorTypes.ExistsOn, ConditionOperatorTypes.NotExistsOn))
         {
             var existsOnSource = ExistsOn(condition.Source, comparisonItem);
             var existsOnDestination = ExistsOn(condition.Destination, comparisonItem);
-                
+            
             switch (condition.ConditionOperator)
             {
                 case ConditionOperatorTypes.ExistsOn:
                     result = existsOnSource && existsOnDestination;
+                    
                     break;
                 case ConditionOperatorTypes.NotExistsOn:
                     result = existsOnSource && !existsOnDestination;
+                    
                     break;
             }
         }
-
+        
         if (result == null)
         {
             throw new ArgumentOutOfRangeException("ConditionMatchesPresence " + condition.ConditionOperator);
         }
-            
+        
         return result.Value;
     }
-
+    
     private bool ConditionMatchesName(AtomicCondition condition, ComparisonItem comparisonItem)
     {
         if (string.IsNullOrWhiteSpace(condition.NamePattern))
         {
             return false;
         }
-
+        
         var name = comparisonItem.PathIdentity.FileName;
         var pattern = condition.NamePattern!;
-
+        
         var result = false;
-
+        
         if (pattern.Contains("*") &&
             condition.ConditionOperator.In(ConditionOperatorTypes.Equals, ConditionOperatorTypes.NotEquals))
         {
             var regex = "^" + Regex.Escape(pattern).Replace("\\*", ".*") + "$";
-            var safeRegex = new Regex(regex,RegexOptions.IgnoreCase,TimeSpan.FromMilliseconds(500));
+            var safeRegex = new Regex(regex, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(500));
             var isMatch = safeRegex.IsMatch(name);
             result = condition.ConditionOperator == ConditionOperatorTypes.Equals ? isMatch : !isMatch;
         }
@@ -386,16 +393,18 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
             {
                 case ConditionOperatorTypes.Equals:
                     result = string.Equals(name, pattern, StringComparison.OrdinalIgnoreCase);
+                    
                     break;
                 case ConditionOperatorTypes.NotEquals:
                     result = !string.Equals(name, pattern, StringComparison.OrdinalIgnoreCase);
+                    
                     break;
             }
         }
-
+        
         return result;
     }
-
+    
     private ContentIdentity? LocalizeContentIdentity(DataPart dataPart, ComparisonItem comparisonItem)
     {
         if (dataPart.Inventory != null)
@@ -413,14 +422,14 @@ public class SynchronizationRuleMatcher : ISynchronizationRuleMatcher
             foreach (var contentIdentity in comparisonItem.ContentIdentities)
             {
                 var inventoryParts = contentIdentity.GetInventoryParts();
-
+                
                 if (inventoryParts.Contains(dataPart.InventoryPart))
                 {
                     return contentIdentity;
                 }
             }
         }
-
+        
         return null;
     }
 }
