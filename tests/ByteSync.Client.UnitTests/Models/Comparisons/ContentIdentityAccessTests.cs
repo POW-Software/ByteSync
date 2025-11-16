@@ -137,7 +137,7 @@ public class ContentIdentityAccessTests
     [Test]
     public void HasAccessIssueFor_ReturnsFalse_WhenInventoryNotPresent()
     {
-        var (invA, partA, invB, _) = CreateInventories();
+        var (_, partA, invB, _) = CreateInventories();
         
         var ci = new ContentIdentity(new ContentIdentityCore { Size = 100 });
         var file = new FileDescription
