@@ -18,6 +18,7 @@ namespace ByteSync.Client.UnitTests.Services.Inventories;
 public class InventoryBuilderPublicTests
 {
     private string _rootTemp = null!;
+    private readonly List<ManualResetEvent> _manualResetEvents = new();
     
     [SetUp]
     public void SetUp()
@@ -40,9 +41,16 @@ public class InventoryBuilderPublicTests
         {
             /* ignore */
         }
+        
+        foreach (var mre in _manualResetEvents)
+        {
+            mre.Dispose();
+        }
+        
+        _manualResetEvents.Clear();
     }
     
-    private static InventoryBuilder CreateBuilder(OSPlatforms os = OSPlatforms.Windows)
+    private InventoryBuilder CreateBuilder(OSPlatforms os = OSPlatforms.Windows)
     {
         var endpoint = new ByteSyncEndpoint
         {
@@ -71,7 +79,9 @@ public class InventoryBuilderPublicTests
         var logger = new Mock<ILogger<InventoryBuilder>>().Object;
         var analyzer = new Mock<IInventoryFileAnalyzer>();
         analyzer.SetupAllProperties();
-        analyzer.Setup(a => a.HasFinished).Returns(new ManualResetEvent(false));
+        var mre = new ManualResetEvent(false);
+        _manualResetEvents.Add(mre);
+        analyzer.Setup(a => a.HasFinished).Returns(mre);
         var saver = new InventorySaver();
         var indexer = new Mock<IInventoryIndexer>().Object;
         
