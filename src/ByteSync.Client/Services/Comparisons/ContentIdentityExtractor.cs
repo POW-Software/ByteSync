@@ -44,23 +44,13 @@ public class ContentIdentityExtractor
     {
         if (dataPart.Inventory != null)
         {
-            foreach (var contentIdentity in comparisonItem.ContentIdentities
-                .Where(ci => ci.GetInventories().Contains(dataPart.Inventory)))
-            {
-                return contentIdentity;
-            }
+            return comparisonItem.ContentIdentities
+                .FirstOrDefault(ci => ci.GetInventories().Contains(dataPart.Inventory));
         }
         else if (dataPart.InventoryPart != null)
         {
-            foreach (var contentIdentity in comparisonItem.ContentIdentities)
-            {
-                var inventoryParts = contentIdentity.GetInventoryParts();
-                
-                if (inventoryParts.Contains(dataPart.InventoryPart))
-                {
-                    return contentIdentity;
-                }
-            }
+            return comparisonItem.ContentIdentities
+                .FirstOrDefault(ci => ci.GetInventoryParts().Contains(dataPart.InventoryPart));
         }
         
         return null;
