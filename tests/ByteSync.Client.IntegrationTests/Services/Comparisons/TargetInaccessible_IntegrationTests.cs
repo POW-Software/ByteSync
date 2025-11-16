@@ -123,7 +123,7 @@ public class TargetInaccessible_IntegrationTests : IntegrationTest
         var dataA = _testDirectoryService.CreateSubTestDirectory("dataA");
         var dataB = _testDirectoryService.CreateSubTestDirectory("dataB");
         
-        var fileA = _testDirectoryService.CreateFileInDirectory(dataA, "file.txt", "source");
+        _ = _testDirectoryService.CreateFileInDirectory(dataA, "file.txt", "source");
         var fileB = _testDirectoryService.CreateFileInDirectory(dataB, "file.txt", "target");
         
         // Make file unreadable: chmod 000, then restore to 0644
