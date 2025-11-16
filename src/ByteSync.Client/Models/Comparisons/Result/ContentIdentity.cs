@@ -119,28 +119,12 @@ public class ContentIdentity
     
     public bool IsPresentIn(InventoryPart inventoryPart)
     {
-        foreach (var pair in FileSystemDescriptionsByInventoryParts)
-        {
-            if (pair.Key.Equals(inventoryPart))
-            {
-                return true;
-            }
-        }
-        
-        return false;
+        return FileSystemDescriptionsByInventoryParts.Any(pair => pair.Key.Equals(inventoryPart));
     }
     
     public bool IsPresentIn(Inventory inventory)
     {
-        foreach (var pair in FileSystemDescriptionsByInventoryParts)
-        {
-            if (pair.Key.Inventory.Equals(inventory))
-            {
-                return true;
-            }
-        }
-        
-        return false;
+        return FileSystemDescriptionsByInventoryParts.Any(pair => pair.Key.Inventory.Equals(inventory));
     }
     
     public HashSet<Inventory> GetInventories()
