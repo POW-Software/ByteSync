@@ -20,6 +20,7 @@ using Moq;
 
 namespace ByteSync.Client.IntegrationTests.Services.Inventories;
 
+#pragma warning disable CA1416
 [TestFixture]
 public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
 {
@@ -52,12 +53,13 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
         var accessibleDir = Directory.CreateDirectory(Path.Combine(dataRoot.FullName, "accessible"));
         var inaccessibleDir = Directory.CreateDirectory(Path.Combine(dataRoot.FullName, "inaccessible"));
         
-        File.WriteAllText(Path.Combine(accessibleDir.FullName, "file1.txt"), "content1");
+        await File.WriteAllTextAsync(Path.Combine(accessibleDir.FullName, "file1.txt"), "content1");
         
         var fileInInaccessible = Path.Combine(inaccessibleDir.FullName, "file2.txt");
-        File.WriteAllText(fileInInaccessible, "content2");
+        await File.WriteAllTextAsync(fileInInaccessible, "content2");
         
-        var original = inaccessibleDir.GetAccessControl();
+        
+        inaccessibleDir.GetAccessControl();
         var sid = WindowsIdentity.GetCurrent().User!;
         var denyRule = new FileSystemAccessRule(sid,
             FileSystemRights.ListDirectory | FileSystemRights.ReadData,
@@ -119,13 +121,13 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             var accessibleDirDesc = part.DirectoryDescriptions
                 .FirstOrDefault(d => d.RelativePath.Contains("accessible"));
             accessibleDirDesc.Should().NotBeNull();
-            accessibleDirDesc!.IsAccessible.Should().BeTrue();
+            accessibleDirDesc.IsAccessible.Should().BeTrue();
             
             var inaccessibleDirDesc = part.DirectoryDescriptions
                 .FirstOrDefault(d => d.RelativePath.Contains("inaccessible"));
             inaccessibleDirDesc.Should().NotBeNull();
             
-            if (inaccessibleDirDesc!.IsAccessible)
+            if (inaccessibleDirDesc.IsAccessible)
             {
                 Assert.Ignore(
                     "Directory permissions were not enforced by the OS - test cannot verify access control (likely running with elevated permissions)");
@@ -135,7 +137,7 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             
             var file1 = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("file1.txt"));
             file1.Should().NotBeNull();
-            file1!.IsAccessible.Should().BeTrue();
+            file1.IsAccessible.Should().BeTrue();
             
             var file2 = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("file2.txt"));
             file2.Should().BeNull("le fichier dans un répertoire inaccessible ne doit pas être inventorié");
@@ -156,9 +158,9 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
         var accessibleDir = Directory.CreateDirectory(Path.Combine(dataRoot.FullName, "accessible"));
         var inaccessibleDir = Directory.CreateDirectory(Path.Combine(dataRoot.FullName, "inaccessible"));
         
-        File.WriteAllText(Path.Combine(accessibleDir.FullName, "file1.txt"), "content1");
+        await File.WriteAllTextAsync(Path.Combine(accessibleDir.FullName, "file1.txt"), "content1");
         var fileInInaccessible = Path.Combine(inaccessibleDir.FullName, "file2.txt");
-        File.WriteAllText(fileInInaccessible, "content2");
+        await File.WriteAllTextAsync(fileInInaccessible, "content2");
         
         try
         {
@@ -215,13 +217,13 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             var accessibleDirDesc = part.DirectoryDescriptions
                 .FirstOrDefault(d => d.RelativePath.Contains("accessible"));
             accessibleDirDesc.Should().NotBeNull();
-            accessibleDirDesc!.IsAccessible.Should().BeTrue();
+            accessibleDirDesc.IsAccessible.Should().BeTrue();
             
             var inaccessibleDirDesc = part.DirectoryDescriptions
                 .FirstOrDefault(d => d.RelativePath.Contains("inaccessible"));
             inaccessibleDirDesc.Should().NotBeNull();
             
-            if (inaccessibleDirDesc!.IsAccessible)
+            if (inaccessibleDirDesc.IsAccessible)
             {
                 Assert.Ignore(
                     "Directory permissions were not enforced by the OS - test cannot verify access control (likely running with elevated permissions)");
@@ -231,7 +233,7 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             
             var file1 = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("file1.txt"));
             file1.Should().NotBeNull();
-            file1!.IsAccessible.Should().BeTrue();
+            file1.IsAccessible.Should().BeTrue();
             
             var file2 = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("file2.txt"));
             file2.Should().BeNull("le fichier dans un répertoire inaccessible ne doit pas être inventorié");
@@ -256,12 +258,12 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
         var subDir = Directory.CreateDirectory(Path.Combine(dataRoot.FullName, "subdir"));
         
         var accessibleFile = Path.Combine(subDir.FullName, "accessible.txt");
-        File.WriteAllText(accessibleFile, "content1");
+        await File.WriteAllTextAsync(accessibleFile, "content1");
         
         var inaccessibleFile = Path.Combine(subDir.FullName, "inaccessible.txt");
-        File.WriteAllText(inaccessibleFile, "content2");
+        await File.WriteAllTextAsync(inaccessibleFile, "content2");
         
-        var originalFile = new FileInfo(inaccessibleFile).GetAccessControl();
+        new FileInfo(inaccessibleFile).GetAccessControl();
         var sid = WindowsIdentity.GetCurrent().User!;
         var denyRule = new FileSystemAccessRule(sid,
             FileSystemRights.ReadData | FileSystemRights.ReadAttributes | FileSystemRights.ReadExtendedAttributes,
@@ -318,16 +320,16 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             
             var subDirDesc = part.DirectoryDescriptions.FirstOrDefault(d => d.RelativePath.Contains("subdir"));
             subDirDesc.Should().NotBeNull();
-            subDirDesc!.IsAccessible.Should().BeTrue();
+            subDirDesc.IsAccessible.Should().BeTrue();
             
             var accessibleFileDesc = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("accessible.txt"));
             accessibleFileDesc.Should().NotBeNull();
-            accessibleFileDesc!.IsAccessible.Should().BeTrue();
+            accessibleFileDesc.IsAccessible.Should().BeTrue();
             
             var inaccessibleFileDesc = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("inaccessible.txt"));
             inaccessibleFileDesc.Should().NotBeNull();
             
-            if (inaccessibleFileDesc!.IsAccessible)
+            if (inaccessibleFileDesc.IsAccessible)
             {
                 Assert.Ignore(
                     "File permissions were not enforced by the OS - test cannot verify access control (likely running with elevated permissions)");
@@ -351,10 +353,10 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
         var subDir = Directory.CreateDirectory(Path.Combine(dataRoot.FullName, "subdir"));
         
         var accessibleFile = Path.Combine(subDir.FullName, "accessible.txt");
-        File.WriteAllText(accessibleFile, "content1");
+        await File.WriteAllTextAsync(accessibleFile, "content1");
         
         var inaccessibleFile = Path.Combine(subDir.FullName, "inaccessible.txt");
-        File.WriteAllText(inaccessibleFile, "content2");
+        await File.WriteAllTextAsync(inaccessibleFile, "content2");
         
         try
         {
@@ -408,16 +410,16 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             
             var subDirDesc = part.DirectoryDescriptions.FirstOrDefault(d => d.RelativePath.Contains("subdir"));
             subDirDesc.Should().NotBeNull();
-            subDirDesc!.IsAccessible.Should().BeTrue();
+            subDirDesc.IsAccessible.Should().BeTrue();
             
             var accessibleFileDesc = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("accessible.txt"));
             accessibleFileDesc.Should().NotBeNull();
-            accessibleFileDesc!.IsAccessible.Should().BeTrue();
+            accessibleFileDesc.IsAccessible.Should().BeTrue();
             
             var inaccessibleFileDesc = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("inaccessible.txt"));
             inaccessibleFileDesc.Should().NotBeNull();
             
-            if (inaccessibleFileDesc!.IsAccessible)
+            if (inaccessibleFileDesc.IsAccessible)
             {
                 Assert.Ignore(
                     "File permissions were not enforced by the OS - test cannot verify access control (likely running with elevated permissions)");
@@ -441,13 +443,13 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
         var dataRoot = _testDirectoryService.CreateSubTestDirectory("data");
         
         var accessibleFile1 = Path.Combine(dataRoot.FullName, "file1.txt");
-        File.WriteAllText(accessibleFile1, new string('A', 1000));
+        await File.WriteAllTextAsync(accessibleFile1, new string('A', 1000));
         
         var accessibleFile2 = Path.Combine(dataRoot.FullName, "file2.txt");
-        File.WriteAllText(accessibleFile2, new string('B', 2000));
+        await File.WriteAllTextAsync(accessibleFile2, new string('B', 2000));
         
         var inaccessibleFile = Path.Combine(dataRoot.FullName, "inaccessible.txt");
-        File.WriteAllText(inaccessibleFile, new string('C', 5000));
+        await File.WriteAllTextAsync(inaccessibleFile, new string('C', 5000));
         
         FileSecurity? originalSecurity = null;
         UnixFileMode? originalMode = null;
@@ -554,13 +556,13 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
         var dataRoot = _testDirectoryService.CreateSubTestDirectory("data");
         
         var dir1 = Directory.CreateDirectory(Path.Combine(dataRoot.FullName, "dir1"));
-        File.WriteAllText(Path.Combine(dir1.FullName, "file1.txt"), "content1");
+        await File.WriteAllTextAsync(Path.Combine(dir1.FullName, "file1.txt"), "content1");
         
         var dir2 = Directory.CreateDirectory(Path.Combine(dataRoot.FullName, "dir2_inaccessible"));
-        File.WriteAllText(Path.Combine(dir2.FullName, "file2.txt"), "content2");
+        await File.WriteAllTextAsync(Path.Combine(dir2.FullName, "file2.txt"), "content2");
         
         var dir3 = Directory.CreateDirectory(Path.Combine(dataRoot.FullName, "dir3"));
-        File.WriteAllText(Path.Combine(dir3.FullName, "file3.txt"), "content3");
+        await File.WriteAllTextAsync(Path.Combine(dir3.FullName, "file3.txt"), "content3");
         
         FileSystemAccessRule? denyRule = null;
         UnixFileMode? originalMode = null;
@@ -633,16 +635,16 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             
             var dir1Desc = part.DirectoryDescriptions.FirstOrDefault(d => d.RelativePath.Contains("dir1"));
             dir1Desc.Should().NotBeNull();
-            dir1Desc!.IsAccessible.Should().BeTrue();
+            dir1Desc.IsAccessible.Should().BeTrue();
             
             var dir3Desc = part.DirectoryDescriptions.FirstOrDefault(d => d.RelativePath.Contains("dir3"));
             dir3Desc.Should().NotBeNull();
-            dir3Desc!.IsAccessible.Should().BeTrue();
+            dir3Desc.IsAccessible.Should().BeTrue();
             
             var dir2Desc = part.DirectoryDescriptions.FirstOrDefault(d => d.RelativePath.Contains("dir2"));
             dir2Desc.Should().NotBeNull();
             
-            if (dir2Desc!.IsAccessible)
+            if (dir2Desc.IsAccessible)
             {
                 Assert.Ignore(
                     "Directory permissions were not enforced by the OS - test cannot verify access control (likely running with elevated permissions)");
@@ -676,9 +678,9 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
     {
         var dataRoot = _testDirectoryService.CreateSubTestDirectory("data");
         var testFile = Path.Combine(dataRoot.FullName, "test.txt");
-        File.WriteAllText(testFile, new string('A', 1000));
+        await File.WriteAllTextAsync(testFile, new string('A', 1000));
         
-        var originalSecurity = new FileInfo(testFile).GetAccessControl();
+        new FileInfo(testFile).GetAccessControl();
         var sid = WindowsIdentity.GetCurrent().User!;
         var denyRule = new FileSystemAccessRule(sid,
             FileSystemRights.ReadData | FileSystemRights.ReadAttributes | FileSystemRights.ReadExtendedAttributes,
@@ -738,7 +740,7 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             var fileDesc = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("test.txt"));
             fileDesc.Should().NotBeNull();
             
-            if (fileDesc!.IsAccessible)
+            if (fileDesc.IsAccessible)
             {
                 Assert.Ignore(
                     "File permissions were not enforced by the OS - test cannot verify access control (likely running with elevated permissions)");
@@ -755,13 +757,14 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
         }
     }
     
+    
     [Test]
     [Platform(Include = "Linux,MacOsX")]
     public async Task InaccessibleFile_AsInventoryPartOfTypeFile_Posix()
     {
         var dataRoot = _testDirectoryService.CreateSubTestDirectory("data");
         var testFile = Path.Combine(dataRoot.FullName, "test.txt");
-        File.WriteAllText(testFile, new string('A', 1000));
+        await File.WriteAllTextAsync(testFile, new string('A', 1000));
         
         var originalMode = File.GetUnixFileMode(testFile);
         
@@ -819,7 +822,7 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             var fileDesc = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("test.txt"));
             fileDesc.Should().NotBeNull();
             
-            if (fileDesc!.IsAccessible)
+            if (fileDesc.IsAccessible)
             {
                 Assert.Ignore(
                     "File permissions were not enforced by the OS - test cannot verify access control (likely running with elevated permissions)");
@@ -834,3 +837,4 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
         }
     }
 }
+#pragma warning restore CA1416
