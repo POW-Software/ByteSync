@@ -140,7 +140,7 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             file1.IsAccessible.Should().BeTrue();
             
             var file2 = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("file2.txt"));
-            file2.Should().BeNull("le fichier dans un répertoire inaccessible ne doit pas être inventorié");
+            file2.Should().BeNull("the file in an inaccessible directory should not be inventoried");
         }
         finally
         {
@@ -236,7 +236,7 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             file1.IsAccessible.Should().BeTrue();
             
             var file2 = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("file2.txt"));
-            file2.Should().BeNull("le fichier dans un répertoire inaccessible ne doit pas être inventorié");
+            file2.Should().BeNull("the file in an inaccessible directory should not be inventoried");
         }
         finally
         {
@@ -532,7 +532,7 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             }
             
             monitorData.IdentifiedFiles.Should().Be(3);
-            monitorData.IdentifiedVolume.Should().Be(3000, "les fichiers inaccessibles ne doivent pas être comptés dans le volume");
+            monitorData.IdentifiedVolume.Should().Be(3000, "inaccessible files should not be counted in the volume");
             
             part.FileDescriptions.Count(f => f.IsAccessible).Should().Be(2);
             part.FileDescriptions.Count(f => !f.IsAccessible).Should().Be(1);
