@@ -16,9 +16,9 @@ namespace ByteSync.Client.UnitTests.Services.Comparisons;
 [TestFixture]
 public class SynchronizationRuleMatcherMakeMatchesTests
 {
-    private Mock<IAtomicActionConsistencyChecker> _consistencyCheckerMock;
-    private Mock<IAtomicActionRepository> _repositoryMock;
-    private SynchronizationRuleMatcher _matcher;
+    private Mock<IAtomicActionConsistencyChecker> _consistencyCheckerMock = null!;
+    private Mock<IAtomicActionRepository> _repositoryMock = null!;
+    private SynchronizationRuleMatcher _matcher = null!;
     
     [SetUp]
     public void SetUp()
@@ -46,9 +46,9 @@ public class SynchronizationRuleMatcherMakeMatchesTests
         var comparisonItem = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/file.txt", "file.txt", "/file.txt"));
         var rules = new List<SynchronizationRule>();
         
-        _repositoryMock.Setup(r => r.GetAtomicActions(comparisonItem)).Returns(new List<AtomicAction>());
+        _repositoryMock.Setup(r => r.GetAtomicActions(comparisonItem)).Returns([]);
         _consistencyCheckerMock.Setup(c => c.GetApplicableActions(It.IsAny<ICollection<SynchronizationRule>>()))
-            .Returns(new List<AtomicAction>());
+            .Returns([]);
         
         _matcher.MakeMatches(comparisonItem, rules);
         
@@ -65,9 +65,9 @@ public class SynchronizationRuleMatcherMakeMatchesTests
         };
         var rules = new List<SynchronizationRule>();
         
-        _repositoryMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
+        _repositoryMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns([]);
         _consistencyCheckerMock.Setup(c => c.GetApplicableActions(It.IsAny<ICollection<SynchronizationRule>>()))
-            .Returns(new List<AtomicAction>());
+            .Returns([]);
         
         _matcher.MakeMatches(comparisonItems, rules);
         
@@ -85,9 +85,9 @@ public class SynchronizationRuleMatcherMakeMatchesTests
         var existingNonRuleAction = new AtomicAction();
         
         _repositoryMock.Setup(r => r.GetAtomicActions(comparisonItem))
-            .Returns(new List<AtomicAction> { existingRuleAction, existingNonRuleAction });
+            .Returns([existingRuleAction, existingNonRuleAction]);
         _consistencyCheckerMock.Setup(c => c.GetApplicableActions(It.IsAny<ICollection<SynchronizationRule>>()))
-            .Returns(new List<AtomicAction>());
+            .Returns([]);
         
         _matcher.MakeMatches(comparisonItem, rules);
         
@@ -112,27 +112,24 @@ public class SynchronizationRuleMatcherMakeMatchesTests
         var action1 = new AtomicAction { Operator = ActionOperatorTypes.DoNothing };
         var action2 = new AtomicAction { Operator = ActionOperatorTypes.Create };
         
-        _repositoryMock.Setup(r => r.GetAtomicActions(comparisonItem)).Returns(new List<AtomicAction>());
+        _repositoryMock.Setup(r => r.GetAtomicActions(comparisonItem)).Returns([]);
         _consistencyCheckerMock.Setup(c => c.GetApplicableActions(It.IsAny<ICollection<SynchronizationRule>>()))
-            .Returns(new List<AtomicAction> { action1, action2 });
+            .Returns([action1, action2]);
         _consistencyCheckerMock.Setup(c =>
                 c.CheckCanAdd(It.Is<AtomicAction>(a => a.Operator == ActionOperatorTypes.DoNothing), comparisonItem))
             .Returns(new AtomicActionConsistencyCheckCanAddResult(new List<ComparisonItem> { comparisonItem })
             {
-                ValidationResults = new List<ComparisonItemValidationResult>
-                {
-                    new ComparisonItemValidationResult(comparisonItem, true)
-                }
+                ValidationResults = [new ComparisonItemValidationResult(comparisonItem, true)]
             });
         _consistencyCheckerMock
             .Setup(c => c.CheckCanAdd(It.Is<AtomicAction>(a => a.Operator == ActionOperatorTypes.Create), comparisonItem))
             .Returns(new AtomicActionConsistencyCheckCanAddResult(new List<ComparisonItem> { comparisonItem })
             {
-                ValidationResults = new List<ComparisonItemValidationResult>
-                {
+                ValidationResults =
+                [
                     new ComparisonItemValidationResult(comparisonItem,
                         AtomicActionValidationFailureReason.SourceNotAllowedForCreateOperation)
-                }
+                ]
             });
         
         _matcher.MakeMatches(comparisonItem, new List<SynchronizationRule> { rule });
@@ -158,16 +155,13 @@ public class SynchronizationRuleMatcherMakeMatchesTests
         var originalAction = new AtomicAction { Operator = ActionOperatorTypes.DoNothing };
         originalAction.ComparisonItem = comparisonItem;
         
-        _repositoryMock.Setup(r => r.GetAtomicActions(comparisonItem)).Returns(new List<AtomicAction>());
+        _repositoryMock.Setup(r => r.GetAtomicActions(comparisonItem)).Returns([]);
         _consistencyCheckerMock.Setup(c => c.GetApplicableActions(It.IsAny<ICollection<SynchronizationRule>>()))
-            .Returns(new List<AtomicAction> { originalAction });
+            .Returns([originalAction]);
         _consistencyCheckerMock.Setup(c => c.CheckCanAdd(It.IsAny<AtomicAction>(), comparisonItem))
             .Returns(new AtomicActionConsistencyCheckCanAddResult(new List<ComparisonItem> { comparisonItem })
             {
-                ValidationResults = new List<ComparisonItemValidationResult>
-                {
-                    new ComparisonItemValidationResult(comparisonItem, true)
-                }
+                ValidationResults = [new ComparisonItemValidationResult(comparisonItem, true)]
             });
         
         _matcher.MakeMatches(comparisonItem, new List<SynchronizationRule> { rule });

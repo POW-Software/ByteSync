@@ -15,7 +15,7 @@ namespace ByteSync.Client.UnitTests.Services.Comparisons;
 [TestFixture]
 public class SynchronizationRuleMatcherContentTests
 {
-    private ContentConditionMatcher _matcher;
+    private ContentConditionMatcher _matcher = null!;
     
     [SetUp]
     public void SetUp()
@@ -99,7 +99,7 @@ public class SynchronizationRuleMatcherContentTests
         var comparisonItem = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/file.txt", "file.txt", "/file.txt"));
         var condition = new AtomicCondition
         {
-            Source = null,
+            Source = null!,
             Destination = null,
             ComparisonProperty = ComparisonProperty.Content,
             ConditionOperator = ConditionOperatorTypes.Equals
@@ -124,7 +124,7 @@ public class SynchronizationRuleMatcherContentTests
         
         var condition = new AtomicCondition
         {
-            Source = null,
+            Source = null!,
             Destination = new DataPart("A", part),
             ComparisonProperty = ComparisonProperty.Content,
             ConditionOperator = ConditionOperatorTypes.Equals
@@ -231,7 +231,7 @@ public class SynchronizationRuleMatcherContentTests
         
         var condition = new AtomicCondition
         {
-            Source = null,
+            Source = null!,
             Destination = new DataPart("A", part),
             ComparisonProperty = ComparisonProperty.Content,
             ConditionOperator = ConditionOperatorTypes.NotEquals

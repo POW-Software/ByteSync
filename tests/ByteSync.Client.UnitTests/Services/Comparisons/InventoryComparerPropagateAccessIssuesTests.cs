@@ -117,7 +117,7 @@ public class InventoryComparerPropagateAccessIssuesTests
         var fileItem = result.ComparisonItems.FirstOrDefault(item => item.PathIdentity.LinkingKeyValue == "/inaccessible/file.txt");
         fileItem.Should().NotBeNull();
         
-        fileItem!.ContentIdentities.Should().HaveCount(1);
+        fileItem.ContentIdentities.Should().HaveCount(1);
         fileItem.ContentIdentities.All(ci => ci.Core != null).Should().BeTrue();
     }
     
@@ -201,17 +201,17 @@ public class InventoryComparerPropagateAccessIssuesTests
         var fileItem = result.ComparisonItems.FirstOrDefault(item => item.PathIdentity.LinkingKeyValue == "/inaccessible/file.txt");
         fileItem.Should().NotBeNull();
         
-        fileItem!.ContentIdentities.Should().HaveCount(2);
+        fileItem.ContentIdentities.Should().HaveCount(2);
         
         var virtualContentIdentity = fileItem.ContentIdentities.FirstOrDefault(ci => ci.Core == null);
         virtualContentIdentity.Should().NotBeNull();
-        virtualContentIdentity!.AccessIssueInventoryParts.Should().Contain(partB);
+        virtualContentIdentity.AccessIssueInventoryParts.Should().Contain(partB);
         
         var virtualFileDescription = virtualContentIdentity.FileSystemDescriptions
             .OfType<FileDescription>()
             .FirstOrDefault(fd => !fd.IsAccessible);
         virtualFileDescription.Should().NotBeNull();
-        virtualFileDescription!.RelativePath.Should().Be("/inaccessible/file.txt");
+        virtualFileDescription.RelativePath.Should().Be("/inaccessible/file.txt");
     }
     
     [Test]
@@ -266,7 +266,7 @@ public class InventoryComparerPropagateAccessIssuesTests
         var dirItem = result.ComparisonItems.FirstOrDefault(item => item.PathIdentity.LinkingKeyValue == "/inaccessible/subdir");
         dirItem.Should().NotBeNull();
         
-        dirItem!.ContentIdentities.Should().HaveCount(1);
+        dirItem.ContentIdentities.Should().HaveCount(1);
         var contentIdentity = dirItem.ContentIdentities.First();
         contentIdentity.AccessIssueInventoryParts.Should().Contain(part);
     }
@@ -293,7 +293,7 @@ public class InventoryComparerPropagateAccessIssuesTests
         var fileItem = result.ComparisonItems.FirstOrDefault(item => item.PathIdentity.LinkingKeyValue == "/accessible/file.txt");
         fileItem.Should().NotBeNull();
         
-        fileItem!.ContentIdentities.Should().HaveCount(1);
+        fileItem.ContentIdentities.Should().HaveCount(1);
         fileItem.ContentIdentities.All(ci => ci.Core != null).Should().BeTrue();
     }
     
@@ -319,7 +319,7 @@ public class InventoryComparerPropagateAccessIssuesTests
         var fileItem = result.ComparisonItems.FirstOrDefault(item => item.PathIdentity.LinkingKeyValue == "/inaccessible/file.txt");
         fileItem.Should().NotBeNull();
         
-        var contentIdentitiesForPart = fileItem!.ContentIdentities
+        var contentIdentitiesForPart = fileItem.ContentIdentities
             .Where(ci => ci.GetInventoryParts().Contains(inventory.InventoryParts[0]))
             .ToList();
         
@@ -515,11 +515,11 @@ public class InventoryComparerPropagateAccessIssuesTests
             result.ComparisonItems.FirstOrDefault(item => item.PathIdentity.LinkingKeyValue == "/inaccessible1/inaccessible2/file.txt");
         fileItem.Should().NotBeNull();
         
-        fileItem!.ContentIdentities.Should().HaveCount(2);
+        fileItem.ContentIdentities.Should().HaveCount(2);
         
         var virtualContentIdentity = fileItem.ContentIdentities.FirstOrDefault(ci => ci.Core == null);
         virtualContentIdentity.Should().NotBeNull();
-        virtualContentIdentity!.AccessIssueInventoryParts.Should().Contain(partB);
+        virtualContentIdentity.AccessIssueInventoryParts.Should().Contain(partB);
     }
     
     [Test]
@@ -601,11 +601,11 @@ public class InventoryComparerPropagateAccessIssuesTests
         
         var fileItem = result.ComparisonItems.FirstOrDefault(item => item.PathIdentity.LinkingKeyValue == "/inaccessible/file.txt");
         fileItem.Should().NotBeNull();
-        fileItem!.ContentIdentities.Should().HaveCount(2);
+        fileItem.ContentIdentities.Should().HaveCount(2);
         
         var virtualContentIdentity = fileItem.ContentIdentities.FirstOrDefault(ci => ci.Core == null);
         virtualContentIdentity.Should().NotBeNull();
-        virtualContentIdentity!.AccessIssueInventoryParts.Should().Contain(partB);
+        virtualContentIdentity.AccessIssueInventoryParts.Should().Contain(partB);
     }
     
     [Test]

@@ -13,7 +13,7 @@ namespace ByteSync.Client.UnitTests.Services.Comparisons;
 [TestFixture]
 public class SynchronizationRuleMatcherLocalizeTests
 {
-    private ContentIdentityExtractor _extractor;
+    private ContentIdentityExtractor _extractor = null!;
     
     [SetUp]
     public void SetUp()

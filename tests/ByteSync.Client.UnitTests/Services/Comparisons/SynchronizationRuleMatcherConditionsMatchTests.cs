@@ -16,9 +16,9 @@ namespace ByteSync.Client.UnitTests.Services.Comparisons;
 [TestFixture]
 public class SynchronizationRuleMatcherConditionsMatchTests
 {
-    private Mock<IAtomicActionConsistencyChecker> _consistencyCheckerMock;
-    private Mock<IAtomicActionRepository> _repositoryMock;
-    private SynchronizationRuleMatcher _matcher;
+    private Mock<IAtomicActionConsistencyChecker> _consistencyCheckerMock = null!;
+    private Mock<IAtomicActionRepository> _repositoryMock = null!;
+    private SynchronizationRuleMatcher _matcher = null!;
     
     [SetUp]
     public void SetUp()

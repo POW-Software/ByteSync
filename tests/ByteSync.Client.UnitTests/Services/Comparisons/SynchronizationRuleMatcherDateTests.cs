@@ -15,7 +15,7 @@ namespace ByteSync.Client.UnitTests.Services.Comparisons;
 [TestFixture]
 public class SynchronizationRuleMatcherDateTests
 {
-    private DateConditionMatcher _matcher;
+    private DateConditionMatcher _matcher = null!;
     
     [SetUp]
     public void SetUp()
