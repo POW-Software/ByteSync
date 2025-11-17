@@ -322,6 +322,13 @@ public class ComparisonItemViewModelTests
         
         sortedCodes.Should().BeInAscendingOrder();
         sortedCodes.Should().Equal("A1", "A2", "A3");
+        
+        createdViewModels.Should().HaveCount(3);
+        createdViewModels.Keys.Should().BeEquivalentTo([contentIdentity1, contentIdentity2, contentIdentity3]);
+        foreach (var vm in createdViewModels.Values)
+        {
+            viewModel.ContentIdentitiesA.Should().Contain(vm);
+        }
     }
     
     [Test]
