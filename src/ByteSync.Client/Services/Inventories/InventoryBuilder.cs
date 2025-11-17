@@ -20,8 +20,6 @@ public class InventoryBuilder : IInventoryBuilder
 {
     private readonly ILogger<InventoryBuilder> _logger;
     
-    private const int FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 4194304;
-    
     public InventoryBuilder(SessionMember sessionMember, DataNode dataNode, SessionSettings sessionSettings,
         InventoryProcessData inventoryProcessData,
         OSPlatforms osPlatform, FingerprintModes fingerprintMode, ILogger<InventoryBuilder> logger,
