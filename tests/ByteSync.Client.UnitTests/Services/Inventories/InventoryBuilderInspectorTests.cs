@@ -296,15 +296,16 @@ public class InventoryBuilderInspectorTests : AbstractTester
         insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
         insp.Setup(i => i.IsRecallOnDataAccess(It.IsAny<FileInfo>())).Returns(false);
         
-        // Reparse only for the specific subdir path
-        string? reparseDir = null;
+        // Create directories before saving the Setup, which captures the path.
+        var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root2"));
+        var sub = Directory.CreateDirectory(Path.Combine(root.FullName, "Sub"));
+        
+        // Define the desired value and then record the behavior based on that value.
+        var reparseDir = sub.FullName;
         insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns<FileSystemInfo>(fsi => fsi.FullName == reparseDir);
         
         var builder = CreateBuilder(insp.Object);
         
-        var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root2"));
-        var sub = Directory.CreateDirectory(Path.Combine(root.FullName, "Sub"));
-        reparseDir = sub.FullName;
         var filePath = Path.Combine(root.FullName, "ok.txt");
         await File.WriteAllTextAsync(filePath, "x");
         
