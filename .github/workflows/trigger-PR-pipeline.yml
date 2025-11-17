@@ -175,6 +175,7 @@ jobs:
         shell: bash
 
       - name: Upload Test Results
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: PR-test-results-${{ matrix.os }}-${{ hashFiles(matrix.testProject) }}
