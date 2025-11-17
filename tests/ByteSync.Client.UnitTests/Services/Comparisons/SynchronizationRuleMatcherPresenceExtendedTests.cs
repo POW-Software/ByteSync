@@ -15,8 +15,8 @@ namespace ByteSync.Client.UnitTests.Services.Comparisons;
 [TestFixture]
 public class SynchronizationRuleMatcherPresenceExtendedTests
 {
-    private PresenceConditionMatcher _matcher;
-    private ContentIdentityExtractor _extractor;
+    private PresenceConditionMatcher _matcher = null!;
+    private ContentIdentityExtractor _extractor = null!;
     
     [SetUp]
     public void SetUp()

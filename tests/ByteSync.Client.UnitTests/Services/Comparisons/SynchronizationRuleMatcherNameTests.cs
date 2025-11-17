@@ -12,7 +12,7 @@ namespace ByteSync.Client.UnitTests.Services.Comparisons;
 [TestFixture]
 public class SynchronizationRuleMatcherNameTests
 {
-    private NameConditionMatcher _matcher;
+    private NameConditionMatcher _matcher = null!;
     
     [SetUp]
     public void SetUp()
