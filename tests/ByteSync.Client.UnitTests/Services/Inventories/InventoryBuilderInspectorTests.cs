@@ -7,6 +7,7 @@ using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Services.Inventories;
+using ByteSync.TestsCommon;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -14,30 +15,19 @@ using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Inventories;
 
-public class InventoryBuilderInspectorTests
+public class InventoryBuilderInspectorTests : AbstractTester
 {
-    private string _rootTemp = null!;
     private readonly List<ManualResetEvent> _manualResetEvents = new();
     
     [SetUp]
     public void SetUp()
     {
-        _rootTemp = Path.Combine(Path.GetTempPath(), "ByteSync.Unit", Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_rootTemp);
+        CreateTestDirectory();
     }
     
     [TearDown]
     public void TearDown()
     {
-        try
-        {
-            if (Directory.Exists(_rootTemp)) Directory.Delete(_rootTemp, true);
-        }
-        catch
-        {
-            /* ignore */
-        }
-        
         foreach (var mre in _manualResetEvents)
         {
             mre.Dispose();
@@ -91,11 +81,11 @@ public class InventoryBuilderInspectorTests
         insp.Setup(i => i.IsHidden(It.IsAny<FileSystemInfo>(), It.IsAny<OSPlatforms>())).Returns(true);
         var builder = CreateBuilder(insp.Object);
         
-        var filePath = Path.Combine(_rootTemp, "a.txt");
+        var filePath = Path.Combine(TestDirectory.FullName, "a.txt");
         await File.WriteAllTextAsync(filePath, "x");
         
         builder.AddInventoryPart(filePath);
-        var invPath = Path.Combine(_rootTemp, "inv.zip");
+        var invPath = Path.Combine(TestDirectory.FullName, "inv.zip");
         await builder.BuildBaseInventoryAsync(invPath);
         
         var part = builder.Inventory.InventoryParts.Single();
@@ -110,11 +100,11 @@ public class InventoryBuilderInspectorTests
         insp.Setup(i => i.IsSystem(It.IsAny<FileInfo>())).Returns(true);
         var builder = CreateBuilder(insp.Object);
         
-        var filePath = Path.Combine(_rootTemp, "b.txt");
+        var filePath = Path.Combine(TestDirectory.FullName, "b.txt");
         await File.WriteAllTextAsync(filePath, "x");
         
         builder.AddInventoryPart(filePath);
-        var invPath = Path.Combine(_rootTemp, "inv2.zip");
+        var invPath = Path.Combine(TestDirectory.FullName, "inv2.zip");
         await builder.BuildBaseInventoryAsync(invPath);
         
         var part = builder.Inventory.InventoryParts.Single();
@@ -130,11 +120,11 @@ public class InventoryBuilderInspectorTests
         insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(true);
         var builder = CreateBuilder(insp.Object);
         
-        var filePath = Path.Combine(_rootTemp, "c.txt");
+        var filePath = Path.Combine(TestDirectory.FullName, "c.txt");
         await File.WriteAllTextAsync(filePath, "x");
         
         builder.AddInventoryPart(filePath);
-        var invPath = Path.Combine(_rootTemp, "inv3.zip");
+        var invPath = Path.Combine(TestDirectory.FullName, "inv3.zip");
         await builder.BuildBaseInventoryAsync(invPath);
         
         var part = builder.Inventory.InventoryParts.Single();
@@ -153,11 +143,11 @@ public class InventoryBuilderInspectorTests
         insp.Setup(i => i.IsRecallOnDataAccess(It.IsAny<FileInfo>())).Returns(false);
         var builder = CreateBuilder(insp.Object);
         
-        var filePath = Path.Combine(_rootTemp, "d.txt");
+        var filePath = Path.Combine(TestDirectory.FullName, "d.txt");
         await File.WriteAllTextAsync(filePath, "x");
         
         builder.AddInventoryPart(filePath);
-        var invPath = Path.Combine(_rootTemp, "inv4.zip");
+        var invPath = Path.Combine(TestDirectory.FullName, "inv4.zip");
         await builder.BuildBaseInventoryAsync(invPath);
         
         var part = builder.Inventory.InventoryParts.Single();
@@ -182,12 +172,12 @@ public class InventoryBuilderInspectorTests
         insp.Setup(i => i.IsRecallOnDataAccess(It.IsAny<FileInfo>())).Returns(false);
         var builder = CreateBuilder(insp.Object);
         
-        var root = Directory.CreateDirectory(Path.Combine(_rootTemp, "root"));
+        var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root"));
         var filePath = Path.Combine(root.FullName, "e.txt");
         await File.WriteAllTextAsync(filePath, "x");
         
         builder.AddInventoryPart(root.FullName);
-        var invPath = Path.Combine(_rootTemp, "inv5.zip");
+        var invPath = Path.Combine(TestDirectory.FullName, "inv5.zip");
         await builder.BuildBaseInventoryAsync(invPath);
         
         var part = builder.Inventory.InventoryParts.Single();
@@ -212,12 +202,12 @@ public class InventoryBuilderInspectorTests
         
         var builder = CreateBuilder(insp.Object);
         
-        var root = Directory.CreateDirectory(Path.Combine(_rootTemp, "root_df"));
+        var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root_df"));
         var filePath = Path.Combine(root.FullName, "df.txt");
         await File.WriteAllTextAsync(filePath, "x");
         
         builder.AddInventoryPart(root.FullName);
-        var invPath = Path.Combine(_rootTemp, "inv_df.zip");
+        var invPath = Path.Combine(TestDirectory.FullName, "inv_df.zip");
         await builder.BuildBaseInventoryAsync(invPath);
         
         var part = builder.Inventory.InventoryParts.Single();
@@ -242,12 +232,12 @@ public class InventoryBuilderInspectorTests
         
         var builder = CreateBuilder(insp.Object);
         
-        var root = Directory.CreateDirectory(Path.Combine(_rootTemp, "root_io"));
+        var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root_io"));
         var filePath = Path.Combine(root.FullName, "io.txt");
         await File.WriteAllTextAsync(filePath, "x");
         
         builder.AddInventoryPart(root.FullName);
-        var invPath = Path.Combine(_rootTemp, "inv_io.zip");
+        var invPath = Path.Combine(TestDirectory.FullName, "inv_io.zip");
         await builder.BuildBaseInventoryAsync(invPath);
         
         var part = builder.Inventory.InventoryParts.Single();
@@ -269,7 +259,7 @@ public class InventoryBuilderInspectorTests
         
         var builder = CreateBuilder(insp.Object);
         
-        var root = Directory.CreateDirectory(Path.Combine(_rootTemp, "root_dir_io"));
+        var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root_dir_io"));
         var sub = Directory.CreateDirectory(Path.Combine(root.FullName, "BadSub"));
         
         // Throw IOException for this specific subdirectory when checking reparse
@@ -284,7 +274,7 @@ public class InventoryBuilderInspectorTests
         await File.WriteAllTextAsync(okFile, "x");
         
         builder.AddInventoryPart(root.FullName);
-        var invPath = Path.Combine(_rootTemp, "inv_dir_io.zip");
+        var invPath = Path.Combine(TestDirectory.FullName, "inv_dir_io.zip");
         await builder.BuildBaseInventoryAsync(invPath);
         
         var part = builder.Inventory.InventoryParts.Single();
@@ -312,14 +302,14 @@ public class InventoryBuilderInspectorTests
         
         var builder = CreateBuilder(insp.Object);
         
-        var root = Directory.CreateDirectory(Path.Combine(_rootTemp, "root2"));
+        var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root2"));
         var sub = Directory.CreateDirectory(Path.Combine(root.FullName, "Sub"));
         reparseDir = sub.FullName;
         var filePath = Path.Combine(root.FullName, "ok.txt");
         await File.WriteAllTextAsync(filePath, "x");
         
         builder.AddInventoryPart(root.FullName);
-        var invPath = Path.Combine(_rootTemp, "inv6.zip");
+        var invPath = Path.Combine(TestDirectory.FullName, "inv6.zip");
         await builder.BuildBaseInventoryAsync(invPath);
         
         var part = builder.Inventory.InventoryParts.Single();
