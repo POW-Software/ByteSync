@@ -8,6 +8,7 @@ using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Services.Inventories;
+using ByteSync.TestsCommon;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -15,33 +16,19 @@ using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Inventories;
 
-public class InventoryBuilderPublicTests
+public class InventoryBuilderPublicTests : AbstractTester
 {
-    private string _rootTemp = null!;
     private readonly List<ManualResetEvent> _manualResetEvents = new();
     
     [SetUp]
     public void SetUp()
     {
-        _rootTemp = Path.Combine(Path.GetTempPath(), "ByteSync.Unit", Guid.NewGuid().ToString());
-        Directory.CreateDirectory(_rootTemp);
+        CreateTestDirectory();
     }
     
     [TearDown]
     public void TearDown()
     {
-        try
-        {
-            if (Directory.Exists(_rootTemp))
-            {
-                Directory.Delete(_rootTemp, true);
-            }
-        }
-        catch
-        {
-            /* ignore */
-        }
-        
         foreach (var mre in _manualResetEvents)
         {
             mre.Dispose();
@@ -93,7 +80,7 @@ public class InventoryBuilderPublicTests
     public async Task BuildBaseInventory_WithDeletedSingleFilePart_AddsInaccessibleFileDescription()
     {
         var builder = CreateBuilder();
-        var work = Directory.CreateDirectory(Path.Combine(_rootTemp, "w1"));
+        var work = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "w1"));
         var filePath = Path.Combine(work.FullName, "gone.txt");
         await File.WriteAllTextAsync(filePath, "x");
         
@@ -101,7 +88,7 @@ public class InventoryBuilderPublicTests
         builder.AddInventoryPart(filePath);
         Directory.Delete(work.FullName, recursive: true); // ensure directory not found
         
-        var inventoryPath = Path.Combine(_rootTemp, "inv.zip");
+        var inventoryPath = Path.Combine(TestDirectory.FullName, "inv.zip");
         await builder.BuildBaseInventoryAsync(inventoryPath);
         
         File.Exists(inventoryPath).Should().BeTrue();
@@ -115,13 +102,13 @@ public class InventoryBuilderPublicTests
     public async Task BuildBaseInventory_WithDirectoryAndRegularFile_CoversNonReparsePaths()
     {
         var builder = CreateBuilder();
-        var root = Directory.CreateDirectory(Path.Combine(_rootTemp, "root"));
+        var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root"));
         var sub = Directory.CreateDirectory(Path.Combine(root.FullName, "Sub"));
         var file = Path.Combine(sub.FullName, "file.txt");
         await File.WriteAllTextAsync(file, "x");
         
         builder.AddInventoryPart(root.FullName);
-        var inventoryPath = Path.Combine(_rootTemp, "inv2.zip");
+        var inventoryPath = Path.Combine(TestDirectory.FullName, "inv2.zip");
         await builder.BuildBaseInventoryAsync(inventoryPath);
         
         File.Exists(inventoryPath).Should().BeTrue();
