@@ -4,7 +4,6 @@ using System.Reactive.Linq;
 using System.Text;
 using ByteSync.Business.Inventories;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Converters;
 using ByteSync.Interfaces.Factories.ViewModels;
@@ -29,11 +28,12 @@ public class ComparisonItemViewModel : IDisposable
     private readonly ISynchronizationActionViewModelFactory _synchronizationActionViewModelFactory;
     private readonly CompositeDisposable _compositeDisposable;
     private readonly IFormatKbSizeConverter _formatKbSizeConverter;
-
+    
     public ComparisonItemViewModel(ITargetedActionsService targetedActionsService,
         IAtomicActionRepository atomicActionRepository, IContentIdentityViewModelFactory contentIdentityViewModelFactory,
-        IContentRepartitionViewModelFactory contentRepartitionViewModelFactory, 
-        IItemSynchronizationStatusViewModelFactory itemSynchronizationStatusViewModelFactory, ComparisonItem comparisonItem, List<Inventory> inventories,
+        IContentRepartitionViewModelFactory contentRepartitionViewModelFactory,
+        IItemSynchronizationStatusViewModelFactory itemSynchronizationStatusViewModelFactory, ComparisonItem comparisonItem,
+        List<Inventory> inventories,
         ISynchronizationActionViewModelFactory synchronizationActionViewModelFactory, IFormatKbSizeConverter formatKbSizeConverter)
     {
         ComparisonItem = comparisonItem;
@@ -46,13 +46,13 @@ public class ComparisonItemViewModel : IDisposable
         _itemSynchronizationStatusViewModelFactory = itemSynchronizationStatusViewModelFactory;
         _synchronizationActionViewModelFactory = synchronizationActionViewModelFactory;
         _formatKbSizeConverter = formatKbSizeConverter;
-
-        ContentIdentitiesA = new HashSet<ContentIdentityViewModel>();
-        ContentIdentitiesB = new HashSet<ContentIdentityViewModel>();
-        ContentIdentitiesC = new HashSet<ContentIdentityViewModel>();
-        ContentIdentitiesD = new HashSet<ContentIdentityViewModel>();
-        ContentIdentitiesE = new HashSet<ContentIdentityViewModel>();
-
+        
+        ContentIdentitiesA = new List<ContentIdentityViewModel>();
+        ContentIdentitiesB = new List<ContentIdentityViewModel>();
+        ContentIdentitiesC = new List<ContentIdentityViewModel>();
+        ContentIdentitiesD = new List<ContentIdentityViewModel>();
+        ContentIdentitiesE = new List<ContentIdentityViewModel>();
+        
         ContentIdentitiesList =
         [
             ContentIdentitiesA,
@@ -61,9 +61,9 @@ public class ComparisonItemViewModel : IDisposable
             ContentIdentitiesD,
             ContentIdentitiesE
         ];
-
+        
         _compositeDisposable = new CompositeDisposable();
-
+        
         _atomicActionRepository.ObservableCache.Connect()
             .Filter(sa => sa.PathIdentity != null && Equals(sa.PathIdentity, ComparisonItem.PathIdentity))
             .Transform(sa => _synchronizationActionViewModelFactory.CreateSynchronizationActionViewModel(sa, this))
@@ -72,50 +72,68 @@ public class ComparisonItemViewModel : IDisposable
             .Bind(out _data)
             .Subscribe()
             .DisposeWith(_compositeDisposable);
-
+        
         PathIdentity = comparisonItem.PathIdentity;
-
+        
         BuildLinkingKeyNameTooltip();
         
+        // Create all ContentIdentityViewModels
         foreach (var contentIdentity in ComparisonItem.ContentIdentities)
         {
             foreach (var inventory in contentIdentity.GetInventories())
             {
                 var collection = GetContentIdentityViews(inventory);
-
+                
                 var contentIdentityView = _contentIdentityViewModelFactory.CreateContentIdentityViewModel(this, contentIdentity, inventory);
                 
                 collection.Add(contentIdentityView);
             }
         }
-
+        
+        // Sort each collection by inventory part codes (A1, A2, B1, B2, etc.)
+        foreach (var contentIdentitiesCollection in ContentIdentitiesList)
+        {
+            contentIdentitiesCollection.Sort((a, b) =>
+            {
+                var aMinCode = a.ContentIdentity.GetInventoryParts()
+                    .Where(ip => ip.Inventory.Equals(a.Inventory))
+                    .Min(ip => ip.Code);
+                var bMinCode = b.ContentIdentity.GetInventoryParts()
+                    .Where(ip => ip.Inventory.Equals(b.Inventory))
+                    .Min(ip => ip.Code);
+                
+                return string.Compare(aMinCode, bMinCode, StringComparison.Ordinal);
+            });
+        }
+        
         ContentRepartitionViewModel = _contentRepartitionViewModelFactory.CreateContentRepartitionViewModel(ComparisonItem, inventories);
         _compositeDisposable.Add(ContentRepartitionViewModel);
         
-        ItemSynchronizationStatusViewModel = _itemSynchronizationStatusViewModelFactory.CreateItemSynchronizationStatusViewModel(ComparisonItem, inventories);
+        ItemSynchronizationStatusViewModel =
+            _itemSynchronizationStatusViewModelFactory.CreateItemSynchronizationStatusViewModel(ComparisonItem, inventories);
         _compositeDisposable.Add(ItemSynchronizationStatusViewModel);
     }
-
+    
     internal ComparisonItem ComparisonItem { get; }
-
+    
     internal List<Inventory> Inventories { get; }
-
+    
     internal PathIdentity PathIdentity { get; }
-
-    internal HashSet<ContentIdentityViewModel> ContentIdentitiesA { get; }
-
-    internal HashSet<ContentIdentityViewModel> ContentIdentitiesB { get; }
-
-    internal HashSet<ContentIdentityViewModel> ContentIdentitiesC { get; }
-
-    internal HashSet<ContentIdentityViewModel> ContentIdentitiesD { get; }
-
-    internal HashSet<ContentIdentityViewModel> ContentIdentitiesE { get; }
-
-    internal List<HashSet<ContentIdentityViewModel>> ContentIdentitiesList { get; set; }
+    
+    public List<ContentIdentityViewModel> ContentIdentitiesA { get; }
+    
+    public List<ContentIdentityViewModel> ContentIdentitiesB { get; }
+    
+    public List<ContentIdentityViewModel> ContentIdentitiesC { get; }
+    
+    public List<ContentIdentityViewModel> ContentIdentitiesD { get; }
+    
+    public List<ContentIdentityViewModel> ContentIdentitiesE { get; }
+    
+    public List<List<ContentIdentityViewModel>> ContentIdentitiesList { get; set; }
     
     public ReadOnlyObservableCollection<SynchronizationActionViewModel> SynchronizationActions => _data;
-
+    
     internal ContentRepartitionViewModel ContentRepartitionViewModel { get; private set; }
     
     internal ItemSynchronizationStatusViewModel ItemSynchronizationStatusViewModel { get; private set; }
@@ -123,16 +141,13 @@ public class ComparisonItemViewModel : IDisposable
     private List<string>? AtomicActionsIds { get; set; }
     
     internal string? LinkingKeyNameTooltip { get; set; }
-
+    
     public FileSystemTypes FileSystemType
     {
-        get
-        {
-            return PathIdentity.FileSystemType;
-        }
+        get { return PathIdentity.FileSystemType; }
     }
-
-    internal HashSet<ContentIdentityViewModel> GetContentIdentityViews(Inventory inventory)
+    
+    public List<ContentIdentityViewModel> GetContentIdentityViews(Inventory inventory)
     {
         var index = Inventories.IndexOf(inventory);
         
@@ -149,11 +164,13 @@ public class ComparisonItemViewModel : IDisposable
             case 4:
                 return ContentIdentitiesE;
             default:
-                Log.Error("GetContentIdentityViews: can not identify ContentIdentities for index:{Index}, inventory:{Inventory}", index, inventory.InventoryId);
+                Log.Error("GetContentIdentityViews: can not identify ContentIdentities for index:{Index}, inventory:{Inventory}", index,
+                    inventory.InventoryId);
+                
                 throw new ApplicationException($"GetContentIdentityViews: can not identify ContentIdentities, {index}:");
         }
     }
-
+    
     public void ClearTargetedActions()
     {
         _targetedActionsService.ClearTargetedActions(this);
@@ -167,9 +184,14 @@ public class ComparisonItemViewModel : IDisposable
         }
         
         var linkingKeyNameTooltip = new StringBuilder();
-
+        
+        // Sort ContentIdentities by inventory parts codes (A1, A2, B1, B2, etc.)
+        var sortedContentIdentities = ComparisonItem.ContentIdentities
+            .OrderBy(ci => ci.GetInventoryParts().Min(ip => ip.Code))
+            .ToList();
+        
         var isFirst = true;
-        foreach (var contentIdentity in ComparisonItem.ContentIdentities)
+        foreach (var contentIdentity in sortedContentIdentities)
         {
             if (isFirst)
             {
@@ -181,32 +203,40 @@ public class ComparisonItemViewModel : IDisposable
             }
             
             linkingKeyNameTooltip.AppendLine("___________________________________________________________");
-            if (contentIdentity.Core!.SignatureHash.IsNotEmpty())
+            
+            // Handle virtual ContentIdentity (inaccessible files with null Core)
+            if (contentIdentity.Core == null)
             {
-                linkingKeyNameTooltip.AppendLine(contentIdentity.Core.SignatureHash); 
+                linkingKeyNameTooltip.AppendLine("Inaccessible");
+                linkingKeyNameTooltip.AppendLine("‾‾‾‾‾‾‾‾‾‾‾‾");
+            }
+            else if (contentIdentity.Core.SignatureHash.IsNotEmpty())
+            {
+                linkingKeyNameTooltip.AppendLine(contentIdentity.Core.SignatureHash);
                 
-                linkingKeyNameTooltip.AppendLine("                                            ‾‾‾"); // Overline U+203E https://en.wikipedia.org/wiki/Overline
+                linkingKeyNameTooltip.AppendLine(
+                    "                                            ‾‾‾"); // Overline U+203E https://en.wikipedia.org/wiki/Overline
             }
             else
             {
                 var size = _formatKbSizeConverter.Convert(contentIdentity.Core.Size);
                 
-                linkingKeyNameTooltip.AppendLine(size); 
+                linkingKeyNameTooltip.AppendLine(size);
                 
                 linkingKeyNameTooltip.AppendLine("‾‾‾‾‾‾"); // Overline U+203E https://en.wikipedia.org/wiki/Overline
             }
-
-
+            
             
             var inventoryParts = contentIdentity.GetInventoryParts().OrderBy(ip => ip.Code);
             foreach (var inventoryPart in inventoryParts)
             {
                 var fileDescriptions = contentIdentity.GetFileSystemDescriptions(inventoryPart);
-
+                
                 if (fileDescriptions.Count > 0)
                 {
-                    linkingKeyNameTooltip.AppendLine(inventoryPart.Inventory.MachineName + " " + inventoryPart.Code + " (" + inventoryPart.RootPath + ")");
-
+                    linkingKeyNameTooltip.AppendLine(inventoryPart.Inventory.MachineName + " " + inventoryPart.Code + " (" +
+                                                     inventoryPart.RootPath + ")");
+                    
                     foreach (var fileDescription in fileDescriptions)
                     {
                         linkingKeyNameTooltip.AppendLine(" - " + fileDescription.RelativePath);
@@ -216,19 +246,19 @@ public class ComparisonItemViewModel : IDisposable
                 }
             }
         }
-
+        
         linkingKeyNameTooltip.TrimEnd();
-
+        
         LinkingKeyNameTooltip = linkingKeyNameTooltip.ToString();
     }
-
+    
     public void Dispose()
     {
         _compositeDisposable.Dispose();
-
+        
         AtomicActionsIds = null;
     }
-
+    
     public void OnLocaleChanged(ILocalizationService localizationService)
     {
         foreach (var contentIdentityViewModel in ContentIdentitiesA)

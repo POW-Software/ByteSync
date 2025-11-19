@@ -17,7 +17,8 @@ public class AutoDetectionModule : Module
                         && t.Namespace != null
                         && t.Namespace.StartsWith("ByteSync.Services")
                         && !t.Name.EndsWith("Service")
-                        && !t.Namespace.Contains("PushReceivers"))
+                        && !t.Namespace.Contains("PushReceivers")
+                        && !t.Namespace.Contains("ConditionMatchers"))
             .AsImplementedInterfaces();
         
         builder.RegisterAssemblyTypes(executingAssembly)

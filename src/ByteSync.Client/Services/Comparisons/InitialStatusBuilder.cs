@@ -49,15 +49,15 @@ public class InitialStatusBuilder : IInitialStatusBuilder
         {
             if (comparisonItem.FileSystemType == FileSystemTypes.File)
             {
-                if (!comparisonItem.ContentRepartition.FingerPrintGroups.ContainsKey(contentIdentity.Core))
+                if (!comparisonItem.ContentRepartition.FingerPrintGroups.ContainsKey(contentIdentity.Core!))
                 {
-                    comparisonItem.ContentRepartition.FingerPrintGroups.Add(contentIdentity.Core, new HashSet<InventoryPart>());
+                    comparisonItem.ContentRepartition.FingerPrintGroups.Add(contentIdentity.Core!, new HashSet<InventoryPart>());
                 }
             }
 
-            foreach (KeyValuePair<DateTime, HashSet<InventoryPart>> pair in contentIdentity.InventoryPartsByLastWriteTimes)
+            foreach (var pair in contentIdentity.InventoryPartsByLastWriteTimes)
             {
-                comparisonItem.ContentRepartition.FingerPrintGroups[contentIdentity.Core].AddAll(pair.Value);
+                comparisonItem.ContentRepartition.FingerPrintGroups[contentIdentity.Core!].AddAll(pair.Value);
 
                 foreach (var inventoryPart in pair.Value)
                 {
@@ -86,8 +86,8 @@ public class InitialStatusBuilder : IInitialStatusBuilder
 
     private void BuildInitialStatusForDirectory(ComparisonItem comparisonItem)
     {
-        HashSet<Inventory> inventoriesOK = new HashSet<Inventory>();
-        HashSet<InventoryPart> inventoryPartsOK = new HashSet<InventoryPart>();
+        var inventoriesOK = new HashSet<Inventory>();
+        var inventoryPartsOK = new HashSet<InventoryPart>();
         
         foreach (var contentIdentity in comparisonItem.ContentIdentities)
         {

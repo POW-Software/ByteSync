@@ -1669,6 +1669,21 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	<data name="ValidationFailure_DuplicateActionNotAllowed" xml:space="preserve">
 		<value>Action en double interdite</value>
 	</data>
+	<data name="ValidationFailure_SourceNotAccessible" xml:space="preserve">
+		<value>L’élément source est inaccessible</value>
+	</data>
+	<data name="ValidationFailure_AtLeastOneTargetsNotAccessible" xml:space="preserve">
+		<value>Au moins une cible est inaccessible</value>
+	</data>
+	<data name="ContentIdentity_AccessIssueTitle" xml:space="preserve">
+		<value>Problème d’accès</value>
+	</data>
+	<data name="ContentIdentity_AccessIssueDescription" xml:space="preserve">
+		<value>Cet élément est présent mais inaccessible sur cet emplacement. Aucune synchronisation n’est possible.</value>
+	</data>
+    <data name="ContentIdentity_AccessIssueShortLabel" xml:space="preserve">
+		<value>Inaccessible</value>
+	</data>
 	<!-- UI Messages -->
 	<data name="TargetedActionEditionGlobal_ActionIssues" xml:space="preserve">
 		<value>L'action ne peut pas être appliquée à certains éléments :</value>

@@ -131,18 +131,51 @@ jobs:
           project="${{ matrix.testProject }}"
           safe_name=$(basename "$project" .csproj)
           echo "Running test project: $project"
-          dotnet test "$project" \
-            --no-restore \
-            --no-build \
-            $extra_filter \
-            --logger "trx;LogFileName=$safe_name.trx" \
-            --results-directory ./TestResults \
+          # Determine whether this is an IntegrationTests project
+          if [[ "$project" == *IntegrationTests* ]]; then
+            is_integration=true
+          else
+            is_integration=false
+          fi
+
+          if [[ "$is_integration" == "true" && "${{ matrix.os }}" == "macos-latest" ]]; then
+            # macOS IntegrationTests: run without coverage but with diagnostics to find hangs
+            dotnet test "$project" \
+              --no-restore \
+              --no-build \
+              $extra_filter \
+              --logger "trx;LogFileName=$safe_name.trx" \
+              --results-directory ./TestResults \
+              --blame-hang --blame-hang-timeout 5m --blame-hang-dump-type full \
+              --diag ./TestResults/vstest-$safe_name.log \
+              -- NUnit.NumberOfTestWorkers=1
+          elif [[ "$is_integration" == "true" ]]; then
+            # IntegrationTests on Linux/Windows: include coverage for Sonar
+            dotnet test "$project" \
+              --no-restore \
+              --no-build \
+              $extra_filter \
+              --logger "trx;LogFileName=$safe_name.trx" \
+              --results-directory ./TestResults \
               --collect:"XPlat Code Coverage" \
               -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover \
-                 DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.OutputDirectory=./TestResults
+                 DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.OutputDirectory=./TestResults/${{ matrix.os }}/$safe_name
+          else
+            # UnitTests on all OS (including macOS): include coverage
+            dotnet test "$project" \
+              --no-restore \
+              --no-build \
+              $extra_filter \
+              --logger "trx;LogFileName=$safe_name.trx" \
+              --results-directory ./TestResults \
+              --collect:"XPlat Code Coverage" \
+              -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover \
+                 DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.OutputDirectory=./TestResults/${{ matrix.os }}/$safe_name
+          fi
         shell: bash
 
       - name: Upload Test Results
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: PR-test-results-${{ matrix.os }}-${{ hashFiles(matrix.testProject) }}
