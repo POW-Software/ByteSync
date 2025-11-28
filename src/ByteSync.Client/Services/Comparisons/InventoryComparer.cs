@@ -56,6 +56,8 @@ public class InventoryComparer : IInventoryComparer
     {
         ComparisonResult.Clear();
         
+        var incompleteInventoryParts = new HashSet<InventoryPart>();
+        
         foreach (var inventoryLoader in InventoryLoaders.OrderBy(il => il.Inventory.Code))
         {
             var inventory = inventoryLoader.Inventory;
@@ -63,6 +65,12 @@ public class InventoryComparer : IInventoryComparer
             
             foreach (var inventoryPart in inventory.InventoryParts)
             {
+                if (SessionSettings.MatchingMode == MatchingModes.Flat && inventoryPart.IsIncompleteDueToAccess)
+                {
+                    incompleteInventoryParts.Add(inventoryPart);
+                    continue;
+                }
+                
                 if (SessionSettings.DataType.In(DataTypes.Files, DataTypes.FilesDirectories))
                 {
                     foreach (var fileDescription in inventoryPart.FileDescriptions)
@@ -84,6 +92,11 @@ public class InventoryComparer : IInventoryComparer
         foreach (var comparisonItem in ComparisonResult.ComparisonItems)
         {
             _initialStatusBuilder.BuildStatus(comparisonItem, InventoryLoaders.Select(il => il.Inventory));
+        }
+        
+        if (SessionSettings.MatchingMode == MatchingModes.Flat && incompleteInventoryParts.Count > 0)
+        {
+            AddIncompleteParts(incompleteInventoryParts);
         }
         
         // Propagate access issues from inaccessible ancestor directories (Tree mode only)
@@ -343,6 +356,45 @@ public class InventoryComparer : IInventoryComparer
             fileSystemDescription.Name, linkingData);
         
         return pathIdentity;
+    }
+    
+    private void AddIncompleteParts(HashSet<InventoryPart> incompleteInventoryParts)
+    {
+        foreach (var item in ComparisonResult.ComparisonItems)
+        {
+            foreach (var inventoryPart in incompleteInventoryParts)
+            {
+                if (item.ContentIdentities.Any(ci => ci.IsPresentIn(inventoryPart)))
+                {
+                    continue;
+                }
+                
+                var virtualContentIdentity = new ContentIdentity(null);
+                var relativePath = "/" + item.PathIdentity.FileName;
+                
+                if (item.FileSystemType == FileSystemTypes.File)
+                {
+                    var virtualFileDescription = new FileDescription(inventoryPart, relativePath)
+                    {
+                        IsAccessible = false
+                    };
+                    
+                    virtualContentIdentity.Add(virtualFileDescription);
+                }
+                else
+                {
+                    var virtualDirectoryDescription = new DirectoryDescription(inventoryPart, relativePath)
+                    {
+                        IsAccessible = false
+                    };
+                    
+                    virtualContentIdentity.Add(virtualDirectoryDescription);
+                }
+                
+                virtualContentIdentity.AddAccessIssue(inventoryPart);
+                item.AddContentIdentity(virtualContentIdentity);
+            }
+        }
     }
     
     private ContentIdentityCore BuildContentIdentityCore(InventoryLoader inventoryLoader,
