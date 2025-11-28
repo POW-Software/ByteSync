@@ -454,6 +454,15 @@ namespace ByteSync.Assets.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à Inventory incomplete.
+        /// </summary>
+        internal static string ComparisonResult_InventoryIncomplete {
+            get {
+                return ResourceManager.GetString("ComparisonResult_InventoryIncomplete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à Status.
         /// </summary>
         internal static string ComparisonResult_ContentRepartition {
