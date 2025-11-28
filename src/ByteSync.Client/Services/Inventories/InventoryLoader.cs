@@ -9,7 +9,7 @@ public class InventoryLoader : IDisposable
 {
     public InventoryLoader(string fullName)
     {
-        FullName = fullName;
+        FullName = fullName2;
         
         ZipArchive = ZipFile.OpenRead(FullName);
         
