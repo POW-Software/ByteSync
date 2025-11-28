@@ -40,14 +40,12 @@ public class InventoryLoader : IDisposable
             throw new InvalidOperationException("Failed to deserialize inventory.json.");
         }
         
-        foreach (var inventoryPart in inventory.InventoryParts)
+        foreach (var inventoryPart in inventory.InventoryParts
+                     .Where(ip => !ip.IsIncompleteDueToAccess &&
+                                  (ip.DirectoryDescriptions.Any(d => !d.IsAccessible)
+                                   || ip.FileDescriptions.Any(f => !f.IsAccessible))))
         {
-            if (!inventoryPart.IsIncompleteDueToAccess &&
-                (inventoryPart.DirectoryDescriptions.Any(d => !d.IsAccessible)
-                 || inventoryPart.FileDescriptions.Any(f => !f.IsAccessible)))
-            {
-                inventoryPart.IsIncompleteDueToAccess = true;
-            }
+            inventoryPart.IsIncompleteDueToAccess = true;
         }
         
         return inventory;

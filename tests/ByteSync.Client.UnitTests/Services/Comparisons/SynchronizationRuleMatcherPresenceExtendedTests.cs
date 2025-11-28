@@ -94,7 +94,7 @@ public class SynchronizationRuleMatcherPresenceExtendedTests
         {
             Source = new DataPart("A", partA),
             Destination = new DataPart("A", partB),
-            ComparisonProperty = ComparisonProperty.Name,
+            ComparisonProperty = ComparisonProperty.Presence,
             ConditionOperator = ConditionOperatorTypes.ExistsOn
         };
         
