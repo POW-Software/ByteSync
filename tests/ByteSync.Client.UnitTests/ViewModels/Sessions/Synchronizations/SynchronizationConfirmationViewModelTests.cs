@@ -159,6 +159,9 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
             MachineName = "TestMachine"
         };
         
+        _localizationService.Setup(l => l["SynchronizationConfirmation_ToDestination"])
+            .Returns("To {0} ({1}):");
+        
         var summaryVm = new DestinationSummaryViewModel(summary, _localizationService.Object);
         
         summaryVm.HeaderText.Should().Contain("A");
