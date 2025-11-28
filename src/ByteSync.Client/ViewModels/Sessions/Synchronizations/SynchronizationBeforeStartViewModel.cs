@@ -6,6 +6,8 @@ using ByteSync.Assets.Resources;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Interfaces.Controls.Synchronizations;
+using ByteSync.Interfaces.Dialogs;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Services.Sessions;
@@ -24,6 +26,9 @@ public class SynchronizationBeforeStartViewModel : ActivatableViewModelBase
     private readonly ISynchronizationStarter _synchronizationStarter = null!;
     private readonly IAtomicActionRepository _atomicActionRepository = null!;
     private readonly ISessionMemberRepository _sessionMemberRepository = null!;
+    private readonly ISharedAtomicActionRepository _sharedAtomicActionRepository = null!;
+    private readonly IDialogService _dialogService = null!;
+    private readonly IFlyoutElementViewModelFactory _flyoutElementViewModelFactory = null!;
     private readonly ILogger<SynchronizationBeforeStartViewModel> _logger = null!;
 
     public SynchronizationBeforeStartViewModel()
@@ -33,6 +38,8 @@ public class SynchronizationBeforeStartViewModel : ActivatableViewModelBase
     public SynchronizationBeforeStartViewModel(ISessionService sessionService, ILocalizationService localizationService,
         ISynchronizationService synchronizationService, ISynchronizationStarter synchronizationStarter,
         IAtomicActionRepository atomicActionRepository, ISessionMemberRepository sessionMemberRepository, 
+        ISharedAtomicActionRepository sharedAtomicActionRepository, IDialogService dialogService,
+        IFlyoutElementViewModelFactory flyoutElementViewModelFactory,
         ILogger<SynchronizationBeforeStartViewModel> logger, ErrorViewModel errorViewModel)
     {
         _sessionService = sessionService;
@@ -41,6 +48,9 @@ public class SynchronizationBeforeStartViewModel : ActivatableViewModelBase
         _synchronizationStarter = synchronizationStarter;
         _atomicActionRepository = atomicActionRepository;
         _sessionMemberRepository = sessionMemberRepository;
+        _sharedAtomicActionRepository = sharedAtomicActionRepository;
+        _dialogService = dialogService;
+        _flyoutElementViewModelFactory = flyoutElementViewModelFactory;
         _logger = logger;
 
         StartSynchronizationError = errorViewModel;
@@ -184,7 +194,19 @@ public class SynchronizationBeforeStartViewModel : ActivatableViewModelBase
         {
             StartSynchronizationError.Clear();
 
-            await _synchronizationStarter.StartSynchronization(true);
+            var actions = _sharedAtomicActionRepository.Elements.ToList();
+            
+            var confirmationViewModel = _flyoutElementViewModelFactory
+                .BuildSynchronizationConfirmationViewModel(actions);
+            
+            _dialogService.ShowFlyout(nameof(Resources.SynchronizationConfirmation_Title), false, confirmationViewModel);
+            
+            bool confirmed = await confirmationViewModel.WaitForResponse();
+            
+            if (confirmed)
+            {
+                await _synchronizationStarter.StartSynchronization(true);
+            }
         }
         catch (Exception ex)
         {

@@ -1,0 +1,73 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:synchronizations="clr-namespace:ByteSync.ViewModels.Sessions.Synchronizations"
+             xmlns:localizations="clr-namespace:ByteSync.Services.Localizations"
+             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="400"
+             x:Class="ByteSync.Views.Sessions.Synchronizations.SynchronizationConfirmationView">
+
+    <Design.DataContext>
+        <synchronizations:SynchronizationConfirmationViewModel />
+    </Design.DataContext>
+
+    <Grid Background="{DynamicResource MahApps.Brushes.Gray7}">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" MinWidth="400" MaxWidth="600" Margin="12">
+            
+            <!-- Global statistics -->
+            <Border Background="{DynamicResource MahApps.Brushes.Gray8}" CornerRadius="4" Padding="12" Margin="0 0 0 12">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="{Binding TotalActionsText}" FontSize="16" FontWeight="SemiBold" 
+                               HorizontalAlignment="Center" Margin="0 0 0 4"/>
+                    <TextBlock Text="{Binding TotalDataSizeText}" FontSize="14" 
+                               Foreground="{DynamicResource MahApps.Brushes.Gray3}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Destinations list -->
+            <ItemsControl ItemsSource="{Binding DestinationSummaryViewModels}" Margin="0 0 0 12">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="{DynamicResource MahApps.Brushes.Gray9}" CornerRadius="4" 
+                                Padding="12" Margin="0 0 0 8">
+                            <StackPanel Orientation="Vertical">
+                                <!-- Destination header -->
+                                <TextBlock Text="{Binding HeaderText}" FontWeight="SemiBold" Margin="0 0 0 8"/>
+                                
+                                <!-- Action counts -->
+                                <StackPanel Orientation="Vertical" Margin="12 0 0 0">
+                                    <TextBlock Margin="0 2" Text="{Binding CreateCountText}"
+                                               IsVisible="{Binding HasCreateActions}"/>
+                                    
+                                    <TextBlock Margin="0 2" Text="{Binding SyncContentCountText}"
+                                               IsVisible="{Binding HasSyncContentActions}"/>
+                                    
+                                    <TextBlock Margin="0 2" Text="{Binding SyncDateCountText}"
+                                               IsVisible="{Binding HasSyncDateActions}"/>
+                                    
+                                    <TextBlock Margin="0 2" Foreground="#E07070" Text="{Binding DeleteCountText}"
+                                               IsVisible="{Binding HasDeleteActions}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Separator -->
+            <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,4,0,12" />
+
+            <!-- Buttons -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0">
+                <Button Classes="GenericButton" Height="32" Margin="0 0 8 0"
+                        Command="{Binding CancelCommand}" 
+                        Content="{localizations:Loc SynchronizationConfirmation_Cancel}" />
+                
+                <Button Classes="AccentButton" Height="32"
+                        Command="{Binding ConfirmCommand}" 
+                        Content="{localizations:Loc SynchronizationConfirmation_Confirm}" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

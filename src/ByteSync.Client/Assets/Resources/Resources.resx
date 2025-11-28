@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
 		<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
@@ -1762,5 +1762,35 @@ Do you want to save this new Session Profile with this name?</value>
     </data>
     <data name="InventoryProcess_LocalInventory_NotLaunched" xml:space="preserve">
         <value>Local Inventory not launched</value>
+    </data>
+    <data name="SynchronizationConfirmation_Title" xml:space="preserve">
+        <value>Synchronization Confirmation</value>
+    </data>
+    <data name="SynchronizationConfirmation_TotalActions" xml:space="preserve">
+        <value>{0} action(s)</value>
+    </data>
+    <data name="SynchronizationConfirmation_TotalSize" xml:space="preserve">
+        <value>{0} to transfer</value>
+    </data>
+    <data name="SynchronizationConfirmation_ToDestination" xml:space="preserve">
+        <value>To {0} ({1}):</value>
+    </data>
+    <data name="SynchronizationConfirmation_CreateCount" xml:space="preserve">
+        <value>• {0} file(s) to create</value>
+    </data>
+    <data name="SynchronizationConfirmation_SyncContentCount" xml:space="preserve">
+        <value>• {0} file(s) to synchronize</value>
+    </data>
+    <data name="SynchronizationConfirmation_SyncDateCount" xml:space="preserve">
+        <value>• {0} file(s) to update (dates)</value>
+    </data>
+    <data name="SynchronizationConfirmation_DeleteCount" xml:space="preserve">
+        <value>• {0} file(s) to delete</value>
+    </data>
+    <data name="SynchronizationConfirmation_Confirm" xml:space="preserve">
+        <value>Confirm</value>
+    </data>
+    <data name="SynchronizationConfirmation_Cancel" xml:space="preserve">
+        <value>Cancel</value>
     </data>
 </root>

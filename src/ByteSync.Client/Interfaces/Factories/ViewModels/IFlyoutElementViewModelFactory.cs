@@ -1,5 +1,6 @@
-﻿using ByteSync.Business;
+using ByteSync.Business;
 using ByteSync.Business.Actions.Local;
+using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Profiles;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Models.Comparisons.Result;
@@ -8,6 +9,7 @@ using ByteSync.ViewModels.Headers;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Profiles;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions;
+using ByteSync.ViewModels.Sessions.Synchronizations;
 using ByteSync.ViewModels.TrustedNetworks;
 
 namespace ByteSync.Interfaces.Factories.ViewModels;
@@ -34,4 +36,6 @@ public interface IFlyoutElementViewModelFactory
         bool isCloneMode = false);
 
     FlyoutElementViewModel BuildAboutApplicationViewModel();
+    
+    SynchronizationConfirmationViewModel BuildSynchronizationConfirmationViewModel(List<SharedAtomicAction> actions);
 }
