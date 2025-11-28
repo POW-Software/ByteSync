@@ -299,6 +299,7 @@ public class InventoryBuilder : IInventoryBuilder
     
     private void AddInaccessibleDirectoryAndLog(InventoryPart inventoryPart, DirectoryInfo directoryInfo, Exception ex, string message)
     {
+        inventoryPart.IsIncompleteDueToAccess = true;
         var subDirectoryDescription = IdentityBuilder.BuildDirectoryDescription(inventoryPart, directoryInfo);
         subDirectoryDescription.IsAccessible = false;
         AddFileSystemDescription(inventoryPart, subDirectoryDescription);
@@ -496,6 +497,7 @@ public class InventoryBuilder : IInventoryBuilder
     
     private void AddInaccessibleFileAndLog(InventoryPart inventoryPart, FileInfo fileInfo, Exception ex, string message)
     {
+        inventoryPart.IsIncompleteDueToAccess = true;
         var relativePath = BuildRelativePath(inventoryPart, fileInfo);
         var fileDescription = new FileDescription(inventoryPart, relativePath)
         {

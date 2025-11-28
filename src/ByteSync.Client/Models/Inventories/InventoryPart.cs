@@ -31,6 +31,8 @@ public class InventoryPart
 
     public List<DirectoryDescription> DirectoryDescriptions { get; set; }
 
+    public bool IsIncompleteDueToAccess { get; set; }
+
     public string RootName
     {
         get
