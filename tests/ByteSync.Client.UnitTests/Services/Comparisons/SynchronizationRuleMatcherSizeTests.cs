@@ -82,6 +82,35 @@ public class SynchronizationRuleMatcherSizeTests
     }
     
     [Test]
+    public void ConditionMatchesSize_ReturnsFalse_WhenDestinationPartIncomplete()
+    {
+        var inventory = new Inventory { InventoryId = "INV_A", Code = "A", Endpoint = new(), MachineName = "M" };
+        var partA = new InventoryPart(inventory, "c:/rootA", FileSystemTypes.Directory) { Code = "A1" };
+        var partB = new InventoryPart(inventory, "c:/rootB", FileSystemTypes.Directory) { Code = "B1", IsIncompleteDueToAccess = true };
+        
+        var contentIdentityA = new ContentIdentity(new ContentIdentityCore { SignatureHash = "hashA", Size = 1024 });
+        contentIdentityA.Add(new FileDescription { InventoryPart = partA, RelativePath = "/file.txt" });
+        var contentIdentityB = new ContentIdentity(new ContentIdentityCore { SignatureHash = "hashB", Size = 1024 });
+        contentIdentityB.Add(new FileDescription { InventoryPart = partB, RelativePath = "/file.txt" });
+        
+        var comparisonItem = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/file.txt", "file.txt", "/file.txt"));
+        comparisonItem.AddContentIdentity(contentIdentityA);
+        comparisonItem.AddContentIdentity(contentIdentityB);
+        
+        var condition = new AtomicCondition
+        {
+            Source = new DataPart("A", partA),
+            Destination = new DataPart("A", partB),
+            ComparisonProperty = ComparisonProperty.Size,
+            ConditionOperator = ConditionOperatorTypes.Equals
+        };
+        
+        var result = _matcher.Matches(condition, comparisonItem);
+        
+        result.Should().BeFalse();
+    }
+    
+    [Test]
     public void ConditionMatchesSize_NotEquals_WithDifferentSize_ReturnsTrue()
     {
         var inventory = new Inventory { InventoryId = "INV_A", Code = "A", Endpoint = new(), MachineName = "M" };

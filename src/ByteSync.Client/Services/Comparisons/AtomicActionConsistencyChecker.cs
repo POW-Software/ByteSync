@@ -168,6 +168,11 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
             {
                 var sourceInventoryPart = atomicAction.Source.GetApplicableInventoryPart();
                 
+                if (sourceInventoryPart.IsIncompleteDueToAccess)
+                {
+                    return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.SourceNotAccessible);
+                }
+                
                 var contentIdentitiesSources = comparisonItem.GetContentIdentities(sourceInventoryPart);
                 
                 if (contentIdentitiesSources.Count != 1)
@@ -190,6 +195,12 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
                 }
                 
                 var targetInventoryPart = atomicAction.Destination!.GetApplicableInventoryPart();
+                
+                if (targetInventoryPart.IsIncompleteDueToAccess)
+                {
+                    return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.AtLeastOneTargetsNotAccessible);
+                }
+                
                 var contentIdentityViewsTargets = comparisonItem.GetContentIdentities(targetInventoryPart);
                 
                 if (contentIdentityViewsTargets.Count == 0 && targetInventoryPart.InventoryPartType == FileSystemTypes.File)
@@ -233,6 +244,12 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         if (atomicAction.IsSynchronizeDate || atomicAction.IsDelete)
         {
             var targetInventoryPart = atomicAction.Destination!.GetApplicableInventoryPart();
+            
+            if (targetInventoryPart.IsIncompleteDueToAccess)
+            {
+                return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.AtLeastOneTargetsNotAccessible);
+            }
+            
             var contentIdentitiesTargets = comparisonItem.GetContentIdentities(targetInventoryPart);
             
             if (contentIdentitiesTargets.Count == 0)
@@ -255,6 +272,11 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
             if (targetInventoryPart.InventoryPartType == FileSystemTypes.File)
             {
                 return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.CreateOperationRequiresDirectoryTarget);
+            }
+            
+            if (targetInventoryPart.IsIncompleteDueToAccess)
+            {
+                return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.AtLeastOneTargetsNotAccessible);
             }
             
             var contentIdentitiesTargets = comparisonItem.GetContentIdentities(targetInventoryPart);

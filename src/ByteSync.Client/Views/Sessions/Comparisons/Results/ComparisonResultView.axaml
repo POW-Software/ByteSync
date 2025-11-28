@@ -27,30 +27,31 @@
         <StackPanel Orientation="Vertical" IsVisible="{Binding !AreResultsLoaded}"
                     HorizontalAlignment="Center" Margin="12">
 
-            <TextBlock FontWeight="Bold" Text="{localizations:Loc ComparisonResult_WaitingForResults}" IsVisible="{Binding !IsResultLoadingError}"
+            <TextBlock FontWeight="Bold" Text="{localizations:Loc ComparisonResult_WaitingForResults}"
+                       IsVisible="{Binding !IsResultLoadingError}"
                        MaxWidth="500"
                        HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
 
-            <TextBlock FontWeight="Bold" Text="{localizations:Loc ComparisonResult_ErrorDuringComparison}" IsVisible="{Binding IsResultLoadingError}"
+            <TextBlock FontWeight="Bold" Text="{localizations:Loc ComparisonResult_ErrorDuringComparison}"
+                       IsVisible="{Binding IsResultLoadingError}"
                        MaxWidth="500"
                        HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
 
         </StackPanel>
-        
+
         <Grid IsVisible="{Binding AreResultsLoaded}" RowDefinitions="Auto,*">
             <Grid Grid.Row="0" ColumnDefinitions="*, Auto" VerticalAlignment="Center" Margin="0 0 0 6">
                 <Border Grid.Column="0" CornerRadius="4" Background="{DynamicResource SettingsHeaderColor}">
                     <Grid ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
-                        <misc:Icon Grid.Column="0" FontSize="16" Value="RegularSearch" Margin="6 0 "  />
-                
+                        <misc:Icon Grid.Column="0" FontSize="16" Value="RegularSearch" Margin="6 0 " />
+
                         <misc:TagEditor Grid.Column="1" x:Name="TheTagEditor"
-                                        Watermark="{localizations:Loc ComparisonResult_Filter}" 
+                                        Watermark="{localizations:Loc ComparisonResult_Filter}"
                                         VerticalAlignment="Bottom"
                                         Tags="{Binding FilterTags}"
                                         TagFilter="{Binding TagFilterValidator}"
-                                        MinWidth="220"
-                        />
-                        
+                                        MinWidth="220" />
+
                         <Button Grid.Column="2" Classes="LinkButtonLight"
                                 Command="{Binding OpenSyntaxDocumentationCommand}"
                                 VerticalAlignment="Center" Margin="6 0 9 0">
@@ -59,9 +60,9 @@
                     </Grid>
 
                 </Border>
-                
+
                 <Border Grid.Column="1" CornerRadius="4" Background="{DynamicResource SettingsHeaderColor}" Margin="24 0 0 0">
-                    <StackPanel Orientation="Horizontal" Margin="6 0 6 0" 
+                    <StackPanel Orientation="Horizontal" Margin="6 0 6 0"
                                 HorizontalAlignment="Center" VerticalAlignment="Center"
                                 DataContext="{Binding PageParameters}">
                         <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="0 3 3 3" VerticalAlignment="Bottom"
@@ -75,8 +76,8 @@
                         </Button>
 
                         <Button Classes="GenericButton" HorizontalAlignment="Left" Margin="3 3 3 3" VerticalAlignment="Bottom"
-                                 Command="{Binding Path=PreviousPageCommand}"
-                                 Background="Transparent" MaxHeight="26">
+                                Command="{Binding Path=PreviousPageCommand}"
+                                Background="Transparent" MaxHeight="26">
 
                             <StackPanel Orientation="Horizontal">
                                 <misc:Icon FontSize="12" Value="RegularChevronLeft"
@@ -111,12 +112,12 @@
                     </StackPanel>
                 </Border>
             </Grid>
-            
+
             <StackPanel Grid.Row="1" Orientation="Vertical" IsVisible="{Binding AreResultsLoaded}">
                 <WrapPanel Orientation="Horizontal" Margin="0 3 0 3">
 
-                    <Border  Margin="0 3 24 3" CornerRadius="4" Background="{DynamicResource SettingsHeaderColor}">
-                        
+                    <Border Margin="0 3 24 3" CornerRadius="4" Background="{DynamicResource SettingsHeaderColor}">
+
                         <WrapPanel Orientation="Horizontal">
                             <!-- Boutons Add/Delete Manual Actions -->
                             <StackPanel Orientation="Horizontal" Margin="0 0 0 0" IsVisible="{Binding CanManageActions}"
@@ -140,12 +141,13 @@
                                 </Button>
                             </StackPanel>
                         </WrapPanel>
-                        
+
                     </Border>
-     
+
                     <Border Margin="0 3 0 3" CornerRadius="4" Background="{DynamicResource SettingsHeaderColor}">
-                        <ContentControl Content="{Binding ManageSynchronizationRules}" IsVisible="{Binding CanManageActions}" IsEnabled="{Binding !IsCloudProfileSession}"
-                                         MinWidth="200"/>
+                        <ContentControl Content="{Binding ManageSynchronizationRules}" IsVisible="{Binding CanManageActions}"
+                                        IsEnabled="{Binding !IsCloudProfileSession}"
+                                        MinWidth="200" />
                     </Border>
                 </WrapPanel>
 
@@ -186,7 +188,8 @@
 
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <ItemsControl ItemsSource="{Binding ContentIdentitiesA}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                                    <ItemsControl ItemsSource="{Binding ContentIdentitiesA}"
+                                                  ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -197,7 +200,8 @@
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <ItemsControl ItemsSource="{Binding ContentIdentitiesB}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                                    <ItemsControl ItemsSource="{Binding ContentIdentitiesB}"
+                                                  ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -209,7 +213,8 @@
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <ItemsControl ItemsSource="{Binding ContentIdentitiesC}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                                    <ItemsControl ItemsSource="{Binding ContentIdentitiesC}"
+                                                  ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -220,7 +225,8 @@
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <ItemsControl ItemsSource="{Binding ContentIdentitiesD}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                                    <ItemsControl ItemsSource="{Binding ContentIdentitiesD}"
+                                                  ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -231,7 +237,8 @@
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <ItemsControl ItemsSource="{Binding ContentIdentitiesE}" ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
+                                    <ItemsControl ItemsSource="{Binding ContentIdentitiesE}"
+                                                  ItemTemplate="{StaticResource ContentIdentityDataTemplate}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -261,7 +268,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        
+
                         <DataGridTemplateColumn Width="Auto" CanUserResize="True">
                             <DataGridTemplateColumn.Header>
                                 <TextBlock Text="{localizations:Loc ComparisonResult_SynchronizationStatus}" Classes="BsDataGridHeader" />

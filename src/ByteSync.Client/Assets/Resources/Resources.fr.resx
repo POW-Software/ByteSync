@@ -1568,9 +1568,12 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	<data name="ComparisonResult_SynchronizationStatus" xml:space="preserve">
 		<value>SYNCHRONISATION</value>
 	</data>
-	<data name="ComparisonResult_Filter_SyntaxDocumentation" xml:space="preserve">
-		<value>Syntaxe de filtrage</value>
-	</data>
+  <data name="ComparisonResult_Filter_SyntaxDocumentation" xml:space="preserve">
+    <value>Syntaxe de filtrage</value>
+  </data>
+  <data name="ComparisonResult_InventoryIncomplete" xml:space="preserve">
+    <value>Inventaire incomplet</value>
+  </data>
 	<data name="DataNodeHeaderView_Tooltip_Header_Remove" xml:space="preserve">
 		<value>Supprimer le Nœud de Données</value>
 	</data>
