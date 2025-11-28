@@ -25,6 +25,18 @@ public class ContentConditionMatcher : IConditionMatcher
             return false;
         }
         
+        var sourcePart = condition.Source?.GetApplicableInventoryPart();
+        if (sourcePart != null && sourcePart.IsIncompleteDueToAccess)
+        {
+            return false;
+        }
+        
+        var destinationPart = condition.Destination?.GetApplicableInventoryPart();
+        if (destinationPart != null && destinationPart.IsIncompleteDueToAccess)
+        {
+            return false;
+        }
+        
         var contentIdentitySource = _extractor.ExtractContentIdentity(condition.Source, comparisonItem);
         var contentIdentityDestination = _extractor.ExtractContentIdentity(condition.Destination, comparisonItem);
         

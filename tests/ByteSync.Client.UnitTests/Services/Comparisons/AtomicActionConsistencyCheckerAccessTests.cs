@@ -75,6 +75,31 @@ public class AtomicActionConsistencyCheckerAccessTests
     }
     
     [Test]
+    public void Synchronize_Fails_When_Source_Part_Incomplete()
+    {
+        var (src, dst) = BuildParts();
+        src.IsIncompleteDueToAccess = true;
+        var item = BuildComparisonItem(src, dst, sourceAccessible: true, targetAccessible: true);
+        
+        var action = new AtomicAction
+        {
+            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Source = new DataPart("A", src),
+            Destination = new DataPart("B", dst),
+            ComparisonItem = item
+        };
+        
+        var repoMock = new Mock<IAtomicActionRepository>();
+        repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
+        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        var result = checker.CheckCanAdd(action, item);
+        
+        result.ValidationResults.Should().HaveCount(1);
+        result.ValidationResults[0].IsValid.Should().BeFalse();
+        result.ValidationResults[0].FailureReason.Should().Be(AtomicActionValidationFailureReason.SourceNotAccessible);
+    }
+    
+    [Test]
     public void Synchronize_WithSourceCoreNull_DoesNotThrowException()
     {
         var (src, dst) = BuildParts();
@@ -121,6 +146,31 @@ public class AtomicActionConsistencyCheckerAccessTests
         Action act = () => checker.CheckCanAdd(action, item);
         
         act.Should().NotThrow();
+    }
+    
+    [Test]
+    public void Synchronize_Fails_When_Target_Part_Incomplete()
+    {
+        var (src, dst) = BuildParts();
+        dst.IsIncompleteDueToAccess = true;
+        var item = BuildComparisonItem(src, dst, sourceAccessible: true, targetAccessible: true);
+        
+        var action = new AtomicAction
+        {
+            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Source = new DataPart("A", src),
+            Destination = new DataPart("B", dst),
+            ComparisonItem = item
+        };
+        
+        var repoMock = new Mock<IAtomicActionRepository>();
+        repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
+        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        var result = checker.CheckCanAdd(action, item);
+        
+        result.ValidationResults.Should().HaveCount(1);
+        result.ValidationResults[0].IsValid.Should().BeFalse();
+        result.ValidationResults[0].FailureReason.Should().Be(AtomicActionValidationFailureReason.AtLeastOneTargetsNotAccessible);
     }
     
     [Test]
