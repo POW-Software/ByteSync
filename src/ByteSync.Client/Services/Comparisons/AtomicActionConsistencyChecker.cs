@@ -181,12 +181,6 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
                 {
                     return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.SourceHasAnalysisError);
                 }
-                // Block if source is present but inaccessible
-                var sourceFsd = contentIdentitySource.GetFileSystemDescriptions(sourceInventoryPart);
-                if (sourceFsd.Any(fsd => fsd is FileDescription && !fsd.IsAccessible))
-                {
-                    return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.SourceNotAccessible);
-                }
                 
                 // Block if source is present but inaccessible
                 var sourceFsd = contentIdentitySource.GetFileSystemDescriptions(sourceInventoryPart);
@@ -218,12 +212,6 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
                 if (contentIdentityViewsTargets.Count > 0 && contentIdentityViewsTargets.Any(t => t.HasAnalysisError))
                 {
                     return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.AtLeastOneTargetsHasAnalysisError);
-                }
-                // Block if at least one target is present but inaccessible
-                if (contentIdentityViewsTargets.Count > 0 && contentIdentityViewsTargets
-                        .Any(t => t.GetFileSystemDescriptions(targetInventoryPart).Any(fsd => fsd is FileDescription && !fsd.IsAccessible)))
-                {
-                    return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.AtLeastOneTargetsNotAccessible);
                 }
                 
                 // Block if at least one target is present but inaccessible

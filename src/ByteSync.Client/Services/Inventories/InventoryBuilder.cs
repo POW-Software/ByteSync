@@ -295,27 +295,6 @@ public class InventoryBuilder : IInventoryBuilder
             
             DoAnalyze(inventoryPart, subFile, cancellationToken);
         }
-        catch (UnauthorizedAccessException ex)
-        {
-            directoryDescription.IsAccessible = false;
-            _logger.LogWarning(ex, "Directory {Directory} is inaccessible and will be skipped", directoryInfo.FullName);
-            
-            return;
-        }
-        catch (DirectoryNotFoundException ex)
-        {
-            directoryDescription.IsAccessible = false;
-            _logger.LogWarning(ex, "Directory {Directory} not found during enumeration and will be skipped", directoryInfo.FullName);
-            
-            return;
-        }
-        catch (IOException ex)
-        {
-            directoryDescription.IsAccessible = false;
-            _logger.LogWarning(ex, "Directory {Directory} IO error and will be skipped", directoryInfo.FullName);
-            
-            return;
-        }
     }
     
     private void AddInaccessibleDirectoryAndLog(InventoryPart inventoryPart, DirectoryInfo directoryInfo, Exception ex, string message)
