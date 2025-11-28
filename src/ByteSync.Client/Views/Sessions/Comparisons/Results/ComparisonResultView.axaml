@@ -181,7 +181,13 @@
                         <!-- Header="{Binding Inventory1Name}" -->
                         <DataGridTemplateColumn Width="Auto" CanUserResize="True">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock Text="{Binding Inventory1Name}" Classes="BsDataGridHeader" />
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Inventory1Name}" Classes="BsDataGridHeader" />
+                                    <StackPanel Orientation="Horizontal" Margin="6 0 0 0" IsVisible="{Binding Inventory1HasIncompleteParts}">
+                                        <misc:Icon Value="RegularWarning" Margin="0 0 3 0" />
+                                        <TextBlock Text="{localizations:Loc ContentIdentity_AccessIssueShortLabel}" Classes="BsDataGridHeader" />
+                                    </StackPanel>
+                                </StackPanel>
                             </DataGridTemplateColumn.Header>
 
                             <DataGridTemplateColumn.CellTemplate>
@@ -193,7 +199,13 @@
 
                         <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumn2Visible}">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock Text="{Binding Inventory2Name}" Classes="BsDataGridHeader" />
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Inventory2Name}" Classes="BsDataGridHeader" />
+                                    <StackPanel Orientation="Horizontal" Margin="6 0 0 0" IsVisible="{Binding Inventory2HasIncompleteParts}">
+                                        <misc:Icon Value="RegularWarning" Margin="0 0 3 0" />
+                                        <TextBlock Text="{localizations:Loc ContentIdentity_AccessIssueShortLabel}" Classes="BsDataGridHeader" />
+                                    </StackPanel>
+                                </StackPanel>
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -205,7 +217,13 @@
 
                         <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumn3Visible}">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock Text="{Binding Inventory3Name}" Classes="BsDataGridHeader" />
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Inventory3Name}" Classes="BsDataGridHeader" />
+                                    <StackPanel Orientation="Horizontal" Margin="6 0 0 0" IsVisible="{Binding Inventory3HasIncompleteParts}">
+                                        <misc:Icon Value="RegularWarning" Margin="0 0 3 0" />
+                                        <TextBlock Text="{localizations:Loc ContentIdentity_AccessIssueShortLabel}" Classes="BsDataGridHeader" />
+                                    </StackPanel>
+                                </StackPanel>
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -216,7 +234,13 @@
 
                         <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumn4Visible}">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock Text="{Binding Inventory4Name}" Classes="BsDataGridHeader" />
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Inventory4Name}" Classes="BsDataGridHeader" />
+                                    <StackPanel Orientation="Horizontal" Margin="6 0 0 0" IsVisible="{Binding Inventory4HasIncompleteParts}">
+                                        <misc:Icon Value="RegularWarning" Margin="0 0 3 0" />
+                                        <TextBlock Text="{localizations:Loc ContentIdentity_AccessIssueShortLabel}" Classes="BsDataGridHeader" />
+                                    </StackPanel>
+                                </StackPanel>
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -227,7 +251,13 @@
 
                         <DataGridTemplateColumn Width="Auto" IsVisible="{Binding IsColumn5Visible}">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock Text="{Binding Inventory5Name}" Classes="BsDataGridHeader" />
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Inventory5Name}" Classes="BsDataGridHeader" />
+                                    <StackPanel Orientation="Horizontal" Margin="6 0 0 0" IsVisible="{Binding Inventory5HasIncompleteParts}">
+                                        <misc:Icon Value="RegularWarning" Margin="0 0 3 0" />
+                                        <TextBlock Text="{localizations:Loc ContentIdentity_AccessIssueShortLabel}" Classes="BsDataGridHeader" />
+                                    </StackPanel>
+                                </StackPanel>
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>

@@ -203,6 +203,21 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
     public string? Inventory5Name { get; set; }
     
     [Reactive]
+    public bool Inventory1HasIncompleteParts { get; set; }
+    
+    [Reactive]
+    public bool Inventory2HasIncompleteParts { get; set; }
+    
+    [Reactive]
+    public bool Inventory3HasIncompleteParts { get; set; }
+    
+    [Reactive]
+    public bool Inventory4HasIncompleteParts { get; set; }
+    
+    [Reactive]
+    public bool Inventory5HasIncompleteParts { get; set; }
+    
+    [Reactive]
     public bool IsColumn2Visible { get; set; }
     
     [Reactive]
@@ -273,29 +288,50 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         PathHeader = pathHeader.ToUpper();
         
         Inventory1Name = ComputeColumnInventoryDescription(0, comparisonResult);
+        Inventory1HasIncompleteParts = HasIncompleteInventoryParts(comparisonResult, 0);
         
         IsColumn2Visible = comparisonResult.Inventories.Count > 1;
         if (comparisonResult.Inventories.Count > 1)
         {
             Inventory2Name = ComputeColumnInventoryDescription(1, comparisonResult);
+            Inventory2HasIncompleteParts = HasIncompleteInventoryParts(comparisonResult, 1);
+        }
+        else
+        {
+            Inventory2HasIncompleteParts = false;
         }
         
         IsColumn3Visible = comparisonResult.Inventories.Count > 2;
         if (comparisonResult.Inventories.Count > 2)
         {
             Inventory3Name = ComputeColumnInventoryDescription(2, comparisonResult);
+            Inventory3HasIncompleteParts = HasIncompleteInventoryParts(comparisonResult, 2);
+        }
+        else
+        {
+            Inventory3HasIncompleteParts = false;
         }
         
         IsColumn4Visible = comparisonResult.Inventories.Count > 3;
         if (comparisonResult.Inventories.Count > 3)
         {
             Inventory4Name = ComputeColumnInventoryDescription(3, comparisonResult);
+            Inventory4HasIncompleteParts = HasIncompleteInventoryParts(comparisonResult, 3);
+        }
+        else
+        {
+            Inventory4HasIncompleteParts = false;
         }
         
         IsColumn5Visible = comparisonResult.Inventories.Count > 4;
         if (comparisonResult.Inventories.Count > 4)
         {
             Inventory5Name = ComputeColumnInventoryDescription(4, comparisonResult);
+            Inventory5HasIncompleteParts = HasIncompleteInventoryParts(comparisonResult, 4);
+        }
+        else
+        {
+            Inventory5HasIncompleteParts = false;
         }
     }
     
@@ -309,6 +345,17 @@ public class ComparisonResultViewModel : ActivatableViewModelBase
         return string.IsNullOrEmpty(description)
             ? $"{inventoryWord} {inventory.Code}"
             : $"{inventoryWord} {inventory.Code} ({description})";
+    }
+    
+    private bool HasIncompleteInventoryParts(ComparisonResult comparisonResult, int inventoryIndex)
+    {
+        if (inventoryIndex >= comparisonResult.Inventories.Count)
+        {
+            return false;
+        }
+        
+        return comparisonResult.Inventories[inventoryIndex].InventoryParts
+            .Any(ip => ip.IsIncompleteDueToAccess);
     }
     
     private void AddManualAction()
