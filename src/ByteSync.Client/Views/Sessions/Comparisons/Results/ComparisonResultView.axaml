@@ -185,7 +185,7 @@
                                     <TextBlock Text="{Binding Inventory1Name}" Classes="BsDataGridHeader" />
                                     <StackPanel Orientation="Horizontal" Margin="6 0 0 0" IsVisible="{Binding Inventory1HasIncompleteParts}">
                                         <misc:Icon Value="RegularWarning" Margin="0 0 3 0" />
-                                        <TextBlock Text="{localizations:Loc ContentIdentity_AccessIssueShortLabel}" Classes="BsDataGridHeader" />
+                                        <TextBlock Text="{localizations:Loc ComparisonResult_InventoryIncomplete}" Classes="BsDataGridHeader" />
                                     </StackPanel>
                                 </StackPanel>
                             </DataGridTemplateColumn.Header>
@@ -203,7 +203,7 @@
                                     <TextBlock Text="{Binding Inventory2Name}" Classes="BsDataGridHeader" />
                                     <StackPanel Orientation="Horizontal" Margin="6 0 0 0" IsVisible="{Binding Inventory2HasIncompleteParts}">
                                         <misc:Icon Value="RegularWarning" Margin="0 0 3 0" />
-                                        <TextBlock Text="{localizations:Loc ContentIdentity_AccessIssueShortLabel}" Classes="BsDataGridHeader" />
+                                        <TextBlock Text="{localizations:Loc ComparisonResult_InventoryIncomplete}" Classes="BsDataGridHeader" />
                                     </StackPanel>
                                 </StackPanel>
                             </DataGridTemplateColumn.Header>
@@ -221,7 +221,7 @@
                                     <TextBlock Text="{Binding Inventory3Name}" Classes="BsDataGridHeader" />
                                     <StackPanel Orientation="Horizontal" Margin="6 0 0 0" IsVisible="{Binding Inventory3HasIncompleteParts}">
                                         <misc:Icon Value="RegularWarning" Margin="0 0 3 0" />
-                                        <TextBlock Text="{localizations:Loc ContentIdentity_AccessIssueShortLabel}" Classes="BsDataGridHeader" />
+                                        <TextBlock Text="{localizations:Loc ComparisonResult_InventoryIncomplete}" Classes="BsDataGridHeader" />
                                     </StackPanel>
                                 </StackPanel>
                             </DataGridTemplateColumn.Header>
@@ -238,7 +238,7 @@
                                     <TextBlock Text="{Binding Inventory4Name}" Classes="BsDataGridHeader" />
                                     <StackPanel Orientation="Horizontal" Margin="6 0 0 0" IsVisible="{Binding Inventory4HasIncompleteParts}">
                                         <misc:Icon Value="RegularWarning" Margin="0 0 3 0" />
-                                        <TextBlock Text="{localizations:Loc ContentIdentity_AccessIssueShortLabel}" Classes="BsDataGridHeader" />
+                                        <TextBlock Text="{localizations:Loc ComparisonResult_InventoryIncomplete}" Classes="BsDataGridHeader" />
                                     </StackPanel>
                                 </StackPanel>
                             </DataGridTemplateColumn.Header>
@@ -255,7 +255,7 @@
                                     <TextBlock Text="{Binding Inventory5Name}" Classes="BsDataGridHeader" />
                                     <StackPanel Orientation="Horizontal" Margin="6 0 0 0" IsVisible="{Binding Inventory5HasIncompleteParts}">
                                         <misc:Icon Value="RegularWarning" Margin="0 0 3 0" />
-                                        <TextBlock Text="{localizations:Loc ContentIdentity_AccessIssueShortLabel}" Classes="BsDataGridHeader" />
+                                        <TextBlock Text="{localizations:Loc ComparisonResult_InventoryIncomplete}" Classes="BsDataGridHeader" />
                                     </StackPanel>
                                 </StackPanel>
                             </DataGridTemplateColumn.Header>
