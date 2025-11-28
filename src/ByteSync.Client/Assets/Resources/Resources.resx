@@ -1723,6 +1723,9 @@ Do you want to save this new Session Profile with this name?</value>
   <data name="ContentIdentity_AccessIssueDescription" xml:space="preserve">
     <value>This item is present but inaccessible on this endpoint. Synchronization is not allowed.</value>
   </data>
+    <data name="ContentIdentity_AccessIssueShortLabel" xml:space="preserve">
+    <value>Inaccessible</value>
+  </data>
 	<!-- UI Messages -->
 	<data name="TargetedActionEditionGlobal_ActionIssues" xml:space="preserve">
 		<value>The action cannot be applied to some items:</value>

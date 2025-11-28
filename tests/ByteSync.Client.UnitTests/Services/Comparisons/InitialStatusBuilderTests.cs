@@ -54,7 +54,7 @@ public class InitialStatusBuilderTests : AbstractTester
         var initialStatusBuilder = new InitialStatusBuilder();
         
         // Act
-        initialStatusBuilder.BuildStatus(comparisonItem, new[] { inventory });
+        initialStatusBuilder.BuildStatus(comparisonItem, [inventory]);
         
         // Assert
         comparisonItem.ContentRepartition.MissingInventories.Should().BeEmpty();
@@ -89,7 +89,7 @@ public class InitialStatusBuilderTests : AbstractTester
         var initialStatusBuilder = new InitialStatusBuilder();
         
         // Act
-        initialStatusBuilder.BuildStatus(comparisonItem, new[] { inventory });
+        initialStatusBuilder.BuildStatus(comparisonItem, [inventory]);
         
         // Assert
         comparisonItem.ContentRepartition.MissingInventories.Should().NotBeEmpty();
@@ -131,7 +131,7 @@ public class InitialStatusBuilderTests : AbstractTester
         var initialStatusBuilder = new InitialStatusBuilder();
         
         // Act
-        initialStatusBuilder.BuildStatus(comparisonItem, new[] { inventory });
+        initialStatusBuilder.BuildStatus(comparisonItem, [inventory]);
         
         // Assert
         comparisonItem.ContentRepartition.MissingInventories.Should().BeEmpty();
@@ -166,7 +166,7 @@ public class InitialStatusBuilderTests : AbstractTester
         var initialStatusBuilder = new InitialStatusBuilder();
         
         // Act
-        initialStatusBuilder.BuildStatus(comparisonItem, new[] { inventory });
+        initialStatusBuilder.BuildStatus(comparisonItem, [inventory]);
         
         // Assert
         comparisonItem.ContentRepartition.MissingInventories.Should().NotBeEmpty();
@@ -241,7 +241,7 @@ public class InitialStatusBuilderTests : AbstractTester
         var initialStatusBuilder = new InitialStatusBuilder();
         
         // Act
-        initialStatusBuilder.BuildStatus(comparisonItem, new[] { inventory });
+        initialStatusBuilder.BuildStatus(comparisonItem, [inventory]);
         
         // Assert
         comparisonItem.ContentRepartition.MissingInventories.Should().BeEmpty();
@@ -311,7 +311,7 @@ public class InitialStatusBuilderTests : AbstractTester
         var initialStatusBuilder = new InitialStatusBuilder();
         
         // Act
-        initialStatusBuilder.BuildStatus(comparisonItem, new[] { inventory });
+        initialStatusBuilder.BuildStatus(comparisonItem, [inventory]);
         
         // Assert
         comparisonItem.ContentRepartition.MissingInventories.Should().BeEmpty();
@@ -384,7 +384,7 @@ public class InitialStatusBuilderTests : AbstractTester
         var initialStatusBuilder = new InitialStatusBuilder();
         
         // Act
-        initialStatusBuilder.BuildStatus(comparisonItem, new[] { inventory1, inventory2 });
+        initialStatusBuilder.BuildStatus(comparisonItem, [inventory1, inventory2]);
         
         // Assert
         comparisonItem.ContentRepartition.MissingInventories.Should().BeEmpty();

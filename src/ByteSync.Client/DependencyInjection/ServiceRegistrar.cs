@@ -34,12 +34,13 @@ public static class ServiceRegistrar
         builder.RegisterModule<ViewsModule>();
         builder.RegisterModule<ExternalAssembliesModule>();
         builder.RegisterModule<ExpressionFilterModule>();
-
+        builder.RegisterModule<ConditionMatchersModule>();
+        
         builder.InitializeAvalonia();
-
+        
         var container = builder.Build();
         ContainerProvider.Container = container;
-
+        
         // Wire up the callback to break the circular dependency
         using (var scope = container.BeginLifetimeScope())
         {
@@ -50,7 +51,7 @@ public static class ServiceRegistrar
                 fileDownloaderCache.OnPartsCoordinatorCreated = downloadManager.RegisterPartsCoordinator;
             }
         }
-
+        
         using (var scope = container.BeginLifetimeScope())
         {
             var environmentService = scope.Resolve<IEnvironmentService>();
@@ -59,14 +60,14 @@ public static class ServiceRegistrar
                 return container;
             }
         }
-
+        
         container.LogBootstrapHeader();
         container.FeedClientId();
         container.LogBootstrap();
-
+        
         return container;
     }
-
+    
     private static void InitializeAvalonia(this ContainerBuilder builder)
     {
         var autofacResolver = builder.UseAutofacDependencyResolver();
@@ -76,7 +77,7 @@ public static class ServiceRegistrar
         autofacResolver.InitializeReactiveUI();
         RxApp.MainThreadScheduler = AvaloniaScheduler.Instance;
     }
-
+    
     private static void FeedClientId(this IContainer container)
     {
         using var scope = container.BeginLifetimeScope();

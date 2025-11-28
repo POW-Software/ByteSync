@@ -4,6 +4,7 @@ using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
+using ByteSync.Models.Inventories;
 using ByteSync.Services.Inventories;
 
 namespace ByteSync.Services.Comparisons;
@@ -85,6 +86,12 @@ public class InventoryComparer : IInventoryComparer
             _initialStatusBuilder.BuildStatus(comparisonItem, InventoryLoaders.Select(il => il.Inventory));
         }
         
+        // Propagate access issues from inaccessible ancestor directories (Tree mode only)
+        if (SessionSettings.MatchingMode == MatchingModes.Tree)
+        {
+            PropagateAccessIssuesFromAncestors();
+        }
+        
         return ComparisonResult;
     }
     
@@ -141,6 +148,133 @@ public class InventoryComparer : IInventoryComparer
         }
         
         contentIdentity.Add(directoryDescription);
+    }
+    
+    private void PropagateAccessIssuesFromAncestors()
+    {
+        var inaccessibleByPart = BuildInaccessibleDirectoriesByPart();
+        
+        foreach (var item in ComparisonResult.ComparisonItems)
+        {
+            var relative = item.PathIdentity.LinkingKeyValue;
+            if (string.IsNullOrWhiteSpace(relative) || relative == "/")
+            {
+                continue;
+            }
+            
+            var partsWithInaccessibleAncestor = FindPartsWithInaccessibleAncestor(relative, inaccessibleByPart);
+            if (partsWithInaccessibleAncestor.Count == 0)
+            {
+                continue;
+            }
+            
+            if (item.FileSystemType == FileSystemTypes.File)
+            {
+                HandleFileWithInaccessibleAncestor(item, relative, partsWithInaccessibleAncestor);
+            }
+            else
+            {
+                HandleDirectoryWithInaccessibleAncestor(item, partsWithInaccessibleAncestor);
+            }
+        }
+    }
+    
+    private Dictionary<InventoryPart, HashSet<string>> BuildInaccessibleDirectoriesByPart()
+    {
+        var inaccessibleByPart = new Dictionary<InventoryPart, HashSet<string>>();
+        
+        foreach (var loader in InventoryLoaders)
+        {
+            foreach (var part in loader.Inventory.InventoryParts)
+            {
+                var inaccessibleDirs = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var dir in part.DirectoryDescriptions)
+                {
+                    if (!dir.IsAccessible)
+                    {
+                        inaccessibleDirs.Add(dir.RelativePath);
+                    }
+                }
+                
+                inaccessibleByPart[part] = inaccessibleDirs;
+            }
+        }
+        
+        return inaccessibleByPart;
+    }
+    
+    private HashSet<InventoryPart> FindPartsWithInaccessibleAncestor(string relativePath,
+        Dictionary<InventoryPart, HashSet<string>> inaccessibleByPart)
+    {
+        var partsWithInaccessibleAncestor = new HashSet<InventoryPart>();
+        
+        foreach (var loader in InventoryLoaders)
+        {
+            foreach (var part in loader.Inventory.InventoryParts)
+            {
+                if (IsUnderInaccessibleAncestor(relativePath, inaccessibleByPart[part]))
+                {
+                    partsWithInaccessibleAncestor.Add(part);
+                }
+            }
+        }
+        
+        return partsWithInaccessibleAncestor;
+    }
+    
+    private void HandleFileWithInaccessibleAncestor(ComparisonItem item, string relativePath,
+        HashSet<InventoryPart> partsWithInaccessibleAncestor)
+    {
+        var partsWithContent = item.ContentIdentities
+            .SelectMany(ci => ci.GetInventoryParts())
+            .ToHashSet();
+        
+        foreach (var part in partsWithInaccessibleAncestor)
+        {
+            if (!partsWithContent.Contains(part))
+            {
+                var virtualContentIdentity = new ContentIdentity(null);
+                var virtualFileDescription = new FileDescription(part, relativePath)
+                {
+                    IsAccessible = false
+                };
+                
+                virtualContentIdentity.Add(virtualFileDescription);
+                virtualContentIdentity.AddAccessIssue(part);
+                item.AddContentIdentity(virtualContentIdentity);
+            }
+        }
+    }
+    
+    private static void HandleDirectoryWithInaccessibleAncestor(ComparisonItem item, HashSet<InventoryPart> partsWithInaccessibleAncestor)
+    {
+        foreach (var part in partsWithInaccessibleAncestor)
+        {
+            foreach (var ci in item.ContentIdentities)
+            {
+                ci.AddAccessIssue(part);
+            }
+        }
+    }
+    
+    private static bool IsUnderInaccessibleAncestor(string relativePath, HashSet<string> inaccessibleDirs)
+    {
+        // Walk parents: /a/b/c.txt -> /a/b -> /a
+        var path = relativePath;
+        while (true)
+        {
+            var idx = path.LastIndexOf('/');
+            if (idx <= 0)
+            {
+                return false;
+            }
+            
+            path = path.Substring(0, idx); // drop last segment
+            if (inaccessibleDirs.Contains(path))
+            {
+                return true;
+            }
+        }
     }
     
     private PathIdentity BuildPathIdentity(FileSystemDescription fileSystemDescription)

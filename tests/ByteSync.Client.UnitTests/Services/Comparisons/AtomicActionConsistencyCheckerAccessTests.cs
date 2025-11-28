@@ -21,39 +21,42 @@ public class AtomicActionConsistencyCheckerAccessTests
     private static ComparisonItem BuildComparisonItem(InventoryPart src, InventoryPart dst, bool sourceAccessible, bool targetAccessible)
     {
         var item = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/p", "p", "/p"));
-
+        
         // Source identity
         var srcCi = new ContentIdentity(null);
-        var srcFd = new FileDescription { InventoryPart = src, RelativePath = "/p", Size = 1, CreationTimeUtc = DateTime.UtcNow, LastWriteTimeUtc = DateTime.UtcNow };
+        var srcFd = new FileDescription
+            { InventoryPart = src, RelativePath = "/p", Size = 1, CreationTimeUtc = DateTime.UtcNow, LastWriteTimeUtc = DateTime.UtcNow };
         srcFd.IsAccessible = sourceAccessible;
         srcCi.Add(srcFd);
         item.AddContentIdentity(srcCi);
-
+        
         // Target identity
         var dstCi = new ContentIdentity(null);
-        var dstFd = new FileDescription { InventoryPart = dst, RelativePath = "/p", Size = 1, CreationTimeUtc = DateTime.UtcNow, LastWriteTimeUtc = DateTime.UtcNow };
+        var dstFd = new FileDescription
+            { InventoryPart = dst, RelativePath = "/p", Size = 1, CreationTimeUtc = DateTime.UtcNow, LastWriteTimeUtc = DateTime.UtcNow };
         dstFd.IsAccessible = targetAccessible;
         dstCi.Add(dstFd);
         item.AddContentIdentity(dstCi);
-
+        
         return item;
     }
-
+    
     private static (InventoryPart src, InventoryPart dst) BuildParts()
     {
         var invA = new Inventory { InventoryId = "INV_A", Code = "A", Endpoint = new(), MachineName = "M" };
         var invB = new Inventory { InventoryId = "INV_B", Code = "B", Endpoint = new(), MachineName = "M" };
         var src = new InventoryPart(invA, "c:/a", FileSystemTypes.Directory) { Code = "A1" };
         var dst = new InventoryPart(invB, "c:/b", FileSystemTypes.Directory) { Code = "B1" };
+        
         return (src, dst);
     }
-
+    
     [Test]
     public void Synchronize_Fails_When_Source_Not_Accessible()
     {
         var (src, dst) = BuildParts();
         var item = BuildComparisonItem(src, dst, sourceAccessible: false, targetAccessible: true);
-
+        
         var action = new AtomicAction
         {
             Operator = ActionOperatorTypes.SynchronizeContentOnly,
@@ -61,18 +64,215 @@ public class AtomicActionConsistencyCheckerAccessTests
             Destination = new DataPart("B", dst),
             ComparisonItem = item
         };
-
+        
         var repoMock = new Mock<IAtomicActionRepository>();
         repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
         var checker = new AtomicActionConsistencyChecker(repoMock.Object);
         var result = checker.CheckCanAdd(action, item);
-
+        
         result.ValidationResults.Should().HaveCount(1);
         result.ValidationResults[0].IsValid.Should().BeFalse();
         result.ValidationResults[0].FailureReason.Should().Be(AtomicActionValidationFailureReason.SourceNotAccessible);
     }
-
-    // Note: target inaccessibility is enforced at action computation time but
-    // depending on ComparisonItem content identities composition it may not be
-    // detectable in this isolated unit. The source-side guard is covered above.
+    
+    [Test]
+    public void Synchronize_WithSourceCoreNull_DoesNotThrowException()
+    {
+        var (src, dst) = BuildParts();
+        var item = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/p", "p", "/p"));
+        
+        var srcCi = new ContentIdentity(null);
+        var srcFd = new FileDescription
+        {
+            InventoryPart = src,
+            RelativePath = "/p",
+            Size = 1,
+            CreationTimeUtc = DateTime.UtcNow,
+            LastWriteTimeUtc = DateTime.UtcNow,
+            IsAccessible = true
+        };
+        srcCi.Add(srcFd);
+        item.AddContentIdentity(srcCi);
+        
+        var dstCi = new ContentIdentity(new ContentIdentityCore { SignatureHash = "hash", Size = 1 });
+        var dstFd = new FileDescription
+        {
+            InventoryPart = dst,
+            RelativePath = "/p",
+            Size = 1,
+            CreationTimeUtc = DateTime.UtcNow,
+            LastWriteTimeUtc = DateTime.UtcNow,
+            IsAccessible = true
+        };
+        dstCi.Add(dstFd);
+        item.AddContentIdentity(dstCi);
+        
+        var action = new AtomicAction
+        {
+            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Source = new DataPart("A", src),
+            Destination = new DataPart("B", dst),
+            ComparisonItem = item
+        };
+        
+        var repoMock = new Mock<IAtomicActionRepository>();
+        repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
+        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        
+        Action act = () => checker.CheckCanAdd(action, item);
+        
+        act.Should().NotThrow();
+    }
+    
+    [Test]
+    public void Synchronize_WithTargetCoreNull_DoesNotThrowException()
+    {
+        var (src, dst) = BuildParts();
+        var item = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/p", "p", "/p"));
+        
+        var srcCi = new ContentIdentity(new ContentIdentityCore { SignatureHash = "hash", Size = 1 });
+        var srcFd = new FileDescription
+        {
+            InventoryPart = src,
+            RelativePath = "/p",
+            Size = 1,
+            CreationTimeUtc = DateTime.UtcNow,
+            LastWriteTimeUtc = DateTime.UtcNow,
+            IsAccessible = true
+        };
+        srcCi.Add(srcFd);
+        item.AddContentIdentity(srcCi);
+        
+        var dstCi = new ContentIdentity(null);
+        var dstFd = new FileDescription
+        {
+            InventoryPart = dst,
+            RelativePath = "/p",
+            Size = 1,
+            CreationTimeUtc = DateTime.UtcNow,
+            LastWriteTimeUtc = DateTime.UtcNow,
+            IsAccessible = true
+        };
+        dstCi.Add(dstFd);
+        item.AddContentIdentity(dstCi);
+        
+        var action = new AtomicAction
+        {
+            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Source = new DataPart("A", src),
+            Destination = new DataPart("B", dst),
+            ComparisonItem = item
+        };
+        
+        var repoMock = new Mock<IAtomicActionRepository>();
+        repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
+        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        
+        Action act = () => checker.CheckCanAdd(action, item);
+        
+        act.Should().NotThrow();
+    }
+    
+    [Test]
+    public void SynchronizeContentOnly_WithBothCoresNull_DoesNotThrowException()
+    {
+        var (src, dst) = BuildParts();
+        var item = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/p", "p", "/p"));
+        
+        var srcCi = new ContentIdentity(null);
+        var srcFd = new FileDescription
+        {
+            InventoryPart = src,
+            RelativePath = "/p",
+            Size = 1,
+            CreationTimeUtc = DateTime.UtcNow,
+            LastWriteTimeUtc = DateTime.UtcNow,
+            IsAccessible = true
+        };
+        srcCi.Add(srcFd);
+        item.AddContentIdentity(srcCi);
+        
+        var dstCi = new ContentIdentity(null);
+        var dstFd = new FileDescription
+        {
+            InventoryPart = dst,
+            RelativePath = "/p",
+            Size = 1,
+            CreationTimeUtc = DateTime.UtcNow,
+            LastWriteTimeUtc = DateTime.UtcNow,
+            IsAccessible = true
+        };
+        dstCi.Add(dstFd);
+        item.AddContentIdentity(dstCi);
+        
+        var action = new AtomicAction
+        {
+            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Source = new DataPart("A", src),
+            Destination = new DataPart("B", dst),
+            ComparisonItem = item
+        };
+        
+        var repoMock = new Mock<IAtomicActionRepository>();
+        repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
+        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        
+        Action act = () => checker.CheckCanAdd(action, item);
+        
+        act.Should().NotThrow();
+    }
+    
+    [Test]
+    public void Synchronize_WithInaccessibleTargetAndNullCore_DoesNotThrowException()
+    {
+        var (src, dst) = BuildParts();
+        var item = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/p", "p", "/p"));
+        
+        var srcCi = new ContentIdentity(new ContentIdentityCore { SignatureHash = "hash", Size = 1 });
+        var srcFd = new FileDescription
+        {
+            InventoryPart = src,
+            RelativePath = "/p",
+            Size = 1,
+            CreationTimeUtc = DateTime.UtcNow,
+            LastWriteTimeUtc = DateTime.UtcNow,
+            IsAccessible = true
+        };
+        srcCi.Add(srcFd);
+        item.AddContentIdentity(srcCi);
+        
+        var dstCi = new ContentIdentity(null);
+        var dstFd = new FileDescription
+        {
+            InventoryPart = dst,
+            RelativePath = "/p",
+            Size = 1,
+            CreationTimeUtc = DateTime.UtcNow,
+            LastWriteTimeUtc = DateTime.UtcNow,
+            IsAccessible = false
+        };
+        dstCi.Add(dstFd);
+        item.AddContentIdentity(dstCi);
+        
+        var action = new AtomicAction
+        {
+            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Source = new DataPart("A", src),
+            Destination = new DataPart("B", dst),
+            ComparisonItem = item
+        };
+        
+        var repoMock = new Mock<IAtomicActionRepository>();
+        repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
+        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        var result = checker.CheckCanAdd(action, item);
+        
+        result.ValidationResults.Should().HaveCount(1);
+        result.ValidationResults[0].IsValid.Should().BeFalse();
+        result.ValidationResults[0].FailureReason.Should().Be(AtomicActionValidationFailureReason.AtLeastOneTargetsNotAccessible);
+    }
+    
+    // Note: Additional tests for multi-target scenarios and various action operators
+    // are covered by integration tests. The unit test above covers the core access control
+    // for inaccessible sources.
 }

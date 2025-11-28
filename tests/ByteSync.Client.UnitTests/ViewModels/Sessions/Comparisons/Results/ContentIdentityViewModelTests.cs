@@ -122,6 +122,7 @@ public class ContentIdentityViewModelTests
             ci,
             _inventory,
             _sessionService.Object,
+            _localizationService.Object,
             _factory.Object);
         
         civm.SignatureHash.Should().Be("");
@@ -147,6 +148,7 @@ public class ContentIdentityViewModelTests
             ci,
             _inventory,
             _sessionService.Object,
+            _localizationService.Object,
             _factory.Object);
         
         vm.SignatureHash.Should().NotBeNull();
@@ -176,6 +178,7 @@ public class ContentIdentityViewModelTests
             ci,
             _inventory,
             _sessionService.Object,
+            _localizationService.Object,
             _factory.Object);
         
         vm.HasAnalysisError.Should().BeTrue();
@@ -215,6 +218,34 @@ public class ContentIdentityViewModelTests
     }
     
     [Test]
+    public void File_identity_with_access_issue_sets_error_icon_and_tooltip_delay()
+    {
+        var ci = new ContentIdentity(null);
+        var file = new FileDescription
+        {
+            InventoryPart = _partA,
+            RelativePath = "/file.txt",
+            Size = 10,
+            CreationTimeUtc = DateTime.UtcNow,
+            LastWriteTimeUtc = DateTime.UtcNow
+        };
+        file.IsAccessible = false;
+        ci.Add(file);
+        
+        var vm = new ContentIdentityViewModel(
+            BuildComparisonItemViewModel(FileSystemTypes.File),
+            ci,
+            _inventory,
+            _sessionService.Object,
+            _localizationService.Object,
+            _factory.Object);
+        
+        vm.HasAnalysisError.Should().BeFalse();
+        vm.HashOrWarnIcon.Should().Be("RegularError");
+        vm.ShowToolTipDelay.Should().Be(400);
+    }
+    
+    [Test]
     public void Directory_identity_sets_presence_parts_and_dates()
     {
         var ci = new ContentIdentity(null);
@@ -229,6 +260,7 @@ public class ContentIdentityViewModelTests
             ci,
             _inventory,
             _sessionService.Object,
+            _localizationService.Object,
             _factory.Object);
         
         vm.IsDirectory.Should().BeTrue();
