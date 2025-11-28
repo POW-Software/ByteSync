@@ -20,7 +20,7 @@ public class InventoryLoader : IDisposable
 
     private ZipArchive ZipArchive { get; set; }
 
-    internal Inventory Inventory { get; private set; }
+    public Inventory Inventory { get; private set; }
 
     private Inventory Load()
     {
@@ -38,6 +38,17 @@ public class InventoryLoader : IDisposable
         if (inventory == null)
         {
             throw new InvalidOperationException("Failed to deserialize inventory.json.");
+        }
+        
+        // Backward compatibility: older inventories may not have persisted IsIncompleteDueToAccess.
+        foreach (var inventoryPart in inventory.InventoryParts)
+        {
+            if (!inventoryPart.IsIncompleteDueToAccess &&
+                (inventoryPart.DirectoryDescriptions.Any(d => !d.IsAccessible)
+                 || inventoryPart.FileDescriptions.Any(f => !f.IsAccessible)))
+            {
+                inventoryPart.IsIncompleteDueToAccess = true;
+            }
         }
         
         return inventory;
