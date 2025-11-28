@@ -1,7 +1,9 @@
 ﻿using System.Collections.ObjectModel;
+using ByteSync.Assets.Resources;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Factories.ViewModels;
+using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
@@ -15,6 +17,7 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Results;
 public class ContentIdentityViewModel : ViewModelBase
 {
     private readonly ISessionService _sessionService;
+    private readonly ILocalizationService _localizationService;
     private readonly IDateAndInventoryPartsViewModelFactory _dateAndInventoryPartsViewModelFactory;
     
     public ContentIdentityViewModel()
@@ -35,6 +38,7 @@ public class ContentIdentityViewModel : ViewModelBase
     
     public ContentIdentityViewModel(ComparisonItemViewModel comparisonItemViewModel,
         ContentIdentity contentIdentity, Inventory inventory, ISessionService sessionService,
+        ILocalizationService localizationService,
         IDateAndInventoryPartsViewModelFactory dateAndInventoryPartsViewModelFactory)
     {
         ComparisonItemViewModel = comparisonItemViewModel;
@@ -45,6 +49,7 @@ public class ContentIdentityViewModel : ViewModelBase
         IsDirectory = !IsFile;
         
         _sessionService = sessionService;
+        _localizationService = localizationService;
         _dateAndInventoryPartsViewModelFactory = dateAndInventoryPartsViewModelFactory;
         
         DateAndInventoryParts = new ObservableCollection<DateAndInventoryPartsViewModel>();
@@ -56,7 +61,12 @@ public class ContentIdentityViewModel : ViewModelBase
         ShowInventoryParts = _sessionService.IsCloudSession;
         
         HasAnalysisError = ContentIdentity.HasAnalysisError;
+        HasAccessIssue = ContentIdentity.HasAccessIssueFor(Inventory) || ContentIdentity.HasAccessIssue;
         if (HasAnalysisError)
+        {
+            ShowToolTipDelay = 400;
+        }
+        else if (HasAccessIssue)
         {
             ShowToolTipDelay = 400;
         }
@@ -90,6 +100,9 @@ public class ContentIdentityViewModel : ViewModelBase
     
     [Reactive]
     public bool HasAnalysisError { get; set; }
+    
+    [Reactive]
+    public bool HasAccessIssue { get; set; }
     
     [Reactive]
     public int ShowToolTipDelay { get; set; }
@@ -126,13 +139,17 @@ public class ContentIdentityViewModel : ViewModelBase
                         .First(fsd => fsd is FileDescription { HasAnalysisError: true })
                     as FileDescription;
                 
-                SignatureHash = onErrorFileDescription!.AnalysisErrorType.Truncate(32);
+                SignatureHash = onErrorFileDescription!.AnalysisErrorType!.Truncate(32);
                 ErrorType = onErrorFileDescription.AnalysisErrorType;
                 ErrorDescription = onErrorFileDescription.AnalysisErrorDescription;
             }
             else
             {
-                if (ContentIdentity.Core == null || ContentIdentity.Core.SignatureHash.IsNullOrEmpty())
+                if (ContentIdentity.HasAccessIssueFor(Inventory))
+                {
+                    SignatureHash = _localizationService[nameof(Resources.ContentIdentity_AccessIssueShortLabel)];
+                }
+                else if (ContentIdentity.Core == null || ContentIdentity.Core.SignatureHash.IsNullOrEmpty())
                 {
                     SignatureHash = "";
                 }
@@ -166,7 +183,8 @@ public class ContentIdentityViewModel : ViewModelBase
             LinkingKeyNameTooltip = ComparisonItemViewModel.LinkingKeyNameTooltip;
         }
         
-        if (IsDirectory)
+        // Show inventory parts (B1, B2, etc.) for directories OR for inaccessible files
+        if (IsDirectory || (IsFile && ContentIdentity.HasAccessIssueFor(Inventory)))
         {
             PresenceParts = ContentIdentity.GetInventoryParts()
                 .Where(ip => ip.Inventory.Equals(Inventory))
@@ -179,7 +197,7 @@ public class ContentIdentityViewModel : ViewModelBase
     
     private void SetHashOrWarnIcon()
     {
-        if (ContentIdentity.HasAnalysisError)
+        if (ContentIdentity.HasAnalysisError || ContentIdentity.HasAccessIssueFor(Inventory))
         {
             HashOrWarnIcon = "RegularError";
         }
@@ -192,6 +210,12 @@ public class ContentIdentityViewModel : ViewModelBase
     private void FillDateAndInventoryParts()
     {
         DateAndInventoryParts.Clear();
+        
+        // Don't show dates for inaccessible files
+        if (ContentIdentity.HasAccessIssueFor(Inventory))
+        {
+            return;
+        }
         
         foreach (var pair in ContentIdentity.InventoryPartsByLastWriteTimes)
         {

@@ -66,9 +66,13 @@ public class FilesIdentifier
         var result = new HashSet<IndexedItem>();
         foreach (var comparisonItem in comparisonItemsToAnalyse)
         {
-            var items = InventoryIndexer.GetItemsBy(comparisonItem.PathIdentity)!;
+            var items = InventoryIndexer.GetItemsBy(comparisonItem.PathIdentity);
             
-            result.AddAll(items);
+            // Items may be null for virtual FileDescriptions (e.g., inaccessible files under inaccessible directories)
+            if (items != null)
+            {
+                result.AddAll(items);
+            }
         }
         
         return result;
