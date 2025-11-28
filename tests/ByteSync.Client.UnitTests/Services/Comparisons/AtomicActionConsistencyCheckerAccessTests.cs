@@ -321,6 +321,55 @@ public class AtomicActionConsistencyCheckerAccessTests
         result.ValidationResults[0].FailureReason.Should().Be(AtomicActionValidationFailureReason.AtLeastOneTargetsNotAccessible);
     }
     
+    [Test]
+    public void Delete_Fails_When_Target_Part_Incomplete()
+    {
+        var (src, dst) = BuildParts();
+        dst.IsIncompleteDueToAccess = true;
+        var item = BuildComparisonItem(src, dst, sourceAccessible: true, targetAccessible: true);
+        
+        var action = new AtomicAction
+        {
+            Operator = ActionOperatorTypes.Delete,
+            Destination = new DataPart("B", dst),
+            ComparisonItem = item
+        };
+        
+        var repoMock = new Mock<IAtomicActionRepository>();
+        repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
+        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        var result = checker.CheckCanAdd(action, item);
+        
+        result.ValidationResults.Should().HaveCount(1);
+        result.ValidationResults[0].IsValid.Should().BeFalse();
+        result.ValidationResults[0].FailureReason.Should().Be(AtomicActionValidationFailureReason.AtLeastOneTargetsNotAccessible);
+    }
+    
+    [Test]
+    public void Create_Fails_When_Target_Part_Incomplete()
+    {
+        var (src, dst) = BuildParts();
+        dst.InventoryPartType = FileSystemTypes.Directory;
+        dst.IsIncompleteDueToAccess = true;
+        var item = new ComparisonItem(new PathIdentity(FileSystemTypes.Directory, "/p", "p", "/p"));
+        
+        var action = new AtomicAction
+        {
+            Operator = ActionOperatorTypes.Create,
+            Destination = new DataPart("B", dst),
+            ComparisonItem = item
+        };
+        
+        var repoMock = new Mock<IAtomicActionRepository>();
+        repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
+        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        var result = checker.CheckCanAdd(action, item);
+        
+        result.ValidationResults.Should().HaveCount(1);
+        result.ValidationResults[0].IsValid.Should().BeFalse();
+        result.ValidationResults[0].FailureReason.Should().Be(AtomicActionValidationFailureReason.AtLeastOneTargetsNotAccessible);
+    }
+    
     // Note: Additional tests for multi-target scenarios and various action operators
     // are covered by integration tests. The unit test above covers the core access control
     // for inaccessible sources.

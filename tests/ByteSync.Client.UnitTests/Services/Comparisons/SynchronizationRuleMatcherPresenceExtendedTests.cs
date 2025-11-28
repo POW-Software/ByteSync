@@ -79,6 +79,31 @@ public class SynchronizationRuleMatcherPresenceExtendedTests
     }
     
     [Test]
+    public void ConditionMatchesPresence_ReturnsFalse_WhenDestinationPartIncomplete()
+    {
+        var inventory = new Inventory { InventoryId = "INV_A", Code = "A", Endpoint = new(), MachineName = "M" };
+        var partA = new InventoryPart(inventory, "c:/rootA", FileSystemTypes.Directory) { Code = "A1" };
+        var partB = new InventoryPart(inventory, "c:/rootB", FileSystemTypes.Directory) { Code = "B1", IsIncompleteDueToAccess = true };
+        
+        var contentIdentityA = new ContentIdentity(null);
+        contentIdentityA.Add(new FileDescription { InventoryPart = partA, RelativePath = "/file.txt" });
+        var comparisonItem = new ComparisonItem(new PathIdentity(FileSystemTypes.File, "/file.txt", "file.txt", "/file.txt"));
+        comparisonItem.AddContentIdentity(contentIdentityA);
+        
+        var condition = new AtomicCondition
+        {
+            Source = new DataPart("A", partA),
+            Destination = new DataPart("A", partB),
+            ComparisonProperty = ComparisonProperty.Name,
+            ConditionOperator = ConditionOperatorTypes.ExistsOn
+        };
+        
+        var result = _matcher.Matches(condition, comparisonItem);
+        
+        result.Should().BeFalse();
+    }
+    
+    [Test]
     public void ConditionMatchesPresence_ExistsOn_WithSourceNotPresent_ReturnsFalse()
     {
         var inventory = new Inventory { InventoryId = "INV_A", Code = "A", Endpoint = new(), MachineName = "M" };

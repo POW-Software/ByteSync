@@ -132,6 +132,44 @@ public class ComparisonResultViewModelTests
     }
     
     [Test]
+    public void WhenComparisonResultHasIncompleteParts_FlagsAreSetPerInventory()
+    {
+        var vm = new ComparisonResultViewModel(
+            _sessionService.Object,
+            _localizationService.Object,
+            _dialogService.Object,
+            _inventoryService.Object,
+            _comparisonItemsService.Object,
+            _comparisonItemViewModelFactory.Object,
+            _sessionMemberRepository.Object,
+            _flyoutElementViewModelFactory.Object,
+            new ManageSynchronizationRulesViewModel(),
+            _comparisonItemRepository,
+            _filterService.Object,
+            _webAccessor.Object,
+            _logger.Object);
+        
+        vm.Activator.Activate();
+        
+        var result = new ComparisonResult();
+        var inventoryA = BuildInventory("Aa", "CII_A", "POW-25-EB01");
+        var inventoryB = BuildInventory("Ba", "CII_B", "POW-25-EB01");
+        var incompletePart = new InventoryPart(inventoryB, "c:/rootB", FileSystemTypes.Directory) { Code = "B1", IsIncompleteDueToAccess = true };
+        inventoryB.Add(incompletePart);
+        var completePart = new InventoryPart(inventoryA, "c:/rootA", FileSystemTypes.Directory) { Code = "A1" };
+        inventoryA.Add(completePart);
+        
+        result.AddInventory(inventoryA);
+        result.AddInventory(inventoryB);
+        
+        _resultSubject.OnNext(result);
+        
+        vm.Inventory1HasIncompleteParts.Should().BeFalse();
+        vm.Inventory2HasIncompleteParts.Should().BeTrue();
+        vm.Inventory3HasIncompleteParts.Should().BeFalse();
+    }
+    
+    [Test]
     public void BuildFilter_NoTags_ReturnsAlwaysTrue_AndDoesNotCallFilterService()
     {
         var vm = new ComparisonResultViewModel(

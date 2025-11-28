@@ -101,7 +101,6 @@ public class InventoryComparerIncompletePartsFlatTests
         
         result.ComparisonItems.Should().BeEmpty();
     }
-    
     private static string CreateInventoryZipFile(string directory, Inventory inventory)
     {
         var zipPath = Path.Combine(directory, $"{Guid.NewGuid()}.zip");
