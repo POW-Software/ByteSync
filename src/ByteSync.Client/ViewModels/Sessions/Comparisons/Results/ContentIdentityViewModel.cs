@@ -145,7 +145,14 @@ public class ContentIdentityViewModel : ViewModelBase
             }
             else
             {
-                if (ContentIdentity.HasAccessIssueFor(Inventory))
+                var isFlatMode = _sessionService.CurrentSessionSettings!.MatchingMode == MatchingModes.Flat;
+                var inventoryIncomplete = Inventory.InventoryParts.Any(ip => ip.IsIncompleteDueToAccess);
+                
+                if (ContentIdentity.HasAccessIssueFor(Inventory) && isFlatMode && inventoryIncomplete)
+                {
+                    SignatureHash = _localizationService[nameof(Resources.ComparisonResult_InventoryIncomplete)];
+                }
+                else if (ContentIdentity.HasAccessIssueFor(Inventory))
                 {
                     SignatureHash = _localizationService[nameof(Resources.ContentIdentity_AccessIssueShortLabel)];
                 }

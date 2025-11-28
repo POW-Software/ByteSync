@@ -50,6 +50,7 @@ public class ContentIdentityViewModelTests
         _localizationService = new Mock<ILocalizationService>();
         _localizationService.SetupGet(l => l.CurrentCultureDefinition).Returns(culture);
         _localizationService.SetupGet(l => l.CurrentCultureObservable).Returns(Observable.Never<CultureDefinition>());
+        _localizationService.Setup(ls => ls[It.IsAny<string>()]).Returns<string>(key => key);
         
         _factory = new Mock<IDateAndInventoryPartsViewModelFactory>();
         _factory.Setup(f =>
@@ -215,6 +216,37 @@ public class ContentIdentityViewModelTests
         
         vm.HasAnalysisError.Should().BeFalse();
         vm.HashOrWarnIcon.Should().Be("RegularError");
+        vm.ShowToolTipDelay.Should().Be(400);
+    }
+    
+    [Test]
+    public void File_identity_with_access_issue_and_incomplete_inventory_uses_inventory_incomplete_label()
+    {
+        var ci = new ContentIdentity(null);
+        var file = new FileDescription
+        {
+            InventoryPart = _partA,
+            RelativePath = "/file.txt",
+            Size = 10,
+            CreationTimeUtc = DateTime.UtcNow,
+            LastWriteTimeUtc = DateTime.UtcNow,
+            IsAccessible = false
+        };
+        ci.Add(file);
+        
+        _partA.IsIncompleteDueToAccess = true;
+        _inventory.InventoryParts.Add(_partA);
+        
+        var vm = new ContentIdentityViewModel(
+            BuildComparisonItemViewModel(FileSystemTypes.File),
+            ci,
+            _inventory,
+            _sessionService.Object,
+            _localizationService.Object,
+            _factory.Object);
+        
+        vm.HashOrWarnIcon.Should().Be("RegularError");
+        vm.SignatureHash.Should().Be("ComparisonResult_InventoryIncomplete");
         vm.ShowToolTipDelay.Should().Be(400);
     }
     

@@ -1610,9 +1610,12 @@ Do you want to save this new Session Profile with this name?</value>
 	<data name="ComparisonResult_SynchronizationStatus" xml:space="preserve">
 		<value>SYNCHRONIZATION</value>
 	</data>
-	<data name="ComparisonResult_Filter_SyntaxDocumentation" xml:space="preserve">
-		<value>Filtering Syntax</value>
-	</data>
+  <data name="ComparisonResult_Filter_SyntaxDocumentation" xml:space="preserve">
+    <value>Filtering Syntax</value>
+  </data>
+  <data name="ComparisonResult_InventoryIncomplete" xml:space="preserve">
+    <value>Inventory incomplete</value>
+  </data>
 	<data name="DataNodeHeaderView_Tooltip_Header_Remove" xml:space="preserve">
 		<value>Remove Data Node</value>
 	</data>
