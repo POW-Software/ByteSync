@@ -1,11 +1,15 @@
 using System.Reactive.Linq;
 using ByteSync.Business.Actions.Local;
+using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Business.Synchronizations;
 using ByteSync.Common.Business.Sessions;
+using ByteSync.Interfaces.Controls.Actions;
 using ByteSync.Interfaces.Controls.Synchronizations;
+using ByteSync.Interfaces.Dialogs;
+using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Services.Sessions;
@@ -21,12 +25,16 @@ using NUnit.Framework;
 namespace ByteSync.Client.UnitTests.ViewModels.Sessions.Synchronizations;
 
 [TestFixture]
-public class TestSynchronizationBeforeStartViewModel : AbstractTester
+public class SynchronizationBeforeStartViewModelTests : AbstractTester
 {
     private SynchronizationBeforeStartViewModel _viewModel = null!;
     private Mock<ISynchronizationStarter> _synchronizationStarter = null!;
     private Mock<ILocalizationService> _localizationService = null!;
     private Mock<ILogger<SynchronizationBeforeStartViewModel>> _logger = null!;
+    private Mock<ISharedAtomicActionRepository> _sharedAtomicActionRepository = null!;
+    private Mock<ISharedAtomicActionComputer> _sharedAtomicActionComputer = null!;
+    private Mock<IDialogService> _dialogService = null!;
+    private Mock<IFlyoutElementViewModelFactory> _flyoutElementViewModelFactory = null!;
     
     [SetUp]
     public void SetUp()
@@ -51,15 +59,34 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
         
         _localizationService = new Mock<ILocalizationService>();
         _localizationService.Setup(l => l["ErrorView_ErrorMessage"]).Returns("Error {0}");
+        _localizationService.Setup(l => l[It.IsAny<string>()]).Returns((string key) => key);
         
         _logger = new Mock<ILogger<SynchronizationBeforeStartViewModel>>();
         
         _synchronizationStarter = new Mock<ISynchronizationStarter>();
+        
+        _sharedAtomicActionRepository = new Mock<ISharedAtomicActionRepository>();
+        _sharedAtomicActionRepository.SetupGet(r => r.Elements).Returns(new List<SharedAtomicAction>());
+        
+        _sharedAtomicActionComputer = new Mock<ISharedAtomicActionComputer>();
+        _sharedAtomicActionComputer.Setup(c => c.ComputeSharedAtomicActions())
+            .ReturnsAsync(new List<SharedAtomicAction>());
+        
+        _dialogService = new Mock<IDialogService>();
+        
+        _flyoutElementViewModelFactory = new Mock<IFlyoutElementViewModelFactory>();
+        var mockConfirmationViewModel = new Mock<SynchronizationConfirmationViewModel>();
+        mockConfirmationViewModel.Setup(vm => vm.WaitForResponse()).ReturnsAsync(true);
+        _flyoutElementViewModelFactory
+            .Setup(f => f.BuildSynchronizationConfirmationViewModel(It.IsAny<List<SharedAtomicAction>>()))
+            .Returns(mockConfirmationViewModel.Object);
+        
         var errorViewModel = new ErrorViewModel(_localizationService.Object);
         
         _viewModel = new SynchronizationBeforeStartViewModel(sessionService.Object, _localizationService.Object,
             synchronizationService.Object, _synchronizationStarter.Object, atomicRepository.Object,
-            sessionMemberRepository.Object, _logger.Object, errorViewModel);
+            sessionMemberRepository.Object, _sharedAtomicActionRepository.Object, _sharedAtomicActionComputer.Object,
+            _dialogService.Object, _flyoutElementViewModelFactory.Object, _logger.Object, errorViewModel);
     }
     
     [Test]
@@ -142,11 +169,39 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
     }
     
     [Test]
-    public async Task StartSynchronizationCommand_ShouldStartProcess()
+    public async Task StartSynchronizationCommand_ShouldShowConfirmationAndStartProcess_WhenConfirmed()
     {
         await _viewModel.StartSynchronizationCommand.Execute();
+        
+        _sharedAtomicActionComputer.Verify(c => c.ComputeSharedAtomicActions(), Times.Once);
+        _flyoutElementViewModelFactory.Verify(
+            f => f.BuildSynchronizationConfirmationViewModel(It.IsAny<List<SharedAtomicAction>>()),
+            Times.Once);
+        _dialogService.Verify(
+            d => d.ShowFlyout(It.IsAny<string>(), false, It.IsAny<FlyoutElementViewModel>()),
+            Times.Once);
         _synchronizationStarter.Verify(s => s.StartSynchronization(true), Times.Once);
         _viewModel.StartSynchronizationError.ErrorMessage.Should().BeNull();
+    }
+    
+    [Test]
+    public async Task StartSynchronizationCommand_ShouldNotStartProcess_WhenCancelled()
+    {
+        var mockConfirmationViewModel = new Mock<SynchronizationConfirmationViewModel>();
+        mockConfirmationViewModel.Setup(vm => vm.WaitForResponse()).ReturnsAsync(false);
+        _flyoutElementViewModelFactory
+            .Setup(f => f.BuildSynchronizationConfirmationViewModel(It.IsAny<List<SharedAtomicAction>>()))
+            .Returns(mockConfirmationViewModel.Object);
+        
+        await _viewModel.StartSynchronizationCommand.Execute();
+        
+        _flyoutElementViewModelFactory.Verify(
+            f => f.BuildSynchronizationConfirmationViewModel(It.IsAny<List<SharedAtomicAction>>()),
+            Times.Once);
+        _dialogService.Verify(
+            d => d.ShowFlyout(It.IsAny<string>(), false, It.IsAny<FlyoutElementViewModel>()),
+            Times.Once);
+        _synchronizationStarter.Verify(s => s.StartSynchronization(true), Times.Never);
     }
     
     [Test]

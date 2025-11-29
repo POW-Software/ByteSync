@@ -1,6 +1,7 @@
-﻿using Autofac;
+using Autofac;
 using ByteSync.Business;
 using ByteSync.Business.Actions.Local;
+using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Profiles;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Interfaces.Factories;
@@ -11,6 +12,7 @@ using ByteSync.ViewModels.Headers;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Profiles;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions;
+using ByteSync.ViewModels.Sessions.Synchronizations;
 using ByteSync.ViewModels.TrustedNetworks;
 
 namespace ByteSync.Services.Misc;
@@ -95,6 +97,14 @@ public class FlyoutElementViewModelFactory : IFlyoutElementViewModelFactory
     public FlyoutElementViewModel BuildAboutApplicationViewModel()
     {
         var result = _context.Resolve<AboutApplicationViewModel>();
+
+        return result;
+    }
+
+    public SynchronizationConfirmationViewModel BuildSynchronizationConfirmationViewModel(List<SharedAtomicAction> actions)
+    {
+        var result = _context.Resolve<SynchronizationConfirmationViewModel>(
+            TypedParameter.From(actions));
 
         return result;
     }
