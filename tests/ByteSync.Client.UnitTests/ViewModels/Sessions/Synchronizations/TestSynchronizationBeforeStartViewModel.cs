@@ -6,6 +6,7 @@ using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Business.Synchronizations;
 using ByteSync.Common.Business.Sessions;
+using ByteSync.Interfaces.Controls.Actions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
@@ -31,6 +32,7 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
     private Mock<ILocalizationService> _localizationService = null!;
     private Mock<ILogger<SynchronizationBeforeStartViewModel>> _logger = null!;
     private Mock<ISharedAtomicActionRepository> _sharedAtomicActionRepository = null!;
+    private Mock<ISharedAtomicActionComputer> _sharedAtomicActionComputer = null!;
     private Mock<IDialogService> _dialogService = null!;
     private Mock<IFlyoutElementViewModelFactory> _flyoutElementViewModelFactory = null!;
     
@@ -66,6 +68,10 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
         _sharedAtomicActionRepository = new Mock<ISharedAtomicActionRepository>();
         _sharedAtomicActionRepository.SetupGet(r => r.Elements).Returns(new List<SharedAtomicAction>());
         
+        _sharedAtomicActionComputer = new Mock<ISharedAtomicActionComputer>();
+        _sharedAtomicActionComputer.Setup(c => c.ComputeSharedAtomicActions())
+            .ReturnsAsync(new List<SharedAtomicAction>());
+        
         _dialogService = new Mock<IDialogService>();
         
         _flyoutElementViewModelFactory = new Mock<IFlyoutElementViewModelFactory>();
@@ -79,8 +85,8 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
         
         _viewModel = new SynchronizationBeforeStartViewModel(sessionService.Object, _localizationService.Object,
             synchronizationService.Object, _synchronizationStarter.Object, atomicRepository.Object,
-            sessionMemberRepository.Object, _sharedAtomicActionRepository.Object, _dialogService.Object,
-            _flyoutElementViewModelFactory.Object, _logger.Object, errorViewModel);
+            sessionMemberRepository.Object, _sharedAtomicActionRepository.Object, _sharedAtomicActionComputer.Object,
+            _dialogService.Object, _flyoutElementViewModelFactory.Object, _logger.Object, errorViewModel);
     }
     
     [Test]
@@ -167,11 +173,12 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
     {
         await _viewModel.StartSynchronizationCommand.Execute();
         
+        _sharedAtomicActionComputer.Verify(c => c.ComputeSharedAtomicActions(), Times.Once);
         _flyoutElementViewModelFactory.Verify(
-            f => f.BuildSynchronizationConfirmationViewModel(It.IsAny<List<SharedAtomicAction>>()), 
+            f => f.BuildSynchronizationConfirmationViewModel(It.IsAny<List<SharedAtomicAction>>()),
             Times.Once);
         _dialogService.Verify(
-            d => d.ShowFlyout(It.IsAny<string>(), false, It.IsAny<FlyoutElementViewModel>()), 
+            d => d.ShowFlyout(It.IsAny<string>(), false, It.IsAny<FlyoutElementViewModel>()),
             Times.Once);
         _synchronizationStarter.Verify(s => s.StartSynchronization(true), Times.Once);
         _viewModel.StartSynchronizationError.ErrorMessage.Should().BeNull();
@@ -189,10 +196,10 @@ public class TestSynchronizationBeforeStartViewModel : AbstractTester
         await _viewModel.StartSynchronizationCommand.Execute();
         
         _flyoutElementViewModelFactory.Verify(
-            f => f.BuildSynchronizationConfirmationViewModel(It.IsAny<List<SharedAtomicAction>>()), 
+            f => f.BuildSynchronizationConfirmationViewModel(It.IsAny<List<SharedAtomicAction>>()),
             Times.Once);
         _dialogService.Verify(
-            d => d.ShowFlyout(It.IsAny<string>(), false, It.IsAny<FlyoutElementViewModel>()), 
+            d => d.ShowFlyout(It.IsAny<string>(), false, It.IsAny<FlyoutElementViewModel>()),
             Times.Once);
         _synchronizationStarter.Verify(s => s.StartSynchronization(true), Times.Never);
     }

@@ -23,7 +23,7 @@ public class SynchronizationConfirmationViewModel : FlyoutElementViewModel
     private bool? _result;
     private readonly object _syncRoot = new();
     private readonly ManualResetEvent _resultSelected = new(false);
-
+    
     public SynchronizationConfirmationViewModel()
     {
         _dataNodeRepository = null!;
@@ -33,7 +33,7 @@ public class SynchronizationConfirmationViewModel : FlyoutElementViewModel
         
         DestinationSummaryViewModels = new ObservableCollection<DestinationSummaryViewModel>();
     }
-
+    
     public SynchronizationConfirmationViewModel(
         List<SharedAtomicAction> actions,
         IDataNodeRepository dataNodeRepository,
@@ -45,57 +45,57 @@ public class SynchronizationConfirmationViewModel : FlyoutElementViewModel
         _sessionMemberRepository = sessionMemberRepository;
         _formatKbSizeConverter = formatKbSizeConverter;
         _localizationService = localizationService;
-
+        
         DestinationSummaryViewModels = new ObservableCollection<DestinationSummaryViewModel>();
-
+        
         ConfirmCommand = ReactiveCommand.Create(OnConfirm);
         CancelCommand = ReactiveCommand.Create(OnCancel);
-
+        
         ComputeStatistics(actions);
     }
-
+    
     [Reactive]
     public int TotalActionsCount { get; set; }
-
+    
     [Reactive]
     public string TotalDataSize { get; set; } = string.Empty;
-
+    
     [Reactive]
     public string TotalActionsText { get; set; } = string.Empty;
-
+    
     [Reactive]
     public string TotalDataSizeText { get; set; } = string.Empty;
-
+    
     public ObservableCollection<DestinationSummaryViewModel> DestinationSummaryViewModels { get; }
-
+    
     public ReactiveCommand<Unit, Unit> ConfirmCommand { get; set; } = null!;
-
+    
     public ReactiveCommand<Unit, Unit> CancelCommand { get; set; } = null!;
-
+    
     private void ComputeStatistics(List<SharedAtomicAction> actions)
     {
         TotalActionsCount = actions.Count;
         TotalActionsText = string.Format(
-            _localizationService[nameof(Resources.SynchronizationConfirmation_TotalActions)], 
+            _localizationService[nameof(Resources.SynchronizationConfirmation_TotalActions)],
             TotalActionsCount);
-
-        long totalBytes = actions.Where(a => a.Size.HasValue).Sum(a => a.Size!.Value);
+        
+        var totalBytes = actions.Where(a => a.Size.HasValue).Sum(a => a.Size!.Value);
         TotalDataSize = _formatKbSizeConverter.Convert(totalBytes);
         TotalDataSizeText = string.Format(
-            _localizationService[nameof(Resources.SynchronizationConfirmation_TotalSize)], 
+            _localizationService[nameof(Resources.SynchronizationConfirmation_TotalSize)],
             TotalDataSize);
-
+        
         var actionsByDestination = actions
             .Where(a => a.Target != null)
             .GroupBy(a => (a.Target!.ClientInstanceId, a.Target.NodeId));
-
+        
         foreach (var group in actionsByDestination)
         {
             var dataNodes = _dataNodeRepository.GetDataNodesByClientInstanceId(group.Key.ClientInstanceId);
             var dataNode = dataNodes.FirstOrDefault(dn => dn.Id == group.Key.NodeId);
             var sessionMember = _sessionMemberRepository.Elements
                 .FirstOrDefault(sm => sm.ClientInstanceId == group.Key.ClientInstanceId);
-
+            
             var summary = new DestinationActionsSummary
             {
                 DestinationCode = dataNode?.Code ?? "?",
@@ -105,47 +105,47 @@ public class SynchronizationConfirmationViewModel : FlyoutElementViewModel
                 SynchronizeDateCount = group.Count(a => a.IsSynchronizeDate),
                 DeleteCount = group.Count(a => a.IsDelete)
             };
-
+            
             var summaryViewModel = new DestinationSummaryViewModel(summary, _localizationService);
             DestinationSummaryViewModels.Add(summaryViewModel);
         }
     }
-
+    
     private void OnConfirm()
     {
         lock (_syncRoot)
         {
             _result ??= true;
         }
-
+        
         _resultSelected.Set();
         RaiseCloseFlyoutRequested();
     }
-
+    
     private void OnCancel()
     {
         lock (_syncRoot)
         {
             _result ??= false;
         }
-
+        
         _resultSelected.Set();
         RaiseCloseFlyoutRequested();
     }
-
+    
     public virtual async Task<bool> WaitForResponse()
     {
         return await Task.Run(() =>
         {
             _resultSelected.WaitOne();
-
+            
             lock (_syncRoot)
             {
                 return _result ?? false;
             }
         });
     }
-
+    
     public override async Task CancelIfNeeded()
     {
         await Task.Run(() =>
@@ -154,7 +154,7 @@ public class SynchronizationConfirmationViewModel : FlyoutElementViewModel
             {
                 _result ??= false;
             }
-
+            
             _resultSelected.Set();
         });
     }
@@ -164,34 +164,34 @@ public class DestinationSummaryViewModel
 {
     private readonly DestinationActionsSummary _summary;
     private readonly ILocalizationService _localizationService;
-
+    
     public DestinationSummaryViewModel(DestinationActionsSummary summary, ILocalizationService localizationService)
     {
         _summary = summary;
         _localizationService = localizationService;
     }
-
+    
     public string HeaderText => string.Format(
         _localizationService[nameof(Resources.SynchronizationConfirmation_ToDestination)],
         _summary.DestinationCode,
         _summary.MachineName);
-
+    
     public string CreateCountText => string.Format(
         _localizationService[nameof(Resources.SynchronizationConfirmation_CreateCount)],
         _summary.CreateCount);
-
+    
     public string SyncContentCountText => string.Format(
         _localizationService[nameof(Resources.SynchronizationConfirmation_SyncContentCount)],
         _summary.SynchronizeContentCount);
-
+    
     public string SyncDateCountText => string.Format(
         _localizationService[nameof(Resources.SynchronizationConfirmation_SyncDateCount)],
         _summary.SynchronizeDateCount);
-
+    
     public string DeleteCountText => string.Format(
         _localizationService[nameof(Resources.SynchronizationConfirmation_DeleteCount)],
         _summary.DeleteCount);
-
+    
     public bool HasCreateActions => _summary.CreateCount > 0;
     
     public bool HasSyncContentActions => _summary.SynchronizeContentCount > 0;
@@ -199,6 +199,6 @@ public class DestinationSummaryViewModel
     public bool HasSyncDateActions => _summary.SynchronizeDateCount > 0;
     
     public bool HasDeleteActions => _summary.DeleteCount > 0;
-
+    
     public DestinationActionsSummary Summary => _summary;
 }
