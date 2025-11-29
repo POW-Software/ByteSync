@@ -2943,11 +2943,20 @@ namespace ByteSync.Assets.Resources {
         }
         
         /// <summary>
-        /// Looks up a localized string similar to {0} action(s).
+        /// Looks up a localized string similar to {0} action.
         /// </summary>
-        internal static string SynchronizationConfirmation_TotalActions {
+        internal static string SynchronizationConfirmation_TotalActions_One {
             get {
-                return ResourceManager.GetString("SynchronizationConfirmation_TotalActions", resourceCulture);
+                return ResourceManager.GetString("SynchronizationConfirmation_TotalActions_One", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to {0} actions.
+        /// </summary>
+        internal static string SynchronizationConfirmation_TotalActions_Many {
+            get {
+                return ResourceManager.GetString("SynchronizationConfirmation_TotalActions_Many", resourceCulture);
             }
         }
         
@@ -2961,11 +2970,20 @@ namespace ByteSync.Assets.Resources {
         }
         
         /// <summary>
-        /// Looks up a localized string similar to {0} to transfer ({1} delta file(s), actual size will be smaller).
+        /// Looks up a localized string similar to {0} to transfer ({1} delta file, actual size will be smaller).
         /// </summary>
-        internal static string SynchronizationConfirmation_TotalSizeWithDelta {
+        internal static string SynchronizationConfirmation_TotalSizeWithDelta_One {
             get {
-                return ResourceManager.GetString("SynchronizationConfirmation_TotalSizeWithDelta", resourceCulture);
+                return ResourceManager.GetString("SynchronizationConfirmation_TotalSizeWithDelta_One", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to {0} to transfer ({1} delta files, actual size will be smaller).
+        /// </summary>
+        internal static string SynchronizationConfirmation_TotalSizeWithDelta_Many {
+            get {
+                return ResourceManager.GetString("SynchronizationConfirmation_TotalSizeWithDelta_Many", resourceCulture);
             }
         }
         
@@ -2979,38 +2997,74 @@ namespace ByteSync.Assets.Resources {
         }
         
         /// <summary>
-        /// Looks up a localized string similar to • {0} file(s) to create.
+        /// Looks up a localized string similar to • {0} file to create.
         /// </summary>
-        internal static string SynchronizationConfirmation_CreateCount {
+        internal static string SynchronizationConfirmation_CreateCount_One {
             get {
-                return ResourceManager.GetString("SynchronizationConfirmation_CreateCount", resourceCulture);
+                return ResourceManager.GetString("SynchronizationConfirmation_CreateCount_One", resourceCulture);
             }
         }
         
         /// <summary>
-        /// Looks up a localized string similar to • {0} file(s) to synchronize.
+        /// Looks up a localized string similar to • {0} files to create.
         /// </summary>
-        internal static string SynchronizationConfirmation_SyncContentCount {
+        internal static string SynchronizationConfirmation_CreateCount_Many {
             get {
-                return ResourceManager.GetString("SynchronizationConfirmation_SyncContentCount", resourceCulture);
+                return ResourceManager.GetString("SynchronizationConfirmation_CreateCount_Many", resourceCulture);
             }
         }
         
         /// <summary>
-        /// Looks up a localized string similar to • {0} file(s) to update (dates).
+        /// Looks up a localized string similar to • {0} file to synchronize.
         /// </summary>
-        internal static string SynchronizationConfirmation_SyncDateCount {
+        internal static string SynchronizationConfirmation_SyncContentCount_One {
             get {
-                return ResourceManager.GetString("SynchronizationConfirmation_SyncDateCount", resourceCulture);
+                return ResourceManager.GetString("SynchronizationConfirmation_SyncContentCount_One", resourceCulture);
             }
         }
         
         /// <summary>
-        /// Looks up a localized string similar to • {0} file(s) to delete.
+        /// Looks up a localized string similar to • {0} files to synchronize.
         /// </summary>
-        internal static string SynchronizationConfirmation_DeleteCount {
+        internal static string SynchronizationConfirmation_SyncContentCount_Many {
             get {
-                return ResourceManager.GetString("SynchronizationConfirmation_DeleteCount", resourceCulture);
+                return ResourceManager.GetString("SynchronizationConfirmation_SyncContentCount_Many", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to • {0} file to update (dates).
+        /// </summary>
+        internal static string SynchronizationConfirmation_SyncDateCount_One {
+            get {
+                return ResourceManager.GetString("SynchronizationConfirmation_SyncDateCount_One", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to • {0} files to update (dates).
+        /// </summary>
+        internal static string SynchronizationConfirmation_SyncDateCount_Many {
+            get {
+                return ResourceManager.GetString("SynchronizationConfirmation_SyncDateCount_Many", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to • {0} file to delete.
+        /// </summary>
+        internal static string SynchronizationConfirmation_DeleteCount_One {
+            get {
+                return ResourceManager.GetString("SynchronizationConfirmation_DeleteCount_One", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        /// Looks up a localized string similar to • {0} files to delete.
+        /// </summary>
+        internal static string SynchronizationConfirmation_DeleteCount_Many {
+            get {
+                return ResourceManager.GetString("SynchronizationConfirmation_DeleteCount_Many", resourceCulture);
             }
         }
         

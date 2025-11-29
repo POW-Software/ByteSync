@@ -77,7 +77,7 @@ public class SynchronizationConfirmationViewModel : FlyoutElementViewModel
     {
         TotalActionsCount = actions.Count;
         TotalActionsText = string.Format(
-            _localizationService[nameof(Resources.SynchronizationConfirmation_TotalActions)],
+            GetPluralizedKey("SynchronizationConfirmation_TotalActions", TotalActionsCount),
             TotalActionsCount);
         
         var totalBytes = actions.Where(a => a.Size.HasValue).Sum(a => a.Size!.Value);
@@ -88,7 +88,7 @@ public class SynchronizationConfirmationViewModel : FlyoutElementViewModel
         if (deltaFilesCount > 0)
         {
             TotalDataSizeText = string.Format(
-                _localizationService[nameof(Resources.SynchronizationConfirmation_TotalSizeWithDelta)],
+                GetPluralizedKey("SynchronizationConfirmation_TotalSizeWithDelta", deltaFilesCount),
                 TotalDataSize,
                 deltaFilesCount);
         }
@@ -172,6 +172,13 @@ public class SynchronizationConfirmationViewModel : FlyoutElementViewModel
             _resultSelected.Set();
         });
     }
+    
+    private string GetPluralizedKey(string baseKey, int count)
+    {
+        var suffix = count <= 1 ? "_One" : "_Many";
+        
+        return _localizationService[baseKey + suffix];
+    }
 }
 
 public class DestinationSummaryViewModel
@@ -191,19 +198,19 @@ public class DestinationSummaryViewModel
         _summary.MachineName);
     
     public string CreateCountText => string.Format(
-        _localizationService[nameof(Resources.SynchronizationConfirmation_CreateCount)],
+        GetPluralizedKey("SynchronizationConfirmation_CreateCount", _summary.CreateCount),
         _summary.CreateCount);
     
     public string SyncContentCountText => string.Format(
-        _localizationService[nameof(Resources.SynchronizationConfirmation_SyncContentCount)],
+        GetPluralizedKey("SynchronizationConfirmation_SyncContentCount", _summary.SynchronizeContentCount),
         _summary.SynchronizeContentCount);
     
     public string SyncDateCountText => string.Format(
-        _localizationService[nameof(Resources.SynchronizationConfirmation_SyncDateCount)],
+        GetPluralizedKey("SynchronizationConfirmation_SyncDateCount", _summary.SynchronizeDateCount),
         _summary.SynchronizeDateCount);
     
     public string DeleteCountText => string.Format(
-        _localizationService[nameof(Resources.SynchronizationConfirmation_DeleteCount)],
+        GetPluralizedKey("SynchronizationConfirmation_DeleteCount", _summary.DeleteCount),
         _summary.DeleteCount);
     
     public bool HasCreateActions => _summary.CreateCount > 0;
@@ -215,4 +222,11 @@ public class DestinationSummaryViewModel
     public bool HasDeleteActions => _summary.DeleteCount > 0;
     
     public DestinationActionsSummary Summary => _summary;
+    
+    private string GetPluralizedKey(string baseKey, int count)
+    {
+        var suffix = count <= 1 ? "_One" : "_Many";
+        
+        return _localizationService[baseKey + suffix];
+    }
 }

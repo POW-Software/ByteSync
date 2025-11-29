@@ -1769,29 +1769,47 @@ Do you want to save this new Session Profile with this name?</value>
     <data name="SynchronizationConfirmation_Title" xml:space="preserve">
         <value>Synchronization Confirmation</value>
     </data>
-    <data name="SynchronizationConfirmation_TotalActions" xml:space="preserve">
-        <value>{0} action(s)</value>
+    <data name="SynchronizationConfirmation_TotalActions_One" xml:space="preserve">
+        <value>{0} action</value>
+    </data>
+    <data name="SynchronizationConfirmation_TotalActions_Many" xml:space="preserve">
+        <value>{0} actions</value>
     </data>
     <data name="SynchronizationConfirmation_TotalSize" xml:space="preserve">
         <value>{0} to transfer</value>
     </data>
-    <data name="SynchronizationConfirmation_TotalSizeWithDelta" xml:space="preserve">
-        <value>{0} to transfer ({1} delta file(s), actual size will be smaller)</value>
+    <data name="SynchronizationConfirmation_TotalSizeWithDelta_One" xml:space="preserve">
+        <value>{0} to transfer ({1} delta file, actual size will be smaller)</value>
+    </data>
+    <data name="SynchronizationConfirmation_TotalSizeWithDelta_Many" xml:space="preserve">
+        <value>{0} to transfer ({1} delta files, actual size will be smaller)</value>
     </data>
     <data name="SynchronizationConfirmation_ToDestination" xml:space="preserve">
         <value>To {0} ({1}):</value>
     </data>
-    <data name="SynchronizationConfirmation_CreateCount" xml:space="preserve">
-        <value>• {0} file(s) to create</value>
+    <data name="SynchronizationConfirmation_CreateCount_One" xml:space="preserve">
+        <value>• {0} file to create</value>
     </data>
-    <data name="SynchronizationConfirmation_SyncContentCount" xml:space="preserve">
-        <value>• {0} file(s) to synchronize</value>
+    <data name="SynchronizationConfirmation_CreateCount_Many" xml:space="preserve">
+        <value>• {0} files to create</value>
     </data>
-    <data name="SynchronizationConfirmation_SyncDateCount" xml:space="preserve">
-        <value>• {0} file(s) to update (dates)</value>
+    <data name="SynchronizationConfirmation_SyncContentCount_One" xml:space="preserve">
+        <value>• {0} file to synchronize</value>
     </data>
-    <data name="SynchronizationConfirmation_DeleteCount" xml:space="preserve">
-        <value>• {0} file(s) to delete</value>
+    <data name="SynchronizationConfirmation_SyncContentCount_Many" xml:space="preserve">
+        <value>• {0} files to synchronize</value>
+    </data>
+    <data name="SynchronizationConfirmation_SyncDateCount_One" xml:space="preserve">
+        <value>• {0} file to update (dates)</value>
+    </data>
+    <data name="SynchronizationConfirmation_SyncDateCount_Many" xml:space="preserve">
+        <value>• {0} files to update (dates)</value>
+    </data>
+    <data name="SynchronizationConfirmation_DeleteCount_One" xml:space="preserve">
+        <value>• {0} file to delete</value>
+    </data>
+    <data name="SynchronizationConfirmation_DeleteCount_Many" xml:space="preserve">
+        <value>• {0} files to delete</value>
     </data>
     <data name="SynchronizationConfirmation_Confirm" xml:space="preserve">
         <value>Confirm</value>
