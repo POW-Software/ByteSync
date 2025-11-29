@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
 		<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
@@ -394,6 +394,9 @@ Would you like to continue ?</value>
 	<data name="InventoryProcess_IdentifiedDirectories" xml:space="preserve">
 		<value>Identified Directories:</value>
 	</data>
+	<data name="InventoryProcess_IdentificationErrors" xml:space="preserve">
+		<value>Identification Errors:</value>
+	</data>
 	<data name="InventoryProcess_Start" xml:space="preserve">
 		<value>Start:</value>
 	</data>
@@ -670,11 +673,14 @@ Would you like to continue ?</value>
     <data name="InventoryProcess_GlobalProcessedSize" xml:space="preserve">
         <value>Total Processed Volume:</value>
     </data>
-    <data name="InventoryProcess_GlobalAnalyzeSuccess" xml:space="preserve">
-        <value>Total Successful Calculations:</value>
-    </data>
-    <data name="InventoryProcess_GlobalAnalyzeErrors" xml:space="preserve">
-        <value>Total Calculation Errors:</value>
+	<data name="InventoryProcess_GlobalAnalyzeSuccess" xml:space="preserve">
+		<value>Total Successful Calculations:</value>
+	</data>
+	<data name="InventoryProcess_GlobalAnalyzeErrors" xml:space="preserve">
+		<value>Total Calculation Errors:</value>
+	</data>
+    <data name="InventoryProcess_GlobalIdentificationErrors" xml:space="preserve">
+        <value>Total Identification Errors:</value>
     </data>
 	<data name="ContentIdentity_AnErrorOccured" xml:space="preserve">
 		<value>An error has occurred during the analysis</value>
@@ -781,15 +787,15 @@ Would you like to continue ?</value>
 	<data name="MessageBox_OK" xml:space="preserve">
 		<value>OK</value>
 	</data>
-	<data name="MessageBox_Yes" xml:space="preserve">
-		<value>Yes</value>
-	</data>
-	<data name="MessageBox_No" xml:space="preserve">
-		<value>No</value>
-	</data>
-	<data name="MessageBox_Cancel" xml:space="preserve">
-		<value>Cancel</value>
-	</data>
+    <data name="MessageBox_Yes" xml:space="preserve">
+        <value>YES</value>
+    </data>
+    <data name="MessageBox_No" xml:space="preserve">
+        <value>NO</value>
+    </data>
+    <data name="MessageBox_Cancel" xml:space="preserve">
+        <value>CANCEL</value>
+    </data>
 	<data name="MainWindow_OnClose_ConfirmTitle" xml:space="preserve">
 		<value>Quit</value>
 	</data>
@@ -1765,5 +1771,56 @@ Do you want to save this new Session Profile with this name?</value>
     </data>
     <data name="InventoryProcess_LocalInventory_NotLaunched" xml:space="preserve">
         <value>Local Inventory not launched</value>
+    </data>
+    <data name="SynchronizationConfirmation_Title" xml:space="preserve">
+        <value>Synchronization Confirmation</value>
+    </data>
+    <data name="SynchronizationConfirmation_TotalActions_One" xml:space="preserve">
+        <value>{0} action</value>
+    </data>
+    <data name="SynchronizationConfirmation_TotalActions_Many" xml:space="preserve">
+        <value>{0} actions</value>
+    </data>
+    <data name="SynchronizationConfirmation_TotalSize" xml:space="preserve">
+        <value>{0} to transfer</value>
+    </data>
+    <data name="SynchronizationConfirmation_TotalSizeWithDelta_One" xml:space="preserve">
+        <value>{0} to transfer ({1} delta file, actual size will be smaller)</value>
+    </data>
+    <data name="SynchronizationConfirmation_TotalSizeWithDelta_Many" xml:space="preserve">
+        <value>{0} to transfer ({1} delta files, actual size will be smaller)</value>
+    </data>
+    <data name="SynchronizationConfirmation_ToDestination" xml:space="preserve">
+        <value>To {0} ({1}):</value>
+    </data>
+    <data name="SynchronizationConfirmation_CreateCount_One" xml:space="preserve">
+        <value>• {0} file to create</value>
+    </data>
+    <data name="SynchronizationConfirmation_CreateCount_Many" xml:space="preserve">
+        <value>• {0} files to create</value>
+    </data>
+    <data name="SynchronizationConfirmation_SyncContentCount_One" xml:space="preserve">
+        <value>• {0} file to synchronize</value>
+    </data>
+    <data name="SynchronizationConfirmation_SyncContentCount_Many" xml:space="preserve">
+        <value>• {0} files to synchronize</value>
+    </data>
+    <data name="SynchronizationConfirmation_SyncDateCount_One" xml:space="preserve">
+        <value>• {0} file to update (dates)</value>
+    </data>
+    <data name="SynchronizationConfirmation_SyncDateCount_Many" xml:space="preserve">
+        <value>• {0} files to update (dates)</value>
+    </data>
+    <data name="SynchronizationConfirmation_DeleteCount_One" xml:space="preserve">
+        <value>• {0} file to delete</value>
+    </data>
+    <data name="SynchronizationConfirmation_DeleteCount_Many" xml:space="preserve">
+        <value>• {0} files to delete</value>
+    </data>
+    <data name="SynchronizationConfirmation_Confirm" xml:space="preserve">
+        <value>CONFIRM</value>
+    </data>
+    <data name="SynchronizationConfirmation_Cancel" xml:space="preserve">
+        <value>CANCEL</value>
     </data>
 </root>

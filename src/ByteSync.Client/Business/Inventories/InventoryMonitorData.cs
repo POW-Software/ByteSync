@@ -12,6 +12,8 @@ public record InventoryMonitorData
     
     public int AnalyzeErrors { get; set; }
     
+    public int IdentificationErrors { get; set; }
+    
     public int AnalyzableFiles { get; set; }
     
     public long AnalyzableVolume { get; set; }
@@ -29,6 +31,7 @@ public record InventoryMonitorData
                || AnalyzedFiles != 0
                || ProcessedVolume != 0
                || AnalyzeErrors != 0
+               || IdentificationErrors != 0
                || AnalyzableFiles != 0
                || AnalyzableVolume != 0
                || IdentifiedVolume != 0

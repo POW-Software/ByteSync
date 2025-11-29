@@ -542,13 +542,25 @@ public class InventoryBuilder : IInventoryBuilder
                     {
                         imd.IdentifiedVolume += fileDescription.Size;
                     }
+                    else
+                    {
+                        imd.IdentificationErrors += 1;
+                    }
                     
                     imd.IdentifiedFiles += 1;
                 });
             }
             else
             {
-                InventoryProcessData.UpdateMonitorData(imd => imd.IdentifiedDirectories += 1);
+                InventoryProcessData.UpdateMonitorData(imd =>
+                {
+                    if (!fileSystemDescription.IsAccessible)
+                    {
+                        imd.IdentificationErrors += 1;
+                    }
+                    
+                    imd.IdentifiedDirectories += 1;
+                });
             }
         }
     }

@@ -6,7 +6,9 @@ public record InventoryStatistics
     
     public long ProcessedVolume { get; init; }
     
-    public int Success { get; init; }
+    public int AnalyzeSuccess { get; init; }
     
-    public int Errors { get; init; }
+    public int AnalyzeErrors { get; init; }
+    
+    public int IdentificationErrors { get; init; }
 }
