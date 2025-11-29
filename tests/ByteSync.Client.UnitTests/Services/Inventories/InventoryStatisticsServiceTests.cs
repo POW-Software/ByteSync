@@ -40,7 +40,8 @@ public class InventoryStatisticsServiceTests
         return zipPath;
     }
     
-    private static Inventory BuildInventoryWithFiles(int successCount, int errorCount, int neutralCount)
+    private static Inventory BuildInventoryWithFiles(int successCount, int errorCount, int neutralCount,
+        int inaccessibleFiles = 0, int inaccessibleDirectories = 0)
     {
         var inv = new Inventory
         {
@@ -100,6 +101,28 @@ public class InventoryStatisticsServiceTests
             part.FileDescriptions.Add(fd);
         }
         
+        for (var i = 0; i < inaccessibleFiles; i++)
+        {
+            var fd = new FileDescription
+            {
+                InventoryPart = part,
+                RelativePath = $"/file_inaccessible_{i}",
+                IsAccessible = false
+            };
+            part.FileDescriptions.Add(fd);
+        }
+        
+        for (var i = 0; i < inaccessibleDirectories; i++)
+        {
+            var dir = new DirectoryDescription
+            {
+                InventoryPart = part,
+                RelativePath = $"/dir_inaccessible_{i}",
+                IsAccessible = false
+            };
+            part.DirectoryDescriptions.Add(dir);
+        }
+        
         return inv;
     }
     
@@ -141,8 +164,9 @@ public class InventoryStatisticsServiceTests
             var stats = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(5));
             
             stats.TotalAnalyzed.Should().Be(5);
-            stats.Success.Should().Be(3);
-            stats.Errors.Should().Be(2);
+            stats.AnalyzeSuccess.Should().Be(3);
+            stats.AnalyzeErrors.Should().Be(2);
+            stats.IdentificationErrors.Should().Be(0);
         }
         finally
         {
@@ -202,8 +226,9 @@ public class InventoryStatisticsServiceTests
             var stats = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(5));
             
             stats.TotalAnalyzed.Should().Be(1 + 1 + 2 + 0);
-            stats.Success.Should().Be(1 + 2);
-            stats.Errors.Should().Be(1 + 0);
+            stats.AnalyzeSuccess.Should().Be(1 + 2);
+            stats.AnalyzeErrors.Should().Be(1 + 0);
+            stats.IdentificationErrors.Should().Be(0);
         }
         finally
         {
@@ -215,6 +240,58 @@ public class InventoryStatisticsServiceTests
             if (File.Exists(zip2))
             {
                 File.Delete(zip2);
+            }
+        }
+    }
+    
+    [Test]
+    public async Task Compute_CountsIdentificationErrors()
+    {
+        var inv = BuildInventoryWithFiles(successCount: 0, errorCount: 0, neutralCount: 0, inaccessibleFiles: 2,
+            inaccessibleDirectories: 1);
+        var zip = CreateInventoryZip(inv);
+        
+        try
+        {
+            var sfd = new SharedFileDefinition
+            {
+                SessionId = "S",
+                ClientInstanceId = inv.Endpoint.ClientInstanceId,
+                SharedFileType = SharedFileTypes.FullInventory,
+                AdditionalName = inv.CodeAndId,
+                IV = new byte[16]
+            };
+            var inventoryFile = new InventoryFile(sfd, zip);
+            
+            var repo = new Mock<IInventoryFileRepository>();
+            repo.Setup(r => r.GetAllInventoriesFiles(LocalInventoryModes.Full))
+                .Returns([inventoryFile]);
+            
+            var ipd = new InventoryProcessData();
+            var invService = new Mock<IInventoryService>();
+            invService.SetupGet(s => s.InventoryProcessData).Returns(ipd);
+            
+            var logger = new Mock<ILogger<InventoryStatisticsService>>();
+            
+            var service = new InventoryStatisticsService(invService.Object, repo.Object, logger.Object);
+            
+            var tcs = new TaskCompletionSource<InventoryStatistics>();
+            using var sub = service.Statistics.Where(s => s != null).Take(1).Select(s => s!).Subscribe(s => tcs.TrySetResult(s));
+            
+            ipd.AreFullInventoriesComplete.OnNext(true);
+            
+            var stats = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            
+            stats.TotalAnalyzed.Should().Be(0);
+            stats.AnalyzeSuccess.Should().Be(0);
+            stats.AnalyzeErrors.Should().Be(0);
+            stats.IdentificationErrors.Should().Be(3);
+        }
+        finally
+        {
+            if (File.Exists(zip))
+            {
+                File.Delete(zip);
             }
         }
     }

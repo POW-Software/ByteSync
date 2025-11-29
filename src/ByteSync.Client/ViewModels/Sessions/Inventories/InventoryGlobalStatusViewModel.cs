@@ -77,7 +77,12 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
     [Reactive]
     public int? GlobalAnalyzeErrors { get; set; }
     
+    [Reactive]
+    public int? GlobalIdentificationErrors { get; set; }
+    
     public extern bool HasErrors { [ObservableAsProperty] get; }
+    
+    public extern bool HasIdentificationErrors { [ObservableAsProperty] get; }
     
     [Reactive]
     public string GlobalMainIcon { get; set; } = "None";
@@ -101,6 +106,11 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
         this.WhenAnyValue(x => x.GlobalAnalyzeErrors)
             .Select(e => (e ?? 0) > 0)
             .ToPropertyEx(this, x => x.HasErrors)
+            .DisposeWith(disposables);
+        
+        this.WhenAnyValue(x => x.GlobalIdentificationErrors)
+            .Select(e => (e ?? 0) > 0)
+            .ToPropertyEx(this, x => x.HasIdentificationErrors)
             .DisposeWith(disposables);
     }
     
@@ -207,7 +217,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
     {
         return streams.StatusStream
             .Select(st => st == InventoryTaskStatus.Success
-                ? streams.StatsStream.Where(s => s != null).Take(1).Select(s => GetSuccessVisualState(s!.Errors))
+                ? streams.StatsStream.Where(s => s != null).Take(1).Select(s => GetSuccessVisualState(s!.AnalyzeErrors))
                 : Observable.Empty<(string Icon, string Text, string BrushKey)>())
             .Switch();
     }
@@ -218,7 +228,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
             .Where(s => s != null)
             .WithLatestFrom(streams.StatusStream, (s, st) => (s: s!, st))
             .Where(t => t.st == InventoryTaskStatus.Success)
-            .Select(t => GetSuccessVisualState(t.s.Errors));
+            .Select(t => GetSuccessVisualState(t.s.AnalyzeErrors));
     }
     
     private (string Icon, string Text, string BrushKey) GetSuccessVisualState(int? errors)
@@ -247,7 +257,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 
                 if (tuple.st == InventoryTaskStatus.Success && tuple.s != null)
                 {
-                    ApplySuccessState(tuple.s.Errors);
+                    ApplySuccessState(tuple.s.AnalyzeErrors, tuple.s.IdentificationErrors);
                 }
             })
             .DisposeWith(disposables);
@@ -257,13 +267,16 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
     {
         GlobalTotalAnalyzed = stats?.TotalAnalyzed;
         GlobalProcessedVolume = stats?.ProcessedVolume;
-        GlobalAnalyzeSuccess = stats?.Success;
-        GlobalAnalyzeErrors = stats?.Errors;
+        GlobalAnalyzeSuccess = stats?.AnalyzeSuccess;
+        GlobalAnalyzeErrors = stats?.AnalyzeErrors;
+        GlobalIdentificationErrors = stats?.IdentificationErrors;
     }
     
-    private void ApplySuccessState(int? errors)
+    private void ApplySuccessState(int? errors, int? identificationErrors = null)
     {
-        if (errors is > 0)
+        var totalErrors = (errors ?? 0) + (identificationErrors ?? 0);
+        
+        if (totalErrors > 0)
         {
             var text = Resources.ResourceManager.GetString("InventoryProcess_InventorySuccessWithErrors", Resources.Culture)
                        ?? Resources.InventoryProcess_InventorySuccess;
@@ -298,7 +311,8 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
             .Subscribe(_ =>
             {
                 var errors = GlobalAnalyzeErrors ?? 0;
-                ApplySuccessState(errors);
+                var identificationErrors = GlobalIdentificationErrors ?? 0;
+                ApplySuccessState(errors, identificationErrors);
             })
             .DisposeWith(disposables);
     }
@@ -317,6 +331,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
         GlobalProcessedVolume = null;
         GlobalAnalyzeSuccess = null;
         GlobalAnalyzeErrors = null;
+        GlobalIdentificationErrors = null;
         GlobalMainIcon = "None";
         GlobalMainStatusText = string.Empty;
         GlobalMainIconBrush = null;
@@ -329,7 +344,15 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
             .WithLatestFrom(streams.StatusStream, (e, st) => (e: e!.Value, st))
             .Where(t => t.st == InventoryTaskStatus.Success)
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(t => ApplySuccessState(t.e))
+            .Subscribe(t => ApplySuccessState(t.e, GlobalIdentificationErrors))
+            .DisposeWith(disposables);
+        
+        this.WhenAnyValue(x => x.GlobalIdentificationErrors)
+            .Where(e => e != null)
+            .WithLatestFrom(streams.StatusStream, (e, st) => (e: e!.Value, st))
+            .Where(t => t.st == InventoryTaskStatus.Success)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(t => ApplySuccessState(GlobalAnalyzeErrors, t.e))
             .DisposeWith(disposables);
     }
     
@@ -345,7 +368,8 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 break;
             case InventoryTaskStatus.Success:
                 var errors = GlobalAnalyzeErrors ?? 0;
-                GlobalMainIconBrush = errors > 0
+                var identificationErrors = GlobalIdentificationErrors ?? 0;
+                GlobalMainIconBrush = (errors + identificationErrors) > 0
                     ? _themeService.GetBrush("MainSecondaryColor")
                     : _themeService.GetBrush("HomeCloudSynchronizationBackGround");
                 

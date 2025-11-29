@@ -56,6 +56,7 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzedFiles}"
@@ -77,10 +78,20 @@
                 <TextBlock Text="{Binding GlobalAnalyzeSuccess, FallbackValue=''}" />
             </Border>
 
-            <Label Grid.Row="3" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzeErrors}"
+            <Label Grid.Row="3" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalIdentificationErrors}"
+                   Classes="InventoryStatusDescription"
+                   Classes.IsBold="{Binding HasIdentificationErrors}" />
+            <Border Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right"
+                    Classes="Badge"
+                    Classes.Secondary="{Binding HasIdentificationErrors}">
+                <TextBlock Text="{Binding GlobalIdentificationErrors, FallbackValue=''}"
+                           Classes.IsBold="{Binding HasIdentificationErrors}" />
+            </Border>
+
+            <Label Grid.Row="4" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzeErrors}"
                    Classes="InventoryStatusDescription"
                    Classes.IsBold="{Binding HasErrors}" />
-            <Border Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right"
+            <Border Grid.Row="4" Grid.Column="1" HorizontalAlignment="Right"
                     Classes="Badge"
                     Classes.Secondary="{Binding HasErrors}">
                 <TextBlock Text="{Binding GlobalAnalyzeErrors, FallbackValue=''}"

@@ -64,8 +64,9 @@ public class InventoryStatisticsService : IInventoryStatisticsService
         {
             TotalAnalyzed = statsCollector.TotalAnalyzed,
             ProcessedVolume = statsCollector.ProcessedSize,
-            Success = statsCollector.Success,
-            Errors = statsCollector.Errors
+            AnalyzeSuccess = statsCollector.Success,
+            AnalyzeErrors = statsCollector.Errors,
+            IdentificationErrors = statsCollector.IdentificationErrors
         };
         
         _statisticsSubject.OnNext(stats);
@@ -80,8 +81,22 @@ public class InventoryStatisticsService : IInventoryStatisticsService
             
             foreach (var part in inventory.InventoryParts)
             {
+                foreach (var dir in part.DirectoryDescriptions)
+                {
+                    if (!dir.IsAccessible)
+                    {
+                        collector.IdentificationErrors += 1;
+                    }
+                }
+                
                 foreach (var fd in part.FileDescriptions)
                 {
+                    if (!fd.IsAccessible)
+                    {
+                        collector.IdentificationErrors += 1;
+                        continue;
+                    }
+                    
                     ProcessFileDescription(fd, collector);
                 }
             }
@@ -125,6 +140,8 @@ public class InventoryStatisticsService : IInventoryStatisticsService
         public int Success { get; set; }
         
         public int Errors { get; set; }
+        
+        public int IdentificationErrors { get; set; }
         
         public long ProcessedSize { get; set; }
     }
