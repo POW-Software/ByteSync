@@ -1,9 +1,11 @@
-﻿using ByteSync.Business.Actions.Local;
+using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
+using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
 
@@ -12,10 +14,12 @@ namespace ByteSync.Services.Comparisons;
 public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
 {
     private readonly IAtomicActionRepository _atomicActionRepository;
+    private readonly ISessionService _sessionService;
     
-    public AtomicActionConsistencyChecker(IAtomicActionRepository atomicActionRepository)
+    public AtomicActionConsistencyChecker(IAtomicActionRepository atomicActionRepository, ISessionService sessionService)
     {
         _atomicActionRepository = atomicActionRepository;
+        _sessionService = sessionService;
     }
     
     public AtomicActionConsistencyCheckCanAddResult CheckCanAdd(AtomicAction atomicAction, ComparisonItem comparisonItem)
@@ -159,8 +163,10 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         return AtomicActionValidationResult.Success();
     }
     
-    private static AtomicActionValidationResult CheckAdvancedConsistency(AtomicAction atomicAction, ComparisonItem comparisonItem)
+    private AtomicActionValidationResult CheckAdvancedConsistency(AtomicAction atomicAction, ComparisonItem comparisonItem)
     {
+        var enforceInventoryPartAccessGuard = _sessionService.CurrentSessionSettings?.MatchingMode == MatchingModes.Flat;
+        
         if (atomicAction.Operator.In(ActionOperatorTypes.SynchronizeContentAndDate, ActionOperatorTypes.SynchronizeContentOnly,
                 ActionOperatorTypes.SynchronizeDate))
         {
@@ -168,7 +174,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
             {
                 var sourceInventoryPart = atomicAction.Source.GetApplicableInventoryPart();
                 
-                if (sourceInventoryPart.IsIncompleteDueToAccess)
+                if (enforceInventoryPartAccessGuard && sourceInventoryPart.IsIncompleteDueToAccess)
                 {
                     return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.SourceNotAccessible);
                 }
@@ -196,7 +202,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
                 
                 var targetInventoryPart = atomicAction.Destination!.GetApplicableInventoryPart();
                 
-                if (targetInventoryPart.IsIncompleteDueToAccess)
+                if (enforceInventoryPartAccessGuard && targetInventoryPart.IsIncompleteDueToAccess)
                 {
                     return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.AtLeastOneTargetsNotAccessible);
                 }
@@ -245,7 +251,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         {
             var targetInventoryPart = atomicAction.Destination!.GetApplicableInventoryPart();
             
-            if (targetInventoryPart.IsIncompleteDueToAccess)
+            if (enforceInventoryPartAccessGuard && targetInventoryPart.IsIncompleteDueToAccess)
             {
                 return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.AtLeastOneTargetsNotAccessible);
             }
@@ -274,7 +280,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
                 return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.CreateOperationRequiresDirectoryTarget);
             }
             
-            if (targetInventoryPart.IsIncompleteDueToAccess)
+            if (enforceInventoryPartAccessGuard && targetInventoryPart.IsIncompleteDueToAccess)
             {
                 return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.AtLeastOneTargetsNotAccessible);
             }
