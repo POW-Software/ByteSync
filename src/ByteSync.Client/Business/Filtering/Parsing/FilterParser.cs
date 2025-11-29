@@ -363,7 +363,7 @@ public class FilterParser : IFilterParser
             }
             
             NextToken();
-            if (CurrentToken?.Type != FilterTokenType.Identifier)
+            if (CurrentToken?.Type != FilterTokenType.Identifier && CurrentToken?.Type != FilterTokenType.String)
             {
                 return ParseResult.Incomplete($"Expected identifier after '{Identifiers.OPERATOR_HAS}:'");
             }
@@ -535,7 +535,7 @@ public class FilterParser : IFilterParser
             NextToken();
         }
         
-        if (CurrentToken?.Type == FilterTokenType.End || 
+        if (CurrentToken?.Type == FilterTokenType.End ||
             CurrentToken?.Type == FilterTokenType.LogicalOperator ||
             CurrentToken?.Type == FilterTokenType.CloseParenthesis)
         {
