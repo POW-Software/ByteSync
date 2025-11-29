@@ -60,7 +60,7 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
     public void TestParse_LogFilesWithActions()
     {
         // Arrange
-        var filterText = "name == \"*.log\" AND actions.copy";
+        var filterText = "name == \"*.log\" AND has:actions.copy";
         
         ConfigureDataPartIndexer();
         
@@ -73,12 +73,12 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
     }
     
     [Theory]
-    [TestCase("name==*.log AND actions.copy", true)]
-    [TestCase("name==\"*.log\" AND actions.copy", true)]
-    [TestCase("name == \"*.log\" AND actions.copy", true)]
-    [TestCase("name == \"*.log\" AND actions.copy > 0", true)]
-    [TestCase("name == \"*.log\" AND actions.copy == 0", false)]
-    [TestCase("name == \"*.log\" AND actions.copy==0", false)]
+    [TestCase("name==*.log AND has:actions.copy", true)]
+    [TestCase("name==\"*.log\" AND has:actions.copy", true)]
+    [TestCase("name == \"*.log\" AND has:actions.copy", true)]
+    [TestCase("name == \"*.log\" AND has:actions.copy > 0", true)]
+    [TestCase("name == \"*.log\" AND has:actions.copy == 0", false)]
+    [TestCase("name == \"*.log\" AND has:actions.copy==0", false)]
     public void TestEvaluate_LogFilesWithActions(string filterText, bool expectedResult)
     {
         var comparisonItem = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 1024, "app.log");
@@ -98,7 +98,7 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
     public void TestParse_OnlyOnSourceAndWillBeCopied()
     {
         // Arrange
-        var filterText = "only:A AND actions.copy";
+        var filterText = "only:A AND has:actions.copy";
         
         ConfigureDataPartIndexer();
         

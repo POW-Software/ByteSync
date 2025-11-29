@@ -77,6 +77,7 @@ public class FilterParser : IFilterParser
             term.Contains('=') ||
             
             // Special operators/keywords
+            term.StartsWith(Identifiers.OPERATOR_HAS, StringComparison.OrdinalIgnoreCase) ||
             term.StartsWith(Identifiers.OPERATOR_ACTIONS, StringComparison.OrdinalIgnoreCase) ||
             term.StartsWith(Identifiers.OPERATOR_NAME, StringComparison.OrdinalIgnoreCase) ||
             term.StartsWith(Identifiers.OPERATOR_PATH, StringComparison.OrdinalIgnoreCase) ||
@@ -352,59 +353,43 @@ public class FilterParser : IFilterParser
         }
         
         if (CurrentToken?.Type == FilterTokenType.Identifier &&
-            CurrentToken.Token.Equals(Identifiers.OPERATOR_ACTIONS, StringComparison.OrdinalIgnoreCase))
+            CurrentToken.Token.Equals(Identifiers.OPERATOR_HAS, StringComparison.OrdinalIgnoreCase))
         {
-            var actionPath = CurrentToken.Token.ToLowerInvariant();
             NextToken();
             
-            while (CurrentToken?.Type == FilterTokenType.Dot)
+            if (CurrentToken?.Type != FilterTokenType.Colon)
             {
-                NextToken();
-                if (CurrentToken?.Type != FilterTokenType.Identifier)
-                {
-                    return ParseResult.Incomplete("Expected identifier after dot in action path");
-                }
-                
-                actionPath += "." + CurrentToken?.Token.ToLowerInvariant();
-                NextToken();
+                return ParseResult.Incomplete($"Expected colon after '{Identifiers.OPERATOR_HAS}'");
             }
             
-            if (CurrentToken?.Type == FilterTokenType.End || CurrentToken?.Type == FilterTokenType.LogicalOperator)
+            NextToken();
+            if (CurrentToken?.Type != FilterTokenType.Identifier)
             {
-                return ParseResult.Success(new ActionComparisonExpression(actionPath, ComparisonOperator.GreaterThan, 0));
+                return ParseResult.Incomplete($"Expected identifier after '{Identifiers.OPERATOR_HAS}:'");
+            }
+            
+            var hasType = CurrentToken.Token.ToLowerInvariant();
+            NextToken();
+            
+            if (hasType == Identifiers.PROPERTY_ACCESS_ISSUE)
+            {
+                return ParseResult.Success(new HasExpression(HasExpressionType.AccessIssue));
+            }
+            else if (hasType == Identifiers.PROPERTY_COMPUTATION_ERROR)
+            {
+                return ParseResult.Success(new HasExpression(HasExpressionType.ComputationError));
+            }
+            else if (hasType == Identifiers.PROPERTY_SYNC_ERROR)
+            {
+                return ParseResult.Success(new HasExpression(HasExpressionType.SyncError));
+            }
+            else if (hasType == Identifiers.OPERATOR_ACTIONS)
+            {
+                return ParseActionsExpression();
             }
             else
             {
-                if (CurrentToken?.Type != FilterTokenType.Operator)
-                {
-                    return ParseResult.Incomplete("Expected operator after action path");
-                }
-                
-                var op = CurrentToken.Token;
-                NextToken();
-                
-                try
-                {
-                    var comparisonOperator = _operatorParser.Parse(op);
-                    
-                    if (CurrentToken?.Type != FilterTokenType.Number && CurrentToken?.Type != FilterTokenType.DateTime)
-                    {
-                        return ParseResult.Incomplete("Expected numeric value / dateTime after operator in action comparison");
-                    }
-                    
-                    if (!int.TryParse(CurrentToken?.Token, out var value))
-                    {
-                        return ParseResult.Incomplete("Invalid numeric value in action comparison");
-                    }
-                    
-                    NextToken();
-                    
-                    return ParseResult.Success(new ActionComparisonExpression(actionPath, comparisonOperator, value));
-                }
-                catch (ArgumentException ex)
-                {
-                    return ParseResult.Incomplete(ex.Message);
-                }
+                return ParseResult.Incomplete($"Unknown has type: {hasType}");
             }
         }
         
@@ -532,6 +517,61 @@ public class FilterParser : IFilterParser
         NextToken();
         
         return ParseResult.Success(textSearchExpression);
+    }
+    
+    private ParseResult ParseActionsExpression()
+    {
+        var actionPath = Identifiers.OPERATOR_ACTIONS;
+        
+        while (CurrentToken?.Type == FilterTokenType.Dot)
+        {
+            NextToken();
+            if (CurrentToken?.Type != FilterTokenType.Identifier)
+            {
+                return ParseResult.Incomplete("Expected identifier after dot in action path");
+            }
+            
+            actionPath += "." + CurrentToken.Token.ToLowerInvariant();
+            NextToken();
+        }
+        
+        if (CurrentToken?.Type == FilterTokenType.End || 
+            CurrentToken?.Type == FilterTokenType.LogicalOperator ||
+            CurrentToken?.Type == FilterTokenType.CloseParenthesis)
+        {
+            return ParseResult.Success(new ActionComparisonExpression(actionPath, ComparisonOperator.GreaterThan, 0));
+        }
+        
+        if (CurrentToken?.Type != FilterTokenType.Operator)
+        {
+            return ParseResult.Incomplete("Expected operator after action path");
+        }
+        
+        var op = CurrentToken.Token;
+        NextToken();
+        
+        try
+        {
+            var comparisonOperator = _operatorParser.Parse(op);
+            
+            if (CurrentToken?.Type != FilterTokenType.Number)
+            {
+                return ParseResult.Incomplete("Expected numeric value after operator in action comparison");
+            }
+            
+            if (!int.TryParse(CurrentToken.Token, out var value))
+            {
+                return ParseResult.Incomplete("Invalid numeric value in action comparison");
+            }
+            
+            NextToken();
+            
+            return ParseResult.Success(new ActionComparisonExpression(actionPath, comparisonOperator, value));
+        }
+        catch (ArgumentException ex)
+        {
+            return ParseResult.Incomplete(ex.Message);
+        }
     }
     
     private void NextToken()
