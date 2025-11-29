@@ -34,7 +34,7 @@ public class TestFiltering_Actions : BaseTestFiltering
         
         _mockActionRepository.AddOrUpdate(actions);
         
-        var filterText = "actions>0";
+        var filterText = "has:actions>0";
         
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
@@ -57,7 +57,7 @@ public class TestFiltering_Actions : BaseTestFiltering
         
         _mockActionRepository.AddOrUpdate(actions);
         
-        var filterText = "actions";
+        var filterText = "has:actions";
         
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
@@ -74,7 +74,7 @@ public class TestFiltering_Actions : BaseTestFiltering
         
         _mockActionRepository.AddOrUpdate(new List<AtomicAction>());
         
-        var filterText = "actions==0";
+        var filterText = "has:actions==0";
         
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
@@ -91,7 +91,7 @@ public class TestFiltering_Actions : BaseTestFiltering
         
         _mockActionRepository.AddOrUpdate(new List<AtomicAction>());
         
-        var filterText = "NOT actions";
+        var filterText = "NOT has:actions";
         
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
@@ -114,7 +114,7 @@ public class TestFiltering_Actions : BaseTestFiltering
 
         _mockActionRepository.AddOrUpdate(actions);
 
-        var filterText = "actions.targeted>0";
+        var filterText = "has:actions.targeted>0";
 
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
@@ -138,7 +138,7 @@ public class TestFiltering_Actions : BaseTestFiltering
 
         _mockActionRepository.AddOrUpdate(actions);
 
-        var filterText = "actions.rules>0";
+        var filterText = "has:actions.rules>0";
 
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
@@ -161,7 +161,7 @@ public class TestFiltering_Actions : BaseTestFiltering
 
         _mockActionRepository.AddOrUpdate(actions);
 
-        var filterText = "actions.delete>0";
+        var filterText = "has:actions.delete>0";
 
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
@@ -184,7 +184,7 @@ public class TestFiltering_Actions : BaseTestFiltering
 
         _mockActionRepository.AddOrUpdate(actions);
 
-        var filterText = "actions.targeted.delete>0";
+        var filterText = "has:actions.targeted.delete>0";
 
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
@@ -207,7 +207,7 @@ public class TestFiltering_Actions : BaseTestFiltering
 
         _mockActionRepository.AddOrUpdate(actions);
 
-        var filterText = "actions.targeted.delete";
+        var filterText = "has:actions.targeted.delete";
 
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
@@ -230,7 +230,7 @@ public class TestFiltering_Actions : BaseTestFiltering
 
         _mockActionRepository.AddOrUpdate(actions);
 
-        var filterText = "actions.rules.copy-contents>0";
+        var filterText = "has:actions.rules.copy-contents>0";
 
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
@@ -253,7 +253,7 @@ public class TestFiltering_Actions : BaseTestFiltering
 
         _mockActionRepository.AddOrUpdate(actions);
 
-        var filterText = "actions.rules.copy-contents";
+        var filterText = "has:actions.rules.copy-contents";
 
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
@@ -276,7 +276,7 @@ public class TestFiltering_Actions : BaseTestFiltering
 
         _mockActionRepository.AddOrUpdate(actions);
 
-        var filterText = "actions.targeted.create==0";
+        var filterText = "has:actions.targeted.create==0";
 
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
@@ -299,7 +299,7 @@ public class TestFiltering_Actions : BaseTestFiltering
 
         _mockActionRepository.AddOrUpdate(actions);
 
-        var filterText = "actions.delete>0 AND actions.create==0";
+        var filterText = "has:actions.delete>0 AND has:actions.create==0";
 
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
@@ -323,7 +323,7 @@ public class TestFiltering_Actions : BaseTestFiltering
 
         _mockActionRepository.AddOrUpdate(actions);
 
-        var filterText = "actions.delete AND NOT actions.create";
+        var filterText = "has:actions.delete AND NOT has:actions.create";
 
         // Act
         var result = EvaluateFilterExpression(filterText, comparisonItem);
