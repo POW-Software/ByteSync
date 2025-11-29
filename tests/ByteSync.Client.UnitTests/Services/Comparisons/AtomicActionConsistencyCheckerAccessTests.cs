@@ -52,7 +52,8 @@ public class AtomicActionConsistencyCheckerAccessTests
         return (src, dst);
     }
     
-    private static AtomicActionConsistencyChecker BuildChecker(Mock<IAtomicActionRepository> repoMock, MatchingModes matchingMode = MatchingModes.Tree)
+    private static AtomicActionConsistencyChecker BuildChecker(Mock<IAtomicActionRepository> repoMock,
+        MatchingModes matchingMode = MatchingModes.Tree)
     {
         var sessionServiceMock = new Mock<ISessionService>();
         sessionServiceMock.SetupGet(s => s.CurrentSessionSettings).Returns(new SessionSettings { MatchingMode = matchingMode });
@@ -383,7 +384,7 @@ public class AtomicActionConsistencyCheckerAccessTests
     [Test]
     public void Create_Fails_When_Target_Part_Incomplete_In_Flat_Mode()
     {
-        var (src, dst) = BuildParts();
+        var (_, dst) = BuildParts();
         dst.InventoryPartType = FileSystemTypes.Directory;
         dst.IsIncompleteDueToAccess = true;
         var item = new ComparisonItem(new PathIdentity(FileSystemTypes.Directory, "/p", "p", "/p"));

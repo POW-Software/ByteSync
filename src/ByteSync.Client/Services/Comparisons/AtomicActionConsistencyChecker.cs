@@ -298,6 +298,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
     
     private AtomicActionValidationResult CheckConsistencyAgainstAlreadySetActions(AtomicAction atomicAction, ComparisonItem comparisonItem)
     {
+        // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
         var alreadySetAtomicActions = _atomicActionRepository.GetAtomicActions(comparisonItem) ?? new List<AtomicAction>();
         
         if (atomicAction.IsTargeted)
