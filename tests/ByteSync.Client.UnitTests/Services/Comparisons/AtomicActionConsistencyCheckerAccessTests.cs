@@ -1,9 +1,11 @@
 using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
 using ByteSync.Business.Inventories;
+using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
@@ -50,6 +52,15 @@ public class AtomicActionConsistencyCheckerAccessTests
         return (src, dst);
     }
     
+    private static AtomicActionConsistencyChecker BuildChecker(Mock<IAtomicActionRepository> repoMock,
+        MatchingModes matchingMode = MatchingModes.Tree)
+    {
+        var sessionServiceMock = new Mock<ISessionService>();
+        sessionServiceMock.SetupGet(s => s.CurrentSessionSettings).Returns(new SessionSettings { MatchingMode = matchingMode });
+        
+        return new AtomicActionConsistencyChecker(repoMock.Object, sessionServiceMock.Object);
+    }
+    
     [Test]
     public void Synchronize_Fails_When_Source_Not_Accessible()
     {
@@ -66,7 +77,7 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var repoMock = new Mock<IAtomicActionRepository>();
         repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
-        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        var checker = BuildChecker(repoMock);
         var result = checker.CheckCanAdd(action, item);
         
         result.ValidationResults.Should().HaveCount(1);
@@ -75,7 +86,7 @@ public class AtomicActionConsistencyCheckerAccessTests
     }
     
     [Test]
-    public void Synchronize_Fails_When_Source_Part_Incomplete()
+    public void Synchronize_Fails_When_Source_Part_Incomplete_In_Flat_Mode()
     {
         var (src, dst) = BuildParts();
         src.IsIncompleteDueToAccess = true;
@@ -91,7 +102,7 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var repoMock = new Mock<IAtomicActionRepository>();
         repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
-        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        var checker = BuildChecker(repoMock, MatchingModes.Flat);
         var result = checker.CheckCanAdd(action, item);
         
         result.ValidationResults.Should().HaveCount(1);
@@ -141,7 +152,7 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var repoMock = new Mock<IAtomicActionRepository>();
         repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
-        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        var checker = BuildChecker(repoMock);
         
         Action act = () => checker.CheckCanAdd(action, item);
         
@@ -149,7 +160,7 @@ public class AtomicActionConsistencyCheckerAccessTests
     }
     
     [Test]
-    public void Synchronize_Fails_When_Target_Part_Incomplete()
+    public void Synchronize_Fails_When_Target_Part_Incomplete_In_Flat_Mode()
     {
         var (src, dst) = BuildParts();
         dst.IsIncompleteDueToAccess = true;
@@ -165,7 +176,7 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var repoMock = new Mock<IAtomicActionRepository>();
         repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
-        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        var checker = BuildChecker(repoMock, MatchingModes.Flat);
         var result = checker.CheckCanAdd(action, item);
         
         result.ValidationResults.Should().HaveCount(1);
@@ -215,7 +226,7 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var repoMock = new Mock<IAtomicActionRepository>();
         repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
-        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        var checker = BuildChecker(repoMock);
         
         Action act = () => checker.CheckCanAdd(action, item);
         
@@ -264,11 +275,36 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var repoMock = new Mock<IAtomicActionRepository>();
         repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
-        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        var checker = BuildChecker(repoMock);
         
         Action act = () => checker.CheckCanAdd(action, item);
         
         act.Should().NotThrow();
+    }
+    
+    [Test]
+    public void Synchronize_Allows_Incomplete_Parts_In_Tree_Mode_When_Items_Accessible()
+    {
+        var (src, dst) = BuildParts();
+        src.IsIncompleteDueToAccess = true;
+        dst.IsIncompleteDueToAccess = true;
+        var item = BuildComparisonItem(src, dst, sourceAccessible: true, targetAccessible: true);
+        
+        var action = new AtomicAction
+        {
+            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Source = new DataPart("A", src),
+            Destination = new DataPart("B", dst),
+            ComparisonItem = item
+        };
+        
+        var repoMock = new Mock<IAtomicActionRepository>();
+        repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
+        var checker = BuildChecker(repoMock, MatchingModes.Tree);
+        var result = checker.CheckCanAdd(action, item);
+        
+        result.ValidationResults.Should().HaveCount(1);
+        result.ValidationResults[0].IsValid.Should().BeTrue();
     }
     
     [Test]
@@ -313,7 +349,7 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var repoMock = new Mock<IAtomicActionRepository>();
         repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
-        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        var checker = BuildChecker(repoMock);
         var result = checker.CheckCanAdd(action, item);
         
         result.ValidationResults.Should().HaveCount(1);
@@ -322,7 +358,7 @@ public class AtomicActionConsistencyCheckerAccessTests
     }
     
     [Test]
-    public void Delete_Fails_When_Target_Part_Incomplete()
+    public void Delete_Fails_When_Target_Part_Incomplete_In_Flat_Mode()
     {
         var (src, dst) = BuildParts();
         dst.IsIncompleteDueToAccess = true;
@@ -337,7 +373,7 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var repoMock = new Mock<IAtomicActionRepository>();
         repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
-        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        var checker = BuildChecker(repoMock, MatchingModes.Flat);
         var result = checker.CheckCanAdd(action, item);
         
         result.ValidationResults.Should().HaveCount(1);
@@ -346,9 +382,9 @@ public class AtomicActionConsistencyCheckerAccessTests
     }
     
     [Test]
-    public void Create_Fails_When_Target_Part_Incomplete()
+    public void Create_Fails_When_Target_Part_Incomplete_In_Flat_Mode()
     {
-        var (src, dst) = BuildParts();
+        var (_, dst) = BuildParts();
         dst.InventoryPartType = FileSystemTypes.Directory;
         dst.IsIncompleteDueToAccess = true;
         var item = new ComparisonItem(new PathIdentity(FileSystemTypes.Directory, "/p", "p", "/p"));
@@ -362,7 +398,7 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var repoMock = new Mock<IAtomicActionRepository>();
         repoMock.Setup(r => r.GetAtomicActions(It.IsAny<ComparisonItem>())).Returns(new List<AtomicAction>());
-        var checker = new AtomicActionConsistencyChecker(repoMock.Object);
+        var checker = BuildChecker(repoMock, MatchingModes.Flat);
         var result = checker.CheckCanAdd(action, item);
         
         result.ValidationResults.Should().HaveCount(1);
