@@ -787,15 +787,15 @@ Would you like to continue ?</value>
 	<data name="MessageBox_OK" xml:space="preserve">
 		<value>OK</value>
 	</data>
-	<data name="MessageBox_Yes" xml:space="preserve">
-		<value>Yes</value>
-	</data>
-	<data name="MessageBox_No" xml:space="preserve">
-		<value>No</value>
-	</data>
-	<data name="MessageBox_Cancel" xml:space="preserve">
-		<value>Cancel</value>
-	</data>
+    <data name="MessageBox_Yes" xml:space="preserve">
+        <value>YES</value>
+    </data>
+    <data name="MessageBox_No" xml:space="preserve">
+        <value>NO</value>
+    </data>
+    <data name="MessageBox_Cancel" xml:space="preserve">
+        <value>CANCEL</value>
+    </data>
 	<data name="MainWindow_OnClose_ConfirmTitle" xml:space="preserve">
 		<value>Quit</value>
 	</data>
@@ -1818,9 +1818,9 @@ Do you want to save this new Session Profile with this name?</value>
         <value>• {0} files to delete</value>
     </data>
     <data name="SynchronizationConfirmation_Confirm" xml:space="preserve">
-        <value>Confirm</value>
+        <value>CONFIRM</value>
     </data>
     <data name="SynchronizationConfirmation_Cancel" xml:space="preserve">
-        <value>Cancel</value>
+        <value>CANCEL</value>
     </data>
 </root>

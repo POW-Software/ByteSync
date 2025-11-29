@@ -763,15 +763,15 @@ Voulez-vous continuer ?</value>
 	<data name="CurrentCloudSession_FatalError" xml:space="preserve">
 		<value>Une erreur fatale s'est produite pendant la session. La session est terminée.</value>
 	</data>
-	<data name="MessageBox_Yes" xml:space="preserve">
-		<value>Oui</value>
-	</data>
-	<data name="MessageBox_No" xml:space="preserve">
-		<value>Non</value>
-	</data>
-	<data name="MessageBox_Cancel" xml:space="preserve">
-		<value>Annuler</value>
-	</data>
+    <data name="MessageBox_Yes" xml:space="preserve">
+        <value>OUI</value>
+    </data>
+    <data name="MessageBox_No" xml:space="preserve">
+        <value>NON</value>
+    </data>
+    <data name="MessageBox_Cancel" xml:space="preserve">
+        <value>ANNULER</value>
+    </data>
 	<data name="MainWindow_OnClose_ConfirmTitle" xml:space="preserve">
 		<value>Quitter</value>
 	</data>
@@ -1793,9 +1793,9 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
         <value>• {0} fichiers à supprimer</value>
     </data>
     <data name="SynchronizationConfirmation_Confirm" xml:space="preserve">
-        <value>Confirmer</value>
+        <value>CONFIRMER</value>
     </data>
     <data name="SynchronizationConfirmation_Cancel" xml:space="preserve">
-        <value>Annuler</value>
+        <value>ANNULER</value>
     </data>
 </root>
