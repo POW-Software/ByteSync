@@ -51,7 +51,13 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
                 IdentifiedFiles = m.IdentifiedFiles;
                 IdentifiedDirectories = m.IdentifiedDirectories;
                 IdentifiedVolume = m.IdentifiedVolume;
+                IdentificationErrors = m.IdentificationErrors;
             })
+            .DisposeWith(disposables);
+        
+        this.WhenAnyValue(x => x.IdentificationErrors)
+            .Select(v => v > 0)
+            .ToPropertyEx(this, x => x.HasIdentificationErrors)
             .DisposeWith(disposables);
         
         _inventoryService.InventoryProcessData.IdentificationStatus
@@ -124,6 +130,11 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
     
     [Reactive]
     public long IdentifiedVolume { get; set; }
+    
+    [Reactive]
+    public int IdentificationErrors { get; set; }
+    
+    public extern bool HasIdentificationErrors { [ObservableAsProperty] get; }
     
     [Reactive]
     public string IdentificationIcon { get; set; } = "None";

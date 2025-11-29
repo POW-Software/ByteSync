@@ -394,6 +394,9 @@ Would you like to continue ?</value>
 	<data name="InventoryProcess_IdentifiedDirectories" xml:space="preserve">
 		<value>Identified Directories:</value>
 	</data>
+	<data name="InventoryProcess_IdentificationErrors" xml:space="preserve">
+		<value>Identification Errors:</value>
+	</data>
 	<data name="InventoryProcess_Start" xml:space="preserve">
 		<value>Start:</value>
 	</data>
@@ -670,11 +673,14 @@ Would you like to continue ?</value>
     <data name="InventoryProcess_GlobalProcessedSize" xml:space="preserve">
         <value>Total Processed Volume:</value>
     </data>
-    <data name="InventoryProcess_GlobalAnalyzeSuccess" xml:space="preserve">
-        <value>Total Successful Calculations:</value>
-    </data>
-    <data name="InventoryProcess_GlobalAnalyzeErrors" xml:space="preserve">
-        <value>Total Calculation Errors:</value>
+	<data name="InventoryProcess_GlobalAnalyzeSuccess" xml:space="preserve">
+		<value>Total Successful Calculations:</value>
+	</data>
+	<data name="InventoryProcess_GlobalAnalyzeErrors" xml:space="preserve">
+		<value>Total Calculation Errors:</value>
+	</data>
+    <data name="InventoryProcess_GlobalIdentificationErrors" xml:space="preserve">
+        <value>Total Identification Errors:</value>
     </data>
 	<data name="ContentIdentity_AnErrorOccured" xml:space="preserve">
 		<value>An error has occurred during the analysis</value>
