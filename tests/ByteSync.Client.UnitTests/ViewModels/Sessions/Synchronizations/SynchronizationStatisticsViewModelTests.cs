@@ -18,7 +18,7 @@ using NUnit.Framework;
 namespace ByteSync.Client.UnitTests.ViewModels.Sessions.Synchronizations;
 
 [TestFixture]
-public class TestSynchronizationStatisticsViewModel : AbstractTester
+public class SynchronizationStatisticsViewModelTests : AbstractTester
 {
     private SynchronizationStatisticsViewModel _viewModel = null!;
     private SynchronizationProcessData _processData = null!;

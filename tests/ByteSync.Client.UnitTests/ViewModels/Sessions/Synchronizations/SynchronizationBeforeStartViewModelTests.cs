@@ -25,7 +25,7 @@ using NUnit.Framework;
 namespace ByteSync.Client.UnitTests.ViewModels.Sessions.Synchronizations;
 
 [TestFixture]
-public class TestSynchronizationBeforeStartViewModel : AbstractTester
+public class SynchronizationBeforeStartViewModelTests : AbstractTester
 {
     private SynchronizationBeforeStartViewModel _viewModel = null!;
     private Mock<ISynchronizationStarter> _synchronizationStarter = null!;
