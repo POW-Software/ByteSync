@@ -11,17 +11,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AWSSDK.S3" Version="4.0.7.4"/>
-        <PackageReference Include="Azure.Identity" Version="1.16.0"/>
+        <PackageReference Include="AWSSDK.S3" Version="4.0.13.1"/>
+        <PackageReference Include="Azure.Identity" Version="1.17.1"/>
         <PackageReference Include="FakeItEasy" Version="8.3.0" />
         <PackageReference Include="AwesomeAssertions" Version="8.0.1" />
         <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.4.0"/>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1"/>
         <PackageReference Include="NUnit" Version="4.4.0" />
-        <PackageReference Include="NUnit3TestAdapter" Version="5.1.0" />
-        <PackageReference Include="NUnit.Analyzers" Version="4.10.0">
+        <PackageReference Include="NUnit3TestAdapter" Version="5.2.0"/>
+        <PackageReference Include="NUnit.Analyzers" Version="4.11.2">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
