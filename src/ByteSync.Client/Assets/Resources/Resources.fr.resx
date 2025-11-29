@@ -1750,6 +1750,9 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
     <data name="SynchronizationConfirmation_TotalSize" xml:space="preserve">
         <value>{0} à transférer</value>
     </data>
+    <data name="SynchronizationConfirmation_TotalSizeWithDelta" xml:space="preserve">
+        <value>{0} à transférer ({1} fichier(s) en delta, taille réelle plus petite)</value>
+    </data>
     <data name="SynchronizationConfirmation_ToDestination" xml:space="preserve">
         <value>Vers {0} ({1}) :</value>
     </data>

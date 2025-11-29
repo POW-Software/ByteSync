@@ -4,7 +4,6 @@ using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Synchronizations;
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.EndPoints;
-using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Converters;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Localizations;
@@ -23,7 +22,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
     private Mock<ISessionMemberRepository> _sessionMemberRepository = null!;
     private Mock<IFormatKbSizeConverter> _formatKbSizeConverter = null!;
     private Mock<ILocalizationService> _localizationService = null!;
-
+    
     [SetUp]
     public void SetUp()
     {
@@ -35,7 +34,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
         _localizationService.Setup(l => l[It.IsAny<string>()]).Returns((string key) => key);
         _formatKbSizeConverter.Setup(c => c.Convert(It.IsAny<long?>())).Returns((long? size) => $"{size} B");
     }
-
+    
     [Test]
     public void Constructor_ShouldComputeTotalActionsCount()
     {
@@ -45,7 +44,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
         
         viewModel.TotalActionsCount.Should().Be(5);
     }
-
+    
     [Test]
     public void Constructor_ShouldComputeTotalDataSize()
     {
@@ -60,7 +59,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
         
         _formatKbSizeConverter.Verify(c => c.Convert(3000L), Times.Once);
     }
-
+    
     [Test]
     public void Constructor_ShouldGroupActionsByDestination()
     {
@@ -82,7 +81,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
         
         viewModel.DestinationSummaryViewModels.Should().HaveCount(2);
     }
-
+    
     [Test]
     public void Constructor_ShouldComputeCorrectActionCounts()
     {
@@ -107,7 +106,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
         summary.SynchronizeDateCount.Should().Be(1);
         summary.DeleteCount.Should().Be(1);
     }
-
+    
     [Test]
     public async Task ConfirmCommand_ShouldReturnTrue()
     {
@@ -121,7 +120,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
         
         result.Should().BeTrue();
     }
-
+    
     [Test]
     public async Task CancelCommand_ShouldReturnFalse()
     {
@@ -135,7 +134,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
         
         result.Should().BeFalse();
     }
-
+    
     [Test]
     public async Task CancelIfNeeded_ShouldReturnFalse()
     {
@@ -149,7 +148,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
         
         result.Should().BeFalse();
     }
-
+    
     [Test]
     public void DestinationSummaryViewModel_ShouldFormatHeaderText()
     {
@@ -167,7 +166,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
         summaryVm.HeaderText.Should().Contain("A");
         summaryVm.HeaderText.Should().Contain("TestMachine");
     }
-
+    
     [Test]
     public void DestinationSummaryViewModel_ShouldHaveCorrectVisibilityFlags()
     {
@@ -186,7 +185,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
         summaryVm.HasSyncDateActions.Should().BeTrue();
         summaryVm.HasDeleteActions.Should().BeFalse();
     }
-
+    
     [Test]
     public void DestinationActionsSummary_TotalActionsCount_ShouldSumAllCounts()
     {
@@ -200,7 +199,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
         
         summary.TotalActionsCount.Should().Be(10);
     }
-
+    
     [Test]
     public void Constructor_WithEmptyActions_ShouldHaveZeroTotals()
     {
@@ -211,7 +210,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
         viewModel.TotalActionsCount.Should().Be(0);
         viewModel.DestinationSummaryViewModels.Should().BeEmpty();
     }
-
+    
     [Test]
     public void Constructor_WithActionsWithoutTarget_ShouldNotCrash()
     {
@@ -225,7 +224,37 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
         viewModel.TotalActionsCount.Should().Be(1);
         viewModel.DestinationSummaryViewModels.Should().BeEmpty();
     }
-
+    
+    [Test]
+    public void Constructor_WithDeltaActions_ShouldShowDeltaInfoInTotalSizeText()
+    {
+        var actions = new List<SharedAtomicAction>
+        {
+            CreateAction("1", size: 1000, SynchronizationTypes.Full),
+            CreateAction("2", size: 2000, SynchronizationTypes.Delta),
+            CreateAction("3", size: 3000, SynchronizationTypes.Delta)
+        };
+        
+        var viewModel = CreateViewModel(actions);
+        
+        viewModel.TotalDataSizeText.Should().Contain("SynchronizationConfirmation_TotalSizeWithDelta");
+    }
+    
+    [Test]
+    public void Constructor_WithOnlyFullActions_ShouldShowRegularTotalSizeText()
+    {
+        var actions = new List<SharedAtomicAction>
+        {
+            CreateAction("1", size: 1000, SynchronizationTypes.Full),
+            CreateAction("2", size: 2000, SynchronizationTypes.Full)
+        };
+        
+        var viewModel = CreateViewModel(actions);
+        
+        viewModel.TotalDataSizeText.Should().Contain("SynchronizationConfirmation_TotalSize");
+        viewModel.TotalDataSizeText.Should().NotContain("SynchronizationConfirmation_TotalSizeWithDelta");
+    }
+    
     private SynchronizationConfirmationViewModel CreateViewModel(List<SharedAtomicAction> actions)
     {
         return new SynchronizationConfirmationViewModel(
@@ -235,7 +264,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
             _formatKbSizeConverter.Object,
             _localizationService.Object);
     }
-
+    
     private List<SharedAtomicAction> CreateTestActions(int count)
     {
         var actions = new List<SharedAtomicAction>();
@@ -243,18 +272,20 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
         {
             actions.Add(CreateAction(i.ToString()));
         }
+        
         return actions;
     }
-
-    private SharedAtomicAction CreateAction(string id, long? size = null)
+    
+    private SharedAtomicAction CreateAction(string id, long? size = null, SynchronizationTypes? synchronizationType = null)
     {
         return new SharedAtomicAction(id)
         {
             Size = size,
-            Operator = ActionOperatorTypes.DoNothing
+            Operator = ActionOperatorTypes.DoNothing,
+            SynchronizationType = synchronizationType
         };
     }
-
+    
     private SharedAtomicAction CreateActionWithTarget(string id, string clientInstanceId, string nodeId, ActionOperatorTypes operatorType)
     {
         return new SharedAtomicAction(id)
@@ -267,7 +298,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
             Operator = operatorType
         };
     }
-
+    
     private void SetupDataNodes(params (string clientInstanceId, string nodeId, string code)[] nodes)
     {
         foreach (var (clientInstanceId, nodeId, code) in nodes)
@@ -281,7 +312,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
                 .Returns(dataNodes);
         }
     }
-
+    
     private void SetupSessionMembers(params (string clientInstanceId, string machineName)[] members)
     {
         var sessionMembers = members.Select(m => new SessionMember

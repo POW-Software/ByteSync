@@ -1775,6 +1775,9 @@ Do you want to save this new Session Profile with this name?</value>
     <data name="SynchronizationConfirmation_TotalSize" xml:space="preserve">
         <value>{0} to transfer</value>
     </data>
+    <data name="SynchronizationConfirmation_TotalSizeWithDelta" xml:space="preserve">
+        <value>{0} to transfer ({1} delta file(s), actual size will be smaller)</value>
+    </data>
     <data name="SynchronizationConfirmation_ToDestination" xml:space="preserve">
         <value>To {0} ({1}):</value>
     </data>

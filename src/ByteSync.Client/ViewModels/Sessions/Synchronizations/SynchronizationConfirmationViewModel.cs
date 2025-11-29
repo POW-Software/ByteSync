@@ -4,6 +4,7 @@ using System.Threading;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Synchronizations;
+using ByteSync.Common.Business.Actions;
 using ByteSync.Interfaces.Converters;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Localizations;
@@ -80,10 +81,23 @@ public class SynchronizationConfirmationViewModel : FlyoutElementViewModel
             TotalActionsCount);
         
         var totalBytes = actions.Where(a => a.Size.HasValue).Sum(a => a.Size!.Value);
+        var deltaFilesCount = actions.Count(a => a.SynchronizationType == SynchronizationTypes.Delta);
+        
         TotalDataSize = _formatKbSizeConverter.Convert(totalBytes);
-        TotalDataSizeText = string.Format(
-            _localizationService[nameof(Resources.SynchronizationConfirmation_TotalSize)],
-            TotalDataSize);
+        
+        if (deltaFilesCount > 0)
+        {
+            TotalDataSizeText = string.Format(
+                _localizationService[nameof(Resources.SynchronizationConfirmation_TotalSizeWithDelta)],
+                TotalDataSize,
+                deltaFilesCount);
+        }
+        else
+        {
+            TotalDataSizeText = string.Format(
+                _localizationService[nameof(Resources.SynchronizationConfirmation_TotalSize)],
+                TotalDataSize);
+        }
         
         var actionsByDestination = actions
             .Where(a => a.Target != null)

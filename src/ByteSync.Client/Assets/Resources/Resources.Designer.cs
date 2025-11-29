@@ -2961,6 +2961,15 @@ namespace ByteSync.Assets.Resources {
         }
         
         /// <summary>
+        /// Looks up a localized string similar to {0} to transfer ({1} delta file(s), actual size will be smaller).
+        /// </summary>
+        internal static string SynchronizationConfirmation_TotalSizeWithDelta {
+            get {
+                return ResourceManager.GetString("SynchronizationConfirmation_TotalSizeWithDelta", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         /// Looks up a localized string similar to To {0} ({1}):.
         /// </summary>
         internal static string SynchronizationConfirmation_ToDestination {
