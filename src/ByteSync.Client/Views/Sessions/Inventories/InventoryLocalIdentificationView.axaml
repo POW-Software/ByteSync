@@ -41,6 +41,7 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_IdentifiedFiles}"
@@ -59,6 +60,16 @@
                    Content="{Binding IdentifiedVolume, FallbackValue=0, 
                         Converter={StaticResource FormatKbSizeConverter}}"
                    HorizontalContentAlignment="Right" />
+
+            <Label Grid.Row="3" Grid.Column="0" Content="{localizations:Loc InventoryProcess_IdentificationErrors}"
+                   Classes="InventoryStatusDescription"
+                   Classes.IsBold="{Binding HasIdentificationErrors}" />
+            <Border Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right"
+                    Classes="Badge"
+                    Classes.Secondary="{Binding HasIdentificationErrors}">
+                <TextBlock Text="{Binding IdentificationErrors, FallbackValue=0}"
+                           Classes.IsBold="{Binding HasIdentificationErrors}" />
+            </Border>
         </Grid>
     </StackPanel>
 </UserControl>

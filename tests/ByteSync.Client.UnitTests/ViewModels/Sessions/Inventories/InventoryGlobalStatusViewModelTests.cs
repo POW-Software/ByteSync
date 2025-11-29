@@ -125,7 +125,7 @@ public class InventoryGlobalStatusViewModelTests
         _processData.GlobalMainStatus.OnNext(InventoryTaskStatus.Success);
         vm.IsInventoryInProgress.Should().BeTrue("waiting for final stats");
         
-        _statsSubject.OnNext(new InventoryStatistics { Errors = 3, Success = 0, TotalAnalyzed = 0 });
+        _statsSubject.OnNext(new InventoryStatistics { AnalyzeErrors = 3, AnalyzeSuccess = 0, TotalAnalyzed = 0 });
         
         vm.HasErrors.Should().BeTrue();
         vm.IsInventoryInProgress.Should().BeFalse();
@@ -140,7 +140,7 @@ public class InventoryGlobalStatusViewModelTests
         _processData.GlobalMainStatus.OnNext(InventoryTaskStatus.Success);
         vm.IsInventoryInProgress.Should().BeTrue();
         
-        _statsSubject.OnNext(new InventoryStatistics { Errors = 0, Success = 10, TotalAnalyzed = 10 });
+        _statsSubject.OnNext(new InventoryStatistics { AnalyzeErrors = 0, AnalyzeSuccess = 10, TotalAnalyzed = 10 });
         
         vm.HasErrors.Should().BeFalse();
         vm.IsInventoryInProgress.Should().BeFalse();
@@ -152,7 +152,7 @@ public class InventoryGlobalStatusViewModelTests
     {
         var vm = CreateVm();
         
-        _statsSubject.OnNext(new InventoryStatistics { Errors = 2, Success = 0, TotalAnalyzed = 2 });
+        _statsSubject.OnNext(new InventoryStatistics { AnalyzeErrors = 2, AnalyzeSuccess = 0, TotalAnalyzed = 2 });
         _processData.GlobalMainStatus.OnNext(InventoryTaskStatus.Success);
         
         vm.HasErrors.Should().BeTrue();
@@ -165,7 +165,7 @@ public class InventoryGlobalStatusViewModelTests
     {
         var vm = CreateVm();
         
-        _statsSubject.OnNext(new InventoryStatistics { Errors = 0, Success = 5, TotalAnalyzed = 5 });
+        _statsSubject.OnNext(new InventoryStatistics { AnalyzeErrors = 0, AnalyzeSuccess = 5, TotalAnalyzed = 5 });
         _processData.GlobalMainStatus.OnNext(InventoryTaskStatus.Success);
         
         vm.GlobalMainIcon.Should().Be("SolidCheckCircle");
@@ -183,7 +183,7 @@ public class InventoryGlobalStatusViewModelTests
         
         vm.IsInventoryInProgress.Should().BeTrue("waiting for first non-null statistics");
         
-        _statsSubject.OnNext(new InventoryStatistics { Errors = 0, Success = 3, TotalAnalyzed = 3 });
+        _statsSubject.OnNext(new InventoryStatistics { AnalyzeErrors = 0, AnalyzeSuccess = 3, TotalAnalyzed = 3 });
         
         vm.GlobalMainIcon.Should().Be("SolidCheckCircle");
         vm.IsInventoryInProgress.Should().BeFalse();
@@ -210,10 +210,10 @@ public class InventoryGlobalStatusViewModelTests
     {
         var vm = CreateVm();
         
-        _statsSubject.OnNext(new InventoryStatistics { Errors = 4, Success = 0, TotalAnalyzed = 4 });
+        _statsSubject.OnNext(new InventoryStatistics { AnalyzeErrors = 4, AnalyzeSuccess = 0, TotalAnalyzed = 4 });
         vm.HasErrors.Should().BeTrue();
         
-        _statsSubject.OnNext(new InventoryStatistics { Errors = 0, Success = 10, TotalAnalyzed = 10 });
+        _statsSubject.OnNext(new InventoryStatistics { AnalyzeErrors = 0, AnalyzeSuccess = 10, TotalAnalyzed = 10 });
         vm.HasErrors.Should().BeFalse();
     }
     
@@ -222,7 +222,7 @@ public class InventoryGlobalStatusViewModelTests
     {
         var vm = CreateVm();
         
-        _statsSubject.OnNext(new InventoryStatistics { Errors = 1, Success = 2, TotalAnalyzed = 3 });
+        _statsSubject.OnNext(new InventoryStatistics { AnalyzeErrors = 1, AnalyzeSuccess = 2, TotalAnalyzed = 3 });
         vm.GlobalAnalyzeErrors.Should().Be(1);
         
         vm.GlobalMainIcon = "SolidCheckCircle";
@@ -234,8 +234,33 @@ public class InventoryGlobalStatusViewModelTests
         vm.GlobalTotalAnalyzed.Should().Be(null);
         vm.GlobalAnalyzeSuccess.Should().Be(null);
         vm.GlobalAnalyzeErrors.Should().Be(null);
+        vm.GlobalIdentificationErrors.Should().Be(null);
         vm.GlobalMainIcon.Should().Be("None");
         vm.GlobalMainStatusText.Should().BeEmpty();
+    }
+    
+    [Test]
+    public void HasIdentificationErrors_ComputedFromStats()
+    {
+        var vm = CreateVm();
+        
+        _statsSubject.OnNext(new InventoryStatistics { AnalyzeErrors = 0, AnalyzeSuccess = 1, TotalAnalyzed = 1, IdentificationErrors = 2 });
+        vm.HasIdentificationErrors.Should().BeTrue();
+        
+        _statsSubject.OnNext(new InventoryStatistics { AnalyzeErrors = 0, AnalyzeSuccess = 1, TotalAnalyzed = 1, IdentificationErrors = 0 });
+        vm.HasIdentificationErrors.Should().BeFalse();
+    }
+    
+    [Test]
+    public void SuccessWithIdentificationErrors_RendersErrorState()
+    {
+        var vm = CreateVm();
+        
+        _statsSubject.OnNext(new InventoryStatistics { AnalyzeErrors = 0, AnalyzeSuccess = 1, TotalAnalyzed = 1, IdentificationErrors = 1 });
+        _processData.GlobalMainStatus.OnNext(InventoryTaskStatus.Success);
+        
+        vm.HasIdentificationErrors.Should().BeTrue();
+        vm.GlobalMainIcon.Should().Be("RegularError");
     }
     
     [Test]

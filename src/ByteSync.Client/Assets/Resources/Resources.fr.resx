@@ -394,6 +394,9 @@ Voulez-vous continuer ?</value>
 	<data name="InventoryProcess_IdentifiedDirectories" xml:space="preserve">
 		<value>Répertoires identifiés :</value>
 	</data>
+	<data name="InventoryProcess_IdentificationErrors" xml:space="preserve">
+		<value>Erreurs d'identification :</value>
+	</data>
 	<data name="InventoryProcess_Start" xml:space="preserve">
 		<value>Démarrage :</value>
 	</data>
@@ -666,6 +669,9 @@ Voulez-vous continuer ?</value>
     </data>
     <data name="InventoryProcess_GlobalAnalyzeErrors" xml:space="preserve">
         <value>Total des erreurs de calcul :</value>
+    </data>
+    <data name="InventoryProcess_GlobalIdentificationErrors" xml:space="preserve">
+        <value>Total erreurs d'identification :</value>
     </data>
 	<data name="ContentIdentity_AnErrorOccured" xml:space="preserve">
 		<value>Une erreur est survenue durant l'analyse</value>
