@@ -8,24 +8,24 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AWSSDK.S3" Version="4.0.7.4"/>
-        <PackageReference Include="Azure.Identity" Version="1.16.0"/>
-      <PackageReference Include="Azure.Storage.Blobs" Version="12.25.0" />
-      <PackageReference Include="MediatR" Version="12.5.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.20"/>
+        <PackageReference Include="AWSSDK.S3" Version="4.0.13.1"/>
+        <PackageReference Include="Azure.Identity" Version="1.17.1"/>
+        <PackageReference Include="Azure.Storage.Blobs" Version="12.26.0"/>
+        <PackageReference Include="MediatR" Version="12.5.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.22"/>
         <PackageReference Include="Microsoft.Azure.SignalR" Version="1.32.0"/>
         <PackageReference Include="Microsoft.Azure.SignalR.Management" Version="1.32.0"/>
-      <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
-      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
-        <PackageReference Include="Polly" Version="8.6.3"/>
-      <PackageReference Include="RedLock.net" Version="2.3.2" />
-        <PackageReference Include="StackExchange.Redis" Version="2.9.17"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1"/>
+        <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3"/>
+        <PackageReference Include="Polly" Version="8.6.5"/>
+        <PackageReference Include="RedLock.net" Version="2.3.2"/>
+        <PackageReference Include="StackExchange.Redis" Version="2.10.1"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ByteSync.Common\ByteSync.Common.csproj" />
+        <ProjectReference Include="..\ByteSync.Common\ByteSync.Common.csproj"/>
     </ItemGroup>
 
 </Project>
