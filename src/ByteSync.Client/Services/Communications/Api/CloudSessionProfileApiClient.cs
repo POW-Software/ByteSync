@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Common.Business.Profiles;
+﻿using ByteSync.Common.Business.Profiles;
 using ByteSync.Interfaces.Controls.Communications.Http;
 
 namespace ByteSync.Services.Communications.Api;
@@ -14,22 +13,23 @@ public class CloudSessionProfileApiClient : ICloudSessionProfileApiClient
         _apiInvoker = apiInvoker;
         _logger = logger;
     }
-
+    
     public async Task<CreateCloudSessionProfileResult> CreateCloudSessionProfile(string sessionId)
     {
         try
         {
             var result = await _apiInvoker.PostAsync<CreateCloudSessionProfileResult>($"cloudSessionProfile", sessionId);
+            
             return result;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "message");
-                
+            
             throw;
         }
     }
-
+    
     public async Task<CloudSessionProfileData> GetCloudSessionProfileData(string sessionId, string additionalName)
     {
         try
@@ -41,27 +41,29 @@ public class CloudSessionProfileApiClient : ICloudSessionProfileApiClient
             };
             
             var result = await _apiInvoker.PostAsync<CloudSessionProfileData>($"cloudSessionProfile/{additionalName}/get", parameters);
+            
             return result;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "message");
-                
+            
             throw;
         }
     }
-
+    
     public async Task<bool> DeleteCloudSessionProfile(DeleteCloudSessionProfileParameters parameters)
     {
         try
         {
             var result = await _apiInvoker.PostAsync<bool>($"cloudSessionProfile/{parameters.CloudSessionProfileId}/delete", parameters);
+            
             return result;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "message");
-                
+            
             throw;
         }
     }

@@ -5,7 +5,6 @@ using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Controls;
 using ByteSync.Interfaces.Controls.Communications;
-using ByteSync.Interfaces.Services.Communications;
 
 namespace ByteSync.Services.Communications;
 
@@ -14,9 +13,8 @@ public class TrustProcessPublicKeysRepository : BaseRepository<TrustProcessPubli
     public TrustProcessPublicKeysRepository(ILogger<TrustProcessPublicKeysRepository> logger)
         : base(logger)
     {
-
     }
-
+    
     public async Task Start(string sessionId)
     {
         await ResetDataAsync(sessionId);
@@ -31,14 +29,14 @@ public class TrustProcessPublicKeysRepository : BaseRepository<TrustProcessPubli
     {
         await RunAsync(sessionId, data => data.JoinerTrustProcessData.FullyTrustedPublicKeyCheckDatas.Add(publicKeyCheckData));
     }
-
+    
     public async Task<bool> IsFullyTrusted(string sessionId, string memberInstanceId)
     {
         return await GetAsync(sessionId,
             data => data.JoinerTrustProcessData
                 .FullyTrustedPublicKeyCheckDatas.Any(pk => pk.IssuerClientInstanceId.Equals(memberInstanceId)));
     }
-
+    
     public async Task<PeerTrustProcessData> ResetPeerTrustProcessData(string sessionId, string otherPartyClientId)
     {
         return await GetAsync(sessionId, data =>
@@ -46,7 +44,7 @@ public class TrustProcessPublicKeysRepository : BaseRepository<TrustProcessPubli
             var peerTrustProcessData = new PeerTrustProcessData(otherPartyClientId);
             
             data.AddPeerTrustProcessData(peerTrustProcessData);
-
+            
             return peerTrustProcessData;
         });
     }
@@ -63,33 +61,31 @@ public class TrustProcessPublicKeysRepository : BaseRepository<TrustProcessPubli
     
     public async Task SetOtherPartyChecked(string sessionId, PublicKeyValidationParameters publicKeyValidationParameters)
     {
-        await RunAsync(sessionId, data =>
-        {
-            data.SetOtherPartyChecked(publicKeyValidationParameters.IssuerClientId, publicKeyValidationParameters.IsValidated);
-        });
+        await RunAsync(sessionId,
+            data =>
+            {
+                data.SetOtherPartyChecked(publicKeyValidationParameters.IssuerClientId, publicKeyValidationParameters.IsValidated);
+            });
     }
     
-    public async Task StoreLocalPublicKeyCheckData(string sessionId, string joinerClientInstanceId, PublicKeyCheckData localPublicKeyCheckData)
+    public async Task StoreLocalPublicKeyCheckData(string sessionId, string joinerClientInstanceId,
+        PublicKeyCheckData localPublicKeyCheckData)
     {
-        await RunAsync(sessionId, data =>
-        {
-            data.SessionMemberTrustProcessData.StoreLocalPublicKeyCheckData(joinerClientInstanceId, localPublicKeyCheckData);
-        });
+        await RunAsync(sessionId,
+            data => { data.SessionMemberTrustProcessData.StoreLocalPublicKeyCheckData(joinerClientInstanceId, localPublicKeyCheckData); });
     }
-
+    
     public async Task<PublicKeyCheckData?> GetLocalPublicKeyCheckData(string sessionId, string joinerClientInstanceId)
     {
-        return await GetAsync(sessionId, data =>
-        {
-            return data.SessionMemberTrustProcessData.GetLocalPublicKeyCheckData(joinerClientInstanceId);
-        });
+        return await GetAsync(sessionId,
+            data => { return data.SessionMemberTrustProcessData.GetLocalPublicKeyCheckData(joinerClientInstanceId); });
     }
-
+    
     protected override string GetDataId(TrustProcessPublicKeysData data)
     {
         return data.SessionId;
     }
-
+    
     protected override ManualResetEvent? GetEndEvent(TrustProcessPublicKeysData data)
     {
         return null;

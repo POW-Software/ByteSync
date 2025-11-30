@@ -1,5 +1,4 @@
 ﻿using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Business.Arguments;
 using ByteSync.Business.Misc;
 using ByteSync.Interfaces.Controls.Applications;
@@ -16,7 +15,7 @@ class ConnectionConstantsService : IConnectionConstantsService
     private readonly IEnvironmentService _environmentService;
     private readonly IConfiguration _configuration;
     private readonly ILogger<ConnectionConstantsService> _logger;
-
+    
     public ConnectionConstantsService(IEnvironmentService environmentService, IConfiguration configuration,
         ILogger<ConnectionConstantsService> logger)
     {
@@ -36,7 +35,7 @@ class ConnectionConstantsService : IConnectionConstantsService
                 _apiUrl = SetApiUrl();
                 _logger.LogInformation("API URL set to {ApiUrl}", _apiUrl);
             }
-
+            
             return _apiUrl;
         }
         finally
@@ -52,6 +51,7 @@ class ConnectionConstantsService : IConnectionConstantsService
             if (_environmentService.Arguments.Contains(RegularArguments.CF_API_URL_STAGING))
             {
                 _logger.LogWarning("*** Staging API URL is used, but the application is running in production mode ***");
+                
                 return _configuration["StagingUrl"]!;
             }
             
@@ -81,11 +81,11 @@ class ConnectionConstantsService : IConnectionConstantsService
             }
         }
     }
-
+    
     public TimeSpan[] GetRetriesTimeSpans()
     {
         var timeSpans = new List<TimeSpan>();
-
+        
         timeSpans.Add(TimeSpan.Zero);
         timeSpans.Add(TimeSpan.FromSeconds(2));
         timeSpans.Add(TimeSpan.FromSeconds(5));
@@ -105,7 +105,7 @@ class ConnectionConstantsService : IConnectionConstantsService
         timeSpans.Add(TimeSpan.FromMinutes(5));
         timeSpans.Add(TimeSpan.FromMinutes(5));
         timeSpans.Add(TimeSpan.FromMinutes(5));
-
+        
         return timeSpans.ToArray();
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Business.Trust.Connections;
 using ByteSync.Interfaces.Controls.Communications.Http;
@@ -11,14 +10,15 @@ public class TrustApiClient : ITrustApiClient
 {
     private readonly IApiInvoker _apiInvoker;
     private readonly ILogger<TrustApiClient> _logger;
-
+    
     public TrustApiClient(IApiInvoker apiInvoker, ILogger<TrustApiClient> logger)
     {
         _apiInvoker = apiInvoker;
         _logger = logger;
     }
     
-    public async Task<StartTrustCheckResult?> StartTrustCheck(TrustCheckParameters parameters, CancellationToken cancellationToken = default)
+    public async Task<StartTrustCheckResult?> StartTrustCheck(TrustCheckParameters parameters,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -27,12 +27,13 @@ public class TrustApiClient : ITrustApiClient
         catch (Exception ex)
         {
             LogError(ex);
-                
+            
             throw;
         }
     }
-
-    public async Task GiveMemberPublicKeyCheckData(GiveMemberPublicKeyCheckDataParameters parameters, CancellationToken cancellationToken = default)
+    
+    public async Task GiveMemberPublicKeyCheckData(GiveMemberPublicKeyCheckDataParameters parameters,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -41,12 +42,13 @@ public class TrustApiClient : ITrustApiClient
         catch (Exception ex)
         {
             LogError(ex);
-                
+            
             throw;
         }
     }
-
-    public async Task InformPublicKeyValidationIsFinished(PublicKeyValidationParameters parameters, CancellationToken cancellationToken = default)
+    
+    public async Task InformPublicKeyValidationIsFinished(PublicKeyValidationParameters parameters,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -55,11 +57,11 @@ public class TrustApiClient : ITrustApiClient
         catch (Exception ex)
         {
             LogError(ex);
-                
+            
             throw;
         }
     }
-
+    
     public async Task RequestTrustPublicKey(RequestTrustProcessParameters parameters, CancellationToken cancellationToken = default)
     {
         try
@@ -69,11 +71,11 @@ public class TrustApiClient : ITrustApiClient
         catch (Exception ex)
         {
             LogError(ex);
-                
+            
             throw;
         }
     }
-
+    
     public async Task SendDigitalSignatures(SendDigitalSignaturesParameters parameters, CancellationToken cancellationToken = default)
     {
         try
@@ -83,11 +85,11 @@ public class TrustApiClient : ITrustApiClient
         catch (Exception ex)
         {
             LogError(ex);
-                
+            
             throw;
         }
     }
-
+    
     public async Task SetAuthChecked(SetAuthCheckedParameters parameters, CancellationToken cancellationToken = default)
     {
         try
@@ -97,11 +99,11 @@ public class TrustApiClient : ITrustApiClient
         catch (Exception ex)
         {
             LogError(ex);
-                
+            
             throw;
         }
     }
-
+    
     private void LogError(Exception exception, [CallerMemberName] string caller = "")
     {
         // ReSharper disable once TemplateIsNotCompileTimeConstantProblem

@@ -1,11 +1,8 @@
-﻿using System.Net;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Common.Controls.Json;
-using ByteSync.Common.Helpers;
 using ByteSync.Exceptions;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Services.Communications;
@@ -19,7 +16,7 @@ public class ApiInvoker : IApiInvoker
     private readonly IConnectionConstantsService _connectionConstantsService;
     private readonly ILogger<ApiInvoker> _logger;
     
-    public ApiInvoker(IHttpClientFactory httpClientFactory, IAuthenticationTokensRepository authenticationTokensRepository, 
+    public ApiInvoker(IHttpClientFactory httpClientFactory, IAuthenticationTokensRepository authenticationTokensRepository,
         IConnectionConstantsService connectionConstantsService, ILogger<ApiInvoker> logger)
     {
         _httpClient = httpClientFactory.CreateClient("ApiClient");
@@ -27,51 +24,55 @@ public class ApiInvoker : IApiInvoker
         _connectionConstantsService = connectionConstantsService;
         _logger = logger;
     }
-
+    
     public Task<T> GetAsync<T>(string resource, CancellationToken cancellationToken = default)
     {
         return InvokeRestAsync<T>(HttpMethod.Get, resource, null, null, cancellationToken);
     }
-
+    
     public Task<T> PostAsync<T>(string resource, object? postObject, CancellationToken cancellationToken = default)
     {
         return InvokeRestAsync<T>(HttpMethod.Post, resource, null, postObject, cancellationToken);
     }
-
+    
     public Task<T> DeleteAsync<T>(string resource, object objectToDelete, CancellationToken cancellationToken = default)
     {
         return InvokeRestAsync<T>(HttpMethod.Delete, resource, null, objectToDelete, cancellationToken);
     }
-
+    
     public Task PostAsync(string resource, object? postObject, CancellationToken cancellationToken = default)
     {
         return DoInvokeRestAsync<object>(HttpMethod.Post, resource, null, postObject, false, cancellationToken);
     }
-
-    private async Task<T> InvokeRestAsync<T>(HttpMethod httpVerb, string resource, Dictionary<string, string>? additionalHeaders, object? requestObject,
+    
+    private async Task<T> InvokeRestAsync<T>(HttpMethod httpVerb, string resource, Dictionary<string, string>? additionalHeaders,
+        object? requestObject,
         CancellationToken cancellationToken)
     {
         return await DoInvokeRestAsync<T>(httpVerb, resource, additionalHeaders, requestObject, true, cancellationToken);
     }
-
-    private async Task<T> DoInvokeRestAsync<T>(HttpMethod httpMethod, string resource, Dictionary<string, string>? additionalHeaders, 
+    
+    private async Task<T> DoInvokeRestAsync<T>(HttpMethod httpMethod, string resource, Dictionary<string, string>? additionalHeaders,
         object? requestObject, bool handleResult, CancellationToken cancellationToken)
     {
         using var request = await BuildRequest(httpMethod, resource, additionalHeaders, requestObject);
-
+        
         try
         {
             var response = await _httpClient.SendAsync(request, cancellationToken);
+            
             return await HandleResponse<T>(handleResult, response);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception occurred while invoking API: {Resource}", resource);
+            
             throw new ApiException($"An error occurred while invoking the API on resource {resource}", ex);
         }
     }
-
-    private async Task<HttpRequestMessage> BuildRequest(HttpMethod httpMethod, string resource, Dictionary<string, string>? additionalHeaders,
+    
+    private async Task<HttpRequestMessage> BuildRequest(HttpMethod httpMethod, string resource,
+        Dictionary<string, string>? additionalHeaders,
         object? requestObject)
     {
         var rootUrl = await _connectionConstantsService.GetApiUrl();
@@ -80,10 +81,11 @@ public class ApiInvoker : IApiInvoker
         var request = new HttpRequestMessage(httpMethod, fullUrl);
         
         var jwtToken = await _authenticationTokensRepository.GetTokens();
-        if (jwtToken != null && !jwtToken.JwtToken.IsNullOrEmpty()) 
+        if (jwtToken != null && !jwtToken.JwtToken.IsNullOrEmpty())
         {
-            request.Headers.Add("authorization", jwtToken.JwtToken);   
+            request.Headers.Add("authorization", jwtToken.JwtToken);
         }
+        
         if (additionalHeaders is { Count: > 0 })
         {
             foreach (var header in additionalHeaders)
@@ -97,14 +99,14 @@ public class ApiInvoker : IApiInvoker
             var json = JsonHelper.Serialize(requestObject);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
         }
-
+        
         return request;
     }
-
+    
     private async Task<T> HandleResponse<T>(bool handleResult, HttpResponseMessage response)
     {
         var content = await response.Content.ReadAsStringAsync();
-
+        
         if (response.IsSuccessStatusCode)
         {
             if (handleResult)
@@ -128,12 +130,13 @@ public class ApiInvoker : IApiInvoker
             {
                 return DeserializeContent<T>(content);
             }
-
+            
             _logger.LogError("API call failed with status code {StatusCode}: {ErrorMessage}", response.StatusCode, errorMessage);
+            
             throw new ApiException($"API call failed with status code {response.StatusCode}: {errorMessage}", response.StatusCode);
         }
     }
-
+    
     private T DeserializeContent<T>(string content)
     {
         try
@@ -143,12 +146,13 @@ public class ApiInvoker : IApiInvoker
             {
                 throw new ApiException("Failed to deserialize the response content.");
             }
-
+            
             return result;
         }
         catch (JsonException ex)
         {
             _logger.LogError(ex, "JSON deserialization error");
+            
             throw new ApiException("Failed to deserialize the response content.", ex);
         }
     }

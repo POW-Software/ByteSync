@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using ByteSync.Common.Business.Lobbies;
+﻿using ByteSync.Common.Business.Lobbies;
 using ByteSync.Common.Business.Lobbies.Connections;
 using ByteSync.Interfaces.Controls.Communications.Http;
 
@@ -25,26 +24,28 @@ public class LobbyApiClient : ILobbyApiClient
         catch (Exception ex)
         {
             _logger.LogError(ex, "message");
-                
+            
             throw;
         }
     }
-
+    
     public async Task<JoinLobbyResult> JoinLobby(JoinLobbyParameters joinLobbyParameters)
     {
         try
         {
-            var result = await _apiInvoker.PostAsync<JoinLobbyResult>($"lobby/join/{joinLobbyParameters.CloudSessionProfileId}", joinLobbyParameters);
+            var result = await _apiInvoker.PostAsync<JoinLobbyResult>($"lobby/join/{joinLobbyParameters.CloudSessionProfileId}",
+                joinLobbyParameters);
+            
             return result;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "message");
-                
+            
             throw;
         }
     }
-
+    
     public async Task QuitLobby(string lobbyId)
     {
         try
@@ -54,11 +55,11 @@ public class LobbyApiClient : ILobbyApiClient
         catch (Exception ex)
         {
             _logger.LogError(ex, "message");
-                
+            
             throw;
         }
     }
-
+    
     public async Task SendLobbyCheckInfos(LobbyCheckInfo lobbyCheckInfo)
     {
         try
@@ -68,11 +69,11 @@ public class LobbyApiClient : ILobbyApiClient
         catch (Exception ex)
         {
             _logger.LogError(ex, "message");
-                
+            
             throw;
         }
     }
-
+    
     public async Task UpdateLobbyMemberStatus(string lobbyId, LobbyMemberStatuses status)
     {
         try
@@ -82,7 +83,7 @@ public class LobbyApiClient : ILobbyApiClient
         catch (Exception ex)
         {
             _logger.LogError(ex, "message");
-                
+            
             throw;
         }
     }

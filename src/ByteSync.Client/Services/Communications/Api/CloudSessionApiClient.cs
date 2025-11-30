@@ -1,8 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
 using ByteSync.Common.Business.Sessions;
-using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using Serilog;
@@ -18,22 +16,23 @@ public class CloudSessionApiClient : ICloudSessionApiClient
         _apiInvoker = apiInvoker!;
     }
     
-    public async Task<CloudSessionResult> CreateCloudSession(CreateCloudSessionParameters parameters, CancellationToken cancellationToken = default)
+    public async Task<CloudSessionResult> CreateCloudSession(CreateCloudSessionParameters parameters,
+        CancellationToken cancellationToken = default)
     {
         try
         {
             var result = await _apiInvoker.PostAsync<CloudSessionResult>($"session", parameters, cancellationToken);
-
+            
             return result;
         }
         catch (Exception ex)
         {
             LogError(ex);
-                
+            
             throw;
         }
     }
-
+    
     public async Task QuitCloudSession(string sessionId)
     {
         try
@@ -43,7 +42,7 @@ public class CloudSessionApiClient : ICloudSessionApiClient
         catch (Exception ex)
         {
             LogError(ex);
-                
+            
             throw;
         }
     }
@@ -57,47 +56,49 @@ public class CloudSessionApiClient : ICloudSessionApiClient
         catch (Exception ex)
         {
             LogError(ex);
-                
+            
             throw;
         }
     }
-
-    public async Task<JoinSessionResult> AskPasswordExchangeKey(AskCloudSessionPasswordExchangeKeyParameters parameters, 
+    
+    public async Task<JoinSessionResult> AskPasswordExchangeKey(AskCloudSessionPasswordExchangeKeyParameters parameters,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var result = await _apiInvoker.PostAsync<JoinSessionResult>($"session/{parameters.SessionId}/askPasswordExchangeKey", parameters, 
+            var result = await _apiInvoker.PostAsync<JoinSessionResult>($"session/{parameters.SessionId}/askPasswordExchangeKey",
+                parameters,
                 cancellationToken);
-
+            
             return result;
         }
         catch (Exception ex)
         {
             LogError(ex);
-                
+            
             throw;
         }
     }
-
-    public async Task<FinalizeJoinSessionResult> FinalizeJoinCloudSession(FinalizeJoinCloudSessionParameters parameters, 
+    
+    public async Task<FinalizeJoinSessionResult> FinalizeJoinCloudSession(FinalizeJoinCloudSessionParameters parameters,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var result = await _apiInvoker.PostAsync<FinalizeJoinSessionResult>($"session/{parameters.SessionId}/finalizeJoin", parameters, cancellationToken);
-
+            var result = await _apiInvoker.PostAsync<FinalizeJoinSessionResult>($"session/{parameters.SessionId}/finalizeJoin", parameters,
+                cancellationToken);
+            
             return result;
         }
         catch (Exception ex)
         {
             LogError(ex);
-                
+            
             throw;
         }
     }
-
-    public async Task GiveCloudSessionPasswordExchangeKey(GiveCloudSessionPasswordExchangeKeyParameters parameters, 
+    
+    public async Task GiveCloudSessionPasswordExchangeKey(GiveCloudSessionPasswordExchangeKeyParameters parameters,
         CancellationToken cancellationToken = default)
     {
         try
@@ -107,27 +108,29 @@ public class CloudSessionApiClient : ICloudSessionApiClient
         catch (Exception ex)
         {
             LogError(ex);
-                
+            
             throw;
         }
     }
-
-    public async Task<JoinSessionResult> AskJoinCloudSession(AskJoinCloudSessionParameters parameters, CancellationToken cancellationToken = default)
+    
+    public async Task<JoinSessionResult> AskJoinCloudSession(AskJoinCloudSessionParameters parameters,
+        CancellationToken cancellationToken = default)
     {
         try
         {
-            var result = await _apiInvoker.PostAsync<JoinSessionResult>($"session/{parameters.SessionId}/askJoin", parameters, cancellationToken);
-
+            var result = await _apiInvoker.PostAsync<JoinSessionResult>($"session/{parameters.SessionId}/askJoin", parameters,
+                cancellationToken);
+            
             return result;
         }
         catch (Exception ex)
         {
             LogError(ex);
-                
+            
             throw;
         }
     }
-
+    
     public async Task ValidateJoinCloudSession(ValidateJoinCloudSessionParameters parameters)
     {
         try
@@ -137,11 +140,11 @@ public class CloudSessionApiClient : ICloudSessionApiClient
         catch (Exception ex)
         {
             LogError(ex);
-                
+            
             throw;
         }
     }
-
+    
     public async Task InformPasswordIsWrong(string sessionId, string joinerInstanceId)
     {
         try
@@ -151,11 +154,11 @@ public class CloudSessionApiClient : ICloudSessionApiClient
         catch (Exception ex)
         {
             LogError(ex);
-                
+            
             throw;
         }
     }
-
+    
     public async Task UpdateSettings(string sessionId, EncryptedSessionSettings encryptedSessionSettings)
     {
         try
@@ -165,11 +168,11 @@ public class CloudSessionApiClient : ICloudSessionApiClient
         catch (Exception ex)
         {
             LogError(ex);
-                
+            
             throw;
         }
     }
-
+    
     private void LogError(Exception exception, [CallerMemberName] string caller = "")
     {
         // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
