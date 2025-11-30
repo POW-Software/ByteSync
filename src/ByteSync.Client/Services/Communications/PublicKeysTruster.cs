@@ -5,6 +5,7 @@ using ByteSync.Business;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Business.Trust.Connections;
+using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
@@ -236,7 +237,8 @@ public class PublicKeysTruster : IPublicKeysTruster
         { 
             SessionId = sessionId, 
             PublicKeyInfo = _publicKeysManager.GetMyPublicKeyInfo(),
-            MembersInstanceIdsToCheck = memberIdsToCheck
+            MembersInstanceIdsToCheck = memberIdsToCheck,
+            ProtocolVersion = ProtocolVersion.Current
         };
 
         await _trustProcessPublicKeysRepository.ResetJoinerTrustProcessData(sessionId);

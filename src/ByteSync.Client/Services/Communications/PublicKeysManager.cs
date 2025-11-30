@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using ByteSync.Business.Communications;
 using ByteSync.Common.Business.EndPoints;
+using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
@@ -33,6 +34,7 @@ public class PublicKeysManager : IPublicKeysManager
         {
             ClientId = applicationSettings.ClientId,
             PublicKey = applicationSettings.DecodedRsaPublicKey!,
+            ProtocolVersion = ProtocolVersion.Current,
         };
 
         return myPublicKeyInfo;
@@ -82,6 +84,8 @@ public class PublicKeysManager : IPublicKeysManager
         }
 
         publicKeyCheckData.OtherPartyCheckResponse = checkResponse;
+        
+        publicKeyCheckData.ProtocolVersion = ProtocolVersion.Current;
 
         return publicKeyCheckData;
     }
