@@ -185,7 +185,7 @@ public class PublicKeysTrusterTests : AbstractTester
         var startTrustCheckResult = new StartTrustCheckResult
         {
             IsOK = true,
-            MembersInstanceIds = new List<string> { "MemberInstanceId" }
+            MembersInstanceIds = ["MemberInstanceId"]
         };
         
         _trustApiClient
@@ -240,12 +240,12 @@ public class PublicKeysTrusterTests : AbstractTester
         var startTrustCheckResult = new StartTrustCheckResult
         {
             IsOK = true,
-            MembersInstanceIds = new List<string> { "MemberInstanceId" }
+            MembersInstanceIds = ["MemberInstanceId"]
         };
         
         _sessionMemberApiClient
             .Setup(c => c.GetMembersClientInstanceIds(sessionId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<string> { "MemberInstanceId" });
+            .ReturnsAsync(["MemberInstanceId"]);
         
         _trustApiClient
             .Setup(c => c.StartTrustCheck(It.Is<TrustCheckParameters>(p =>
@@ -309,14 +309,14 @@ public class PublicKeysTrusterTests : AbstractTester
         var startTrustCheckResult = new StartTrustCheckResult
         {
             IsOK = true,
-            MembersInstanceIds = new List<string> { memberInstanceId }
+            MembersInstanceIds = [memberInstanceId]
         };
         
         TrustCheckParameters? capturedParameters = null;
         
         _trustApiClient
             .Setup(c => c.StartTrustCheck(It.IsAny<TrustCheckParameters>(), It.IsAny<CancellationToken>()))
-            .Callback<TrustCheckParameters, CancellationToken>((p, ct) => capturedParameters = p)
+            .Callback<TrustCheckParameters, CancellationToken>((p, _) => capturedParameters = p)
             .ReturnsAsync(startTrustCheckResult);
         
         _trustProcessPublicKeysRepository
@@ -364,7 +364,7 @@ public class PublicKeysTrusterTests : AbstractTester
         
         _publicKeysManager
             .Setup(m => m.BuildMemberPublicKeyCheckData(publicKeyInfo, false))
-            .Returns((PublicKeyInfo pkInfo, bool isTrusted) =>
+            .Returns((PublicKeyInfo pkInfo, bool _) =>
             {
                 var checkData = new PublicKeyCheckData
                 {

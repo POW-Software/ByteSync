@@ -5,11 +5,11 @@ namespace ByteSync.Common.Business.Sessions.Cloud.Connections;
 
 public class TrustCheckParameters
 {
-    public string SessionId { get; set; } = null!;
-
-    public PublicKeyInfo PublicKeyInfo { get; set; } = null!;
+    public string SessionId { get; init; } = null!;
     
-    public List<string> MembersInstanceIdsToCheck { get; set; } = null!;
+    public PublicKeyInfo PublicKeyInfo { get; init; } = null!;
     
-    public int ProtocolVersion { get; set; }
+    public List<string> MembersInstanceIdsToCheck { get; init; } = null!;
+    
+    public int ProtocolVersion { get; init; }
 }
