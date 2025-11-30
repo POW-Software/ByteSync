@@ -1,7 +1,9 @@
+using System.Collections.ObjectModel;
 using System.Text;
 using ByteSync.Business.Communications.PublicKeysTrusting;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
+using ByteSync.Common.Business.Trust.Connections;
 using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications;
@@ -172,5 +174,221 @@ public class PublicKeysTrusterTests : AbstractTester
         await FluentActions.Invoking(async () => await _publicKeysTruster.OnTrustPublicKeyRequestedAsync(requestParameters))
             .Should()
             .NotThrowAsync();
+    }
+    
+    [Test]
+    public async Task TrustAllMembersPublicKeys_WithIncompatibleProtocolVersion_ShouldReturnIncompatibleProtocolVersion()
+    {
+        var sessionId = "TestSessionId";
+        var incompatibleVersion = 2;
+        
+        var startTrustCheckResult = new StartTrustCheckResult
+        {
+            IsOK = true,
+            MembersInstanceIds = new List<string> { "MemberInstanceId" }
+        };
+        
+        _trustApiClient
+            .Setup(c => c.StartTrustCheck(It.Is<TrustCheckParameters>(p =>
+                    p.SessionId == sessionId &&
+                    p.ProtocolVersion == ProtocolVersion.CURRENT),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(startTrustCheckResult);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.ResetJoinerTrustProcessData(sessionId))
+            .Returns(Task.CompletedTask);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.SetExpectedPublicKeyCheckDataCount(sessionId, It.IsAny<List<string>>()))
+            .Returns(Task.CompletedTask);
+        
+        var trustProcessData = new TrustProcessPublicKeysData(sessionId);
+        trustProcessData.JoinerTrustProcessData.WaitForAllPublicKeyCheckDatasReceived.Set();
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.WaitAsync(sessionId, It.IsAny<Func<TrustProcessPublicKeysData, EventWaitHandle>>(), It.IsAny<TimeSpan>()))
+            .ReturnsAsync(true);
+        
+        var incompatiblePublicKeyCheckData = new PublicKeyCheckData
+        {
+            IssuerPublicKeyInfo = new PublicKeyInfo
+            {
+                ClientId = "MemberClientId",
+                PublicKey = Encoding.UTF8.GetBytes("MemberPublicKey"),
+                ProtocolVersion = incompatibleVersion
+            },
+            IssuerClientInstanceId = "MemberInstanceId",
+            ProtocolVersion = incompatibleVersion,
+            Salt = "TestSalt123"
+        };
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.GetReceivedPublicKeyCheckData(sessionId))
+            .ReturnsAsync(new ReadOnlyCollection<PublicKeyCheckData>(new List<PublicKeyCheckData> { incompatiblePublicKeyCheckData }));
+        
+        var result = await _publicKeysTruster.TrustAllMembersPublicKeys(sessionId);
+        
+        result.Status.Should().Be(JoinSessionStatus.IncompatibleProtocolVersion);
+    }
+    
+    [Test]
+    public async Task TrustAllMembersPublicKeys_WithCompatibleProtocolVersion_ShouldReturnProcessingNormally()
+    {
+        var sessionId = "TestSessionId";
+        
+        var startTrustCheckResult = new StartTrustCheckResult
+        {
+            IsOK = true,
+            MembersInstanceIds = new List<string> { "MemberInstanceId" }
+        };
+        
+        _sessionMemberApiClient
+            .Setup(c => c.GetMembersClientInstanceIds(sessionId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<string> { "MemberInstanceId" });
+        
+        _trustApiClient
+            .Setup(c => c.StartTrustCheck(It.Is<TrustCheckParameters>(p =>
+                    p.SessionId == sessionId &&
+                    p.ProtocolVersion == ProtocolVersion.CURRENT),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(startTrustCheckResult);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.ResetJoinerTrustProcessData(sessionId))
+            .Returns(Task.CompletedTask);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.SetExpectedPublicKeyCheckDataCount(sessionId, It.IsAny<List<string>>()))
+            .Returns(Task.CompletedTask);
+        
+        var trustProcessData = new TrustProcessPublicKeysData(sessionId);
+        trustProcessData.JoinerTrustProcessData.WaitForAllPublicKeyCheckDatasReceived.Set();
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.WaitAsync(sessionId, It.IsAny<Func<TrustProcessPublicKeysData, EventWaitHandle>>(), It.IsAny<TimeSpan>()))
+            .ReturnsAsync(true);
+        
+        var compatiblePublicKeyCheckData = new PublicKeyCheckData
+        {
+            IssuerPublicKeyInfo = new PublicKeyInfo
+            {
+                ClientId = "MemberClientId",
+                PublicKey = Encoding.UTF8.GetBytes("MemberPublicKey"),
+                ProtocolVersion = ProtocolVersion.CURRENT
+            },
+            IssuerClientInstanceId = "MemberInstanceId",
+            ProtocolVersion = ProtocolVersion.CURRENT,
+            Salt = "TestSalt123",
+            OtherPartyCheckResponse = true
+        };
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.GetReceivedPublicKeyCheckData(sessionId))
+            .ReturnsAsync(new ReadOnlyCollection<PublicKeyCheckData>(new List<PublicKeyCheckData> { compatiblePublicKeyCheckData }));
+        
+        _publicKeysManager
+            .Setup(m => m.IsTrusted(It.IsAny<PublicKeyCheckData>()))
+            .Returns(true);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.SetFullyTrusted(sessionId, compatiblePublicKeyCheckData))
+            .Returns(Task.CompletedTask);
+        
+        var result = await _publicKeysTruster.TrustAllMembersPublicKeys(sessionId);
+        
+        result.Status.Should().Be(JoinSessionStatus.ProcessingNormally);
+    }
+    
+    [Test]
+    public async Task InitiateAndWaitForTrustCheck_ShouldIncludeProtocolVersionInTrustCheckParameters()
+    {
+        var sessionId = "TestSessionId";
+        var memberInstanceId = "MemberInstanceId";
+        
+        var startTrustCheckResult = new StartTrustCheckResult
+        {
+            IsOK = true,
+            MembersInstanceIds = new List<string> { memberInstanceId }
+        };
+        
+        TrustCheckParameters? capturedParameters = null;
+        
+        _trustApiClient
+            .Setup(c => c.StartTrustCheck(It.IsAny<TrustCheckParameters>(), It.IsAny<CancellationToken>()))
+            .Callback<TrustCheckParameters, CancellationToken>((p, ct) => capturedParameters = p)
+            .ReturnsAsync(startTrustCheckResult);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.ResetJoinerTrustProcessData(sessionId))
+            .Returns(Task.CompletedTask);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.SetExpectedPublicKeyCheckDataCount(sessionId, It.IsAny<List<string>>()))
+            .Returns(Task.CompletedTask);
+        
+        var trustProcessData = new TrustProcessPublicKeysData(sessionId);
+        trustProcessData.JoinerTrustProcessData.WaitForAllPublicKeyCheckDatasReceived.Set();
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.WaitAsync(sessionId, It.IsAny<Func<TrustProcessPublicKeysData, EventWaitHandle>>(), It.IsAny<TimeSpan>()))
+            .ReturnsAsync(true);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.GetReceivedPublicKeyCheckData(sessionId))
+            .ReturnsAsync(new ReadOnlyCollection<PublicKeyCheckData>(new List<PublicKeyCheckData>()));
+        
+        await _publicKeysTruster.TrustAllMembersPublicKeys(sessionId);
+        
+        capturedParameters.Should().NotBeNull();
+        capturedParameters!.ProtocolVersion.Should().Be(ProtocolVersion.CURRENT);
+    }
+    
+    [Test]
+    public async Task OnPublicKeyCheckDataAskedAsync_ShouldPropagateProtocolVersion()
+    {
+        var sessionId = "TestSessionId";
+        var clientInstanceId = "ClientInstanceId";
+        var publicKeyInfo = new PublicKeyInfo
+        {
+            ClientId = "OtherClientId",
+            PublicKey = Encoding.UTF8.GetBytes("OtherPublicKey"),
+            ProtocolVersion = ProtocolVersion.CURRENT
+        };
+        
+        PublicKeyCheckData? capturedPublicKeyCheckData = null;
+        
+        _publicKeysManager
+            .Setup(m => m.IsTrusted(publicKeyInfo))
+            .Returns(false);
+        
+        _publicKeysManager
+            .Setup(m => m.BuildMemberPublicKeyCheckData(publicKeyInfo, false))
+            .Returns((PublicKeyInfo pkInfo, bool isTrusted) =>
+            {
+                var checkData = new PublicKeyCheckData
+                {
+                    IssuerPublicKeyInfo = _publicKeysManager.Object.GetMyPublicKeyInfo(),
+                    OtherPartyPublicKeyInfo = pkInfo,
+                    Salt = "TestSalt123",
+                    ProtocolVersion = ProtocolVersion.CURRENT
+                };
+                capturedPublicKeyCheckData = checkData;
+                
+                return checkData;
+            });
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.StoreLocalPublicKeyCheckData(sessionId, clientInstanceId, It.IsAny<PublicKeyCheckData>()))
+            .Returns(Task.CompletedTask);
+        
+        _trustApiClient
+            .Setup(c => c.GiveMemberPublicKeyCheckData(It.IsAny<GiveMemberPublicKeyCheckDataParameters>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        
+        await _publicKeysTruster.OnPublicKeyCheckDataAskedAsync((sessionId, clientInstanceId, publicKeyInfo));
+        
+        capturedPublicKeyCheckData.Should().NotBeNull();
+        capturedPublicKeyCheckData!.ProtocolVersion.Should().Be(ProtocolVersion.CURRENT);
     }
 }
