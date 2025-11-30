@@ -4,7 +4,6 @@ using System.Text;
 using ByteSync.Business.Communications;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Versions;
-using ByteSync.Common.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Services.Communications;
