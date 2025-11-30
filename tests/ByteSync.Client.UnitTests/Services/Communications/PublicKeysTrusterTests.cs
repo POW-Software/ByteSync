@@ -182,6 +182,10 @@ public class PublicKeysTrusterTests : AbstractTester
         var sessionId = "TestSessionId";
         var incompatibleVersion = 2;
         
+        _sessionMemberApiClient
+            .Setup(c => c.GetMembersClientInstanceIds(sessionId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(["MemberInstanceId"]);
+        
         var startTrustCheckResult = new StartTrustCheckResult
         {
             IsOK = true,
@@ -305,6 +309,10 @@ public class PublicKeysTrusterTests : AbstractTester
     {
         var sessionId = "TestSessionId";
         var memberInstanceId = "MemberInstanceId";
+        
+        _sessionMemberApiClient
+            .Setup(c => c.GetMembersClientInstanceIds(sessionId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([memberInstanceId]);
         
         var startTrustCheckResult = new StartTrustCheckResult
         {
