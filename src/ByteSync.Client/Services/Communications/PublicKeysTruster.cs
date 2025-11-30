@@ -108,6 +108,14 @@ public class PublicKeysTruster : IPublicKeysTruster
             throw new ArgumentException("Salt is not the same, unable to proceed");
         }
 
+        // Validate protocol version compatibility
+        if (!ProtocolVersion.IsCompatible(requestTrustProcessParameters.JoinerPublicKeyCheckData.ProtocolVersion))
+        {
+            _logger.LogWarning("Protocol version mismatch: joiner has version {JoinerVersion}, current version is {CurrentVersion}", 
+                requestTrustProcessParameters.JoinerPublicKeyCheckData.ProtocolVersion, ProtocolVersion.Current);
+            throw new InvalidOperationException("Protocol version incompatible");
+        }
+
         // Reset the peer trust process data
         var peerTrustProcessData = await _trustProcessPublicKeysRepository.ResetPeerTrustProcessData(
             requestTrustProcessParameters.SessionId, myPublicKeyCheckData.OtherPartyPublicKeyInfo!.ClientId);
@@ -159,9 +167,21 @@ public class PublicKeysTruster : IPublicKeysTruster
             return joinSessionResult;
         }
         
+        // Validate protocol version compatibility
+        var receivedPublicKeyCheckData = await _trustProcessPublicKeysRepository.GetReceivedPublicKeyCheckData(sessionId);
+        foreach (var publicKeyCheckData in receivedPublicKeyCheckData)
+        {
+            if (!ProtocolVersion.IsCompatible(publicKeyCheckData.ProtocolVersion))
+            {
+                _logger.LogWarning("Protocol version mismatch: member has version {MemberVersion}, current version is {CurrentVersion}", 
+                    publicKeyCheckData.ProtocolVersion, ProtocolVersion.Current);
+                return JoinSessionResult.BuildFrom(JoinSessionStatus.IncompatibleProtocolVersion);
+            }
+        }
+        
         // We determine the keys to trust
         var keysToTrust = new List<PublicKeyCheckData>();
-        foreach (var publicKeyCheckData in await _trustProcessPublicKeysRepository.GetReceivedPublicKeyCheckData(sessionId))
+        foreach (var publicKeyCheckData in receivedPublicKeyCheckData)
         {
             var isFullTrusted = publicKeyCheckData.IsTrustedByOtherParty && _publicKeysManager.IsTrusted(publicKeyCheckData);
 
