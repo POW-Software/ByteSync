@@ -4,9 +4,9 @@ public static class ProtocolVersion
 {
     public const int V1 = 1;
     
-    public const int Current = V1;
+    public const int CURRENT = V1;
     
-    public const int MinSupported = V1;
+    public const int MIN_SUPPORTED = V1;
     
     public static bool IsCompatible(int otherVersion)
     {
@@ -15,7 +15,6 @@ public static class ProtocolVersion
             return false;
         }
         
-        return otherVersion == Current;
+        return otherVersion == CURRENT;
     }
 }
-

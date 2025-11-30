@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.Text;
-using System.Threading;
 using ByteSync.Business.Communications.PublicKeysTrusting;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
@@ -32,7 +31,7 @@ public class PublicKeysTrusterTests : AbstractTester
     private Mock<ISessionMemberApiClient> _sessionMemberApiClient = null!;
     private Mock<ILogger<PublicKeysTruster>> _logger = null!;
     private PublicKeysTruster _publicKeysTruster = null!;
-
+    
     [SetUp]
     public void SetUp()
     {
@@ -44,7 +43,7 @@ public class PublicKeysTrusterTests : AbstractTester
         _flyoutElementViewModelFactory = new Mock<IFlyoutElementViewModelFactory>();
         _sessionMemberApiClient = new Mock<ISessionMemberApiClient>();
         _logger = new Mock<ILogger<PublicKeysTruster>>();
-
+        
         _environmentService
             .Setup(e => e.ClientId)
             .Returns("TestClientId");
@@ -52,16 +51,16 @@ public class PublicKeysTrusterTests : AbstractTester
         _environmentService
             .Setup(e => e.ClientInstanceId)
             .Returns("TestClientInstanceId");
-
+        
         _publicKeysManager
             .Setup(m => m.GetMyPublicKeyInfo())
             .Returns(new PublicKeyInfo
             {
                 ClientId = "TestClientId",
                 PublicKey = Encoding.UTF8.GetBytes("TestPublicKey"),
-                ProtocolVersion = ProtocolVersion.Current
+                ProtocolVersion = ProtocolVersion.CURRENT
             });
-
+        
         _publicKeysTruster = new PublicKeysTruster(
             _environmentService.Object,
             _trustApiClient.Object,
@@ -73,32 +72,32 @@ public class PublicKeysTrusterTests : AbstractTester
             _logger.Object
         );
     }
-
-
+    
+    
     [Test]
     public async Task OnTrustPublicKeyRequestedAsync_WithIncompatibleProtocolVersion_ShouldThrowInvalidOperationException()
     {
         var sessionId = "TestSessionId";
         var incompatibleVersion = 2;
         var joinerInstanceId = "JoinerInstanceId";
-
+        
         var myPublicKeyCheckData = new PublicKeyCheckData
         {
             IssuerPublicKeyInfo = new PublicKeyInfo
             {
                 ClientId = "TestClientId",
                 PublicKey = Encoding.UTF8.GetBytes("TestPublicKey"),
-                ProtocolVersion = ProtocolVersion.Current
+                ProtocolVersion = ProtocolVersion.CURRENT
             },
             Salt = "TestSalt123",
             OtherPartyPublicKeyInfo = new PublicKeyInfo
             {
                 ClientId = "JoinerClientId",
                 PublicKey = Encoding.UTF8.GetBytes("JoinerPublicKey"),
-                ProtocolVersion = ProtocolVersion.Current
+                ProtocolVersion = ProtocolVersion.CURRENT
             }
         };
-
+        
         var joinerPublicKeyCheckData = new PublicKeyCheckData
         {
             IssuerPublicKeyInfo = new PublicKeyInfo
@@ -111,67 +110,67 @@ public class PublicKeysTrusterTests : AbstractTester
             Salt = "TestSalt123",
             ProtocolVersion = incompatibleVersion
         };
-
+        
         _trustProcessPublicKeysRepository
             .Setup(r => r.GetLocalPublicKeyCheckData(sessionId, joinerInstanceId))
             .ReturnsAsync(myPublicKeyCheckData);
-
+        
         var requestParameters = new RequestTrustProcessParameters(sessionId, joinerPublicKeyCheckData, joinerInstanceId);
-
+        
         await FluentActions.Invoking(async () => await _publicKeysTruster.OnTrustPublicKeyRequestedAsync(requestParameters))
             .Should()
             .ThrowAsync<InvalidOperationException>()
             .WithMessage("Protocol version incompatible");
     }
-
+    
     [Test]
     public async Task OnTrustPublicKeyRequestedAsync_WithCompatibleProtocolVersion_ShouldNotThrow()
     {
         var sessionId = "TestSessionId";
         var joinerInstanceId = "JoinerInstanceId";
-
+        
         var myPublicKeyCheckData = new PublicKeyCheckData
         {
             IssuerPublicKeyInfo = new PublicKeyInfo
             {
                 ClientId = "TestClientId",
                 PublicKey = Encoding.UTF8.GetBytes("TestPublicKey"),
-                ProtocolVersion = ProtocolVersion.Current
+                ProtocolVersion = ProtocolVersion.CURRENT
             },
             Salt = "TestSalt123",
             OtherPartyPublicKeyInfo = new PublicKeyInfo
             {
                 ClientId = "JoinerClientId",
                 PublicKey = Encoding.UTF8.GetBytes("JoinerPublicKey"),
-                ProtocolVersion = ProtocolVersion.Current
+                ProtocolVersion = ProtocolVersion.CURRENT
             }
         };
-
+        
         var joinerPublicKeyCheckData = new PublicKeyCheckData
         {
             IssuerPublicKeyInfo = new PublicKeyInfo
             {
                 ClientId = "JoinerClientId",
                 PublicKey = Encoding.UTF8.GetBytes("JoinerPublicKey"),
-                ProtocolVersion = ProtocolVersion.Current
+                ProtocolVersion = ProtocolVersion.CURRENT
             },
             IssuerClientInstanceId = joinerInstanceId,
             Salt = "TestSalt123",
-            ProtocolVersion = ProtocolVersion.Current
+            ProtocolVersion = ProtocolVersion.CURRENT
         };
-
+        
         var peerTrustProcessData = new PeerTrustProcessData("JoinerClientId");
-
+        
         _trustProcessPublicKeysRepository
             .Setup(r => r.GetLocalPublicKeyCheckData(sessionId, joinerInstanceId))
             .ReturnsAsync(myPublicKeyCheckData);
-
+        
         _trustProcessPublicKeysRepository
             .Setup(r => r.ResetPeerTrustProcessData(sessionId, "JoinerClientId"))
             .ReturnsAsync(peerTrustProcessData);
-
+        
         var requestParameters = new RequestTrustProcessParameters(sessionId, joinerPublicKeyCheckData, joinerInstanceId);
-
+        
         await FluentActions.Invoking(async () => await _publicKeysTruster.OnTrustPublicKeyRequestedAsync(requestParameters))
             .Should()
             .NotThrowAsync();
@@ -393,4 +392,3 @@ public class PublicKeysTrusterTests : AbstractTester
         capturedPublicKeyCheckData!.ProtocolVersion.Should().Be(ProtocolVersion.CURRENT);
     }
 }
-
