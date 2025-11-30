@@ -1559,6 +1559,9 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	<data name="JoinCloudSession_CanceledByUser" xml:space="preserve">
 		<value>Opération annulée par l'utilisateur.</value>
 	</data>
+	<data name="JoinCloudSession_IncompatibleProtocolVersion" xml:space="preserve">
+		<value>Version incompatible</value>
+	</data>
 	<data name="CreateCloudSession_CanceledByUser" xml:space="preserve">
 		<value>Opération annulée par l'utilisateur.</value>
 	</data>
