@@ -14,4 +14,5 @@ public enum JoinSessionStatus
     UnexpectedError = 10,
     TimeoutError = 11,
     CanceledByUser = 12,
+    IncompatibleProtocolVersion = 13,
 }

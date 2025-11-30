@@ -28,6 +28,8 @@ public class PublicKeyCheckData
     }
     
     public PublicKeyInfo? OtherPartyPublicKeyInfo { get; set; }
+    
+    public int ProtocolVersion { get; set; }
 
     protected bool Equals(PublicKeyCheckData other)
     {

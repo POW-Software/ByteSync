@@ -10,4 +10,6 @@ public class TrustCheckParameters
     public PublicKeyInfo PublicKeyInfo { get; set; } = null!;
     
     public List<string> MembersInstanceIdsToCheck { get; set; } = null!;
+    
+    public int ProtocolVersion { get; set; }
 }
