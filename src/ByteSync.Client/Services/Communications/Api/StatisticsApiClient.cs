@@ -1,4 +1,5 @@
-﻿using ByteSync.Common.Business.Misc;
+﻿using System.Threading.Tasks;
+using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Controls.Communications.Http;
 
 namespace ByteSync.Services.Communications.Api;
@@ -17,7 +18,7 @@ public class StatisticsApiClient : IStatisticsApiClient
     public async Task<UsageStatisticsData> GetUsageStatistics(UsageStatisticsRequest usageStatisticsRequest)
     {
         var result = await _apiInvoker.PostAsync<UsageStatisticsData>("statistics/getUsageStatistics", usageStatisticsRequest);
-        
+
         return result;
     }
 }

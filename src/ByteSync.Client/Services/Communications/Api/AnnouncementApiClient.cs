@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using ByteSync.Common.Business.Announcements;
 using ByteSync.Interfaces.Controls.Communications.Http;
 
@@ -7,13 +10,13 @@ public class AnnouncementApiClient : IAnnouncementApiClient
 {
     private readonly IApiInvoker _apiInvoker;
     private readonly ILogger<AnnouncementApiClient> _logger;
-    
+
     public AnnouncementApiClient(IApiInvoker apiInvoker, ILogger<AnnouncementApiClient> logger)
     {
         _apiInvoker = apiInvoker;
         _logger = logger;
     }
-    
+
     public async Task<List<Announcement>> GetAnnouncements()
     {
         try
@@ -23,7 +26,6 @@ public class AnnouncementApiClient : IAnnouncementApiClient
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while retrieving announcements");
-            
             throw;
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
+using System.Threading.Tasks;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Lobbies;
 using ByteSync.Common.Business.Sessions;
@@ -31,14 +32,13 @@ public class HubPushHandler2 : IHubPushHandler2
             .SelectMany(async connection =>
             {
                 await SetConnection(connection!);
-                
                 return connection;
             })
             .Subscribe();
     }
     
     internal static ILogger<HubPushHandler2> Logger { get; private set; } = null!;
-    
+
     private readonly List<ISubjectInfo> _subjectInfos =
     [
         new SubjectInfo<CloudSessionResult, ValidateJoinCloudSessionParameters>(nameof(IHubByteSyncPush.YouJoinedSession)),
@@ -74,104 +74,104 @@ public class HubPushHandler2 : IHubPushHandler2
         new SubjectInfo<LobbyCloudSessionCredentials>(nameof(IHubByteSyncPush.LobbyCloudSessionCredentialsSent))
     ];
     
-    public Subject<(CloudSessionResult, ValidateJoinCloudSessionParameters)> YouJoinedSession =>
+    public Subject<(CloudSessionResult, ValidateJoinCloudSessionParameters)> YouJoinedSession => 
         GetSubject<CloudSessionResult, ValidateJoinCloudSessionParameters>(nameof(IHubByteSyncPush.YouJoinedSession));
     
-    public Subject<string> YouGaveAWrongPassword =>
+    public Subject<string> YouGaveAWrongPassword => 
         GetSubject<string>(nameof(IHubByteSyncPush.YouGaveAWrongPassword));
     
-    public Subject<SessionMemberInfoDTO> MemberJoinedSession =>
+    public Subject<SessionMemberInfoDTO> MemberJoinedSession => 
         GetSubject<SessionMemberInfoDTO>(nameof(IHubByteSyncPush.MemberJoinedSession));
     
-    public Subject<SessionMemberInfoDTO> MemberQuittedSession =>
+    public Subject<SessionMemberInfoDTO> MemberQuittedSession => 
         GetSubject<SessionMemberInfoDTO>(nameof(IHubByteSyncPush.MemberQuittedSession));
     
-    public Subject<SessionSettingsUpdatedDTO> SessionSettingsUpdated =>
+    public Subject<SessionSettingsUpdatedDTO> SessionSettingsUpdated => 
         GetSubject<SessionSettingsUpdatedDTO>(nameof(IHubByteSyncPush.SessionSettingsUpdated));
     
     public Subject<InventoryStartedDTO> InventoryStarted =>
         GetSubject<InventoryStartedDTO>(nameof(IHubByteSyncPush.InventoryStarted));
-    
+
     public Subject<DataNodeDTO> DataNodeAdded =>
         GetSubject<DataNodeDTO>(nameof(IHubByteSyncPush.DataNodeAdded));
-    
+
     public Subject<DataNodeDTO> DataNodeRemoved =>
         GetSubject<DataNodeDTO>(nameof(IHubByteSyncPush.DataNodeRemoved));
-    
+
     public Subject<DataSourceDTO> DataSourceAdded =>
         GetSubject<DataSourceDTO>(nameof(IHubByteSyncPush.DataSourceAdded));
     
-    public Subject<DataSourceDTO> DataSourceRemoved =>
+    public Subject<DataSourceDTO> DataSourceRemoved => 
         GetSubject<DataSourceDTO>(nameof(IHubByteSyncPush.DataSourceRemoved));
     
-    public Subject<FileTransferPush> FilePartUploaded =>
+    public Subject<FileTransferPush> FilePartUploaded => 
         GetSubject<FileTransferPush>(nameof(IHubByteSyncPush.FilePartUploaded));
     
-    public Subject<FileTransferPush> UploadFinished =>
+    public Subject<FileTransferPush> UploadFinished => 
         GetSubject<FileTransferPush>(nameof(IHubByteSyncPush.UploadFinished));
     
-    public Subject<string> OnReconnected =>
+    public Subject<string> OnReconnected => 
         GetSubject<string>(nameof(IHubByteSyncPush.OnReconnected));
     
-    public Subject<Synchronization> SynchronizationStarted =>
+    public Subject<Synchronization> SynchronizationStarted => 
         GetSubject<Synchronization>(nameof(IHubByteSyncPush.SynchronizationStarted));
     
-    public Subject<Synchronization> SynchronizationUpdated =>
+    public Subject<Synchronization> SynchronizationUpdated => 
         GetSubject<Synchronization>(nameof(IHubByteSyncPush.SynchronizationUpdated));
     
-    public Subject<UpdateSessionMemberGeneralStatusParameters> SessionMemberGeneralStatusUpdated =>
+    public Subject<UpdateSessionMemberGeneralStatusParameters> SessionMemberGeneralStatusUpdated => 
         GetSubject<UpdateSessionMemberGeneralStatusParameters>(nameof(IHubByteSyncPush.SessionMemberGeneralStatusUpdated));
     
-    public Subject<SynchronizationProgressPush> SynchronizationProgressUpdated =>
+    public Subject<SynchronizationProgressPush> SynchronizationProgressUpdated => 
         GetSubject<SynchronizationProgressPush>(nameof(IHubByteSyncPush.SynchronizationProgressUpdated));
     
-    public Subject<(string, string, PublicKeyInfo)> AskPublicKeyCheckData =>
+    public Subject<(string, string, PublicKeyInfo)> AskPublicKeyCheckData => 
         GetSubject<string, string, PublicKeyInfo>(nameof(IHubByteSyncPush.AskPublicKeyCheckData));
     
-    public Subject<(string, PublicKeyCheckData)> GiveMemberPublicKeyCheckData =>
+    public Subject<(string, PublicKeyCheckData)> GiveMemberPublicKeyCheckData => 
         GetSubject<string, PublicKeyCheckData>(nameof(IHubByteSyncPush.GiveMemberPublicKeyCheckData));
     
-    public Subject<RequestTrustProcessParameters> RequestTrustPublicKey =>
+    public Subject<RequestTrustProcessParameters> RequestTrustPublicKey => 
         GetSubject<RequestTrustProcessParameters>(nameof(IHubByteSyncPush.RequestTrustPublicKey));
     
-    public Subject<DigitalSignatureCheckInfo> RequestCheckDigitalSignature =>
+    public Subject<DigitalSignatureCheckInfo> RequestCheckDigitalSignature => 
         GetSubject<DigitalSignatureCheckInfo>(nameof(IHubByteSyncPush.RequestCheckDigitalSignature));
     
-    public Subject<PublicKeyValidationParameters> InformPublicKeyValidationIsFinished =>
+    public Subject<PublicKeyValidationParameters> InformPublicKeyValidationIsFinished => 
         GetSubject<PublicKeyValidationParameters>(nameof(IHubByteSyncPush.InformPublicKeyValidationIsFinished));
     
-    public Subject<AskCloudSessionPasswordExchangeKeyPush> AskCloudSessionPasswordExchangeKey =>
+    public Subject<AskCloudSessionPasswordExchangeKeyPush> AskCloudSessionPasswordExchangeKey=> 
         GetSubject<AskCloudSessionPasswordExchangeKeyPush>(nameof(IHubByteSyncPush.AskCloudSessionPasswordExchangeKey));
     
-    public Subject<GiveCloudSessionPasswordExchangeKeyParameters> GiveCloudSessionPasswordExchangeKey =>
+    public Subject<GiveCloudSessionPasswordExchangeKeyParameters> GiveCloudSessionPasswordExchangeKey => 
         GetSubject<GiveCloudSessionPasswordExchangeKeyParameters>(nameof(IHubByteSyncPush.GiveCloudSessionPasswordExchangeKey));
     
-    public Subject<AskJoinCloudSessionParameters> CheckCloudSessionPasswordExchangeKey =>
+    public Subject<AskJoinCloudSessionParameters> CheckCloudSessionPasswordExchangeKey => 
         GetSubject<AskJoinCloudSessionParameters>(nameof(IHubByteSyncPush.CheckCloudSessionPasswordExchangeKey));
     
-    public Subject<BaseSessionDto> SessionResetted =>
+    public Subject<BaseSessionDto> SessionResetted => 
         GetSubject<BaseSessionDto>(nameof(IHubByteSyncPush.SessionResetted));
     
-    public Subject<(string, LobbyMemberInfo)> MemberJoinedLobby =>
+    public Subject<(string, LobbyMemberInfo)> MemberJoinedLobby => 
         GetSubject<string, LobbyMemberInfo>(nameof(IHubByteSyncPush.MemberJoinedLobby));
     
-    public Subject<(string, string)> MemberQuittedLobby =>
+    public Subject<(string, string)> MemberQuittedLobby => 
         GetSubject<string, string>(nameof(IHubByteSyncPush.MemberQuittedLobby));
     
-    public Subject<(string, LobbyCheckInfo)> LobbyCheckInfosSent =>
+    public Subject<(string, LobbyCheckInfo)> LobbyCheckInfosSent => 
         GetSubject<string, LobbyCheckInfo>(nameof(IHubByteSyncPush.LobbyCheckInfosSent));
     
-    public Subject<(string, string, LobbyMemberStatuses)> LobbyMemberStatusUpdated =>
+    public Subject<(string, string, LobbyMemberStatuses)> LobbyMemberStatusUpdated => 
         GetSubject<string, string, LobbyMemberStatuses>(nameof(IHubByteSyncPush.LobbyMemberStatusUpdated));
     
-    public Subject<LobbyCloudSessionCredentials> LobbyCloudSessionCredentialsSent =>
+    public Subject<LobbyCloudSessionCredentials> LobbyCloudSessionCredentialsSent => 
         GetSubject<LobbyCloudSessionCredentials>(nameof(IHubByteSyncPush.LobbyCloudSessionCredentialsSent));
-    
+
     private async Task SetConnection(HubConnection connection)
     {
         await _semaphore.WaitAsync();
         
-        try
+        try 
         {
             if (_connection != null)
             {
@@ -182,7 +182,7 @@ public class HubPushHandler2 : IHubPushHandler2
             }
             
             Logger.LogInformation("HubPushHandler2: Setting connection");
-            
+
             _connection = connection;
             SetupObservables(connection);
         }
@@ -195,7 +195,7 @@ public class HubPushHandler2 : IHubPushHandler2
     private Subject<T> GetSubject<T>(string methodName)
     {
         var subjectInfo = _subjectInfos.OfType<SubjectInfo<T>>().FirstOrDefault(s => s.MethodName == methodName);
-        
+
         if (subjectInfo == null)
         {
             throw new ArgumentOutOfRangeException(nameof(methodName),
@@ -210,7 +210,7 @@ public class HubPushHandler2 : IHubPushHandler2
     private Subject<(T1, T2)> GetSubject<T1, T2>(string methodName)
     {
         var subjectInfo = _subjectInfos.OfType<SubjectInfo<T1, T2>>().FirstOrDefault(s => s.MethodName == methodName);
-        
+
         if (subjectInfo == null)
         {
             throw new ArgumentOutOfRangeException(nameof(methodName),
@@ -225,7 +225,7 @@ public class HubPushHandler2 : IHubPushHandler2
     private Subject<(T1, T2, T3)> GetSubject<T1, T2, T3>(string methodName)
     {
         var subjectInfo = _subjectInfos.OfType<SubjectInfo<T1, T2, T3>>().FirstOrDefault(s => s.MethodName == methodName);
-        
+
         if (subjectInfo == null)
         {
             throw new ArgumentOutOfRangeException(nameof(methodName),
@@ -237,7 +237,7 @@ public class HubPushHandler2 : IHubPushHandler2
             return subjectInfo.Subject;
         }
     }
-    
+
     private void SetupObservables(HubConnection connection)
     {
         foreach (var subjectInfo in _subjectInfos)
@@ -250,7 +250,6 @@ public class HubPushHandler2 : IHubPushHandler2
 public interface ISubjectInfo
 {
     string MethodName { get; }
-    
     void SetupOnCall(HubConnection connection);
     
     // protected void LogDebug(string methodName)
@@ -262,15 +261,14 @@ public interface ISubjectInfo
 public class SubjectInfo<T> : ISubjectInfo
 {
     public Subject<T> Subject { get; }
-    
     public string MethodName { get; }
-    
+
     public SubjectInfo(string methodName)
     {
         Subject = new Subject<T>();
         MethodName = methodName;
     }
-    
+
     public void SetupOnCall(HubConnection connection)
     {
         connection.On<T>(MethodName, value =>
@@ -284,15 +282,14 @@ public class SubjectInfo<T> : ISubjectInfo
 public class SubjectInfo<T1, T2> : ISubjectInfo
 {
     public Subject<(T1, T2)> Subject { get; }
-    
     public string MethodName { get; }
-    
+
     public SubjectInfo(string methodName)
     {
         Subject = new Subject<(T1, T2)>();
         MethodName = methodName;
     }
-    
+
     public void SetupOnCall(HubConnection connection)
     {
         connection.On<T1, T2>(MethodName, (arg1, arg2) =>
@@ -306,15 +303,14 @@ public class SubjectInfo<T1, T2> : ISubjectInfo
 public class SubjectInfo<T1, T2, T3> : ISubjectInfo
 {
     public Subject<(T1, T2, T3)> Subject { get; }
-    
     public string MethodName { get; }
-    
+
     public SubjectInfo(string methodName)
     {
         Subject = new Subject<(T1, T2, T3)>();
         MethodName = methodName;
     }
-    
+
     public void SetupOnCall(HubConnection connection)
     {
         connection.On<T1, T2, T3>(MethodName, (arg1, arg2, arg3) =>
@@ -335,5 +331,5 @@ internal static class SubjectInfoHelper
     internal static void LogDebug(this ISubjectInfo subjectInfo, string methodName)
     {
         HubPushHandler2.Logger.LogDebug("HubPushHandler2.{methodName}", methodName);
-    }
+    } 
 }

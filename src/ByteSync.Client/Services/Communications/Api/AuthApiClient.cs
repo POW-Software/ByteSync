@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using ByteSync.Common.Business.Auth;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using Serilog;
@@ -19,33 +20,33 @@ public class AuthApiClient : IAuthApiClient
         try
         {
             var result = await _apiInvoker.PostAsync<InitialAuthenticationResponse>($"auth/login", loginData);
-            
+
             return result;
         }
         catch (Exception ex)
         {
             LogError(ex);
-            
+                
             throw;
         }
     }
-    
+
     public async Task<RefreshTokensResponse?> RefreshAuthenticationTokens(RefreshTokensData refreshTokensData)
     {
         try
         {
             var result = await _apiInvoker.PostAsync<RefreshTokensResponse>($"auth/refreshTokens", refreshTokensData);
-            
+
             return result;
         }
         catch (Exception ex)
         {
             LogError(ex);
-            
+                
             throw;
         }
     }
-    
+
     private void LogError(Exception exception, [CallerMemberName] string caller = "")
     {
         // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
