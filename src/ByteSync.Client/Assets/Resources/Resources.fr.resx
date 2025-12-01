@@ -772,6 +772,21 @@ Voulez-vous continuer ?</value>
     <data name="MessageBox_Cancel" xml:space="preserve">
         <value>ANNULER</value>
     </data>
+    <data name="RatingPrompt_Title" xml:space="preserve">
+        <value>Vous aimez ByteSync ?</value>
+    </data>
+    <data name="RatingPrompt_Message" xml:space="preserve">
+        <value>Synchronisation réussie ! Si ByteSync vous aide, pourriez-vous laisser une évaluation pour nous faire connaître ?</value>
+    </data>
+    <data name="RatingPrompt_RateNow" xml:space="preserve">
+        <value>Évaluer ByteSync</value>
+    </data>
+    <data name="RatingPrompt_AskLater" xml:space="preserve">
+        <value>Me redemander plus tard</value>
+    </data>
+    <data name="RatingPrompt_DoNotAskAgain" xml:space="preserve">
+        <value>Ne plus me demander</value>
+    </data>
 	<data name="MainWindow_OnClose_ConfirmTitle" xml:space="preserve">
 		<value>Quitter</value>
 	</data>

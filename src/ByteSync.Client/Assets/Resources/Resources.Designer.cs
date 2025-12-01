@@ -2016,6 +2016,87 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à OK.
+        /// </summary>
+        internal static string MessageBox_OK {
+            get {
+                return ResourceManager.GetString("MessageBox_OK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à YES.
+        /// </summary>
+        internal static string MessageBox_Yes {
+            get {
+                return ResourceManager.GetString("MessageBox_Yes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à NO.
+        /// </summary>
+        internal static string MessageBox_No {
+            get {
+                return ResourceManager.GetString("MessageBox_No", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à CANCEL.
+        /// </summary>
+        internal static string MessageBox_Cancel {
+            get {
+                return ResourceManager.GetString("MessageBox_Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Enjoying ByteSync?.
+        /// </summary>
+        internal static string RatingPrompt_Title {
+            get {
+                return ResourceManager.GetString("RatingPrompt_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Sync completed! If ByteSync helps you, please leave a rating to spread the word..
+        /// </summary>
+        internal static string RatingPrompt_Message {
+            get {
+                return ResourceManager.GetString("RatingPrompt_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Rate ByteSync.
+        /// </summary>
+        internal static string RatingPrompt_RateNow {
+            get {
+                return ResourceManager.GetString("RatingPrompt_RateNow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Ask me later.
+        /// </summary>
+        internal static string RatingPrompt_AskLater {
+            get {
+                return ResourceManager.GetString("RatingPrompt_AskLater", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Don&apos;t ask again.
+        /// </summary>
+        internal static string RatingPrompt_DoNotAskAgain {
+            get {
+                return ResourceManager.GetString("RatingPrompt_DoNotAskAgain", resourceCulture);
+            }
+        }
+        
         public static string MainWindow_OnClose_ConfirmTitle {
             get {
                 return ResourceManager.GetString("MainWindow_OnClose_ConfirmTitle", resourceCulture);

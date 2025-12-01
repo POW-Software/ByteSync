@@ -2,6 +2,7 @@
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
+using ByteSync.Assets.Resources;
 using ByteSync.Business;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Services.Localizations;
@@ -16,7 +17,10 @@ public class MessageBoxViewModel : FlyoutElementViewModel
     
     public MessageBoxViewModel()
     {
-        
+        OkButtonText = "";
+        YesButtonText = "";
+        NoButtonText = "";
+        CancelButtonText = "";
     }
 
     public MessageBoxViewModel(string titleKey, string? messageKey, List<string>? messageArguments, ILocalizationService localizationService)
@@ -39,6 +43,11 @@ public class MessageBoxViewModel : FlyoutElementViewModel
                 Message = string.Format(localizationService[MessageKey], MessageArguments!.ToArray());
             }
         }
+        
+        OkButtonText = localizationService[nameof(Resources.MessageBox_OK)];
+        YesButtonText = localizationService[nameof(Resources.MessageBox_Yes)];
+        NoButtonText = localizationService[nameof(Resources.MessageBox_No)];
+        CancelButtonText = localizationService[nameof(Resources.MessageBox_Cancel)];
 
         ResultSelected = new ManualResetEvent(false);
 
@@ -109,6 +118,18 @@ public class MessageBoxViewModel : FlyoutElementViewModel
     
     [Reactive] 
     public bool ShowCancel { get; set; }
+
+    [Reactive]
+    public string OkButtonText { get; set; }
+
+    [Reactive]
+    public string YesButtonText { get; set; }
+
+    [Reactive]
+    public string NoButtonText { get; set; }
+
+    [Reactive]
+    public string CancelButtonText { get; set; }
 
     public List<string>? MessageArguments { get; }
     
