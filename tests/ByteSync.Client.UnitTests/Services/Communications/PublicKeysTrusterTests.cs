@@ -495,4 +495,74 @@ public class PublicKeysTrusterTests : AbstractTester
             p.ClientInstanceId == clientInstanceId &&
             p.PublicKeyCheckData == memberPublicKeyCheckData), It.IsAny<CancellationToken>()), Times.Once);
     }
+    
+    [Test]
+    public async Task OnPublicKeyCheckDataAskedAsync_WithIncompatibleProtocolVersion_ShouldSendNotification()
+    {
+        var sessionId = "TestSessionId";
+        var joinerClientInstanceId = "JoinerClientInstanceId";
+        var incompatibleVersion = 0;
+        
+        var publicKeyInfo = new PublicKeyInfo
+        {
+            ClientId = "JoinerClientId",
+            PublicKey = Encoding.UTF8.GetBytes("JoinerPublicKey"),
+            ProtocolVersion = incompatibleVersion
+        };
+        
+        _trustApiClient
+            .Setup(c => c.InformProtocolVersionIncompatible(It.IsAny<InformProtocolVersionIncompatibleParameters>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        
+        await _publicKeysTruster.OnPublicKeyCheckDataAskedAsync((sessionId, joinerClientInstanceId, publicKeyInfo));
+        
+        _trustApiClient.Verify(c => c.InformProtocolVersionIncompatible(
+            It.Is<InformProtocolVersionIncompatibleParameters>(p =>
+                p.SessionId == sessionId &&
+                p.MemberClientInstanceId == "TestClientInstanceId" &&
+                p.JoinerClientInstanceId == joinerClientInstanceId &&
+                p.MemberProtocolVersion == ProtocolVersion.CURRENT &&
+                p.JoinerProtocolVersion == incompatibleVersion),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+    
+    [Test]
+    public async Task TrustAllMembersPublicKeys_WhenProtocolVersionIncompatibleNotificationReceived_ShouldReturnIncompatibleProtocolVersion()
+    {
+        var sessionId = "TestSessionId";
+        
+        _sessionMemberApiClient
+            .Setup(c => c.GetMembersClientInstanceIds(sessionId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(["MemberInstanceId"]);
+        
+        var startTrustCheckResult = new StartTrustCheckResult
+        {
+            IsOK = true,
+            MembersInstanceIds = ["MemberInstanceId"]
+        };
+        
+        _trustApiClient
+            .Setup(c => c.StartTrustCheck(It.IsAny<TrustCheckParameters>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(startTrustCheckResult);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.ResetJoinerTrustProcessData(sessionId))
+            .Returns(Task.CompletedTask);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.SetExpectedPublicKeyCheckDataCount(sessionId, It.IsAny<List<string>>()))
+            .Returns(Task.CompletedTask);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.WaitAsync(sessionId, It.IsAny<Func<TrustProcessPublicKeysData, EventWaitHandle>>(), It.IsAny<TimeSpan>()))
+            .ReturnsAsync(true);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.IsProtocolVersionIncompatible(sessionId))
+            .ReturnsAsync(true);
+        
+        var result = await _publicKeysTruster.TrustAllMembersPublicKeys(sessionId);
+        
+        result.Status.Should().Be(JoinSessionStatus.IncompatibleProtocolVersion);
+    }
 }
