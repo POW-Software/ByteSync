@@ -2051,6 +2051,42 @@ namespace ByteSync.Assets.Resources {
                 return ResourceManager.GetString("MessageBox_Cancel", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Microsoft Store.
+        /// </summary>
+        internal static string RatingPrompt_Channel_MicrosoftStore {
+            get {
+                return ResourceManager.GetString("RatingPrompt_Channel_MicrosoftStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à GitHub.
+        /// </summary>
+        internal static string RatingPrompt_Channel_GitHub {
+            get {
+                return ResourceManager.GetString("RatingPrompt_Channel_GitHub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à AlternativeTo.
+        /// </summary>
+        internal static string RatingPrompt_Channel_AlternativeTo {
+            get {
+                return ResourceManager.GetString("RatingPrompt_Channel_AlternativeTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à MajorGeeks.
+        /// </summary>
+        internal static string RatingPrompt_Channel_MajorGeeks {
+            get {
+                return ResourceManager.GetString("RatingPrompt_Channel_MajorGeeks", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Enjoying ByteSync?.

@@ -1,0 +1,45 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
+             x:Class="ByteSync.Views.Ratings.RatingPromptView">
+
+    <Grid Background="{DynamicResource MahApps.Brushes.Gray7}">
+        <StackPanel Margin="12" Spacing="12">
+            <TextBlock Text="{Binding Message}"
+                       TextWrapping="Wrap"
+                       FontSize="16"
+                       MaxWidth="560" />
+
+            <ItemsControl Items="{Binding RatingOptions}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Classes="GenericButton Accent"
+                                Height="36"
+                                HorizontalAlignment="Stretch"
+                                Command="{Binding DataContext.RateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding Url}"
+                                Content="{Binding Label}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Classes="GenericButton"
+                        Height="32"
+                        Command="{Binding AskLaterCommand}"
+                        Content="{Binding AskLaterText}" />
+                <Button Classes="GenericButton"
+                        Height="32"
+                        Command="{Binding DoNotAskAgainCommand}"
+                        Content="{Binding DoNotAskAgainText}" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

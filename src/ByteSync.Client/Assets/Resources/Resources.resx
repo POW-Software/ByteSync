@@ -811,6 +811,18 @@ Would you like to continue ?</value>
     <data name="RatingPrompt_DoNotAskAgain" xml:space="preserve">
         <value>Don't ask again</value>
     </data>
+    <data name="RatingPrompt_Channel_MicrosoftStore" xml:space="preserve">
+        <value>Microsoft Store</value>
+    </data>
+    <data name="RatingPrompt_Channel_GitHub" xml:space="preserve">
+        <value>GitHub</value>
+    </data>
+    <data name="RatingPrompt_Channel_AlternativeTo" xml:space="preserve">
+        <value>AlternativeTo</value>
+    </data>
+    <data name="RatingPrompt_Channel_MajorGeeks" xml:space="preserve">
+        <value>MajorGeeks</value>
+    </data>
 	<data name="MainWindow_OnClose_ConfirmTitle" xml:space="preserve">
 		<value>Quit</value>
 	</data>

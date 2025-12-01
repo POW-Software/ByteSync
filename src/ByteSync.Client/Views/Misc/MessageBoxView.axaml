@@ -26,12 +26,12 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="6">
                 <Button Classes="GenericButton Accent" Height="32" HorizontalAlignment="Left" VerticalAlignment="Bottom"
                         IsVisible="{Binding ShowOK}"
-                        Command="{Binding Path=OKButtonCommand}" Margin="3" Content="{Binding OkButtonText}">
+                        Command="{Binding Path=OKButtonCommand}" Margin="3" Content="{localizations:Loc MessageBox_OK}">
                 </Button>
 
                 <Button Classes="GenericButton Accent" Height="32" HorizontalAlignment="Left" VerticalAlignment="Bottom"
                         IsVisible="{Binding ShowYesNo}"
-                        Command="{Binding Path=AnyButtonCommand}" Margin="3" Content="{Binding YesButtonText}">
+                        Command="{Binding Path=AnyButtonCommand}" Margin="3" Content="{localizations:Loc MessageBox_Yes}">
                     <Button.CommandParameter>
                         <business:MessageBoxResult>Yes</business:MessageBoxResult>
                     </Button.CommandParameter>
@@ -39,7 +39,7 @@
 
                 <Button Classes="GenericButton" Height="32" HorizontalAlignment="Left" VerticalAlignment="Bottom"
                         IsVisible="{Binding ShowYesNo}"
-                        Command="{Binding Path=AnyButtonCommand}" Margin="3" Content="{Binding NoButtonText}">
+                        Command="{Binding Path=AnyButtonCommand}" Margin="3" Content="{localizations:Loc MessageBox_No}">
                     <Button.CommandParameter>
                         <business:MessageBoxResult>No</business:MessageBoxResult>
                     </Button.CommandParameter>
@@ -47,7 +47,7 @@
 
                 <Button Classes="GenericButton" Height="32" HorizontalAlignment="Left" VerticalAlignment="Bottom"
                         IsVisible="{Binding ShowCancel}"
-                        Command="{Binding Path=AnyButtonCommand}" Margin="3" Content="{Binding CancelButtonText}">
+                        Command="{Binding Path=AnyButtonCommand}" Margin="3" Content="{localizations:Loc MessageBox_Cancel}">
                     <Button.CommandParameter>
                         <business:MessageBoxResult>Cancel</business:MessageBoxResult>
                     </Button.CommandParameter>

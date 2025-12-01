@@ -10,6 +10,7 @@ using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Announcements;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Interfaces.Services.Localizations;
+using ByteSync.Interfaces.Services;
 using ByteSync.Interfaces.Updates;
 using Splat.Autofac;
 
@@ -71,6 +72,8 @@ public class GraphicalUserInterfaceBootstrapper : BaseBootstrapper
         {
             var announcementService = scope.Resolve<IAnnouncementService>();
             _ = announcementService.Start();
+
+            scope.Resolve<IRatingPromptService>();
         }
 
         

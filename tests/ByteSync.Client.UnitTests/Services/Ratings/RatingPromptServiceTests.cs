@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ByteSync.Business;
+using System.Linq;
 using ByteSync.Business.Configurations;
 using ByteSync.Business.Misc;
 using ByteSync.Common.Business.Misc;
@@ -13,9 +13,9 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Services.Localizations;
-using ByteSync.Services.Dialogs;
 using ByteSync.Services.Ratings;
 using ByteSync.ViewModels.Misc;
+using ByteSync.ViewModels.Ratings;
 using FluentAssertions;
 using Moq;
 using Microsoft.Extensions.Logging;
@@ -32,9 +32,9 @@ public class RatingPromptServiceTests
     private Mock<IDialogService> _dialogService = null!;
     private Mock<IWebAccessor> _webAccessor = null!;
     private Mock<ILocalizationService> _localizationService = null!;
-    private IMessageBoxViewModelFactory _messageBoxViewModelFactory = null!;
     private ApplicationSettings _applicationSettings = null!;
     private Mock<ILogger<RatingPromptService>> _logger = null!;
+    private TaskCompletionSource<RatingPromptViewModel> _promptShown = null!;
 
     [SetUp]
     public void SetUp()
@@ -68,29 +68,27 @@ public class RatingPromptServiceTests
         _localizationService = new Mock<ILocalizationService>();
         _localizationService.Setup(ls => ls[It.IsAny<string>()]).Returns((string key) => key);
 
-        _messageBoxViewModelFactory = new MessageBoxViewModelFactory(_localizationService.Object);
-
         _dialogService = new Mock<IDialogService>();
         _webAccessor = new Mock<IWebAccessor>();
         _logger = new Mock<ILogger<RatingPromptService>>();
+
+        _promptShown = new TaskCompletionSource<RatingPromptViewModel>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _dialogService.Setup(d => d.ShowFlyout(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<FlyoutElementViewModel>()))
+            .Callback<string, bool, FlyoutElementViewModel>((_, _, vm) =>
+            {
+                _promptShown.TrySetResult((RatingPromptViewModel)vm);
+            });
     }
 
     [Test]
     public async Task Shows_prompt_on_successful_synchronization()
     {
-        var promptShown = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        _dialogService.Setup(d => d.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()))
-            .Returns<MessageBoxViewModel>(_ =>
-            {
-                promptShown.TrySetResult(true);
-                return Task.FromResult<MessageBoxResult?>(MessageBoxResult.No);
-            });
-
         using var service = BuildService(() => 0.1);
 
         PublishSynchronizationEnd();
 
-        await WaitForCompletion(promptShown.Task);
+        var viewModel = await WaitForPromptAsync();
+        viewModel.SelectAskLater();
     }
 
     [Test]
@@ -98,35 +96,25 @@ public class RatingPromptServiceTests
     {
         _applicationSettings.UserRatingOptOut = true;
 
-        var promptShown = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        _dialogService.Setup(d => d.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()))
-            .Returns(Task.FromResult<MessageBoxResult?>(MessageBoxResult.No))
-            .Callback(() => promptShown.TrySetResult(true));
-
         using var service = BuildService(() => 0.1);
 
         PublishSynchronizationEnd();
 
-        await EnsureNotCompleted(promptShown.Task);
+        await EnsurePromptNotShownAsync();
     }
 
     [Test]
     public async Task Does_not_prompt_when_probability_fails_or_in_command_line_mode()
     {
-        var promptShown = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        _dialogService.Setup(d => d.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()))
-            .Returns(Task.FromResult<MessageBoxResult?>(MessageBoxResult.No))
-            .Callback(() => promptShown.TrySetResult(true));
-
         using var serviceLowProbability = BuildService(() => 0.9);
         PublishSynchronizationEnd();
-        await EnsureNotCompleted(promptShown.Task);
+        await EnsurePromptNotShownAsync();
 
         _environmentService.SetupGet(e => e.OperationMode).Returns(OperationMode.CommandLine);
 
         using var serviceCli = BuildService(() => 0.1);
         PublishSynchronizationEnd();
-        await EnsureNotCompleted(promptShown.Task);
+        await EnsurePromptNotShownAsync();
     }
 
     [Test]
@@ -137,18 +125,13 @@ public class RatingPromptServiceTests
             ErrorActionsCount = 1
         });
 
-        var promptShown = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        _dialogService.Setup(d => d.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()))
-            .Returns(Task.FromResult<MessageBoxResult?>(MessageBoxResult.No))
-            .Callback(() => promptShown.TrySetResult(true));
-
         using var serviceWithErrors = BuildService(() => 0.1);
         PublishSynchronizationEnd();
-        await EnsureNotCompleted(promptShown.Task);
+        await EnsurePromptNotShownAsync();
 
         using var serviceWithFailedStatus = BuildService(() => 0.1);
         PublishSynchronizationEnd(SynchronizationEndStatuses.Error);
-        await EnsureNotCompleted(promptShown.Task);
+        await EnsurePromptNotShownAsync();
     }
 
     [Test]
@@ -164,13 +147,13 @@ public class RatingPromptServiceTests
                 return Task.CompletedTask;
             });
 
-        _dialogService.Setup(d => d.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()))
-            .Returns(Task.FromResult<MessageBoxResult?>(MessageBoxResult.Yes));
-
         _environmentService.SetupGet(e => e.DeploymentMode).Returns(DeploymentModes.MsixInstallation);
 
         using var service = BuildService(() => 0.0);
         PublishSynchronizationEnd();
+
+        var viewModel = await WaitForPromptAsync();
+        viewModel.SelectRateOption(viewModel.RatingOptions.First().Url);
 
         await WaitForCompletion(urlsOpened.Task);
         openedUrls.Should().ContainSingle(url => url.Contains("apps.microsoft.com"));
@@ -193,19 +176,18 @@ public class RatingPromptServiceTests
                 return Task.CompletedTask;
             });
 
-        _dialogService.Setup(d => d.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()))
-            .Returns(Task.FromResult<MessageBoxResult?>(MessageBoxResult.Yes));
-
         _environmentService.SetupGet(e => e.DeploymentMode).Returns(DeploymentModes.SetupInstallation);
 
         using var service = BuildService(() => 0.0);
         PublishSynchronizationEnd();
 
+        var viewModel = await WaitForPromptAsync();
+        viewModel.RatingOptions.Count.Should().Be(4);
+        viewModel.SelectRateOption(viewModel.RatingOptions.Last().Url);
+
         await WaitForCompletion(urlsOpened.Task);
-        openedUrls.Should().HaveCount(4);
+        openedUrls.Should().HaveCount(1);
         openedUrls.Should().Contain(url => url.Contains("apps.microsoft.com"));
-        openedUrls.Should().Contain(url => url.Contains("github.com/POW-Software/ByteSync"));
-        openedUrls.Should().Contain(url => url.Contains("alternativeto.net"));
         openedUrls.Should().Contain(url => url.Contains("majorgeeks.com"));
     }
 
@@ -222,12 +204,12 @@ public class RatingPromptServiceTests
                 return _applicationSettings;
             });
 
-        _dialogService.Setup(d => d.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()))
-            .Returns(Task.FromResult<MessageBoxResult?>(MessageBoxResult.Cancel));
-
         using var service = BuildService(() => 0.0);
 
         PublishSynchronizationEnd();
+
+        var viewModel = await WaitForPromptAsync();
+        viewModel.SelectDoNotAskAgain();
 
         await WaitForCompletion(settingsUpdated.Task);
         _applicationSettings.UserRatingOptOut.Should().BeTrue();
@@ -237,7 +219,7 @@ public class RatingPromptServiceTests
     private RatingPromptService BuildService(Func<double>? randomProvider)
     {
         return new RatingPromptService(_synchronizationService.Object, _environmentService.Object,
-            _applicationSettingsRepository.Object, _dialogService.Object, _messageBoxViewModelFactory,
+            _applicationSettingsRepository.Object, _dialogService.Object,
             _webAccessor.Object, _localizationService.Object, _logger.Object, randomProvider);
     }
 
@@ -251,15 +233,22 @@ public class RatingPromptServiceTests
         });
     }
 
+    private async Task<RatingPromptViewModel> WaitForPromptAsync()
+    {
+        var completed = await Task.WhenAny(_promptShown.Task, Task.Delay(TimeSpan.FromSeconds(1)));
+        completed.Should().Be(_promptShown.Task);
+        return _promptShown.Task.Result;
+    }
+
+    private async Task EnsurePromptNotShownAsync()
+    {
+        var completed = await Task.WhenAny(_promptShown.Task, Task.Delay(TimeSpan.FromMilliseconds(200))) == _promptShown.Task;
+        completed.Should().BeFalse();
+    }
+
     private static async Task WaitForCompletion(Task task)
     {
         var completed = await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(1))) == task;
         completed.Should().BeTrue();
-    }
-
-    private static async Task EnsureNotCompleted(Task task)
-    {
-        var completed = await Task.WhenAny(task, Task.Delay(TimeSpan.FromMilliseconds(200))) == task;
-        completed.Should().BeFalse();
     }
 }

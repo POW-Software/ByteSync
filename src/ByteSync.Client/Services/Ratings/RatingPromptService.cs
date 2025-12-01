@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using ByteSync.Assets.Resources;
-using ByteSync.Business;
 using ByteSync.Business.Misc;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Business.Synchronizations;
@@ -14,6 +13,7 @@ using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Services;
 using ByteSync.Interfaces.Services.Localizations;
+using ByteSync.ViewModels.Ratings;
 
 namespace ByteSync.Services.Ratings;
 
@@ -34,7 +34,6 @@ public class RatingPromptService : IRatingPromptService, IDisposable
     private readonly IEnvironmentService _environmentService;
     private readonly IApplicationSettingsRepository _applicationSettingsRepository;
     private readonly IDialogService _dialogService;
-    private readonly IMessageBoxViewModelFactory _messageBoxViewModelFactory;
     private readonly IWebAccessor _webAccessor;
     private readonly ILocalizationService _localizationService;
     private readonly ILogger<RatingPromptService> _logger;
@@ -43,15 +42,13 @@ public class RatingPromptService : IRatingPromptService, IDisposable
 
     public RatingPromptService(ISynchronizationService synchronizationService, IEnvironmentService environmentService,
         IApplicationSettingsRepository applicationSettingsRepository, IDialogService dialogService,
-        IMessageBoxViewModelFactory messageBoxViewModelFactory, IWebAccessor webAccessor,
-        ILocalizationService localizationService, ILogger<RatingPromptService> logger,
+        IWebAccessor webAccessor, ILocalizationService localizationService, ILogger<RatingPromptService> logger,
         Func<double>? randomValueProvider = null)
     {
         _synchronizationService = synchronizationService;
         _environmentService = environmentService;
         _applicationSettingsRepository = applicationSettingsRepository;
         _dialogService = dialogService;
-        _messageBoxViewModelFactory = messageBoxViewModelFactory;
         _webAccessor = webAccessor;
         _localizationService = localizationService;
         _logger = logger;
@@ -122,31 +119,24 @@ public class RatingPromptService : IRatingPromptService, IDisposable
 
     private async Task ShowPromptAsync()
     {
-        var messageBoxViewModel = _messageBoxViewModelFactory.CreateMessageBoxViewModel(
-            nameof(Resources.RatingPrompt_Title),
-            nameof(Resources.RatingPrompt_Message));
+        var options = BuildRatingOptions();
+        var ratingPromptViewModel = new RatingPromptViewModel(_localizationService, options);
 
-        messageBoxViewModel.ShowYesNo = true;
-        messageBoxViewModel.ShowCancel = true;
-        messageBoxViewModel.ShowOK = false;
-        messageBoxViewModel.YesButtonText = _localizationService[nameof(Resources.RatingPrompt_RateNow)];
-        messageBoxViewModel.NoButtonText = _localizationService[nameof(Resources.RatingPrompt_AskLater)];
-        messageBoxViewModel.CancelButtonText = _localizationService[nameof(Resources.RatingPrompt_DoNotAskAgain)];
+        _dialogService.ShowFlyout(nameof(Resources.RatingPrompt_Title), false, ratingPromptViewModel);
 
-        var result = await _dialogService.ShowMessageBoxAsync(messageBoxViewModel);
-
+        var result = await ratingPromptViewModel.WaitForResultAsync();
         var timestamp = DateTimeOffset.UtcNow;
 
-        switch (result)
+        switch (result.ResultType)
         {
-            case MessageBoxResult.Yes:
+            case RatingPromptResultType.Rate when result.Url != null:
                 _applicationSettingsRepository.UpdateCurrentApplicationSettings(settings =>
                 {
                     settings.UserRatingLastPromptedOn = timestamp;
                 });
-                await OnRateNowAsync();
+                await _webAccessor.OpenUrl(result.Url);
                 break;
-            case MessageBoxResult.Cancel:
+            case RatingPromptResultType.DoNotAskAgain:
                 _applicationSettingsRepository.UpdateCurrentApplicationSettings(settings =>
                 {
                     settings.UserRatingOptOut = true;
@@ -154,27 +144,24 @@ public class RatingPromptService : IRatingPromptService, IDisposable
                 });
                 break;
             default:
-                _applicationSettingsRepository.UpdateCurrentApplicationSettings(settings =>
-                {
-                    settings.UserRatingLastPromptedOn = timestamp;
-                });
                 break;
         }
     }
 
-    private async Task OnRateNowAsync()
+    private IEnumerable<RatingOption> BuildRatingOptions()
     {
-        if (_environmentService.DeploymentMode == DeploymentModes.MsixInstallation)
+        var options = new List<RatingOption>
         {
-            await _webAccessor.OpenUrl(StoreRatingUrl);
-            return;
+            new RatingOption(_localizationService[nameof(Resources.RatingPrompt_Channel_MicrosoftStore)], StoreRatingUrl)
+        };
+
+        if (_environmentService.DeploymentMode != DeploymentModes.MsixInstallation)
+        {
+            options.Add(new RatingOption(_localizationService[nameof(Resources.RatingPrompt_Channel_GitHub)], AdditionalRatingUrls[0]));
+            options.Add(new RatingOption(_localizationService[nameof(Resources.RatingPrompt_Channel_AlternativeTo)], AdditionalRatingUrls[1]));
+            options.Add(new RatingOption(_localizationService[nameof(Resources.RatingPrompt_Channel_MajorGeeks)], AdditionalRatingUrls[2]));
         }
 
-        await _webAccessor.OpenUrl(StoreRatingUrl);
-
-        foreach (var url in AdditionalRatingUrls)
-        {
-            await _webAccessor.OpenUrl(url);
-        }
+        return options;
     }
 }
