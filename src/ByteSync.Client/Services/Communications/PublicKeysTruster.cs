@@ -74,6 +74,16 @@ public class PublicKeysTruster : IPublicKeysTruster
     // Called during StartTrustCheck on the session members so that they provide their PublicKeyCheckData to the joiner
     public async Task OnPublicKeyCheckDataAskedAsync((string sessionId, string clientInstanceId, PublicKeyInfo publicKeyInfo) tuple)
     {
+        // Validate protocol version compatibility before responding
+        if (!ProtocolVersion.IsCompatible(tuple.publicKeyInfo.ProtocolVersion))
+        {
+            _logger.LogWarning(
+                "Protocol version mismatch in OnPublicKeyCheckDataAskedAsync: joiner has version {JoinerVersion}, current version is {CurrentVersion}. Not responding to trust check request.",
+                tuple.publicKeyInfo.ProtocolVersion, ProtocolVersion.CURRENT);
+            
+            return;
+        }
+        
         var isTrusted = _publicKeysManager.IsTrusted(tuple.publicKeyInfo);
         
         var memberPublicKeyCheckData = _publicKeysManager.BuildMemberPublicKeyCheckData(tuple.publicKeyInfo, isTrusted);
