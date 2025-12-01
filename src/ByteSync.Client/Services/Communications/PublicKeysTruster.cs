@@ -81,6 +81,17 @@ public class PublicKeysTruster : IPublicKeysTruster
                 "Protocol version mismatch in OnPublicKeyCheckDataAskedAsync: joiner has version {JoinerVersion}, current version is {CurrentVersion}. Not responding to trust check request.",
                 tuple.publicKeyInfo.ProtocolVersion, ProtocolVersion.CURRENT);
             
+            var incompatibleParameters = new InformProtocolVersionIncompatibleParameters
+            {
+                SessionId = tuple.sessionId,
+                MemberClientInstanceId = _environmentService.ClientInstanceId,
+                JoinerClientInstanceId = tuple.clientInstanceId,
+                MemberProtocolVersion = ProtocolVersion.CURRENT,
+                JoinerProtocolVersion = tuple.publicKeyInfo.ProtocolVersion
+            };
+            
+            await _trustApiClient.InformProtocolVersionIncompatible(incompatibleParameters);
+            
             return;
         }
         
