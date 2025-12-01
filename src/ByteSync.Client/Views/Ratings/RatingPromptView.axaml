@@ -12,7 +12,7 @@
                        FontSize="16"
                        MaxWidth="560" />
 
-            <ItemsControl Items="{Binding RatingOptions}">
+            <ItemsControl ItemsSource="{Binding RatingOptions}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Vertical" Spacing="8" />
