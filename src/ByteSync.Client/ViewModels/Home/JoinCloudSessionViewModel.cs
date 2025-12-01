@@ -200,6 +200,10 @@ public class JoinCloudSessionViewModel : ActivatableViewModelBase
             case JoinSessionStatus.CanceledByUser:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_CanceledByUser));
                 break;
+            
+            case JoinSessionStatus.IncompatibleProtocolVersion:
+                UpdateErrorMessage(nameof(Resources.JoinCloudSession_IncompatibleProtocolVersion), joinSessionError.Exception);
+                break;
 
             default:
                 UpdateErrorMessage(nameof(Resources.JoinCloudSession_UnkownError), joinSessionError.Exception);
