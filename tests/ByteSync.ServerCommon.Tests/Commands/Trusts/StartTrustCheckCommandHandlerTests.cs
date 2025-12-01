@@ -1,6 +1,7 @@
 ﻿using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
+using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Interfaces.Hub;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
@@ -46,17 +47,26 @@ public class StartTrustCheckCommandHandlerTests
         var member2 = "memberInstance2";
         var member3 = "nonExistentMemberInstance";
         
-        var publicKeyInfo = new PublicKeyInfo();
+        var publicKeyInfo = new PublicKeyInfo { ProtocolVersion = ProtocolVersion.CURRENT };
         var parameters = new TrustCheckParameters
         {
             SessionId = sessionId,
             MembersInstanceIdsToCheck = new List<string> { member1, member2, member3 },
-            PublicKeyInfo = publicKeyInfo
+            PublicKeyInfo = publicKeyInfo,
+            ProtocolVersion = ProtocolVersion.CURRENT
         };
         
         var cloudSession = new CloudSessionData(sessionId, new EncryptedSessionSettings(), new Client { ClientInstanceId = "member1" });
-        cloudSession.SessionMembers.Add(new SessionMemberData { ClientInstanceId = member1 });
-        cloudSession.SessionMembers.Add(new SessionMemberData { ClientInstanceId = member2 });
+        cloudSession.SessionMembers.Add(new SessionMemberData 
+        { 
+            ClientInstanceId = member1,
+            PublicKeyInfo = new PublicKeyInfo { ProtocolVersion = ProtocolVersion.CURRENT }
+        });
+        cloudSession.SessionMembers.Add(new SessionMemberData 
+        { 
+            ClientInstanceId = member2,
+            PublicKeyInfo = new PublicKeyInfo { ProtocolVersion = ProtocolVersion.CURRENT }
+        });
         
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSession);
@@ -101,7 +111,8 @@ public class StartTrustCheckCommandHandlerTests
         {
             SessionId = sessionId,
             MembersInstanceIdsToCheck = new List<string> { member1 },
-            PublicKeyInfo = new PublicKeyInfo()
+            PublicKeyInfo = new PublicKeyInfo { ProtocolVersion = ProtocolVersion.CURRENT },
+            ProtocolVersion = ProtocolVersion.CURRENT
         };
         
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
@@ -133,11 +144,16 @@ public class StartTrustCheckCommandHandlerTests
         {
             SessionId = sessionId,
             MembersInstanceIdsToCheck = new List<string> { nonExistentMember },
-            PublicKeyInfo = new PublicKeyInfo()
+            PublicKeyInfo = new PublicKeyInfo { ProtocolVersion = ProtocolVersion.CURRENT },
+            ProtocolVersion = ProtocolVersion.CURRENT
         };
         
         var cloudSession = new CloudSessionData(sessionId, new EncryptedSessionSettings(), new Client { ClientInstanceId = "creator" });
-        cloudSession.SessionMembers.Add(new SessionMemberData { ClientInstanceId = "otherMember" });
+        cloudSession.SessionMembers.Add(new SessionMemberData 
+        { 
+            ClientInstanceId = "otherMember",
+            PublicKeyInfo = new PublicKeyInfo { ProtocolVersion = ProtocolVersion.CURRENT }
+        });
         
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSession);
@@ -154,5 +170,131 @@ public class StartTrustCheckCommandHandlerTests
         
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _mockInvokeClientsService.Client(A<string>.Ignored)).MustNotHaveHappened();
+    }
+    
+    [Test]
+    public async Task Handle_WhenMemberHasIncompatibleProtocolVersion_ReturnsProtocolVersionIncompatible()
+    {
+        var sessionId = "testSession";
+        var joinerClient = new Client { ClientId = "joinerClient", ClientInstanceId = "joinerClientInstance" };
+        var member1 = "memberInstance1";
+        
+        var publicKeyInfo = new PublicKeyInfo { ProtocolVersion = ProtocolVersion.CURRENT };
+        var parameters = new TrustCheckParameters
+        {
+            SessionId = sessionId,
+            MembersInstanceIdsToCheck = new List<string> { member1 },
+            PublicKeyInfo = publicKeyInfo,
+            ProtocolVersion = ProtocolVersion.CURRENT
+        };
+        
+        var cloudSession = new CloudSessionData(sessionId, new EncryptedSessionSettings(), new Client { ClientInstanceId = "creator" });
+        cloudSession.SessionMembers.Add(new SessionMemberData 
+        { 
+            ClientInstanceId = member1,
+            PublicKeyInfo = new PublicKeyInfo { ProtocolVersion = 0 }
+        });
+        
+        A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
+            .Returns(cloudSession);
+        
+        var request = new StartTrustCheckRequest(parameters, joinerClient);
+        
+        var result = await _startTrustCheckCommandHandler.Handle(request, CancellationToken.None);
+        
+        result.Should().NotBeNull();
+        result.IsOK.Should().BeFalse();
+        result.IsProtocolVersionIncompatible.Should().BeTrue();
+        result.MembersInstanceIds.Should().BeEmpty();
+        
+        A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockInvokeClientsService.Client(A<string>.Ignored)).MustNotHaveHappened();
+    }
+    
+    [Test]
+    public async Task Handle_WhenJoinerHasIncompatibleProtocolVersion_ReturnsProtocolVersionIncompatible()
+    {
+        var sessionId = "testSession";
+        var joinerClient = new Client { ClientId = "joinerClient", ClientInstanceId = "joinerClientInstance" };
+        var member1 = "memberInstance1";
+        
+        var publicKeyInfo = new PublicKeyInfo { ProtocolVersion = 0 };
+        var parameters = new TrustCheckParameters
+        {
+            SessionId = sessionId,
+            MembersInstanceIdsToCheck = new List<string> { member1 },
+            PublicKeyInfo = publicKeyInfo,
+            ProtocolVersion = 0
+        };
+        
+        var cloudSession = new CloudSessionData(sessionId, new EncryptedSessionSettings(), new Client { ClientInstanceId = "creator" });
+        cloudSession.SessionMembers.Add(new SessionMemberData 
+        { 
+            ClientInstanceId = member1,
+            PublicKeyInfo = new PublicKeyInfo { ProtocolVersion = ProtocolVersion.CURRENT }
+        });
+        
+        A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
+            .Returns(cloudSession);
+        
+        var request = new StartTrustCheckRequest(parameters, joinerClient);
+        
+        var result = await _startTrustCheckCommandHandler.Handle(request, CancellationToken.None);
+        
+        result.Should().NotBeNull();
+        result.IsOK.Should().BeFalse();
+        result.IsProtocolVersionIncompatible.Should().BeTrue();
+        result.MembersInstanceIds.Should().BeEmpty();
+        
+        A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockInvokeClientsService.Client(A<string>.Ignored)).MustNotHaveHappened();
+    }
+    
+    [Test]
+    public async Task Handle_WhenJoinerAndMemberHaveCompatibleVersions_ReturnsSuccess()
+    {
+        var sessionId = "testSession";
+        var joinerClient = new Client { ClientId = "joinerClient", ClientInstanceId = "joinerClientInstance" };
+        var member1 = "memberInstance1";
+        
+        var publicKeyInfo = new PublicKeyInfo { ProtocolVersion = ProtocolVersion.CURRENT };
+        var parameters = new TrustCheckParameters
+        {
+            SessionId = sessionId,
+            MembersInstanceIdsToCheck = new List<string> { member1 },
+            PublicKeyInfo = publicKeyInfo,
+            ProtocolVersion = ProtocolVersion.CURRENT
+        };
+        
+        var cloudSession = new CloudSessionData(sessionId, new EncryptedSessionSettings(), new Client { ClientInstanceId = "creator" });
+        cloudSession.SessionMembers.Add(new SessionMemberData 
+        { 
+            ClientInstanceId = member1,
+            PublicKeyInfo = new PublicKeyInfo { ProtocolVersion = ProtocolVersion.CURRENT }
+        });
+        
+        A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
+            .Returns(cloudSession);
+        
+        A.CallTo(() => _mockInvokeClientsService.Client(member1))
+            .Returns(_mockHubByteSyncPush);
+        
+        A.CallTo(() => _mockHubByteSyncPush.AskPublicKeyCheckData(sessionId, joinerClient.ClientInstanceId, publicKeyInfo))
+            .Returns(Task.CompletedTask);
+        
+        var request = new StartTrustCheckRequest(parameters, joinerClient);
+        
+        var result = await _startTrustCheckCommandHandler.Handle(request, CancellationToken.None);
+        
+        result.Should().NotBeNull();
+        result.IsOK.Should().BeTrue();
+        result.IsProtocolVersionIncompatible.Should().BeFalse();
+        result.MembersInstanceIds.Should().HaveCount(1);
+        result.MembersInstanceIds.Should().Contain(member1);
+        
+        A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockInvokeClientsService.Client(member1)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _mockHubByteSyncPush.AskPublicKeyCheckData(sessionId, joinerClient.ClientInstanceId, publicKeyInfo))
+            .MustHaveHappenedOnceExactly();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ByteSync.Common.Business.Sessions.Cloud.Connections;
+using ByteSync.Common.Business.Versions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
@@ -29,6 +30,35 @@ public class StartTrustCheckCommandHandler : IRequestHandler<StartTrustCheckRequ
         if (cloudSession == null)
         {
             return new StartTrustCheckResult { IsOK = false };
+        }
+
+        var joinerProtocolVersion = trustCheckParameters.ProtocolVersion;
+        
+        if (!ProtocolVersion.IsCompatible(joinerProtocolVersion))
+        {
+            _logger.LogWarning(
+                "StartTrustCheck: Joiner {JoinerId} has incompatible protocol version {JoinerVersion}",
+                joiner.ClientInstanceId, joinerProtocolVersion);
+            
+            return new StartTrustCheckResult { IsOK = false, IsProtocolVersionIncompatible = true };
+        }
+        
+        foreach (var member in cloudSession.SessionMembers)
+        {
+            if (trustCheckParameters.MembersInstanceIdsToCheck.Contains(member.ClientInstanceId))
+            {
+                var memberProtocolVersion = member.PublicKeyInfo.ProtocolVersion;
+                
+                if (!ProtocolVersion.IsCompatible(memberProtocolVersion) || 
+                    memberProtocolVersion != joinerProtocolVersion)
+                {
+                    _logger.LogWarning(
+                        "StartTrustCheck: Protocol version mismatch between joiner {JoinerId} (version {JoinerVersion}) and member {MemberId} (version {MemberVersion})",
+                        joiner.ClientInstanceId, joinerProtocolVersion, member.ClientInstanceId, memberProtocolVersion);
+                    
+                    return new StartTrustCheckResult { IsOK = false, IsProtocolVersionIncompatible = true };
+                }
+            }
         }
 
         _logger.LogInformation("StartTrustCheck: {Joiner} starts trust check for session {SessionId}. {Count} members to check", 

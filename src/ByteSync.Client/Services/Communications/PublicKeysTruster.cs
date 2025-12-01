@@ -293,6 +293,13 @@ public class PublicKeysTruster : IPublicKeysTruster
         
         if (result == null || !result.IsOK)
         {
+            if (result is { IsProtocolVersionIncompatible: true })
+            {
+                _logger.LogWarning("StartTrustCheck returned protocol version incompatibility");
+                
+                return JoinSessionResult.BuildFrom(JoinSessionStatus.IncompatibleProtocolVersion);
+            }
+            
             _logger.LogError("Can not start trust check");
             
             return JoinSessionResult.BuildFrom(JoinSessionStatus.UnexpectedError);
