@@ -306,6 +306,13 @@ public class PublicKeysTruster : IPublicKeysTruster
         
         if (isWaitOK)
         {
+            if (await _trustProcessPublicKeysRepository.IsProtocolVersionIncompatible(sessionId))
+            {
+                _logger.LogWarning("Trust check interrupted due to protocol version incompatibility");
+                
+                return JoinSessionResult.BuildFrom(JoinSessionStatus.IncompatibleProtocolVersion);
+            }
+            
             return JoinSessionResult.BuildProcessingNormally();
         }
         else
