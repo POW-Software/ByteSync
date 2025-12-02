@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces.Controls.Communications.Http;
@@ -99,6 +96,22 @@ public class MockServerFacade
         return this;
     }
     
+    public MockServerFacade WithStartTrustCheckProtocolVersionIncompatible(string sessionId, int protocolVersion)
+    {
+        _trustApiClient
+            .Setup(c => c.StartTrustCheck(
+                It.Is<TrustCheckParameters>(p => p.SessionId == sessionId && p.ProtocolVersion == protocolVersion),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new StartTrustCheckResult
+            {
+                IsOK = false,
+                IsProtocolVersionIncompatible = true,
+                MembersInstanceIds = new List<string>()
+            });
+        
+        return this;
+    }
+    
     public MockServerFacade WithStartTrustCheckFailure(string sessionId)
     {
         _trustApiClient
@@ -119,7 +132,7 @@ public class MockServerFacade
     
     public Mock<ISessionMemberApiClient> GetSessionMemberApiClient() => _sessionMemberApiClient;
     
-    public void VerifyStartTrustCheckCalled(string sessionId, Moq.Times times)
+    public void VerifyStartTrustCheckCalled(string sessionId, Times times)
     {
         _trustApiClient.Verify(
             c => c.StartTrustCheck(
@@ -133,7 +146,7 @@ public class MockServerFacade
         VerifyStartTrustCheckCalled(sessionId, Times.Once());
     }
     
-    public void VerifyInformProtocolVersionIncompatibleCalled(Moq.Times times)
+    public void VerifyInformProtocolVersionIncompatibleCalled(Times times)
     {
         _trustApiClient.Verify(
             c => c.InformProtocolVersionIncompatible(
@@ -150,14 +163,14 @@ public class MockServerFacade
     private class SessionConfiguration
     {
         public string SessionId { get; set; } = null!;
+        
         public List<MemberConfiguration> Members { get; set; } = new();
     }
     
     private class MemberConfiguration
     {
         public string InstanceId { get; set; } = null!;
+        
         public int ProtocolVersion { get; set; }
     }
 }
-
-

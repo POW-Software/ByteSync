@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Autofac;
 using ByteSync.Business.Communications.PublicKeysTrusting;
-using ByteSync.Business.Sessions.Connecting;
-using ByteSync.Client.IntegrationTests.TestHelpers;
 using ByteSync.Client.IntegrationTests.TestHelpers.Server;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
@@ -22,7 +16,6 @@ using ByteSync.Services.Communications;
 using ByteSync.TestsCommon;
 using FluentAssertions;
 using Moq;
-using NUnit.Framework;
 
 namespace ByteSync.Client.IntegrationTests.Scenarios.SessionConnection;
 
@@ -31,6 +24,7 @@ public class ProtocolVersion_IntegrationTests : IntegrationTest
     private FakeHubPushHandler _fakeHubPushHandler = null!;
     private MockServerFacade _serverFacade = null!;
     private Mock<ITrustProcessPublicKeysRepository> _mockTrustProcessPublicKeysRepository = null!;
+    private Mock<IPublicKeysManager> _mockPublicKeysManager = null!;
     
     [SetUp]
     public void Setup()
@@ -50,7 +44,8 @@ public class ProtocolVersion_IntegrationTests : IntegrationTest
             .Setup(r => r.SetExpectedPublicKeyCheckDataCount(It.IsAny<string>(), It.IsAny<List<string>>()))
             .Returns(Task.CompletedTask);
         _mockTrustProcessPublicKeysRepository
-            .Setup(r => r.WaitAsync(It.IsAny<string>(), It.IsAny<Func<TrustProcessPublicKeysData, EventWaitHandle>>(), It.IsAny<TimeSpan>()))
+            .Setup(r => r.WaitAsync(It.IsAny<string>(), It.IsAny<Func<TrustProcessPublicKeysData, EventWaitHandle>>(),
+                It.IsAny<TimeSpan>()))
             .ReturnsAsync(true);
         _mockTrustProcessPublicKeysRepository
             .Setup(r => r.IsProtocolVersionIncompatible(It.IsAny<string>()))
@@ -69,6 +64,8 @@ public class ProtocolVersion_IntegrationTests : IntegrationTest
         };
         mockPublicKeysManager.Setup(m => m.GetMyPublicKeyInfo()).Returns(myPublicKeyInfo);
         _builder.RegisterInstance(mockPublicKeysManager.Object).As<IPublicKeysManager>();
+        
+        _mockPublicKeysManager = mockPublicKeysManager;
         
         var mockEnvironmentService = new Mock<IEnvironmentService>();
         mockEnvironmentService.Setup(m => m.ClientInstanceId).Returns("joiner-instance-id");
@@ -157,7 +154,42 @@ public class ProtocolVersion_IntegrationTests : IntegrationTest
                     p.JoinerProtocolVersion == 0 &&
                     p.MemberProtocolVersion == ProtocolVersion.CURRENT),
                 It.IsAny<CancellationToken>()),
-            Moq.Times.Once);
+            Times.Once);
+    }
+    
+    [Test]
+    public async Task TrustAllMembersPublicKeys_WhenJoinerHasOldVersionAndMemberHasOldVersion_ShouldReturnIncompatibleStatus()
+    {
+        var sessionId = "test-session-123";
+        var oldProtocolVersion = 0;
+        
+        var oldPublicKeyInfo = new PublicKeyInfo
+        {
+            ClientId = "joiner-client-id",
+            PublicKey = Encoding.UTF8.GetBytes("test-public-key"),
+            ProtocolVersion = oldProtocolVersion
+        };
+        _mockPublicKeysManager.Setup(m => m.GetMyPublicKeyInfo()).Returns(oldPublicKeyInfo);
+        
+        _serverFacade
+            .WithSession(sessionId, "member-instance-1")
+            .WithMemberProtocolVersion(sessionId, "member-instance-1", oldProtocolVersion)
+            .WithStartTrustCheckProtocolVersionIncompatible(sessionId, ProtocolVersion.CURRENT);
+        
+        var truster = Container.Resolve<IPublicKeysTruster>();
+        
+        var result = await truster.TrustAllMembersPublicKeys(sessionId);
+        
+        result.Status.Should().Be(JoinSessionStatus.IncompatibleProtocolVersion);
+        result.IsOK.Should().BeFalse();
+        
+        var trustApiClient = _serverFacade.GetTrustApiClient();
+        trustApiClient.Verify(
+            c => c.StartTrustCheck(
+                It.Is<TrustCheckParameters>(p =>
+                    p.SessionId == sessionId &&
+                    p.ProtocolVersion == ProtocolVersion.CURRENT),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 }
-
