@@ -776,7 +776,7 @@ Voulez-vous continuer ?</value>
         <value>Vous aimez ByteSync ?</value>
     </data>
     <data name="RatingPrompt_Message" xml:space="preserve">
-        <value>Synchronisation réussie ! Si ByteSync vous aide, pourriez-vous laisser une évaluation pour nous faire connaître ?</value>
+        <value>Synchronisation réussie ! ByteSync progresse pas à pas avec l'appui de ses utilisateurs. Si l'outil vous rend service, une note publique nous aidera énormément à gagner en visibilité et à continuer à l'améliorer. Merci pour votre soutien !</value>
     </data>
     <data name="RatingPrompt_RateNow" xml:space="preserve">
         <value>Évaluer ByteSync</value>

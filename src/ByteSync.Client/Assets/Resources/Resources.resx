@@ -800,7 +800,7 @@ Would you like to continue ?</value>
         <value>Enjoying ByteSync?</value>
     </data>
     <data name="RatingPrompt_Message" xml:space="preserve">
-        <value>Sync completed! If ByteSync helps you, please leave a rating to spread the word.</value>
+        <value>Sync completed! ByteSync moves forward step by step with the support of its users. If it helps you, a public rating would greatly boost our visibility and let us keep improving. Thanks for your support!</value>
     </data>
     <data name="RatingPrompt_RateNow" xml:space="preserve">
         <value>Rate ByteSync</value>

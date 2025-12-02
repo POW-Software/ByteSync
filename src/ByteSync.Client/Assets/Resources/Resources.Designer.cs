@@ -2097,27 +2097,18 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Sync completed! If ByteSync helps you, please leave a rating to spread the word..
-        /// </summary>
         internal static string RatingPrompt_Message {
             get {
                 return ResourceManager.GetString("RatingPrompt_Message", resourceCulture);
             }
         }
         
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Rate ByteSync.
-        /// </summary>
         internal static string RatingPrompt_RateNow {
             get {
                 return ResourceManager.GetString("RatingPrompt_RateNow", resourceCulture);
             }
         }
         
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Ask me later.
-        /// </summary>
         internal static string RatingPrompt_AskLater {
             get {
                 return ResourceManager.GetString("RatingPrompt_AskLater", resourceCulture);
