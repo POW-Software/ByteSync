@@ -1601,6 +1601,9 @@ Do you want to save this new Session Profile with this name?</value>
 	<data name="JoinCloudSession_CanceledByUser" xml:space="preserve">
 		<value>Operation canceled by the user.</value>
 	</data>
+	<data name="JoinCloudSession_IncompatibleProtocolVersion" xml:space="preserve">
+		<value>Your application version is incompatible with this session. Please update ByteSync to join this session.</value>
+	</data>
 	<data name="CreateCloudSession_CanceledByUser" xml:space="preserve">
 		<value>Operation canceled by the user.</value>
 	</data>

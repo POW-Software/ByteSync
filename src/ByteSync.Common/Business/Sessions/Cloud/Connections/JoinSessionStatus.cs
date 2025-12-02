@@ -2,7 +2,7 @@
 
 public enum JoinSessionStatus
 {
-    SessionJoinedSucessfully = 1,
+    SessionJoinedSuccessfully = 1,
     ProcessingNormally = 2,
     SessionNotFound = 3,
     ServerError = 4,
@@ -14,4 +14,5 @@ public enum JoinSessionStatus
     UnexpectedError = 10,
     TimeoutError = 11,
     CanceledByUser = 12,
+    IncompatibleProtocolVersion = 13,
 }

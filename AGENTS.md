@@ -42,6 +42,11 @@ Examples:
 - `[feature] Add user registration`
 - `[bugfix] Fix memory leak in sync module`
 
+### PR Descriptions
+
+- PR descriptions must be written in English.
+- Include a summary of the changes, main modifications, and implementation approach when relevant.
+
 ### Notes for Agents
 - Never propose changes directly on `master`.
 - Always create a branch using the proper prefix.
