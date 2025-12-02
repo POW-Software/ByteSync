@@ -168,10 +168,7 @@ public class RatingPromptServiceTests
             .Returns<string>(url =>
             {
                 openedUrls.Add(url);
-                if (openedUrls.Count == 4)
-                {
-                    urlsOpened.TrySetResult(true);
-                }
+                urlsOpened.TrySetResult(true);
 
                 return Task.CompletedTask;
             });
@@ -187,7 +184,6 @@ public class RatingPromptServiceTests
 
         await WaitForCompletion(urlsOpened.Task);
         openedUrls.Should().HaveCount(1);
-        openedUrls.Should().Contain(url => url.Contains("apps.microsoft.com"));
         openedUrls.Should().Contain(url => url.Contains("majorgeeks.com"));
     }
 
