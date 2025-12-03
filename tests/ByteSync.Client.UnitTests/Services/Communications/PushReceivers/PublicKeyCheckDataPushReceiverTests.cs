@@ -45,10 +45,6 @@ public class PublicKeyCheckDataPushReceiverTests
         _hubPushHandlerMock.SetupGet(h => h.InformProtocolVersionIncompatible)
             .Returns(_informProtocolVersionIncompatibleSubject);
         
-        _trustProcessPublicKeysRepositoryMock
-            .Setup(r => r.SetProtocolVersionIncompatible(It.IsAny<string>(), It.IsAny<string>()))
-            .Returns(Task.CompletedTask);
-        
         _ = new PublicKeyCheckDataPushReceiver(
             _hubPushHandlerMock.Object,
             _publicKeysTrusterMock.Object,
@@ -64,6 +60,12 @@ public class PublicKeyCheckDataPushReceiverTests
         var memberClientInstanceId = "member-instance-id";
         var joinerClientInstanceId = "joiner-instance-id";
         
+        var tcs = new TaskCompletionSource<bool>();
+        _trustProcessPublicKeysRepositoryMock
+            .Setup(r => r.SetProtocolVersionIncompatible(sessionId, memberClientInstanceId))
+            .Returns(Task.CompletedTask)
+            .Callback(() => tcs.TrySetResult(true));
+        
         var parameters = new InformProtocolVersionIncompatibleParameters
         {
             SessionId = sessionId,
@@ -75,7 +77,7 @@ public class PublicKeyCheckDataPushReceiverTests
         
         _informProtocolVersionIncompatibleSubject.OnNext(parameters);
         
-        await Task.Delay(100);
+        await tcs.Task.WaitAsync(TimeSpan.FromSeconds(5));
         
         _trustProcessPublicKeysRepositoryMock.Verify(
             r => r.SetProtocolVersionIncompatible(sessionId, memberClientInstanceId),

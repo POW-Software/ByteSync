@@ -29,16 +29,14 @@ public class MockServerFacade
         }
         
         var session = _sessions[sessionId];
-        foreach (var memberId in memberInstanceIds)
+        var newMemberIds = memberInstanceIds.Where(id => !session.Members.Any(m => m.InstanceId == id));
+        foreach (var memberId in newMemberIds)
         {
-            if (!session.Members.Any(m => m.InstanceId == memberId))
+            session.Members.Add(new MemberConfiguration
             {
-                session.Members.Add(new MemberConfiguration
-                {
-                    InstanceId = memberId,
-                    ProtocolVersion = ProtocolVersion.CURRENT
-                });
-            }
+                InstanceId = memberId,
+                ProtocolVersion = ProtocolVersion.CURRENT
+            });
         }
         
         _sessionMemberApiClient

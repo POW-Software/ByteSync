@@ -128,12 +128,12 @@ public class ProtocolVersion_IntegrationTests : IntegrationTest
     public async Task OnPublicKeyCheckDataAskedAsync_WhenJoinerHasIncompatibleVersion_ShouldSendNotification()
     {
         var sessionId = "test-session-123";
-        var joinerInstanceId = "joiner-instance-id";
+        var joinerInstanceId = "incompatible-joiner-instance-id";
         var memberInstanceId = "joiner-instance-id";
         
         var incompatiblePublicKeyInfo = new PublicKeyInfo
         {
-            ClientId = "joiner-client-id",
+            ClientId = "incompatible-joiner-client-id",
             PublicKey = Encoding.UTF8.GetBytes("joiner-public-key"),
             ProtocolVersion = 0
         };

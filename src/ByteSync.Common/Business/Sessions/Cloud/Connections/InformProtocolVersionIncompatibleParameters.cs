@@ -12,4 +12,3 @@ public class InformProtocolVersionIncompatibleParameters
     
     public int JoinerProtocolVersion { get; set; }
 }
-

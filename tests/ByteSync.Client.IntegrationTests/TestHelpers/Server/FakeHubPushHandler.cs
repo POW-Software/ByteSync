@@ -76,5 +76,3 @@ public class FakeHubPushHandler : IHubPushHandler2
     
     public Subject<InformProtocolVersionIncompatibleParameters> InformProtocolVersionIncompatible { get; } = new();
 }
-
-

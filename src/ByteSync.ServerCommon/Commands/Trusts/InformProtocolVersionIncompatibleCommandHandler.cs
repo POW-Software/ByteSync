@@ -18,7 +18,6 @@ public class InformProtocolVersionIncompatibleCommandHandler : IRequestHandler<I
     public async Task Handle(InformProtocolVersionIncompatibleRequest request, CancellationToken cancellationToken)
     {
         var parameters = request.Parameters;
-        var client = request.Client;
         
         await _invokeClientsService.Client(parameters.JoinerClientInstanceId)
             .InformProtocolVersionIncompatible(parameters)
@@ -32,4 +31,3 @@ public class InformProtocolVersionIncompatibleCommandHandler : IRequestHandler<I
             parameters.JoinerProtocolVersion);
     }
 }
-

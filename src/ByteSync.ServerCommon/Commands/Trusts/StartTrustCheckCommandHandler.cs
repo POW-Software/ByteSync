@@ -43,42 +43,40 @@ public class StartTrustCheckCommandHandler : IRequestHandler<StartTrustCheckRequ
             return new StartTrustCheckResult { IsOK = false, IsProtocolVersionIncompatible = true };
         }
         
-        foreach (var member in cloudSession.SessionMembers)
+        var membersToCheck = cloudSession.SessionMembers
+            .Where(m => trustCheckParameters.MembersInstanceIdsToCheck.Contains(m.ClientInstanceId));
+        
+        foreach (var member in membersToCheck)
         {
-            if (trustCheckParameters.MembersInstanceIdsToCheck.Contains(member.ClientInstanceId))
+            var memberProtocolVersion = member.PublicKeyInfo.ProtocolVersion;
+            
+            if (!ProtocolVersion.IsCompatible(memberProtocolVersion) || 
+                memberProtocolVersion != joinerProtocolVersion)
             {
-                var memberProtocolVersion = member.PublicKeyInfo.ProtocolVersion;
+                _logger.LogWarning(
+                    "StartTrustCheck: Protocol version mismatch between joiner {JoinerId} (version {JoinerVersion}) and member {MemberId} (version {MemberVersion})",
+                    joiner.ClientInstanceId, joinerProtocolVersion, member.ClientInstanceId, memberProtocolVersion);
                 
-                if (!ProtocolVersion.IsCompatible(memberProtocolVersion) || 
-                    memberProtocolVersion != joinerProtocolVersion)
-                {
-                    _logger.LogWarning(
-                        "StartTrustCheck: Protocol version mismatch between joiner {JoinerId} (version {JoinerVersion}) and member {MemberId} (version {MemberVersion})",
-                        joiner.ClientInstanceId, joinerProtocolVersion, member.ClientInstanceId, memberProtocolVersion);
-                    
-                    return new StartTrustCheckResult { IsOK = false, IsProtocolVersionIncompatible = true };
-                }
+                return new StartTrustCheckResult { IsOK = false, IsProtocolVersionIncompatible = true };
             }
         }
 
         _logger.LogInformation("StartTrustCheck: {Joiner} starts trust check for session {SessionId}. {Count} members to check", 
             joiner.ClientInstanceId, trustCheckParameters.SessionId, trustCheckParameters.MembersInstanceIdsToCheck.Count);
         
-        List<string> members = new List<string>();
-        foreach (var clientInstanceId in trustCheckParameters.MembersInstanceIdsToCheck)
+        var validMemberIds = trustCheckParameters.MembersInstanceIdsToCheck
+            .Where(id => cloudSession.SessionMembers.Any(sm => sm.ClientInstanceId == id))
+            .ToList();
+        
+        foreach (var clientInstanceId in validMemberIds)
         {
-            if (cloudSession.SessionMembers.Any(sm => sm.ClientInstanceId == clientInstanceId))
-            {
-                members.Add(clientInstanceId);
-                
-                _logger.LogInformation("StartTrustCheck: {Member} must be trusted by {Joiner}", 
-                    clientInstanceId, joiner.ClientInstanceId);
-                
-                await _invokeClientsService.Client(clientInstanceId).AskPublicKeyCheckData(trustCheckParameters.SessionId, joiner.ClientInstanceId,
-                    trustCheckParameters.PublicKeyInfo).ConfigureAwait(false);
-            }
+            _logger.LogInformation("StartTrustCheck: {Member} must be trusted by {Joiner}", 
+                clientInstanceId, joiner.ClientInstanceId);
+            
+            await _invokeClientsService.Client(clientInstanceId).AskPublicKeyCheckData(trustCheckParameters.SessionId, joiner.ClientInstanceId,
+                trustCheckParameters.PublicKeyInfo).ConfigureAwait(false);
         }
         
-        return new StartTrustCheckResult { IsOK = true, MembersInstanceIds = members };
+        return new StartTrustCheckResult { IsOK = true, MembersInstanceIds = validMemberIds };
     }
 }
