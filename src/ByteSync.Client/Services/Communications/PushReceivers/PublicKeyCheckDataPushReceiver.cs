@@ -13,9 +13,9 @@ public class PublicKeyCheckDataPushReceiver : IPushReceiver
     private readonly ITrustProcessPublicKeysRepository _trustProcessPublicKeysRepository;
     private readonly IDigitalSignaturesChecker _digitalSignaturesChecker;
     private readonly ILogger<PublicKeyCheckDataPushReceiver> _logger;
-
-    public PublicKeyCheckDataPushReceiver(IHubPushHandler2 hubPushHandler2, IPublicKeysTruster publicKeysTruster, 
-        ITrustProcessPublicKeysRepository trustProcessPublicKeysRepository, IDigitalSignaturesChecker digitalSignaturesChecker, 
+    
+    public PublicKeyCheckDataPushReceiver(IHubPushHandler2 hubPushHandler2, IPublicKeysTruster publicKeysTruster,
+        ITrustProcessPublicKeysRepository trustProcessPublicKeysRepository, IDigitalSignaturesChecker digitalSignaturesChecker,
         ILogger<PublicKeyCheckDataPushReceiver> logger)
     {
         _hubPushHandler2 = hubPushHandler2;
@@ -23,7 +23,7 @@ public class PublicKeyCheckDataPushReceiver : IPushReceiver
         _trustProcessPublicKeysRepository = trustProcessPublicKeysRepository;
         _digitalSignaturesChecker = digitalSignaturesChecker;
         _logger = logger;
-
+        
         _hubPushHandler2.AskPublicKeyCheckData.Subscribe(OnPublicKeyCheckDataAsked);
         _hubPushHandler2.GiveMemberPublicKeyCheckData.Subscribe(OnMemberPublicKeyCheckDataGiven);
         _hubPushHandler2.RequestTrustPublicKey.Subscribe(OnTrustPublicKeyRequested);
@@ -31,7 +31,7 @@ public class PublicKeyCheckDataPushReceiver : IPushReceiver
         _hubPushHandler2.RequestCheckDigitalSignature.Subscribe(OnRequestCheckDigitalSignature);
         _hubPushHandler2.InformProtocolVersionIncompatible.Subscribe(OnProtocolVersionIncompatible);
     }
-
+    
     private async void OnPublicKeyCheckDataAsked((string sessionId, string clientInstanceId, PublicKeyInfo publicKeyInfo) tuple)
     {
         try
@@ -48,7 +48,12 @@ public class PublicKeyCheckDataPushReceiver : IPushReceiver
     {
         try
         {
-            await _trustProcessPublicKeysRepository.RunAsync(tuple.sessionId, 
+            _logger.LogInformation(
+                "[PROTOCOL_VERSION_DEBUG] OnMemberPublicKeyCheckDataGiven - Received PublicKeyCheckData: SessionId={SessionId}, IssuerClientInstanceId={IssuerClientInstanceId}, ProtocolVersion={ProtocolVersion}, IssuerPublicKeyInfo.ProtocolVersion={IssuerPublicKeyInfoProtocolVersion}",
+                tuple.sessionId, tuple.publicKeyCheckData.IssuerClientInstanceId, tuple.publicKeyCheckData.ProtocolVersion,
+                tuple.publicKeyCheckData.IssuerPublicKeyInfo.ProtocolVersion);
+            
+            await _trustProcessPublicKeysRepository.RunAsync(tuple.sessionId,
                 data => data.JoinerTrustProcessData.StoreMemberPublicKeyCheckData(tuple.publicKeyCheckData));
         }
         catch (Exception ex)
