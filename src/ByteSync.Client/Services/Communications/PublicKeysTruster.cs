@@ -74,15 +74,11 @@ public class PublicKeysTruster : IPublicKeysTruster
     // Called during StartTrustCheck on the session members so that they provide their PublicKeyCheckData to the joiner
     public async Task OnPublicKeyCheckDataAskedAsync((string sessionId, string clientInstanceId, PublicKeyInfo publicKeyInfo) tuple)
     {
-        _logger.LogInformation(
-            "[PROTOCOL_VERSION_DEBUG] OnPublicKeyCheckDataAskedAsync - Received request from joiner: SessionId={SessionId}, JoinerClientInstanceId={JoinerClientInstanceId}, JoinerProtocolVersion={JoinerProtocolVersion}, CurrentProtocolVersion={CurrentProtocolVersion}",
-            tuple.sessionId, tuple.clientInstanceId, tuple.publicKeyInfo.ProtocolVersion, ProtocolVersion.CURRENT);
-        
         // Validate protocol version compatibility before responding
         if (!ProtocolVersion.IsCompatible(tuple.publicKeyInfo.ProtocolVersion))
         {
             _logger.LogWarning(
-                "[PROTOCOL_VERSION_DEBUG] Protocol version mismatch in OnPublicKeyCheckDataAskedAsync: joiner has version {JoinerVersion}, current version is {CurrentVersion}. Not responding to trust check request.",
+                "Protocol version mismatch in OnPublicKeyCheckDataAskedAsync: joiner has version {JoinerVersion}, current version is {CurrentVersion}. Not responding to trust check request.",
                 tuple.publicKeyInfo.ProtocolVersion, ProtocolVersion.CURRENT);
             
             var incompatibleParameters = new InformProtocolVersionIncompatibleParameters
@@ -99,17 +95,9 @@ public class PublicKeysTruster : IPublicKeysTruster
             return;
         }
         
-        _logger.LogInformation(
-            "[PROTOCOL_VERSION_DEBUG] OnPublicKeyCheckDataAskedAsync - Protocol versions compatible, proceeding with trust check");
-        
         var isTrusted = _publicKeysManager.IsTrusted(tuple.publicKeyInfo);
         
         var memberPublicKeyCheckData = _publicKeysManager.BuildMemberPublicKeyCheckData(tuple.publicKeyInfo, isTrusted);
-        
-        _logger.LogInformation(
-            "[PROTOCOL_VERSION_DEBUG] OnPublicKeyCheckDataAskedAsync - Sending PublicKeyCheckData: IssuerClientInstanceId={IssuerClientInstanceId}, ProtocolVersion={ProtocolVersion}, IssuerPublicKeyInfo.ProtocolVersion={IssuerPublicKeyInfoProtocolVersion}",
-            memberPublicKeyCheckData.IssuerClientInstanceId, memberPublicKeyCheckData.ProtocolVersion,
-            memberPublicKeyCheckData.IssuerPublicKeyInfo.ProtocolVersion);
         
         await _trustProcessPublicKeysRepository.StoreLocalPublicKeyCheckData(tuple.sessionId, tuple.clientInstanceId,
             memberPublicKeyCheckData);
@@ -206,19 +194,11 @@ public class PublicKeysTruster : IPublicKeysTruster
         
         // Validate protocol version compatibility
         var receivedPublicKeyCheckData = await _trustProcessPublicKeysRepository.GetReceivedPublicKeyCheckData(sessionId);
-        _logger.LogInformation("[PROTOCOL_VERSION_DEBUG] DoTrustMembersPublicKeys - Validating {Count} received PublicKeyCheckData",
-            receivedPublicKeyCheckData.Count);
-        
         foreach (var publicKeyCheckData in receivedPublicKeyCheckData)
         {
-            _logger.LogInformation(
-                "[PROTOCOL_VERSION_DEBUG] DoTrustMembersPublicKeys - Checking member: IssuerClientInstanceId={IssuerClientInstanceId}, ProtocolVersion={ProtocolVersion}, CurrentProtocolVersion={CurrentProtocolVersion}",
-                publicKeyCheckData.IssuerClientInstanceId, publicKeyCheckData.ProtocolVersion, ProtocolVersion.CURRENT);
-            
             if (!ProtocolVersion.IsCompatible(publicKeyCheckData.ProtocolVersion))
             {
-                _logger.LogWarning(
-                    "[PROTOCOL_VERSION_DEBUG] Protocol version mismatch: member has version {MemberVersion}, current version is {CurrentVersion}",
+                _logger.LogWarning("Protocol version mismatch: member has version {MemberVersion}, current version is {CurrentVersion}",
                     publicKeyCheckData.ProtocolVersion, ProtocolVersion.CURRENT);
                 
                 return JoinSessionResult.BuildFrom(JoinSessionStatus.IncompatibleProtocolVersion);
@@ -300,25 +280,16 @@ public class PublicKeysTruster : IPublicKeysTruster
             return JoinSessionResult.BuildProcessingNormally();
         }
         
-        var myPublicKeyInfo = _publicKeysManager.GetMyPublicKeyInfo();
         var parameters = new TrustCheckParameters
         {
             SessionId = sessionId,
-            PublicKeyInfo = myPublicKeyInfo,
+            PublicKeyInfo = _publicKeysManager.GetMyPublicKeyInfo(),
             MembersInstanceIdsToCheck = memberIdsToCheck,
             ProtocolVersion = ProtocolVersion.CURRENT
         };
         
-        _logger.LogInformation(
-            "[PROTOCOL_VERSION_DEBUG] InitiateAndWaitForTrustCheck - Sending StartTrustCheck with ProtocolVersion={ProtocolVersion}, PublicKeyInfo.ProtocolVersion={PublicKeyInfoProtocolVersion}, SessionId={SessionId}, MembersCount={MembersCount}",
-            parameters.ProtocolVersion, myPublicKeyInfo.ProtocolVersion, sessionId, memberIdsToCheck.Count);
-        
         await _trustProcessPublicKeysRepository.ResetJoinerTrustProcessData(sessionId);
         var result = await _trustApiClient.StartTrustCheck(parameters, cancellationToken);
-        
-        _logger.LogInformation(
-            "[PROTOCOL_VERSION_DEBUG] InitiateAndWaitForTrustCheck - Received StartTrustCheckResult: IsOK={IsOK}, IsProtocolVersionIncompatible={IsProtocolVersionIncompatible}",
-            result?.IsOK, result?.IsProtocolVersionIncompatible);
         
         if (result == null || !result.IsOK)
         {

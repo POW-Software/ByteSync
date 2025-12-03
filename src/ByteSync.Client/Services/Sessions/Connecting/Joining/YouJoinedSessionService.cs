@@ -27,12 +27,11 @@ public class YouJoinedSessionService : IYouJoinedSessionService
     
     private const string UNKNOWN_RECEIVED_SESSION_ID = "unknown received sessionId {sessionId}";
     private const string PUBLIC_KEY_IS_NOT_TRUSTED = "Public key is not trusted";
-    
+
     public YouJoinedSessionService(ICloudSessionConnectionRepository cloudSessionConnectionRepository,
         IEnvironmentService environmentService, IPublicKeysTruster publicKeysTruster, IDigitalSignaturesChecker digitalSignaturesChecker,
-        IDataEncrypter dataEncrypter, ICloudSessionApiClient cloudSessionApiClient, IPublicKeysManager publicKeysManager,
-        IAfterJoinSessionService afterJoinSessionService, ICloudSessionConnectionService cloudSessionConnectionService,
-        ILogger<YouJoinedSessionService> logger)
+        IDataEncrypter dataEncrypter, ICloudSessionApiClient cloudSessionApiClient, IPublicKeysManager publicKeysManager, 
+        IAfterJoinSessionService afterJoinSessionService, ICloudSessionConnectionService cloudSessionConnectionService, ILogger<YouJoinedSessionService> logger)
     {
         _cloudSessionConnectionRepository = cloudSessionConnectionRepository;
         _environmentService = environmentService;
@@ -53,62 +52,48 @@ public class YouJoinedSessionService : IYouJoinedSessionService
             if (!await _cloudSessionConnectionRepository.CheckConnectingCloudSession(cloudSessionResult.CloudSession.SessionId))
             {
                 _logger.LogError(UNKNOWN_RECEIVED_SESSION_ID, cloudSessionResult.CloudSession.SessionId);
-                
                 return;
             }
-            
+
             if (!_environmentService.ClientInstanceId.Equals(parameters.JoinerClientInstanceId))
             {
                 _logger.LogWarning("unexpected session event received with JoinerId {joinerId}", parameters.JoinerClientInstanceId);
-                
                 return;
             }
-            
+
             if (_cloudSessionConnectionRepository.CurrentConnectionStatus != SessionConnectionStatus.JoiningSession)
             {
                 _logger.LogWarning("no longer trying to join session");
-                
                 return;
             }
             
             var isAuthOK = false;
             var cpt = 0;
-            while (!isAuthOK)
+            while (! isAuthOK)
             {
                 cpt += 1;
                 if (cpt == 5)
                 {
                     _logger.LogWarning($"can not check auth. Too many tries");
-                    
                     return;
                 }
                 
-                _logger.LogInformation(
-                    "[PROTOCOL_VERSION_DEBUG] YouJoinedSessionService - About to call TrustMissingMembersPublicKeys for SessionId={SessionId}",
-                    cloudSessionResult.CloudSession.SessionId);
-                var sessionMembersClientInstanceIds = await _publicKeysTruster.TrustMissingMembersPublicKeys(
-                    cloudSessionResult.CloudSession.SessionId,
+                var sessionMembersClientInstanceIds = await _publicKeysTruster.TrustMissingMembersPublicKeys(cloudSessionResult.CloudSession.SessionId,
                     _cloudSessionConnectionRepository.CancellationToken);
-                _logger.LogInformation(
-                    "[PROTOCOL_VERSION_DEBUG] YouJoinedSessionService - TrustMissingMembersPublicKeys returned: Count={Count}",
-                    sessionMembersClientInstanceIds?.Count ?? 0);
-                
                 if (sessionMembersClientInstanceIds == null)
                 {
                     _logger.LogWarning($"can not check trust");
-                    
                     return;
                 }
                 
-                isAuthOK = await _digitalSignaturesChecker.CheckExistingMembersDigitalSignatures(cloudSessionResult.CloudSession.SessionId,
+                isAuthOK = await _digitalSignaturesChecker.CheckExistingMembersDigitalSignatures(cloudSessionResult.CloudSession.SessionId, 
                     sessionMembersClientInstanceIds);
                 if (!isAuthOK)
                 {
                     _logger.LogWarning($"can not check auth");
-                    
                     return;
                 }
-                
+
                 var sessionMemberPrivateData = new SessionMemberPrivateData
                 {
                     MachineName = _environmentService.MachineName
@@ -119,10 +104,10 @@ public class YouJoinedSessionService : IYouJoinedSessionService
                 
                 var encryptedSessionMemberPrivateData = _dataEncrypter.EncryptSessionMemberPrivateData(sessionMemberPrivateData);
                 var finalizeParameters = new FinalizeJoinCloudSessionParameters(parameters, encryptedSessionMemberPrivateData);
-                
-                var finalizeJoinSessionResult = await _cloudSessionApiClient.FinalizeJoinCloudSession(finalizeParameters,
+
+                var finalizeJoinSessionResult = await _cloudSessionApiClient.FinalizeJoinCloudSession(finalizeParameters, 
                     _cloudSessionConnectionRepository.CancellationToken);
-                
+
                 if (finalizeJoinSessionResult.Status == FinalizeJoinSessionStatuses.AuthIsNotChecked)
                 {
                     isAuthOK = false;
@@ -131,25 +116,23 @@ public class YouJoinedSessionService : IYouJoinedSessionService
                 else if (!finalizeJoinSessionResult.IsOK)
                 {
                     _logger.LogWarning($"error during join session finalization");
-                    
                     return;
                 }
             }
-            
+
             try
             {
                 var aesEncryptionKey = _publicKeysManager.DecryptBytes(parameters.EncryptedAesKey);
                 _cloudSessionConnectionRepository.SetAesEncryptionKey(aesEncryptionKey);
-                
+
                 _logger.LogDebug("...EncryptionKey received successfully");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "...Error during EncryptionKey reception");
-                
                 throw;
             }
-            
+
             var lobbySessionDetails = await _cloudSessionConnectionRepository
                 .GetTempLobbySessionDetails(cloudSessionResult.CloudSession.SessionId);
             
