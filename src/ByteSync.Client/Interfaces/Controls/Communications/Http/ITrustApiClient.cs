@@ -18,4 +18,6 @@ public interface ITrustApiClient
     Task SendDigitalSignatures(SendDigitalSignaturesParameters parameters, CancellationToken cancellationToken = default);
     
     Task SetAuthChecked(SetAuthCheckedParameters parameters, CancellationToken cancellationToken = default);
+    
+    Task InformProtocolVersionIncompatible(InformProtocolVersionIncompatibleParameters parameters, CancellationToken cancellationToken = default);
 }

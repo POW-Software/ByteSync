@@ -42,4 +42,5 @@ public interface IHubPushHandler2
     Subject<(string, LobbyCheckInfo)> LobbyCheckInfosSent { get; }
     Subject<(string, string, LobbyMemberStatuses)> LobbyMemberStatusUpdated { get; }
     Subject<LobbyCloudSessionCredentials> LobbyCloudSessionCredentialsSent { get; }
+    Subject<InformProtocolVersionIncompatibleParameters> InformProtocolVersionIncompatible { get; }
 }

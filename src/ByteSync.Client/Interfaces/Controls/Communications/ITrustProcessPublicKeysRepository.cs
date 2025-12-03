@@ -28,4 +28,8 @@ public interface ITrustProcessPublicKeysRepository : IRepository<TrustProcessPub
     Task<PublicKeyCheckData?> GetLocalPublicKeyCheckData(string sessionId, string joinerClientInstanceId);
     
     Task SetOtherPartyChecked(string sessionId, PublicKeyValidationParameters publicKeyValidationParameters);
+    
+    Task SetProtocolVersionIncompatible(string sessionId, string memberClientInstanceId);
+    
+    Task<bool> IsProtocolVersionIncompatible(string sessionId);
 }

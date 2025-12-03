@@ -29,6 +29,7 @@ public class PublicKeyCheckDataPushReceiver : IPushReceiver
         _hubPushHandler2.RequestTrustPublicKey.Subscribe(OnTrustPublicKeyRequested);
         _hubPushHandler2.InformPublicKeyValidationIsFinished.Subscribe(OnPublicKeyValidationIsFinished);
         _hubPushHandler2.RequestCheckDigitalSignature.Subscribe(OnRequestCheckDigitalSignature);
+        _hubPushHandler2.InformProtocolVersionIncompatible.Subscribe(OnProtocolVersionIncompatible);
     }
 
     private async void OnPublicKeyCheckDataAsked((string sessionId, string clientInstanceId, PublicKeyInfo publicKeyInfo) tuple)
@@ -89,6 +90,18 @@ public class PublicKeyCheckDataPushReceiver : IPushReceiver
         catch (Exception ex)
         {
             _logger.LogError(ex, "OnRequestCheckDigitalSignature");
+        }
+    }
+    
+    private async void OnProtocolVersionIncompatible(InformProtocolVersionIncompatibleParameters parameters)
+    {
+        try
+        {
+            await _trustProcessPublicKeysRepository.SetProtocolVersionIncompatible(parameters.SessionId, parameters.MemberClientInstanceId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "OnProtocolVersionIncompatible");
         }
     }
 }

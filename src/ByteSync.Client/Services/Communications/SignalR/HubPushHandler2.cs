@@ -71,7 +71,8 @@ public class HubPushHandler2 : IHubPushHandler2
         new SubjectInfo<string, string>(nameof(IHubByteSyncPush.MemberQuittedLobby)),
         new SubjectInfo<string, LobbyCheckInfo>(nameof(IHubByteSyncPush.LobbyCheckInfosSent)),
         new SubjectInfo<string, string, LobbyMemberStatuses>(nameof(IHubByteSyncPush.LobbyMemberStatusUpdated)),
-        new SubjectInfo<LobbyCloudSessionCredentials>(nameof(IHubByteSyncPush.LobbyCloudSessionCredentialsSent))
+        new SubjectInfo<LobbyCloudSessionCredentials>(nameof(IHubByteSyncPush.LobbyCloudSessionCredentialsSent)),
+        new SubjectInfo<InformProtocolVersionIncompatibleParameters>(nameof(IHubByteSyncPush.InformProtocolVersionIncompatible))
     ];
     
     public Subject<(CloudSessionResult, ValidateJoinCloudSessionParameters)> YouJoinedSession => 
@@ -166,6 +167,9 @@ public class HubPushHandler2 : IHubPushHandler2
     
     public Subject<LobbyCloudSessionCredentials> LobbyCloudSessionCredentialsSent => 
         GetSubject<LobbyCloudSessionCredentials>(nameof(IHubByteSyncPush.LobbyCloudSessionCredentialsSent));
+    
+    public Subject<InformProtocolVersionIncompatibleParameters> InformProtocolVersionIncompatible => 
+        GetSubject<InformProtocolVersionIncompatibleParameters>(nameof(IHubByteSyncPush.InformProtocolVersionIncompatible));
 
     private async Task SetConnection(HubConnection connection)
     {
