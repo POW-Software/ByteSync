@@ -126,4 +126,22 @@ public class TrustFunction
         
         return response;
     }
+    
+    [Function("InformProtocolVersionIncompatibleFunction")]
+    public async Task<HttpResponseData> InformProtocolVersionIncompatible(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "trust/informProtocolVersionIncompatible")] 
+        HttpRequestData req, 
+        FunctionContext executionContext)
+    {
+        var client = FunctionHelper.GetClientFromContext(executionContext);
+        var parameters = await FunctionHelper.DeserializeRequestBody<InformProtocolVersionIncompatibleParameters>(req);
+
+        var request = new InformProtocolVersionIncompatibleRequest(parameters, client);
+        await _mediator.Send(request);
+            
+        var response = req.CreateResponse();
+        response.StatusCode = HttpStatusCode.OK;
+        
+        return response;
+    }
 }

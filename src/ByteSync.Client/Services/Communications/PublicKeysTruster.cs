@@ -74,6 +74,27 @@ public class PublicKeysTruster : IPublicKeysTruster
     // Called during StartTrustCheck on the session members so that they provide their PublicKeyCheckData to the joiner
     public async Task OnPublicKeyCheckDataAskedAsync((string sessionId, string clientInstanceId, PublicKeyInfo publicKeyInfo) tuple)
     {
+        // Validate protocol version compatibility before responding
+        if (!ProtocolVersion.IsCompatible(tuple.publicKeyInfo.ProtocolVersion))
+        {
+            _logger.LogWarning(
+                "Protocol version mismatch in OnPublicKeyCheckDataAskedAsync: joiner has version {JoinerVersion}, current version is {CurrentVersion}. Not responding to trust check request.",
+                tuple.publicKeyInfo.ProtocolVersion, ProtocolVersion.CURRENT);
+            
+            var incompatibleParameters = new InformProtocolVersionIncompatibleParameters
+            {
+                SessionId = tuple.sessionId,
+                MemberClientInstanceId = _environmentService.ClientInstanceId,
+                JoinerClientInstanceId = tuple.clientInstanceId,
+                MemberProtocolVersion = ProtocolVersion.CURRENT,
+                JoinerProtocolVersion = tuple.publicKeyInfo.ProtocolVersion
+            };
+            
+            await _trustApiClient.InformProtocolVersionIncompatible(incompatibleParameters);
+            
+            return;
+        }
+        
         var isTrusted = _publicKeysManager.IsTrusted(tuple.publicKeyInfo);
         
         var memberPublicKeyCheckData = _publicKeysManager.BuildMemberPublicKeyCheckData(tuple.publicKeyInfo, isTrusted);
@@ -272,6 +293,13 @@ public class PublicKeysTruster : IPublicKeysTruster
         
         if (result == null || !result.IsOK)
         {
+            if (result is { IsProtocolVersionIncompatible: true })
+            {
+                _logger.LogWarning("StartTrustCheck returned protocol version incompatibility");
+                
+                return JoinSessionResult.BuildFrom(JoinSessionStatus.IncompatibleProtocolVersion);
+            }
+            
             _logger.LogError("Can not start trust check");
             
             return JoinSessionResult.BuildFrom(JoinSessionStatus.UnexpectedError);
@@ -285,6 +313,13 @@ public class PublicKeysTruster : IPublicKeysTruster
         
         if (isWaitOK)
         {
+            if (await _trustProcessPublicKeysRepository.IsProtocolVersionIncompatible(sessionId))
+            {
+                _logger.LogWarning("Trust check interrupted due to protocol version incompatibility");
+                
+                return JoinSessionResult.BuildFrom(JoinSessionStatus.IncompatibleProtocolVersion);
+            }
+            
             return JoinSessionResult.BuildProcessingNormally();
         }
         else
