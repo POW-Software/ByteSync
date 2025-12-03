@@ -102,6 +102,20 @@ public class TrustApiClient : ITrustApiClient
         }
     }
 
+    public async Task InformProtocolVersionIncompatible(InformProtocolVersionIncompatibleParameters parameters, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _apiInvoker.PostAsync($"trust/informProtocolVersionIncompatible", parameters, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            LogError(ex);
+                
+            throw;
+        }
+    }
+
     private void LogError(Exception exception, [CallerMemberName] string caller = "")
     {
         // ReSharper disable once TemplateIsNotCompileTimeConstantProblem

@@ -11,5 +11,7 @@ public class StartTrustCheckResult
     
     public bool IsOK { get; set; }
     
+    public bool IsProtocolVersionIncompatible { get; set; }
+    
     public List<string> MembersInstanceIds { get; set; }
 }

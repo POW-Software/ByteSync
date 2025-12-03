@@ -399,4 +399,170 @@ public class PublicKeysTrusterTests : AbstractTester
         capturedPublicKeyCheckData.Should().NotBeNull();
         capturedPublicKeyCheckData!.ProtocolVersion.Should().Be(ProtocolVersion.CURRENT);
     }
+    
+    [Test]
+    public async Task OnPublicKeyCheckDataAskedAsync_WithIncompatibleProtocolVersion_ShouldNotRespond()
+    {
+        var sessionId = "TestSessionId";
+        var clientInstanceId = "ClientInstanceId";
+        var incompatibleVersion = 0;
+        
+        var publicKeyInfo = new PublicKeyInfo
+        {
+            ClientId = "OtherClientId",
+            PublicKey = Encoding.UTF8.GetBytes("OtherPublicKey"),
+            ProtocolVersion = incompatibleVersion
+        };
+        
+        await _publicKeysTruster.OnPublicKeyCheckDataAskedAsync((sessionId, clientInstanceId, publicKeyInfo));
+        
+        _publicKeysManager.Verify(m => m.IsTrusted(It.IsAny<PublicKeyInfo>()), Times.Never);
+        _publicKeysManager.Verify(m => m.BuildMemberPublicKeyCheckData(It.IsAny<PublicKeyInfo>(), It.IsAny<bool>()), Times.Never);
+        _trustProcessPublicKeysRepository.Verify(r => r.StoreLocalPublicKeyCheckData(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PublicKeyCheckData>()), Times.Never);
+        _trustApiClient.Verify(c => c.GiveMemberPublicKeyCheckData(It.IsAny<GiveMemberPublicKeyCheckDataParameters>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+    
+    [Test]
+    public async Task OnPublicKeyCheckDataAskedAsync_WithIncompatibleProtocolVersion_ShouldLogWarning()
+    {
+        var sessionId = "TestSessionId";
+        var clientInstanceId = "ClientInstanceId";
+        var incompatibleVersion = 2;
+        
+        var publicKeyInfo = new PublicKeyInfo
+        {
+            ClientId = "OtherClientId",
+            PublicKey = Encoding.UTF8.GetBytes("OtherPublicKey"),
+            ProtocolVersion = incompatibleVersion
+        };
+        
+        await _publicKeysTruster.OnPublicKeyCheckDataAskedAsync((sessionId, clientInstanceId, publicKeyInfo));
+        
+        _logger.Verify(
+            x => x.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Protocol version mismatch")),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+    }
+    
+    [Test]
+    public async Task OnPublicKeyCheckDataAskedAsync_WithCompatibleProtocolVersion_ShouldRespond()
+    {
+        var sessionId = "TestSessionId";
+        var clientInstanceId = "ClientInstanceId";
+        
+        var publicKeyInfo = new PublicKeyInfo
+        {
+            ClientId = "OtherClientId",
+            PublicKey = Encoding.UTF8.GetBytes("OtherPublicKey"),
+            ProtocolVersion = ProtocolVersion.CURRENT
+        };
+        
+        var memberPublicKeyCheckData = new PublicKeyCheckData
+        {
+            IssuerPublicKeyInfo = _publicKeysManager.Object.GetMyPublicKeyInfo(),
+            OtherPartyPublicKeyInfo = publicKeyInfo,
+            Salt = "TestSalt123",
+            ProtocolVersion = ProtocolVersion.CURRENT
+        };
+        
+        _publicKeysManager
+            .Setup(m => m.IsTrusted(publicKeyInfo))
+            .Returns(false);
+        
+        _publicKeysManager
+            .Setup(m => m.BuildMemberPublicKeyCheckData(publicKeyInfo, false))
+            .Returns(memberPublicKeyCheckData);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.StoreLocalPublicKeyCheckData(sessionId, clientInstanceId, memberPublicKeyCheckData))
+            .Returns(Task.CompletedTask);
+        
+        _trustApiClient
+            .Setup(c => c.GiveMemberPublicKeyCheckData(It.IsAny<GiveMemberPublicKeyCheckDataParameters>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        
+        await _publicKeysTruster.OnPublicKeyCheckDataAskedAsync((sessionId, clientInstanceId, publicKeyInfo));
+        
+        _publicKeysManager.Verify(m => m.IsTrusted(publicKeyInfo), Times.Once);
+        _publicKeysManager.Verify(m => m.BuildMemberPublicKeyCheckData(publicKeyInfo, false), Times.Once);
+        _trustProcessPublicKeysRepository.Verify(r => r.StoreLocalPublicKeyCheckData(sessionId, clientInstanceId, memberPublicKeyCheckData), Times.Once);
+        _trustApiClient.Verify(c => c.GiveMemberPublicKeyCheckData(It.Is<GiveMemberPublicKeyCheckDataParameters>(p =>
+            p.SessionId == sessionId &&
+            p.ClientInstanceId == clientInstanceId &&
+            p.PublicKeyCheckData == memberPublicKeyCheckData), It.IsAny<CancellationToken>()), Times.Once);
+    }
+    
+    [Test]
+    public async Task OnPublicKeyCheckDataAskedAsync_WithIncompatibleProtocolVersion_ShouldSendNotification()
+    {
+        var sessionId = "TestSessionId";
+        var joinerClientInstanceId = "JoinerClientInstanceId";
+        var incompatibleVersion = 0;
+        
+        var publicKeyInfo = new PublicKeyInfo
+        {
+            ClientId = "JoinerClientId",
+            PublicKey = Encoding.UTF8.GetBytes("JoinerPublicKey"),
+            ProtocolVersion = incompatibleVersion
+        };
+        
+        _trustApiClient
+            .Setup(c => c.InformProtocolVersionIncompatible(It.IsAny<InformProtocolVersionIncompatibleParameters>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        
+        await _publicKeysTruster.OnPublicKeyCheckDataAskedAsync((sessionId, joinerClientInstanceId, publicKeyInfo));
+        
+        _trustApiClient.Verify(c => c.InformProtocolVersionIncompatible(
+            It.Is<InformProtocolVersionIncompatibleParameters>(p =>
+                p.SessionId == sessionId &&
+                p.MemberClientInstanceId == "TestClientInstanceId" &&
+                p.JoinerClientInstanceId == joinerClientInstanceId &&
+                p.MemberProtocolVersion == ProtocolVersion.CURRENT &&
+                p.JoinerProtocolVersion == incompatibleVersion),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+    
+    [Test]
+    public async Task TrustAllMembersPublicKeys_WhenProtocolVersionIncompatibleNotificationReceived_ShouldReturnIncompatibleProtocolVersion()
+    {
+        var sessionId = "TestSessionId";
+        
+        _sessionMemberApiClient
+            .Setup(c => c.GetMembersClientInstanceIds(sessionId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(["MemberInstanceId"]);
+        
+        var startTrustCheckResult = new StartTrustCheckResult
+        {
+            IsOK = true,
+            MembersInstanceIds = ["MemberInstanceId"]
+        };
+        
+        _trustApiClient
+            .Setup(c => c.StartTrustCheck(It.IsAny<TrustCheckParameters>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(startTrustCheckResult);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.ResetJoinerTrustProcessData(sessionId))
+            .Returns(Task.CompletedTask);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.SetExpectedPublicKeyCheckDataCount(sessionId, It.IsAny<List<string>>()))
+            .Returns(Task.CompletedTask);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.WaitAsync(sessionId, It.IsAny<Func<TrustProcessPublicKeysData, EventWaitHandle>>(), It.IsAny<TimeSpan>()))
+            .ReturnsAsync(true);
+        
+        _trustProcessPublicKeysRepository
+            .Setup(r => r.IsProtocolVersionIncompatible(sessionId))
+            .ReturnsAsync(true);
+        
+        var result = await _publicKeysTruster.TrustAllMembersPublicKeys(sessionId);
+        
+        result.Status.Should().Be(JoinSessionStatus.IncompatibleProtocolVersion);
+    }
 }

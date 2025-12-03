@@ -72,4 +72,6 @@ public interface IHubByteSyncPush
     Task InformPublicKeyValidationIsFinished(PublicKeyValidationParameters parameters);
 
     Task RequestCheckDigitalSignature(DigitalSignatureCheckInfo digitalSignatureCheckInfo);
+    
+    Task InformProtocolVersionIncompatible(InformProtocolVersionIncompatibleParameters parameters);
 }

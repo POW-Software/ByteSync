@@ -13,6 +13,7 @@ public class JoinerTrustProcessData
         
         NonStoredPublicKeyCheckDatas = new List<PublicKeyCheckData>();
         FullyTrustedPublicKeyCheckDatas = new List<PublicKeyCheckData>();
+        IncompatibleMemberClientInstanceIds = new List<string>();
     }
 
     private List<string>? ExpectedPublicKeyCheckDataMembers { get; set; }
@@ -22,6 +23,10 @@ public class JoinerTrustProcessData
     public List<PublicKeyCheckData> NonStoredPublicKeyCheckDatas { get; }
     
     public List<PublicKeyCheckData> FullyTrustedPublicKeyCheckDatas { get; }
+    
+    public List<string> IncompatibleMemberClientInstanceIds { get; }
+    
+    public bool IsProtocolVersionIncompatible => IncompatibleMemberClientInstanceIds.Count > 0;
 
     private PublicKeyCheckData?[] ReceivedMembersPublicKeyCheckDatas { get; set; }
 
@@ -90,5 +95,15 @@ public class JoinerTrustProcessData
             .Cast<PublicKeyCheckData>()
             .ToList()
             .AsReadOnly();
+    }
+    
+    public void SetProtocolVersionIncompatible(string memberClientInstanceId)
+    {
+        if (!IncompatibleMemberClientInstanceIds.Contains(memberClientInstanceId))
+        {
+            IncompatibleMemberClientInstanceIds.Add(memberClientInstanceId);
+        }
+        
+        WaitForAllPublicKeyCheckDatasReceived.Set();
     }
 }

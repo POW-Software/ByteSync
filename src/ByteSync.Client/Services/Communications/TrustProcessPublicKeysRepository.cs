@@ -85,6 +85,19 @@ public class TrustProcessPublicKeysRepository : BaseRepository<TrustProcessPubli
         });
     }
 
+    public async Task SetProtocolVersionIncompatible(string sessionId, string memberClientInstanceId)
+    {
+        await RunAsync(sessionId, data =>
+        {
+            data.JoinerTrustProcessData.SetProtocolVersionIncompatible(memberClientInstanceId);
+        });
+    }
+
+    public async Task<bool> IsProtocolVersionIncompatible(string sessionId)
+    {
+        return await GetAsync(sessionId, data => data.JoinerTrustProcessData.IsProtocolVersionIncompatible);
+    }
+
     protected override string GetDataId(TrustProcessPublicKeysData data)
     {
         return data.SessionId;
