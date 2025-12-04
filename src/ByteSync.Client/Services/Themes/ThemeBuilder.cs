@@ -146,61 +146,77 @@ public class ThemeBuilder : IThemeBuilder
     
     private void ApplyColorSchemeConfig(ColorScheme colorScheme, ThemeColor themeColor, double secondaryColorHue, ColorSchemeConfig config)
     {
-        colorScheme.MainAccentColor =
-            Math.Abs(config.MainAccentSaturation - 1.0) < Epsilon && Math.Abs(config.MainAccentValue - 1.0) < Epsilon
-                ? themeColor
-                : themeColor.WithSaturationValue(config.MainAccentSaturation, config.MainAccentValue);
+        colorScheme.MainAccentColor = GetMainAccentColor(themeColor, config);
         colorScheme.MainSecondaryColor = colorScheme.MainAccentColor.WithHue(secondaryColorHue);
         
-        colorScheme.AccentTextForeGround =
-            Math.Abs(config.AccentTextSaturation - 1.0) < Epsilon && Math.Abs(config.AccentTextValue - 1.0) < Epsilon
-                ? themeColor.AvaloniaColor
-                : themeColor.WithSaturationValue(config.AccentTextSaturation, config.AccentTextValue).AvaloniaColor;
+        colorScheme.AccentTextForeGround = GetAccentTextForeground(themeColor, config);
         
-        colorScheme.HomeCloudSynchronizationBackGround = themeColor
-            .WithSaturationValue(config.HomeCloudSyncSaturation, config.HomeCloudSyncValue).AvaloniaColor;
-        colorScheme.HomeCloudSynchronizationPointerOverBackGround = themeColor
-            .WithSaturationValue(config.HomeCloudSyncPointerOverSaturation, config.HomeCloudSyncPointerOverValue).AvaloniaColor;
-        colorScheme.HomeLocalSynchronizationBackGround = colorScheme.MainSecondaryColor
-            .WithSaturationValue(config.HomeCloudSyncSaturation, config.HomeCloudSyncValue).AvaloniaColor;
-        colorScheme.HomeLocalSynchronizationPointerOverBackGround = colorScheme.MainSecondaryColor
-            .WithSaturationValue(config.HomeCloudSyncPointerOverSaturation, config.HomeCloudSyncPointerOverValue).AvaloniaColor;
+        colorScheme.HomeCloudSynchronizationBackGround =
+            GetColorFromSaturationValue(themeColor, config.HomeCloudSyncSaturation, config.HomeCloudSyncValue);
+        colorScheme.HomeCloudSynchronizationPointerOverBackGround = GetColorFromSaturationValue(themeColor,
+            config.HomeCloudSyncPointerOverSaturation, config.HomeCloudSyncPointerOverValue);
+        colorScheme.HomeLocalSynchronizationBackGround = GetColorFromSaturationValue(colorScheme.MainSecondaryColor,
+            config.HomeCloudSyncSaturation, config.HomeCloudSyncValue);
+        colorScheme.HomeLocalSynchronizationPointerOverBackGround = GetColorFromSaturationValue(colorScheme.MainSecondaryColor,
+            config.HomeCloudSyncPointerOverSaturation, config.HomeCloudSyncPointerOverValue);
         
-        colorScheme.ChartsMainBarColor = themeColor
-            .WithSaturationValue(config.ChartsBarSaturation, config.ChartsBarValue).AvaloniaColor;
-        colorScheme.ChartsAlternateBarColor = colorScheme.MainSecondaryColor
-            .WithSaturationValue(config.ChartsBarSaturation, config.ChartsBarValue).AvaloniaColor;
+        colorScheme.ChartsMainBarColor = GetColorFromSaturationValue(themeColor, config.ChartsBarSaturation, config.ChartsBarValue);
+        colorScheme.ChartsAlternateBarColor =
+            GetColorFromSaturationValue(colorScheme.MainSecondaryColor, config.ChartsBarSaturation, config.ChartsBarValue);
         colorScheme.ChartsMainLineColor = colorScheme.MainAccentColor.AvaloniaColor;
         
-        colorScheme.CurrentMemberBackGround = themeColor
-            .WithSaturationValue(config.CurrentMemberSaturation, config.CurrentMemberValue);
+        colorScheme.CurrentMemberBackGround = themeColor.WithSaturationValue(config.CurrentMemberSaturation, config.CurrentMemberValue);
         colorScheme.DisabledMemberBackGround = new ThemeColor(config.DisabledMemberBackGround);
         colorScheme.OtherMemberBackGround = new ThemeColor(config.DisabledMemberBackGround);
         
-        colorScheme.ConnectedMemberLetterBackGround = themeColor
-            .WithSaturationValue(config.ConnectedMemberLetterSaturation, config.ConnectedMemberLetterValue);
+        colorScheme.ConnectedMemberLetterBackGround =
+            themeColor.WithSaturationValue(config.ConnectedMemberLetterSaturation, config.ConnectedMemberLetterValue);
         colorScheme.DisabledMemberLetterBackGround = new ThemeColor(config.DisabledMemberLetterBackGround);
         
-        colorScheme.ConnectedMemberLetterBorder = themeColor
-            .WithSaturationValue(config.ConnectedMemberLetterBorderSaturation, config.ConnectedMemberLetterBorderValue);
+        colorScheme.ConnectedMemberLetterBorder =
+            themeColor.WithSaturationValue(config.ConnectedMemberLetterBorderSaturation, config.ConnectedMemberLetterBorderValue);
         colorScheme.DisabledMemberLetterBorder = new ThemeColor(config.DisabledMemberLetterBorder);
         
-        colorScheme.BsAccentButtonBackGround = themeColor
-            .WithSaturationValue(config.BsAccentButtonSaturation, config.BsAccentButtonValue).AvaloniaColor;
-        colorScheme.BsAccentButtonPointerOverBackGround = themeColor
-            .WithSaturationValue(config.BsAccentButtonPointerOverSaturation, config.BsAccentButtonPointerOverValue).AvaloniaColor;
+        colorScheme.BsAccentButtonBackGround =
+            GetColorFromSaturationValue(themeColor, config.BsAccentButtonSaturation, config.BsAccentButtonValue);
+        colorScheme.BsAccentButtonPointerOverBackGround = GetColorFromSaturationValue(themeColor,
+            config.BsAccentButtonPointerOverSaturation, config.BsAccentButtonPointerOverValue);
         
-        colorScheme.SecondaryButtonBackGround = colorScheme.MainSecondaryColor
-            .WithSaturationValue(config.BsAccentButtonSaturation, config.BsAccentButtonValue).AvaloniaColor;
-        colorScheme.SecondaryButtonPointerOverBackGround = colorScheme.MainSecondaryColor
-            .WithSaturationValue(config.BsAccentButtonPointerOverSaturation, config.BsAccentButtonPointerOverValue).AvaloniaColor;
+        colorScheme.SecondaryButtonBackGround = GetColorFromSaturationValue(colorScheme.MainSecondaryColor, config.BsAccentButtonSaturation,
+            config.BsAccentButtonValue);
+        colorScheme.SecondaryButtonPointerOverBackGround = GetColorFromSaturationValue(colorScheme.MainSecondaryColor,
+            config.BsAccentButtonPointerOverSaturation, config.BsAccentButtonPointerOverValue);
         
-        colorScheme.StatusMainBackGround = themeColor
-            .WithSaturationValue(config.StatusMainBackGroundSaturation, config.StatusMainBackGroundValue);
+        colorScheme.StatusMainBackGround =
+            themeColor.WithSaturationValue(config.StatusMainBackGroundSaturation, config.StatusMainBackGroundValue);
         
         ComputeAttenuations(colorScheme);
         AssignAccentColors(colorScheme, config.UseDarkAccents);
         
+        ApplyStaticColors(colorScheme, config);
+    }
+    
+    private static ThemeColor GetMainAccentColor(ThemeColor themeColor, ColorSchemeConfig config)
+    {
+        return Math.Abs(config.MainAccentSaturation - 1.0) < Epsilon && Math.Abs(config.MainAccentValue - 1.0) < Epsilon
+            ? themeColor
+            : themeColor.WithSaturationValue(config.MainAccentSaturation, config.MainAccentValue);
+    }
+    
+    private static Color GetAccentTextForeground(ThemeColor themeColor, ColorSchemeConfig config)
+    {
+        return Math.Abs(config.AccentTextSaturation - 1.0) < Epsilon && Math.Abs(config.AccentTextValue - 1.0) < Epsilon
+            ? themeColor.AvaloniaColor
+            : themeColor.WithSaturationValue(config.AccentTextSaturation, config.AccentTextValue).AvaloniaColor;
+    }
+    
+    private static Color GetColorFromSaturationValue(ThemeColor themeColor, double saturation, double value)
+    {
+        return themeColor.WithSaturationValue(saturation, value).AvaloniaColor;
+    }
+    
+    private static void ApplyStaticColors(ColorScheme colorScheme, ColorSchemeConfig config)
+    {
         colorScheme.VeryLightGray = config.VeryLightGray;
         colorScheme.GenericButtonBorder = config.GenericButtonBorder;
         colorScheme.Gray1 = config.Gray1;
@@ -210,7 +226,6 @@ public class ThemeBuilder : IThemeBuilder
         colorScheme.Gray8 = config.Gray8;
         colorScheme.SettingsHeaderColor = config.SettingsHeaderColor;
         colorScheme.BlockBackColor = config.BlockBackColor;
-        
         colorScheme.MainWindowTopColor = config.MainWindowTopColor;
         colorScheme.MainWindowBottomColor = config.MainWindowBottomColor;
     }
@@ -271,16 +286,19 @@ public class ThemeBuilder : IThemeBuilder
     
     private static void AssignAccentColors(ColorScheme colorScheme, bool useDarkAccents)
     {
-        var source1 = useDarkAccents ? colorScheme.SystemAccentColorDark1 : colorScheme.SystemAccentColorLight1;
-        var source2 = useDarkAccents ? colorScheme.SystemAccentColorDark2 : colorScheme.SystemAccentColorLight2;
-        var source3 = useDarkAccents ? colorScheme.SystemAccentColorDark3 : colorScheme.SystemAccentColorLight3;
-        var source4 = useDarkAccents ? colorScheme.SystemAccentColorDark4 : colorScheme.SystemAccentColorLight4;
-        var source5 = useDarkAccents ? colorScheme.SystemAccentColorDark5 : colorScheme.SystemAccentColorLight5;
+        var sources = new[]
+        {
+            useDarkAccents ? colorScheme.SystemAccentColorDark1 : colorScheme.SystemAccentColorLight1,
+            useDarkAccents ? colorScheme.SystemAccentColorDark2 : colorScheme.SystemAccentColorLight2,
+            useDarkAccents ? colorScheme.SystemAccentColorDark3 : colorScheme.SystemAccentColorLight3,
+            useDarkAccents ? colorScheme.SystemAccentColorDark4 : colorScheme.SystemAccentColorLight4,
+            useDarkAccents ? colorScheme.SystemAccentColorDark5 : colorScheme.SystemAccentColorLight5
+        };
         
-        colorScheme.Accent1 = source1.AvaloniaColor;
-        colorScheme.Accent2 = source2.AvaloniaColor;
-        colorScheme.Accent3 = source3.AvaloniaColor;
-        colorScheme.Accent4 = source4.AvaloniaColor;
-        colorScheme.Accent5 = source5.AvaloniaColor;
+        colorScheme.Accent1 = sources[0].AvaloniaColor;
+        colorScheme.Accent2 = sources[1].AvaloniaColor;
+        colorScheme.Accent3 = sources[2].AvaloniaColor;
+        colorScheme.Accent4 = sources[3].AvaloniaColor;
+        colorScheme.Accent5 = sources[4].AvaloniaColor;
     }
 }
