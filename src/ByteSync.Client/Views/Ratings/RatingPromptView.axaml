@@ -11,13 +11,13 @@
     </Design.DataContext>
 
     <Grid Background="{DynamicResource Gray7}">
-        <StackPanel Margin="12" Spacing="12">
+        <StackPanel Margin="12" Spacing="12" Grid.IsSharedSizeScope="True">
             <TextBlock Text="{Binding Message}"
                        TextWrapping="Wrap"
                        FontSize="16"
                        MaxWidth="560" />
 
-            <ItemsControl ItemsSource="{Binding RatingOptions}">
+            <ItemsControl ItemsSource="{Binding RatingOptions}" HorizontalAlignment="Center">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Vertical" Spacing="8" />
@@ -25,12 +25,18 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Button Classes="GenericButton Accent"
-                                Height="36"
-                                HorizontalAlignment="Stretch"
-                                Command="{Binding DataContext.RateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                CommandParameter="{Binding Url}"
-                                Content="{Binding Label}" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="RatingOptionColumn" />
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0"
+                                    Classes="GenericButton Accent"
+                                    Height="36"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{Binding DataContext.RateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding Url}"
+                                    Content="{Binding Label}" />
+                        </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
