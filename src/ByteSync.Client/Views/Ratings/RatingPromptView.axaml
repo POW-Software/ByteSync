@@ -2,8 +2,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ratings="clr-namespace:ByteSync.ViewModels.Ratings"
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
              x:Class="ByteSync.Views.Ratings.RatingPromptView">
+
+    <Design.DataContext>
+        <ratings:RatingPromptViewModel />
+    </Design.DataContext>
 
     <Grid Background="{DynamicResource MahApps.Brushes.Gray7}">
         <StackPanel Margin="12" Spacing="12">
