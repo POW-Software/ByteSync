@@ -772,6 +772,33 @@ Voulez-vous continuer ?</value>
     <data name="MessageBox_Cancel" xml:space="preserve">
         <value>ANNULER</value>
     </data>
+    <data name="RatingPrompt_Title" xml:space="preserve">
+        <value>Vous aimez ByteSync ?</value>
+    </data>
+    <data name="RatingPrompt_Message" xml:space="preserve">
+        <value>Synchronisation réussie ! ByteSync progresse pas à pas avec l'appui de ses utilisateurs. Si l'outil vous rend service, une note publique nous aidera énormément à gagner en visibilité et à continuer à l'améliorer. Merci pour votre soutien !</value>
+    </data>
+    <data name="RatingPrompt_RateNow" xml:space="preserve">
+        <value>Évaluer ByteSync</value>
+    </data>
+    <data name="RatingPrompt_AskLater" xml:space="preserve">
+        <value>Me redemander plus tard</value>
+    </data>
+    <data name="RatingPrompt_DoNotAskAgain" xml:space="preserve">
+        <value>Ne plus me demander</value>
+    </data>
+    <data name="RatingPrompt_Channel_MicrosoftStore" xml:space="preserve">
+        <value>Noter sur Microsoft Store</value>
+    </data>
+    <data name="RatingPrompt_Channel_GitHub" xml:space="preserve">
+        <value>Mettre une étoile sur GitHub</value>
+    </data>
+    <data name="RatingPrompt_Channel_AlternativeTo" xml:space="preserve">
+        <value>Noter sur AlternativeTo</value>
+    </data>
+    <data name="RatingPrompt_Channel_MajorGeeks" xml:space="preserve">
+        <value>Noter sur MajorGeeks</value>
+    </data>
 	<data name="MainWindow_OnClose_ConfirmTitle" xml:space="preserve">
 		<value>Quitter</value>
 	</data>

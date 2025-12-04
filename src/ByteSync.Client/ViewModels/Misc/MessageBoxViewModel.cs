@@ -16,7 +16,6 @@ public class MessageBoxViewModel : FlyoutElementViewModel
     
     public MessageBoxViewModel()
     {
-        
     }
 
     public MessageBoxViewModel(string titleKey, string? messageKey, List<string>? messageArguments, ILocalizationService localizationService)
