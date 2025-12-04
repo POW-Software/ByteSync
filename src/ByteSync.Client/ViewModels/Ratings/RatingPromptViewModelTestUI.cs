@@ -1,9 +1,11 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Reactive;
 using ReactiveUI;
 
 namespace ByteSync.ViewModels.Ratings;
 
+[ExcludeFromCodeCoverage]
 public sealed class RatingPromptViewModelTestUI : RatingPromptViewModel
 {
     public RatingPromptViewModelTestUI()
