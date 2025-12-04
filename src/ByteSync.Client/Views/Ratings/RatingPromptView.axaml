@@ -10,7 +10,7 @@
         <ratings:RatingPromptViewModelTestUI />
     </Design.DataContext>
 
-    <Grid Background="{DynamicResource Gray7}">
+    <Grid>
         <StackPanel Margin="12" Spacing="12" Grid.IsSharedSizeScope="True">
             <TextBlock Text="{Binding Message}"
                        TextWrapping="Wrap"

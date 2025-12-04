@@ -11,7 +11,7 @@
         <synchronizations:SynchronizationConfirmationViewModel />
     </Design.DataContext>
 
-    <Grid Background="{DynamicResource Gray7}">
+    <Grid>
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" MinWidth="400" MaxWidth="600" Margin="12">
 
             <!-- Global statistics -->

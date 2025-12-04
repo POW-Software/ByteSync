@@ -9,18 +9,18 @@
              xmlns:converters="clr-namespace:ByteSync.Services.Converters"
 
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             
+
              x:Class="ByteSync.Views.Sessions.Comparisons.Actions.TargetedActionGlobalView">
-   
+
     <Design.DataContext>
         <actions:TargetedActionGlobalViewModel />
     </Design.DataContext>
-    
+
     <UserControl.Resources>
-        <converters:ItemCountToLocalizedTextConverter x:Key="ItemCountToLocalizedTextConverter"/>
+        <converters:ItemCountToLocalizedTextConverter x:Key="ItemCountToLocalizedTextConverter" />
     </UserControl.Resources>
-    
-    <Grid Background="{DynamicResource Gray7}">
+
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -28,11 +28,10 @@
         </Grid.RowDefinitions>
 
 
-
         <Grid Grid.Row="0" Margin="0 0 0 21">
             <StackPanel Orientation="Vertical">
                 <TextBlock Classes="GroupBoxHeader" Text="{localizations:Loc TargetedActionEditionGlobal_Actions, True}"></TextBlock>
-                
+
                 <StackPanel Orientation="Horizontal">
                     <Label Content="{localizations:Loc TargetedActionEditionGlobal_DoTheFollowingAction}"></Label>
                 </StackPanel>
@@ -40,16 +39,16 @@
                 <ItemsControl IsEnabled="{Binding CanEditAction}" ItemsSource="{Binding Actions}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <StackPanel Orientation="Vertical" Margin="40 10"/>
+                            <StackPanel Orientation="Vertical" Margin="40 10" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <actions1:AtomicActionEditView Margin="0 5"/>
+                            <actions1:AtomicActionEditView Margin="0 5" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                
+
             </StackPanel>
         </Grid>
 
@@ -59,18 +58,18 @@
 
                 <StackPanel Orientation="Horizontal" Margin="2">
                     <misc:Icon FontSize="12" Value="RegularSave" />
-                    
+
                     <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_Save}" Margin="6 0 0 0" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>
 
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Classes="GenericButton" 
+                <Button Classes="GenericButton"
                         HorizontalAlignment="Right" Margin="6 9" Command="{Binding Path=ResetCommand}" MaxHeight="30">
 
                     <StackPanel Orientation="Horizontal">
-                        <misc:Icon FontSize="12" Value="RegularReset"  />
-                        
+                        <misc:Icon FontSize="12" Value="RegularReset" />
+
                         <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_Reset}" Margin="6 0 0 0" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
@@ -80,7 +79,7 @@
 
                     <StackPanel Orientation="Horizontal">
                         <misc:Icon FontSize="12" Value="RegularExit" />
-                        
+
                         <TextBlock Text="{localizations:Loc SynchronizationRulesGlobal_Cancel}" Margin="6 0 0 0" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
@@ -91,11 +90,11 @@
         <StackPanel Grid.Row="2" Orientation="Vertical" HorizontalAlignment="Center" Margin="24"
                     IsVisible="{Binding Path=ShowWarning}">
             <StackPanel MinWidth="300" MaxWidth="450" HorizontalAlignment="Center" Background="{DynamicResource OtherMemberBackGround}">
-                
+
                 <!-- Header with failure details if present -->
                 <StackPanel IsVisible="{Binding FailureSummaries.Count}">
                     <TextBlock Text="{Binding ActionIssuesHeaderMessage}" Margin="6" FontWeight="SemiBold" />
-                    
+
                     <!-- List of failure summaries with tooltip -->
                     <ItemsControl ItemsSource="{Binding FailureSummaries}" Margin="20,0,6,6">
                         <ItemsControl.ItemTemplate>
@@ -105,13 +104,15 @@
                                         <TextBlock Text="•" Margin="0,0,6,0" />
                                         <TextBlock Text="{Binding Count}" FontWeight="SemiBold" />
                                         <TextBlock Text=" " />
-                                        <TextBlock Text="{Binding Count, Converter={StaticResource ItemCountToLocalizedTextConverter}}" Margin="0,0,4,0" />
+                                        <TextBlock Text="{Binding Count, Converter={StaticResource ItemCountToLocalizedTextConverter}}"
+                                                   Margin="0,0,4,0" />
                                         <TextBlock Text="{Binding LocalizedMessage}" />
                                     </StackPanel>
                                     <ToolTip.Tip>
                                         <StackPanel>
-                                            <TextBlock Text="{Binding $parent[UserControl].((actions:TargetedActionGlobalViewModel)DataContext).AffectedItemsTooltipHeader}" 
-                                                      FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                            <TextBlock
+                                                Text="{Binding $parent[UserControl].((actions:TargetedActionGlobalViewModel)DataContext).AffectedItemsTooltipHeader}"
+                                                FontWeight="SemiBold" Margin="0,0,0,4" />
                                             <TextBlock Text="{Binding AffectedItemsTooltip}" />
                                         </StackPanel>
                                     </ToolTip.Tip>
@@ -120,25 +121,26 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </StackPanel>
-                
+
                 <!-- Standard message for missing fields -->
                 <Label IsVisible="{Binding !FailureSummaries.Count}">
                     <TextBlock Text="{Binding SaveWarning}" TextWrapping="Wrap" />
                 </Label>
-                
+
                 <!-- Separator if we have both -->
-                <Border Height="1" Background="{DynamicResource Gray5}" Margin="6" 
-                       IsVisible="{Binding FailureSummaries.Count}" />
-                
+                <Border Height="1" Background="{DynamicResource Gray5}" Margin="6"
+                        IsVisible="{Binding FailureSummaries.Count}" />
+
                 <!-- Continuation message -->
                 <TextBlock Text="{Binding SaveWarning}" TextWrapping="Wrap" Margin="6"
-                          IsVisible="{Binding FailureSummaries.Count}" />
+                           IsVisible="{Binding FailureSummaries.Count}" />
 
                 <Button HorizontalAlignment="Center" Margin="6 9" Command="{Binding Path=SaveValidItemsCommand}" MaxHeight="30"
-                        IsVisible="{Binding Path=ShowSaveValidItemsCommand}" BorderThickness="0" >
+                        IsVisible="{Binding Path=ShowSaveValidItemsCommand}" BorderThickness="0">
                     <StackPanel Orientation="Horizontal" Margin="2">
                         <misc:Icon FontSize="12" Value="RegularSave" />
-                        <TextBlock Text="{localizations:Loc TargetedActionEditionGlobal_SaveForValidItems}" Margin="6 0 0 0" VerticalAlignment="Center" />
+                        <TextBlock Text="{localizations:Loc TargetedActionEditionGlobal_SaveForValidItems}" Margin="6 0 0 0"
+                                   VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
             </StackPanel>
