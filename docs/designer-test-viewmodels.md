@@ -38,6 +38,9 @@ without running the full app. It is written for both humans and AI agents.
     - Plan to delete these classes once the view is finalized or no preview is needed.
     - Avoid shipping them in release builds unless they remain useful for future tweaks.
 
+6. **Testing**
+    - Add a ExcludeFromCodeCoverage attribute to the TestUI class to avoid skewing coverage metrics.
+
 ## Step-by-Step Procedure
 
 1. **Inspect the Target ViewModel**

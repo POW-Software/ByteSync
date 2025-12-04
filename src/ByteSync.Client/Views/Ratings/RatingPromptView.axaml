@@ -8,7 +8,7 @@
              x:Class="ByteSync.Views.Ratings.RatingPromptView">
 
     <Design.DataContext>
-        <ratings:RatingPromptViewModelTestUI />
+        <ratings:RatingPromptViewModel />
     </Design.DataContext>
 
     <Grid>
