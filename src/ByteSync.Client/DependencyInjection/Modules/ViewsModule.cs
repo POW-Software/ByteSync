@@ -5,11 +5,13 @@ using ByteSync.ViewModels.Home;
 using ByteSync.ViewModels.Lobbies;
 using ByteSync.ViewModels.Sessions;
 using ByteSync.ViewModels.Announcements;
+using ByteSync.ViewModels.Ratings;
 using ByteSync.Views;
 using ByteSync.Views.Home;
 using ByteSync.Views.Announcements;
 using ByteSync.Views.Lobbies;
 using ByteSync.Views.Sessions;
+using ByteSync.Views.Ratings;
 using ReactiveUI;
 using Module = Autofac.Module;
 
@@ -29,6 +31,7 @@ public class ViewsModule : Module
         builder.RegisterType<SessionMainView>().As<IViewFor<SessionMainViewModel>>();
         builder.RegisterType<LobbyMainView>().As<IViewFor<LobbyMainViewModel>>();
         builder.RegisterType<AnnouncementView>().As<IViewFor<AnnouncementViewModel>>();
+        builder.RegisterType<RatingPromptView>().As<IViewFor<RatingPromptViewModel>>();
         
         builder.RegisterInstance(new AvaloniaActivationForViewFetcher())
             .As<IActivationForViewFetcher>()

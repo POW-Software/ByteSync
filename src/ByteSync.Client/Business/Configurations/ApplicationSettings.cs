@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
@@ -25,6 +26,8 @@ public class ApplicationSettings : ICloneable
         TrustedPublicKeys = null;
         SettingsVersion = null;
         AcknowledgedAnnouncementIds = null;
+        UserRatingOptOut = false;
+        UserRatingLastPromptedOn = null;
     }
 
     public string InstallationId { get; set; } = null!;
@@ -189,6 +192,10 @@ public class ApplicationSettings : ICloneable
     public string? SettingsVersion { get; set; }
     
     public string? AcknowledgedAnnouncementIds { get; set; }
+    
+    public bool UserRatingOptOut { get; set; }
+
+    public DateTimeOffset? UserRatingLastPromptedOn { get; set; }
         
     private string EncryptionPassword { get; set; } = null!;
 

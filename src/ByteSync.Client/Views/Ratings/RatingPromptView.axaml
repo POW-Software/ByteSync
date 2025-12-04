@@ -1,0 +1,68 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ratings="clr-namespace:ByteSync.ViewModels.Ratings"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
+             x:Class="ByteSync.Views.Ratings.RatingPromptView">
+
+    <Design.DataContext>
+        <ratings:RatingPromptViewModel />
+    </Design.DataContext>
+
+    <Grid>
+        <StackPanel Margin="12" Spacing="12" Grid.IsSharedSizeScope="True">
+            <TextBlock Text="{Binding Message}"
+                       TextWrapping="Wrap"
+                       FontSize="16"
+                       MaxWidth="560" />
+
+            <ItemsControl ItemsSource="{Binding RatingOptions}" HorizontalAlignment="Center" Margin="12">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="RatingOptionColumn" />
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0"
+                                    Classes="GenericButton Accent"
+                                    Height="40"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{Binding DataContext.RateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding Url}">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="6">
+                                    <misc:Icon FontSize="20" Value="{Binding Icon}"
+                                               IsVisible="{Binding Icon, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                               Margin="2"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Label}" FontSize="14"
+                                               VerticalAlignment="Center"
+                                               Margin="4" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Border BorderBrush="Silver" BorderThickness="0,1,0,1" Margin="0,8" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Classes="GenericButton"
+                        Height="32"
+                        Command="{Binding AskLaterCommand}"
+                        Content="{Binding AskLaterText}" />
+                <Button Classes="GenericButton"
+                        Height="32"
+                        Command="{Binding DoNotAskAgainCommand}"
+                        Content="{Binding DoNotAskAgainText}" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>
