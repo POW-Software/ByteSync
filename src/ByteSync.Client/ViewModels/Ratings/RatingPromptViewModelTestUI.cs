@@ -10,9 +10,9 @@ public sealed class RatingPromptViewModelTestUI : RatingPromptViewModel
     {
         RatingOptions = new ObservableCollection<RatingOption>
         {
-            new("Noter sur le Store", "https://bytesync.app/store"),
-            new("Envoyer un feedback", "https://bytesync.app/feedback"),
-            new("Découvrir les nouveautés", "https://bytesync.app/releases")
+            new("Noter sur le Store", "https://bytesync.app/store", "RegularStore"),
+            new("Envoyer un feedback", "https://bytesync.app/feedback", "LogosGithub"),
+            new("Découvrir les nouveautés", "https://bytesync.app/releases", "RegularWorld")
         };
         
         RateCommand = ReactiveCommand.Create<string>(_ => { });
