@@ -10,7 +10,7 @@
         <ratings:RatingPromptViewModel />
     </Design.DataContext>
 
-    <Grid Background="{DynamicResource MahApps.Brushes.Gray7}">
+    <Grid Background="{DynamicResource Gray7}">
         <StackPanel Margin="12" Spacing="12">
             <TextBlock Text="{Binding Message}"
                        TextWrapping="Wrap"
