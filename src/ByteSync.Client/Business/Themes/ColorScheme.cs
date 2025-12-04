@@ -9,78 +9,117 @@ public class ColorScheme
         ThemeMode = themeMode;
         SecondaryColors = new List<ThemeColor>();
     }
-
+    
     public ThemeModes ThemeMode { get; }
     
     public ThemeColor MainAccentColor { get; set; } = null!;
-
+    
     public Color Accent1 { get; set; }
+    
     public Color Accent2 { get; set; }
+    
     public Color Accent3 { get; set; }
+    
     public Color Accent4 { get; set; }
+    
     public Color Accent5 { get; set; }
     
     public Color AccentTextForeGround { get; set; }
-
+    
     public Color HomeCloudSynchronizationBackGround { get; set; }
+    
     public Color HomeCloudSynchronizationPointerOverBackGround { get; set; }
+    
     public Color HomeLocalSynchronizationBackGround { get; set; }
+    
     public Color HomeLocalSynchronizationPointerOverBackGround { get; set; }
     
     public ThemeColor CurrentMemberBackGround { get; set; } = null!;
+    
     public ThemeColor DisabledMemberBackGround { get; set; } = null!;
+    
     public ThemeColor OtherMemberBackGround { get; set; } = null!;
-
+    
     public ThemeColor ConnectedMemberLetterBackGround { get; set; } = null!;
+    
     public ThemeColor DisabledMemberLetterBackGround { get; set; } = null!;
+    
     public ThemeColor ConnectedMemberLetterBorder { get; set; } = null!;
+    
     public ThemeColor DisabledMemberLetterBorder { get; set; } = null!;
-
+    
     public Color BsAccentButtonBackGround { get; set; }
+    
     public Color BsAccentButtonPointerOverBackGround { get; set; }
     
     public Color SecondaryButtonBackGround { get; set; }
+    
     public Color SecondaryButtonPointerOverBackGround { get; set; }
     
     public ThemeColor SystemAccentColorDark1 { get; set; } = null!;
+    
     public ThemeColor SystemAccentColorDark2 { get; set; } = null!;
+    
     public ThemeColor SystemAccentColorDark3 { get; set; } = null!;
+    
     public ThemeColor SystemAccentColorDark4 { get; set; } = null!;
+    
     public ThemeColor SystemAccentColorDark5 { get; set; } = null!;
-
+    
     public ThemeColor SystemAccentColorLight1 { get; set; } = null!;
+    
     public ThemeColor SystemAccentColorLight2 { get; set; } = null!;
+    
     public ThemeColor SystemAccentColorLight3 { get; set; } = null!;
+    
     public ThemeColor SystemAccentColorLight4 { get; set; } = null!;
+    
     public ThemeColor SystemAccentColorLight5 { get; set; } = null!;
-
+    
     public ThemeColor MainSecondaryColor { get; set; } = null!;
+    
     public List<ThemeColor> SecondaryColors { get; set; }
     
     public ThemeColor CurrentMemberSecondaryBackGround { get; set; } = null!;
+    
     public ThemeColor OtherMemberSecondaryBackGround { get; set; } = null!;
-
+    
     public ThemeColor StatusMainBackGround { get; set; } = null!;
+    
     public ThemeColor StatusSecondaryBackGround { get; set; } = null!;
-
+    
     public Color ChartsMainBarColor { get; set; }
+    
     public Color ChartsAlternateBarColor { get; set; }
+    
     public Color ChartsMainLineColor { get; set; }
     
     public Color VeryLightGray { get; set; }
+    
     public Color GenericButtonBorder { get; set; }
+    
     public Color Gray1 { get; set; }
+    
     public Color Gray2 { get; set; }
+    
     public Color Gray5 { get; set; }
+    
+    public Color Gray7 { get; set; }
+    
     public Color Gray8 { get; set; }
+    
     public Color SettingsHeaderColor { get; set; }
+    
     public Color BlockBackColor { get; set; }
     
     public SolidColorBrush StatusMainBackGroundBrush { get; set; } = null!;
+    
     public SolidColorBrush StatusSecondaryBackGroundBrush { get; set; } = null!;
+    
     public SolidColorBrush VeryLightGrayBrush { get; set; } = null!;
-
+    
     public Color MainWindowTopColor { get; set; }
+    
     public Color MainWindowBottomColor { get; set; }
     
     public Color TextControlSelectionHighlightColor { get; set; }

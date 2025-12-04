@@ -7,7 +7,7 @@
              x:Class="ByteSync.Views.Ratings.RatingPromptView">
 
     <Design.DataContext>
-        <ratings:RatingPromptViewModel />
+        <ratings:RatingPromptViewModelTestUI />
     </Design.DataContext>
 
     <Grid Background="{DynamicResource Gray7}">

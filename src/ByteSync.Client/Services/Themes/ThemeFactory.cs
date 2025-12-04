@@ -8,7 +8,7 @@ namespace ByteSync.Services.Themes;
 public class ThemeFactory : IThemeFactory
 {
     private readonly IThemeService _themeService;
-
+    
     public ThemeFactory(IThemeService themeService)
     {
         _themeService = themeService;
@@ -16,12 +16,12 @@ public class ThemeFactory : IThemeFactory
     
     public void BuildThemes()
     {
-        BuildThemes(ThemeConstants.BLUE, "#094177");      // PowBlue
-        BuildThemes(ThemeConstants.GOLD, "#b88746");      // PowGold 
+        BuildThemes(ThemeConstants.BLUE, "#094177"); // PowBlue
+        BuildThemes(ThemeConstants.GOLD, "#b88746"); // PowGold 
         
         BuildThemes("Green", "#0d990d");
         BuildThemes("Red", "#E51400");
-        BuildThemes("Pink", "#F472D0"); 
+        BuildThemes("Pink", "#F472D0");
         BuildThemes("Purple", "#763dc2");
         
         _themeService.OnThemesRegistered();
@@ -30,23 +30,23 @@ public class ThemeFactory : IThemeFactory
     private void BuildThemes(string themeName, string primaryColorHex)
     {
         ThemeColor themeColor = new ThemeColor(primaryColorHex);
-
+        
         // Create two variants with different secondary colors
         BuildAndRegisterThemes(themeName + "1", themeColor, themeColor.Hue - 60, primaryColorHex);
         BuildAndRegisterThemes(themeName + "2", themeColor, themeColor.Hue + 60, primaryColorHex);
     }
-
+    
     private void BuildAndRegisterThemes(string themeName, ThemeColor themeColor, double secondaryColorHue, string primaryColorHex)
     {
         // Create secondary theme color with given hue but same saturation/value as primary
         var secondarySystemColor = ColorUtils.ColorFromHsv(secondaryColorHue, themeColor.Saturation, themeColor.Value);
         ThemeColor secondaryThemeColor = new ThemeColor(secondarySystemColor);
-
+        
         // Create light theme
         Theme lightTheme = new Theme(themeName, ThemeModes.Light, themeColor, secondaryThemeColor);
         BuildColorScheme(lightTheme, themeColor, secondaryColorHue, ThemeModes.Light);
         _themeService.RegisterTheme(lightTheme);
-
+        
         // Create dark theme
         Theme darkTheme = new Theme(themeName, ThemeModes.Dark, themeColor, secondaryThemeColor);
         BuildColorScheme(darkTheme, themeColor, secondaryColorHue, ThemeModes.Dark);
@@ -64,7 +64,7 @@ public class ThemeFactory : IThemeFactory
             colorScheme.MainSecondaryColor = colorScheme.MainAccentColor.WithHue(secondaryColorHue);
             
             colorScheme.AccentTextForeGround = themeColor.WithSaturationValue(0.33, 0.85).AvaloniaColor;
-
+            
             // Home
             colorScheme.HomeCloudSynchronizationBackGround = themeColor
                 .WithSaturationValue(0.55, 0.70).AvaloniaColor;
@@ -87,7 +87,7 @@ public class ThemeFactory : IThemeFactory
                 .WithSaturationValue(0.35, 0.22);
             colorScheme.DisabledMemberBackGround = new ThemeColor(Color.FromArgb(0xFF, 0x30, 0x30, 0x30));
             colorScheme.OtherMemberBackGround = new ThemeColor(Color.FromArgb(0xFF, 0x30, 0x30, 0x30));
-
+            
             colorScheme.ConnectedMemberLetterBackGround = themeColor
                 .WithSaturationValue(0.35, 0.28);
             colorScheme.DisabledMemberLetterBackGround = new ThemeColor(Color.FromArgb(0xFF, 0x37, 0x37, 0x37));
@@ -110,9 +110,9 @@ public class ThemeFactory : IThemeFactory
             
             colorScheme.StatusMainBackGround = themeColor
                 .WithSaturationValue(0.45, 0.25);
-
+            
             ComputeAttenuations(colorScheme);
-
+            
             colorScheme.Accent1 = colorScheme.SystemAccentColorDark1.AvaloniaColor;
             colorScheme.Accent2 = colorScheme.SystemAccentColorDark2.AvaloniaColor;
             colorScheme.Accent3 = colorScheme.SystemAccentColorDark3.AvaloniaColor;
@@ -124,10 +124,11 @@ public class ThemeFactory : IThemeFactory
             colorScheme.Gray1 = Color.FromArgb(0xFF, 0xCC, 0xCC, 0xCC);
             colorScheme.Gray2 = Color.FromArgb(0xFF, 0x80, 0x80, 0x80);
             colorScheme.Gray5 = Color.FromArgb(0xFF, 0x46, 0x46, 0x46);
+            colorScheme.Gray7 = Color.FromArgb(0xFF, 0x3A, 0x3A, 0x3A);
             colorScheme.Gray8 = Color.FromArgb(0xFF, 0x2C, 0x2C, 0x2C);
             colorScheme.SettingsHeaderColor = Color.FromArgb(0xFF, 0x30, 0x30, 0x30);
             colorScheme.BlockBackColor = Color.FromArgb(0xFF, 0x1F, 0x1F, 0x1F);
-
+            
             colorScheme.MainWindowTopColor = colorScheme.VeryLightGray;
             colorScheme.MainWindowBottomColor = Color.FromArgb(0xFF, 0x04, 0x04, 0x04);
             
@@ -173,7 +174,7 @@ public class ThemeFactory : IThemeFactory
             colorScheme.ConnectedMemberLetterBackGround = themeColor
                 .WithSaturationValue(0.20, 0.84);
             colorScheme.DisabledMemberLetterBackGround = new ThemeColor(Color.FromArgb(0xFF, 0xE6, 0xE6, 0xE6));
-                
+            
             colorScheme.ConnectedMemberLetterBorder = themeColor
                 .WithSaturationValue(0.20, 0.78);
             colorScheme.DisabledMemberLetterBorder = new ThemeColor(Color.FromArgb(0xFF, 0xE0, 0xE0, 0xE0));
@@ -192,7 +193,7 @@ public class ThemeFactory : IThemeFactory
             
             colorScheme.StatusMainBackGround = themeColor
                 .WithSaturationValue(0.35, 0.90);
-
+            
             ComputeAttenuations(colorScheme);
             
             colorScheme.Accent1 = colorScheme.SystemAccentColorLight1.AvaloniaColor;
@@ -200,16 +201,17 @@ public class ThemeFactory : IThemeFactory
             colorScheme.Accent3 = colorScheme.SystemAccentColorLight3.AvaloniaColor;
             colorScheme.Accent4 = colorScheme.SystemAccentColorLight4.AvaloniaColor;
             colorScheme.Accent5 = colorScheme.SystemAccentColorLight5.AvaloniaColor;
-                
+            
             colorScheme.VeryLightGray = Color.FromArgb(0xFF, 0xF7, 0xF7, 0xF7);
             colorScheme.GenericButtonBorder = Color.FromArgb(0xFF, 0xAA, 0xAA, 0xAA);
             colorScheme.Gray1 = Color.FromArgb(0xFF, 0x33, 0x33, 0x33);
             colorScheme.Gray2 = Color.FromArgb(0xFF, 0x7F, 0x7F, 0x7F);
             colorScheme.Gray5 = Color.FromArgb(0xFF, 0xB9, 0xB9, 0xB9);
+            colorScheme.Gray7 = Color.FromArgb(0xFF, 0xD6, 0xD6, 0xD6);
             colorScheme.Gray8 = Color.FromArgb(0xFF, 0xE0, 0xE0, 0xE0);
             colorScheme.SettingsHeaderColor = Color.FromArgb(0xFF, 0xEC, 0xEC, 0xEC);
             colorScheme.BlockBackColor = Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF);
-
+            
             colorScheme.MainWindowTopColor = Color.FromArgb(0xFF, 0xFA, 0xFA, 0xFA);
             colorScheme.MainWindowBottomColor = Color.FromArgb(0xFF, 0xEF, 0xEF, 0xEF);
             
@@ -241,7 +243,7 @@ public class ThemeFactory : IThemeFactory
         
         colorScheme.OtherMemberSecondaryBackGround = colorScheme.OtherMemberBackGround
             .WithHue(secondaryColorHue);
-
+        
         if (themeMode == ThemeModes.Dark)
         {
             colorScheme.StatusSecondaryBackGround = colorScheme.StatusMainBackGround
@@ -254,7 +256,7 @@ public class ThemeFactory : IThemeFactory
                 .WithHue(secondaryColorHue);
         }
     }
-
+    
     private static void ComputeAttenuations(ColorScheme colorScheme)
     {
         colorScheme.SystemAccentColorDark1 = colorScheme.MainAccentColor.AdjustSaturationValue(0, -0.10);
@@ -262,7 +264,7 @@ public class ThemeFactory : IThemeFactory
         colorScheme.SystemAccentColorDark3 = colorScheme.MainAccentColor.AdjustSaturationValue(0, -0.30);
         colorScheme.SystemAccentColorDark4 = colorScheme.MainAccentColor.AdjustSaturationValue(0, -0.40);
         colorScheme.SystemAccentColorDark5 = colorScheme.MainAccentColor.AdjustSaturationValue(0, -0.50);
-
+        
         colorScheme.SystemAccentColorLight1 = colorScheme.MainAccentColor.AdjustSaturationValue(0, 0.10);
         colorScheme.SystemAccentColorLight2 = colorScheme.MainAccentColor.AdjustSaturationValue(0, 0.20);
         colorScheme.SystemAccentColorLight3 = colorScheme.MainAccentColor.AdjustSaturationValue(0, 0.30);
