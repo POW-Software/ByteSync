@@ -15,7 +15,7 @@ public enum RatingPromptResultType
     DoNotAskAgain
 }
 
-public record RatingOption(string Label, string Url);
+public record RatingOption(string Label, string Url, string? Icon = null);
 
 public record RatingPromptResult(RatingPromptResultType ResultType, string? Url);
 

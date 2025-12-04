@@ -788,16 +788,16 @@ Voulez-vous continuer ?</value>
         <value>Ne plus me demander</value>
     </data>
     <data name="RatingPrompt_Channel_MicrosoftStore" xml:space="preserve">
-        <value>Microsoft Store</value>
+        <value>Noter sur Microsoft Store</value>
     </data>
     <data name="RatingPrompt_Channel_GitHub" xml:space="preserve">
-        <value>GitHub</value>
+        <value>Mettre une étoile sur GitHub</value>
     </data>
     <data name="RatingPrompt_Channel_AlternativeTo" xml:space="preserve">
-        <value>AlternativeTo</value>
+        <value>Noter sur AlternativeTo</value>
     </data>
     <data name="RatingPrompt_Channel_MajorGeeks" xml:space="preserve">
-        <value>MajorGeeks</value>
+        <value>Noter sur MajorGeeks</value>
     </data>
 	<data name="MainWindow_OnClose_ConfirmTitle" xml:space="preserve">
 		<value>Quitter</value>

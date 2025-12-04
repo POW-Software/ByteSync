@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:ratings="clr-namespace:ByteSync.ViewModels.Ratings"
+             xmlns:misc="clr-namespace:ByteSync.Views.Misc"
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
              x:Class="ByteSync.Views.Ratings.RatingPromptView">
 
@@ -34,8 +35,13 @@
                                     Height="36"
                                     HorizontalAlignment="Stretch"
                                     Command="{Binding DataContext.RateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                    CommandParameter="{Binding Url}"
-                                    Content="{Binding Label}" />
+                                    CommandParameter="{Binding Url}">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="6">
+                                    <misc:Icon FontSize="16" Value="{Binding Icon}"
+                                               IsVisible="{Binding Icon, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                    <TextBlock Text="{Binding Label}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
