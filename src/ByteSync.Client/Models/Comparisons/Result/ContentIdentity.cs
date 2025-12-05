@@ -39,7 +39,7 @@ public class ContentIdentity
     {
         get
         {
-            return FileSystemDescriptions.Any(fsd => fsd is FileDescription && !fsd.IsAccessible)
+            return FileSystemDescriptions.Any(fsd => !fsd.IsAccessible)
                    || AccessIssueInventoryParts.Count > 0;
         }
     }
@@ -57,10 +57,10 @@ public class ContentIdentity
             return true;
         }
         
-        // Or present FileDescriptions are marked inaccessible for this inventory
+        // Or present file system descriptions are marked inaccessible for this inventory
         return FileSystemDescriptionsByInventoryParts
             .Any(pair => pair.Key.Inventory.Equals(inventory)
-                         && pair.Value.Any(fsd => fsd is FileDescription fd && !fd.IsAccessible));
+                         && pair.Value.Any(fsd => !fsd.IsAccessible));
     }
     
     public bool HasManyFileSystemDescriptionOnAnInventoryPart

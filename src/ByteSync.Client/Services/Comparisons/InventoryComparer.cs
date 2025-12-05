@@ -161,6 +161,11 @@ public class InventoryComparer : IInventoryComparer
         }
         
         contentIdentity.Add(directoryDescription);
+        
+        if (!directoryDescription.IsAccessible)
+        {
+            contentIdentity.AddAccessIssue(directoryDescription.InventoryPart);
+        }
     }
     
     private void PropagateAccessIssuesFromAncestors()
