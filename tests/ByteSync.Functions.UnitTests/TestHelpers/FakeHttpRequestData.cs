@@ -1,3 +1,4 @@
+using System.Net;
 using System.Security.Claims;
 using System.Text.Json;
 using Azure.Core.Serialization;
@@ -48,13 +49,25 @@ public class FakeHttpRequestData : HttpRequestData
         
         contextMock.SetupGet(c => c.InstanceServices).Returns(serviceProvider);
 
-        var responseMock = new Mock<HttpResponseData>(contextMock.Object);
-        responseMock.SetupProperty(r => r.StatusCode);
-        responseMock.SetupGet(r => r.Headers).Returns(new HttpHeadersCollection());
-        responseMock.SetupProperty(r => r.Body, new MemoryStream());
-        responseMock.SetupGet(r => r.Cookies).Returns(new Mock<HttpCookies>().Object);
-        responseMock.SetupGet(r => r.FunctionContext).Returns(contextMock.Object);
+        return new FakeHttpResponseData(contextMock.Object);
+    }
+    
+    private class FakeHttpResponseData : HttpResponseData
+    {
+        public FakeHttpResponseData(FunctionContext functionContext) : base(functionContext)
+        {
+            StatusCode = HttpStatusCode.OK;
+            Headers = new HttpHeadersCollection();
+            Body = new MemoryStream();
+            Cookies = new Mock<HttpCookies>().Object;
+        }
 
-        return responseMock.Object;
+        public override HttpStatusCode StatusCode { get; set; }
+        
+        public override HttpHeadersCollection Headers { get; set; }
+        
+        public override Stream Body { get; set; }
+        
+        public override HttpCookies Cookies { get; }
     }
 }
