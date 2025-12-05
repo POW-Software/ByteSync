@@ -15,6 +15,8 @@ public class FakeHttpRequestData : HttpRequestData
         Headers = new HttpHeadersCollection();
         Body = new MemoryStream();
         Url = new Uri("http://localhost");
+        Cookies = new List<IHttpCookie>();
+        Method = "GET";
     }
 
     public override HttpHeadersCollection Headers { get; }
