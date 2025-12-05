@@ -216,6 +216,7 @@ public class ContentIdentityViewModelTests
         
         vm.HasAnalysisError.Should().BeFalse();
         vm.HashOrWarnIcon.Should().Be("RegularError");
+        vm.SignatureHash.Should().Be("ContentIdentity_AccessIssueShortLabel");
         vm.ShowToolTipDelay.Should().Be(400);
     }
     
@@ -248,6 +249,52 @@ public class ContentIdentityViewModelTests
         vm.HashOrWarnIcon.Should().Be("RegularError");
         vm.SignatureHash.Should().Be("ComparisonResult_InventoryIncomplete");
         vm.ShowToolTipDelay.Should().Be(400);
+    }
+    
+    [Test]
+    public void Directory_identity_with_access_issue_sets_access_label_and_icon()
+    {
+        var ci = new ContentIdentity(null);
+        var dir = new DirectoryDescription { InventoryPart = _partA, RelativePath = "/dir", IsAccessible = false };
+        ci.Add(dir);
+        
+        _inventory.InventoryParts.Add(_partA);
+        
+        var vm = new ContentIdentityViewModel(
+            BuildComparisonItemViewModel(FileSystemTypes.Directory),
+            ci,
+            _inventory,
+            _sessionService.Object,
+            _localizationService.Object,
+            _factory.Object);
+        
+        vm.AccessIssueLabel.Should().Be("ContentIdentity_AccessIssueShortLabel");
+        vm.HashOrWarnIcon.Should().Be("RegularError");
+        vm.ShowDirectoryAccessIssue.Should().BeTrue();
+        vm.ShowToolTipDelay.Should().Be(400);
+        vm.PresenceParts.Should().Contain("Aa1");
+    }
+    
+    [Test]
+    public void Directory_identity_with_access_issue_and_incomplete_inventory_uses_inventory_incomplete_label()
+    {
+        var ci = new ContentIdentity(null);
+        var dir = new DirectoryDescription { InventoryPart = _partA, RelativePath = "/dir", IsAccessible = false };
+        ci.Add(dir);
+        
+        _partA.IsIncompleteDueToAccess = true;
+        _inventory.InventoryParts.Add(_partA);
+        
+        var vm = new ContentIdentityViewModel(
+            BuildComparisonItemViewModel(FileSystemTypes.Directory),
+            ci,
+            _inventory,
+            _sessionService.Object,
+            _localizationService.Object,
+            _factory.Object);
+        
+        vm.AccessIssueLabel.Should().Be("ComparisonResult_InventoryIncomplete");
+        vm.ShowDirectoryAccessIssue.Should().BeTrue();
     }
     
     [Test]
