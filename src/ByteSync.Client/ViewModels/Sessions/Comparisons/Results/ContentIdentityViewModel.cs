@@ -66,15 +66,19 @@ public class ContentIdentityViewModel : ViewModelBase
                 ? _localizationService[nameof(Resources.ComparisonResult_InventoryIncomplete)]
                 : _localizationService[nameof(Resources.ContentIdentity_AccessIssueShortLabel)];
         }
+        else if (HasAccessIssue && IsDirectory)
+        {
+            AccessIssueLabel = _localizationService[nameof(Resources.ContentIdentity_AccessIssueShortLabel)];
+        }
         
         FillDateAndInventoryParts();
         FillStringData(hasAccessIssueForInventory);
-        SetHashOrWarnIcon(hasAccessIssueForInventory);
+        SetHashOrWarnIcon(HasAccessIssue);
         
         ShowInventoryParts = _sessionService.IsCloudSession;
         
         ShowFileAccessIssue = IsFile && HasAccessIssue;
-        ShowDirectoryAccessIssue = IsDirectory && AccessIssueLabel.IsNotEmpty();
+        ShowDirectoryAccessIssue = IsDirectory && HasAccessIssue;
         if (HasAnalysisError)
         {
             ShowToolTipDelay = 400;
@@ -217,9 +221,9 @@ public class ContentIdentityViewModel : ViewModelBase
         }
     }
     
-    private void SetHashOrWarnIcon(bool hasAccessIssueForInventory)
+    private void SetHashOrWarnIcon(bool hasAccessIssue)
     {
-        if (ContentIdentity.HasAnalysisError || hasAccessIssueForInventory)
+        if (ContentIdentity.HasAnalysisError || hasAccessIssue)
         {
             HashOrWarnIcon = "RegularError";
         }

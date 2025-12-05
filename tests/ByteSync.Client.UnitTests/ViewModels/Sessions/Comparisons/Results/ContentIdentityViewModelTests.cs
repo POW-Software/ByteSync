@@ -298,6 +298,29 @@ public class ContentIdentityViewModelTests
     }
     
     [Test]
+    public void Directory_identity_with_access_issue_without_incomplete_flag_still_shows_label()
+    {
+        var ci = new ContentIdentity(null);
+        var dir = new DirectoryDescription { InventoryPart = _partA, RelativePath = "/dir", IsAccessible = false };
+        ci.Add(dir);
+        
+        _partA.IsIncompleteDueToAccess = false;
+        _inventory.InventoryParts.Add(_partA);
+        
+        var vm = new ContentIdentityViewModel(
+            BuildComparisonItemViewModel(FileSystemTypes.Directory),
+            ci,
+            _inventory,
+            _sessionService.Object,
+            _localizationService.Object,
+            _factory.Object);
+        
+        vm.AccessIssueLabel.Should().Be("ContentIdentity_AccessIssueShortLabel");
+        vm.ShowDirectoryAccessIssue.Should().BeTrue();
+        vm.HashOrWarnIcon.Should().Be("RegularError");
+    }
+    
+    [Test]
     public void Directory_identity_sets_presence_parts_and_dates()
     {
         var ci = new ContentIdentity(null);
