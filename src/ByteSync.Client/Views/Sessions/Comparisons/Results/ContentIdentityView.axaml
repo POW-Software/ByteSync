@@ -75,13 +75,25 @@
                 </ItemsControl>
 
                 <!-- Show PresenceParts (B1) for inaccessible files -->
-                <StackPanel IsVisible="{Binding HasAccessIssue}" Orientation="Horizontal" Margin="0 3 0 0"
+                <StackPanel IsVisible="{Binding ShowFileAccessIssue}" Orientation="Horizontal" Margin="0 3 0 0"
                             HorizontalAlignment="Right" VerticalAlignment="Bottom">
 
                     <misc:Icon FontSize="14" Value="RegularData" Foreground="{DynamicResource SystemBaseHighColor}"
                                Margin="15 0 0 0" VerticalAlignment="Center" />
 
                     <TextBlock Text="{Binding PresenceParts}" HorizontalAlignment="Left" VerticalAlignment="Center"
+                               Margin="4 0" Foreground="{DynamicResource SystemBaseHighColor}">
+                    </TextBlock>
+
+                </StackPanel>
+
+                <StackPanel IsVisible="{Binding ShowDirectoryAccessIssue}" Orientation="Horizontal" Margin="0 3 0 0"
+                            HorizontalAlignment="Right" VerticalAlignment="Bottom">
+
+                    <misc:Icon FontSize="14" Value="{Binding HashOrWarnIcon}" Foreground="{DynamicResource SystemBaseHighColor}"
+                               Margin="15 0 0 0" VerticalAlignment="Center" />
+
+                    <TextBlock Text="{Binding AccessIssueLabel}" HorizontalAlignment="Left" VerticalAlignment="Center"
                                Margin="4 0" Foreground="{DynamicResource SystemBaseHighColor}">
                     </TextBlock>
 

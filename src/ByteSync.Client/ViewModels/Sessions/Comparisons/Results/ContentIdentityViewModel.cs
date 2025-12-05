@@ -31,8 +31,8 @@ public class ContentIdentityViewModel : ViewModelBase
         DateAndInventoryParts = new ObservableCollection<DateAndInventoryPartsViewModel>();
         
         FillDateAndInventoryParts();
-        FillStringData();
-        SetHashOrWarnIcon();
+        FillStringData(false);
+        SetHashOrWarnIcon(false);
     #endif
     }
     
@@ -54,14 +54,31 @@ public class ContentIdentityViewModel : ViewModelBase
         
         DateAndInventoryParts = new ObservableCollection<DateAndInventoryPartsViewModel>();
         
+        HasAnalysisError = ContentIdentity.HasAnalysisError;
+        var hasAccessIssueForInventory = ContentIdentity.HasAccessIssueFor(Inventory);
+        HasAccessIssue = hasAccessIssueForInventory || ContentIdentity.HasAccessIssue;
+        
+        var isFlatMode = _sessionService.CurrentSessionSettings!.MatchingMode == MatchingModes.Flat;
+        var inventoryIncomplete = Inventory.InventoryParts.Any(ip => ip.IsIncompleteDueToAccess);
+        if (hasAccessIssueForInventory)
+        {
+            AccessIssueLabel = isFlatMode && inventoryIncomplete
+                ? _localizationService[nameof(Resources.ComparisonResult_InventoryIncomplete)]
+                : _localizationService[nameof(Resources.ContentIdentity_AccessIssueShortLabel)];
+        }
+        else if (HasAccessIssue && IsDirectory)
+        {
+            AccessIssueLabel = _localizationService[nameof(Resources.ContentIdentity_AccessIssueShortLabel)];
+        }
+        
         FillDateAndInventoryParts();
-        FillStringData();
-        SetHashOrWarnIcon();
+        FillStringData(hasAccessIssueForInventory);
+        SetHashOrWarnIcon(HasAccessIssue);
         
         ShowInventoryParts = _sessionService.IsCloudSession;
         
-        HasAnalysisError = ContentIdentity.HasAnalysisError;
-        HasAccessIssue = ContentIdentity.HasAccessIssueFor(Inventory) || ContentIdentity.HasAccessIssue;
+        ShowFileAccessIssue = IsFile && HasAccessIssue;
+        ShowDirectoryAccessIssue = IsDirectory && HasAccessIssue;
         if (HasAnalysisError)
         {
             ShowToolTipDelay = 400;
@@ -105,6 +122,9 @@ public class ContentIdentityViewModel : ViewModelBase
     public bool HasAccessIssue { get; set; }
     
     [Reactive]
+    public string? AccessIssueLabel { get; set; }
+    
+    [Reactive]
     public int ShowToolTipDelay { get; set; }
     
     [Reactive]
@@ -119,6 +139,12 @@ public class ContentIdentityViewModel : ViewModelBase
     [Reactive]
     public string PresenceParts { get; set; }
     
+    [Reactive]
+    public bool ShowFileAccessIssue { get; set; }
+    
+    [Reactive]
+    public bool ShowDirectoryAccessIssue { get; set; }
+    
     public ObservableCollection<DateAndInventoryPartsViewModel> DateAndInventoryParts { get; private set; }
     
     public long? Size
@@ -129,7 +155,7 @@ public class ContentIdentityViewModel : ViewModelBase
     [Reactive]
     public string? LinkingKeyNameTooltip { get; set; }
     
-    private void FillStringData()
+    private void FillStringData(bool hasAccessIssueForInventory)
     {
         if (IsFile)
         {
@@ -143,23 +169,16 @@ public class ContentIdentityViewModel : ViewModelBase
                 ErrorType = onErrorFileDescription.AnalysisErrorType;
                 ErrorDescription = onErrorFileDescription.AnalysisErrorDescription;
             }
-            else
+        else
+        {
+            if (hasAccessIssueForInventory)
             {
-                var isFlatMode = _sessionService.CurrentSessionSettings!.MatchingMode == MatchingModes.Flat;
-                var inventoryIncomplete = Inventory.InventoryParts.Any(ip => ip.IsIncompleteDueToAccess);
-                
-                if (ContentIdentity.HasAccessIssueFor(Inventory) && isFlatMode && inventoryIncomplete)
-                {
-                    SignatureHash = _localizationService[nameof(Resources.ComparisonResult_InventoryIncomplete)];
-                }
-                else if (ContentIdentity.HasAccessIssueFor(Inventory))
-                {
-                    SignatureHash = _localizationService[nameof(Resources.ContentIdentity_AccessIssueShortLabel)];
-                }
-                else if (ContentIdentity.Core == null || ContentIdentity.Core.SignatureHash.IsNullOrEmpty())
-                {
-                    SignatureHash = "";
-                }
+                SignatureHash = AccessIssueLabel;
+            }
+            else if (ContentIdentity.Core == null || ContentIdentity.Core.SignatureHash.IsNullOrEmpty())
+            {
+                SignatureHash = "";
+            }
                 else
                 {
                     if (ContentIdentity.Core.SignatureHash!.Length > 32)
@@ -191,7 +210,7 @@ public class ContentIdentityViewModel : ViewModelBase
         }
         
         // Show inventory parts (B1, B2, etc.) for directories OR for inaccessible files
-        if (IsDirectory || (IsFile && ContentIdentity.HasAccessIssueFor(Inventory)))
+        if (IsDirectory || (IsFile && hasAccessIssueForInventory))
         {
             PresenceParts = ContentIdentity.GetInventoryParts()
                 .Where(ip => ip.Inventory.Equals(Inventory))
@@ -202,9 +221,9 @@ public class ContentIdentityViewModel : ViewModelBase
         }
     }
     
-    private void SetHashOrWarnIcon()
+    private void SetHashOrWarnIcon(bool hasAccessIssue)
     {
-        if (ContentIdentity.HasAnalysisError || ContentIdentity.HasAccessIssueFor(Inventory))
+        if (ContentIdentity.HasAnalysisError || hasAccessIssue)
         {
             HashOrWarnIcon = "RegularError";
         }
