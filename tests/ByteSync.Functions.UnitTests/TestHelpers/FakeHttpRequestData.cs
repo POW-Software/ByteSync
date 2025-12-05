@@ -53,6 +53,7 @@ public class FakeHttpRequestData : HttpRequestData
         responseMock.SetupGet(r => r.Headers).Returns(new HttpHeadersCollection());
         responseMock.SetupProperty(r => r.Body, new MemoryStream());
         responseMock.SetupGet(r => r.Cookies).Returns(new Mock<HttpCookies>().Object);
+        responseMock.SetupGet(r => r.FunctionContext).Returns(contextMock.Object);
 
         return responseMock.Object;
     }
