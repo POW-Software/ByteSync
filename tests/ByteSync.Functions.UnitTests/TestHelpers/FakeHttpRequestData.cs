@@ -11,6 +11,8 @@ namespace ByteSync.Functions.UnitTests.TestHelpers;
 
 public class FakeHttpRequestData : HttpRequestData
 {
+    private readonly IServiceProvider _serviceProvider;
+    
     public FakeHttpRequestData(FunctionContext functionContext) : base(functionContext)
     {
         Headers = new HttpHeadersCollection();
@@ -18,6 +20,14 @@ public class FakeHttpRequestData : HttpRequestData
         Url = new Uri("http://localhost");
         Cookies = new List<IHttpCookie>();
         Method = "GET";
+        
+        var jsonSerializer = new JsonObjectSerializer(new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        _serviceProvider = new ServiceCollection()
+            .AddSingleton<ObjectSerializer>(jsonSerializer)
+            .BuildServiceProvider();
+        
+        var contextMock = Mock.Get(functionContext);
+        contextMock.SetupGet(c => c.InstanceServices).Returns(_serviceProvider);
     }
 
     public override HttpHeadersCollection Headers { get; }
@@ -34,22 +44,7 @@ public class FakeHttpRequestData : HttpRequestData
 
     public override HttpResponseData CreateResponse()
     {
-        var jsonSerializer = new JsonObjectSerializer(new JsonSerializerOptions(JsonSerializerDefaults.Web));
-        var serviceProvider = new ServiceCollection()
-            .AddSingleton<ObjectSerializer>(jsonSerializer)
-            .BuildServiceProvider();
-
-        var existingContextMock = Mock.Get(FunctionContext);
-        var contextMock = existingContextMock ?? new Mock<FunctionContext>();
-        
-        if (existingContextMock == null)
-        {
-            contextMock.SetupGet(c => c.Items).Returns(new Dictionary<object, object>());
-        }
-        
-        contextMock.SetupGet(c => c.InstanceServices).Returns(serviceProvider);
-
-        return new FakeHttpResponseData(contextMock.Object);
+        return new FakeHttpResponseData(FunctionContext);
     }
     
     private class FakeHttpResponseData : HttpResponseData
