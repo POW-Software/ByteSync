@@ -11,6 +11,16 @@ namespace ByteSync.Functions.UnitTests.TestHelpers;
 
 public class FakeHttpRequestData : HttpRequestData
 {
+    private static readonly IServiceProvider SharedServiceProvider = BuildServiceProvider();
+    
+    private static IServiceProvider BuildServiceProvider()
+    {
+        var jsonSerializer = new JsonObjectSerializer(new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        return new ServiceCollection()
+            .AddSingleton<ObjectSerializer>(jsonSerializer)
+            .BuildServiceProvider();
+    }
+    
     public FakeHttpRequestData(FunctionContext functionContext) : base(functionContext)
     {
         Headers = new HttpHeadersCollection();
@@ -34,15 +44,25 @@ public class FakeHttpRequestData : HttpRequestData
 
     public override HttpResponseData CreateResponse()
     {
-        var jsonSerializer = new JsonObjectSerializer(new JsonSerializerOptions(JsonSerializerDefaults.Web));
-        var serviceProvider = new ServiceCollection()
-            .AddSingleton<ObjectSerializer>(jsonSerializer)
-            .BuildServiceProvider();
+        return new FakeHttpResponseData(new FakeFunctionContext(SharedServiceProvider));
+    }
+    
+    private class FakeFunctionContext : FunctionContext
+    {
+        public FakeFunctionContext(IServiceProvider serviceProvider)
+        {
+            InstanceServices = serviceProvider;
+        }
 
-        var contextMock = new Mock<FunctionContext>();
-        contextMock.SetupGet(c => c.InstanceServices).Returns(serviceProvider);
-
-        return new FakeHttpResponseData(contextMock.Object);
+        public override string InvocationId => Guid.NewGuid().ToString();
+        public override string FunctionId => "test-function";
+        public override TraceContext TraceContext => null!;
+        public override BindingContext BindingContext => null!;
+        public override RetryContext RetryContext => null!;
+        public override IServiceProvider InstanceServices { get; set; }
+        public override FunctionDefinition FunctionDefinition => null!;
+        public override IDictionary<object, object> Items { get; set; } = new Dictionary<object, object>();
+        public override IInvocationFeatures Features => null!;
     }
     
     private class FakeHttpResponseData : HttpResponseData
