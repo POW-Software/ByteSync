@@ -321,6 +321,65 @@ public class ContentIdentityViewModelTests
     }
     
     [Test]
+    public void Directory_identity_in_flat_mode_with_incomplete_inventory_shows_inventory_incomplete_label()
+    {
+        _sessionService.SetupGet(s => s.CurrentSessionSettings).Returns(new SessionSettings
+        {
+            DataType = DataTypes.Directories,
+            MatchingMode = MatchingModes.Flat,
+            LinkingCase = LinkingCases.Insensitive
+        });
+        
+        var ci = new ContentIdentity(null);
+        var dir = new DirectoryDescription { InventoryPart = _partA, RelativePath = "/dir", IsAccessible = true };
+        ci.Add(dir);
+        
+        _partA.IsIncompleteDueToAccess = true;
+        _inventory.InventoryParts.Add(_partA);
+        
+        var vm = new ContentIdentityViewModel(
+            BuildComparisonItemViewModel(FileSystemTypes.Directory),
+            ci,
+            _inventory,
+            _sessionService.Object,
+            _localizationService.Object,
+            _factory.Object);
+        
+        vm.AccessIssueLabel.Should().Be("ComparisonResult_InventoryIncomplete");
+        vm.ShowDirectoryAccessIssue.Should().BeTrue();
+        vm.HashOrWarnIcon.Should().Be("RegularError");
+    }
+    
+    [Test]
+    public void Directory_identity_in_flat_mode_with_explicit_inaccessible_description_shows_access_issue()
+    {
+        _sessionService.SetupGet(s => s.CurrentSessionSettings).Returns(new SessionSettings
+        {
+            DataType = DataTypes.Directories,
+            MatchingMode = MatchingModes.Flat,
+            LinkingCase = LinkingCases.Insensitive
+        });
+        
+        var ci = new ContentIdentity(null);
+        var dir = new DirectoryDescription { InventoryPart = _partA, RelativePath = "/dir", IsAccessible = false };
+        ci.Add(dir);
+        
+        _inventory.InventoryParts.Add(_partA);
+        
+        var vm = new ContentIdentityViewModel(
+            BuildComparisonItemViewModel(FileSystemTypes.Directory),
+            ci,
+            _inventory,
+            _sessionService.Object,
+            _localizationService.Object,
+            _factory.Object);
+        
+        vm.AccessIssueLabel.Should().Be("ContentIdentity_AccessIssueShortLabel");
+        vm.ShowDirectoryAccessIssue.Should().BeTrue();
+        vm.HashOrWarnIcon.Should().Be("RegularError");
+    }
+    
+    [Test]
     public void Directory_identity_sets_presence_parts_and_dates()
     {
         var ci = new ContentIdentity(null);
