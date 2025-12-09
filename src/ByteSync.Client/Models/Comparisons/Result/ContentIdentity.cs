@@ -188,12 +188,13 @@ public class ContentIdentity
     {
         FileSystemDescriptions.Add(fileSystemDescription);
         
-        if (!FileSystemDescriptionsByInventoryParts.ContainsKey(fileSystemDescription.InventoryPart))
+        if (!FileSystemDescriptionsByInventoryParts.TryGetValue(fileSystemDescription.InventoryPart, out var value))
         {
-            FileSystemDescriptionsByInventoryParts.Add(fileSystemDescription.InventoryPart, new HashSet<FileSystemDescription>());
+            value = [];
+            FileSystemDescriptionsByInventoryParts.Add(fileSystemDescription.InventoryPart, value);
         }
         
-        FileSystemDescriptionsByInventoryParts[fileSystemDescription.InventoryPart].Add(fileSystemDescription);
+        value.Add(fileSystemDescription);
         
         if (fileSystemDescription is FileDescription fileDescription)
         {
