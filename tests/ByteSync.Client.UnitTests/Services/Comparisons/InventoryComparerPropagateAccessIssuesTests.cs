@@ -581,7 +581,8 @@ public class InventoryComparerPropagateAccessIssuesTests
         
         var result = comparer.Compare();
         
-        var dirItem = result.ComparisonItems.FirstOrDefault(item => item.PathIdentity.FileName == "bytesync-test");
+        var dirItem = result.ComparisonItems.FirstOrDefault(item =>
+            item.PathIdentity.FileName.Equals("bytesync-test", StringComparison.Ordinal));
         dirItem.Should().NotBeNull();
         
         // Expect directory content to include the incomplete inventory part B
@@ -661,7 +662,8 @@ public class InventoryComparerPropagateAccessIssuesTests
         
         var result = comparer.Compare();
         
-        var dirItem = result.ComparisonItems.FirstOrDefault(item => item.PathIdentity.FileName == "bytesync-test");
+        var dirItem = result.ComparisonItems.FirstOrDefault(item =>
+            item.PathIdentity.FileName.Equals("bytesync-test", StringComparison.Ordinal));
         dirItem.Should().NotBeNull();
         
         // Should have a single ContentIdentity containing both parts, with access issue flagged for B
@@ -780,7 +782,8 @@ public class InventoryComparerPropagateAccessIssuesTests
         var result = comparer.Compare();
         
         var fileItem = result.ComparisonItems.FirstOrDefault(item =>
-            item.PathIdentity.LinkingKeyValue == "/inaccessible/file.txt" || item.PathIdentity.FileName == "file.txt");
+            item.PathIdentity.LinkingKeyValue == "/inaccessible/file.txt" ||
+            item.PathIdentity.FileName.Equals("file.txt", StringComparison.Ordinal));
         if (fileItem != null)
         {
             fileItem.ContentIdentities.Should().HaveCount(1);

@@ -1,4 +1,5 @@
-﻿using ByteSync.Models.FileSystems;
+﻿using System.Text;
+using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 
 namespace ByteSync.Models.Comparisons.Result;
@@ -101,15 +102,21 @@ public class ContentIdentity
     public override string ToString()
     {
     #if DEBUG
-        var toString = $"ContentIdentity {Core?.SignatureHash} {Core?.Size}";
+        var sb = new StringBuilder();
+        sb.Append("ContentIdentity ");
+        sb.Append(Core?.SignatureHash);
+        sb.Append(' ');
+        sb.Append(Core?.Size);
         
         foreach (var inventoryPartsByDate in InventoryPartsByLastWriteTimes)
         {
-            toString +=
-                $" - '{inventoryPartsByDate.Key:G}' {inventoryPartsByDate.Value.Select(ip => ip.RootName).ToList().JoinToString(", ")}";
+            sb.Append(" - '");
+            sb.Append(inventoryPartsByDate.Key.ToString("G"));
+            sb.Append("' ");
+            sb.Append(string.Join(", ", inventoryPartsByDate.Value.Select(ip => ip.RootName)));
         }
         
-        return toString;
+        return sb.ToString();
     #endif
         
 #pragma warning disable 162
