@@ -523,6 +523,160 @@ public class InventoryComparerPropagateAccessIssuesTests
     }
     
     [Test]
+    public void AddIncompleteParts_WithFlatMode_AddsVirtualDirectoryForIncompleteInventory()
+    {
+        // Inventory A: accessible directory present
+        var inventoryA = new Inventory
+        {
+            InventoryId = "INV_A",
+            Code = "A",
+            MachineName = "MachineA",
+            Endpoint = new ByteSyncEndpoint
+            {
+                ClientInstanceId = "CII_A",
+                OSPlatform = OSPlatforms.Windows
+            }
+        };
+        var partA = new InventoryPart(inventoryA, "c:/rootA", FileSystemTypes.Directory) { Code = "A1" };
+        inventoryA.Add(partA);
+        partA.DirectoryDescriptions.Add(new DirectoryDescription
+        {
+            InventoryPart = partA,
+            RelativePath = "/bytesync-test"
+        });
+        
+        // Inventory B: incomplete, no directory content
+        var inventoryB = new Inventory
+        {
+            InventoryId = "INV_B",
+            Code = "B",
+            MachineName = "MachineB",
+            Endpoint = new ByteSyncEndpoint
+            {
+                ClientInstanceId = "CII_B",
+                OSPlatform = OSPlatforms.Windows
+            }
+        };
+        var partB = new InventoryPart(inventoryB, "c:/rootB", FileSystemTypes.Directory)
+        {
+            Code = "B1",
+            IsIncompleteDueToAccess = true
+        };
+        inventoryB.Add(partB);
+        
+        var inventoryFileA = CreateInventoryZipFile(_tempDirectory, inventoryA);
+        var inventoryFileB = CreateInventoryZipFile(_tempDirectory, inventoryB);
+        
+        var sessionSettings = new SessionSettings
+        {
+            DataType = DataTypes.FilesDirectories,
+            MatchingMode = MatchingModes.Flat,
+            LinkingCase = LinkingCases.Insensitive
+        };
+        
+        var initialStatusBuilder = new InitialStatusBuilder();
+        using var comparer = new InventoryComparer(sessionSettings, initialStatusBuilder);
+        comparer.AddInventory(inventoryFileA);
+        comparer.AddInventory(inventoryFileB);
+        
+        var result = comparer.Compare();
+        
+        var dirItem = result.ComparisonItems.FirstOrDefault(item =>
+            item.PathIdentity.FileName.Equals("bytesync-test", StringComparison.Ordinal));
+        dirItem.Should().NotBeNull();
+        
+        // Expect directory content to include the incomplete inventory part B
+        dirItem.ContentIdentities.Should().HaveCount(1);
+        var contentForB = dirItem.ContentIdentities.First();
+        
+        var inventoryBFromResult = result.Inventories.First(inv => inv.InventoryId == "INV_B");
+        var partBFromResult = inventoryBFromResult.InventoryParts.First(ip => ip.Code == "B1");
+        
+        contentForB.AccessIssueInventoryParts.Should().Contain(partBFromResult);
+        contentForB.FileSystemDescriptions.OfType<DirectoryDescription>()
+            .Any(d => Equals(d.InventoryPart, partBFromResult) && !d.IsAccessible)
+            .Should().BeTrue();
+    }
+    
+    [Test]
+    public void AddIncompleteParts_WithFlatMode_ExistingDirectoryOnBothSides_MarksIncompleteInventory()
+    {
+        // Inventory A: directory present
+        var inventoryA = new Inventory
+        {
+            InventoryId = "INV_A",
+            Code = "A",
+            MachineName = "MachineA",
+            Endpoint = new ByteSyncEndpoint
+            {
+                ClientInstanceId = "CII_A",
+                OSPlatform = OSPlatforms.Windows
+            }
+        };
+        var partA = new InventoryPart(inventoryA, "c:/rootA", FileSystemTypes.Directory) { Code = "A1" };
+        inventoryA.Add(partA);
+        partA.DirectoryDescriptions.Add(new DirectoryDescription
+        {
+            InventoryPart = partA,
+            RelativePath = "/bytesync-test"
+        });
+        
+        // Inventory B: same directory listed but inventory incomplete
+        var inventoryB = new Inventory
+        {
+            InventoryId = "INV_B",
+            Code = "B",
+            MachineName = "MachineB",
+            Endpoint = new ByteSyncEndpoint
+            {
+                ClientInstanceId = "CII_B",
+                OSPlatform = OSPlatforms.Windows
+            }
+        };
+        var partB = new InventoryPart(inventoryB, "c:/rootB", FileSystemTypes.Directory)
+        {
+            Code = "B1",
+            IsIncompleteDueToAccess = true
+        };
+        inventoryB.Add(partB);
+        partB.DirectoryDescriptions.Add(new DirectoryDescription
+        {
+            InventoryPart = partB,
+            RelativePath = "/bytesync-test"
+        });
+        
+        var inventoryFileA = CreateInventoryZipFile(_tempDirectory, inventoryA);
+        var inventoryFileB = CreateInventoryZipFile(_tempDirectory, inventoryB);
+        
+        var sessionSettings = new SessionSettings
+        {
+            DataType = DataTypes.FilesDirectories,
+            MatchingMode = MatchingModes.Flat,
+            LinkingCase = LinkingCases.Insensitive
+        };
+        
+        var initialStatusBuilder = new InitialStatusBuilder();
+        using var comparer = new InventoryComparer(sessionSettings, initialStatusBuilder);
+        comparer.AddInventory(inventoryFileA);
+        comparer.AddInventory(inventoryFileB);
+        
+        var result = comparer.Compare();
+        
+        var dirItem = result.ComparisonItems.FirstOrDefault(item =>
+            item.PathIdentity.FileName.Equals("bytesync-test", StringComparison.Ordinal));
+        dirItem.Should().NotBeNull();
+        
+        // Should have a single ContentIdentity containing both parts, with access issue flagged for B
+        dirItem.ContentIdentities.Should().HaveCount(1);
+        var content = dirItem.ContentIdentities.First();
+        
+        var inventoryBFromResult = result.Inventories.First(inv => inv.InventoryId == "INV_B");
+        var partBFromResult = inventoryBFromResult.InventoryParts.First(ip => ip.Code == "B1");
+        
+        content.AccessIssueInventoryParts.Should().Contain(partBFromResult);
+    }
+    
+    [Test]
     public void PropagateAccessIssuesFromAncestors_WithMultipleInventories_PropagatesPerInventoryPart()
     {
         var inventoryA = new Inventory
@@ -628,7 +782,8 @@ public class InventoryComparerPropagateAccessIssuesTests
         var result = comparer.Compare();
         
         var fileItem = result.ComparisonItems.FirstOrDefault(item =>
-            item.PathIdentity.LinkingKeyValue == "/inaccessible/file.txt" || item.PathIdentity.FileName == "file.txt");
+            item.PathIdentity.LinkingKeyValue == "/inaccessible/file.txt" ||
+            item.PathIdentity.FileName.Equals("file.txt", StringComparison.Ordinal));
         if (fileItem != null)
         {
             fileItem.ContentIdentities.Should().HaveCount(1);

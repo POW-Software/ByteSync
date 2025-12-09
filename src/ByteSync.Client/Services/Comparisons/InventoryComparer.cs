@@ -68,6 +68,7 @@ public class InventoryComparer : IInventoryComparer
                 if (SessionSettings.MatchingMode == MatchingModes.Flat && inventoryPart.IsIncompleteDueToAccess)
                 {
                     incompleteInventoryParts.Add(inventoryPart);
+                    
                     continue;
                 }
                 
@@ -161,6 +162,11 @@ public class InventoryComparer : IInventoryComparer
         }
         
         contentIdentity.Add(directoryDescription);
+        
+        if (!directoryDescription.IsAccessible)
+        {
+            contentIdentity.AddAccessIssue(directoryDescription.InventoryPart);
+        }
     }
     
     private void PropagateAccessIssuesFromAncestors()
@@ -369,30 +375,38 @@ public class InventoryComparer : IInventoryComparer
                     continue;
                 }
                 
-                var virtualContentIdentity = new ContentIdentity(null);
                 var relativePath = "/" + item.PathIdentity.FileName;
                 
-                if (item.FileSystemType == FileSystemTypes.File)
+                if (item.FileSystemType == FileSystemTypes.Directory)
                 {
+                    // For directories, merge with existing ContentIdentity (Core is null and would de-dupe in the HashSet)
+                    var contentIdentity = item.ContentIdentities.FirstOrDefault();
+                    if (contentIdentity == null)
+                    {
+                        contentIdentity = new ContentIdentity(null);
+                        item.AddContentIdentity(contentIdentity);
+                    }
+                    
+                    var virtualDirectoryDescription = new DirectoryDescription(inventoryPart, relativePath)
+                    {
+                        IsAccessible = false
+                    };
+                    
+                    contentIdentity.Add(virtualDirectoryDescription);
+                    contentIdentity.AddAccessIssue(inventoryPart);
+                }
+                else
+                {
+                    var virtualContentIdentity = new ContentIdentity(null);
                     var virtualFileDescription = new FileDescription(inventoryPart, relativePath)
                     {
                         IsAccessible = false
                     };
                     
                     virtualContentIdentity.Add(virtualFileDescription);
+                    virtualContentIdentity.AddAccessIssue(inventoryPart);
+                    item.AddContentIdentity(virtualContentIdentity);
                 }
-                else
-                {
-                    var virtualDirectoryDescription = new DirectoryDescription(inventoryPart, relativePath)
-                    {
-                        IsAccessible = false
-                    };
-                    
-                    virtualContentIdentity.Add(virtualDirectoryDescription);
-                }
-                
-                virtualContentIdentity.AddAccessIssue(inventoryPart);
-                item.AddContentIdentity(virtualContentIdentity);
             }
         }
     }
