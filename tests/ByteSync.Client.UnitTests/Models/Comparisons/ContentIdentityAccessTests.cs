@@ -58,6 +58,18 @@ public class ContentIdentityAccessTests
     }
     
     [Test]
+    public void HasAccessIssue_ReturnsTrue_WhenDirectoryIsInaccessible()
+    {
+        var (_, partA, _, _) = CreateInventories();
+        
+        var ci = new ContentIdentity(null);
+        var directory = new DirectoryDescription(partA, "/dir") { IsAccessible = false };
+        ci.Add(directory);
+        
+        ci.HasAccessIssue.Should().BeTrue();
+    }
+    
+    [Test]
     public void HasAccessIssue_ReturnsTrue_WhenAccessIssueInventoryPartIsSet()
     {
         var (_, partA, _, partB) = CreateInventories();
@@ -129,6 +141,23 @@ public class ContentIdentityAccessTests
             IsAccessible = false
         };
         ci.Add(fileB);
+        
+        ci.HasAccessIssueFor(invB).Should().BeTrue();
+        ci.HasAccessIssueFor(invA).Should().BeFalse();
+    }
+    
+    [Test]
+    public void HasAccessIssueFor_ReturnsTrue_WhenDirectoryDescriptionInaccessibleForInventory()
+    {
+        var (invA, partA, invB, partB) = CreateInventories();
+        
+        var ci = new ContentIdentity(null);
+        
+        var directoryA = new DirectoryDescription(partA, "/dir");
+        ci.Add(directoryA);
+        
+        var directoryB = new DirectoryDescription(partB, "/dir") { IsAccessible = false };
+        ci.Add(directoryB);
         
         ci.HasAccessIssueFor(invB).Should().BeTrue();
         ci.HasAccessIssueFor(invA).Should().BeFalse();

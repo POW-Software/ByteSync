@@ -1,4 +1,6 @@
-﻿using ByteSync.Models.FileSystems;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 
 namespace ByteSync.Models.Comparisons.Result;
@@ -39,7 +41,7 @@ public class ContentIdentity
     {
         get
         {
-            return FileSystemDescriptions.Any(fsd => fsd is FileDescription && !fsd.IsAccessible)
+            return FileSystemDescriptions.Any(fsd => !fsd.IsAccessible)
                    || AccessIssueInventoryParts.Count > 0;
         }
     }
@@ -57,10 +59,10 @@ public class ContentIdentity
             return true;
         }
         
-        // Or present FileDescriptions are marked inaccessible for this inventory
+        // Or present file system descriptions are marked inaccessible for this inventory
         return FileSystemDescriptionsByInventoryParts
             .Any(pair => pair.Key.Inventory.Equals(inventory)
-                         && pair.Value.Any(fsd => fsd is FileDescription fd && !fd.IsAccessible));
+                         && pair.Value.Any(fsd => !fsd.IsAccessible));
     }
     
     public bool HasManyFileSystemDescriptionOnAnInventoryPart
@@ -98,21 +100,30 @@ public class ContentIdentity
         return (Core != null ? Core.GetHashCode() : 0);
     }
     
+    [ExcludeFromCodeCoverage]
     public override string ToString()
     {
     #if DEBUG
-        var toString = $"ContentIdentity {Core?.SignatureHash} {Core?.Size}";
+        var sb = new StringBuilder();
+        sb.Append("ContentIdentity ");
+        sb.Append(Core?.SignatureHash);
+        sb.Append(' ');
+        sb.Append(Core?.Size);
         
         foreach (var inventoryPartsByDate in InventoryPartsByLastWriteTimes)
         {
-            toString +=
-                $" - '{inventoryPartsByDate.Key:G}' {inventoryPartsByDate.Value.Select(ip => ip.RootName).ToList().JoinToString(", ")}";
+            sb.Append(" - '");
+            sb.Append(inventoryPartsByDate.Key.ToString("G"));
+            sb.Append("' ");
+            sb.Append(string.Join(", ", inventoryPartsByDate.Value.Select(ip => ip.RootName)));
         }
         
-        return toString;
+        return sb.ToString();
     #endif
         
 #pragma warning disable 162
+        
+        // ReSharper disable once HeuristicUnreachableCode
         return base.ToString();
 #pragma warning restore 162
     }
@@ -181,12 +192,13 @@ public class ContentIdentity
     {
         FileSystemDescriptions.Add(fileSystemDescription);
         
-        if (!FileSystemDescriptionsByInventoryParts.ContainsKey(fileSystemDescription.InventoryPart))
+        if (!FileSystemDescriptionsByInventoryParts.TryGetValue(fileSystemDescription.InventoryPart, out var value))
         {
-            FileSystemDescriptionsByInventoryParts.Add(fileSystemDescription.InventoryPart, new HashSet<FileSystemDescription>());
+            value = [];
+            FileSystemDescriptionsByInventoryParts.Add(fileSystemDescription.InventoryPart, value);
         }
         
-        FileSystemDescriptionsByInventoryParts[fileSystemDescription.InventoryPart].Add(fileSystemDescription);
+        value.Add(fileSystemDescription);
         
         if (fileSystemDescription is FileDescription fileDescription)
         {
