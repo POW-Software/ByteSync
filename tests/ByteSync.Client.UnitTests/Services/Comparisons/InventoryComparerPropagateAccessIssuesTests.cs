@@ -594,7 +594,7 @@ public class InventoryComparerPropagateAccessIssuesTests
         
         contentForB.AccessIssueInventoryParts.Should().Contain(partBFromResult);
         contentForB.FileSystemDescriptions.OfType<DirectoryDescription>()
-            .Any(d => d.InventoryPart == partBFromResult && !d.IsAccessible)
+            .Any(d => Equals(d.InventoryPart, partBFromResult) && !d.IsAccessible)
             .Should().BeTrue();
     }
     

@@ -120,6 +120,8 @@ public class ContentIdentity
     #endif
         
 #pragma warning disable 162
+        
+        // ReSharper disable once HeuristicUnreachableCode
         return base.ToString();
 #pragma warning restore 162
     }
