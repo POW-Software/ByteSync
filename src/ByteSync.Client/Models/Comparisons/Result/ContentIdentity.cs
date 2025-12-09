@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 
@@ -99,6 +100,7 @@ public class ContentIdentity
         return (Core != null ? Core.GetHashCode() : 0);
     }
     
+    [ExcludeFromCodeCoverage]
     public override string ToString()
     {
     #if DEBUG
