@@ -25,13 +25,13 @@ public class CloudSessionFunctionTests
         var mockContext = new Mock<FunctionContext>();
         var items = new Dictionary<object, object>();
         mockContext.SetupGet(c => c.Items).Returns(items);
-
+        
         var client = new Client("cli", "cliInst", "1.0.0", OSPlatforms.Windows, "127.0.0.1");
         items[AuthConstants.FUNCTION_CONTEXT_CLIENT] = client;
-
+        
         return mockContext.Object;
     }
-
+    
     private static async Task WriteBodyAsync<T>(FakeHttpRequestData request, T body)
     {
         var json = JsonHelper.Serialize(body);
@@ -40,7 +40,7 @@ public class CloudSessionFunctionTests
         await request.Body.WriteAsync(bytes, 0, bytes.Length);
         request.Body.Position = 0;
     }
-
+    
     [Test]
     public async Task Create_ReturnsOk_AndSendsRequest()
     {
@@ -68,13 +68,13 @@ public class CloudSessionFunctionTests
                     JoinedSessionOn = DateTimeOffset.UtcNow,
                     PositionInList = 0
                 },
-                MembersIds = new List<string> { "cliInst" }
+                MembersIds = ["cliInst"]
             });
-
+        
         var function = new CloudSessionFunction(mediatorMock.Object);
         var context = BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
-
+        
         var parameters = new CreateCloudSessionParameters
         {
             LobbyId = "L1",
@@ -84,16 +84,16 @@ public class CloudSessionFunctionTests
             CreatorPrivateData = new EncryptedSessionMemberPrivateData { Id = "priv", Data = [7], IV = [8] }
         };
         await WriteBodyAsync(request, parameters);
-
+        
         var response = await function.Create(request, context);
-
+        
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         captured.Should().NotBeNull();
         captured!.CreateCloudSessionParameters.LobbyId.Should().Be("L1");
         captured.Client.ClientId.Should().Be("cli");
         response.Body.Length.Should().BeGreaterThan(0);
     }
-
+    
     [Test]
     public async Task AskPasswordExchangeKey_ReturnsOk_AndSendsRequest()
     {
@@ -103,11 +103,11 @@ public class CloudSessionFunctionTests
             .Setup(m => m.Send(It.IsAny<AskPasswordExchangeKeyRequest>(), It.IsAny<CancellationToken>()))
             .Callback<object, CancellationToken>((r, _) => captured = (AskPasswordExchangeKeyRequest)r)
             .ReturnsAsync(JoinSessionResult.BuildProcessingNormally());
-
+        
         var function = new CloudSessionFunction(mediatorMock.Object);
         var context = BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
-
+        
         var parameters = new AskCloudSessionPasswordExchangeKeyParameters
         {
             SessionId = "S1",
@@ -116,16 +116,16 @@ public class CloudSessionFunctionTests
             ProfileClientId = "prof"
         };
         await WriteBodyAsync(request, parameters);
-
+        
         var response = await function.AskPasswordExchangeKey(request, context, "S1");
-
+        
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         captured.Should().NotBeNull();
         captured!.Parameters.SessionId.Should().Be("S1");
         captured.Client.ClientInstanceId.Should().Be("cliInst");
         response.Body.Length.Should().BeGreaterThan(0);
     }
-
+    
     [Test]
     public async Task ValidateJoinCloudSession_ReturnsOk_AndSendsRequest()
     {
@@ -135,11 +135,11 @@ public class CloudSessionFunctionTests
             .Setup(m => m.Send(It.IsAny<ValidateJoinCloudSessionRequest>(), It.IsAny<CancellationToken>()))
             .Callback<object, CancellationToken>((r, _) => captured = (ValidateJoinCloudSessionRequest)r)
             .ReturnsAsync(Unit.Value);
-
+        
         var function = new CloudSessionFunction(mediatorMock.Object);
         var context = new Mock<FunctionContext>().Object;
         var request = new FakeHttpRequestData(context);
-
+        
         var parameters = new ValidateJoinCloudSessionParameters
         {
             SessionId = "S2",
@@ -149,14 +149,14 @@ public class CloudSessionFunctionTests
             FinalizationPassword = "pwd"
         };
         await WriteBodyAsync(request, parameters);
-
+        
         var response = await function.ValidateJoinCloudSession(request, context, "S2");
-
+        
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         captured.Should().NotBeNull();
         captured!.Parameters.SessionId.Should().Be("S2");
     }
-
+    
     [Test]
     public async Task FinalizeJoinCloudSession_ReturnsOk_AndSendsRequest()
     {
@@ -166,11 +166,11 @@ public class CloudSessionFunctionTests
             .Setup(m => m.Send(It.IsAny<FinalizeJoinCloudSessionRequest>(), It.IsAny<CancellationToken>()))
             .Callback<object, CancellationToken>((r, _) => captured = (FinalizeJoinCloudSessionRequest)r)
             .ReturnsAsync(FinalizeJoinSessionResult.BuildFrom(FinalizeJoinSessionStatuses.FinalizeJoinSessionSucess));
-
+        
         var function = new CloudSessionFunction(mediatorMock.Object);
         var context = BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
-
+        
         var parameters = new FinalizeJoinCloudSessionParameters
         {
             SessionId = "S3",
@@ -180,16 +180,16 @@ public class CloudSessionFunctionTests
             EncryptedSessionMemberPrivateData = new EncryptedSessionMemberPrivateData { Id = "mid", Data = [12], IV = [13] }
         };
         await WriteBodyAsync(request, parameters);
-
+        
         var response = await function.FinalizeJoinCloudSession(request, context, "S3");
-
+        
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         captured.Should().NotBeNull();
         captured!.FinalizeJoinCloudSessionParameters.SessionId.Should().Be("S3");
         captured.Client.ClientInstanceId.Should().Be("cliInst");
         response.Body.Length.Should().BeGreaterThan(0);
     }
-
+    
     [Test]
     public async Task AskJoinCloudSession_ReturnsOk_AndSendsRequest()
     {
@@ -199,11 +199,11 @@ public class CloudSessionFunctionTests
             .Setup(m => m.Send(It.IsAny<AskJoinCloudSessionRequest>(), It.IsAny<CancellationToken>()))
             .Callback<object, CancellationToken>((r, _) => captured = (AskJoinCloudSessionRequest)r)
             .ReturnsAsync(JoinSessionResult.BuildProcessingNormally());
-
+        
         var function = new CloudSessionFunction(mediatorMock.Object);
         var context = BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
-
+        
         var parameters = new AskJoinCloudSessionParameters
         {
             SessionId = "S4",
@@ -212,16 +212,16 @@ public class CloudSessionFunctionTests
             EncryptedPassword = [14, 15]
         };
         await WriteBodyAsync(request, parameters);
-
+        
         var response = await function.AskJoinCloudSession(request, context, "S4");
-
+        
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         captured.Should().NotBeNull();
         captured!.Parameters.SessionId.Should().Be("S4");
         captured.Client.ClientInstanceId.Should().Be("cliInst");
         response.Body.Length.Should().BeGreaterThan(0);
     }
-
+    
     [Test]
     public async Task GiveCloudSessionPasswordExchangeKey_ReturnsOk_AndSendsRequest()
     {
@@ -231,11 +231,11 @@ public class CloudSessionFunctionTests
             .Setup(m => m.Send(It.IsAny<GiveCloudSessionPasswordExchangeKeyRequest>(), It.IsAny<CancellationToken>()))
             .Callback<object, CancellationToken>((r, _) => captured = (GiveCloudSessionPasswordExchangeKeyRequest)r)
             .ReturnsAsync(Unit.Value);
-
+        
         var function = new CloudSessionFunction(mediatorMock.Object);
         var context = BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
-
+        
         var parameters = new GiveCloudSessionPasswordExchangeKeyParameters
         {
             SessionId = "S5",
@@ -244,15 +244,15 @@ public class CloudSessionFunctionTests
             PublicKeyInfo = new PublicKeyInfo { ClientId = "cli", PublicKey = [16], ProtocolVersion = 3 }
         };
         await WriteBodyAsync(request, parameters);
-
+        
         var response = await function.GiveCloudSessionPasswordExchangeKey(request, context, "S5");
-
+        
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         captured.Should().NotBeNull();
         captured!.Parameters.SessionId.Should().Be("S5");
         captured.Client.ClientInstanceId.Should().Be("cliInst");
     }
-
+    
     [Test]
     public async Task InformPasswordIsWrong_ReturnsOk_AndSendsRequest()
     {
@@ -262,21 +262,21 @@ public class CloudSessionFunctionTests
             .Setup(m => m.Send(It.IsAny<InformPasswordIsWrongRequest>(), It.IsAny<CancellationToken>()))
             .Callback<object, CancellationToken>((r, _) => captured = (InformPasswordIsWrongRequest)r)
             .ReturnsAsync(Unit.Value);
-
+        
         var function = new CloudSessionFunction(mediatorMock.Object);
         var context = BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
-
+        
         await WriteBodyAsync(request, "bad-client-inst");
-
+        
         var response = await function.InformPasswordIsWrong(request, context, "S6");
-
+        
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         captured.Should().NotBeNull();
         captured!.SessionId.Should().Be("S6");
         captured.ClientInstanceId.Should().Be("bad-client-inst");
     }
-
+    
     [Test]
     public async Task UpdateSettings_ReturnsOk_WhenUpdated()
     {
@@ -286,21 +286,21 @@ public class CloudSessionFunctionTests
             .Setup(m => m.Send(It.IsAny<UpdateSessionSettingsRequest>(), It.IsAny<CancellationToken>()))
             .Callback<object, CancellationToken>((r, _) => captured = (UpdateSessionSettingsRequest)r)
             .ReturnsAsync(true);
-
+        
         var function = new CloudSessionFunction(mediatorMock.Object);
         var context = BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
-
+        
         var settings = new EncryptedSessionSettings { Id = "set1", Data = [17], IV = [18] };
         await WriteBodyAsync(request, settings);
-
+        
         var response = await function.UpdateSettings(request, context, "S7");
-
+        
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         captured.Should().NotBeNull();
         captured!.SessionId.Should().Be("S7");
     }
-
+    
     [Test]
     public async Task UpdateSettings_ReturnsConflict_WhenNotUpdated()
     {
@@ -308,19 +308,19 @@ public class CloudSessionFunctionTests
         mediatorMock
             .Setup(m => m.Send(It.IsAny<UpdateSessionSettingsRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-
+        
         var function = new CloudSessionFunction(mediatorMock.Object);
         var context = BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
-
+        
         var settings = new EncryptedSessionSettings { Id = "set2", Data = [19], IV = [20] };
         await WriteBodyAsync(request, settings);
-
+        
         var response = await function.UpdateSettings(request, context, "S8");
-
+        
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }
-
+    
     [Test]
     public async Task Quit_ReturnsOk_AndSendsRequest()
     {
@@ -330,18 +330,18 @@ public class CloudSessionFunctionTests
             .Setup(m => m.Send(It.IsAny<QuitSessionRequest>(), It.IsAny<CancellationToken>()))
             .Callback<object, CancellationToken>((r, _) => captured = (QuitSessionRequest)r)
             .Returns(Task.FromResult(Unit.Value));
-
+        
         var function = new CloudSessionFunction(mediatorMock.Object);
         var context = BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
-
+        
         var response = await function.Quit(request, context, "S9");
-
+        
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         captured.Should().NotBeNull();
         captured!.SessionId.Should().Be("S9");
     }
-
+    
     [Test]
     public async Task Reset_ReturnsOk_AndSendsRequest()
     {
@@ -351,13 +351,13 @@ public class CloudSessionFunctionTests
             .Setup(m => m.Send(It.IsAny<ResetSessionRequest>(), It.IsAny<CancellationToken>()))
             .Callback<object, CancellationToken>((r, _) => captured = (ResetSessionRequest)r)
             .Returns(Task.FromResult(Unit.Value));
-
+        
         var function = new CloudSessionFunction(mediatorMock.Object);
         var context = BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
-
+        
         var response = await function.Reset(request, context, "S10");
-
+        
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         captured.Should().NotBeNull();
         captured!.SessionId.Should().Be("S10");
