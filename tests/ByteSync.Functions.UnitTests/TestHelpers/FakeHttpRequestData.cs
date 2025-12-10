@@ -5,6 +5,7 @@ using Azure.Core.Serialization;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace ByteSync.Functions.UnitTests.TestHelpers;
@@ -16,8 +17,11 @@ public class FakeHttpRequestData : HttpRequestData
     private static IServiceProvider BuildServiceProvider()
     {
         var jsonSerializer = new JsonObjectSerializer(new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        var workerOptions = Options.Create(new WorkerOptions { Serializer = jsonSerializer });
+        
         return new ServiceCollection()
             .AddSingleton<ObjectSerializer>(jsonSerializer)
+            .AddSingleton<IOptions<WorkerOptions>>(workerOptions)
             .BuildServiceProvider();
     }
     
