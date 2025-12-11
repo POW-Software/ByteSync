@@ -44,7 +44,7 @@ public class SynchronizationFunctionTests
         var request = new FakeHttpRequestData(context);
         var body = new SynchronizationActionRequest
         {
-            ActionsGroupIds = new List<string> { "A1" },
+            ActionsGroupIds = ["A1"],
             NodeId = "N1",
             ActionMetricsByActionId = new Dictionary<string, SynchronizationActionMetrics>
             {
@@ -89,7 +89,7 @@ public class SynchronizationFunctionTests
         var request = new FakeHttpRequestData(context);
         var body = new SynchronizationActionRequest
         {
-            ActionsGroupIds = new List<string> { "B1" },
+            ActionsGroupIds = ["B1"],
             NodeId = "N2"
         };
         var json = ByteSync.Common.Controls.Json.JsonHelper.Serialize(body);
@@ -128,14 +128,14 @@ public class SynchronizationFunctionTests
         var body = new SynchronizationStartRequest
         {
             SessionId = "S3",
-            ActionsGroupDefinitions = new List<ByteSync.Common.Business.Actions.ActionsGroupDefinition>()
-            {
+            ActionsGroupDefinitions =
+            [
                 new()
                 {
                     ActionsGroupId = "G1",
                     FileSystemType = ByteSync.Common.Business.Inventories.FileSystemTypes.File
                 }
-            }
+            ]
         };
         var json = ByteSync.Common.Controls.Json.JsonHelper.Serialize(body);
         await using (var writer = new StreamWriter(request.Body, Encoding.UTF8, 1024, leaveOpen: true))
@@ -172,7 +172,7 @@ public class SynchronizationFunctionTests
         var request = new FakeHttpRequestData(context);
         var body = new SynchronizationActionRequest
         {
-            ActionsGroupIds = new List<string> { "C1" },
+            ActionsGroupIds = ["C1"],
             NodeId = "N3"
         };
         var json = ByteSync.Common.Controls.Json.JsonHelper.Serialize(body);
@@ -210,7 +210,7 @@ public class SynchronizationFunctionTests
         var request = new FakeHttpRequestData(context);
         var body = new SynchronizationActionRequest
         {
-            ActionsGroupIds = new List<string> { "D1" },
+            ActionsGroupIds = ["D1"],
             NodeId = "N4"
         };
         var json = ByteSync.Common.Controls.Json.JsonHelper.Serialize(body);
@@ -296,7 +296,7 @@ public class SynchronizationFunctionTests
         var request = new FakeHttpRequestData(context);
         var body = new SynchronizationActionRequest
         {
-            ActionsGroupIds = new List<string> { "E1" },
+            ActionsGroupIds = ["E1"],
             NodeId = "N5"
         };
         var json = ByteSync.Common.Controls.Json.JsonHelper.Serialize(body);
