@@ -13,7 +13,7 @@ public class ContentIdentity
         
         FileSystemDescriptions = new HashSet<FileSystemDescription>();
         InventoryPartsByCreationTimes = new Dictionary<DateTime, HashSet<InventoryPart>>();
-        InventoryPartsByLastWriteTimes = new Dictionary<DateTime, HashSet<InventoryPart>>();
+        InventoryPartsByLastWriteTimes = new Dictionary<DateTime, List<InventoryPart>>();
         FileSystemDescriptionsByInventoryParts = new Dictionary<InventoryPart, HashSet<FileSystemDescription>>();
         
         AccessIssueInventoryParts = new HashSet<InventoryPart>();
@@ -25,7 +25,7 @@ public class ContentIdentity
     
     private Dictionary<DateTime, HashSet<InventoryPart>> InventoryPartsByCreationTimes { get; }
     
-    public Dictionary<DateTime, HashSet<InventoryPart>> InventoryPartsByLastWriteTimes { get; }
+    public Dictionary<DateTime, List<InventoryPart>> InventoryPartsByLastWriteTimes { get; }
     
     private Dictionary<InventoryPart, HashSet<FileSystemDescription>> FileSystemDescriptionsByInventoryParts { get; }
     
@@ -221,7 +221,7 @@ public class ContentIdentity
     {
         if (!InventoryPartsByLastWriteTimes.ContainsKey(lastWriteTimeUtc))
         {
-            InventoryPartsByLastWriteTimes.Add(lastWriteTimeUtc, new HashSet<InventoryPart>());
+            InventoryPartsByLastWriteTimes.Add(lastWriteTimeUtc, new List<InventoryPart>());
         }
         
         InventoryPartsByLastWriteTimes[lastWriteTimeUtc].Add(inventoryPart);

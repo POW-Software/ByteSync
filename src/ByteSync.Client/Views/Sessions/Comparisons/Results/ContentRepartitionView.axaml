@@ -14,10 +14,10 @@
     
     <UserControl.Resources>
         <DataTemplate x:Key="StatusItemDataTemplate" DataType="misc:StatusItemViewModel">
-            <Border BorderBrush="Gray" BorderThickness="0">
+            <Border BorderBrush="Gray" BorderThickness="0" Width="{Binding Width}" MinWidth="{Binding Width}">
                 <Grid VerticalAlignment="Stretch" Background="{Binding BackBrush}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition SharedSizeGroup="StatusCell" />
+                        <ColumnDefinition />
                     </Grid.ColumnDefinitions>
                     <TextBlock MinWidth="20" Text="{Binding Letter}" TextAlignment="Center" 
                                HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -28,8 +28,7 @@
         </DataTemplate>
     </UserControl.Resources>
     
-    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4" 
-          Grid.IsSharedSizeScope="True">
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4">
         <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
             
             <!-- FileDifferences -->
