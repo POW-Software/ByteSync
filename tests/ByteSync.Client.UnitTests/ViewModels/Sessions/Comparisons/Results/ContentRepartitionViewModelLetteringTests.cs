@@ -9,6 +9,7 @@ using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.Inventories;
+using ByteSync.Services.Comparisons;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
 using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
 using FluentAssertions;
@@ -139,5 +140,38 @@ public class ContentRepartitionViewModelLetteringTests
         // Assert: letters should be A1, B1, B2 (not A, B, B)
         vm.FingerPrintGroups.Should().NotBeNull();
         vm.FingerPrintGroups!.Select(s => s.Letter).Should().ContainInOrder("A1", "B1", "B2");
+    }
+    
+    [Test]
+    public void LastWriteTime_Badges_UseWidthProportionalToMultiplicity()
+    {
+        // Arrange: two occurrences for A at the same timestamp, one for B
+        var invA = MakeInventory("A", 1);
+        var invB = MakeInventory("B", 1);
+        var allInventories = new List<Inventory> { invA, invB };
+
+        var pathIdentity = new PathIdentity(FileSystemTypes.File, "f", "f", "f");
+        var item = new ComparisonItem(pathIdentity) { ComparisonResult = new ComparisonResult() };
+
+        var date = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+        item.ContentRepartition.LastWriteTimeGroups[date] = new List<InventoryPart>
+        {
+            invA.InventoryParts[0],
+            invA.InventoryParts[0],
+            invB.InventoryParts[0]
+        };
+
+        var theme = new TestThemeService();
+        var factory = new TestFactory(vm => new ContentRepartitionGroupsComputer(vm, allInventories));
+
+        // Act
+        var vm = new ContentRepartitionViewModel(item, allInventories, theme, factory);
+
+        // Assert
+        vm.LastWriteTimeGroups.Should().NotBeNull();
+        vm.LastWriteTimeGroups!.Select(s => (s.Letter, s.Width)).Should()
+            .ContainInOrder(
+                ("A", StatusItemViewModel.BaseWidth * 2),
+                ("B", StatusItemViewModel.BaseWidth));
     }
 }
