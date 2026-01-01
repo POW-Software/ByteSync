@@ -8,7 +8,7 @@ using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
 
 namespace ByteSync.Services.Comparisons;
 
-class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
+public class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
 {
     public ContentRepartitionGroupsComputer(ContentRepartitionViewModel contentRepartitionViewModel, List<Inventory> allInventories)
     {
@@ -38,11 +38,11 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
 
         if (ContentRepartitionViewModel.FileSystemType == FileSystemTypes.File)
         {
-            var fingerPrintMembers = ComputeMembers(Status.FingerPrintGroups);
+            var fingerPrintMembers = ComputeMembers(Status.FingerPrintGroups.Select(pair => (pair.Key, (IEnumerable<InventoryPart>)pair.Value)));
             var fingerPrintGroups = ComputeGroups(fingerPrintMembers);
             SetStatusViewGroups(fingerPrintGroups, ContentRepartitionViewModel.FingerPrintGroups);
 
-            var lastWriteTimeMembers = ComputeMembers(Status.LastWriteTimeGroups);
+            var lastWriteTimeMembers = ComputeMembers(Status.LastWriteTimeGroups.Select(pair => (pair.Key, (IEnumerable<InventoryPart>)pair.Value)));
             var lastWriteTimeGroups = ComputeGroups(lastWriteTimeMembers);
             SetStatusViewGroups(lastWriteTimeGroups, ContentRepartitionViewModel.LastWriteTimeGroups);
 
@@ -90,21 +90,26 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
                 cpt += 1;
             }
 
-            foreach (var member in group.Members.OrderBy(m => m.Letter))
+            var membersByLetter = group.Members
+                .GroupBy(m => m.Letter)
+                .OrderBy(g => g.Key);
+            
+            foreach (var memberGroup in membersByLetter)
             {
-                var statusItemViewModel = new StatusItemViewModel();
-
-                statusItemViewModel.Letter = member.Letter;
-
-                statusItemViewModel.BackBrushColor = backBrushColor;
-                statusItemViewModel.ForeBrushColor = foreBrushColor;
+                var statusItemViewModel = new StatusItemViewModel
+                {
+                    Letter = memberGroup.Key,
+                    BackBrushColor = backBrushColor,
+                    ForeBrushColor = foreBrushColor,
+                    Width = StatusItemViewModel.BaseWidth * memberGroup.Count()
+                };
 
                 targetGroup.Add(statusItemViewModel);
             }
         }
     }
 
-    private List<ContentRepartitionGroupMember> ComputeMembers<T>(Dictionary<T, HashSet<InventoryPart>> dictionary) where T : notnull
+    private List<ContentRepartitionGroupMember> ComputeMembers<T>(IEnumerable<(T Link, IEnumerable<InventoryPart> Members)> dictionary) where T : notnull
     {
         var isOnlyOnePartByInventory = AllInventories.All(i => i.InventoryParts.Count == 1);
         
@@ -124,9 +129,9 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
             result.Add(member);
         }
 
-        foreach (var pair in dictionary)
+        foreach (var (link, members) in dictionary)
         {
-            foreach (var inventoryPart in pair.Value)
+            foreach (var inventoryPart in members)
             {
                 var letter = isOnlyOnePartByInventory ? inventoryPart.Inventory.Code : inventoryPart.Code;
                 
@@ -134,7 +139,7 @@ class ContentRepartitionGroupsComputer : IContentRepartitionGroupsComputer
                 {
                     Letter = letter,
                     InventoryPart = inventoryPart,
-                    Link = pair.Key
+                    Link = link
                 };
 
                 result.Add(member);

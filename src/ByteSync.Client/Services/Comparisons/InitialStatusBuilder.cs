@@ -70,7 +70,7 @@ public class InitialStatusBuilder : IInitialStatusBuilder
             {
                 if (!comparisonItem.ContentRepartition.LastWriteTimeGroups.ContainsKey(pair.Key))
                 {
-                    comparisonItem.ContentRepartition.LastWriteTimeGroups.Add(pair.Key, new HashSet<InventoryPart>());
+                    comparisonItem.ContentRepartition.LastWriteTimeGroups.Add(pair.Key, new List<InventoryPart>());
                 }
 
                 comparisonItem.ContentRepartition.LastWriteTimeGroups[pair.Key].AddAll(pair.Value);

@@ -5,6 +5,8 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
 
 public class StatusItemViewModel : ViewModelBase
 {
+    public const double BaseWidth = 24;
+    
     private IBrush? _backBrush;
     private IBrush? _foreBrush;
     public string? Letter { get; set; }
@@ -44,4 +46,6 @@ public class StatusItemViewModel : ViewModelBase
         _foreBrush = foreBrush;
         _backBrush = backBrush;
     }
+    
+    public double Width { get; set; } = BaseWidth;
 }

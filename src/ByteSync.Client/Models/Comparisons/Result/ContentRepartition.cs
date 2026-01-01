@@ -10,7 +10,7 @@ public class ContentRepartition
         PathIdentity = pathIdentity;
             
         FingerPrintGroups = new Dictionary<ContentIdentityCore, HashSet<InventoryPart>>();
-        LastWriteTimeGroups = new Dictionary<DateTime, HashSet<InventoryPart>>();
+        LastWriteTimeGroups = new Dictionary<DateTime, List<InventoryPart>>();
 
         MissingInventories = new HashSet<Inventory>();
         MissingInventoryParts = new HashSet<InventoryPart>();
@@ -20,7 +20,7 @@ public class ContentRepartition
 
     public Dictionary<ContentIdentityCore, HashSet<InventoryPart>> FingerPrintGroups { get; private set; }
 
-    public Dictionary<DateTime, HashSet<InventoryPart>> LastWriteTimeGroups { get; private set; }
+    public Dictionary<DateTime, List<InventoryPart>> LastWriteTimeGroups { get; private set; }
 
     public HashSet<Inventory> MissingInventories { get; set; }
         
