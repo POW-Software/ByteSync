@@ -15,6 +15,7 @@ using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.ViewModels.Misc;
 using ByteSync.Services.Localizations;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -30,6 +31,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
     private readonly IAtomicActionConsistencyChecker _atomicActionConsistencyChecker = null!;
     private readonly IActionEditViewModelFactory _actionEditViewModelFactory = null!;
     private readonly IAtomicActionValidationFailureReasonService _failureReasonLocalizer = null!;
+    private readonly ILogger<TargetedActionGlobalViewModel> _logger = null!;
 
     public TargetedActionGlobalViewModel() 
     {
@@ -39,7 +41,8 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
     public TargetedActionGlobalViewModel(List<ComparisonItem> comparisonItems, 
         IDialogService dialogService, ILocalizationService localizationService,
         ITargetedActionsService targetedActionsService, IAtomicActionConsistencyChecker atomicActionConsistencyChecker,
-        IActionEditViewModelFactory actionEditViewModelFactory, 
+        IActionEditViewModelFactory actionEditViewModelFactory,
+        ILogger<TargetedActionGlobalViewModel> logger,
         IAtomicActionValidationFailureReasonService failureReasonLocalizer)
     {
         ComparisonItems = comparisonItems;
@@ -52,6 +55,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         _atomicActionConsistencyChecker = atomicActionConsistencyChecker;
         _actionEditViewModelFactory = actionEditViewModelFactory;
         _failureReasonLocalizer = failureReasonLocalizer;
+        _logger = logger;
 
         // Initialize localized messages
         ActionIssuesHeaderMessage = _localizationService[nameof(Resources.TargetedActionEditionGlobal_ActionIssues)];
@@ -175,7 +179,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
             }
             else
             {
-                ShowConsistencyWarning(result);
+                ShowConsistencyWarning(atomicAction, result);
             }
         }
     }
@@ -292,7 +296,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         DoShowWarning();
     }
     
-    private void ShowConsistencyWarning(AtomicActionConsistencyCheckCanAddResult checkCanAddResult)
+    private void ShowConsistencyWarning(AtomicAction atomicAction, AtomicActionConsistencyCheckCanAddResult checkCanAddResult)
     {
         ShowSaveValidItemsCommand = checkCanAddResult.GetValidComparisonItems().Count > 0;
 
@@ -319,13 +323,16 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
                 LocalizedMessage = _failureReasonLocalizer.GetLocalizedMessage(g.Key),
                 AffectedItems = g.Select(f => f.ComparisonItem).ToList()
             })
-            .OrderByDescending(s => s.Count); // Most frequent failures first
+            .OrderByDescending(s => s.Count)
+            .ToList(); // Most frequent failures first
         
         foreach (var summary in summaries)
         {
             FailureSummaries.Add(summary);
         }
         
+        LogConsistencyFailure(atomicAction, checkCanAddResult, summaries);
+
         AreMissingFields = false;
 
         DoShowWarning();
@@ -364,5 +371,44 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         IsInconsistentWithValidItems = null;
         IsInconsistentWithNoValidItems = false;
         FailureSummaries.Clear();
+    }
+
+    private void LogConsistencyFailure(AtomicAction atomicAction, AtomicActionConsistencyCheckCanAddResult result,
+        IEnumerable<ValidationFailureSummary> summaries)
+    {
+        var validItemsCount = result.GetValidComparisonItems().Count;
+        var invalidItemsCount = result.GetInvalidComparisonItems().Count;
+        var failureDetails = BuildFailureDetails(summaries);
+
+        _logger.LogWarning(
+            "Targeted action validation failed. Operator={Operator} Source={Source} Destination={Destination} FileSystemType={FileSystemType} TotalItems={TotalItems} ValidItems={ValidItems} InvalidItems={InvalidItems} Failures={Failures}",
+            atomicAction.Operator,
+            atomicAction.SourceName ?? string.Empty,
+            atomicAction.DestinationName ?? string.Empty,
+            FileSystemType,
+            result.ComparisonItems.Count,
+            validItemsCount,
+            invalidItemsCount,
+            failureDetails);
+    }
+
+    private static string BuildFailureDetails(IEnumerable<ValidationFailureSummary> summaries)
+    {
+        const int maxItemsPerReason = 3;
+
+        var details = summaries
+            .Select(summary =>
+            {
+                var items = summary.AffectedItems
+                    .Select(item => item.PathIdentity.LinkingKeyValue)
+                    .Take(maxItemsPerReason)
+                    .ToList();
+
+                var suffix = summary.AffectedItems.Count > maxItemsPerReason ? ", ..." : string.Empty;
+                return $"{summary.Reason}={summary.Count} [{string.Join(", ", items)}{suffix}]";
+            })
+            .ToList();
+
+        return details.Count == 0 ? "none" : string.Join("; ", details);
     }
 }

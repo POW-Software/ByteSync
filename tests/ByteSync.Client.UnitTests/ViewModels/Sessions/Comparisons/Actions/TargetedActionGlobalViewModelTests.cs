@@ -7,6 +7,7 @@ using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
 using ByteSync.Business.Inventories;
 using ByteSync.Client.UnitTests.Helpers;
+using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Dialogs;
@@ -16,6 +17,7 @@ using ByteSync.Models.Comparisons.Result;
 using ByteSync.TestsCommon;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 
@@ -30,6 +32,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
     private Mock<IAtomicActionConsistencyChecker> _mockAtomicActionConsistencyChecker = null!;
     private Mock<IActionEditViewModelFactory> _mockActionEditViewModelFactory = null!;
     private Mock<IAtomicActionValidationFailureReasonService> _mockFailureReasonService = null!;
+    private Mock<ILogger<TargetedActionGlobalViewModel>> _mockLogger = null!;
     private Subject<CultureDefinition> _cultureSubject = null!;
     private List<ComparisonItem> _comparisonItems = null!;
     
@@ -42,6 +45,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         _mockAtomicActionConsistencyChecker = new Mock<IAtomicActionConsistencyChecker>();
         _mockActionEditViewModelFactory = new Mock<IActionEditViewModelFactory>();
         _mockFailureReasonService = new Mock<IAtomicActionValidationFailureReasonService>();
+        _mockLogger = new Mock<ILogger<TargetedActionGlobalViewModel>>();
         _cultureSubject = new Subject<CultureDefinition>();
         
         // Setup basic mocks
@@ -89,6 +93,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             _mockTargetedActionsService.Object,
             _mockAtomicActionConsistencyChecker.Object,
             _mockActionEditViewModelFactory.Object,
+            _mockLogger.Object,
             _mockFailureReasonService.Object
         );
         
@@ -124,6 +129,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             _mockTargetedActionsService.Object,
             _mockAtomicActionConsistencyChecker.Object,
             _mockActionEditViewModelFactory.Object,
+            _mockLogger.Object,
             _mockFailureReasonService.Object
         );
         
@@ -147,6 +153,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             _mockTargetedActionsService.Object,
             _mockAtomicActionConsistencyChecker.Object,
             _mockActionEditViewModelFactory.Object,
+            _mockLogger.Object,
             _mockFailureReasonService.Object
         );
         
@@ -178,6 +185,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             _mockTargetedActionsService.Object,
             _mockAtomicActionConsistencyChecker.Object,
             _mockActionEditViewModelFactory.Object,
+            _mockLogger.Object,
             _mockFailureReasonService.Object
         );
         
@@ -219,6 +227,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             _mockTargetedActionsService.Object,
             _mockAtomicActionConsistencyChecker.Object,
             _mockActionEditViewModelFactory.Object,
+            _mockLogger.Object,
             _mockFailureReasonService.Object
         );
         
@@ -255,6 +264,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             _mockTargetedActionsService.Object,
             _mockAtomicActionConsistencyChecker.Object,
             _mockActionEditViewModelFactory.Object,
+            _mockLogger.Object,
             _mockFailureReasonService.Object
         );
         
@@ -263,13 +273,14 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[0], true)); // Valid
         result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[1],
             AtomicActionValidationFailureReason.InvalidSourceCount)); // Invalid
+        var atomicAction = new AtomicAction { Operator = ActionOperatorTypes.SynchronizeContentOnly };
         
         // Use reflection to access private method
         var showConsistencyWarningMethod = typeof(TargetedActionGlobalViewModel)
             .GetMethod("ShowConsistencyWarning", BindingFlags.NonPublic | BindingFlags.Instance);
         
         // Act
-        showConsistencyWarningMethod?.Invoke(viewModel, [result]);
+        showConsistencyWarningMethod?.Invoke(viewModel, [atomicAction, result]);
         
         // Assert
         viewModel.ShowSaveValidItemsCommand.Should().BeTrue();
@@ -297,6 +308,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             _mockTargetedActionsService.Object,
             _mockAtomicActionConsistencyChecker.Object,
             _mockActionEditViewModelFactory.Object,
+            _mockLogger.Object,
             _mockFailureReasonService.Object
         );
         
@@ -306,13 +318,14 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             AtomicActionValidationFailureReason.InvalidSourceCount)); // Invalid
         result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[1],
             AtomicActionValidationFailureReason.InvalidSourceCount)); // Invalid
+        var atomicAction = new AtomicAction { Operator = ActionOperatorTypes.SynchronizeContentOnly };
         
         // Use reflection to access private method
         var showConsistencyWarningMethod = typeof(TargetedActionGlobalViewModel)
             .GetMethod("ShowConsistencyWarning", BindingFlags.NonPublic | BindingFlags.Instance);
         
         // Act
-        showConsistencyWarningMethod?.Invoke(viewModel, [result]);
+        showConsistencyWarningMethod?.Invoke(viewModel, [atomicAction, result]);
         
         // Assert
         viewModel.ShowSaveValidItemsCommand.Should().BeFalse();
@@ -333,6 +346,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             _mockTargetedActionsService.Object,
             _mockAtomicActionConsistencyChecker.Object,
             _mockActionEditViewModelFactory.Object,
+            _mockLogger.Object,
             _mockFailureReasonService.Object
         );
         
@@ -344,6 +358,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             AtomicActionValidationFailureReason.CreateOperationOnFileNotAllowed)); // Different reason
         result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[0],
             AtomicActionValidationFailureReason.InvalidSourceCount)); // Duplicate InvalidSourceCount
+        var atomicAction = new AtomicAction { Operator = ActionOperatorTypes.SynchronizeContentOnly };
         
         _mockFailureReasonService.Setup(x => x.GetLocalizedMessage(AtomicActionValidationFailureReason.CreateOperationOnFileNotAllowed))
             .Returns("Cannot create files");
@@ -353,7 +368,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             .GetMethod("ShowConsistencyWarning", BindingFlags.NonPublic | BindingFlags.Instance);
         
         // Act
-        showConsistencyWarningMethod?.Invoke(viewModel, [result]);
+        showConsistencyWarningMethod?.Invoke(viewModel, [atomicAction, result]);
         
         // Assert
         viewModel.FailureSummaries.Should().HaveCount(2);
@@ -378,6 +393,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             _mockTargetedActionsService.Object,
             _mockAtomicActionConsistencyChecker.Object,
             _mockActionEditViewModelFactory.Object,
+            _mockLogger.Object,
             _mockFailureReasonService.Object
         );
         
@@ -414,6 +430,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             _mockTargetedActionsService.Object,
             _mockAtomicActionConsistencyChecker.Object,
             _mockActionEditViewModelFactory.Object,
+            _mockLogger.Object,
             _mockFailureReasonService.Object
         );
         
@@ -437,6 +454,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             _mockTargetedActionsService.Object,
             _mockAtomicActionConsistencyChecker.Object,
             _mockActionEditViewModelFactory.Object,
+            _mockLogger.Object,
             _mockFailureReasonService.Object
         );
         
@@ -460,6 +478,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             _mockTargetedActionsService.Object,
             _mockAtomicActionConsistencyChecker.Object,
             _mockActionEditViewModelFactory.Object,
+            _mockLogger.Object,
             _mockFailureReasonService.Object
         );
         
@@ -481,6 +500,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             _mockTargetedActionsService.Object,
             _mockAtomicActionConsistencyChecker.Object,
             _mockActionEditViewModelFactory.Object,
+            _mockLogger.Object,
             _mockFailureReasonService.Object
         );
         
@@ -527,3 +547,4 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         tooltip.Should().Be("file1.txt\ndirectory1");
     }
 }
+
