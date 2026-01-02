@@ -41,7 +41,7 @@ public class SynchronizationRuleGlobalViewModelTests
         _localizationService = new Mock<ILocalizationService>(MockBehavior.Strict);
         _actionEditViewModelFactory = new Mock<IActionEditViewModelFactory>(MockBehavior.Strict);
         _synchronizationRulesService = new Mock<ISynchronizationRulesService>(MockBehavior.Strict);
-        _logger = new Mock<ILogger<SynchronizationRuleGlobalViewModel>>(MockBehavior.Strict);
+        _logger = new Mock<ILogger<SynchronizationRuleGlobalViewModel>>();
         
         _cultureSubject = new Subject<CultureDefinition>();
         
