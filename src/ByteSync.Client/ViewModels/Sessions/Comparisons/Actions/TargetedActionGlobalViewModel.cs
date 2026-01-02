@@ -174,6 +174,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
                 ResetWarning();
                 
                 _targetedActionsService.AddTargetedAction(atomicAction, ComparisonItems);
+                LogConsistencySuccess(atomicAction, ComparisonItems.Count);
 
                 _dialogService.CloseFlyout();
             }
@@ -194,10 +195,11 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         else
         {
             var result = _atomicActionConsistencyChecker.CheckCanAdd(atomicAction, ComparisonItems);
-            
+
             ResetWarning();
 
             _targetedActionsService.AddTargetedAction(atomicAction, result.GetValidComparisonItems());
+            LogConsistencySuccess(atomicAction, result.GetValidComparisonItems().Count);
 
             _dialogService.CloseFlyout();
         }
@@ -390,6 +392,17 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
             validItemsCount,
             invalidItemsCount,
             failureDetails);
+    }
+
+    private void LogConsistencySuccess(AtomicAction atomicAction, int itemsCount)
+    {
+        _logger.LogInformation(
+            "Targeted action created. Operator={Operator} Source={Source} Destination={Destination} FileSystemType={FileSystemType} ItemsCount={ItemsCount}",
+            atomicAction.Operator,
+            atomicAction.SourceName ?? string.Empty,
+            atomicAction.DestinationName ?? string.Empty,
+            FileSystemType,
+            itemsCount);
     }
 
     private static string BuildFailureDetails(IEnumerable<ValidationFailureSummary> summaries)
