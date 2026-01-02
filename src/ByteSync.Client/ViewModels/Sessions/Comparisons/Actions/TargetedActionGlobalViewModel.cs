@@ -7,15 +7,12 @@ using ByteSync.Assets.Resources;
 using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
 using ByteSync.Common.Business.Inventories;
-using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Comparisons;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.ViewModels.Misc;
-using ByteSync.Services.Localizations;
-using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -24,7 +21,7 @@ namespace ByteSync.ViewModels.Sessions.Comparisons.Actions;
 public class TargetedActionGlobalViewModel : FlyoutElementViewModel
 {
     readonly ObservableAsPropertyHelper<bool> _canEditAction = null!;
-
+    
     private readonly ILocalizationService _localizationService = null!;
     private readonly IDialogService _dialogService = null!;
     private readonly ITargetedActionsService _targetedActionsService = null!;
@@ -32,13 +29,12 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
     private readonly IActionEditViewModelFactory _actionEditViewModelFactory = null!;
     private readonly IAtomicActionValidationFailureReasonService _failureReasonLocalizer = null!;
     private readonly ILogger<TargetedActionGlobalViewModel> _logger = null!;
-
-    public TargetedActionGlobalViewModel() 
+    
+    public TargetedActionGlobalViewModel()
     {
-
     }
-
-    public TargetedActionGlobalViewModel(List<ComparisonItem> comparisonItems, 
+    
+    public TargetedActionGlobalViewModel(List<ComparisonItem> comparisonItems,
         IDialogService dialogService, ILocalizationService localizationService,
         ITargetedActionsService targetedActionsService, IAtomicActionConsistencyChecker atomicActionConsistencyChecker,
         IActionEditViewModelFactory actionEditViewModelFactory,
@@ -46,7 +42,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         IAtomicActionValidationFailureReasonService failureReasonLocalizer)
     {
         ComparisonItems = comparisonItems;
-
+        
         FileSystemType = ComparisonItems.Select(civm => civm.FileSystemType).ToHashSet().Single();
         
         _dialogService = dialogService;
@@ -56,38 +52,38 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         _actionEditViewModelFactory = actionEditViewModelFactory;
         _failureReasonLocalizer = failureReasonLocalizer;
         _logger = logger;
-
+        
         // Initialize localized messages
         ActionIssuesHeaderMessage = _localizationService[nameof(Resources.TargetedActionEditionGlobal_ActionIssues)];
         AffectedItemsTooltipHeader = _localizationService[nameof(Resources.TargetedActionEditionGlobal_AffectedItemsTooltip)];
-
+        
         Actions = new ObservableCollection<AtomicActionEditViewModel>();
-
+        
         var canSave = this
             .WhenAnyValue(
-                x => x.ShowWarning, x=> x.ShowSaveValidItemsCommand,
+                x => x.ShowWarning, x => x.ShowSaveValidItemsCommand,
                 (showWarning, showSaveValidItemsCommand) => !showWarning || !showSaveValidItemsCommand)
             .ObserveOn(RxApp.MainThreadScheduler);
-            
+        
         canSave
             .ToProperty(this, x => x.CanEditAction, out _canEditAction);
-
+        
         this
             .WhenAnyValue(x => x.AreMissingFields, x => x.IsInconsistentWithValidItems, x => x.IsInconsistentWithNoValidItems,
                 (areMissingFields, isInconsistentWithValidItems, isInconsistentWithNoValidItems) =>
                     areMissingFields || isInconsistentWithValidItems != null || isInconsistentWithNoValidItems)
             .ObserveOn(RxApp.MainThreadScheduler)
             .ToPropertyEx(this, x => x.ShowWarning);
-
+        
         AddActionCommand = ReactiveCommand.Create(AddAction);
         SaveCommand = ReactiveCommand.Create(Save, canSave);
         ResetCommand = ReactiveCommand.Create(Reset);
         CancelCommand = ReactiveCommand.Create(Cancel);
-
+        
         SaveValidItemsCommand = ReactiveCommand.Create(SaveValidItems);
-
+        
         ResetWarning();
-
+        
         Reset();
         
         this.WhenActivated(disposables =>
@@ -98,29 +94,32 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
                 .DisposeWith(disposables);
         });
     }
-
+    
     public List<ComparisonItem> ComparisonItems { get; private set; } = null!;
-
+    
     public ReactiveCommand<Unit, Unit> AddActionCommand { get; set; } = null!;
-
+    
     public ReactiveCommand<Unit, Unit> SaveCommand { get; set; } = null!;
+    
     public ReactiveCommand<Unit, Unit> ResetCommand { get; set; } = null!;
+    
     public ReactiveCommand<Unit, Unit> CancelCommand { get; set; } = null!;
-
+    
     public ReactiveCommand<Unit, Unit> SaveValidItemsCommand { get; set; } = null!;
-
+    
     internal AtomicAction? BaseAtomicAction { get; set; }
+    
     internal ObservableCollection<AtomicActionEditViewModel> Actions { get; } = null!;
-
+    
     private FileSystemTypes FileSystemType { get; }
     
-    public extern bool ShowWarning { [ObservableAsProperty]get; }
-
+    public extern bool ShowWarning { [ObservableAsProperty] get; }
+    
     [Reactive]
     public bool ShowSaveValidItemsCommand { get; set; }
-
+    
     public bool CanEditAction => _canEditAction.Value;
-
+    
     [Reactive]
     public string SaveWarning { get; set; } = string.Empty;
     
@@ -135,32 +134,32 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
     
     public ObservableCollection<ValidationFailureSummary> FailureSummaries { get; set; } = new();
     
-    [Reactive] 
+    [Reactive]
     public string ActionIssuesHeaderMessage { get; set; } = string.Empty;
     
-    [Reactive] 
+    [Reactive]
     public string AffectedItemsTooltipHeader { get; set; } = string.Empty;
-
+    
     private void AddAction()
     {
-        var atomicActionEditViewModel = 
+        var atomicActionEditViewModel =
             _actionEditViewModelFactory.BuildAtomicActionEditViewModel(FileSystemType, false, null, ComparisonItems);
         
         atomicActionEditViewModel.PropertyChanged += AtomicActionEditViewModelOnPropertyChanged;
-            
+        
         Actions.Add(atomicActionEditViewModel);
     }
-
+    
     private void AtomicActionEditViewModelOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         ResetWarning();
     }
-
-
+    
+    
     private void Save()
     {
         var atomicAction = Export();
-
+        
         if (atomicAction == null)
         {
             ShowMissingFieldsWarning();
@@ -175,7 +174,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
                 
                 _targetedActionsService.AddTargetedAction(atomicAction, ComparisonItems);
                 LogConsistencySuccess(atomicAction, ComparisonItems.Count);
-
+                
                 _dialogService.CloseFlyout();
             }
             else
@@ -184,7 +183,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
             }
         }
     }
-
+    
     private void SaveValidItems()
     {
         var atomicAction = Export();
@@ -195,21 +194,21 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         else
         {
             var result = _atomicActionConsistencyChecker.CheckCanAdd(atomicAction, ComparisonItems);
-
+            
             ResetWarning();
-
+            
             _targetedActionsService.AddTargetedAction(atomicAction, result.GetValidComparisonItems());
             LogConsistencySuccess(atomicAction, result.GetValidComparisonItems().Count);
-
+            
             _dialogService.CloseFlyout();
         }
     }
-
+    
     private AtomicAction? Export()
     {
         var automaticActionsActionEditViewModel = Actions.Single(); // (AutomaticActionsActionEditViewModel)region.Views.Single();
         var atomicAction = automaticActionsActionEditViewModel.ExportSynchronizationAction();
-
+        
         if (atomicAction != null)
         {
             if (BaseAtomicAction != null)
@@ -217,11 +216,11 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
                 atomicAction.AtomicActionId = BaseAtomicAction.AtomicActionId;
             }
         }
-
-
+        
+        
         return atomicAction;
     }
-
+    
     private void Reset()
     {
         if (BaseAtomicAction == null)
@@ -232,25 +231,26 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         {
             ResetToEdition();
         }
-
+        
         ResetWarning();
     }
-
+    
     private void ResetToCreation()
     {
         ClearActions();
-
+        
         AddAction();
     }
-
+    
     private void ResetToEdition()
     {
         ClearActions();
-
-        var atomicActionEditViewModel = _actionEditViewModelFactory.BuildAtomicActionEditViewModel(FileSystemType, false, BaseAtomicAction, ComparisonItems);
-
+        
+        var atomicActionEditViewModel =
+            _actionEditViewModelFactory.BuildAtomicActionEditViewModel(FileSystemType, false, BaseAtomicAction, ComparisonItems);
+        
         atomicActionEditViewModel.PropertyChanged += AtomicActionEditViewModelOnPropertyChanged;
-            
+        
         atomicActionEditViewModel.SetAtomicAction(BaseAtomicAction!);
         
         Actions.Add(atomicActionEditViewModel);
@@ -265,11 +265,11 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         
         Actions.Clear();
     }
-
+    
     private void Cancel()
     {
         RaiseCloseFlyoutRequested();
-
+        
         Reset();
     }
     
@@ -294,17 +294,17 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         IsInconsistentWithValidItems = null;
         IsInconsistentWithNoValidItems = false;
         FailureSummaries.Clear(); // Clear previous validation failure summaries
-
+        
         DoShowWarning();
     }
     
     private void ShowConsistencyWarning(AtomicAction atomicAction, AtomicActionConsistencyCheckCanAddResult checkCanAddResult)
     {
         ShowSaveValidItemsCommand = checkCanAddResult.GetValidComparisonItems().Count > 0;
-
+        
         if (ShowSaveValidItemsCommand)
         {
-            IsInconsistentWithValidItems = new Tuple<int, int>(checkCanAddResult.GetValidComparisonItems().Count, 
+            IsInconsistentWithValidItems = new Tuple<int, int>(checkCanAddResult.GetValidComparisonItems().Count,
                 checkCanAddResult.GetInvalidComparisonItems().Count);
             IsInconsistentWithNoValidItems = false;
         }
@@ -318,7 +318,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         FailureSummaries.Clear();
         var summaries = checkCanAddResult.FailedValidations
             .GroupBy(f => f.FailureReason!.Value)
-            .Select(g => new ValidationFailureSummary 
+            .Select(g => new ValidationFailureSummary
             {
                 Reason = g.Key,
                 Count = g.Count(),
@@ -334,12 +334,12 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         }
         
         LogConsistencyFailure(atomicAction, checkCanAddResult, summaries);
-
+        
         AreMissingFields = false;
-
+        
         DoShowWarning();
     }
-
+    
     private void DoShowWarning()
     {
         var saveWarning = "";
@@ -358,15 +358,15 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         {
             saveWarning = Resources.TargetedActionEditionGlobal_SaveWarningLocked;
         }
-
+        
         SaveWarning = saveWarning;
     }
-
+    
     private void OnAtomicInputChanged()
     {
         ResetWarning();
     }
-
+    
     private void ResetWarning()
     {
         AreMissingFields = false;
@@ -374,14 +374,14 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
         IsInconsistentWithNoValidItems = false;
         FailureSummaries.Clear();
     }
-
+    
     private void LogConsistencyFailure(AtomicAction atomicAction, AtomicActionConsistencyCheckCanAddResult result,
         IEnumerable<ValidationFailureSummary> summaries)
     {
         var validItemsCount = result.GetValidComparisonItems().Count;
         var invalidItemsCount = result.GetInvalidComparisonItems().Count;
         var failureDetails = BuildFailureDetails(summaries);
-
+        
         _logger.LogWarning(
             "Targeted action validation failed. Operator={Operator} Source={Source} Destination={Destination} FileSystemType={FileSystemType} TotalItems={TotalItems} ValidItems={ValidItems} InvalidItems={InvalidItems} Failures={Failures}",
             atomicAction.Operator,
@@ -393,7 +393,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
             invalidItemsCount,
             failureDetails);
     }
-
+    
     private void LogConsistencySuccess(AtomicAction atomicAction, int itemsCount)
     {
         _logger.LogInformation(
@@ -404,11 +404,11 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
             FileSystemType,
             itemsCount);
     }
-
+    
     private static string BuildFailureDetails(IEnumerable<ValidationFailureSummary> summaries)
     {
         const int maxItemsPerReason = 3;
-
+        
         var details = summaries
             .Select(summary =>
             {
@@ -416,12 +416,13 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
                     .Select(item => item.PathIdentity.LinkingKeyValue)
                     .Take(maxItemsPerReason)
                     .ToList();
-
+                
                 var suffix = summary.AffectedItems.Count > maxItemsPerReason ? ", ..." : string.Empty;
+                
                 return $"{summary.Reason}={summary.Count} [{string.Join(", ", items)}{suffix}]";
             })
             .ToList();
-
+        
         return details.Count == 0 ? "none" : string.Join("; ", details);
     }
 }
