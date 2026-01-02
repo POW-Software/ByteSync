@@ -15,6 +15,7 @@ using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 
@@ -28,6 +29,7 @@ public class SynchronizationRuleGlobalViewModelTests
     private Mock<ILocalizationService> _localizationService = null!;
     private Mock<IActionEditViewModelFactory> _actionEditViewModelFactory = null!;
     private Mock<ISynchronizationRulesService> _synchronizationRulesService = null!;
+    private Mock<ILogger<SynchronizationRuleGlobalViewModel>> _logger = null!;
     
     private Subject<CultureDefinition> _cultureSubject = null!;
     
@@ -39,6 +41,7 @@ public class SynchronizationRuleGlobalViewModelTests
         _localizationService = new Mock<ILocalizationService>(MockBehavior.Strict);
         _actionEditViewModelFactory = new Mock<IActionEditViewModelFactory>(MockBehavior.Strict);
         _synchronizationRulesService = new Mock<ISynchronizationRulesService>(MockBehavior.Strict);
+        _logger = new Mock<ILogger<SynchronizationRuleGlobalViewModel>>(MockBehavior.Strict);
         
         _cultureSubject = new Subject<CultureDefinition>();
         
@@ -95,6 +98,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -129,6 +133,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -150,6 +155,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -175,6 +181,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -200,6 +207,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -228,6 +236,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -254,6 +263,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -297,6 +307,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             baseRule,
             false);
         
@@ -322,6 +333,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -350,6 +362,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -360,3 +373,4 @@ public class SynchronizationRuleGlobalViewModelTests
         _localizationService.VerifyGet(l => l.CurrentCultureObservable, Times.Once);
     }
 }
+

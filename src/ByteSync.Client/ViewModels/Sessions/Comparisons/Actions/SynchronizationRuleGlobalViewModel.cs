@@ -14,9 +14,9 @@ using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions.Misc;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Serilog;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Actions;
 
@@ -27,6 +27,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
     private readonly ILocalizationService _localizationService = null!;
     private readonly IActionEditViewModelFactory _actionEditViewModelFactory = null!;
     private readonly ISynchronizationRulesService _synchronizationRulesService = null!;
+    private readonly ILogger<SynchronizationRuleGlobalViewModel> _logger = null!;
 
     public SynchronizationRuleGlobalViewModel() 
     {
@@ -34,13 +35,15 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
     
     public SynchronizationRuleGlobalViewModel(IDialogService dialogService, 
         ISessionService sessionService, ILocalizationService localizationService, IActionEditViewModelFactory actionEditViewModelFactory, 
-        ISynchronizationRulesService synchronizationRulesService, SynchronizationRule? baseAutomaticAction, bool isCloneMode)
+        ISynchronizationRulesService synchronizationRulesService, ILogger<SynchronizationRuleGlobalViewModel> logger,
+        SynchronizationRule? baseAutomaticAction, bool isCloneMode)
     {
         _dialogService = dialogService;
         _sessionService = sessionService;
         _localizationService = localizationService;
         _actionEditViewModelFactory = actionEditViewModelFactory;
         _synchronizationRulesService = synchronizationRulesService;
+        _logger = logger;
 
         ShowFileSystemTypeSelection = _sessionService.CurrentSessionSettings!.DataType == DataTypes.FilesDirectories;
 
@@ -212,6 +215,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
                 ShowWarning = false;
                 
                 _synchronizationRulesService.AddOrUpdateSynchronizationRule(synchronizationRule);
+                LogSaveSuccess(synchronizationRule);
 
                 _dialogService.CloseFlyout();
             }
@@ -222,7 +226,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error during saving");
+            _logger.LogError(ex, "Error while saving synchronization rule");
         }
     }
 
@@ -230,6 +234,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
     {
         ShowWarning = true;
         SaveWarning = Resources.TargetedActionEditionGlobal_MissingFields;
+        _logger.LogWarning("Synchronization rule validation failed: missing fields");
     }
 
     private SynchronizationRule? Export()
@@ -366,5 +371,17 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
         ConditionModes.Single(cm => cm.IsAny).Description = Resources.SynchronizationRulesGlobal_Any;
 
         ConditionModes.Single(cm => cm.IsAll).Description = Resources.SynchronizationRulesGlobal_All;
+    }
+
+    private void LogSaveSuccess(SynchronizationRule synchronizationRule)
+    {
+        _logger.LogInformation(
+            "Synchronization rule saved. RuleId={RuleId} FileSystemType={FileSystemType} ConditionMode={ConditionMode} Conditions={ConditionsCount} Actions={ActionsCount} IsCloneMode={IsCloneMode}",
+            synchronizationRule.SynchronizationRuleId ?? string.Empty,
+            synchronizationRule.FileSystemType,
+            synchronizationRule.ConditionMode,
+            synchronizationRule.Conditions.Count,
+            synchronizationRule.Actions.Count,
+            IsCloneMode);
     }
 }
