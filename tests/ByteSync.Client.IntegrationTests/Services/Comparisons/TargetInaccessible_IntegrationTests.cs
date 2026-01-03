@@ -90,7 +90,7 @@ public class TargetInaccessible_IntegrationTests : IntegrationTest
             
             var action = new AtomicAction
             {
-                Operator = ActionOperatorTypes.SynchronizeContentOnly,
+                Operator = ActionOperatorTypes.CopyContentOnly,
                 Source = invA.GetSingleDataPart(),
                 Destination = invB.GetSingleDataPart(),
                 ComparisonItem = targetItem
@@ -145,7 +145,7 @@ public class TargetInaccessible_IntegrationTests : IntegrationTest
             
             var action = new AtomicAction
             {
-                Operator = ActionOperatorTypes.SynchronizeContentOnly,
+                Operator = ActionOperatorTypes.CopyContentOnly,
                 Source = invA.GetSingleDataPart(),
                 Destination = invB.GetSingleDataPart(),
                 ComparisonItem = targetItem

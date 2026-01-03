@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using ByteSync.Assets.Resources;
 using ByteSync.Common.Business.Actions;
-using ByteSync.Interfaces;
 using ByteSync.Interfaces.Services.Localizations;
 
 namespace ByteSync.Services.Comparisons.DescriptionBuilders;
@@ -12,19 +11,19 @@ public abstract class AbstractDescriptionBuilder<T>
     {
         LocalizationService = localizationService;
     }
-
+    
     protected ILocalizationService LocalizationService { get; }
-
+    
     public string GetDescription(T element)
     {
         var stringBuilder = new StringBuilder();
         
         AppendDescription(stringBuilder, element);
         var description = stringBuilder.ToString();
-            
+        
         return description;
     }
-
+    
     public abstract void AppendDescription(StringBuilder stringBuilder, T element);
     
     protected string GetAction(AbstractAction action)
@@ -35,34 +34,40 @@ public abstract class AbstractDescriptionBuilder<T>
     protected string GetAction(ActionOperatorTypes operatorType)
     {
         var result = "";
-
+        
         switch (operatorType)
         {
-            case ActionOperatorTypes.SynchronizeContentOnly:
-                result = LocalizationService[nameof(Resources.SynchronizationActionDescription_Action_SynchronizeContent)];
+            case ActionOperatorTypes.CopyContentOnly:
+                result = LocalizationService[nameof(Resources.SynchronizationActionDescription_Action_CopyContent)];
+                
                 break;
-            case ActionOperatorTypes.SynchronizeContentAndDate:
-                result = LocalizationService[nameof(Resources.SynchronizationActionDescription_Action_SynchronizeContentAndDate)];
+            case ActionOperatorTypes.Copy:
+                result = LocalizationService[nameof(Resources.SynchronizationActionDescription_Action_Copy)];
+                
                 break;
-            case ActionOperatorTypes.SynchronizeDate:
-                result = LocalizationService[nameof(Resources.SynchronizationActionDescription_Action_SynchronizeDate)];
+            case ActionOperatorTypes.CopyDatesOnly:
+                result = LocalizationService[nameof(Resources.SynchronizationActionDescription_Action_CopyDate)];
+                
                 break;
             case ActionOperatorTypes.Create:
                 result = LocalizationService[nameof(Resources.SynchronizationActionDescription_Action_Create)];
+                
                 break;
             case ActionOperatorTypes.Delete:
                 result = LocalizationService[nameof(Resources.SynchronizationActionDescription_Action_Delete)];
+                
                 break;
             case ActionOperatorTypes.DoNothing:
                 result = LocalizationService[nameof(Resources.SynchronizationActionDescription_Action_DoNothing)];
+                
                 break;
         }
-
+        
         if (result.IsEmpty())
         {
             throw new ApplicationException("Unknown actionsGroup.Operator " + operatorType);
         }
-
+        
         return result;
     }
     

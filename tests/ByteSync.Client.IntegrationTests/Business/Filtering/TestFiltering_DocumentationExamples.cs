@@ -84,7 +84,7 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
         var comparisonItem = PrepareComparisonWithOneContent("A1", "sameHash", DateTime.Now, 1024, "app.log");
         
         // Add copy action
-        var copyAction = CreateAtomicAction(comparisonItem, ActionOperatorTypes.SynchronizeContentAndDate, false);
+        var copyAction = CreateAtomicAction(comparisonItem, ActionOperatorTypes.Copy, false);
         _mockActionRepository.AddOrUpdate(new List<AtomicAction> { copyAction });
         
         // Act
@@ -167,7 +167,7 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
     public void TestParse_DuplicatedFiles()
     {
         // Arrange
-        var filterText = "A1.contents==A2.contents AND A1.size==A2.size AND is:file";
+        var filterText = "A1.content==A2.content AND A1.size==A2.size AND is:file";
         
         ConfigureDataPartIndexer("A", "A"); // Need A1 and A2 from same inventory A
         
@@ -254,20 +254,20 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
         var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
         var inventoryA = new Inventory
         {
-            InventoryId = $"Id_{inventoryACode}", 
+            InventoryId = $"Id_{inventoryACode}",
             Code = inventoryACode
         };
         var inventoryB = new Inventory
         {
-            InventoryId = $"Id_{inventoryBCode}", 
+            InventoryId = $"Id_{inventoryBCode}",
             Code = inventoryBCode
         };
-    
-        var inventoryPartA = new InventoryPart(inventoryA, $"/testRoot{inventoryACode}", 
+        
+        var inventoryPartA = new InventoryPart(inventoryA, $"/testRoot{inventoryACode}",
             FileSystemTypes.Directory);
-        var inventoryPartB = new InventoryPart(inventoryB, $"/testRoot{inventoryBCode}", 
+        var inventoryPartB = new InventoryPart(inventoryB, $"/testRoot{inventoryBCode}",
             FileSystemTypes.Directory);
-    
+        
         var dataPartAName = $"{inventoryACode}1";
         var dataPartBName = $"{inventoryBCode}1";
         var dataPartA2Name = $"{inventoryACode}2"; // For A2 if needed
@@ -275,7 +275,7 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
         var dataPartA = new DataPart(dataPartAName, inventoryPartA);
         var dataPartB = new DataPart(dataPartBName, inventoryPartB);
         var dataPartA2 = new DataPart(dataPartA2Name, inventoryPartA);
-    
+        
         mockDataPartIndexer.Setup(m => m.GetDataPart(dataPartAName)).Returns(dataPartA);
         mockDataPartIndexer.Setup(m => m.GetDataPart(dataPartBName)).Returns(dataPartB);
         mockDataPartIndexer.Setup(m => m.GetDataPart(dataPartA2Name)).Returns(dataPartA2);
@@ -285,12 +285,12 @@ public class TestFiltering_DocumentationExamples : BaseTestFiltering
     {
         var action = new AtomicAction($"AAID_{Guid.NewGuid()}", comparisonItem);
         action.Operator = operatorType;
-
+        
         if (!isTargeted)
         {
             action.SynchronizationRule = new SynchronizationRule(comparisonItem.FileSystemType, ConditionModes.All);
         }
-
+        
         return action;
     }
-} 
+}

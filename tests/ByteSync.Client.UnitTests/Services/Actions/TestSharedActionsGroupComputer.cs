@@ -50,7 +50,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
             SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", null, null, false);
         sharedAtomicAction.Target =
             SharedDataPartTestFactory.Create("B1", FileSystemTypes.Directory, "CII_B", "B", "D:\\", "file1.txt", null, null, false);
-        sharedAtomicAction.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
+        sharedAtomicAction.Operator = ActionOperatorTypes.Copy;
         sharedAtomicAction.SynchronizationType = SynchronizationTypes.Full;
         sharedAtomicAction.Size = 10;
         sharedAtomicAction.LastWriteTimeUtc = dateTime;
@@ -71,9 +71,9 @@ public class TestSharedActionsGroupComputer : AbstractTester
         Assert.That(capturedGroup.Count, Is.EqualTo(1));
         var sharedActionGroup = capturedGroup.Single();
         Assert.That(sharedActionGroup.ActionsGroupId, Does.StartWith("AGID_"));
-        Assert.That(sharedActionGroup.IsSynchronizeContent, Is.True);
-        Assert.That(sharedActionGroup.IsSynchronizeContentAndDate, Is.True);
-        Assert.That(sharedActionGroup.IsFinallySynchronizeContentAndDate, Is.True);
+        Assert.That(sharedActionGroup.IsCopyContent, Is.True);
+        Assert.That(sharedActionGroup.IsFullCopy, Is.True);
+        Assert.That(sharedActionGroup.IsFinallyCopyContentAndDate, Is.True);
         Assert.That(sharedActionGroup.IsInitialOperatingOnSourceNeeded, Is.True);
         Assert.That(sharedActionGroup.NeedsOnlyOperatingOnTargets, Is.False);
         Assert.That(sharedActionGroup.IsFile, Is.True);
@@ -81,12 +81,12 @@ public class TestSharedActionsGroupComputer : AbstractTester
         Assert.That(sharedActionGroup.IsCreate, Is.False);
         Assert.That(sharedActionGroup.IsDelete, Is.False);
         Assert.That(sharedActionGroup.IsDoNothing, Is.False);
-        Assert.That(sharedActionGroup.IsSynchronizeContentOnly, Is.False);
-        Assert.That(sharedActionGroup.IsSynchronizeDate, Is.False);
+        Assert.That(sharedActionGroup.IsCopyContentOnly, Is.False);
+        Assert.That(sharedActionGroup.IsCopyDates, Is.False);
         Assert.That(sharedActionGroup.IsFinallySynchronizeDate, Is.False);
-        Assert.That(sharedActionGroup.AppliesOnlySynchronizeDate, Is.False);
+        Assert.That(sharedActionGroup.AppliesOnlyCopyDate, Is.False);
         Assert.That(sharedActionGroup.LinkingKeyValue, Is.EqualTo("file1.txt"));
-        Assert.That(sharedActionGroup.Operator, Is.EqualTo(ActionOperatorTypes.SynchronizeContentAndDate));
+        Assert.That(sharedActionGroup.Operator, Is.EqualTo(ActionOperatorTypes.Copy));
         Assert.That(sharedActionGroup.PathIdentity, Is.EqualTo(sharedAtomicAction.PathIdentity));
         Assert.That(sharedActionGroup.Size, Is.EqualTo(10));
         Assert.That(sharedActionGroup.LastWriteTimeUtc, Is.EqualTo(dateTime));
@@ -146,7 +146,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
             SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", null, null, false);
         sharedAtomicAction1.Target =
             SharedDataPartTestFactory.Create("B1", FileSystemTypes.Directory, "CII_B", "B", "D:\\", "file1.txt", null, null, false);
-        sharedAtomicAction1.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
+        sharedAtomicAction1.Operator = ActionOperatorTypes.Copy;
         sharedAtomicAction1.SynchronizationType = SynchronizationTypes.Full;
         sharedAtomicAction1.Size = 10;
         sharedAtomicAction1.LastWriteTimeUtc = dateTime;
@@ -158,7 +158,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
             SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt", null, null, false);
         sharedAtomicAction2.Target =
             SharedDataPartTestFactory.Create("C1", FileSystemTypes.Directory, "CII_C", "C", "D:\\", "file1.txt", null, null, false);
-        sharedAtomicAction2.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
+        sharedAtomicAction2.Operator = ActionOperatorTypes.Copy;
         sharedAtomicAction2.SynchronizationType = SynchronizationTypes.Full;
         sharedAtomicAction2.Size = 10;
         sharedAtomicAction2.LastWriteTimeUtc = dateTime;
@@ -184,24 +184,24 @@ public class TestSharedActionsGroupComputer : AbstractTester
         
         ClassicAssert.IsTrue(sharedActionsGroup.ActionsGroupId.StartsWith("AGID_"));
         
-        ClassicAssert.IsFalse(sharedActionsGroup.AppliesOnlySynchronizeDate);
+        ClassicAssert.IsFalse(sharedActionsGroup.AppliesOnlyCopyDate);
         ClassicAssert.IsFalse(sharedActionsGroup.IsCreate);
         ClassicAssert.IsFalse(sharedActionsGroup.IsDelete);
         ClassicAssert.IsFalse(sharedActionsGroup.IsDirectory);
         ClassicAssert.IsFalse(sharedActionsGroup.IsDoNothing);
         ClassicAssert.IsTrue(sharedActionsGroup.IsFile);
-        ClassicAssert.IsTrue(sharedActionsGroup.IsFinallySynchronizeContentAndDate);
+        ClassicAssert.IsTrue(sharedActionsGroup.IsFinallyCopyContentAndDate);
         ClassicAssert.IsFalse(sharedActionsGroup.IsFinallySynchronizeDate);
         ClassicAssert.IsTrue(sharedActionsGroup.IsInitialOperatingOnSourceNeeded);
         ClassicAssert.IsFalse(sharedActionsGroup.NeedsOnlyOperatingOnTargets);
-        ClassicAssert.IsTrue(sharedActionsGroup.IsSynchronizeContent);
-        ClassicAssert.IsTrue(sharedActionsGroup.IsSynchronizeContentAndDate);
-        ClassicAssert.IsFalse(sharedActionsGroup.IsSynchronizeContentOnly);
-        ClassicAssert.IsFalse(sharedActionsGroup.IsSynchronizeDate);
+        ClassicAssert.IsTrue(sharedActionsGroup.IsCopyContent);
+        ClassicAssert.IsTrue(sharedActionsGroup.IsFullCopy);
+        ClassicAssert.IsFalse(sharedActionsGroup.IsCopyContentOnly);
+        ClassicAssert.IsFalse(sharedActionsGroup.IsCopyDates);
         
         ClassicAssert.AreEqual(dateTime, sharedActionsGroup.LastWriteTimeUtc);
         ClassicAssert.AreEqual("file1.txt", sharedActionsGroup.LinkingKeyValue);
-        ClassicAssert.AreEqual(ActionOperatorTypes.SynchronizeContentAndDate, sharedActionsGroup.Operator);
+        ClassicAssert.AreEqual(ActionOperatorTypes.Copy, sharedActionsGroup.Operator);
         ClassicAssert.AreEqual(sharedAtomicAction1.PathIdentity, sharedActionsGroup.PathIdentity);
         ClassicAssert.AreEqual(10, sharedActionsGroup.Size);
         ClassicAssert.AreEqual(sharedAtomicAction1.Source, sharedActionsGroup.Source);
@@ -225,7 +225,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
             "SigGuidA", "SigHashA", false);
         sharedAtomicAction1.Target = SharedDataPartTestFactory.Create("B1", FileSystemTypes.Directory, "CII_B", "B", "D:\\", "file1.txt",
             "SigGuidB", "SigHashBC", false);
-        sharedAtomicAction1.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
+        sharedAtomicAction1.Operator = ActionOperatorTypes.Copy;
         sharedAtomicAction1.SynchronizationType = SynchronizationTypes.Delta;
         sharedAtomicAction1.Size = 10;
         sharedAtomicAction1.LastWriteTimeUtc = dateTime;
@@ -237,7 +237,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
             "SigGuidA", "SigHashA", false);
         sharedAtomicAction2.Target = SharedDataPartTestFactory.Create("C1", FileSystemTypes.Directory, "CII_C", "C", "D:\\", "file1.txt",
             "SigGuidC", "SigHashBC", false);
-        sharedAtomicAction2.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
+        sharedAtomicAction2.Operator = ActionOperatorTypes.Copy;
         sharedAtomicAction2.SynchronizationType = SynchronizationTypes.Delta;
         sharedAtomicAction2.Size = 10;
         sharedAtomicAction2.LastWriteTimeUtc = dateTime;
@@ -262,24 +262,24 @@ public class TestSharedActionsGroupComputer : AbstractTester
         
         ClassicAssert.IsTrue(sharedActionsGroup.ActionsGroupId.StartsWith("AGID_"));
         
-        ClassicAssert.IsFalse(sharedActionsGroup.AppliesOnlySynchronizeDate);
+        ClassicAssert.IsFalse(sharedActionsGroup.AppliesOnlyCopyDate);
         ClassicAssert.IsFalse(sharedActionsGroup.IsCreate);
         ClassicAssert.IsFalse(sharedActionsGroup.IsDelete);
         ClassicAssert.IsFalse(sharedActionsGroup.IsDirectory);
         ClassicAssert.IsFalse(sharedActionsGroup.IsDoNothing);
         ClassicAssert.IsTrue(sharedActionsGroup.IsFile);
-        ClassicAssert.IsTrue(sharedActionsGroup.IsFinallySynchronizeContentAndDate);
+        ClassicAssert.IsTrue(sharedActionsGroup.IsFinallyCopyContentAndDate);
         ClassicAssert.IsFalse(sharedActionsGroup.IsFinallySynchronizeDate);
         ClassicAssert.IsTrue(sharedActionsGroup.IsInitialOperatingOnSourceNeeded);
         ClassicAssert.IsFalse(sharedActionsGroup.NeedsOnlyOperatingOnTargets);
-        ClassicAssert.IsTrue(sharedActionsGroup.IsSynchronizeContent);
-        ClassicAssert.IsTrue(sharedActionsGroup.IsSynchronizeContentAndDate);
-        ClassicAssert.IsFalse(sharedActionsGroup.IsSynchronizeContentOnly);
-        ClassicAssert.IsFalse(sharedActionsGroup.IsSynchronizeDate);
+        ClassicAssert.IsTrue(sharedActionsGroup.IsCopyContent);
+        ClassicAssert.IsTrue(sharedActionsGroup.IsFullCopy);
+        ClassicAssert.IsFalse(sharedActionsGroup.IsCopyContentOnly);
+        ClassicAssert.IsFalse(sharedActionsGroup.IsCopyDates);
         
         ClassicAssert.AreEqual(dateTime, sharedActionsGroup.LastWriteTimeUtc);
         ClassicAssert.AreEqual("file1.txt", sharedActionsGroup.LinkingKeyValue);
-        ClassicAssert.AreEqual(ActionOperatorTypes.SynchronizeContentAndDate, sharedActionsGroup.Operator);
+        ClassicAssert.AreEqual(ActionOperatorTypes.Copy, sharedActionsGroup.Operator);
         ClassicAssert.AreEqual(sharedAtomicAction1.PathIdentity, sharedActionsGroup.PathIdentity);
         ClassicAssert.AreEqual(10, sharedActionsGroup.Size);
         ClassicAssert.AreEqual(sharedAtomicAction1.Source, sharedActionsGroup.Source);
@@ -302,7 +302,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
             "SigGuidA", "SigHashA", false);
         sharedAtomicAction1.Target = SharedDataPartTestFactory.Create("B1", FileSystemTypes.Directory, "CII_B", "B", "D:\\", "file1.txt",
             "SigGuidB", "SigHashB", false);
-        sharedAtomicAction1.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
+        sharedAtomicAction1.Operator = ActionOperatorTypes.Copy;
         sharedAtomicAction1.SynchronizationType = SynchronizationTypes.Delta;
         sharedAtomicAction1.Size = 10;
         sharedAtomicAction1.LastWriteTimeUtc = dateTime;
@@ -314,7 +314,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
             "SigGuidA", "SigHashA", false);
         sharedAtomicAction2.Target = SharedDataPartTestFactory.Create("C1", FileSystemTypes.Directory, "CII_C", "C", "D:\\", "file1.txt",
             "SigGuidC", "SigHashC", false);
-        sharedAtomicAction2.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
+        sharedAtomicAction2.Operator = ActionOperatorTypes.Copy;
         sharedAtomicAction2.SynchronizationType = SynchronizationTypes.Delta;
         sharedAtomicAction2.Size = 10;
         sharedAtomicAction2.LastWriteTimeUtc = dateTime;
@@ -339,24 +339,24 @@ public class TestSharedActionsGroupComputer : AbstractTester
         {
             ClassicAssert.IsTrue(sharedActionsGroup.ActionsGroupId.StartsWith("AGID_"));
             
-            ClassicAssert.IsFalse(sharedActionsGroup.AppliesOnlySynchronizeDate);
+            ClassicAssert.IsFalse(sharedActionsGroup.AppliesOnlyCopyDate);
             ClassicAssert.IsFalse(sharedActionsGroup.IsCreate);
             ClassicAssert.IsFalse(sharedActionsGroup.IsDelete);
             ClassicAssert.IsFalse(sharedActionsGroup.IsDirectory);
             ClassicAssert.IsFalse(sharedActionsGroup.IsDoNothing);
             ClassicAssert.IsTrue(sharedActionsGroup.IsFile);
-            ClassicAssert.IsTrue(sharedActionsGroup.IsFinallySynchronizeContentAndDate);
+            ClassicAssert.IsTrue(sharedActionsGroup.IsFinallyCopyContentAndDate);
             ClassicAssert.IsFalse(sharedActionsGroup.IsFinallySynchronizeDate);
             ClassicAssert.IsTrue(sharedActionsGroup.IsInitialOperatingOnSourceNeeded);
             ClassicAssert.IsFalse(sharedActionsGroup.NeedsOnlyOperatingOnTargets);
-            ClassicAssert.IsTrue(sharedActionsGroup.IsSynchronizeContent);
-            ClassicAssert.IsTrue(sharedActionsGroup.IsSynchronizeContentAndDate);
-            ClassicAssert.IsFalse(sharedActionsGroup.IsSynchronizeContentOnly);
-            ClassicAssert.IsFalse(sharedActionsGroup.IsSynchronizeDate);
+            ClassicAssert.IsTrue(sharedActionsGroup.IsCopyContent);
+            ClassicAssert.IsTrue(sharedActionsGroup.IsFullCopy);
+            ClassicAssert.IsFalse(sharedActionsGroup.IsCopyContentOnly);
+            ClassicAssert.IsFalse(sharedActionsGroup.IsCopyDates);
             
             ClassicAssert.AreEqual(dateTime, sharedActionsGroup.LastWriteTimeUtc);
             ClassicAssert.AreEqual("file1.txt", sharedActionsGroup.LinkingKeyValue);
-            ClassicAssert.AreEqual(ActionOperatorTypes.SynchronizeContentAndDate, sharedActionsGroup.Operator);
+            ClassicAssert.AreEqual(ActionOperatorTypes.Copy, sharedActionsGroup.Operator);
             ClassicAssert.AreEqual(sharedAtomicAction1.PathIdentity, sharedActionsGroup.PathIdentity);
             ClassicAssert.AreEqual(10, sharedActionsGroup.Size);
             ClassicAssert.AreEqual(sharedAtomicAction1.Source, sharedActionsGroup.Source);
@@ -379,7 +379,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
             "SigGuidA", "SigHashABC", false);
         sharedAtomicAction1.Target = SharedDataPartTestFactory.Create("B1", FileSystemTypes.Directory, "CII_B", "B", "D:\\", "file1.txt",
             "SigGuidB", "SigHashABC", false);
-        sharedAtomicAction1.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
+        sharedAtomicAction1.Operator = ActionOperatorTypes.Copy;
         sharedAtomicAction1.SynchronizationType = SynchronizationTypes.Delta;
         sharedAtomicAction1.Size = 10;
         sharedAtomicAction1.LastWriteTimeUtc = dateTime;
@@ -391,7 +391,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
             "SigGuidA", "SigHashABC", false);
         sharedAtomicAction2.Target = SharedDataPartTestFactory.Create("C1", FileSystemTypes.Directory, "CII_C", "C", "D:\\", "file1.txt",
             "SigGuidC", "SigHashABC", false);
-        sharedAtomicAction2.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
+        sharedAtomicAction2.Operator = ActionOperatorTypes.Copy;
         sharedAtomicAction2.SynchronizationType = SynchronizationTypes.Delta;
         sharedAtomicAction2.Size = 10;
         sharedAtomicAction2.LastWriteTimeUtc = dateTime;
@@ -416,24 +416,24 @@ public class TestSharedActionsGroupComputer : AbstractTester
         
         ClassicAssert.IsTrue(sharedActionsGroup.ActionsGroupId.StartsWith("AGID_"));
         
-        ClassicAssert.IsTrue(sharedActionsGroup.AppliesOnlySynchronizeDate);
+        ClassicAssert.IsTrue(sharedActionsGroup.AppliesOnlyCopyDate);
         ClassicAssert.IsFalse(sharedActionsGroup.IsCreate);
         ClassicAssert.IsFalse(sharedActionsGroup.IsDelete);
         ClassicAssert.IsFalse(sharedActionsGroup.IsDirectory);
         ClassicAssert.IsFalse(sharedActionsGroup.IsDoNothing);
         ClassicAssert.IsTrue(sharedActionsGroup.IsFile);
-        ClassicAssert.IsFalse(sharedActionsGroup.IsFinallySynchronizeContentAndDate);
+        ClassicAssert.IsFalse(sharedActionsGroup.IsFinallyCopyContentAndDate);
         ClassicAssert.IsTrue(sharedActionsGroup.IsFinallySynchronizeDate);
         ClassicAssert.IsFalse(sharedActionsGroup.IsInitialOperatingOnSourceNeeded);
         ClassicAssert.IsTrue(sharedActionsGroup.NeedsOnlyOperatingOnTargets);
-        ClassicAssert.IsTrue(sharedActionsGroup.IsSynchronizeContent);
-        ClassicAssert.IsTrue(sharedActionsGroup.IsSynchronizeContentAndDate);
-        ClassicAssert.IsFalse(sharedActionsGroup.IsSynchronizeContentOnly);
-        ClassicAssert.IsFalse(sharedActionsGroup.IsSynchronizeDate);
+        ClassicAssert.IsTrue(sharedActionsGroup.IsCopyContent);
+        ClassicAssert.IsTrue(sharedActionsGroup.IsFullCopy);
+        ClassicAssert.IsFalse(sharedActionsGroup.IsCopyContentOnly);
+        ClassicAssert.IsFalse(sharedActionsGroup.IsCopyDates);
         
         ClassicAssert.AreEqual(dateTime, sharedActionsGroup.LastWriteTimeUtc);
         ClassicAssert.AreEqual("file1.txt", sharedActionsGroup.LinkingKeyValue);
-        ClassicAssert.AreEqual(ActionOperatorTypes.SynchronizeContentAndDate, sharedActionsGroup.Operator);
+        ClassicAssert.AreEqual(ActionOperatorTypes.Copy, sharedActionsGroup.Operator);
         ClassicAssert.AreEqual(sharedAtomicAction1.PathIdentity, sharedActionsGroup.PathIdentity);
         ClassicAssert.AreEqual(10, sharedActionsGroup.Size);
         ClassicAssert.AreEqual(sharedAtomicAction1.Source, sharedActionsGroup.Source);
@@ -455,7 +455,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
         sharedAtomicAction1.Source = SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CII_A", "A", "D:\\", "file1.txt",
             "SigGuidA", "SigHashABC", false);
         sharedAtomicAction1.Target = null;
-        sharedAtomicAction1.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
+        sharedAtomicAction1.Operator = ActionOperatorTypes.Copy;
         sharedAtomicAction1.SynchronizationType = SynchronizationTypes.Delta;
         sharedAtomicAction1.Size = 10;
         sharedAtomicAction1.LastWriteTimeUtc = dateTime;
@@ -467,7 +467,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
             "SigGuidA", "SigHashABC", false);
         sharedAtomicAction2.Target = SharedDataPartTestFactory.Create("C1", FileSystemTypes.Directory, "CII_C", "C", "D:\\", "file1.txt",
             "SigGuidC", "SigHashABC", false);
-        sharedAtomicAction2.Operator = ActionOperatorTypes.SynchronizeContentAndDate;
+        sharedAtomicAction2.Operator = ActionOperatorTypes.Copy;
         sharedAtomicAction2.SynchronizationType = SynchronizationTypes.Delta;
         sharedAtomicAction2.Size = 10;
         sharedAtomicAction2.LastWriteTimeUtc = dateTime;
@@ -492,24 +492,24 @@ public class TestSharedActionsGroupComputer : AbstractTester
         
         ClassicAssert.IsTrue(sharedActionsGroup.ActionsGroupId.StartsWith("AGID_"));
         
-        ClassicAssert.IsTrue(sharedActionsGroup.AppliesOnlySynchronizeDate);
+        ClassicAssert.IsTrue(sharedActionsGroup.AppliesOnlyCopyDate);
         ClassicAssert.IsFalse(sharedActionsGroup.IsCreate);
         ClassicAssert.IsFalse(sharedActionsGroup.IsDelete);
         ClassicAssert.IsFalse(sharedActionsGroup.IsDirectory);
         ClassicAssert.IsFalse(sharedActionsGroup.IsDoNothing);
         ClassicAssert.IsTrue(sharedActionsGroup.IsFile);
-        ClassicAssert.IsFalse(sharedActionsGroup.IsFinallySynchronizeContentAndDate);
+        ClassicAssert.IsFalse(sharedActionsGroup.IsFinallyCopyContentAndDate);
         ClassicAssert.IsTrue(sharedActionsGroup.IsFinallySynchronizeDate);
         ClassicAssert.IsFalse(sharedActionsGroup.IsInitialOperatingOnSourceNeeded);
         ClassicAssert.IsTrue(sharedActionsGroup.NeedsOnlyOperatingOnTargets);
-        ClassicAssert.IsTrue(sharedActionsGroup.IsSynchronizeContent);
-        ClassicAssert.IsTrue(sharedActionsGroup.IsSynchronizeContentAndDate);
-        ClassicAssert.IsFalse(sharedActionsGroup.IsSynchronizeContentOnly);
-        ClassicAssert.IsFalse(sharedActionsGroup.IsSynchronizeDate);
+        ClassicAssert.IsTrue(sharedActionsGroup.IsCopyContent);
+        ClassicAssert.IsTrue(sharedActionsGroup.IsFullCopy);
+        ClassicAssert.IsFalse(sharedActionsGroup.IsCopyContentOnly);
+        ClassicAssert.IsFalse(sharedActionsGroup.IsCopyDates);
         
         ClassicAssert.AreEqual(dateTime, sharedActionsGroup.LastWriteTimeUtc);
         ClassicAssert.AreEqual("file1.txt", sharedActionsGroup.LinkingKeyValue);
-        ClassicAssert.AreEqual(ActionOperatorTypes.SynchronizeContentAndDate, sharedActionsGroup.Operator);
+        ClassicAssert.AreEqual(ActionOperatorTypes.Copy, sharedActionsGroup.Operator);
         ClassicAssert.AreEqual(sharedAtomicAction1.PathIdentity, sharedActionsGroup.PathIdentity);
         ClassicAssert.AreEqual(10, sharedActionsGroup.Size);
         ClassicAssert.AreEqual(sharedAtomicAction1.Source, sharedActionsGroup.Source);

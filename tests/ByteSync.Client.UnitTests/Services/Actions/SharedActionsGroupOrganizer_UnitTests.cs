@@ -54,7 +54,7 @@ public class SharedActionsGroupOrganizer_UnitTests
         {
             new()
             {
-                Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+                Operator = ActionOperatorTypes.Copy,
                 ActionsGroupId = "AGId1",
                 PathIdentity = new PathIdentity(FileSystemTypes.File, "file1", "file1", "file1"),
                 Source = SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CID1", "A", "root", "relative", null, null,
@@ -69,7 +69,7 @@ public class SharedActionsGroupOrganizer_UnitTests
                 Size = null,
                 CreationTimeUtc = null,
                 LastWriteTimeUtc = null,
-                AppliesOnlySynchronizeDate = false,
+                AppliesOnlyCopyDate = false,
             }
         };
         
@@ -99,7 +99,7 @@ public class SharedActionsGroupOrganizer_UnitTests
     [Test]
     [TestCase("CID1", 0)]
     [TestCase("CID2", 1)]
-    public async Task OrganizeSharedActionsGroups_When_SynchronizeContentAndDate_And_AppliesOnlySynchronizeDate_ShouldSortCorrectly(
+    public async Task OrganizeSharedActionsGroups_When_Copy_And_AppliesOnlyCopyDate_ShouldSortCorrectly(
         string clientInstanceId, int expectedCount)
     {
         // Arrange
@@ -107,7 +107,7 @@ public class SharedActionsGroupOrganizer_UnitTests
         {
             new()
             {
-                Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+                Operator = ActionOperatorTypes.Copy,
                 ActionsGroupId = "AGId1",
                 PathIdentity = new PathIdentity(FileSystemTypes.File, "file1", "file1", "file1"),
                 Source = SharedDataPartTestFactory.Create("A1", FileSystemTypes.Directory, "CID1", "A", "root", "relative", null, null,
@@ -122,7 +122,7 @@ public class SharedActionsGroupOrganizer_UnitTests
                 Size = null,
                 CreationTimeUtc = null,
                 LastWriteTimeUtc = null,
-                AppliesOnlySynchronizeDate = true,
+                AppliesOnlyCopyDate = true,
             }
         };
         

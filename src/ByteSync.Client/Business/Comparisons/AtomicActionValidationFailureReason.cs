@@ -17,9 +17,10 @@ public enum AtomicActionValidationFailureReason
     DestinationRequiredForCreateOperation = 22,
     
     // Advanced Consistency - Source Issues
-    InvalidSourceCount = 30,
     SourceHasAnalysisError = 31,
     SourceNotAccessible = 32,
+    SourceMissing = 33,
+    SourceHasMultipleIdentities = 34,
     
     // Advanced Consistency - Target Issues
     TargetFileNotPresent = 40,

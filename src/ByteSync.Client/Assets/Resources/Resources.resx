@@ -131,7 +131,7 @@
 		<value>of the following conditions are met:</value>
 	</data>
 	<data name="AtomicConditionEdit_Content" xml:space="preserve">
-		<value>Contents</value>
+		<value>Content</value>
 	</data>
 	<data name="AtomicConditionEdit_LastWriteTime" xml:space="preserve">
 		<value>Last write time</value>
@@ -232,13 +232,13 @@
 	<data name="AtomicActionEdit_Destination" xml:space="preserve">
 		<value>Destination</value>
 	</data>
-	<data name="AtomicActionEdit_SynchronizeContentAndDate" xml:space="preserve">
+    <data name="AtomicActionEdit_Copy" xml:space="preserve">
 		<value>Copy</value>
 	</data>
-	<data name="AtomicActionEdit_SynchronizeContent" xml:space="preserve">
-		<value>Copy contents only</value>
+    <data name="AtomicActionEdit_CopyContent" xml:space="preserve">
+		<value>Copy content only</value>
 	</data>
-	<data name="AtomicActionEdit_SynchronizeDate" xml:space="preserve">
+    <data name="AtomicActionEdit_CopyDate" xml:space="preserve">
 		<value>Copy dates only</value>
 	</data>
 	<data name="AtomicActionEdit_DoNothing" xml:space="preserve">
@@ -289,13 +289,13 @@
 	<data name="TargetedActionEditionGlobal_DoTheFollowingAction" xml:space="preserve">
 		<value>Do the following action:</value>
 	</data>
-	<data name="SynchronizationActionDescription_Action_SynchronizeContent" xml:space="preserve">
-		<value>Copy contents only</value>
+    <data name="SynchronizationActionDescription_Action_CopyContent" xml:space="preserve">
+		<value>Copy content only</value>
 	</data>
-	<data name="SynchronizationActionDescription_Action_SynchronizeDate" xml:space="preserve">
+    <data name="SynchronizationActionDescription_Action_CopyDate" xml:space="preserve">
 		<value>Copy dates only</value>
 	</data>
-	<data name="SynchronizationActionDescription_Action_SynchronizeContentAndDate" xml:space="preserve">
+    <data name="SynchronizationActionDescription_Action_Copy" xml:space="preserve">
 		<value>Copy</value>
 	</data>
 	<data name="SynchronizationActionDescription_Action_DoNothing" xml:space="preserve">
@@ -353,7 +353,7 @@ Would you like to continue ?</value>
 		<value>If</value>
 	</data>
 	<data name="AtomicConditionDescription_ComparisonElement_Content" xml:space="preserve">
-		<value>Contents</value>
+		<value>Content</value>
 	</data>
 	<data name="AtomicConditionDescription_ComparisonElement_Date" xml:space="preserve">
 		<value>Date</value>
@@ -1696,8 +1696,11 @@ Do you want to save this new Session Profile with this name?</value>
 		<value>Destination required for create</value>
 	</data>
 	<!-- Advanced Consistency - Source Issues -->
-	<data name="ValidationFailure_InvalidSourceCount" xml:space="preserve">
-		<value>Invalid source data</value>
+	<data name="ValidationFailure_SourceMissing" xml:space="preserve">
+		<value>Source not found</value>
+	</data>
+	<data name="ValidationFailure_SourceHasMultipleIdentities" xml:space="preserve">
+		<value>Multiple sources found</value>
 	</data>
 	<data name="ValidationFailure_SourceHasAnalysisError" xml:space="preserve">
 		<value>Source has analysis error</value>
