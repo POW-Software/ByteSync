@@ -273,7 +273,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[0], true)); // Valid
         result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[1],
             AtomicActionValidationFailureReason.SourceMissing)); // Invalid
-        var atomicAction = new AtomicAction { Operator = ActionOperatorTypes.SynchronizeContentOnly };
+        var atomicAction = new AtomicAction { Operator = ActionOperatorTypes.CopyContentOnly };
         
         // Use reflection to access private method
         var showConsistencyWarningMethod = typeof(TargetedActionGlobalViewModel)
@@ -318,7 +318,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             AtomicActionValidationFailureReason.SourceHasMultipleIdentities)); // Invalid
         result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[1],
             AtomicActionValidationFailureReason.SourceHasMultipleIdentities)); // Invalid
-        var atomicAction = new AtomicAction { Operator = ActionOperatorTypes.SynchronizeContentOnly };
+        var atomicAction = new AtomicAction { Operator = ActionOperatorTypes.CopyContentOnly };
         
         // Use reflection to access private method
         var showConsistencyWarningMethod = typeof(TargetedActionGlobalViewModel)
@@ -358,7 +358,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
             AtomicActionValidationFailureReason.CreateOperationOnFileNotAllowed)); // Different reason
         result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[0],
             AtomicActionValidationFailureReason.SourceMissing)); // Duplicate SourceMissing
-        var atomicAction = new AtomicAction { Operator = ActionOperatorTypes.SynchronizeContentOnly };
+        var atomicAction = new AtomicAction { Operator = ActionOperatorTypes.CopyContentOnly };
         
         _mockFailureReasonService.Setup(x => x.GetLocalizedMessage(AtomicActionValidationFailureReason.CreateOperationOnFileNotAllowed))
             .Returns("Cannot create files");
@@ -547,5 +547,3 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         tooltip.Should().Be("file1.txt\ndirectory1");
     }
 }
-
-

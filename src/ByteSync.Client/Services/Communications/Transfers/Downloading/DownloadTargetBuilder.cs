@@ -16,14 +16,13 @@ namespace ByteSync.Services.Communications.Transfers.Downloading;
 
 public class DownloadTargetBuilder : IDownloadTargetBuilder, IDisposable
 {
-    
     private readonly ICloudSessionLocalDataManager _cloudSessionLocalDataManager;
     private readonly ISessionProfileLocalDataManager _sessionProfileLocalDataManager;
     private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository;
     private readonly IConnectionService _connectionService;
     private readonly ITemporaryFileManagerFactory _temporaryFileManagerFactory;
     private readonly ISessionService _sessionService;
-
+    
     // Add a cache to ensure singleton DownloadTarget per fileId
     private readonly Dictionary<string, DownloadTarget> _downloadTargetCache = new();
     
@@ -31,8 +30,9 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder, IDisposable
     private readonly IDisposable _sessionSubscription;
     private readonly IDisposable _sessionStatusSubscription;
     private bool _disposed = false;
-
-    public DownloadTargetBuilder(ICloudSessionLocalDataManager cloudSessionLocalDataManager, ISessionProfileLocalDataManager sessionProfileLocalDataManager,
+    
+    public DownloadTargetBuilder(ICloudSessionLocalDataManager cloudSessionLocalDataManager,
+        ISessionProfileLocalDataManager sessionProfileLocalDataManager,
         ISharedActionsGroupRepository sharedActionsGroupRepository, IConnectionService connectionService,
         ITemporaryFileManagerFactory temporaryFileManagerFactory, ISessionService sessionService)
     {
@@ -47,7 +47,7 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder, IDisposable
         _sessionSubscription = _sessionService.SessionObservable
             .Where(session => session == null)
             .Subscribe(_ => ClearCache());
-            
+        
         _sessionStatusSubscription = _sessionService.SessionStatusObservable
             .Where(status => status == SessionStatus.Preparation)
             .Subscribe(_ => ClearCache());
@@ -58,7 +58,7 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder, IDisposable
         // Check cache first
         if (_downloadTargetCache.TryGetValue(sharedFileDefinition.Id, out var existing))
             return existing;
-
+        
         LocalSharedFile? sharedFile = null;
         var downloadDestinations = new HashSet<string>();
         string destinationPath;
@@ -66,7 +66,7 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder, IDisposable
         Dictionary<string, HashSet<string>>? finalDestinationsPerActionsGroupId = null;
         Dictionary<string, DownloadTargetDates>? datesPerActionsGroupId = null;
         List<ITemporaryFileManager>? temporaryFileManagers = null;
-
+        
         DownloadTarget downloadTarget;
         if (sharedFileDefinition.IsInventory)
         {
@@ -98,15 +98,15 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder, IDisposable
             {
                 var zipDestinationPath = _cloudSessionLocalDataManager.GetSynchronizationTempZipPath(sharedFileDefinition);
                 downloadDestinations.Add(zipDestinationPath);
-
+                
                 foreach (var actionsGroupId in sharedFileDefinition.ActionsGroupIds!)
                 {
                     var sharedActionsGroup = _sharedActionsGroupRepository.GetSharedActionsGroup(actionsGroupId);
                     var actionsGroupDestinations = sharedActionsGroup!.GetTargetsFullNames(_connectionService.CurrentEndPoint!);
                     
                     finalDestinationsPerActionsGroupId.Add(actionsGroupId, actionsGroupDestinations);
-
-                    if (sharedActionsGroup.IsSynchronizeContentAndDate)
+                    
+                    if (sharedActionsGroup.IsFullCopy)
                     {
                         datesPerActionsGroupId.Add(actionsGroupId, DownloadTargetDates.FromSharedActionsGroup(sharedActionsGroup));
                     }
@@ -114,7 +114,8 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder, IDisposable
             }
             else
             {
-                var sharedActionsGroup = _sharedActionsGroupRepository.GetSharedActionsGroup(sharedFileDefinition.ActionsGroupIds!.Single());
+                var sharedActionsGroup =
+                    _sharedActionsGroupRepository.GetSharedActionsGroup(sharedFileDefinition.ActionsGroupIds!.Single());
                 
                 var finalDestinations = sharedActionsGroup!.GetTargetsFullNames(_connectionService.CurrentEndPoint!);
                 finalDestinationsPerActionsGroupId.Add(sharedActionsGroup.ActionsGroupId, finalDestinations);
@@ -126,7 +127,7 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder, IDisposable
                     {
                         var temporaryFileManager = _temporaryFileManagerFactory.Create(finalDestination);
                         var destinationTemporaryPath = temporaryFileManager.GetDestinationTemporaryPath();
-
+                        
                         downloadDestinations.Add(destinationTemporaryPath);
                         temporaryFileManagers.Add(temporaryFileManager);
                     }
@@ -139,9 +140,10 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder, IDisposable
                     downloadDestinations.Add(deltaDestination);
                 }
                 
-                if (sharedActionsGroup.IsSynchronizeContentAndDate)
+                if (sharedActionsGroup.IsFullCopy)
                 {
-                    datesPerActionsGroupId.Add(sharedActionsGroup.ActionsGroupId, DownloadTargetDates.FromSharedActionsGroup(sharedActionsGroup));
+                    datesPerActionsGroupId.Add(sharedActionsGroup.ActionsGroupId,
+                        DownloadTargetDates.FromSharedActionsGroup(sharedActionsGroup));
                 }
             }
         }
@@ -155,10 +157,10 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder, IDisposable
         downloadTarget.FinalDestinationsPerActionsGroupId = finalDestinationsPerActionsGroupId;
         downloadTarget.LastWriteTimeUtcPerActionsGroupId = datesPerActionsGroupId;
         downloadTarget.TemporaryFileManagers = temporaryFileManagers;
-
+        
         // Store in cache
         _downloadTargetCache[sharedFileDefinition.Id] = downloadTarget;
-
+        
         return downloadTarget;
     }
     

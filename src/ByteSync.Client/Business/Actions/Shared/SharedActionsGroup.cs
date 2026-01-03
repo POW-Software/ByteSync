@@ -11,43 +11,34 @@ public class SharedActionsGroup : AbstractActionsGroup
     {
         Targets = new HashSet<SharedDataPart>();
     }
-
+    
     public PathIdentity PathIdentity { get; set; } = null!;
-
+    
     public SharedDataPart? Source { get; set; }
-
+    
     public HashSet<SharedDataPart> Targets { get; set; }
-
+    
     public SynchronizationTypes? SynchronizationType { get; set; }
-        
+    
     public SynchronizationStatus? SynchronizationStatus { get; set; }
-        
+    
     public bool IsFromSynchronizationRule { get; set; }
-
+    
     public string LinkingKeyValue
     {
-        get
-        {
-            return PathIdentity.LinkingKeyValue;
-        }
+        get { return PathIdentity.LinkingKeyValue; }
     }
-
+    
     public bool IsFile
     {
-        get
-        {
-            return PathIdentity.FileSystemType == FileSystemTypes.File;
-        }
+        get { return PathIdentity.FileSystemType == FileSystemTypes.File; }
     }
-        
+    
     public bool IsDirectory
     {
-        get
-        {
-            return PathIdentity.FileSystemType == FileSystemTypes.Directory;
-        }
+        get { return PathIdentity.FileSystemType == FileSystemTypes.Directory; }
     }
-
+    
     public string Key
     {
         get
@@ -62,27 +53,27 @@ public class SharedActionsGroup : AbstractActionsGroup
                    + SynchronizationType;
         }
     }
-
+    
     public string GetSourceFullName()
     {
         string sourceFileName = GetFullName(Source!);
-
+        
         return sourceFileName;
     }
-
+    
     public HashSet<string> GetTargetsFullNames(ByteSyncEndpoint endpoint)
     {
         HashSet<string> result = new HashSet<string>();
-
+        
         foreach (var target in Targets.Where(sdp => Equals(sdp.ClientInstanceId, endpoint.ClientInstanceId)))
         {
             var fullName = GetFullName(target);
             result.Add(fullName);
         }
-
+        
         return result;
     }
-        
+    
     public string GetFullName(SharedDataPart sharedDataPart)
     {
         string sourceFileName;
@@ -94,36 +85,37 @@ public class SharedActionsGroup : AbstractActionsGroup
         {
             sourceFileName = sharedDataPart.RootPath;
         }
-
+        
         return sourceFileName;
     }
-        
+    
     private bool Equals(SharedActionsGroup other)
     {
         return ActionsGroupId == other.ActionsGroupId;
     }
-
+    
     public override bool Equals(object? obj)
     {
         if (ReferenceEquals(null, obj)) return false;
         if (ReferenceEquals(this, obj)) return true;
         if (obj.GetType() != this.GetType()) return false;
-        return Equals((SharedActionsGroup) obj);
+        
+        return Equals((SharedActionsGroup)obj);
     }
-
+    
     public override int GetHashCode()
     {
         return ActionsGroupId.GetHashCode();
     }
-
+    
     public ActionsGroupDefinition GetDefinition()
     {
         var actionsGroupDefinition = new ActionsGroupDefinition();
-
+        
         actionsGroupDefinition.ActionsGroupId = ActionsGroupId;
         actionsGroupDefinition.FileSystemType = PathIdentity.FileSystemType;
         actionsGroupDefinition.Operator = Operator;
-        actionsGroupDefinition.AppliesOnlySynchronizeDate = AppliesOnlySynchronizeDate;
+        actionsGroupDefinition.AppliesOnlyCopyDate = AppliesOnlyCopyDate;
         actionsGroupDefinition.SourceClientInstanceId = Source?.ClientInstanceId;
         actionsGroupDefinition.TargetClientInstanceAndNodeIds = Targets
             .Select(t => new ClientInstanceIdAndNodeId
@@ -135,7 +127,7 @@ public class SharedActionsGroup : AbstractActionsGroup
         actionsGroupDefinition.Size = Size;
         actionsGroupDefinition.CreationTimeUtc = CreationTimeUtc;
         actionsGroupDefinition.LastWriteTimeUtc = LastWriteTimeUtc;
-
+        
         return actionsGroupDefinition;
     }
 }

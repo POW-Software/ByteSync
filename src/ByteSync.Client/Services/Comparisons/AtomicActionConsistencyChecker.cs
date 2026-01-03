@@ -104,8 +104,8 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
     
     private static AtomicActionValidationResult CheckBasicConsistency(AtomicAction atomicAction, ComparisonItem comparisonItem)
     {
-        if (atomicAction.Operator.In(ActionOperatorTypes.SynchronizeContentAndDate, ActionOperatorTypes.SynchronizeContentOnly,
-                ActionOperatorTypes.SynchronizeDate))
+        if (atomicAction.Operator.In(ActionOperatorTypes.Copy, ActionOperatorTypes.CopyContentOnly,
+                ActionOperatorTypes.CopyDatesOnly))
         {
             if (comparisonItem.FileSystemType == FileSystemTypes.Directory)
             {
@@ -168,13 +168,13 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
     {
         var enforceInventoryPartAccessGuard = ShouldEnforceInventoryPartAccessGuard();
         
-        if (atomicAction.Operator.In(ActionOperatorTypes.SynchronizeContentAndDate, ActionOperatorTypes.SynchronizeContentOnly,
-                ActionOperatorTypes.SynchronizeDate))
+        if (atomicAction.Operator.In(ActionOperatorTypes.Copy, ActionOperatorTypes.CopyContentOnly,
+                ActionOperatorTypes.CopyDatesOnly))
         {
             return ValidateSynchronize(atomicAction, comparisonItem, enforceInventoryPartAccessGuard);
         }
         
-        if (atomicAction.IsSynchronizeDate || atomicAction.IsDelete)
+        if (atomicAction.IsCopyDate || atomicAction.IsDelete)
         {
             return ValidateSynchronizeDateOrDelete(atomicAction, comparisonItem, enforceInventoryPartAccessGuard);
         }
@@ -289,7 +289,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
             return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.AtLeastOneTargetsNotAccessible);
         }
         
-        if (atomicAction.IsSynchronizeContentOnly && targetContentIdentities.Count != 0 &&
+        if (atomicAction.IsCopyContentOnly && targetContentIdentities.Count != 0 &&
             sourceContentIdentity.Core != null &&
             targetContentIdentities.All(t => t.Core != null && sourceContentIdentity.Core.Equals(t.Core)))
         {
@@ -474,8 +474,8 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         {
             var alreadySetAtomicAction = alreadySetAtomicActions.Single();
             
-            if ((!alreadySetAtomicAction.IsSynchronizeDate || !atomicAction.IsSynchronizeContentOnly)
-                && (!alreadySetAtomicAction.IsSynchronizeContentOnly || !atomicAction.IsSynchronizeDate))
+            if ((!alreadySetAtomicAction.IsCopyDate || !atomicAction.IsCopyContentOnly)
+                && (!alreadySetAtomicAction.IsCopyContentOnly || !atomicAction.IsCopyDate))
             {
                 return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason
                     .DestinationAlreadyUsedByNonComplementaryAction);

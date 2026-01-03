@@ -25,7 +25,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
     private readonly ISynchronizationApiClient _synchronizationApiClient;
     private readonly IFileDatesSetter _fileDatesSetter;
     private readonly ILogger<SynchronizationActionHandler> _logger;
-
+    
     public SynchronizationActionHandler(ISessionService sessionService, IConnectionService connectionService, IDeltaManager deltaManager,
         ISynchronizationActionServerInformer synchronizationActionServerInformer,
         ISynchronizationActionRemoteUploader synchronizationActionRemoteUploader,
@@ -43,20 +43,20 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         _fileDatesSetter = fileDatesSetter;
         _logger = logger;
     }
-
+    
     public ByteSyncEndpoint CurrentEndPoint => _connectionService.CurrentEndPoint!;
-
+    
     public async Task RunSynchronizationAction(SharedActionsGroup sharedActionsGroup, CancellationToken cancellationToken = default)
     {
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-
-            if (sharedActionsGroup.IsSynchronizeContentOnly || sharedActionsGroup.IsFinallySynchronizeContentAndDate)
+            
+            if (sharedActionsGroup.IsCopyContentOnly || sharedActionsGroup.IsFinallyCopyContentAndDate)
             {
                 await RunCopyContentSynchronizationAction(sharedActionsGroup, cancellationToken);
             }
-            else if (sharedActionsGroup.IsSynchronizeDate || sharedActionsGroup.IsFinallySynchronizeDate)
+            else if (sharedActionsGroup.IsCopyDate || sharedActionsGroup.IsFinallySynchronizeDate)
             {
                 await RunCopyDateSynchronizationAction(sharedActionsGroup, cancellationToken);
             }
@@ -76,70 +76,70 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         catch (OperationCanceledException)
         {
             _logger.LogInformation("SynchronizationAction cancelled for {ActionsGroupId}", sharedActionsGroup.ActionsGroupId);
-
+            
             throw;
         }
         catch (Exception)
         {
             await _synchronizationActionServerInformer.HandleCloudActionError(sharedActionsGroup);
-
+            
             throw;
         }
     }
-
+    
     public async Task RunPendingSynchronizationActions(CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Running pending synchronization actions");
-
+        
         cancellationToken.ThrowIfCancellationRequested();
-
+        
         if (_sessionService.CurrentSession is CloudSession)
         {
             if (_synchronizationService.SynchronizationProcessData.SynchronizationAbortRequest.Value == null)
             {
                 await _synchronizationActionRemoteUploader.Complete();
-
+                
                 await _synchronizationActionServerInformer.HandlePendingActions();
             }
             else
             {
                 await _synchronizationActionRemoteUploader.Abort();
-
+                
                 await _synchronizationActionServerInformer.ClearPendingActions();
             }
         }
     }
-
+    
     private async Task RunCopyContentSynchronizationAction(SharedActionsGroup sharedActionsGroup, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-
+        
         var localTargets = GetLocalTargets(sharedActionsGroup);
         if (localTargets.Count > 0)
         {
             await RunCopyContentLocal(sharedActionsGroup, localTargets, cancellationToken);
         }
-
+        
         cancellationToken.ThrowIfCancellationRequested();
-
+        
         var remoteTargets = GetRemoteTargets(sharedActionsGroup);
         if (remoteTargets.Count > 0)
         {
             await _synchronizationActionRemoteUploader.UploadForRemote(sharedActionsGroup);
         }
     }
-
+    
     private async Task RunCopyContentLocal(SharedActionsGroup sharedActionsGroup, HashSet<SharedDataPart> localTargets,
         CancellationToken cancellationToken)
     {
         var sourceFullName = sharedActionsGroup.GetSourceFullName();
-
+        
         foreach (var localTarget in localTargets)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
+            
             var destinationFullName = sharedActionsGroup.GetFullName(localTarget);
-
+            
             long? transferredBytes;
             if (sharedActionsGroup.SynchronizationType == SynchronizationTypes.Full)
             {
@@ -148,29 +148,29 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 {
                     _logger.LogInformation("{Type:l}: creating directory {directory}",
                         $"Synchronization.{sharedActionsGroup.Operator}", destinationFileInfo.Directory);
-
+                    
                     destinationFileInfo.Directory.Create();
                 }
-
+                
                 _logger.LogInformation("{Type:l}: copying from {source} to {destination}",
                     $"Synchronization.{sharedActionsGroup.Operator}", sourceFullName, destinationFullName);
-
+                
                 // For full copy, the transferred volume equals the file size
                 transferredBytes = new FileInfo(sourceFullName).Length;
                 File.Copy(sourceFullName, destinationFullName, true);
-
+                
                 await ApplyDatesFromLocalSource(sharedActionsGroup, destinationFullName);
             }
             else
             {
                 var deltaFullName = await _deltaManager.BuildDelta(sharedActionsGroup, localTarget, sourceFullName);
-
+                
                 try
                 {
                     // For delta copy, the transferred volume equals the delta size
                     transferredBytes = new FileInfo(deltaFullName).Length;
                     await _deltaManager.ApplyDelta(destinationFullName, deltaFullName);
-
+                    
                     await ApplyDatesFromSharedActionsGroup(sharedActionsGroup, destinationFullName);
                 }
                 finally
@@ -179,7 +179,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                     File.Delete(deltaFullName);
                 }
             }
-
+            
             var metrics = new Dictionary<string, SynchronizationActionMetrics>
             {
                 [sharedActionsGroup.ActionsGroupId] = new()
@@ -187,15 +187,15 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                     TransferredBytes = transferredBytes
                 }
             };
-
+            
             await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, localTarget,
                 _synchronizationApiClient.AssertLocalCopyIsDone, metrics);
         }
     }
-
+    
     private async Task ApplyDatesFromLocalSource(SharedActionsGroup sharedActionsGroup, string destinationFullName)
     {
-        if (sharedActionsGroup.IsSynchronizeContentOnly)
+        if (sharedActionsGroup.IsCopyContentOnly)
         {
             await _fileDatesSetter.SetDates(sharedActionsGroup, destinationFullName, null);
         }
@@ -205,23 +205,23 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
             await _fileDatesSetter.SetDates(sharedActionsGroup, destinationFullName, downloadTargetDates);
         }
     }
-
+    
     private async Task ApplyDatesFromSharedActionsGroup(SharedActionsGroup sharedActionsGroup, string destinationFullName)
     {
         DownloadTargetDates? downloadTargetDates = null;
-
-        if (sharedActionsGroup.IsSynchronizeContentAndDate || sharedActionsGroup.IsSynchronizeDate)
+        
+        if (sharedActionsGroup.IsFullCopy || sharedActionsGroup.IsCopyDate)
         {
             downloadTargetDates = DownloadTargetDates.FromSharedActionsGroup(sharedActionsGroup);
         }
-
+        
         await _fileDatesSetter.SetDates(sharedActionsGroup, destinationFullName, downloadTargetDates);
     }
-
+    
     private HashSet<SharedDataPart> GetLocalTargets(SharedActionsGroup sharedActionsGroup)
     {
         var localTargets = new HashSet<SharedDataPart>();
-
+        
         foreach (var sharedDataPart in sharedActionsGroup.Targets)
         {
             if (sharedDataPart.ClientInstanceId.Equals(CurrentEndPoint.ClientInstanceId))
@@ -229,14 +229,14 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 localTargets.Add(sharedDataPart);
             }
         }
-
+        
         return localTargets;
     }
-
+    
     private HashSet<SharedDataPart> GetRemoteTargets(SharedActionsGroup sharedActionsGroup)
     {
         var remoteTargets = new HashSet<SharedDataPart>();
-
+        
         foreach (var sharedDataPart in sharedActionsGroup.Targets)
         {
             if (!sharedDataPart.ClientInstanceId.Equals(CurrentEndPoint.ClientInstanceId))
@@ -244,24 +244,24 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 remoteTargets.Add(sharedDataPart);
             }
         }
-
+        
         return remoteTargets;
     }
-
+    
     private async Task RunCopyDateSynchronizationAction(SharedActionsGroup sharedActionsGroup, CancellationToken cancellationToken)
     {
         var localTargets = GetLocalTargets(sharedActionsGroup);
-
+        
         foreach (var localTarget in localTargets)
         {
             var destinationPath = sharedActionsGroup.GetFullName(localTarget);
-
+            
             cancellationToken.ThrowIfCancellationRequested();
-
+            
             if (File.Exists(destinationPath))
             {
                 await ApplyDatesFromSharedActionsGroup(sharedActionsGroup, destinationPath);
-
+                
                 await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, localTarget,
                     _synchronizationApiClient.AssertDateIsCopied);
             }
@@ -269,26 +269,26 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
             {
                 _logger.LogWarning("{Type:l}: can not apply last write time on {fileInfo}. This file does not exist",
                     $"Synchronization.{sharedActionsGroup.Operator}", destinationPath);
-
+                
                 await _synchronizationActionServerInformer.HandleCloudActionError(sharedActionsGroup, localTarget);
             }
         }
     }
-
+    
     private async Task RunDeleteSynchronizationAction(SharedActionsGroup sharedActionsGroup, CancellationToken cancellationToken)
     {
         var localTargets = GetLocalTargets(sharedActionsGroup);
-
+        
         foreach (var localTarget in localTargets)
         {
             var destinationPath = sharedActionsGroup.GetFullName(localTarget);
-
+            
             cancellationToken.ThrowIfCancellationRequested();
-
+            
             if (sharedActionsGroup.IsFile && File.Exists(destinationPath))
             {
                 var fileInfo = new FileInfo(destinationPath);
-
+                
                 _logger.LogInformation("{Type:l}: deleting {fileInfo}",
                     $"Synchronization.{sharedActionsGroup.Operator}", fileInfo.FullName);
                 fileInfo.Delete();
@@ -296,10 +296,10 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
             else if (sharedActionsGroup.IsDirectory && Directory.Exists(destinationPath))
             {
                 var directoryInfo = new DirectoryInfo(destinationPath);
-
+                
                 _logger.LogInformation("{Type:l}: deleting {fileInfo}",
                     $"Synchronization.{sharedActionsGroup.Operator}", directoryInfo.FullName);
-
+                
                 var subFilesCount = directoryInfo.GetFiles("*", SearchOption.AllDirectories).Length;
                 directoryInfo.Delete(subFilesCount == 0);
             }
@@ -308,30 +308,30 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 _logger.LogWarning("{Type:l}: {fileInfo} is already missing, will not try to delete it",
                     $"Synchronization.{sharedActionsGroup.Operator}", destinationPath);
             }
-
+            
             await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, localTarget,
                 _synchronizationApiClient.AssertFileOrDirectoryIsDeleted);
         }
     }
-
+    
     private async Task RunCreateSynchronizationAction(SharedActionsGroup sharedActionsGroup, CancellationToken cancellationToken)
     {
         var localTargets = GetLocalTargets(sharedActionsGroup);
-
+        
         foreach (var localTarget in localTargets)
         {
             var destinationPath = sharedActionsGroup.GetFullName(localTarget);
             cancellationToken.ThrowIfCancellationRequested();
-
+            
             if (sharedActionsGroup.PathIdentity.FileSystemType == FileSystemTypes.Directory)
             {
                 var directoryInfo = new DirectoryInfo(destinationPath);
-
+                
                 if (!directoryInfo.Exists)
                 {
                     _logger.LogInformation("{Type:l}: creating {directoryInfo}",
                         $"Synchronization.{sharedActionsGroup.Operator}", directoryInfo.FullName);
-
+                    
                     directoryInfo.Create();
                 }
                 else
@@ -339,7 +339,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                     _logger.LogInformation("{Type:l}: {directoryInfo} already exists",
                         $"Synchronization.{sharedActionsGroup.Operator}", directoryInfo.FullName);
                 }
-
+                
                 await _synchronizationActionServerInformer.HandleCloudActionDone(sharedActionsGroup, localTarget,
                     _synchronizationApiClient.AssertDirectoryIsCreated);
             }

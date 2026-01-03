@@ -1,4 +1,5 @@
-﻿using ByteSync.Business.Comparisons;
+﻿using System.IO;
+using ByteSync.Business.Comparisons;
 using ByteSync.Business.Filtering.Parsing;
 using ByteSync.Business.Filtering.Values;
 using ByteSync.Interfaces.Services.Filtering;
@@ -15,50 +16,50 @@ public class PropertyValueExtractor : IPropertyValueExtractor
         {
             return GetGeneralPropertyValue(item, property);
         }
-
+        
         // Find content identities for the specific data source
         var contentIdentities = item.GetContentIdentities(dataPart.GetApplicableInventoryPart());
-
+        
         var propertyLower = property.ToLowerInvariant();
         
         var propertyActions = new Dictionary<string, Func<PropertyValueCollection>>
         {
-            { Identifiers.PROPERTY_CONTENTS, () => ExtractContent(contentIdentities) },
-            { Identifiers.PROPERTY_CONTENTS_AND_DATE, () => ExtractContentAndDate(contentIdentities, dataPart) },
+            { Identifiers.PROPERTY_CONTENT, () => ExtractContent(contentIdentities) },
+            { Identifiers.PROPERTY_CONTENT_AND_DATE, () => ExtractContentAndDate(contentIdentities, dataPart) },
             { Identifiers.PROPERTY_SIZE, () => ExtractSize(contentIdentities, dataPart) },
             { Identifiers.PROPERTY_LAST_WRITE_TIME, () => ExtractLastWriteTime(contentIdentities, dataPart) },
         };
-
+        
         if (propertyActions.TryGetValue(propertyLower, out var action))
         {
             return action();
         }
-
+        
         throw new ArgumentException($"Unknown property: {property}");
     }
-
+    
     private PropertyValueCollection ExtractContent(List<ContentIdentity> contentIdentities)
     {
         var contents = new HashSet<string>();
-
+        
         foreach (var contentIdentity in contentIdentities)
         {
             contents.Add(contentIdentity.Core!.SignatureHash!);
         }
-
+        
         var result = new PropertyValueCollection();
         foreach (var content in contents)
         {
             result.Add(new PropertyValue(content));
         }
-
+        
         return result;
     }
     
     private PropertyValueCollection ExtractContentAndDate(List<ContentIdentity> contentIdentities, DataPart dataPart)
     {
         var contents = new HashSet<string>();
-
+        
         foreach (var contentIdentity in contentIdentities)
         {
             var signatureHash = contentIdentity.Core!.SignatureHash;
@@ -66,20 +67,20 @@ public class PropertyValueExtractor : IPropertyValueExtractor
             
             contents.Add($"{signatureHash}_{lastWriteTime?.Ticks}");
         }
-
+        
         var result = new PropertyValueCollection();
         foreach (var content in contents)
         {
             result.Add(new PropertyValue(content));
         }
-
+        
         return result;
     }
     
     private PropertyValueCollection ExtractSize(List<ContentIdentity> contentIdentities, DataPart dataPart)
     {
         var contents = new HashSet<long>();
-
+        
         foreach (var contentIdentity in contentIdentities)
         {
             foreach (var fileSystemDescription in contentIdentity.GetFileSystemDescriptions(dataPart.GetApplicableInventoryPart()))
@@ -90,20 +91,20 @@ public class PropertyValueExtractor : IPropertyValueExtractor
                 }
             }
         }
-
+        
         var result = new PropertyValueCollection();
         foreach (var content in contents)
         {
             result.Add(new PropertyValue(content));
         }
-
+        
         return result;
     }
     
     private PropertyValueCollection ExtractLastWriteTime(List<ContentIdentity> contentIdentities, DataPart dataPart)
     {
         var contents = new HashSet<DateTime>();
-
+        
         foreach (var contentIdentity in contentIdentities)
         {
             foreach (var fileSystemDescription in contentIdentity.GetFileSystemDescriptions(dataPart.GetApplicableInventoryPart()))
@@ -114,39 +115,42 @@ public class PropertyValueExtractor : IPropertyValueExtractor
                 }
             }
         }
-
+        
         var result = new PropertyValueCollection();
         foreach (var content in contents)
         {
             result.Add(new PropertyValue(content));
         }
-
+        
         return result;
     }
-
+    
     /// <summary>
     /// Gets property value that's not specific to a data source
     /// </summary>
     private PropertyValueCollection GetGeneralPropertyValue(ComparisonItem item, string property)
     {
         var propertyLower = property.ToLowerInvariant();
-
+        
         object value;
         switch (propertyLower)
         {
             case "ext":
-                value = System.IO.Path.GetExtension(item.PathIdentity.FileName).TrimStart('.');
+                value = Path.GetExtension(item.PathIdentity.FileName).TrimStart('.');
+                
                 break;
             case "name":
-                value = System.IO.Path.GetFileNameWithoutExtension(item.PathIdentity.FileName);
+                value = Path.GetFileNameWithoutExtension(item.PathIdentity.FileName);
+                
                 break;
             case "path":
                 value = item.PathIdentity.FileName;
+                
                 break;
             default:
                 throw new ArgumentException($"Property '{property}' requires a data source");
         }
-
+        
         var result = new PropertyValueCollection();
         result.Add(new PropertyValue(value));
         

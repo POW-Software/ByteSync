@@ -198,7 +198,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         atomicAction = new AtomicAction
         {
             Source = inventoryDataA.GetSingleDataPart(),
-            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Operator = ActionOperatorTypes.Copy,
             Destination = inventoryDataB.GetSingleDataPart()
         };
         
@@ -212,9 +212,9 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
     }
     
     [Test]
-    [TestCase(ActionOperatorTypes.SynchronizeContentAndDate, 0)]
-    [TestCase(ActionOperatorTypes.SynchronizeContentOnly, 0)]
-    [TestCase(ActionOperatorTypes.SynchronizeDate, 0)]
+    [TestCase(ActionOperatorTypes.Copy, 0)]
+    [TestCase(ActionOperatorTypes.CopyContentOnly, 0)]
+    [TestCase(ActionOperatorTypes.CopyDatesOnly, 0)]
     public async Task Test_FileOnAAndB_SameContentAndDate(ActionOperatorTypes actionOperator, int expectedValidItems)
     {
         AtomicAction atomicAction;
@@ -268,7 +268,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         var atomicAction = new AtomicAction
         {
             Source = new DataPart("A1", inventoryPartA),
-            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Operator = ActionOperatorTypes.Copy,
             Destination = new DataPart("B1", inventoryPartB)
         };
         
@@ -326,7 +326,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         var atomicAction = new AtomicAction
         {
             Source = null, // Missing source
-            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Operator = ActionOperatorTypes.Copy,
             Destination = new DataPart("B1", inventoryPartB)
         };
         
@@ -353,7 +353,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         var atomicAction = new AtomicAction
         {
             Source = new DataPart("A1", inventoryPartA),
-            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Operator = ActionOperatorTypes.Copy,
             Destination = null // Missing destination
         };
         
@@ -643,7 +643,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         var atomicAction = new AtomicAction
         {
             Source = new DataPart("A1", inventoryPartA),
-            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Operator = ActionOperatorTypes.Copy,
             Destination = new DataPart("B1", inventoryPartB)
         };
         
@@ -850,7 +850,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         var newAction = new AtomicAction
         {
             Source = commonDataPart, // Same as the destination of existingAction
-            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Operator = ActionOperatorTypes.Copy,
             Destination = inventoryDataB.GetSingleDataPart()
         };
         
@@ -893,7 +893,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         var existingAction = new AtomicAction
         {
             Source = commonDataPart, // This source will be the destination of the new action
-            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Operator = ActionOperatorTypes.Copy,
             Destination = inventoryDataB.GetSingleDataPart()
         };
         
@@ -1001,7 +1001,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         var existingSynchronizeDateAction = new AtomicAction
         {
             Source = inventoryDataA.GetSingleDataPart(),
-            Operator = ActionOperatorTypes.SynchronizeDate,
+            Operator = ActionOperatorTypes.CopyDatesOnly,
             Destination = commonDestination
         };
         
@@ -1009,7 +1009,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         var newSynchronizeContentOnlyAction = new AtomicAction
         {
             Source = inventoryDataA.GetSingleDataPart(), // Same source
-            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Operator = ActionOperatorTypes.CopyContentOnly,
             Destination = commonDestination // Same destination
         };
         
@@ -1059,7 +1059,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         var existingAction2 = new AtomicAction
         {
             Source = inventoryDataA.GetSingleDataPart(),
-            Operator = ActionOperatorTypes.SynchronizeDate,
+            Operator = ActionOperatorTypes.CopyDatesOnly,
             Destination = commonDestination
         };
         
@@ -1067,7 +1067,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         var newAction = new AtomicAction
         {
             Source = inventoryDataA.GetSingleDataPart(),
-            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Operator = ActionOperatorTypes.CopyContentOnly,
             Destination = commonDestination
         };
         
@@ -1114,7 +1114,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         var existingAction = new AtomicAction
         {
             Source = sourceItem,
-            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Operator = ActionOperatorTypes.Copy,
             Destination = itemToDelete // itemToDelete is used as destination
         };
         
@@ -1177,7 +1177,7 @@ public class TestAtomicActionConsistencyChecker : IntegrationTest
         var newAction = new AtomicAction
         {
             Source = itemBeingDeleted, // Tries to use the item being deleted as source
-            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Operator = ActionOperatorTypes.Copy,
             Destination = otherItem
         };
         
