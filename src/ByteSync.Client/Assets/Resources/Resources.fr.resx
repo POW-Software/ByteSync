@@ -1654,8 +1654,11 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 		<value>Destination requise pour la création</value>
 	</data>
 	<!-- Advanced Consistency - Source Issues -->
-	<data name="ValidationFailure_InvalidSourceCount" xml:space="preserve">
-		<value>Données source invalides</value>
+	<data name="ValidationFailure_SourceMissing" xml:space="preserve">
+		<value>Source introuvable</value>
+	</data>
+	<data name="ValidationFailure_SourceHasMultipleIdentities" xml:space="preserve">
+		<value>Plusieurs sources trouvées</value>
 	</data>
 	<data name="ValidationFailure_SourceHasAnalysisError" xml:space="preserve">
 		<value>Erreur d'analyse de la source</value>

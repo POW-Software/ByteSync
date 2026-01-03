@@ -229,9 +229,14 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
             return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.SourceNotAccessible);
         }
         
-        if (sourceContentIdentities.Count != 1)
+        if (sourceContentIdentities.Count == 0)
         {
-            return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.InvalidSourceCount);
+            return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.SourceMissing);
+        }
+        
+        if (sourceContentIdentities.Count >= 2)
+        {
+            return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason.SourceHasMultipleIdentities);
         }
         
         var sourceContentIdentity = sourceContentIdentities.Single();

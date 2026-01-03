@@ -194,7 +194,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         
         var failureSummary = new ValidationFailureSummary
         {
-            Reason = AtomicActionValidationFailureReason.InvalidSourceCount,
+            Reason = AtomicActionValidationFailureReason.SourceMissing,
             Count = 2,
             LocalizedMessage = "Old message",
             AffectedItems = []
@@ -202,7 +202,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         viewModel.FailureSummaries.Add(failureSummary);
         
         // Set up the new localized message before triggering the culture change
-        _mockFailureReasonService.Setup(x => x.GetLocalizedMessage(AtomicActionValidationFailureReason.InvalidSourceCount))
+        _mockFailureReasonService.Setup(x => x.GetLocalizedMessage(AtomicActionValidationFailureReason.SourceMissing))
             .Returns("New localized message");
         
         // Act
@@ -213,7 +213,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         
         // Assert
         viewModel.FailureSummaries[0].LocalizedMessage.Should().Be("New localized message");
-        _mockFailureReasonService.Verify(x => x.GetLocalizedMessage(AtomicActionValidationFailureReason.InvalidSourceCount), Times.Once);
+        _mockFailureReasonService.Verify(x => x.GetLocalizedMessage(AtomicActionValidationFailureReason.SourceMissing), Times.Once);
     }
     
     [Test]
@@ -233,7 +233,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         
         viewModel.FailureSummaries.Add(new ValidationFailureSummary
         {
-            Reason = AtomicActionValidationFailureReason.InvalidSourceCount,
+            Reason = AtomicActionValidationFailureReason.SourceHasMultipleIdentities,
             Count = 1,
             LocalizedMessage = "Test",
             AffectedItems = []
@@ -272,7 +272,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         var result = new AtomicActionConsistencyCheckCanAddResult(_comparisonItems);
         result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[0], true)); // Valid
         result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[1],
-            AtomicActionValidationFailureReason.InvalidSourceCount)); // Invalid
+            AtomicActionValidationFailureReason.SourceMissing)); // Invalid
         var atomicAction = new AtomicAction { Operator = ActionOperatorTypes.SynchronizeContentOnly };
         
         // Use reflection to access private method
@@ -291,7 +291,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         viewModel.AreMissingFields.Should().BeFalse();
         
         viewModel.FailureSummaries.Should().HaveCount(1);
-        viewModel.FailureSummaries[0].Reason.Should().Be(AtomicActionValidationFailureReason.InvalidSourceCount);
+        viewModel.FailureSummaries[0].Reason.Should().Be(AtomicActionValidationFailureReason.SourceMissing);
         viewModel.FailureSummaries[0].Count.Should().Be(1);
         viewModel.FailureSummaries[0].LocalizedMessage.Should().Be("Test failure message");
         viewModel.FailureSummaries[0].AffectedItems.Should().HaveCount(1);
@@ -315,9 +315,9 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         // Create real instance instead of mock - all items fail validation
         var result = new AtomicActionConsistencyCheckCanAddResult(_comparisonItems);
         result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[0],
-            AtomicActionValidationFailureReason.InvalidSourceCount)); // Invalid
+            AtomicActionValidationFailureReason.SourceHasMultipleIdentities)); // Invalid
         result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[1],
-            AtomicActionValidationFailureReason.InvalidSourceCount)); // Invalid
+            AtomicActionValidationFailureReason.SourceHasMultipleIdentities)); // Invalid
         var atomicAction = new AtomicAction { Operator = ActionOperatorTypes.SynchronizeContentOnly };
         
         // Use reflection to access private method
@@ -353,11 +353,11 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         // Create real instance instead of mock with multiple failure reasons
         var result = new AtomicActionConsistencyCheckCanAddResult(_comparisonItems);
         result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[0],
-            AtomicActionValidationFailureReason.InvalidSourceCount)); // First InvalidSourceCount
+            AtomicActionValidationFailureReason.SourceMissing)); // First SourceMissing
         result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[1],
             AtomicActionValidationFailureReason.CreateOperationOnFileNotAllowed)); // Different reason
         result.ValidationResults.Add(new ComparisonItemValidationResult(_comparisonItems[0],
-            AtomicActionValidationFailureReason.InvalidSourceCount)); // Duplicate InvalidSourceCount
+            AtomicActionValidationFailureReason.SourceMissing)); // Duplicate SourceMissing
         var atomicAction = new AtomicAction { Operator = ActionOperatorTypes.SynchronizeContentOnly };
         
         _mockFailureReasonService.Setup(x => x.GetLocalizedMessage(AtomicActionValidationFailureReason.CreateOperationOnFileNotAllowed))
@@ -374,8 +374,8 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         viewModel.FailureSummaries.Should().HaveCount(2);
         
         // Should be ordered by count (most frequent first)
-        viewModel.FailureSummaries[0].Count.Should().Be(2); // InvalidSourceCount appears twice
-        viewModel.FailureSummaries[0].Reason.Should().Be(AtomicActionValidationFailureReason.InvalidSourceCount);
+        viewModel.FailureSummaries[0].Count.Should().Be(2); // SourceMissing appears twice
+        viewModel.FailureSummaries[0].Reason.Should().Be(AtomicActionValidationFailureReason.SourceMissing);
         
         viewModel.FailureSummaries[1].Count.Should().Be(1); // CreateOperationOnFileNotAllowed appears once
         viewModel.FailureSummaries[1].Reason.Should().Be(AtomicActionValidationFailureReason.CreateOperationOnFileNotAllowed);
@@ -399,7 +399,7 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         
         viewModel.FailureSummaries.Add(new ValidationFailureSummary
         {
-            Reason = AtomicActionValidationFailureReason.InvalidSourceCount,
+            Reason = AtomicActionValidationFailureReason.SourceMissing,
             Count = 1,
             LocalizedMessage = "Test",
             AffectedItems = []
@@ -547,4 +547,5 @@ public class TargetedActionGlobalViewModelTests : AbstractTester
         tooltip.Should().Be("file1.txt\ndirectory1");
     }
 }
+
 

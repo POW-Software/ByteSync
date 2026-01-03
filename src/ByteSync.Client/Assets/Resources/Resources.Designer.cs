@@ -2910,14 +2910,23 @@ namespace ByteSync.Assets.Resources {
             get {
                 return ResourceManager.GetString("ValidationFailure_DuplicateActionNotAllowed", resourceCulture);
             }
+        }        
+        
+        /// <summary>
+        /// Looks up a localized string similar to Multiple sources found.
+        /// </summary>
+        internal static string ValidationFailure_SourceHasMultipleIdentities {
+            get {
+                return ResourceManager.GetString("ValidationFailure_SourceHasMultipleIdentities", resourceCulture);
+            }
         }
         
         /// <summary>
-        /// Looks up a localized string similar to Invalid source data.
+        /// Looks up a localized string similar to Source not found.
         /// </summary>
-        internal static string ValidationFailure_InvalidSourceCount {
+        internal static string ValidationFailure_SourceMissing {
             get {
-                return ResourceManager.GetString("ValidationFailure_InvalidSourceCount", resourceCulture);
+                return ResourceManager.GetString("ValidationFailure_SourceMissing", resourceCulture);
             }
         }
         
@@ -3201,3 +3210,6 @@ namespace ByteSync.Assets.Resources {
         }
     }
 }
+
+
+
