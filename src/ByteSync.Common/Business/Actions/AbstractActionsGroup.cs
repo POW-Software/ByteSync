@@ -36,6 +36,6 @@ public class AbstractActionsGroup : AbstractAction
     
     public bool NeedsOnlyOperatingOnTargets
     {
-        get { return IsCopyDate || IsCreate || IsDelete || IsFinallySynchronizeDate; }
+        get { return IsCopyDates || IsCreate || IsDelete || IsFinallySynchronizeDate; }
     }
 }

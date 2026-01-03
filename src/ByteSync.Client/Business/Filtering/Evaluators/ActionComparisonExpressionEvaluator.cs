@@ -96,7 +96,7 @@ public class ActionComparisonExpressionEvaluator : ExpressionEvaluator<ActionCom
         {
             Identifiers.ACTION_COPY_CONTENT => actions.Count(a => a.IsCopyContent),
             Identifiers.ACTION_COPY => actions.Count(a => a.IsFullCopy),
-            Identifiers.ACTION_COPY_DATES => actions.Count(a => a.IsCopyDate),
+            Identifiers.ACTION_COPY_DATES => actions.Count(a => a.IsCopyDates),
             Identifiers.ACTION_SYNCHRONIZE_DELETE => actions.Count(a => a.IsDelete),
             Identifiers.ACTION_SYNCHRONIZE_CREATE => actions.Count(a => a.IsCreate),
             Identifiers.ACTION_DO_NOTHING => actions.Count(a => a.IsDoNothing),

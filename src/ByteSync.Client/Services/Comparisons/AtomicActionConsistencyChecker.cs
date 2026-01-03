@@ -174,7 +174,7 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
             return ValidateSynchronize(atomicAction, comparisonItem, enforceInventoryPartAccessGuard);
         }
         
-        if (atomicAction.IsCopyDate || atomicAction.IsDelete)
+        if (atomicAction.IsCopyDates || atomicAction.IsDelete)
         {
             return ValidateSynchronizeDateOrDelete(atomicAction, comparisonItem, enforceInventoryPartAccessGuard);
         }
@@ -474,8 +474,8 @@ public class AtomicActionConsistencyChecker : IAtomicActionConsistencyChecker
         {
             var alreadySetAtomicAction = alreadySetAtomicActions.Single();
             
-            if ((!alreadySetAtomicAction.IsCopyDate || !atomicAction.IsCopyContentOnly)
-                && (!alreadySetAtomicAction.IsCopyContentOnly || !atomicAction.IsCopyDate))
+            if ((!alreadySetAtomicAction.IsCopyDates || !atomicAction.IsCopyContentOnly)
+                && (!alreadySetAtomicAction.IsCopyContentOnly || !atomicAction.IsCopyDates))
             {
                 return AtomicActionValidationResult.Failure(AtomicActionValidationFailureReason
                     .DestinationAlreadyUsedByNonComplementaryAction);

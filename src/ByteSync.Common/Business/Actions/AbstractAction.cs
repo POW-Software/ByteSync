@@ -21,7 +21,7 @@ public abstract class AbstractAction
         get { return Operator.In(ActionOperatorTypes.Copy); }
     }
     
-    public bool IsCopyDate
+    public bool IsCopyDates
     {
         get { return Operator.In(ActionOperatorTypes.CopyDatesOnly); }
     }

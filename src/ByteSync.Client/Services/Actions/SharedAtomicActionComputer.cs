@@ -48,7 +48,7 @@ public class SharedAtomicActionComputer : ISharedAtomicActionComputer
         {
             var targetContentIdentities = atomicAction.ComparisonItem!.GetContentIdentities(target!.GetApplicableInventoryPart());
             
-            targetSharedDataParts = new HashSet<SharedDataPart>();
+            targetSharedDataParts = [];
             foreach (var contentIdentity in targetContentIdentities)
             {
                 targetSharedDataParts.AddAll(BuildSharedDataPart(target, contentIdentity));
@@ -57,11 +57,11 @@ public class SharedAtomicActionComputer : ISharedAtomicActionComputer
         
         if (atomicAction.IsCreate)
         {
-            SharedDataPart targetSharedDataPart = DoBuildSharedDataPart(target!, atomicAction.PathIdentity!.LinkingKeyValue);
+            var targetSharedDataPart = DoBuildSharedDataPart(target!, atomicAction.PathIdentity!.LinkingKeyValue);
             
-            targetSharedDataParts = new HashSet<SharedDataPart> { targetSharedDataPart };
+            targetSharedDataParts = [targetSharedDataPart];
         }
-        else if (atomicAction.IsCopyContent || atomicAction.IsCopyDate)
+        else if (atomicAction.IsCopyContent || atomicAction.IsCopyDates)
         {
             var sourceContentIdentities = atomicAction.ComparisonItem!.GetContentIdentities(source!.GetApplicableInventoryPart());
             var targetContentIdentities = atomicAction.ComparisonItem!.GetContentIdentities(target!.GetApplicableInventoryPart());
@@ -83,7 +83,7 @@ public class SharedAtomicActionComputer : ISharedAtomicActionComputer
                 
                 sourceSharedDataPart = BuildSharedDataPart(source, sourceContentIdentity).First();
                 
-                targetSharedDataParts = new HashSet<SharedDataPart>();
+                targetSharedDataParts = [];
                 foreach (var targetContentIdentity in targetContentIdentities)
                 {
                     if (!Equals(targetContentIdentity.Core?.SignatureHash,
@@ -101,10 +101,10 @@ public class SharedAtomicActionComputer : ISharedAtomicActionComputer
                 
                 sourceSharedDataPart = BuildSharedDataPart(source, sourceContentIdentity).First();
                 
-                SharedDataPart targetSharedDataPart = DoBuildSharedDataPart(target,
+                var targetSharedDataPart = DoBuildSharedDataPart(target,
                     sourceSharedDataPart.RelativePath);
                 
-                targetSharedDataParts = new HashSet<SharedDataPart> { targetSharedDataPart };
+                targetSharedDataParts = [targetSharedDataPart];
             }
         }
         
@@ -116,7 +116,7 @@ public class SharedAtomicActionComputer : ISharedAtomicActionComputer
         }
         else
         {
-            foreach (SharedDataPart targetSharedDataPart in targetSharedDataParts)
+            foreach (var targetSharedDataPart in targetSharedDataParts)
             {
                 CreateSharedAtomicAction(atomicAction.AtomicActionId, sourceSharedDataPart, targetSharedDataPart,
                     atomicAction.Operator, atomicAction.PathIdentity!, synchronizationType,
@@ -160,7 +160,7 @@ public class SharedAtomicActionComputer : ISharedAtomicActionComputer
             
             string? signatureGuid = null;
             string? signatureHash = null;
-            bool hasAnalysisError = false;
+            var hasAnalysisError = false;
             
             if (fileSystemDescription is FileDescription fileDescription)
             {
@@ -169,7 +169,7 @@ public class SharedAtomicActionComputer : ISharedAtomicActionComputer
                 hasAnalysisError = fileDescription.HasAnalysisError;
             }
             
-            SharedDataPart sharedDataPart = DoBuildSharedDataPart(dataPart,
+            var sharedDataPart = DoBuildSharedDataPart(dataPart,
                 fileSystemDescription.RelativePath, signatureGuid, signatureHash, hasAnalysisError);
             
             result.Add(sharedDataPart);
@@ -184,7 +184,7 @@ public class SharedAtomicActionComputer : ISharedAtomicActionComputer
         var inventory = dataPart.GetAppliableInventory();
         var inventoryPart = dataPart.GetApplicableInventoryPart();
         
-        SharedDataPart sharedDataPart = new SharedDataPart(
+        var sharedDataPart = new SharedDataPart(
             dataPart.Name,
             inventory,
             inventoryPart,

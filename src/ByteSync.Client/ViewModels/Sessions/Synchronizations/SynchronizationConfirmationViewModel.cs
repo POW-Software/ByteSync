@@ -116,7 +116,7 @@ public class SynchronizationConfirmationViewModel : FlyoutElementViewModel
                 MachineName = sessionMember?.MachineName ?? "Unknown",
                 CreateCount = group.Count(a => a.IsCreate),
                 SynchronizeContentCount = group.Count(a => a.IsCopyContent),
-                SynchronizeDateCount = group.Count(a => a.IsCopyDate),
+                SynchronizeDateCount = group.Count(a => a.IsCopyDates),
                 DeleteCount = group.Count(a => a.IsDelete)
             };
             

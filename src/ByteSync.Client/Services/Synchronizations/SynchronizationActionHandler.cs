@@ -56,7 +56,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
             {
                 await RunCopyContentSynchronizationAction(sharedActionsGroup, cancellationToken);
             }
-            else if (sharedActionsGroup.IsCopyDate || sharedActionsGroup.IsFinallySynchronizeDate)
+            else if (sharedActionsGroup.IsCopyDates || sharedActionsGroup.IsFinallySynchronizeDate)
             {
                 await RunCopyDateSynchronizationAction(sharedActionsGroup, cancellationToken);
             }
@@ -210,7 +210,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
     {
         DownloadTargetDates? downloadTargetDates = null;
         
-        if (sharedActionsGroup.IsFullCopy || sharedActionsGroup.IsCopyDate)
+        if (sharedActionsGroup.IsFullCopy || sharedActionsGroup.IsCopyDates)
         {
             downloadTargetDates = DownloadTargetDates.FromSharedActionsGroup(sharedActionsGroup);
         }

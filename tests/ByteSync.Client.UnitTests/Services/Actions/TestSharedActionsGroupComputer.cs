@@ -82,7 +82,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
         Assert.That(sharedActionGroup.IsDelete, Is.False);
         Assert.That(sharedActionGroup.IsDoNothing, Is.False);
         Assert.That(sharedActionGroup.IsCopyContentOnly, Is.False);
-        Assert.That(sharedActionGroup.IsCopyDate, Is.False);
+        Assert.That(sharedActionGroup.IsCopyDates, Is.False);
         Assert.That(sharedActionGroup.IsFinallySynchronizeDate, Is.False);
         Assert.That(sharedActionGroup.AppliesOnlyCopyDate, Is.False);
         Assert.That(sharedActionGroup.LinkingKeyValue, Is.EqualTo("file1.txt"));
@@ -197,7 +197,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
         ClassicAssert.IsTrue(sharedActionsGroup.IsCopyContent);
         ClassicAssert.IsTrue(sharedActionsGroup.IsFullCopy);
         ClassicAssert.IsFalse(sharedActionsGroup.IsCopyContentOnly);
-        ClassicAssert.IsFalse(sharedActionsGroup.IsCopyDate);
+        ClassicAssert.IsFalse(sharedActionsGroup.IsCopyDates);
         
         ClassicAssert.AreEqual(dateTime, sharedActionsGroup.LastWriteTimeUtc);
         ClassicAssert.AreEqual("file1.txt", sharedActionsGroup.LinkingKeyValue);
@@ -275,7 +275,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
         ClassicAssert.IsTrue(sharedActionsGroup.IsCopyContent);
         ClassicAssert.IsTrue(sharedActionsGroup.IsFullCopy);
         ClassicAssert.IsFalse(sharedActionsGroup.IsCopyContentOnly);
-        ClassicAssert.IsFalse(sharedActionsGroup.IsCopyDate);
+        ClassicAssert.IsFalse(sharedActionsGroup.IsCopyDates);
         
         ClassicAssert.AreEqual(dateTime, sharedActionsGroup.LastWriteTimeUtc);
         ClassicAssert.AreEqual("file1.txt", sharedActionsGroup.LinkingKeyValue);
@@ -352,7 +352,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
             ClassicAssert.IsTrue(sharedActionsGroup.IsCopyContent);
             ClassicAssert.IsTrue(sharedActionsGroup.IsFullCopy);
             ClassicAssert.IsFalse(sharedActionsGroup.IsCopyContentOnly);
-            ClassicAssert.IsFalse(sharedActionsGroup.IsCopyDate);
+            ClassicAssert.IsFalse(sharedActionsGroup.IsCopyDates);
             
             ClassicAssert.AreEqual(dateTime, sharedActionsGroup.LastWriteTimeUtc);
             ClassicAssert.AreEqual("file1.txt", sharedActionsGroup.LinkingKeyValue);
@@ -429,7 +429,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
         ClassicAssert.IsTrue(sharedActionsGroup.IsCopyContent);
         ClassicAssert.IsTrue(sharedActionsGroup.IsFullCopy);
         ClassicAssert.IsFalse(sharedActionsGroup.IsCopyContentOnly);
-        ClassicAssert.IsFalse(sharedActionsGroup.IsCopyDate);
+        ClassicAssert.IsFalse(sharedActionsGroup.IsCopyDates);
         
         ClassicAssert.AreEqual(dateTime, sharedActionsGroup.LastWriteTimeUtc);
         ClassicAssert.AreEqual("file1.txt", sharedActionsGroup.LinkingKeyValue);
@@ -505,7 +505,7 @@ public class TestSharedActionsGroupComputer : AbstractTester
         ClassicAssert.IsTrue(sharedActionsGroup.IsCopyContent);
         ClassicAssert.IsTrue(sharedActionsGroup.IsFullCopy);
         ClassicAssert.IsFalse(sharedActionsGroup.IsCopyContentOnly);
-        ClassicAssert.IsFalse(sharedActionsGroup.IsCopyDate);
+        ClassicAssert.IsFalse(sharedActionsGroup.IsCopyDates);
         
         ClassicAssert.AreEqual(dateTime, sharedActionsGroup.LastWriteTimeUtc);
         ClassicAssert.AreEqual("file1.txt", sharedActionsGroup.LinkingKeyValue);
