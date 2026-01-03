@@ -173,7 +173,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
                 ResetWarning();
                 
                 _targetedActionsService.AddTargetedAction(atomicAction, ComparisonItems);
-                LogConsistencySuccess(atomicAction, ComparisonItems.Count);
+                LogConsistencySuccess(atomicAction, ComparisonItems);
                 
                 _dialogService.CloseFlyout();
             }
@@ -198,7 +198,7 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
             ResetWarning();
             
             _targetedActionsService.AddTargetedAction(atomicAction, result.GetValidComparisonItems());
-            LogConsistencySuccess(atomicAction, result.GetValidComparisonItems().Count);
+            LogConsistencySuccess(atomicAction, result.GetValidComparisonItems());
             
             _dialogService.CloseFlyout();
         }
@@ -394,15 +394,22 @@ public class TargetedActionGlobalViewModel : FlyoutElementViewModel
             failureDetails);
     }
     
-    private void LogConsistencySuccess(AtomicAction atomicAction, int itemsCount)
+    private void LogConsistencySuccess(AtomicAction atomicAction, IEnumerable<ComparisonItem> comparisonItems)
     {
+        var itemList = BuildItemList(comparisonItems);
+        
         _logger.LogInformation(
-            "Targeted action created. Operator={Operator} Source={Source} Destination={Destination} FileSystemType={FileSystemType} ItemsCount={ItemsCount}",
+            "Targeted action created. Operator={Operator} Source={Source} Destination={Destination} FileSystemType={FileSystemType} Items={Items}",
             atomicAction.Operator,
             atomicAction.SourceName ?? string.Empty,
             atomicAction.DestinationName ?? string.Empty,
             FileSystemType,
-            itemsCount);
+            itemList);
+    }
+    
+    private static string BuildItemList(IEnumerable<ComparisonItem> comparisonItems)
+    {
+        return string.Join(", ", comparisonItems.Select(item => item.PathIdentity?.LinkingKeyValue ?? "unknown"));
     }
     
     private static string BuildFailureDetails(IEnumerable<ValidationFailureSummary> summaries)
