@@ -50,6 +50,7 @@ public abstract class BaseTestFiltering : IntegrationTest
         RegisterType<PropertyComparisonExpressionEvaluator, IExpressionEvaluator>();
         RegisterType<TextSearchExpressionEvaluator, IExpressionEvaluator>();
         RegisterType<ActionComparisonExpressionEvaluator, IExpressionEvaluator>();
+        RegisterType<HasExpressionEvaluator, IExpressionEvaluator>();
         
         RegisterType<ExpressionEvaluatorFactory, IExpressionEvaluatorFactory>();
         RegisterType<FilterParser>();
@@ -302,5 +303,98 @@ public abstract class BaseTestFiltering : IntegrationTest
         var evaluator = _evaluatorFactory.GetEvaluator(expression);
         
         return evaluator.Evaluate(expression, item);
+    }
+    
+    protected ComparisonItem PrepareComparisonWithInaccessibleFile(string dataPartId)
+    {
+        var comparisonItem = CreateBasicComparisonItem(FileSystemTypes.File);
+
+        string letter = dataPartId[0].ToString();
+
+        var inventory = new Inventory { InventoryId = $"Id_{letter}", Code = letter };
+        var inventoryPart = new InventoryPart(inventory, $"/testRoot{letter}", FileSystemTypes.Directory);
+        inventoryPart.Code = $"{letter}1";
+
+        var fileDescription = new FileDescription
+        {
+            InventoryPart = inventoryPart,
+            RelativePath = "/inaccessible_file.txt",
+            IsAccessible = false
+        };
+
+        var contentIdentity = new ContentIdentity(null);
+        contentIdentity.Add(fileDescription);
+        comparisonItem.AddContentIdentity(contentIdentity);
+
+        var dataParts = new Dictionary<string, (InventoryPart, FileDescription)>
+        {
+            { dataPartId, (inventoryPart, fileDescription) }
+        };
+        ConfigureDataPartIndex(dataParts);
+
+        return comparisonItem;
+    }
+
+    protected ComparisonItem PrepareComparisonWithInaccessibleDirectory(string dataPartId)
+    {
+        var comparisonItem = CreateBasicComparisonItem(FileSystemTypes.Directory);
+
+        string letter = dataPartId[0].ToString();
+
+        var inventory = new Inventory { InventoryId = $"Id_{letter}", Code = letter };
+        var inventoryPart = new InventoryPart(inventory, $"/testRoot{letter}", FileSystemTypes.Directory);
+        inventoryPart.Code = $"{letter}1";
+
+        var directoryDescription = new DirectoryDescription
+        {
+            InventoryPart = inventoryPart,
+            RelativePath = "/inaccessible_dir",
+            IsAccessible = false
+        };
+
+        var contentIdentity = new ContentIdentity(null);
+        contentIdentity.Add(directoryDescription);
+        contentIdentity.AddAccessIssue(inventoryPart);
+        comparisonItem.AddContentIdentity(contentIdentity);
+
+        var dataParts = new Dictionary<string, (InventoryPart, DirectoryDescription)>
+        {
+            { dataPartId, (inventoryPart, directoryDescription) }
+        };
+        ConfigureDataPartIndex(dataParts);
+
+        return comparisonItem;
+    }
+
+    protected ComparisonItem PrepareComparisonWithAnalysisError(string dataPartId)
+    {
+        var comparisonItem = CreateBasicComparisonItem(FileSystemTypes.File);
+
+        string letter = dataPartId[0].ToString();
+
+        var inventory = new Inventory { InventoryId = $"Id_{letter}", Code = letter };
+        var inventoryPart = new InventoryPart(inventory, $"/testRoot{letter}", FileSystemTypes.Directory);
+        inventoryPart.Code = $"{letter}1";
+
+        var fileDescription = new FileDescription
+        {
+            InventoryPart = inventoryPart,
+            RelativePath = "/error_file.txt",
+            IsAccessible = true,
+            AnalysisErrorDescription = "Simulated analysis error",
+            AnalysisErrorType = "TestError"
+        };
+
+        var contentIdentity = new ContentIdentity(null);
+        contentIdentity.Add(fileDescription);
+        comparisonItem.AddContentIdentity(contentIdentity);
+
+        var dataParts = new Dictionary<string, (InventoryPart, FileDescription)>
+        {
+            { dataPartId, (inventoryPart, fileDescription) }
+        };
+        ConfigureDataPartIndex(dataParts);
+
+        return comparisonItem;
     }
 }

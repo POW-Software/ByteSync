@@ -16,9 +16,14 @@ public class Identifiers
     public const string OPERATOR_ON = "on";
     public const string OPERATOR_ONLY = "only";
     public const string OPERATOR_IS = "is";
+    public const string OPERATOR_HAS = "has";
     public const string OPERATOR_ACTIONS = "actions";
     public const string OPERATOR_NAME = "name";
     public const string OPERATOR_PATH = "path";
+    
+    public const string PROPERTY_ACCESS_ISSUE = "access-issue";
+    public const string PROPERTY_COMPUTATION_ERROR = "computation-error";
+    public const string PROPERTY_SYNC_ERROR = "sync-error";
     
     public const string PROPERTY_CONTENT = "content";
     public const string PROPERTY_CONTENT_AND_DATE = "content-and-date";
