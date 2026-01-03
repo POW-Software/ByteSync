@@ -67,7 +67,7 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
         {
             CreateActionWithTarget("1", "client1", "node1", ActionOperatorTypes.Create),
             CreateActionWithTarget("2", "client1", "node1", ActionOperatorTypes.Delete),
-            CreateActionWithTarget("3", "client2", "node2", ActionOperatorTypes.SynchronizeContentOnly)
+            CreateActionWithTarget("3", "client2", "node2", ActionOperatorTypes.CopyContentOnly)
         };
         
         SetupDataNodes(
@@ -89,8 +89,8 @@ public class SynchronizationConfirmationViewModelTests : AbstractTester
         {
             CreateActionWithTarget("1", "client1", "node1", ActionOperatorTypes.Create),
             CreateActionWithTarget("2", "client1", "node1", ActionOperatorTypes.Create),
-            CreateActionWithTarget("3", "client1", "node1", ActionOperatorTypes.SynchronizeContentOnly),
-            CreateActionWithTarget("4", "client1", "node1", ActionOperatorTypes.SynchronizeDate),
+            CreateActionWithTarget("3", "client1", "node1", ActionOperatorTypes.CopyContentOnly),
+            CreateActionWithTarget("4", "client1", "node1", ActionOperatorTypes.CopyDatesOnly),
             CreateActionWithTarget("5", "client1", "node1", ActionOperatorTypes.Delete)
         };
         

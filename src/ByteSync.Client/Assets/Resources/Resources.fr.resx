@@ -235,13 +235,13 @@
 	<data name="AtomicActionEdit_Destination" xml:space="preserve">
 		<value>Destination</value>
 	</data>
-	<data name="AtomicActionEdit_SynchronizeContentAndDate" xml:space="preserve">
+    <data name="AtomicActionEdit_Copy" xml:space="preserve">
 		<value>Copier</value>
 	</data>
-	<data name="AtomicActionEdit_SynchronizeContent" xml:space="preserve">
+    <data name="AtomicActionEdit_CopyContent" xml:space="preserve">
 		<value>Copier le contenu uniquement</value>
 	</data>
-	<data name="AtomicActionEdit_SynchronizeDate" xml:space="preserve">
+    <data name="AtomicActionEdit_CopyDate" xml:space="preserve">
 		<value>Copier les dates uniquement</value>
 	</data>
 	<data name="AtomicActionEdit_DoNothing" xml:space="preserve">
@@ -289,13 +289,13 @@
 	<data name="TargetedActionEditionGlobal_DoTheFollowingAction" xml:space="preserve">
 		<value>Effectuer l'action suivante :</value>
 	</data>
-	<data name="SynchronizationActionDescription_Action_SynchronizeContent" xml:space="preserve">
+    <data name="SynchronizationActionDescription_Action_CopyContent" xml:space="preserve">
 		<value>Copier le contenu uniquement</value>
 	</data>
-	<data name="SynchronizationActionDescription_Action_SynchronizeContentAndDate" xml:space="preserve">
+    <data name="SynchronizationActionDescription_Action_Copy" xml:space="preserve">
 		<value>Copier</value>
 	</data>
-	<data name="SynchronizationActionDescription_Action_SynchronizeDate" xml:space="preserve">
+    <data name="SynchronizationActionDescription_Action_CopyDate" xml:space="preserve">
 		<value>Copier les dates uniquement</value>
 	</data>
 	<data name="SynchronizationActionDescription_Action_DoNothing" xml:space="preserve">
@@ -1654,8 +1654,11 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 		<value>Destination requise pour la création</value>
 	</data>
 	<!-- Advanced Consistency - Source Issues -->
-	<data name="ValidationFailure_InvalidSourceCount" xml:space="preserve">
-		<value>Données source invalides</value>
+	<data name="ValidationFailure_SourceMissing" xml:space="preserve">
+		<value>Source introuvable</value>
+	</data>
+	<data name="ValidationFailure_SourceHasMultipleIdentities" xml:space="preserve">
+		<value>Plusieurs sources trouvées</value>
 	</data>
 	<data name="ValidationFailure_SourceHasAnalysisError" xml:space="preserve">
 		<value>Erreur d'analyse de la source</value>

@@ -1,20 +1,28 @@
+using System.Collections;
+using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
+using Autofac;
 using ByteSync.Business;
 using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Comparisons;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Actions;
+using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Inventories;
+using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
+using ByteSync.Models.Inventories;
+using ByteSync.Services;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 
@@ -28,6 +36,7 @@ public class SynchronizationRuleGlobalViewModelTests
     private Mock<ILocalizationService> _localizationService = null!;
     private Mock<IActionEditViewModelFactory> _actionEditViewModelFactory = null!;
     private Mock<ISynchronizationRulesService> _synchronizationRulesService = null!;
+    private Mock<ILogger<SynchronizationRuleGlobalViewModel>> _logger = null!;
     
     private Subject<CultureDefinition> _cultureSubject = null!;
     
@@ -39,6 +48,7 @@ public class SynchronizationRuleGlobalViewModelTests
         _localizationService = new Mock<ILocalizationService>(MockBehavior.Strict);
         _actionEditViewModelFactory = new Mock<IActionEditViewModelFactory>(MockBehavior.Strict);
         _synchronizationRulesService = new Mock<ISynchronizationRulesService>(MockBehavior.Strict);
+        _logger = new Mock<ILogger<SynchronizationRuleGlobalViewModel>>();
         
         _cultureSubject = new Subject<CultureDefinition>();
         
@@ -49,6 +59,128 @@ public class SynchronizationRuleGlobalViewModelTests
     private void SetupSession(DataTypes dataType)
     {
         _sessionService.SetupGet(s => s.CurrentSessionSettings).Returns(new SessionSettings { DataType = dataType });
+    }
+    
+    private sealed class TestDataPartIndexer : IDataPartIndexer
+    {
+        private readonly ReadOnlyCollection<DataPart> _dataParts;
+        
+        public TestDataPartIndexer(IReadOnlyCollection<DataPart> dataParts)
+        {
+            _dataParts = new ReadOnlyCollection<DataPart>(dataParts.ToList());
+        }
+        
+        public void BuildMap(List<Inventory> inventories)
+        {
+        }
+        
+        public ReadOnlyCollection<DataPart> GetAllDataParts()
+        {
+            return _dataParts;
+        }
+        
+        public DataPart? GetDataPart(string? dataPartName)
+        {
+            return _dataParts.FirstOrDefault(dp => dp.Name == dataPartName);
+        }
+        
+        public void Remap(ICollection<SynchronizationRule> synchronizationRules)
+        {
+        }
+    }
+    
+    private static TestDataPartIndexer BuildDataPartIndexer()
+    {
+        var endpoint = new ByteSyncEndpoint
+        {
+            ClientId = "c",
+            ClientInstanceId = "ci",
+            Version = "v",
+            OSPlatform = OSPlatforms.Windows,
+            IpAddress = "127.0.0.1"
+        };
+        
+        var inventoryA = new Inventory { InventoryId = "INV_A", Code = "A", Endpoint = endpoint, MachineName = "M" };
+        var inventoryB = new Inventory { InventoryId = "INV_B", Code = "B", Endpoint = endpoint, MachineName = "M" };
+        var partA = new InventoryPart(inventoryA, "c:\\a", FileSystemTypes.Directory) { Code = "A1" };
+        var partB = new InventoryPart(inventoryB, "c:\\b", FileSystemTypes.Directory) { Code = "B1" };
+        
+        var dataParts = new List<DataPart>
+        {
+            new("A", partA),
+            new("B", partB)
+        };
+        
+        return new TestDataPartIndexer(dataParts);
+    }
+    
+    private static AtomicConditionEditViewModel BuildValidConditionViewModel(IDataPartIndexer dataPartIndexer)
+    {
+        var conditionVm = new AtomicConditionEditViewModel(FileSystemTypes.File, dataPartIndexer);
+        
+        var sourceOrProperties = (IEnumerable)GetInternalProperty(conditionVm, "SourceOrProperties");
+        var comparisonOperators = (IEnumerable)GetInternalProperty(conditionVm, "ComparisonOperators");
+        var destinations = (IEnumerable)GetInternalProperty(conditionVm, "ConditionDestinations");
+        
+        SetInternalProperty(conditionVm, "SelectedSourceOrProperty", FirstWhereBoolProperty(sourceOrProperties, "IsDataPart", true));
+        SetInternalProperty(conditionVm, "SelectedComparisonOperator", FirstItem(comparisonOperators));
+        SetInternalProperty(conditionVm, "SelectedDestination", FirstWhereBoolProperty(destinations, "IsVirtual", false));
+        
+        return conditionVm;
+    }
+    
+    private static AtomicActionEditViewModel BuildValidActionViewModel(IDataPartIndexer dataPartIndexer)
+    {
+        var actionVm = new AtomicActionEditViewModel(FileSystemTypes.File, true, null, dataPartIndexer);
+        
+        var actions = (IEnumerable)GetInternalProperty(actionVm, "Actions");
+        var sources = (IEnumerable)GetInternalProperty(actionVm, "Sources");
+        
+        SetInternalProperty(actionVm, "SelectedAction", FirstItem(actions));
+        SetInternalProperty(actionVm, "SelectedSource", FirstItem(sources));
+        
+        var destinations = (IEnumerable)GetInternalProperty(actionVm, "Destinations");
+        SetInternalProperty(actionVm, "SelectedDestination", FirstItem(destinations));
+        
+        return actionVm;
+    }
+    
+    private static object GetInternalProperty(object target, string propertyName)
+    {
+        var property = target.GetType().GetProperty(propertyName, BindingFlags.Instance | BindingFlags.NonPublic);
+        
+        return property!.GetValue(target)!;
+    }
+    
+    private static void SetInternalProperty(object target, string propertyName, object? value)
+    {
+        var property = target.GetType().GetProperty(propertyName, BindingFlags.Instance | BindingFlags.NonPublic);
+        property!.SetValue(target, value);
+    }
+    
+    private static object FirstItem(IEnumerable items)
+    {
+        foreach (var item in items)
+        {
+            return item!;
+        }
+        
+        throw new InvalidOperationException("Empty collection");
+    }
+    
+    private static object FirstWhereBoolProperty(IEnumerable items, string propertyName, bool expectedValue)
+    {
+        foreach (var item in items)
+        {
+            var property = item!.GetType().GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (property != null && property.PropertyType == typeof(bool)
+                                 && (bool)property.GetValue(item)! == expectedValue)
+            {
+                return item;
+            }
+        }
+        
+        throw new InvalidOperationException($"No item found with {propertyName}={expectedValue}");
     }
     
     // Test doubles to surface protected helpers
@@ -95,6 +227,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -129,6 +262,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -150,6 +284,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -175,6 +310,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -200,6 +336,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -228,6 +365,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -239,6 +377,57 @@ public class SynchronizationRuleGlobalViewModelTests
         vm.SaveWarning.Should().NotBeNullOrEmpty();
         _synchronizationRulesService.Verify(s => s.AddOrUpdateSynchronizationRule(It.IsAny<SynchronizationRule>()), Times.Never);
         _dialogService.Verify(d => d.CloseFlyout(), Times.Never);
+    }
+    
+    [Test]
+    public void Save_WithValidFields_ShouldPersistAndLogSuccess()
+    {
+        SetupSession(DataTypes.FilesDirectories);
+        _localizationService.Setup(l => l[It.IsAny<string>()]).Returns("unit");
+        
+        var containerBuilder = new ContainerBuilder();
+        containerBuilder.RegisterInstance(_localizationService.Object).As<ILocalizationService>();
+        ContainerProvider.Container = containerBuilder.Build();
+        
+        var dataPartIndexer = BuildDataPartIndexer();
+        var conditionVm = BuildValidConditionViewModel(dataPartIndexer);
+        var actionVm = BuildValidActionViewModel(dataPartIndexer);
+        
+        _actionEditViewModelFactory
+            .Setup(f => f.BuildAtomicConditionEditViewModel(It.IsAny<FileSystemTypes>(), It.IsAny<AtomicCondition?>()))
+            .Returns(conditionVm);
+        
+        _actionEditViewModelFactory
+            .Setup(f => f.BuildAtomicActionEditViewModel(It.IsAny<FileSystemTypes>(), It.IsAny<bool>(), It.IsAny<AtomicAction?>(),
+                It.IsAny<List<ComparisonItem>?>()))
+            .Returns(actionVm);
+        
+        _synchronizationRulesService
+            .Setup(s => s.AddOrUpdateSynchronizationRule(It.IsAny<SynchronizationRule>()));
+        
+        _dialogService.Setup(d => d.CloseFlyout());
+        
+        var vm = new SynchronizationRuleGlobalViewModel(
+            _dialogService.Object,
+            _sessionService.Object,
+            _localizationService.Object,
+            _actionEditViewModelFactory.Object,
+            _synchronizationRulesService.Object,
+            _logger.Object,
+            null,
+            false);
+        
+        vm.SaveCommand.Execute().Subscribe();
+        
+        _synchronizationRulesService.Verify(s => s.AddOrUpdateSynchronizationRule(It.IsAny<SynchronizationRule>()), Times.Once);
+        _dialogService.Verify(d => d.CloseFlyout(), Times.Once);
+        _logger.Verify(l => l.Log(
+                LogLevel.Information,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((state, _) => state.ToString()!.Contains("Synchronization rule saved.")),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
     }
     
     [Test]
@@ -254,6 +443,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -297,6 +487,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             baseRule,
             false);
         
@@ -322,6 +513,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         
@@ -350,6 +542,7 @@ public class SynchronizationRuleGlobalViewModelTests
             _localizationService.Object,
             _actionEditViewModelFactory.Object,
             _synchronizationRulesService.Object,
+            _logger.Object,
             null,
             false);
         

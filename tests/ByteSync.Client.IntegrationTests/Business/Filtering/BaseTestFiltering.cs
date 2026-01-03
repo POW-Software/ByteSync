@@ -25,7 +25,7 @@ public abstract class BaseTestFiltering : IntegrationTest
     protected FilterParser _filterParser = null!;
     protected ExpressionEvaluatorFactory _evaluatorFactory = null!;
     protected ILogger<FilterService> _logger = null!;
-
+    
     // [SetUp]
     protected void SetupBase()
     {
@@ -60,14 +60,15 @@ public abstract class BaseTestFiltering : IntegrationTest
         _evaluatorFactory = Container.Resolve<ExpressionEvaluatorFactory>();
         _logger = Container.Resolve<ILogger<FilterService>>();
     }
-
+    
     protected ComparisonItem CreateBasicComparisonItem(FileSystemTypes fileSystemType = FileSystemTypes.File,
         string filePath = "/file1.txt", string fileName = "file1.txt")
     {
         var pathIdentity = new PathIdentity(fileSystemType, filePath, fileName, filePath);
+        
         return new ComparisonItem(pathIdentity);
     }
-
+    
     protected (FileDescription, InventoryPart) CreateFileDescription(
         string inventoryId,
         string rootPath,
@@ -76,13 +77,13 @@ public abstract class BaseTestFiltering : IntegrationTest
         long size = 100,
         string relativePath = "/unset")
     {
-        string letter = inventoryId.Replace("Id_", "");
+        var letter = inventoryId.Replace("Id_", "");
         var inventory = new Inventory { InventoryId = inventoryId, Code = letter };
         
-        string code = $"{letter}1";
+        var code = $"{letter}1";
         var inventoryPart = new InventoryPart(inventory, rootPath, FileSystemTypes.Directory);
         inventoryPart.Code = code;
-
+        
         var fileDescription = new FileDescription
         {
             InventoryPart = inventoryPart,
@@ -93,7 +94,7 @@ public abstract class BaseTestFiltering : IntegrationTest
             Sha256 = hash,
             RelativePath = relativePath
         };
-
+        
         return (fileDescription, inventoryPart);
     }
     
@@ -101,26 +102,26 @@ public abstract class BaseTestFiltering : IntegrationTest
         string inventoryId,
         string rootPath)
     {
-        string letter = inventoryId.Replace("Id_", "");
+        var letter = inventoryId.Replace("Id_", "");
         var inventory = new Inventory { InventoryId = inventoryId, Code = letter };
         
-        string code = $"{letter}1";
+        var code = $"{letter}1";
         var inventoryPart = new InventoryPart(inventory, rootPath, FileSystemTypes.Directory);
         inventoryPart.Code = code;
-
+        
         var directoryDescription = new DirectoryDescription
         {
             InventoryPart = inventoryPart,
         };
-
+        
         return (directoryDescription, inventoryPart);
     }
-
+    
     protected void ConfigureDataPartIndex(
         Dictionary<string, (InventoryPart, FileDescription)> dataParts)
     {
         var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
-
+        
         foreach (var pair in dataParts)
         {
             var dataPart = new DataPart(pair.Key, pair.Value.Item1);
@@ -133,7 +134,7 @@ public abstract class BaseTestFiltering : IntegrationTest
         Dictionary<string, (InventoryPart, DirectoryDescription)> dataParts)
     {
         var mockDataPartIndexer = Container.Resolve<Mock<IDataPartIndexer>>();
-
+        
         foreach (var pair in dataParts)
         {
             var dataPart = new DataPart(pair.Key, pair.Value.Item1);
@@ -141,7 +142,7 @@ public abstract class BaseTestFiltering : IntegrationTest
                 .Returns(dataPart);
         }
     }
-
+    
     protected ComparisonItem PrepareComparisonWithTwoContents(
         string leftDataPartId,
         string leftHash,
@@ -149,7 +150,7 @@ public abstract class BaseTestFiltering : IntegrationTest
         string rightDataPartId,
         string rightHash,
         DateTime rightDateTime
-        )
+    )
     {
         return PrepareComparisonWithTwoContents(
             leftDataPartId,
@@ -161,7 +162,7 @@ public abstract class BaseTestFiltering : IntegrationTest
             rightDateTime,
             100);
     }
-
+    
     protected ComparisonItem PrepareComparisonWithTwoContents(
         string leftDataPartId,
         string leftHash,
@@ -173,21 +174,21 @@ public abstract class BaseTestFiltering : IntegrationTest
         long rightSize)
     {
         var comparisonItem = CreateBasicComparisonItem();
-
+        
         var (fileDescA, inventoryPartA) = CreateFileDescription(
             "Id_A",
             "/testRootA",
             leftDateTime,
             leftHash,
             leftSize);
-
+        
         var (fileDescB, inventoryPartB) = CreateFileDescription(
             "Id_B",
             "/testRootB",
             rightDateTime,
             rightHash,
             rightSize);
-
+        
         // Créer et ajouter les identités de contenu
         var contentIdCoreA = new ContentIdentityCore
         {
@@ -197,7 +198,7 @@ public abstract class BaseTestFiltering : IntegrationTest
         var contentIdA = new ContentIdentity(contentIdCoreA);
         comparisonItem.AddContentIdentity(contentIdA);
         contentIdA.Add(fileDescA);
-
+        
         if (leftHash == rightHash)
         {
             contentIdA.Add(fileDescB);
@@ -213,19 +214,19 @@ public abstract class BaseTestFiltering : IntegrationTest
             comparisonItem.AddContentIdentity(contentIdB);
             contentIdB.Add(fileDescB);
         }
-
+        
         // Configurer l'indexeur de DataPart
         var dataParts = new Dictionary<string, (InventoryPart, FileDescription)>
         {
             { leftDataPartId, (inventoryPartA, fileDescA) },
             { rightDataPartId, (inventoryPartB, fileDescB) }
         };
-
+        
         ConfigureDataPartIndex(dataParts);
-
+        
         return comparisonItem;
     }
-
+    
     protected ComparisonItem PrepareComparisonWithOneContent(
         string dataPartId,
         string leftHash,
@@ -234,9 +235,9 @@ public abstract class BaseTestFiltering : IntegrationTest
         string fileName = "file1.txt")
     {
         var comparisonItem = CreateBasicComparisonItem(FileSystemTypes.File, "/" + fileName.TrimStart('/'), fileName);
-
+        
         var letter = new string(dataPartId.TakeWhile(char.IsLetter).ToArray());
-
+        
         var (fileDesc, inventoryPart) = CreateFileDescription(
             $"Id_{letter}",
             $"/testRoot{letter}",
@@ -258,18 +259,18 @@ public abstract class BaseTestFiltering : IntegrationTest
         {
             { dataPartId, (inventoryPart, fileDesc) }
         };
-
+        
         ConfigureDataPartIndex(dataParts);
-
+        
         return comparisonItem;
     }
     
     protected ComparisonItem PrepareComparisonWithOneDirectory(string dataPartId)
     {
         var comparisonItem = CreateBasicComparisonItem(FileSystemTypes.Directory);
-
-        string letter = dataPartId[0].ToString();
-
+        
+        var letter = dataPartId[0].ToString();
+        
         var (dirDesc, inventoryPart) = CreateDirectoryDescription(
             $"Id_{letter}",
             $"/testRoot{letter}");
@@ -283,9 +284,9 @@ public abstract class BaseTestFiltering : IntegrationTest
         {
             { dataPartId, (inventoryPart, dirDesc) }
         };
-
+        
         ConfigureDataPartIndex(dataParts);
-
+        
         return comparisonItem;
     }
     
@@ -300,6 +301,7 @@ public abstract class BaseTestFiltering : IntegrationTest
         
         var expression = parseResult.Expression!;
         var evaluator = _evaluatorFactory.GetEvaluator(expression);
+        
         return evaluator.Evaluate(expression, item);
     }
     

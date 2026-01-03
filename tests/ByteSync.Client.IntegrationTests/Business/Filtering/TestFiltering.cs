@@ -22,7 +22,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_Complete_Expression()
     {
         // Arrange
-        var filterText = "A1.contents==B1.contents";
+        var filterText = "A1.content==B1.content";
         
         ConfigureDataPartIndexer();
         
@@ -39,7 +39,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_Complete_Expression_MultiDataNode()
     {
         // Arrange
-        var filterText = "Aa1.contents==Ba1.contents";
+        var filterText = "Aa1.content==Ba1.content";
         
         ConfigureDataPartIndexer("Aa", "Ba");
         
@@ -56,7 +56,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_CompleteLowerCase_Expression()
     {
         // Arrange
-        var filterText = "a1.contents==b1.contents";
+        var filterText = "a1.content==b1.content";
         
         ConfigureDataPartIndexer();
         
@@ -73,7 +73,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_CompleteWithSpaces1_Expression()
     {
         // Arrange
-        var filterText = "A1.contents == B1.contents";
+        var filterText = "A1.content == B1.content";
         
         ConfigureDataPartIndexer();
         
@@ -107,7 +107,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_Incomplete_Expression()
     {
         // Arrange
-        var filterText = "A1.contents==";
+        var filterText = "A1.content==";
         
         ConfigureDataPartIndexer();
         
@@ -156,7 +156,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_Incomplete_Operator()
     {
         // Arrange
-        var filterText = "A1.contents";
+        var filterText = "A1.content";
         
         // Act
         var parseResult = _filterParser.TryParse(filterText);
@@ -201,7 +201,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_Incomplete_ParenthesesExpression()
     {
         // Arrange
-        var filterText = "(A1.contents==B1.contents";
+        var filterText = "(A1.content==B1.content";
         
         ConfigureDataPartIndexer();
         
@@ -218,7 +218,7 @@ public class TestFiltering : BaseTestFiltering
     public void TestParse_Incomplete_WithAndOperator()
     {
         // Arrange
-        var filterText = "A1.contents==B1.contents AND on:";
+        var filterText = "A1.content==B1.content AND on:";
         
         ConfigureDataPartIndexer();
         
@@ -255,7 +255,7 @@ public class TestFiltering : BaseTestFiltering
         var comparisonItem = CreateBasicComparisonItem();
         
         // Act & Assert - Should not throw
-        var filter = filterService.BuildFilter("A1.content==");
+        var filter = filterService.BuildFilter("A1.contents==");
         
         // By default, incomplete filters should accept everything
         filter(comparisonItem).Should().BeTrue();
@@ -271,7 +271,7 @@ public class TestFiltering : BaseTestFiltering
         // A complete expression and an incomplete one
         var filterTexts = new List<string>
         {
-            "A1.content==B1.content", // complete
+            "A1.contents==B1.contents", // complete
             "A1.content==" // incomplete
         };
         

@@ -270,27 +270,27 @@ namespace ByteSync.Assets.Resources {
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Copy content.
         /// </summary>
-        internal static string AtomicActionEdit_SynchronizeContent {
+        internal static string AtomicActionEdit_CopyContent {
             get {
-                return ResourceManager.GetString("AtomicActionEdit_SynchronizeContent", resourceCulture);
+                return ResourceManager.GetString("AtomicActionEdit_CopyContent", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Copy content and date.
         /// </summary>
-        internal static string AtomicActionEdit_SynchronizeContentAndDate {
+        internal static string AtomicActionEdit_Copy {
             get {
-                return ResourceManager.GetString("AtomicActionEdit_SynchronizeContentAndDate", resourceCulture);
+                return ResourceManager.GetString("AtomicActionEdit_Copy", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Copy date.
         /// </summary>
-        internal static string AtomicActionEdit_SynchronizeDate {
+        internal static string AtomicActionEdit_CopyDate {
             get {
-                return ResourceManager.GetString("AtomicActionEdit_SynchronizeDate", resourceCulture);
+                return ResourceManager.GetString("AtomicActionEdit_CopyDate", resourceCulture);
             }
         }
         
@@ -1596,27 +1596,27 @@ namespace ByteSync.Assets.Resources {
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Copy content.
         /// </summary>
-        internal static string SynchronizationActionDescription_Action_SynchronizeContent {
+        internal static string SynchronizationActionDescription_Action_CopyContent {
             get {
-                return ResourceManager.GetString("SynchronizationActionDescription_Action_SynchronizeContent", resourceCulture);
+                return ResourceManager.GetString("SynchronizationActionDescription_Action_CopyContent", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Copy content and date.
         /// </summary>
-        internal static string SynchronizationActionDescription_Action_SynchronizeContentAndDate {
+        internal static string SynchronizationActionDescription_Action_Copy {
             get {
-                return ResourceManager.GetString("SynchronizationActionDescription_Action_SynchronizeContentAndDate", resourceCulture);
+                return ResourceManager.GetString("SynchronizationActionDescription_Action_Copy", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à Copy date.
         /// </summary>
-        internal static string SynchronizationActionDescription_Action_SynchronizeDate {
+        internal static string SynchronizationActionDescription_Action_CopyDate {
             get {
-                return ResourceManager.GetString("SynchronizationActionDescription_Action_SynchronizeDate", resourceCulture);
+                return ResourceManager.GetString("SynchronizationActionDescription_Action_CopyDate", resourceCulture);
             }
         }
         
@@ -2910,14 +2910,23 @@ namespace ByteSync.Assets.Resources {
             get {
                 return ResourceManager.GetString("ValidationFailure_DuplicateActionNotAllowed", resourceCulture);
             }
+        }        
+        
+        /// <summary>
+        /// Looks up a localized string similar to Multiple sources found.
+        /// </summary>
+        internal static string ValidationFailure_SourceHasMultipleIdentities {
+            get {
+                return ResourceManager.GetString("ValidationFailure_SourceHasMultipleIdentities", resourceCulture);
+            }
         }
         
         /// <summary>
-        /// Looks up a localized string similar to Invalid source data.
+        /// Looks up a localized string similar to Source not found.
         /// </summary>
-        internal static string ValidationFailure_InvalidSourceCount {
+        internal static string ValidationFailure_SourceMissing {
             get {
-                return ResourceManager.GetString("ValidationFailure_InvalidSourceCount", resourceCulture);
+                return ResourceManager.GetString("ValidationFailure_SourceMissing", resourceCulture);
             }
         }
         
@@ -3201,3 +3210,6 @@ namespace ByteSync.Assets.Resources {
         }
     }
 }
+
+
+

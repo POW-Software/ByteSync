@@ -6,7 +6,6 @@ using System.Reactive.Linq;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Actions.Local;
 using ByteSync.Business.Sessions;
-using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
@@ -16,7 +15,6 @@ using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions.Misc;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Serilog;
 
 namespace ByteSync.ViewModels.Sessions.Comparisons.Actions;
 
@@ -27,32 +25,35 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
     private readonly ILocalizationService _localizationService = null!;
     private readonly IActionEditViewModelFactory _actionEditViewModelFactory = null!;
     private readonly ISynchronizationRulesService _synchronizationRulesService = null!;
-
-    public SynchronizationRuleGlobalViewModel() 
+    private readonly ILogger<SynchronizationRuleGlobalViewModel> _logger = null!;
+    
+    public SynchronizationRuleGlobalViewModel()
     {
     }
     
-    public SynchronizationRuleGlobalViewModel(IDialogService dialogService, 
-        ISessionService sessionService, ILocalizationService localizationService, IActionEditViewModelFactory actionEditViewModelFactory, 
-        ISynchronizationRulesService synchronizationRulesService, SynchronizationRule? baseAutomaticAction, bool isCloneMode)
+    public SynchronizationRuleGlobalViewModel(IDialogService dialogService,
+        ISessionService sessionService, ILocalizationService localizationService, IActionEditViewModelFactory actionEditViewModelFactory,
+        ISynchronizationRulesService synchronizationRulesService, ILogger<SynchronizationRuleGlobalViewModel> logger,
+        SynchronizationRule? baseAutomaticAction, bool isCloneMode)
     {
         _dialogService = dialogService;
         _sessionService = sessionService;
         _localizationService = localizationService;
         _actionEditViewModelFactory = actionEditViewModelFactory;
         _synchronizationRulesService = synchronizationRulesService;
-
+        _logger = logger;
+        
         ShowFileSystemTypeSelection = _sessionService.CurrentSessionSettings!.DataType == DataTypes.FilesDirectories;
-
+        
         Conditions = new ObservableCollection<AtomicConditionEditViewModel>();
         Actions = new ObservableCollection<AtomicActionEditViewModel>();
-            
+        
         AddConditionCommand = ReactiveCommand.Create(AddCondition);
         AddActionCommand = ReactiveCommand.Create(AddAction);
         SaveCommand = ReactiveCommand.Create(Save);
         ResetCommand = ReactiveCommand.Create(Reset);
         CancelCommand = ReactiveCommand.Create(Cancel);
-
+        
         FileSystemTypes = BuildFileSystemTypes();
         SelectedFileSystemType =
             _sessionService.CurrentSessionSettings!.DataType == DataTypes.Directories
@@ -61,16 +62,16 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
         
         ConditionModes = BuildConditionModes();
         SelectedConditionMode = ConditionModes.Single(cm => cm.IsAll);
-
+        
         BaseAutomaticAction = baseAutomaticAction;
         IsCloneMode = isCloneMode;
-
+        
         Reset();
-
+        
         this.WhenAnyValue(x => x.SelectedFileSystemType)
             .Skip(1)
             .Subscribe(_ => Reset());
-
+        
         this.WhenAnyValue(x => x.SelectedConditionMode)
             .Subscribe(x =>
             {
@@ -92,30 +93,34 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
                 .DisposeWith(disposables);
         });
     }
-
+    
     public ReactiveCommand<Unit, Unit> AddConditionCommand { get; set; } = null!;
+    
     public ReactiveCommand<Unit, Unit> AddActionCommand { get; set; } = null!;
+    
     public ReactiveCommand<Unit, Unit> SaveCommand { get; set; } = null!;
+    
     public ReactiveCommand<Unit, Unit> ResetCommand { get; set; } = null!;
+    
     public ReactiveCommand<Unit, Unit> CancelCommand { get; set; } = null!;
-
+    
     public ObservableCollection<FileSystemTypeViewModel> FileSystemTypes { get; set; } = null!;
-
+    
     public ObservableCollection<ConditionModeViewModel> ConditionModes { get; set; } = null!;
-
+    
     public ObservableCollection<AtomicConditionEditViewModel> Conditions { get; } = null!;
-
+    
     public ObservableCollection<AtomicActionEditViewModel> Actions { get; } = null!;
-
+    
     [Reactive]
     public FileSystemTypeViewModel SelectedFileSystemType { get; set; } = null!;
-
+    
     [Reactive]
     public ConditionModeViewModel SelectedConditionMode { get; set; } = null!;
-
+    
     [Reactive]
     public string TextAfterConditionModesComboBox { get; set; } = null!;
-
+    
     [Reactive]
     public bool ShowFileSystemTypeSelection { get; set; }
     
@@ -124,7 +129,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
     
     [Reactive]
     public string SaveWarning { get; set; } = null!;
-
+    
     public SynchronizationRule? BaseAutomaticAction { get; }
     
     public bool IsCloneMode { get; }
@@ -132,51 +137,55 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
     private ObservableCollection<FileSystemTypeViewModel> BuildFileSystemTypes()
     {
         var fileSystemTypes = new ObservableCollection<FileSystemTypeViewModel>();
-
-        var file = new FileSystemTypeViewModel { 
-            FileSystemType = Common.Business.Inventories.FileSystemTypes.File, 
-            Description = Resources.General_Files};
         
-        var directory = new FileSystemTypeViewModel { 
-            FileSystemType = Common.Business.Inventories.FileSystemTypes.Directory, 
-            Description = Resources.General_Directories};
+        var file = new FileSystemTypeViewModel
+        {
+            FileSystemType = Common.Business.Inventories.FileSystemTypes.File,
+            Description = Resources.General_Files
+        };
+        
+        var directory = new FileSystemTypeViewModel
+        {
+            FileSystemType = Common.Business.Inventories.FileSystemTypes.Directory,
+            Description = Resources.General_Directories
+        };
         
         fileSystemTypes.Add(file);
         fileSystemTypes.Add(directory);
-
+        
         return fileSystemTypes;
     }
     
     private ObservableCollection<ConditionModeViewModel> BuildConditionModes()
     {
         var conditionModes = new ObservableCollection<ConditionModeViewModel>();
-
+        
         var any = new ConditionModeViewModel
         {
-            Mode = ByteSync.Business.Comparisons.ConditionModes.Any, 
+            Mode = Business.Comparisons.ConditionModes.Any,
             Description = Resources.SynchronizationRulesGlobal_Any
         };
-
+        
         var all = new ConditionModeViewModel
         {
-            Mode = ByteSync.Business.Comparisons.ConditionModes.All, 
+            Mode = Business.Comparisons.ConditionModes.All,
             Description = Resources.SynchronizationRulesGlobal_All
         };
-
+        
         conditionModes.Add(any);
         conditionModes.Add(all);
-
+        
         return conditionModes;
     }
-        
+    
     private void AddCondition()
     {
         var atomicConditionEditViewModel = _actionEditViewModelFactory.BuildAtomicConditionEditViewModel(
             SelectedFileSystemType.FileSystemType);
-
+        
         AddCondition(atomicConditionEditViewModel);
     }
-
+    
     private void AddCondition(AtomicConditionEditViewModel atomicConditionEditViewModel)
     {
         atomicConditionEditViewModel.PropertyChanged += OnConditionOrActionPropertyChanged;
@@ -184,15 +193,15 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
         
         Conditions.Add(atomicConditionEditViewModel);
     }
-
+    
     private void AddAction()
     {
         var atomicActionEditViewModel = _actionEditViewModelFactory.BuildAtomicActionEditViewModel(
             SelectedFileSystemType.FileSystemType, true);
-
+        
         AddAction(atomicActionEditViewModel);
     }
-
+    
     private void AddAction(AtomicActionEditViewModel atomicActionEditViewModel)
     {
         atomicActionEditViewModel.PropertyChanged += OnConditionOrActionPropertyChanged;
@@ -200,19 +209,20 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
         
         Actions.Add(atomicActionEditViewModel);
     }
-
+    
     private void Save()
     {
         try
         {
             var synchronizationRule = Export();
-
+            
             if (synchronizationRule != null)
             {
                 ShowWarning = false;
                 
                 _synchronizationRulesService.AddOrUpdateSynchronizationRule(synchronizationRule);
-
+                LogSaveSuccess(synchronizationRule);
+                
                 _dialogService.CloseFlyout();
             }
             else
@@ -222,24 +232,25 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error during saving");
+            _logger.LogError(ex, "Error while saving synchronization rule");
         }
     }
-
+    
     private void ShowMissingFieldsWarning()
     {
         ShowWarning = true;
         SaveWarning = Resources.TargetedActionEditionGlobal_MissingFields;
+        _logger.LogWarning("Synchronization rule validation failed: missing fields");
     }
-
+    
     private SynchronizationRule? Export()
     {
         var synchronizationRule = new SynchronizationRule(SelectedFileSystemType.FileSystemType, SelectedConditionMode.Mode);
-        if (BaseAutomaticAction != null && ! IsCloneMode)
+        if (BaseAutomaticAction != null && !IsCloneMode)
         {
             synchronizationRule.SynchronizationRuleId = BaseAutomaticAction.SynchronizationRuleId;
         }
-
+        
         var isMissingField = false;
         
         // Conditions
@@ -255,12 +266,12 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
                 isMissingField = true;
             }
         }
-
+        
         // Actions
         foreach (var automaticActionsActionEditViewModel in Actions)
         {
             var atomicAction = automaticActionsActionEditViewModel.ExportSynchronizationAction();
-
+            
             if (atomicAction != null)
             {
                 synchronizationRule.AddAction(atomicAction);
@@ -270,7 +281,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
                 isMissingField = true;
             }
         }
-
+        
         if (isMissingField)
         {
             return null;
@@ -280,7 +291,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
             return synchronizationRule;
         }
     }
-
+    
     private void Reset()
     {
         ShowWarning = false;
@@ -294,7 +305,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
             ResetToEdition();
         }
     }
-
+    
     private void ResetToCreation()
     {
         Conditions.Clear();
@@ -303,23 +314,24 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
         AddCondition();
         AddAction();
     }
-
-
+    
+    
     private void ResetToEdition()
     {
         Conditions.Clear();
         Actions.Clear();
-
+        
         SelectedFileSystemType = FileSystemTypes.First(fst => Equals(fst.FileSystemType, BaseAutomaticAction!.FileSystemType));
         SelectedConditionMode = ConditionModes.First(cm => Equals(cm.Mode, BaseAutomaticAction!.ConditionMode));
-
+        
         foreach (var condition in BaseAutomaticAction!.Conditions)
         {
-            var atomicConditionEditViewModel = _actionEditViewModelFactory.BuildAtomicConditionEditViewModel(SelectedFileSystemType.FileSystemType, condition);
+            var atomicConditionEditViewModel =
+                _actionEditViewModelFactory.BuildAtomicConditionEditViewModel(SelectedFileSystemType.FileSystemType, condition);
             
             AddCondition(atomicConditionEditViewModel);
         }
-
+        
         foreach (var action in BaseAutomaticAction.Actions)
         {
             var automaticActionsActionEditViewModel = _actionEditViewModelFactory.BuildAtomicActionEditViewModel(
@@ -328,7 +340,7 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
             AddAction(automaticActionsActionEditViewModel);
         }
     }
-
+    
     private void OnConditionOrActionPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         ShowWarning = false;
@@ -353,18 +365,30 @@ public class SynchronizationRuleGlobalViewModel : FlyoutElementViewModel
         
         Conditions.Remove(atomicConditionEditViewModel);
     }
-
+    
     private void Cancel()
     {
         _dialogService.CloseFlyout();
-
+        
         Reset();
     }
     
     private void OnLocaleChanged()
     {
         ConditionModes.Single(cm => cm.IsAny).Description = Resources.SynchronizationRulesGlobal_Any;
-
+        
         ConditionModes.Single(cm => cm.IsAll).Description = Resources.SynchronizationRulesGlobal_All;
+    }
+    
+    private void LogSaveSuccess(SynchronizationRule synchronizationRule)
+    {
+        _logger.LogInformation(
+            "Synchronization rule saved. RuleId={RuleId} FileSystemType={FileSystemType} ConditionMode={ConditionMode} Conditions={ConditionsCount} Actions={ActionsCount} IsCloneMode={IsCloneMode}",
+            synchronizationRule.SynchronizationRuleId ?? string.Empty,
+            synchronizationRule.FileSystemType,
+            synchronizationRule.ConditionMode,
+            synchronizationRule.Conditions.Count,
+            synchronizationRule.Actions.Count,
+            IsCloneMode);
     }
 }

@@ -69,7 +69,7 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var action = new AtomicAction
         {
-            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Operator = ActionOperatorTypes.CopyContentOnly,
             Source = new DataPart("A", src),
             Destination = new DataPart("B", dst),
             ComparisonItem = item
@@ -94,7 +94,7 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var action = new AtomicAction
         {
-            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Operator = ActionOperatorTypes.CopyContentOnly,
             Source = new DataPart("A", src),
             Destination = new DataPart("B", dst),
             ComparisonItem = item
@@ -144,7 +144,7 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var action = new AtomicAction
         {
-            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Operator = ActionOperatorTypes.Copy,
             Source = new DataPart("A", src),
             Destination = new DataPart("B", dst),
             ComparisonItem = item
@@ -168,7 +168,7 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var action = new AtomicAction
         {
-            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Operator = ActionOperatorTypes.CopyContentOnly,
             Source = new DataPart("A", src),
             Destination = new DataPart("B", dst),
             ComparisonItem = item
@@ -218,7 +218,7 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var action = new AtomicAction
         {
-            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Operator = ActionOperatorTypes.Copy,
             Source = new DataPart("A", src),
             Destination = new DataPart("B", dst),
             ComparisonItem = item
@@ -267,7 +267,7 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var action = new AtomicAction
         {
-            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Operator = ActionOperatorTypes.CopyContentOnly,
             Source = new DataPart("A", src),
             Destination = new DataPart("B", dst),
             ComparisonItem = item
@@ -292,7 +292,7 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var action = new AtomicAction
         {
-            Operator = ActionOperatorTypes.SynchronizeContentOnly,
+            Operator = ActionOperatorTypes.CopyContentOnly,
             Source = new DataPart("A", src),
             Destination = new DataPart("B", dst),
             ComparisonItem = item
@@ -341,7 +341,7 @@ public class AtomicActionConsistencyCheckerAccessTests
         
         var action = new AtomicAction
         {
-            Operator = ActionOperatorTypes.SynchronizeContentAndDate,
+            Operator = ActionOperatorTypes.Copy,
             Source = new DataPart("A", src),
             Destination = new DataPart("B", dst),
             ComparisonItem = item

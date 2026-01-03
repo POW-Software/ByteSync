@@ -115,8 +115,8 @@ public class SynchronizationConfirmationViewModel : FlyoutElementViewModel
                 DestinationCode = dataNode?.Code ?? "?",
                 MachineName = sessionMember?.MachineName ?? "Unknown",
                 CreateCount = group.Count(a => a.IsCreate),
-                SynchronizeContentCount = group.Count(a => a.IsSynchronizeContent),
-                SynchronizeDateCount = group.Count(a => a.IsSynchronizeDate),
+                SynchronizeContentCount = group.Count(a => a.IsCopyContent),
+                SynchronizeDateCount = group.Count(a => a.IsCopyDates),
                 DeleteCount = group.Count(a => a.IsDelete)
             };
             

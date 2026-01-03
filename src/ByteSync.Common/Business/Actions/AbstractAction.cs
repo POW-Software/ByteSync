@@ -6,59 +6,38 @@ public abstract class AbstractAction
 {
     public ActionOperatorTypes Operator { get; set; }
     
-    public bool IsSynchronizeContent
+    public bool IsCopyContent
     {
-        get
-        {
-            return Operator.In(ActionOperatorTypes.SynchronizeContentOnly, ActionOperatorTypes.SynchronizeContentAndDate);
-        }
+        get { return Operator.In(ActionOperatorTypes.CopyContentOnly, ActionOperatorTypes.Copy); }
     }
     
-    public bool IsSynchronizeContentOnly
+    public bool IsCopyContentOnly
     {
-        get
-        {
-            return Operator.In(ActionOperatorTypes.SynchronizeContentOnly);
-        }
+        get { return Operator.In(ActionOperatorTypes.CopyContentOnly); }
     }
     
-    public bool IsSynchronizeContentAndDate
+    public bool IsFullCopy
     {
-        get
-        {
-            return Operator.In(ActionOperatorTypes.SynchronizeContentAndDate);
-        }
+        get { return Operator.In(ActionOperatorTypes.Copy); }
     }
     
-    public bool IsSynchronizeDate
+    public bool IsCopyDates
     {
-        get
-        {
-            return Operator.In(ActionOperatorTypes.SynchronizeDate);
-        }
+        get { return Operator.In(ActionOperatorTypes.CopyDatesOnly); }
     }
     
     public bool IsDelete
     {
-        get
-        {
-            return Operator.In(ActionOperatorTypes.Delete);
-        }
+        get { return Operator.In(ActionOperatorTypes.Delete); }
     }
     
     public bool IsCreate
     {
-        get
-        {
-            return Operator.In(ActionOperatorTypes.Create);
-        }
+        get { return Operator.In(ActionOperatorTypes.Create); }
     }
     
     public bool IsDoNothing
     {
-        get
-        {
-            return Operator.In(ActionOperatorTypes.DoNothing);
-        }
+        get { return Operator.In(ActionOperatorTypes.DoNothing); }
     }
 }
