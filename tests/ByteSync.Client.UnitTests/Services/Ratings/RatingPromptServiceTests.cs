@@ -148,6 +148,9 @@ public class RatingPromptServiceTests
         PublishSynchronizationEnd();
         
         var viewModel = await WaitForPromptAsync();
+        viewModel.RatingOptions.Should().HaveCount(2);
+        viewModel.RatingOptions[0].Url.Should().Contain("apps.microsoft.com");
+        viewModel.RatingOptions[1].Url.Should().Contain("github.com");
         viewModel.SelectRateOption(viewModel.RatingOptions.First().Url);
         
         await WaitForCompletion(urlsOpened.Task);
@@ -155,7 +158,7 @@ public class RatingPromptServiceTests
     }
     
     [Test]
-    public async Task Opens_all_links_for_non_msix_installations()
+    public async Task Opens_selected_link_for_non_msix_installations()
     {
         var openedUrls = new List<string>();
         var urlsOpened = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -174,12 +177,28 @@ public class RatingPromptServiceTests
         PublishSynchronizationEnd();
         
         var viewModel = await WaitForPromptAsync();
-        viewModel.RatingOptions.Count.Should().Be(3);
-        viewModel.SelectRateOption(viewModel.RatingOptions.Last().Url);
+        viewModel.RatingOptions.Should().HaveCount(4);
+        viewModel.RatingOptions.First().Url.Should().Contain("github.com");
+        var allowedDomains = new[]
+        {
+            "github.com",
+            "alternativeto.net",
+            "majorgeeks.com",
+            "softpedia.com",
+            "uptodown.com",
+            "sourceforge.net"
+        };
+        viewModel.RatingOptions.Select(option => option.Url)
+            .Should()
+            .OnlyContain(url => allowedDomains.Any(domain => url.Contains(domain)));
+        viewModel.RatingOptions.Select(option => option.Url).Distinct().Should().HaveCount(4);
+        
+        var selectedUrl = viewModel.RatingOptions.First(option => option.Url.Contains("github.com")).Url;
+        viewModel.SelectRateOption(selectedUrl);
         
         await WaitForCompletion(urlsOpened.Task);
         openedUrls.Should().HaveCount(1);
-        openedUrls.Should().Contain(url => url.Contains("majorgeeks.com"));
+        openedUrls.Should().Contain(url => url.Contains("github.com"));
     }
     
     [Test]

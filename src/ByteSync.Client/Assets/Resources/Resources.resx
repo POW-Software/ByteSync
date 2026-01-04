@@ -823,6 +823,15 @@ Would you like to continue ?</value>
     <data name="RatingPrompt_Channel_MajorGeeks" xml:space="preserve">
         <value>Rate on MajorGeeks</value>
     </data>
+    <data name="RatingPrompt_Channel_Softpedia" xml:space="preserve">
+        <value>Rate on Softpedia</value>
+    </data>
+    <data name="RatingPrompt_Channel_Uptodown" xml:space="preserve">
+        <value>Rate on Uptodown</value>
+    </data>
+    <data name="RatingPrompt_Channel_SourceForge" xml:space="preserve">
+        <value>Rate on SourceForge</value>
+    </data>
 	<data name="MainWindow_OnClose_ConfirmTitle" xml:space="preserve">
 		<value>Quit</value>
 	</data>

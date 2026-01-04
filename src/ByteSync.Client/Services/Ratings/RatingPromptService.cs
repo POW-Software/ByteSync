@@ -16,15 +16,47 @@ namespace ByteSync.Services.Ratings;
 
 public class RatingPromptService : IRatingPromptService, IDisposable
 {
-    internal const double PromptProbability = 1d / 3d;
+    internal const double PROMPT_PROBABILITY = 1d / 3d;
     
-    private const string StoreRatingUrl = "https://apps.microsoft.com/detail/9p17gqw3z2q2?hl=fr-FR&gl=FR";
+    private const string STORE_RATING_URL = "https://apps.microsoft.com/detail/9p17gqw3z2q2?hl=fr-FR&gl=FR";
     
-    private static readonly IReadOnlyList<string> AdditionalRatingUrls = new[]
-    {
+    private const int RANDOM_ADDITIONAL_OPTIONS_COUNT = 3;
+    private const string RATING_PROMPT_CHANNEL_SOFTPEDIA_KEY = "RatingPrompt_Channel_Softpedia";
+    private const string RATING_PROMPT_CHANNEL_UPTODOWN_KEY = "RatingPrompt_Channel_Uptodown";
+    private const string RATING_PROMPT_CHANNEL_SOURCE_FORGE_KEY = "RatingPrompt_Channel_SourceForge";
+    
+    private static readonly RatingChannel StoreRatingChannel = new(
+        nameof(Resources.RatingPrompt_Channel_MicrosoftStore),
+        STORE_RATING_URL,
+        "RegularStore");
+    
+    private static readonly RatingChannel GitHubRatingChannel = new(
+        nameof(Resources.RatingPrompt_Channel_GitHub),
         "https://github.com/POW-Software/ByteSync",
-        "https://alternativeto.net/software/bytesync/about/",
-        "https://www.majorgeeks.com/files/details/bytesync.html"
+        "LogosGithub");
+    
+    private static readonly IReadOnlyList<RatingChannel> AdditionalRatingChannels = new[]
+    {
+        new RatingChannel(
+            nameof(Resources.RatingPrompt_Channel_AlternativeTo),
+            "https://alternativeto.net/software/bytesync/about/",
+            "RegularWorld"),
+        new RatingChannel(
+            nameof(Resources.RatingPrompt_Channel_MajorGeeks),
+            "https://www.majorgeeks.com/files/details/bytesync.html",
+            "RegularWorld"),
+        new RatingChannel(
+            RATING_PROMPT_CHANNEL_SOFTPEDIA_KEY,
+            "https://www.softpedia.com/get/System/Back-Up-and-Recovery/ByteSync.shtml",
+            "RegularWorld"),
+        new RatingChannel(
+            RATING_PROMPT_CHANNEL_UPTODOWN_KEY,
+            "https://bytesync-windows.fr.uptodown.com/windows",
+            "RegularWorld"),
+        new RatingChannel(
+            RATING_PROMPT_CHANNEL_SOURCE_FORGE_KEY,
+            "https://sourceforge.net/projects/bytesync/",
+            "RegularWorld")
     };
     
     private readonly ISynchronizationService _synchronizationService;
@@ -111,7 +143,7 @@ public class RatingPromptService : IRatingPromptService, IDisposable
             return false;
         }
         
-        return _randomValueProvider() < PromptProbability;
+        return _randomValueProvider() < PROMPT_PROBABILITY;
     }
     
     private async Task ShowPromptAsync()
@@ -142,8 +174,6 @@ public class RatingPromptService : IRatingPromptService, IDisposable
                 });
                 
                 break;
-            default:
-                break;
         }
     }
     
@@ -153,27 +183,37 @@ public class RatingPromptService : IRatingPromptService, IDisposable
         
         if (_environmentService.DeploymentMode == DeploymentModes.MsixInstallation)
         {
-            options.Add(new RatingOption(
-                _localizationService[nameof(Resources.RatingPrompt_Channel_MicrosoftStore)],
-                StoreRatingUrl,
-                "RegularStore"));
+            options.Add(CreateRatingOption(StoreRatingChannel));
+            options.Add(CreateRatingOption(GitHubRatingChannel));
         }
         else
         {
-            options.Add(new RatingOption(
-                _localizationService[nameof(Resources.RatingPrompt_Channel_GitHub)],
-                AdditionalRatingUrls[0],
-                "LogosGithub"));
-            options.Add(new RatingOption(
-                _localizationService[nameof(Resources.RatingPrompt_Channel_AlternativeTo)],
-                AdditionalRatingUrls[1],
-                "RegularWorld"));
-            options.Add(new RatingOption(
-                _localizationService[nameof(Resources.RatingPrompt_Channel_MajorGeeks)],
-                AdditionalRatingUrls[2],
-                "RegularWorld"));
+            options.Add(CreateRatingOption(GitHubRatingChannel));
+            
+            var additionalChannels = GetRandomizedChannels(AdditionalRatingChannels)
+                .Take(Math.Min(RANDOM_ADDITIONAL_OPTIONS_COUNT, AdditionalRatingChannels.Count));
+            foreach (var channel in additionalChannels)
+            {
+                options.Add(CreateRatingOption(channel));
+            }
         }
         
         return options;
     }
+    
+    private RatingOption CreateRatingOption(RatingChannel channel)
+    {
+        return new RatingOption(_localizationService[channel.LabelKey], channel.Url, channel.Icon);
+    }
+    
+    private IEnumerable<RatingChannel> GetRandomizedChannels(IEnumerable<RatingChannel> channels)
+    {
+        return channels
+            .Select((channel, index) => new { Channel = channel, SortKey = _randomValueProvider(), Index = index })
+            .OrderBy(entry => entry.SortKey)
+            .ThenBy(entry => entry.Index)
+            .Select(entry => entry.Channel);
+    }
+    
+    private sealed record RatingChannel(string LabelKey, string Url, string Icon);
 }
