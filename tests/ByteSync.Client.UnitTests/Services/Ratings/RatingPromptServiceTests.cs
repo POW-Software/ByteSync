@@ -9,6 +9,7 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Services.Localizations;
+using ByteSync.Interfaces.Services.Ratings;
 using ByteSync.Services.Ratings;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Ratings;
@@ -44,6 +45,7 @@ public class RatingPromptServiceTests
         _environmentService.SetupGet(e => e.OperateCommandLine).Returns(false);
         _environmentService.Setup(e => e.IsAutoRunProfile()).Returns(false);
         _environmentService.SetupGet(e => e.DeploymentMode).Returns(DeploymentModes.SetupInstallation);
+        _environmentService.SetupGet(e => e.OSPlatform).Returns(OSPlatforms.Windows);
         
         _applicationSettings = new ApplicationSettings
         {
@@ -227,11 +229,49 @@ public class RatingPromptServiceTests
         _applicationSettings.UserRatingLastPromptedOn.Should().NotBeNull();
     }
     
-    private RatingPromptService BuildService(Func<double>? randomProvider)
+    private RatingPromptService BuildService(Func<double>? randomProvider, RatingPromptConfiguration? configuration = null)
     {
+        var configurationProvider = new StubRatingPromptConfigurationProvider(configuration ?? BuildConfiguration());
+        
         return new RatingPromptService(_synchronizationService.Object, _environmentService.Object,
             _applicationSettingsRepository.Object, _dialogService.Object,
-            _webAccessor.Object, _localizationService.Object, _logger.Object, randomProvider);
+            _webAccessor.Object, _localizationService.Object, configurationProvider, _logger.Object, randomProvider);
+    }
+    
+    private static RatingPromptConfiguration BuildConfiguration(int additionalCount = 3)
+    {
+        var alwaysInclude = new List<RatingPromptChannelConfiguration>
+        {
+            new("RatingPrompt_Channel_GitHub", "https://github.com/POW-Software/ByteSync", "LogosGithub")
+        };
+        var additional = new List<RatingPromptChannelConfiguration>
+        {
+            new("RatingPrompt_Channel_AlternativeTo", "https://alternativeto.net/software/bytesync/about/", "RegularWorld"),
+            new("RatingPrompt_Channel_MajorGeeks", "https://www.majorgeeks.com/files/details/bytesync.html", "RegularWorld"),
+            new("RatingPrompt_Channel_Softpedia", "https://www.softpedia.com/get/System/Back-Up-and-Recovery/ByteSync.shtml",
+                "RegularWorld"),
+            new("RatingPrompt_Channel_Uptodown", "https://bytesync-windows.fr.uptodown.com/windows", "RegularWorld"),
+            new("RatingPrompt_Channel_SourceForge", "https://sourceforge.net/projects/bytesync/", "RegularWorld")
+        };
+        var stores = new Dictionary<OSPlatforms, RatingPromptChannelConfiguration>
+        {
+            [OSPlatforms.Windows] = new RatingPromptChannelConfiguration(
+                "RatingPrompt_Channel_MicrosoftStore",
+                "https://apps.microsoft.com/detail/9p17gqw3z2q2?hl=fr-FR&gl=FR",
+                "RegularStore")
+        };
+        
+        return new RatingPromptConfiguration(1d / 3d, additionalCount, alwaysInclude, additional, stores);
+    }
+    
+    private sealed class StubRatingPromptConfigurationProvider : IRatingPromptConfigurationProvider
+    {
+        public StubRatingPromptConfigurationProvider(RatingPromptConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+        
+        public RatingPromptConfiguration Configuration { get; }
     }
     
     private void PublishSynchronizationEnd(SynchronizationEndStatuses status = SynchronizationEndStatuses.Regular)

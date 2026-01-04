@@ -814,6 +814,9 @@ Would you like to continue ?</value>
     <data name="RatingPrompt_Channel_MicrosoftStore" xml:space="preserve">
         <value>Rate on Microsoft Store</value>
     </data>
+    <data name="RatingPrompt_Channel_MacAppStore" xml:space="preserve">
+        <value>Rate on Mac App Store</value>
+    </data>
     <data name="RatingPrompt_Channel_GitHub" xml:space="preserve">
         <value>Star on GitHub</value>
     </data>

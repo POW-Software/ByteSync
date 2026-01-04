@@ -790,6 +790,9 @@ Voulez-vous continuer ?</value>
     <data name="RatingPrompt_Channel_MicrosoftStore" xml:space="preserve">
         <value>Noter sur Microsoft Store</value>
     </data>
+    <data name="RatingPrompt_Channel_MacAppStore" xml:space="preserve">
+        <value>Noter sur Mac App Store</value>
+    </data>
     <data name="RatingPrompt_Channel_GitHub" xml:space="preserve">
         <value>Mettre une étoile sur GitHub</value>
     </data>

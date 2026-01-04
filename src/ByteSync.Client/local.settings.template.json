@@ -1,7 +1,57 @@
-﻿{
+{
   "LocalDebugUrl": "",
   "DevelopmentUrl": "",
   "StagingUrl": "",
   "ProductionUrl": "",
-  "UpdatesDefinitionUrl": ""
+  "UpdatesDefinitionUrl": "",
+  "RatingPrompt": {
+    "Probability": 0.3333333,
+    "AdditionalCount": 3,
+    "AlwaysInclude": [
+      {
+        "LabelKey": "RatingPrompt_Channel_GitHub",
+        "Url": "",
+        "Icon": "LogosGithub"
+      }
+    ],
+    "Stores": {
+      "Windows": {
+        "LabelKey": "RatingPrompt_Channel_MicrosoftStore",
+        "Url": "",
+        "Icon": "RegularStore"
+      },
+      "MacOs": {
+        "LabelKey": "RatingPrompt_Channel_MacAppStore",
+        "Url": "",
+        "Icon": "RegularStore"
+      }
+    },
+    "Additional": [
+      {
+        "LabelKey": "RatingPrompt_Channel_AlternativeTo",
+        "Url": "",
+        "Icon": "RegularWorld"
+      },
+      {
+        "LabelKey": "RatingPrompt_Channel_MajorGeeks",
+        "Url": "",
+        "Icon": "RegularWorld"
+      },
+      {
+        "LabelKey": "RatingPrompt_Channel_Softpedia",
+        "Url": "",
+        "Icon": "RegularWorld"
+      },
+      {
+        "LabelKey": "RatingPrompt_Channel_Uptodown",
+        "Url": "",
+        "Icon": "RegularWorld"
+      },
+      {
+        "LabelKey": "RatingPrompt_Channel_SourceForge",
+        "Url": "",
+        "Icon": "RegularWorld"
+      }
+    ]
+  }
 }
