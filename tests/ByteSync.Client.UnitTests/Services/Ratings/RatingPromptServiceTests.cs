@@ -196,7 +196,7 @@ public class RatingPromptServiceTests
         };
         viewModel.RatingOptions.Select(option => option.Url)
             .Should()
-            .OnlyContain(url => allowedDomains.Any(domain => url.Contains(domain)));
+            .OnlyContain(url => allowedDomains.Any(url.Contains));
         viewModel.RatingOptions.Select(option => option.Url).Distinct().Should().HaveCount(4);
         
         var selectedUrl = viewModel.RatingOptions.First(option => option.Url.Contains("github.com")).Url;
