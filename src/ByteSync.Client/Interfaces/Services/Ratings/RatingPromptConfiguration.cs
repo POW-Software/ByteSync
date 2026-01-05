@@ -2,7 +2,10 @@ using ByteSync.Common.Business.Misc;
 
 namespace ByteSync.Interfaces.Services.Ratings;
 
-public sealed record RatingPromptChannelConfiguration(string LabelKey, string Url, string Icon);
+public sealed record RatingPromptChannelConfiguration(
+    string Url,
+    string Icon,
+    IReadOnlyDictionary<string, string> Labels);
 
 public sealed record RatingPromptConfiguration(
     double PromptProbability,

@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System.Globalization;
+using System.Reactive.Linq;
 using ByteSync.Assets.Resources;
 using ByteSync.Business.Misc;
 using ByteSync.Common.Business.Misc;
@@ -166,7 +167,7 @@ public class RatingPromptService : IRatingPromptService, IDisposable
     
     private RatingOption CreateRatingOption(RatingPromptChannelConfiguration channel)
     {
-        return new RatingOption(_localizationService[channel.LabelKey], channel.Url, channel.Icon);
+        return new RatingOption(ResolveLabel(channel), channel.Url, channel.Icon);
     }
     
     private void AddChannels(ICollection<RatingOption> options, IEnumerable<RatingPromptChannelConfiguration> channels)
@@ -175,6 +176,58 @@ public class RatingPromptService : IRatingPromptService, IDisposable
         {
             options.Add(CreateRatingOption(channel));
         }
+    }
+    
+    private string ResolveLabel(RatingPromptChannelConfiguration channel)
+    {
+        var culture = _localizationService.CurrentCultureDefinition?.CultureInfo;
+        
+        return ResolveLabel(channel, culture);
+    }
+    
+    private static string ResolveLabel(RatingPromptChannelConfiguration channel, CultureInfo? culture)
+    {
+        if (culture != null)
+        {
+            if (channel.Labels.TryGetValue(culture.Name, out var exactLabel))
+            {
+                return exactLabel;
+            }
+            
+            var neutralCulture = culture.TwoLetterISOLanguageName;
+            if (!string.IsNullOrWhiteSpace(neutralCulture)
+                && channel.Labels.TryGetValue(neutralCulture, out var neutralLabel))
+            {
+                return neutralLabel;
+            }
+        }
+        
+        if (channel.Labels.TryGetValue("en", out var englishLabel))
+        {
+            return englishLabel;
+        }
+        
+        return GetDomainFallback(channel.Url);
+    }
+    
+    private static string GetDomainFallback(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || string.IsNullOrWhiteSpace(uri.Host))
+        {
+            return url;
+        }
+        
+        var host = uri.Host;
+        if (host.StartsWith("www.", StringComparison.OrdinalIgnoreCase))
+        {
+            host = host[4..];
+        }
+        
+        var hostParts = host.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var domain = hostParts.Length >= 2 ? hostParts[^2] : host;
+        var readable = domain.Replace('-', ' ');
+        
+        return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(readable);
     }
     
     private IEnumerable<RatingPromptChannelConfiguration> GetRandomizedChannels(IEnumerable<RatingPromptChannelConfiguration> channels)

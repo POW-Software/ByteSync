@@ -1,3 +1,5 @@
+using System.Globalization;
+using ByteSync.Business;
 using ByteSync.Business.Configurations;
 using ByteSync.Business.Misc;
 using ByteSync.Business.Synchronizations;
@@ -66,6 +68,8 @@ public class RatingPromptServiceTests
         
         _localizationService = new Mock<ILocalizationService>();
         _localizationService.Setup(ls => ls[It.IsAny<string>()]).Returns((string key) => key);
+        _localizationService.SetupGet(ls => ls.CurrentCultureDefinition)
+            .Returns(new CultureDefinition(new CultureInfo("en")));
         
         _dialogService = new Mock<IDialogService>();
         _webAccessor = new Mock<IWebAccessor>();
@@ -229,6 +233,19 @@ public class RatingPromptServiceTests
         _applicationSettings.UserRatingLastPromptedOn.Should().NotBeNull();
     }
     
+    [Test]
+    public async Task Uses_labels_for_current_culture()
+    {
+        _localizationService.SetupGet(ls => ls.CurrentCultureDefinition)
+            .Returns(new CultureDefinition(new CultureInfo("fr-FR")));
+        
+        using var service = BuildService(() => 0.0);
+        PublishSynchronizationEnd();
+        
+        var viewModel = await WaitForPromptAsync();
+        viewModel.RatingOptions.First().Label.Should().Be("Mettre une étoile sur GitHub");
+    }
+    
     private RatingPromptService BuildService(Func<double>? randomProvider, RatingPromptConfiguration? configuration = null)
     {
         var configurationProvider = new StubRatingPromptConfigurationProvider(configuration ?? BuildConfiguration());
@@ -242,26 +259,52 @@ public class RatingPromptServiceTests
     {
         var alwaysInclude = new List<RatingPromptChannelConfiguration>
         {
-            new("RatingPrompt_Channel_GitHub", "https://github.com/POW-Software/ByteSync", "LogosGithub")
+            new(
+                "https://github.com/POW-Software/ByteSync",
+                "LogosGithub",
+                BuildLabels("Star on GitHub", "Mettre une étoile sur GitHub"))
         };
         var additional = new List<RatingPromptChannelConfiguration>
         {
-            new("RatingPrompt_Channel_AlternativeTo", "https://alternativeto.net/software/bytesync/about/", "RegularWorld"),
-            new("RatingPrompt_Channel_MajorGeeks", "https://www.majorgeeks.com/files/details/bytesync.html", "RegularWorld"),
-            new("RatingPrompt_Channel_Softpedia", "https://www.softpedia.com/get/System/Back-Up-and-Recovery/ByteSync.shtml",
-                "RegularWorld"),
-            new("RatingPrompt_Channel_Uptodown", "https://bytesync-windows.fr.uptodown.com/windows", "RegularWorld"),
-            new("RatingPrompt_Channel_SourceForge", "https://sourceforge.net/projects/bytesync/", "RegularWorld")
+            new(
+                "https://alternativeto.net/software/bytesync/about/",
+                "RegularWorld",
+                BuildLabels("Rate on AlternativeTo", "Noter sur AlternativeTo")),
+            new(
+                "https://www.majorgeeks.com/files/details/bytesync.html",
+                "RegularWorld",
+                BuildLabels("Rate on MajorGeeks", "Noter sur MajorGeeks")),
+            new(
+                "https://www.softpedia.com/get/System/Back-Up-and-Recovery/ByteSync.shtml",
+                "RegularWorld",
+                BuildLabels("Rate on Softpedia", "Noter sur Softpedia")),
+            new(
+                "https://bytesync-windows.fr.uptodown.com/windows",
+                "RegularWorld",
+                BuildLabels("Rate on Uptodown", "Noter sur Uptodown")),
+            new(
+                "https://sourceforge.net/projects/bytesync/",
+                "RegularWorld",
+                BuildLabels("Rate on SourceForge", "Noter sur SourceForge"))
         };
         var stores = new Dictionary<OSPlatforms, RatingPromptChannelConfiguration>
         {
             [OSPlatforms.Windows] = new RatingPromptChannelConfiguration(
-                "RatingPrompt_Channel_MicrosoftStore",
                 "https://apps.microsoft.com/detail/9p17gqw3z2q2?hl=fr-FR&gl=FR",
-                "RegularStore")
+                "RegularStore",
+                BuildLabels("Rate on Microsoft Store", "Noter sur Microsoft Store"))
         };
         
         return new RatingPromptConfiguration(1d / 3d, additionalCount, alwaysInclude, additional, stores);
+    }
+    
+    private static IReadOnlyDictionary<string, string> BuildLabels(string english, string french)
+    {
+        return new Dictionary<string, string>
+        {
+            ["en"] = english,
+            ["fr"] = french
+        };
     }
     
     private sealed class StubRatingPromptConfigurationProvider : IRatingPromptConfigurationProvider

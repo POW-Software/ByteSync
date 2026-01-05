@@ -9,48 +9,72 @@
     "AdditionalCount": 3,
     "AlwaysInclude": [
       {
-        "LabelKey": "RatingPrompt_Channel_GitHub",
         "Url": "",
-        "Icon": "LogosGithub"
+        "Icon": "LogosGithub",
+        "Labels": {
+          "en": "Star on GitHub",
+          "fr": "Mettre une étoile sur GitHub"
+        }
       }
     ],
     "Stores": {
       "Windows": {
-        "LabelKey": "RatingPrompt_Channel_MicrosoftStore",
         "Url": "",
-        "Icon": "RegularStore"
+        "Icon": "RegularStore",
+        "Labels": {
+          "en": "Rate on Microsoft Store",
+          "fr": "Noter sur Microsoft Store"
+        }
       },
       "MacOs": {
-        "LabelKey": "RatingPrompt_Channel_MacAppStore",
         "Url": "",
-        "Icon": "RegularStore"
+        "Icon": "RegularStore",
+        "Labels": {
+          "en": "Rate on Mac App Store",
+          "fr": "Noter sur Mac App Store"
+        }
       }
     },
     "Additional": [
       {
-        "LabelKey": "RatingPrompt_Channel_AlternativeTo",
         "Url": "",
-        "Icon": "RegularWorld"
+        "Icon": "RegularWorld",
+        "Labels": {
+          "en": "Rate on AlternativeTo",
+          "fr": "Noter sur AlternativeTo"
+        }
       },
       {
-        "LabelKey": "RatingPrompt_Channel_MajorGeeks",
         "Url": "",
-        "Icon": "RegularWorld"
+        "Icon": "RegularWorld",
+        "Labels": {
+          "en": "Rate on MajorGeeks",
+          "fr": "Noter sur MajorGeeks"
+        }
       },
       {
-        "LabelKey": "RatingPrompt_Channel_Softpedia",
         "Url": "",
-        "Icon": "RegularWorld"
+        "Icon": "RegularWorld",
+        "Labels": {
+          "en": "Rate on Softpedia",
+          "fr": "Noter sur Softpedia"
+        }
       },
       {
-        "LabelKey": "RatingPrompt_Channel_Uptodown",
         "Url": "",
-        "Icon": "RegularWorld"
+        "Icon": "RegularWorld",
+        "Labels": {
+          "en": "Rate on Uptodown",
+          "fr": "Noter sur Uptodown"
+        }
       },
       {
-        "LabelKey": "RatingPrompt_Channel_SourceForge",
         "Url": "",
-        "Icon": "RegularWorld"
+        "Icon": "RegularWorld",
+        "Labels": {
+          "en": "Rate on SourceForge",
+          "fr": "Noter sur SourceForge"
+        }
       }
     ]
   }

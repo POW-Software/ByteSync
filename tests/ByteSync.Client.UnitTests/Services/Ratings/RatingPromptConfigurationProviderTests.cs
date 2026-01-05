@@ -19,28 +19,40 @@ public class RatingPromptConfigurationProviderTests
                        "AdditionalCount": 2,
                        "AlwaysInclude": [
                          {
-                           "LabelKey": "RatingPrompt_Channel_GitHub",
                            "Url": "https://github.com/POW-Software/ByteSync",
-                           "Icon": "LogosGithub"
+                           "Icon": "LogosGithub",
+                           "Labels": {
+                             "en": "Star on GitHub",
+                             "fr": "Mettre une étoile sur GitHub"
+                           }
                          }
                        ],
                        "Stores": {
                          "Windows": {
-                           "LabelKey": "RatingPrompt_Channel_MicrosoftStore",
                            "Url": "https://apps.microsoft.com/detail/9p17gqw3z2q2?hl=fr-FR&gl=FR",
-                           "Icon": "RegularStore"
+                           "Icon": "RegularStore",
+                           "Labels": {
+                             "en": "Rate on Microsoft Store",
+                             "fr": "Noter sur Microsoft Store"
+                           }
                          }
                        },
                        "Additional": [
                          {
-                           "LabelKey": "RatingPrompt_Channel_AlternativeTo",
                            "Url": "https://alternativeto.net/software/bytesync/about/",
-                           "Icon": "RegularWorld"
+                           "Icon": "RegularWorld",
+                           "Labels": {
+                             "en": "Rate on AlternativeTo",
+                             "fr": "Noter sur AlternativeTo"
+                           }
                          },
                          {
-                           "LabelKey": "RatingPrompt_Channel_MajorGeeks",
                            "Url": "https://www.majorgeeks.com/files/details/bytesync.html",
-                           "Icon": "RegularWorld"
+                           "Icon": "RegularWorld",
+                           "Labels": {
+                             "en": "Rate on MajorGeeks",
+                             "fr": "Noter sur MajorGeeks"
+                           }
                          }
                        ]
                      }
@@ -52,6 +64,7 @@ public class RatingPromptConfigurationProviderTests
         provider.Configuration.PromptProbability.Should().Be(0.5);
         provider.Configuration.AdditionalCount.Should().Be(2);
         provider.Configuration.AlwaysInclude.Should().ContainSingle();
+        provider.Configuration.AlwaysInclude[0].Labels.Should().ContainKey("fr");
         provider.Configuration.Additional.Should().HaveCount(2);
         provider.Configuration.GetStoreChannel(OSPlatforms.Windows)!.Url.Should()
             .Contain("apps.microsoft.com");
@@ -67,23 +80,29 @@ public class RatingPromptConfigurationProviderTests
                        "AdditionalCount": 0,
                        "AlwaysInclude": [
                          {
-                           "LabelKey": "",
-                           "Url": "https://github.com/POW-Software/ByteSync",
-                           "Icon": "LogosGithub"
+                           "Url": "",
+                           "Icon": "LogosGithub",
+                           "Labels": {
+                             "en": "Star on GitHub"
+                           }
                          }
                        ],
                        "Stores": {
                          "Windows": {
-                           "LabelKey": "RatingPrompt_Channel_MicrosoftStore",
                            "Url": "",
-                           "Icon": "RegularStore"
+                           "Icon": "RegularStore",
+                           "Labels": {
+                             "en": "Rate on Microsoft Store"
+                           }
                          }
                        },
                        "Additional": [
                          {
-                           "LabelKey": "RatingPrompt_Channel_AlternativeTo",
                            "Url": " ",
-                           "Icon": "RegularWorld"
+                           "Icon": "RegularWorld",
+                           "Labels": {
+                             "en": "Rate on AlternativeTo"
+                           }
                          }
                        ]
                      }

@@ -99,17 +99,30 @@ public sealed class RatingPromptConfigurationProvider : IRatingPromptConfigurati
     
     private static RatingPromptChannelConfiguration? ReadChannel(IConfigurationSection section)
     {
-        var labelKey = section["LabelKey"]?.Trim();
         var url = section["Url"]?.Trim();
         var icon = section["Icon"]?.Trim();
+        var labels = ReadLabels(section.GetSection("Labels"));
         
-        if (string.IsNullOrWhiteSpace(labelKey)
-            || string.IsNullOrWhiteSpace(url)
-            || string.IsNullOrWhiteSpace(icon))
+        if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(icon))
         {
             return null;
         }
         
-        return new RatingPromptChannelConfiguration(labelKey, url, icon);
+        return new RatingPromptChannelConfiguration(url, icon, labels);
+    }
+    
+    private static IReadOnlyDictionary<string, string> ReadLabels(IConfigurationSection section)
+    {
+        var labels = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var child in section.GetChildren())
+        {
+            var value = child.Value?.Trim();
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                labels[child.Key] = value;
+            }
+        }
+        
+        return labels;
     }
 }
