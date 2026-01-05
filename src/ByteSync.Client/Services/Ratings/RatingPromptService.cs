@@ -180,7 +180,7 @@ public class RatingPromptService : IRatingPromptService, IDisposable
     
     private string ResolveLabel(RatingPromptChannelConfiguration channel)
     {
-        var culture = _localizationService.CurrentCultureDefinition?.CultureInfo;
+        var culture = _localizationService.CurrentCultureDefinition.CultureInfo;
         
         return ResolveLabel(channel, culture);
     }

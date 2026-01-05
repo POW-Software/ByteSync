@@ -787,31 +787,7 @@ Voulez-vous continuer ?</value>
     <data name="RatingPrompt_DoNotAskAgain" xml:space="preserve">
         <value>Ne plus me demander</value>
     </data>
-    <data name="RatingPrompt_Channel_MicrosoftStore" xml:space="preserve">
-        <value>Noter sur Microsoft Store</value>
-    </data>
-    <data name="RatingPrompt_Channel_MacAppStore" xml:space="preserve">
-        <value>Noter sur Mac App Store</value>
-    </data>
-    <data name="RatingPrompt_Channel_GitHub" xml:space="preserve">
-        <value>Mettre une étoile sur GitHub</value>
-    </data>
-    <data name="RatingPrompt_Channel_AlternativeTo" xml:space="preserve">
-        <value>Noter sur AlternativeTo</value>
-    </data>
-    <data name="RatingPrompt_Channel_MajorGeeks" xml:space="preserve">
-        <value>Noter sur MajorGeeks</value>
-    </data>
-    <data name="RatingPrompt_Channel_Softpedia" xml:space="preserve">
-        <value>Noter sur Softpedia</value>
-    </data>
-    <data name="RatingPrompt_Channel_Uptodown" xml:space="preserve">
-        <value>Noter sur Uptodown</value>
-    </data>
-    <data name="RatingPrompt_Channel_SourceForge" xml:space="preserve">
-        <value>Noter sur SourceForge</value>
-    </data>
-	<data name="MainWindow_OnClose_ConfirmTitle" xml:space="preserve">
+    <data name="MainWindow_OnClose_ConfirmTitle" xml:space="preserve">
 		<value>Quitter</value>
 	</data>
 	<data name="MainWindow_OnClose_ConfirmMessage" xml:space="preserve">
@@ -1844,3 +1820,4 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
         <value>ANNULER</value>
     </data>
 </root>
+
