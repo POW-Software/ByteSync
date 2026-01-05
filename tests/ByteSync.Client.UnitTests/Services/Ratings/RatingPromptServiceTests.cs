@@ -246,6 +246,49 @@ public class RatingPromptServiceTests
         viewModel.RatingOptions.First().Label.Should().Be("Mettre une étoile sur GitHub");
     }
     
+    [Test]
+    public async Task Falls_back_to_neutral_culture_labels()
+    {
+        _localizationService.SetupGet(ls => ls.CurrentCultureDefinition)
+            .Returns(new CultureDefinition(new CultureInfo("fr-CA")));
+        
+        using var service = BuildService(() => 0.0);
+        PublishSynchronizationEnd();
+        
+        var viewModel = await WaitForPromptAsync();
+        viewModel.RatingOptions.First().Label.Should().Be("Mettre une étoile sur GitHub");
+    }
+    
+    [Test]
+    public async Task Falls_back_to_english_when_culture_is_missing()
+    {
+        _localizationService.SetupGet(ls => ls.CurrentCultureDefinition)
+            .Returns(new CultureDefinition
+            {
+                Code = string.Empty,
+                Description = string.Empty,
+                CultureInfo = null!
+            });
+        
+        using var service = BuildService(() => 0.0);
+        PublishSynchronizationEnd();
+        
+        var viewModel = await WaitForPromptAsync();
+        viewModel.RatingOptions.First().Label.Should().Be("Star on GitHub");
+    }
+    
+    [Test]
+    public async Task Falls_back_to_domain_when_no_labels_are_available()
+    {
+        var configuration = BuildConfigurationWithEmptyLabels();
+        
+        using var service = BuildService(() => 0.0, configuration);
+        PublishSynchronizationEnd();
+        
+        var viewModel = await WaitForPromptAsync();
+        viewModel.RatingOptions.First().Label.Should().Be("Foo Bar");
+    }
+    
     private RatingPromptService BuildService(Func<double>? randomProvider, RatingPromptConfiguration? configuration = null)
     {
         var configurationProvider = new StubRatingPromptConfigurationProvider(configuration ?? BuildConfiguration());
@@ -296,6 +339,17 @@ public class RatingPromptServiceTests
         };
         
         return new RatingPromptConfiguration(1d / 3d, additionalCount, alwaysInclude, additional, stores);
+    }
+    
+    private static RatingPromptConfiguration BuildConfigurationWithEmptyLabels()
+    {
+        var alwaysInclude = new List<RatingPromptChannelConfiguration>
+        {
+            new("https://foo-bar.com/somewhere", "LogosGithub", new Dictionary<string, string>())
+        };
+        var stores = new Dictionary<OSPlatforms, RatingPromptChannelConfiguration>();
+        
+        return new RatingPromptConfiguration(1d / 3d, 1, alwaysInclude, new List<RatingPromptChannelConfiguration>(), stores);
     }
     
     private static IReadOnlyDictionary<string, string> BuildLabels(string english, string french)
