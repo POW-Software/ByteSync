@@ -1,5 +1,4 @@
 ﻿using ByteSync.Common.Business.Sessions.Cloud.Connections;
-using ByteSync.Common.Business.Versions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
@@ -33,32 +32,24 @@ public class StartTrustCheckCommandHandler : IRequestHandler<StartTrustCheckRequ
         }
 
         var joinerProtocolVersion = trustCheckParameters.ProtocolVersion;
-        
-        if (!ProtocolVersion.IsCompatible(joinerProtocolVersion))
+        var sessionProtocolVersion = cloudSession.ProtocolVersion;
+        if (sessionProtocolVersion == 0)
         {
-            _logger.LogWarning(
-                "StartTrustCheck: Joiner {JoinerId} has incompatible protocol version {JoinerVersion}",
-                joiner.ClientInstanceId, joinerProtocolVersion);
-            
-            return new StartTrustCheckResult { IsOK = false, IsProtocolVersionIncompatible = true };
+            var creatorMember = cloudSession.SessionMembers
+                .FirstOrDefault(m => m.ClientInstanceId == cloudSession.CreatorInstanceId);
+            if (creatorMember != null)
+            {
+                sessionProtocolVersion = creatorMember.PublicKeyInfo.ProtocolVersion;
+            }
         }
         
-        var membersToCheck = cloudSession.SessionMembers
-            .Where(m => trustCheckParameters.MembersInstanceIdsToCheck.Contains(m.ClientInstanceId));
-        
-        foreach (var member in membersToCheck)
+        if (joinerProtocolVersion != sessionProtocolVersion)
         {
-            var memberProtocolVersion = member.PublicKeyInfo.ProtocolVersion;
+            _logger.LogWarning(
+                "StartTrustCheck: Joiner {JoinerId} has incompatible protocol version {JoinerVersion} for session {SessionId} (version {SessionVersion})",
+                joiner.ClientInstanceId, joinerProtocolVersion, trustCheckParameters.SessionId, sessionProtocolVersion);
             
-            if (!ProtocolVersion.IsCompatible(memberProtocolVersion) || 
-                memberProtocolVersion != joinerProtocolVersion)
-            {
-                _logger.LogWarning(
-                    "StartTrustCheck: Protocol version mismatch between joiner {JoinerId} (version {JoinerVersion}) and member {MemberId} (version {MemberVersion})",
-                    joiner.ClientInstanceId, joinerProtocolVersion, member.ClientInstanceId, memberProtocolVersion);
-                
-                return new StartTrustCheckResult { IsOK = false, IsProtocolVersionIncompatible = true };
-            }
+            return new StartTrustCheckResult { IsOK = false, IsProtocolVersionIncompatible = true };
         }
 
         _logger.LogInformation("StartTrustCheck: {Joiner} starts trust check for session {SessionId}. {Count} members to check", 

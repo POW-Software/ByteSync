@@ -39,6 +39,7 @@ public class CreateSessionCommandHandler : IRequestHandler<CreateSessionRequest,
         SessionMemberData creatorData;
         
         cloudSessionData = new CloudSessionData(createCloudSessionParameters.LobbyId, createCloudSessionParameters.SessionSettings, client);
+        cloudSessionData.ProtocolVersion = createCloudSessionParameters.CreatorPublicKeyInfo.ProtocolVersion;
         creatorData = new SessionMemberData(client, createCloudSessionParameters.CreatorPublicKeyInfo, 
             createCloudSessionParameters.CreatorProfileClientId, cloudSessionData, 
             createCloudSessionParameters.CreatorPrivateData);

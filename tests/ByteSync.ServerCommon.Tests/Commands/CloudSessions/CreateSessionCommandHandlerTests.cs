@@ -54,7 +54,7 @@ public class CreateSessionCommandHandlerTests
         var lobbyId = "lobbyId";
         var sessionSettings = new EncryptedSessionSettings();
         var client = new Client { ClientInstanceId = "clientInstance1" };
-        var creatorPublicKeyInfo = new PublicKeyInfo();
+        var creatorPublicKeyInfo = new PublicKeyInfo { ProtocolVersion = 2 };
         var creatorProfileClientId = "creatorProfile";
         var creatorPrivateData = new EncryptedSessionMemberPrivateData();
         var sessionId = "123ABC456";
@@ -108,6 +108,7 @@ public class CreateSessionCommandHandlerTests
         addedCloudSession.Should().NotBeNull();
         addedCloudSession.LobbyId.Should().Be(lobbyId);
         addedCloudSession.SessionSettings.Should().BeSameAs(sessionSettings);
+        addedCloudSession.ProtocolVersion.Should().Be(creatorPublicKeyInfo.ProtocolVersion);
         addedCloudSession.SessionMembers.Should().HaveCount(1);
 
         // Verify session member creation
