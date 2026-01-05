@@ -16,6 +16,6 @@ public sealed record RatingPromptConfiguration(
 {
     public RatingPromptChannelConfiguration? GetStoreChannel(OSPlatforms osPlatform)
     {
-        return Stores.TryGetValue(osPlatform, out var channel) ? channel : null;
+        return Stores.GetValueOrDefault(osPlatform);
     }
 }

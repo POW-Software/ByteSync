@@ -7,13 +7,13 @@ namespace ByteSync.Services.Ratings;
 
 public sealed class RatingPromptConfigurationProvider : IRatingPromptConfigurationProvider
 {
-    private const string RatingPromptSectionName = "RatingPrompt";
-    private const string ProbabilityKey = "Probability";
-    private const string AdditionalCountKey = "AdditionalCount";
-    private const int DefaultAdditionalCount = 3;
-    private const double DefaultPromptProbability = 1d / 3d;
+    private const string RATING_PROMPT_SECTION_NAME = "RatingPrompt";
+    private const string PROBABILITY_KEY = "Probability";
+    private const string ADDITIONAL_COUNT_KEY = "AdditionalCount";
+    private const int DEFAULT_ADDITIONAL_COUNT = 3;
+    private const double DEFAULT_PROMPT_PROBABILITY = 1d / 3d;
     
-    private static readonly IReadOnlyDictionary<string, OSPlatforms> StorePlatformMappings =
+    private static readonly IReadOnlyDictionary<string, OSPlatforms> _storePlatformMappings =
         new Dictionary<string, OSPlatforms>(StringComparer.OrdinalIgnoreCase)
         {
             ["Windows"] = OSPlatforms.Windows,
@@ -24,15 +24,15 @@ public sealed class RatingPromptConfigurationProvider : IRatingPromptConfigurati
     
     public RatingPromptConfigurationProvider(IConfiguration configuration)
     {
-        Configuration = BuildConfiguration(configuration.GetSection(RatingPromptSectionName));
+        Configuration = BuildConfiguration(configuration.GetSection(RATING_PROMPT_SECTION_NAME));
     }
     
     public RatingPromptConfiguration Configuration { get; }
     
     private static RatingPromptConfiguration BuildConfiguration(IConfigurationSection section)
     {
-        var promptProbability = ReadProbability(section[ProbabilityKey]);
-        var additionalCount = ReadAdditionalCount(section[AdditionalCountKey]);
+        var promptProbability = ReadProbability(section[PROBABILITY_KEY]);
+        var additionalCount = ReadAdditionalCount(section[ADDITIONAL_COUNT_KEY]);
         var alwaysInclude = ReadChannels(section.GetSection("AlwaysInclude"));
         var additional = ReadChannels(section.GetSection("Additional"));
         var stores = ReadStores(section.GetSection("Stores"));
@@ -48,7 +48,7 @@ public sealed class RatingPromptConfigurationProvider : IRatingPromptConfigurati
             return probability;
         }
         
-        return DefaultPromptProbability;
+        return DEFAULT_PROMPT_PROBABILITY;
     }
     
     private static int ReadAdditionalCount(string? rawAdditionalCount)
@@ -59,7 +59,7 @@ public sealed class RatingPromptConfigurationProvider : IRatingPromptConfigurati
             return additionalCount;
         }
         
-        return DefaultAdditionalCount;
+        return DEFAULT_ADDITIONAL_COUNT;
     }
     
     private static IReadOnlyList<RatingPromptChannelConfiguration> ReadChannels(IConfigurationSection section)
@@ -82,7 +82,7 @@ public sealed class RatingPromptConfigurationProvider : IRatingPromptConfigurati
         var stores = new Dictionary<OSPlatforms, RatingPromptChannelConfiguration>();
         foreach (var child in section.GetChildren())
         {
-            if (!StorePlatformMappings.TryGetValue(child.Key, out var osPlatform))
+            if (!_storePlatformMappings.TryGetValue(child.Key, out var osPlatform))
             {
                 continue;
             }
