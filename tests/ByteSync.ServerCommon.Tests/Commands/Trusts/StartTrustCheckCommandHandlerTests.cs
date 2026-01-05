@@ -23,7 +23,7 @@ public class StartTrustCheckCommandHandlerTests
     private readonly IHubByteSyncPush _mockHubByteSyncPush;
     
     private readonly StartTrustCheckCommandHandler _startTrustCheckCommandHandler;
-
+    
     public StartTrustCheckCommandHandlerTests()
     {
         _mockCloudSessionsRepository = A.Fake<ICloudSessionsRepository>();
@@ -32,7 +32,7 @@ public class StartTrustCheckCommandHandlerTests
         _mockHubByteSyncPush = A.Fake<IHubByteSyncPush>();
         
         _startTrustCheckCommandHandler = new StartTrustCheckCommandHandler(
-            _mockCloudSessionsRepository, 
+            _mockCloudSessionsRepository,
             _mockInvokeClientsService,
             _mockLogger);
     }
@@ -58,13 +58,13 @@ public class StartTrustCheckCommandHandlerTests
         
         var cloudSession = new CloudSessionData(sessionId, new EncryptedSessionSettings(), new Client { ClientInstanceId = "member1" });
         cloudSession.ProtocolVersion = ProtocolVersion.CURRENT;
-        cloudSession.SessionMembers.Add(new SessionMemberData 
-        { 
+        cloudSession.SessionMembers.Add(new SessionMemberData
+        {
             ClientInstanceId = member1,
             PublicKeyInfo = new PublicKeyInfo { ProtocolVersion = ProtocolVersion.CURRENT }
         });
-        cloudSession.SessionMembers.Add(new SessionMemberData 
-        { 
+        cloudSession.SessionMembers.Add(new SessionMemberData
+        {
             ClientInstanceId = member2,
             PublicKeyInfo = new PublicKeyInfo { ProtocolVersion = ProtocolVersion.CURRENT }
         });
@@ -76,7 +76,7 @@ public class StartTrustCheckCommandHandlerTests
             .Returns(_mockHubByteSyncPush);
         A.CallTo(() => _mockInvokeClientsService.Client(member2))
             .Returns(_mockHubByteSyncPush);
-            
+        
         A.CallTo(() => _mockHubByteSyncPush.AskPublicKeyCheckData(sessionId, joinerClient.ClientInstanceId, publicKeyInfo))
             .Returns(Task.CompletedTask);
         
@@ -151,8 +151,8 @@ public class StartTrustCheckCommandHandlerTests
         
         var cloudSession = new CloudSessionData(sessionId, new EncryptedSessionSettings(), new Client { ClientInstanceId = "creator" });
         cloudSession.ProtocolVersion = ProtocolVersion.CURRENT;
-        cloudSession.SessionMembers.Add(new SessionMemberData 
-        { 
+        cloudSession.SessionMembers.Add(new SessionMemberData
+        {
             ClientInstanceId = "otherMember",
             PublicKeyInfo = new PublicKeyInfo { ProtocolVersion = ProtocolVersion.CURRENT }
         });
@@ -192,15 +192,15 @@ public class StartTrustCheckCommandHandlerTests
         
         var cloudSession = new CloudSessionData(sessionId, new EncryptedSessionSettings(), new Client { ClientInstanceId = "creator" });
         cloudSession.ProtocolVersion = ProtocolVersion.CURRENT;
-        cloudSession.SessionMembers.Add(new SessionMemberData 
-        { 
+        cloudSession.SessionMembers.Add(new SessionMemberData
+        {
             ClientInstanceId = member1,
             PublicKeyInfo = new PublicKeyInfo { ProtocolVersion = 0 }
         });
         
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
             .Returns(cloudSession);
-
+        
         A.CallTo(() => _mockInvokeClientsService.Client(member1))
             .Returns(_mockHubByteSyncPush);
         A.CallTo(() => _mockHubByteSyncPush.AskPublicKeyCheckData(sessionId, joinerClient.ClientInstanceId, publicKeyInfo))
@@ -241,13 +241,8 @@ public class StartTrustCheckCommandHandlerTests
         cloudSession.ProtocolVersion = 0;
         cloudSession.SessionMembers.Add(new SessionMemberData
         {
-            ClientInstanceId = "creator",
-            PublicKeyInfo = new PublicKeyInfo { ProtocolVersion = 0 }
-        });
-        cloudSession.SessionMembers.Add(new SessionMemberData 
-        { 
             ClientInstanceId = member1,
-            PublicKeyInfo = new PublicKeyInfo { ProtocolVersion = ProtocolVersion.CURRENT }
+            PublicKeyInfo = new PublicKeyInfo { ProtocolVersion = 0 }
         });
         
         A.CallTo(() => _mockCloudSessionsRepository.Get(sessionId))
@@ -284,8 +279,8 @@ public class StartTrustCheckCommandHandlerTests
         
         var cloudSession = new CloudSessionData(sessionId, new EncryptedSessionSettings(), new Client { ClientInstanceId = "creator" });
         cloudSession.ProtocolVersion = ProtocolVersion.CURRENT;
-        cloudSession.SessionMembers.Add(new SessionMemberData 
-        { 
+        cloudSession.SessionMembers.Add(new SessionMemberData
+        {
             ClientInstanceId = member1,
             PublicKeyInfo = new PublicKeyInfo { ProtocolVersion = ProtocolVersion.CURRENT }
         });

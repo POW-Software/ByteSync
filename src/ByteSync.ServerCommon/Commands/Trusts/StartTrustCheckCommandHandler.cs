@@ -11,8 +11,8 @@ public class StartTrustCheckCommandHandler : IRequestHandler<StartTrustCheckRequ
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly IInvokeClientsService _invokeClientsService;
     private readonly ILogger<StartTrustCheckCommandHandler> _logger;
-
-    public StartTrustCheckCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IInvokeClientsService invokeClientsService, 
+    
+    public StartTrustCheckCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IInvokeClientsService invokeClientsService,
         ILogger<StartTrustCheckCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
@@ -30,18 +30,9 @@ public class StartTrustCheckCommandHandler : IRequestHandler<StartTrustCheckRequ
         {
             return new StartTrustCheckResult { IsOK = false };
         }
-
+        
         var joinerProtocolVersion = trustCheckParameters.ProtocolVersion;
         var sessionProtocolVersion = cloudSession.ProtocolVersion;
-        if (sessionProtocolVersion == 0)
-        {
-            var creatorMember = cloudSession.SessionMembers
-                .FirstOrDefault(m => m.ClientInstanceId == cloudSession.CreatorInstanceId);
-            if (creatorMember != null)
-            {
-                sessionProtocolVersion = creatorMember.PublicKeyInfo.ProtocolVersion;
-            }
-        }
         
         if (joinerProtocolVersion != sessionProtocolVersion)
         {
@@ -51,8 +42,8 @@ public class StartTrustCheckCommandHandler : IRequestHandler<StartTrustCheckRequ
             
             return new StartTrustCheckResult { IsOK = false, IsProtocolVersionIncompatible = true };
         }
-
-        _logger.LogInformation("StartTrustCheck: {Joiner} starts trust check for session {SessionId}. {Count} members to check", 
+        
+        _logger.LogInformation("StartTrustCheck: {Joiner} starts trust check for session {SessionId}. {Count} members to check",
             joiner.ClientInstanceId, trustCheckParameters.SessionId, trustCheckParameters.MembersInstanceIdsToCheck.Count);
         
         var validMemberIds = trustCheckParameters.MembersInstanceIdsToCheck
@@ -61,10 +52,11 @@ public class StartTrustCheckCommandHandler : IRequestHandler<StartTrustCheckRequ
         
         foreach (var clientInstanceId in validMemberIds)
         {
-            _logger.LogInformation("StartTrustCheck: {Member} must be trusted by {Joiner}", 
+            _logger.LogInformation("StartTrustCheck: {Member} must be trusted by {Joiner}",
                 clientInstanceId, joiner.ClientInstanceId);
             
-            await _invokeClientsService.Client(clientInstanceId).AskPublicKeyCheckData(trustCheckParameters.SessionId, joiner.ClientInstanceId,
+            await _invokeClientsService.Client(clientInstanceId).AskPublicKeyCheckData(trustCheckParameters.SessionId,
+                joiner.ClientInstanceId,
                 trustCheckParameters.PublicKeyInfo).ConfigureAwait(false);
         }
         
