@@ -1,7 +1,41 @@
-﻿{
+{
   "LocalDebugUrl": "",
   "DevelopmentUrl": "",
   "StagingUrl": "",
   "ProductionUrl": "",
-  "UpdatesDefinitionUrl": ""
+  "UpdatesDefinitionUrl": "",
+  "RatingPrompt": {
+    "Probability": 0.3333333,
+    "AdditionalCount": 3,
+    "AlwaysInclude": [
+      {
+        "Url": "",
+        "Icon": "LogosGithub",
+        "Labels": {
+          "en": "Star on GitHub",
+          "fr": "Mettre une étoile sur GitHub"
+        }
+      }
+    ],
+    "Stores": {
+      "Windows": {
+        "Url": "",
+        "Icon": "RegularStore",
+        "Labels": {
+          "en": "Rate on Microsoft Store",
+          "fr": "Noter sur Microsoft Store"
+        }
+      }
+    },
+    "Additional": [
+      {
+        "Url": "",
+        "Icon": "RegularWorld",
+        "Labels": {
+          "en": "Rate on Additional Platform",
+          "fr": "Noter sur Plateforme Supplémentaire"
+        }
+      }
+    ]
+  }
 }

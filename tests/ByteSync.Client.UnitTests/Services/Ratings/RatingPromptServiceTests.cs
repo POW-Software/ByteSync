@@ -1,3 +1,5 @@
+using System.Globalization;
+using ByteSync.Business;
 using ByteSync.Business.Configurations;
 using ByteSync.Business.Misc;
 using ByteSync.Business.Synchronizations;
@@ -9,6 +11,7 @@ using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Services.Localizations;
+using ByteSync.Interfaces.Services.Ratings;
 using ByteSync.Services.Ratings;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Ratings;
@@ -44,6 +47,7 @@ public class RatingPromptServiceTests
         _environmentService.SetupGet(e => e.OperateCommandLine).Returns(false);
         _environmentService.Setup(e => e.IsAutoRunProfile()).Returns(false);
         _environmentService.SetupGet(e => e.DeploymentMode).Returns(DeploymentModes.SetupInstallation);
+        _environmentService.SetupGet(e => e.OSPlatform).Returns(OSPlatforms.Windows);
         
         _applicationSettings = new ApplicationSettings
         {
@@ -64,6 +68,8 @@ public class RatingPromptServiceTests
         
         _localizationService = new Mock<ILocalizationService>();
         _localizationService.Setup(ls => ls[It.IsAny<string>()]).Returns((string key) => key);
+        _localizationService.SetupGet(ls => ls.CurrentCultureDefinition)
+            .Returns(new CultureDefinition(new CultureInfo("en")));
         
         _dialogService = new Mock<IDialogService>();
         _webAccessor = new Mock<IWebAccessor>();
@@ -148,6 +154,9 @@ public class RatingPromptServiceTests
         PublishSynchronizationEnd();
         
         var viewModel = await WaitForPromptAsync();
+        viewModel.RatingOptions.Should().HaveCount(2);
+        viewModel.RatingOptions[0].Url.Should().Contain("apps.microsoft.com");
+        viewModel.RatingOptions[1].Url.Should().Contain("github.com");
         viewModel.SelectRateOption(viewModel.RatingOptions.First().Url);
         
         await WaitForCompletion(urlsOpened.Task);
@@ -155,7 +164,7 @@ public class RatingPromptServiceTests
     }
     
     [Test]
-    public async Task Opens_all_links_for_non_msix_installations()
+    public async Task Opens_selected_link_for_non_msix_installations()
     {
         var openedUrls = new List<string>();
         var urlsOpened = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -174,12 +183,28 @@ public class RatingPromptServiceTests
         PublishSynchronizationEnd();
         
         var viewModel = await WaitForPromptAsync();
-        viewModel.RatingOptions.Count.Should().Be(3);
-        viewModel.SelectRateOption(viewModel.RatingOptions.Last().Url);
+        viewModel.RatingOptions.Should().HaveCount(4);
+        viewModel.RatingOptions.First().Url.Should().Contain("github.com");
+        var allowedDomains = new[]
+        {
+            "github.com",
+            "alternativeto.net",
+            "majorgeeks.com",
+            "softpedia.com",
+            "uptodown.com",
+            "sourceforge.net"
+        };
+        viewModel.RatingOptions.Select(option => option.Url)
+            .Should()
+            .OnlyContain(url => allowedDomains.Any(url.Contains));
+        viewModel.RatingOptions.Select(option => option.Url).Distinct().Should().HaveCount(4);
+        
+        var selectedUrl = viewModel.RatingOptions.First(option => option.Url.Contains("github.com")).Url;
+        viewModel.SelectRateOption(selectedUrl);
         
         await WaitForCompletion(urlsOpened.Task);
         openedUrls.Should().HaveCount(1);
-        openedUrls.Should().Contain(url => url.Contains("majorgeeks.com"));
+        openedUrls.Should().Contain(url => url.Contains("github.com"));
     }
     
     [Test]
@@ -208,11 +233,142 @@ public class RatingPromptServiceTests
         _applicationSettings.UserRatingLastPromptedOn.Should().NotBeNull();
     }
     
-    private RatingPromptService BuildService(Func<double>? randomProvider)
+    [Test]
+    public async Task Uses_labels_for_current_culture()
     {
+        _localizationService.SetupGet(ls => ls.CurrentCultureDefinition)
+            .Returns(new CultureDefinition(new CultureInfo("fr-FR")));
+        
+        using var service = BuildService(() => 0.0);
+        PublishSynchronizationEnd();
+        
+        var viewModel = await WaitForPromptAsync();
+        viewModel.RatingOptions.First().Label.Should().Be("Mettre une étoile sur GitHub");
+    }
+    
+    [Test]
+    public async Task Falls_back_to_neutral_culture_labels()
+    {
+        _localizationService.SetupGet(ls => ls.CurrentCultureDefinition)
+            .Returns(new CultureDefinition(new CultureInfo("fr-CA")));
+        
+        using var service = BuildService(() => 0.0);
+        PublishSynchronizationEnd();
+        
+        var viewModel = await WaitForPromptAsync();
+        viewModel.RatingOptions.First().Label.Should().Be("Mettre une étoile sur GitHub");
+    }
+    
+    [Test]
+    public async Task Falls_back_to_english_when_culture_is_missing()
+    {
+        _localizationService.SetupGet(ls => ls.CurrentCultureDefinition)
+            .Returns(new CultureDefinition
+            {
+                Code = string.Empty,
+                Description = string.Empty,
+                CultureInfo = null!
+            });
+        
+        using var service = BuildService(() => 0.0);
+        PublishSynchronizationEnd();
+        
+        var viewModel = await WaitForPromptAsync();
+        viewModel.RatingOptions.First().Label.Should().Be("Star on GitHub");
+    }
+    
+    [Test]
+    public async Task Falls_back_to_domain_when_no_labels_are_available()
+    {
+        var configuration = BuildConfigurationWithEmptyLabels();
+        
+        using var service = BuildService(() => 0.0, configuration);
+        PublishSynchronizationEnd();
+        
+        var viewModel = await WaitForPromptAsync();
+        viewModel.RatingOptions.First().Label.Should().Be("Foo Bar");
+    }
+    
+    private RatingPromptService BuildService(Func<double>? randomProvider, RatingPromptConfiguration? configuration = null)
+    {
+        var configurationProvider = new StubRatingPromptConfigurationProvider(configuration ?? BuildConfiguration());
+        
         return new RatingPromptService(_synchronizationService.Object, _environmentService.Object,
             _applicationSettingsRepository.Object, _dialogService.Object,
-            _webAccessor.Object, _localizationService.Object, _logger.Object, randomProvider);
+            _webAccessor.Object, _localizationService.Object, configurationProvider, _logger.Object, randomProvider);
+    }
+    
+    private static RatingPromptConfiguration BuildConfiguration(int additionalCount = 3)
+    {
+        var alwaysInclude = new List<RatingPromptChannelConfiguration>
+        {
+            new(
+                "https://github.com/POW-Software/ByteSync",
+                "LogosGithub",
+                BuildLabels("Star on GitHub", "Mettre une étoile sur GitHub"))
+        };
+        var additional = new List<RatingPromptChannelConfiguration>
+        {
+            new(
+                "https://alternativeto.net/software/bytesync/about/",
+                "RegularWorld",
+                BuildLabels("Rate on AlternativeTo", "Noter sur AlternativeTo")),
+            new(
+                "https://www.majorgeeks.com/files/details/bytesync.html",
+                "RegularWorld",
+                BuildLabels("Rate on MajorGeeks", "Noter sur MajorGeeks")),
+            new(
+                "https://www.softpedia.com/get/System/Back-Up-and-Recovery/ByteSync.shtml",
+                "RegularWorld",
+                BuildLabels("Rate on Softpedia", "Noter sur Softpedia")),
+            new(
+                "https://bytesync-windows.fr.uptodown.com/windows",
+                "RegularWorld",
+                BuildLabels("Rate on Uptodown", "Noter sur Uptodown")),
+            new(
+                "https://sourceforge.net/projects/bytesync/",
+                "RegularWorld",
+                BuildLabels("Rate on SourceForge", "Noter sur SourceForge"))
+        };
+        var stores = new Dictionary<OSPlatforms, RatingPromptChannelConfiguration>
+        {
+            [OSPlatforms.Windows] = new RatingPromptChannelConfiguration(
+                "https://apps.microsoft.com/detail/9p17gqw3z2q2?hl=fr-FR&gl=FR",
+                "RegularStore",
+                BuildLabels("Rate on Microsoft Store", "Noter sur Microsoft Store"))
+        };
+        
+        return new RatingPromptConfiguration(1d / 3d, additionalCount, alwaysInclude, additional, stores);
+    }
+    
+    private static RatingPromptConfiguration BuildConfigurationWithEmptyLabels()
+    {
+        var alwaysInclude = new List<RatingPromptChannelConfiguration>
+        {
+            new("https://foo-bar.com/somewhere", "LogosGithub", new Dictionary<string, string>())
+        };
+        var stores = new Dictionary<OSPlatforms, RatingPromptChannelConfiguration>();
+        
+        return new RatingPromptConfiguration(1d / 3d, 1, alwaysInclude, new List<RatingPromptChannelConfiguration>(), stores);
+    }
+    
+    private static IReadOnlyDictionary<string, string> BuildLabels(string english, string french)
+    {
+        return new Dictionary<string, string>
+        {
+            ["en"] = english,
+            ["fr"] = french
+        };
+    }
+    
+    private sealed class StubRatingPromptConfigurationProvider : IRatingPromptConfigurationProvider
+    {
+        public StubRatingPromptConfigurationProvider(RatingPromptConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+        
+        public RatingPromptConfiguration Configuration { get; }
     }
     
     private void PublishSynchronizationEnd(SynchronizationEndStatuses status = SynchronizationEndStatuses.Regular)
