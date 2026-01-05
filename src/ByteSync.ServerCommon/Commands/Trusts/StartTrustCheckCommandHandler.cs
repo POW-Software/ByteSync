@@ -1,5 +1,4 @@
 ﻿using ByteSync.Common.Business.Sessions.Cloud.Connections;
-using ByteSync.Common.Business.Versions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
@@ -12,8 +11,8 @@ public class StartTrustCheckCommandHandler : IRequestHandler<StartTrustCheckRequ
     private readonly ICloudSessionsRepository _cloudSessionsRepository;
     private readonly IInvokeClientsService _invokeClientsService;
     private readonly ILogger<StartTrustCheckCommandHandler> _logger;
-
-    public StartTrustCheckCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IInvokeClientsService invokeClientsService, 
+    
+    public StartTrustCheckCommandHandler(ICloudSessionsRepository cloudSessionsRepository, IInvokeClientsService invokeClientsService,
         ILogger<StartTrustCheckCommandHandler> logger)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
@@ -31,37 +30,20 @@ public class StartTrustCheckCommandHandler : IRequestHandler<StartTrustCheckRequ
         {
             return new StartTrustCheckResult { IsOK = false };
         }
-
-        var joinerProtocolVersion = trustCheckParameters.ProtocolVersion;
         
-        if (!ProtocolVersion.IsCompatible(joinerProtocolVersion))
+        var joinerProtocolVersion = trustCheckParameters.ProtocolVersion;
+        var sessionProtocolVersion = cloudSession.ProtocolVersion;
+        
+        if (joinerProtocolVersion != sessionProtocolVersion)
         {
             _logger.LogWarning(
-                "StartTrustCheck: Joiner {JoinerId} has incompatible protocol version {JoinerVersion}",
-                joiner.ClientInstanceId, joinerProtocolVersion);
+                "StartTrustCheck: Joiner {JoinerId} has incompatible protocol version {JoinerVersion} for session {SessionId} (version {SessionVersion})",
+                joiner.ClientInstanceId, joinerProtocolVersion, trustCheckParameters.SessionId, sessionProtocolVersion);
             
             return new StartTrustCheckResult { IsOK = false, IsProtocolVersionIncompatible = true };
         }
         
-        var membersToCheck = cloudSession.SessionMembers
-            .Where(m => trustCheckParameters.MembersInstanceIdsToCheck.Contains(m.ClientInstanceId));
-        
-        foreach (var member in membersToCheck)
-        {
-            var memberProtocolVersion = member.PublicKeyInfo.ProtocolVersion;
-            
-            if (!ProtocolVersion.IsCompatible(memberProtocolVersion) || 
-                memberProtocolVersion != joinerProtocolVersion)
-            {
-                _logger.LogWarning(
-                    "StartTrustCheck: Protocol version mismatch between joiner {JoinerId} (version {JoinerVersion}) and member {MemberId} (version {MemberVersion})",
-                    joiner.ClientInstanceId, joinerProtocolVersion, member.ClientInstanceId, memberProtocolVersion);
-                
-                return new StartTrustCheckResult { IsOK = false, IsProtocolVersionIncompatible = true };
-            }
-        }
-
-        _logger.LogInformation("StartTrustCheck: {Joiner} starts trust check for session {SessionId}. {Count} members to check", 
+        _logger.LogInformation("StartTrustCheck: {Joiner} starts trust check for session {SessionId}. {Count} members to check",
             joiner.ClientInstanceId, trustCheckParameters.SessionId, trustCheckParameters.MembersInstanceIdsToCheck.Count);
         
         var validMemberIds = trustCheckParameters.MembersInstanceIdsToCheck
@@ -70,10 +52,11 @@ public class StartTrustCheckCommandHandler : IRequestHandler<StartTrustCheckRequ
         
         foreach (var clientInstanceId in validMemberIds)
         {
-            _logger.LogInformation("StartTrustCheck: {Member} must be trusted by {Joiner}", 
+            _logger.LogInformation("StartTrustCheck: {Member} must be trusted by {Joiner}",
                 clientInstanceId, joiner.ClientInstanceId);
             
-            await _invokeClientsService.Client(clientInstanceId).AskPublicKeyCheckData(trustCheckParameters.SessionId, joiner.ClientInstanceId,
+            await _invokeClientsService.Client(clientInstanceId).AskPublicKeyCheckData(trustCheckParameters.SessionId,
+                joiner.ClientInstanceId,
                 trustCheckParameters.PublicKeyInfo).ConfigureAwait(false);
         }
         

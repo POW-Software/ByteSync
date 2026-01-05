@@ -29,6 +29,8 @@ public class CloudSessionData
         
     public EncryptedSessionSettings SessionSettings { get; set; } = null!;
 
+    public int ProtocolVersion { get; set; }
+
     public bool IsSessionActivated { get; set; }
 
     public List<SessionMemberData> SessionMembers { get; set; }
