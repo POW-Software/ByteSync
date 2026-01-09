@@ -147,6 +147,64 @@ public class InventoryBuilderInspectorTests : AbstractTester
     }
     
     [Test]
+    public async Task Hidden_Child_File_Is_Ignored()
+    {
+        var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsHidden(It.Is<FileInfo>(fi => fi.Name == "hidden.txt"), It.IsAny<OSPlatforms>()))
+            .Returns(true);
+        insp.Setup(i => i.IsHidden(It.Is<FileInfo>(fi => fi.Name != "hidden.txt"), It.IsAny<OSPlatforms>()))
+            .Returns(false);
+        insp.Setup(i => i.IsSystem(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
+        insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
+        insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsRecallOnDataAccess(It.IsAny<FileInfo>())).Returns(false);
+        var builder = CreateBuilder(insp.Object);
+        
+        var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root_hidden_child"));
+        var visiblePath = Path.Combine(root.FullName, "visible.txt");
+        var hiddenPath = Path.Combine(root.FullName, "hidden.txt");
+        await File.WriteAllTextAsync(visiblePath, "x");
+        await File.WriteAllTextAsync(hiddenPath, "x");
+        
+        builder.AddInventoryPart(root.FullName);
+        var invPath = Path.Combine(TestDirectory.FullName, "inv_hidden_child.zip");
+        await builder.BuildBaseInventoryAsync(invPath);
+        
+        var part = builder.Inventory.InventoryParts.Single();
+        part.FileDescriptions.Should().ContainSingle(fd => fd.Name == "visible.txt");
+    }
+    
+    [Test]
+    public async Task System_Child_File_Is_Ignored()
+    {
+        var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystem(It.Is<FileInfo>(fi => fi.Name == "system.txt"))).Returns(true);
+        insp.Setup(i => i.IsSystem(It.Is<FileInfo>(fi => fi.Name != "system.txt"))).Returns(false);
+        insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
+        insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
+        insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsRecallOnDataAccess(It.IsAny<FileInfo>())).Returns(false);
+        var builder = CreateBuilder(insp.Object);
+        
+        var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root_system_child"));
+        var visiblePath = Path.Combine(root.FullName, "visible.txt");
+        var systemPath = Path.Combine(root.FullName, "system.txt");
+        await File.WriteAllTextAsync(visiblePath, "x");
+        await File.WriteAllTextAsync(systemPath, "x");
+        
+        builder.AddInventoryPart(root.FullName);
+        var invPath = Path.Combine(TestDirectory.FullName, "inv_system_child.zip");
+        await builder.BuildBaseInventoryAsync(invPath);
+        
+        var part = builder.Inventory.InventoryParts.Single();
+        part.FileDescriptions.Should().ContainSingle(fd => fd.Name == "visible.txt");
+    }
+    
+    [Test]
     public async Task Reparse_File_Is_Ignored()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
