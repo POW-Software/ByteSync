@@ -389,6 +389,48 @@ public class TestInventoryBuilder : IntegrationTest
     }
     
     [Test]
+    [Platform(Include = "Linux,MacOsX")]
+    public async Task Test_HiddenRootDirectory_Linux_Mac()
+    {
+        InventoryBuilder inventoryBuilder;
+        Inventory inventory;
+        
+        DirectoryInfo sourceA, unzipDir;
+        FileInfo fileInfo;
+        
+        sourceA = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, ".sourceA"));
+        sourceA.Create();
+        
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(sourceA.FullName, "fileA.txt", "file1Content").FullName);
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(sourceA.FullName, ".fileA_hidden.txt", "file1Content").FullName);
+        
+        var inventoryAFilePath = IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, $"inventoryA.zip");
+        
+        var sessionSettings = SessionSettings.BuildDefault();
+        sessionSettings.ExcludeHiddenFiles = true;
+        
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings);
+        inventoryBuilder.AddInventoryPart(sourceA.FullName);
+        await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
+        
+        File.Exists(inventoryAFilePath).Should().BeTrue();
+        
+        unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
+        unzipDir.Create();
+        
+        var fastZip = new FastZip();
+        fastZip.ExtractZip(inventoryAFilePath, unzipDir.FullName, null);
+        
+        unzipDir.GetFiles("*", SearchOption.AllDirectories).Length.Should().Be(1);
+        File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")).Should().BeTrue();
+        
+        inventory = inventoryBuilder.Inventory!;
+        inventory.InventoryParts.Count.Should().Be(1);
+        inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(1);
+        inventory.InventoryParts[0].FileDescriptions[0].Name.Should().Be("fileA.txt");
+    }
+    
+    [Test]
     [Platform(Exclude = "Win")]
     [TestCase(true, 0)]
     [TestCase(false, 2)]
