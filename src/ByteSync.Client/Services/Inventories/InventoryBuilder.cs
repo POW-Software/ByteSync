@@ -305,6 +305,24 @@ public class InventoryBuilder : IInventoryBuilder
         AddFileSystemDescription(inventoryPart, subDirectoryDescription);
         _logger.LogWarning(ex, message, directoryInfo.FullName);
     }
+
+    private bool IsRootPath(InventoryPart inventoryPart, FileSystemInfo fileSystemInfo)
+    {
+        var rootPath = NormalizePath(inventoryPart.RootPath);
+        var currentPath = NormalizePath(fileSystemInfo.FullName);
+        var comparison = OSPlatform == OSPlatforms.Windows
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal;
+        
+        return string.Equals(rootPath, currentPath, comparison);
+    }
+    
+    private static string NormalizePath(string path)
+    {
+        var fullPath = Path.GetFullPath(path);
+        
+        return Path.TrimEndingDirectorySeparator(fullPath);
+    }
     
     private bool ShouldIgnoreHiddenDirectory(DirectoryInfo directoryInfo)
     {
@@ -339,12 +357,14 @@ public class InventoryBuilder : IInventoryBuilder
         
         try
         {
-            if (ShouldIgnoreHiddenFile(fileInfo))
+            var isRoot = IsRootPath(inventoryPart, fileInfo);
+            
+            if (!isRoot && ShouldIgnoreHiddenFile(fileInfo))
             {
                 return;
             }
             
-            if (ShouldIgnoreSystemFile(fileInfo))
+            if (!isRoot && ShouldIgnoreSystemFile(fileInfo))
             {
                 return;
             }
@@ -397,7 +417,7 @@ public class InventoryBuilder : IInventoryBuilder
             return;
         }
         
-        if (ShouldIgnoreHiddenDirectory(directoryInfo))
+        if (!IsRootPath(inventoryPart, directoryInfo) && ShouldIgnoreHiddenDirectory(directoryInfo))
         {
             return;
         }
