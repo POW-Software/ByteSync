@@ -88,7 +88,7 @@ public class InventoryBuilder : IInventoryBuilder
     private OSPlatforms OSPlatform { get; set; }
     
     private IFileSystemInspector FileSystemInspector { get; }
-
+    
     private IPosixFileTypeClassifier PosixFileTypeClassifier { get; }
     
     private bool IgnoreHidden
@@ -309,7 +309,7 @@ public class InventoryBuilder : IInventoryBuilder
         AddFileSystemDescription(inventoryPart, subDirectoryDescription);
         _logger.LogWarning(ex, message, directoryInfo.FullName);
     }
-
+    
     private bool IsRootPath(InventoryPart inventoryPart, FileSystemInfo fileSystemInfo)
     {
         var rootPath = NormalizePath(inventoryPart.RootPath);
@@ -362,11 +362,12 @@ public class InventoryBuilder : IInventoryBuilder
         try
         {
             var isRoot = IsRootPath(inventoryPart, fileInfo);
-
+            
             var entryKind = PosixFileTypeClassifier.ClassifyPosixEntry(fileInfo.FullName);
             if (IsPosixSpecialFile(entryKind))
             {
                 AddPosixSpecialFileAndLog(inventoryPart, fileInfo, entryKind);
+                
                 return;
             }
             
@@ -537,7 +538,7 @@ public class InventoryBuilder : IInventoryBuilder
         AddFileSystemDescription(inventoryPart, fileDescription);
         _logger.LogWarning(ex, message, fileInfo.FullName);
     }
-
+    
     private void AddPosixSpecialFileAndLog(InventoryPart inventoryPart, FileInfo fileInfo, FileSystemEntryKind entryKind)
     {
         inventoryPart.IsIncompleteDueToAccess = true;
@@ -549,13 +550,14 @@ public class InventoryBuilder : IInventoryBuilder
         AddFileSystemDescription(inventoryPart, fileDescription);
         _logger.LogWarning("File {File} is a POSIX special file ({EntryKind}) and will be skipped", fileInfo.FullName, entryKind);
     }
-
+    
     private static bool IsPosixSpecialFile(FileSystemEntryKind entryKind)
     {
-        return entryKind == FileSystemEntryKind.BlockDevice
-               || entryKind == FileSystemEntryKind.CharacterDevice
-               || entryKind == FileSystemEntryKind.Fifo
-               || entryKind == FileSystemEntryKind.Socket;
+        return entryKind is
+            FileSystemEntryKind.BlockDevice or
+            FileSystemEntryKind.CharacterDevice or
+            FileSystemEntryKind.Fifo or
+            FileSystemEntryKind.Socket;
     }
     
     private string BuildRelativePath(InventoryPart inventoryPart, FileInfo fileInfo)
