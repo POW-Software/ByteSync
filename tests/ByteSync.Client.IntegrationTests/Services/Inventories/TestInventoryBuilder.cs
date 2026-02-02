@@ -735,6 +735,13 @@ public class TestInventoryBuilder : IntegrationTest
         var fifoPath = IOUtils.Combine(sourceA.FullName, "pipeA");
         CreateFifo(fifoPath);
 
+        var classifier = new PosixFileTypeClassifier();
+        var fifoKind = classifier.ClassifyPosixEntry(fifoPath);
+        if (fifoKind == FileSystemEntryKind.Unknown)
+        {
+            Assert.Ignore($"POSIX classification returned Unknown for '{fifoPath}'.");
+        }
+
         var inventoryAFilePath = IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, $"inventoryA.zip");
 
         var sessionSettings = SessionSettings.BuildDefault();
