@@ -13,14 +13,14 @@ public class PosixFileTypeClassifier : IPosixFileTypeClassifier
         {
             return FileSystemEntryKind.Unknown;
         }
-
+        
         try
         {
             if (!TryGetMode(path, out var type))
             {
                 return FileSystemEntryKind.Unknown;
             }
-
+            
             var entryKind = MapFilePermissions(type);
             if (entryKind == FileSystemEntryKind.RegularFile || entryKind == FileSystemEntryKind.Unknown)
             {
@@ -30,7 +30,7 @@ public class PosixFileTypeClassifier : IPosixFileTypeClassifier
                     return unixKind;
                 }
             }
-
+            
             return entryKind;
         }
         catch (DllNotFoundException)
@@ -45,10 +45,8 @@ public class PosixFileTypeClassifier : IPosixFileTypeClassifier
         {
             return FileSystemEntryKind.Unknown;
         }
-
-        return FileSystemEntryKind.Unknown;
     }
-
+    
     private static bool TryGetMode(string path, out FilePermissions type)
     {
         if (Syscall.lstat(path, out var stat) != 0)
@@ -56,60 +54,63 @@ public class PosixFileTypeClassifier : IPosixFileTypeClassifier
             if (Syscall.stat(path, out stat) != 0)
             {
                 type = 0;
+                
                 return false;
             }
         }
-
-        var mode = (FilePermissions)stat.st_mode;
+        
+        var mode = stat.st_mode;
         type = mode & FilePermissions.S_IFMT;
+        
         return true;
     }
-
+    
     private static FileSystemEntryKind MapFilePermissions(FilePermissions type)
     {
         if (type == FilePermissions.S_IFREG)
         {
             return FileSystemEntryKind.RegularFile;
         }
-
+        
         if (type == FilePermissions.S_IFDIR)
         {
             return FileSystemEntryKind.Directory;
         }
-
+        
         if (type == FilePermissions.S_IFBLK)
         {
             return FileSystemEntryKind.BlockDevice;
         }
-
+        
         if (type == FilePermissions.S_IFCHR)
         {
             return FileSystemEntryKind.CharacterDevice;
         }
-
+        
         if (type == FilePermissions.S_IFIFO)
         {
             return FileSystemEntryKind.Fifo;
         }
-
+        
         if (type == FilePermissions.S_IFSOCK)
         {
             return FileSystemEntryKind.Socket;
         }
-
+        
         if (type == FilePermissions.S_IFLNK)
         {
             return FileSystemEntryKind.Symlink;
         }
-
+        
         return FileSystemEntryKind.Unknown;
     }
-
+    
     private static FileSystemEntryKind TryClassifyWithUnixFileInfo(string path)
     {
         try
         {
             var info = new UnixFileInfo(path);
+            
             return info.FileType switch
             {
                 FileTypes.BlockDevice => FileSystemEntryKind.BlockDevice,
