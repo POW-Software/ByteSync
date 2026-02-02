@@ -6,7 +6,7 @@ namespace ByteSync.Common.Helpers;
 
 public static class ProtectedPaths
 {
-    private static readonly string[] ProtectedRoots =
+    private static readonly string[] _protectedRoots =
     [
         "/dev",
         "/proc",
@@ -31,15 +31,12 @@ public static class ProtectedPaths
         }
         
         var normalizedPath = Normalize(path);
-        var comparison = osPlatform == OSPlatforms.Windows
-            ? StringComparison.OrdinalIgnoreCase
-            : StringComparison.Ordinal;
         
-        foreach (var root in ProtectedRoots)
+        foreach (var root in _protectedRoots)
         {
             var normalizedRoot = Normalize(root);
             
-            if (IsSameOrSubPath(normalizedPath, normalizedRoot, comparison))
+            if (IsSameOrSubPath(normalizedPath, normalizedRoot, StringComparison.Ordinal))
             {
                 protectedRoot = root;
                 

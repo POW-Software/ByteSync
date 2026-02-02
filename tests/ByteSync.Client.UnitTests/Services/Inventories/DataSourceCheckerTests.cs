@@ -15,11 +15,11 @@ namespace ByteSync.Client.UnitTests.Services.Inventories;
 
 public class DataSourceCheckerTests
 {
-    private Mock<IDialogService> _mockDialogService;
-    private Mock<IEnvironmentService> _mockEnvironmentService;
-    private List<DataSource> _existingDataSources;
+    private Mock<IDialogService> _mockDialogService = null!;
+    private Mock<IEnvironmentService> _mockEnvironmentService = null!;
+    private List<DataSource> _existingDataSources = null!;
     
-    private DataSourceChecker _dataSourceChecker;
+    private DataSourceChecker _dataSourceChecker = null!;
     
     [SetUp]
     public void Setup()
@@ -31,7 +31,7 @@ public class DataSourceCheckerTests
             .ReturnsAsync(MessageBoxResult.OK);
         _mockDialogService
             .Setup(x => x.CreateMessageBoxViewModel(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string[]>()))
-            .Returns((string title, string message, string[] parameters) => new MessageBoxViewModel { ShowOK = true });
+            .Returns((string _, string _, string[] _) => new MessageBoxViewModel { ShowOK = true });
         
         _mockEnvironmentService = new Mock<IEnvironmentService>();
         _mockEnvironmentService.SetupGet(x => x.ClientInstanceId).Returns("client1");
