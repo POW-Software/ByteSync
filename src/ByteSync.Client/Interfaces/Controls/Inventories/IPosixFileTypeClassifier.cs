@@ -1,4 +1,4 @@
-using ByteSync.Common.Business.Inventories;
+using ByteSync.Business.Inventories;
 
 namespace ByteSync.Interfaces.Controls.Inventories;
 

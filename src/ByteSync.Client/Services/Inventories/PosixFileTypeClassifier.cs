@@ -1,4 +1,4 @@
-using ByteSync.Common.Business.Inventories;
+using ByteSync.Business.Inventories;
 using ByteSync.Interfaces.Controls.Inventories;
 using Mono.Unix.Native;
 

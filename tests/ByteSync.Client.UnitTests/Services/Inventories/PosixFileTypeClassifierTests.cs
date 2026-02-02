@@ -1,5 +1,5 @@
 using System.IO;
-using ByteSync.Common.Business.Inventories;
+using ByteSync.Business.Inventories;
 using ByteSync.Services.Inventories;
 using FluentAssertions;
 using NUnit.Framework;

@@ -1,4 +1,4 @@
-namespace ByteSync.Common.Business.Inventories;
+namespace ByteSync.Business.Inventories;
 
 public enum FileSystemEntryKind
 {
