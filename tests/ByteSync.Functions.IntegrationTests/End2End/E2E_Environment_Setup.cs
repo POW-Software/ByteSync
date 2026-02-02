@@ -70,6 +70,11 @@ public class E2E_Environment_Setup
         var env = new Dictionary<string, string>
         {
             ["AzureWebJobsStorage"] = cfg["AzureWebJobsStorage"]!,
+            ["FUNCTIONS_WORKER_RUNTIME"] = "dotnet-isolated",
+            ["AzureWebJobsScriptRoot"] = "/home/site/wwwroot",
+            ["AZURE_FUNCTIONS_ENVIRONMENT"] = "Development",
+            ["AzureFunctionsJobHost__Logging__LogLevel__Default"] = "Information",
+            ["AzureFunctionsJobHost__Logging__LogLevel__Host"] = "Information",
             ["AppSettings__SkipClientsVersionCheck"] = "True",
             ["Redis__ConnectionString"] = cfg["Redis:ConnectionString"]!,
             ["SignalR__ConnectionString"] = cfg["SignalR:ConnectionString"]!,
