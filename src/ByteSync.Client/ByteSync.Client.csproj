@@ -53,19 +53,19 @@
   <ItemGroup>
     <PackageReference Include="Autofac" Version="8.4.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
-      <PackageReference Include="Avalonia" Version="11.3.9"/>
-      <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.9"/>
-      <PackageReference Include="Avalonia.Desktop" Version="11.3.9"/>
-      <PackageReference Include="Avalonia.Diagnostics" Version="11.3.9"/>
+      <PackageReference Include="Avalonia" Version="11.3.11"/>
+      <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.11"/>
+      <PackageReference Include="Avalonia.Desktop" Version="11.3.11"/>
+      <PackageReference Include="Avalonia.Diagnostics" Version="11.3.11"/>
       <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.8"/>
     <PackageReference Include="Avalonia.Svg.Skia" Version="11.3.0" />
-      <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.9"/>
-      <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="11.3.9"/>
-      <PackageReference Include="Azure.Storage.Blobs" Version="12.26.0"/>
+      <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.11"/>
+      <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="11.3.11"/>
+      <PackageReference Include="Azure.Storage.Blobs" Version="12.27.0"/>
     <PackageReference Include="DynamicData" Version="9.4.1" />
       <PackageReference Include="FastRsyncNet" Version="2.4.4"/>
     <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0-beta.700" />
-      <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.22"/>
+      <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.23"/>
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
@@ -95,7 +95,7 @@
     <PackageReference Include="System.Security.Cryptography.Cng" Version="5.0.0" />
     <PackageReference Include="System.Security.Cryptography.OpenSsl" Version="5.0.0" />
     <PackageReference Update="Packaging.Targets" Version="0.1.232" />
-      <PackageReference Include="Xaml.Behaviors.Avalonia" Version="11.3.9"/>
+      <PackageReference Include="Xaml.Behaviors.Avalonia" Version="11.3.9.3"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ByteSync.Common\ByteSync.Common.csproj" />
