@@ -15,13 +15,10 @@ public class PosixFileTypeClassifier : IPosixFileTypeClassifier
 
         try
         {
-            if (Syscall.lstat(path, out var stat) != 0)
+            if (!TryGetMode(path, out var type))
             {
                 return FileSystemEntryKind.Unknown;
             }
-
-            var mode = (FilePermissions)stat.st_mode;
-            var type = mode & FilePermissions.S_IFMT;
 
             if (type == FilePermissions.S_IFREG)
             {
@@ -72,5 +69,21 @@ public class PosixFileTypeClassifier : IPosixFileTypeClassifier
         }
 
         return FileSystemEntryKind.Unknown;
+    }
+
+    private static bool TryGetMode(string path, out FilePermissions type)
+    {
+        if (Syscall.lstat(path, out var stat) != 0)
+        {
+            if (Syscall.stat(path, out stat) != 0)
+            {
+                type = 0;
+                return false;
+            }
+        }
+
+        var mode = (FilePermissions)stat.st_mode;
+        type = mode & FilePermissions.S_IFMT;
+        return true;
     }
 }
