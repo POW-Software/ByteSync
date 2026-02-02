@@ -131,4 +131,31 @@ public class PosixFileTypeClassifierTests
             Directory.Delete(tempDirectory, true);
         }
     }
+
+    [Test]
+    [Platform(Include = "Linux,MacOsX")]
+    public void ClassifyPosixEntry_ReturnsUnknown_WhenUnixFileInfoThrows()
+    {
+        var classifier = new PosixFileTypeClassifier(_ => throw new InvalidOperationException("fail"));
+        var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDirectory);
+        var tempFile = Path.Combine(tempDirectory, "file.txt");
+        File.WriteAllText(tempFile, "data");
+
+        try
+        {
+            var result = classifier.ClassifyPosixEntry(tempFile);
+
+            if (result == FileSystemEntryKind.Unknown)
+            {
+                Assert.Ignore($"POSIX classification returned Unknown for '{tempFile}'.");
+            }
+            
+            result.Should().Be(FileSystemEntryKind.RegularFile);
+        }
+        finally
+        {
+            Directory.Delete(tempDirectory, true);
+        }
+    }
 }

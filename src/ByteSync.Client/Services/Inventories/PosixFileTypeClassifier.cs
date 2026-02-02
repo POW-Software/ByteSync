@@ -7,6 +7,18 @@ namespace ByteSync.Services.Inventories;
 
 public class PosixFileTypeClassifier : IPosixFileTypeClassifier
 {
+    private readonly Func<string, UnixFileInfo> _unixFileInfoFactory;
+    
+    public PosixFileTypeClassifier()
+        : this(path => new UnixFileInfo(path))
+    {
+    }
+    
+    public PosixFileTypeClassifier(Func<string, UnixFileInfo> unixFileInfoFactory)
+    {
+        _unixFileInfoFactory = unixFileInfoFactory;
+    }
+    
     public FileSystemEntryKind ClassifyPosixEntry(string path)
     {
         if (OperatingSystem.IsWindows())
@@ -105,11 +117,11 @@ public class PosixFileTypeClassifier : IPosixFileTypeClassifier
         return FileSystemEntryKind.Unknown;
     }
     
-    private static FileSystemEntryKind TryClassifyWithUnixFileInfo(string path)
+    private FileSystemEntryKind TryClassifyWithUnixFileInfo(string path)
     {
         try
         {
-            var info = new UnixFileInfo(path);
+            var info = _unixFileInfoFactory(path);
             
             return info.FileType switch
             {
