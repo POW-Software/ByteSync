@@ -78,7 +78,7 @@ public class PublicKeysTrusterTests : AbstractTester
     public async Task OnTrustPublicKeyRequestedAsync_WithIncompatibleProtocolVersion_ShouldThrowInvalidOperationException()
     {
         var sessionId = "TestSessionId";
-        var incompatibleVersion = 2;
+        var incompatibleVersion = ProtocolVersion.CURRENT - 1;
         var joinerInstanceId = "JoinerInstanceId";
         
         var myPublicKeyCheckData = new PublicKeyCheckData
@@ -180,7 +180,7 @@ public class PublicKeysTrusterTests : AbstractTester
     public async Task TrustAllMembersPublicKeys_WithIncompatibleProtocolVersion_ShouldReturnIncompatibleProtocolVersion()
     {
         var sessionId = "TestSessionId";
-        var incompatibleVersion = 2;
+        var incompatibleVersion = ProtocolVersion.CURRENT - 1;
         
         _sessionMemberApiClient
             .Setup(c => c.GetMembersClientInstanceIds(sessionId, It.IsAny<CancellationToken>()))
@@ -427,7 +427,7 @@ public class PublicKeysTrusterTests : AbstractTester
     {
         var sessionId = "TestSessionId";
         var clientInstanceId = "ClientInstanceId";
-        var incompatibleVersion = 2;
+        var incompatibleVersion = ProtocolVersion.CURRENT - 1;
         
         var publicKeyInfo = new PublicKeyInfo
         {
