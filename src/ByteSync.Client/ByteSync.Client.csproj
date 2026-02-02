@@ -39,7 +39,7 @@
     <AvaloniaResource Remove="Assets\Resources\Resources.fr.resx" />
     <AvaloniaResource Remove="Assets\Resources\Resources.resx" />
     <AvaloniaXaml Remove="Assets\BoxIcons.axaml" />
-    <AvaloniaXaml Remove="Assets\Icons\BoxIcons.axaml" />
+      <AvaloniaXaml Remove="Assets\Icons\BoxIcons.axaml"/>
     <AvaloniaXaml Remove="Assets\Themes\FluentPowBlueLight.axaml" />
     <AvaloniaXaml Remove="Assets\Themes\GeneralStyles.axaml" />
     <AvaloniaXaml Remove="Assets\Themes\PowBlueAccentColors.axaml" />
