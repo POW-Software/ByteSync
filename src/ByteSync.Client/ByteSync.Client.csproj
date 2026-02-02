@@ -1,260 +1,260 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <Nullable>enable</Nullable>
-    <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
-    <ApplicationIcon>Assets\ByteSync.ico</ApplicationIcon>
-    <TargetFramework>net8.0</TargetFramework>
-    <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
-    <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
-    <IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
-    <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
-    <LangVersion>default</LangVersion>
-    <PackageId>ByteSync.Client</PackageId>
-    <RootNamespace>ByteSync</RootNamespace>
-    <AssemblyName>ByteSync</AssemblyName>
-    <UseWpf>false</UseWpf>
-    <UseWindowsForms>false</UseWindowsForms>
-    <AvaloniaUseStatic>true</AvaloniaUseStatic>
-    <AvaloniaXamlLoaderUseNameReferences>true</AvaloniaXamlLoaderUseNameReferences>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <Nullable>enable</Nullable>
+        <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
+        <ApplicationIcon>Assets\ByteSync.ico</ApplicationIcon>
+        <TargetFramework>net8.0</TargetFramework>
+        <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
+        <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
+        <IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
+        <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
+        <LangVersion>default</LangVersion>
+        <PackageId>ByteSync.Client</PackageId>
+        <RootNamespace>ByteSync</RootNamespace>
+        <AssemblyName>ByteSync</AssemblyName>
+        <UseWpf>false</UseWpf>
+        <UseWindowsForms>false</UseWindowsForms>
+        <AvaloniaUseStatic>true</AvaloniaUseStatic>
+        <AvaloniaXamlLoaderUseNameReferences>true</AvaloniaXamlLoaderUseNameReferences>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(IsWindows)'=='true'">
-    <DefineConstants>WIN</DefineConstants>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(IsWindows)'=='true'">
+        <DefineConstants>WIN</DefineConstants>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(IsOSX)'=='true'">
-    <DefineConstants>OSX</DefineConstants>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(IsOSX)'=='true'">
+        <DefineConstants>OSX</DefineConstants>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(IsLinux)'=='true'">
-    <DefineConstants>LIN</DefineConstants>
-  </PropertyGroup>
-  
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\**" />
-    <AvaloniaResource Remove="Assets\Icons\BoxIcons.xaml" />
-    <AvaloniaResource Remove="Assets\Resources\Resources.Designer.cs" />
-    <AvaloniaResource Remove="Assets\Resources\Resources.en.resx" />
-    <AvaloniaResource Remove="Assets\Resources\Resources.fr.resx" />
-    <AvaloniaResource Remove="Assets\Resources\Resources.resx" />
-    <AvaloniaXaml Remove="Assets\BoxIcons.axaml" />
-      <AvaloniaXaml Remove="Assets\Icons\BoxIcons.axaml"/>
-    <AvaloniaXaml Remove="Assets\Themes\FluentPowBlueLight.axaml" />
-    <AvaloniaXaml Remove="Assets\Themes\GeneralStyles.axaml" />
-    <AvaloniaXaml Remove="Assets\Themes\PowBlueAccentColors.axaml" />
-    <None Remove=".gitignore" />
-    <None Remove="Assets\ByteSyncLogo.png" />
-    <AvaloniaXaml Remove="Assets\Themes\ActivityIndicator.axaml" />
-    <None Update="local.settings.template.json">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Autofac" Version="8.4.0" />
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
-      <PackageReference Include="Avalonia" Version="11.3.11"/>
-      <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.11"/>
-      <PackageReference Include="Avalonia.Desktop" Version="11.3.11"/>
-      <PackageReference Include="Avalonia.Diagnostics" Version="11.3.11"/>
-      <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.8"/>
-    <PackageReference Include="Avalonia.Svg.Skia" Version="11.3.0" />
-      <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.11"/>
-      <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="11.3.11"/>
-      <PackageReference Include="Azure.Storage.Blobs" Version="12.27.0"/>
-    <PackageReference Include="DynamicData" Version="9.4.1" />
-      <PackageReference Include="FastRsyncNet" Version="2.4.4"/>
-    <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0-beta.700" />
-      <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.23"/>
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
-      <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.22"/>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
-      <PackageReference Include="Polly" Version="8.6.5"/>
-    <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" Version="1.3.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
-    <PackageReference Include="Serilog" Version="4.3.0" />
-    <PackageReference Include="Serilog.Extensions.Autofac.DependencyInjection" Version="5.0.0" />
-    <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
-      <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1"/>
-    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageReference Include="SharpZipLib" Version="1.4.2" />
-      <PackageReference Include="SkiaSharp" Version="3.119.1"/>
-      <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.1"/>
-      <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="3.119.1"/>
-      <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.119.1"/>
-      <PackageReference Include="Splat" Version="15.4.1"/>
-    <PackageReference Include="Splat.Autofac" Version="15.4.1" />
-      <PackageReference Include="Splat.Serilog" Version="15.4.1"/>
-      <PackageReference Include="System.Reactive" Version="6.1.0"/>
-    <PackageReference Include="System.Security.Cryptography.Cng" Version="5.0.0" />
-    <PackageReference Include="System.Security.Cryptography.OpenSsl" Version="5.0.0" />
-    <PackageReference Update="Packaging.Targets" Version="0.1.232" />
-      <PackageReference Include="Xaml.Behaviors.Avalonia" Version="11.3.9.3"/>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ByteSync.Common\ByteSync.Common.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Update="Assets\Resources\Resources.fr.resx">
-      <DependentUpon>Resources.resx</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Assets\Resources\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <None Remove="local.settings.json" />
-    <EmbeddedResource Include="local.settings.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <UpToDateCheckInput Remove="Assets\Resources\Resources.en.resx" />
-    <UpToDateCheckInput Remove="Views\Sessions\Members\SessionMachineView.axaml" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Assets\Resources\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <AvaloniaResource Update="Assets\BoxIcons.axaml">
-      <SubType>Designer</SubType>
-    </AvaloniaResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Update="Assets\Resources\Resources.en.resx">
-      <DependentUpon>Resources.resx</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="Assets\Themes\ActivityIndicator.xaml.cs">
-      <DependentUpon>ActivityIndicator.axaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Sessions\Managing\CurrentCloudSessionView.axaml.cs">
-      <DependentUpon>CurrentCloudSessionView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\Managing\JoinCloudSessionView.axaml.cs">
-      <DependentUpon>JoinCloudSessionView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\Managing\StartCloudSessionView.axaml.cs">
-      <DependentUpon>StartCloudSessionView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\Managing\StartOrJoinView.axaml.cs">
-      <DependentUpon>StartOrJoinView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\Comparisons\Results\ComparisonResultView.axaml.cs">
-      <DependentUpon>ComparisonResultView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\Comparisons\Results\ContentRepartitionView.axaml.cs">
-      <DependentUpon>StatusView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\Comparisons\Results\SynchronizationActionView.axaml.cs">
-      <DependentUpon>SynchronizationActionView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\Comparisons\Results\ManageSynchronizationRulesView.axaml.cs">
-      <DependentUpon>ManageSynchronizationRulesView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\Comparisons\Results\ContentIdentityView.axaml.cs">
-      <DependentUpon>ContentIdentityView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\Comparisons\Results\SynchronizationRuleSummaryView.axaml.cs">
-      <DependentUpon>AutomaticActionSummaryView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\Comparisons\Actions\AtomicActionEditView.axaml.cs">
-      <DependentUpon>AtomicActionEditView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\Comparisons\Actions\AtomicConditionEditView.axaml.cs">
-      <DependentUpon>AtomicConditionEditView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\Comparisons\Actions\SynchronizationRuleGlobalView.axaml.cs">
-      <DependentUpon>SynchronizationRulesGlobalView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\Comparisons\Actions\TargetedActionGlobalView.axaml.cs">
-      <DependentUpon>ManualActionEditionGlobalView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\Misc\SessionSettingsEditView.axaml.cs">
-      <DependentUpon>SessionSettingsEditView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Home\HomeMainView.axaml.cs">
-      <DependentUpon>HomeMainView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Misc\SelectLocaleView.axaml.cs">
-      <DependentUpon>SelectLocaleView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\Cloud\Members\AddTrustedClientView.axaml.cs">
-      <DependentUpon>AddTrustedClientView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\TrustedNetworks\TrustedPublicKeysView.axaml.cs">
-      <DependentUpon>TrustedPublicKeysView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Profiles\ProfilesView.axaml.cs">
-      <DependentUpon>ProfilesView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\AccountDetails\AccountDetailsView.axaml.cs">
-      <DependentUpon>AccountDetailsView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\AccountDetails\UsageStatisticsView.axaml.cs">
-      <DependentUpon>UsageStatisticsView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\Managing\SessionSettingsEditView.axaml.cs">
-      <DependentUpon>SessionSettingsEditView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Announcements\AnnouncementView.axaml.cs">
-      <DependentUpon>AnnouncementView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\DataNodes\DataNodeHeaderView.axaml.cs">
-      <DependentUpon>DataNodeHeaderView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\DataNodes\DataNodeSourcesView.axaml.cs">
-      <DependentUpon>DataNodeSourcesView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\DataNodes\DataNodeStatusView.axaml.cs">
-      <DependentUpon>DataNodeStatusView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Sessions\DataNodes\DataNodeView.axaml.cs">
-      <DependentUpon>DataNodeView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\TrustedNetworks\AddTrustedClientView.axaml.cs">
-      <DependentUpon>AddTrustedClientView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Announcements\AnnouncementView.axaml.cs">
-      <DependentUpon>AnnouncementView.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
+    <PropertyGroup Condition="'$(IsLinux)'=='true'">
+        <DefineConstants>LIN</DefineConstants>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\**"/>
+        <AvaloniaResource Remove="Assets\Icons\BoxIcons.xaml"/>
+        <AvaloniaResource Remove="Assets\Resources\Resources.Designer.cs"/>
+        <AvaloniaResource Remove="Assets\Resources\Resources.en.resx"/>
+        <AvaloniaResource Remove="Assets\Resources\Resources.fr.resx"/>
+        <AvaloniaResource Remove="Assets\Resources\Resources.resx"/>
+        <AvaloniaXaml Remove="Assets\BoxIcons.axaml"/>
+        <AvaloniaXaml Remove="Assets\Icons\BoxIcons.axaml"/>
+        <AvaloniaXaml Remove="Assets\Themes\FluentPowBlueLight.axaml"/>
+        <AvaloniaXaml Remove="Assets\Themes\GeneralStyles.axaml"/>
+        <AvaloniaXaml Remove="Assets\Themes\PowBlueAccentColors.axaml"/>
+        <None Remove=".gitignore"/>
+        <None Remove="Assets\ByteSyncLogo.png"/>
+        <AvaloniaXaml Remove="Assets\Themes\ActivityIndicator.axaml"/>
+        <None Update="local.settings.template.json">
+            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Autofac" Version="8.4.0"/>
+        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0"/>
+        <PackageReference Include="Avalonia" Version="11.3.11"/>
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.11"/>
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.11"/>
+        <PackageReference Include="Avalonia.Diagnostics" Version="11.3.11"/>
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.8"/>
+        <PackageReference Include="Avalonia.Svg.Skia" Version="11.3.0"/>
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.11"/>
+        <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="11.3.11"/>
+        <PackageReference Include="Azure.Storage.Blobs" Version="12.27.0"/>
+        <PackageReference Include="DynamicData" Version="9.4.1"/>
+        <PackageReference Include="FastRsyncNet" Version="2.4.4"/>
+        <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0-beta.700"/>
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.23"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1"/>
+        <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1"/>
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.22"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3"/>
+        <PackageReference Include="Polly" Version="8.6.5"/>
+        <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" Version="1.3.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="ReactiveUI.Fody" Version="19.5.41"/>
+        <PackageReference Include="Serilog" Version="4.3.0"/>
+        <PackageReference Include="Serilog.Extensions.Autofac.DependencyInjection" Version="5.0.0"/>
+        <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0"/>
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1"/>
+        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0"/>
+        <PackageReference Include="SharpZipLib" Version="1.4.2"/>
+        <PackageReference Include="SkiaSharp" Version="3.119.1"/>
+        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.1"/>
+        <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="3.119.1"/>
+        <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.119.1"/>
+        <PackageReference Include="Splat" Version="15.4.1"/>
+        <PackageReference Include="Splat.Autofac" Version="15.4.1"/>
+        <PackageReference Include="Splat.Serilog" Version="15.4.1"/>
+        <PackageReference Include="System.Reactive" Version="6.1.0"/>
+        <PackageReference Include="System.Security.Cryptography.Cng" Version="5.0.0"/>
+        <PackageReference Include="System.Security.Cryptography.OpenSsl" Version="5.0.0"/>
+        <PackageReference Update="Packaging.Targets" Version="0.1.232"/>
+        <PackageReference Include="Xaml.Behaviors.Avalonia" Version="11.3.9.3"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\ByteSync.Common\ByteSync.Common.csproj"/>
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Update="Assets\Resources\Resources.fr.resx">
+            <DependentUpon>Resources.resx</DependentUpon>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Assets\Resources\Resources.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+        <None Remove="local.settings.json"/>
+        <EmbeddedResource Include="local.settings.json"/>
+    </ItemGroup>
+    <ItemGroup>
+        <UpToDateCheckInput Remove="Assets\Resources\Resources.en.resx"/>
+        <UpToDateCheckInput Remove="Views\Sessions\Members\SessionMachineView.axaml"/>
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Assets\Resources\Resources.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>Resources.resx</DependentUpon>
+        </EmbeddedResource>
+    </ItemGroup>
+    <ItemGroup>
+        <AvaloniaResource Update="Assets\BoxIcons.axaml">
+            <SubType>Designer</SubType>
+        </AvaloniaResource>
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Update="Assets\Resources\Resources.en.resx">
+            <DependentUpon>Resources.resx</DependentUpon>
+        </EmbeddedResource>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Update="Assets\Themes\ActivityIndicator.xaml.cs">
+            <DependentUpon>ActivityIndicator.axaml</DependentUpon>
+        </Compile>
+        <Compile Update="Views\Sessions\Managing\CurrentCloudSessionView.axaml.cs">
+            <DependentUpon>CurrentCloudSessionView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\Managing\JoinCloudSessionView.axaml.cs">
+            <DependentUpon>JoinCloudSessionView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\Managing\StartCloudSessionView.axaml.cs">
+            <DependentUpon>StartCloudSessionView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\Managing\StartOrJoinView.axaml.cs">
+            <DependentUpon>StartOrJoinView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\Comparisons\Results\ComparisonResultView.axaml.cs">
+            <DependentUpon>ComparisonResultView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\Comparisons\Results\ContentRepartitionView.axaml.cs">
+            <DependentUpon>StatusView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\Comparisons\Results\SynchronizationActionView.axaml.cs">
+            <DependentUpon>SynchronizationActionView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\Comparisons\Results\ManageSynchronizationRulesView.axaml.cs">
+            <DependentUpon>ManageSynchronizationRulesView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\Comparisons\Results\ContentIdentityView.axaml.cs">
+            <DependentUpon>ContentIdentityView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\Comparisons\Results\SynchronizationRuleSummaryView.axaml.cs">
+            <DependentUpon>AutomaticActionSummaryView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\Comparisons\Actions\AtomicActionEditView.axaml.cs">
+            <DependentUpon>AtomicActionEditView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\Comparisons\Actions\AtomicConditionEditView.axaml.cs">
+            <DependentUpon>AtomicConditionEditView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\Comparisons\Actions\SynchronizationRuleGlobalView.axaml.cs">
+            <DependentUpon>SynchronizationRulesGlobalView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\Comparisons\Actions\TargetedActionGlobalView.axaml.cs">
+            <DependentUpon>ManualActionEditionGlobalView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\Misc\SessionSettingsEditView.axaml.cs">
+            <DependentUpon>SessionSettingsEditView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Home\HomeMainView.axaml.cs">
+            <DependentUpon>HomeMainView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Misc\SelectLocaleView.axaml.cs">
+            <DependentUpon>SelectLocaleView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\Cloud\Members\AddTrustedClientView.axaml.cs">
+            <DependentUpon>AddTrustedClientView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\TrustedNetworks\TrustedPublicKeysView.axaml.cs">
+            <DependentUpon>TrustedPublicKeysView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Profiles\ProfilesView.axaml.cs">
+            <DependentUpon>ProfilesView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\AccountDetails\AccountDetailsView.axaml.cs">
+            <DependentUpon>AccountDetailsView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\AccountDetails\UsageStatisticsView.axaml.cs">
+            <DependentUpon>UsageStatisticsView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\Managing\SessionSettingsEditView.axaml.cs">
+            <DependentUpon>SessionSettingsEditView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Announcements\AnnouncementView.axaml.cs">
+            <DependentUpon>AnnouncementView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\DataNodes\DataNodeHeaderView.axaml.cs">
+            <DependentUpon>DataNodeHeaderView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\DataNodes\DataNodeSourcesView.axaml.cs">
+            <DependentUpon>DataNodeSourcesView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\DataNodes\DataNodeStatusView.axaml.cs">
+            <DependentUpon>DataNodeStatusView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Sessions\DataNodes\DataNodeView.axaml.cs">
+            <DependentUpon>DataNodeView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\TrustedNetworks\AddTrustedClientView.axaml.cs">
+            <DependentUpon>AddTrustedClientView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Announcements\AnnouncementView.axaml.cs">
+            <DependentUpon>AnnouncementView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+    </ItemGroup>
 </Project>
