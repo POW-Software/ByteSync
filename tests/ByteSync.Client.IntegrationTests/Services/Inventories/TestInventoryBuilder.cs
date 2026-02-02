@@ -714,7 +714,7 @@ public class TestInventoryBuilder : IntegrationTest
         
         inventory = inventoryBuilder.Inventory!;
         inventory.InventoryParts.Count.Should().Be(1);
-        inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(0);
+        inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(1);
         inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(2);
     }
 
@@ -757,7 +757,7 @@ public class TestInventoryBuilder : IntegrationTest
 
         inventory = inventoryBuilder.Inventory!;
         inventory.InventoryParts.Count.Should().Be(1);
-        inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(1);
+        inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(0);
         inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(2);
 
         var fifoDescription = inventory.InventoryParts[0].FileDescriptions.Single(fd => fd.Name.Equals("pipeA"));
