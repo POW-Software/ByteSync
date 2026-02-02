@@ -158,4 +158,40 @@ public class PosixFileTypeClassifierTests
             Directory.Delete(tempDirectory, true);
         }
     }
+
+    [Test]
+    [Platform(Include = "Linux,MacOsX")]
+    public void ClassifyPosixEntry_ReturnsUnknown_WhenDllNotFound()
+    {
+        var classifier = new PosixFileTypeClassifier(_ => throw new InvalidOperationException("unused"),
+            _ => throw new DllNotFoundException("missing"));
+
+        var result = classifier.ClassifyPosixEntry("/tmp");
+
+        result.Should().Be(FileSystemEntryKind.Unknown);
+    }
+
+    [Test]
+    [Platform(Include = "Linux,MacOsX")]
+    public void ClassifyPosixEntry_ReturnsUnknown_WhenEntryPointNotFound()
+    {
+        var classifier = new PosixFileTypeClassifier(_ => throw new InvalidOperationException("unused"),
+            _ => throw new EntryPointNotFoundException("missing"));
+
+        var result = classifier.ClassifyPosixEntry("/tmp");
+
+        result.Should().Be(FileSystemEntryKind.Unknown);
+    }
+
+    [Test]
+    [Platform(Include = "Linux,MacOsX")]
+    public void ClassifyPosixEntry_ReturnsUnknown_WhenPlatformNotSupported()
+    {
+        var classifier = new PosixFileTypeClassifier(_ => throw new InvalidOperationException("unused"),
+            _ => throw new PlatformNotSupportedException("missing"));
+
+        var result = classifier.ClassifyPosixEntry("/tmp");
+
+        result.Should().Be(FileSystemEntryKind.Unknown);
+    }
 }

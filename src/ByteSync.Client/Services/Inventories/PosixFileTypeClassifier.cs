@@ -8,15 +8,23 @@ namespace ByteSync.Services.Inventories;
 public class PosixFileTypeClassifier : IPosixFileTypeClassifier
 {
     private readonly Func<string, UnixFileInfo> _unixFileInfoFactory;
+    private readonly Func<string, (bool Success, FilePermissions Type)> _tryGetMode;
     
     public PosixFileTypeClassifier()
-        : this(path => new UnixFileInfo(path))
+        : this(path => new UnixFileInfo(path), TryGetModeDefault)
     {
     }
     
     public PosixFileTypeClassifier(Func<string, UnixFileInfo> unixFileInfoFactory)
+        : this(unixFileInfoFactory, TryGetModeDefault)
+    {
+    }
+    
+    public PosixFileTypeClassifier(Func<string, UnixFileInfo> unixFileInfoFactory,
+        Func<string, (bool Success, FilePermissions Type)> tryGetMode)
     {
         _unixFileInfoFactory = unixFileInfoFactory;
+        _tryGetMode = tryGetMode;
     }
     
     public FileSystemEntryKind ClassifyPosixEntry(string path)
@@ -28,12 +36,13 @@ public class PosixFileTypeClassifier : IPosixFileTypeClassifier
         
         try
         {
-            if (!TryGetMode(path, out var type))
+            var modeResult = _tryGetMode(path);
+            if (!modeResult.Success)
             {
                 return FileSystemEntryKind.Unknown;
             }
             
-            var entryKind = MapFilePermissions(type);
+            var entryKind = MapFilePermissions(modeResult.Type);
             if (entryKind == FileSystemEntryKind.RegularFile || entryKind == FileSystemEntryKind.Unknown)
             {
                 var unixKind = TryClassifyWithUnixFileInfo(path);
@@ -59,22 +68,20 @@ public class PosixFileTypeClassifier : IPosixFileTypeClassifier
         }
     }
     
-    private static bool TryGetMode(string path, out FilePermissions type)
+    private static (bool Success, FilePermissions Type) TryGetModeDefault(string path)
     {
         if (Syscall.lstat(path, out var stat) != 0)
         {
             if (Syscall.stat(path, out stat) != 0)
             {
-                type = 0;
-                
-                return false;
+                return (false, 0);
             }
         }
         
         var mode = stat.st_mode;
-        type = mode & FilePermissions.S_IFMT;
+        var type = mode & FilePermissions.S_IFMT;
         
-        return true;
+        return (true, type);
     }
     
     private static FileSystemEntryKind MapFilePermissions(FilePermissions type)
