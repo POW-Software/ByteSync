@@ -921,6 +921,12 @@ You must select at least 2 Data Nodes.</value>
 		<value>It is not possible to add this element for the following reason: 
 Either this element, or a parent, or a descendant is already present.</value>
 	</data>
+	<data name="DataSourceChecker_ProtectedPathError_Title" xml:space="preserve">
+		<value>Unable to add the data source</value>
+	</data>
+	<data name="DataSourceChecker_ProtectedPathError_Message" xml:space="preserve">
+		<value>The selected path "{0}" points to a protected system location and cannot be inventoried or synchronized.</value>
+	</data>
 	<data name="DataTypes_FilesDirectories" xml:space="preserve">
 		<value>Files and directories</value>
 	</data>

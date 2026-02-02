@@ -63,6 +63,7 @@ public class TestInventoryBuilderFactory : IntegrationTest
         
         _builder.RegisterGeneric(typeof(Mock<>)).SingleInstance();
         _builder.Register(_ => new Mock<ILogger<InventoryBuilder>>().Object).As<ILogger<InventoryBuilder>>();
+        _builder.Register(_ => new Mock<ILogger<InventoryBuilderFactory>>().Object).As<ILogger<InventoryBuilderFactory>>();
         _builder.Register(_ => new Mock<ILogger<InventoryFileAnalyzer>>().Object).As<ILogger<InventoryFileAnalyzer>>();
         _builder.Register(_ => new Mock<ILogger<InventoryService>>().Object).As<ILogger<InventoryService>>();
         
