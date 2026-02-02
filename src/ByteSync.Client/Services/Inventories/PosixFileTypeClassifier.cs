@@ -1,5 +1,6 @@
 using ByteSync.Business.Inventories;
 using ByteSync.Interfaces.Controls.Inventories;
+using Mono.Unix;
 using Mono.Unix.Native;
 
 namespace ByteSync.Services.Inventories;
@@ -20,40 +21,17 @@ public class PosixFileTypeClassifier : IPosixFileTypeClassifier
                 return FileSystemEntryKind.Unknown;
             }
 
-            if (type == FilePermissions.S_IFREG)
+            var entryKind = MapFilePermissions(type);
+            if (entryKind == FileSystemEntryKind.RegularFile || entryKind == FileSystemEntryKind.Unknown)
             {
-                return FileSystemEntryKind.RegularFile;
+                var unixKind = TryClassifyWithUnixFileInfo(path);
+                if (unixKind != FileSystemEntryKind.Unknown)
+                {
+                    return unixKind;
+                }
             }
 
-            if (type == FilePermissions.S_IFDIR)
-            {
-                return FileSystemEntryKind.Directory;
-            }
-
-            if (type == FilePermissions.S_IFBLK)
-            {
-                return FileSystemEntryKind.BlockDevice;
-            }
-
-            if (type == FilePermissions.S_IFCHR)
-            {
-                return FileSystemEntryKind.CharacterDevice;
-            }
-
-            if (type == FilePermissions.S_IFIFO)
-            {
-                return FileSystemEntryKind.Fifo;
-            }
-
-            if (type == FilePermissions.S_IFSOCK)
-            {
-                return FileSystemEntryKind.Socket;
-            }
-
-            if (type == FilePermissions.S_IFLNK)
-            {
-                return FileSystemEntryKind.Symlink;
-            }
+            return entryKind;
         }
         catch (DllNotFoundException)
         {
@@ -85,5 +63,68 @@ public class PosixFileTypeClassifier : IPosixFileTypeClassifier
         var mode = (FilePermissions)stat.st_mode;
         type = mode & FilePermissions.S_IFMT;
         return true;
+    }
+
+    private static FileSystemEntryKind MapFilePermissions(FilePermissions type)
+    {
+        if (type == FilePermissions.S_IFREG)
+        {
+            return FileSystemEntryKind.RegularFile;
+        }
+
+        if (type == FilePermissions.S_IFDIR)
+        {
+            return FileSystemEntryKind.Directory;
+        }
+
+        if (type == FilePermissions.S_IFBLK)
+        {
+            return FileSystemEntryKind.BlockDevice;
+        }
+
+        if (type == FilePermissions.S_IFCHR)
+        {
+            return FileSystemEntryKind.CharacterDevice;
+        }
+
+        if (type == FilePermissions.S_IFIFO)
+        {
+            return FileSystemEntryKind.Fifo;
+        }
+
+        if (type == FilePermissions.S_IFSOCK)
+        {
+            return FileSystemEntryKind.Socket;
+        }
+
+        if (type == FilePermissions.S_IFLNK)
+        {
+            return FileSystemEntryKind.Symlink;
+        }
+
+        return FileSystemEntryKind.Unknown;
+    }
+
+    private static FileSystemEntryKind TryClassifyWithUnixFileInfo(string path)
+    {
+        try
+        {
+            var info = new UnixFileInfo(path);
+            return info.FileType switch
+            {
+                FileTypes.BlockDevice => FileSystemEntryKind.BlockDevice,
+                FileTypes.CharacterDevice => FileSystemEntryKind.CharacterDevice,
+                FileTypes.Fifo => FileSystemEntryKind.Fifo,
+                FileTypes.Socket => FileSystemEntryKind.Socket,
+                FileTypes.Directory => FileSystemEntryKind.Directory,
+                FileTypes.RegularFile => FileSystemEntryKind.RegularFile,
+                FileTypes.SymbolicLink => FileSystemEntryKind.Symlink,
+                _ => FileSystemEntryKind.Unknown
+            };
+        }
+        catch (Exception)
+        {
+            return FileSystemEntryKind.Unknown;
+        }
     }
 }
