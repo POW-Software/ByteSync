@@ -26,7 +26,8 @@ public class InventoryBuilder : IInventoryBuilder
         IInventoryFileAnalyzer inventoryFileAnalyzer,
         IInventorySaver inventorySaver,
         IInventoryIndexer inventoryIndexer,
-        IFileSystemInspector? fileSystemInspector = null)
+        IFileSystemInspector? fileSystemInspector = null,
+        IPosixFileTypeClassifier? posixFileTypeClassifier = null)
     {
         _logger = logger;
         
@@ -45,6 +46,7 @@ public class InventoryBuilder : IInventoryBuilder
         
         InventoryFileAnalyzer = inventoryFileAnalyzer;
         FileSystemInspector = fileSystemInspector ?? new FileSystemInspector();
+        PosixFileTypeClassifier = posixFileTypeClassifier ?? new PosixFileTypeClassifier();
     }
     
     private Inventory InstantiateInventory()
@@ -86,6 +88,8 @@ public class InventoryBuilder : IInventoryBuilder
     private OSPlatforms OSPlatform { get; set; }
     
     private IFileSystemInspector FileSystemInspector { get; }
+    
+    private IPosixFileTypeClassifier PosixFileTypeClassifier { get; }
     
     private bool IgnoreHidden
     {
@@ -305,7 +309,7 @@ public class InventoryBuilder : IInventoryBuilder
         AddFileSystemDescription(inventoryPart, subDirectoryDescription);
         _logger.LogWarning(ex, message, directoryInfo.FullName);
     }
-
+    
     private bool IsRootPath(InventoryPart inventoryPart, FileSystemInfo fileSystemInfo)
     {
         var rootPath = NormalizePath(inventoryPart.RootPath);
@@ -358,6 +362,14 @@ public class InventoryBuilder : IInventoryBuilder
         try
         {
             var isRoot = IsRootPath(inventoryPart, fileInfo);
+            
+            var entryKind = PosixFileTypeClassifier.ClassifyPosixEntry(fileInfo.FullName);
+            if (IsPosixSpecialFile(entryKind))
+            {
+                AddPosixSpecialFileAndLog(inventoryPart, fileInfo, entryKind);
+                
+                return;
+            }
             
             if (!isRoot && ShouldIgnoreHiddenFile(fileInfo))
             {
@@ -525,6 +537,27 @@ public class InventoryBuilder : IInventoryBuilder
         };
         AddFileSystemDescription(inventoryPart, fileDescription);
         _logger.LogWarning(ex, message, fileInfo.FullName);
+    }
+    
+    private void AddPosixSpecialFileAndLog(InventoryPart inventoryPart, FileInfo fileInfo, FileSystemEntryKind entryKind)
+    {
+        inventoryPart.IsIncompleteDueToAccess = true;
+        var relativePath = BuildRelativePath(inventoryPart, fileInfo);
+        var fileDescription = new FileDescription(inventoryPart, relativePath)
+        {
+            IsAccessible = false
+        };
+        AddFileSystemDescription(inventoryPart, fileDescription);
+        _logger.LogWarning("File {File} is a POSIX special file ({EntryKind}) and will be skipped", fileInfo.FullName, entryKind);
+    }
+    
+    private static bool IsPosixSpecialFile(FileSystemEntryKind entryKind)
+    {
+        return entryKind is
+            FileSystemEntryKind.BlockDevice or
+            FileSystemEntryKind.CharacterDevice or
+            FileSystemEntryKind.Fifo or
+            FileSystemEntryKind.Socket;
     }
     
     private string BuildRelativePath(InventoryPart inventoryPart, FileInfo fileInfo)

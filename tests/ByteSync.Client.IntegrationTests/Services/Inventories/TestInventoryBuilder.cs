@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Autofac;
 using ByteSync.Business;
 using ByteSync.Business.DataNodes;
@@ -716,6 +717,60 @@ public class TestInventoryBuilder : IntegrationTest
         inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(1);
         inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(2);
     }
+
+    [Test]
+    [Platform(Include = "Linux,MacOsX")]
+    public async Task Test_PosixFifo_IsSkipped()
+    {
+        InventoryBuilder inventoryBuilder;
+        Inventory inventory;
+
+        DirectoryInfo sourceA, unzipDir;
+        FileInfo fileInfo;
+
+        sourceA = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "sourceA"));
+        sourceA.Create();
+        fileInfo = new FileInfo(_testDirectoryService.CreateFileInDirectory(sourceA.FullName, "fileA.txt", "fileAContent").FullName);
+
+        var fifoPath = IOUtils.Combine(sourceA.FullName, "pipeA");
+        CreateFifo(fifoPath);
+
+        var classifier = new PosixFileTypeClassifier();
+        var fifoKind = classifier.ClassifyPosixEntry(fifoPath);
+        if (fifoKind == FileSystemEntryKind.Unknown)
+        {
+            Assert.Ignore($"POSIX classification returned Unknown for '{fifoPath}'.");
+        }
+
+        var inventoryAFilePath = IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, $"inventoryA.zip");
+
+        var sessionSettings = SessionSettings.BuildDefault();
+        var osPlatform = OperatingSystem.IsMacOS() ? OSPlatforms.MacOs : OSPlatforms.Linux;
+
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings, null, null, osPlatform);
+        inventoryBuilder.AddInventoryPart(sourceA.FullName);
+        await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
+
+        File.Exists(inventoryAFilePath).Should().BeTrue();
+
+        unzipDir = new DirectoryInfo(IOUtils.Combine(_testDirectoryService.TestDirectory.FullName, "unzip"));
+        unzipDir.Create();
+
+        var fastZip = new FastZip();
+        fastZip.ExtractZip(inventoryAFilePath, unzipDir.FullName, null);
+
+        unzipDir.GetFiles("*", SearchOption.AllDirectories).Length.Should().Be(1);
+        File.Exists(IOUtils.Combine(unzipDir.FullName, $"inventory.json")).Should().BeTrue();
+
+        inventory = inventoryBuilder.Inventory!;
+        inventory.InventoryParts.Count.Should().Be(1);
+        inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(0);
+        inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(2);
+
+        var fifoDescription = inventory.InventoryParts[0].FileDescriptions.Single(fd => fd.Name.Equals("pipeA"));
+        fifoDescription.IsAccessible.Should().BeFalse();
+        inventory.InventoryParts[0].IsIncompleteDueToAccess.Should().BeTrue();
+    }
     
     [Test]
     public async Task Test_GetBuildingStageData()
@@ -872,5 +927,22 @@ public class TestInventoryBuilder : IntegrationTest
             analyzer,
             saver,
             new InventoryIndexer());
+    }
+
+    private static void CreateFifo(string path)
+    {
+        var startInfo = new ProcessStartInfo("mkfifo", path)
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
+
+        using var process = Process.Start(startInfo);
+        process.Should().NotBeNull();
+        process!.WaitForExit();
+
+        var error = process.StandardError.ReadToEnd();
+        process.ExitCode.Should().Be(0, error);
     }
 }
