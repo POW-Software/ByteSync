@@ -31,11 +31,6 @@ Create a Pull Request using `gh pr create` with:
 - English title
 - English description summarizing changes and approach
 
-Example:
-```bash
-gh pr create --title "[type] Short summary" --body "Summary:\n- ...\n\nKey changes:\n- ...\n\nNotes/risks:\n- ..."
-```
-
 ### 4) Provide PR text template
 
 Provide a minimal PR template to pass to `gh pr create`:
