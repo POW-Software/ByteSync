@@ -9,7 +9,6 @@ using ByteSync.Business.SessionMembers;
 using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Misc;
-using ByteSync.Common.Helpers;
 using ByteSync.Helpers;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Models.FileSystems;
@@ -121,6 +120,7 @@ public class InventoryBuilder : IInventoryBuilder
             _logger.LogWarning(
                 "InventoryBuilder.AddInventoryPart: Path {Path} is under protected root {ProtectedRoot} and will be rejected",
                 fullName, protectedRoot);
+            
             throw new InvalidOperationException(
                 $"Path '{fullName}' is under protected root '{protectedRoot}'");
         }
