@@ -1,13 +1,14 @@
+using System.Reflection;
+using System.Runtime.Serialization;
 using Azure;
 using Azure.Core;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
 using ByteSync.ServerCommon.Services.Storage;
+using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using NUnit.Framework;
-using FakeItEasy;
 
 namespace ByteSync.ServerCommon.Tests.Services;
 
@@ -70,18 +71,19 @@ public class AzureBlobStorageServiceTests
     private static AsyncPageable<BlobItem> BuildPageable(params BlobItem[] items)
     {
         var page = Page<BlobItem>.FromValues(items, continuationToken: null, response: new TestResponse(200));
+        
         return AsyncPageable<BlobItem>.FromPages([page]);
     }
     
     private static BlobItem CreateBlobItem(string name, DateTimeOffset? createdOn)
     {
 #pragma warning disable SYSLIB0050
-        var properties = (BlobItemProperties)System.Runtime.Serialization.FormatterServices
+        var properties = (BlobItemProperties)FormatterServices
             .GetUninitializedObject(typeof(BlobItemProperties));
 #pragma warning restore SYSLIB0050
         var createdOnProperty = typeof(BlobItemProperties).GetProperty(nameof(BlobItemProperties.CreatedOn));
         createdOnProperty!.SetValue(properties, createdOn,
-            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic,
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
             null, null, null);
         
         return BlobsModelFactory.BlobItem(name, false, properties, null, null);
@@ -99,9 +101,11 @@ public class AzureBlobStorageServiceTests
         
         public GetBlobsOptions? LastOptions { get; private set; }
         
-        public override AsyncPageable<BlobItem> GetBlobsAsync(GetBlobsOptions? options = null, CancellationToken cancellationToken = default)
+        public override AsyncPageable<BlobItem> GetBlobsAsync(GetBlobsOptions? options = null,
+            CancellationToken cancellationToken = default)
         {
             LastOptions = options;
+            
             return _pageable;
         }
     }
@@ -116,8 +120,11 @@ public class AzureBlobStorageServiceTests
         }
         
         public override int Status => _status;
+        
         public override string ReasonPhrase => string.Empty;
+        
         public override Stream? ContentStream { get; set; }
+        
         public override string ClientRequestId { get; set; } = string.Empty;
         
         public override void Dispose()
@@ -127,12 +134,14 @@ public class AzureBlobStorageServiceTests
         protected override bool TryGetHeader(string name, out string value)
         {
             value = string.Empty;
+            
             return false;
         }
         
         protected override bool TryGetHeaderValues(string name, out IEnumerable<string> values)
         {
             values = [];
+            
             return false;
         }
         
