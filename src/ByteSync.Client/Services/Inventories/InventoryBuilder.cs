@@ -271,6 +271,7 @@ public class InventoryBuilder : IInventoryBuilder
                 if (IsReparsePoint(subDirectory))
                 {
                     RecordSkippedEntry(inventoryPart, subDirectory, SkipReason.Symlink, FileSystemEntryKind.Symlink);
+                    
                     continue;
                 }
             }
@@ -480,6 +481,8 @@ public class InventoryBuilder : IInventoryBuilder
         if (IsPosixSpecialFile(entryKind))
         {
             RecordSkippedEntry(inventoryPart, directoryInfo, SkipReason.SpecialPosixFile, entryKind);
+            _logger.LogWarning("Directory {Directory} is a POSIX special file ({EntryKind}) and will be skipped",
+                directoryInfo.FullName, entryKind);
             
             return;
         }
