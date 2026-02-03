@@ -28,8 +28,8 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="NUnit3TestAdapter" Version="5.2.0"/>
-        <PackageReference Include="Avalonia.Headless" Version="11.3.9"/>
-        <PackageReference Include="Avalonia.Headless.NUnit" Version="11.3.9"/>
+        <PackageReference Include="Avalonia.Headless" Version="11.3.11"/>
+        <PackageReference Include="Avalonia.Headless.NUnit" Version="11.3.11"/>
     </ItemGroup>
 
     <ItemGroup>
