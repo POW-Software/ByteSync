@@ -11,7 +11,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AWSSDK.S3" Version="4.0.13.1"/>
+        <PackageReference Include="AWSSDK.S3" Version="4.0.18.1"/>
         <PackageReference Include="Azure.Identity" Version="1.17.1"/>
         <PackageReference Include="FakeItEasy" Version="8.3.0" />
         <PackageReference Include="AwesomeAssertions" Version="8.0.1" />
