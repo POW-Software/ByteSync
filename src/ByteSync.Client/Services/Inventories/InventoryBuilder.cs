@@ -610,13 +610,6 @@ public class InventoryBuilder : IInventoryBuilder
     
     private void AddPosixSpecialFileAndLog(InventoryPart inventoryPart, FileInfo fileInfo, FileSystemEntryKind entryKind)
     {
-        inventoryPart.IsIncompleteDueToAccess = true;
-        var relativePath = BuildRelativePath(inventoryPart, fileInfo);
-        var fileDescription = new FileDescription(inventoryPart, relativePath)
-        {
-            IsAccessible = false
-        };
-        AddFileSystemDescription(inventoryPart, fileDescription);
         RecordSkippedEntry(inventoryPart, fileInfo, SkipReason.SpecialPosixFile, entryKind);
         _logger.LogWarning("File {File} is a POSIX special file ({EntryKind}) and will be skipped", fileInfo.FullName, entryKind);
     }
