@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using ByteSync.Common.Business.Misc;
 
-namespace ByteSync.Common.Helpers;
+namespace ByteSync.Helpers;
 
 public static class ProtectedPaths
 {

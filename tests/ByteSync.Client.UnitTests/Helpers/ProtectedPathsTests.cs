@@ -1,9 +1,9 @@
 using ByteSync.Common.Business.Misc;
-using ByteSync.Common.Helpers;
+using ByteSync.Helpers;
 using FluentAssertions;
 using NUnit.Framework;
 
-namespace TestingCommon.Helpers;
+namespace ByteSync.Client.UnitTests.Helpers;
 
 [TestFixture]
 public class ProtectedPathsTests

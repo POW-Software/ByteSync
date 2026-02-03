@@ -2,6 +2,7 @@ using ByteSync.Assets.Resources;
 using ByteSync.Business.DataSources;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Helpers;
+using ByteSync.Helpers;
 using ByteSync.Interfaces;
 using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Dialogs;
