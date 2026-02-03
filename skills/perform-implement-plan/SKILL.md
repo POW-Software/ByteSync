@@ -1,6 +1,6 @@
 ---
-name: plan-implementation
-description: Execute an implementation plan end-to-end in the ByteSync repo. Use when the user asks to implement a previously established plan step by step, requires creating a branch before coding, and expects regular commits during progress.
+name: perform-implement-plan
+description: Execute an implementation plan end-to-end in the ByteSync repo. Use when the user asks to implement a previously established plan step by step, requires creating a branch before coding, expects regular commits during progress, and wants build/test validation.
 ---
 
 # Plan Implementation
@@ -32,13 +32,15 @@ Implement the plan in small, ordered steps. After each step:
 - Commit the work with a concise English message
 - Keep commits focused and incremental
 
-### 4) Respect repo conventions
+### 4) Respect repo conventions and validation
 
 Follow the repo guidance (AGENTS.md), including:
 
 - Do not add unnecessary comments
 - Use FluentAssertions for tests
-- Build and test as separate commands when asked to run them
+- Build and test as separate commands
+- During intermediate commits, run only tests related to the changes when reasonable
+- At the end, run the full solution tests
 
 ### 5) Keep the user informed
 
