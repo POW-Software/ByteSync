@@ -897,6 +897,12 @@ Vous devez sélectionner au minimum 2 Nœuds de Données.</value>
 		<value>Il n'est pas possible d'ajouter cet élément pour la raison suivante : 
 Soit cet élément, soit un parent, soit un descendant est déjà présent.</value>
 	</data>
+	<data name="DataSourceChecker_ProtectedPathError_Title" xml:space="preserve">
+		<value>Impossible d'ajouter la source</value>
+	</data>
+	<data name="DataSourceChecker_ProtectedPathError_Message" xml:space="preserve">
+		<value>Le chemin sélectionné "{0}" correspond à un emplacement système protégé et ne peut pas être inventorié ni synchronisé.</value>
+	</data>
 	<data name="DataTypes_FilesDirectories" xml:space="preserve">
 		<value>Fichiers et répertoires</value>
 	</data>

@@ -2304,6 +2304,18 @@ namespace ByteSync.Assets.Resources {
             }
         }
         
+        public static string DataSourceChecker_ProtectedPathError_Title {
+            get {
+                return ResourceManager.GetString("DataSourceChecker_ProtectedPathError_Title", resourceCulture);
+            }
+        }
+        
+        public static string DataSourceChecker_ProtectedPathError_Message {
+            get {
+                return ResourceManager.GetString("DataSourceChecker_ProtectedPathError_Message", resourceCulture);
+            }
+        }
+        
         public static string SessionQuitChecker_CanNotRestart_Title {
             get {
                 return ResourceManager.GetString("SessionQuitChecker_CanNotRestart_Title", resourceCulture);

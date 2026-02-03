@@ -10,16 +10,19 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
+using Microsoft.Extensions.Logging;
 
 namespace ByteSync.Factories;
 
 public class InventoryBuilderFactory : IInventoryBuilderFactory
 {
     private readonly IComponentContext _context;
+    private readonly ILogger<InventoryBuilderFactory> _logger;
     
-    public InventoryBuilderFactory(IComponentContext context)
+    public InventoryBuilderFactory(IComponentContext context, ILogger<InventoryBuilderFactory> logger)
     {
         _context = context;
+        _logger = logger;
     }
     
     public IInventoryBuilder CreateInventoryBuilder(DataNode dataNode)
@@ -54,7 +57,16 @@ public class InventoryBuilderFactory : IInventoryBuilderFactory
         
         foreach (var dataSource in myDataSources)
         {
-            inventoryBuilder.AddInventoryPart(dataSource);
+            try
+            {
+                inventoryBuilder.AddInventoryPart(dataSource);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex,
+                    "InventoryBuilderFactory: Failed to add data source {Path} for DataNode {DataNodeId}",
+                    dataSource.Path, dataNode.Id);
+            }
         }
         
         return inventoryBuilder;

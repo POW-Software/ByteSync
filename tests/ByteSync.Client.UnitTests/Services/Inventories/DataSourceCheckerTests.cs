@@ -1,10 +1,13 @@
-﻿using ByteSync.Business;
+using ByteSync.Business;
 using ByteSync.Business.DataSources;
 using ByteSync.Common.Business.Inventories;
+using ByteSync.Common.Business.Misc;
+using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Services.Inventories;
 using ByteSync.ViewModels.Misc;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 
@@ -12,10 +15,11 @@ namespace ByteSync.Client.UnitTests.Services.Inventories;
 
 public class DataSourceCheckerTests
 {
-    private Mock<IDialogService> _mockDialogService;
-    private List<DataSource> _existingDataSources;
+    private Mock<IDialogService> _mockDialogService = null!;
+    private Mock<IEnvironmentService> _mockEnvironmentService = null!;
+    private List<DataSource> _existingDataSources = null!;
     
-    private DataSourceChecker _dataSourceChecker;
+    private DataSourceChecker _dataSourceChecker = null!;
     
     [SetUp]
     public void Setup()
@@ -27,9 +31,14 @@ public class DataSourceCheckerTests
             .ReturnsAsync(MessageBoxResult.OK);
         _mockDialogService
             .Setup(x => x.CreateMessageBoxViewModel(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string[]>()))
-            .Returns((string title, string message, string[] parameters) => new MessageBoxViewModel { ShowOK = true });
+            .Returns((string _, string _, string[] _) => new MessageBoxViewModel { ShowOK = true });
         
-        _dataSourceChecker = new DataSourceChecker(_mockDialogService.Object);
+        _mockEnvironmentService = new Mock<IEnvironmentService>();
+        _mockEnvironmentService.SetupGet(x => x.ClientInstanceId).Returns("client1");
+        _mockEnvironmentService.SetupGet(x => x.OSPlatform).Returns(OSPlatforms.Linux);
+        var logger = new Mock<ILogger<DataSourceChecker>>().Object;
+        
+        _dataSourceChecker = new DataSourceChecker(_mockDialogService.Object, _mockEnvironmentService.Object, logger);
         _existingDataSources = new List<DataSource>();
     }
     
@@ -159,5 +168,37 @@ public class DataSourceCheckerTests
         
         result.Should().BeFalse();
         _mockDialogService.Verify(x => x.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()), Times.Once);
+    }
+    
+    [Test]
+    public async Task CheckDataSource_ProtectedPath_Local_ReturnsFalse()
+    {
+        var dataSource = new DataSource
+        {
+            ClientInstanceId = "client1",
+            Type = FileSystemTypes.Directory,
+            Path = "/dev"
+        };
+        
+        var result = await _dataSourceChecker.CheckDataSource(dataSource, _existingDataSources);
+        
+        result.Should().BeFalse();
+        _mockDialogService.Verify(x => x.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()), Times.Once);
+    }
+    
+    [Test]
+    public async Task CheckDataSource_ProtectedPath_Remote_ReturnsTrue()
+    {
+        var dataSource = new DataSource
+        {
+            ClientInstanceId = "client2",
+            Type = FileSystemTypes.Directory,
+            Path = "/dev"
+        };
+        
+        var result = await _dataSourceChecker.CheckDataSource(dataSource, _existingDataSources);
+        
+        result.Should().BeTrue();
+        _mockDialogService.Verify(x => x.ShowMessageBoxAsync(It.IsAny<MessageBoxViewModel>()), Times.Never);
     }
 }
