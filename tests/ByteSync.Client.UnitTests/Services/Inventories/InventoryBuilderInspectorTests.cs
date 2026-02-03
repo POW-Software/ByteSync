@@ -6,6 +6,7 @@ using ByteSync.Business.Sessions;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Models.Inventories;
 using ByteSync.Services.Inventories;
 using ByteSync.TestsCommon;
 using FluentAssertions;
@@ -36,7 +37,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
         _manualResetEvents.Clear();
     }
     
-    private InventoryBuilder CreateBuilder(IFileSystemInspector inspector)
+    private InventoryBuilder CreateBuilder(IFileSystemInspector inspector, InventoryProcessData? processData = null,
+        IPosixFileTypeClassifier? posixFileTypeClassifier = null)
     {
         var endpoint = new ByteSyncEndpoint
         {
@@ -59,7 +61,7 @@ public class InventoryBuilderInspectorTests : AbstractTester
         var dataNode = new DataNode
             { Id = Guid.NewGuid().ToString("N"), ClientInstanceId = endpoint.ClientInstanceId, Code = "A", OrderIndex = 0 };
         var settings = SessionSettings.BuildDefault();
-        var processData = new InventoryProcessData();
+        processData ??= new InventoryProcessData();
         
         var logger = new Mock<ILogger<InventoryBuilder>>().Object;
         var analyzer = new Mock<IInventoryFileAnalyzer>();
@@ -71,7 +73,15 @@ public class InventoryBuilderInspectorTests : AbstractTester
         var indexer = new Mock<IInventoryIndexer>().Object;
         
         return new InventoryBuilder(sessionMember, dataNode, settings, processData, endpoint.OSPlatform,
-            FingerprintModes.Rsync, logger, analyzer.Object, saver, indexer, inspector);
+            FingerprintModes.Rsync, logger, analyzer.Object, saver, indexer, inspector, posixFileTypeClassifier);
+    }
+
+    private (InventoryBuilder Builder, InventoryProcessData ProcessData) CreateBuilderWithData(IFileSystemInspector inspector,
+        IPosixFileTypeClassifier? posixFileTypeClassifier = null)
+    {
+        var processData = new InventoryProcessData();
+        var builder = CreateBuilder(inspector, processData, posixFileTypeClassifier);
+        return (builder, processData);
     }
     
     [Test]
@@ -207,6 +217,151 @@ public class InventoryBuilderInspectorTests : AbstractTester
         
         var part = builder.Inventory.InventoryParts.Single();
         part.FileDescriptions.Should().ContainSingle(fd => fd.Name == "visible.txt");
+    }
+
+    [Test]
+    public async Task Noise_Child_File_Is_Recorded()
+    {
+        var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsNoiseFileName(It.Is<FileInfo>(fi => fi.Name == "thumbs.db"), It.IsAny<OSPlatforms>()))
+            .Returns(true);
+        insp.Setup(i => i.IsNoiseFileName(It.Is<FileInfo>(fi => fi.Name != "thumbs.db"), It.IsAny<OSPlatforms>()))
+            .Returns(false);
+        insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
+        insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
+        insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsRecallOnDataAccess(It.IsAny<FileInfo>())).Returns(false);
+        var (builder, processData) = CreateBuilderWithData(insp.Object);
+        
+        var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root_noise_child"));
+        var visiblePath = Path.Combine(root.FullName, "visible.txt");
+        var noisePath = Path.Combine(root.FullName, "thumbs.db");
+        await File.WriteAllTextAsync(visiblePath, "x");
+        await File.WriteAllTextAsync(noisePath, "x");
+        
+        builder.AddInventoryPart(root.FullName);
+        var invPath = Path.Combine(TestDirectory.FullName, "inv_noise_child.zip");
+        await builder.BuildBaseInventoryAsync(invPath);
+        
+        processData.SkippedEntries.Should()
+            .ContainSingle(e => e.Name == "thumbs.db" && e.Reason == SkipReason.NoiseFile);
+    }
+
+    [Test]
+    public async Task System_Child_File_Is_Recorded()
+    {
+        var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystemAttribute(It.Is<FileInfo>(fi => fi.Name == "system.txt"))).Returns(true);
+        insp.Setup(i => i.IsSystemAttribute(It.Is<FileInfo>(fi => fi.Name != "system.txt"))).Returns(false);
+        insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
+        insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
+        insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsRecallOnDataAccess(It.IsAny<FileInfo>())).Returns(false);
+        var (builder, processData) = CreateBuilderWithData(insp.Object);
+        
+        var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root_system_recorded"));
+        var visiblePath = Path.Combine(root.FullName, "visible.txt");
+        var systemPath = Path.Combine(root.FullName, "system.txt");
+        await File.WriteAllTextAsync(visiblePath, "x");
+        await File.WriteAllTextAsync(systemPath, "x");
+        
+        builder.AddInventoryPart(root.FullName);
+        var invPath = Path.Combine(TestDirectory.FullName, "inv_system_recorded.zip");
+        await builder.BuildBaseInventoryAsync(invPath);
+        
+        processData.SkippedEntries.Should()
+            .ContainSingle(e => e.Name == "system.txt" && e.Reason == SkipReason.SystemAttribute);
+    }
+
+    [Test]
+    public async Task Offline_Root_File_Is_Recorded()
+    {
+        var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
+        insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
+        insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(true);
+        insp.Setup(i => i.IsRecallOnDataAccess(It.IsAny<FileInfo>())).Returns(false);
+        var (builder, processData) = CreateBuilderWithData(insp.Object);
+        
+        var filePath = Path.Combine(TestDirectory.FullName, "offline.txt");
+        await File.WriteAllTextAsync(filePath, "x");
+        
+        builder.AddInventoryPart(filePath);
+        var invPath = Path.Combine(TestDirectory.FullName, "inv_offline.zip");
+        await builder.BuildBaseInventoryAsync(invPath);
+        
+        var part = builder.Inventory.InventoryParts.Single();
+        part.FileDescriptions.Should().BeEmpty();
+        processData.SkippedEntries.Should()
+            .ContainSingle(e => e.Name == "offline.txt" && e.Reason == SkipReason.Offline);
+    }
+
+    [Test]
+    public async Task Posix_Symlink_File_Is_Recorded()
+    {
+        var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        var posix = new Mock<IPosixFileTypeClassifier>(MockBehavior.Strict);
+        posix.Setup(p => p.ClassifyPosixEntry(It.IsAny<string>())).Returns(FileSystemEntryKind.Symlink);
+        var (builder, processData) = CreateBuilderWithData(insp.Object, posix.Object);
+        
+        var filePath = Path.Combine(TestDirectory.FullName, "posix_symlink.txt");
+        await File.WriteAllTextAsync(filePath, "x");
+        
+        builder.AddInventoryPart(filePath);
+        var invPath = Path.Combine(TestDirectory.FullName, "inv_posix_symlink.zip");
+        await builder.BuildBaseInventoryAsync(invPath);
+        
+        var part = builder.Inventory.InventoryParts.Single();
+        part.FileDescriptions.Should().BeEmpty();
+        processData.SkippedEntries.Should()
+            .ContainSingle(e => e.Name == "posix_symlink.txt" && e.Reason == SkipReason.Symlink);
+    }
+
+    [Test]
+    public async Task Posix_Special_File_Is_Recorded()
+    {
+        var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        var posix = new Mock<IPosixFileTypeClassifier>(MockBehavior.Strict);
+        posix.Setup(p => p.ClassifyPosixEntry(It.IsAny<string>())).Returns(FileSystemEntryKind.BlockDevice);
+        var (builder, processData) = CreateBuilderWithData(insp.Object, posix.Object);
+        
+        var filePath = Path.Combine(TestDirectory.FullName, "posix_special.txt");
+        await File.WriteAllTextAsync(filePath, "x");
+        
+        builder.AddInventoryPart(filePath);
+        var invPath = Path.Combine(TestDirectory.FullName, "inv_posix_special.zip");
+        await builder.BuildBaseInventoryAsync(invPath);
+        
+        var part = builder.Inventory.InventoryParts.Single();
+        part.FileDescriptions.Should().ContainSingle(fd => !fd.IsAccessible);
+        processData.SkippedEntries.Should()
+            .ContainSingle(e => e.Name == "posix_special.txt" && e.Reason == SkipReason.SpecialPosixFile);
+    }
+
+    [Test]
+    public async Task Posix_Symlink_Directory_Is_Recorded()
+    {
+        var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        var posix = new Mock<IPosixFileTypeClassifier>(MockBehavior.Strict);
+        posix.Setup(p => p.ClassifyPosixEntry(It.IsAny<string>())).Returns(FileSystemEntryKind.Symlink);
+        var (builder, processData) = CreateBuilderWithData(insp.Object, posix.Object);
+        
+        var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root_posix_symlink"));
+        
+        builder.AddInventoryPart(root.FullName);
+        var invPath = Path.Combine(TestDirectory.FullName, "inv_posix_symlink_dir.zip");
+        await builder.BuildBaseInventoryAsync(invPath);
+        
+        var part = builder.Inventory.InventoryParts.Single();
+        part.DirectoryDescriptions.Should().BeEmpty();
+        processData.SkippedEntries.Should()
+            .ContainSingle(e => e.Name == "root_posix_symlink" && e.Reason == SkipReason.Symlink);
     }
     
     [Test]
