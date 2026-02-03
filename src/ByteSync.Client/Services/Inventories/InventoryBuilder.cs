@@ -270,26 +270,27 @@ public class InventoryBuilder : IInventoryBuilder
             {
                 if (IsReparsePoint(subDirectory))
                 {
+                    RecordSkippedEntry(inventoryPart, subDirectory, SkipReason.Symlink, FileSystemEntryKind.Symlink);
                     continue;
                 }
             }
             catch (UnauthorizedAccessException ex)
             {
-                AddInaccessibleDirectoryAndLog(inventoryPart, subDirectory, ex,
+                AddInaccessibleDirectoryAndLog(inventoryPart, subDirectory, SkipReason.Inaccessible, ex,
                     "Directory {Directory} is inaccessible and will be skipped");
                 
                 continue;
             }
             catch (DirectoryNotFoundException ex)
             {
-                AddInaccessibleDirectoryAndLog(inventoryPart, subDirectory, ex,
+                AddInaccessibleDirectoryAndLog(inventoryPart, subDirectory, SkipReason.NotFound, ex,
                     "Directory {Directory} not found during enumeration and will be skipped");
                 
                 continue;
             }
             catch (IOException ex)
             {
-                AddInaccessibleDirectoryAndLog(inventoryPart, subDirectory, ex,
+                AddInaccessibleDirectoryAndLog(inventoryPart, subDirectory, SkipReason.IoError, ex,
                     "Directory {Directory} IO error and will be skipped");
                 
                 continue;
@@ -312,12 +313,14 @@ public class InventoryBuilder : IInventoryBuilder
         }
     }
     
-    private void AddInaccessibleDirectoryAndLog(InventoryPart inventoryPart, DirectoryInfo directoryInfo, Exception ex, string message)
+    private void AddInaccessibleDirectoryAndLog(InventoryPart inventoryPart, DirectoryInfo directoryInfo, SkipReason reason,
+        Exception ex, string message)
     {
         inventoryPart.IsIncompleteDueToAccess = true;
         var subDirectoryDescription = IdentityBuilder.BuildDirectoryDescription(inventoryPart, directoryInfo);
         subDirectoryDescription.IsAccessible = false;
         AddFileSystemDescription(inventoryPart, subDirectoryDescription);
+        RecordSkippedEntry(inventoryPart, directoryInfo, reason);
         _logger.LogWarning(ex, message, directoryInfo.FullName);
     }
     
@@ -375,6 +378,13 @@ public class InventoryBuilder : IInventoryBuilder
             var isRoot = IsRootPath(inventoryPart, fileInfo);
             
             var entryKind = PosixFileTypeClassifier.ClassifyPosixEntry(fileInfo.FullName);
+            if (entryKind == FileSystemEntryKind.Symlink)
+            {
+                RecordSkippedEntry(inventoryPart, fileInfo, SkipReason.Symlink, FileSystemEntryKind.Symlink);
+                
+                return;
+            }
+            
             if (IsPosixSpecialFile(entryKind))
             {
                 AddPosixSpecialFileAndLog(inventoryPart, fileInfo, entryKind);
@@ -384,21 +394,40 @@ public class InventoryBuilder : IInventoryBuilder
             
             if (!isRoot && ShouldIgnoreHiddenFile(fileInfo))
             {
+                RecordSkippedEntry(inventoryPart, fileInfo, SkipReason.Hidden, FileSystemEntryKind.RegularFile);
+                
                 return;
             }
             
-            if (!isRoot && ShouldIgnoreSystemFile(fileInfo))
+            if (!isRoot)
             {
-                return;
+                var systemSkipReason = GetSystemSkipReason(fileInfo);
+                if (systemSkipReason.HasValue)
+                {
+                    RecordSkippedEntry(inventoryPart, fileInfo, systemSkipReason.Value, FileSystemEntryKind.RegularFile);
+                    
+                    return;
+                }
             }
             
             if (IsReparsePoint(fileInfo))
             {
+                RecordSkippedEntry(inventoryPart, fileInfo, SkipReason.Symlink, FileSystemEntryKind.Symlink);
+                
                 return;
             }
             
-            if (!FileSystemInspector.Exists(fileInfo) || FileSystemInspector.IsOffline(fileInfo) || IsRecallOnDataAccess(fileInfo))
+            if (!FileSystemInspector.Exists(fileInfo))
             {
+                RecordSkippedEntry(inventoryPart, fileInfo, SkipReason.NotFound);
+                
+                return;
+            }
+            
+            if (FileSystemInspector.IsOffline(fileInfo) || IsRecallOnDataAccess(fileInfo))
+            {
+                RecordSkippedEntry(inventoryPart, fileInfo, SkipReason.Offline, FileSystemEntryKind.RegularFile);
+                
                 return;
             }
             
@@ -410,17 +439,17 @@ public class InventoryBuilder : IInventoryBuilder
         }
         catch (UnauthorizedAccessException ex)
         {
-            AddInaccessibleFileAndLog(inventoryPart, fileInfo, ex,
+            AddInaccessibleFileAndLog(inventoryPart, fileInfo, SkipReason.Inaccessible, ex,
                 "File {File} is inaccessible and will be skipped");
         }
         catch (DirectoryNotFoundException ex)
         {
-            AddInaccessibleFileAndLog(inventoryPart, fileInfo, ex,
+            AddInaccessibleFileAndLog(inventoryPart, fileInfo, SkipReason.NotFound, ex,
                 "File {File} parent directory not found and will be skipped");
         }
         catch (IOException ex)
         {
-            AddInaccessibleFileAndLog(inventoryPart, fileInfo, ex,
+            AddInaccessibleFileAndLog(inventoryPart, fileInfo, SkipReason.IoError, ex,
                 "File {File} IO error and will be skipped");
         }
     }
@@ -440,8 +469,25 @@ public class InventoryBuilder : IInventoryBuilder
             return;
         }
         
+        var entryKind = PosixFileTypeClassifier.ClassifyPosixEntry(directoryInfo.FullName);
+        if (entryKind == FileSystemEntryKind.Symlink)
+        {
+            RecordSkippedEntry(inventoryPart, directoryInfo, SkipReason.Symlink, FileSystemEntryKind.Symlink);
+            
+            return;
+        }
+        
+        if (IsPosixSpecialFile(entryKind))
+        {
+            RecordSkippedEntry(inventoryPart, directoryInfo, SkipReason.SpecialPosixFile, entryKind);
+            
+            return;
+        }
+        
         if (!IsRootPath(inventoryPart, directoryInfo) && ShouldIgnoreHiddenDirectory(directoryInfo))
         {
+            RecordSkippedEntry(inventoryPart, directoryInfo, SkipReason.Hidden, FileSystemEntryKind.Directory);
+            
             return;
         }
         
@@ -459,16 +505,19 @@ public class InventoryBuilder : IInventoryBuilder
         catch (UnauthorizedAccessException ex)
         {
             directoryDescription.IsAccessible = false;
+            RecordSkippedEntry(inventoryPart, directoryInfo, SkipReason.Inaccessible);
             _logger.LogWarning(ex, "Directory {Directory} is inaccessible and will be skipped", directoryInfo.FullName);
         }
         catch (DirectoryNotFoundException ex)
         {
             directoryDescription.IsAccessible = false;
+            RecordSkippedEntry(inventoryPart, directoryInfo, SkipReason.NotFound);
             _logger.LogWarning(ex, "Directory {Directory} not found during enumeration and will be skipped", directoryInfo.FullName);
         }
         catch (IOException ex)
         {
             directoryDescription.IsAccessible = false;
+            RecordSkippedEntry(inventoryPart, directoryInfo, SkipReason.IoError);
             _logger.LogWarning(ex, "Directory {Directory} IO error and will be skipped", directoryInfo.FullName);
         }
     }
@@ -490,21 +539,28 @@ public class InventoryBuilder : IInventoryBuilder
         return false;
     }
     
-    private bool ShouldIgnoreSystemFile(FileInfo fileInfo)
+    private SkipReason? GetSystemSkipReason(FileInfo fileInfo)
     {
         if (!IgnoreSystem)
         {
-            return false;
+            return null;
         }
         
-        if (FileSystemInspector.IsSystem(fileInfo))
+        if (FileSystemInspector.IsNoiseFileName(fileInfo, OSPlatform))
+        {
+            _logger.LogInformation("File {File} is ignored because considered as noise", fileInfo.FullName);
+            
+            return SkipReason.NoiseFile;
+        }
+        
+        if (FileSystemInspector.IsSystemAttribute(fileInfo))
         {
             _logger.LogInformation("File {File} is ignored because considered as system", fileInfo.FullName);
             
-            return true;
+            return SkipReason.SystemAttribute;
         }
         
-        return false;
+        return null;
     }
     
     private bool IsReparsePoint(FileInfo fileInfo)
@@ -538,7 +594,8 @@ public class InventoryBuilder : IInventoryBuilder
         return FileSystemInspector.IsRecallOnDataAccess(fileInfo);
     }
     
-    private void AddInaccessibleFileAndLog(InventoryPart inventoryPart, FileInfo fileInfo, Exception ex, string message)
+    private void AddInaccessibleFileAndLog(InventoryPart inventoryPart, FileInfo fileInfo, SkipReason reason,
+        Exception ex, string message)
     {
         inventoryPart.IsIncompleteDueToAccess = true;
         var relativePath = BuildRelativePath(inventoryPart, fileInfo);
@@ -547,6 +604,7 @@ public class InventoryBuilder : IInventoryBuilder
             IsAccessible = false
         };
         AddFileSystemDescription(inventoryPart, fileDescription);
+        RecordSkippedEntry(inventoryPart, fileInfo, reason);
         _logger.LogWarning(ex, message, fileInfo.FullName);
     }
     
@@ -559,6 +617,7 @@ public class InventoryBuilder : IInventoryBuilder
             IsAccessible = false
         };
         AddFileSystemDescription(inventoryPart, fileDescription);
+        RecordSkippedEntry(inventoryPart, fileInfo, SkipReason.SpecialPosixFile, entryKind);
         _logger.LogWarning("File {File} is a POSIX special file ({EntryKind}) and will be skipped", fileInfo.FullName, entryKind);
     }
     
@@ -569,6 +628,16 @@ public class InventoryBuilder : IInventoryBuilder
             FileSystemEntryKind.CharacterDevice or
             FileSystemEntryKind.Fifo or
             FileSystemEntryKind.Socket;
+    }
+    
+    private string BuildRelativePath(InventoryPart inventoryPart, FileSystemInfo fileSystemInfo)
+    {
+        return fileSystemInfo switch
+        {
+            FileInfo fileInfo => BuildRelativePath(inventoryPart, fileInfo),
+            DirectoryInfo directoryInfo => BuildRelativePath(inventoryPart, directoryInfo),
+            _ => string.Empty
+        };
     }
     
     private string BuildRelativePath(InventoryPart inventoryPart, FileInfo fileInfo)
@@ -589,6 +658,51 @@ public class InventoryBuilder : IInventoryBuilder
         }
         
         return normalizedPath;
+    }
+    
+    private string BuildRelativePath(InventoryPart inventoryPart, DirectoryInfo directoryInfo)
+    {
+        if (inventoryPart.InventoryPartType != FileSystemTypes.Directory)
+        {
+            return "/" + directoryInfo.Name;
+        }
+        
+        var rawRelativePath = IOUtils.ExtractRelativePath(directoryInfo.FullName, inventoryPart.RootPath);
+        var normalizedPath = OSPlatform == OSPlatforms.Windows
+            ? rawRelativePath.Replace(Path.DirectorySeparatorChar, IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR)
+            : rawRelativePath;
+        
+        if (!normalizedPath.StartsWith(IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR))
+        {
+            normalizedPath = IdentityBuilder.GLOBAL_DIRECTORY_SEPARATOR + normalizedPath;
+        }
+        
+        return normalizedPath;
+    }
+    
+    private void RecordSkippedEntry(InventoryPart inventoryPart, FileSystemInfo fileSystemInfo, SkipReason reason,
+        FileSystemEntryKind? detectedKind = null)
+    {
+        string relativePath;
+        try
+        {
+            relativePath = BuildRelativePath(inventoryPart, fileSystemInfo);
+        }
+        catch (Exception)
+        {
+            relativePath = string.Empty;
+        }
+        
+        var entry = new SkippedEntry
+        {
+            FullPath = fileSystemInfo.FullName,
+            RelativePath = relativePath,
+            Name = fileSystemInfo.Name,
+            Reason = reason,
+            DetectedKind = detectedKind
+        };
+        
+        InventoryProcessData.RecordSkippedEntry(entry);
     }
     
     private void AddFileSystemDescription(InventoryPart inventoryPart, FileSystemDescription fileSystemDescription)

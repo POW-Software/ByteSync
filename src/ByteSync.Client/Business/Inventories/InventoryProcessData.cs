@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+using System.Collections.Concurrent;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using ByteSync.Interfaces.Controls.Inventories;
@@ -11,6 +12,7 @@ namespace ByteSync.Business.Inventories;
 public class InventoryProcessData : ReactiveObject
 {
     private readonly object _monitorDataLock = new object();
+    private readonly ConcurrentQueue<SkippedEntry> _skippedEntries = new();
     
     public InventoryProcessData()
     {
@@ -101,6 +103,8 @@ public class InventoryProcessData : ReactiveObject
     
     public IObservable<InventoryMonitorData> InventoryMonitorObservable => InventoryMonitorDataSubject.AsObservable();
     
+    public IReadOnlyCollection<SkippedEntry> SkippedEntries => _skippedEntries.ToArray();
+    
     [Reactive]
     public DateTimeOffset InventoryStart { get; set; }
     
@@ -131,8 +135,14 @@ public class InventoryProcessData : ReactiveObject
         LastException = null;
         
         InventoryMonitorDataSubject.OnNext(new InventoryMonitorData());
+        ClearSkippedEntries();
     }
     
+    public void RecordSkippedEntry(SkippedEntry entry)
+    {
+        _skippedEntries.Enqueue(entry);
+    }
+
     public void SetError(Exception exception)
     {
         LastException = exception;
@@ -150,4 +160,12 @@ public class InventoryProcessData : ReactiveObject
             InventoryMonitorDataSubject.OnNext(newValue);
         }
     }
+    
+    private void ClearSkippedEntries()
+    {
+        while (_skippedEntries.TryDequeue(out _))
+        {
+        }
+    }
 }
+
