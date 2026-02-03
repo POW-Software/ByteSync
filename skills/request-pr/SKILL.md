@@ -7,7 +7,7 @@ description: Request pushing the current branch and creating a Pull Request for 
 
 ## Overview
 
-Provide a short workflow to ask for pushing the current branch and opening a Pull Request with an English title and description.
+Provide a short workflow to push the current branch and open a Pull Request with an English title and description using the `gh` CLI.
 
 ## Workflow
 
@@ -17,18 +17,28 @@ Confirm the current branch name and whether there are uncommitted changes. If ch
 
 ### 2) Push branch
 
-Request the user to push the current branch to the remote.
+Push the current branch to the remote. If the user did not specify a tool, default to using the `gh` CLI context and run a normal git push for the current branch.
+
+Example:
+```bash
+git push -u origin HEAD
+```
 
 ### 3) Create PR
 
-Request creation of a Pull Request with:
+Create a Pull Request using `gh pr create` with:
 
 - English title
 - English description summarizing changes and approach
 
+Example:
+```bash
+gh pr create --title "[type] Short summary" --body "Summary:\n- ...\n\nKey changes:\n- ...\n\nNotes/risks:\n- ..."
+```
+
 ### 4) Provide PR text template
 
-Provide a minimal PR template the user can paste:
+Provide a minimal PR template to pass to `gh pr create`:
 
 Title: `[type] Short summary`
 
@@ -41,4 +51,4 @@ Ensure the template is in English and matches the repo's PR format when applicab
 
 ### 5) Keep it brief
 
-Keep the response focused on the push + PR request, avoiding extra steps unless the user asks.
+Keep the response focused on the push + PR actions, avoiding extra steps unless the user asks.
