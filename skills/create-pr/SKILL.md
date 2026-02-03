@@ -1,6 +1,6 @@
 ---
-name: request-pr
-description: Request pushing the current branch and creating a Pull Request for ByteSync. Use when the user wants to push a branch and open a PR, and requires the PR title and description in English.
+name: create-pr
+description: Push the current branch and create a Pull Request for ByteSync. Use when the user wants the agent to push a branch and open a PR, and requires the PR title and description in English.
 ---
 
 # Request PR
