@@ -339,7 +339,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
         await builder.BuildBaseInventoryAsync(invPath);
         
         var part = builder.Inventory.InventoryParts.Single();
-        part.FileDescriptions.Should().ContainSingle(fd => !fd.IsAccessible);
+        part.FileDescriptions.Should().BeEmpty();
+        part.IsIncompleteDueToAccess.Should().BeFalse();
         processData.SkippedEntries.Should()
             .ContainSingle(e => e.Name == "posix_special.txt" && e.Reason == SkipReason.SpecialPosixFile);
     }

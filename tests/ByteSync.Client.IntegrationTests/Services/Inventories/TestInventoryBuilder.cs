@@ -747,7 +747,8 @@ public class TestInventoryBuilder : IntegrationTest
         var sessionSettings = SessionSettings.BuildDefault();
         var osPlatform = OperatingSystem.IsMacOS() ? OSPlatforms.MacOs : OSPlatforms.Linux;
 
-        inventoryBuilder = BuildInventoryBuilder(sessionSettings, null, null, osPlatform);
+        var inventoryProcessData = new InventoryProcessData();
+        inventoryBuilder = BuildInventoryBuilder(sessionSettings, inventoryProcessData, null, osPlatform);
         inventoryBuilder.AddInventoryPart(sourceA.FullName);
         await inventoryBuilder.BuildBaseInventoryAsync(inventoryAFilePath);
 
@@ -765,11 +766,11 @@ public class TestInventoryBuilder : IntegrationTest
         inventory = inventoryBuilder.Inventory!;
         inventory.InventoryParts.Count.Should().Be(1);
         inventory.InventoryParts[0].DirectoryDescriptions.Count.Should().Be(0);
-        inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(2);
-
-        var fifoDescription = inventory.InventoryParts[0].FileDescriptions.Single(fd => fd.Name.Equals("pipeA"));
-        fifoDescription.IsAccessible.Should().BeFalse();
-        inventory.InventoryParts[0].IsIncompleteDueToAccess.Should().BeTrue();
+        inventory.InventoryParts[0].FileDescriptions.Count.Should().Be(1);
+        inventory.InventoryParts[0].FileDescriptions.Single().Name.Should().Be("fileA.txt");
+        inventory.InventoryParts[0].IsIncompleteDueToAccess.Should().BeFalse();
+        inventoryProcessData.SkippedEntries.Should()
+            .ContainSingle(entry => entry.Name == "pipeA" && entry.Reason == SkipReason.SpecialPosixFile);
     }
     
     [Test]
