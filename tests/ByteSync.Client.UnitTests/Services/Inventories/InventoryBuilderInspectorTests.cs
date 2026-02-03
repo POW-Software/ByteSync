@@ -79,7 +79,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
         insp.Setup(i => i.IsHidden(It.IsAny<FileSystemInfo>(), It.IsAny<OSPlatforms>())).Returns(true);
-        insp.Setup(i => i.IsSystem(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
         insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
         insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
         insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
@@ -102,7 +103,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
         insp.Setup(i => i.IsHidden(It.IsAny<FileSystemInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
-        insp.Setup(i => i.IsSystem(It.IsAny<FileInfo>())).Returns(true);
+        insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(true);
         insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
         insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
         insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
@@ -126,7 +128,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
         insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(true);
         insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
-        insp.Setup(i => i.IsSystem(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
         insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
         insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
         insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
@@ -155,7 +158,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
             .Returns(true);
         insp.Setup(i => i.IsHidden(It.Is<FileInfo>(fi => fi.Name != "hidden.txt"), It.IsAny<OSPlatforms>()))
             .Returns(false);
-        insp.Setup(i => i.IsSystem(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
         insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
         insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
         insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
@@ -182,8 +186,9 @@ public class InventoryBuilderInspectorTests : AbstractTester
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
         insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
-        insp.Setup(i => i.IsSystem(It.Is<FileInfo>(fi => fi.Name == "system.txt"))).Returns(true);
-        insp.Setup(i => i.IsSystem(It.Is<FileInfo>(fi => fi.Name != "system.txt"))).Returns(false);
+        insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystemAttribute(It.Is<FileInfo>(fi => fi.Name == "system.txt"))).Returns(true);
+        insp.Setup(i => i.IsSystemAttribute(It.Is<FileInfo>(fi => fi.Name != "system.txt"))).Returns(false);
         insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
         insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
         insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
@@ -209,7 +214,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
         insp.Setup(i => i.IsHidden(It.IsAny<FileSystemInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
-        insp.Setup(i => i.IsSystem(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
         insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(true);
         var builder = CreateBuilder(insp.Object);
         
@@ -229,7 +235,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
         insp.Setup(i => i.IsHidden(It.IsAny<FileSystemInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
-        insp.Setup(i => i.IsSystem(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
         insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
         insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(false);
         insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
@@ -258,7 +265,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
         // File access triggers UnauthorizedAccess inside DoAnalyze(FileInfo) try/catch
         insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>()))
             .Throws(new UnauthorizedAccessException("denied"));
-        insp.Setup(i => i.IsSystem(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
         insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
         insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
         insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
@@ -287,7 +295,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
         insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>()))
             .Throws(new DirectoryNotFoundException("parent missing"));
-        insp.Setup(i => i.IsSystem(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
         insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
         insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
         insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
@@ -317,7 +326,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
         insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>()))
             .Throws(new IOException("io error"));
-        insp.Setup(i => i.IsSystem(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
         insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
         insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
         insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
@@ -345,7 +355,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
         insp.Setup(i => i.IsHidden(It.IsAny<FileSystemInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
-        insp.Setup(i => i.IsSystem(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
         insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
         insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
         insp.Setup(i => i.IsRecallOnDataAccess(It.IsAny<FileInfo>())).Returns(false);
@@ -384,7 +395,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
         insp.Setup(i => i.IsHidden(It.IsAny<FileSystemInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
-        insp.Setup(i => i.IsSystem(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
         insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
         insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
         insp.Setup(i => i.IsRecallOnDataAccess(It.IsAny<FileInfo>())).Returns(false);
@@ -414,3 +426,4 @@ public class InventoryBuilderInspectorTests : AbstractTester
         part.FileDescriptions[0].RelativePath.Should().Be("/ok.txt");
     }
 }
+
