@@ -16,12 +16,22 @@ public class FileSystemInspector : IFileSystemInspector
         return isHidden || isDot;
     }
     
-    public bool IsSystem(FileInfo fileInfo)
+    public bool IsSystemAttribute(FileInfo fileInfo)
     {
-        var isCommon = fileInfo.Name.In("desktop.ini", "thumbs.db", ".desktop.ini", ".thumbs.db", ".DS_Store");
         var isSystem = (fileInfo.Attributes & FileAttributes.System) == FileAttributes.System;
         
-        return isCommon || isSystem;
+        return isSystem;
+    }
+    
+    public bool IsNoiseFileName(FileInfo fileInfo, OSPlatforms os)
+    {
+        var comparison = os == OSPlatforms.Linux ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+        
+        return fileInfo.Name.Equals("desktop.ini", comparison)
+               || fileInfo.Name.Equals("thumbs.db", comparison)
+               || fileInfo.Name.Equals(".desktop.ini", comparison)
+               || fileInfo.Name.Equals(".thumbs.db", comparison)
+               || fileInfo.Name.Equals(".DS_Store", comparison);
     }
     
     public bool IsReparsePoint(FileSystemInfo fsi)

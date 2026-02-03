@@ -497,7 +497,14 @@ public class InventoryBuilder : IInventoryBuilder
             return false;
         }
         
-        if (FileSystemInspector.IsSystem(fileInfo))
+        if (FileSystemInspector.IsNoiseFileName(fileInfo, OSPlatform))
+        {
+            _logger.LogInformation("File {File} is ignored because considered as noise", fileInfo.FullName);
+            
+            return true;
+        }
+        
+        if (FileSystemInspector.IsSystemAttribute(fileInfo))
         {
             _logger.LogInformation("File {File} is ignored because considered as system", fileInfo.FullName);
             
