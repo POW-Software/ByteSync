@@ -1,4 +1,5 @@
 using System.IO;
+using ByteSync.Business.Inventories;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Controls.Inventories;
 
@@ -7,6 +8,48 @@ namespace ByteSync.Services.Inventories;
 public class FileSystemInspector : IFileSystemInspector
 {
     private const int FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 4194304;
+    private readonly IPosixFileTypeClassifier _posixFileTypeClassifier;
+
+    public FileSystemInspector(IPosixFileTypeClassifier? posixFileTypeClassifier = null)
+    {
+        _posixFileTypeClassifier = posixFileTypeClassifier ?? new PosixFileTypeClassifier();
+    }
+
+    public FileSystemEntryKind ClassifyEntry(FileSystemInfo fsi)
+    {
+        if (fsi is null)
+        {
+            return FileSystemEntryKind.Unknown;
+        }
+
+        if (HasLinkTarget(fsi) || SafeIsReparsePoint(fsi))
+        {
+            return FileSystemEntryKind.Symlink;
+        }
+
+        if (!OperatingSystem.IsWindows())
+        {
+            try
+            {
+                var posixKind = _posixFileTypeClassifier.ClassifyPosixEntry(fsi.FullName);
+                if (posixKind != FileSystemEntryKind.Unknown)
+                {
+                    return posixKind;
+                }
+            }
+            catch (Exception)
+            {
+                return FileSystemEntryKind.Unknown;
+            }
+        }
+
+        return fsi switch
+        {
+            DirectoryInfo => FileSystemEntryKind.Directory,
+            FileInfo => FileSystemEntryKind.RegularFile,
+            _ => FileSystemEntryKind.Unknown
+        };
+    }
     
     public bool IsHidden(FileSystemInfo fsi, OSPlatforms os)
     {
@@ -52,5 +95,34 @@ public class FileSystemInspector : IFileSystemInspector
     public bool IsRecallOnDataAccess(FileInfo fileInfo)
     {
         return (((int)fileInfo.Attributes) & FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS) == FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS;
+    }
+
+    private static bool HasLinkTarget(FileSystemInfo fsi)
+    {
+        try
+        {
+            return fsi switch
+            {
+                FileInfo fileInfo => fileInfo.LinkTarget != null,
+                DirectoryInfo directoryInfo => directoryInfo.LinkTarget != null,
+                _ => false
+            };
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    private bool SafeIsReparsePoint(FileSystemInfo fsi)
+    {
+        try
+        {
+            return IsReparsePoint(fsi);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 }
