@@ -83,11 +83,24 @@ public class InventoryBuilderInspectorTests : AbstractTester
         var builder = CreateBuilder(inspector, processData, posixFileTypeClassifier);
         return (builder, processData);
     }
+
+    private static void SetupDefaultClassification(Mock<IFileSystemInspector> inspector)
+    {
+        inspector
+            .Setup(i => i.ClassifyEntry(It.IsAny<FileSystemInfo>()))
+            .Returns<FileSystemInfo>(fsi => fsi switch
+            {
+                DirectoryInfo => FileSystemEntryKind.Directory,
+                FileInfo => FileSystemEntryKind.RegularFile,
+                _ => FileSystemEntryKind.Unknown
+            });
+    }
     
     [Test]
     public async Task Hidden_Root_File_Is_Analyzed()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
         insp.Setup(i => i.IsHidden(It.IsAny<FileSystemInfo>(), It.IsAny<OSPlatforms>())).Returns(true);
         insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
@@ -112,6 +125,7 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task System_Root_File_Is_Analyzed()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
         insp.Setup(i => i.IsHidden(It.IsAny<FileSystemInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(true);
@@ -136,6 +150,7 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task Hidden_Root_Directory_Is_Analyzed()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
         insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(true);
         insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
@@ -163,6 +178,7 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task Hidden_Child_File_Is_Ignored()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
         insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsHidden(It.Is<FileInfo>(fi => fi.Name == "hidden.txt"), It.IsAny<OSPlatforms>()))
             .Returns(true);
@@ -194,6 +210,7 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task System_Child_File_Is_Ignored()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
         insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
@@ -223,6 +240,7 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task Noise_Child_File_Is_Recorded()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
         insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsNoiseFileName(It.Is<FileInfo>(fi => fi.Name == "thumbs.db"), It.IsAny<OSPlatforms>()))
@@ -254,6 +272,7 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task System_Child_File_Is_Recorded()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
         insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
@@ -283,6 +302,7 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task Offline_Root_File_Is_Recorded()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
         insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
         insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
         insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(true);
@@ -306,9 +326,9 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task Posix_Symlink_File_Is_Recorded()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
-        var posix = new Mock<IPosixFileTypeClassifier>(MockBehavior.Strict);
-        posix.Setup(p => p.ClassifyPosixEntry(It.IsAny<string>())).Returns(FileSystemEntryKind.Symlink);
-        var (builder, processData) = CreateBuilderWithData(insp.Object, posix.Object);
+        SetupDefaultClassification(insp);
+        insp.Setup(i => i.ClassifyEntry(It.IsAny<FileSystemInfo>())).Returns(FileSystemEntryKind.Symlink);
+        var (builder, processData) = CreateBuilderWithData(insp.Object);
         
         var filePath = Path.Combine(TestDirectory.FullName, "posix_symlink.txt");
         await File.WriteAllTextAsync(filePath, "x");
@@ -327,9 +347,9 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task Posix_Special_File_Is_Recorded()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
-        var posix = new Mock<IPosixFileTypeClassifier>(MockBehavior.Strict);
-        posix.Setup(p => p.ClassifyPosixEntry(It.IsAny<string>())).Returns(FileSystemEntryKind.BlockDevice);
-        var (builder, processData) = CreateBuilderWithData(insp.Object, posix.Object);
+        SetupDefaultClassification(insp);
+        insp.Setup(i => i.ClassifyEntry(It.IsAny<FileSystemInfo>())).Returns(FileSystemEntryKind.BlockDevice);
+        var (builder, processData) = CreateBuilderWithData(insp.Object);
         
         var filePath = Path.Combine(TestDirectory.FullName, "posix_special.txt");
         await File.WriteAllTextAsync(filePath, "x");
@@ -349,9 +369,9 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task Posix_Symlink_Directory_Is_Recorded()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
-        var posix = new Mock<IPosixFileTypeClassifier>(MockBehavior.Strict);
-        posix.Setup(p => p.ClassifyPosixEntry(It.IsAny<string>())).Returns(FileSystemEntryKind.Symlink);
-        var (builder, processData) = CreateBuilderWithData(insp.Object, posix.Object);
+        SetupDefaultClassification(insp);
+        insp.Setup(i => i.ClassifyEntry(It.IsAny<FileSystemInfo>())).Returns(FileSystemEntryKind.Symlink);
+        var (builder, processData) = CreateBuilderWithData(insp.Object);
         
         var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root_posix_symlink"));
         
@@ -369,9 +389,9 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task Posix_Special_Directory_Is_Recorded()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
-        var posix = new Mock<IPosixFileTypeClassifier>(MockBehavior.Strict);
-        posix.Setup(p => p.ClassifyPosixEntry(It.IsAny<string>())).Returns(FileSystemEntryKind.BlockDevice);
-        var (builder, processData) = CreateBuilderWithData(insp.Object, posix.Object);
+        SetupDefaultClassification(insp);
+        insp.Setup(i => i.ClassifyEntry(It.IsAny<FileSystemInfo>())).Returns(FileSystemEntryKind.BlockDevice);
+        var (builder, processData) = CreateBuilderWithData(insp.Object);
         
         var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root_posix_special"));
         
@@ -391,10 +411,11 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task Reparse_File_Is_Ignored()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
+        insp.Setup(i => i.ClassifyEntry(It.IsAny<FileSystemInfo>())).Returns(FileSystemEntryKind.Symlink);
         insp.Setup(i => i.IsHidden(It.IsAny<FileSystemInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
-        insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(true);
         var builder = CreateBuilder(insp.Object);
         
         var filePath = Path.Combine(TestDirectory.FullName, "c.txt");
@@ -412,6 +433,7 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task ExistsFalse_File_Is_Ignored()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
         insp.Setup(i => i.IsHidden(It.IsAny<FileSystemInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
@@ -436,6 +458,7 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task UnauthorizedAccess_Adds_Inaccessible_FileDescription()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
         
         // Directory is readable
         insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
@@ -470,6 +493,7 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task DirectoryNotFound_Adds_Inaccessible_FileDescription()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
         insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>()))
             .Throws(new DirectoryNotFoundException("parent missing"));
@@ -501,6 +525,7 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task IOException_Adds_Inaccessible_FileDescription()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
         insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>()))
             .Throws(new IOException("io error"));
@@ -532,6 +557,7 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task Directory_IOException_Marked_Inaccessible_And_Skipped()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
         insp.Setup(i => i.IsHidden(It.IsAny<FileSystemInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
@@ -544,13 +570,9 @@ public class InventoryBuilderInspectorTests : AbstractTester
         var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root_dir_io"));
         var sub = Directory.CreateDirectory(Path.Combine(root.FullName, "BadSub"));
         
-        // Throw IOException for this specific subdirectory when checking reparse
-        insp.Setup(i => i.IsReparsePoint(It.Is<FileSystemInfo>(fsi => fsi.FullName == sub.FullName)))
+        // Throw IOException for this specific subdirectory during classification
+        insp.Setup(i => i.ClassifyEntry(It.Is<FileSystemInfo>(fsi => fsi.FullName == sub.FullName)))
             .Throws(new IOException("dir io error"));
-        
-        // Default to not reparse otherwise
-        insp.Setup(i => i.IsReparsePoint(It.Is<FileSystemInfo>(fsi => fsi.FullName != sub.FullName)))
-            .Returns(false);
         
         var okFile = Path.Combine(root.FullName, "ok.txt");
         await File.WriteAllTextAsync(okFile, "x");
@@ -572,6 +594,7 @@ public class InventoryBuilderInspectorTests : AbstractTester
     public async Task Directory_ReparsePoint_Is_Skipped()
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
         insp.Setup(i => i.IsHidden(It.IsAny<FileSystemInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
@@ -585,7 +608,12 @@ public class InventoryBuilderInspectorTests : AbstractTester
         
         // Define the desired value and then record the behavior based on that value.
         var reparseDir = sub.FullName;
-        insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns<FileSystemInfo>(fsi => fsi.FullName == reparseDir);
+        insp.Setup(i => i.ClassifyEntry(It.IsAny<FileSystemInfo>()))
+            .Returns<FileSystemInfo>(fsi => fsi.FullName == reparseDir
+                ? FileSystemEntryKind.Symlink
+                : fsi is DirectoryInfo
+                    ? FileSystemEntryKind.Directory
+                    : FileSystemEntryKind.RegularFile);
         
         var builder = CreateBuilder(insp.Object);
         
