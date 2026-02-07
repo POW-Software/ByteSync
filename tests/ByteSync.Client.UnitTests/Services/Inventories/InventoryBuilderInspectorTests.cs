@@ -339,7 +339,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
         await builder.BuildBaseInventoryAsync(invPath);
         
         var part = builder.Inventory.InventoryParts.Single();
-        part.FileDescriptions.Should().ContainSingle(fd => !fd.IsAccessible);
+        part.FileDescriptions.Should().BeEmpty();
+        part.IsIncompleteDueToAccess.Should().BeFalse();
         processData.SkippedEntries.Should()
             .ContainSingle(e => e.Name == "posix_special.txt" && e.Reason == SkipReason.SpecialPosixFile);
     }
@@ -362,6 +363,28 @@ public class InventoryBuilderInspectorTests : AbstractTester
         part.DirectoryDescriptions.Should().BeEmpty();
         processData.SkippedEntries.Should()
             .ContainSingle(e => e.Name == "root_posix_symlink" && e.Reason == SkipReason.Symlink);
+    }
+
+    [Test]
+    public async Task Posix_Special_Directory_Is_Recorded()
+    {
+        var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        var posix = new Mock<IPosixFileTypeClassifier>(MockBehavior.Strict);
+        posix.Setup(p => p.ClassifyPosixEntry(It.IsAny<string>())).Returns(FileSystemEntryKind.BlockDevice);
+        var (builder, processData) = CreateBuilderWithData(insp.Object, posix.Object);
+        
+        var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root_posix_special"));
+        
+        builder.AddInventoryPart(root.FullName);
+        var invPath = Path.Combine(TestDirectory.FullName, "inv_posix_special_dir.zip");
+        await builder.BuildBaseInventoryAsync(invPath);
+        
+        var part = builder.Inventory.InventoryParts.Single();
+        part.DirectoryDescriptions.Should().BeEmpty();
+        part.FileDescriptions.Should().BeEmpty();
+        part.IsIncompleteDueToAccess.Should().BeFalse();
+        processData.SkippedEntries.Should()
+            .ContainSingle(e => e.Name == "root_posix_special" && e.Reason == SkipReason.SpecialPosixFile);
     }
     
     [Test]
