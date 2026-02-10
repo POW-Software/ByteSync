@@ -32,10 +32,9 @@ public class FileSystemInspector : IFileSystemInspector
                     return posixKind;
                 }
             }
-            
-            // ReSharper disable once EmptyGeneralCatchClause
-            catch (Exception)
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Failed to classify POSIX entry '{fsi.FullName}': {ex}");
             }
         }
         
