@@ -109,6 +109,30 @@ public class FileSystemInspectorTests
     }
 
     [Test]
+    [Platform(Include = "Linux,MacOsX")]
+    public void ClassifyEntry_FallsBackToRegularFile_WhenPosixClassifierThrows()
+    {
+        var posix = new Mock<IPosixFileTypeClassifier>(MockBehavior.Strict);
+        posix.Setup(p => p.ClassifyPosixEntry(It.IsAny<string>())).Throws(new InvalidOperationException("boom"));
+        var inspector = new FileSystemInspector(posix.Object);
+        var tempDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")));
+        var tempFilePath = Path.Combine(tempDirectory.FullName, "file.txt");
+        File.WriteAllText(tempFilePath, "x");
+        var fileInfo = new FileInfo(tempFilePath);
+
+        try
+        {
+            var result = inspector.ClassifyEntry(fileInfo);
+
+            result.Should().Be(FileSystemEntryKind.RegularFile);
+        }
+        finally
+        {
+            Directory.Delete(tempDirectory.FullName, true);
+        }
+    }
+
+    [Test]
     public void ClassifyEntry_ReturnsUnknown_ForNullEntry()
     {
         var posix = new Mock<IPosixFileTypeClassifier>(MockBehavior.Strict);

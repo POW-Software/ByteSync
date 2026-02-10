@@ -34,7 +34,6 @@ public class FileSystemInspector : IFileSystemInspector
             }
             catch (Exception)
             {
-                return FileSystemEntryKind.Unknown;
             }
         }
         
