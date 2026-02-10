@@ -63,13 +63,7 @@ public class FileSystemInspector : IFileSystemInspector
     
     public bool IsNoiseFileName(FileInfo fileInfo, OSPlatforms os)
     {
-        var comparison = os == OSPlatforms.Linux ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
-        
-        return fileInfo.Name.Equals("desktop.ini", comparison)
-               || fileInfo.Name.Equals("thumbs.db", comparison)
-               || fileInfo.Name.Equals(".desktop.ini", comparison)
-               || fileInfo.Name.Equals(".thumbs.db", comparison)
-               || fileInfo.Name.Equals(".DS_Store", comparison);
+        return NoiseFileDetector.IsNoiseFileName(fileInfo.Name, os);
     }
     
     public bool IsReparsePoint(FileSystemInfo fsi)
