@@ -46,8 +46,7 @@ public class InventoryBuilder : IInventoryBuilder
         InventorySaver = inventorySaver;
         
         InventoryFileAnalyzer = inventoryFileAnalyzer;
-        FileSystemInspector = fileSystemInspector ?? new FileSystemInspector();
-        PosixFileTypeClassifier = posixFileTypeClassifier ?? new PosixFileTypeClassifier();
+        FileSystemInspector = fileSystemInspector ?? new FileSystemInspector(posixFileTypeClassifier);
     }
     
     private Inventory InstantiateInventory()
@@ -89,8 +88,6 @@ public class InventoryBuilder : IInventoryBuilder
     private OSPlatforms OSPlatform { get; set; }
     
     private IFileSystemInspector FileSystemInspector { get; }
-    
-    private IPosixFileTypeClassifier PosixFileTypeClassifier { get; }
     
     private bool IgnoreHidden
     {
@@ -268,12 +265,7 @@ public class InventoryBuilder : IInventoryBuilder
             
             try
             {
-                if (IsReparsePoint(subDirectory))
-                {
-                    RecordSkippedEntry(inventoryPart, subDirectory, SkipReason.Symlink, FileSystemEntryKind.Symlink);
-                    
-                    continue;
-                }
+                DoAnalyze(inventoryPart, subDirectory, cancellationToken);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -296,8 +288,6 @@ public class InventoryBuilder : IInventoryBuilder
                 
                 continue;
             }
-            
-            DoAnalyze(inventoryPart, subDirectory, cancellationToken);
         }
     }
     
@@ -408,7 +398,7 @@ public class InventoryBuilder : IInventoryBuilder
     
     private bool TryHandleFileSkip(InventoryPart inventoryPart, FileInfo fileInfo, bool isRoot)
     {
-        var entryKind = PosixFileTypeClassifier.ClassifyPosixEntry(fileInfo.FullName);
+        var entryKind = FileSystemInspector.ClassifyEntry(fileInfo);
         if (entryKind == FileSystemEntryKind.Symlink)
         {
             RecordSkippedEntry(inventoryPart, fileInfo, SkipReason.Symlink, FileSystemEntryKind.Symlink);
@@ -439,13 +429,6 @@ public class InventoryBuilder : IInventoryBuilder
                 
                 return true;
             }
-        }
-        
-        if (IsReparsePoint(fileInfo))
-        {
-            RecordSkippedEntry(inventoryPart, fileInfo, SkipReason.Symlink, FileSystemEntryKind.Symlink);
-            
-            return true;
         }
         
         if (!FileSystemInspector.Exists(fileInfo))
@@ -480,7 +463,7 @@ public class InventoryBuilder : IInventoryBuilder
             return;
         }
         
-        var entryKind = PosixFileTypeClassifier.ClassifyPosixEntry(directoryInfo.FullName);
+        var entryKind = FileSystemInspector.ClassifyEntry(directoryInfo);
         if (entryKind == FileSystemEntryKind.Symlink)
         {
             RecordSkippedEntry(inventoryPart, directoryInfo, SkipReason.Symlink, FileSystemEntryKind.Symlink);
@@ -574,32 +557,6 @@ public class InventoryBuilder : IInventoryBuilder
         }
         
         return null;
-    }
-    
-    private bool IsReparsePoint(FileInfo fileInfo)
-    {
-        if (FileSystemInspector.IsReparsePoint(fileInfo))
-        {
-            _logger.LogWarning(
-                "File {File} is ignored because it has flag 'ReparsePoint'. It might be a symbolic link",
-                fileInfo.FullName);
-            
-            return true;
-        }
-        
-        return false;
-    }
-    
-    private bool IsReparsePoint(DirectoryInfo directoryInfo)
-    {
-        if (FileSystemInspector.IsReparsePoint(directoryInfo))
-        {
-            _logger.LogWarning("Directory {Directory} is ignored because it has flag 'ReparsePoint'", directoryInfo.FullName);
-            
-            return true;
-        }
-        
-        return false;
     }
     
     private bool IsRecallOnDataAccess(FileInfo fileInfo)
