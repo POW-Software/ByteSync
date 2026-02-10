@@ -32,6 +32,8 @@ public class FileSystemInspector : IFileSystemInspector
                     return posixKind;
                 }
             }
+            
+            // ReSharper disable once EmptyGeneralCatchClause
             catch (Exception)
             {
             }
