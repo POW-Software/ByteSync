@@ -9,24 +9,19 @@ public class FileSystemInspector : IFileSystemInspector
 {
     private const int FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 4194304;
     private readonly IPosixFileTypeClassifier _posixFileTypeClassifier;
-
+    
     public FileSystemInspector(IPosixFileTypeClassifier? posixFileTypeClassifier = null)
     {
         _posixFileTypeClassifier = posixFileTypeClassifier ?? new PosixFileTypeClassifier();
     }
-
+    
     public FileSystemEntryKind ClassifyEntry(FileSystemInfo fsi)
     {
-        if (fsi is null)
-        {
-            return FileSystemEntryKind.Unknown;
-        }
-
         if (HasLinkTarget(fsi) || SafeIsReparsePoint(fsi))
         {
             return FileSystemEntryKind.Symlink;
         }
-
+        
         if (!OperatingSystem.IsWindows())
         {
             try
@@ -42,7 +37,7 @@ public class FileSystemInspector : IFileSystemInspector
                 return FileSystemEntryKind.Unknown;
             }
         }
-
+        
         return fsi switch
         {
             DirectoryInfo => FileSystemEntryKind.Directory,
@@ -96,7 +91,7 @@ public class FileSystemInspector : IFileSystemInspector
     {
         return (((int)fileInfo.Attributes) & FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS) == FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS;
     }
-
+    
     private static bool HasLinkTarget(FileSystemInfo fsi)
     {
         try
@@ -113,7 +108,7 @@ public class FileSystemInspector : IFileSystemInspector
             return false;
         }
     }
-
+    
     private bool SafeIsReparsePoint(FileSystemInfo fsi)
     {
         try
