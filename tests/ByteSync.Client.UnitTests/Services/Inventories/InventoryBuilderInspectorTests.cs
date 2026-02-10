@@ -303,7 +303,6 @@ public class InventoryBuilderInspectorTests : AbstractTester
     {
         var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
         SetupDefaultClassification(insp);
-        insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
         insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
         insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(true);
         insp.Setup(i => i.IsRecallOnDataAccess(It.IsAny<FileInfo>())).Returns(false);
