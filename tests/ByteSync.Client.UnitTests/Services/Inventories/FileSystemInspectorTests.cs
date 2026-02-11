@@ -1,4 +1,5 @@
 using ByteSync.Business.Inventories;
+using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Services.Inventories;
 using FluentAssertions;
@@ -125,6 +126,48 @@ public class FileSystemInspectorTests
             var result = inspector.ClassifyEntry(fileInfo);
             
             result.Should().Be(FileSystemEntryKind.RegularFile);
+        }
+        finally
+        {
+            Directory.Delete(tempDirectory.FullName, true);
+        }
+    }
+
+    [Test]
+    public void IsNoiseFileName_ShouldReturnTrue_ForKnownNoiseFile()
+    {
+        var inspector = new FileSystemInspector();
+        var tempDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")));
+        var filePath = Path.Combine(tempDirectory.FullName, "thumbs.db");
+        File.WriteAllText(filePath, "x");
+        var fileInfo = new FileInfo(filePath);
+
+        try
+        {
+            var result = inspector.IsNoiseFileName(fileInfo, OSPlatforms.Windows);
+
+            result.Should().BeTrue();
+        }
+        finally
+        {
+            Directory.Delete(tempDirectory.FullName, true);
+        }
+    }
+
+    [Test]
+    public void IsNoiseFileName_ShouldReturnFalse_ForUnknownFile()
+    {
+        var inspector = new FileSystemInspector();
+        var tempDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")));
+        var filePath = Path.Combine(tempDirectory.FullName, "regular.txt");
+        File.WriteAllText(filePath, "x");
+        var fileInfo = new FileInfo(filePath);
+
+        try
+        {
+            var result = inspector.IsNoiseFileName(fileInfo, OSPlatforms.Windows);
+
+            result.Should().BeFalse();
         }
         finally
         {

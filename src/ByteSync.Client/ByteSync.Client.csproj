@@ -111,6 +111,7 @@
         </EmbeddedResource>
         <None Remove="local.settings.json"/>
         <EmbeddedResource Include="local.settings.json"/>
+        <EmbeddedResource Include="Services\Inventories\noise-files.json"/>
     </ItemGroup>
     <ItemGroup>
         <UpToDateCheckInput Remove="Assets\Resources\Resources.en.resx"/>
