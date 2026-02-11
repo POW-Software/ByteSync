@@ -28,24 +28,13 @@ public static class NoiseFileDetector
     {
         var assembly = typeof(NoiseFileDetector).Assembly;
         var resourceName = assembly.GetManifestResourceNames()
-            .SingleOrDefault(rn => rn.EndsWith(NoiseFileResourceSuffix, StringComparison.Ordinal));
-
-        if (resourceName == null)
-        {
-            throw new InvalidOperationException($"Embedded resource not found: '*{NoiseFileResourceSuffix}'");
-        }
+            .Single(rn => rn.EndsWith(NoiseFileResourceSuffix, StringComparison.Ordinal));
 
         using var stream = assembly.GetManifestResourceStream(resourceName);
-        if (stream == null)
-        {
-            throw new InvalidOperationException($"Unable to open embedded resource stream: '{resourceName}'");
-        }
+        ArgumentNullException.ThrowIfNull(stream);
 
         var parsed = JsonSerializer.Deserialize<string[]>(stream);
-        if (parsed == null)
-        {
-            throw new InvalidOperationException($"Unable to deserialize embedded resource: '{resourceName}'");
-        }
+        ArgumentNullException.ThrowIfNull(parsed);
 
         return parsed
             .Where(s => !string.IsNullOrWhiteSpace(s))
