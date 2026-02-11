@@ -480,14 +480,16 @@ public class InventoryBuilder : IInventoryBuilder
             return;
         }
         
-        if (!IsRootPath(inventoryPart, directoryInfo) && ShouldIgnoreHiddenDirectory(directoryInfo))
+        var isRoot = IsRootPath(inventoryPart, directoryInfo);
+        
+        if (!isRoot && ShouldIgnoreHiddenDirectory(directoryInfo))
         {
             RecordSkippedEntry(inventoryPart, directoryInfo, SkipReason.Hidden, FileSystemEntryKind.Directory);
             
             return;
         }
         
-        if (!IsRootPath(inventoryPart, directoryInfo) && ShouldIgnoreNoiseDirectory(directoryInfo))
+        if (!isRoot && ShouldIgnoreNoiseDirectory(directoryInfo))
         {
             RecordSkippedEntry(inventoryPart, directoryInfo, SkipReason.NoiseEntry, FileSystemEntryKind.Directory);
             
