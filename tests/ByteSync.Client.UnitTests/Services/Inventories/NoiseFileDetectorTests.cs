@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text.Json;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Services.Inventories;
@@ -10,23 +9,23 @@ namespace ByteSync.Client.UnitTests.Services.Inventories;
 public class NoiseFileDetectorTests
 {
     private static readonly string[] KnownNoiseFileNames = LoadNoiseFileNamesFromEmbeddedResource();
-
+    
     [TestCaseSource(nameof(KnownNoiseFileNames))]
     public void IsNoiseFileName_ShouldReturnTrue_ForKnownNoiseFiles_OnWindows(string fileName)
     {
         var result = NoiseFileDetector.IsNoiseFileName(fileName, OSPlatforms.Windows);
-
+        
         result.Should().BeTrue();
     }
-
+    
     [TestCaseSource(nameof(KnownNoiseFileNames))]
     public void IsNoiseFileName_ShouldReturnTrue_ForKnownNoiseFiles_OnLinux(string fileName)
     {
         var result = NoiseFileDetector.IsNoiseFileName(fileName, OSPlatforms.Linux);
-
+        
         result.Should().BeTrue();
     }
-
+    
     [TestCase("DESKTOP.INI")]
     [TestCase("THUMBS.DB")]
     [TestCase("EHTHUMBS.DB")]
@@ -44,11 +43,11 @@ public class NoiseFileDetectorTests
     {
         var windowsResult = NoiseFileDetector.IsNoiseFileName(fileName, OSPlatforms.Windows);
         var macResult = NoiseFileDetector.IsNoiseFileName(fileName, OSPlatforms.MacOs);
-
+        
         windowsResult.Should().BeTrue();
         macResult.Should().BeTrue();
     }
-
+    
     [TestCase("DESKTOP.INI")]
     [TestCase("THUMBS.DB")]
     [TestCase("EHTHUMBS.DB")]
@@ -65,10 +64,10 @@ public class NoiseFileDetectorTests
     public void IsNoiseFileName_ShouldBeCaseSensitive_OnLinux(string fileName)
     {
         var result = NoiseFileDetector.IsNoiseFileName(fileName, OSPlatforms.Linux);
-
+        
         result.Should().BeFalse();
     }
-
+    
     [TestCase("readme.md")]
     [TestCase("normal.txt")]
     [TestCase(".gitignore")]
@@ -76,11 +75,11 @@ public class NoiseFileDetectorTests
     {
         var windowsResult = NoiseFileDetector.IsNoiseFileName(fileName, OSPlatforms.Windows);
         var linuxResult = NoiseFileDetector.IsNoiseFileName(fileName, OSPlatforms.Linux);
-
+        
         windowsResult.Should().BeFalse();
         linuxResult.Should().BeFalse();
     }
-
+    
     [TestCase(null)]
     [TestCase("")]
     [TestCase("   ")]
@@ -88,25 +87,25 @@ public class NoiseFileDetectorTests
     {
         var windowsResult = NoiseFileDetector.IsNoiseFileName(fileName, OSPlatforms.Windows);
         var linuxResult = NoiseFileDetector.IsNoiseFileName(fileName, OSPlatforms.Linux);
-
+        
         windowsResult.Should().BeFalse();
         linuxResult.Should().BeFalse();
     }
-
+    
     private static string[] LoadNoiseFileNamesFromEmbeddedResource()
     {
         var assembly = typeof(NoiseFileDetector).Assembly;
         var resourceName = assembly.GetManifestResourceNames()
             .SingleOrDefault(rn => rn.EndsWith(".Services.Inventories.noise-files.json", StringComparison.Ordinal));
-
+        
         resourceName.Should().NotBeNull();
-
+        
         using var stream = assembly.GetManifestResourceStream(resourceName!);
         stream.Should().NotBeNull();
-
+        
         var data = JsonSerializer.Deserialize<string[]>(stream!);
         data.Should().NotBeNull();
-
+        
         return data!;
     }
 }
