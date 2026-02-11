@@ -5,7 +5,7 @@ public enum SkipReason
     Unknown = 0,
     Hidden = 1,
     SystemAttribute = 2,
-    NoiseFile = 3,
+    NoiseEntry = 3,
     Symlink = 4,
     SpecialPosixFile = 5,
     Offline = 6,

@@ -487,6 +487,13 @@ public class InventoryBuilder : IInventoryBuilder
             return;
         }
         
+        if (!IsRootPath(inventoryPart, directoryInfo) && ShouldIgnoreNoiseDirectory(directoryInfo))
+        {
+            RecordSkippedEntry(inventoryPart, directoryInfo, SkipReason.NoiseEntry, FileSystemEntryKind.Directory);
+            
+            return;
+        }
+        
         var directoryDescription = IdentityBuilder.BuildDirectoryDescription(inventoryPart, directoryInfo);
         
         AddFileSystemDescription(inventoryPart, directoryDescription);
@@ -535,6 +542,23 @@ public class InventoryBuilder : IInventoryBuilder
         return false;
     }
     
+    private bool ShouldIgnoreNoiseDirectory(DirectoryInfo directoryInfo)
+    {
+        if (!IgnoreSystem)
+        {
+            return false;
+        }
+        
+        if (NoiseFileDetector.IsNoiseFileName(directoryInfo.Name, OSPlatform))
+        {
+            _logger.LogInformation("Directory {Directory} is ignored because considered as noise", directoryInfo.FullName);
+            
+            return true;
+        }
+        
+        return false;
+    }
+    
     private SkipReason? GetSystemSkipReason(FileInfo fileInfo)
     {
         if (!IgnoreSystem)
@@ -546,7 +570,7 @@ public class InventoryBuilder : IInventoryBuilder
         {
             _logger.LogInformation("File {File} is ignored because considered as noise", fileInfo.FullName);
             
-            return SkipReason.NoiseFile;
+            return SkipReason.NoiseEntry;
         }
         
         if (FileSystemInspector.IsSystemAttribute(fileInfo))
