@@ -61,14 +61,14 @@ public class FileSystemInspector : IFileSystemInspector
         return isSystem;
     }
     
-    public bool IsNoiseEntryName(string? entryName, OSPlatforms os)
-    {
-        return NoiseFileDetector.IsNoiseFileName(entryName, os);
-    }
-    
     public bool IsNoiseFileName(FileInfo fileInfo, OSPlatforms os)
     {
-        return IsNoiseEntryName(fileInfo.Name, os);
+        return NoiseFileDetector.IsNoiseFileName(fileInfo.Name, os);
+    }
+    
+    public bool IsNoiseDirectoryName(DirectoryInfo directoryInfo, OSPlatforms os)
+    {
+        return NoiseFileDetector.IsNoiseFileName(directoryInfo.Name, os);
     }
     
     public bool IsReparsePoint(FileSystemInfo fsi)

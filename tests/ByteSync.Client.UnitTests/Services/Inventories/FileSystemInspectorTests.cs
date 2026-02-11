@@ -134,23 +134,41 @@ public class FileSystemInspectorTests
     }
 
     [Test]
-    public void IsNoiseEntryName_ShouldReturnTrue_ForKnownNoiseEntry()
+    public void IsNoiseDirectoryName_ShouldReturnTrue_ForKnownNoiseDirectory()
     {
         var inspector = new FileSystemInspector();
+        var tempDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")));
+        var noiseDirectory = Directory.CreateDirectory(Path.Combine(tempDirectory.FullName, "$RECYCLE.BIN"));
 
-        var result = inspector.IsNoiseEntryName("thumbs.db", OSPlatforms.Windows);
+        try
+        {
+            var result = inspector.IsNoiseDirectoryName(noiseDirectory, OSPlatforms.Windows);
 
-        result.Should().BeTrue();
+            result.Should().BeTrue();
+        }
+        finally
+        {
+            Directory.Delete(tempDirectory.FullName, true);
+        }
     }
 
     [Test]
-    public void IsNoiseEntryName_ShouldReturnFalse_ForUnknownEntry()
+    public void IsNoiseDirectoryName_ShouldReturnFalse_ForUnknownDirectory()
     {
         var inspector = new FileSystemInspector();
+        var tempDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")));
+        var regularDirectory = Directory.CreateDirectory(Path.Combine(tempDirectory.FullName, "regular"));
 
-        var result = inspector.IsNoiseEntryName("regular.txt", OSPlatforms.Windows);
+        try
+        {
+            var result = inspector.IsNoiseDirectoryName(regularDirectory, OSPlatforms.Windows);
 
-        result.Should().BeFalse();
+            result.Should().BeFalse();
+        }
+        finally
+        {
+            Directory.Delete(tempDirectory.FullName, true);
+        }
     }
 
     [Test]

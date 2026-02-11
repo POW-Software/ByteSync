@@ -549,7 +549,7 @@ public class InventoryBuilder : IInventoryBuilder
             return false;
         }
         
-        if (FileSystemInspector.IsNoiseEntryName(directoryInfo.Name, OSPlatform))
+        if (FileSystemInspector.IsNoiseDirectoryName(directoryInfo, OSPlatform))
         {
             _logger.LogInformation("Directory {Directory} is ignored because considered as noise", directoryInfo.FullName);
             
@@ -566,7 +566,7 @@ public class InventoryBuilder : IInventoryBuilder
             return null;
         }
         
-        if (FileSystemInspector.IsNoiseEntryName(fileInfo.Name, OSPlatform))
+        if (FileSystemInspector.IsNoiseFileName(fileInfo, OSPlatform))
         {
             _logger.LogInformation("File {File} is ignored because considered as noise", fileInfo.FullName);
             

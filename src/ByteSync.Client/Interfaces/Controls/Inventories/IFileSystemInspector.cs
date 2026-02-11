@@ -12,9 +12,9 @@ public interface IFileSystemInspector
     
     bool IsSystemAttribute(FileInfo fileInfo);
     
-    bool IsNoiseEntryName(string? entryName, OSPlatforms os);
-    
     bool IsNoiseFileName(FileInfo fileInfo, OSPlatforms os);
+    
+    bool IsNoiseDirectoryName(DirectoryInfo directoryInfo, OSPlatforms os);
     
     bool IsReparsePoint(FileSystemInfo fsi);
     
