@@ -1,3 +1,5 @@
+using System.Reflection;
+using System.Text.Json;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Services.Inventories;
 using FluentAssertions;
@@ -7,24 +9,7 @@ namespace ByteSync.Client.UnitTests.Services.Inventories;
 
 public class NoiseFileDetectorTests
 {
-    private static readonly string[] KnownNoiseFileNames =
-    [
-        "desktop.ini",
-        "thumbs.db",
-        "ehthumbs.db",
-        "ehthumbs_vista.db",
-        ".desktop.ini",
-        ".thumbs.db",
-        ".DS_Store",
-        ".AppleDouble",
-        ".LSOverride",
-        ".Spotlight-V100",
-        ".Trashes",
-        ".fseventsd",
-        ".TemporaryItems",
-        ".VolumeIcon.icns",
-        ".directory"
-    ];
+    private static readonly string[] KnownNoiseFileNames = LoadNoiseFileNamesFromEmbeddedResource();
 
     [TestCaseSource(nameof(KnownNoiseFileNames))]
     public void IsNoiseFileName_ShouldReturnTrue_ForKnownNoiseFiles_OnWindows(string fileName)
@@ -106,5 +91,22 @@ public class NoiseFileDetectorTests
 
         windowsResult.Should().BeFalse();
         linuxResult.Should().BeFalse();
+    }
+
+    private static string[] LoadNoiseFileNamesFromEmbeddedResource()
+    {
+        var assembly = typeof(NoiseFileDetector).Assembly;
+        var resourceName = assembly.GetManifestResourceNames()
+            .SingleOrDefault(rn => rn.EndsWith(".Services.Inventories.noise-files.json", StringComparison.Ordinal));
+
+        resourceName.Should().NotBeNull();
+
+        using var stream = assembly.GetManifestResourceStream(resourceName!);
+        stream.Should().NotBeNull();
+
+        var data = JsonSerializer.Deserialize<string[]>(stream!);
+        data.Should().NotBeNull();
+
+        return data!;
     }
 }

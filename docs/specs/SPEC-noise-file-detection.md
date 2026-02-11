@@ -4,6 +4,9 @@
 
 This document lists the known noise file names filtered by the client inventory pipeline and their platform origin.
 
+The runtime source of truth is the embedded JSON resource:
+`src/ByteSync.Client/Services/Inventories/noise-files.json`.
+
 ## Known noise file names
 
 | File name | Origin platform | Typical purpose |
