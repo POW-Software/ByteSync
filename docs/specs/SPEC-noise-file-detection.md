@@ -15,10 +15,13 @@ The runtime source of truth is the embedded JSON resource:
 | `thumbs.db` | Windows | Thumbnail cache |
 | `ehthumbs.db` | Windows | Media Center thumbnail cache |
 | `ehthumbs_vista.db` | Windows | Vista Media Center thumbnail cache |
+| `$RECYCLE.BIN` | Windows | Recycle bin folder marker |
 | `.desktop.ini` | Windows/Linux legacy compatibility | Legacy hidden variant |
 | `.thumbs.db` | Windows/Linux legacy compatibility | Legacy hidden variant |
 | `.DS_Store` | macOS | Finder metadata |
 | `.AppleDouble` | macOS | Resource fork metadata |
+| `.AppleDB` | macOS | Apple database file |
+| `.AppleDesktop` | macOS | Apple desktop database file |
 | `.LSOverride` | macOS | Launch Services overrides |
 | `.Spotlight-V100` | macOS | Spotlight indexing data |
 | `.Trashes` | macOS | Trash metadata or folder marker |
@@ -31,3 +34,4 @@ The runtime source of truth is the embedded JSON resource:
 
 - On Linux, matching is case-sensitive.
 - On non-Linux platforms, matching is case-insensitive.
+- macOS remains intentionally case-insensitive for consistency with current product behavior.
