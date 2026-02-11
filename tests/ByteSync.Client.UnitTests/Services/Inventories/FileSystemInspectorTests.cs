@@ -134,6 +134,44 @@ public class FileSystemInspectorTests
     }
 
     [Test]
+    public void IsNoiseDirectoryName_ShouldReturnTrue_ForKnownNoiseDirectory()
+    {
+        var inspector = new FileSystemInspector();
+        var tempDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")));
+        var noiseDirectory = Directory.CreateDirectory(Path.Combine(tempDirectory.FullName, "$RECYCLE.BIN"));
+
+        try
+        {
+            var result = inspector.IsNoiseDirectoryName(noiseDirectory, OSPlatforms.Windows);
+
+            result.Should().BeTrue();
+        }
+        finally
+        {
+            Directory.Delete(tempDirectory.FullName, true);
+        }
+    }
+
+    [Test]
+    public void IsNoiseDirectoryName_ShouldReturnFalse_ForUnknownDirectory()
+    {
+        var inspector = new FileSystemInspector();
+        var tempDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")));
+        var regularDirectory = Directory.CreateDirectory(Path.Combine(tempDirectory.FullName, "regular"));
+
+        try
+        {
+            var result = inspector.IsNoiseDirectoryName(regularDirectory, OSPlatforms.Windows);
+
+            result.Should().BeFalse();
+        }
+        finally
+        {
+            Directory.Delete(tempDirectory.FullName, true);
+        }
+    }
+
+    [Test]
     public void IsNoiseFileName_ShouldReturnTrue_ForKnownNoiseFile()
     {
         var inspector = new FileSystemInspector();

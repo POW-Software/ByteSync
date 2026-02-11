@@ -94,6 +94,9 @@ public class InventoryBuilderInspectorTests : AbstractTester
                 FileInfo => FileSystemEntryKind.RegularFile,
                 _ => FileSystemEntryKind.Unknown
             });
+        inspector
+            .Setup(i => i.IsNoiseDirectoryName(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>()))
+            .Returns(false);
     }
     
     [Test]
@@ -265,7 +268,72 @@ public class InventoryBuilderInspectorTests : AbstractTester
         await builder.BuildBaseInventoryAsync(invPath);
         
         processData.SkippedEntries.Should()
-            .ContainSingle(e => e.Name == "thumbs.db" && e.Reason == SkipReason.NoiseFile);
+            .ContainSingle(e => e.Name == "thumbs.db" && e.Reason == SkipReason.NoiseEntry);
+    }
+    
+    [Test]
+    public async Task Noise_Child_Directory_Is_Recorded_And_Not_Traversed()
+    {
+        var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
+        insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsNoiseDirectoryName(It.Is<DirectoryInfo>(di => di.Name == "$RECYCLE.BIN"), It.IsAny<OSPlatforms>()))
+            .Returns(true);
+        insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
+        insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
+        insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsRecallOnDataAccess(It.IsAny<FileInfo>())).Returns(false);
+        var (builder, processData) = CreateBuilderWithData(insp.Object);
+        
+        var root = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "root_noise_dir"));
+        var visiblePath = Path.Combine(root.FullName, "visible.txt");
+        await File.WriteAllTextAsync(visiblePath, "x");
+        
+        var noiseDirectory = Directory.CreateDirectory(Path.Combine(root.FullName, "$RECYCLE.BIN"));
+        var nestedNoiseFile = Path.Combine(noiseDirectory.FullName, "nested.txt");
+        await File.WriteAllTextAsync(nestedNoiseFile, "x");
+        
+        builder.AddInventoryPart(root.FullName);
+        var invPath = Path.Combine(TestDirectory.FullName, "inv_noise_dir.zip");
+        await builder.BuildBaseInventoryAsync(invPath);
+        
+        var part = builder.Inventory.InventoryParts.Single();
+        part.FileDescriptions.Should().ContainSingle(fd => fd.Name == "visible.txt");
+        part.FileDescriptions.Should().NotContain(fd => fd.Name == "nested.txt");
+        
+        processData.SkippedEntries.Should()
+            .ContainSingle(e => e.Name == "$RECYCLE.BIN" && e.Reason == SkipReason.NoiseEntry);
+    }
+    
+    [Test]
+    public async Task Noise_Root_Directory_Is_Analyzed()
+    {
+        var insp = new Mock<IFileSystemInspector>(MockBehavior.Strict);
+        SetupDefaultClassification(insp);
+        insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
+        insp.Setup(i => i.Exists(It.IsAny<FileInfo>())).Returns(true);
+        insp.Setup(i => i.IsOffline(It.IsAny<FileInfo>())).Returns(false);
+        insp.Setup(i => i.IsRecallOnDataAccess(It.IsAny<FileInfo>())).Returns(false);
+        var (builder, processData) = CreateBuilderWithData(insp.Object);
+        
+        var noiseRoot = Directory.CreateDirectory(Path.Combine(TestDirectory.FullName, "$RECYCLE.BIN"));
+        var filePath = Path.Combine(noiseRoot.FullName, "inside.txt");
+        await File.WriteAllTextAsync(filePath, "x");
+        
+        builder.AddInventoryPart(noiseRoot.FullName);
+        var invPath = Path.Combine(TestDirectory.FullName, "inv_noise_root_dir.zip");
+        await builder.BuildBaseInventoryAsync(invPath);
+        
+        var part = builder.Inventory.InventoryParts.Single();
+        part.FileDescriptions.Should().ContainSingle(fd => fd.Name == "inside.txt");
+        processData.SkippedEntries.Should().NotContain(e => e.Name == "$RECYCLE.BIN");
     }
 
     [Test]

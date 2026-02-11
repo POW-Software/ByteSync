@@ -14,6 +14,8 @@ public interface IFileSystemInspector
     
     bool IsNoiseFileName(FileInfo fileInfo, OSPlatforms os);
     
+    bool IsNoiseDirectoryName(DirectoryInfo directoryInfo, OSPlatforms os);
+    
     bool IsReparsePoint(FileSystemInfo fsi);
     
     bool Exists(FileInfo fileInfo);

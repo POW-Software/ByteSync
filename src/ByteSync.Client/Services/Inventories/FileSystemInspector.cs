@@ -66,6 +66,11 @@ public class FileSystemInspector : IFileSystemInspector
         return NoiseFileDetector.IsNoiseFileName(fileInfo.Name, os);
     }
     
+    public bool IsNoiseDirectoryName(DirectoryInfo directoryInfo, OSPlatforms os)
+    {
+        return NoiseFileDetector.IsNoiseFileName(directoryInfo.Name, os);
+    }
+    
     public bool IsReparsePoint(FileSystemInfo fsi)
     {
         return (fsi.Attributes & FileAttributes.ReparsePoint) == FileAttributes.ReparsePoint;
