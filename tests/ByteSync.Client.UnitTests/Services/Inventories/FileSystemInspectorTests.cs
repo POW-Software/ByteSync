@@ -134,6 +134,26 @@ public class FileSystemInspectorTests
     }
 
     [Test]
+    public void IsNoiseEntryName_ShouldReturnTrue_ForKnownNoiseEntry()
+    {
+        var inspector = new FileSystemInspector();
+
+        var result = inspector.IsNoiseEntryName("thumbs.db", OSPlatforms.Windows);
+
+        result.Should().BeTrue();
+    }
+
+    [Test]
+    public void IsNoiseEntryName_ShouldReturnFalse_ForUnknownEntry()
+    {
+        var inspector = new FileSystemInspector();
+
+        var result = inspector.IsNoiseEntryName("regular.txt", OSPlatforms.Windows);
+
+        result.Should().BeFalse();
+    }
+
+    [Test]
     public void IsNoiseFileName_ShouldReturnTrue_ForKnownNoiseFile()
     {
         var inspector = new FileSystemInspector();

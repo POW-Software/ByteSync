@@ -94,6 +94,9 @@ public class InventoryBuilderInspectorTests : AbstractTester
                 FileInfo => FileSystemEntryKind.RegularFile,
                 _ => FileSystemEntryKind.Unknown
             });
+        inspector
+            .Setup(i => i.IsNoiseEntryName(It.IsAny<string>(), It.IsAny<OSPlatforms>()))
+            .Returns(false);
     }
     
     [Test]
@@ -243,6 +246,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
         SetupDefaultClassification(insp);
         insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsNoiseEntryName(It.Is<string>(name => name == "thumbs.db"), It.IsAny<OSPlatforms>()))
+            .Returns(true);
         insp.Setup(i => i.IsNoiseFileName(It.Is<FileInfo>(fi => fi.Name == "thumbs.db"), It.IsAny<OSPlatforms>()))
             .Returns(true);
         insp.Setup(i => i.IsNoiseFileName(It.Is<FileInfo>(fi => fi.Name != "thumbs.db"), It.IsAny<OSPlatforms>()))
@@ -275,6 +280,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
         SetupDefaultClassification(insp);
         insp.Setup(i => i.IsHidden(It.IsAny<DirectoryInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsHidden(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
+        insp.Setup(i => i.IsNoiseEntryName(It.Is<string>(name => name == "$RECYCLE.BIN"), It.IsAny<OSPlatforms>()))
+            .Returns(true);
         insp.Setup(i => i.IsNoiseFileName(It.IsAny<FileInfo>(), It.IsAny<OSPlatforms>())).Returns(false);
         insp.Setup(i => i.IsSystemAttribute(It.IsAny<FileInfo>())).Returns(false);
         insp.Setup(i => i.IsReparsePoint(It.IsAny<FileSystemInfo>())).Returns(false);
