@@ -33,5 +33,4 @@ The runtime source of truth is the embedded JSON resource:
 ## Matching behavior
 
 - On Linux, matching is case-sensitive.
-- On non-Linux platforms, matching is case-insensitive.
-- macOS remains intentionally case-insensitive for consistency with current product behavior.
+- On non-Linux platforms (including macOS), matching is case-insensitive; macOS remains intentionally case-insensitive for consistency with current product behavior and to reflect the deviation from the original issue wording.
