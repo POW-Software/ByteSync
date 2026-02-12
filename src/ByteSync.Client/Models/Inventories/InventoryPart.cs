@@ -32,6 +32,16 @@ public class InventoryPart
     public List<DirectoryDescription> DirectoryDescriptions { get; set; }
 
     public bool IsIncompleteDueToAccess { get; set; }
+    
+    private Dictionary<SkipReason, int> _skippedCountsByReason = new();
+    
+    public Dictionary<SkipReason, int> SkippedCountsByReason
+    {
+        get => _skippedCountsByReason;
+        set => _skippedCountsByReason = value ?? new Dictionary<SkipReason, int>();
+    }
+    
+    public int SkippedCount => SkippedCountsByReason.Values.Sum();
 
     public string RootName
     {
@@ -100,5 +110,15 @@ public class InventoryPart
         {
             DirectoryDescriptions.Add((DirectoryDescription) fileSystemDescription);
         }
+    }
+    
+    public int GetSkippedCountByReason(SkipReason reason)
+    {
+        return SkippedCountsByReason.TryGetValue(reason, out var count) ? count : 0;
+    }
+    
+    public void RecordSkippedEntry(SkipReason reason)
+    {
+        SkippedCountsByReason[reason] = GetSkippedCountByReason(reason) + 1;
     }
 }
