@@ -20,7 +20,8 @@ This is a C#/.NET 8 solution with a client-server architecture:
 
 ### Overview
 This repository uses a branch-based development workflow. Please follow the conventions below when working in this project, especially when creating branches, writing PR titles, and generating commits or documentation.
-Agents must not create branches until explicitly instructed to do so by a human.
+Agents must not create branches until they have received clear instructions to do so from a human or an explicitly
+invoked skill.
 
 ### Branch Naming
 Use the following prefixes:

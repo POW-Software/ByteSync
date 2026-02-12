@@ -691,6 +691,7 @@ public class InventoryBuilder : IInventoryBuilder
             DetectedKind = detectedKind
         };
         
+        inventoryPart.RecordSkippedEntry(reason);
         InventoryProcessData.RecordSkippedEntry(entry);
     }
     
