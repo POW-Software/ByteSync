@@ -267,8 +267,12 @@ public class InventoryBuilderInspectorTests : AbstractTester
         var invPath = Path.Combine(TestDirectory.FullName, "inv_noise_child.zip");
         await builder.BuildBaseInventoryAsync(invPath);
         
+        var part = builder.Inventory.InventoryParts.Single();
+        
         processData.SkippedEntries.Should()
             .ContainSingle(e => e.Name == "thumbs.db" && e.Reason == SkipReason.NoiseEntry);
+        part.SkippedCount.Should().Be(1);
+        part.GetSkippedCountByReason(SkipReason.NoiseEntry).Should().Be(1);
     }
     
     [Test]
@@ -306,6 +310,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
         
         processData.SkippedEntries.Should()
             .ContainSingle(e => e.Name == "$RECYCLE.BIN" && e.Reason == SkipReason.NoiseEntry);
+        part.SkippedCount.Should().Be(1);
+        part.GetSkippedCountByReason(SkipReason.NoiseEntry).Should().Be(1);
     }
     
     [Test]
@@ -387,6 +393,8 @@ public class InventoryBuilderInspectorTests : AbstractTester
         part.FileDescriptions.Should().BeEmpty();
         processData.SkippedEntries.Should()
             .ContainSingle(e => e.Name == "offline.txt" && e.Reason == SkipReason.Offline);
+        part.SkippedCount.Should().Be(1);
+        part.GetSkippedCountByReason(SkipReason.Offline).Should().Be(1);
     }
 
     [Test]
