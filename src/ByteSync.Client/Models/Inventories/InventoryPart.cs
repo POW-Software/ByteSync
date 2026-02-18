@@ -6,12 +6,13 @@ namespace ByteSync.Models.Inventories;
 
 public class InventoryPart
 {
-    private Dictionary<SkipReason, int> _skippedCountsByReason = new();
+    private Dictionary<SkipReason, int> _skippedCountsByReason;
     
     public InventoryPart()
     {
         FileDescriptions = new List<FileDescription>();
         DirectoryDescriptions = new List<DirectoryDescription>();
+        SkippedCountsByReason = new Dictionary<SkipReason, int>();
     }
     
     public InventoryPart(Inventory inventory, string rootPath, FileSystemTypes inventoryPartType) : this()
