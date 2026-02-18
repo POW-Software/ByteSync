@@ -6,6 +6,8 @@ namespace ByteSync.Models.Inventories;
 
 public class InventoryPart
 {
+    private Dictionary<SkipReason, int> _skippedCountsByReason = new();
+    
     public InventoryPart()
     {
         FileDescriptions = new List<FileDescription>();
@@ -33,7 +35,13 @@ public class InventoryPart
     
     public bool IsIncompleteDueToAccess { get; set; }
     
-    public Dictionary<SkipReason, int> SkippedCountsByReason { get; set; } = new();
+    public Dictionary<SkipReason, int> SkippedCountsByReason
+    {
+        get => _skippedCountsByReason;
+        
+        // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
+        set => _skippedCountsByReason = value ?? new Dictionary<SkipReason, int>();
+    }
     
     public int SkippedCount => SkippedCountsByReason.Values.Sum();
     
