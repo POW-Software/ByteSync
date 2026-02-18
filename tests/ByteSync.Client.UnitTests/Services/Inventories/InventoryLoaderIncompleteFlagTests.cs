@@ -45,6 +45,28 @@ public class InventoryLoaderIncompleteFlagTests
         loadedInventory.InventoryParts[0].IsIncompleteDueToAccess.Should().BeTrue();
     }
     
+    [Test]
+    public void Load_ShouldKeepSkippedCountsByReason()
+    {
+        // Arrange
+        var inventory = BuildInventoryWithInaccessibleDirectory();
+        var part = inventory.InventoryParts[0];
+        part.RecordSkippedEntry(SkipReason.Hidden);
+        part.RecordSkippedEntry(SkipReason.Hidden);
+        part.RecordSkippedEntry(SkipReason.NoiseEntry);
+        var zipPath = CreateInventoryZipFile(_tempDirectory, inventory);
+        
+        // Act
+        using var loader = new InventoryLoader(zipPath);
+        var loadedPart = loader.Inventory.InventoryParts[0];
+        
+        // Assert
+        loadedPart.SkippedCount.Should().Be(3);
+        loadedPart.GetSkippedCountByReason(SkipReason.Hidden).Should().Be(2);
+        loadedPart.GetSkippedCountByReason(SkipReason.NoiseEntry).Should().Be(1);
+        loadedPart.GetSkippedCountByReason(SkipReason.Offline).Should().Be(0);
+    }
+    
     private static Inventory BuildInventoryWithInaccessibleDirectory()
     {
         var inventory = new Inventory
