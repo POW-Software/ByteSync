@@ -33,7 +33,7 @@ public class InventoryPart
     
     public bool IsIncompleteDueToAccess { get; set; }
     
-    public Dictionary<SkipReason, int> SkippedCountsByReason { get; set; } = new Dictionary<SkipReason, int>();
+    public Dictionary<SkipReason, int> SkippedCountsByReason { get; set; } = new();
     
     public int SkippedCount => SkippedCountsByReason.Values.Sum();
     
