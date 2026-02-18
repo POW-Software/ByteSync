@@ -151,9 +151,9 @@ public class InventoryProcessData : ReactiveObject
     
     public int GetSkippedCountByReason(SkipReason reason)
     {
-        return _skippedCountsByReason.TryGetValue(reason, out var count) ? count : 0;
+        return _skippedCountsByReason.GetValueOrDefault(reason, 0);
     }
-
+    
     public void SetError(Exception exception)
     {
         LastException = exception;
@@ -182,4 +182,3 @@ public class InventoryProcessData : ReactiveObject
         Interlocked.Exchange(ref _skippedCount, 0);
     }
 }
-
