@@ -149,6 +149,7 @@ public class InventoryProcessData : ReactiveObject
         Interlocked.Increment(ref _skippedCount);
     }
     
+    // should be used during issue 268 implementation
     public int GetSkippedCountByReason(SkipReason reason)
     {
         return _skippedCountsByReason.GetValueOrDefault(reason, 0);
