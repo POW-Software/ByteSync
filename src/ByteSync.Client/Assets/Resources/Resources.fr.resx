@@ -673,6 +673,9 @@ Voulez-vous continuer ?</value>
     <data name="InventoryProcess_GlobalAnalyzeErrors" xml:space="preserve">
         <value>Total des erreurs de calcul :</value>
     </data>
+	<data name="InventoryProcess_GlobalSkippedEntries" xml:space="preserve">
+		<value>Total des entrées ignorées :</value>
+	</data>
     <data name="InventoryProcess_GlobalIdentificationErrors" xml:space="preserve">
         <value>Total erreurs d'identification :</value>
     </data>

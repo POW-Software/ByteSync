@@ -41,7 +41,7 @@ public class InventoryStatisticsServiceTests
     }
     
     private static Inventory BuildInventoryWithFiles(int successCount, int errorCount, int neutralCount,
-        int inaccessibleFiles = 0, int inaccessibleDirectories = 0)
+        int inaccessibleFiles = 0, int inaccessibleDirectories = 0, int skippedHidden = 0, int skippedNoise = 0)
     {
         var inv = new Inventory
         {
@@ -122,6 +122,16 @@ public class InventoryStatisticsServiceTests
             };
             part.DirectoryDescriptions.Add(dir);
         }
+
+        for (var i = 0; i < skippedHidden; i++)
+        {
+            part.RecordSkippedEntry(SkipReason.Hidden);
+        }
+
+        for (var i = 0; i < skippedNoise; i++)
+        {
+            part.RecordSkippedEntry(SkipReason.NoiseEntry);
+        }
         
         return inv;
     }
@@ -167,6 +177,7 @@ public class InventoryStatisticsServiceTests
             stats.AnalyzeSuccess.Should().Be(3);
             stats.AnalyzeErrors.Should().Be(2);
             stats.IdentificationErrors.Should().Be(0);
+            stats.TotalSkippedEntries.Should().Be(0);
         }
         finally
         {
@@ -229,6 +240,7 @@ public class InventoryStatisticsServiceTests
             stats.AnalyzeSuccess.Should().Be(1 + 2);
             stats.AnalyzeErrors.Should().Be(1 + 0);
             stats.IdentificationErrors.Should().Be(0);
+            stats.TotalSkippedEntries.Should().Be(0);
         }
         finally
         {
@@ -286,6 +298,55 @@ public class InventoryStatisticsServiceTests
             stats.AnalyzeSuccess.Should().Be(0);
             stats.AnalyzeErrors.Should().Be(0);
             stats.IdentificationErrors.Should().Be(3);
+            stats.TotalSkippedEntries.Should().Be(0);
+        }
+        finally
+        {
+            if (File.Exists(zip))
+            {
+                File.Delete(zip);
+            }
+        }
+    }
+
+    [Test]
+    public async Task Compute_CountsSkippedEntriesFromInventoryParts()
+    {
+        var inv = BuildInventoryWithFiles(successCount: 0, errorCount: 0, neutralCount: 0, skippedHidden: 2, skippedNoise: 1);
+        var zip = CreateInventoryZip(inv);
+
+        try
+        {
+            var sfd = new SharedFileDefinition
+            {
+                SessionId = "S",
+                ClientInstanceId = inv.Endpoint.ClientInstanceId,
+                SharedFileType = SharedFileTypes.FullInventory,
+                AdditionalName = inv.CodeAndId,
+                IV = new byte[16]
+            };
+            var inventoryFile = new InventoryFile(sfd, zip);
+
+            var repo = new Mock<IInventoryFileRepository>();
+            repo.Setup(r => r.GetAllInventoriesFiles(LocalInventoryModes.Full))
+                .Returns([inventoryFile]);
+
+            var ipd = new InventoryProcessData();
+            var invService = new Mock<IInventoryService>();
+            invService.SetupGet(s => s.InventoryProcessData).Returns(ipd);
+
+            var logger = new Mock<ILogger<InventoryStatisticsService>>();
+
+            var service = new InventoryStatisticsService(invService.Object, repo.Object, logger.Object);
+
+            var tcs = new TaskCompletionSource<InventoryStatistics>();
+            using var sub = service.Statistics.Where(s => s != null).Take(1).Select(s => s!).Subscribe(s => tcs.TrySetResult(s));
+
+            ipd.AreFullInventoriesComplete.OnNext(true);
+
+            var stats = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
+            stats.TotalSkippedEntries.Should().Be(3);
         }
         finally
         {

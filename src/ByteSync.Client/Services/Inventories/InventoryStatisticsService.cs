@@ -66,7 +66,8 @@ public class InventoryStatisticsService : IInventoryStatisticsService
             ProcessedVolume = statsCollector.ProcessedSize,
             AnalyzeSuccess = statsCollector.Success,
             AnalyzeErrors = statsCollector.Errors,
-            IdentificationErrors = statsCollector.IdentificationErrors
+            IdentificationErrors = statsCollector.IdentificationErrors,
+            TotalSkippedEntries = statsCollector.TotalSkippedEntries
         };
         
         _statisticsSubject.OnNext(stats);
@@ -81,6 +82,8 @@ public class InventoryStatisticsService : IInventoryStatisticsService
             
             foreach (var part in inventory.InventoryParts)
             {
+                collector.TotalSkippedEntries += part.SkippedCount;
+                
                 foreach (var dir in part.DirectoryDescriptions)
                 {
                     if (!dir.IsAccessible)
@@ -142,6 +145,8 @@ public class InventoryStatisticsService : IInventoryStatisticsService
         public int Errors { get; set; }
         
         public int IdentificationErrors { get; set; }
+
+        public int TotalSkippedEntries { get; set; }
         
         public long ProcessedSize { get; set; }
     }

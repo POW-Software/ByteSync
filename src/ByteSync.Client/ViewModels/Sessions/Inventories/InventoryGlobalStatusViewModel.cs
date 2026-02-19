@@ -79,10 +79,15 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
     
     [Reactive]
     public int? GlobalIdentificationErrors { get; set; }
+
+    [Reactive]
+    public int? GlobalSkippedEntries { get; set; }
     
     public extern bool HasErrors { [ObservableAsProperty] get; }
     
     public extern bool HasIdentificationErrors { [ObservableAsProperty] get; }
+
+    public extern bool ShowGlobalSkippedEntries { [ObservableAsProperty] get; }
     
     [Reactive]
     public string GlobalMainIcon { get; set; } = "None";
@@ -111,6 +116,11 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
         this.WhenAnyValue(x => x.GlobalIdentificationErrors)
             .Select(e => (e ?? 0) > 0)
             .ToPropertyEx(this, x => x.HasIdentificationErrors)
+            .DisposeWith(disposables);
+
+        this.WhenAnyValue(x => x.GlobalSkippedEntries)
+            .Select(e => (e ?? 0) > 0)
+            .ToPropertyEx(this, x => x.ShowGlobalSkippedEntries)
             .DisposeWith(disposables);
     }
     
@@ -270,6 +280,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
         GlobalAnalyzeSuccess = stats?.AnalyzeSuccess;
         GlobalAnalyzeErrors = stats?.AnalyzeErrors;
         GlobalIdentificationErrors = stats?.IdentificationErrors;
+        GlobalSkippedEntries = stats?.TotalSkippedEntries;
     }
     
     private void ApplySuccessState(int? errors, int? identificationErrors = null)
@@ -332,6 +343,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
         GlobalAnalyzeSuccess = null;
         GlobalAnalyzeErrors = null;
         GlobalIdentificationErrors = null;
+        GlobalSkippedEntries = null;
         GlobalMainIcon = "None";
         GlobalMainStatusText = string.Empty;
         GlobalMainIconBrush = null;
