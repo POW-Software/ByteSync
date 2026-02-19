@@ -149,6 +149,19 @@ public class InventoryMonitorDataTests
         // Assert
         result.Should().BeTrue();
     }
+
+    [Test]
+    public void HasNonZeroProperty_WithSkippedEntriesCount_ShouldReturnTrue()
+    {
+        // Arrange
+        var data = new InventoryMonitorData { SkippedEntriesCount = 2 };
+
+        // Act
+        var result = data.HasNonZeroProperty();
+
+        // Assert
+        result.Should().BeTrue();
+    }
     
     [Test]
     public void HasNonZeroProperty_WithMultipleNonZeroProperties_ShouldReturnTrue()

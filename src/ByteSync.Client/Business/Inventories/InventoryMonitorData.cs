@@ -23,6 +23,8 @@ public record InventoryMonitorData
     public long UploadTotalVolume { get; set; }
 
     public long UploadedVolume { get; set; }
+
+    public int SkippedEntriesCount { get; set; }
     
     public bool HasNonZeroProperty()
     {
@@ -36,6 +38,7 @@ public record InventoryMonitorData
                || AnalyzableVolume != 0
                || IdentifiedVolume != 0
                || UploadTotalVolume != 0
-               || UploadedVolume != 0;
+               || UploadedVolume != 0
+               || SkippedEntriesCount != 0;
     }
 }
