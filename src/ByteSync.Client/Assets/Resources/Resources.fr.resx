@@ -397,6 +397,9 @@ Voulez-vous continuer ?</value>
 	<data name="InventoryProcess_IdentificationErrors" xml:space="preserve">
 		<value>Erreurs d'identification :</value>
 	</data>
+	<data name="InventoryProcess_SkippedEntries" xml:space="preserve">
+		<value>Entrées ignorées :</value>
+	</data>
 	<data name="InventoryProcess_Start" xml:space="preserve">
 		<value>Démarrage :</value>
 	</data>

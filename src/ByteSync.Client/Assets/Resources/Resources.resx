@@ -397,6 +397,9 @@ Would you like to continue ?</value>
 	<data name="InventoryProcess_IdentificationErrors" xml:space="preserve">
 		<value>Identification Errors:</value>
 	</data>
+	<data name="InventoryProcess_SkippedEntries" xml:space="preserve">
+		<value>Skipped Entries:</value>
+	</data>
 	<data name="InventoryProcess_Start" xml:space="preserve">
 		<value>Start:</value>
 	</data>
