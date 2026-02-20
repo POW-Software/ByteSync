@@ -57,6 +57,7 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalAnalyzedFiles}"
@@ -96,6 +97,15 @@
                     Classes.Secondary="{Binding HasErrors}">
                 <TextBlock Text="{Binding GlobalAnalyzeErrors, FallbackValue=''}"
                            Classes.IsBold="{Binding HasErrors}" />
+            </Border>
+
+            <Label Grid.Row="5" Grid.Column="0" Content="{localizations:Loc InventoryProcess_GlobalSkippedEntries}"
+                   Classes="InventoryStatusDescription"
+                   IsVisible="{Binding ShowGlobalSkippedEntries}" />
+            <Border Grid.Row="5" Grid.Column="1" HorizontalAlignment="Right"
+                    Classes="Badge"
+                    IsVisible="{Binding ShowGlobalSkippedEntries}">
+                <TextBlock Text="{Binding GlobalSkippedEntries, FallbackValue=''}" />
             </Border>
         </Grid>
     </WrapPanel>

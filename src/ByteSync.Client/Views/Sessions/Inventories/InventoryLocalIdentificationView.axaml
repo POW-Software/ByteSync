@@ -42,6 +42,7 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_IdentifiedFiles}"
@@ -69,6 +70,15 @@
                     Classes.Secondary="{Binding HasIdentificationErrors}">
                 <TextBlock Text="{Binding IdentificationErrors, FallbackValue=0}"
                            Classes.IsBold="{Binding HasIdentificationErrors}" />
+            </Border>
+
+            <Label Grid.Row="4" Grid.Column="0" Content="{localizations:Loc InventoryProcess_SkippedEntries}"
+                   Classes="InventoryStatusDescription"
+                   IsVisible="{Binding ShowSkippedEntriesCount}" />
+            <Border Grid.Row="4" Grid.Column="1" HorizontalAlignment="Right"
+                    Classes="Badge"
+                    IsVisible="{Binding ShowSkippedEntriesCount}">
+                <TextBlock Text="{Binding SkippedEntriesCount, FallbackValue=0}" />
             </Border>
         </Grid>
     </StackPanel>

@@ -147,6 +147,7 @@ public class InventoryProcessData : ReactiveObject
         _skippedEntries.Enqueue(entry);
         _skippedCountsByReason.AddOrUpdate(entry.Reason, 1, (_, currentCount) => currentCount + 1);
         Interlocked.Increment(ref _skippedCount);
+        UpdateMonitorData(m => { m.SkippedEntriesCount += 1; });
     }
     
     // should be used during issue 268 implementation

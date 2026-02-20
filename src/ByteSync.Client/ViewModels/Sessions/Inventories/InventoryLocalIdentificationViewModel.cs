@@ -52,12 +52,18 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
                 IdentifiedDirectories = m.IdentifiedDirectories;
                 IdentifiedVolume = m.IdentifiedVolume;
                 IdentificationErrors = m.IdentificationErrors;
+                SkippedEntriesCount = m.SkippedEntriesCount;
             })
             .DisposeWith(disposables);
         
         this.WhenAnyValue(x => x.IdentificationErrors)
             .Select(v => v > 0)
             .ToPropertyEx(this, x => x.HasIdentificationErrors)
+            .DisposeWith(disposables);
+
+        this.WhenAnyValue(x => x.SkippedEntriesCount)
+            .Select(v => v > 0)
+            .ToPropertyEx(this, x => x.ShowSkippedEntriesCount)
             .DisposeWith(disposables);
         
         _inventoryService.InventoryProcessData.IdentificationStatus
@@ -133,8 +139,13 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
     
     [Reactive]
     public int IdentificationErrors { get; set; }
-    
+
     public extern bool HasIdentificationErrors { [ObservableAsProperty] get; }
+
+    [Reactive]
+    public int SkippedEntriesCount { get; set; }
+
+    public extern bool ShowSkippedEntriesCount { [ObservableAsProperty] get; }
     
     [Reactive]
     public string IdentificationIcon { get; set; } = "None";

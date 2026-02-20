@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using ByteSync.Business.Inventories;
 using ByteSync.Models.Inventories;
 using FluentAssertions;
@@ -43,6 +44,21 @@ public class InventoryProcessDataTests
         data.GetSkippedCountByReason(SkipReason.Hidden).Should().Be(2);
         data.GetSkippedCountByReason(SkipReason.NoiseEntry).Should().Be(1);
         data.GetSkippedCountByReason(SkipReason.Offline).Should().Be(0);
+    }
+
+    [Test]
+    public async Task RecordSkippedEntry_ShouldUpdateMonitorSkippedEntriesCount()
+    {
+        // Arrange
+        var data = new InventoryProcessData();
+
+        // Act
+        data.RecordSkippedEntry(new SkippedEntry { Reason = SkipReason.Hidden });
+        data.RecordSkippedEntry(new SkippedEntry { Reason = SkipReason.NoiseEntry });
+        var monitor = await data.InventoryMonitorObservable.FirstAsync();
+
+        // Assert
+        monitor.SkippedEntriesCount.Should().Be(2);
     }
     
     [Test]
