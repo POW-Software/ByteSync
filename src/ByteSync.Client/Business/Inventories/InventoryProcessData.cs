@@ -14,7 +14,6 @@ public class InventoryProcessData : ReactiveObject
     private readonly object _monitorDataLock = new object();
     private readonly ConcurrentQueue<SkippedEntry> _skippedEntries = new();
     private readonly ConcurrentDictionary<SkipReason, int> _skippedCountsByReason = new();
-    private int _skippedCount;
     
     public InventoryProcessData()
     {
@@ -107,7 +106,7 @@ public class InventoryProcessData : ReactiveObject
     
     public IReadOnlyCollection<SkippedEntry> SkippedEntries => _skippedEntries.ToArray();
     
-    public int SkippedCount => _skippedCount;
+    public int SkippedCount => _skippedCountsByReason.Values.Sum();
     
     [Reactive]
     public DateTimeOffset InventoryStart { get; set; }
@@ -146,7 +145,6 @@ public class InventoryProcessData : ReactiveObject
     {
         _skippedEntries.Enqueue(entry);
         _skippedCountsByReason.AddOrUpdate(entry.Reason, 1, (_, currentCount) => currentCount + 1);
-        Interlocked.Increment(ref _skippedCount);
         UpdateMonitorData(m => { m.SkippedEntriesCount += 1; });
     }
     
@@ -179,6 +177,5 @@ public class InventoryProcessData : ReactiveObject
         _skippedEntries.Clear();
         
         _skippedCountsByReason.Clear();
-        Interlocked.Exchange(ref _skippedCount, 0);
     }
 }
