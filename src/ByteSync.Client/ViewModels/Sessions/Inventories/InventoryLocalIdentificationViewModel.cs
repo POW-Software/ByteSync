@@ -46,6 +46,7 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
         
         _inventoryService.InventoryProcessData.InventoryMonitorObservable
             .Sample(TimeSpan.FromMilliseconds(500))
+            .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(m =>
             {
                 IdentifiedFiles = m.IdentifiedFiles;
