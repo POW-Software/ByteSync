@@ -106,8 +106,7 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
                     InventoryTaskStatus.Success => "InventoryProcess_IdentificationSuccess",
                     InventoryTaskStatus.Cancelled => "InventoryProcess_IdentificationCancelled",
                     InventoryTaskStatus.Error => "InventoryProcess_IdentificationError",
-                    InventoryTaskStatus.Pending => "InventoryProcess_IdentificationRunning",
-                    InventoryTaskStatus.Running => "InventoryProcess_IdentificationRunning",
+                    InventoryTaskStatus.Pending or InventoryTaskStatus.Running => "InventoryProcess_IdentificationRunning",
                     InventoryTaskStatus.NotLaunched => "InventoryProcess_IdentificationCancelled",
                     _ => string.Empty
                 };
@@ -170,8 +169,6 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
                 IdentificationIconBrush = _theme_service_get_background();
                 
                 break;
-            case InventoryTaskStatus.Pending:
-            case InventoryTaskStatus.Running:
             default:
                 IdentificationIconBrush = _theme_service_get_background();
                 
@@ -179,6 +176,6 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
         }
     }
     
-    private IBrush _theme_service_get_background() => _themeService.GetBrush("HomeCloudSynchronizationBackGround");
-    private IBrush _theme_service_get_secondary() => _themeService.GetBrush("MainSecondaryColor");
+    private IBrush? _theme_service_get_background() => _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+    private IBrush? _theme_service_get_secondary() => _themeService.GetBrush("MainSecondaryColor");
 }

@@ -11,7 +11,6 @@ namespace ByteSync.Services.Inventories;
 
 public class InventoryStatisticsService : IInventoryStatisticsService
 {
-    private readonly IInventoryService _inventoryService;
     private readonly IInventoryFileRepository _inventoryFileRepository;
     private readonly ILogger<InventoryStatisticsService> _logger;
     
@@ -20,13 +19,12 @@ public class InventoryStatisticsService : IInventoryStatisticsService
     public InventoryStatisticsService(IInventoryService inventoryService, IInventoryFileRepository inventoryFileRepository,
         ILogger<InventoryStatisticsService> logger)
     {
-        _inventoryService = inventoryService;
         _inventoryFileRepository = inventoryFileRepository;
         _logger = logger;
         
         _statisticsSubject = new BehaviorSubject<InventoryStatistics?>(null);
         
-        _inventoryService.InventoryProcessData.AreFullInventoriesComplete
+        inventoryService.InventoryProcessData.AreFullInventoriesComplete
             .DistinctUntilChanged()
             .SelectMany(isComplete =>
                 isComplete
@@ -136,7 +134,7 @@ public class InventoryStatisticsService : IInventoryStatisticsService
         return !string.IsNullOrEmpty(fd.Sha256) || !string.IsNullOrEmpty(fd.SignatureGuid);
     }
     
-    private class StatisticsCollector
+    private sealed class StatisticsCollector
     {
         public int TotalAnalyzed { get; set; }
         
