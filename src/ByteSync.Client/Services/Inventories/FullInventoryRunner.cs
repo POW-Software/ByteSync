@@ -87,7 +87,7 @@ public class FullInventoryRunner : IFullInventoryRunner
             else
             {
                 InventoryProcessData.AnalysisStatus.OnNext(InventoryTaskStatus.Success);
-                await _inventoryFinishedService.SetLocalInventoryFinished(InventoryProcessData.Inventories!, LocalInventoryModes.Full);
+                await _inventoryFinishedService.SetLocalInventoryFinished(InventoryProcessData.GetInventories()!, LocalInventoryModes.Full);
                 InventoryProcessData.MainStatus.OnNext(InventoryTaskStatus.Success);
             }
             

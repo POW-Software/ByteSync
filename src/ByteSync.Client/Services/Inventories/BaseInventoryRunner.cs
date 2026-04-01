@@ -46,7 +46,7 @@ public class BaseInventoryRunner : IBaseInventoryRunner
             {
                 InventoryProcessData.IdentificationStatus.OnNext(InventoryTaskStatus.Success);
                 
-                await _inventoryFinishedService.SetLocalInventoryFinished(InventoryProcessData.Inventories!, LocalInventoryModes.Base);
+                await _inventoryFinishedService.SetLocalInventoryFinished(InventoryProcessData.GetInventories()!, LocalInventoryModes.Base);
             }
             
             isOK = true;

@@ -74,9 +74,9 @@ public class InventoryProcessData : ReactiveObject
     
     public List<IInventoryBuilder>? InventoryBuilders { get; set; }
     
-    public List<Inventory>? Inventories
+    public List<Inventory>? GetInventories()
     {
-        get { return InventoryBuilders?.Select(ib => ib.Inventory).ToList(); }
+        return InventoryBuilders?.Select(ib => ib.Inventory).ToList();
     }
     
     public CancellationTokenSource CancellationTokenSource { get; private set; }
