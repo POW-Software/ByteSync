@@ -44,7 +44,7 @@ public class FullInventoryRunner : IFullInventoryRunner
             await _sessionMemberService.UpdateCurrentMemberGeneralStatus(SessionMemberGeneralStatus.InventoryRunningAnalysis);
             
             var inventoriesBuildersAndItems = new List<Tuple<IInventoryBuilder, HashSet<IndexedItem>>>();
-            foreach (var inventoryBuilder in InventoryProcessData.InventoryBuilders!)
+            foreach (var inventoryBuilder in InventoryProcessData.InventoryBuilders)
             {
                 using var inventoryComparer =
                     _inventoryComparerFactory.CreateInventoryComparer(LocalInventoryModes.Base, inventoryBuilder.InventoryIndexer);
@@ -87,7 +87,7 @@ public class FullInventoryRunner : IFullInventoryRunner
             else
             {
                 InventoryProcessData.AnalysisStatus.OnNext(InventoryTaskStatus.Success);
-                await _inventoryFinishedService.SetLocalInventoryFinished(InventoryProcessData.GetInventories()!, LocalInventoryModes.Full);
+                await _inventoryFinishedService.SetLocalInventoryFinished(InventoryProcessData.GetInventories(), LocalInventoryModes.Full);
                 InventoryProcessData.MainStatus.OnNext(InventoryTaskStatus.Success);
             }
             
