@@ -34,6 +34,12 @@ public class TimeTrackingComputerTests
     {
         return new TimeTrackingComputer(_dataTrackingStrategyMock.Object);
     }
+
+    private static void WaitFor(TimeSpan delay)
+    {
+        using var gate = new ManualResetEventSlim(false);
+        gate.Wait(delay);
+    }
     
     [Test]
     public void Constructor_ShouldInitialize_WithDefaultValues()
@@ -76,7 +82,7 @@ public class TimeTrackingComputerTests
         
         sut.Start(firstStart);
         _dataSubject.OnNext((1000, 500));
-        Thread.Sleep(50);
+        WaitFor(TimeSpan.FromMilliseconds(50));
         
         sut.Start(secondStart);
         
@@ -104,11 +110,11 @@ public class TimeTrackingComputerTests
         
         using var subscription = sut.RemainingTime.Subscribe(tt => emissions.Add(tt));
         
-        Thread.Sleep(1500);
+        WaitFor(TimeSpan.FromMilliseconds(1500));
         
         sut.Stop();
         
-        Thread.Sleep(100);
+        WaitFor(TimeSpan.FromMilliseconds(100));
         
         emissions.Should().NotBeEmpty();
         var finalTimeTrack = emissions.Last();
@@ -135,7 +141,7 @@ public class TimeTrackingComputerTests
         
         sut.Stop();
         
-        Thread.Sleep(100);
+        WaitFor(TimeSpan.FromMilliseconds(100));
         
         capturedTimeTrack.Should().NotBeNull();
         capturedTimeTrack!.EstimatedEndDateTime.Should().NotBeNull();
@@ -152,7 +158,7 @@ public class TimeTrackingComputerTests
         
         _dataSubject.OnNext((1000, 100));
         
-        Thread.Sleep(100);
+        WaitFor(TimeSpan.FromMilliseconds(100));
         
         emissions.Should().BeEmpty();
     }
@@ -168,11 +174,11 @@ public class TimeTrackingComputerTests
         
         using var subscription = sut.RemainingTime.Take(2).Subscribe(emissions.Add);
         
-        Thread.Sleep(100);
+        WaitFor(TimeSpan.FromMilliseconds(100));
         
         _dataSubject.OnNext((1000, 100));
         
-        Thread.Sleep(2100);
+        WaitFor(TimeSpan.FromMilliseconds(2100));
         
         sut.LastDataHandledDateTime.Should().NotBeNull();
         emissions.Should().NotBeEmpty();
@@ -287,7 +293,7 @@ public class TimeTrackingComputerTests
                 tt => emissions.Add(tt),
                 _ => { });
         
-        Thread.Sleep(600);
+        WaitFor(TimeSpan.FromMilliseconds(600));
         
         emissions.Should().BeEmpty();
     }
@@ -325,15 +331,15 @@ public class TimeTrackingComputerTests
         
         using var subscription = sut.RemainingTime.Subscribe(_ => emissionCount++);
         
-        Thread.Sleep(2100);
+        WaitFor(TimeSpan.FromMilliseconds(2100));
         
         sut.Stop();
         
-        Thread.Sleep(100);
+        WaitFor(TimeSpan.FromMilliseconds(100));
         
         var countAfterStop = emissionCount;
         
-        Thread.Sleep(1500);
+        WaitFor(TimeSpan.FromMilliseconds(1500));
         
         var countAfterWait = emissionCount;
         
@@ -378,16 +384,16 @@ public class TimeTrackingComputerTests
         
         using var subscription = sut.RemainingTime.Subscribe(tt => emissions.Add(tt));
         
-        Thread.Sleep(100);
+        WaitFor(TimeSpan.FromMilliseconds(100));
         
         _dataSubject.OnNext((1000, 100));
-        Thread.Sleep(1100);
+        WaitFor(TimeSpan.FromMilliseconds(1100));
         
         _dataSubject.OnNext((1000, 200));
-        Thread.Sleep(1100);
+        WaitFor(TimeSpan.FromMilliseconds(1100));
         
         _dataSubject.OnNext((1000, 300));
-        Thread.Sleep(1100);
+        WaitFor(TimeSpan.FromMilliseconds(1100));
         
         emissions.Should().HaveCountGreaterThanOrEqualTo(3);
         
@@ -404,11 +410,11 @@ public class TimeTrackingComputerTests
         
         sut.Start(startDateTime);
         
-        Thread.Sleep(50);
+        WaitFor(TimeSpan.FromMilliseconds(50));
         
         _dataSubject.OnNext((1000, 100));
         
-        Thread.Sleep(100);
+        WaitFor(TimeSpan.FromMilliseconds(100));
         
         var afterUpdate = DateTime.Now;
         
@@ -432,7 +438,7 @@ public class TimeTrackingComputerTests
             .Take(3)
             .Subscribe(tt => emissions.Add(tt));
         
-        Thread.Sleep(3500);
+        WaitFor(TimeSpan.FromMilliseconds(3500));
         
         emissions.Should().HaveCountGreaterThanOrEqualTo(2);
         emissions.Should().OnlyContain(tt => tt.StartDateTime.HasValue);
@@ -487,20 +493,20 @@ public class TimeTrackingComputerTests
         
         using var subscription = sut.RemainingTime.Subscribe(tt => emissions.Add(tt));
         
-        Thread.Sleep(100);
+        WaitFor(TimeSpan.FromMilliseconds(100));
         
         _dataSubject.OnNext((1000, 250));
-        Thread.Sleep(1100);
+        WaitFor(TimeSpan.FromMilliseconds(1100));
         
         _dataSubject.OnNext((1000, 500));
-        Thread.Sleep(1100);
+        WaitFor(TimeSpan.FromMilliseconds(1100));
         
         _dataSubject.OnNext((1000, 750));
-        Thread.Sleep(1100);
+        WaitFor(TimeSpan.FromMilliseconds(1100));
         
         sut.Stop();
         
-        Thread.Sleep(100);
+        WaitFor(TimeSpan.FromMilliseconds(100));
         
         emissions.Should().NotBeEmpty();
         var finalEmission = emissions.Last();

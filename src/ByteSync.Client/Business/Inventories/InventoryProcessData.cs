@@ -176,9 +176,7 @@ public class InventoryProcessData : ReactiveObject
     
     private void ClearSkippedEntries()
     {
-        while (_skippedEntries.TryDequeue(out _))
-        {
-        }
+        _skippedEntries.Clear();
         
         _skippedCountsByReason.Clear();
         Interlocked.Exchange(ref _skippedCount, 0);
