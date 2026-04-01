@@ -1,5 +1,6 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Collections.Concurrent;
 using ByteSync.Business.Misc;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Services.TimeTracking;
@@ -296,16 +297,19 @@ public class TimeTrackingComputerTests
     {
         var sut = CreateSut();
         var startDateTime = DateTimeOffset.Now;
-        var emissions = new List<TimeTrack>();
+        var emissions = new ConcurrentQueue<TimeTrack>();
         
         sut.Start(startDateTime);
         
         using var subscription = sut.RemainingTime
             .Take(3)
-            .Subscribe(tt => emissions.Add(tt));
+            .Subscribe(tt => emissions.Enqueue(tt));
         
-        Thread.Sleep(2500);
+        var receivedTwoEmissions = SpinWait.SpinUntil(
+            () => emissions.Count >= 2,
+            TimeSpan.FromSeconds(5));
         
+        receivedTwoEmissions.Should().BeTrue("remaining time should emit periodically while tracking is started");
         emissions.Should().HaveCountGreaterThanOrEqualTo(2);
         emissions.All(tt => tt.StartDateTime.HasValue).Should().BeTrue();
     }
