@@ -64,7 +64,7 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
 
         this.WhenAnyValue(x => x.SkippedEntriesCount)
             .Select(v => v > 0)
-            .ToPropertyEx(this, x => x.ShowSkippedEntriesCount)
+            .ToPropertyEx(this, x => x.HasSkippedEntriesCount)
             .DisposeWith(disposables);
         
         _inventoryService.InventoryProcessData.IdentificationStatus
@@ -145,7 +145,7 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
     [Reactive]
     public int SkippedEntriesCount { get; set; }
 
-    public extern bool ShowSkippedEntriesCount { [ObservableAsProperty] get; }
+    public extern bool HasSkippedEntriesCount { [ObservableAsProperty] get; }
     
     [Reactive]
     public string IdentificationIcon { get; set; } = "None";

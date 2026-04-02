@@ -78,12 +78,13 @@
 
             <Label Grid.Row="4" Grid.Column="0" Content="{localizations:Loc InventoryProcess_SkippedEntries}"
                    Classes="InventoryStatusDescription"
-                   IsVisible="{Binding ShowSkippedEntriesCount}" />
+                   Classes.IsBold="{Binding HasSkippedEntriesCount}" />
             <Border Grid.Row="4" Grid.Column="1" HorizontalAlignment="Right"
                     Classes="Badge"
-                    IsVisible="{Binding ShowSkippedEntriesCount}">
+                    Classes.Secondary="{Binding HasSkippedEntriesCount}">
                 <Label Content="{Binding SkippedEntriesCount, FallbackValue=0}"
-                       HorizontalContentAlignment="Right" />
+                       HorizontalContentAlignment="Right"
+                       Classes.IsBold="{Binding HasSkippedEntriesCount}" />
             </Border>
         </Grid>
     </StackPanel>

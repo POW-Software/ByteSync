@@ -86,21 +86,21 @@ public class InventoryLocalIdentificationViewModelTests
     }
 
     [Test]
-    public void MonitorUpdates_ShouldUpdateSkippedEntriesAndVisibility()
+    public void MonitorUpdates_ShouldUpdateSkippedEntriesAndHasFlag()
     {
         var vm = CreateVm();
 
         vm.SkippedEntriesCount.Should().Be(0);
-        vm.ShowSkippedEntriesCount.Should().BeFalse();
+        vm.HasSkippedEntriesCount.Should().BeFalse();
 
         _processData.UpdateMonitorData(m => { m.SkippedEntriesCount = 3; });
 
         vm.ShouldEventuallyBe(x => x.SkippedEntriesCount, 3);
-        vm.ShouldEventuallyBe(x => x.ShowSkippedEntriesCount, true);
+        vm.ShouldEventuallyBe(x => x.HasSkippedEntriesCount, true);
 
         _processData.UpdateMonitorData(m => { m.SkippedEntriesCount = 0; });
 
-        vm.ShouldEventuallyBe(x => x.ShowSkippedEntriesCount, false);
+        vm.ShouldEventuallyBe(x => x.HasSkippedEntriesCount, false);
     }
     
     private InventoryLocalIdentificationViewModel CreateVm()
