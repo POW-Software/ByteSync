@@ -12,7 +12,7 @@
         <inventories:InventoryDeltaGenerationViewModel />
     </Design.DataContext>
 
-    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
         <!-- Status block -->
         <StackPanel Orientation="Vertical" Height="60"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -39,7 +39,7 @@
                Content="{Binding AnalysisStatusText}"
                HorizontalContentAlignment="Center" FontWeight="Bold" Margin="6" />
 
-        <StackPanel HorizontalAlignment="Center" Margin="3 12 3 0" Height="100">
+        <StackPanel HorizontalAlignment="Center" Margin="3 12 3 0">
 
             <Grid>
 
@@ -55,10 +55,12 @@
                     <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
 
-                <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_DeltaGeneration_AnalyzedFiles}"
+                <Label Grid.Row="0" Grid.Column="0"
+                       Content="{localizations:Loc InventoryProcess_DeltaGeneration_AnalyzedFiles}"
                        Classes="InventoryStatusDescription" />
 
-                <Border Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge" IsVisible="{Binding ShowAnalysisValues}">
+                <Border Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge"
+                        IsVisible="{Binding ShowAnalysisValues}">
                     <StackPanel Orientation="Horizontal">
                         <Label
                             Content="{Binding AnalyzedFiles, FallbackValue=''}"
@@ -70,15 +72,20 @@
                     </StackPanel>
                 </Border>
 
-                <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc InventoryProcess_DeltaGeneration_ProcessedSize}"
+                <Label Grid.Row="1" Grid.Column="0"
+                       Content="{localizations:Loc InventoryProcess_DeltaGeneration_ProcessedSize}"
                        Classes="InventoryStatusDescription" />
-                <Border Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge" IsVisible="{Binding ShowAnalysisValues}">
-                    <TextBlock Text="{Binding ProcessedVolume, FallbackValue='', Converter={StaticResource FormatKbSizeConverter}}" />
+                <Border Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge"
+                        IsVisible="{Binding ShowAnalysisValues}">
+                    <TextBlock
+                        Text="{Binding ProcessedVolume, FallbackValue='', Converter={StaticResource FormatKbSizeConverter}}" />
                 </Border>
 
-                <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc InventoryProcess_DeltaGeneration_AnalyzeSuccess}"
+                <Label Grid.Row="2" Grid.Column="0"
+                       Content="{localizations:Loc InventoryProcess_DeltaGeneration_AnalyzeSuccess}"
                        Classes="InventoryStatusDescription" />
-                <Border Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge" IsVisible="{Binding ShowAnalysisValues}">
+                <Border Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge"
+                        IsVisible="{Binding ShowAnalysisValues}">
                     <Label
                         Content="{Binding AnalyzeSuccess, FallbackValue=''}"
                         HorizontalContentAlignment="Right" />
