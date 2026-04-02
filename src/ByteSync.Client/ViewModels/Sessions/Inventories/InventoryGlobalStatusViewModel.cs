@@ -90,7 +90,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
     
     public extern bool HasIdentificationErrors { [ObservableAsProperty] get; }
 
-    public extern bool ShowGlobalSkippedEntries { [ObservableAsProperty] get; }
+    public extern bool HasGlobalSkippedEntries { [ObservableAsProperty] get; }
     
     [Reactive]
     public string GlobalMainIcon { get; set; } = "None";
@@ -123,7 +123,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
 
         this.WhenAnyValue(x => x.GlobalSkippedEntries)
             .Select(e => (e ?? 0) > 0)
-            .ToPropertyEx(this, x => x.ShowGlobalSkippedEntries)
+            .ToPropertyEx(this, x => x.HasGlobalSkippedEntries)
             .DisposeWith(disposables);
     }
     

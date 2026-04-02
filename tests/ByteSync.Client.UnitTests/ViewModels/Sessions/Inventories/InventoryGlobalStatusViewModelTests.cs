@@ -264,16 +264,16 @@ public class InventoryGlobalStatusViewModelTests
     }
 
     [Test]
-    public void ShowGlobalSkippedEntries_ComputedFromStats()
+    public void HasGlobalSkippedEntries_ComputedFromStats()
     {
         var vm = CreateVm();
 
         _statsSubject.OnNext(new InventoryStatistics { TotalSkippedEntries = 4 });
-        vm.ShowGlobalSkippedEntries.Should().BeTrue();
+        vm.HasGlobalSkippedEntries.Should().BeTrue();
         vm.GlobalSkippedEntries.Should().Be(4);
 
         _statsSubject.OnNext(new InventoryStatistics { TotalSkippedEntries = 0 });
-        vm.ShowGlobalSkippedEntries.Should().BeFalse();
+        vm.HasGlobalSkippedEntries.Should().BeFalse();
         vm.GlobalSkippedEntries.Should().Be(0);
     }
     
