@@ -304,18 +304,24 @@ public class TimeTrackingComputerTests
         var sut = CreateSut();
         var startDateTime = DateTimeOffset.Now;
         var emissions = new ConcurrentQueue<TimeTrack>();
+        using var receivedTwoEmissions = new ManualResetEventSlim(false);
         
         sut.Start(startDateTime);
         
         using var subscription = sut.RemainingTime
             .Take(3)
-            .Subscribe(tt => emissions.Enqueue(tt));
+            .Subscribe(tt =>
+            {
+                emissions.Enqueue(tt);
+                if (emissions.Count >= 2)
+                {
+                    receivedTwoEmissions.Set();
+                }
+            });
         
-        var receivedTwoEmissions = SpinWait.SpinUntil(
-            () => emissions.Count >= 2,
-            TimeSpan.FromSeconds(5));
+        var receivedTwoEmissionsWithinTimeout = receivedTwoEmissions.Wait(TimeSpan.FromSeconds(5));
         
-        receivedTwoEmissions.Should().BeTrue("remaining time should emit periodically while tracking is started");
+        receivedTwoEmissionsWithinTimeout.Should().BeTrue("remaining time should emit periodically while tracking is started");
         emissions.Should().HaveCountGreaterThanOrEqualTo(2);
         emissions.All(tt => tt.StartDateTime.HasValue).Should().BeTrue();
     }
