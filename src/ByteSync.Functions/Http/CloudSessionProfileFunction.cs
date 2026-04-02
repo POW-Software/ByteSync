@@ -29,7 +29,7 @@ public class CloudSessionProfileFunction
         var result = await _cloudSessionProfileService.CreateCloudSessionProfile(sessionId, client);
             
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(result);
 
         return response;
     }
@@ -47,7 +47,7 @@ public class CloudSessionProfileFunction
         var result = await _cloudSessionProfileService.GetCloudSessionProfileData(parameters, client);
             
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(result);
 
         return response;
     }
@@ -63,7 +63,7 @@ public class CloudSessionProfileFunction
         var result = await _cloudSessionProfileService.GetProfileDetailsPassword(parameters, client);
             
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(result);
 
         return response;
     }
@@ -79,7 +79,7 @@ public class CloudSessionProfileFunction
         var result = await _cloudSessionProfileService.DeleteCloudSessionProfile(parameters, client);
             
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(result);
 
         return response;
     }

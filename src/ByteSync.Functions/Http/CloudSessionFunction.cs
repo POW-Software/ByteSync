@@ -30,7 +30,7 @@ public class CloudSessionFunction
         var cloudSessionResult = await _mediator.Send(request);
             
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(cloudSessionResult, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(cloudSessionResult);
         
         return response;
     }
@@ -44,7 +44,7 @@ public class CloudSessionFunction
         var parameters = await FunctionHelper.DeserializeRequestBody<AskCloudSessionPasswordExchangeKeyParameters>(req);
         var result = await _mediator.Send(new AskPasswordExchangeKeyRequest(client, parameters), executionContext.CancellationToken);
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(result);
         return response;
     }
     
@@ -72,7 +72,7 @@ public class CloudSessionFunction
         var result = await _mediator.Send(request);
             
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(result);
         
         return response;
     }
@@ -86,7 +86,7 @@ public class CloudSessionFunction
         var parameters = await FunctionHelper.DeserializeRequestBody<AskJoinCloudSessionParameters>(req);
         var result = await _mediator.Send(new AskJoinCloudSessionRequest(client, parameters));
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(result);
         return response;
     }
     

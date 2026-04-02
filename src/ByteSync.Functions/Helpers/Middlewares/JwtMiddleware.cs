@@ -182,7 +182,7 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
         if (httpReqData != null)
         {
             var newHttpResponse = httpReqData.CreateResponse(httpStatusCode);
-            await newHttpResponse.WriteAsJsonAsync(new { ResponseStatus = message }, newHttpResponse.StatusCode);
+            await newHttpResponse.WriteAsJsonAsync(new { ResponseStatus = message });
             context.GetInvocationResult().Value = newHttpResponse;
         }
     }
