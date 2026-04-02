@@ -47,23 +47,25 @@
 
             <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_IdentifiedFiles}"
                    Classes="InventoryStatusDescription" />
-            <Label Grid.Row="0" Grid.Column="1" Content="{Binding IdentifiedFiles, FallbackValue=0}"
-                   Classes="Badge"
-                   HorizontalContentAlignment="Right" />
+            <Border Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                <Label Content="{Binding IdentifiedFiles, FallbackValue=0}"
+                       HorizontalContentAlignment="Right" />
+            </Border>
 
             <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc InventoryProcess_IdentifiedDirectories}"
                    Classes="InventoryStatusDescription" />
-            <Label Grid.Row="1" Grid.Column="1" Content="{Binding IdentifiedDirectories, FallbackValue=0}"
-                   Classes="Badge"
-                   HorizontalContentAlignment="Right" />
+            <Border Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                <Label Content="{Binding IdentifiedDirectories, FallbackValue=0}"
+                       HorizontalContentAlignment="Right" />
+            </Border>
 
             <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc InventoryProcess_TotalSize}"
                    Classes="InventoryStatusDescription" />
-            <Label Grid.Row="2" Grid.Column="1"
-                   Content="{Binding IdentifiedVolume, FallbackValue=0, 
+            <Border Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                <Label Content="{Binding IdentifiedVolume, FallbackValue=0, 
                         Converter={StaticResource FormatKbSizeConverter}}"
-                   Classes="Badge"
-                   HorizontalContentAlignment="Right" />
+                       HorizontalContentAlignment="Right" />
+            </Border>
 
             <Label Grid.Row="3" Grid.Column="0" Content="{localizations:Loc InventoryProcess_IdentificationErrors}"
                    Classes="InventoryStatusDescription"
