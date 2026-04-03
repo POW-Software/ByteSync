@@ -119,15 +119,15 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             part.DirectoryDescriptions.Should().HaveCountGreaterThanOrEqualTo(2);
             
             var accessibleDirDesc = part.DirectoryDescriptions
-                .FirstOrDefault(d => d.RelativePath.Contains("accessible"));
+                .FirstOrDefault(d => d.RelativePath.EndsWith("/accessible"));
             accessibleDirDesc.Should().NotBeNull();
-            accessibleDirDesc.IsAccessible.Should().BeTrue();
+            accessibleDirDesc!.IsAccessible.Should().BeTrue();
             
             var inaccessibleDirDesc = part.DirectoryDescriptions
-                .FirstOrDefault(d => d.RelativePath.Contains("inaccessible"));
+                .FirstOrDefault(d => d.RelativePath.EndsWith("/inaccessible"));
             inaccessibleDirDesc.Should().NotBeNull();
             
-            if (inaccessibleDirDesc.IsAccessible)
+            if (inaccessibleDirDesc!.IsAccessible)
             {
                 Assert.Ignore(
                     "Directory permissions were not enforced by the OS - test cannot verify access control (likely running with elevated permissions)");
@@ -135,11 +135,11 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             
             inaccessibleDirDesc.IsAccessible.Should().BeFalse();
             
-            var file1 = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("file1.txt"));
+            var file1 = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.EndsWith("/file1.txt"));
             file1.Should().NotBeNull();
-            file1.IsAccessible.Should().BeTrue();
+            file1!.IsAccessible.Should().BeTrue();
             
-            var file2 = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("file2.txt"));
+            var file2 = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.EndsWith("/file2.txt"));
             file2.Should().BeNull("the file in an inaccessible directory should not be inventoried");
         }
         finally
@@ -215,15 +215,15 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             part.DirectoryDescriptions.Should().HaveCountGreaterThanOrEqualTo(2);
             
             var accessibleDirDesc = part.DirectoryDescriptions
-                .FirstOrDefault(d => d.RelativePath.Contains("accessible"));
+                .FirstOrDefault(d => d.RelativePath.EndsWith("/accessible"));
             accessibleDirDesc.Should().NotBeNull();
-            accessibleDirDesc.IsAccessible.Should().BeTrue();
+            accessibleDirDesc!.IsAccessible.Should().BeTrue();
             
             var inaccessibleDirDesc = part.DirectoryDescriptions
-                .FirstOrDefault(d => d.RelativePath.Contains("inaccessible"));
+                .FirstOrDefault(d => d.RelativePath.EndsWith("/inaccessible"));
             inaccessibleDirDesc.Should().NotBeNull();
             
-            if (inaccessibleDirDesc.IsAccessible)
+            if (inaccessibleDirDesc!.IsAccessible)
             {
                 Assert.Ignore(
                     "Directory permissions were not enforced by the OS - test cannot verify access control (likely running with elevated permissions)");
@@ -231,11 +231,11 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             
             inaccessibleDirDesc.IsAccessible.Should().BeFalse();
             
-            var file1 = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("file1.txt"));
+            var file1 = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.EndsWith("/file1.txt"));
             file1.Should().NotBeNull();
-            file1.IsAccessible.Should().BeTrue();
+            file1!.IsAccessible.Should().BeTrue();
             
-            var file2 = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("file2.txt"));
+            var file2 = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.EndsWith("/file2.txt"));
             file2.Should().BeNull("the file in an inaccessible directory should not be inventoried");
         }
         finally
