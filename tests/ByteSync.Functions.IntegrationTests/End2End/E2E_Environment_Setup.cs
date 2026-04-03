@@ -86,7 +86,7 @@ public class E2E_Environment_Setup
         };
         
         var functionsBuilder = new ContainerBuilder()
-            .WithImage("mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated8.0")
+            .WithImage("mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0")
             .WithName($"bytesync-functions-e2e-{Guid.NewGuid():N}")
             .WithPortBinding(7071, 80)
             .WithBindMount(publishDir, "/home/site/wwwroot")
