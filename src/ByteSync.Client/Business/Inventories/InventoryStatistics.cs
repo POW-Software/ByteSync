@@ -11,4 +11,6 @@ public record InventoryStatistics
     public int AnalyzeErrors { get; init; }
     
     public int IdentificationErrors { get; init; }
+
+    public int TotalSkippedEntries { get; init; }
 }

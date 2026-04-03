@@ -46,18 +46,25 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
         
         _inventoryService.InventoryProcessData.InventoryMonitorObservable
             .Sample(TimeSpan.FromMilliseconds(500))
+            .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(m =>
             {
                 IdentifiedFiles = m.IdentifiedFiles;
                 IdentifiedDirectories = m.IdentifiedDirectories;
                 IdentifiedVolume = m.IdentifiedVolume;
                 IdentificationErrors = m.IdentificationErrors;
+                SkippedEntriesCount = m.SkippedEntriesCount;
             })
             .DisposeWith(disposables);
         
         this.WhenAnyValue(x => x.IdentificationErrors)
             .Select(v => v > 0)
             .ToPropertyEx(this, x => x.HasIdentificationErrors)
+            .DisposeWith(disposables);
+
+        this.WhenAnyValue(x => x.SkippedEntriesCount)
+            .Select(v => v > 0)
+            .ToPropertyEx(this, x => x.HasSkippedEntriesCount)
             .DisposeWith(disposables);
         
         _inventoryService.InventoryProcessData.IdentificationStatus
@@ -100,8 +107,7 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
                     InventoryTaskStatus.Success => "InventoryProcess_IdentificationSuccess",
                     InventoryTaskStatus.Cancelled => "InventoryProcess_IdentificationCancelled",
                     InventoryTaskStatus.Error => "InventoryProcess_IdentificationError",
-                    InventoryTaskStatus.Pending => "InventoryProcess_IdentificationRunning",
-                    InventoryTaskStatus.Running => "InventoryProcess_IdentificationRunning",
+                    InventoryTaskStatus.Pending or InventoryTaskStatus.Running => "InventoryProcess_IdentificationRunning",
                     InventoryTaskStatus.NotLaunched => "InventoryProcess_IdentificationCancelled",
                     _ => string.Empty
                 };
@@ -133,8 +139,13 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
     
     [Reactive]
     public int IdentificationErrors { get; set; }
-    
+
     public extern bool HasIdentificationErrors { [ObservableAsProperty] get; }
+
+    [Reactive]
+    public int SkippedEntriesCount { get; set; }
+
+    public extern bool HasSkippedEntriesCount { [ObservableAsProperty] get; }
     
     [Reactive]
     public string IdentificationIcon { get; set; } = "None";
@@ -159,8 +170,6 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
                 IdentificationIconBrush = _theme_service_get_background();
                 
                 break;
-            case InventoryTaskStatus.Pending:
-            case InventoryTaskStatus.Running:
             default:
                 IdentificationIconBrush = _theme_service_get_background();
                 
@@ -168,6 +177,6 @@ public class InventoryLocalIdentificationViewModel : ActivatableViewModelBase
         }
     }
     
-    private IBrush _theme_service_get_background() => _themeService.GetBrush("HomeCloudSynchronizationBackGround");
-    private IBrush _theme_service_get_secondary() => _themeService.GetBrush("MainSecondaryColor");
+    private IBrush? _theme_service_get_background() => _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+    private IBrush? _theme_service_get_secondary() => _themeService.GetBrush("MainSecondaryColor");
 }

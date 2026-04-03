@@ -274,9 +274,18 @@ public class DataNodeViewModelTests
         
         // Leave preparation -> cannot execute
         bool? latestCanExec = null;
-        using var sub = vm.AddDataNodeCommand.CanExecute.Subscribe(b => latestCanExec = b);
+        using var canExecuteBecameFalse = new ManualResetEventSlim(false);
+        using var sub = vm.AddDataNodeCommand.CanExecute.Subscribe(b =>
+        {
+            latestCanExec = b;
+            if (b == false)
+            {
+                canExecuteBecameFalse.Set();
+            }
+        });
         status.OnNext(SessionStatus.Inventory);
-        SpinWait.SpinUntil(() => latestCanExec == false, TimeSpan.FromSeconds(5)).Should()
+        canExecuteBecameFalse.Wait(TimeSpan.FromSeconds(5)).Should()
             .BeTrue("AddDataNodeCommand.CanExecute should become false outside Preparation");
+        latestCanExec.Should().BeFalse();
     }
 }

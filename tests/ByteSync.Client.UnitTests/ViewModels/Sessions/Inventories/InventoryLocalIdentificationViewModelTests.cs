@@ -84,6 +84,24 @@ public class InventoryLocalIdentificationViewModelTests
         vm.IdentificationStatusText.Should().NotBeNullOrWhiteSpace();
         vm.IdentificationStatusText.Should().NotBe(successText);
     }
+
+    [Test]
+    public void MonitorUpdates_ShouldUpdateSkippedEntriesAndHasFlag()
+    {
+        var vm = CreateVm();
+
+        vm.SkippedEntriesCount.Should().Be(0);
+        vm.HasSkippedEntriesCount.Should().BeFalse();
+
+        _processData.UpdateMonitorData(m => { m.SkippedEntriesCount = 3; });
+
+        vm.ShouldEventuallyBe(x => x.SkippedEntriesCount, 3);
+        vm.ShouldEventuallyBe(x => x.HasSkippedEntriesCount, true);
+
+        _processData.UpdateMonitorData(m => { m.SkippedEntriesCount = 0; });
+
+        vm.ShouldEventuallyBe(x => x.HasSkippedEntriesCount, false);
+    }
     
     private InventoryLocalIdentificationViewModel CreateVm()
     {
