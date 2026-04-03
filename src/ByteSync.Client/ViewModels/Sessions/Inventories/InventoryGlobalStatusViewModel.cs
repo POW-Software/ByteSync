@@ -17,6 +17,9 @@ namespace ByteSync.ViewModels.Sessions.Inventories;
 
 public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
 {
+    private const string MainSecondaryColorBrushKey = "MainSecondaryColor";
+    private const string HomeCloudSynchronizationBackGroundBrushKey = "HomeCloudSynchronizationBackGround";
+
     private readonly IInventoryService _inventoryService = null!;
     private readonly ISessionService _sessionService = null!;
     private readonly IDialogService _dialogService = null!;
@@ -79,10 +82,15 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
     
     [Reactive]
     public int? GlobalIdentificationErrors { get; set; }
+
+    [Reactive]
+    public int? GlobalSkippedEntries { get; set; }
     
     public extern bool HasErrors { [ObservableAsProperty] get; }
     
     public extern bool HasIdentificationErrors { [ObservableAsProperty] get; }
+
+    public extern bool HasGlobalSkippedEntries { [ObservableAsProperty] get; }
     
     [Reactive]
     public string GlobalMainIcon { get; set; } = "None";
@@ -111,6 +119,11 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
         this.WhenAnyValue(x => x.GlobalIdentificationErrors)
             .Select(e => (e ?? 0) > 0)
             .ToPropertyEx(this, x => x.HasIdentificationErrors)
+            .DisposeWith(disposables);
+
+        this.WhenAnyValue(x => x.GlobalSkippedEntries)
+            .Select(e => (e ?? 0) > 0)
+            .ToPropertyEx(this, x => x.HasGlobalSkippedEntries)
             .DisposeWith(disposables);
     }
     
@@ -200,7 +213,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
             .DisposeWith(disposables);
     }
     
-    private IObservable<(string Icon, string Text, string BrushKey)> CreateNonSuccessVisual(
+    private static IObservable<(string Icon, string Text, string BrushKey)> CreateNonSuccessVisual(
         IObservable<InventoryTaskStatus> statusStream)
     {
         return statusStream
@@ -210,7 +223,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                 InventoryTaskStatus.Cancelled => Resources.InventoryProcess_InventoryCancelled,
                 InventoryTaskStatus.Error => Resources.InventoryProcess_InventoryError,
                 _ => Resources.InventoryProcess_InventoryError
-            }, BrushKey: "MainSecondaryColor"));
+            }, BrushKey: MainSecondaryColorBrushKey));
     }
     
     private IObservable<(string Icon, string Text, string BrushKey)> CreateSuccessVisual(ReactiveStreams streams)
@@ -231,18 +244,18 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
             .Select(t => GetSuccessVisualState(t.s.AnalyzeErrors));
     }
     
-    private (string Icon, string Text, string BrushKey) GetSuccessVisualState(int? errors)
+    private static (string Icon, string Text, string BrushKey) GetSuccessVisualState(int? errors)
     {
         if (errors is > 0)
         {
             var text = Resources.ResourceManager.GetString("InventoryProcess_InventorySuccessWithErrors", Resources.Culture)
                        ?? Resources.InventoryProcess_InventorySuccess;
             
-            return (Icon: "RegularError", Text: text, BrushKey: "MainSecondaryColor");
+            return (Icon: "RegularError", Text: text, BrushKey: MainSecondaryColorBrushKey);
         }
         
         return (Icon: "SolidCheckCircle", Text: Resources.InventoryProcess_InventorySuccess,
-            BrushKey: "HomeCloudSynchronizationBackGround");
+            BrushKey: HomeCloudSynchronizationBackGroundBrushKey);
     }
     
     private void SetupStatisticsSubscription(IInventoryStatisticsService inventoryStatisticsService,
@@ -270,6 +283,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
         GlobalAnalyzeSuccess = stats?.AnalyzeSuccess;
         GlobalAnalyzeErrors = stats?.AnalyzeErrors;
         GlobalIdentificationErrors = stats?.IdentificationErrors;
+        GlobalSkippedEntries = stats?.TotalSkippedEntries;
     }
     
     private void ApplySuccessState(int? errors, int? identificationErrors = null)
@@ -282,13 +296,13 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
                        ?? Resources.InventoryProcess_InventorySuccess;
             GlobalMainIcon = "RegularError";
             GlobalMainStatusText = text;
-            GlobalMainIconBrush = _themeService.GetBrush("MainSecondaryColor");
+            GlobalMainIconBrush = _themeService.GetBrush(MainSecondaryColorBrushKey);
         }
         else
         {
             GlobalMainIcon = "SolidCheckCircle";
             GlobalMainStatusText = Resources.InventoryProcess_InventorySuccess;
-            GlobalMainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+            GlobalMainIconBrush = _themeService.GetBrush(HomeCloudSynchronizationBackGroundBrushKey);
         }
     }
     
@@ -332,6 +346,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
         GlobalAnalyzeSuccess = null;
         GlobalAnalyzeErrors = null;
         GlobalIdentificationErrors = null;
+        GlobalSkippedEntries = null;
         GlobalMainIcon = "None";
         GlobalMainStatusText = string.Empty;
         GlobalMainIconBrush = null;
@@ -363,21 +378,19 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
             case InventoryTaskStatus.Error:
             case InventoryTaskStatus.Cancelled:
             case InventoryTaskStatus.NotLaunched:
-                GlobalMainIconBrush = _themeService.GetBrush("MainSecondaryColor");
+                GlobalMainIconBrush = _themeService.GetBrush(MainSecondaryColorBrushKey);
                 
                 break;
             case InventoryTaskStatus.Success:
                 var errors = GlobalAnalyzeErrors ?? 0;
                 var identificationErrors = GlobalIdentificationErrors ?? 0;
                 GlobalMainIconBrush = (errors + identificationErrors) > 0
-                    ? _themeService.GetBrush("MainSecondaryColor")
-                    : _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                    ? _themeService.GetBrush(MainSecondaryColorBrushKey)
+                    : _themeService.GetBrush(HomeCloudSynchronizationBackGroundBrushKey);
                 
                 break;
-            case InventoryTaskStatus.Pending:
-            case InventoryTaskStatus.Running:
             default:
-                GlobalMainIconBrush = _themeService.GetBrush("HomeCloudSynchronizationBackGround");
+                GlobalMainIconBrush = _themeService.GetBrush(HomeCloudSynchronizationBackGroundBrushKey);
                 
                 break;
         }
@@ -398,7 +411,7 @@ public class InventoryGlobalStatusViewModel : ActivatableViewModelBase
         }
     }
     
-    private record ReactiveStreams(
+    private sealed record ReactiveStreams(
         IObservable<InventoryTaskStatus> StatusStream,
         IObservable<SessionStatus> SessionPreparation,
         IObservable<InventoryStatistics?> StatsStream,

@@ -32,7 +32,7 @@ public class BaseInventoryRunner : IBaseInventoryRunner
         bool isOK;
         try
         {
-            await Parallel.ForEachAsync(InventoryProcessData.InventoryBuilders!,
+            await Parallel.ForEachAsync(InventoryProcessData.InventoryBuilders,
                 new ParallelOptions { MaxDegreeOfParallelism = 2, CancellationToken = InventoryProcessData.CancellationTokenSource.Token },
                 async (builder, token) =>
                 {
@@ -46,7 +46,7 @@ public class BaseInventoryRunner : IBaseInventoryRunner
             {
                 InventoryProcessData.IdentificationStatus.OnNext(InventoryTaskStatus.Success);
                 
-                await _inventoryFinishedService.SetLocalInventoryFinished(InventoryProcessData.Inventories!, LocalInventoryModes.Base);
+                await _inventoryFinishedService.SetLocalInventoryFinished(InventoryProcessData.GetInventories(), LocalInventoryModes.Base);
             }
             
             isOK = true;

@@ -119,12 +119,12 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             part.DirectoryDescriptions.Should().HaveCountGreaterThanOrEqualTo(2);
             
             var accessibleDirDesc = part.DirectoryDescriptions
-                .FirstOrDefault(d => d.RelativePath.Contains("accessible"));
+                .FirstOrDefault(d => d.RelativePath.EndsWith("/accessible", StringComparison.Ordinal));
             accessibleDirDesc.Should().NotBeNull();
             accessibleDirDesc.IsAccessible.Should().BeTrue();
             
             var inaccessibleDirDesc = part.DirectoryDescriptions
-                .FirstOrDefault(d => d.RelativePath.Contains("inaccessible"));
+                .FirstOrDefault(d => d.RelativePath.EndsWith("/inaccessible", StringComparison.Ordinal));
             inaccessibleDirDesc.Should().NotBeNull();
             
             if (inaccessibleDirDesc.IsAccessible)
@@ -215,12 +215,12 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             part.DirectoryDescriptions.Should().HaveCountGreaterThanOrEqualTo(2);
             
             var accessibleDirDesc = part.DirectoryDescriptions
-                .FirstOrDefault(d => d.RelativePath.Contains("accessible"));
+                .FirstOrDefault(d => d.RelativePath.EndsWith("/accessible", StringComparison.Ordinal));
             accessibleDirDesc.Should().NotBeNull();
             accessibleDirDesc.IsAccessible.Should().BeTrue();
             
             var inaccessibleDirDesc = part.DirectoryDescriptions
-                .FirstOrDefault(d => d.RelativePath.Contains("inaccessible"));
+                .FirstOrDefault(d => d.RelativePath.EndsWith("/inaccessible", StringComparison.Ordinal));
             inaccessibleDirDesc.Should().NotBeNull();
             
             if (inaccessibleDirDesc.IsAccessible)
@@ -322,11 +322,13 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             subDirDesc.Should().NotBeNull();
             subDirDesc.IsAccessible.Should().BeTrue();
             
-            var accessibleFileDesc = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("accessible.txt"));
+            var accessibleFileDesc = part.FileDescriptions
+                .FirstOrDefault(f => f.RelativePath.EndsWith("/accessible.txt", StringComparison.Ordinal));
             accessibleFileDesc.Should().NotBeNull();
             accessibleFileDesc.IsAccessible.Should().BeTrue();
             
-            var inaccessibleFileDesc = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("inaccessible.txt"));
+            var inaccessibleFileDesc = part.FileDescriptions
+                .FirstOrDefault(f => f.RelativePath.EndsWith("/inaccessible.txt", StringComparison.Ordinal));
             inaccessibleFileDesc.Should().NotBeNull();
             
             if (inaccessibleFileDesc.IsAccessible)
@@ -412,11 +414,13 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             subDirDesc.Should().NotBeNull();
             subDirDesc.IsAccessible.Should().BeTrue();
             
-            var accessibleFileDesc = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("accessible.txt"));
+            var accessibleFileDesc = part.FileDescriptions
+                .FirstOrDefault(f => f.RelativePath.EndsWith("/accessible.txt", StringComparison.Ordinal));
             accessibleFileDesc.Should().NotBeNull();
             accessibleFileDesc.IsAccessible.Should().BeTrue();
             
-            var inaccessibleFileDesc = part.FileDescriptions.FirstOrDefault(f => f.RelativePath.Contains("inaccessible.txt"));
+            var inaccessibleFileDesc = part.FileDescriptions
+                .FirstOrDefault(f => f.RelativePath.EndsWith("/inaccessible.txt", StringComparison.Ordinal));
             inaccessibleFileDesc.Should().NotBeNull();
             
             if (inaccessibleFileDesc.IsAccessible)

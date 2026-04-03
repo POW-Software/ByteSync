@@ -12,7 +12,7 @@
         <inventories:InventoryLocalIdentificationViewModel />
     </Design.DataContext>
 
-    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
         <!-- Status block -->
         <StackPanel Orientation="Vertical" Height="60"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -31,7 +31,7 @@
                Content="{Binding IdentificationStatusText}"
                HorizontalContentAlignment="Center" FontWeight="Bold" Margin="6" />
 
-        <Grid HorizontalAlignment="Center" Margin="3 12 3 0" Height="100">
+        <Grid HorizontalAlignment="Center" Margin="3 12 3 0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -42,24 +42,30 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0" Content="{localizations:Loc InventoryProcess_IdentifiedFiles}"
                    Classes="InventoryStatusDescription" />
-            <Label Grid.Row="0" Grid.Column="1" Content="{Binding IdentifiedFiles, FallbackValue=0}"
-                   HorizontalContentAlignment="Right" />
+            <Border Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                <Label Content="{Binding IdentifiedFiles, FallbackValue=0}"
+                       HorizontalContentAlignment="Right" />
+            </Border>
 
             <Label Grid.Row="1" Grid.Column="0" Content="{localizations:Loc InventoryProcess_IdentifiedDirectories}"
                    Classes="InventoryStatusDescription" />
-            <Label Grid.Row="1" Grid.Column="1" Content="{Binding IdentifiedDirectories, FallbackValue=0}"
-                   HorizontalContentAlignment="Right" />
+            <Border Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                <Label Content="{Binding IdentifiedDirectories, FallbackValue=0}"
+                       HorizontalContentAlignment="Right" />
+            </Border>
 
             <Label Grid.Row="2" Grid.Column="0" Content="{localizations:Loc InventoryProcess_TotalSize}"
                    Classes="InventoryStatusDescription" />
-            <Label Grid.Row="2" Grid.Column="1"
-                   Content="{Binding IdentifiedVolume, FallbackValue=0, 
+            <Border Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Classes="Badge">
+                <Label Content="{Binding IdentifiedVolume, FallbackValue=0, 
                         Converter={StaticResource FormatKbSizeConverter}}"
-                   HorizontalContentAlignment="Right" />
+                       HorizontalContentAlignment="Right" />
+            </Border>
 
             <Label Grid.Row="3" Grid.Column="0" Content="{localizations:Loc InventoryProcess_IdentificationErrors}"
                    Classes="InventoryStatusDescription"
@@ -67,8 +73,20 @@
             <Border Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right"
                     Classes="Badge"
                     Classes.Secondary="{Binding HasIdentificationErrors}">
-                <TextBlock Text="{Binding IdentificationErrors, FallbackValue=0}"
-                           Classes.IsBold="{Binding HasIdentificationErrors}" />
+                <Label Content="{Binding IdentificationErrors, FallbackValue=0}"
+                       HorizontalContentAlignment="Right"
+                       Classes.IsBold="{Binding HasIdentificationErrors}" />
+            </Border>
+
+            <Label Grid.Row="4" Grid.Column="0" Content="{localizations:Loc InventoryProcess_SkippedEntries}"
+                   Classes="InventoryStatusDescription"
+                   Classes.IsBold="{Binding HasSkippedEntriesCount}" />
+            <Border Grid.Row="4" Grid.Column="1" HorizontalAlignment="Right"
+                    Classes="Badge"
+                    Classes.Secondary="{Binding HasSkippedEntriesCount}">
+                <Label Content="{Binding SkippedEntriesCount, FallbackValue=0}"
+                       HorizontalContentAlignment="Right"
+                       Classes.IsBold="{Binding HasSkippedEntriesCount}" />
             </Border>
         </Grid>
     </StackPanel>

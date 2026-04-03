@@ -262,6 +262,20 @@ public class InventoryGlobalStatusViewModelTests
         vm.HasIdentificationErrors.Should().BeTrue();
         vm.GlobalMainIcon.Should().Be("RegularError");
     }
+
+    [Test]
+    public void HasGlobalSkippedEntries_ComputedFromStats()
+    {
+        var vm = CreateVm();
+
+        _statsSubject.OnNext(new InventoryStatistics { TotalSkippedEntries = 4 });
+        vm.HasGlobalSkippedEntries.Should().BeTrue();
+        vm.GlobalSkippedEntries.Should().Be(4);
+
+        _statsSubject.OnNext(new InventoryStatistics { TotalSkippedEntries = 0 });
+        vm.HasGlobalSkippedEntries.Should().BeFalse();
+        vm.GlobalSkippedEntries.Should().Be(0);
+    }
     
     [Test]
     public async Task AbortCommand_UserConfirms_RequestsAbort()
