@@ -5,7 +5,6 @@ using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Business.Trust.Connections;
 using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Controls.Json;
-using ByteSync.Common.Business.EndPoints;
 using ByteSync.Functions.Http;
 using ByteSync.Functions.UnitTests.TestHelpers;
 using ByteSync.ServerCommon.Business.Auth;
@@ -20,26 +19,7 @@ namespace ByteSync.Functions.UnitTests.Http;
 [TestFixture]
 public class TrustFunctionTests
 {
-    private static FunctionContext BuildFunctionContextWithClient()
-    {
-        var mockContext = new Mock<FunctionContext>();
-        var items = new Dictionary<object, object>();
-        mockContext.SetupGet(c => c.Items).Returns(items);
-        
-        var client = new Client("cli", "cliInst", "1.0.0", OSPlatforms.Windows, "127.0.0.1");
-        items[AuthConstants.FUNCTION_CONTEXT_CLIENT] = client;
-        
-        return mockContext.Object;
-    }
-    
-    private static async Task WriteBodyAsync<T>(FakeHttpRequestData request, T body)
-    {
-        var json = JsonHelper.Serialize(body);
-        var bytes = Encoding.UTF8.GetBytes(json);
-        request.Body.SetLength(0);
-        await request.Body.WriteAsync(bytes, 0, bytes.Length);
-        request.Body.Position = 0;
-    }
+
     
     [Test]
     public async Task StartTrustCheck_ForwardsRequest_AndReturnsOk()
@@ -52,11 +32,11 @@ public class TrustFunctionTests
             .ReturnsAsync(new StartTrustCheckResult { IsOK = true });
         
         var function = new TrustFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new TrustCheckParameters { SessionId = "S1", MembersInstanceIdsToCheck = ["VI"] };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.StartTrustCheck(request, context);
         
@@ -76,11 +56,11 @@ public class TrustFunctionTests
             .Returns(Task.CompletedTask);
         
         var function = new TrustFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new GiveMemberPublicKeyCheckDataParameters { SessionId = "S1", PublicKeyCheckData = new PublicKeyCheckData() };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.GiveMemberPublicKeyCheckData(request, context);
         
@@ -100,11 +80,11 @@ public class TrustFunctionTests
             .Returns(Task.CompletedTask);
         
         var function = new TrustFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new SendDigitalSignaturesParameters { DataId = "S1", DigitalSignatureCheckInfos = new List<DigitalSignatureCheckInfo>() };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.SendDigitalSignatures(request, context);
         
@@ -124,11 +104,11 @@ public class TrustFunctionTests
             .Returns(Task.CompletedTask);
         
         var function = new TrustFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new SetAuthCheckedParameters { SessionId = "S1" };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.SetAuthChecked(request, context);
         
@@ -148,11 +128,11 @@ public class TrustFunctionTests
             .Returns(Task.CompletedTask);
         
         var function = new TrustFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new RequestTrustProcessParameters { SessionId = "S1" };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.RequestTrustPublicKey(request, context);
         
@@ -172,11 +152,11 @@ public class TrustFunctionTests
             .Returns(Task.CompletedTask);
         
         var function = new TrustFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new PublicKeyValidationParameters { SessionId = "S1" };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.InformPublicKeyValidationIsFinished(request, context);
         
@@ -196,7 +176,7 @@ public class TrustFunctionTests
             .Returns(Task.CompletedTask);
         
         var function = new TrustFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new InformProtocolVersionIncompatibleParameters
@@ -207,7 +187,7 @@ public class TrustFunctionTests
             MemberProtocolVersion = ProtocolVersion.CURRENT,
             JoinerProtocolVersion = 0
         };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.InformProtocolVersionIncompatible(request, context);
         

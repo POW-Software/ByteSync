@@ -17,26 +17,7 @@ namespace ByteSync.Functions.UnitTests.Http;
 [TestFixture]
 public class FileTransferFunctionTests
 {
-    private static FunctionContext BuildFunctionContextWithClient()
-    {
-        var mockContext = new Mock<FunctionContext>();
-        var items = new Dictionary<object, object>();
-        mockContext.SetupGet(c => c.Items).Returns(items);
-        
-        var client = new Client("cli", "cliInst", "1.0.0", OSPlatforms.Windows, "127.0.0.1");
-        items[AuthConstants.FUNCTION_CONTEXT_CLIENT] = client;
-        
-        return mockContext.Object;
-    }
-    
-    private static async Task WriteBodyAsync<T>(FakeHttpRequestData request, T body)
-    {
-        var json = JsonHelper.Serialize(body);
-        var bytes = Encoding.UTF8.GetBytes(json);
-        request.Body.SetLength(0);
-        await request.Body.WriteAsync(bytes, 0, bytes.Length);
-        request.Body.Position = 0;
-    }
+
 
     [Test]
     public async Task GetUploadFileUrl_ForwardsRequest_AndReturnsOk()
@@ -50,11 +31,11 @@ public class FileTransferFunctionTests
             .ReturnsAsync("http://upload.url");
         
         var function = new FileTransferFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new TransferParameters { SharedFileDefinition = new SharedFileDefinition { Id = "F1", SharedFileType = SharedFileTypes.FullInventory } };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.GetUploadFileUrl(request, context, "S1");
         
@@ -75,11 +56,11 @@ public class FileTransferFunctionTests
             .ReturnsAsync(new FileStorageLocation("http://abc", StorageProvider.AzureBlobStorage));
         
         var function = new FileTransferFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new TransferParameters { SharedFileDefinition = new SharedFileDefinition { Id = "F1" } };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.GetUploadFileStorageLocation(request, context, "S1");
         
@@ -100,11 +81,11 @@ public class FileTransferFunctionTests
             .ReturnsAsync("http://download.url");
         
         var function = new FileTransferFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new TransferParameters { SharedFileDefinition = new SharedFileDefinition { Id = "F1" } };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.GetDownloadFileUrl(request, context, "S1");
         
@@ -125,11 +106,11 @@ public class FileTransferFunctionTests
             .ReturnsAsync(new FileStorageLocation("http://xyz", StorageProvider.AzureBlobStorage));
         
         var function = new FileTransferFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new TransferParameters { SharedFileDefinition = new SharedFileDefinition { Id = "F1" } };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.GetDownloadFileStorageLocation(request, context, "S1");
         
@@ -150,11 +131,11 @@ public class FileTransferFunctionTests
             .Returns(Task.CompletedTask);
         
         var function = new FileTransferFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new TransferParameters { SharedFileDefinition = new SharedFileDefinition { Id = "F1" } };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.AssertFilePartIsUploaded(request, context, "S1");
         
@@ -175,11 +156,11 @@ public class FileTransferFunctionTests
             .Returns(Task.CompletedTask);
         
         var function = new FileTransferFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new TransferParameters { SharedFileDefinition = new SharedFileDefinition { Id = "F1" } };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.AssertFilePartIsDownloaded(request, context, "S1");
         
@@ -200,11 +181,11 @@ public class FileTransferFunctionTests
             .Returns(Task.CompletedTask);
         
         var function = new FileTransferFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new TransferParameters { SharedFileDefinition = new SharedFileDefinition { Id = "F1" } };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.AssertUploadIsFinished(request, context, "S1");
         
@@ -225,11 +206,11 @@ public class FileTransferFunctionTests
             .Returns(Task.CompletedTask);
         
         var function = new FileTransferFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new TransferParameters { SharedFileDefinition = new SharedFileDefinition { Id = "F1" } };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.AssertDownloadIsFinished(request, context, "S1");
         

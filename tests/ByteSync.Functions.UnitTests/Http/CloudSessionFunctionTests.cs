@@ -20,26 +20,7 @@ namespace ByteSync.Functions.UnitTests.Http;
 [TestFixture]
 public class CloudSessionFunctionTests
 {
-    private static FunctionContext BuildFunctionContextWithClient()
-    {
-        var mockContext = new Mock<FunctionContext>();
-        var items = new Dictionary<object, object>();
-        mockContext.SetupGet(c => c.Items).Returns(items);
-        
-        var client = new Client("cli", "cliInst", "1.0.0", OSPlatforms.Windows, "127.0.0.1");
-        items[AuthConstants.FUNCTION_CONTEXT_CLIENT] = client;
-        
-        return mockContext.Object;
-    }
-    
-    private static async Task WriteBodyAsync<T>(FakeHttpRequestData request, T body)
-    {
-        var json = JsonHelper.Serialize(body);
-        var bytes = Encoding.UTF8.GetBytes(json);
-        request.Body.SetLength(0);
-        await request.Body.WriteAsync(bytes, 0, bytes.Length);
-        request.Body.Position = 0;
-    }
+
     
     [Test]
     public async Task Create_ReturnsOk_AndSendsRequest()
@@ -72,7 +53,7 @@ public class CloudSessionFunctionTests
             });
         
         var function = new CloudSessionFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new CreateCloudSessionParameters
@@ -83,7 +64,7 @@ public class CloudSessionFunctionTests
             CreatorPublicKeyInfo = new PublicKeyInfo { ClientId = "cli", PublicKey = [5, 6], ProtocolVersion = 1 },
             CreatorPrivateData = new EncryptedSessionMemberPrivateData { Id = "priv", Data = [7], IV = [8] }
         };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.Create(request, context);
         
@@ -105,7 +86,7 @@ public class CloudSessionFunctionTests
             .ReturnsAsync(JoinSessionResult.BuildProcessingNormally());
         
         var function = new CloudSessionFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new AskCloudSessionPasswordExchangeKeyParameters
@@ -115,7 +96,7 @@ public class CloudSessionFunctionTests
             LobbyId = "L2",
             ProfileClientId = "prof"
         };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.AskPasswordExchangeKey(request, context, "S1");
         
@@ -148,7 +129,7 @@ public class CloudSessionFunctionTests
             EncryptedAesKey = [10, 11],
             FinalizationPassword = "pwd"
         };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.ValidateJoinCloudSession(request, context, "S2");
         
@@ -168,7 +149,7 @@ public class CloudSessionFunctionTests
             .ReturnsAsync(FinalizeJoinSessionResult.BuildFrom(FinalizeJoinSessionStatuses.FinalizeJoinSessionSucess));
         
         var function = new CloudSessionFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new FinalizeJoinCloudSessionParameters
@@ -179,7 +160,7 @@ public class CloudSessionFunctionTests
             FinalizationPassword = "finalPwd",
             EncryptedSessionMemberPrivateData = new EncryptedSessionMemberPrivateData { Id = "mid", Data = [12], IV = [13] }
         };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.FinalizeJoinCloudSession(request, context, "S3");
         
@@ -201,7 +182,7 @@ public class CloudSessionFunctionTests
             .ReturnsAsync(JoinSessionResult.BuildProcessingNormally());
         
         var function = new CloudSessionFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new AskJoinCloudSessionParameters
@@ -211,7 +192,7 @@ public class CloudSessionFunctionTests
             ValidatorInstanceId = "validator3",
             EncryptedPassword = [14, 15]
         };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.AskJoinCloudSession(request, context, "S4");
         
@@ -233,7 +214,7 @@ public class CloudSessionFunctionTests
             .ReturnsAsync(Unit.Value);
         
         var function = new CloudSessionFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new GiveCloudSessionPasswordExchangeKeyParameters
@@ -243,7 +224,7 @@ public class CloudSessionFunctionTests
             ValidatorInstanceId = "validator4",
             PublicKeyInfo = new PublicKeyInfo { ClientId = "cli", PublicKey = [16], ProtocolVersion = 3 }
         };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.GiveCloudSessionPasswordExchangeKey(request, context, "S5");
         
@@ -264,10 +245,10 @@ public class CloudSessionFunctionTests
             .ReturnsAsync(Unit.Value);
         
         var function = new CloudSessionFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
-        await WriteBodyAsync(request, "bad-client-inst");
+        await HttpFunctionTestHelper.WriteBodyAsync(request, "bad-client-inst");
         
         var response = await function.InformPasswordIsWrong(request, context, "S6");
         
@@ -288,11 +269,11 @@ public class CloudSessionFunctionTests
             .ReturnsAsync(true);
         
         var function = new CloudSessionFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var settings = new EncryptedSessionSettings { Id = "set1", Data = [17], IV = [18] };
-        await WriteBodyAsync(request, settings);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, settings);
         
         var response = await function.UpdateSettings(request, context, "S7");
         
@@ -310,11 +291,11 @@ public class CloudSessionFunctionTests
             .ReturnsAsync(false);
         
         var function = new CloudSessionFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var settings = new EncryptedSessionSettings { Id = "set2", Data = [19], IV = [20] };
-        await WriteBodyAsync(request, settings);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, settings);
         
         var response = await function.UpdateSettings(request, context, "S8");
         
@@ -332,7 +313,7 @@ public class CloudSessionFunctionTests
             .Returns(Task.FromResult(Unit.Value));
         
         var function = new CloudSessionFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var response = await function.Quit(request, context, "S9");
@@ -353,7 +334,7 @@ public class CloudSessionFunctionTests
             .Returns(Task.FromResult(Unit.Value));
         
         var function = new CloudSessionFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var response = await function.Reset(request, context, "S10");

@@ -18,26 +18,7 @@ namespace ByteSync.Functions.UnitTests.Http;
 [TestFixture]
 public class InventoryFunctionTests
 {
-    private static FunctionContext BuildFunctionContextWithClient()
-    {
-        var mockContext = new Mock<FunctionContext>();
-        var items = new Dictionary<object, object>();
-        mockContext.SetupGet(c => c.Items).Returns(items);
-        
-        var client = new Client("cli", "cliInst", "1.0.0", OSPlatforms.Windows, "127.0.0.1");
-        items[AuthConstants.FUNCTION_CONTEXT_CLIENT] = client;
-        
-        return mockContext.Object;
-    }
-    
-    private static async Task WriteBodyAsync<T>(FakeHttpRequestData request, T body)
-    {
-        var json = JsonHelper.Serialize(body);
-        var bytes = Encoding.UTF8.GetBytes(json);
-        request.Body.SetLength(0);
-        await request.Body.WriteAsync(bytes, 0, bytes.Length);
-        request.Body.Position = 0;
-    }
+
 
     [Test]
     public async Task Start_ForwardsRequest_AndReturnsOk()
@@ -51,7 +32,7 @@ public class InventoryFunctionTests
             .ReturnsAsync(StartInventoryResult.BuildOK());
         
         var function = new InventoryFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var response = await function.Start(request, context, "S1");
@@ -73,11 +54,11 @@ public class InventoryFunctionTests
             .ReturnsAsync(true);
         
         var function = new InventoryFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var dataSource = new EncryptedDataSource { Id = "DS1", Data = [1] };
-        await WriteBodyAsync(request, dataSource);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, dataSource);
         
         var response = await function.AddDataSource(request, context, "S1", "CI1", "DN1");
         
@@ -98,11 +79,11 @@ public class InventoryFunctionTests
             .ReturnsAsync(true);
         
         var function = new InventoryFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var dataSource = new EncryptedDataSource { Id = "DS1", Data = [1] };
-        await WriteBodyAsync(request, dataSource);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, dataSource);
         
         var response = await function.RemoveDataSource(request, context, "S1", "CI1", "DN1");
         
@@ -145,11 +126,11 @@ public class InventoryFunctionTests
             .ReturnsAsync(true);
         
         var function = new InventoryFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var dataNode = new EncryptedDataNode { Id = "DN1", Data = [1] };
-        await WriteBodyAsync(request, dataNode);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, dataNode);
         
         var response = await function.AddDataNode(request, context, "S1", "CI1");
         
@@ -170,11 +151,11 @@ public class InventoryFunctionTests
             .ReturnsAsync(true);
         
         var function = new InventoryFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var dataNode = new EncryptedDataNode { Id = "DN1", Data = [1] };
-        await WriteBodyAsync(request, dataNode);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, dataNode);
         
         var response = await function.RemoveDataNode(request, context, "S1", "CI1");
         

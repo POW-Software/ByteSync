@@ -17,26 +17,7 @@ namespace ByteSync.Functions.UnitTests.Http;
 [TestFixture]
 public class CloudSessionProfileFunctionTests
 {
-    private static FunctionContext BuildFunctionContextWithClient()
-    {
-        var mockContext = new Mock<FunctionContext>();
-        var items = new Dictionary<object, object>();
-        mockContext.SetupGet(c => c.Items).Returns(items);
-        
-        var client = new Client("cli", "cliInst", "1.0.0", OSPlatforms.Windows, "127.0.0.1");
-        items[AuthConstants.FUNCTION_CONTEXT_CLIENT] = client;
-        
-        return mockContext.Object;
-    }
-    
-    private static async Task WriteBodyAsync<T>(FakeHttpRequestData request, T body)
-    {
-        var json = JsonHelper.Serialize(body);
-        var bytes = Encoding.UTF8.GetBytes(json);
-        request.Body.SetLength(0);
-        await request.Body.WriteAsync(bytes, 0, bytes.Length);
-        request.Body.Position = 0;
-    }
+
 
     [Test]
     public async Task CreateCloudSessionProfile_ForwardsRequest_AndReturnsOk()
@@ -48,11 +29,11 @@ public class CloudSessionProfileFunctionTests
             .ReturnsAsync(new CreateCloudSessionProfileResult());
         
         var function = new CloudSessionProfileFunction(serviceMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var sessionId = "S1";
-        await WriteBodyAsync(request, sessionId);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, sessionId);
         
         var response = await function.CreateCloudSessionProfile(request, context);
         
@@ -72,11 +53,11 @@ public class CloudSessionProfileFunctionTests
             .ReturnsAsync(new CloudSessionProfileData());
         
         var function = new CloudSessionProfileFunction(serviceMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new GetCloudSessionProfileDataParameters { SessionId = "P1", CloudSessionProfileId = "PC1" };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.GetCloudSessionProfileData(request, context, "P1");
         
@@ -97,11 +78,11 @@ public class CloudSessionProfileFunctionTests
             .ReturnsAsync("password123");
         
         var function = new CloudSessionProfileFunction(serviceMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new GetProfileDetailsPasswordParameters { ProfileClientId = "PC1" };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.GetProfileDetailsPassword(request, context, "P1");
         
@@ -122,11 +103,11 @@ public class CloudSessionProfileFunctionTests
             .ReturnsAsync(true);
         
         var function = new CloudSessionProfileFunction(serviceMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new DeleteCloudSessionProfileParameters { ProfileClientId = "PC1" };
-        await WriteBodyAsync(request, parameters);
+        await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.DeleteCloudSessionProfile(request, context, "P1");
         

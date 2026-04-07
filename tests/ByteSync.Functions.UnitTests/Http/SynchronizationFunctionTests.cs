@@ -15,17 +15,7 @@ namespace ByteSync.Functions.UnitTests.Http;
 [TestFixture]
 public class SynchronizationFunctionTests
 {
-    private static FunctionContext BuildFunctionContextWithClient()
-    {
-        var mockContext = new Mock<FunctionContext>();
-        var items = new Dictionary<object, object>();
-        mockContext.SetupGet(c => c.Items).Returns(items);
 
-        var client = new Client("cli", "cliInst", "1.0.0", ByteSync.Common.Business.Misc.OSPlatforms.Windows, "127.0.0.1");
-        items[AuthConstants.FUNCTION_CONTEXT_CLIENT] = client;
-
-        return mockContext.Object;
-    }
 
     [Test]
     public async Task LocalCopyIsDone_ForwardsMetrics_AndReturnsOk()
@@ -39,7 +29,7 @@ public class SynchronizationFunctionTests
             .Returns(Task.CompletedTask);
 
         var function = new SynchronizationFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
 
         var request = new FakeHttpRequestData(context);
         var body = new SynchronizationActionRequest
@@ -84,7 +74,7 @@ public class SynchronizationFunctionTests
             .Returns(Task.CompletedTask);
 
         var function = new SynchronizationFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
 
         var request = new FakeHttpRequestData(context);
         var body = new SynchronizationActionRequest
@@ -122,7 +112,7 @@ public class SynchronizationFunctionTests
             .Returns(Task.CompletedTask);
 
         var function = new SynchronizationFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
 
         var request = new FakeHttpRequestData(context);
         var body = new SynchronizationStartRequest
@@ -167,7 +157,7 @@ public class SynchronizationFunctionTests
             .Returns(Task.CompletedTask);
 
         var function = new SynchronizationFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
 
         var request = new FakeHttpRequestData(context);
         var body = new SynchronizationActionRequest
@@ -205,7 +195,7 @@ public class SynchronizationFunctionTests
             .Returns(Task.CompletedTask);
 
         var function = new SynchronizationFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
 
         var request = new FakeHttpRequestData(context);
         var body = new SynchronizationActionRequest
@@ -243,7 +233,7 @@ public class SynchronizationFunctionTests
             .Returns(Task.CompletedTask);
 
         var function = new SynchronizationFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
 
         // Act
@@ -267,7 +257,7 @@ public class SynchronizationFunctionTests
             .Returns(Task.CompletedTask);
 
         var function = new SynchronizationFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
 
         // Act
@@ -291,7 +281,7 @@ public class SynchronizationFunctionTests
             .Returns(Task.CompletedTask);
 
         var function = new SynchronizationFunction(mediatorMock.Object);
-        var context = BuildFunctionContextWithClient();
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
 
         var request = new FakeHttpRequestData(context);
         var body = new SynchronizationActionRequest
