@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
@@ -32,6 +32,7 @@ public class TrustFunction
         var result = await _mediator.Send(request);
         
         var response = req.CreateResponse();
+        response.StatusCode = HttpStatusCode.OK;
         await response.WriteAsJsonAsync(result);
         
         return response;

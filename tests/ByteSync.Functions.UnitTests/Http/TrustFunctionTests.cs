@@ -5,6 +5,7 @@ using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Business.Trust.Connections;
 using ByteSync.Common.Business.Versions;
 using ByteSync.Common.Controls.Json;
+using ByteSync.Common.Business.EndPoints;
 using ByteSync.Functions.Http;
 using ByteSync.Functions.UnitTests.TestHelpers;
 using ByteSync.ServerCommon.Business.Auth;
