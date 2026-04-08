@@ -8,11 +8,12 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using ByteSync.TestsCommon;
 
 namespace ByteSync.Client.UnitTests.Services.Communications.Transfers.Downloading;
 
 [TestFixture]
-public class SynchronizationDownloadFinalizerTests
+public class SynchronizationDownloadFinalizerTests : AbstractTester
 {
     private Mock<IDeltaManager> _deltaManager = null!;
     private Mock<ITemporaryFileManagerFactory> _temporaryFileManagerFactory = null!;
@@ -24,6 +25,7 @@ public class SynchronizationDownloadFinalizerTests
     [SetUp]
     public void Setup()
     {
+        CreateTestDirectory();
         _deltaManager = new Mock<IDeltaManager>(MockBehavior.Strict);
         _temporaryFileManagerFactory = new Mock<ITemporaryFileManagerFactory>(MockBehavior.Strict);
         _fileDatesSetter = new Mock<IFileDatesSetter>(MockBehavior.Strict);
@@ -276,15 +278,15 @@ public class SynchronizationDownloadFinalizerTests
         writer.Write(content);
     }
     
-    private static string GetTempFilePath()
+    private string GetTempFilePath()
     {
-        var path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        var path = Path.Combine(TestDirectory.FullName, Guid.NewGuid().ToString("N"));
         
         return path;
     }
     
-    private static string GetNewTempPath(string extension)
+    private string GetNewTempPath(string extension)
     {
-        return Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + extension);
+        return Path.Combine(TestDirectory.FullName, Guid.NewGuid().ToString("N") + extension);
     }
 }

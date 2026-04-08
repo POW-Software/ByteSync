@@ -12,11 +12,12 @@ using DynamicData;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using ByteSync.TestsCommon;
 
 namespace ByteSync.Client.UnitTests.ViewModels.Sessions.DataNodes;
 
 [TestFixture]
-public class DataNodeSourcesViewModelTests
+public class DataNodeSourcesViewModelTests : AbstractTester
 {
     private Mock<ISessionService> _sessionServiceMock = null!;
     private Mock<IDataSourceService> _dataSourceServiceMock = null!;
@@ -29,6 +30,7 @@ public class DataNodeSourcesViewModelTests
     [SetUp]
     public void SetUp()
     {
+        CreateTestDirectory();
         _dataNode = new DataNode { Id = "DN_1" };
         _sessionServiceMock = new Mock<ISessionService>();
         _dataSourceServiceMock = new Mock<IDataSourceService>();
@@ -58,7 +60,7 @@ public class DataNodeSourcesViewModelTests
     public async Task AddDirectoryCommand_WhenUserSelectsDirectory_ShouldCallCreateAndTryAddDataSource()
     {
         // Arrange
-        var selectedPath = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar);
+        var selectedPath = TestDirectory.FullName.TrimEnd(Path.DirectorySeparatorChar);
         _fileDialogServiceMock
             .Setup(f => f.ShowOpenFolderDialogAsync(It.IsAny<string>()))
             .ReturnsAsync(selectedPath);

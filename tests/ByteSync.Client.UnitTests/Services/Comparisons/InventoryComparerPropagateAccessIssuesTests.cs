@@ -7,32 +7,25 @@ using ByteSync.Common.Controls.Json;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Comparisons;
+using ByteSync.TestsCommon;
 using FluentAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Comparisons;
 
 [TestFixture]
-public class InventoryComparerPropagateAccessIssuesTests
+public class InventoryComparerPropagateAccessIssuesTests : AbstractTester
 {
     private string _tempDirectory = null!;
     
     [SetUp]
     public void Setup()
     {
-        _tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        Directory.CreateDirectory(_tempDirectory);
+        CreateTestDirectory();
+        _tempDirectory = TestDirectory.FullName;
     }
     
-    [TearDown]
-    public void TearDown()
-    {
-        if (Directory.Exists(_tempDirectory))
-        {
-            Directory.Delete(_tempDirectory, true);
-        }
-    }
-    
+
     private static string CreateInventoryZipFile(string directory, Inventory inventory)
     {
         var zipPath = Path.Combine(directory, $"{Guid.NewGuid()}.zip");

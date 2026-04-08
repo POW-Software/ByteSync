@@ -8,17 +8,19 @@ using ByteSync.Services.Configurations;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using ByteSync.TestsCommon;
 
 namespace ByteSync.Client.UnitTests.Services.Configurations;
 
 [TestFixture]
-public class LocalApplicationDataManagerTests
+public class LocalApplicationDataManagerTests : AbstractTester
 {
     private Mock<IEnvironmentService> _environmentServiceMock = null!;
     
     [SetUp]
     public void SetUp()
     {
+        CreateTestDirectory();
         _environmentServiceMock = new Mock<IEnvironmentService>();
         _environmentServiceMock.SetupGet(e => e.ExecutionMode).Returns(ExecutionMode.Regular);
         _environmentServiceMock.SetupProperty(e => e.Arguments, []);
@@ -81,7 +83,7 @@ public class LocalApplicationDataManagerTests
     public void ApplicationDataPath_Should_Append_CustomSuffix_When_DebugArgumentProvided(OSPlatforms osPlatform)
     {
         // Arrange
-        var tempRoot = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        var tempRoot = TestDirectory.FullName;
         Directory.CreateDirectory(tempRoot);
         var assemblyDirectory = Directory.CreateDirectory(Path.Combine(tempRoot, "Portable")).FullName;
         var assemblyPath = Path.Combine(assemblyDirectory, "ByteSync.exe");
@@ -131,7 +133,7 @@ public class LocalApplicationDataManagerTests
     public void ApplicationDataPath_Should_Create_DebugDirectory_When_DebugModeWithoutOverride(OSPlatforms osPlatform)
     {
         // Arrange
-        var tempRoot = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        var tempRoot = TestDirectory.FullName;
         Directory.CreateDirectory(tempRoot);
         var assemblyDirectory = Directory.CreateDirectory(Path.Combine(tempRoot, "Portable")).FullName;
         var assemblyPath = Path.Combine(assemblyDirectory, "ByteSync.exe");
@@ -180,7 +182,7 @@ public class LocalApplicationDataManagerTests
     public void LogFilePath_Should_Return_MostRecent_Log_Excluding_Debug()
     {
         // Arrange
-        var tempRoot = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        var tempRoot = TestDirectory.FullName;
         Directory.CreateDirectory(tempRoot);
         var assemblyDirectory = Directory.CreateDirectory(Path.Combine(tempRoot, "Portable")).FullName;
         var assemblyPath = Path.Combine(assemblyDirectory, "ByteSync.exe");
@@ -243,7 +245,7 @@ public class LocalApplicationDataManagerTests
     public void DebugLogFilePath_Should_Return_MostRecent_Debug_Log()
     {
         // Arrange
-        var tempRoot = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        var tempRoot = TestDirectory.FullName;
         Directory.CreateDirectory(tempRoot);
         var assemblyDirectory = Directory.CreateDirectory(Path.Combine(tempRoot, "Portable")).FullName;
         var assemblyPath = Path.Combine(assemblyDirectory, "ByteSync.exe");

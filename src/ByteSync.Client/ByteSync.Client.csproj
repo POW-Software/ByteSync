@@ -109,7 +109,6 @@
             <Generator>ResXFileCodeGenerator</Generator>
             <LastGenOutput>Resources.Designer.cs</LastGenOutput>
         </EmbeddedResource>
-        <None Remove="local.settings.json"/>
         <EmbeddedResource Include="local.settings.json"/>
         <EmbeddedResource Include="Services\Inventories\noise-files.json"/>
     </ItemGroup>

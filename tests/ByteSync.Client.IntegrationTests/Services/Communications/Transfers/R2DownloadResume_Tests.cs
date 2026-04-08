@@ -6,6 +6,7 @@ using ByteSync.Client.IntegrationTests.TestHelpers.Http;
 using ByteSync.Common.Business.Actions;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.SharedFiles;
+using ByteSync.TestsCommon;
 using ByteSync.DependencyInjection;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Factories;
@@ -22,13 +23,14 @@ using ByteSync.Services.Communications.Transfers.Uploading;
 
 namespace ByteSync.Client.IntegrationTests.Services.Communications.Transfers;
 
-public class R2DownloadResume_Tests
+public class R2DownloadResume_Tests : AbstractTester
 {
     private ILifetimeScope _clientScope = null!;
 
     [SetUp]
     public void SetUp()
     {
+        CreateTestDirectory();
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (ByteSync.Services.ContainerProvider.Container == null)
         {
@@ -99,7 +101,7 @@ public class R2DownloadResume_Tests
             Source = new SharedDataPart
             {
                 ClientInstanceId = shared.ClientInstanceId,
-                RootPath = Path.GetTempPath(),
+                RootPath = TestDirectory.FullName,
                 InventoryPartType = FileSystemTypes.File,
                 Name = "itests",
                 InventoryCodeAndId = "itests"
@@ -113,7 +115,7 @@ public class R2DownloadResume_Tests
         sag.Targets.Add(new SharedDataPart
         {
             ClientInstanceId = shared.ClientInstanceId,
-            RootPath = Path.GetTempFileName(),
+            RootPath = Path.Combine(TestDirectory.FullName, Guid.NewGuid().ToString("N") + ".tmp"),
             InventoryPartType = FileSystemTypes.File,
             Name = "itests",
             InventoryCodeAndId = "itests"
@@ -123,7 +125,7 @@ public class R2DownloadResume_Tests
 
         // First upload a file so we can download it
         var inputContent = new string('z', 1_000_000);
-        var tempFile = Path.GetTempFileName();
+        var tempFile = Path.Combine(TestDirectory.FullName, Guid.NewGuid().ToString("N") + ".tmp");
         await File.WriteAllTextAsync(tempFile, inputContent);
 
         var uploader = uploaderFactory.Build(tempFile, shared);
