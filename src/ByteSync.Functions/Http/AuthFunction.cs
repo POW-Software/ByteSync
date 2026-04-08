@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using ByteSync.Common.Business.Auth;
 using ByteSync.Functions.Helpers.Misc;
 using ByteSync.ServerCommon.Commands.Authentication;
@@ -30,11 +30,12 @@ public class AuthFunction
         var response = req.CreateResponse();
         if (authResult.IsSuccess)
         {
-            await response.WriteAsJsonAsync(authResult, HttpStatusCode.OK);
+            await response.WriteAsJsonAsync(authResult);
         }
         else
         {
-            await response.WriteAsJsonAsync(authResult, HttpStatusCode.Unauthorized);
+            response.StatusCode = HttpStatusCode.Unauthorized;
+            await response.WriteAsJsonAsync(authResult);
         }
         
         return response;
@@ -52,11 +53,12 @@ public class AuthFunction
         var response = req.CreateResponse();
         if (authResult.IsSuccess)
         {
-            await response.WriteAsJsonAsync(authResult, HttpStatusCode.OK);
+            await response.WriteAsJsonAsync(authResult);
         }
         else
         {
-            await response.WriteAsJsonAsync(authResult, HttpStatusCode.Unauthorized);
+            response.StatusCode = HttpStatusCode.Unauthorized;
+            await response.WriteAsJsonAsync(authResult);
         }
         
         return response;

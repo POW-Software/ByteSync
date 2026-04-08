@@ -24,7 +24,7 @@ public class SessionMemberFunction
     {
         var result = await _mediator.Send(new GetMembersInstanceIdsRequest(sessionId));
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(result);
         return response;
     }
     
@@ -35,7 +35,7 @@ public class SessionMemberFunction
     {
         var result = await _mediator.Send(new GetMembersRequest(sessionId));
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(result);
         return response;
     }
 
@@ -53,7 +53,7 @@ public class SessionMemberFunction
         var result = await _mediator.Send(request);
 
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(result);
         
         return response;
     }

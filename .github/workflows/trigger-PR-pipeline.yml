@@ -32,10 +32,10 @@ jobs:
           mkdir -p src/ByteSync.Client
           echo "$CLIENT_LOCAL_SETTINGS_JSON" > src/ByteSync.Client/local.settings.json
 
-      - name: Setup .NET 8 Environment
+      - name: Setup .NET 10 Environment
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Install SonarScanner for .NET
         run: |
@@ -98,10 +98,10 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
-      - name: Setup .NET 8 Environment
+      - name: Setup .NET 10 Environment
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Create Config Files
         shell: bash

@@ -31,7 +31,7 @@ public class FileTransferFunction
         var url = await _mediator.Send(request);
            
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(url, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(url);
 
         return response;
     }
@@ -49,7 +49,7 @@ public class FileTransferFunction
         var request = new GetUploadFileStorageLocationRequest(sessionId, client, transferParameters);
         var responseObject = await _mediator.Send(request);
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(responseObject, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(responseObject);
 
         return response;
     }
@@ -68,7 +68,7 @@ public class FileTransferFunction
         var url = await _mediator.Send(request);
            
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(url, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(url);
 
         return response;
     }
@@ -86,7 +86,7 @@ public class FileTransferFunction
         var request = new GetDownloadFileStorageLocationRequest(sessionId, client, transferParameters);
         var responseObject = await _mediator.Send(request);
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(responseObject, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(responseObject);
 
         return response;
     }

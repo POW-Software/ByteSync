@@ -35,7 +35,7 @@ public class LobbyFunction
         var result = await _mediator.Send(request);
 
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(result, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(result);
         
         return response;
     }

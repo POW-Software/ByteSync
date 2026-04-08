@@ -23,7 +23,7 @@ public class AnnouncementFunction
         var announcements = await _mediator.Send(new GetActiveAnnouncementsRequest());
 
         var response = req.CreateResponse();
-        await response.WriteAsJsonAsync(announcements, HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(announcements);
         return response;
     }
 }
