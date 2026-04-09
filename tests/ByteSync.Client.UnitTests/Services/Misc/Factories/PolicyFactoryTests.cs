@@ -33,7 +33,7 @@ public class PolicyFactoryTests
         var policy = _factory.BuildFileUploadPolicy();
         
         using var cts = new CancellationTokenSource();
-        cts.CancelAfter(1000);
+        cts.CancelAfter(50);
         
         Func<Task> act = async () =>
         {
@@ -62,7 +62,7 @@ public class PolicyFactoryTests
         var policy = _factory.BuildFileUploadPolicy();
         
         using var cts = new CancellationTokenSource();
-        cts.CancelAfter(1000);
+        cts.CancelAfter(50);
         
         Func<Task> act = async () => { await policy.ExecuteAsync(async _ => { throw new ApiException("api error", status); }, cts.Token); };
         
