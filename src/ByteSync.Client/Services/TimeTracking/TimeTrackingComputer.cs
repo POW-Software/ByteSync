@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ByteSync.Business.Misc;
 using ByteSync.Interfaces.Controls.TimeTracking;
@@ -11,10 +12,12 @@ public class TimeTrackingComputer : ITimeTrackingComputer
     private readonly BehaviorSubject<bool> _isStarted;
     
     private readonly IDataTrackingStrategy _dataTrackingStrategy;
+    private readonly IScheduler _scheduler;
     
-    public TimeTrackingComputer(IDataTrackingStrategy dataTrackingStrategy)
+    public TimeTrackingComputer(IDataTrackingStrategy dataTrackingStrategy, IScheduler? scheduler = null)
     {
         _dataTrackingStrategy = dataTrackingStrategy;
+        _scheduler = scheduler ?? Scheduler.Default;
         
         _timeTrack = new BehaviorSubject<TimeTrack>(new TimeTrack());
         _isStarted = new BehaviorSubject<bool>(false);
@@ -49,7 +52,7 @@ public class TimeTrackingComputer : ITimeTrackingComputer
                 {
                     if (isStarted)
                     {
-                        return Observable.Interval(TimeSpan.FromSeconds(1));
+                        return Observable.Interval(TimeSpan.FromSeconds(1), _scheduler);
                     }
                     else
                     {
