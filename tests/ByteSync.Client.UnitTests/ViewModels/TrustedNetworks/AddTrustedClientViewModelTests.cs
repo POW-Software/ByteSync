@@ -24,7 +24,7 @@ public class AddTrustedClientViewModelTests
     private Mock<IApplicationSettingsRepository> _appSettings = null!;
     private Mock<IPublicKeysTruster> _truster = null!;
     private Mock<ILogger<AddTrustedClientViewModel>> _logger = null!;
-    
+
     private PublicKeyCheckData CreateCheckData()
     {
         var issuer = new PublicKeyInfo
@@ -32,13 +32,13 @@ public class AddTrustedClientViewModelTests
             ClientId = "OtherClient",
             PublicKey = Encoding.UTF8.GetBytes("OTHER_PUBLIC_KEY")
         };
-        
+
         return new PublicKeyCheckData
         {
             IssuerPublicKeyInfo = issuer,
         };
     }
-    
+
     [SetUp]
     public void SetUp()
     {
@@ -46,13 +46,13 @@ public class AddTrustedClientViewModelTests
         _appSettings = new Mock<IApplicationSettingsRepository>();
         _truster = new Mock<IPublicKeysTruster>();
         _logger = new Mock<ILogger<AddTrustedClientViewModel>>();
-        
+
         _appSettings.Setup(a => a.GetCurrentApplicationSettings())
             .Returns(new ApplicationSettings { ClientId = "MyClient" });
-        
+
         _publicKeysManager.Setup(m => m.GetMyPublicKeyInfo())
             .Returns(new PublicKeyInfo { ClientId = "MyClient", PublicKey = Encoding.UTF8.GetBytes("MY_PUBLIC_KEY") });
-        
+
         _publicKeysManager.Setup(m => m.BuildTrustedPublicKey(It.IsAny<PublicKeyCheckData>()))
             .Returns((PublicKeyCheckData p) => new TrustedPublicKey
             {
@@ -61,7 +61,7 @@ public class AddTrustedClientViewModelTests
                 SafetyKey = new string('0', 64)
             });
     }
-    
+
     private TrustDataParameters CreateTrustParams(out PeerTrustProcessData peer, bool otherFinished, bool success)
     {
         peer = new PeerTrustProcessData("OtherClient");
@@ -69,169 +69,165 @@ public class AddTrustedClientViewModelTests
         {
             peer.SetOtherPartyChecked(success);
         }
-        
+
         return new TrustDataParameters(0, 2, false, "S1", peer);
     }
-    
+
+    private TestableAddTrustedClientViewModel CreateVm(PublicKeyCheckData check, TrustDataParameters trustParams)
+    {
+        return new TestableAddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
+            _truster.Object, _logger.Object, null!);
+    }
+
     [Test]
     public async Task ValidateClient_Success_Should_Trust_And_Close()
     {
         var check = CreateCheckData();
         var trustParams = CreateTrustParams(out var peer, true, true);
-        
-        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
-            _truster.Object, _logger.Object, null!)
-        {
-            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false }
-        };
-        
+
+        var vm = CreateVm(check, trustParams);
+        vm.Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false };
+
         _truster.Setup(t => t.OnPublicKeyValidationFinished(It.IsAny<PublicKeyCheckData>(), trustParams, true))
             .Returns(async () =>
             {
                 peer.SetMyPartyChecked(true);
                 await Task.CompletedTask;
             });
-        
+
         bool closeRequested = false;
         vm.CloseFlyoutRequested += (_, _) => closeRequested = true;
-        
+
         await vm.ValidateClientCommand.Execute();
-        
+
         _publicKeysManager.Verify(m => m.Trust(It.IsAny<TrustedPublicKey>()), Times.Once);
-        vm.ShowSuccess.Should().BeFalse(); // after delay, it returns to false
+        vm.ShowSuccess.Should().BeFalse();
         vm.ShowError.Should().BeFalse();
         vm.Container.CanCloseCurrentFlyout.Should().BeTrue();
         closeRequested.Should().BeTrue();
     }
-    
+
     [Test]
     public async Task ValidateClient_Failure_Should_ShowError_And_Close()
     {
         var check = CreateCheckData();
         var trustParams = CreateTrustParams(out var peer, true, false);
-        
-        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
-            _truster.Object, _logger.Object, null!)
-        {
-            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false }
-        };
-        
+
+        var vm = CreateVm(check, trustParams);
+        vm.Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false };
+
         _truster.Setup(t => t.OnPublicKeyValidationFinished(It.IsAny<PublicKeyCheckData>(), trustParams, true))
             .Returns(async () =>
             {
                 peer.SetMyPartyChecked(true);
                 await Task.CompletedTask;
             });
-        
+
         bool closeRequested = false;
         vm.CloseFlyoutRequested += (_, _) => closeRequested = true;
-        
+
         await vm.ValidateClientCommand.Execute();
-        
+
         _publicKeysManager.Verify(m => m.Trust(It.IsAny<TrustedPublicKey>()), Times.Never);
         vm.ShowError.Should().BeFalse();
         vm.Container.CanCloseCurrentFlyout.Should().BeTrue();
         closeRequested.Should().BeTrue();
     }
-    
+
     [Test]
     public async Task RejectClient_Should_Call_Truster_Cancel_And_Close()
     {
         var check = CreateCheckData();
         var trustParams = CreateTrustParams(out _, true, false);
-        
-        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
-            _truster.Object, _logger.Object, null!)
-        {
-            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false }
-        };
-        
+
+        var vm = CreateVm(check, trustParams);
+        vm.Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false };
+
         bool closeRequested = false;
         vm.CloseFlyoutRequested += (_, _) => closeRequested = true;
-        
+
         await vm.RejectClientCommand.Execute();
-        
+
         _truster.Verify(t => t.OnPublicKeyValidationFinished(It.IsAny<PublicKeyCheckData>(), trustParams, false), Times.Once);
         _truster.Verify(t => t.OnPublicKeyValidationCanceled(It.IsAny<PublicKeyCheckData>(), trustParams), Times.Once);
         vm.Container.CanCloseCurrentFlyout.Should().BeTrue();
         closeRequested.Should().BeTrue();
     }
-    
+
     [Test]
     public void EmptyConstructor_Should_Work_Fine()
     {
         var vm = new AddTrustedClientViewModel();
-        
+
         vm.Should().NotBeNull();
     }
-    
+
     [Test]
     public void OnDisplayed_Should_Disable_Flyout_Closing()
     {
         var check = CreateCheckData();
         var trustParams = CreateTrustParams(out _, true, true);
-        
-        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
-            _truster.Object, _logger.Object, null!)
-        {
-            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = true }
-        };
-        
-        // Act
+
+        var vm = CreateVm(check, trustParams);
+        vm.Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = true };
+
         vm.OnDisplayed();
-        
-        // Assert
+
         vm.Container.CanCloseCurrentFlyout.Should().BeFalse();
     }
-    
+
     [Test]
     public void WhenActivated_Toggles_CanExecute_While_Command_IsExecuting()
     {
         var check = CreateCheckData();
         var trustParams = CreateTrustParams(out _, true, true);
-        
-        var vm = new AddTrustedClientViewModel(check, trustParams, _publicKeysManager.Object, _appSettings.Object,
-            _truster.Object, _logger.Object, null!)
-        {
-            Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false }
-        };
-        
-        // Arrange a long-running Cancel to keep IsExecuting = true
+
+        var vm = CreateVm(check, trustParams);
+        vm.Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false };
+
         var tcs = new TaskCompletionSource();
         _truster.Setup(t => t.OnPublicKeyValidationCanceled(It.IsAny<PublicKeyCheckData>(), trustParams))
             .Returns(tcs.Task);
-        
-        // Activate to wire up WhenActivated subscriptions
+
         vm.Activator.Activate();
-        
+
         bool canExecuteCopy = true;
         using var sub = vm.CopyToClipboardCommand.CanExecute.Subscribe(v => canExecuteCopy = v);
-        
-        // Initially true
+
         canExecuteCopy.Should().BeTrue();
-        
-        // Start Cancel (this flips canRun to false while executing)
+
         vm.CancelCommand.Execute().Subscribe();
-        
-        // Wait until CanExecute becomes false
+
         var sw = Stopwatch.StartNew();
         while (canExecuteCopy && sw.ElapsedMilliseconds < 1000)
         {
             Thread.Sleep(10);
         }
-        
+
         canExecuteCopy.Should().BeFalse();
-        
-        // Complete the cancel to release IsExecuting
+
         tcs.SetResult();
-        
-        // Wait until CanExecute becomes true again
+
         sw.Restart();
         while (!canExecuteCopy && sw.ElapsedMilliseconds < 1000)
         {
             Thread.Sleep(10);
         }
-        
+
         canExecuteCopy.Should().BeTrue();
+    }
+
+    private class TestableAddTrustedClientViewModel : AddTrustedClientViewModel
+    {
+        public TestableAddTrustedClientViewModel(PublicKeyCheckData? publicKeyCheckData,
+            TrustDataParameters trustDataParameters, IPublicKeysManager publicKeysManager,
+            IApplicationSettingsRepository applicationSettingsManager, IPublicKeysTruster publicKeysTruster,
+            ILogger<AddTrustedClientViewModel> logger, Views.MainWindow mainWindow)
+            : base(publicKeyCheckData, trustDataParameters, publicKeysManager, applicationSettingsManager,
+                publicKeysTruster, logger, mainWindow)
+        {
+        }
+
+        protected override Task DelayAsync(TimeSpan delay) => Task.CompletedTask;
     }
 }
