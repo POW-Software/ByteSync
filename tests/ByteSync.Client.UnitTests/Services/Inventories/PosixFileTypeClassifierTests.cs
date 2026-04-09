@@ -1,13 +1,29 @@
 using System.IO;
 using ByteSync.Business.Inventories;
 using ByteSync.Services.Inventories;
+using ByteSync.TestsCommon;
 using FluentAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Inventories;
 
-public class PosixFileTypeClassifierTests
+public class PosixFileTypeClassifierTests : AbstractTester
 {
+    [SetUp]
+    public void SetUp()
+    {
+        CreateTestDirectory();
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        if (TestDirectory?.Exists == true)
+        {
+            TestDirectory.Delete(true);
+        }
+    }
+
     [Test]
     [Platform(Include = "Linux,MacOsX")]
     [TestCase("/dev/null", FileSystemEntryKind.CharacterDevice)]
@@ -36,26 +52,19 @@ public class PosixFileTypeClassifierTests
     public void ClassifyPosixEntry_ReturnsRegularFile_ForTempFile()
     {
         var classifier = new PosixFileTypeClassifier();
-        var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        var tempDirectory = Path.Combine(TestDirectory.FullName, Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(tempDirectory);
         var tempFile = Path.Combine(tempDirectory, "file.txt");
         File.WriteAllText(tempFile, "data");
 
-        try
-        {
-            var result = classifier.ClassifyPosixEntry(tempFile);
+        var result = classifier.ClassifyPosixEntry(tempFile);
 
-            if (result == FileSystemEntryKind.Unknown)
-            {
-                Assert.Ignore($"POSIX classification returned Unknown for '{tempFile}'.");
-            }
-
-            result.Should().Be(FileSystemEntryKind.RegularFile);
-        }
-        finally
+        if (result == FileSystemEntryKind.Unknown)
         {
-            Directory.Delete(tempDirectory, true);
+            Assert.Ignore($"POSIX classification returned Unknown for '{tempFile}'.");
         }
+
+        result.Should().Be(FileSystemEntryKind.RegularFile);
     }
 
     [Test]
@@ -63,24 +72,17 @@ public class PosixFileTypeClassifierTests
     public void ClassifyPosixEntry_ReturnsDirectory_ForTempDirectory()
     {
         var classifier = new PosixFileTypeClassifier();
-        var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        var tempDirectory = Path.Combine(TestDirectory.FullName, Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(tempDirectory);
 
-        try
-        {
-            var result = classifier.ClassifyPosixEntry(tempDirectory);
+        var result = classifier.ClassifyPosixEntry(tempDirectory);
 
-            if (result == FileSystemEntryKind.Unknown)
-            {
-                Assert.Ignore($"POSIX classification returned Unknown for '{tempDirectory}'.");
-            }
-
-            result.Should().Be(FileSystemEntryKind.Directory);
-        }
-        finally
+        if (result == FileSystemEntryKind.Unknown)
         {
-            Directory.Delete(tempDirectory, true);
+            Assert.Ignore($"POSIX classification returned Unknown for '{tempDirectory}'.");
         }
+
+        result.Should().Be(FileSystemEntryKind.Directory);
     }
 
     [Test]
@@ -88,7 +90,7 @@ public class PosixFileTypeClassifierTests
     public void ClassifyPosixEntry_ReturnsUnknown_ForMissingPath()
     {
         var classifier = new PosixFileTypeClassifier();
-        var missingPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "missing");
+        var missingPath = Path.Combine(TestDirectory.FullName, Guid.NewGuid().ToString("N"), "missing");
 
         var result = classifier.ClassifyPosixEntry(missingPath);
 
@@ -100,7 +102,7 @@ public class PosixFileTypeClassifierTests
     public void ClassifyPosixEntry_ReturnsSymlink_WhenSupported()
     {
         var classifier = new PosixFileTypeClassifier();
-        var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        var tempDirectory = Path.Combine(TestDirectory.FullName, Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(tempDirectory);
         var targetFile = Path.Combine(tempDirectory, "target.txt");
         File.WriteAllText(targetFile, "data");
@@ -108,28 +110,21 @@ public class PosixFileTypeClassifierTests
 
         try
         {
-            try
-            {
-                File.CreateSymbolicLink(linkPath, targetFile);
-            }
-            catch (Exception ex)
-            {
-                Assert.Ignore($"Symbolic link creation failed: {ex.GetType().Name}");
-            }
-
-            var result = classifier.ClassifyPosixEntry(linkPath);
-
-            if (result == FileSystemEntryKind.Unknown)
-            {
-                Assert.Ignore($"POSIX classification returned Unknown for '{linkPath}'.");
-            }
-
-            result.Should().Be(FileSystemEntryKind.Symlink);
+            File.CreateSymbolicLink(linkPath, targetFile);
         }
-        finally
+        catch (Exception ex)
         {
-            Directory.Delete(tempDirectory, true);
+            Assert.Ignore($"Symbolic link creation failed: {ex.GetType().Name}");
         }
+
+        var result = classifier.ClassifyPosixEntry(linkPath);
+
+        if (result == FileSystemEntryKind.Unknown)
+        {
+            Assert.Ignore($"POSIX classification returned Unknown for '{linkPath}'.");
+        }
+
+        result.Should().Be(FileSystemEntryKind.Symlink);
     }
 
     [Test]
@@ -137,26 +132,19 @@ public class PosixFileTypeClassifierTests
     public void ClassifyPosixEntry_ReturnsUnknown_WhenUnixFileInfoThrows()
     {
         var classifier = new PosixFileTypeClassifier(_ => throw new InvalidOperationException("fail"));
-        var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        var tempDirectory = Path.Combine(TestDirectory.FullName, Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(tempDirectory);
         var tempFile = Path.Combine(tempDirectory, "file.txt");
         File.WriteAllText(tempFile, "data");
 
-        try
-        {
-            var result = classifier.ClassifyPosixEntry(tempFile);
+        var result = classifier.ClassifyPosixEntry(tempFile);
 
-            if (result == FileSystemEntryKind.Unknown)
-            {
-                Assert.Ignore($"POSIX classification returned Unknown for '{tempFile}'.");
-            }
-            
-            result.Should().Be(FileSystemEntryKind.RegularFile);
-        }
-        finally
+        if (result == FileSystemEntryKind.Unknown)
         {
-            Directory.Delete(tempDirectory, true);
+            Assert.Ignore($"POSIX classification returned Unknown for '{tempFile}'.");
         }
+
+        result.Should().Be(FileSystemEntryKind.RegularFile);
     }
 
     [Test]

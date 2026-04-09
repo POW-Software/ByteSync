@@ -7,28 +7,29 @@ using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Inventories;
 using FluentAssertions;
+using ByteSync.TestsCommon;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Inventories;
 
 [TestFixture]
-public class InventoryLoaderIncompleteFlagTests
+public class InventoryLoaderIncompleteFlagTests : AbstractTester
 {
     private string _tempDirectory = null!;
     
     [SetUp]
     public void Setup()
     {
-        _tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        Directory.CreateDirectory(_tempDirectory);
+        CreateTestDirectory();
+        _tempDirectory = TestDirectory.FullName;
     }
     
     [TearDown]
     public void TearDown()
     {
-        if (Directory.Exists(_tempDirectory))
+        if (TestDirectory?.Exists == true)
         {
-            Directory.Delete(_tempDirectory, true);
+            TestDirectory.Delete(true);
         }
     }
     

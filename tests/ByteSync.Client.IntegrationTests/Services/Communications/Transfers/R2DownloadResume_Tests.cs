@@ -60,6 +60,11 @@ public class R2DownloadResume_Tests : AbstractTester
     public void TearDown()
     {
         _clientScope.Dispose();
+
+        if (TestDirectory?.Exists == true)
+        {
+            TestDirectory.Delete(true);
+        }
     }
 
     [Test]

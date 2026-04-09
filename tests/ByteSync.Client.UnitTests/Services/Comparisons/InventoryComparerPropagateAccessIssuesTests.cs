@@ -24,6 +24,15 @@ public class InventoryComparerPropagateAccessIssuesTests : AbstractTester
         CreateTestDirectory();
         _tempDirectory = TestDirectory.FullName;
     }
+
+    [TearDown]
+    public void TearDown()
+    {
+        if (TestDirectory?.Exists == true)
+        {
+            TestDirectory.Delete(true);
+        }
+    }
     
 
     private static string CreateInventoryZipFile(string directory, Inventory inventory)
