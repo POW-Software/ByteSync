@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Text;
 using ByteSync.Business;
 using ByteSync.Business.Communications;
@@ -177,7 +177,7 @@ public class AddTrustedClientViewModelTests
     }
 
     [Test]
-    public void WhenActivated_Toggles_CanExecute_While_Command_IsExecuting()
+    public async Task WhenActivated_Toggles_CanExecute_While_Command_IsExecuting()
     {
         var check = CreateCheckData();
         var trustParams = CreateTrustParams(out _, true, true);
@@ -185,36 +185,36 @@ public class AddTrustedClientViewModelTests
         var vm = CreateVm(check, trustParams);
         vm.Container = new FlyoutContainerViewModel { CanCloseCurrentFlyout = false };
 
-        var tcs = new TaskCompletionSource();
+        var tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         _truster.Setup(t => t.OnPublicKeyValidationCanceled(It.IsAny<PublicKeyCheckData>(), trustParams))
             .Returns(tcs.Task);
 
         vm.Activator.Activate();
 
-        bool canExecuteCopy = true;
-        using var sub = vm.CopyToClipboardCommand.CanExecute.Subscribe(v => canExecuteCopy = v);
+        var canExecute = vm.CopyToClipboardCommand.CanExecute
+            .Replay(1)
+            .RefCount();
 
-        canExecuteCopy.Should().BeTrue();
+        (await canExecute.Take(1).Timeout(TimeSpan.FromSeconds(1)).ToTask()).Should().BeTrue();
 
-        vm.CancelCommand.Execute().Subscribe();
+        var canExecuteFalseTask = canExecute
+            .FirstAsync(v => !v)
+            .Timeout(TimeSpan.FromSeconds(1))
+            .ToTask();
 
-        var sw = Stopwatch.StartNew();
-        while (canExecuteCopy && sw.ElapsedMilliseconds < 1000)
-        {
-            Thread.Sleep(10);
-        }
+        var cancelTask = vm.CancelCommand.Execute().ToTask();
 
-        canExecuteCopy.Should().BeFalse();
+        (await canExecuteFalseTask).Should().BeFalse();
+
+        var canExecuteTrueTask = canExecute
+            .FirstAsync(v => v)
+            .Timeout(TimeSpan.FromSeconds(1))
+            .ToTask();
 
         tcs.SetResult();
 
-        sw.Restart();
-        while (!canExecuteCopy && sw.ElapsedMilliseconds < 1000)
-        {
-            Thread.Sleep(10);
-        }
-
-        canExecuteCopy.Should().BeTrue();
+        (await canExecuteTrueTask).Should().BeTrue();
+        await cancelTask;
     }
 
     private class TestableAddTrustedClientViewModel : AddTrustedClientViewModel

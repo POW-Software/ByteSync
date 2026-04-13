@@ -43,10 +43,6 @@ public class TestRsa
         
         publicKeys.Count.Should().Be(10);
         encryptedMessages.Count.Should().Be(10);
-        
-        // We verify that the control we were applying works correctly
-        publicKeys.Any(pk => pk.SequenceEqual(publicKeys[5])).Should().BeTrue();
-        encryptedMessages.Any(em => em.SequenceEqual(encryptedMessages[5])).Should().BeTrue();
     }
     
     [Test]
@@ -84,10 +80,6 @@ public class TestRsa
         
         publicKeys.Count.Should().Be(10);
         encryptedMessages.Count.Should().Be(10);
-        
-        // We verify that the control we were applying works correctly
-        publicKeys.Any(pk => pk.SequenceEqual(publicKeys[5])).Should().BeTrue();
-        encryptedMessages.Any(em => em.SequenceEqual(encryptedMessages[5])).Should().BeTrue();
     }
     
     [Test]

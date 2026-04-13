@@ -70,10 +70,12 @@ public class ConnectionService : IConnectionService, IDisposable
     
     public async Task StartConnectionAsync()
     {
+        var retryDelaySleepDurationProvider = RetryDelaySleepDurationProvider;
+
         var retryPolicy = Policy
             .Handle<Exception>(ex => !(ex is BuildConnectionException bce && bce.InitialConnectionStatus == InitialConnectionStatus.VersionNotAllowed))
             .WaitAndRetryForeverAsync(
-                retryAttempt => RetryDelaySleepDurationProvider?.Invoke(retryAttempt) ?? TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                retryAttempt => retryDelaySleepDurationProvider?.Invoke(retryAttempt) ?? TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                 (exception, _, _) =>
                 {
                     ConnectionStatusSubject.OnNext(ConnectionStatuses.NotConnected);

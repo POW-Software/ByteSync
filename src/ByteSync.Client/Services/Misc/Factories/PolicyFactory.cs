@@ -12,15 +12,22 @@ namespace ByteSync.Services.Misc.Factories;
 public class PolicyFactory : IPolicyFactory
 {
     private readonly ILogger<PolicyFactory> _logger;
+    private readonly Func<int, TimeSpan> _sleepDurationProvider;
 
     public PolicyFactory(ILogger<PolicyFactory> logger)
+        : this(logger, DefaultSleepDurationProvider)
+    {
+    }
+
+    public PolicyFactory(ILogger<PolicyFactory> logger, Func<int, TimeSpan> sleepDurationProvider)
     {
         _logger = logger;
+        _sleepDurationProvider = sleepDurationProvider;
     }
     
     private const int MAX_RETRIES = 5;
     
-    private TimeSpan SleepDurationProvider(int retryAttempt)
+    private static TimeSpan DefaultSleepDurationProvider(int retryAttempt)
     {
         // Exponential backoff with jitter: 2^({attempt}-1) seconds + 0-500ms
         var baseSeconds = Math.Pow(2, Math.Max(0, retryAttempt - 1));
@@ -39,7 +46,7 @@ public class PolicyFactory : IPolicyFactory
         var policy = Policy
             .HandleResult<DownloadFileResponse>(x => !x.IsSuccess)
             .Or<HttpRequestException>(e => e.StatusCode == HttpStatusCode.Forbidden)
-            .WaitAndRetryAsync(MAX_RETRIES, SleepDurationProvider, onRetryAsync: async (response, timeSpan, retryCount, _) =>
+            .WaitAndRetryAsync(MAX_RETRIES, _sleepDurationProvider, onRetryAsync: async (response, timeSpan, retryCount, _) =>
             {
                 _logger.LogError(response.Exception, 
                     "FileTransferOperation failed (Attempt number {AttemptNumber}). ResponseCode:{ResponseCode} ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. Waiting {WaitingTime} seconds before retry",
@@ -68,7 +75,7 @@ public class PolicyFactory : IPolicyFactory
                                     || ex.HttpStatusCode == HttpStatusCode.InternalServerError)
             .Or<TaskCanceledException>()
             .Or<TimeoutException>()
-            .WaitAndRetryAsync(MAX_RETRIES, SleepDurationProvider, onRetryAsync: async (response, timeSpan, retryCount, _) =>
+            .WaitAndRetryAsync(MAX_RETRIES, _sleepDurationProvider, onRetryAsync: async (response, timeSpan, retryCount, _) =>
             {
                 _logger.LogError(response.Exception,
                     "FileTransferOperation failed (Attempt number {AttemptNumber}). ResponseCode:{ResponseCode} ExceptionType:{ExceptionType}, ExceptionMessage:{ExceptionMessage}. Waiting {WaitingTime} seconds before retry",
