@@ -18,6 +18,15 @@ public class DeltaByteShiftToleranceTests : AbstractTester
         CreateTestDirectory();
     }
 
+    [TearDown]
+    public void TearDown()
+    {
+        if (TestDirectory?.Exists == true)
+        {
+            TestDirectory.Delete(true);
+        }
+    }
+
     [Test]
     public void BuildDelta_WithByteInsertionShift_ShouldReconstructSourceAndKeepDeltaCompact()
     {
