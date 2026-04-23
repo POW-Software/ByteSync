@@ -18,7 +18,7 @@ public class PolicyFactoryTests
     public void SetUp()
     {
         _mockLogger = new Mock<ILogger<PolicyFactory>>();
-        _factory = new PolicyFactory(_mockLogger.Object);
+        _factory = new PolicyFactory(_mockLogger.Object, _ => TimeSpan.Zero);
     }
     
     [TestCase(HttpStatusCode.Forbidden)]
@@ -31,17 +31,14 @@ public class PolicyFactoryTests
     public async Task BuildFileUploadPolicy_ShouldRetry_On_HttpRequestException_StatusCodes(HttpStatusCode status)
     {
         var policy = _factory.BuildFileUploadPolicy();
-        
-        using var cts = new CancellationTokenSource();
-        cts.CancelAfter(1000);
-        
+
         Func<Task> act = async () =>
         {
             await policy.ExecuteAsync(async _ => { throw new HttpRequestException("test", inner: null, statusCode: status); },
-                cts.Token);
+                CancellationToken.None);
         };
-        
-        await act.Should().ThrowAsync<OperationCanceledException>();
+
+        await act.Should().ThrowAsync<HttpRequestException>();
         
         _mockLogger.Verify(x => x.Log(
             It.Is<LogLevel>(l => l == LogLevel.Error),
@@ -60,13 +57,10 @@ public class PolicyFactoryTests
     public async Task BuildFileUploadPolicy_ShouldRetry_On_ApiException_StatusCodes(HttpStatusCode status)
     {
         var policy = _factory.BuildFileUploadPolicy();
-        
-        using var cts = new CancellationTokenSource();
-        cts.CancelAfter(1000);
-        
-        Func<Task> act = async () => { await policy.ExecuteAsync(async _ => { throw new ApiException("api error", status); }, cts.Token); };
-        
-        await act.Should().ThrowAsync<OperationCanceledException>();
+
+        Func<Task> act = async () => { await policy.ExecuteAsync(async _ => { throw new ApiException("api error", status); }, CancellationToken.None); };
+
+        await act.Should().ThrowAsync<ApiException>();
         
         _mockLogger.Verify(x => x.Log(
             It.Is<LogLevel>(l => l == LogLevel.Error),

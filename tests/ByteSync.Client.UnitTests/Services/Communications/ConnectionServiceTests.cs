@@ -1,4 +1,4 @@
-﻿using ByteSync.Business.Communications;
+using ByteSync.Business.Communications;
 using ByteSync.Common.Business.Auth;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Exceptions;
@@ -33,6 +33,8 @@ public class ConnectionServiceTests
             _mockAuthenticationTokensRepository.Object,
             _mockLogger.Object
         );
+        
+        _connectionService.RetryDelaySleepDurationProvider = _ => TimeSpan.Zero;
     }
     
     [Test]

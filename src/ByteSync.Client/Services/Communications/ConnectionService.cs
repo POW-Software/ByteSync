@@ -1,4 +1,4 @@
-﻿using System.Net.Http;
+using System.Net.Http;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -65,13 +65,17 @@ public class ConnectionService : IConnectionService, IDisposable
     public ByteSyncEndpoint? CurrentEndPoint { get; set; }
     
     public string? ClientInstanceId => CurrentEndPoint?.ClientInstanceId;
+
+    public Func<int, TimeSpan>? RetryDelaySleepDurationProvider { get; set; }
     
     public async Task StartConnectionAsync()
     {
+        var retryDelaySleepDurationProvider = RetryDelaySleepDurationProvider;
+
         var retryPolicy = Policy
             .Handle<Exception>(ex => !(ex is BuildConnectionException bce && bce.InitialConnectionStatus == InitialConnectionStatus.VersionNotAllowed))
             .WaitAndRetryForeverAsync(
-                retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                retryAttempt => retryDelaySleepDurationProvider?.Invoke(retryAttempt) ?? TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                 (exception, _, _) =>
                 {
                     ConnectionStatusSubject.OnNext(ConnectionStatuses.NotConnected);
