@@ -42,6 +42,17 @@ public class DataNodeSourcesViewModelTests : AbstractTester
         _dataSourceRepositoryMock.SetupGet(r => r.ObservableCache).Returns(_cache);
     }
 
+    [TearDown]
+    public void TearDown()
+    {
+        _cache?.Dispose();
+
+        if (TestDirectory?.Exists == true)
+        {
+            TestDirectory.Delete(true);
+        }
+    }
+
     [Test]
     public void Constructor_WithAllDependencies_ShouldCreateInstance()
     {

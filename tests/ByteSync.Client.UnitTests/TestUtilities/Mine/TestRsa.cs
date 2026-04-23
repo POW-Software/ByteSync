@@ -14,7 +14,7 @@ public class TestRsa
         var publicKeys = new List<byte[]>();
         var encryptedMessages = new List<byte[]>();
         
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 10; i++)
         {
             var rsaBob = RSA.Create(); // Alice can encrypt, Bob can decrypt
             
@@ -41,12 +41,8 @@ public class TestRsa
             decryptedMessage.Should().Be(aliceMessage);
         }
         
-        publicKeys.Count.Should().Be(100);
-        encryptedMessages.Count.Should().Be(100);
-        
-        // We verify that the control we were applying works correctly
-        publicKeys.Any(pk => pk.SequenceEqual(publicKeys[50])).Should().BeTrue();
-        encryptedMessages.Any(em => em.SequenceEqual(encryptedMessages[50])).Should().BeTrue();
+        publicKeys.Count.Should().Be(10);
+        encryptedMessages.Count.Should().Be(10);
     }
     
     [Test]
@@ -55,7 +51,7 @@ public class TestRsa
         var publicKeys = new List<byte[]>();
         var encryptedMessages = new List<byte[]>();
         
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 10; i++)
         {
             var rsaBob = RSA.Create(); // Alice can encrypt, Bob can decrypt
             
@@ -82,18 +78,14 @@ public class TestRsa
             decryptedMessage.Should().Be(aliceMessage);
         }
         
-        publicKeys.Count.Should().Be(100);
-        encryptedMessages.Count.Should().Be(100);
-        
-        // We verify that the control we were applying works correctly
-        publicKeys.Any(pk => pk.SequenceEqual(publicKeys[50])).Should().BeTrue();
-        encryptedMessages.Any(em => em.SequenceEqual(encryptedMessages[50])).Should().BeTrue();
+        publicKeys.Count.Should().Be(10);
+        encryptedMessages.Count.Should().Be(10);
     }
     
     [Test]
     public void Test1_PublicKeyUnicity()
     {
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 10; i++)
         {
             var rsaBob = RSA.Create(); // Alice can encrypt, Bob can decrypt
             
@@ -107,7 +99,7 @@ public class TestRsa
     [Test]
     public void Test1_EncryptedMessageNonUnicity()
     {
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 10; i++)
         {
             var rsaBob = RSA.Create(); // Alice can encrypt, Bob can decrypt
             

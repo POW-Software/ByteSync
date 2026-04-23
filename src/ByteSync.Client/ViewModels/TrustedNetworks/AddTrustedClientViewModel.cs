@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -279,13 +279,13 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
                 _publicKeysManager.Trust(TrustedPublicKey);
 
                 ShowSuccess = true;
-                await Task.Delay(TimeSpan.FromSeconds(3));
+                await DelayAsync(TimeSpan.FromSeconds(3));
                 ShowSuccess = false;
             }
             else
             {
                 ShowError = true;
-                await Task.Delay(TimeSpan.FromSeconds(3));
+                await DelayAsync(TimeSpan.FromSeconds(3));
                 ShowError = false;
             }
             
@@ -309,7 +309,7 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
             var task2 = _publicKeysTruster.OnPublicKeyValidationCanceled(PublicKeyCheckData!, TrustDataParameters);
         
             ShowError = true;
-            await Task.Delay(TimeSpan.FromSeconds(3));
+            await DelayAsync(TimeSpan.FromSeconds(3));
             ShowError = false;
 
             await Task.WhenAll(task, task2);
@@ -329,6 +329,8 @@ public class AddTrustedClientViewModel : FlyoutElementViewModel
         
         await _publicKeysTruster.OnPublicKeyValidationCanceled(PublicKeyCheckData!, TrustDataParameters);
     }
+
+    protected virtual Task DelayAsync(TimeSpan delay) => Task.Delay(delay);
 
     private string[] BuildSafetyWords()
     {
