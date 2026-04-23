@@ -10,6 +10,8 @@ namespace ByteSync.Client.UnitTests.Services.Synchronizations;
 [TestFixture]
 public class DeltaByteShiftToleranceTests : AbstractTester
 {
+    private const int MaxDeltaPercent = 5;
+
     [SetUp]
     public void SetUp()
     {
@@ -27,7 +29,7 @@ public class DeltaByteShiftToleranceTests : AbstractTester
 
         reconstructedBytes.Should().Equal(sourceBytes);
         deltaLength.Should().BeGreaterThan(0);
-        deltaLength.Should().BeLessThan(sourceBytes.Length / 4L);
+        deltaLength.Should().BeLessThanOrEqualTo(sourceBytes.Length * MaxDeltaPercent / 100L);
     }
 
     [Test]
@@ -40,7 +42,7 @@ public class DeltaByteShiftToleranceTests : AbstractTester
 
         reconstructedBytes.Should().Equal(sourceBytes);
         deltaLength.Should().BeGreaterThan(0);
-        deltaLength.Should().BeLessThan(sourceBytes.Length / 4L);
+        deltaLength.Should().BeLessThanOrEqualTo(sourceBytes.Length * MaxDeltaPercent / 100L);
     }
 
     private (long DeltaLength, byte[] ReconstructedBytes) BuildAndApplyDelta(byte[] sourceBytes, byte[] destinationBytes)
