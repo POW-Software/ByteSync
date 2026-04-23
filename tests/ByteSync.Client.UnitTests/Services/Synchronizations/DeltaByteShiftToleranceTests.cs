@@ -93,8 +93,14 @@ public class DeltaByteShiftToleranceTests : AbstractTester
     private static byte[] CreateDeterministicBytes(int length, int seed)
     {
         var bytes = new byte[length];
-        var random = new Random(seed);
-        random.NextBytes(bytes);
+
+        uint state = unchecked((uint)seed);
+        for (var i = 0; i < bytes.Length; i++)
+        {
+            state = state * 1664525u + 1013904223u;
+            bytes[i] = (byte)(state >> 24);
+        }
+
         return bytes;
     }
 
