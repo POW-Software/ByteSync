@@ -27,7 +27,7 @@ public class AzureBlobStorageUploadStrategy : IUploadStrategy
             var blob = new BlobClient(new Uri(storageLocation.Url), options);
             var response = await blob.UploadAsync(slice.MemoryStream, cancellationToken);
                 
-            _logger.LogDebug("UploadAvailableSlice: slice {number} is uploaded", slice.PartNumber);
+            _logger.LogDebug("UploadAvailableSlice: slice {PartNumber} is uploaded", slice.PartNumber);
 
             var rawResponse = response.GetRawResponse();
             
@@ -45,10 +45,15 @@ public class AzureBlobStorageUploadStrategy : IUploadStrategy
                 );
             }
         }
+        catch (OperationCanceledException ex)
+        {
+            _logger.LogWarning(ex, "Upload of slice {PartNumber} was canceled or timed out", slice.PartNumber);
+            return UploadFailureClassifier.Classify(ex, cancellationToken);
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to upload slice {number}", slice.PartNumber);
-            return UploadFileResponse.Failure(500, ex);
+            _logger.LogError(ex, "Failed to upload slice {PartNumber}", slice.PartNumber);
+            return UploadFailureClassifier.Classify(ex, cancellationToken);
         }
     }
 }

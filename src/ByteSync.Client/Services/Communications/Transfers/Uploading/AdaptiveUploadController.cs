@@ -1,5 +1,6 @@
 using System.Reactive.Linq;
 using ByteSync.Business.Sessions;
+using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Services.Sessions;
 
@@ -81,14 +82,18 @@ public class AdaptiveUploadController : IAdaptiveUploadController
         }
     }
     
-    public void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null,
-        Exception? exception = null, string? fileId = null, long actualBytes = -1)
+    public void RecordUploadResult(UploadResult uploadResult)
     {
         lock (_syncRoot)
         {
-            EnqueueSample(elapsed, isSuccess, actualBytes);
+            if (IsClientSideFailure(uploadResult.FailureKind))
+            {
+                return;
+            }
             
-            if (HandleBandwidthReset(isSuccess, statusCode))
+            EnqueueSample(uploadResult.Elapsed, uploadResult.IsSuccess, uploadResult.ActualBytes);
+            
+            if (HandleBandwidthReset(uploadResult.IsSuccess, uploadResult.StatusCode))
             {
                 return;
             }
@@ -102,18 +107,18 @@ public class AdaptiveUploadController : IAdaptiveUploadController
             
             _logger.LogDebug(
                 "Adaptive: file {FileId} maxElapsed={MaxElapsedMs} ms, window={Window}, parallelism={Parallelism}, chunkSize={ChunkKb} KB",
-                fileId ?? "-",
+                uploadResult.FileId ?? "-",
                 maxElapsed.TotalMilliseconds,
                 _windowSize,
                 _currentParallelism,
                 Math.Round(_currentChunkSizeBytes / 1024d));
             
-            if (TryHandleDownscale(maxElapsed, fileId))
+            if (TryHandleDownscale(maxElapsed, uploadResult.FileId))
             {
                 return;
             }
             
-            TryHandleUpscale(fileId);
+            TryHandleUpscale(uploadResult.FileId);
         }
     }
     
@@ -144,6 +149,11 @@ public class AdaptiveUploadController : IAdaptiveUploadController
                 _recentBytes.Dequeue();
             }
         }
+    }
+    
+    private static bool IsClientSideFailure(UploadFailureKind failureKind)
+    {
+        return failureKind is UploadFailureKind.ClientCancellation or UploadFailureKind.ClientTimeout;
     }
     
     private bool HandleBandwidthReset(bool isSuccess, int? statusCode)
@@ -278,7 +288,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
         }
     }
     
-    private double GetUpscaleMultiplier(TimeSpan maxElapsedEligible)
+    private static double GetUpscaleMultiplier(TimeSpan maxElapsedEligible)
     {
         if (maxElapsedEligible < TimeSpan.FromSeconds(1))
         {

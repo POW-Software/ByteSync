@@ -1,5 +1,6 @@
 using System.Reactive.Linq;
 using ByteSync.Business.Sessions;
+using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Communications.Transfers.Uploading;
@@ -129,11 +130,108 @@ public class AdaptiveUploadControllerTests
         var parallelismBefore = _controller.CurrentParallelism;
         
         // Act - Record bandwidth-related failure (e.g., 429)
-        _controller.RecordUploadResult(TimeSpan.FromSeconds(1), isSuccess: false, partNumber: 1, statusCode: 429);
+        RecordUploadResult(_controller, TimeSpan.FromSeconds(1), isSuccess: false, partNumber: 1, statusCode: 429);
         
         // Assert
         _controller.CurrentChunkSizeBytes.Should().Be(500 * 1024);
         _controller.CurrentParallelism.Should().Be(parallelismBefore);
+    }
+    
+    [Test]
+    public void ClientCancellation_DoesNotResetChunkSize()
+    {
+        // Arrange - Inflate chunk somewhat first
+        FeedFastWindow(_controller);
+        var inflatedChunk = _controller.CurrentChunkSizeBytes;
+        inflatedChunk.Should().BeGreaterThan(500 * 1024);
+        var parallelismBefore = _controller.CurrentParallelism;
+        
+        // Act - Record a client cancellation (e.g., user pressed cancel)
+        RecordUploadResult(
+            _controller,
+            TimeSpan.FromSeconds(2),
+            isSuccess: false,
+            partNumber: 1,
+            statusCode: 0,
+            failureKind: UploadFailureKind.ClientCancellation);
+        
+        // Assert
+        _controller.CurrentChunkSizeBytes.Should().Be(inflatedChunk);
+        _controller.CurrentParallelism.Should().Be(parallelismBefore);
+    }
+    
+    [Test]
+    public void ClientTimeout_DoesNotResetChunkSize()
+    {
+        // Arrange - Inflate chunk somewhat first
+        FeedFastWindow(_controller);
+        var inflatedChunk = _controller.CurrentChunkSizeBytes;
+        inflatedChunk.Should().BeGreaterThan(500 * 1024);
+        var parallelismBefore = _controller.CurrentParallelism;
+        
+        // Act - Record a client-side timeout (our attempt CTS expired)
+        RecordUploadResult(
+            _controller,
+            TimeSpan.FromSeconds(60),
+            isSuccess: false,
+            partNumber: 1,
+            statusCode: 0,
+            failureKind: UploadFailureKind.ClientTimeout);
+        
+        // Assert
+        _controller.CurrentChunkSizeBytes.Should().Be(inflatedChunk);
+        _controller.CurrentParallelism.Should().Be(parallelismBefore);
+    }
+    
+    [Test]
+    public void ClientTimeout_DoesNotEnterAdaptiveWindow_AndDoesNotResetChunkSize()
+    {
+        // Arrange - Inflate chunk and make sure parallelism is just at min (=2)
+        var safety = 10;
+        while (_controller.CurrentChunkSizeBytes < 1024 * 1024 && safety-- > 0)
+        {
+            FeedFastWindow(_controller);
+        }
+        _controller.CurrentParallelism.Should().Be(2);
+        var inflatedChunk = _controller.CurrentChunkSizeBytes;
+        
+        // Act - Feed a window of slow client-timeout failures (with the new failure kind)
+        var p = _controller.CurrentParallelism;
+        for (var i = 0; i < p; i++)
+        {
+            RecordUploadResult(
+                _controller,
+                TimeSpan.FromSeconds(60),
+                isSuccess: false,
+                partNumber: i + 1,
+                statusCode: 0,
+                failureKind: UploadFailureKind.ClientTimeout);
+        }
+        
+        RecordUploadResult(
+            _controller,
+            TimeSpan.FromSeconds(1),
+            isSuccess: true,
+            partNumber: 100);
+        
+        // Assert - the timeout samples were ignored and cannot trigger a later downscale
+        _controller.CurrentChunkSizeBytes.Should().NotBe(500 * 1024);
+        _controller.CurrentChunkSizeBytes.Should().Be(inflatedChunk,
+            because: "client-side cancellations are not bandwidth signals and must not influence chunk sizing");
+    }
+    
+    [Test]
+    public void ServerError500_StillResetsChunkSize_WhenNoFailureKind()
+    {
+        // Arrange - Inflate chunk somewhat first
+        FeedFastWindow(_controller);
+        _controller.CurrentChunkSizeBytes.Should().BeGreaterThan(500 * 1024);
+        
+        // Act - Record a real 500 server error (unknown failure kind)
+        RecordUploadResult(_controller, TimeSpan.FromSeconds(2), isSuccess: false, partNumber: 1, statusCode: 500);
+        
+        // Assert - resets, like before
+        _controller.CurrentChunkSizeBytes.Should().Be(500 * 1024);
     }
     
     private static void FeedFastWindow(AdaptiveUploadController controller)
@@ -146,7 +244,23 @@ public class AdaptiveUploadControllerTests
         var p = controller.CurrentParallelism;
         for (var i = 0; i < p; i++)
         {
-            controller.RecordUploadResult(elapsed, isSuccess: successes, partNumber: i + 1);
+            RecordUploadResult(controller, elapsed, isSuccess: successes, partNumber: i + 1);
         }
+    }
+    
+    private static void RecordUploadResult(
+        AdaptiveUploadController controller,
+        TimeSpan elapsed,
+        bool isSuccess,
+        int partNumber,
+        int? statusCode = null,
+        UploadFailureKind failureKind = UploadFailureKind.None)
+    {
+        controller.RecordUploadResult(new UploadResult(
+            elapsed,
+            isSuccess,
+            partNumber,
+            statusCode,
+            FailureKind: failureKind));
     }
 }

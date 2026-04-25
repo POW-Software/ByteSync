@@ -1,3 +1,4 @@
+using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Interfaces.Controls.Communications;
 
 namespace ByteSync.Client.IntegrationTests.TestHelpers;
@@ -18,7 +19,7 @@ public class FixedAdaptiveUploadController : IAdaptiveUploadController
         return CurrentChunkSizeBytes;
     }
 
-    public void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null, Exception? exception = null, string? fileId = null, long actualBytes = -1)
+    public void RecordUploadResult(UploadResult uploadResult)
     {
         // no-op: fixed behavior for tests
     }

@@ -76,10 +76,15 @@ public class CloudflareR2UploadStrategy : IUploadStrategy
                 );
             }
         }
+        catch (OperationCanceledException ex)
+        {
+            _logger.LogWarning(ex, "Upload of slice {PartNumber} was canceled or timed out", slice.PartNumber);
+            return UploadFailureClassifier.Classify(ex, cancellationToken);
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to upload slice {number}", slice.PartNumber);
-            return UploadFileResponse.Failure(500, ex);
+            _logger.LogError(ex, "Failed to upload slice {PartNumber}", slice.PartNumber);
+            return UploadFailureClassifier.Classify(ex, cancellationToken);
         }
     }
 }
