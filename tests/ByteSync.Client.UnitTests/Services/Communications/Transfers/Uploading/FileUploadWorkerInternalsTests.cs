@@ -1,4 +1,3 @@
-using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Services.Communications.Transfers.Uploading;
 using FluentAssertions;
@@ -9,17 +8,10 @@ namespace ByteSync.Client.UnitTests.Services.Communications.Transfers.Uploading;
 [TestFixture]
 public class FileUploadWorkerInternalsTests
 {
-    private static FileUploaderSlice SliceOfSize(int bytes)
-    {
-        return new FileUploaderSlice(1, new MemoryStream(new byte[bytes]));
-    }
-    
     [Test]
     public void ComputeAttemptTimeoutSeconds_UsesFloorOf60Seconds_ForTinySlices()
     {
-        var slice = SliceOfSize(64 * 1024); // 64 KB
-        
-        var timeout = FileUploadWorker.ComputeAttemptTimeoutSeconds(slice);
+        var timeout = FileUploadWorker.ComputeAttemptTimeoutSeconds(64 * 1024);
         
         timeout.Should().Be(FileUploadWorker.AttemptTimeoutFloorSeconds);
         timeout.Should().Be(60);
@@ -28,9 +20,7 @@ public class FileUploadWorkerInternalsTests
     [Test]
     public void ComputeAttemptTimeoutSeconds_UsesFloor_For500KbSlices()
     {
-        var slice = SliceOfSize(500 * 1024);
-        
-        var timeout = FileUploadWorker.ComputeAttemptTimeoutSeconds(slice);
+        var timeout = FileUploadWorker.ComputeAttemptTimeoutSeconds(500 * 1024);
         
         timeout.Should().Be(60);
     }
@@ -38,9 +28,7 @@ public class FileUploadWorkerInternalsTests
     [Test]
     public void ComputeAttemptTimeoutSeconds_UsesFloor_For1MbSlices()
     {
-        var slice = SliceOfSize(1024 * 1024);
-        
-        var timeout = FileUploadWorker.ComputeAttemptTimeoutSeconds(slice);
+        var timeout = FileUploadWorker.ComputeAttemptTimeoutSeconds(1024 * 1024);
         
         timeout.Should().Be(60);
     }
@@ -48,9 +36,7 @@ public class FileUploadWorkerInternalsTests
     [Test]
     public void ComputeAttemptTimeoutSeconds_ScalesLinearly_BeyondFloor()
     {
-        var slice = SliceOfSize(25 * 1024 * 1024); // 25 MB -> 3*25 = 75s
-        
-        var timeout = FileUploadWorker.ComputeAttemptTimeoutSeconds(slice);
+        var timeout = FileUploadWorker.ComputeAttemptTimeoutSeconds(25L * 1024 * 1024);
         
         timeout.Should().Be(75);
     }
@@ -58,9 +44,7 @@ public class FileUploadWorkerInternalsTests
     [Test]
     public void ComputeAttemptTimeoutSeconds_CapsAtCeiling_ForLargeSlices()
     {
-        var slice = SliceOfSize(64 * 1024 * 1024); // 64 MB -> would be 192s, capped
-        
-        var timeout = FileUploadWorker.ComputeAttemptTimeoutSeconds(slice);
+        var timeout = FileUploadWorker.ComputeAttemptTimeoutSeconds(64L * 1024 * 1024);
         
         timeout.Should().Be(FileUploadWorker.AttemptTimeoutCeilingSeconds);
         timeout.Should().Be(120);
@@ -71,11 +55,11 @@ public class FileUploadWorkerInternalsTests
     {
         using var attemptCts = new CancellationTokenSource();
         
-        FileUploadWorker.RefineFailureKind(UploadFailureKind.None, CancellationToken.None, attemptCts)
+        FileUploadWorker.RefineFailureKind(UploadFailureKind.None, attemptCts, CancellationToken.None)
             .Should().Be(UploadFailureKind.None);
-        FileUploadWorker.RefineFailureKind(UploadFailureKind.ServerError, CancellationToken.None, attemptCts)
+        FileUploadWorker.RefineFailureKind(UploadFailureKind.ServerError, attemptCts, CancellationToken.None)
             .Should().Be(UploadFailureKind.ServerError);
-        FileUploadWorker.RefineFailureKind(UploadFailureKind.ClientTimeout, CancellationToken.None, attemptCts)
+        FileUploadWorker.RefineFailureKind(UploadFailureKind.ClientTimeout, attemptCts, CancellationToken.None)
             .Should().Be(UploadFailureKind.ClientTimeout);
     }
     
@@ -86,7 +70,7 @@ public class FileUploadWorkerInternalsTests
         global.Cancel();
         using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(global.Token);
         
-        var refined = FileUploadWorker.RefineFailureKind(UploadFailureKind.ClientCancellation, global.Token, attemptCts);
+        var refined = FileUploadWorker.RefineFailureKind(UploadFailureKind.ClientCancellation, attemptCts, global.Token);
         
         refined.Should().Be(UploadFailureKind.ClientCancellation);
     }
@@ -98,7 +82,7 @@ public class FileUploadWorkerInternalsTests
         using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(global.Token);
         attemptCts.Cancel();
         
-        var refined = FileUploadWorker.RefineFailureKind(UploadFailureKind.ClientCancellation, global.Token, attemptCts);
+        var refined = FileUploadWorker.RefineFailureKind(UploadFailureKind.ClientCancellation, attemptCts, global.Token);
         
         refined.Should().Be(UploadFailureKind.ClientTimeout);
     }
@@ -109,7 +93,7 @@ public class FileUploadWorkerInternalsTests
         using var global = new CancellationTokenSource();
         using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(global.Token);
         
-        var refined = FileUploadWorker.RefineFailureKind(UploadFailureKind.ClientCancellation, global.Token, attemptCts);
+        var refined = FileUploadWorker.RefineFailureKind(UploadFailureKind.ClientCancellation, attemptCts, global.Token);
         
         refined.Should().Be(UploadFailureKind.ClientCancellation);
     }
@@ -121,7 +105,7 @@ public class FileUploadWorkerInternalsTests
         global.Cancel();
         using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(global.Token);
         
-        var kind = FileUploadWorker.DetermineCancellationKind(global.Token, attemptCts);
+        var kind = FileUploadWorker.DetermineCancellationKind(attemptCts, global.Token);
         
         kind.Should().Be(UploadFailureKind.ClientCancellation);
     }
@@ -133,7 +117,7 @@ public class FileUploadWorkerInternalsTests
         using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(global.Token);
         attemptCts.Cancel();
         
-        var kind = FileUploadWorker.DetermineCancellationKind(global.Token, attemptCts);
+        var kind = FileUploadWorker.DetermineCancellationKind(attemptCts, global.Token);
         
         kind.Should().Be(UploadFailureKind.ClientTimeout);
     }
@@ -144,7 +128,7 @@ public class FileUploadWorkerInternalsTests
         using var global = new CancellationTokenSource();
         using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(global.Token);
         
-        var kind = FileUploadWorker.DetermineCancellationKind(global.Token, attemptCts);
+        var kind = FileUploadWorker.DetermineCancellationKind(attemptCts, global.Token);
         
         kind.Should().Be(UploadFailureKind.ClientCancellation);
     }

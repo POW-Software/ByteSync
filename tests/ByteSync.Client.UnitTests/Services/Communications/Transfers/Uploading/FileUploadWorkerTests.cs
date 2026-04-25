@@ -267,15 +267,13 @@ public class FileUploadWorkerTests
         await _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_availableSlices, _progressState);
         
         // Assert
-        _mockAdaptiveController.Verify(x => x.RecordUploadResult(
-            It.IsAny<TimeSpan>(),
-            true,
-            slice.PartNumber,
-            200,
-            null,
-            _sharedFileDefinition.Id,
-            It.IsAny<long>(),
-            UploadFailureKind.None), Times.AtLeastOnce);
+        _mockAdaptiveController.Verify(x => x.RecordUploadResult(It.Is<UploadResult>(result =>
+            result.IsSuccess &&
+            result.PartNumber == slice.PartNumber &&
+            result.StatusCode == 200 &&
+            result.Exception == null &&
+            result.FileId == _sharedFileDefinition.Id &&
+            result.FailureKind == UploadFailureKind.None)), Times.AtLeastOnce);
     }
     
     [Test]
@@ -301,26 +299,15 @@ public class FileUploadWorkerTests
         await _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_availableSlices, _progressState);
         
         // Assert: a client-side failure kind (Cancellation or Timeout) was reported, never ServerError
-        _mockAdaptiveController.Verify(x => x.RecordUploadResult(
-            It.IsAny<TimeSpan>(),
-            false,
-            slice.PartNumber,
-            It.IsAny<int?>(),
-            It.IsAny<Exception?>(),
-            It.IsAny<string?>(),
-            It.IsAny<long>(),
-            It.Is<UploadFailureKind>(k => k == UploadFailureKind.ClientCancellation || k == UploadFailureKind.ClientTimeout)),
+        _mockAdaptiveController.Verify(x => x.RecordUploadResult(It.Is<UploadResult>(result =>
+                !result.IsSuccess &&
+                result.PartNumber == slice.PartNumber &&
+                (result.FailureKind == UploadFailureKind.ClientCancellation ||
+                 result.FailureKind == UploadFailureKind.ClientTimeout))),
             Times.AtLeastOnce);
         
-        _mockAdaptiveController.Verify(x => x.RecordUploadResult(
-            It.IsAny<TimeSpan>(),
-            It.IsAny<bool>(),
-            It.IsAny<int>(),
-            It.IsAny<int?>(),
-            It.IsAny<Exception?>(),
-            It.IsAny<string?>(),
-            It.IsAny<long>(),
-            UploadFailureKind.ServerError),
+        _mockAdaptiveController.Verify(x => x.RecordUploadResult(It.Is<UploadResult>(result =>
+                result.FailureKind == UploadFailureKind.ServerError)),
             Times.Never);
     }
     
@@ -347,14 +334,11 @@ public class FileUploadWorkerTests
         await _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_availableSlices, _progressState);
         
         // Assert
-        _mockAdaptiveController.Verify(x => x.RecordUploadResult(
-            It.IsAny<TimeSpan>(),
-            false,
-            slice.PartNumber,
-            503,
-            It.IsAny<Exception?>(),
-            _sharedFileDefinition.Id,
-            It.IsAny<long>(),
-            UploadFailureKind.ServerError), Times.AtLeastOnce);
+        _mockAdaptiveController.Verify(x => x.RecordUploadResult(It.Is<UploadResult>(result =>
+            !result.IsSuccess &&
+            result.PartNumber == slice.PartNumber &&
+            result.StatusCode == 503 &&
+            result.FileId == _sharedFileDefinition.Id &&
+            result.FailureKind == UploadFailureKind.ServerError)), Times.AtLeastOnce);
     }
 }

@@ -37,7 +37,7 @@ public class UploadFailureClassifierTests
     }
     
     [Test]
-    public void Classify_OperationCanceledException_WithNonCancelledToken_ShouldReturnServerError()
+    public void Classify_OperationCanceledException_WithNonCancelledToken_ShouldReturnClientTimeout()
     {
         using var cts = new CancellationTokenSource();
         var ex = new OperationCanceledException("odd");
@@ -45,8 +45,22 @@ public class UploadFailureClassifierTests
         var response = UploadFailureClassifier.Classify(ex, cts.Token);
         
         response.IsSuccess.Should().BeFalse();
-        response.FailureKind.Should().Be(UploadFailureKind.ServerError);
-        response.StatusCode.Should().Be(500);
+        response.FailureKind.Should().Be(UploadFailureKind.ClientTimeout);
+        response.StatusCode.Should().Be(0);
+        response.Exception.Should().BeSameAs(ex);
+    }
+    
+    [Test]
+    public void Classify_TaskCanceledException_WithNonCancelledToken_ShouldReturnClientTimeout()
+    {
+        using var cts = new CancellationTokenSource();
+        var ex = new TaskCanceledException("http timeout");
+        
+        var response = UploadFailureClassifier.Classify(ex, cts.Token);
+        
+        response.IsSuccess.Should().BeFalse();
+        response.FailureKind.Should().Be(UploadFailureKind.ClientTimeout);
+        response.StatusCode.Should().Be(0);
         response.Exception.Should().BeSameAs(ex);
     }
     

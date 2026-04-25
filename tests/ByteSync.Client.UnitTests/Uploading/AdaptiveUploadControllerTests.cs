@@ -1,5 +1,6 @@
 using System.Reactive.Linq;
 using ByteSync.Business.Sessions;
+using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Communications.Transfers.Uploading;
@@ -39,8 +40,8 @@ public class AdaptiveUploadControllerTests
         var c = CreateController();
         var before = c.CurrentChunkSizeBytes;
         
-        c.RecordUploadResult(TimeSpan.FromSeconds(5), true, partNumber: 1);
-        c.RecordUploadResult(TimeSpan.FromSeconds(6), true, partNumber: 2);
+        RecordUploadResult(c, TimeSpan.FromSeconds(5), true, partNumber: 1);
+        RecordUploadResult(c, TimeSpan.FromSeconds(6), true, partNumber: 2);
         
         c.CurrentChunkSizeBytes.Should().BeGreaterThan(before);
         c.CurrentParallelism.Should().Be(2);
@@ -51,8 +52,8 @@ public class AdaptiveUploadControllerTests
     {
         var c = CreateController();
         
-        c.RecordUploadResult(TimeSpan.FromSeconds(35), true, partNumber: 1);
-        c.RecordUploadResult(TimeSpan.FromSeconds(36), true, partNumber: 2);
+        RecordUploadResult(c, TimeSpan.FromSeconds(35), true, partNumber: 1);
+        RecordUploadResult(c, TimeSpan.FromSeconds(36), true, partNumber: 2);
         
         // 500 KB * 0.75 = 375 KB
         c.CurrentChunkSizeBytes.Should().Be(375 * 1024);
@@ -64,11 +65,11 @@ public class AdaptiveUploadControllerTests
     {
         var c = CreateController();
         
-        c.RecordUploadResult(TimeSpan.FromSeconds(1), true, partNumber: 1);
-        c.RecordUploadResult(TimeSpan.FromSeconds(1), true, partNumber: 2);
+        RecordUploadResult(c, TimeSpan.FromSeconds(1), true, partNumber: 1);
+        RecordUploadResult(c, TimeSpan.FromSeconds(1), true, partNumber: 2);
         c.CurrentChunkSizeBytes.Should().BeGreaterThan(500 * 1024);
         
-        c.RecordUploadResult(TimeSpan.FromSeconds(1), false, partNumber: 3, statusCode: 429);
+        RecordUploadResult(c, TimeSpan.FromSeconds(1), false, partNumber: 3, statusCode: 429);
         c.CurrentChunkSizeBytes.Should().Be(500 * 1024);
     }
     
@@ -81,10 +82,20 @@ public class AdaptiveUploadControllerTests
             var p = c.CurrentParallelism;
             for (int j = 0; j < p; j++)
             {
-                c.RecordUploadResult(TimeSpan.FromSeconds(1), true, partNumber: i * 10 + j);
+                RecordUploadResult(c, TimeSpan.FromSeconds(1), true, partNumber: i * 10 + j);
             }
         }
         
         c.CurrentChunkSizeBytes.Should().BeLessThanOrEqualTo(16 * 1024 * 1024);
+    }
+    
+    private static void RecordUploadResult(
+        AdaptiveUploadController controller,
+        TimeSpan elapsed,
+        bool isSuccess,
+        int partNumber,
+        int? statusCode = null)
+    {
+        controller.RecordUploadResult(new UploadResult(elapsed, isSuccess, partNumber, statusCode));
     }
 }

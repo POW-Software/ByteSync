@@ -130,7 +130,7 @@ public class AdaptiveUploadControllerTests
         var parallelismBefore = _controller.CurrentParallelism;
         
         // Act - Record bandwidth-related failure (e.g., 429)
-        _controller.RecordUploadResult(TimeSpan.FromSeconds(1), isSuccess: false, partNumber: 1, statusCode: 429);
+        RecordUploadResult(_controller, TimeSpan.FromSeconds(1), isSuccess: false, partNumber: 1, statusCode: 429);
         
         // Assert
         _controller.CurrentChunkSizeBytes.Should().Be(500 * 1024);
@@ -147,7 +147,8 @@ public class AdaptiveUploadControllerTests
         var parallelismBefore = _controller.CurrentParallelism;
         
         // Act - Record a client cancellation (e.g., user pressed cancel)
-        _controller.RecordUploadResult(
+        RecordUploadResult(
+            _controller,
             TimeSpan.FromSeconds(2),
             isSuccess: false,
             partNumber: 1,
@@ -169,7 +170,8 @@ public class AdaptiveUploadControllerTests
         var parallelismBefore = _controller.CurrentParallelism;
         
         // Act - Record a client-side timeout (our attempt CTS expired)
-        _controller.RecordUploadResult(
+        RecordUploadResult(
+            _controller,
             TimeSpan.FromSeconds(60),
             isSuccess: false,
             partNumber: 1,
@@ -182,7 +184,7 @@ public class AdaptiveUploadControllerTests
     }
     
     [Test]
-    public void ClientTimeout_ShouldNotShortcircuitDownscale_ItIgnoresTheSampleResetButLetsAdaptiveLogicProceed()
+    public void ClientTimeout_DoesNotEnterAdaptiveWindow_AndDoesNotResetChunkSize()
     {
         // Arrange - Inflate chunk and make sure parallelism is just at min (=2)
         var safety = 10;
@@ -197,7 +199,8 @@ public class AdaptiveUploadControllerTests
         var p = _controller.CurrentParallelism;
         for (var i = 0; i < p; i++)
         {
-            _controller.RecordUploadResult(
+            RecordUploadResult(
+                _controller,
                 TimeSpan.FromSeconds(60),
                 isSuccess: false,
                 partNumber: i + 1,
@@ -205,7 +208,13 @@ public class AdaptiveUploadControllerTests
                 failureKind: UploadFailureKind.ClientTimeout);
         }
         
-        // Assert - chunk size was NOT reset to 500 KB
+        RecordUploadResult(
+            _controller,
+            TimeSpan.FromSeconds(1),
+            isSuccess: true,
+            partNumber: 100);
+        
+        // Assert - the timeout samples were ignored and cannot trigger a later downscale
         _controller.CurrentChunkSizeBytes.Should().NotBe(500 * 1024);
         _controller.CurrentChunkSizeBytes.Should().Be(inflatedChunk,
             because: "client-side cancellations are not bandwidth signals and must not influence chunk sizing");
@@ -219,7 +228,7 @@ public class AdaptiveUploadControllerTests
         _controller.CurrentChunkSizeBytes.Should().BeGreaterThan(500 * 1024);
         
         // Act - Record a real 500 server error (unknown failure kind)
-        _controller.RecordUploadResult(TimeSpan.FromSeconds(2), isSuccess: false, partNumber: 1, statusCode: 500);
+        RecordUploadResult(_controller, TimeSpan.FromSeconds(2), isSuccess: false, partNumber: 1, statusCode: 500);
         
         // Assert - resets, like before
         _controller.CurrentChunkSizeBytes.Should().Be(500 * 1024);
@@ -235,7 +244,23 @@ public class AdaptiveUploadControllerTests
         var p = controller.CurrentParallelism;
         for (var i = 0; i < p; i++)
         {
-            controller.RecordUploadResult(elapsed, isSuccess: successes, partNumber: i + 1);
+            RecordUploadResult(controller, elapsed, isSuccess: successes, partNumber: i + 1);
         }
+    }
+    
+    private static void RecordUploadResult(
+        AdaptiveUploadController controller,
+        TimeSpan elapsed,
+        bool isSuccess,
+        int partNumber,
+        int? statusCode = null,
+        UploadFailureKind failureKind = UploadFailureKind.None)
+    {
+        controller.RecordUploadResult(new UploadResult(
+            elapsed,
+            isSuccess,
+            partNumber,
+            statusCode,
+            FailureKind: failureKind));
     }
 }

@@ -174,7 +174,7 @@ public class CloudflareR2UploadStrategyTests
     }
     
     [Test]
-    public async Task UploadAsync_WhenOperationCanceledThrown_WithLiveToken_ShouldReturnServerError()
+    public async Task UploadAsync_WhenOperationCanceledThrown_WithLiveToken_ShouldReturnClientTimeout()
     {
         var (strategy, handler) = CreateStrategy();
         using var cts = new CancellationTokenSource();
@@ -183,7 +183,7 @@ public class CloudflareR2UploadStrategyTests
         var response = await strategy.UploadAsync(CreateSlice(), CreateLocation(), cts.Token);
         
         response.IsSuccess.Should().BeFalse();
-        response.FailureKind.Should().Be(UploadFailureKind.ServerError);
-        response.StatusCode.Should().Be(500);
+        response.FailureKind.Should().Be(UploadFailureKind.ClientTimeout);
+        response.StatusCode.Should().Be(0);
     }
 }

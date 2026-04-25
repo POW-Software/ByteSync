@@ -199,26 +199,45 @@ public class FileUploadWorker : IFileUploadWorker
             
             var attemptResponse = await uploadTask;
             var elapsed = DateTime.UtcNow - attemptStart;
-            var refinedKind = RefineFailureKind(attemptResponse.FailureKind, globalToken, attemptCts);
-            _adaptiveUploadController.RecordUploadResult(elapsed, attemptResponse.IsSuccess, slice.PartNumber, attemptResponse.StatusCode,
-                null, _sharedFileDefinition.Id, slice.MemoryStream.Length, refinedKind);
+            var refinedKind = RefineFailureKind(attemptResponse.FailureKind, attemptCts, globalToken);
+            _adaptiveUploadController.RecordUploadResult(new UploadResult(
+                elapsed,
+                attemptResponse.IsSuccess,
+                slice.PartNumber,
+                attemptResponse.StatusCode,
+                FileId: _sharedFileDefinition.Id,
+                ActualBytes: slice.MemoryStream.Length,
+                FailureKind: refinedKind));
             
             return attemptResponse;
         }
         catch (OperationCanceledException oce)
         {
             var elapsed = DateTime.UtcNow - attemptStart;
-            var kind = DetermineCancellationKind(globalToken, attemptCts);
-            _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, null, oce, _sharedFileDefinition.Id,
-                slice.MemoryStream.Length, kind);
+            var kind = DetermineCancellationKind(attemptCts, globalToken);
+            _adaptiveUploadController.RecordUploadResult(new UploadResult(
+                elapsed,
+                false,
+                slice.PartNumber,
+                Exception: oce,
+                FileId: _sharedFileDefinition.Id,
+                ActualBytes: slice.MemoryStream.Length,
+                FailureKind: kind));
             
             throw new TaskCanceledException("Upload attempt canceled during slot wait or upload.", oce);
         }
         catch (Exception ex)
         {
             var elapsed = DateTime.UtcNow - attemptStart;
-            _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, 500, ex, _sharedFileDefinition.Id,
-                slice.MemoryStream.Length, UploadFailureKind.ServerError);
+            _adaptiveUploadController.RecordUploadResult(new UploadResult(
+                elapsed,
+                false,
+                slice.PartNumber,
+                500,
+                ex,
+                _sharedFileDefinition.Id,
+                slice.MemoryStream.Length,
+                UploadFailureKind.ServerError));
             
             throw;
         }
@@ -252,24 +271,29 @@ public class FileUploadWorker : IFileUploadWorker
     
     internal static int ComputeAttemptTimeoutSeconds(FileUploaderSlice slice)
     {
-        var sizeMb = Math.Max(1, (int)Math.Ceiling((slice.MemoryStream.Length) / (1024d * 1024d)));
+        return ComputeAttemptTimeoutSeconds(slice.MemoryStream.Length);
+    }
+    
+    internal static int ComputeAttemptTimeoutSeconds(long sliceLengthBytes)
+    {
+        var sizeMb = Math.Max(1, (int)Math.Ceiling(sliceLengthBytes / (1024d * 1024d)));
         var timeoutSec = Math.Clamp(SecondsPerMegabyteHeuristic * sizeMb, AttemptTimeoutFloorSeconds, AttemptTimeoutCeilingSeconds);
         
         return timeoutSec;
     }
     
-    internal static UploadFailureKind RefineFailureKind(UploadFailureKind kind, CancellationToken globalToken,
-        CancellationTokenSource attemptCts)
+    internal static UploadFailureKind RefineFailureKind(UploadFailureKind kind, CancellationTokenSource attemptCts,
+        CancellationToken globalToken)
     {
         if (kind != UploadFailureKind.ClientCancellation)
         {
             return kind;
         }
         
-        return DetermineCancellationKind(globalToken, attemptCts);
+        return DetermineCancellationKind(attemptCts, globalToken);
     }
     
-    internal static UploadFailureKind DetermineCancellationKind(CancellationToken globalToken, CancellationTokenSource attemptCts)
+    internal static UploadFailureKind DetermineCancellationKind(CancellationTokenSource attemptCts, CancellationToken globalToken)
     {
         if (globalToken.IsCancellationRequested)
         {

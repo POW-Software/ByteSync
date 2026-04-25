@@ -10,7 +10,5 @@ public interface IAdaptiveUploadController
 	
 	int GetNextChunkSizeBytes();
 	
-	void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null, 
-		Exception? exception = null, string? fileId = null, long actualBytes = -1,
-		UploadFailureKind failureKind = UploadFailureKind.None);
+	void RecordUploadResult(UploadResult uploadResult);
 }

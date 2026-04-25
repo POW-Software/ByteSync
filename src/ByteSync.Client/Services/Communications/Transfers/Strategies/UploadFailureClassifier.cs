@@ -12,6 +12,11 @@ public static class UploadFailureClassifier
         {
             return UploadFileResponse.ClientCancellation(exception);
         }
+        
+        if (exception is OperationCanceledException)
+        {
+            return UploadFileResponse.ClientTimeout(exception);
+        }
 
         return UploadFileResponse.Failure(500, exception);
     }

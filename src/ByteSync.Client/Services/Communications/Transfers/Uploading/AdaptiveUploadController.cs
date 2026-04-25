@@ -82,20 +82,18 @@ public class AdaptiveUploadController : IAdaptiveUploadController
         }
     }
     
-    public void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null,
-        Exception? exception = null, string? fileId = null, long actualBytes = -1,
-        UploadFailureKind failureKind = UploadFailureKind.None)
+    public void RecordUploadResult(UploadResult uploadResult)
     {
         lock (_syncRoot)
         {
-            EnqueueSample(elapsed, isSuccess, actualBytes);
-            
-            if (IsClientSideFailure(failureKind))
+            if (IsClientSideFailure(uploadResult.FailureKind))
             {
                 return;
             }
             
-            if (HandleBandwidthReset(isSuccess, statusCode))
+            EnqueueSample(uploadResult.Elapsed, uploadResult.IsSuccess, uploadResult.ActualBytes);
+            
+            if (HandleBandwidthReset(uploadResult.IsSuccess, uploadResult.StatusCode))
             {
                 return;
             }
@@ -109,18 +107,18 @@ public class AdaptiveUploadController : IAdaptiveUploadController
             
             _logger.LogDebug(
                 "Adaptive: file {FileId} maxElapsed={MaxElapsedMs} ms, window={Window}, parallelism={Parallelism}, chunkSize={ChunkKb} KB",
-                fileId ?? "-",
+                uploadResult.FileId ?? "-",
                 maxElapsed.TotalMilliseconds,
                 _windowSize,
                 _currentParallelism,
                 Math.Round(_currentChunkSizeBytes / 1024d));
             
-            if (TryHandleDownscale(maxElapsed, fileId))
+            if (TryHandleDownscale(maxElapsed, uploadResult.FileId))
             {
                 return;
             }
             
-            TryHandleUpscale(fileId);
+            TryHandleUpscale(uploadResult.FileId);
         }
     }
     
@@ -290,7 +288,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
         }
     }
     
-    private double GetUpscaleMultiplier(TimeSpan maxElapsedEligible)
+    private static double GetUpscaleMultiplier(TimeSpan maxElapsedEligible)
     {
         if (maxElapsedEligible < TimeSpan.FromSeconds(1))
         {
