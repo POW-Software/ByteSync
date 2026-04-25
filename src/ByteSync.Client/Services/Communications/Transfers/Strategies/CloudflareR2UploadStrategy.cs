@@ -76,10 +76,15 @@ public class CloudflareR2UploadStrategy : IUploadStrategy
                 );
             }
         }
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogWarning("Upload of slice {number} was canceled by caller", slice.PartNumber);
+            return UploadFailureClassifier.Classify(ex, cancellationToken);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to upload slice {number}", slice.PartNumber);
-            return UploadFileResponse.Failure(500, ex);
+            return UploadFailureClassifier.Classify(ex, cancellationToken);
         }
     }
 }

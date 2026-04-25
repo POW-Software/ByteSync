@@ -1,0 +1,81 @@
+using ByteSync.Common.Business.Communications.Transfers;
+using ByteSync.Services.Communications.Transfers.Strategies;
+using FluentAssertions;
+using NUnit.Framework;
+
+namespace ByteSync.Client.UnitTests.Services.Communications.Transfers.Strategies;
+
+[TestFixture]
+public class UploadFailureClassifierTests
+{
+    [Test]
+    public void Classify_OperationCanceledException_WithCancelledToken_ShouldReturnClientCancellation()
+    {
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        var ex = new OperationCanceledException("user cancel");
+        
+        var response = UploadFailureClassifier.Classify(ex, cts.Token);
+        
+        response.IsSuccess.Should().BeFalse();
+        response.FailureKind.Should().Be(UploadFailureKind.ClientCancellation);
+        response.Exception.Should().BeSameAs(ex);
+    }
+    
+    [Test]
+    public void Classify_TaskCanceledException_WithCancelledToken_ShouldReturnClientCancellation()
+    {
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        var ex = new TaskCanceledException("timed out");
+        
+        var response = UploadFailureClassifier.Classify(ex, cts.Token);
+        
+        response.IsSuccess.Should().BeFalse();
+        response.FailureKind.Should().Be(UploadFailureKind.ClientCancellation);
+        response.Exception.Should().BeSameAs(ex);
+    }
+    
+    [Test]
+    public void Classify_OperationCanceledException_WithNonCancelledToken_ShouldReturnServerError()
+    {
+        using var cts = new CancellationTokenSource();
+        var ex = new OperationCanceledException("odd");
+        
+        var response = UploadFailureClassifier.Classify(ex, cts.Token);
+        
+        response.IsSuccess.Should().BeFalse();
+        response.FailureKind.Should().Be(UploadFailureKind.ServerError);
+        response.StatusCode.Should().Be(500);
+        response.Exception.Should().BeSameAs(ex);
+    }
+    
+    [Test]
+    public void Classify_GenericException_ShouldReturnServerError500()
+    {
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        var ex = new InvalidOperationException("broken");
+        
+        var response = UploadFailureClassifier.Classify(ex, cts.Token);
+        
+        response.IsSuccess.Should().BeFalse();
+        response.StatusCode.Should().Be(500);
+        response.FailureKind.Should().Be(UploadFailureKind.ServerError);
+        response.Exception.Should().BeSameAs(ex);
+    }
+    
+    [Test]
+    public void Classify_HttpRequestException_ShouldReturnServerError500()
+    {
+        using var cts = new CancellationTokenSource();
+        var ex = new HttpRequestException("network issue");
+        
+        var response = UploadFailureClassifier.Classify(ex, cts.Token);
+        
+        response.IsSuccess.Should().BeFalse();
+        response.StatusCode.Should().Be(500);
+        response.FailureKind.Should().Be(UploadFailureKind.ServerError);
+        response.Exception.Should().BeSameAs(ex);
+    }
+}

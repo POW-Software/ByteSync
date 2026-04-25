@@ -102,6 +102,9 @@
         <ProjectReference Include="..\ByteSync.Common\ByteSync.Common.csproj"/>
     </ItemGroup>
     <ItemGroup>
+        <InternalsVisibleTo Include="ByteSync.Client.UnitTests"/>
+    </ItemGroup>
+    <ItemGroup>
         <EmbeddedResource Update="Assets\Resources\Resources.fr.resx">
             <DependentUpon>Resources.resx</DependentUpon>
         </EmbeddedResource>

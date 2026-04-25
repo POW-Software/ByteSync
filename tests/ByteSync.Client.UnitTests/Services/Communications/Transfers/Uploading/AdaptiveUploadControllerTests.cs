@@ -1,5 +1,6 @@
 using System.Reactive.Linq;
 using ByteSync.Business.Sessions;
+using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Communications.Transfers.Uploading;
@@ -134,6 +135,94 @@ public class AdaptiveUploadControllerTests
         // Assert
         _controller.CurrentChunkSizeBytes.Should().Be(500 * 1024);
         _controller.CurrentParallelism.Should().Be(parallelismBefore);
+    }
+    
+    [Test]
+    public void ClientCancellation_DoesNotResetChunkSize()
+    {
+        // Arrange - Inflate chunk somewhat first
+        FeedFastWindow(_controller);
+        var inflatedChunk = _controller.CurrentChunkSizeBytes;
+        inflatedChunk.Should().BeGreaterThan(500 * 1024);
+        var parallelismBefore = _controller.CurrentParallelism;
+        
+        // Act - Record a client cancellation (e.g., user pressed cancel)
+        _controller.RecordUploadResult(
+            TimeSpan.FromSeconds(2),
+            isSuccess: false,
+            partNumber: 1,
+            statusCode: 0,
+            failureKind: UploadFailureKind.ClientCancellation);
+        
+        // Assert
+        _controller.CurrentChunkSizeBytes.Should().Be(inflatedChunk);
+        _controller.CurrentParallelism.Should().Be(parallelismBefore);
+    }
+    
+    [Test]
+    public void ClientTimeout_DoesNotResetChunkSize()
+    {
+        // Arrange - Inflate chunk somewhat first
+        FeedFastWindow(_controller);
+        var inflatedChunk = _controller.CurrentChunkSizeBytes;
+        inflatedChunk.Should().BeGreaterThan(500 * 1024);
+        var parallelismBefore = _controller.CurrentParallelism;
+        
+        // Act - Record a client-side timeout (our attempt CTS expired)
+        _controller.RecordUploadResult(
+            TimeSpan.FromSeconds(60),
+            isSuccess: false,
+            partNumber: 1,
+            statusCode: 0,
+            failureKind: UploadFailureKind.ClientTimeout);
+        
+        // Assert
+        _controller.CurrentChunkSizeBytes.Should().Be(inflatedChunk);
+        _controller.CurrentParallelism.Should().Be(parallelismBefore);
+    }
+    
+    [Test]
+    public void ClientTimeout_ShouldNotShortcircuitDownscale_ItIgnoresTheSampleResetButLetsAdaptiveLogicProceed()
+    {
+        // Arrange - Inflate chunk and make sure parallelism is just at min (=2)
+        var safety = 10;
+        while (_controller.CurrentChunkSizeBytes < 1024 * 1024 && safety-- > 0)
+        {
+            FeedFastWindow(_controller);
+        }
+        _controller.CurrentParallelism.Should().Be(2);
+        var inflatedChunk = _controller.CurrentChunkSizeBytes;
+        
+        // Act - Feed a window of slow client-timeout failures (with the new failure kind)
+        var p = _controller.CurrentParallelism;
+        for (var i = 0; i < p; i++)
+        {
+            _controller.RecordUploadResult(
+                TimeSpan.FromSeconds(60),
+                isSuccess: false,
+                partNumber: i + 1,
+                statusCode: 0,
+                failureKind: UploadFailureKind.ClientTimeout);
+        }
+        
+        // Assert - chunk size was NOT reset to 500 KB
+        _controller.CurrentChunkSizeBytes.Should().NotBe(500 * 1024);
+        _controller.CurrentChunkSizeBytes.Should().Be(inflatedChunk,
+            because: "client-side cancellations are not bandwidth signals and must not influence chunk sizing");
+    }
+    
+    [Test]
+    public void ServerError500_StillResetsChunkSize_WhenNoFailureKind()
+    {
+        // Arrange - Inflate chunk somewhat first
+        FeedFastWindow(_controller);
+        _controller.CurrentChunkSizeBytes.Should().BeGreaterThan(500 * 1024);
+        
+        // Act - Record a real 500 server error (unknown failure kind)
+        _controller.RecordUploadResult(TimeSpan.FromSeconds(2), isSuccess: false, partNumber: 1, statusCode: 500);
+        
+        // Assert - resets, like before
+        _controller.CurrentChunkSizeBytes.Should().Be(500 * 1024);
     }
     
     private static void FeedFastWindow(AdaptiveUploadController controller)

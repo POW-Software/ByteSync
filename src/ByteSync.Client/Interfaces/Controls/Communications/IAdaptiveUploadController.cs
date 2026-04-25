@@ -1,3 +1,5 @@
+using ByteSync.Common.Business.Communications.Transfers;
+
 namespace ByteSync.Interfaces.Controls.Communications;
 
 public interface IAdaptiveUploadController
@@ -9,5 +11,6 @@ public interface IAdaptiveUploadController
 	int GetNextChunkSizeBytes();
 	
 	void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null, 
-		Exception? exception = null, string? fileId = null, long actualBytes = -1);
+		Exception? exception = null, string? fileId = null, long actualBytes = -1,
+		UploadFailureKind failureKind = UploadFailureKind.None);
 }

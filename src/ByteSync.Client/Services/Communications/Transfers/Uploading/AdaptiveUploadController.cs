@@ -1,5 +1,6 @@
 using System.Reactive.Linq;
 using ByteSync.Business.Sessions;
+using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Services.Sessions;
 
@@ -82,11 +83,17 @@ public class AdaptiveUploadController : IAdaptiveUploadController
     }
     
     public void RecordUploadResult(TimeSpan elapsed, bool isSuccess, int partNumber, int? statusCode = null,
-        Exception? exception = null, string? fileId = null, long actualBytes = -1)
+        Exception? exception = null, string? fileId = null, long actualBytes = -1,
+        UploadFailureKind failureKind = UploadFailureKind.None)
     {
         lock (_syncRoot)
         {
             EnqueueSample(elapsed, isSuccess, actualBytes);
+            
+            if (IsClientSideFailure(failureKind))
+            {
+                return;
+            }
             
             if (HandleBandwidthReset(isSuccess, statusCode))
             {
@@ -144,6 +151,11 @@ public class AdaptiveUploadController : IAdaptiveUploadController
                 _recentBytes.Dequeue();
             }
         }
+    }
+    
+    private static bool IsClientSideFailure(UploadFailureKind failureKind)
+    {
+        return failureKind is UploadFailureKind.ClientCancellation or UploadFailureKind.ClientTimeout;
     }
     
     private bool HandleBandwidthReset(bool isSuccess, int? statusCode)

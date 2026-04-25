@@ -187,19 +187,21 @@ public class FileUploadWorker : IFileUploadWorker
 
             var attemptResponse = await uploadTask;
             var elapsed = DateTime.UtcNow - attemptStart;
-            _adaptiveUploadController.RecordUploadResult(elapsed, attemptResponse.IsSuccess, slice.PartNumber, attemptResponse.StatusCode, null, _sharedFileDefinition.Id, slice.MemoryStream.Length);
+            var refinedKind = RefineFailureKind(attemptResponse.FailureKind, globalToken, attemptCts);
+            _adaptiveUploadController.RecordUploadResult(elapsed, attemptResponse.IsSuccess, slice.PartNumber, attemptResponse.StatusCode, null, _sharedFileDefinition.Id, slice.MemoryStream.Length, refinedKind);
             return attemptResponse;
         }
         catch (OperationCanceledException oce)
         {
             var elapsed = DateTime.UtcNow - attemptStart;
-            _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, null, oce, _sharedFileDefinition.Id, slice.MemoryStream.Length);
+            var kind = DetermineCancellationKind(globalToken, attemptCts);
+            _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, null, oce, _sharedFileDefinition.Id, slice.MemoryStream.Length, kind);
             throw new TaskCanceledException("Upload attempt canceled during slot wait or upload.", oce);
         }
         catch (Exception ex)
         {
             var elapsed = DateTime.UtcNow - attemptStart;
-            _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, 500, ex, _sharedFileDefinition.Id, slice.MemoryStream.Length);
+            _adaptiveUploadController.RecordUploadResult(elapsed, false, slice.PartNumber, 500, ex, _sharedFileDefinition.Id, slice.MemoryStream.Length, UploadFailureKind.ServerError);
             throw;
         }
         finally
@@ -228,11 +230,40 @@ public class FileUploadWorker : IFileUploadWorker
         }
     }
 
-    private static int ComputeAttemptTimeoutSeconds(FileUploaderSlice slice)
+    internal const int AttemptTimeoutFloorSeconds = 60;
+    internal const int AttemptTimeoutCeilingSeconds = 120;
+    internal const int SecondsPerMegabyteHeuristic = 3;
+    
+    internal static int ComputeAttemptTimeoutSeconds(FileUploaderSlice slice)
     {
         var sizeMb = Math.Max(1, (int)Math.Ceiling((slice.MemoryStream.Length) / (1024d * 1024d)));
-        var timeoutSec = Math.Clamp(3 * sizeMb, 30, 90);
+        var timeoutSec = Math.Clamp(SecondsPerMegabyteHeuristic * sizeMb, AttemptTimeoutFloorSeconds, AttemptTimeoutCeilingSeconds);
         return timeoutSec;
+    }
+    
+    internal static UploadFailureKind RefineFailureKind(UploadFailureKind kind, CancellationToken globalToken, CancellationTokenSource attemptCts)
+    {
+        if (kind != UploadFailureKind.ClientCancellation)
+        {
+            return kind;
+        }
+        
+        return DetermineCancellationKind(globalToken, attemptCts);
+    }
+    
+    internal static UploadFailureKind DetermineCancellationKind(CancellationToken globalToken, CancellationTokenSource attemptCts)
+    {
+        if (globalToken.IsCancellationRequested)
+        {
+            return UploadFailureKind.ClientCancellation;
+        }
+        
+        if (attemptCts.IsCancellationRequested)
+        {
+            return UploadFailureKind.ClientTimeout;
+        }
+        
+        return UploadFailureKind.ClientCancellation;
     }
 
     private async Task AssertSliceUploadedAsync(
