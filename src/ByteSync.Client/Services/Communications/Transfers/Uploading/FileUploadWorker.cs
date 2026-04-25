@@ -29,9 +29,9 @@ public class FileUploadWorker : IFileUploadWorker
     
     private static int _workerTaskCounter;
     
-    internal const int AttemptTimeoutFloorSeconds = 60;
-    internal const int AttemptTimeoutCeilingSeconds = 120;
-    internal const int SecondsPerMegabyteHeuristic = 3;
+    private const int AttemptTimeoutFloorSeconds = 60;
+    private const int AttemptTimeoutCeilingSeconds = 120;
+    private const int SecondsPerMegabyteHeuristic = 3;
     
     public FileUploadWorker(
         IPolicyFactory policyFactory,
@@ -269,12 +269,12 @@ public class FileUploadWorker : IFileUploadWorker
         }
     }
     
-    internal static int ComputeAttemptTimeoutSeconds(FileUploaderSlice slice)
+    private static int ComputeAttemptTimeoutSeconds(FileUploaderSlice slice)
     {
         return ComputeAttemptTimeoutSeconds(slice.MemoryStream.Length);
     }
     
-    internal static int ComputeAttemptTimeoutSeconds(long sliceLengthBytes)
+    private static int ComputeAttemptTimeoutSeconds(long sliceLengthBytes)
     {
         var sizeMb = Math.Max(1, (int)Math.Ceiling(sliceLengthBytes / (1024d * 1024d)));
         var timeoutSec = Math.Clamp(SecondsPerMegabyteHeuristic * sizeMb, AttemptTimeoutFloorSeconds, AttemptTimeoutCeilingSeconds);
@@ -282,7 +282,7 @@ public class FileUploadWorker : IFileUploadWorker
         return timeoutSec;
     }
     
-    internal static UploadFailureKind RefineFailureKind(UploadFailureKind kind, CancellationTokenSource attemptCts,
+    private static UploadFailureKind RefineFailureKind(UploadFailureKind kind, CancellationTokenSource attemptCts,
         CancellationToken globalToken)
     {
         if (kind != UploadFailureKind.ClientCancellation)
@@ -293,7 +293,7 @@ public class FileUploadWorker : IFileUploadWorker
         return DetermineCancellationKind(attemptCts, globalToken);
     }
     
-    internal static UploadFailureKind DetermineCancellationKind(CancellationTokenSource attemptCts, CancellationToken globalToken)
+    private static UploadFailureKind DetermineCancellationKind(CancellationTokenSource attemptCts, CancellationToken globalToken)
     {
         if (globalToken.IsCancellationRequested)
         {
