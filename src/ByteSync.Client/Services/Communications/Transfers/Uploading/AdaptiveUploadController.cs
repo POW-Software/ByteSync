@@ -14,6 +14,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
     private const int MAX_CHUNK_SIZE_BYTES = 16 * 1024 * 1024; // 16 MB
     private const int MIN_PARALLELISM = 2;
     private const int MAX_PARALLELISM = 4;
+    private const int CLIENT_TIMEOUTS_BEFORE_DOWNSCALE = 2;
     
     private const double MULTIPLIER_2_X = 2.0;
     private const double MULTIPLIER_1_75_X = 1.75;
@@ -36,6 +37,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
     private readonly Queue<long> _recentBytes;
     private int _successesInWindow;
     private int _windowSize;
+    private int _consecutiveClientTimeouts;
     private readonly ILogger<AdaptiveUploadController> _logger;
     private readonly object _syncRoot = new();
     
@@ -86,10 +88,18 @@ public class AdaptiveUploadController : IAdaptiveUploadController
     {
         lock (_syncRoot)
         {
-            if (IsClientSideFailure(uploadResult.FailureKind))
+            if (uploadResult.FailureKind == UploadFailureKind.ClientCancellation)
             {
                 return;
             }
+            
+            if (uploadResult.FailureKind == UploadFailureKind.ClientTimeout)
+            {
+                HandleClientTimeout(uploadResult.FileId);
+                return;
+            }
+            
+            _consecutiveClientTimeouts = 0;
             
             EnqueueSample(uploadResult.Elapsed, uploadResult.IsSuccess, uploadResult.ActualBytes);
             
@@ -151,9 +161,26 @@ public class AdaptiveUploadController : IAdaptiveUploadController
         }
     }
     
-    private static bool IsClientSideFailure(UploadFailureKind failureKind)
+    private void HandleClientTimeout(string? fileId)
     {
-        return failureKind is UploadFailureKind.ClientCancellation or UploadFailureKind.ClientTimeout;
+        _consecutiveClientTimeouts += 1;
+        if (_consecutiveClientTimeouts < CLIENT_TIMEOUTS_BEFORE_DOWNSCALE)
+        {
+            _logger.LogDebug(
+                "Adaptive: file {FileId} client timeout {TimeoutCount}/{Threshold}. Waiting before downscale",
+                fileId ?? "-",
+                _consecutiveClientTimeouts,
+                CLIENT_TIMEOUTS_BEFORE_DOWNSCALE);
+            
+            return;
+        }
+        
+        _logger.LogInformation(
+            "Adaptive: file {FileId} client timeout threshold reached ({TimeoutCount}). Downscaling upload settings",
+            fileId ?? "-",
+            _consecutiveClientTimeouts);
+        _consecutiveClientTimeouts = 0;
+        Downscale(fileId, "client timeouts");
     }
     
     private bool HandleBandwidthReset(bool isSuccess, int? statusCode)
@@ -192,38 +219,43 @@ public class AdaptiveUploadController : IAdaptiveUploadController
     {
         if (maxElapsed > _downscaleThreshold)
         {
-            if (_currentParallelism > MIN_PARALLELISM)
-            {
-                _logger.LogInformation(
-                    "Adaptive: file {FileId} Downscale. Reducing parallelism {Prev} -> {Next}. Resetting window (window before {WindowBefore})",
-                    fileId ?? "-",
-                    _currentParallelism, _currentParallelism - 1,
-                    _windowSize);
-                _currentParallelism -= 1;
-                _windowSize = _currentParallelism;
-                ResetWindow();
-                
-                return true;
-            }
-            
-            var reduced = (int)Math.Max(MIN_CHUNK_SIZE_BYTES, _currentChunkSizeBytes * 0.75);
-            if (reduced != _currentChunkSizeBytes)
-            {
-                _currentChunkSizeBytes = reduced;
-                _logger.LogInformation(
-                    "Adaptive: file {FileId} Downscale. maxElapsed={MaxElapsedMs} ms > {ThresholdMs} ms. New chunkSize={ChunkKb} KB",
-                    fileId ?? "-",
-                    maxElapsed.TotalMilliseconds,
-                    _downscaleThreshold.TotalMilliseconds,
-                    Math.Round(_currentChunkSizeBytes / 1024d));
-            }
-            
-            ResetWindow();
-            
+            Downscale(fileId, $"maxElapsed={maxElapsed.TotalMilliseconds} ms > {_downscaleThreshold.TotalMilliseconds} ms");
             return true;
         }
         
         return false;
+    }
+    
+    private void Downscale(string? fileId, string reason)
+    {
+        if (_currentParallelism > MIN_PARALLELISM)
+        {
+            _logger.LogInformation(
+                "Adaptive: file {FileId} Downscale ({Reason}). Reducing parallelism {Prev} -> {Next}. Resetting window (window before {WindowBefore})",
+                fileId ?? "-",
+                reason,
+                _currentParallelism,
+                _currentParallelism - 1,
+                _windowSize);
+            _currentParallelism -= 1;
+            _windowSize = _currentParallelism;
+            ResetWindow();
+            
+            return;
+        }
+        
+        var reduced = (int)Math.Max(MIN_CHUNK_SIZE_BYTES, _currentChunkSizeBytes * 0.75);
+        if (reduced != _currentChunkSizeBytes)
+        {
+            _currentChunkSizeBytes = reduced;
+            _logger.LogInformation(
+                "Adaptive: file {FileId} Downscale ({Reason}). New chunkSize={ChunkKb} KB",
+                fileId ?? "-",
+                reason,
+                Math.Round(_currentChunkSizeBytes / 1024d));
+        }
+        
+        ResetWindow();
     }
     
     private void TryHandleUpscale(string? fileId)
@@ -362,6 +394,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
             _currentChunkSizeBytes = Math.Clamp(INITIAL_CHUNK_SIZE_BYTES, MIN_CHUNK_SIZE_BYTES, MAX_CHUNK_SIZE_BYTES);
             _currentParallelism = MIN_PARALLELISM;
             _windowSize = _currentParallelism;
+            _consecutiveClientTimeouts = 0;
         }
         
         ResetWindow();
