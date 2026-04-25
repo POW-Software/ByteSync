@@ -375,7 +375,7 @@ public class FileUploadWorker : IFileUploadWorker
         if (response == null || !response.IsSuccess)
         {
             throw new Exception(
-                $"UploadAvailableSlice: unable to get upload url. Status: {response?.StatusCode}, Error: {response?.ErrorMessage}");
+                $"UploadAvailableSlice: upload attempt failed. Status: {response?.StatusCode}, Error: {response?.ErrorMessage}");
         }
     }
     
