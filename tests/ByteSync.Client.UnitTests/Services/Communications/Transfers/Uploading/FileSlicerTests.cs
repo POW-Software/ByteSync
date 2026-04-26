@@ -168,7 +168,57 @@ public class FileSlicerTests
         // Channel should be completed
         _availableSlices.Reader.Completion.IsCompleted.Should().BeTrue();
     }
-    
+
+    [Test]
+    public async Task SliceAndEncryptAsync_WhenChannelClosesAfterSliceCreated_ShouldDisposeSlice()
+    {
+        // Arrange
+        var stream = new MemoryStream(new byte[128]);
+        var slice = new FileUploaderSlice(1, stream);
+
+        _mockSlicerEncrypter.Setup(x => x.SliceAndEncrypt())
+            .Callback(() =>
+            {
+                _exceptionOccurred.Set();
+                _availableSlices.Writer.TryComplete();
+            })
+            .ReturnsAsync(slice);
+
+        // Act
+        await _fileSlicer.SliceAndEncryptAsync(_sharedFileDefinition, _progressState);
+
+        // Assert
+        _progressState.TotalCreatedSlices.Should().Be(1);
+        var readDisposedStream = () => _ = stream.Length;
+        readDisposedStream.Should().Throw<ObjectDisposedException>();
+    }
+
+    [Test]
+    public async Task SliceAndEncryptAdaptiveAsync_WhenChannelClosesAfterSliceCreated_ShouldDisposeSlice()
+    {
+        // Arrange
+        var stream = new MemoryStream(new byte[128]);
+        var slice = new FileUploaderSlice(1, stream);
+
+        _mockAdaptiveController.Setup(x => x.CurrentChunkSizeBytes).Returns(64 * 1024);
+        _mockAdaptiveController.Setup(x => x.GetNextChunkSizeBytes()).Returns(64 * 1024);
+        _mockSlicerEncrypter.Setup(x => x.SliceAndEncrypt())
+            .Callback(() =>
+            {
+                _exceptionOccurred.Set();
+                _availableSlices.Writer.TryComplete();
+            })
+            .ReturnsAsync(slice);
+
+        // Act
+        await _fileSlicer.SliceAndEncryptAdaptiveAsync(_sharedFileDefinition, _progressState);
+
+        // Assert
+        _progressState.TotalCreatedSlices.Should().Be(1);
+        var readDisposedStream = () => _ = stream.Length;
+        readDisposedStream.Should().Throw<ObjectDisposedException>();
+    }
+
     [Test]
     public async Task SliceAndEncryptAsync_WithMultipleSlices_ShouldProcessAllSlices()
     {

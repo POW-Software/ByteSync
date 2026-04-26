@@ -169,7 +169,7 @@ public class FileSlicer : IFileSlicer
         }
         catch (ChannelClosedException) when (_exceptionOccurred.WaitOne(0))
         {
-            fileUploaderSlice.MemoryStream.Dispose();
+            await fileUploaderSlice.MemoryStream.DisposeAsync();
 
             return false;
         }

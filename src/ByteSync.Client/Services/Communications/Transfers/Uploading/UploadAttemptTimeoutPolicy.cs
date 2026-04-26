@@ -19,7 +19,7 @@ public static class UploadAttemptTimeoutPolicy
         }
         
         var staleChunkPenalty = ComputeStaleChunkPenaltySeconds(sliceLengthBytes, currentChunkSizeBytes);
-        timeoutSec += (attempt - 1) * RetryGrowthSeconds + staleChunkPenalty;
+        timeoutSec += (long)(attempt - 1) * RetryGrowthSeconds + staleChunkPenalty;
         
         return (int)Math.Clamp(timeoutSec, AttemptTimeoutFloorSeconds, AttemptTimeoutCeilingSeconds);
     }
