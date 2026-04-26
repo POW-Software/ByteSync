@@ -12,7 +12,7 @@ public class FileUploadCoordinator : IFileUploadCoordinator
     private readonly ManualResetEvent _uploadingIsFinished;
     private readonly ManualResetEvent _exceptionOccurred;
     private readonly ILogger<FileUploadCoordinator> _logger;
-    private const int CHANNEL_CAPACITY = 8;
+    private const int CHANNEL_CAPACITY = 2;
 
     public FileUploadCoordinator(ILogger<FileUploadCoordinator> logger)
     {

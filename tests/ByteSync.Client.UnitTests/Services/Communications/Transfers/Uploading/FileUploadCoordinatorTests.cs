@@ -178,6 +178,28 @@ public class FileUploadCoordinatorTests
     }
     
     [Test]
+    public async Task AvailableSlices_ShouldApplyTightBackpressure()
+    {
+        // Arrange
+        var first = new FileUploaderSlice(1, new MemoryStream());
+        var second = new FileUploaderSlice(2, new MemoryStream());
+        var third = new FileUploaderSlice(3, new MemoryStream());
+
+        // Act
+        await _coordinator.AvailableSlices.Writer.WriteAsync(first);
+        await _coordinator.AvailableSlices.Writer.WriteAsync(second);
+        var thirdWrite = _coordinator.AvailableSlices.Writer.WriteAsync(third).AsTask();
+
+        // Assert
+        thirdWrite.IsCompleted.Should().BeFalse();
+
+        var readSlice = await _coordinator.AvailableSlices.Reader.ReadAsync();
+        readSlice.Should().Be(first);
+
+        await thirdWrite.WaitAsync(TimeSpan.FromSeconds(1));
+    }
+
+    [Test]
     public void MultipleSetExceptionCalls_ShouldNotThrow()
     {
         // Arrange
