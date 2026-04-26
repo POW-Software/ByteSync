@@ -414,7 +414,7 @@ public class FileUploadWorkerTests
 
                 if (slice.PartNumber == 1)
                 {
-                    firstUploadCanFail.Wait(TimeSpan.FromSeconds(5));
+                    firstUploadCanFail.Wait(TimeSpan.FromSeconds(5), CancellationToken.None);
 
                     return UploadFileResponse.Failure(500, "server failure");
                 }
@@ -457,5 +457,35 @@ public class FileUploadWorkerTests
         secondUploadCanceled.Wait(TimeSpan.FromSeconds(1)).Should().BeTrue();
         _exceptionOccurred.WaitOne(0).Should().BeTrue();
         _progressState.Exceptions.Should().HaveCount(1);
+    }
+
+    [Test]
+    public async Task UploadAvailableSlicesAdaptiveAsync_WhenWorkerFails_ShouldDisposeQueuedSlices()
+    {
+        // Arrange
+        var activeSlice = new FileUploaderSlice(1, new MemoryStream(new byte[64 * 1024]));
+        var queuedStream = new MemoryStream(new byte[64 * 1024]);
+        var queuedSlice = new FileUploaderSlice(2, queuedStream);
+        var mockUploadStrategy = new Mock<IUploadStrategy>();
+        var mockUploadLocation = new FileStorageLocation("https://test.example.com/upload", StorageProvider.CloudflareR2);
+
+        mockUploadStrategy.Setup(x =>
+                x.UploadAsync(It.IsAny<FileUploaderSlice>(), It.IsAny<FileStorageLocation>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(UploadFileResponse.Failure(500, "server failure"));
+
+        _mockStrategies.Setup(x => x[StorageProvider.CloudflareR2]).Returns(mockUploadStrategy.Object);
+        _mockFileTransferApiClient.Setup(x => x.GetUploadFileStorageLocation(It.IsAny<TransferParameters>()))
+            .ReturnsAsync(mockUploadLocation);
+
+        await _availableSlices.Writer.WriteAsync(activeSlice);
+        await _availableSlices.Writer.WriteAsync(queuedSlice);
+        _availableSlices.Writer.Complete();
+
+        // Act
+        await _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_availableSlices, _progressState);
+
+        // Assert
+        var readQueuedStream = () => _ = queuedStream.Length;
+        readQueuedStream.Should().Throw<ObjectDisposedException>();
     }
 }

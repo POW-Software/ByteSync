@@ -58,4 +58,30 @@ public class UploadAttemptTimeoutPolicyTests
         // Assert
         timeout.Should().Be(120);
     }
+
+    [Test]
+    public void ComputeTimeoutSeconds_WithHugeSlice_ShouldNotOverflow()
+    {
+        // Act
+        var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
+            long.MaxValue,
+            attempt: 1,
+            currentChunkSizeBytes: 64 * 1024);
+
+        // Assert
+        timeout.Should().Be(120);
+    }
+
+    [Test]
+    public void ComputeTimeoutSeconds_WithHugeStaleRatio_ShouldNotOverflow()
+    {
+        // Act
+        var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
+            long.MaxValue,
+            attempt: 2,
+            currentChunkSizeBytes: 1);
+
+        // Assert
+        timeout.Should().Be(120);
+    }
 }

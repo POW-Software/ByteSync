@@ -12,37 +12,46 @@ public static class UploadAttemptTimeoutPolicy
     
     public static int ComputeTimeoutSeconds(long sliceLengthBytes, int attempt, int currentChunkSizeBytes)
     {
-        var timeoutSec = ComputeBaseTimeoutSeconds(sliceLengthBytes);
+        var timeoutSec = (long)ComputeBaseTimeoutSeconds(sliceLengthBytes);
         if (attempt <= 1)
         {
-            return timeoutSec;
+            return (int)timeoutSec;
         }
         
         var staleChunkPenalty = ComputeStaleChunkPenaltySeconds(sliceLengthBytes, currentChunkSizeBytes);
         timeoutSec += (attempt - 1) * RetryGrowthSeconds + staleChunkPenalty;
         
-        return Math.Clamp(timeoutSec, AttemptTimeoutFloorSeconds, AttemptTimeoutCeilingSeconds);
+        return (int)Math.Clamp(timeoutSec, AttemptTimeoutFloorSeconds, AttemptTimeoutCeilingSeconds);
     }
     
     private static int ComputeBaseTimeoutSeconds(long sliceLengthBytes)
     {
-        var sizeMb = Math.Max(1, (int)Math.Ceiling(sliceLengthBytes / (1024d * 1024d)));
+        var sizeMb = Math.Max(1d, Math.Ceiling(sliceLengthBytes / (1024d * 1024d)));
+        var ceilingSizeMb = Math.Ceiling(AttemptTimeoutCeilingSeconds / (double)SecondsPerMegabyteHeuristic);
+        if (sizeMb >= ceilingSizeMb)
+        {
+            return AttemptTimeoutCeilingSeconds;
+        }
         
         return Math.Clamp(
-            SecondsPerMegabyteHeuristic * sizeMb,
+            SecondsPerMegabyteHeuristic * (int)sizeMb,
             AttemptTimeoutFloorSeconds,
             AttemptTimeoutCeilingSeconds);
     }
     
-    private static int ComputeStaleChunkPenaltySeconds(long sliceLengthBytes, int currentChunkSizeBytes)
+    private static long ComputeStaleChunkPenaltySeconds(long sliceLengthBytes, int currentChunkSizeBytes)
     {
         if (currentChunkSizeBytes <= 0 || sliceLengthBytes <= currentChunkSizeBytes)
         {
             return 0;
         }
         
-        var chunkRatio = (int)Math.Ceiling(sliceLengthBytes / (double)currentChunkSizeBytes);
+        var chunkRatio = Math.Ceiling(sliceLengthBytes / (double)currentChunkSizeBytes);
+        if (chunkRatio >= AttemptTimeoutCeilingSeconds / (double)StaleChunkPenaltySeconds + 1)
+        {
+            return AttemptTimeoutCeilingSeconds;
+        }
         
-        return (chunkRatio - 1) * StaleChunkPenaltySeconds;
+        return (long)(chunkRatio - 1) * StaleChunkPenaltySeconds;
     }
 }

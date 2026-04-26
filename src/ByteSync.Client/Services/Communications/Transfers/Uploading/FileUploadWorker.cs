@@ -28,6 +28,7 @@ public class FileUploadWorker : IFileUploadWorker
     private CancellationTokenSource CancellationTokenSource { get; }
     
     private static int _workerTaskCounter;
+    private int _remainingSlicesDrained;
     
     public FileUploadWorker(
         IPolicyFactory policyFactory,
@@ -145,7 +146,7 @@ public class FileUploadWorker : IFileUploadWorker
                 }
                 catch (Exception ex)
                 {
-                    await HandleUploadExceptionAsync(progressState, ex, workerId);
+                    await HandleUploadExceptionAsync(progressState, availableSlices, ex, workerId);
 
                     return;
                 }
@@ -385,7 +386,7 @@ public class FileUploadWorker : IFileUploadWorker
     {
         if (response == null || !response.IsSuccess)
         {
-            throw new Exception(
+            throw new InvalidOperationException(
                 $"UploadAvailableSlice: upload attempt failed. Status: {response?.StatusCode}, Error: {response?.ErrorMessage}");
         }
     }
@@ -410,7 +411,11 @@ public class FileUploadWorker : IFileUploadWorker
         }
     }
     
-    private async Task HandleUploadExceptionAsync(UploadProgressState progressState, Exception ex, int workerId)
+    private async Task HandleUploadExceptionAsync(
+        UploadProgressState progressState,
+        Channel<FileUploaderSlice> availableSlices,
+        Exception ex,
+        int workerId)
     {
         _logger.LogError(ex, "UploadAvailableSlice: worker {WorkerId} error", workerId);
         
@@ -425,7 +430,22 @@ public class FileUploadWorker : IFileUploadWorker
         }
         
         _exceptionOccurred.Set();
+        availableSlices.Writer.TryComplete(ex);
         await CancellationTokenSource.CancelAsync();
+        DrainRemainingSlices(availableSlices.Reader);
+    }
+
+    private void DrainRemainingSlices(ChannelReader<FileUploaderSlice> reader)
+    {
+        if (Interlocked.Exchange(ref _remainingSlicesDrained, 1) == 1)
+        {
+            return;
+        }
+
+        while (reader.TryRead(out var slice))
+        {
+            DisposeSlice(slice);
+        }
     }
     
     private void DisposeSlice(FileUploaderSlice slice)
@@ -489,7 +509,7 @@ public class FileUploadWorker : IFileUploadWorker
         {
             var fileName = _sharedFileDefinition.GetFileName(slice.PartNumber);
             _logger.LogError(ex,
-                "Error while uploading slice {Number} for {FileName} (worker {WorkerId}), sharedFileDefinitionId:{sharedFileDefinitionId} ",
+                "Error while uploading slice {Number} for {FileName} (worker {WorkerId}), SharedFileDefinitionId:{SharedFileDefinitionId} ",
                 slice.PartNumber, fileName, workerId, _sharedFileDefinition.Id);
             
             throw;
