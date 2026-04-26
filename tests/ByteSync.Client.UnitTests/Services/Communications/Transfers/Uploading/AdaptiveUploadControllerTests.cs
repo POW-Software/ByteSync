@@ -93,6 +93,7 @@ public class AdaptiveUploadControllerTests
             FeedFastWindow(_controller);
         }
         
+        _controller.CurrentChunkSizeBytes.Should().BeGreaterThanOrEqualTo(4 * 1024 * 1024);
         _controller.CurrentParallelism.Should().BeGreaterThan(2);
         var beforeParallelism = _controller.CurrentParallelism;
         var beforeChunk = _controller.CurrentChunkSizeBytes;

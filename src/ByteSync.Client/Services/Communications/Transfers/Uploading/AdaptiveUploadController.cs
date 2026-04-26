@@ -90,6 +90,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
         {
             if (uploadResult.FailureKind == UploadFailureKind.ClientCancellation)
             {
+                _consecutiveClientTimeouts = 0;
                 return;
             }
             
