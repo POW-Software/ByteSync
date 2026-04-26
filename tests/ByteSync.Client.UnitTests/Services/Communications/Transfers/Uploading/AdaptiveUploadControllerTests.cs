@@ -93,6 +93,7 @@ public class AdaptiveUploadControllerTests
             FeedFastWindow(_controller);
         }
         
+        _controller.CurrentChunkSizeBytes.Should().BeGreaterThanOrEqualTo(4 * 1024 * 1024);
         _controller.CurrentParallelism.Should().BeGreaterThan(2);
         var beforeParallelism = _controller.CurrentParallelism;
         var beforeChunk = _controller.CurrentChunkSizeBytes;
@@ -184,40 +185,58 @@ public class AdaptiveUploadControllerTests
     }
     
     [Test]
-    public void ClientTimeout_DoesNotEnterAdaptiveWindow_AndDoesNotResetChunkSize()
+    public void ClientTimeouts_DownscaleBelowInitialChunkSize_WhenAtMinParallelism()
     {
-        // Arrange - Inflate chunk and make sure parallelism is just at min (=2)
-        var safety = 10;
-        while (_controller.CurrentChunkSizeBytes < 1024 * 1024 && safety-- > 0)
+        // Arrange
+        _controller.CurrentParallelism.Should().Be(2);
+        _controller.CurrentChunkSizeBytes.Should().Be(500 * 1024);
+        
+        // Act - Two consecutive client-side timeouts trigger controlled downscale
+        FeedClientTimeouts(_controller, 2);
+        
+        // Assert
+        _controller.CurrentParallelism.Should().Be(2);
+        _controller.CurrentChunkSizeBytes.Should().BeLessThan(500 * 1024);
+        _controller.CurrentChunkSizeBytes.Should().Be(375 * 1024);
+    }
+    
+    [Test]
+    public void ClientTimeouts_ReduceParallelismFirst_WhenAboveMinParallelism()
+    {
+        // Arrange
+        var safety = 100;
+        while (_controller.CurrentChunkSizeBytes < 4 * 1024 * 1024 && safety-- > 0)
         {
             FeedFastWindow(_controller);
         }
-        _controller.CurrentParallelism.Should().Be(2);
-        var inflatedChunk = _controller.CurrentChunkSizeBytes;
         
-        // Act - Feed a window of slow client-timeout failures (with the new failure kind)
-        var p = _controller.CurrentParallelism;
-        for (var i = 0; i < p; i++)
+        _controller.CurrentParallelism.Should().BeGreaterThan(2);
+        var beforeParallelism = _controller.CurrentParallelism;
+        var beforeChunk = _controller.CurrentChunkSizeBytes;
+        
+        // Act
+        FeedClientTimeouts(_controller, 2);
+        
+        // Assert
+        _controller.CurrentParallelism.Should().Be(beforeParallelism - 1);
+        _controller.CurrentChunkSizeBytes.Should().Be(beforeChunk);
+    }
+    
+    [Test]
+    public void ClientTimeouts_DoNotReduceChunkSizeBelowMinimum()
+    {
+        // Arrange
+        _controller.CurrentParallelism.Should().Be(2);
+        
+        // Act
+        for (var i = 0; i < 20; i++)
         {
-            RecordUploadResult(
-                _controller,
-                TimeSpan.FromSeconds(60),
-                isSuccess: false,
-                partNumber: i + 1,
-                statusCode: 0,
-                failureKind: UploadFailureKind.ClientTimeout);
+            FeedClientTimeouts(_controller, 2);
         }
         
-        RecordUploadResult(
-            _controller,
-            TimeSpan.FromSeconds(1),
-            isSuccess: true,
-            partNumber: 100);
-        
-        // Assert - the timeout samples were ignored and cannot trigger a later downscale
-        _controller.CurrentChunkSizeBytes.Should().NotBe(500 * 1024);
-        _controller.CurrentChunkSizeBytes.Should().Be(inflatedChunk,
-            because: "client-side cancellations are not bandwidth signals and must not influence chunk sizing");
+        // Assert
+        _controller.CurrentChunkSizeBytes.Should().Be(64 * 1024);
+        _controller.CurrentParallelism.Should().Be(2);
     }
     
     [Test]
@@ -245,6 +264,20 @@ public class AdaptiveUploadControllerTests
         for (var i = 0; i < p; i++)
         {
             RecordUploadResult(controller, elapsed, isSuccess: successes, partNumber: i + 1);
+        }
+    }
+    
+    private static void FeedClientTimeouts(AdaptiveUploadController controller, int count)
+    {
+        for (var i = 0; i < count; i++)
+        {
+            RecordUploadResult(
+                controller,
+                TimeSpan.FromSeconds(60),
+                isSuccess: false,
+                partNumber: i + 1,
+                statusCode: 0,
+                failureKind: UploadFailureKind.ClientTimeout);
         }
     }
     
