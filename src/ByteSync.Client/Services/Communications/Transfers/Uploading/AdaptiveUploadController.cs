@@ -14,7 +14,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
     private const int MAX_CHUNK_SIZE_BYTES = 16 * 1024 * 1024; // 16 MB
     private const int MIN_PARALLELISM = 2;
     private const int MAX_PARALLELISM = 4;
-    private const int CLIENT_TIMEOUTS_BEFORE_DOWNSCALE = 2;
+    private const int CLIENT_NETWORK_ISSUES_BEFORE_DOWNSCALE = 2;
     
     private const double MULTIPLIER_2_X = 2.0;
     private const double MULTIPLIER_1_75_X = 1.75;
@@ -37,7 +37,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
     private readonly Queue<long> _recentBytes;
     private int _successesInWindow;
     private int _windowSize;
-    private int _consecutiveClientTimeouts;
+    private int _consecutiveClientNetworkIssues;
     private readonly ILogger<AdaptiveUploadController> _logger;
     private readonly object _syncRoot = new();
     
@@ -90,7 +90,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
         {
             if (uploadResult.FailureKind == UploadFailureKind.ClientCancellation)
             {
-                _consecutiveClientTimeouts = 0;
+                _consecutiveClientNetworkIssues = 0;
                 return;
             }
             
@@ -100,7 +100,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
                 return;
             }
             
-            _consecutiveClientTimeouts = 0;
+            _consecutiveClientNetworkIssues = 0;
             
             EnqueueSample(uploadResult.Elapsed, uploadResult.IsSuccess, uploadResult.ActualBytes);
             
@@ -164,24 +164,24 @@ public class AdaptiveUploadController : IAdaptiveUploadController
     
     private void HandleClientNetworkIssue(string? fileId, UploadFailureKind failureKind)
     {
-        _consecutiveClientTimeouts += 1;
-        if (_consecutiveClientTimeouts < CLIENT_TIMEOUTS_BEFORE_DOWNSCALE)
+        _consecutiveClientNetworkIssues += 1;
+        if (_consecutiveClientNetworkIssues < CLIENT_NETWORK_ISSUES_BEFORE_DOWNSCALE)
         {
             _logger.LogDebug(
-                "Adaptive: file {FileId} client network issue {FailureKind} {TimeoutCount}/{Threshold}. Waiting before downscale",
+                "Adaptive: file {FileId} client network issue {FailureKind} {IssueCount}/{Threshold}. Waiting before downscale",
                 fileId ?? "-",
                 failureKind,
-                _consecutiveClientTimeouts,
-                CLIENT_TIMEOUTS_BEFORE_DOWNSCALE);
+                _consecutiveClientNetworkIssues,
+                CLIENT_NETWORK_ISSUES_BEFORE_DOWNSCALE);
             
             return;
         }
         
         _logger.LogInformation(
-            "Adaptive: file {FileId} client network issue threshold reached ({TimeoutCount}). Downscaling upload settings",
+            "Adaptive: file {FileId} client network issue threshold reached ({IssueCount}). Downscaling upload settings",
             fileId ?? "-",
-            _consecutiveClientTimeouts);
-        _consecutiveClientTimeouts = 0;
+            _consecutiveClientNetworkIssues);
+        _consecutiveClientNetworkIssues = 0;
         Downscale(fileId, "client network issues");
     }
     
@@ -396,7 +396,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
             _currentChunkSizeBytes = Math.Clamp(INITIAL_CHUNK_SIZE_BYTES, MIN_CHUNK_SIZE_BYTES, MAX_CHUNK_SIZE_BYTES);
             _currentParallelism = MIN_PARALLELISM;
             _windowSize = _currentParallelism;
-            _consecutiveClientTimeouts = 0;
+            _consecutiveClientNetworkIssues = 0;
         }
         
         ResetWindow();

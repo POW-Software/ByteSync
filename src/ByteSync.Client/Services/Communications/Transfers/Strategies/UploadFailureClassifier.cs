@@ -31,7 +31,7 @@ public static class UploadFailureClassifier
 
     private static bool IsClientNetworkError(Exception exception)
     {
-        if (exception is not HttpRequestException and not IOException)
+        if (exception is not HttpRequestException and not IOException and not SocketException)
         {
             return false;
         }
