@@ -27,14 +27,27 @@ public class CloudflareR2UploadStrategyTests
     
     private static (CloudflareR2UploadStrategy strategy, Mock<HttpMessageHandler> handler) CreateStrategy()
     {
+        var (strategy, handler, _) = CreateStrategyWithCreatedClients();
+        return (strategy, handler);
+    }
+
+    private static (CloudflareR2UploadStrategy strategy, Mock<HttpMessageHandler> handler, List<HttpClient> createdClients)
+        CreateStrategyWithCreatedClients()
+    {
         var handler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+        var createdClients = new List<HttpClient>();
         var factory = new Mock<IHttpClientFactory>();
         factory
             .Setup(f => f.CreateClient(It.IsAny<string>()))
-            .Returns(() => new HttpClient(handler.Object, disposeHandler: false));
+            .Returns(() =>
+            {
+                var httpClient = new HttpClient(handler.Object, disposeHandler: false);
+                createdClients.Add(httpClient);
+                return httpClient;
+            });
         
         var strategy = new CloudflareR2UploadStrategy(NullLogger<CloudflareR2UploadStrategy>.Instance, factory.Object);
-        return (strategy, handler);
+        return (strategy, handler, createdClients);
     }
     
     private static void SetupHandler(Mock<HttpMessageHandler> handler, HttpResponseMessage response)
@@ -70,6 +83,18 @@ public class CloudflareR2UploadStrategyTests
         response.FailureKind.Should().Be(UploadFailureKind.None);
     }
     
+    [Test]
+    public async Task UploadAsync_ShouldLetCallerTokenControlAttemptTimeout()
+    {
+        var (strategy, handler, createdClients) = CreateStrategyWithCreatedClients();
+        SetupHandler(handler, new HttpResponseMessage(HttpStatusCode.OK));
+
+        await strategy.UploadAsync(CreateSlice(), CreateLocation(), CancellationToken.None);
+
+        createdClients.Should().ContainSingle();
+        createdClients[0].Timeout.Should().Be(Timeout.InfiniteTimeSpan);
+    }
+
     [Test]
     public async Task UploadAsync_On500_ShouldReturnServerFailure_WithRealStatusCode()
     {

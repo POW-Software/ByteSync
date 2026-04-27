@@ -21,7 +21,7 @@ public class AzureBlobStorageUploadStrategy : IUploadStrategy
         try
         {
             var options = new BlobClientOptions();
-            options.Retry.NetworkTimeout = TimeSpan.FromMinutes(1);
+            options.Retry.NetworkTimeout = TimeSpan.FromMinutes(10);
 
             slice.MemoryStream.Position = 0;
             var blob = new BlobClient(new Uri(storageLocation.Url), options);

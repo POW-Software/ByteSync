@@ -66,4 +66,16 @@ public class UploadFileResponse
             FailureKind = UploadFailureKind.ClientTimeout,
         };
     }
+
+    public static UploadFileResponse ClientNetworkError(Exception exception)
+    {
+        return new UploadFileResponse
+        {
+            IsSuccess = false,
+            StatusCode = 0,
+            ErrorMessage = exception.Message,
+            Exception = exception,
+            FailureKind = UploadFailureKind.ClientNetworkError,
+        };
+    }
 }

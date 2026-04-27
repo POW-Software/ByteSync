@@ -29,7 +29,7 @@ public class CloudflareR2UploadStrategy : IUploadStrategy
             slice.MemoryStream.Position = 0;
             
             using var httpClient = _httpClientFactory.CreateClient();
-            httpClient.Timeout = TimeSpan.FromMinutes(1);
+            httpClient.Timeout = Timeout.InfiniteTimeSpan;
             httpClient.DefaultRequestHeaders.ExpectContinue = false;
             
             // Build ReadOnlyMemory without copying when possible; fallback to ToArray otherwise

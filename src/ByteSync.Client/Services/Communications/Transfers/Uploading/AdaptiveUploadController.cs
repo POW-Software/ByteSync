@@ -94,9 +94,9 @@ public class AdaptiveUploadController : IAdaptiveUploadController
                 return;
             }
             
-            if (uploadResult.FailureKind == UploadFailureKind.ClientTimeout)
+            if (uploadResult.FailureKind is UploadFailureKind.ClientTimeout or UploadFailureKind.ClientNetworkError)
             {
-                HandleClientTimeout(uploadResult.FileId);
+                HandleClientNetworkIssue(uploadResult.FileId, uploadResult.FailureKind);
                 return;
             }
             
@@ -162,14 +162,15 @@ public class AdaptiveUploadController : IAdaptiveUploadController
         }
     }
     
-    private void HandleClientTimeout(string? fileId)
+    private void HandleClientNetworkIssue(string? fileId, UploadFailureKind failureKind)
     {
         _consecutiveClientTimeouts += 1;
         if (_consecutiveClientTimeouts < CLIENT_TIMEOUTS_BEFORE_DOWNSCALE)
         {
             _logger.LogDebug(
-                "Adaptive: file {FileId} client timeout {TimeoutCount}/{Threshold}. Waiting before downscale",
+                "Adaptive: file {FileId} client network issue {FailureKind} {TimeoutCount}/{Threshold}. Waiting before downscale",
                 fileId ?? "-",
+                failureKind,
                 _consecutiveClientTimeouts,
                 CLIENT_TIMEOUTS_BEFORE_DOWNSCALE);
             
@@ -177,11 +178,11 @@ public class AdaptiveUploadController : IAdaptiveUploadController
         }
         
         _logger.LogInformation(
-            "Adaptive: file {FileId} client timeout threshold reached ({TimeoutCount}). Downscaling upload settings",
+            "Adaptive: file {FileId} client network issue threshold reached ({TimeoutCount}). Downscaling upload settings",
             fileId ?? "-",
             _consecutiveClientTimeouts);
         _consecutiveClientTimeouts = 0;
-        Downscale(fileId, "client timeouts");
+        Downscale(fileId, "client network issues");
     }
     
     private bool HandleBandwidthReset(bool isSuccess, int? statusCode)

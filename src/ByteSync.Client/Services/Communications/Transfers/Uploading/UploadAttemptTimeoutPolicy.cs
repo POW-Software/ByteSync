@@ -5,7 +5,7 @@ namespace ByteSync.Services.Communications.Transfers.Uploading;
 public static class UploadAttemptTimeoutPolicy
 {
     private const int AttemptTimeoutFloorSeconds = 60;
-    private const int AttemptTimeoutCeilingSeconds = 120;
+    private const int AttemptTimeoutCeilingSeconds = 180;
     private const int SecondsPerMegabyteHeuristic = 3;
     private const int RetryGrowthSeconds = 15;
     private const int StaleChunkPenaltySeconds = 5;

@@ -56,7 +56,20 @@ public class UploadAttemptTimeoutPolicyTests
             currentChunkSizeBytes: 64 * 1024);
         
         // Assert
-        timeout.Should().Be(120);
+        timeout.Should().Be(180);
+    }
+
+    [Test]
+    public void ComputeTimeoutSeconds_ForLargeStaleSliceAtLowBandwidth_ShouldAllowMoreThanTwoMinutes()
+    {
+        // Act
+        var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
+            1969 * 1024,
+            attempt: 6,
+            currentChunkSizeBytes: 500 * 1024);
+
+        // Assert
+        timeout.Should().Be(150);
     }
 
     [Test]
@@ -69,7 +82,7 @@ public class UploadAttemptTimeoutPolicyTests
             currentChunkSizeBytes: 64 * 1024);
 
         // Assert
-        timeout.Should().Be(120);
+        timeout.Should().Be(180);
     }
 
     [Test]
@@ -82,6 +95,6 @@ public class UploadAttemptTimeoutPolicyTests
             currentChunkSizeBytes: 1);
 
         // Assert
-        timeout.Should().Be(120);
+        timeout.Should().Be(180);
     }
 }
