@@ -2,6 +2,8 @@ using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Services.Communications.Transfers.Strategies;
 using FluentAssertions;
 using NUnit.Framework;
+using System.Net.Http;
+using System.Net.Sockets;
 
 namespace ByteSync.Client.UnitTests.Services.Communications.Transfers.Strategies;
 
@@ -80,16 +82,46 @@ public class UploadFailureClassifierTests
     }
     
     [Test]
-    public void Classify_HttpRequestException_ShouldReturnServerError500()
+    public void Classify_HttpRequestExceptionWithoutSocketFailure_ShouldReturnServerError500()
     {
         using var cts = new CancellationTokenSource();
         var ex = new HttpRequestException("network issue");
-        
+
         var response = UploadFailureClassifier.Classify(ex, cts.Token);
-        
+
         response.IsSuccess.Should().BeFalse();
         response.StatusCode.Should().Be(500);
         response.FailureKind.Should().Be(UploadFailureKind.ServerError);
+        response.Exception.Should().BeSameAs(ex);
+    }
+
+    [Test]
+    public void Classify_HttpRequestExceptionWithConnectionReset_ShouldReturnClientNetworkError()
+    {
+        using var cts = new CancellationTokenSource();
+        var socketException = new SocketException((int)SocketError.ConnectionReset);
+        var ioException = new IOException("transport closed", socketException);
+        var ex = new HttpRequestException("copy failed", ioException);
+
+        var response = UploadFailureClassifier.Classify(ex, cts.Token);
+
+        response.IsSuccess.Should().BeFalse();
+        response.StatusCode.Should().Be(0);
+        response.FailureKind.Should().Be(UploadFailureKind.ClientNetworkError);
+        response.Exception.Should().BeSameAs(ex);
+    }
+
+    [Test]
+    public void Classify_DirectSocketExceptionWithConnectionReset_ShouldReturnClientNetworkError()
+    {
+        using var cts = new CancellationTokenSource();
+        var ex = new SocketException((int)SocketError.ConnectionReset);
+
+        var response = UploadFailureClassifier.Classify(ex, cts.Token);
+
+        response.IsSuccess.Should().BeFalse();
+        response.StatusCode.Should().Be(0);
+        response.FailureKind.Should().Be(UploadFailureKind.ClientNetworkError);
         response.Exception.Should().BeSameAs(ex);
     }
 }

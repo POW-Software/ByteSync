@@ -199,7 +199,22 @@ public class AdaptiveUploadControllerTests
         _controller.CurrentChunkSizeBytes.Should().BeLessThan(500 * 1024);
         _controller.CurrentChunkSizeBytes.Should().Be(375 * 1024);
     }
-    
+
+    [Test]
+    public void ClientNetworkErrors_DownscaleBelowInitialChunkSize_WhenAtMinParallelism()
+    {
+        // Arrange
+        _controller.CurrentParallelism.Should().Be(2);
+        _controller.CurrentChunkSizeBytes.Should().Be(500 * 1024);
+
+        // Act
+        FeedClientNetworkErrors(_controller, 2);
+
+        // Assert
+        _controller.CurrentParallelism.Should().Be(2);
+        _controller.CurrentChunkSizeBytes.Should().Be(375 * 1024);
+    }
+
     [Test]
     public void ClientTimeouts_ReduceParallelismFirst_WhenAboveMinParallelism()
     {
@@ -280,7 +295,21 @@ public class AdaptiveUploadControllerTests
                 failureKind: UploadFailureKind.ClientTimeout);
         }
     }
-    
+
+    private static void FeedClientNetworkErrors(AdaptiveUploadController controller, int count)
+    {
+        for (var i = 0; i < count; i++)
+        {
+            RecordUploadResult(
+                controller,
+                TimeSpan.FromSeconds(90),
+                isSuccess: false,
+                partNumber: i + 1,
+                statusCode: 0,
+                failureKind: UploadFailureKind.ClientNetworkError);
+        }
+    }
+
     private static void RecordUploadResult(
         AdaptiveUploadController controller,
         TimeSpan elapsed,

@@ -6,4 +6,5 @@ public enum UploadFailureKind
     ServerError = 1,
     ClientCancellation = 2,
     ClientTimeout = 3,
+    ClientNetworkError = 4,
 }

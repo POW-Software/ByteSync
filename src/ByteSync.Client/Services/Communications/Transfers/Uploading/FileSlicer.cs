@@ -63,7 +63,10 @@ public class FileSlicer : IFileSlicer
                         _semaphoreSlim.Release();
                     }
 
-                    await _availableSlices.Writer.WriteAsync(fileUploaderSlice);
+                    if (!await TryWriteSliceAsync(fileUploaderSlice))
+                    {
+                        return;
+                    }
                 }
                 else
                 {
@@ -126,7 +129,10 @@ public class FileSlicer : IFileSlicer
                         _semaphoreSlim.Release();
                     }
 
-                    await _availableSlices.Writer.WriteAsync(fileUploaderSlice);
+                    if (!await TryWriteSliceAsync(fileUploaderSlice))
+                    {
+                        return;
+                    }
                 }
                 else
                 {
@@ -150,6 +156,22 @@ public class FileSlicer : IFileSlicer
             }
             _exceptionOccurred.Set();
             _availableSlices.Writer.TryComplete(ex);
+        }
+    }
+
+    private async Task<bool> TryWriteSliceAsync(FileUploaderSlice fileUploaderSlice)
+    {
+        try
+        {
+            await _availableSlices.Writer.WriteAsync(fileUploaderSlice);
+
+            return true;
+        }
+        catch (ChannelClosedException) when (_exceptionOccurred.WaitOne(0))
+        {
+            await fileUploaderSlice.MemoryStream.DisposeAsync();
+
+            return false;
         }
     }
 }

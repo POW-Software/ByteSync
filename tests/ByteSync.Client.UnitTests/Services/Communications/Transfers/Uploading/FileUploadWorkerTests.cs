@@ -61,6 +61,8 @@ public class FileUploadWorkerTests
         _availableSlices = Channel.CreateBounded<FileUploaderSlice>(8);
         _progressState = new UploadProgressState();
         _mockAdaptiveController = new Mock<IAdaptiveUploadController>();
+        _mockAdaptiveController.Setup(x => x.CurrentChunkSizeBytes).Returns(500 * 1024);
+        _mockAdaptiveController.Setup(x => x.CurrentParallelism).Returns(2);
         
         _fileUploadWorker = new FileUploadWorker(
             _mockPolicyFactory.Object,
@@ -340,5 +342,150 @@ public class FileUploadWorkerTests
             result.StatusCode == 503 &&
             result.FileId == _sharedFileDefinition.Id &&
             result.FailureKind == UploadFailureKind.ServerError)), Times.AtLeastOnce);
+    }
+
+    [Test]
+    public async Task UploadAvailableSlicesAdaptiveAsync_WhenClientTimeoutIsRetried_ShouldKeepFailureKindAndEventuallySucceed()
+    {
+        // Arrange
+        var slice = new FileUploaderSlice(1, new MemoryStream(new byte[625 * 1024]));
+        var mockUploadStrategy = new Mock<IUploadStrategy>();
+        var mockUploadLocation = new FileStorageLocation("https://test.example.com/upload", StorageProvider.CloudflareR2);
+        var attempt = 0;
+
+        _policy = Policy<UploadFileResponse>
+            .HandleResult(x => !x.IsSuccess)
+            .RetryAsync(1, onRetry: (_, _, _) => { });
+        _mockPolicyFactory.Setup(x => x.BuildFileUploadPolicy()).Returns(_policy);
+        _mockAdaptiveController.Setup(x => x.CurrentChunkSizeBytes).Returns(64 * 1024);
+
+        mockUploadStrategy.Setup(x =>
+                x.UploadAsync(It.IsAny<FileUploaderSlice>(), It.IsAny<FileStorageLocation>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() =>
+            {
+                attempt++;
+
+                return attempt == 1
+                    ? UploadFileResponse.ClientTimeout(new TaskCanceledException("attempt timed out"))
+                    : UploadFileResponse.Success(200);
+            });
+
+        _mockStrategies.Setup(x => x[StorageProvider.CloudflareR2]).Returns(mockUploadStrategy.Object);
+        _mockFileTransferApiClient.Setup(x => x.GetUploadFileStorageLocation(It.IsAny<TransferParameters>()))
+            .ReturnsAsync(mockUploadLocation);
+        _mockFileTransferApiClient.Setup(x => x.AssertFilePartIsUploaded(It.IsAny<TransferParameters>()))
+            .Returns(Task.CompletedTask);
+        _progressState.TotalCreatedSlices = 1;
+
+        await _availableSlices.Writer.WriteAsync(slice);
+        _availableSlices.Writer.Complete();
+
+        // Act
+        await _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_availableSlices, _progressState);
+
+        // Assert
+        attempt.Should().Be(2);
+        _uploadingIsFinished.WaitOne(1000).Should().BeTrue();
+        _mockAdaptiveController.Verify(x => x.RecordUploadResult(It.Is<UploadResult>(result =>
+            !result.IsSuccess &&
+            result.FailureKind == UploadFailureKind.ClientTimeout)), Times.Once);
+        _mockAdaptiveController.Verify(x => x.RecordUploadResult(It.Is<UploadResult>(result =>
+            result.IsSuccess &&
+            result.FailureKind == UploadFailureKind.None)), Times.Once);
+    }
+
+    [Test]
+    public async Task UploadAvailableSlicesAdaptiveAsync_WhenOneWorkerFails_ShouldCancelOtherWorkers()
+    {
+        // Arrange
+        var firstSlice = new FileUploaderSlice(1, new MemoryStream(new byte[64 * 1024]));
+        var secondSlice = new FileUploaderSlice(2, new MemoryStream(new byte[64 * 1024]));
+        var mockUploadStrategy = new Mock<IUploadStrategy>();
+        var mockUploadLocation = new FileStorageLocation("https://test.example.com/upload", StorageProvider.CloudflareR2);
+        using var bothUploadsStarted = new CountdownEvent(2);
+        using var firstUploadCanFail = new ManualResetEventSlim(false);
+        using var secondUploadCanceled = new ManualResetEventSlim(false);
+
+        mockUploadStrategy.Setup(x =>
+                x.UploadAsync(It.IsAny<FileUploaderSlice>(), It.IsAny<FileStorageLocation>(), It.IsAny<CancellationToken>()))
+            .Returns<FileUploaderSlice, FileStorageLocation, CancellationToken>(async (slice, _, cancellationToken) =>
+            {
+                bothUploadsStarted.Signal();
+
+                if (slice.PartNumber == 1)
+                {
+                    firstUploadCanFail.Wait(TimeSpan.FromSeconds(5), CancellationToken.None);
+
+                    return UploadFileResponse.Failure(500, "server failure");
+                }
+
+                firstUploadCanFail.Set();
+
+                try
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
+
+                    return UploadFileResponse.Success(200);
+                }
+                catch (OperationCanceledException ex)
+                {
+                    secondUploadCanceled.Set();
+
+                    return UploadFileResponse.ClientCancellation(ex);
+                }
+            });
+
+        _mockStrategies.Setup(x => x[StorageProvider.CloudflareR2]).Returns(mockUploadStrategy.Object);
+        _mockFileTransferApiClient.Setup(x => x.GetUploadFileStorageLocation(It.IsAny<TransferParameters>()))
+            .ReturnsAsync(mockUploadLocation);
+        _progressState.TotalCreatedSlices = 2;
+
+        var firstWorker = _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_availableSlices, _progressState);
+        var secondWorker = _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_availableSlices, _progressState);
+
+        await _availableSlices.Writer.WriteAsync(firstSlice);
+        await _availableSlices.Writer.WriteAsync(secondSlice);
+        _availableSlices.Writer.Complete();
+
+        // Act
+        bothUploadsStarted.Wait(TimeSpan.FromSeconds(2)).Should().BeTrue();
+        var allWorkers = Task.WhenAll(firstWorker, secondWorker);
+        var completed = await Task.WhenAny(allWorkers, Task.Delay(TimeSpan.FromSeconds(3)));
+
+        // Assert
+        completed.Should().Be(allWorkers);
+        secondUploadCanceled.Wait(TimeSpan.FromSeconds(1)).Should().BeTrue();
+        _exceptionOccurred.WaitOne(0).Should().BeTrue();
+        _progressState.Exceptions.Should().HaveCount(1);
+    }
+
+    [Test]
+    public async Task UploadAvailableSlicesAdaptiveAsync_WhenWorkerFails_ShouldDisposeQueuedSlices()
+    {
+        // Arrange
+        var activeSlice = new FileUploaderSlice(1, new MemoryStream(new byte[64 * 1024]));
+        var queuedStream = new MemoryStream(new byte[64 * 1024]);
+        var queuedSlice = new FileUploaderSlice(2, queuedStream);
+        var mockUploadStrategy = new Mock<IUploadStrategy>();
+        var mockUploadLocation = new FileStorageLocation("https://test.example.com/upload", StorageProvider.CloudflareR2);
+
+        mockUploadStrategy.Setup(x =>
+                x.UploadAsync(It.IsAny<FileUploaderSlice>(), It.IsAny<FileStorageLocation>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(UploadFileResponse.Failure(500, "server failure"));
+
+        _mockStrategies.Setup(x => x[StorageProvider.CloudflareR2]).Returns(mockUploadStrategy.Object);
+        _mockFileTransferApiClient.Setup(x => x.GetUploadFileStorageLocation(It.IsAny<TransferParameters>()))
+            .ReturnsAsync(mockUploadLocation);
+
+        await _availableSlices.Writer.WriteAsync(activeSlice);
+        await _availableSlices.Writer.WriteAsync(queuedSlice);
+        _availableSlices.Writer.Complete();
+
+        // Act
+        await _fileUploadWorker.UploadAvailableSlicesAdaptiveAsync(_availableSlices, _progressState);
+
+        // Assert
+        var readQueuedStream = () => _ = queuedStream.Length;
+        readQueuedStream.Should().Throw<ObjectDisposedException>();
     }
 }
