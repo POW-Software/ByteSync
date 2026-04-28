@@ -73,7 +73,7 @@ public class UploadAttemptTimeoutPolicyTests
     }
 
     [Test]
-    public void ComputeTimeoutSeconds_ForLargeStaleSliceAtLowBandwidth_ShouldAllowMoreThanTwoMinutes()
+    public void ComputeTimeoutSeconds_FirstAttemptForLargeStaleSlice_ShouldScaleWithChunkRatio()
     {
         // Act
         var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(

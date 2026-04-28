@@ -21,6 +21,11 @@ public static class UploadFailureClassifier
             return UploadFileResponse.ClientTimeout(exception);
         }
 
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return UploadFileResponse.ClientCancellation(exception);
+        }
+
         if (IsClientNetworkError(exception))
         {
             return UploadFileResponse.ClientNetworkError(exception);
@@ -51,9 +56,20 @@ public static class UploadFailureClassifier
                     or SocketError.HostUnreachable;
             }
 
+            if (current is IOException ioException && IsUnexpectedTransportClosure(ioException))
+            {
+                return true;
+            }
+
             current = current.InnerException;
         }
 
         return false;
+    }
+
+    private static bool IsUnexpectedTransportClosure(IOException exception)
+    {
+        return exception.Message.Contains("unexpected EOF", StringComparison.OrdinalIgnoreCase)
+            || exception.Message.Contains("0 bytes from the transport stream", StringComparison.OrdinalIgnoreCase);
     }
 }
