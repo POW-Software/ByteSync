@@ -58,15 +58,41 @@ public class UploadAttemptTimeoutPolicyTests
         // Assert
         timeout.Should().Be(165);
     }
+
+    [Test]
+    public void ComputeTimeoutSeconds_RetryForModeratelyOversizedSlice_ShouldKeepStandardCeiling()
+    {
+        // Act
+        var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
+            2 * 1024 * 1024,
+            attempt: 4,
+            currentChunkSizeBytes: 500 * 1024);
+
+        // Assert
+        timeout.Should().Be(180);
+    }
+
+    [Test]
+    public void ComputeTimeoutSeconds_RetryForLargeStaleOversizedSlice_ShouldUseExtendedCeiling()
+    {
+        // Act
+        var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
+            2 * 1024 * 1024,
+            attempt: 4,
+            currentChunkSizeBytes: 250 * 1024);
+
+        // Assert
+        timeout.Should().Be(300);
+    }
     
     [Test]
-    public void ComputeTimeoutSeconds_ShouldNotExceedCeiling()
+    public void ComputeTimeoutSeconds_CurrentChunkSizedLargeSlice_ShouldKeepStandardCeiling()
     {
         // Act
         var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
             16 * 1024 * 1024,
             attempt: 10,
-            currentChunkSizeBytes: 64 * 1024);
+            currentChunkSizeBytes: 16 * 1024 * 1024);
         
         // Assert
         timeout.Should().Be(180);
@@ -86,7 +112,7 @@ public class UploadAttemptTimeoutPolicyTests
     }
 
     [Test]
-    public void ComputeTimeoutSeconds_WithHugeSlice_ShouldNotOverflow()
+    public void ComputeTimeoutSeconds_WithHugeStaleSlice_ShouldNotOverflow()
     {
         // Act
         var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
@@ -95,7 +121,7 @@ public class UploadAttemptTimeoutPolicyTests
             currentChunkSizeBytes: 64 * 1024);
 
         // Assert
-        timeout.Should().Be(180);
+        timeout.Should().Be(300);
     }
 
     [Test]
@@ -108,6 +134,6 @@ public class UploadAttemptTimeoutPolicyTests
             currentChunkSizeBytes: 1);
 
         // Assert
-        timeout.Should().Be(180);
+        timeout.Should().Be(300);
     }
 }
