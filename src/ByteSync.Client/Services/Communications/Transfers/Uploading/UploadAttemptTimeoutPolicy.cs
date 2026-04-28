@@ -8,18 +8,18 @@ public static class UploadAttemptTimeoutPolicy
     private const int AttemptTimeoutCeilingSeconds = 180;
     private const int SecondsPerMegabyteHeuristic = 3;
     private const int RetryGrowthSeconds = 15;
-    private const int StaleChunkPenaltySeconds = 5;
+    private const int OversizedSliceSecondsPerCurrentChunk = 30;
     
     public static int ComputeTimeoutSeconds(long sliceLengthBytes, int attempt, int currentChunkSizeBytes)
     {
-        var timeoutSec = (long)ComputeBaseTimeoutSeconds(sliceLengthBytes);
-        if (attempt <= 1)
+        var timeoutSec = Math.Max(
+            (long)ComputeBaseTimeoutSeconds(sliceLengthBytes),
+            ComputeOversizedSliceTimeoutSeconds(sliceLengthBytes, currentChunkSizeBytes));
+
+        if (attempt > 1)
         {
-            return (int)timeoutSec;
+            timeoutSec += (long)(attempt - 1) * RetryGrowthSeconds;
         }
-        
-        var staleChunkPenalty = ComputeStaleChunkPenaltySeconds(sliceLengthBytes, currentChunkSizeBytes);
-        timeoutSec += (long)(attempt - 1) * RetryGrowthSeconds + staleChunkPenalty;
         
         return (int)Math.Clamp(timeoutSec, AttemptTimeoutFloorSeconds, AttemptTimeoutCeilingSeconds);
     }
@@ -39,7 +39,7 @@ public static class UploadAttemptTimeoutPolicy
             AttemptTimeoutCeilingSeconds);
     }
     
-    private static long ComputeStaleChunkPenaltySeconds(long sliceLengthBytes, int currentChunkSizeBytes)
+    private static long ComputeOversizedSliceTimeoutSeconds(long sliceLengthBytes, int currentChunkSizeBytes)
     {
         if (currentChunkSizeBytes <= 0 || sliceLengthBytes <= currentChunkSizeBytes)
         {
@@ -47,11 +47,11 @@ public static class UploadAttemptTimeoutPolicy
         }
         
         var chunkRatio = Math.Ceiling(sliceLengthBytes / (double)currentChunkSizeBytes);
-        if (chunkRatio >= AttemptTimeoutCeilingSeconds / (double)StaleChunkPenaltySeconds + 1)
+        if (chunkRatio >= AttemptTimeoutCeilingSeconds / (double)OversizedSliceSecondsPerCurrentChunk)
         {
             return AttemptTimeoutCeilingSeconds;
         }
         
-        return (long)(chunkRatio - 1) * StaleChunkPenaltySeconds;
+        return (long)chunkRatio * OversizedSliceSecondsPerCurrentChunk;
     }
 }

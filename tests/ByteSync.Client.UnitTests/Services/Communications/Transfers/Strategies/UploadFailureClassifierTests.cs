@@ -124,4 +124,18 @@ public class UploadFailureClassifierTests
         response.FailureKind.Should().Be(UploadFailureKind.ClientNetworkError);
         response.Exception.Should().BeSameAs(ex);
     }
+
+    [Test]
+    public void Classify_DirectSocketExceptionWithOperationAborted_ShouldReturnClientNetworkError()
+    {
+        using var cts = new CancellationTokenSource();
+        var ex = new SocketException((int)SocketError.OperationAborted);
+
+        var response = UploadFailureClassifier.Classify(ex, cts.Token);
+
+        response.IsSuccess.Should().BeFalse();
+        response.StatusCode.Should().Be(0);
+        response.FailureKind.Should().Be(UploadFailureKind.ClientNetworkError);
+        response.Exception.Should().BeSameAs(ex);
+    }
 }

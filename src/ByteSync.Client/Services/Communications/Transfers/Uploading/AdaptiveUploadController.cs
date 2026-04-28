@@ -15,6 +15,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
     private const int MIN_PARALLELISM = 2;
     private const int MAX_PARALLELISM = 4;
     private const int CLIENT_NETWORK_ISSUES_BEFORE_DOWNSCALE = 2;
+    private const double CLIENT_NETWORK_ISSUE_CHUNK_FACTOR = 0.5;
     
     private const double MULTIPLIER_2_X = 2.0;
     private const double MULTIPLIER_1_75_X = 1.75;
@@ -182,7 +183,7 @@ public class AdaptiveUploadController : IAdaptiveUploadController
             fileId ?? "-",
             _consecutiveClientNetworkIssues);
         _consecutiveClientNetworkIssues = 0;
-        Downscale(fileId, "client network issues");
+        DownscaleForClientNetworkIssue(fileId, failureKind);
     }
     
     private bool HandleBandwidthReset(bool isSuccess, int? statusCode)
@@ -257,6 +258,29 @@ public class AdaptiveUploadController : IAdaptiveUploadController
                 Math.Round(_currentChunkSizeBytes / 1024d));
         }
         
+        ResetWindow();
+    }
+
+    private void DownscaleForClientNetworkIssue(string? fileId, UploadFailureKind failureKind)
+    {
+        var previousParallelism = _currentParallelism;
+        var previousChunkSizeBytes = _currentChunkSizeBytes;
+
+        _currentParallelism = MIN_PARALLELISM;
+        _currentChunkSizeBytes = Math.Max(
+            MIN_CHUNK_SIZE_BYTES,
+            (int)Math.Round(_currentChunkSizeBytes * CLIENT_NETWORK_ISSUE_CHUNK_FACTOR));
+        _windowSize = _currentParallelism;
+
+        _logger.LogInformation(
+            "Adaptive: file {FileId} client network issue downscale ({FailureKind}). Parallelism {PrevParallelism}->{NextParallelism}, chunkSize {PrevChunkKb}->{NextChunkKb} KB",
+            fileId ?? "-",
+            failureKind,
+            previousParallelism,
+            _currentParallelism,
+            Math.Round(previousChunkSizeBytes / 1024d),
+            Math.Round(_currentChunkSizeBytes / 1024d));
+
         ResetWindow();
     }
     

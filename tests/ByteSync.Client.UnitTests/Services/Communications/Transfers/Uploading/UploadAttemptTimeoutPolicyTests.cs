@@ -21,16 +21,16 @@ public class UploadAttemptTimeoutPolicyTests
     }
     
     [Test]
-    public void ComputeTimeoutSeconds_RetryForStaleLargeSlice_ShouldIncreaseBudget()
+    public void ComputeTimeoutSeconds_FirstAttemptForOversizedSlice_ShouldIncreaseBudgetImmediately()
     {
         // Act
         var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
             625 * 1024,
-            attempt: 2,
+            attempt: 1,
             currentChunkSizeBytes: 64 * 1024);
         
         // Assert
-        timeout.Should().Be(120);
+        timeout.Should().Be(180);
     }
     
     [Test]
@@ -44,6 +44,19 @@ public class UploadAttemptTimeoutPolicyTests
         
         // Assert
         timeout.Should().Be(75);
+    }
+
+    [Test]
+    public void ComputeTimeoutSeconds_RetryForOversizedSlice_ShouldKeepRetryGrowthBounded()
+    {
+        // Act
+        var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
+            2 * 1024 * 1024,
+            attempt: 2,
+            currentChunkSizeBytes: 500 * 1024);
+
+        // Assert
+        timeout.Should().Be(165);
     }
     
     [Test]
@@ -65,11 +78,11 @@ public class UploadAttemptTimeoutPolicyTests
         // Act
         var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
             1969 * 1024,
-            attempt: 6,
+            attempt: 1,
             currentChunkSizeBytes: 500 * 1024);
 
         // Assert
-        timeout.Should().Be(150);
+        timeout.Should().Be(120);
     }
 
     [Test]

@@ -43,6 +43,7 @@ public static class UploadFailureClassifier
             {
                 return socketException.SocketErrorCode is SocketError.ConnectionReset
                     or SocketError.ConnectionAborted
+                    or SocketError.OperationAborted
                     or SocketError.TimedOut
                     or SocketError.NetworkDown
                     or SocketError.NetworkUnreachable
