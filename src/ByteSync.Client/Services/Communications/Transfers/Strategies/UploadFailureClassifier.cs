@@ -9,6 +9,12 @@ namespace ByteSync.Services.Communications.Transfers.Strategies;
 
 public static class UploadFailureClassifier
 {
+    private static readonly string[] UnexpectedTransportClosureMessageFragments =
+    {
+        "unexpected EOF",
+        "0 bytes from the transport stream",
+    };
+
     public static UploadFileResponse Classify(Exception exception, CancellationToken cancellationToken)
     {
         if (exception is OperationCanceledException && cancellationToken.IsCancellationRequested)
@@ -19,6 +25,11 @@ public static class UploadFailureClassifier
         if (exception is OperationCanceledException)
         {
             return UploadFileResponse.ClientTimeout(exception);
+        }
+
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return UploadFileResponse.ClientCancellation(exception);
         }
 
         if (IsClientNetworkError(exception))
@@ -43,6 +54,7 @@ public static class UploadFailureClassifier
             {
                 return socketException.SocketErrorCode is SocketError.ConnectionReset
                     or SocketError.ConnectionAborted
+                    or SocketError.OperationAborted
                     or SocketError.TimedOut
                     or SocketError.NetworkDown
                     or SocketError.NetworkUnreachable
@@ -50,7 +62,25 @@ public static class UploadFailureClassifier
                     or SocketError.HostUnreachable;
             }
 
+            if (current is IOException ioException && HasUnexpectedTransportClosureMessage(ioException))
+            {
+                return true;
+            }
+
             current = current.InnerException;
+        }
+
+        return false;
+    }
+
+    private static bool HasUnexpectedTransportClosureMessage(IOException exception)
+    {
+        foreach (var fragment in UnexpectedTransportClosureMessageFragments)
+        {
+            if (exception.Message.Contains(fragment, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
         }
 
         return false;

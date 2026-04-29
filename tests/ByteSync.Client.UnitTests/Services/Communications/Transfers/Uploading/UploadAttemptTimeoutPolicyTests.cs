@@ -21,16 +21,16 @@ public class UploadAttemptTimeoutPolicyTests
     }
     
     [Test]
-    public void ComputeTimeoutSeconds_RetryForStaleLargeSlice_ShouldIncreaseBudget()
+    public void ComputeTimeoutSeconds_FirstAttemptForOversizedSlice_ShouldIncreaseBudgetImmediately()
     {
         // Act
         var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
             625 * 1024,
-            attempt: 2,
+            attempt: 1,
             currentChunkSizeBytes: 64 * 1024);
         
         // Assert
-        timeout.Should().Be(120);
+        timeout.Should().Be(180);
     }
     
     [Test]
@@ -45,35 +45,74 @@ public class UploadAttemptTimeoutPolicyTests
         // Assert
         timeout.Should().Be(75);
     }
+
+    [Test]
+    public void ComputeTimeoutSeconds_RetryForOversizedSlice_ShouldKeepRetryGrowthBounded()
+    {
+        // Act
+        var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
+            2 * 1024 * 1024,
+            attempt: 2,
+            currentChunkSizeBytes: 500 * 1024);
+
+        // Assert
+        timeout.Should().Be(165);
+    }
+
+    [Test]
+    public void ComputeTimeoutSeconds_RetryForModeratelyOversizedSlice_ShouldKeepStandardCeiling()
+    {
+        // Act
+        var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
+            2 * 1024 * 1024,
+            attempt: 4,
+            currentChunkSizeBytes: 500 * 1024);
+
+        // Assert
+        timeout.Should().Be(180);
+    }
+
+    [Test]
+    public void ComputeTimeoutSeconds_RetryForLargeStaleOversizedSlice_ShouldUseExtendedCeiling()
+    {
+        // Act
+        var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
+            2 * 1024 * 1024,
+            attempt: 4,
+            currentChunkSizeBytes: 250 * 1024);
+
+        // Assert
+        timeout.Should().Be(300);
+    }
     
     [Test]
-    public void ComputeTimeoutSeconds_ShouldNotExceedCeiling()
+    public void ComputeTimeoutSeconds_CurrentChunkSizedLargeSlice_ShouldKeepStandardCeiling()
     {
         // Act
         var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
             16 * 1024 * 1024,
             attempt: 10,
-            currentChunkSizeBytes: 64 * 1024);
+            currentChunkSizeBytes: 16 * 1024 * 1024);
         
         // Assert
         timeout.Should().Be(180);
     }
 
     [Test]
-    public void ComputeTimeoutSeconds_ForLargeStaleSliceAtLowBandwidth_ShouldAllowMoreThanTwoMinutes()
+    public void ComputeTimeoutSeconds_FirstAttemptForLargeStaleSlice_ShouldScaleWithChunkRatio()
     {
         // Act
         var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
             1969 * 1024,
-            attempt: 6,
+            attempt: 1,
             currentChunkSizeBytes: 500 * 1024);
 
         // Assert
-        timeout.Should().Be(150);
+        timeout.Should().Be(120);
     }
 
     [Test]
-    public void ComputeTimeoutSeconds_WithHugeSlice_ShouldNotOverflow()
+    public void ComputeTimeoutSeconds_WithHugeStaleSlice_ShouldNotOverflow()
     {
         // Act
         var timeout = UploadAttemptTimeoutPolicy.ComputeTimeoutSeconds(
@@ -82,7 +121,7 @@ public class UploadAttemptTimeoutPolicyTests
             currentChunkSizeBytes: 64 * 1024);
 
         // Assert
-        timeout.Should().Be(180);
+        timeout.Should().Be(300);
     }
 
     [Test]
@@ -95,6 +134,6 @@ public class UploadAttemptTimeoutPolicyTests
             currentChunkSizeBytes: 1);
 
         // Assert
-        timeout.Should().Be(180);
+        timeout.Should().Be(300);
     }
 }

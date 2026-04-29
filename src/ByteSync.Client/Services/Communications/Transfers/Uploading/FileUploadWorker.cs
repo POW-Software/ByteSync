@@ -174,18 +174,22 @@ public class FileUploadWorker : IFileUploadWorker
             slice.MemoryStream.Length,
             attempt,
             currentChunkSizeBytes);
+        var chunkRatio = currentChunkSizeBytes > 0
+            ? slice.MemoryStream.Length / (double)currentChunkSizeBytes
+            : 0d;
         using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(globalToken);
         attemptCts.CancelAfter(TimeSpan.FromSeconds(timeoutSec));
         
         var beforeWait = _uploadSlots.CurrentCount;
         _logger.LogDebug(
-            "UploadAvailableSlice: worker {WorkerId} waiting for upload slot (available {Available}), attempt {Attempt}, timeout {TimeoutSec}s, slice {SliceKb} KB, currentChunk {CurrentChunkKb} KB",
+            "UploadAvailableSlice: worker {WorkerId} waiting for upload slot (available {Available}), attempt {Attempt}, timeout {TimeoutSec}s, slice {SliceKb} KB, currentChunk {CurrentChunkKb} KB, chunkRatio {ChunkRatio}",
             workerId,
             beforeWait,
             attempt,
             timeoutSec,
             Math.Round(slice.MemoryStream.Length / 1024d),
-            Math.Round(currentChunkSizeBytes / 1024d));
+            Math.Round(currentChunkSizeBytes / 1024d),
+            Math.Round(chunkRatio, 2));
         
         var acquired = false;
         try

@@ -120,6 +120,7 @@ public class AdaptiveUploadControllerTests
         _controller.CurrentParallelism.Should().Be(2);
         _controller.CurrentChunkSizeBytes.Should().BeLessThan(before);
         _controller.CurrentChunkSizeBytes.Should().BeGreaterThanOrEqualTo(64 * 1024);
+        _controller.CurrentChunkSizeBytes.Should().Be(375 * 1024);
     }
     
     [Test]
@@ -197,7 +198,7 @@ public class AdaptiveUploadControllerTests
         // Assert
         _controller.CurrentParallelism.Should().Be(2);
         _controller.CurrentChunkSizeBytes.Should().BeLessThan(500 * 1024);
-        _controller.CurrentChunkSizeBytes.Should().Be(375 * 1024);
+        _controller.CurrentChunkSizeBytes.Should().Be(250 * 1024);
     }
 
     [Test]
@@ -212,11 +213,11 @@ public class AdaptiveUploadControllerTests
 
         // Assert
         _controller.CurrentParallelism.Should().Be(2);
-        _controller.CurrentChunkSizeBytes.Should().Be(375 * 1024);
+        _controller.CurrentChunkSizeBytes.Should().Be(250 * 1024);
     }
 
     [Test]
-    public void ClientTimeouts_ReduceParallelismFirst_WhenAboveMinParallelism()
+    public void ClientTimeouts_DownscaleParallelismAndChunk_WhenAboveMinParallelism()
     {
         // Arrange
         var safety = 100;
@@ -233,8 +234,9 @@ public class AdaptiveUploadControllerTests
         FeedClientTimeouts(_controller, 2);
         
         // Assert
-        _controller.CurrentParallelism.Should().Be(beforeParallelism - 1);
-        _controller.CurrentChunkSizeBytes.Should().Be(beforeChunk);
+        _controller.CurrentParallelism.Should().Be(2);
+        _controller.CurrentParallelism.Should().BeLessThan(beforeParallelism);
+        _controller.CurrentChunkSizeBytes.Should().Be(Math.Max(64 * 1024, (int)Math.Round(beforeChunk * 0.5)));
     }
     
     [Test]
