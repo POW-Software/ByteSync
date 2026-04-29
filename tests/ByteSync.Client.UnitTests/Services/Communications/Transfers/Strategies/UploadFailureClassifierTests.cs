@@ -110,11 +110,12 @@ public class UploadFailureClassifierTests
         response.Exception.Should().BeSameAs(ex);
     }
 
-    [Test]
-    public void Classify_HttpRequestExceptionWithUnexpectedEof_ShouldReturnClientNetworkError()
+    [TestCase("Received an unexpected EOF from the transport stream.")]
+    [TestCase("Received 0 bytes from the transport stream.")]
+    public void Classify_HttpRequestExceptionWithUnexpectedTransportClosureMessage_ShouldReturnClientNetworkError(string message)
     {
         using var cts = new CancellationTokenSource();
-        var ioException = new IOException("Received an unexpected EOF or 0 bytes from the transport stream.");
+        var ioException = new IOException(message);
         var ex = new HttpRequestException("The SSL connection could not be established, see inner exception.", ioException);
 
         var response = UploadFailureClassifier.Classify(ex, cts.Token);

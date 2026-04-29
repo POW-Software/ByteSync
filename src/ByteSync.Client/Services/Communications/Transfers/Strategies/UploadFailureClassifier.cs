@@ -9,6 +9,12 @@ namespace ByteSync.Services.Communications.Transfers.Strategies;
 
 public static class UploadFailureClassifier
 {
+    private static readonly string[] UnexpectedTransportClosureMessageFragments =
+    {
+        "unexpected EOF",
+        "0 bytes from the transport stream",
+    };
+
     public static UploadFileResponse Classify(Exception exception, CancellationToken cancellationToken)
     {
         if (exception is OperationCanceledException && cancellationToken.IsCancellationRequested)
@@ -56,7 +62,7 @@ public static class UploadFailureClassifier
                     or SocketError.HostUnreachable;
             }
 
-            if (current is IOException ioException && IsUnexpectedTransportClosure(ioException))
+            if (current is IOException ioException && HasUnexpectedTransportClosureMessage(ioException))
             {
                 return true;
             }
@@ -67,9 +73,16 @@ public static class UploadFailureClassifier
         return false;
     }
 
-    private static bool IsUnexpectedTransportClosure(IOException exception)
+    private static bool HasUnexpectedTransportClosureMessage(IOException exception)
     {
-        return exception.Message.Contains("unexpected EOF", StringComparison.OrdinalIgnoreCase)
-            || exception.Message.Contains("0 bytes from the transport stream", StringComparison.OrdinalIgnoreCase);
+        foreach (var fragment in UnexpectedTransportClosureMessageFragments)
+        {
+            if (exception.Message.Contains(fragment, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
