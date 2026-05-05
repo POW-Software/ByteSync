@@ -23,7 +23,7 @@ public class TelemetryAndLoggingMiddleware : IFunctionsWorkerMiddleware
         
         var scopeProperties = new Dictionary<string, object>
         {
-            ["OperationId"] = operation.Telemetry.Context.Operation.Id,
+            ["OperationId"] = operation.Telemetry.Id,
             ["FunctionName"] = context.FunctionDefinition.Name
         };
         

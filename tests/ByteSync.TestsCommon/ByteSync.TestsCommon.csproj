@@ -11,10 +11,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.5"/>
-        <PackageReference Include="Autofac" Version="8.4.0" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.7"/>
+        <PackageReference Include="Autofac" Version="9.1.0" />
         <PackageReference Include="Moq" Version="4.20.72" />
-        <PackageReference Include="NUnit" Version="4.4.0" />
+        <PackageReference Include="NUnit" Version="4.6.0" />
     </ItemGroup>
 
 </Project>
