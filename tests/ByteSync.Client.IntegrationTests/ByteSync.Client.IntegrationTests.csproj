@@ -10,26 +10,26 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Autofac" Version="8.4.0" />
-        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
-        <PackageReference Include="coverlet.collector" Version="6.0.4">
+        <PackageReference Include="Autofac" Version="9.1.0" />
+        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.0" />
+        <PackageReference Include="coverlet.collector" Version="10.0.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="AwesomeAssertions" Version="8.0.1" />
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.5" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.5" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1"/>
+        <PackageReference Include="FluentAssertions" Version="8.9.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.7" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1"/>
         <PackageReference Include="Moq" Version="4.20.72" />
-        <PackageReference Include="NUnit" Version="4.4.0" />
-        <PackageReference Include="NUnit.Analyzers" Version="4.11.2">
+        <PackageReference Include="NUnit" Version="4.6.0" />
+        <PackageReference Include="NUnit.Analyzers" Version="4.13.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="NUnit3TestAdapter" Version="5.2.0"/>
-        <PackageReference Include="Avalonia.Headless" Version="11.3.11"/>
-        <PackageReference Include="Avalonia.Headless.NUnit" Version="11.3.11"/>
+        <PackageReference Include="NUnit3TestAdapter" Version="6.2.0"/>
+        <PackageReference Include="Avalonia.Headless" Version="11.3.14"/>
+        <PackageReference Include="Avalonia.Headless.NUnit" Version="11.3.14"/>
     </ItemGroup>
 
     <ItemGroup>
