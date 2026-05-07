@@ -19,7 +19,7 @@ using ByteSync.Services.Inventories;
 using ByteSync.Services.Sessions;
 using ByteSync.TestsCommon;
 using DynamicData;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 

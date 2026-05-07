@@ -1,7 +1,7 @@
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace ByteSync.Client.IntegrationTests.Business.Filtering;
 

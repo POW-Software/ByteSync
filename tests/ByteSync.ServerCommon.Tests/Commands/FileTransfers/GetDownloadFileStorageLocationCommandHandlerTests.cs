@@ -4,7 +4,7 @@ using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Commands.FileTransfers;
 using ByteSync.ServerCommon.Interfaces.Services;
 using FakeItEasy;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

@@ -7,7 +7,7 @@ using ByteSync.ServerCommon.Interfaces.Factories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using FakeItEasy;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace ByteSync.ServerCommon.Tests.Commands.Authentication;
 

@@ -1,6 +1,6 @@
 using System.Reactive.Subjects;
 using ByteSync.Helpers;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Helpers;

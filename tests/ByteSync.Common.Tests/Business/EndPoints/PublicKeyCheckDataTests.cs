@@ -1,6 +1,6 @@
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Versions;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace TestingCommon.Business.EndPoints;

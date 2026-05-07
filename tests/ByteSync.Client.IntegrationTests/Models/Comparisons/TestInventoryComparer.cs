@@ -11,7 +11,7 @@ using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
 using ByteSync.Services.Sessions;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 
 namespace ByteSync.Client.IntegrationTests.Models.Comparisons;

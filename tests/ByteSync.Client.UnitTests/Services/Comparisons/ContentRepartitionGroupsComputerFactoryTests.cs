@@ -12,7 +12,7 @@ using ByteSync.Interfaces.Factories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.Inventories;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

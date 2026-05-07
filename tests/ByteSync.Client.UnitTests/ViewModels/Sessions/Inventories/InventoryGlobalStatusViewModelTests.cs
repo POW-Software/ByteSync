@@ -13,7 +13,7 @@ using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Sessions.Inventories;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;

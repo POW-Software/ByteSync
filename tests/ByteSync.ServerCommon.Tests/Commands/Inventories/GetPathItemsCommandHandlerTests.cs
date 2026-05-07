@@ -6,7 +6,7 @@ using ByteSync.ServerCommon.Commands.Inventories;
 using ByteSync.ServerCommon.Entities.Inventories;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using FakeItEasy;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Tests.Commands.Inventories;

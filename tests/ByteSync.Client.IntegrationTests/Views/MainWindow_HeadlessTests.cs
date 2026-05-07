@@ -1,7 +1,7 @@
 using Avalonia.ReactiveUI;
 using ByteSync.Client.IntegrationTests.TestHelpers;
 using ByteSync.Views;
-using FluentAssertions;
+using AwesomeAssertions;
 using ReactiveUI;
 using Splat;
 

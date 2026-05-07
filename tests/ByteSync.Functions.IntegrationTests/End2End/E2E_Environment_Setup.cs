@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using DotNet.Testcontainers.Builders;
-using FluentAssertions;
+using AwesomeAssertions;
 using ContainerBuilder = DotNet.Testcontainers.Builders.ContainerBuilder;
 using IContainer = DotNet.Testcontainers.Containers.IContainer;
 

@@ -1,6 +1,6 @@
 using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Services.Communications.Transfers.Strategies;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 using System.Net.Http;
 using System.Net.Sockets;

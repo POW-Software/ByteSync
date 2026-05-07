@@ -4,7 +4,7 @@ using ByteSync.Client.UnitTests.TestUtilities.Helpers;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Repositories;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

@@ -5,7 +5,7 @@ using ByteSync.ServerCommon.Repositories;
 using ByteSync.ServerCommon.Services;
 using ByteSync.ServerCommon.Tests.Helpers;
 using FakeItEasy;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

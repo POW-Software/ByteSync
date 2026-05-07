@@ -1,7 +1,7 @@
 using System.Net;
 using ByteSync.Exceptions;
 using ByteSync.Services.Misc.Factories;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;

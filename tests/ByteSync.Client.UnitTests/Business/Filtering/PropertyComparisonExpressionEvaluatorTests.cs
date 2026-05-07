@@ -7,7 +7,7 @@ using ByteSync.Business.Inventories;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Services.Filtering;
 using ByteSync.Models.Comparisons.Result;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

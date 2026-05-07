@@ -1,5 +1,5 @@
 using ByteSync.Business.Inventories;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Business.Inventories;

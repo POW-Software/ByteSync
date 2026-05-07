@@ -9,7 +9,7 @@ using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Communications.Transfers.Uploading;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;

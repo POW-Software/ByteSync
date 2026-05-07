@@ -14,7 +14,7 @@ using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Services.Communications;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 
 namespace ByteSync.Client.IntegrationTests.Scenarios.SessionConnection;

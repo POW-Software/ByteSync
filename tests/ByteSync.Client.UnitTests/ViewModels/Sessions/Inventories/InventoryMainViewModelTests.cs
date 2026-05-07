@@ -1,7 +1,7 @@
 using ByteSync.Business.Inventories;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.ViewModels.Sessions.Inventories;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

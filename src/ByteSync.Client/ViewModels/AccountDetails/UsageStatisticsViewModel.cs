@@ -305,7 +305,7 @@ public class UsageStatisticsViewModel : FlyoutElementViewModel
         var mainColumnSerie = new ColumnSeries<LogarithmicPoint>
         {
             Values = BuildValues(UsageStatisticsData.CurrentPeriodData),
-            TooltipLabelFormatter = BuildToolTipLabel,
+            YToolTipLabelFormatter = BuildToolTipLabel,
             Fill = new SolidColorPaint(new SKColor(chartsMainBarColor.R, chartsMainBarColor.G, chartsMainBarColor.B)),
             Mapping = BuildMapping
         };
@@ -331,7 +331,7 @@ public class UsageStatisticsViewModel : FlyoutElementViewModel
         var lineSeries = new LineSeries<LogarithmicPoint>
         {
             Values = BuildValues(UsageStatisticsData.PreviousPeriodData),
-            TooltipLabelFormatter = BuildToolTipLabel,
+            YToolTipLabelFormatter = BuildToolTipLabel,
             Stroke = new SolidColorPaint(new SKColor(chartsMainLineColor.R, chartsMainLineColor.G, chartsMainLineColor.B), 3),
             GeometrySize = 0,
             GeometryStroke = null,
@@ -358,20 +358,19 @@ public class UsageStatisticsViewModel : FlyoutElementViewModel
         return values;
     }
 
-    private string BuildToolTipLabel(ChartPoint<LogarithmicPoint, BezierPoint<CircleGeometry>, LabelGeometry> chartPoint)
+    private string BuildToolTipLabel(ChartPoint<LogarithmicPoint, CircleGeometry, LabelGeometry> chartPoint)
     {
-        return DoBuildToolTipLabel(chartPoint.Context, chartPoint.Model!, PreviousYear);
+        return DoBuildToolTipLabel(chartPoint.Index, chartPoint.Model!, PreviousYear);
     }
 
     private string BuildToolTipLabel(ChartPoint<LogarithmicPoint, RoundedRectangleGeometry, LabelGeometry> chartPoint)
     {
-        return DoBuildToolTipLabel(chartPoint.Context, chartPoint.Model!, Year);
+        return DoBuildToolTipLabel(chartPoint.Index, chartPoint.Model!, Year);
     }
 
-    private string DoBuildToolTipLabel(ChartPointContext context, LogarithmicPoint model, int year)
+    private string DoBuildToolTipLabel(int pointIndex, LogarithmicPoint model, int year)
     {
-        // Exemple : "Janvier 2023 - 520 987 o (507,29 Ko)
-        var monthName = _localizationService.GetMonthName(context.Entity.EntityIndex);
+        var monthName = _localizationService.GetMonthName(pointIndex);
         var result = $"{string.Format(Resources.General_MonthYearColon, monthName, year)} ";
                     
         if (model.Volume > 1024)
@@ -390,24 +389,13 @@ public class UsageStatisticsViewModel : FlyoutElementViewModel
         return result;
     }
 
-    private void BuildMapping(LogarithmicPoint logPoint, ChartPoint chartPoint)
+    private Coordinate BuildMapping(LogarithmicPoint logPoint, int index)
     {
-        // Le mapping permet d'adapter la valeur quand le mode progressif est utilisé
-                
-        // https://lvcharts.com/docs/Avalonia/2.0.0-beta.700/samples.axes.logarithmic
+        var volume = UseProgressiveScale
+            ? Math.Pow(logPoint.Volume, PROGRESSIVE_MODE_POWER_BASE)
+            : logPoint.Volume;
 
-        // for the x coordinate, we use the X property of the LogaritmicPoint instance
-        chartPoint.SecondaryValue = logPoint.X;
-
-        // but for the Y coordinate, we will map to the logarithm of the value
-        if (UseProgressiveScale)
-        {
-            chartPoint.PrimaryValue = Math.Pow(logPoint.Volume, PROGRESSIVE_MODE_POWER_BASE);
-        }
-        else
-        {
-            chartPoint.PrimaryValue = logPoint.Volume;
-        }
+        return new Coordinate(logPoint.X, volume);
     }
 
     private class LogarithmicPoint

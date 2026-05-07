@@ -1,6 +1,6 @@
 using System.Text.Json;
 using ByteSync.Business.Sessions;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Business.Sessions;

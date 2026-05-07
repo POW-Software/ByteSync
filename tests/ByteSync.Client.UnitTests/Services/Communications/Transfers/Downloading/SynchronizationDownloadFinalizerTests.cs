@@ -4,7 +4,7 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Services.Communications.Transfers.Downloading;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;

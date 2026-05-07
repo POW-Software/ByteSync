@@ -8,7 +8,7 @@ using ByteSync.Functions.Http;
 using ByteSync.Functions.UnitTests.TestHelpers;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Interfaces.Services;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Azure.Functions.Worker;
 using Moq;
 

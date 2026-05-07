@@ -3,7 +3,7 @@ using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Services.Inventories;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

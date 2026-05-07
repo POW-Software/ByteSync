@@ -3,7 +3,7 @@ using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Services.Communications.Api;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;

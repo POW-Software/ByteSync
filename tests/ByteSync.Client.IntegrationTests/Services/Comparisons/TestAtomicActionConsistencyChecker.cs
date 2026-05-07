@@ -18,7 +18,7 @@ using ByteSync.Models.Inventories;
 using ByteSync.Services.Comparisons;
 using ByteSync.Services.Sessions;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework.Legacy;
 

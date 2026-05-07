@@ -2,7 +2,7 @@ using System.Reactive.Concurrency;
 using ByteSync.Business.Synchronizations;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Services.TimeTracking;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Reactive.Testing;
 using Moq;
 using NUnit.Framework;

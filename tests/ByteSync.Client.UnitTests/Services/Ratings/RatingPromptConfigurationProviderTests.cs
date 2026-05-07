@@ -1,7 +1,7 @@
 using System.Text;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Services.Ratings;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 

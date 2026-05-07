@@ -1,6 +1,6 @@
 using ByteSync.Business.Themes;
 using ByteSync.Services.Themes;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Themes;
