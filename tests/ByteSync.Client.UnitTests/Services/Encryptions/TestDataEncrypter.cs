@@ -5,7 +5,7 @@ using ByteSync.Common.Helpers;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Services.Encryptions;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

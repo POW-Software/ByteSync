@@ -6,7 +6,7 @@ using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Controls.Json;
-using FluentAssertions;
+using AwesomeAssertions;
 using ByteSync.Functions.IntegrationTests.TestHelpers;
 
 namespace ByteSync.Functions.IntegrationTests.End2End;

@@ -12,7 +12,7 @@ using ByteSync.Interfaces.Dialogs;
 using ByteSync.Interfaces.Factories.ViewModels;
 using ByteSync.Services.Communications;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;

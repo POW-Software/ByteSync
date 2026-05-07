@@ -12,7 +12,7 @@ using ByteSync.Models.Inventories;
 using ByteSync.Services.Comparisons;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
 using ByteSync.ViewModels.Sessions.Comparisons.Results.Misc;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.ViewModels.Sessions.Comparisons.Results;

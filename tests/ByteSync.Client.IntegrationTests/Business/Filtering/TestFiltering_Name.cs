@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using ByteSync.Business.Filtering.Expressions;
 using ByteSync.Business.Filtering.Parsing;
 

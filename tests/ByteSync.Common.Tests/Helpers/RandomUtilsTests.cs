@@ -1,5 +1,5 @@
 using ByteSync.Common.Helpers;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace TestingCommon.Helpers;

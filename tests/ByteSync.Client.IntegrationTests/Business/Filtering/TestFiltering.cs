@@ -5,7 +5,7 @@ using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Filtering;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 
 namespace ByteSync.Client.IntegrationTests.Business.Filtering;

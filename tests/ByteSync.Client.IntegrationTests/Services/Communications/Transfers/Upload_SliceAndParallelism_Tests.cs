@@ -7,7 +7,7 @@ using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Services;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace ByteSync.Client.IntegrationTests.Services.Communications.Transfers;
 

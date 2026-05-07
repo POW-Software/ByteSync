@@ -2,7 +2,7 @@
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Factories;
 using FakeItEasy;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Options;
 
 namespace ByteSync.ServerCommon.Tests.Factories;

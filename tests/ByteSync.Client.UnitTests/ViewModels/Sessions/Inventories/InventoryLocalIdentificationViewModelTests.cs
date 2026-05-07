@@ -6,7 +6,7 @@ using ByteSync.Client.UnitTests.Helpers;
 using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Themes;
 using ByteSync.ViewModels.Sessions.Inventories;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

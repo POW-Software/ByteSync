@@ -7,7 +7,7 @@ using ByteSync.Interfaces.Repositories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Services.Comparisons;
 using ByteSync.Services.Comparisons.ConditionMatchers;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

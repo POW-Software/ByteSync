@@ -4,7 +4,7 @@ using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Communications.Transfers.Uploading;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;

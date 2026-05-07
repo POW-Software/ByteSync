@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 using ByteSync.Business.Misc;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Services.TimeTracking;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Reactive.Testing;
 using Moq;
 using NUnit.Framework;

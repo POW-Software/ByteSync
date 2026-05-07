@@ -7,7 +7,7 @@ using ByteSync.Business.Sessions;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Inventories;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;

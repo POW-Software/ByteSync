@@ -2,7 +2,7 @@ using ByteSync.Business.Communications.Downloading;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Services.Communications.Transfers.Downloading;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

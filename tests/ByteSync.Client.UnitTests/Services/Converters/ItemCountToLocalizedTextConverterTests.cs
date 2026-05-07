@@ -1,7 +1,7 @@
 using System.Globalization;
 using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Services.Converters;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

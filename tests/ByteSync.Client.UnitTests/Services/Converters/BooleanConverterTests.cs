@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 using ByteSync.Services.Converters;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Converters;

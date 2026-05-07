@@ -7,7 +7,7 @@ using Azure.Storage.Blobs.Models;
 using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
 using ByteSync.ServerCommon.Services.Storage;
 using FakeItEasy;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Tests.Services;

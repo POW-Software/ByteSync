@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FluentAssertions" Version="8.9.0" />
+        <PackageReference Include="AwesomeAssertions" Version="9.4.0" />
         <PackageReference Include="Azure.Identity" Version="1.21.0"/>
         <PackageReference Include="Microsoft.Azure.SignalR" Version="1.33.0"/>
         <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Timer" Version="4.3.1" />

@@ -10,7 +10,7 @@ using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Inventories;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.ViewModels.Sessions.Comparisons.Actions;

@@ -14,7 +14,7 @@
         <PackageReference Include="Autofac" Version="9.1.0" />
         <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.0" />
         <PackageReference Include="FakeItEasy" Version="9.0.1" />
-        <PackageReference Include="FluentAssertions" Version="8.9.0" />
+        <PackageReference Include="AwesomeAssertions" Version="9.4.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.7" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.7" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.7" />

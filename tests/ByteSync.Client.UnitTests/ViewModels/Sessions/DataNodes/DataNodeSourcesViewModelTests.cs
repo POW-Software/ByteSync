@@ -9,7 +9,7 @@ using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.ViewModels.Sessions.DataNodes;
 using DynamicData;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 using ByteSync.TestsCommon;

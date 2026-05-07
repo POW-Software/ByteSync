@@ -1,6 +1,6 @@
 ﻿using ByteSync.Functions.Helpers.Misc;
 using ByteSync.Functions.UnitTests.TestHelpers;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Moq;

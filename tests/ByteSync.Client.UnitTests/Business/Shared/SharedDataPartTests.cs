@@ -2,7 +2,7 @@ using System.Reflection;
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Controls.Json;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Business.Shared;

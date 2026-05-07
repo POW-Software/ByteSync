@@ -13,7 +13,7 @@ using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Sessions.DataNodes;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

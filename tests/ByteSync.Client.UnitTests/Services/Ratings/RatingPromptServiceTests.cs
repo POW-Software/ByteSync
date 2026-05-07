@@ -15,7 +15,7 @@ using ByteSync.Interfaces.Services.Ratings;
 using ByteSync.Services.Ratings;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Ratings;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;

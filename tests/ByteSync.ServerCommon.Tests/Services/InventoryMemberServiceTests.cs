@@ -4,7 +4,7 @@ using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Entities.Inventories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Services;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace ByteSync.ServerCommon.Tests.Services;
 

@@ -2,7 +2,7 @@ using ByteSync.TestsCommon;
 using FastRsync.Core;
 using FastRsync.Delta;
 using FastRsync.Signature;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Synchronizations;

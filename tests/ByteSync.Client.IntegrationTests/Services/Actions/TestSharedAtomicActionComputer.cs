@@ -15,7 +15,7 @@ using ByteSync.Repositories;
 using ByteSync.Services.Actions;
 using ByteSync.Services.Sessions;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework.Legacy;
 
