@@ -10,7 +10,7 @@ This is an implementation and local validation report, not evidence of a deploye
 
 `AuthenticationProtocol` derives the identity from SHA-256 of canonical DER SubjectPublicKeyInfo after fully importing the existing PKCS#1 RSA public key. The full uppercase 64-character fingerprint is the security identity. Keys must be 2048–8192 bits; trailing key data is rejected. Instance identifiers consist of that fingerprint, an underscore and a canonical GUID. Multiple instances can prove possession of the same durable key independently.
 
-The client retains its existing RSA private key. Login first obtains a random 256-bit server nonce with a two-minute lifetime, then signs a length-prefixed canonical binary message with RSA-PSS/SHA-256. The message binds the domain, authentication epoch, relay audience, protocol version, challenge ID, nonce, expiry, fingerprint, instance, software version and platform. The relay stores the exact binding, consumes the Redis challenge using atomic `GETDEL`, then verifies the signature. Failed verification does not issue tokens or adopt an existing instance. Redis 6.2 or newer, or a compatible service implementing GETDEL, is a deployment prerequisite.
+The client retains its existing RSA private key. Login first obtains a random 256-bit server nonce with a two-minute lifetime, then signs a length-prefixed canonical binary message with RSA-PSS/SHA-256. The message binds the domain, authentication epoch, relay audience, protocol version, challenge ID, nonce, expiry, fingerprint, instance, software version and platform. The relay stores the exact binding, consumes the Redis challenge using a single atomic Lua script (`GET` followed by `DEL` inside the script), then verifies the signature. Failed verification does not issue tokens or adopt an existing instance. The script uses commands available in Azure Cache for Redis 6.0; GETDEL is not required. Scripting must be permitted, and script errors fail closed without a non-atomic fallback.
 
 The current authentication epoch is 1 and protocol is V3. Software version remains a separate compatibility check and cannot substitute for proof of possession. The legacy short `ApplicationSettings.ClientId` remains a display/trust alias; it cannot claim a server identity or an old instance. There is no first-key-wins migration of old aliases. Existing mismatched or legacy instance records are rejected.
 
@@ -81,7 +81,7 @@ Microsoft documents that a directory must be empty to establish a reparse point:
 | Persist locally enrolled permissions | Ask for confirmation at every sync | Local permissions preserve unattended operation without substituting prompts for enforcement. |
 | Native no-follow access and initial link refusal | GetFullPath/StartsWith or repeated path checks alone | Text does not pin the filesystem object accessed. Supporting links safely needs additional design. |
 
-## Validation
+## Initial security-boundary validation
 
 The final non-incremental build and each test command were run separately. Final commands and result counts are recorded below. TRX and coverage artifacts are retained locally under `artifacts/security-boundaries/`; build/test logs are local ignored files. They contain no intentionally logged tokens, private keys or session secrets. Test keys and sentinels are synthetic.
 
@@ -130,10 +130,26 @@ Security tests cover real RSA proofs, expiry/replay, concurrent consumption (30 
 ### Validation not performed
 
 * No tests against production, staging or hosted ByteSync, Redis, Azure SignalR, Blob Storage or R2. Server repository and Functions integration suites require configured services and were excluded. R2 upload/download and resume integration classes were excluded explicitly.
-* Atomic Redis behavior is implemented with GETDEL and tested with a fake; a real supported Redis deployment, RedLock/transaction failure and failover behavior must be exercised in an isolated environment.
+* Challenge consumption uses an atomic Lua script compatible with Redis 6.0. Distributed Redis/RedLock transaction failures and failover behavior still require isolated integration validation.
 * Docker is installed but its engine was unavailable; no ready Linux/macOS runner was available. POSIX native syscall/ABI behavior, filesystem-specific edge cases and packaged applications need runtime tests on each supported OS/architecture.
 * Windows ACL-denial integration cases self-skipped because this host did not enforce their synthetic permission changes. POSIX-only tests cannot run on Windows.
 * No Sonar PR analysis, production-scale/load/rate-limit evaluation, complete UI/manual trust exchange, or live multi-machine automatic synchronization was run. Local tests do not establish a production security certification.
+
+## Redis 6.0 compatibility follow-up
+
+Azure resource metadata confirmed that the ByteSync development/staging and production caches use Azure Cache for Redis 6.0 (Basic and Standard respectively). GETDEL requires Redis 6.2 and is unavailable on those engines. Authentication now consumes a challenge by executing one short Lua script with one explicitly declared key: GET the value, DEL that same key if present, and return the value. Redis executes the script atomically; there is no separate client-side GET/DEL or weak authentication fallback. Missing/expired values reject authentication, invalid signatures still burn their challenge, and script/server errors propagate without issuing tokens. The RSA binding, two-minute challenge expiry and authentication epoch are preserved. No infrastructure upgrade is required for this change. See [Redis scripting atomicity](https://redis.io/docs/latest/develop/programmability/eval-intro/) and [Azure Cache versions](https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-how-to-upgrade#current-versions).
+
+The unit fake now rejects GETDEL as Redis 6.0 does. Added cases enforce one ScriptEvaluateAsync call with exactly the challenge key, verify that an invalid signature consumes only its own challenge, and verify that a script failure never falls back to non-atomic commands. Existing concurrent-consumer, replay, expiry, key/instance and signature checks remain active.
+
+Follow-up validation: solution build succeeded with zero errors (142 warnings); **367 server unit tests and 66 Functions unit tests passed, zero failures**. Coverage of the C# AuthenticationChallengeService is 100.0% (42/42 executable lines). This does not measure execution of the Lua body. Local TRX/Cobertura evidence is indexed by [Redis 6.0 validation](../artifacts/security-boundaries/redis60/validation.json). The initial validation counts above belong to the earlier commit.
+
+Four explicit integration cases were added in `AuthenticationChallengeRedis60Tests` for a real disposable Redis 6.0: valid proof/replay and TTL, 30 concurrent consumers across independent connections, invalid-signature consumption and isolation, and Redis-side expiry/nil handling. They only connect to 127.0.0.1, require an explicit Redis60Port parameter, check the server is version 6.0, and remove only the randomly generated challenge keys they created. They do not load hosted connection settings. **These four cases were not executed:** Docker failed during startup and Paul stopped it. Docker was not restarted and no test was run against Azure Redis. Run them later with an isolated local Redis 6.0 and an explicit port, for example:
+
+```powershell
+rtk proxy dotnet test tests/ByteSync.ServerCommon.Tests/ByteSync.ServerCommon.Tests.csproj --no-build --no-restore --filter 'FullyQualifiedName~AuthenticationChallengeRedis60Tests' -- 'TestRunParameters.Parameter(name="Redis60Port", value="16379")'
+```
+
+The server regression run excluded `.Repositories.` and `.Integration.` to avoid running service-dependent suites. This follow-up changed no Azure settings and requires no production or staging data access.
 
 ## Future rollout proposal (not executed)
 

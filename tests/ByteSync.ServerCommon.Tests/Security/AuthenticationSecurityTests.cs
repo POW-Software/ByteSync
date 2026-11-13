@@ -17,19 +17,23 @@ public class AuthenticationSecurityTests
     private RSA _key = null!;
     private AuthenticationChallengeService _service = null!;
     private ConcurrentDictionary<string, string> _store = null!;
+    private IDatabaseAsync _database = null!;
 
     [SetUp]
     public void SetUp()
     {
         _key = RSA.Create(2048);
         _store = new();
-        var database = A.Fake<IDatabaseAsync>();
-        A.CallTo(database).Where(call => call.Method.Name == "StringSetAsync").WithReturnType<Task<bool>>()
+        _database = A.Fake<IDatabaseAsync>();
+        A.CallTo(_database).Where(call => call.Method.Name == "StringSetAsync").WithReturnType<Task<bool>>()
             .ReturnsLazily(call => Task.FromResult(_store.TryAdd(call.Arguments[0]!.ToString()!, call.Arguments[1]!.ToString()!)));
-        A.CallTo(() => database.StringGetDeleteAsync(A<RedisKey>._, A<CommandFlags>._))
-            .ReturnsLazily((RedisKey key, CommandFlags flags) => _store.TryRemove(key.ToString(), out var value) ? (RedisValue)value : RedisValue.Null);
+        A.CallTo(() => _database.StringGetDeleteAsync(A<RedisKey>._, A<CommandFlags>._))
+            .Throws(new RedisServerException("ERR unknown command 'GETDEL'"));
+        A.CallTo(() => _database.ScriptEvaluateAsync(A<string>._, A<RedisKey[]>._, A<RedisValue[]>._, A<CommandFlags>._))
+            .ReturnsLazily((string script, RedisKey[] keys, RedisValue[] values, CommandFlags flags) =>
+                RedisResult.Create(_store.TryRemove(keys.Single().ToString(), out var value) ? (RedisValue)value : RedisValue.Null));
         var redis = A.Fake<IRedisInfrastructureService>();
-        A.CallTo(() => redis.GetDatabase()).Returns(database);
+        A.CallTo(() => redis.GetDatabase()).Returns(_database);
         _service = new AuthenticationChallengeService(redis);
     }
 
@@ -138,4 +142,58 @@ public class AuthenticationSecurityTests
         login.ChallengeId = Guid.NewGuid().ToString("N");
         (await _service.VerifyAndConsume(login)).Should().BeFalse();
     }
+    [Test]
+    public async Task Challenge_Consumption_UsesOneScriptWithAnExplicitKeyAndNoSeparateCommands()
+    {
+        var login = Login();
+        var challenge = await _service.Create(login);
+        Sign(login, challenge);
+        Fake.ClearRecordedCalls(_database);
+
+        var authenticated = await _service.VerifyAndConsume(login);
+
+        authenticated.Should().BeTrue();
+        var calls = Fake.GetCalls(_database).ToList();
+        calls.Should().ContainSingle();
+        var call = calls.Single();
+        call.Method.Name.Should().Be(nameof(IDatabaseAsync.ScriptEvaluateAsync));
+        call.Arguments.Get<RedisKey[]>(1).Should().Equal((RedisKey)$"auth:{AuthenticationProtocol.Epoch}:challenge:{challenge.Id}");
+        call.Arguments.Get<RedisValue[]>(2).Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task InvalidSignature_ConsumesOnlyItsChallengeAndCannotBeRetriedWithAValidSignature()
+    {
+        var login = Login();
+        var challenge = await _service.Create(login);
+        var other = Login();
+        Sign(other, await _service.Create(other));
+        Sign(login, challenge);
+        login.Signature[0] ^= 1;
+
+        (await _service.VerifyAndConsume(login)).Should().BeFalse();
+        Sign(login, challenge);
+
+        (await _service.VerifyAndConsume(login)).Should().BeFalse();
+        (await _service.VerifyAndConsume(other)).Should().BeTrue();
+        _store.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task RedisScriptFailure_DoesNotFallBackToNonAtomicConsumption()
+    {
+        var login = Login();
+        Sign(login, await _service.Create(login));
+        A.CallTo(() => _database.ScriptEvaluateAsync(A<string>._, A<RedisKey[]>._, A<RedisValue[]>._, A<CommandFlags>._))
+            .Throws(new RedisServerException("ERR scripting unavailable"));
+        Fake.ClearRecordedCalls(_database);
+
+        var act = () => _service.VerifyAndConsume(login);
+
+        await act.Should().ThrowAsync<RedisServerException>();
+        Fake.GetCalls(_database).Should().ContainSingle(call => call.Method.Name == nameof(IDatabaseAsync.ScriptEvaluateAsync));
+        Fake.GetCalls(_database).Should().HaveCount(1);
+        _store.Should().ContainSingle();
+    }
+
 }

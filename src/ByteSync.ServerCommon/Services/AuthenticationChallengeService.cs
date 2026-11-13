@@ -11,6 +11,14 @@ public class AuthenticationChallengeService(IRedisInfrastructureService redis) :
 {
     private sealed record ChallengeRecord(LoginData Login, AuthenticationChallenge Challenge);
 
+    private const string ConsumeChallengeScript = """
+        local value = redis.call('GET', KEYS[1])
+        if value then
+            redis.call('DEL', KEYS[1])
+        end
+        return value
+        """;
+
     public async Task<AuthenticationChallenge> Create(LoginData login)
     {
         Validate(login);
@@ -32,7 +40,8 @@ public class AuthenticationChallengeService(IRedisInfrastructureService redis) :
         {
             Validate(login);
             if (!Guid.TryParseExact(login.ChallengeId, "N", out _)) return false;
-            var value = await redis.GetDatabase().StringGetDeleteAsync(Key(login.ChallengeId));
+            var value = (RedisValue)await redis.GetDatabase().ScriptEvaluateAsync(ConsumeChallengeScript,
+                new RedisKey[] { Key(login.ChallengeId) }, Array.Empty<RedisValue>());
             if (value.IsNullOrEmpty) return false;
             var record = JsonSerializer.Deserialize<ChallengeRecord>((string)value!)!;
             if (record.Challenge.ExpiresAt <= DateTimeOffset.UtcNow) return false;
