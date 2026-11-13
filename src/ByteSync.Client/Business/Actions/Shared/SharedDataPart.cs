@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.Inventories;
+using ByteSync.Common.Business.Inventories;
 using ByteSync.Models.Inventories;
 
 namespace ByteSync.Business.Actions.Shared;
@@ -20,6 +20,9 @@ public class SharedDataPart
         InventoryCodeAndId = inventory.CodeAndId;
         NodeId = inventory.NodeId;
         RootPath = inventoryPart.RootPath;
+        SourceId = inventoryPart.SourceId;
+        SourceRelativePath = inventoryPart.InventoryPartType == FileSystemTypes.File ? "" :
+            (relativePath?.StartsWith('/') == true ? relativePath[1..] : relativePath);
         RelativePath = relativePath;
         SignatureGuid = signatureGuid;
         SignatureHash = signatureHash;
@@ -37,6 +40,10 @@ public class SharedDataPart
     public string? NodeId { get; set; }
 
     public string RootPath { get; set; } = null!;
+    public string? SourceId { get; set; }
+    public string? SourceRelativePath { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public Func<string>? LocalPathResolver { get; set; }
         
     public string? RelativePath { get; set; }
 
@@ -48,7 +55,9 @@ public class SharedDataPart
 
     protected bool Equals(SharedDataPart other)
     {
-        return Equals(ClientInstanceId, other.ClientInstanceId) && 
+        return Equals(SourceId, other.SourceId) && Equals(NodeId, other.NodeId) &&
+               Equals(SourceRelativePath, other.SourceRelativePath) &&
+               Equals(ClientInstanceId, other.ClientInstanceId) &&
                RootPath.Equals(other.RootPath, StringComparison.InvariantCultureIgnoreCase) &&
                Equals (RelativePath, other.RelativePath);
     }

@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -50,12 +50,13 @@ public class MergerDecrypter : IMergerDecrypter
 
         CancellationTokenSource = cancellationTokenSource;
 
+        DownloadTarget.CheckAccess();
         var fileInfo = new FileInfo(FinalFile);
         if (fileInfo.Directory != null)
         {
-            fileInfo.Directory.Create();
+            ByteSync.Services.Synchronizations.LocalPathSafety.CreateDirectory(fileInfo.Directory.FullName);
         }
-        using (var _ = new FileStream(FinalFile, FileMode.Append))
+        using (var _ = ByteSync.Services.Synchronizations.LocalPathSafety.OpenWrite(FinalFile, append: true))
         {
             // Pour créer au moins un fichier vide
         }
@@ -68,7 +69,8 @@ public class MergerDecrypter : IMergerDecrypter
             return;
         }
             
-        await using var outStream = new FileStream(FinalFile, FileMode.Append);
+        DownloadTarget.CheckAccess();
+        await using var outStream = ByteSync.Services.Synchronizations.LocalPathSafety.OpenWrite(FinalFile, append: true);
             
         var cryptoTransform = Aes.CreateDecryptor(Aes.Key, Aes.IV);
         await using var cryptoStream = new CryptoStream(outStream, cryptoTransform, CryptoStreamMode.Write);

@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.SharedFiles;
+using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Business.Settings;
@@ -68,7 +68,6 @@ public class SharedFilesService : ISharedFilesService
         var sharedFileDefinition = transferParameters.SharedFileDefinition;
         var partNumber = transferParameters.PartNumber!.Value;
         bool shouldDeletePart = false;
-        bool unregister = false;
         
         await _sharedFilesRepository.AddOrUpdate(sharedFileDefinition, sharedFileData =>
         {
@@ -83,10 +82,6 @@ public class SharedFilesService : ISharedFilesService
             
             shouldDeletePart = isPartFullyDownloaded && !_appSettings.RetainFilesAfterTransfer;
             
-            if (sharedFileData.IsFullyDownloaded)
-            {
-                unregister = true;
-            }
 
             return sharedFileData;
         });
@@ -94,18 +89,6 @@ public class SharedFilesService : ISharedFilesService
         if (shouldDeletePart)
         {
             await DeleteDownloadedPart(transferParameters, sharedFileDefinition, partNumber);
-        }
-
-        if (unregister)
-        {
-            try
-            {
-                await _sharedFilesRepository.Forget(sharedFileDefinition);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Can not unregister SharedFileDefinition:{Id}", sharedFileDefinition.Id);
-            }
         }
     }
 

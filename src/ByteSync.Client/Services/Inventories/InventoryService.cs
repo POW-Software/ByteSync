@@ -1,4 +1,4 @@
-﻿using System.Reactive.Linq;
+using System.Reactive.Linq;
 using ByteSync.Business;
 using ByteSync.Business.Communications;
 using ByteSync.Business.DataNodes;
@@ -62,6 +62,11 @@ public class InventoryService : IInventoryService
     {
         if (localSharedFile.SharedFileDefinition.IsInventory)
         {
+            using var loader = new InventoryLoader(localSharedFile.LocalPath, localSharedFile.SharedFileDefinition.ClientInstanceId);
+            var node = _dataNodeRepository.GetElement(loader.Inventory.NodeId);
+            if (node == null || node.ClientInstanceId != localSharedFile.SharedFileDefinition.ClientInstanceId ||
+                loader.Inventory.CodeAndId != localSharedFile.SharedFileDefinition.AdditionalName)
+                throw new UnauthorizedAccessException("Inventory node or id mismatch");
             var inventoryFile = new InventoryFile(localSharedFile);
             
             _inventoryFileRepository.AddOrUpdate(inventoryFile);

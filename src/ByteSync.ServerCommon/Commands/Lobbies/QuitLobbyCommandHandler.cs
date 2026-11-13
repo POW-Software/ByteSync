@@ -1,4 +1,4 @@
-﻿using ByteSync.ServerCommon.Interfaces.Repositories;
+using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
@@ -56,7 +56,7 @@ public class QuitLobbyCommandHandler : IRequestHandler<QuitLobbyRequest, bool>
             await _invokeClientsService.LobbyGroup(lobbyId).
                 MemberQuittedLobby(lobbyId, client.ClientInstanceId).ConfigureAwait(false);
                 
-            await _clientsGroupsService.RemoveFromLobbyGroup(client, $"Lobby_{lobbyId}").ConfigureAwait(false);
+            await _clientsGroupsService.RemoveFromLobbyGroup(client, lobbyId).ConfigureAwait(false);
         }
 
         return result.IsSaved || result.IsDeleted;

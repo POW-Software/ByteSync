@@ -104,7 +104,7 @@ public class InventoryFunctionTests
             .ReturnsAsync([new EncryptedDataSource { Id = "DS1" }]);
         
         var function = new InventoryFunction(mediatorMock.Object);
-        var context = new Mock<FunctionContext>().Object;
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var response = await function.GetDataSources(request, context, "S1", "CI1", "DN1");
@@ -176,7 +176,7 @@ public class InventoryFunctionTests
             .ReturnsAsync([new EncryptedDataNode { Id = "DN1" }]);
         
         var function = new InventoryFunction(mediatorMock.Object);
-        var context = new Mock<FunctionContext>().Object;
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var response = await function.GetDataNodes(request, context, "S1", "CI1");

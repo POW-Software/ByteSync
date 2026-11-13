@@ -1,10 +1,11 @@
+using ByteSync.ServerCommon.Security;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.FileTransfers;
 
-public class AssertDownloadIsFinishedRequest : IRequest
+public class AssertDownloadIsFinishedRequest : IRequest, IFileTransferRequest
 {
     public AssertDownloadIsFinishedRequest(string sessionId, Client client, TransferParameters transferParameters)
     {

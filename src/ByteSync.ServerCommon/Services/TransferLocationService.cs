@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.SharedFiles;
+using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Business.Settings;
@@ -18,17 +18,19 @@ public class TransferLocationService : ITransferLocationService
     private readonly ICloudflareR2Service _cloudflareR2Service;
     private readonly ILogger<TransferLocationService> _logger;
     private readonly StorageProvider _storageProvider;
+    private readonly ITransferAuthorizationService _authorization;
 
     public TransferLocationService(ICloudSessionsRepository cloudSessionsRepository, IAzureBlobStorageService azureBlobStorageService,
         ICloudflareR2Service cloudflareR2Service,
         IOptions<AppSettings> appSettings,
-        ILogger<TransferLocationService> logger)
+        ILogger<TransferLocationService> logger, ITransferAuthorizationService authorization)
     {
         _cloudSessionsRepository = cloudSessionsRepository;
         _azureBlobStorageService = azureBlobStorageService;
         _cloudflareR2Service = cloudflareR2Service;
         _storageProvider = appSettings.Value.DefaultStorageProvider;
         _logger = logger;
+        _authorization = authorization;
     }
     
     public async Task<string> GetUploadFileUrl(string sessionId, Client client, TransferParameters transferParameters)
@@ -38,6 +40,7 @@ public class TransferLocationService : ITransferLocationService
             throw new ArgumentOutOfRangeException(nameof(transferParameters.PartNumber), "Part number must be greater than 0");
         }
         
+        await _authorization.Authorize(sessionId, client, transferParameters, true, true);
         var sessionMemberData = await _cloudSessionsRepository.GetSessionMember(sessionId, client);
         var sharedFileDefinition = transferParameters.SharedFileDefinition;
         var partNumber = transferParameters.PartNumber.Value;
@@ -46,7 +49,7 @@ public class TransferLocationService : ITransferLocationService
 
         if (canGetUrl)
         {
-            string uploadUrl = _storageProvider switch
+            string uploadUrl = transferParameters.StorageProvider switch
             {
                 StorageProvider.AzureBlobStorage => await _azureBlobStorageService.GetUploadFileUrl(sharedFileDefinition, partNumber),
                 StorageProvider.CloudflareR2 => await _cloudflareR2Service.GetUploadFileUrl(sharedFileDefinition, partNumber),
@@ -71,6 +74,7 @@ public class TransferLocationService : ITransferLocationService
             throw new ArgumentOutOfRangeException(nameof(transferParameters.PartNumber), "Part number must be greater than 0");
         }
         
+        await _authorization.Authorize(sessionId, client, transferParameters, false, false);
         var sessionMemberData = await _cloudSessionsRepository.GetSessionMember(sessionId, client);
         var sharedFileDefinition = transferParameters.SharedFileDefinition;
         var partNumber = transferParameters.PartNumber.Value;
@@ -79,7 +83,7 @@ public class TransferLocationService : ITransferLocationService
 
         if (canGetUrl)
         {
-            string downloadUrl = _storageProvider switch
+            string downloadUrl = transferParameters.StorageProvider switch
             {
                 StorageProvider.AzureBlobStorage => await _azureBlobStorageService.GetDownloadFileUrl(sharedFileDefinition, partNumber),
                 StorageProvider.CloudflareR2 => await _cloudflareR2Service.GetDownloadFileUrl(sharedFileDefinition, partNumber),
@@ -98,7 +102,7 @@ public class TransferLocationService : ITransferLocationService
     {
         bool canGetUrl = false;
 
-        if (sessionMemberData != null && sharedFileDefinition != null)
+        if (sessionMemberData != null && sharedFileDefinition != null && sharedFileDefinition.SessionId == sessionMemberData.CloudSessionData.SessionId)
         {
             canGetUrl = sessionMemberData.CloudSessionData.SessionMembers.Any(smd =>
                 Equals(smd.ClientInstanceId, sharedFileDefinition.ClientInstanceId));

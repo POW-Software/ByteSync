@@ -241,7 +241,7 @@ public class FullInventoryRunner_IntegrationTests : IntegrationTest
         var inventoryFileAnalyzerLogger = new Mock<ILogger<InventoryFileAnalyzer>>().Object;
         
         var saver = new InventorySaver();
-        var analyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, processData, saver, inventoryFileAnalyzerLogger);
+        var analyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, processData, saver, inventoryFileAnalyzerLogger, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
         
         var inventoryBuilder = new InventoryBuilder(
             sessionMember,

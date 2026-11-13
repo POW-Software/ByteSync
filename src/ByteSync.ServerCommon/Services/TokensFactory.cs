@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using ByteSync.Common.Business.Auth;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Interfaces.Factories;
@@ -21,6 +22,9 @@ public class TokensFactory : ITokensFactory
     
     public JwtTokens BuildTokens(Client client)
     {
+        if (client.AuthenticationEpoch != AuthenticationProtocol.Epoch ||
+            !AuthenticationProtocol.IsInstanceOf(client.ClientInstanceId, client.Identity ?? ""))
+            throw new UnauthorizedAccessException("Verified identity required");
         var jwtToken = GenerateJwtToken(client);
         var refreshToken = GenerateRefreshToken(client);
 
@@ -41,6 +45,8 @@ public class TokensFactory : ITokensFactory
             new(AuthConstants.CLAIM_CLIENT_INSTANCE_ID, client.ClientInstanceId),
             new(AuthConstants.CLAIM_CLIENT_ID, client.ClientId),
             new(AuthConstants.CLAIM_VERSION, client.Version),
+            new(AuthConstants.CLAIM_IDENTITY, client.Identity!),
+            new(AuthConstants.CLAIM_AUTHENTICATION_EPOCH, AuthenticationProtocol.Epoch.ToString()),
             new(AuthConstants.CLAIM_OS_PLATFORM, client.OsPlatform.ToString()),
         };
 
@@ -73,6 +79,7 @@ public class TokensFactory : ITokensFactory
             return new RefreshToken
             {
                 Token = token,
+                AuthenticationEpoch = AuthenticationProtocol.Epoch,
                 Expires = DateTime.UtcNow.AddSeconds(_appSettings.JwtDurationInSeconds * 2),
                 Created = DateTimeOffset.UtcNow,
                 CreatedByIp = client.IpAddress

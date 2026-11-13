@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.IO.Compression;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Common.Business.SharedFiles;
@@ -23,9 +23,10 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
         _fileDatesSetter = fileDatesSetter;
         _logger = logger;
     }
-    
+
     public async Task FinalizeSynchronization(SharedFileDefinition sharedFileDefinition, DownloadTarget downloadTarget)
     {
+        downloadTarget.CheckAccess();
         if (downloadTarget.IsMultiFileZip)
         {
             await HandleSynchronizationZipMultiFile(sharedFileDefinition, downloadTarget);
@@ -35,31 +36,35 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
             await HandleSynchronizationMonoFile(sharedFileDefinition, downloadTarget);
         }
     }
-    
+
     private async Task HandleSynchronizationZipMultiFile(SharedFileDefinition sharedFileDefinition, DownloadTarget downloadTarget)
     {
         var downloadDestination = downloadTarget.DownloadDestinations.Single();
-        using (var zipArchive = ZipFile.Open(downloadDestination, ZipArchiveMode.Read))
+        using (var zipArchive = new ZipArchive(ByteSync.Services.Synchronizations.LocalPathSafety.OpenRead(downloadDestination), ZipArchiveMode.Read))
         {
+            if (zipArchive.Entries.Any(e => e.FullName != e.Name || !downloadTarget.FinalDestinationsPerActionsGroupId!.ContainsKey(e.Name)) ||
+                zipArchive.Entries.Select(e => e.Name).Distinct().Count() != zipArchive.Entries.Count)
+                throw new UnauthorizedAccessException("Unexpected archive entries");
             foreach (var entry in zipArchive.Entries)
             {
                 var finalDestinations = downloadTarget.FinalDestinationsPerActionsGroupId![entry.Name];
                 var downloadTargetDates = downloadTarget.GetTargetDates(entry.Name);
-            
+
                 if (sharedFileDefinition.IsDeltaSynchronization)
                 {
                     // Synchro delta
                     foreach (var finalDestination in finalDestinations)
                     {
-                        _logger.LogInformation("{SharedFileDefinitionId}: Extracting and applying delta on {FinalDestination}", 
+                        downloadTarget.CheckAccess();
+                        _logger.LogInformation("{SharedFileDefinitionId}: Extracting and applying delta on {FinalDestination}",
                             sharedFileDefinition.Id, finalDestination);
-                        
+
                         await using (var stream = entry.Open())
                         {
                             using (var reader = new MemoryStream())
                             {
                                 await stream.CopyToAsync(reader);
-                            
+
                                 await _deltaManager.ApplyDelta(finalDestination, reader);
                             }
                         }
@@ -71,21 +76,24 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
                 {
                     foreach (var finalDestination in finalDestinations)
                     {
-                        _logger.LogInformation("{SharedFileDefinitionId}: Extracting to :{FinalDestination}", 
+                        downloadTarget.CheckAccess();
+                        _logger.LogInformation("{SharedFileDefinitionId}: Extracting to :{FinalDestination}",
                             sharedFileDefinition.Id, finalDestination);
-                        
+
                         var fileInfo = new FileInfo(finalDestination);
                         if (fileInfo.Directory is { Exists: false })
                         {
-                            fileInfo.Directory.Create();
+                            ByteSync.Services.Synchronizations.LocalPathSafety.CreateDirectory(fileInfo.Directory.FullName);
                         }
 
                         var temporaryFileManager = _temporaryFileManagerFactory.Create(finalDestination);
                         var destinationTemporaryPath = temporaryFileManager.GetDestinationTemporaryPath();
-                        
+
                         try
                         {
-                            entry.ExtractToFile(destinationTemporaryPath); //NOSONAR 
+                            using (var input = entry.Open())
+                            using (var output = ByteSync.Services.Synchronizations.LocalPathSafety.OpenWrite(destinationTemporaryPath, true)) input.CopyTo(output);
+                            downloadTarget.CheckAccess();
                             temporaryFileManager.ValidateTemporaryFile();
                             await _fileDatesSetter.SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
                         }
@@ -98,50 +106,51 @@ public class SynchronizationDownloadFinalizer : ISynchronizationDownloadFinalize
                 }
             }
         }
-        
+
         DeleteTemporaryDownloadedFile(downloadDestination);
     }
-    
+
     private async Task HandleSynchronizationMonoFile(SharedFileDefinition sharedFileDefinition, DownloadTarget downloadTarget)
     {
         var actionsGroupId = sharedFileDefinition.ActionsGroupIds!.Single();
-            
+
         var downloadTargetDates = downloadTarget.GetTargetDates(actionsGroupId);
 
         if (sharedFileDefinition.IsDeltaSynchronization)
         {
             var downloadDestination = downloadTarget.DownloadDestinations.Single();
-            
+
             var deltaFullName = downloadDestination;
             var finalDestinations = downloadTarget.FinalDestinationsPerActionsGroupId![actionsGroupId];
             foreach (var finalDestination in finalDestinations)
             {
-                _logger.LogInformation("{SharedFileDefinitionId}: Applying delta on {FinalDestination}", 
+                downloadTarget.CheckAccess();
+                _logger.LogInformation("{SharedFileDefinitionId}: Applying delta on {FinalDestination}",
                     sharedFileDefinition.Id, finalDestination);
-                
+
                 await _deltaManager.ApplyDelta(finalDestination, deltaFullName);
 
                 await _fileDatesSetter.SetDates(sharedFileDefinition, finalDestination, downloadTargetDates);
             }
-            
+
             DeleteTemporaryDownloadedFile(downloadDestination);
         }
         else
         {
             var tasks = new List<Task>();
-            
+
             foreach (var downloadDestination in downloadTarget.AllFinalDestinations)
             {
                 tasks.Add(_fileDatesSetter.SetDates(sharedFileDefinition, downloadDestination, downloadTargetDates));
             }
-            
+
             await Task.WhenAll(tasks);
         }
     }
-    
+
     private void DeleteTemporaryDownloadedFile(string temporaryDownloadedFile)
     {
         _logger.LogInformation("Deleting temporary downloaded file {temporaryDownloadedFile}", temporaryDownloadedFile);
-        File.Delete(temporaryDownloadedFile);
+        ByteSync.Services.Synchronizations.LocalPathSafety.Delete(temporaryDownloadedFile);
     }
 }

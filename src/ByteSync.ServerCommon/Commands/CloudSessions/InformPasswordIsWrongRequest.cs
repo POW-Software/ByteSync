@@ -1,9 +1,10 @@
+using ByteSync.ServerCommon.Security;
 using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.CloudSessions;
 
-public class InformPasswordIsWrongRequest : IRequest<Unit>
+public class InformPasswordIsWrongRequest : IRequest<Unit>, ISessionRequest
 {
     public InformPasswordIsWrongRequest(Client client, string sessionId, string clientInstanceId)
     {

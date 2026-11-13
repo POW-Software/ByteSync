@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
@@ -37,6 +37,8 @@ public class FileUploader : IFileUploader
         SharedFileDefinition = sharedFileDefinition ?? throw new NullReferenceException("SharedFileDefinition is null");
     }
 
+    public Action? ValidateAccess { get; set; }
+
     public int? MaxSliceLength { get; set; }
     private SharedFileDefinition SharedFileDefinition { get; set; }
     private string? LocalFileToUpload { get; set; }
@@ -49,6 +51,8 @@ public class FileUploader : IFileUploader
 
     public Task Upload()
     {
+        ValidateAccess?.Invoke();
+        _slicerEncrypter.ValidateAccess = ValidateAccess;
         if (LocalFileToUpload != null)
         {
             return UploadFile();

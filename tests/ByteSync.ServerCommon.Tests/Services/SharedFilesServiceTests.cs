@@ -32,7 +32,7 @@ public class SharedFilesServiceTests
     [Test]
     [TestCase(StorageProvider.AzureBlobStorage)]
     [TestCase(StorageProvider.CloudflareR2)]
-    public async Task AssertFilePartIsDownloaded_WhenPartBecomesFullyDownloaded_DeletesObject_And_Unregisters_WhenRetentionDisabled(StorageProvider storageProvider)
+    public async Task AssertFilePartIsDownloaded_WhenPartBecomesFullyDownloaded_DeletesObject_And_RetainsAuthorizationRecord_WhenRetentionDisabled(StorageProvider storageProvider)
     {
         // Arrange
         var appSettings = Options.Create(new AppSettings { RetainFilesAfterTransfer = false });
@@ -91,13 +91,13 @@ public class SharedFilesServiceTests
         }
 
         A.CallTo(() => _sharedFilesRepository.Forget(sharedFileDefinition))
-            .MustHaveHappenedOnceExactly();
+            .MustNotHaveHappened();
     }
 
     [Test]
     [TestCase(StorageProvider.AzureBlobStorage)]
     [TestCase(StorageProvider.CloudflareR2)]
-    public async Task AssertFilePartIsDownloaded_WhenRetentionEnabled_DoesNotDeleteObject_ButUnregistersWhenFullyDownloaded(StorageProvider storageProvider)
+    public async Task AssertFilePartIsDownloaded_WhenRetentionEnabled_DoesNotDeleteObject_AndRetainsAuthorizationRecordWhenFullyDownloaded(StorageProvider storageProvider)
     {
         // Arrange
         var appSettings = Options.Create(new AppSettings { RetainFilesAfterTransfer = true });
@@ -143,7 +143,7 @@ public class SharedFilesServiceTests
             .MustNotHaveHappened();
 
         A.CallTo(() => _sharedFilesRepository.Forget(sharedFileDefinition))
-            .MustHaveHappenedOnceExactly();
+            .MustNotHaveHappened();
 
         // Also assert the in-memory state evolved to be fully downloaded for the part
         preExisting.IsPartFullyDownloaded(partNumber).Should().BeTrue();

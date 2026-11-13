@@ -1,9 +1,10 @@
+using ByteSync.ServerCommon.Security;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.ServerCommon.Business.Auth;
 
 namespace ByteSync.ServerCommon.Commands.Synchronizations;
 
-public class LocalCopyIsDoneRequest : IActionCompletedRequest
+public class LocalCopyIsDoneRequest : IActionCompletedRequest, ISessionRequest
 {
     public LocalCopyIsDoneRequest(string sessionId, Client client, List<string> actionsGroupIds, string? nodeId)
         : this(sessionId, client, actionsGroupIds, nodeId, null)

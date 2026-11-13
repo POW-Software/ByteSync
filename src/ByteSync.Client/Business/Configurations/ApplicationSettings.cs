@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
@@ -11,6 +11,8 @@ namespace ByteSync.Business.Configurations;
 
 public class ApplicationSettings : ICloneable
 {
+    public List<ByteSync.Business.DataSources.LocalSourcePermission> LocalSourcePermissions { get; set; } = new();
+
     private string? _rsaPrivateKey;
 
     public ApplicationSettings()
@@ -229,7 +231,9 @@ public class ApplicationSettings : ICloneable
 
     public object Clone()
     {
-        return this.MemberwiseClone();
+        var clone = (ApplicationSettings)MemberwiseClone();
+        clone.LocalSourcePermissions = LocalSourcePermissions.Select(p => p with { }).ToList();
+        return clone;
     }
 
     public void SetEncryptionPassword(string encryptionPassword)

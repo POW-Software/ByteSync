@@ -30,7 +30,10 @@ public class RefreshTokensCommandHandler: IRequestHandler<RefreshTokensRequest, 
         var result = await _clientsRepository.AddOrUpdate(req.RefreshTokensData.ClientInstanceId,
             client =>
             {
-                if (client == null || client.RefreshToken == null || !Equals(client.RefreshToken.Token, req.RefreshTokensData.Token))
+                if (client == null || client.AuthenticationEpoch != AuthenticationProtocol.Epoch ||
+                    !AuthenticationProtocol.IsInstanceOf(client.ClientInstanceId, client.Identity ?? "") ||
+                    client.RefreshToken == null || client.RefreshToken.AuthenticationEpoch != AuthenticationProtocol.Epoch ||
+                    !client.RefreshToken.IsActive || !Equals(client.RefreshToken.Token, req.RefreshTokensData.Token))
                 {
                     authenticationResponse = new RefreshTokensResponse(RefreshTokensStatus.RefreshTokenNotFound);
                     return null;

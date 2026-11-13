@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Azure.Core.Serialization;
 using ByteSync.Common.Interfaces.Hub;
 using ByteSync.Functions.Helpers.Misc;
@@ -36,11 +36,11 @@ public class SignalREntryFunction
             
             var client = FunctionHelper.GetClientFromContext(executionContext);
             
-            var negotiateResponse = await _hubContext.NegotiateAsync(new() { UserId = client.ClientInstanceId });
+            var negotiateResponse = await _hubContext.NegotiateAsync(new() { UserId = $"{ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch}:{client.ClientInstanceId}" });
             
             if (negotiateResponse == null || string.IsNullOrEmpty(negotiateResponse.Url) || string.IsNullOrEmpty(negotiateResponse.AccessToken))
             {
-                _logger.LogWarning("Negotiate response is null or invalid {@negotiateResponse}", negotiateResponse);
+                _logger.LogWarning("Negotiate response is null or invalid");
                 return req.CreateResponse(System.Net.HttpStatusCode.InternalServerError);
             }
             
@@ -69,9 +69,10 @@ public class SignalREntryFunction
     {
         try
         {
-            await _clientsService.OnClientConnected(invocationContext.UserId, invocationContext.ConnectionId);
+            var prefix = $"{ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch}:";
+            if (!invocationContext.UserId.StartsWith(prefix, StringComparison.Ordinal)) return;
+            await _clientsService.OnClientConnected(invocationContext.UserId[prefix.Length..], invocationContext.ConnectionId);
         
-            invocationContext.Headers.TryGetValue("Authorization", out var auth);
             _logger.LogInformation("{InvocationContextConnectionId} has connected", invocationContext.ConnectionId);
         }
         catch (Exception ex)

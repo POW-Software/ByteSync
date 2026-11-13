@@ -1,10 +1,11 @@
+using ByteSync.ServerCommon.Security;
 using ByteSync.Common.Business.Actions;
 using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Synchronizations;
 
-public class StartSynchronizationRequest : IRequest
+public class StartSynchronizationRequest : IRequest, ISessionRequest
 {
     public StartSynchronizationRequest(string sessionId, Client client, List<ActionsGroupDefinition> actionsGroupDefinitions)
     {

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Text.Json;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -105,7 +105,11 @@ var host = new HostBuilder()
         services.AddClaimAuthorization();
         services.AddJwtAuthentication(appSettings!.Secret);
         
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(AddDataSourceRequest).Assembly));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(AddDataSourceRequest).Assembly);
+            cfg.AddOpenBehavior(typeof(ByteSync.ServerCommon.Security.SessionAuthorizationBehavior<,>));
+        });
     })
     .Build();
 

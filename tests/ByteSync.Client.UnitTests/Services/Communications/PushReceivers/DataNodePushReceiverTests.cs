@@ -45,7 +45,7 @@ public class DataNodePushReceiverTests
     {
         var encrypted = new EncryptedDataNode();
         var dto = new DataNodeDTO("SID", "CID", encrypted);
-        var node = new DataNode();
+        var node = new DataNode { ClientInstanceId = "CID" };
         _dataEncrypterMock.Setup(e => e.DecryptDataNode(encrypted)).Returns(node);
         
         _addedSubject.OnNext(dto);
@@ -59,7 +59,7 @@ public class DataNodePushReceiverTests
     {
         var encrypted = new EncryptedDataNode();
         var dto = new DataNodeDTO("SID", "CID", encrypted);
-        var node = new DataNode();
+        var node = new DataNode { ClientInstanceId = "CID" };
         _dataEncrypterMock.Setup(e => e.DecryptDataNode(encrypted)).Returns(node);
         
         _removedSubject.OnNext(dto);

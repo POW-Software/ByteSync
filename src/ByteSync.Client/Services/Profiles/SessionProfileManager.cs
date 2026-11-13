@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
 using ByteSync.Assets.Resources;
@@ -367,7 +367,8 @@ public class SessionProfileManager : ISessionProfileManager
             cloudSessionProfileMember.IpAddress = sessionMemberInfo.IpAddress;
             cloudSessionProfileMember.ProfileClientId =
                 data.Slots
-                    .Single(t => t.ClientId.Equals(sessionMemberInfo.Endpoint.ClientId)).ProfileClientId;
+                    .Single(t => t.ClientId.Equals(sessionMemberInfo.Endpoint.ClientId) &&
+                                 t.OriginalClientInstanceId == sessionMemberInfo.ClientInstanceId).ProfileClientId;
             cloudSessionProfileMember.ProfileClientPassword = $"CSPCP_{Guid.NewGuid()}";
             cloudSessionProfileMember.DataSources = allDataSources
                 .Where(ds => ds.BelongsTo(sessionMemberInfo))

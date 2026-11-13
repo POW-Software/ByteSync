@@ -141,7 +141,7 @@ public class EnvironmentService_Tests
     {
         var service = new EnvironmentService(new MsixPfnParser());
         
-        var clientId = "client-123";
+        var clientId = new string('A', 64);
         service.SetClientId(clientId);
         
         service.ClientId.Should().Be(clientId);

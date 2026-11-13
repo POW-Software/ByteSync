@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Functions.Helpers.Misc;
@@ -35,6 +35,19 @@ public class CloudSessionFunction
         return response;
     }
     
+    [Function("BeginJoinSessionFunction")]
+    public async Task<HttpResponseData> BeginJoin(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/beginJoin")] HttpRequestData req,
+        FunctionContext context, string sessionId)
+    {
+        var parameters = await FunctionHelper.DeserializeRequestBody<AskCloudSessionPasswordExchangeKeyParameters>(req);
+        if (parameters.SessionId != sessionId) throw new ByteSync.ServerCommon.Exceptions.BadRequestException("Session route mismatch");
+        var result = await _mediator.Send(new BeginJoinSessionRequest(FunctionHelper.GetClientFromContext(context), parameters));
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(result);
+        return response;
+    }
+
     [Function("AskPasswordExchangeKeyFunction")]
     public async Task<HttpResponseData> AskPasswordExchangeKey(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "session/{sessionId}/askPasswordExchangeKey")] HttpRequestData req,
@@ -42,6 +55,7 @@ public class CloudSessionFunction
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<AskCloudSessionPasswordExchangeKeyParameters>(req);
+        if (parameters.SessionId != sessionId) throw new ByteSync.ServerCommon.Exceptions.BadRequestException("Session route mismatch");
         var result = await _mediator.Send(new AskPasswordExchangeKeyRequest(client, parameters), executionContext.CancellationToken);
         var response = req.CreateResponse();
         await response.WriteAsJsonAsync(result);
@@ -54,7 +68,8 @@ public class CloudSessionFunction
         FunctionContext executionContext, string sessionId)
     {
         var parameters = await FunctionHelper.DeserializeRequestBody<ValidateJoinCloudSessionParameters>(req);
-        await _mediator.Send(new ValidateJoinCloudSessionRequest(parameters));
+        if (parameters.SessionId != sessionId) throw new ByteSync.ServerCommon.Exceptions.BadRequestException("Session route mismatch");
+        await _mediator.Send(new ValidateJoinCloudSessionRequest(parameters, FunctionHelper.GetClientFromContext(executionContext)));
         var response = req.CreateResponse(HttpStatusCode.OK);
         return response;
     }
@@ -67,6 +82,7 @@ public class CloudSessionFunction
        
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<FinalizeJoinCloudSessionParameters>(req);
+        if (parameters.SessionId != sessionId) throw new ByteSync.ServerCommon.Exceptions.BadRequestException("Session route mismatch");
 
         var request = new FinalizeJoinCloudSessionRequest(parameters, client);
         var result = await _mediator.Send(request);
@@ -84,6 +100,7 @@ public class CloudSessionFunction
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<AskJoinCloudSessionParameters>(req);
+        if (parameters.SessionId != sessionId) throw new ByteSync.ServerCommon.Exceptions.BadRequestException("Session route mismatch");
         var result = await _mediator.Send(new AskJoinCloudSessionRequest(client, parameters));
         var response = req.CreateResponse();
         await response.WriteAsJsonAsync(result);
@@ -97,6 +114,7 @@ public class CloudSessionFunction
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<GiveCloudSessionPasswordExchangeKeyParameters>(req);
+        if (parameters.SessionId != sessionId) throw new ByteSync.ServerCommon.Exceptions.BadRequestException("Session route mismatch");
         await _mediator.Send(new GiveCloudSessionPasswordExchangeKeyRequest(client, parameters));
         var response = req.CreateResponse(HttpStatusCode.OK);
         return response;

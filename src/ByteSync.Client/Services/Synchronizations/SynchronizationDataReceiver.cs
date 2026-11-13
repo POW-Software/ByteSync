@@ -1,4 +1,5 @@
-﻿using ByteSync.Business.Actions.Shared;
+using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Communications;
 using ByteSync.Interfaces.Controls.Actions;
 using ByteSync.Interfaces.Controls.Synchronizations;
@@ -10,6 +11,8 @@ namespace ByteSync.Services.Synchronizations;
 
 public class SynchronizationDataReceiver : ISynchronizationDataReceiver
 {
+    private readonly ILocalSourceAuthorizationService _authorization;
+
     private readonly ICloudSessionLocalDataManager _cloudSessionLocalDataManager;
     private readonly ISharedAtomicActionRepository _sharedAtomicActionRepository;
     private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository;
@@ -19,8 +22,9 @@ public class SynchronizationDataReceiver : ISynchronizationDataReceiver
 
     public SynchronizationDataReceiver(ICloudSessionLocalDataManager cloudSessionLocalDataManager, ISharedAtomicActionRepository sharedAtomicActionRepository,
         ISharedActionsGroupRepository sharedActionsGroupRepository, ISynchronizationService synchronizationService, 
-        ISharedActionsGroupOrganizer sharedActionsGroupOrganizer, ISynchronizationDataLogger synchronizationDataLogger)
+        ISharedActionsGroupOrganizer sharedActionsGroupOrganizer, ISynchronizationDataLogger synchronizationDataLogger, ILocalSourceAuthorizationService authorization)
     {
+        _authorization = authorization;
         _cloudSessionLocalDataManager = cloudSessionLocalDataManager;
         _sharedAtomicActionRepository = sharedAtomicActionRepository;
         _sharedActionsGroupRepository = sharedActionsGroupRepository;
@@ -35,11 +39,15 @@ public class SynchronizationDataReceiver : ISynchronizationDataReceiver
         var synchronizationDataSaver = new SynchronizationDataSaver();
         var synchronizationData = synchronizationDataSaver.Load(synchronizationDataPath);
 
+        if (synchronizationData.SessionId != downloadTargetLocalSharedFile.SharedFileDefinition.SessionId ||
+            synchronizationData.Endpoint.ClientInstanceId != downloadTargetLocalSharedFile.SharedFileDefinition.ClientInstanceId)
+            throw new UnauthorizedAccessException("Synchronization plan sender mismatch");
         await SetSynchronizationStartData(synchronizationData);
     }
     
     private async Task SetSynchronizationStartData(SharedSynchronizationStartData sharedSynchronizationStartData)
     {
+        _authorization.ValidatePlan(sharedSynchronizationStartData.SharedActionsGroups);
         _sharedAtomicActionRepository.SetSharedAtomicActions(sharedSynchronizationStartData.SharedAtomicActions);
         _sharedActionsGroupRepository.SetSharedActionsGroups(sharedSynchronizationStartData.SharedActionsGroups);
         

@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using Avalonia.ReactiveUI;
 using ByteSync.Business.Arguments;
 using ByteSync.DependencyInjection.Modules;
@@ -86,7 +86,7 @@ public static class ServiceRegistrar
         var environmentService = scope.Resolve<IEnvironmentService>();
         
         var applicationSettings = applicationSettingsRepository.GetCurrentApplicationSettings();
-        environmentService.SetClientId(applicationSettings.ClientId);
+        environmentService.SetClientId(ByteSync.Common.Business.Auth.AuthenticationProtocol.GetIdentity(applicationSettings.DecodedRsaPublicKey!));
     }
     
     private static void LogBootstrapHeader(this IContainer container)

@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using ByteSync.ServerCommon.Exceptions;
 using Microsoft.ApplicationInsights;
 using Microsoft.Azure.Functions.Worker;
@@ -24,6 +24,18 @@ public class ErrorHandlingMiddleware : IFunctionsWorkerMiddleware
         try
         {
             await next(context);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            var request = await context.GetHttpRequestDataAsync();
+            if (request == null) throw;
+            PrepareResponse(context, request, HttpStatusCode.Forbidden);
+        }
+        catch (System.Security.Cryptography.CryptographicException)
+        {
+            var request = await context.GetHttpRequestDataAsync();
+            if (request == null) throw;
+            PrepareResponse(context, request, HttpStatusCode.BadRequest);
         }
         catch (BadRequestException ex)
         {

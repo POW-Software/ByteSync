@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+using ByteSync.Interfaces.Controls.Inventories;
+using System.Reactive.Linq;
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Misc;
 using ByteSync.Business.Sessions;
@@ -16,6 +17,8 @@ namespace ByteSync.Services.Synchronizations;
 
 public class SynchronizationService : ISynchronizationService
 {
+    private readonly ILocalSourceAuthorizationService _authorization;
+
     private readonly ISessionService _sessionService;
     private readonly ISessionMemberService _sessionMemberService;
     private readonly ISynchronizationApiClient _synchronizationApiClient;
@@ -26,8 +29,9 @@ public class SynchronizationService : ISynchronizationService
     public SynchronizationService(ISessionService sessionService, ISessionMemberService sessionMemberService,
         ISynchronizationApiClient synchronizationApiClient,
         ISynchronizationLooperFactory synchronizationLooperFactory, ITimeTrackingCache timeTrackingCache,
-        ILogger<SynchronizationService> logger)
+        ILogger<SynchronizationService> logger, ILocalSourceAuthorizationService authorization)
     {
+        _authorization = authorization;
         _sessionService = sessionService;
         _sessionMemberService = sessionMemberService;
         _synchronizationApiClient = synchronizationApiClient;
@@ -130,6 +134,7 @@ public class SynchronizationService : ISynchronizationService
 
     public Task OnSynchronizationDataTransmitted(SharedSynchronizationStartData sharedSynchronizationStartData)
     {
+        _authorization.ValidatePlan(sharedSynchronizationStartData.SharedActionsGroups);
         SynchronizationProcessData.TotalVolumeToProcess = sharedSynchronizationStartData.TotalVolumeToProcess;
         SynchronizationProcessData.TotalActionsToProcess = sharedSynchronizationStartData.TotalAtomicActionsToProcess;
 

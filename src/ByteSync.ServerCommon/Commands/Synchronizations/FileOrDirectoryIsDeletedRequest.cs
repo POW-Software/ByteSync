@@ -1,8 +1,9 @@
+using ByteSync.ServerCommon.Security;
 using ByteSync.ServerCommon.Business.Auth;
 
 namespace ByteSync.ServerCommon.Commands.Synchronizations;
 
-public class FileOrDirectoryIsDeletedRequest : IActionCompletedRequest
+public class FileOrDirectoryIsDeletedRequest : IActionCompletedRequest, ISessionRequest
 {
     public FileOrDirectoryIsDeletedRequest(string sessionId, Client client, List<string> actionsGroupIds, string? nodeId)
     {

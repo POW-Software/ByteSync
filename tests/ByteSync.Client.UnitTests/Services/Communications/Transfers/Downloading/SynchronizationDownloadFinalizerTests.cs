@@ -59,6 +59,7 @@ public class SynchronizationDownloadFinalizerTests : AbstractTester
         
         var downloadTarget = new DownloadTarget(shared, null, ["temp.delta"])
         {
+            ValidateAccess = () => { },
             FinalDestinationsPerActionsGroupId = new Dictionary<string, HashSet<string>>
             {
                 ["ag1"] = [GetTempFilePath(), GetTempFilePath()]
@@ -95,6 +96,7 @@ public class SynchronizationDownloadFinalizerTests : AbstractTester
         
         var downloadTarget = new DownloadTarget(shared, null, [])
         {
+            ValidateAccess = () => { },
             FinalDestinationsPerActionsGroupId = new Dictionary<string, HashSet<string>>
             {
                 ["ag1"] = [GetTempFilePath(), GetTempFilePath(), GetTempFilePath()]
@@ -139,6 +141,7 @@ public class SynchronizationDownloadFinalizerTests : AbstractTester
         
         var downloadTarget = new DownloadTarget(shared, null, [zipPath])
         {
+            ValidateAccess = () => { },
             FinalDestinationsPerActionsGroupId = finalMap,
             IsMultiFileZip = true
         };
@@ -210,6 +213,7 @@ public class SynchronizationDownloadFinalizerTests : AbstractTester
         
         var downloadTarget = new DownloadTarget(shared, null, [zipPath])
         {
+            ValidateAccess = () => { },
             FinalDestinationsPerActionsGroupId = finalMap,
             IsMultiFileZip = true
         };
@@ -261,6 +265,7 @@ public class SynchronizationDownloadFinalizerTests : AbstractTester
         
         var downloadTarget = new DownloadTarget(shared, null, [zipPath])
         {
+            ValidateAccess = () => { },
             FinalDestinationsPerActionsGroupId = finalMap,
             IsMultiFileZip = true
         };

@@ -1,4 +1,5 @@
-﻿using System.IO;
+using ByteSync.Interfaces.Controls.Inventories;
+using System.IO;
 using System.Threading;
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Communications.Downloading;
@@ -16,6 +17,8 @@ namespace ByteSync.Services.Synchronizations;
 
 public class SynchronizationActionHandler : ISynchronizationActionHandler
 {
+    private readonly ILocalSourceAuthorizationService _authorization;
+
     private readonly ISessionService _sessionService;
     private readonly IConnectionService _connectionService;
     private readonly IDeltaManager _deltaManager;
@@ -31,8 +34,9 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         ISynchronizationActionRemoteUploader synchronizationActionRemoteUploader,
         ISynchronizationService synchronizationService, ISynchronizationApiClient synchronizationApiClient,
         IFileDatesSetter fileDatesSetter,
-        ILogger<SynchronizationActionHandler> logger)
+        ILogger<SynchronizationActionHandler> logger, ILocalSourceAuthorizationService authorization)
     {
+        _authorization = authorization;
         _sessionService = sessionService;
         _connectionService = connectionService;
         _deltaManager = deltaManager;
@@ -51,6 +55,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
+            _authorization.ValidatePlan(new[] { sharedActionsGroup });
             
             if (sharedActionsGroup.IsCopyContentOnly || sharedActionsGroup.IsFinallyCopyContentAndDate)
             {
@@ -137,6 +142,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         foreach (var localTarget in localTargets)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            _authorization.ValidatePlan(new[] { sharedActionsGroup });
             
             var destinationFullName = sharedActionsGroup.GetFullName(localTarget);
             
@@ -149,7 +155,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                     _logger.LogInformation("{Type:l}: creating directory {directory}",
                         $"Synchronization.{sharedActionsGroup.Operator}", destinationFileInfo.Directory);
                     
-                    destinationFileInfo.Directory.Create();
+                    LocalPathSafety.CreateDirectory(destinationFileInfo.Directory.FullName);
                 }
                 
                 _logger.LogInformation("{Type:l}: copying from {source} to {destination}",
@@ -157,7 +163,16 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 
                 // For full copy, the transferred volume equals the file size
                 transferredBytes = new FileInfo(sourceFullName).Length;
-                File.Copy(sourceFullName, destinationFullName, true);
+                var temporary = destinationFullName + "." + Guid.NewGuid().ToString("N") + ".bstemp";
+                try
+                {
+                    using (var input = LocalPathSafety.OpenRead(sourceFullName))
+                    using (var output = LocalPathSafety.OpenWrite(temporary, true)) input.CopyTo(output);
+                    _authorization.ValidateDestination(sharedActionsGroup, destinationFullName);
+                    LocalPathSafety.AssertNoLinks(destinationFullName);
+                    LocalPathSafety.Move(temporary, destinationFullName, true);
+                }
+                finally { if (File.Exists(temporary)) File.Delete(temporary); }
                 
                 await ApplyDatesFromLocalSource(sharedActionsGroup, destinationFullName);
             }
@@ -255,8 +270,10 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         foreach (var localTarget in localTargets)
         {
             var destinationPath = sharedActionsGroup.GetFullName(localTarget);
+            using var access = LocalPathSafety.Acquire(destinationPath);
             
             cancellationToken.ThrowIfCancellationRequested();
+            _authorization.ValidatePlan(new[] { sharedActionsGroup });
             
             if (File.Exists(destinationPath))
             {
@@ -282,8 +299,10 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         foreach (var localTarget in localTargets)
         {
             var destinationPath = sharedActionsGroup.GetFullName(localTarget);
+            using var access = LocalPathSafety.Acquire(destinationPath);
             
             cancellationToken.ThrowIfCancellationRequested();
+            _authorization.ValidatePlan(new[] { sharedActionsGroup });
             
             if (sharedActionsGroup.IsFile && File.Exists(destinationPath))
             {
@@ -291,7 +310,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 
                 _logger.LogInformation("{Type:l}: deleting {fileInfo}",
                     $"Synchronization.{sharedActionsGroup.Operator}", fileInfo.FullName);
-                fileInfo.Delete();
+                LocalPathSafety.Delete(fileInfo.FullName);
             }
             else if (sharedActionsGroup.IsDirectory && Directory.Exists(destinationPath))
             {
@@ -300,8 +319,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                 _logger.LogInformation("{Type:l}: deleting {fileInfo}",
                     $"Synchronization.{sharedActionsGroup.Operator}", directoryInfo.FullName);
                 
-                var subFilesCount = directoryInfo.GetFiles("*", SearchOption.AllDirectories).Length;
-                directoryInfo.Delete(subFilesCount == 0);
+                LocalPathSafety.Delete(directoryInfo.FullName, true);
             }
             else
             {
@@ -321,7 +339,9 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
         foreach (var localTarget in localTargets)
         {
             var destinationPath = sharedActionsGroup.GetFullName(localTarget);
+            using var access = LocalPathSafety.Acquire(destinationPath);
             cancellationToken.ThrowIfCancellationRequested();
+            _authorization.ValidatePlan(new[] { sharedActionsGroup });
             
             if (sharedActionsGroup.PathIdentity.FileSystemType == FileSystemTypes.Directory)
             {
@@ -332,7 +352,7 @@ public class SynchronizationActionHandler : ISynchronizationActionHandler
                     _logger.LogInformation("{Type:l}: creating {directoryInfo}",
                         $"Synchronization.{sharedActionsGroup.Operator}", directoryInfo.FullName);
                     
-                    directoryInfo.Create();
+                    LocalPathSafety.CreateDirectory(directoryInfo.FullName);
                 }
                 else
                 {

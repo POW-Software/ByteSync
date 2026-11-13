@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using ByteSync.Business.Arguments;
 using ByteSync.Business.Misc;
@@ -229,6 +229,8 @@ public class EnvironmentService : IEnvironmentService
     
     public void SetClientId(string clientId)
     {
+        if (!ByteSync.Common.Business.Auth.AuthenticationProtocol.IsInstanceOf($"{clientId}_{Guid.Empty:D}", clientId))
+            throw new ArgumentException("A full RSA key fingerprint is required", nameof(clientId));
         ClientId = clientId;
         ClientInstanceId = $"{ClientId}_{Guid.NewGuid():D}";
     }

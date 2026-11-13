@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.IO.Compression;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Business.SharedFiles;
@@ -28,6 +28,7 @@ public class MultiUploadZip : IDisposable
         ActionsGroupIdsConcatenationLength = 0;
     }
 
+    public List<Action> AccessValidators { get; } = new();
     public string Key { get; }
         
     public SharedFileDefinition SharedFileDefinition { get; }
@@ -57,7 +58,8 @@ public class MultiUploadZip : IDisposable
     public void AddEntry(FileInfo fileInfo, string actionsGroupId)
     {
         // https://stackoverflow.com/questions/22339260/how-do-i-add-files-to-an-existing-zip-archive
-        ZipArchive.CreateEntryFromFile(fileInfo.FullName, actionsGroupId, CompressionLevel.Fastest);
+        using (var input = ByteSync.Services.Synchronizations.LocalPathSafety.OpenRead(fileInfo.FullName))
+        using (var output = ZipArchive.CreateEntry(actionsGroupId, CompressionLevel.Fastest).Open()) input.CopyTo(output);
 
         ActionGroupsIds.Add(actionsGroupId);
         FilesFullNames.Add(fileInfo.FullName);

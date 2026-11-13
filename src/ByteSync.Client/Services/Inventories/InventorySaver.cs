@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.IO.Compression;
 using ByteSync.Common.Controls.Json;
 using ByteSync.Interfaces.Controls.Inventories;
@@ -19,12 +19,12 @@ public class InventorySaver : IInventorySaver
         if (File.Exists(inventoryFullName))
         {
             Log.Information("Deleting {FileFullName}", inventoryFullName);
-            File.Delete(inventoryFullName);
+            ByteSync.Services.Synchronizations.LocalPathSafety.Delete(inventoryFullName);
             
             // throw new Exception("file already exists");
         }
         
-        ZipArchive = ZipFile.Open(inventoryFullName, ZipArchiveMode.Create);
+        ZipArchive = new ZipArchive(ByteSync.Services.Synchronizations.LocalPathSafety.OpenWrite(inventoryFullName, true), ZipArchiveMode.Create);
         
         CountByDirectory.Clear();
     }

@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Synchronizations;
 
@@ -14,6 +14,14 @@ public class DownloadTarget
 
         SyncRoot = new object();
         MemoryStreams = new Dictionary<int, MemoryStream>();
+    }
+
+    public Action? ValidateAccess { get; set; }
+
+    public void CheckAccess()
+    {
+        if (SharedFileDefinition.IsSynchronization && ValidateAccess == null) throw new UnauthorizedAccessException("Missing download authorization");
+        ValidateAccess?.Invoke();
     }
 
     public SharedFileDefinition SharedFileDefinition { get; set; }

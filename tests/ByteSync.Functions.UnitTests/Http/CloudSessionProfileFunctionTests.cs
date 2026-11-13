@@ -59,7 +59,7 @@ public class CloudSessionProfileFunctionTests
         var parameters = new GetCloudSessionProfileDataParameters { SessionId = "P1", CloudSessionProfileId = "PC1" };
         await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
-        var response = await function.GetCloudSessionProfileData(request, context, "P1");
+        var response = await function.GetCloudSessionProfileData(request, context, "PC1");
         
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         captured.Should().NotBeNull();
@@ -81,7 +81,7 @@ public class CloudSessionProfileFunctionTests
         var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
-        var parameters = new GetProfileDetailsPasswordParameters { ProfileClientId = "PC1" };
+        var parameters = new GetProfileDetailsPasswordParameters { CloudSessionProfileId = "P1", ProfileClientId = "PC1" };
         await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.GetProfileDetailsPassword(request, context, "P1");
@@ -106,7 +106,7 @@ public class CloudSessionProfileFunctionTests
         var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
-        var parameters = new DeleteCloudSessionProfileParameters { ProfileClientId = "PC1" };
+        var parameters = new DeleteCloudSessionProfileParameters { CloudSessionProfileId = "P1", ProfileClientId = "PC1" };
         await HttpFunctionTestHelper.WriteBodyAsync(request, parameters);
         
         var response = await function.DeleteCloudSessionProfile(request, context, "P1");

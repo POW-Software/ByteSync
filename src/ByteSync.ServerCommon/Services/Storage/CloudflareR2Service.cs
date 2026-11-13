@@ -34,7 +34,7 @@ public class CloudflareR2Service : ICloudflareR2Service
             BucketName = _cloudflareR2Settings.BucketName,
             Key = key,
             Verb = HttpVerb.PUT,
-            Expires = DateTime.UtcNow.AddMinutes(60)
+            Expires = DateTime.UtcNow.AddMinutes(5)
         };
 
         var preSignedUrl = await s3Client.GetPreSignedURLAsync(request);
@@ -51,7 +51,7 @@ public class CloudflareR2Service : ICloudflareR2Service
             BucketName = _cloudflareR2Settings.BucketName,
             Key = key,
             Verb = HttpVerb.GET,
-            Expires = DateTime.UtcNow.AddMinutes(20)
+            Expires = DateTime.UtcNow.AddMinutes(5)
         };
 
         return await s3Client.GetPreSignedURLAsync(request);
@@ -77,8 +77,7 @@ public class CloudflareR2Service : ICloudflareR2Service
 
     private string GetServerFileName(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        var fileName = sharedFileDefinition.GetFileName(partNumber);
-        var serverFileName = sharedFileDefinition.SessionId + "_" + sharedFileDefinition.ClientInstanceId + "_" + fileName;
+        var serverFileName = $"{Guid.ParseExact(sharedFileDefinition.StorageObjectId!, "N"):N}/part-{partNumber}";
         
         return serverFileName;
     }

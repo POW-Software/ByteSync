@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
+using ByteSync.Common.Business.Auth;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
@@ -28,7 +29,7 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
     {
         var loginFunctionEntryPoint = GetEntryPoint<AuthFunction>(nameof(AuthFunction.Login));
         var getAnnouncementsFunctionEntryPoint = GetEntryPoint<AnnouncementFunction>(nameof(AnnouncementFunction.GetAnnouncements));
-        _allowedAnonymousFunctionEntryPoints = [loginFunctionEntryPoint, getAnnouncementsFunctionEntryPoint];
+        _allowedAnonymousFunctionEntryPoints = [loginFunctionEntryPoint, getAnnouncementsFunctionEntryPoint, GetEntryPoint<AuthFunction>(nameof(AuthFunction.Challenge)), GetEntryPoint<AuthFunction>(nameof(AuthFunction.RefreshTokens)), GetEntryPoint<ByteSync.Functions.SignalR.SignalREntryFunction>(nameof(ByteSync.Functions.SignalR.SignalREntryFunction.OnConnected)), GetEntryPoint<ByteSync.Functions.SignalR.SignalREntryFunction>(nameof(ByteSync.Functions.SignalR.SignalREntryFunction.OnDisconnected))];
         
         _secret = appSettings.Value.Secret;
         _clientsRepository = clientsRepository;
@@ -148,7 +149,9 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateIssuer = false,
+            ValidateIssuer = true,
+            ValidateLifetime = true,
+            ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
             ValidIssuer = AuthConstants.ISSUER,
             ValidateAudience = true,
             ValidAudience = AuthConstants.AUDIENCE,
@@ -171,6 +174,8 @@ public class JwtMiddleware : IFunctionsWorkerMiddleware
         {
             throw new SecurityTokenExpiredException("Client is null");
         }
+
+        ByteSync.ServerCommon.Security.ClientAuthentication.ValidateClaims(client, claims);
 
         return client;
     }

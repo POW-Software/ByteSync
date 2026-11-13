@@ -4,6 +4,8 @@ namespace ByteSync.ServerCommon.Entities;
 
 public class CloudSessionProfileEntity
 {
+    public int AuthenticationEpoch { get; set; }
+
     public CloudSessionProfileEntity()
     {
         CreationDateTime = DateTime.UtcNow;

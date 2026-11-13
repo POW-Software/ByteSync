@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using ByteSync.Common.Business.Inventories;
@@ -88,7 +88,7 @@ public class InventoryFunction
         string clientInstanceId,
         string dataNodeId)
     {
-        var request = new GetDataSourcesRequest(sessionId, clientInstanceId, dataNodeId);
+        var request = new GetDataSourcesRequest(sessionId, clientInstanceId, dataNodeId, FunctionHelper.GetClientFromContext(executionContext));
         var result = await _mediator.Send(request);
 
         var response = req.CreateResponse();
@@ -145,7 +145,7 @@ public class InventoryFunction
         string sessionId,
         string clientInstanceId)
     {
-        var request = new GetDataNodesRequest(sessionId, clientInstanceId);
+        var request = new GetDataNodesRequest(sessionId, clientInstanceId, FunctionHelper.GetClientFromContext(executionContext));
         var result = await _mediator.Send(request);
 
         var response = req.CreateResponse();

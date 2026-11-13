@@ -1,4 +1,4 @@
-﻿using ByteSync.ServerCommon.Entities;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using MediatR;
@@ -40,7 +40,8 @@ public class SendDigitalSignaturesCommandHandler : IRequestHandler<SendDigitalSi
         Lobby? lobby = null;
         if (cloudSession != null)
         {
-            if (cloudSession.FindMemberOrPreMember(client.ClientInstanceId) == null)
+            if (cloudSession.AuthenticationEpoch != ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch || cloudSession.IsSessionRemoved || cloudSession.FindMemberOrPreMember(client.ClientInstanceId) == null ||
+                parameters.DigitalSignatureCheckInfos.Any(ds => cloudSession.FindMemberOrPreMember(ds.Recipient) == null))
             {
                 _logger.LogInformation("{Endpoint} is neither a member nor a premember of session {session}", client.ClientInstanceId, parameters.DataId);
                 return;
@@ -51,7 +52,8 @@ public class SendDigitalSignaturesCommandHandler : IRequestHandler<SendDigitalSi
             lobby = await _lobbyRepository.Get(parameters.DataId).ConfigureAwait(false);
             if (lobby != null)
             {
-                if (lobby.GetLobbyMemberByClientInstanceId(client.ClientInstanceId) == null)
+                if (lobby.AuthenticationEpoch != ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch || lobby.GetLobbyMemberByClientInstanceId(client.ClientInstanceId) == null ||
+                    parameters.DigitalSignatureCheckInfos.Any(ds => lobby.GetLobbyMemberByClientInstanceId(ds.Recipient) == null))
                 {
                     _logger.LogInformation("{Endpoint} is neither a member of lobby {lobbyId}", client.ClientInstanceId, parameters.DataId);
                     return;

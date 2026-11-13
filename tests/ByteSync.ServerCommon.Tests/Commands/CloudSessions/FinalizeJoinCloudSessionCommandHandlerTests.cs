@@ -84,9 +84,12 @@ public class FinalizeJoinCloudSessionCommandHandlerTests
             ClientInstanceId = joinerInstanceId,
             ValidatorInstanceId = validatorInstanceId,
             FinalizationPassword = finalizationPassword,
+            JoinExpiresAt = DateTimeOffset.UtcNow.AddMinutes(1),
             CloudSessionData = cloudSession
         };
 
+        cloudSession.SessionMembers.Add(new SessionMemberData { ClientInstanceId = validatorInstanceId,
+            AuthCheckClientInstanceIds = new List<string> { joinerInstanceId } });
         cloudSession.PreSessionMembers.Add(joiner);
 
         bool funcResult = false;

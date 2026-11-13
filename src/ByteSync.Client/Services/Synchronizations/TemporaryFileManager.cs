@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using ByteSync.Interfaces.Controls.Synchronizations;
 
 namespace ByteSync.Services.Synchronizations;
@@ -10,10 +10,10 @@ public class TemporaryFileManager : ITemporaryFileManager
     public TemporaryFileManager(string destinationFullName, ILogger<TemporaryFileManager> logger)
     {
         _logger = logger;
-        
+
         Reset(destinationFullName);
     }
-    
+
     private void Reset(string destinationFullName)
     {
         DestinationFullName = destinationFullName;
@@ -29,13 +29,13 @@ public class TemporaryFileManager : ITemporaryFileManager
     }
 
     public string DestinationFullName { get; set; } = null!;
-    
+
     public string? DestinationTemporaryPath { get; set; }
-    
+
     public string? PreviousFileTemporaryPath { get; set; }
-    
+
     public bool HasValidationStarted { get; set; }
-    
+
     public bool PreviousFileExistsBeforeValidation { get; set; }
 
     public bool WasPreviousFileMovedToTemp { get; set; }
@@ -53,43 +53,34 @@ public class TemporaryFileManager : ITemporaryFileManager
 
     private string GetTemporaryPath()
     {
-        var cpt = 0;
-        var temporaryPath = DestinationFullName + $".bstemp_t{cpt}$";
-        
-        while (File.Exists(temporaryPath))
-        {
-            cpt += 1;
-            temporaryPath = DestinationFullName + $".bstemp_t{cpt}$";
-        }
-
-        return temporaryPath;
+        return DestinationFullName + "." + Guid.NewGuid().ToString("N") + ".bstemp";
     }
 
     public void ValidateTemporaryFile()
     {
         HasValidationStarted = true;
-        
+
         // Rename the existing file to “.bstemp_t$”
         if (File.Exists(DestinationFullName))
         {
             PreviousFileExistsBeforeValidation = true;
-            
+
             PreviousFileTemporaryPath = GetTemporaryPath();
-            File.Move(DestinationFullName, PreviousFileTemporaryPath);
-            
+            LocalPathSafety.Move(DestinationFullName, PreviousFileTemporaryPath);
+
             WasPreviousFileMovedToTemp = true;
         }
 
         // Rename the merged file to its final name
-        File.Move(DestinationTemporaryPath!, DestinationFullName);
-        
+        LocalPathSafety.Move(DestinationTemporaryPath!, DestinationFullName);
+
         WasNewFileMovedFromTemp = true;
 
         if (PreviousFileExistsBeforeValidation)
         {
             // The old file is deleted
-            File.Delete(PreviousFileTemporaryPath!);
-        
+            LocalPathSafety.Delete(PreviousFileTemporaryPath!);
+
             WasPreviousFileDeleted = true;
         }
     }
@@ -98,7 +89,7 @@ public class TemporaryFileManager : ITemporaryFileManager
     {
         try
         {
-            _logger.LogWarning("An exception has occurred during validation operations on file {file}: {type} - {message}. Trying to revert operation", 
+            _logger.LogWarning("An exception has occurred during validation operations on file {file}: {type} - {message}. Trying to revert operation",
                 DestinationFullName, exception.GetType().Name, exception.Message);
             if (!HasValidationStarted)
             {
@@ -106,7 +97,7 @@ public class TemporaryFileManager : ITemporaryFileManager
                 if (File.Exists(DestinationTemporaryPath))
                 {
                     _logger.LogWarning("Deleting {file}", DestinationTemporaryPath);
-                    File.Delete(DestinationTemporaryPath);
+                    LocalPathSafety.Delete(DestinationTemporaryPath);
                 }
                 else
                 {
@@ -125,7 +116,7 @@ public class TemporaryFileManager : ITemporaryFileManager
                     _logger.LogWarning("nothing seems to be undone here");
                 }
             }
-            else 
+            else
             {
                 // We go back from the end to the beginning
                 if (WasPreviousFileDeleted)
@@ -140,7 +131,7 @@ public class TemporaryFileManager : ITemporaryFileManager
                 else if (WasPreviousFileMovedToTemp)
                 {
                     _logger.LogWarning("The previous version of the file may still exist at location {previous}, " +
-                                       "while the new version of the file may be found at location {new}", 
+                                       "while the new version of the file may be found at location {new}",
                         PreviousFileTemporaryPath, DestinationTemporaryPath);
                 }
                 else
@@ -152,7 +143,7 @@ public class TemporaryFileManager : ITemporaryFileManager
                     if (File.Exists(DestinationTemporaryPath))
                     {
                         _logger.LogWarning("Deleting {file}", DestinationTemporaryPath);
-                        File.Delete(DestinationTemporaryPath);
+                        LocalPathSafety.Delete(DestinationTemporaryPath);
                     }
                     else
                     {

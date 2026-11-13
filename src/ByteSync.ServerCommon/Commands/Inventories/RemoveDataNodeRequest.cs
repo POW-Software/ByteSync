@@ -1,10 +1,11 @@
+using ByteSync.ServerCommon.Security;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
-public class RemoveDataNodeRequest : IRequest<bool>
+public class RemoveDataNodeRequest : IRequest<bool>, ISessionRequest
 {
     public RemoveDataNodeRequest(string sessionId, Client client, string clientInstanceId, EncryptedDataNode encryptedDataNode)
     {

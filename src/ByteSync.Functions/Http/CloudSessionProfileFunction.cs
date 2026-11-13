@@ -43,6 +43,7 @@ public class CloudSessionProfileFunction
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<GetCloudSessionProfileDataParameters>(req);
+        if (parameters.CloudSessionProfileId != cloudSessionProfileId) throw new ByteSync.ServerCommon.Exceptions.BadRequestException("Profile route mismatch");
 
         var result = await _cloudSessionProfileService.GetCloudSessionProfileData(parameters, client);
             
@@ -59,6 +60,7 @@ public class CloudSessionProfileFunction
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<GetProfileDetailsPasswordParameters>(req);
+        if (parameters.CloudSessionProfileId != cloudSessionProfileId) throw new ByteSync.ServerCommon.Exceptions.BadRequestException("Profile route mismatch");
 
         var result = await _cloudSessionProfileService.GetProfileDetailsPassword(parameters, client);
             
@@ -75,6 +77,7 @@ public class CloudSessionProfileFunction
     {
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<DeleteCloudSessionProfileParameters>(req);
+        if (parameters.CloudSessionProfileId != cloudSessionProfileId) throw new ByteSync.ServerCommon.Exceptions.BadRequestException("Profile route mismatch");
 
         var result = await _cloudSessionProfileService.DeleteCloudSessionProfile(parameters, client);
             

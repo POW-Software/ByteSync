@@ -1,4 +1,5 @@
-﻿using ByteSync.Business.Actions.Shared;
+using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Business.Actions.Shared;
 using ByteSync.Interfaces.Controls.Actions;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Repositories;
@@ -9,6 +10,8 @@ namespace ByteSync.Services.Synchronizations;
 
 public class SynchronizationStartFactory : ISynchronizationStartFactory
 {
+    private readonly ILocalSourceAuthorizationService _authorization;
+
     private readonly ISharedAtomicActionComputer _sharedAtomicActionComputer;
     private readonly ISynchronizationRulesService _synchronizationRulesService;
     private readonly ISharedActionsGroupComputer _sharedActionsGroupComputer;
@@ -20,8 +23,9 @@ public class SynchronizationStartFactory : ISynchronizationStartFactory
     public SynchronizationStartFactory(ISharedAtomicActionComputer sharedAtomicActionComputer,
         ISynchronizationRulesService synchronizationRulesService, ISharedActionsGroupComputer sharedActionsGroupComputer,
         ISessionService sessionService, IConnectionService connectionService, ISharedActionsGroupOrganizer sharedActionsGroupOrganizer,
-        ISharedActionsGroupRepository sharedActionsGroupRepository)
+        ISharedActionsGroupRepository sharedActionsGroupRepository, ILocalSourceAuthorizationService authorization)
     {
+        _authorization = authorization;
         _sharedAtomicActionComputer = sharedAtomicActionComputer;
         _synchronizationRulesService = synchronizationRulesService;
         _sharedActionsGroupComputer = sharedActionsGroupComputer;
@@ -39,6 +43,7 @@ public class SynchronizationStartFactory : ISynchronizationStartFactory
 
         var sharedActionsGroups = _sharedActionsGroupRepository.Elements.ToList();
 
+        _authorization.ValidatePlan(sharedActionsGroups);
         await _sharedActionsGroupOrganizer.OrganizeSharedActionGroups();
         
         var looseSynchronizationRules = _synchronizationRulesService.GetLooseSynchronizationRules();

@@ -1,4 +1,4 @@
-﻿using System.Reactive.Subjects;
+using System.Reactive.Subjects;
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Misc;
 using ByteSync.Business.Sessions;
@@ -55,7 +55,7 @@ public class SynchronizationServiceTests
         
         var svc = new SynchronizationService(_sessionServiceMock.Object, _sessionMemberServiceMock.Object,
             _synchronizationApiClientMock.Object, _synchronizationLooperFactoryMock.Object,
-            _timeTrackingCacheMock.Object, _loggerMock.Object);
+            _timeTrackingCacheMock.Object, _loggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
         
         var startedAt = DateTimeOffset.UtcNow.AddMinutes(-1);
         var sync = new Synchronization { SessionId = "sid-1", Started = startedAt };
@@ -85,7 +85,7 @@ public class SynchronizationServiceTests
         
         var svc = new SynchronizationService(_sessionServiceMock.Object, _sessionMemberServiceMock.Object,
             _synchronizationApiClientMock.Object, _synchronizationLooperFactoryMock.Object,
-            _timeTrackingCacheMock.Object, _loggerMock.Object);
+            _timeTrackingCacheMock.Object, _loggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
         
         var endedAt = DateTimeOffset.UtcNow;
         var sync = new Synchronization { SessionId = "sid-end", Ended = endedAt, EndStatus = SynchronizationEndStatuses.Regular };
@@ -113,7 +113,7 @@ public class SynchronizationServiceTests
         
         var svc = new SynchronizationService(_sessionServiceMock.Object, _sessionMemberServiceMock.Object,
             _synchronizationApiClientMock.Object, _synchronizationLooperFactoryMock.Object,
-            _timeTrackingCacheMock.Object, _loggerMock.Object);
+            _timeTrackingCacheMock.Object, _loggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
         
         var when = DateTimeOffset.UtcNow;
         var by = new List<string> { "c1", "c2" };
@@ -138,7 +138,7 @@ public class SynchronizationServiceTests
         
         var svc = new SynchronizationService(_sessionServiceMock.Object, _sessionMemberServiceMock.Object,
             _synchronizationApiClientMock.Object, _synchronizationLooperFactoryMock.Object,
-            _timeTrackingCacheMock.Object, _loggerMock.Object);
+            _timeTrackingCacheMock.Object, _loggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
         
         var data = new SharedSynchronizationStartData { TotalVolumeToProcess = 123, TotalAtomicActionsToProcess = 45 };
         
@@ -159,7 +159,7 @@ public class SynchronizationServiceTests
         
         var svc = new SynchronizationService(_sessionServiceMock.Object, _sessionMemberServiceMock.Object,
             _synchronizationApiClientMock.Object, _synchronizationLooperFactoryMock.Object,
-            _timeTrackingCacheMock.Object, _loggerMock.Object);
+            _timeTrackingCacheMock.Object, _loggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
         
         svc.SynchronizationProcessData.TotalVolumeToProcess = 999;
         
@@ -212,7 +212,7 @@ public class SynchronizationServiceTests
         
         var synchronizationService = new SynchronizationService(_sessionServiceMock.Object, _sessionMemberServiceMock.Object,
             _synchronizationApiClientMock.Object,
-            _synchronizationLooperFactoryMock.Object, _timeTrackingCacheMock.Object, _loggerMock.Object);
+            _synchronizationLooperFactoryMock.Object, _timeTrackingCacheMock.Object, _loggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
         
         // Act
         await synchronizationService.AbortSynchronization();
@@ -251,7 +251,7 @@ public class SynchronizationServiceTests
             _synchronizationLooperFactoryMock.Object,
             _timeTrackingCacheMock.Object,
             _loggerMock.Object
-        );
+        , Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
         
         var synchronization = new Synchronization { SessionId = "test-session" };
         
@@ -306,7 +306,7 @@ public class SynchronizationServiceTests
             _synchronizationLooperFactoryMock.Object,
             _timeTrackingCacheMock.Object,
             _loggerMock.Object
-        );
+        , Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
         
         var synchronization = new Synchronization { SessionId = "test-session" };
         var currentThreadId = Environment.CurrentManagedThreadId;

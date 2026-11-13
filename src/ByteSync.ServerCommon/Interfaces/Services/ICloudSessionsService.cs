@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.Sessions.Cloud;
+using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
@@ -10,12 +10,14 @@ public interface ICloudSessionsService
     Task<CloudSessionResult> BuildCloudSessionResult(CloudSessionData cloudSessionData, SessionMemberData sessionMemberData);
 
     Task<List<string>> GetMembersInstanceIds(string sessionId);
+
+    Task PreJoinCloudSession(Client client, ByteSync.Common.Business.EndPoints.PublicKeyInfo publicKeyInfo, string? profileClientId, string sessionId, string validatorClientInstanceId);
     
     Task<JoinSessionResult> AskCloudSessionPasswordExchangeKey(Client client, AskCloudSessionPasswordExchangeKeyParameters parameters);
 
     Task<JoinSessionResult> AskJoinCloudSession(Client client, AskJoinCloudSessionParameters parameters);
     
-    Task ValidateJoinCloudSession(ValidateJoinCloudSessionParameters parameters);
+    Task ValidateJoinCloudSession(ValidateJoinCloudSessionParameters parameters, Client? caller = null);
 
     Task<List<SessionMemberInfoDTO>> GetSessionMembersInfosAsync(string sessionId);
     

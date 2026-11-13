@@ -73,7 +73,7 @@ public class ConnectionService : IConnectionService, IDisposable
         var retryDelaySleepDurationProvider = RetryDelaySleepDurationProvider;
 
         var retryPolicy = Policy
-            .Handle<Exception>(ex => !(ex is BuildConnectionException bce && bce.InitialConnectionStatus == InitialConnectionStatus.VersionNotAllowed))
+            .Handle<Exception>(ex => !(ex is BuildConnectionException bce && bce.InitialConnectionStatus is InitialConnectionStatus.VersionNotAllowed or InitialConnectionStatus.InvalidProof))
             .WaitAndRetryForeverAsync(
                 retryAttempt => retryDelaySleepDurationProvider?.Invoke(retryAttempt) ?? TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                 (exception, _, _) =>
@@ -102,7 +102,7 @@ public class ConnectionService : IConnectionService, IDisposable
             }
             else
             {
-                if (result.AuthenticateResponseStatus == InitialConnectionStatus.VersionNotAllowed)
+                if (result.AuthenticateResponseStatus is InitialConnectionStatus.VersionNotAllowed or InitialConnectionStatus.InvalidProof)
                 {
                     ConnectionStatusSubject.OnNext(ConnectionStatuses.NotConnected);
                 }

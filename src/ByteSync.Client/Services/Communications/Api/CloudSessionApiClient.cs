@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Common.Business.Sessions;
@@ -60,6 +60,12 @@ public class CloudSessionApiClient : ICloudSessionApiClient
                 
             throw;
         }
+    }
+
+    public async Task<List<string>> BeginJoin(AskCloudSessionPasswordExchangeKeyParameters parameters, CancellationToken cancellationToken = default)
+    {
+        return await _apiInvoker.PostAsync<List<string>>($"session/{parameters.SessionId}/beginJoin", parameters, cancellationToken)
+            ?? throw new UnauthorizedAccessException("Join attempt could not be created");
     }
 
     public async Task<JoinSessionResult> AskPasswordExchangeKey(AskCloudSessionPasswordExchangeKeyParameters parameters, 

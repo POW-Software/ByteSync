@@ -1,10 +1,11 @@
+using ByteSync.ServerCommon.Security;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.FileTransfers;
 
-public class GetDownloadFileUrlRequest : IRequest<string>
+public class GetDownloadFileUrlRequest : IRequest<string>, IFileTransferRequest
 {
     public GetDownloadFileUrlRequest(string sessionId, Client client, TransferParameters transferParameters)
     {

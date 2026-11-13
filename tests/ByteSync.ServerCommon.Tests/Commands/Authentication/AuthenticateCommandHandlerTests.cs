@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.Auth;
+using ByteSync.Common.Business.Auth;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Common.Business.Serials;
@@ -31,7 +31,7 @@ public class AuthenticateCommandHandlerTests
             _mockEndpointFactory,
             _mockClientsRepository,
             _mockClientSoftwareVersionService
-        );
+        , FakeItEasy.A.Fake<ByteSync.ServerCommon.Interfaces.Services.IAuthenticationChallengeService>());
     }
 
     [Test]
@@ -74,6 +74,13 @@ public class AuthenticateCommandHandlerTests
         var expectedTokens = expectedJwtTokens.BuildAuthenticationTokens();
         var expectedBindSerialResponse = new BindSerialResponse { Status = BindSerialResponseStatus.Ignored };
         var expectedEndpoint = new ByteSync.Common.Business.EndPoints.ByteSyncEndpoint();
+
+        loginData.Identity = "identity";
+        client.Identity = "identity";
+        client.AuthenticationEpoch = AuthenticationProtocol.Epoch;
+        var challenges = A.Fake<ByteSync.ServerCommon.Interfaces.Services.IAuthenticationChallengeService>();
+        A.CallTo(() => challenges.VerifyAndConsume(loginData)).Returns(true);
+        _authenticateCommandHandler = new AuthenticateCommandHandler(_mockTokensFactory, _mockEndpointFactory, _mockClientsRepository, _mockClientSoftwareVersionService, challenges);
 
         // Mock version check
         A.CallTo(() => _mockClientSoftwareVersionService.IsClientVersionAllowed(loginData)).Returns(true);

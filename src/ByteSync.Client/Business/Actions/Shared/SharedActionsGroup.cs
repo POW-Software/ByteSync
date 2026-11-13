@@ -76,17 +76,8 @@ public class SharedActionsGroup : AbstractActionsGroup
     
     public string GetFullName(SharedDataPart sharedDataPart)
     {
-        string sourceFileName;
-        if (sharedDataPart.InventoryPartType == FileSystemTypes.Directory)
-        {
-            sourceFileName = IOUtils.Combine(sharedDataPart.RootPath, sharedDataPart.RelativePath!);
-        }
-        else
-        {
-            sourceFileName = sharedDataPart.RootPath;
-        }
-        
-        return sourceFileName;
+        return sharedDataPart.LocalPathResolver?.Invoke()
+            ?? throw new UnauthorizedAccessException("Action has no local source authorization");
     }
     
     private bool Equals(SharedActionsGroup other)

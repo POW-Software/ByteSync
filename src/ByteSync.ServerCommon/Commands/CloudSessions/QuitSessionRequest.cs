@@ -1,9 +1,10 @@
-﻿using ByteSync.ServerCommon.Business.Auth;
+using ByteSync.ServerCommon.Security;
+using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.CloudSessions;
 
-public class QuitSessionRequest : IRequest
+public class QuitSessionRequest : IRequest, ISessionRequest
 {
     public QuitSessionRequest(string sessionId, Client client)
     {

@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Threading;
 using ByteSync.Business;
 using ByteSync.Business.Arguments;
@@ -19,15 +19,17 @@ public class InventoryFileAnalyzer : IInventoryFileAnalyzer
     
     private readonly IInventorySaver _saver;
     private readonly ILogger<InventoryFileAnalyzer> _logger;
+    private readonly ILocalSourceAuthorizationService _authorization;
     
     public InventoryFileAnalyzer(FingerprintModes fingerprintMode, InventoryProcessData processData, IInventorySaver saver,
-        ILogger<InventoryFileAnalyzer> logger)
+        ILogger<InventoryFileAnalyzer> logger, ILocalSourceAuthorizationService authorization)
     {
         _fingerprintMode = fingerprintMode;
         _processData = processData;
         
         _saver = saver;
         _logger = logger;
+        _authorization = authorization;
         
         ManualResetSyncEvents = new ManualResetSyncEvents();
         SyncRoot = new object();
@@ -148,9 +150,10 @@ public class InventoryFileAnalyzer : IInventoryFileAnalyzer
     
     private void ComputeFingerPrint(Tuple<FileDescription, FileInfo> tuple)
     {
+        _authorization.ValidatePath(tuple.Item2.FullName);
         if (tuple.Item1.FingerprintMode == FingerprintModes.Sha256)
         {
-            using var basisStream = new FileStream(tuple.Item2.FullName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var basisStream = ByteSync.Services.Synchronizations.LocalPathSafety.OpenRead(tuple.Item2.FullName);
             var sha256 = CryptographyUtils.ComputeSHA256(basisStream);
             
             tuple.Item1.Sha256 = sha256;
@@ -159,7 +162,7 @@ public class InventoryFileAnalyzer : IInventoryFileAnalyzer
         {
             _logger.LogInformation("Analyzing file {FullName}", tuple.Item2.FullName);
             
-            using var basisStream = new FileStream(tuple.Item2.FullName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var basisStream = ByteSync.Services.Synchronizations.LocalPathSafety.OpenRead(tuple.Item2.FullName);
             using var memoryStream = new MemoryStream();
             var signatureBuilder = new SignatureBuilder();
             signatureBuilder.Build(basisStream, new SignatureWriter(memoryStream));

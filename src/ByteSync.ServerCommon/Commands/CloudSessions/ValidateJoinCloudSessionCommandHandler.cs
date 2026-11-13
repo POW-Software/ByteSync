@@ -14,7 +14,7 @@ public class ValidateJoinCloudSessionCommandHandler : IRequestHandler<ValidateJo
     
     public async Task<Unit> Handle(ValidateJoinCloudSessionRequest request, CancellationToken cancellationToken)
     {
-        await _cloudSessionsService.ValidateJoinCloudSession(request.Parameters);
+        await _cloudSessionsService.ValidateJoinCloudSession(request.Parameters, request.Client);
         return Unit.Value;
     }
 } 

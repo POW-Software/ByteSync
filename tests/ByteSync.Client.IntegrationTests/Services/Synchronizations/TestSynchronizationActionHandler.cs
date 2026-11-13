@@ -1,5 +1,9 @@
-﻿using Autofac;
+using Autofac;
 using ByteSync.Business.Actions.Shared;
+using ByteSync.Business.Configurations;
+using ByteSync.Business.DataSources;
+using ByteSync.Interfaces.Controls.Inventories;
+using ByteSync.Services.Inventories;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.Synchronizations;
 using ByteSync.Client.IntegrationTests.TestHelpers;
@@ -30,11 +34,14 @@ namespace ByteSync.Client.IntegrationTests.Services.Synchronizations;
 public class TestSynchronizationActionHandler : IntegrationTest
 {
     private ByteSyncEndpoint _currentEndPoint;
+    private LocalSourceAuthorizationService _authorization;
+    private ApplicationSettings _settings;
     private SynchronizationActionHandler _synchronizationActionHandler;
     
     [SetUp]
     public void SetUp()
     {
+        RegisterType<LocalSourceAuthorizationService, ILocalSourceAuthorizationService>();
         RegisterType<DeltaManager, IDeltaManager>();
         RegisterType<CloudSessionLocalDataManager, ICloudSessionLocalDataManager>();
         RegisterType<TemporaryFileManagerFactory, ITemporaryFileManagerFactory>();
@@ -60,9 +67,31 @@ public class TestSynchronizationActionHandler : IntegrationTest
         mockLocalApplicationDataManager.Setup(m => m.ApplicationDataPath).Returns(IOUtils.Combine(testDirectory.FullName,
             "ApplicationDataPath"));
         
+        _settings = new ApplicationSettings { InstallationId = "integration-test" };
+        _settings.SetEncryptionPassword("local-test-password");
+        _settings.InitializeRsa();
+        var settings = Container.Resolve<Mock<IApplicationSettingsRepository>>();
+        settings.Setup(s => s.GetCurrentApplicationSettings()).Returns(_settings);
+        settings.Setup(s => s.UpdateCurrentApplicationSettings(It.IsAny<Action<ApplicationSettings>>(), It.IsAny<bool>()))
+            .Returns((Action<ApplicationSettings> update, bool save) => { update(_settings); return _settings; });
+        _authorization = Container.Resolve<LocalSourceAuthorizationService>();
         _synchronizationActionHandler = Container.Resolve<SynchronizationActionHandler>();
     }
     
+    [TearDown]
+    public void DisposeSecuritySettings() => _settings?.PrivateRsa.Dispose();
+
+    private Task RunWithLocalPermissions(SharedActionsGroup group, CancellationToken cancellationToken = default)
+    {
+        foreach (var part in group.Targets.Concat(group.Source == null ? Array.Empty<SharedDataPart>() : new[] { group.Source })
+                     .Where(p => p.ClientInstanceId == _currentEndPoint.ClientInstanceId))
+        {
+            _authorization.Grant(new DataSource { Id = part.SourceId!, DataNodeId = part.NodeId!,
+                ClientInstanceId = part.ClientInstanceId, Path = part.RootPath, Type = part.InventoryPartType });
+        }
+        return _synchronizationActionHandler.RunSynchronizationAction(group, cancellationToken);
+    }
+
     [Test]
     public async Task Test_FailUnknownOperator()
     {
@@ -71,8 +100,8 @@ public class TestSynchronizationActionHandler : IntegrationTest
             ActionsGroupId = "ACI_Test",
         };
         
-        await FluentActions.Awaiting(() => _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup))
-            .Should().ThrowAsync<ApplicationException>();
+        await FluentActions.Awaiting(() => RunWithLocalPermissions(sharedActionsGroup))
+            .Should().ThrowAsync<UnauthorizedAccessException>();
     }
     
     [Test]
@@ -122,7 +151,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
             PathIdentity = new PathIdentity(FileSystemTypes.File, "/fileToCopy1.txt", "fileToCopy1.txt", "/fileToCopy1.txt")
         };
         
-        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        await RunWithLocalPermissions(sharedActionsGroup);
         
         fileA.Refresh();
         fileB.Refresh();
@@ -210,7 +239,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
             PathIdentity = new PathIdentity(FileSystemTypes.File, "/fileToCopy1.txt", "fileToCopy1.txt", "/fileToCopy1.txt")
         };
         
-        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        await RunWithLocalPermissions(sharedActionsGroup);
         
         fileA.Refresh();
         fileB.Refresh();
@@ -258,7 +287,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
             LastWriteTimeUtc = originalDateA
         };
         
-        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        await RunWithLocalPermissions(sharedActionsGroup);
         
         fileA.Refresh();
         fileB.Refresh();
@@ -310,7 +339,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
             LastWriteTimeUtc = originalDateA
         };
         
-        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        await RunWithLocalPermissions(sharedActionsGroup);
         
         fileA.Refresh();
         fileB.Refresh();
@@ -347,7 +376,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
             PathIdentity = new PathIdentity(FileSystemTypes.Directory, "/NewDirectory", "NewDirectory", "/NewDirectory")
         };
         
-        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        await RunWithLocalPermissions(sharedActionsGroup);
         
         targetDirectory.Refresh();
         targetDirectory.Exists.Should().BeTrue();
@@ -376,7 +405,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         };
         
         // Should not throw exception even if directory already exists
-        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        await RunWithLocalPermissions(sharedActionsGroup);
         
         existingDirectory.Refresh();
         existingDirectory.Exists.Should().BeTrue();
@@ -404,7 +433,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
             PathIdentity = new PathIdentity(FileSystemTypes.File, "/fileToDelete.txt", "fileToDelete.txt", "/fileToDelete.txt")
         };
         
-        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        await RunWithLocalPermissions(sharedActionsGroup);
         
         fileToDelete.Refresh();
         fileToDelete.Exists.Should().BeFalse();
@@ -432,7 +461,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
             PathIdentity = new PathIdentity(FileSystemTypes.Directory, "/DirectoryToDelete", "DirectoryToDelete", "/DirectoryToDelete")
         };
         
-        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        await RunWithLocalPermissions(sharedActionsGroup);
         
         directoryToDelete.Refresh();
         directoryToDelete.Exists.Should().BeFalse();
@@ -461,7 +490,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         };
         
         // Should not throw exception for non-existent files
-        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        await RunWithLocalPermissions(sharedActionsGroup);
     }
     
     [Test]
@@ -479,15 +508,17 @@ public class TestSynchronizationActionHandler : IntegrationTest
         var sharedActionsGroup = new SharedActionsGroup
         {
             ActionsGroupId = "ACI_SyncDateNonExistent",
+            CreationTimeUtc = DateTime.UtcNow,
+            LastWriteTimeUtc = DateTime.UtcNow,
             Operator = ActionOperatorTypes.CopyDatesOnly,
             Targets = [target],
-            Source = null,
+            Source = target,
             SynchronizationType = SynchronizationTypes.Full,
             PathIdentity = new PathIdentity(FileSystemTypes.File, "/nonExistent.txt", "nonExistent.txt", "/nonExistent.txt")
         };
         
         // Should not throw but should handle the missing file gracefully
-        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        await RunWithLocalPermissions(sharedActionsGroup);
     }
     
     [Test]
@@ -510,8 +541,8 @@ public class TestSynchronizationActionHandler : IntegrationTest
         };
         
         // Should throw exception because Create operation should only work for directories
-        await FluentActions.Awaiting(() => _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup))
-            .Should().ThrowAsync<ApplicationException>();
+        await FluentActions.Awaiting(() => RunWithLocalPermissions(sharedActionsGroup))
+            .Should().ThrowAsync<UnauthorizedAccessException>();
     }
     
     [Test]
@@ -541,7 +572,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         };
         
         // Should throw IOException when trying to delete non-empty directory with recursive=false
-        await FluentActions.Awaiting(() => _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup))
+        await FluentActions.Awaiting(() => RunWithLocalPermissions(sharedActionsGroup))
             .Should().ThrowAsync<IOException>();
         
         // Directory should still exist because the delete operation failed
@@ -566,7 +597,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         };
         
         await FluentActions.Awaiting(() =>
-                _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup, cancellationTokenSource.Token))
+                RunWithLocalPermissions(sharedActionsGroup, cancellationTokenSource.Token))
             .Should().ThrowAsync<OperationCanceledException>();
     }
     
@@ -597,7 +628,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         };
         
         // This should call the remote uploader (mocked in integration tests)
-        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        await RunWithLocalPermissions(sharedActionsGroup);
         
         // Verify that no local files were affected
         fileA.Refresh();
@@ -637,7 +668,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
             PathIdentity = new PathIdentity(FileSystemTypes.File, "/fileToSync.txt", "fileToSync.txt", "/fileToSync.txt")
         };
         
-        await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup);
+        await RunWithLocalPermissions(sharedActionsGroup);
         
         // Verify local target was synchronized
         fileB.Refresh();
@@ -690,7 +721,7 @@ public class TestSynchronizationActionHandler : IntegrationTest
         
         try
         {
-            await _synchronizationActionHandler.RunSynchronizationAction(sharedActionsGroup, cancellationTokenSource.Token);
+            await RunWithLocalPermissions(sharedActionsGroup, cancellationTokenSource.Token);
         }
         catch (OperationCanceledException)
         {

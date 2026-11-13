@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Threading;
 using ByteSync.Business;
 using ByteSync.Business.Arguments;
@@ -104,6 +104,7 @@ public class InventoryBuilder : IInventoryBuilder
         var inventoryPart = AddInventoryPart(dataSource.Path);
         
         inventoryPart.Code = dataSource.Code;
+        inventoryPart.SourceId = dataSource.Id;
         
         return inventoryPart;
     }

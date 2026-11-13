@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.EndPoints;
+using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.ServerCommon.Business.Auth;
@@ -7,6 +7,8 @@ namespace ByteSync.ServerCommon.Business.Sessions;
 
 public class CloudSessionData
 {
+    public int AuthenticationEpoch { get; set; }
+
     public CloudSessionData()
     {
         SessionMembers = new List<SessionMemberData>();
@@ -21,6 +23,7 @@ public class CloudSessionData
         SessionSettings = sessionSettings;
 
         CreatorInstanceId = creator.ClientInstanceId;
+        AuthenticationEpoch = creator.AuthenticationEpoch;
     }
 
     public string SessionId { get; set; } = null!;

@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.IO.Compression;
 using ByteSync.Common.Controls.Json;
 using ByteSync.Models.Inventories;
@@ -7,13 +7,25 @@ namespace ByteSync.Services.Inventories;
 
 public class InventoryLoader : IDisposable
 {
-    public InventoryLoader(string fullName)
+    private readonly string? _expectedOwner;
+
+    public InventoryLoader(string fullName, string? expectedOwner = null)
     {
         FullName = fullName;
+        _expectedOwner = expectedOwner;
         
-        ZipArchive = ZipFile.OpenRead(FullName);
-        
-        Inventory = Load();
+        var stream = ByteSync.Services.Synchronizations.LocalPathSafety.OpenRead(FullName);
+        try
+        {
+            ZipArchive = new ZipArchive(stream, ZipArchiveMode.Read);
+            Inventory = Load();
+        }
+        catch
+        {
+            ZipArchive?.Dispose();
+            stream.Dispose();
+            throw;
+        }
     }
     
     public string FullName { get; }
@@ -40,6 +52,22 @@ public class InventoryLoader : IDisposable
             throw new InvalidOperationException("Failed to deserialize inventory.json.");
         }
         
+        if (_expectedOwner != null && inventory.Endpoint.ClientInstanceId != _expectedOwner) throw new UnauthorizedAccessException("Inventory sender mismatch");
+        foreach (var part in inventory.InventoryParts)
+        {
+            part.Inventory = inventory;
+            if (_expectedOwner != null && string.IsNullOrEmpty(part.SourceId)) throw new UnauthorizedAccessException("Missing inventory source id");
+            foreach (var item in part.FileDescriptions.Cast<ByteSync.Models.FileSystems.FileSystemDescription>().Concat(part.DirectoryDescriptions))
+            {
+                item.InventoryPart = part;
+                if (_expectedOwner != null)
+                {
+                    if (item.RelativePath == null || !item.RelativePath.StartsWith('/')) throw new UnauthorizedAccessException("Invalid inventory path");
+                    ByteSync.Services.Synchronizations.LocalPathSafety.ValidateRelativePath(item.RelativePath[1..]);
+                }
+            }
+        }
+
         foreach (var inventoryPart in inventory.InventoryParts
                      .Where(ip => !ip.IsIncompleteDueToAccess &&
                                   (ip.DirectoryDescriptions.Any(d => !d.IsAccessible)

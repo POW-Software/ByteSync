@@ -1,10 +1,11 @@
+using ByteSync.ServerCommon.Security;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.FileTransfers;
 
-public class GetUploadFileStorageLocationRequest : IRequest<FileStorageLocation>
+public class GetUploadFileStorageLocationRequest : IRequest<FileStorageLocation>, IFileTransferRequest
 {
     public GetUploadFileStorageLocationRequest(string sessionId, Client client, TransferParameters transferParameters)
     {

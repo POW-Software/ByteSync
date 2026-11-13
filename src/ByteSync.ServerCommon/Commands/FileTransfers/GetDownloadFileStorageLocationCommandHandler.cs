@@ -31,7 +31,7 @@ public class GetDownloadFileStorageLocationCommandHandler : IRequestHandler<GetD
             request.TransferParameters
         );
         
-        var responseObject = new FileStorageLocation(url, _storageProvider);
+        var responseObject = new FileStorageLocation(url, request.TransferParameters.StorageProvider);
         
         _logger.LogDebug("Download file storage location generated for session {SessionId}, file {FileId}", 
             request.SessionId, request.TransferParameters.SharedFileDefinition.Id);

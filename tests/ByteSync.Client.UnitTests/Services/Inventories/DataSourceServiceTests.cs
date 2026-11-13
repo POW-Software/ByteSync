@@ -50,7 +50,7 @@ public class DataSourceServiceTests
             _inventoryApiClientMock.Object,
             _dataSourceRepositoryMock.Object,
             _codeGeneratorMock.Object,
-            _loggerMock.Object);
+            _loggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
     }
     
     [Test]

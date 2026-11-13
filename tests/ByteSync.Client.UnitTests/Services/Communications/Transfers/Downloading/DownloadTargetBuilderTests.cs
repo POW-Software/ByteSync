@@ -49,7 +49,7 @@ public class DownloadTargetBuilderTests
             _sharedActionsGroupRepository.Object,
             _connectionService.Object,
             _temporaryFileManagerFactory.Object,
-            _sessionService.Object);
+            _sessionService.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
     }
     
     [TearDown]
