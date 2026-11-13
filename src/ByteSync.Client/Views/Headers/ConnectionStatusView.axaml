@@ -12,7 +12,8 @@
     </Design.DataContext>
     
     <StackPanel Orientation="Vertical">
-        <Border Background="{Binding BadgeBrush}" CornerRadius="4" VerticalAlignment="Stretch" >
+        <Border Background="{Binding BadgeBrush}" CornerRadius="4" VerticalAlignment="Stretch"
+                ToolTip.Tip="{Binding Details}">
             <TextBlock Text="{Binding Text}" FontWeight="Bold"
                        Margin="12 6" Foreground="{DynamicResource SystemAltHighColor}" 
                        VerticalAlignment="Center"/>

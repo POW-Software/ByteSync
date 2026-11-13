@@ -73,7 +73,8 @@ public class ConnectionService : IConnectionService, IDisposable
         var retryDelaySleepDurationProvider = RetryDelaySleepDurationProvider;
 
         var retryPolicy = Policy
-            .Handle<Exception>(ex => !(ex is BuildConnectionException bce && bce.InitialConnectionStatus is InitialConnectionStatus.VersionNotAllowed or InitialConnectionStatus.InvalidProof))
+            .Handle<Exception>(ex => ex is not RelayIncompatibleException &&
+                !(ex is BuildConnectionException bce && bce.InitialConnectionStatus is InitialConnectionStatus.VersionNotAllowed or InitialConnectionStatus.InvalidProof))
             .WaitAndRetryForeverAsync(
                 retryAttempt => retryDelaySleepDurationProvider?.Invoke(retryAttempt) ?? TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                 (exception, _, _) =>
@@ -83,35 +84,46 @@ public class ConnectionService : IConnectionService, IDisposable
 
                     _logger.LogError(exception, "An error occurred while starting the connection");
                 });
-        
-        await retryPolicy.ExecuteAsync(async () =>
+
+        try
         {
-            _logger.LogInformation("Starting connection");
-
-            ConnectionStatusSubject.OnNext(ConnectionStatuses.Connecting);
-
-            var result = await _connectionFactory.BuildConnection();
-            
-            ConnectionSubject.OnNext(result.HubConnection);
-            
-            if (result.HubConnection != null)
+            await retryPolicy.ExecuteAsync(async () =>
             {
-                CurrentEndPoint = result.EndPoint!;
-                
-                ConnectionStatusSubject.OnNext(ConnectionStatuses.Connected);
-            }
-            else
-            {
-                if (result.AuthenticateResponseStatus is InitialConnectionStatus.VersionNotAllowed or InitialConnectionStatus.InvalidProof)
+                _logger.LogInformation("Starting connection");
+
+                ConnectionStatusSubject.OnNext(ConnectionStatuses.Connecting);
+
+                var result = await _connectionFactory.BuildConnection();
+
+                ConnectionSubject.OnNext(result.HubConnection);
+
+                if (result.HubConnection != null)
                 {
-                    ConnectionStatusSubject.OnNext(ConnectionStatuses.NotConnected);
+                    CurrentEndPoint = result.EndPoint!;
+
+                    ConnectionStatusSubject.OnNext(ConnectionStatuses.Connected);
                 }
-                
-                throw new BuildConnectionException("Unable to connect", result.AuthenticateResponseStatus);
-            }
-        });
+                else
+                {
+                    if (result.AuthenticateResponseStatus is InitialConnectionStatus.VersionNotAllowed or InitialConnectionStatus.InvalidProof)
+                    {
+                        ConnectionStatusSubject.OnNext(ConnectionStatuses.NotConnected);
+                    }
+
+                    throw new BuildConnectionException("Unable to connect", result.AuthenticateResponseStatus);
+                }
+            });
+        }
+        catch (RelayIncompatibleException ex)
+        {
+            await StopConnection();
+            CurrentEndPoint = null;
+            ConnectionStatusSubject.OnNext(ConnectionStatuses.RelayIncompatible);
+            _logger.LogError(ex, "{RelayCompatibilityError}", ex.Message);
+            throw;
+        }
     }
-    
+
     private async Task StartOrRestartJwtTokensRefreshTimer()
     {
         await CancelCurrentRefreshCancellationTokenSource();
@@ -216,6 +228,11 @@ public class ConnectionService : IConnectionService, IDisposable
     
     private async Task RestartConnection()
     {
+        if (CurrentConnectionStatus == ConnectionStatuses.RelayIncompatible)
+        {
+            return;
+        }
+
         await StopConnection();
         await StartConnectionAsync();
     }

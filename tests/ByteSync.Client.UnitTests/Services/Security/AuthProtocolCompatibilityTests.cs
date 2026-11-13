@@ -1,13 +1,21 @@
 using System.Net;
+using System.Net.Http;
 using System.Security.Cryptography;
 using ByteSync.Business.Configurations;
+using ByteSync.Business.Communications;
 using ByteSync.Common.Business.Auth;
 using ByteSync.Common.Business.Versions;
 using ByteSync.Exceptions;
+using ByteSync.Factories;
 using ByteSync.Interfaces;
+using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Controls.Communications.Http;
+using ByteSync.Interfaces.Factories;
+using ByteSync.Interfaces.Services.Communications;
+using ByteSync.Services.Communications;
 using ByteSync.Services.Communications.Api;
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
 
@@ -34,19 +42,92 @@ public class AuthProtocolCompatibilityTests
     [TearDown]
     public void TearDown() => _settings.PrivateRsa.Dispose();
 
-    [Test]
-    public async Task OlderRelayWithoutChallengeEndpoint_IsRejectedWithoutCallingLegacyLogin()
+    [TestCase(false)]
+    [TestCase(true)]
+    public async Task OlderRelayWithoutChallengeEndpoint_IsRejectedWithoutCallingLegacyLogin(bool wrapped)
     {
-        var error = new ApiException("Challenge request failed", new ApiException("Not Found", HttpStatusCode.NotFound));
+        var notFound = new ApiException("Not Found", HttpStatusCode.NotFound);
+        var error = wrapped ? new ApiException("Challenge request failed", notFound) : notFound;
+        _api.Setup(a => a.PostAsync<AuthenticationChallenge>("auth/challenge", It.IsAny<object>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(error);
+
+        var act = () => _client.Login(new LoginData());
+
+        var exception = (await act.Should().ThrowAsync<RelayIncompatibleException>()).Which;
+        exception.InnerException.Should().BeSameAs(error);
+        exception.Message.Should().Contain("auth/challenge").And.Contain("HTTP 404")
+            .And.Contain("Check the relay address").And.Contain("update the relay server").And.Contain("Automatic reconnection has stopped");
+        _api.Verify(a => a.PostAsync<InitialAuthenticationResponse>(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()), Times.Never);
+        _api.Verify(a => a.PostAsync<AuthenticationChallenge>("auth/challenge", It.IsAny<object>(), It.IsAny<CancellationToken>()), Times.Once);
+        _api.VerifyNoOtherCalls();
+    }
+
+    [TestCase("")]
+    [TestCase("<html><body>Not Found</body></html>")]
+    [TestCase("{\"message\":\"Not Found\"}")]
+    [TestCase("{\"Id\":\"unexpected-challenge\",\"Nonce\":\"unexpected-nonce\"}")]
+    public async Task MissingChallengeEndpoint_StopsConnectionAfterOneHttpRequest(string body)
+    {
+        using var handler = new MissingChallengeHandler(body);
+        using var httpClient = new HttpClient(handler);
+        var httpClientFactory = new Mock<IHttpClientFactory>();
+        httpClientFactory.Setup(f => f.CreateClient("ApiClient")).Returns(httpClient);
+        var tokens = new Mock<IAuthenticationTokensRepository>(MockBehavior.Strict);
+        tokens.Setup(t => t.GetTokens()).ReturnsAsync((AuthenticationTokens?)null);
+        var constants = new Mock<IConnectionConstantsService>();
+        constants.Setup(c => c.GetApiUrl()).ReturnsAsync("https://relay.invalid/api/");
+        var api = new ApiInvoker(httpClientFactory.Object, tokens.Object, constants.Object, NullLogger<ApiInvoker>.Instance);
+        var settings = new Mock<IApplicationSettingsRepository>();
+        settings.Setup(s => s.GetCurrentApplicationSettings()).Returns(_settings);
+        var auth = new AuthApiClient(api, settings.Object);
+        var environment = new Mock<IEnvironmentService>();
+        environment.SetupGet(e => e.ApplicationVersion).Returns(new Version(1, 0, 0));
+        var hubFactory = new Mock<IHubConnectionFactory>(MockBehavior.Strict);
+        var factory = new ConnectionFactory(tokens.Object, environment.Object, auth, hubFactory.Object, NullLogger<ConnectionFactory>.Instance);
+        using var connection = new ConnectionService(factory, tokens.Object, NullLogger<ConnectionService>.Instance)
+        {
+            RetryDelaySleepDurationProvider = _ => throw new InvalidOperationException("Unexpected reconnection attempt")
+        };
+
+        var act = () => connection.StartConnectionAsync();
+
+        await act.Should().ThrowAsync<RelayIncompatibleException>();
+        connection.CurrentConnectionStatus.Should().Be(ConnectionStatuses.RelayIncompatible);
+        handler.Requests.Should().Equal("/api/auth/challenge");
+        tokens.Verify(t => t.Store(It.IsAny<AuthenticationTokens>()), Times.Never);
+        hubFactory.VerifyNoOtherCalls();
+    }
+
+    [TestCase(HttpStatusCode.BadRequest)]
+    [TestCase(HttpStatusCode.Unauthorized)]
+    [TestCase(HttpStatusCode.InternalServerError)]
+    [TestCase(HttpStatusCode.ServiceUnavailable)]
+    public async Task OtherChallengeFailures_KeepTheirOriginalErrorWithoutCallingLogin(HttpStatusCode status)
+    {
+        var error = new ApiException("Challenge request failed", status);
         _api.Setup(a => a.PostAsync<AuthenticationChallenge>("auth/challenge", It.IsAny<object>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(error);
 
         var act = () => _client.Login(new LoginData());
 
         (await act.Should().ThrowAsync<ApiException>()).Which.Should().BeSameAs(error);
-        _api.Verify(a => a.PostAsync<InitialAuthenticationResponse>(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()), Times.Never);
         _api.Verify(a => a.PostAsync<AuthenticationChallenge>("auth/challenge", It.IsAny<object>(), It.IsAny<CancellationToken>()), Times.Once);
         _api.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task LoginEndpointNotFound_IsNotReportedAsAMissingChallengeEndpoint()
+    {
+        var error = new ApiException("Login not found", HttpStatusCode.NotFound);
+        _api.Setup(a => a.PostAsync<AuthenticationChallenge>("auth/challenge", It.IsAny<object>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new AuthenticationChallenge { Id = "challenge", Nonce = "nonce" });
+        _api.Setup(a => a.PostAsync<InitialAuthenticationResponse>("auth/login", It.IsAny<object>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(error);
+
+        var act = () => _client.Login(new LoginData { ClientInstanceId = "local-test-instance", Version = "local-test" });
+
+        (await act.Should().ThrowAsync<ApiException>()).Which.Should().BeSameAs(error);
+        _api.Verify(a => a.PostAsync<InitialAuthenticationResponse>("auth/login", It.IsAny<object>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -97,5 +178,16 @@ public class AuthProtocolCompatibilityTests
         (await act.Should().ThrowAsync<ApiException>()).Which.Should().BeSameAs(error);
         _api.Verify(a => a.PostAsync<RefreshTokensResponse>("auth/refreshTokens", It.IsAny<object>(), It.IsAny<CancellationToken>()), Times.Once);
         _api.VerifyNoOtherCalls();
+    }
+
+    private sealed class MissingChallengeHandler(string body) : HttpMessageHandler
+    {
+        public List<string> Requests { get; } = [];
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            Requests.Add(request.RequestUri!.AbsolutePath);
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound) { Content = new StringContent(body) });
+        }
     }
 }

@@ -36,6 +36,57 @@ public class ConnectionServiceTests
         
         _connectionService.RetryDelaySleepDurationProvider = _ => TimeSpan.Zero;
     }
+
+    [TearDown]
+    public void TearDown() => _connectionService.Dispose();
+
+    [Test]
+    public async Task MissingChallengeEndpoint_ClearsConnectionAndPublishesTerminalStatusWithoutRetrying()
+    {
+        var error = new RelayIncompatibleException(new ApiException("Not Found", System.Net.HttpStatusCode.NotFound));
+        _mockConnectionFactory.SetupSequence(f => f.BuildConnection())
+            .ThrowsAsync(error)
+            .ThrowsAsync(new BuildConnectionException("Unexpected retry", InitialConnectionStatus.VersionNotAllowed));
+        _connectionService.CurrentEndPoint = new ByteSyncEndpoint { ClientId = "stale", ClientInstanceId = "stale" };
+        var statuses = new List<ConnectionStatuses>();
+        using var subscription = _connectionService.ConnectionStatus.Subscribe(statuses.Add);
+        Microsoft.AspNetCore.SignalR.Client.HubConnection? currentConnection = null;
+        using var connectionSubscription = _connectionService.Connection.Subscribe(c => currentConnection = c);
+
+        var act = () => _connectionService.StartConnectionAsync();
+
+        (await act.Should().ThrowAsync<RelayIncompatibleException>()).Which.Should().BeSameAs(error);
+        _mockConnectionFactory.Verify(f => f.BuildConnection(), Times.Once);
+        statuses.Should().Equal(ConnectionStatuses.NotConnected, ConnectionStatuses.Connecting,
+            ConnectionStatuses.NotConnected, ConnectionStatuses.RelayIncompatible);
+        _connectionService.CurrentEndPoint.Should().BeNull();
+        _connectionService.ClientInstanceId.Should().BeNull();
+        currentConnection.Should().BeNull();
+        _mockLogger.Verify(l => l.Log(LogLevel.Error, It.IsAny<EventId>(),
+            It.Is<It.IsAnyType>((state, _) => state.ToString()!.Contains("auth/challenge") && state.ToString()!.Contains("Automatic reconnection has stopped")),
+            error, It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
+    }
+
+    [Test]
+    public async Task ManualStartAfterRelayUpgrade_CanConnectAgain()
+    {
+        _mockAuthenticationTokensRepository.Setup(r => r.GetTokens()).ReturnsAsync((AuthenticationTokens?)null);
+        _mockConnectionFactory.SetupSequence(f => f.BuildConnection())
+            .ThrowsAsync(new RelayIncompatibleException(new ApiException("Not Found")))
+            .ReturnsAsync(new BuildConnectionResult
+            {
+                HubConnection = new TestableHubConnection(),
+                EndPoint = new ByteSyncEndpoint { ClientId = "compatible", ClientInstanceId = "compatible" }
+            });
+        var initialStart = () => _connectionService.StartConnectionAsync();
+        await initialStart.Should().ThrowAsync<RelayIncompatibleException>();
+
+        await _connectionService.StartConnectionAsync();
+
+        _connectionService.CurrentConnectionStatus.Should().Be(ConnectionStatuses.Connected);
+        _connectionService.ClientInstanceId.Should().Be("compatible");
+        _mockConnectionFactory.Verify(f => f.BuildConnection(), Times.Exactly(2));
+    }
     
     [Test]
     public async Task StartConnectionAsync_ShouldRetryOnException_ExceptVersionNotAllowed()

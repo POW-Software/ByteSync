@@ -82,6 +82,7 @@ public class ConnectionStatusViewModel : ActivatableViewModelBase
             ConnectionStatuses.Connected => ConnectedBadgeBrush,
             ConnectionStatuses.Connecting => ConnectingBadgeBrush,
             ConnectionStatuses.ConnectionFailed => ConnectionFailedBadgeBrush,
+            ConnectionStatuses.RelayIncompatible => ConnectionFailedBadgeBrush,
             ConnectionStatuses.NotConnected => NotConnectedBadgeBrush,
             ConnectionStatuses.RetryConnectingSoon => RetryConnectingSoonBadgeBrush,
             _ => UnknownBadgeBrush
@@ -109,14 +110,22 @@ public class ConnectionStatusViewModel : ActivatableViewModelBase
             ConnectionStatuses.Connected => _localizationService[nameof(Resources.ConnectionStatus_Connected)],
             ConnectionStatuses.Connecting => _localizationService[nameof(Resources.ConnectionStatus_Connecting)],
             ConnectionStatuses.ConnectionFailed => _localizationService[nameof(Resources.ConnectionStatus_ConnectionFailed)],
+            ConnectionStatuses.RelayIncompatible => _localizationService["ConnectionStatus_RelayIncompatible"],
             ConnectionStatuses.NotConnected => _localizationService[nameof(Resources.ConnectionStatus_NotConnected)],
             ConnectionStatuses.RetryConnectingSoon => _localizationService[nameof(Resources.ConnectionStatus_RetryConnectingSoon)],
             _ => _localizationService[nameof(Resources.ConnectionStatus_Unkown)]
         };
+
+        Details = connectionStatus == ConnectionStatuses.RelayIncompatible
+            ? _localizationService["ConnectionStatus_RelayIncompatibleDetails"]
+            : null;
     }
     
     [Reactive]
     public string Text { get; set; }
+
+    [Reactive]
+    public string? Details { get; set; }
     
     [Reactive]
     public IBrush BadgeBrush { get; set; }
