@@ -34,6 +34,12 @@ public class ProtocolVersionTests
         
         result.Should().BeFalse();
     }
+
+    [Test]
+    public void IsCompatible_WithLegacyV2_ShouldReturnFalse()
+    {
+        ProtocolVersion.IsCompatible(ProtocolVersion.V2).Should().BeFalse();
+    }
     
     [Test]
     public void IsCompatible_WithZero_ShouldReturnFalse()

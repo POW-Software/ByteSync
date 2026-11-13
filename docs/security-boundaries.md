@@ -151,6 +151,24 @@ rtk proxy dotnet test tests/ByteSync.ServerCommon.Tests/ByteSync.ServerCommon.Te
 
 The server regression run excluded `.Repositories.` and `.Integration.` to avoid running service-dependent suites. This follow-up changed no Azure settings and requires no production or staging data access.
 
+## Offline Redis 6.0 regression guard
+
+`Redis60CompatibilityTests` runs in the ordinary server unit suite without a Redis process, Azure access, configuration secrets, Docker or network access. It inspects compiled production IL, including async state machines and generic repository methods, and allows only the reviewed Redis API overloads. Unreviewed command APIs and raw command dispatch fail the test. The audit covers StackExchange.Redis 2.10.1 and RedLock.net 2.3.2; the resolved dependency versions must match that baseline so SDK command-mapping changes require review.
+
+Lua bodies are restricted to the audited constant script, and RedLock's actual embedded Extend/Unlock resources are checked against audited SHA-256 digests. Line endings are normalized for cross-platform checkouts. Changing Lua commands, options, dynamic dispatch or these dependency versions requires an explicit compatibility review and baseline update. This is a conservative audit allowlist; a new compatible operation also requires review. Reflection-based or dynamically generated production command dispatch is outside this static guard and must not be used to bypass it.
+
+The guard's negative cases cover GETDEL, GETEX, SET GET/EXAT, read-only scripting APIs, raw dispatch, absolute-expiry/value-condition overloads, and a real GETDEL call in compiled test code that is inspected but never executed. Repository saves now explicitly select the TimeSpan/When overload for their two-day TTL. The former three-argument call selected the modern Expiration/ValueCondition overload; its existing relative-TTL/default-condition usage was compatible, but that broader overload is deliberately refused by the guard. Fake-backed tests exercise both immediate and transactional saves and assert the relative TTL and audited overload.
+
+Validation: solution build succeeded with zero errors (17 warnings). **1,742 tests passed with zero failures**: 386 server, 1,236 client, 54 Common, 66 Functions. These include 19 Redis guard cases and four new client authentication cases. Twelve existing POSIX-only client cases did not execute on Windows. Evidence: [guard validation](../artifacts/security-boundaries/redis-guard/final/validation.json). Redis runtime/ACL/failover behavior remains outside this run; no Azure endpoint was contacted and Docker was not started.
+
+### Older relay and client compatibility
+
+The supplied client log shows a 404 for `auth/challenge` while targeting the remote development API, before SignalR negotiation or any peer exchange. The source before this branch has no challenge endpoint. An old relay or a deployment missing that route therefore cannot authenticate this client. The deployed server version was not probed; this diagnosis uses the supplied log and local source only.
+
+V3 clients require the matching relay and V3 peers. An older V2 peer is explicitly incompatible, and an older relay cannot provide the required possession proof. Regression tests assert that a missing challenge endpoint fails without calling the legacy login; a supported relay receives a valid RSA-PSS proof with the current epoch/protocol; refresh has no login fallback; and V2 remains rejected. The secure protocol is not downgraded to restore legacy connectivity.
+
+For local Rider testing, run the Functions project built from this branch and launch the client in Debug with `--use-local-api`. Check the client's `LocalDebugUrl` matches the Functions host's actual port and `/api/` base path, then confirm the client log selects that local URL. Debug defaults to the remote DevelopmentUrl when no API-selection argument is supplied. The local-API switch applies to Debug execution; Release uses ProductionUrl (or its existing staging override). Run all session peers from the same V3 branch and create a fresh session. Coordinated remote deployment remains a separate, unexecuted operation.
+
 ## Future rollout proposal (not executed)
 
 1. Review this patch and approve the breaking protocol, restrictions and enrollment experience. Complete native multi-platform CI, isolated Redis/SignalR/storage end-to-end tests, load/abuse checks and the coverage gate. Confirm the Redis version before rollout. Back up local RSA/settings/trust/profile data through the existing supported process; do not collect private keys centrally.
