@@ -173,6 +173,16 @@ V3 clients require the matching relay and V3 peers. An older V2 peer is explicit
 
 For local Rider testing, run the Functions project built from this branch and launch the client in Debug with `--use-local-api`. Check the client's `LocalDebugUrl` matches the Functions host's actual port and `/api/` base path, then confirm the client log selects that local URL. Debug defaults to the remote DevelopmentUrl when no API-selection argument is supplied. The local-API switch applies to Debug execution; Release uses ProductionUrl (or its existing staging override). Run all session peers from the same V3 branch and create a fresh session. Coordinated remote deployment remains a separate, unexecuted operation.
 
+## PR review corrections (2026-11-21)
+
+Join validation now resends the existing finalization proof after a failed or lost SignalR notification. Retries preserve both the proof and its original expiry, still require the bound current validator and an eligible pending member, and cannot recreate a proof after finalization. Regression tests cover successful and failed first notifications, ineligible retries, and exactly one finalization after resending.
+
+Functions integration fixtures and the HTTP end-to-end scenario now use a shared real RSA identity, request and sign an authentication challenge, bind refresh records to the current identity/epoch, and use server-generated storage object IDs instead of client metadata in object paths. The end-to-end join validation is authenticated as the validator rather than the joining client. Offline regressions exercise the shared identity with the real challenge, login, token and refresh services, reject challenge/refresh replay, and check SAS object/part/operation scope without making storage requests.
+
+Validation: solution build succeeded with zero errors; 402 server unit tests (excluding service-dependent repository and integration suites), 66 Functions unit tests and 54 Common unit tests passed, zero failures. These include 16 new regression cases; the shared RSA fixture helper has 100% line coverage. The migrated integration fixtures and E2E compile but were not executed because this correction was explicitly required to avoid Azure access and Docker. Restore used the local NuGet package cache. Evidence is under `artifacts/pr351-fixes/`.
+
+The correction commit uses `[skip ci]` to prevent the PR workflows from contacting configured Azure services or starting container-based tests after the requested push. Those workflows and the actual integration/E2E suites must be run later when external-service testing is authorized; no production checks were weakened to accommodate legacy fixtures.
+
 ## Future rollout proposal (not executed)
 
 1. Review this patch and approve the breaking protocol, restrictions and enrollment experience. Complete native multi-platform CI, isolated Redis/SignalR/storage end-to-end tests, load/abuse checks and the coverage gate. Confirm the Redis version before rollout. Back up local RSA/settings/trust/profile data through the existing supported process; do not collect private keys centrally.

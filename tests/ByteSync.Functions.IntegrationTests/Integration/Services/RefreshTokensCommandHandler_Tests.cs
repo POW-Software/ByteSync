@@ -4,6 +4,8 @@ using ByteSync.ServerCommon.Repositories;
 using ByteSync.Functions.IntegrationTests.TestHelpers.Autofac;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Commands.Authentication;
+using ByteSync.TestsCommon.TestHelpers;
+using FluentAssertions;
 
 namespace ByteSync.Functions.IntegrationTests.Integration.Services;
 
@@ -36,8 +38,9 @@ public class RefreshTokensCommandHandler_Tests
     {
         // Arrange
         var clientsRepository = _scope.Resolve<ClientsRepository>();
-        var clientInstanceId = "integration-client-instance";
-        var clientId = "integration-client-id";
+        using var identity = new AuthenticationTestIdentity();
+        var clientInstanceId = identity.ClientInstanceId;
+        var clientId = identity.Identity;
         var refreshToken = "valid-refresh-token";
         var version = "2.0.0";
         var osPlatform = Common.Business.Misc.OSPlatforms.Windows;
@@ -46,12 +49,15 @@ public class RefreshTokensCommandHandler_Tests
 
         await clientsRepository.AddOrUpdate(clientInstanceId, c => {
             c ??= new Client();
+            c.Identity = identity.Identity;
+            c.AuthenticationEpoch = AuthenticationProtocol.Epoch;
             c.ClientId = clientId;
             c.ClientInstanceId = clientInstanceId;
             c.Version = version;
             c.OsPlatform = osPlatform;
             c.IpAddress = ipAddress;
             c.RefreshToken = new RefreshToken {
+                AuthenticationEpoch = AuthenticationProtocol.Epoch,
                 Token = refreshToken,
                 Expires = now.AddMinutes(10),
                 Created = now,
@@ -77,15 +83,17 @@ public class RefreshTokensCommandHandler_Tests
         // Act
         var response = await handler.Handle(request, CancellationToken.None);
 
-        // Assert
-        Assert.That(response.RefreshTokensStatus, Is.EqualTo(RefreshTokensStatus.RefreshTokenOk));
-        Assert.That(response.AuthenticationTokens, Is.Not.Null);
+        response.RefreshTokensStatus.Should().Be(RefreshTokensStatus.RefreshTokenOk);
+        response.AuthenticationTokens.Should().NotBeNull();
 
-        // Assert that the refresh token was updated (rotated)
         var updatedClient = await clientsRepository.Get(clientInstanceId);
-        Assert.That(updatedClient, Is.Not.Null);
-        Assert.That(updatedClient.RefreshToken, Is.Not.Null);
-        Assert.That(updatedClient.RefreshToken.Token, Is.Not.EqualTo(refreshToken), "Refresh token should be rotated and not equal to the old token.");
-        Assert.That(updatedClient.RefreshToken.Expires, Is.GreaterThan(now), "New refresh token should have a later expiration.");
+        updatedClient.Should().NotBeNull();
+        updatedClient!.Identity.Should().Be(identity.Identity);
+        updatedClient.AuthenticationEpoch.Should().Be(AuthenticationProtocol.Epoch);
+        updatedClient.RefreshToken.Should().NotBeNull();
+        updatedClient.RefreshToken!.Token.Should().NotBe(refreshToken);
+        updatedClient.RefreshToken.Expires.Should().BeAfter(now);
+        updatedClient.RefreshToken.AuthenticationEpoch.Should().Be(AuthenticationProtocol.Epoch);
+        response.AuthenticationTokens!.RefreshToken.Should().Be(updatedClient.RefreshToken.Token);
     }
 }

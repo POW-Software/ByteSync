@@ -4,6 +4,9 @@ using ByteSync.Functions.IntegrationTests.TestHelpers.Autofac;
 using ByteSync.ServerCommon.Commands.Authentication;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using FakeItEasy;
+using ByteSync.ServerCommon.Interfaces.Services;
+using ByteSync.TestsCommon.TestHelpers;
+using FluentAssertions;
 
 namespace ByteSync.Functions.IntegrationTests.Integration.Services;
 
@@ -40,19 +43,11 @@ public class AuthenticateCommandHandler_Tests
     [Test]
     public async Task Authenticate_WithValidData_ReturnsSuccessResponse()
     {
-        var clientId = "integration-client-id";
-        var clientInstanceId = "integration-client-instance";
-        var version = "2.0.0";
-        var osPlatform = Common.Business.Misc.OSPlatforms.Windows;
+        using var identity = new AuthenticationTestIdentity();
+        var loginData = identity.CreateLogin();
+        var challengeService = _scope.Resolve<IAuthenticationChallengeService>();
+        identity.Sign(loginData, await challengeService.Create(loginData));
         var ipAddress = "127.0.0.1";
-
-        var loginData = new LoginData
-        {
-            ClientId = clientId,
-            ClientInstanceId = clientInstanceId,
-            Version = version,
-            OsPlatform = osPlatform
-        };
 
         var request = new AuthenticateRequest(loginData, ipAddress);
         var handler = _scope.Resolve<AuthenticateCommandHandler>();
@@ -60,11 +55,15 @@ public class AuthenticateCommandHandler_Tests
         // Act
         var response = await handler.Handle(request, CancellationToken.None);
 
-        // Assert
-        Assert.That(response, Is.Not.Null);
-        Assert.That(response.IsSuccess, Is.True, "Authentication should succeed with valid data");
-        Assert.That(response.InitialConnectionStatus, Is.EqualTo(InitialConnectionStatus.Success));
-        Assert.That(response.AuthenticationTokens, Is.Not.Null, "AuthenticationTokens should not be null");
-        Assert.That(response.EndPoint, Is.Not.Null, "EndPoint should not be null");
+        response.IsSuccess.Should().BeTrue();
+        response.InitialConnectionStatus.Should().Be(InitialConnectionStatus.Success);
+        response.AuthenticationTokens.Should().NotBeNull();
+        response.EndPoint.Should().NotBeNull();
+        response.EndPoint!.ClientInstanceId.Should().Be(identity.ClientInstanceId);
+
+        var replay = await handler.Handle(request, CancellationToken.None);
+
+        replay.InitialConnectionStatus.Should().Be(InitialConnectionStatus.InvalidProof);
+        replay.AuthenticationTokens.Should().BeNull();
     }
 }

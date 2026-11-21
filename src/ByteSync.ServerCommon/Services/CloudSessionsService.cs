@@ -173,14 +173,15 @@ public class CloudSessionsService : ICloudSessionsService
                     .FirstOrDefault(m =>
                         Equals(m.ClientInstanceId, parameters.JoinerClientInstanceId) && 
                         Equals(m.ValidatorInstanceId, parameters.ValidatorInstanceId) &&
-                        m.JoinExpiresAt > DateTimeOffset.UtcNow && string.IsNullOrEmpty(m.FinalizationPassword));
+                        m.JoinExpiresAt > DateTimeOffset.UtcNow);
 
                 if (joiner != null)
                 {
-                    var finaliationPassword = $"FP_{Guid.NewGuid()}";
-
-                    joiner.FinalizationPassword = finaliationPassword;
-                    parameters.FinalizationPassword = finaliationPassword;
+                    if (string.IsNullOrEmpty(joiner.FinalizationPassword))
+                    {
+                        joiner.FinalizationPassword = $"FP_{Guid.NewGuid()}";
+                    }
+                    parameters.FinalizationPassword = joiner.FinalizationPassword;
                 }
 
                 return joiner != null;

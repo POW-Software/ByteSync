@@ -9,6 +9,15 @@ using ByteSync.ServerCommon.Services;
 using FakeItEasy;
 using FluentAssertions;
 using StackExchange.Redis;
+using ByteSync.ServerCommon.Business.Auth;
+using ByteSync.ServerCommon.Business.Settings;
+using ByteSync.ServerCommon.Commands.Authentication;
+using ByteSync.ServerCommon.Interfaces.Factories;
+using ByteSync.ServerCommon.Interfaces.Repositories;
+using ByteSync.ServerCommon.Interfaces.Services.Clients;
+using ByteSync.ServerCommon.Tests.Helpers;
+using ByteSync.TestsCommon.TestHelpers;
+using Microsoft.Extensions.Options;
 
 namespace ByteSync.ServerCommon.Tests.Security;
 
@@ -52,6 +61,52 @@ public class AuthenticationSecurityTests
     {
         login.ChallengeId = challenge.Id;
         login.Signature = _key.SignData(AuthenticationProtocol.GetMessage(login, challenge), HashAlgorithmName.SHA256, RSASignaturePadding.Pss);
+    }
+
+    [Test]
+    public async Task IntegrationIdentity_UsesSignedChallengesAndProducesRefreshableCurrentEpochTokens()
+    {
+        using var identity = new AuthenticationTestIdentity();
+        var login = identity.CreateLogin();
+        var keyInfo = identity.CreatePublicKeyInfo();
+        AuthenticationProtocol.GetIdentity(keyInfo.PublicKey).Should().Be(identity.Identity);
+        keyInfo.ProtocolVersion.Should().Be(ProtocolVersion.CURRENT);
+        keyInfo.ClientId.Should().Be(identity.Identity);
+        identity.Sign(login, await _service.Create(login));
+        Client? saved = null;
+        var clients = A.Fake<IClientsRepository>();
+        A.CallTo(() => clients.AddOrUpdate(identity.ClientInstanceId, A<Func<Client?, Client?>>._))
+            .ReturnsLazily((string _, Func<Client?, Client?> update) =>
+            {
+                var updated = update(saved);
+                if (updated != null) saved = updated;
+                return UpdateResultBuilder.BuildAddOrUpdateResult(updated, false);
+            });
+        var versions = A.Fake<IClientSoftwareVersionService>();
+        A.CallTo(() => versions.IsClientVersionAllowed(login)).Returns(true);
+        var tokens = new TokensFactory(Options.Create(new AppSettings
+        {
+            Secret = "offline-fixture-validation-signing-key-at-least-32-bytes", JwtDurationInSeconds = 300
+        }));
+        var handler = new AuthenticateCommandHandler(tokens, A.Fake<IByteSyncEndpointFactory>(), clients, versions, _service);
+
+        var response = await handler.Handle(new AuthenticateRequest(login, "127.0.0.1"), CancellationToken.None);
+        var originalRefresh = response.AuthenticationTokens!.RefreshToken;
+        var refreshed = await new RefreshTokensCommandHandler(tokens, clients).Handle(new RefreshTokensRequest(
+            new RefreshTokensData { ClientInstanceId = identity.ClientInstanceId, Token = originalRefresh }, "127.0.0.1"), CancellationToken.None);
+        var replay = await handler.Handle(new AuthenticateRequest(login, "127.0.0.1"), CancellationToken.None);
+
+        response.IsSuccess.Should().BeTrue();
+        saved!.Identity.Should().Be(identity.Identity);
+        saved.AuthenticationEpoch.Should().Be(AuthenticationProtocol.Epoch);
+        refreshed.RefreshTokensStatus.Should().Be(RefreshTokensStatus.RefreshTokenOk);
+        refreshed.AuthenticationTokens!.RefreshToken.Should().NotBe(originalRefresh);
+        saved.RefreshToken!.AuthenticationEpoch.Should().Be(AuthenticationProtocol.Epoch);
+        var reusedRefresh = await new RefreshTokensCommandHandler(tokens, clients).Handle(new RefreshTokensRequest(
+            new RefreshTokensData { ClientInstanceId = identity.ClientInstanceId, Token = originalRefresh }, "127.0.0.1"), CancellationToken.None);
+        reusedRefresh.IsSuccess.Should().BeFalse();
+        replay.InitialConnectionStatus.Should().Be(InitialConnectionStatus.InvalidProof);
+        replay.AuthenticationTokens.Should().BeNull();
     }
 
     [Test]

@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using ByteSync.ServerCommon.Services.Storage;
 using ByteSync.ServerCommon.Business.Settings;
 using Microsoft.Extensions.Options;
@@ -47,6 +47,7 @@ public class AzureBlobStorageService_Tests
         var service = _scope.Resolve<AzureBlobStorageService>();
         var shared = new SharedFileDefinition
         {
+            StorageObjectId = Guid.NewGuid().ToString("N"),
             SessionId = "sess123",
             ClientInstanceId = "cliABC",
             SharedFileType = SharedFileTypes.FullSynchronization,
@@ -70,8 +71,11 @@ public class AzureBlobStorageService_Tests
         downloadQuery["se"].Should().NotBeNull();
         downloadQuery["sp"].Should().NotBeNull();
 
-        uploadQuery["sp"]!.Should().Contain("w");
-        downloadQuery["sp"]!.Should().Contain("r");
+        uploadQuery["sp"].Should().Be("w");
+        downloadQuery["sp"].Should().Be("r");
+        uploadUri.AbsolutePath.Should().EndWith($"/{shared.StorageObjectId}/part-{partNumber}");
+        downloadUri.AbsolutePath.Should().Be(uploadUri.AbsolutePath);
+        DateTimeOffset.Parse(uploadQuery["se"]!).Should().BeCloseTo(DateTimeOffset.UtcNow.AddMinutes(5), TimeSpan.FromSeconds(15));
     }
 
     [Test]
@@ -80,6 +84,7 @@ public class AzureBlobStorageService_Tests
         var service = _scope.Resolve<AzureBlobStorageService>();
         var shared = new SharedFileDefinition
         {
+            StorageObjectId = Guid.NewGuid().ToString("N"),
             SessionId = "sessA",
             ClientInstanceId = "cliA",
             SharedFileType = SharedFileTypes.FullSynchronization
@@ -88,14 +93,17 @@ public class AzureBlobStorageService_Tests
         var url1 = await service.GetUploadFileUrl(shared, 1);
         var url2 = await service.GetUploadFileUrl(shared, 2);
         url1.Should().NotBe(url2);
+        new Uri(url1).AbsolutePath.Should().EndWith($"/{shared.StorageObjectId}/part-1");
+        new Uri(url2).AbsolutePath.Should().EndWith($"/{shared.StorageObjectId}/part-2");
     }
 
     [Test]
-    public async Task InventoryType_ShouldUseAdditionalNameInKey()
+    public async Task InventoryType_ShouldUseServerObjectIdWithoutEmbeddingClientMetadata()
     {
         var service = _scope.Resolve<AzureBlobStorageService>();
         var shared = new SharedFileDefinition
         {
+            StorageObjectId = Guid.NewGuid().ToString("N"),
             SessionId = "sessInvA",
             ClientInstanceId = "cliInvA",
             SharedFileType = SharedFileTypes.BaseInventory,
@@ -104,6 +112,10 @@ public class AzureBlobStorageService_Tests
 
         var url = await service.GetDownloadFileUrl(shared, 1);
         var uri = new Uri(url);
-        uri.ToString().Should().Contain("base_inventory_profileABC");
+        uri.AbsolutePath.Should().EndWith($"/{shared.StorageObjectId}/part-1");
+        uri.AbsolutePath.Should().NotContain(shared.SessionId).And.NotContain(shared.ClientInstanceId).And.NotContain(shared.AdditionalName);
+        shared.AdditionalName = "different-profile-name";
+        var renamed = new Uri(await service.GetDownloadFileUrl(shared, 1));
+        renamed.AbsolutePath.Should().Be(uri.AbsolutePath);
     }
 }

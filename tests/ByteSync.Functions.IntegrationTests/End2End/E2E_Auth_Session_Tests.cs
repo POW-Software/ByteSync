@@ -8,6 +8,7 @@ using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Controls.Json;
 using FluentAssertions;
 using ByteSync.Functions.IntegrationTests.TestHelpers;
+using ByteSync.TestsCommon.TestHelpers;
 
 namespace ByteSync.Functions.IntegrationTests.End2End;
 
@@ -37,14 +38,9 @@ public class E2E_Auth_Session_Tests
     [Test]
     public async Task Auth_Login_Then_CreateCloudSession_ShouldSucceed()
     {
-        var loginA = new LoginData
-        {
-            ClientId = "e2e-client-A",
-            ClientInstanceId = Guid.NewGuid().ToString("N"),
-            Version = "9.9.9",
-            OsPlatform = Common.Business.Misc.OSPlatforms.Windows
-        };
-        var tokenA = await LoginAsync(loginA);
+        using var identityA = new AuthenticationTestIdentity();
+        var loginA = identityA.CreateLogin();
+        var tokenA = await LoginAsync(loginA, identityA);
         _api.SetBearerToken(tokenA.AuthenticationTokens!.JwtToken);
         var createParams = new CreateCloudSessionParameters
         {
@@ -52,7 +48,7 @@ public class E2E_Auth_Session_Tests
             CreatorProfileClientId = null,
             SessionSettings = new EncryptedSessionSettings
                 { Id = Guid.NewGuid().ToString("N"), Data = new byte[16], IV = new byte[16] },
-            CreatorPublicKeyInfo = new PublicKeyInfo { ClientId = loginA.ClientId, PublicKey = new byte[32] },
+            CreatorPublicKeyInfo = identityA.CreatePublicKeyInfo(),
             CreatorPrivateData = new EncryptedSessionMemberPrivateData
                 { Id = Guid.NewGuid().ToString("N"), Data = new byte[16], IV = new byte[16] }
         };
@@ -61,20 +57,18 @@ public class E2E_Auth_Session_Tests
         var sessionId = createResult.SessionId;
         var creatorMembers = await _api.GetJsonAsync<List<SessionMemberInfoDTO>>($"session/{sessionId}/members");
         creatorMembers.Any(m => m.ClientInstanceId == loginA.ClientInstanceId).Should().BeTrue();
-        var loginB = new LoginData
-        {
-            ClientId = "e2e-client-B",
-            ClientInstanceId = Guid.NewGuid().ToString("N"),
-            Version = "9.9.9",
-            OsPlatform = Common.Business.Misc.OSPlatforms.Windows
-        };
-        var tokenB = await LoginAsync(loginB);
+        using var identityB = new AuthenticationTestIdentity();
+        var loginB = identityB.CreateLogin();
+        var tokenB = await LoginAsync(loginB, identityB);
         var askParams = new AskCloudSessionPasswordExchangeKeyParameters(sessionId,
-            new PublicKeyInfo { ClientId = loginB.ClientId, PublicKey = new byte[32] })
+            identityB.CreatePublicKeyInfo())
         {
             LobbyId = null,
             ProfileClientId = null
         };
+        var members = await _api.PostJsonAsync<List<string>>($"session/{sessionId}/beginJoin",
+            askParams, tokenB.AuthenticationTokens!.JwtToken);
+        members.Should().Contain(loginA.ClientInstanceId);
         var askResult = await _api.PostJsonAsync<JoinSessionResult>($"session/{sessionId}/askPasswordExchangeKey",
             askParams, tokenB.AuthenticationTokens!.JwtToken);
         askResult.Should().NotBeNull();
@@ -82,11 +76,14 @@ public class E2E_Auth_Session_Tests
         var validateParams = new ValidateJoinCloudSessionParameters(sessionId, loginB.ClientInstanceId,
             loginA.ClientInstanceId, new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 });
         await _api.PostJsonAsync<object>($"session/{sessionId}/validateJoin", validateParams,
-            tokenB.AuthenticationTokens!.JwtToken);
+            tokenA.AuthenticationTokens!.JwtToken);
     }
 
-    private async Task<InitialAuthenticationResponse> LoginAsync(LoginData login)
+    private async Task<InitialAuthenticationResponse> LoginAsync(LoginData login, AuthenticationTestIdentity identity)
     {
+        var challenge = await _api.PostJsonAsync<AuthenticationChallenge>("auth/challenge", login);
+        challenge.Should().NotBeNull();
+        identity.Sign(login, challenge!);
         var loginJson = JsonSerializer.Serialize(login);
         using var loginContent = new StringContent(loginJson, Encoding.UTF8, "application/json");
         TestContext.Progress.WriteLine($"{DateTime.UtcNow:o} | POST /auth/login");
@@ -94,7 +91,7 @@ public class E2E_Auth_Session_Tests
         if (!authResponse.IsSuccessStatusCode)
         {
             var body = await authResponse.Content.ReadAsStringAsync();
-            Assert.Fail($"auth/login failed: {(int)authResponse.StatusCode} {authResponse.ReasonPhrase}. Body: {body}");
+            throw new HttpRequestException($"auth/login failed: {(int)authResponse.StatusCode} {authResponse.ReasonPhrase}. Body: {body}");
         }
 
         var authJson = await authResponse.Content.ReadAsStringAsync();
