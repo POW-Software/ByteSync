@@ -86,7 +86,8 @@ public static class ServiceRegistrar
         var environmentService = scope.Resolve<IEnvironmentService>();
         
         var applicationSettings = applicationSettingsRepository.GetCurrentApplicationSettings();
-        environmentService.SetClientId(ByteSync.Common.Business.Auth.AuthenticationProtocol.GetIdentity(applicationSettings.DecodedRsaPublicKey!));
+        environmentService.SetClientIdentity(applicationSettings.ClientId,
+            ByteSync.Common.Business.Auth.AuthenticationProtocol.GetIdentity(applicationSettings.DecodedRsaPublicKey!));
     }
     
     private static void LogBootstrapHeader(this IContainer container)

@@ -55,7 +55,7 @@ public class AuthenticationChallengeRedis60Tests
     private LoginData Login()
     {
         var identity = AuthenticationProtocol.GetIdentity(_key.ExportRSAPublicKey());
-        return new LoginData { Identity = identity, ClientInstanceId = identity + "_" + Guid.NewGuid().ToString("D"),
+        return new LoginData { ClientId = "ABCD-EFG-HIJ", Identity = identity, ClientInstanceId = identity + "_" + Guid.NewGuid().ToString("D"),
             PublicKey = _key.ExportRSAPublicKey(), AuthenticationEpoch = AuthenticationProtocol.Epoch,
             ProtocolVersion = ProtocolVersion.CURRENT, Version = "local-redis60-test" };
     }

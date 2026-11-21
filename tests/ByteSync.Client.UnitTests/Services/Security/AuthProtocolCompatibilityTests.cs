@@ -14,6 +14,7 @@ using ByteSync.Interfaces.Factories;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Services.Communications;
 using ByteSync.Services.Communications.Api;
+using ByteSync.Services.Applications;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -41,6 +42,74 @@ public class AuthProtocolCompatibilityTests
 
     [TearDown]
     public void TearDown() => _settings.PrivateRsa.Dispose();
+
+    [Test]
+    public void EnvironmentInitialization_PreservesTheStoredReadableIdAndExistingKeys()
+    {
+        var clientId = _settings.ClientId;
+        var publicKey = _settings.DecodedRsaPublicKey!.ToArray();
+        var privateKey = _settings.DecodedRsaPrivateKey!.ToArray();
+        _settings.InitializeTrustedPublicKeys();
+        _settings.AddTrustedKey(new TrustedPublicKey { ClientId = "PEER-CLI-ENT", PublicKey = _settings.DecodedRsaPublicKey!,
+            ValidationDate = DateTimeOffset.UtcNow });
+        var trustedKeys = _settings.TrustedPublicKeys;
+        var identity = AuthenticationProtocol.GetIdentity(publicKey);
+        var environment = new EnvironmentService(Mock.Of<IMsixPfnParser>());
+
+        environment.SetClientIdentity(clientId, identity);
+
+        environment.ClientId.Should().Be(clientId).And.MatchRegex("^[A-Z]{4}-[A-Z]{3}-[A-Z]{3}$");
+        environment.Identity.Should().Be(identity).And.NotBe(clientId);
+        AuthenticationProtocol.IsInstanceOf(environment.ClientInstanceId, identity).Should().BeTrue();
+        _settings.ClientId.Should().Be(clientId);
+        _settings.DecodedRsaPublicKey.Should().Equal(publicKey);
+        _settings.DecodedRsaPrivateKey.Should().Equal(privateKey);
+        _settings.TrustedPublicKeys.Should().Be(trustedKeys);
+    }
+
+    [TestCase(null)]
+    [TestCase("")]
+    [TestCase("ABCD-EFG-HIJ")]
+    [TestCase("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]
+    public void EnvironmentInitialization_RejectsAnAliasOrInvalidFingerprintAsIdentity(string? identity)
+    {
+        var environment = new EnvironmentService(Mock.Of<IMsixPfnParser>());
+
+        var act = () => environment.SetClientIdentity(_settings.ClientId, identity!);
+
+        act.Should().Throw<ArgumentException>();
+    }
+
+    [TestCase(null)]
+    [TestCase("")]
+    [TestCase(" ")]
+    public void EnvironmentInitialization_RejectsAMissingReadableId(string? clientId)
+    {
+        var environment = new EnvironmentService(Mock.Of<IMsixPfnParser>());
+        var identity = AuthenticationProtocol.GetIdentity(_settings.DecodedRsaPublicKey!);
+
+        var act = () => environment.SetClientIdentity(clientId!, identity);
+
+        act.Should().Throw<ArgumentException>();
+    }
+
+    [Test]
+    public void TwoInstallationsWithOneKey_KeepDistinctAliasesAndInstancesOfTheSameIdentity()
+    {
+        var identity = AuthenticationProtocol.GetIdentity(_settings.DecodedRsaPublicKey!);
+        var first = new EnvironmentService(Mock.Of<IMsixPfnParser>());
+        var second = new EnvironmentService(Mock.Of<IMsixPfnParser>());
+
+        first.SetClientIdentity("ABCD-EFG-HIJ", identity);
+        second.SetClientIdentity("KLMN-OPQ-RST", identity);
+
+        first.ClientId.Should().Be("ABCD-EFG-HIJ");
+        second.ClientId.Should().Be("KLMN-OPQ-RST");
+        first.Identity.Should().Be(second.Identity);
+        first.ClientInstanceId.Should().NotBe(second.ClientInstanceId);
+        AuthenticationProtocol.IsInstanceOf(first.ClientInstanceId, identity).Should().BeTrue();
+        AuthenticationProtocol.IsInstanceOf(second.ClientInstanceId, identity).Should().BeTrue();
+    }
 
     [TestCase(false)]
     [TestCase(true)]
@@ -133,8 +202,15 @@ public class AuthProtocolCompatibilityTests
     [Test]
     public async Task CurrentRelay_ReceivesAValidProofWithTheCurrentEpochAndProtocol()
     {
+        var clientId = _settings.ClientId;
+        var publicKeyBeforeLogin = _settings.DecodedRsaPublicKey!.ToArray();
+        var privateKeyBeforeLogin = _settings.DecodedRsaPrivateKey!.ToArray();
+        _settings.InitializeTrustedPublicKeys();
+        _settings.AddTrustedKey(new TrustedPublicKey { ClientId = "PEER-CLI-ENT", PublicKey = _settings.DecodedRsaPublicKey!,
+            ValidationDate = DateTimeOffset.UtcNow });
+        var trustedKeys = _settings.TrustedPublicKeys;
         var identity = AuthenticationProtocol.GetIdentity(_settings.DecodedRsaPublicKey!);
-        var login = new LoginData { ClientInstanceId = identity + "_" + Guid.NewGuid().ToString("D"), Version = "local-test" };
+        var login = new LoginData { ClientId = "caller-supplied-alias", ClientInstanceId = identity + "_" + Guid.NewGuid().ToString("D"), Version = "local-test" };
         var challenge = new AuthenticationChallenge { Id = Guid.NewGuid().ToString("N"), Nonce = "local-test-nonce", ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(2) };
         var response = new InitialAuthenticationResponse(InitialConnectionStatus.Success);
         var sequence = new MockSequence();
@@ -146,6 +222,11 @@ public class AuthProtocolCompatibilityTests
         var result = await _client.Login(login);
 
         result.Should().BeSameAs(response);
+        login.ClientId.Should().Be(clientId).And.NotBe(identity);
+        _settings.ClientId.Should().Be(clientId);
+        _settings.DecodedRsaPublicKey.Should().Equal(publicKeyBeforeLogin);
+        _settings.DecodedRsaPrivateKey.Should().Equal(privateKeyBeforeLogin);
+        _settings.TrustedPublicKeys.Should().Be(trustedKeys);
         login.Identity.Should().Be(identity);
         login.ProtocolVersion.Should().Be(ProtocolVersion.CURRENT);
         login.AuthenticationEpoch.Should().Be(AuthenticationProtocol.Epoch);

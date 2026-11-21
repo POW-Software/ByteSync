@@ -29,6 +29,8 @@ public class EnvironmentService : IEnvironmentService
     }
     
     public string ClientId { get; private set; } = null!;
+
+    public string Identity { get; private set; } = null!;
     
     public string ClientInstanceId { get; private set; } = null!;
     
@@ -227,11 +229,13 @@ public class EnvironmentService : IEnvironmentService
         }
     }
     
-    public void SetClientId(string clientId)
+    public void SetClientIdentity(string clientId, string identity)
     {
-        if (!ByteSync.Common.Business.Auth.AuthenticationProtocol.IsInstanceOf($"{clientId}_{Guid.Empty:D}", clientId))
-            throw new ArgumentException("A full RSA key fingerprint is required", nameof(clientId));
+        ArgumentException.ThrowIfNullOrWhiteSpace(clientId);
+        if (identity == null || !ByteSync.Common.Business.Auth.AuthenticationProtocol.IsInstanceOf($"{identity}_{Guid.Empty:D}", identity))
+            throw new ArgumentException("A full RSA key fingerprint is required", nameof(identity));
         ClientId = clientId;
-        ClientInstanceId = $"{ClientId}_{Guid.NewGuid():D}";
+        Identity = identity;
+        ClientInstanceId = $"{Identity}_{Guid.NewGuid():D}";
     }
 }

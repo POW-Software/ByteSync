@@ -10,18 +10,20 @@ public sealed class AuthenticationTestIdentity : IDisposable
 {
     private readonly RSA _key = RSA.Create(2048);
 
-    public AuthenticationTestIdentity()
+    public AuthenticationTestIdentity(string clientId = "ABCD-EFG-HIJ")
     {
+        ClientId = clientId;
         Identity = AuthenticationProtocol.GetIdentity(_key.ExportRSAPublicKey());
         ClientInstanceId = $"{Identity}_{Guid.NewGuid():D}";
     }
 
     public string Identity { get; }
+    public string ClientId { get; }
     public string ClientInstanceId { get; }
 
     public LoginData CreateLogin() => new()
     {
-        ClientId = Identity,
+        ClientId = ClientId,
         Identity = Identity,
         ClientInstanceId = ClientInstanceId,
         PublicKey = _key.ExportRSAPublicKey(),
@@ -33,7 +35,7 @@ public sealed class AuthenticationTestIdentity : IDisposable
 
     public PublicKeyInfo CreatePublicKeyInfo() => new()
     {
-        ClientId = Identity,
+        ClientId = ClientId,
         PublicKey = _key.ExportRSAPublicKey(),
         ProtocolVersion = ProtocolVersion.CURRENT
     };

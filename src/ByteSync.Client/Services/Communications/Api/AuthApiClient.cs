@@ -28,6 +28,7 @@ public class AuthApiClient : IAuthApiClient
         try
         {
             var settings = _settings.GetCurrentApplicationSettings();
+            loginData.ClientId = settings.ClientId;
             loginData.PublicKey = settings.DecodedRsaPublicKey!;
             loginData.Identity = AuthenticationProtocol.GetIdentity(loginData.PublicKey);
             loginData.AuthenticationEpoch = AuthenticationProtocol.Epoch;

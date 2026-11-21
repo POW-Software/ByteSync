@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using ByteSync.Business.Communications;
 using ByteSync.Business.Configurations;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Versions;
@@ -79,6 +80,25 @@ public class PublicKeysManagerTests : AbstractTester
         var result = _publicKeysManager.GetMyPublicKeyInfo();
         
         result.PublicKey.Should().BeEquivalentTo(applicationSettings.DecodedRsaPublicKey);
+    }
+
+    [TestCase(false)]
+    [TestCase(true)]
+    public void ExistingReadableAliasTrust_RequiresThePreviouslyTrustedKey(bool differentKey)
+    {
+        var settings = _applicationSettingsRepository.Object.GetCurrentApplicationSettings();
+        var trustedKey = settings.DecodedRsaPublicKey!;
+        settings.InitializeTrustedPublicKeys();
+        settings.AddTrustedKey(new TrustedPublicKey { ClientId = "ABCD-EFG-HIJ", PublicKey = trustedKey,
+            ValidationDate = DateTimeOffset.UtcNow });
+        using var otherKey = RSA.Create(2048);
+        var peer = new PublicKeyInfo { ClientId = "ABCD-EFG-HIJ",
+            PublicKey = differentKey ? otherKey.ExportRSAPublicKey() : trustedKey };
+
+        var trusted = _publicKeysManager.IsTrusted(peer);
+
+        trusted.Should().Be(!differentKey);
+        settings.DecodedTrustedPublicKeys.Should().ContainSingle().Which.PublicKey.Should().Equal(trustedKey);
     }
     
     [Test]

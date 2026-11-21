@@ -48,6 +48,8 @@ public class PublicKeysTrusterTests : AbstractTester
             .Setup(e => e.ClientId)
             .Returns("TestClientId");
         
+        _environmentService.SetupGet(e => e.Identity).Returns(new string('A', 64));
+
         _environmentService
             .Setup(e => e.ClientInstanceId)
             .Returns("TestClientInstanceId");
@@ -74,6 +76,29 @@ public class PublicKeysTrusterTests : AbstractTester
     }
     
     
+    [Test]
+    public async Task TrustCheck_SkipsOnlyInstancesOfTheCryptographicIdentity()
+    {
+        const string alias = "ABCD-EFG-HIJ";
+        var identity = new string('A', 64);
+        var ownInstance = identity + "_" + Guid.NewGuid().ToString("D");
+        var aliasInstance = alias + "_" + Guid.NewGuid().ToString("D");
+        var otherInstance = new string('B', 64) + "_" + Guid.NewGuid().ToString("D");
+        _environmentService.SetupGet(e => e.ClientId).Returns(alias);
+        _environmentService.SetupGet(e => e.Identity).Returns(identity);
+        _sessionMemberApiClient.Setup(c => c.GetMembersClientInstanceIds("session", It.IsAny<CancellationToken>()))
+            .ReturnsAsync([ownInstance, aliasInstance, otherInstance]);
+        _trustApiClient.Setup(c => c.StartTrustCheck(It.IsAny<TrustCheckParameters>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new StartTrustCheckResult { IsOK = false });
+
+        await _publicKeysTruster.TrustAllMembersPublicKeys("session");
+
+        _trustApiClient.Verify(c => c.StartTrustCheck(It.Is<TrustCheckParameters>(p =>
+            p.MembersInstanceIdsToCheck.Count == 2 && p.MembersInstanceIdsToCheck.Contains(aliasInstance) &&
+            p.MembersInstanceIdsToCheck.Contains(otherInstance) && !p.MembersInstanceIdsToCheck.Contains(ownInstance)),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
     [Test]
     public async Task OnTrustPublicKeyRequestedAsync_WithIncompatibleProtocolVersion_ShouldThrowInvalidOperationException()
     {

@@ -41,6 +41,7 @@ public static class AuthenticationProtocol
         writer.Write(challenge.Nonce);
         writer.Write(challenge.ExpiresAt.UtcTicks);
         writer.Write(login.Identity);
+        writer.Write(login.ClientId);
         writer.Write(login.ClientInstanceId);
         writer.Write(login.Version);
         writer.Write((int)(login.OsPlatform ?? 0));

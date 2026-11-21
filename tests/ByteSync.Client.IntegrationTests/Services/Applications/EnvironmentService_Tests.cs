@@ -137,17 +137,18 @@ public class EnvironmentService_Tests
     }
     
     [Test]
-    public void SetClientId_sets_ids_and_instance_contains_guid()
+    public void SetClientIdentity_preserves_readable_id_and_binds_instance_to_identity()
     {
         var service = new EnvironmentService(new MsixPfnParser());
         
-        var clientId = new string('A', 64);
-        service.SetClientId(clientId);
+        var clientId = "ABCD-EFG-HIJ";
+        var identity = new string('A', 64);
+        service.SetClientIdentity(clientId, identity);
         
         service.ClientId.Should().Be(clientId);
-        service.ClientInstanceId.Should().StartWith(clientId + "_");
+        service.ClientInstanceId.Should().StartWith(identity + "_");
         
-        var suffix = service.ClientInstanceId.Substring(clientId.Length + 1);
+        var suffix = service.ClientInstanceId.Substring(identity.Length + 1);
         Guid.TryParse(suffix, out _).Should().BeTrue();
     }
 }

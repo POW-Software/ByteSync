@@ -64,6 +64,80 @@ public class AuthenticationSecurityTests
     }
 
     [Test]
+    public async Task ReadableAlias_CannotMergeDifferentKeysOrClaimALegacyRecord()
+    {
+        using var first = new AuthenticationTestIdentity();
+        using var second = new AuthenticationTestIdentity(first.ClientId);
+        var legacy = new Client(first.ClientId, "legacy-instance", "old", OSPlatforms.Windows, "127.0.0.1");
+        var records = new Dictionary<string, Client> { [legacy.ClientInstanceId] = legacy };
+        var clients = A.Fake<IClientsRepository>();
+        A.CallTo(() => clients.AddOrUpdate(A<string>._, A<Func<Client?, Client?>>._))
+            .ReturnsLazily((string instance, Func<Client?, Client?> update) =>
+            {
+                var updated = update(records.GetValueOrDefault(instance));
+                if (updated != null) records[instance] = updated;
+                return UpdateResultBuilder.BuildAddOrUpdateResult(updated, false);
+            });
+        var versions = A.Fake<IClientSoftwareVersionService>();
+        A.CallTo(() => versions.IsClientVersionAllowed(A<LoginData>._)).Returns(true);
+        var tokens = new TokensFactory(Options.Create(new AppSettings
+        {
+            Secret = "offline-alias-collision-signing-key-at-least-32-bytes", JwtDurationInSeconds = 300
+        }));
+        var handler = new AuthenticateCommandHandler(tokens, new ByteSync.ServerCommon.Factories.ByteSyncEndpointFactory(), clients, versions, _service);
+
+        foreach (var identity in new[] { first, second })
+        {
+            var login = identity.CreateLogin();
+            identity.Sign(login, await _service.Create(login));
+            var response = await handler.Handle(new AuthenticateRequest(login, "127.0.0.1"), CancellationToken.None);
+            response.IsSuccess.Should().BeTrue();
+            response.EndPoint!.ClientId.Should().Be(first.ClientId);
+            response.EndPoint.ClientInstanceId.Should().Be(identity.ClientInstanceId);
+        }
+
+        records.Should().HaveCount(3);
+        records[first.ClientInstanceId].Identity.Should().Be(first.Identity);
+        records[second.ClientInstanceId].Identity.Should().Be(second.Identity).And.NotBe(first.Identity);
+        records[legacy.ClientInstanceId].Should().BeSameAs(legacy);
+        legacy.Identity.Should().BeNull();
+        legacy.AuthenticationEpoch.Should().Be(0);
+        var takeover = second.CreateLogin();
+        takeover.ClientInstanceId = first.ClientInstanceId;
+        var act = () => _service.Create(takeover);
+        await act.Should().ThrowAsync<CryptographicException>();
+    }
+
+    [Test]
+    public async Task ClientAliasChangedAfterChallenge_IsRejectedEvenWithANewValidSignature()
+    {
+        using var identity = new AuthenticationTestIdentity();
+        var login = identity.CreateLogin();
+        var challenge = await _service.Create(login);
+        login.ClientId = "KLMN-OPQ-RST";
+        identity.Sign(login, challenge);
+
+        var accepted = await _service.VerifyAndConsume(login);
+
+        accepted.Should().BeFalse();
+        _store.Should().BeEmpty();
+    }
+
+    [TestCase(null)]
+    [TestCase("")]
+    [TestCase(" ")]
+    public async Task MissingClientAlias_CannotCreateAChallenge(string? clientId)
+    {
+        var login = Login();
+        login.ClientId = clientId!;
+
+        var act = () => _service.Create(login);
+
+        await act.Should().ThrowAsync<CryptographicException>();
+        _store.Should().BeEmpty();
+    }
+
+    [Test]
     public async Task IntegrationIdentity_UsesSignedChallengesAndProducesRefreshableCurrentEpochTokens()
     {
         using var identity = new AuthenticationTestIdentity();
@@ -71,7 +145,7 @@ public class AuthenticationSecurityTests
         var keyInfo = identity.CreatePublicKeyInfo();
         AuthenticationProtocol.GetIdentity(keyInfo.PublicKey).Should().Be(identity.Identity);
         keyInfo.ProtocolVersion.Should().Be(ProtocolVersion.CURRENT);
-        keyInfo.ClientId.Should().Be(identity.Identity);
+        keyInfo.ClientId.Should().Be(identity.ClientId).And.NotBe(identity.Identity);
         identity.Sign(login, await _service.Create(login));
         Client? saved = null;
         var clients = A.Fake<IClientsRepository>();
@@ -88,7 +162,7 @@ public class AuthenticationSecurityTests
         {
             Secret = "offline-fixture-validation-signing-key-at-least-32-bytes", JwtDurationInSeconds = 300
         }));
-        var handler = new AuthenticateCommandHandler(tokens, A.Fake<IByteSyncEndpointFactory>(), clients, versions, _service);
+        var handler = new AuthenticateCommandHandler(tokens, new ByteSync.ServerCommon.Factories.ByteSyncEndpointFactory(), clients, versions, _service);
 
         var response = await handler.Handle(new AuthenticateRequest(login, "127.0.0.1"), CancellationToken.None);
         var originalRefresh = response.AuthenticationTokens!.RefreshToken;
@@ -97,7 +171,12 @@ public class AuthenticationSecurityTests
         var replay = await handler.Handle(new AuthenticateRequest(login, "127.0.0.1"), CancellationToken.None);
 
         response.IsSuccess.Should().BeTrue();
+        saved!.ClientId.Should().Be(identity.ClientId);
+        response.EndPoint!.ClientId.Should().Be(identity.ClientId);
         saved!.Identity.Should().Be(identity.Identity);
+        var jwt = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler().ReadJwtToken(response.AuthenticationTokens.JwtToken);
+        jwt.Claims.Single(c => c.Type == AuthConstants.CLAIM_CLIENT_ID).Value.Should().Be(identity.ClientId);
+        jwt.Claims.Single(c => c.Type == AuthConstants.CLAIM_IDENTITY).Value.Should().Be(identity.Identity);
         saved.AuthenticationEpoch.Should().Be(AuthenticationProtocol.Epoch);
         refreshed.RefreshTokensStatus.Should().Be(RefreshTokensStatus.RefreshTokenOk);
         refreshed.AuthenticationTokens!.RefreshToken.Should().NotBe(originalRefresh);
@@ -131,6 +210,7 @@ public class AuthenticationSecurityTests
     [TestCase("version")]
     [TestCase("epoch")]
     [TestCase("protocol")]
+    [TestCase("client-id")]
     public async Task Login_WithAlteredProof_IsRejected(string field)
     {
         var login = Login();
@@ -145,6 +225,7 @@ public class AuthenticationSecurityTests
             case "version": login.Version = "other"; break;
             case "epoch": login.AuthenticationEpoch = 0; break;
             case "protocol": login.ProtocolVersion = 2; break;
+            case "client-id": login.ClientId = "OTHER-CLI-ENT"; break;
         }
 
         (await _service.VerifyAndConsume(login)).Should().BeFalse();

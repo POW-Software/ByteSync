@@ -19,7 +19,7 @@ public interface IEnvironmentService
 
     public bool IsAutoRunProfile();
 
-    public void SetClientId(string clientId);
+    public void SetClientIdentity(string clientId, string identity);
 
     string AssemblyFullName { get; }
 
@@ -34,6 +34,8 @@ public interface IEnvironmentService
     Version ApplicationVersion { get; }
 
     string ClientId { get; }
+
+    string Identity { get; }
 
     string ClientInstanceId { get; }
 }

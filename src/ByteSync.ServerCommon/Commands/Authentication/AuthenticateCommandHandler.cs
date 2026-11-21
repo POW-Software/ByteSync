@@ -66,7 +66,7 @@ public class AuthenticateCommandHandler : IRequestHandler<AuthenticateRequest, I
         {
             if (client == null)
             {
-                client = new Client(request.LoginData.Identity, request.LoginData.ClientInstanceId,
+                client = new Client(request.LoginData.ClientId, request.LoginData.ClientInstanceId,
                     request.LoginData.Version, request.LoginData.OsPlatform!.Value, request.IpAddress);
                 client.Identity = request.LoginData.Identity;
                 client.AuthenticationEpoch = AuthenticationProtocol.Epoch;
@@ -75,6 +75,7 @@ public class AuthenticateCommandHandler : IRequestHandler<AuthenticateRequest, I
             {
                 if (client.Identity != request.LoginData.Identity || client.AuthenticationEpoch != AuthenticationProtocol.Epoch)
                     return null;
+                client.ClientId = request.LoginData.ClientId;
                 client.IpAddress = request.IpAddress;
                 client.Version = request.LoginData.Version;
                 client.OsPlatform = request.LoginData.OsPlatform.Value;

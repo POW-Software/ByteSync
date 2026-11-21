@@ -43,7 +43,7 @@ public class LoginIdentityBindingSecurityTests
         result.IsSuccess.Should().Be(expected);
         if (expected)
         {
-            saved!.ClientId.Should().Be(identity);
+            saved!.ClientId.Should().Be(login.ClientId);
             saved.Identity.Should().Be(identity);
             saved.Version.Should().Be(login.Version);
             saved.AuthenticationEpoch.Should().Be(AuthenticationProtocol.Epoch);

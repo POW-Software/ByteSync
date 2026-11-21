@@ -61,7 +61,8 @@ public class AuthenticationChallengeService(IRedisInfrastructureService redis) :
 
     private static void Validate(LoginData login)
     {
-        if (login.PublicKey == null || login.PublicKey.Length > 2048 || login.Signature == null || login.Signature.Length > 1024 ||
+        if (string.IsNullOrWhiteSpace(login.ClientId) || login.ClientId.Length > 100 ||
+            login.PublicKey == null || login.PublicKey.Length > 2048 || login.Signature == null || login.Signature.Length > 1024 ||
             login.AuthenticationEpoch != AuthenticationProtocol.Epoch || login.ProtocolVersion != ProtocolVersion.CURRENT ||
             string.IsNullOrEmpty(login.Version) || login.Version.Length > 100 ||
             AuthenticationProtocol.GetIdentity(login.PublicKey) != login.Identity ||

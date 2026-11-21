@@ -44,7 +44,7 @@ public class TryJoinLobbyCommandHandler : IRequestHandler<TryJoinLobbyRequest, J
         if (ByteSync.Common.Business.Auth.AuthenticationProtocol.GetIdentity(joinLobbyParameters.PublicKeyInfo.PublicKey) != client.Identity)
             throw new UnauthorizedAccessException();
         var authorizedProfile = await _cloudSessionProfileRepository.Get(joinLobbyParameters.CloudSessionProfileId);
-        if (authorizedProfile == null || authorizedProfile.AuthenticationEpoch != ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch || !authorizedProfile.Slots.Any(s => s.ProfileClientId == joinLobbyParameters.ProfileClientId && s.ClientId == client.Identity))
+        if (authorizedProfile == null || authorizedProfile.AuthenticationEpoch != ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch || !authorizedProfile.Slots.Any(s => s.ProfileClientId == joinLobbyParameters.ProfileClientId && s.Identity == client.Identity))
             throw new UnauthorizedAccessException();
 
         JoinLobbyResult? joinLobbyResult = null;

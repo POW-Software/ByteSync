@@ -274,7 +274,7 @@ public class PublicKeysTruster : IPublicKeysTruster
             return JoinSessionResult.BuildFrom(JoinSessionStatus.SessionNotFound);
         }
         
-        memberIdsToCheck.RemoveAll(id => ByteSync.Common.Business.Auth.AuthenticationProtocol.IsInstanceOf(id, _environmentService.ClientId));
+        memberIdsToCheck.RemoveAll(id => ByteSync.Common.Business.Auth.AuthenticationProtocol.IsInstanceOf(id, _environmentService.Identity));
         if (memberIdsToCheck.Count == 0)
         {
             return JoinSessionResult.BuildProcessingNormally();
