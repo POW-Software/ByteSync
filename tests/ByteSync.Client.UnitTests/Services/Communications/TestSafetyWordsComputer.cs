@@ -1,7 +1,7 @@
 using ByteSync.Common.Helpers;
 using ByteSync.Services.Communications;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Communications;

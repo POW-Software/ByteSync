@@ -10,7 +10,7 @@ using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Services.Encryptions;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using ICSharpCode.SharpZipLib.Zip;
 using Moq;
 

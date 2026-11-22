@@ -4,7 +4,7 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.Synchronizations;
 using ByteSync.Interfaces.Profiles;
 using ByteSync.Services.Communications.Transfers.Downloading;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

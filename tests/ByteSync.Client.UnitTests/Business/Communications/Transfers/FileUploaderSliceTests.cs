@@ -1,5 +1,5 @@
 using ByteSync.Business.Communications.Transfers;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Business.Communications.Transfers;

@@ -9,7 +9,7 @@ using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.TestsCommon;
 using ByteSync.ViewModels.Sessions.Synchronizations;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

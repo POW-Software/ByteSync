@@ -14,7 +14,7 @@ using ByteSync.Interfaces.Controls.Encryptions;
 using ByteSync.Interfaces.Repositories;
 using ByteSync.Interfaces.Services.Sessions.Connecting;
 using ByteSync.Services.Sessions;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;

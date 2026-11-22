@@ -3,7 +3,7 @@ using ByteSync.Common.Controls.Json;
 using ByteSync.ServerCommon.Business.Settings;
 using ByteSync.ServerCommon.Loaders;
 using FakeItEasy;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net;

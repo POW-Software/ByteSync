@@ -1,6 +1,6 @@
 using ByteSync.Business.Inventories;
 using ByteSync.Models.Inventories;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Models.Inventories;

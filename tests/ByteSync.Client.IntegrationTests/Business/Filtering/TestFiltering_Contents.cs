@@ -8,7 +8,7 @@ using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 
 namespace ByteSync.Client.IntegrationTests.Business.Filtering;

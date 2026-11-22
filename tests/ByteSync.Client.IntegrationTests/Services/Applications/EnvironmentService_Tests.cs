@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using ByteSync.Business.Misc;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Services.Applications;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace ByteSync.Client.IntegrationTests.Services.Applications;
 

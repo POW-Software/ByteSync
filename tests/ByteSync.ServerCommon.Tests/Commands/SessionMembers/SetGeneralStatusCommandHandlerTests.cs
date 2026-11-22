@@ -9,7 +9,7 @@ using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using ByteSync.ServerCommon.Tests.Helpers;
 using FakeItEasy;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Tests.Commands.SessionMembers;

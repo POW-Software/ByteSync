@@ -3,7 +3,7 @@ using ByteSync.Business.Sessions;
 using ByteSync.Factories.ViewModels;
 using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.ViewModels.Sessions.Managing;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

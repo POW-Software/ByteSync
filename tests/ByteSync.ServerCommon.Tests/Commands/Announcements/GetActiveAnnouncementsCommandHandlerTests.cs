@@ -2,7 +2,7 @@ using ByteSync.Common.Business.Announcements;
 using ByteSync.ServerCommon.Commands.Announcements;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using FakeItEasy;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace ByteSync.ServerCommon.Tests.Commands.Announcements;
 

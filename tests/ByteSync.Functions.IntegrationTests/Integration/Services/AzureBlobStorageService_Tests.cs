@@ -4,7 +4,7 @@ using ByteSync.ServerCommon.Business.Settings;
 using Microsoft.Extensions.Options;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.ServerCommon.Interfaces.Services.Storage.Factories;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace ByteSync.Functions.IntegrationTests.Integration.Services;
 

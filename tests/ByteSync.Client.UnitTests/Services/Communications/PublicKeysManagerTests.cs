@@ -7,7 +7,7 @@ using ByteSync.Interfaces;
 using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Services.Communications;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;

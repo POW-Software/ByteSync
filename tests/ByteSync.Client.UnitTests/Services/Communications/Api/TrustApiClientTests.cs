@@ -2,7 +2,7 @@ using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Business.Versions;
 using ByteSync.Interfaces.Controls.Communications.Http;
 using ByteSync.Services.Communications.Api;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;

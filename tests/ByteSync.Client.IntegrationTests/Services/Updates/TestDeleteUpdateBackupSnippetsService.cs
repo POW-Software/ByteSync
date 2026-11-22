@@ -3,7 +3,7 @@ using ByteSync.Business.Updates;
 using ByteSync.Interfaces.Updates;
 using ByteSync.Services.Updates;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 
 namespace ByteSync.Client.IntegrationTests.Services.Updates;

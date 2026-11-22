@@ -6,7 +6,7 @@ using ByteSync.Interfaces.Controls.Applications;
 using ByteSync.Interfaces.Dialogs;
 using ByteSync.Services.Inventories;
 using ByteSync.ViewModels.Misc;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;

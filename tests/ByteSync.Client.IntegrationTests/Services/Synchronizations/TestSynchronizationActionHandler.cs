@@ -22,7 +22,7 @@ using ByteSync.Models.FileSystems;
 using ByteSync.Services.Sessions;
 using ByteSync.Services.Synchronizations;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 
 namespace ByteSync.Client.IntegrationTests.Services.Synchronizations;

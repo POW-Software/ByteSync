@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using ByteSync.Business.Filtering.Parsing;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Business.Filtering;

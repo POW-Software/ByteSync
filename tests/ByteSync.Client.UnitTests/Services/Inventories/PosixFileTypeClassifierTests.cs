@@ -2,7 +2,7 @@ using System.IO;
 using ByteSync.Business.Inventories;
 using ByteSync.Services.Inventories;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Inventories;

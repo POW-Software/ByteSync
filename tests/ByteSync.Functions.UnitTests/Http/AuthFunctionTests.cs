@@ -6,7 +6,7 @@ using ByteSync.Common.Controls.Json;
 using ByteSync.Functions.Http;
 using ByteSync.Functions.UnitTests.TestHelpers;
 using ByteSync.ServerCommon.Commands.Authentication;
-using FluentAssertions;
+using AwesomeAssertions;
 using MediatR;
 using Microsoft.Azure.Functions.Worker;
 using Moq;

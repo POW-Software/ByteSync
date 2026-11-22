@@ -11,7 +11,7 @@ using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using System.Linq;
 using ByteSync.ServerCommon.Entities.Inventories;
 using FakeItEasy;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Tests.Commands.Inventories;

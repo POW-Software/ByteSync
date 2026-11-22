@@ -1,6 +1,6 @@
 ﻿using Avalonia.Media;
 using ByteSync.Helpers;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Helpers;

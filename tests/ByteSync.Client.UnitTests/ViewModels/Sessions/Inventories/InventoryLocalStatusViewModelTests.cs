@@ -5,7 +5,7 @@ using ByteSync.Interfaces.Controls.Inventories;
 using ByteSync.Interfaces.Controls.TimeTracking;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.ViewModels.Sessions.Inventories;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

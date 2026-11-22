@@ -10,7 +10,7 @@ using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.TestsCommon;
 using ByteSync.ViewModels.Announcements;
 using DynamicData;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

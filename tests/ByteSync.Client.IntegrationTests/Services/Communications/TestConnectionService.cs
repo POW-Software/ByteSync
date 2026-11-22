@@ -12,7 +12,7 @@ using ByteSync.Interfaces.Services.Communications;
 using ByteSync.Services.Communications;
 using ByteSync.TestsCommon;
 using ByteSync.TestsCommon.TestHelpers;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.AspNetCore.SignalR.Client;
 using Moq;
 using IConnectionFactory = ByteSync.Interfaces.Factories.IConnectionFactory;

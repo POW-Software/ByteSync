@@ -3,7 +3,7 @@ using ByteSync.Common.Business.Announcements;
 using ByteSync.Functions.Http;
 using ByteSync.Functions.UnitTests.TestHelpers;
 using ByteSync.ServerCommon.Commands.Announcements;
-using FluentAssertions;
+using AwesomeAssertions;
 using MediatR;
 using Microsoft.Azure.Functions.Worker;
 using Moq;

@@ -1,6 +1,6 @@
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Services.Communications.Transfers.Downloading;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Communications.Transfers.Downloading;

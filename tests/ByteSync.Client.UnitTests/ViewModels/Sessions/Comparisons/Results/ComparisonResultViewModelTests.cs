@@ -23,7 +23,7 @@ using ByteSync.Models.Inventories;
 using ByteSync.Repositories;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
 using ByteSync.Views.Misc;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;

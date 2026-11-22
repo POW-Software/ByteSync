@@ -8,26 +8,27 @@
         <UserSecretsId>fad123b6-a5bb-4773-8a56-3af68f41292c</UserSecretsId>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Autofac" Version="8.4.0" />
-        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
-        <PackageReference Include="Azure.Identity" Version="1.17.1"/>
-        <PackageReference Include="MediatR" Version="12.5.0" />
+        <PackageReference Include="Autofac" Version="9.1.0" />
+        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.0" />
+        <PackageReference Include="Azure.Identity" Version="1.21.0"/>
+        <PackageReference Include="MediatR" Version="14.1.0" />
         <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.23.0" />
-        <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.51.0"/>
+        <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.52.0"/>
         <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="2.50.0" />
         <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.3.0" />
-        <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.SignalRService" Version="1.14.1" />
+        <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.SignalRService" Version="2.0.1" />
         <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Timer" Version="4.3.1" />
         <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.7" />
         <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.5.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5"/>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.7"/>
         <PackageReference Include="Microsoft.Azure.SignalR" Version="1.33.0"/>
         <PackageReference Include="Microsoft.Azure.SignalR.Management" Version="1.33.0"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
-        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.5" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.7" />
+        <PackageReference Include="OpenTelemetry.Api" Version="1.15.3" />
         <PackageReference Include="RedLock.net" Version="2.3.2" />
-        <PackageReference Include="StackExchange.Redis" Version="2.10.1"/>
+        <PackageReference Include="StackExchange.Redis" Version="2.12.14"/>
     </ItemGroup>
     <ItemGroup>
         <None Update="host.json">

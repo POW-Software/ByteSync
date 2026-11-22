@@ -6,7 +6,7 @@ using ByteSync.Common.Business.Misc;
 using ByteSync.Interfaces.Services.Localizations;
 using ByteSync.Services;
 using ByteSync.Services.Converters;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

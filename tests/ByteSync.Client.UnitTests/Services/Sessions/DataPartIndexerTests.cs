@@ -3,7 +3,7 @@ using ByteSync.Business.Comparisons;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Sessions;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Sessions;

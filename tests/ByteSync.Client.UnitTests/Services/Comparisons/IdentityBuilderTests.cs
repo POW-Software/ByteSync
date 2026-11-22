@@ -12,7 +12,7 @@ using ByteSync.Common.Helpers;
 using ByteSync.Services.Comparisons;
 using ByteSync.Services.Inventories;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;

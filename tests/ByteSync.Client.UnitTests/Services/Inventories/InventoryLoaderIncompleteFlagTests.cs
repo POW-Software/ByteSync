@@ -6,7 +6,7 @@ using ByteSync.Common.Controls.Json;
 using ByteSync.Models.FileSystems;
 using ByteSync.Models.Inventories;
 using ByteSync.Services.Inventories;
-using FluentAssertions;
+using AwesomeAssertions;
 using ByteSync.TestsCommon;
 using NUnit.Framework;
 

@@ -4,7 +4,7 @@ using ByteSync.Business.Inventories;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Models.Comparisons.Result;
 using ByteSync.Services.Comparisons.ConditionMatchers;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Comparisons;

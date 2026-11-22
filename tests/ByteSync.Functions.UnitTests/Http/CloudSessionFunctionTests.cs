@@ -10,7 +10,7 @@ using ByteSync.Functions.Http;
 using ByteSync.Functions.UnitTests.TestHelpers;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Commands.CloudSessions;
-using FluentAssertions;
+using AwesomeAssertions;
 using MediatR;
 using Microsoft.Azure.Functions.Worker;
 using Moq;

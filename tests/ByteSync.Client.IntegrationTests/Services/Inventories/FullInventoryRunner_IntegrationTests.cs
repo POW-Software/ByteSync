@@ -25,7 +25,7 @@ using ByteSync.Services.Comparisons;
 using ByteSync.Services.Inventories;
 using ByteSync.Services.Sessions;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 

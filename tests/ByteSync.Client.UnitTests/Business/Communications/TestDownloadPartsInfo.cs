@@ -1,6 +1,6 @@
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Business.Communications;

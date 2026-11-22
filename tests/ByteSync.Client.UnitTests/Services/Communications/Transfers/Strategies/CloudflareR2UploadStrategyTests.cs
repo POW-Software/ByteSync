@@ -3,7 +3,7 @@ using ByteSync.Business.Communications.Transfers;
 using ByteSync.Common.Business.Communications.Transfers;
 using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Services.Communications.Transfers.Strategies;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Moq.Protected;

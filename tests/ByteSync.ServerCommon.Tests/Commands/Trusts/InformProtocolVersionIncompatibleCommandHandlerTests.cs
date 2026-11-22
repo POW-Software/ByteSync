@@ -5,7 +5,7 @@ using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Commands.Trusts;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
 using FakeItEasy;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 
 namespace ByteSync.ServerCommon.Tests.Commands.Trusts;

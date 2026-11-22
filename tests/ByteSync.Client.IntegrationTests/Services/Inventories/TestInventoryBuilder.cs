@@ -20,7 +20,7 @@ using ByteSync.Models.Inventories;
 using ByteSync.Services.Inventories;
 using ByteSync.Services.Sessions;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.Extensions.Logging;
 using Moq;

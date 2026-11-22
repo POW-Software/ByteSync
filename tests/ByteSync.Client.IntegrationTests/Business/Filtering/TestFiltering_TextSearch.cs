@@ -4,7 +4,7 @@ using ByteSync.Business.Inventories;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Models.Comparisons.Result;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 
 namespace ByteSync.Client.IntegrationTests.Business.Filtering;

@@ -3,7 +3,7 @@ using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Services;
 using FakeItEasy;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace ByteSync.ServerCommon.Tests.Services;
 

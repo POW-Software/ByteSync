@@ -1,7 +1,7 @@
 using ByteSync.Business.Filtering.Evaluators;
 using ByteSync.Business.Filtering.Parsing;
 using ByteSync.Business.Filtering.Values;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Business.Filtering;

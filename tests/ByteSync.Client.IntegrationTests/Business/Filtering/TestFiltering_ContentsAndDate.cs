@@ -1,5 +1,5 @@
 ﻿using System.Globalization;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace ByteSync.Client.IntegrationTests.Business.Filtering;
 

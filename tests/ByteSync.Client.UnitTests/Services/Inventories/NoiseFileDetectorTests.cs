@@ -1,7 +1,7 @@
 using System.Text.Json;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Services.Inventories;
-using FluentAssertions;
+using AwesomeAssertions;
 using NUnit.Framework;
 
 namespace ByteSync.Client.UnitTests.Services.Inventories;

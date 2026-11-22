@@ -13,7 +13,7 @@ using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Repositories;
 using ByteSync.Services.Inventories;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 

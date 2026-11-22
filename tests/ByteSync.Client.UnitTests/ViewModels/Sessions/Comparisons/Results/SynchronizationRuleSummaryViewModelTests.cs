@@ -20,7 +20,7 @@ using ByteSync.Interfaces.Services.Sessions;
 using ByteSync.Services.Comparisons.DescriptionBuilders;
 using ByteSync.ViewModels.Sessions.Comparisons.Actions;
 using ByteSync.ViewModels.Sessions.Comparisons.Results;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using NUnit.Framework;
 

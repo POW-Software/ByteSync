@@ -12,7 +12,7 @@ using ByteSync.Interfaces.Repositories;
 using ByteSync.Repositories;
 using ByteSync.Services.Inventories;
 using ByteSync.TestsCommon;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 
 namespace ByteSync.Client.IntegrationTests.Services.Inventories;

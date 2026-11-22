@@ -17,7 +17,7 @@ using ByteSync.TestsCommon;
 using ByteSync.ViewModels.Misc;
 using ByteSync.ViewModels.Sessions.Synchronizations;
 using DynamicData;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
