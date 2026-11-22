@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using ByteSync.Business.Communications;
 using ByteSync.Common.Business.EndPoints;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -17,6 +17,8 @@ public interface IConnectionService
     
     string? ClientInstanceId { get; }
     
+    bool IsStarting { get; }
+
     Task StartConnectionAsync();
     
     Task StopConnection();

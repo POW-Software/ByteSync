@@ -1862,4 +1862,7 @@ Do you want to save this new Session Profile with this name?</value>
 	<data name="ConnectionStatus_RelayIncompatibleDetails" xml:space="preserve">
 		<value>The relay server does not provide the secure authentication required by this client. Check the relay address or update the relay server. Automatic reconnection has stopped.</value>
 	</data>
+  <data name="TrustedNetworkView_RenewKeyAvailability" xml:space="preserve">
+    <value>Renew your key outside a session, after connection attempts have finished.</value>
+  </data>
 </root>

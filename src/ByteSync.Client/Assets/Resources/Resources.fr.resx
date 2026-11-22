@@ -1837,5 +1837,8 @@ Voulez-vous enregistrer ce nouveau Profil de Session avec ce nom ?</value>
 	<data name="ConnectionStatus_RelayIncompatibleDetails" xml:space="preserve">
 		<value>Le serveur relais ne fournit pas l’authentification sécurisée requise par ce client. Vérifiez l’adresse du relais ou mettez à jour le serveur. La reconnexion automatique est arrêtée.</value>
 	</data>
+  <data name="TrustedNetworkView_RenewKeyAvailability" xml:space="preserve">
+    <value>Renouvelez votre clé hors session, une fois les tentatives de connexion terminées.</value>
+  </data>
 </root>
 

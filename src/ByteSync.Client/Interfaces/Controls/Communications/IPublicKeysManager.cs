@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using ByteSync.Business.Communications;
 using ByteSync.Common.Business.EndPoints;
 
@@ -24,7 +24,7 @@ public interface IPublicKeysManager
     
     void Delete(TrustedPublicKey trustedPublicKey);
     
-    void InitializeRsaAndTrustedPublicKeys();
+    Task InitializeRsaAndTrustedPublicKeys();
     
     byte[] DecryptBytes(byte[] messageToEncrypt);
     

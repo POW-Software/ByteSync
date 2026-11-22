@@ -209,6 +209,18 @@ Validation: the solution, including integration fixtures, builds with zero error
 
 Evidence is retained locally under `artifacts/pr351-p1/` in the original checkout, including TRX, coverage and `validation.json`. The correction uses `[skip ci]` to avoid Azure/container workflows after pushing to the same PR.
 
+## Coherent manual key renewal (2026-11-22)
+
+Explicit manual renewal now updates the stored RSA pair, readable ClientId, runtime Identity and fingerprint-prefixed ClientInstanceId together. The existing manual-renewal behavior still regenerates the readable code and clears trusted keys after user confirmation; normal startup/login does neither. The readable code keeps its historical format.
+
+Renewal is serialized and refused while a session exists, while creating/joining a session, or while an authentication attempt/retry is pending. These checks run before stopping the connection and session state is checked again afterwards. The UI disables renewal during sessions/connection setup and supplies English/French guidance. A failed hub stop leaves the keys unchanged.
+
+Before key replacement, the client cancels token refresh, waits for any in-flight refresh request to finish, stops the old hub, clears its endpoint and removes the old JWT/refresh tokens. The settings update installs the matching environment identity and a fresh instance. A previously connected client starts an observed fresh-login reconnection in the background, allowing the new identity to appear immediately even if the relay is unavailable. Reconnection failure preserves coherent new key/identity state for another attempt. No legacy login fallback is introduced.
+
+Automatic restarts and explicit stops share a lifecycle gate; canceled refresh work cannot restart the old connection. Ordinary same-key reconnections keep the existing instance identity so local source grants and current sessions are not invalidated by transient connectivity. Only explicit key renewal clears/replaces the endpoint and key identity. Existing session membership and local permissions are not promoted to the new key.
+
+Validation: the solution and integration fixtures compile with zero errors. The full client unit suite passes **1,317 tests**, zero failures, including 18 additional cases for renewal, real RSA-PSS login after renewal, token removal, refusal/failure paths, refresh draining, automatic restart, recipient/session UI guards and nonblocking reconnection. Twelve existing POSIX-only cases do not execute on Windows. Coverage reaches 88 of 93 changed executable/instrumented lines (94.6%), including the XAML tooltip sequence point; this does not establish the PR-wide Sonar gate. Backend production code is unchanged; the server/Functions/Common suites were not rerun for this client-only follow-up. The previous P1 validation remains recorded above. Integration/E2E services were not exercised. No Azure endpoint was contacted and Docker was not started. Evidence is under `artifacts/p2/validated/`; the correction uses `[skip ci]` when pushed to the same PR.
+
 ## Future rollout proposal (not executed)
 
 1. Review this patch and approve the breaking protocol, restrictions and enrollment experience. Complete native multi-platform CI, isolated Redis/SignalR/storage end-to-end tests, load/abuse checks and the coverage gate. Confirm the Redis version before rollout. Back up local RSA/settings/trust/profile data through the existing supported process; do not collect private keys centrally.

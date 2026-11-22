@@ -1,4 +1,10 @@
-﻿using System.Collections.ObjectModel;
+using System.Threading;
+using ByteSync.Common.Business.Auth;
+using ByteSync.Business.Sessions;
+using ByteSync.Interfaces.Controls.Applications;
+using ByteSync.Interfaces.Repositories;
+using ByteSync.Interfaces.Services.Sessions;
+using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Text;
 using ByteSync.Business.Communications;
@@ -16,13 +22,23 @@ public class PublicKeysManager : IPublicKeysManager
     private readonly IApplicationSettingsRepository _applicationSettingsRepository;
     private readonly IConnectionService _connectionService;
     private readonly ILogger<PublicKeysManager> _logger;
+    private readonly IEnvironmentService _environment;
+    private readonly IAuthenticationTokensRepository _tokens;
+    private readonly Lazy<ISessionService> _session;
+    private readonly ICloudSessionConnectionRepository _sessionConnection;
+    private readonly SemaphoreSlim _renewalGate = new(1, 1);
     
     public PublicKeysManager(IApplicationSettingsRepository applicationSettingsManager, IConnectionService connectionService,
-        ILogger<PublicKeysManager> logger)
+        ILogger<PublicKeysManager> logger, IEnvironmentService environment,
+        IAuthenticationTokensRepository tokens, Lazy<ISessionService> session, ICloudSessionConnectionRepository sessionConnection)
     {
         _applicationSettingsRepository = applicationSettingsManager;
         _connectionService = connectionService;
         _logger = logger;
+        _environment = environment;
+        _tokens = tokens;
+        _session = session;
+        _sessionConnection = sessionConnection;
     }
     
     public PublicKeyInfo GetMyPublicKeyInfo()
@@ -161,18 +177,39 @@ public class PublicKeysManager : IPublicKeysManager
         _logger.LogInformation("Removed Trusted Public Key {@publicKey}", trustedPublicKey);
     }
     
-    public void InitializeRsaAndTrustedPublicKeys()
+    public async Task InitializeRsaAndTrustedPublicKeys()
     {
-        var updatedSettings = _applicationSettingsRepository.UpdateCurrentApplicationSettings(settings =>
+        await _renewalGate.WaitAsync();
+        try
         {
-            settings.InitializeRsa();
-            settings.InitializeTrustedPublicKeys();
-        });
-        
-        _logger.LogInformation("Initialized Local RSA Keys and removed all Trusted Public Keys");
-        _logger.LogInformation("ClientId is now {@clientId}", updatedSettings.ClientId);
+            if (_session.Value.CurrentSession != null || _sessionConnection.CurrentConnectionStatus != SessionConnectionStatus.NoSession ||
+                _connectionService.IsStarting || _connectionService.CurrentConnectionStatus == ByteSync.Business.Communications.ConnectionStatuses.Connecting)
+                throw new InvalidOperationException("Leave the current session and wait for the connection to finish before renewing the key");
+            var reconnect = _connectionService.CurrentConnectionStatus == ConnectionStatuses.Connected;
+            await _connectionService.StopConnection();
+            if (_session.Value.CurrentSession != null || _sessionConnection.CurrentConnectionStatus != SessionConnectionStatus.NoSession)
+                throw new InvalidOperationException("A session started while stopping the connection; the key was not renewed");
+            _connectionService.CurrentEndPoint = null;
+            await _tokens.Clear();
+            var updatedSettings = _applicationSettingsRepository.UpdateCurrentApplicationSettings(settings =>
+            {
+                settings.InitializeRsa();
+                settings.InitializeTrustedPublicKeys();
+                _environment.SetClientIdentity(settings.ClientId, AuthenticationProtocol.GetIdentity(settings.DecodedRsaPublicKey!));
+            });
+            _logger.LogInformation("Initialized Local RSA Keys and removed all Trusted Public Keys");
+            _logger.LogInformation("ClientId is now {@clientId}", updatedSettings.ClientId);
+            if (reconnect) _ = ReconnectAfterRenewal();
+        }
+        finally { _renewalGate.Release(); }
     }
-    
+
+    private async Task ReconnectAfterRenewal()
+    {
+        try { await _connectionService.StartConnectionAsync(); }
+        catch (Exception ex) { _logger.LogError(ex, "The key was renewed but reconnection failed"); }
+    }
+
     public byte[] DecryptBytes(byte[] messageToDecrypt)
     {
         // On décrypte avec la clé privée

@@ -143,6 +143,149 @@ public class AuthProtocolCompatibilityTests
         await act.Should().ThrowAsync<ArgumentException>();
     }
 
+    [TestCase(false)]
+    [TestCase(true)]
+    public async Task KeyRenewal_UpdatesReadableIdIdentityAndInstanceBeforeSigningAnotherLogin(bool connected)
+    {
+        var previousId = _settings.ClientId;
+        var previousKey = _settings.DecodedRsaPublicKey!.ToArray();
+        var environment = new EnvironmentService(Mock.Of<IMsixPfnParser>());
+        environment.SetClientIdentity(previousId, AuthenticationProtocol.GetIdentity(previousKey));
+        var previousInstance = environment.ClientInstanceId;
+        var repository = new Mock<IApplicationSettingsRepository>();
+        repository.Setup(r => r.GetCurrentApplicationSettings()).Returns(_settings);
+        repository.Setup(r => r.UpdateCurrentApplicationSettings(It.IsAny<Action<ApplicationSettings>>(), true))
+            .Returns((Action<ApplicationSettings> update, bool save) => { update(_settings); return _settings; });
+        var tokens = new AuthenticationTokensRepository();
+        await tokens.Store(new AuthenticationTokens { JwtToken = "old-token", RefreshToken = "old-refresh" });
+        var connection = new Mock<IConnectionService>();
+        connection.SetupProperty(c => c.CurrentEndPoint, new ByteSync.Common.Business.EndPoints.ByteSyncEndpoint { ClientInstanceId = previousInstance });
+        connection.SetupGet(c => c.CurrentConnectionStatus).Returns(connected ? ConnectionStatuses.Connected : ConnectionStatuses.NotConnected);
+        var order = new List<string>();
+        connection.Setup(c => c.StopConnection()).Callback(() => order.Add("stop")).Returns(Task.CompletedTask);
+        var challenge = new AuthenticationChallenge { Id = Guid.NewGuid().ToString("N"), Nonce = "local-nonce", ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(2) };
+        _api.Setup(a => a.PostAsync<AuthenticationChallenge>("auth/challenge", It.IsAny<object>(), It.IsAny<CancellationToken>())).ReturnsAsync(challenge);
+        _api.Setup(a => a.PostAsync<InitialAuthenticationResponse>("auth/login", It.IsAny<object>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new InitialAuthenticationResponse(InitialConnectionStatus.Success));
+        async Task ValidateFreshLogin()
+        {
+            (await tokens.GetTokens()).Should().BeNull();
+            connection.Object.CurrentEndPoint.Should().BeNull();
+            var login = new LoginData { ClientInstanceId = environment.ClientInstanceId, Version = "test" };
+            await _client.Login(login);
+            login.ClientId.Should().Be(environment.ClientId);
+            login.Identity.Should().Be(environment.Identity);
+            AuthenticationProtocol.IsInstanceOf(login.ClientInstanceId, login.Identity).Should().BeTrue();
+            using var verifier = RSA.Create();
+            verifier.ImportRSAPublicKey(login.PublicKey, out _);
+            verifier.VerifyData(AuthenticationProtocol.GetMessage(login, challenge), login.Signature,
+                HashAlgorithmName.SHA256, RSASignaturePadding.Pss).Should().BeTrue();
+            order.Add("fresh-login");
+        }
+        connection.Setup(c => c.StartConnectionAsync()).Returns(ValidateFreshLogin);
+        var manager = new PublicKeysManager(repository.Object, connection.Object, NullLogger<PublicKeysManager>.Instance,
+            environment, tokens, new Lazy<ByteSync.Interfaces.Services.Sessions.ISessionService>(() => Mock.Of<ByteSync.Interfaces.Services.Sessions.ISessionService>()),
+            Mock.Of<ByteSync.Interfaces.Repositories.ICloudSessionConnectionRepository>());
+
+        await manager.InitializeRsaAndTrustedPublicKeys();
+
+        environment.ClientId.Should().Be(_settings.ClientId).And.MatchRegex("^[A-Z]{4}-[A-Z]{3}-[A-Z]{3}$");
+        environment.Identity.Should().Be(AuthenticationProtocol.GetIdentity(_settings.DecodedRsaPublicKey!));
+        environment.ClientInstanceId.Should().NotBe(previousInstance);
+        _settings.DecodedRsaPublicKey.Should().NotEqual(previousKey);
+        _settings.DecodedTrustedPublicKeys.Should().BeEmpty();
+        connection.Verify(c => c.StartConnectionAsync(), connected ? Times.Once() : Times.Never());
+        order.First().Should().Be("stop");
+        if (!connected) await ValidateFreshLogin();
+        order.Should().Equal("stop", "fresh-login");
+    }
+
+    [TestCase("session")]
+    [TestCase("joining")]
+    [TestCase("connecting")]
+    [TestCase("retrying")]
+    [TestCase("stop-failure")]
+    [TestCase("session-starts-during-stop")]
+    public async Task KeyRenewal_LeavesExistingKeysIntactWhenTheTransitionIsUnsafe(string reason)
+    {
+        var before = _settings.DecodedRsaPublicKey!.ToArray();
+        var clientId = _settings.ClientId;
+        var session = new Mock<ByteSync.Interfaces.Services.Sessions.ISessionService>();
+        if (reason == "session") session.SetupGet(s => s.CurrentSession).Returns(new ByteSync.Common.Business.Sessions.Cloud.CloudSession("session", "instance"));
+        var sessionConnection = new Mock<ByteSync.Interfaces.Repositories.ICloudSessionConnectionRepository>();
+        if (reason == "joining") sessionConnection.SetupGet(s => s.CurrentConnectionStatus).Returns(ByteSync.Business.Sessions.SessionConnectionStatus.JoiningSession);
+        var connection = new Mock<IConnectionService>();
+        if (reason == "connecting") connection.SetupGet(c => c.CurrentConnectionStatus).Returns(ConnectionStatuses.Connecting);
+        if (reason == "retrying") connection.SetupGet(c => c.IsStarting).Returns(true);
+        if (reason == "stop-failure") connection.Setup(c => c.StopConnection()).ThrowsAsync(new InvalidOperationException("stop failed"));
+        if (reason == "session-starts-during-stop") connection.Setup(c => c.StopConnection())
+            .Callback(() => sessionConnection.SetupGet(s => s.CurrentConnectionStatus).Returns(ByteSync.Business.Sessions.SessionConnectionStatus.JoiningSession))
+            .Returns(Task.CompletedTask);
+        var settings = new Mock<IApplicationSettingsRepository>(MockBehavior.Strict);
+        var tokens = new Mock<IAuthenticationTokensRepository>(MockBehavior.Strict);
+        var environment = new Mock<IEnvironmentService>(MockBehavior.Strict);
+        var manager = new PublicKeysManager(settings.Object, connection.Object, NullLogger<PublicKeysManager>.Instance,
+            environment.Object, tokens.Object, new Lazy<ByteSync.Interfaces.Services.Sessions.ISessionService>(() => session.Object), sessionConnection.Object);
+
+        var act = () => manager.InitializeRsaAndTrustedPublicKeys();
+
+        await act.Should().ThrowAsync<InvalidOperationException>();
+        _settings.DecodedRsaPublicKey.Should().Equal(before);
+        _settings.ClientId.Should().Be(clientId);
+        settings.VerifyNoOtherCalls();
+        tokens.VerifyNoOtherCalls();
+        environment.VerifyNoOtherCalls();
+        connection.Verify(c => c.StartConnectionAsync(), Times.Never());
+    }
+
+    [Test]
+    public async Task ReconnectionFailure_LeavesTheRenewedIdentityReadyForTheNextAttempt()
+    {
+        var environment = new EnvironmentService(Mock.Of<IMsixPfnParser>());
+        var repository = new Mock<IApplicationSettingsRepository>();
+        repository.Setup(r => r.UpdateCurrentApplicationSettings(It.IsAny<Action<ApplicationSettings>>(), true))
+            .Returns((Action<ApplicationSettings> update, bool save) => { update(_settings); return _settings; });
+        var connection = new Mock<IConnectionService>();
+        connection.SetupGet(c => c.CurrentConnectionStatus).Returns(ConnectionStatuses.Connected);
+        connection.Setup(c => c.StartConnectionAsync()).ThrowsAsync(new InvalidOperationException("relay unavailable"));
+        var tokens = new AuthenticationTokensRepository();
+        await tokens.Store(new AuthenticationTokens { JwtToken = "old-token" });
+        var manager = new PublicKeysManager(repository.Object, connection.Object, NullLogger<PublicKeysManager>.Instance,
+            environment, tokens, new Lazy<ByteSync.Interfaces.Services.Sessions.ISessionService>(() => Mock.Of<ByteSync.Interfaces.Services.Sessions.ISessionService>()),
+            Mock.Of<ByteSync.Interfaces.Repositories.ICloudSessionConnectionRepository>());
+
+        await manager.InitializeRsaAndTrustedPublicKeys();
+
+        environment.Identity.Should().Be(AuthenticationProtocol.GetIdentity(_settings.DecodedRsaPublicKey!));
+        environment.ClientId.Should().Be(_settings.ClientId);
+        AuthenticationProtocol.IsInstanceOf(environment.ClientInstanceId, environment.Identity).Should().BeTrue();
+        (await tokens.GetTokens()).Should().BeNull();
+    }
+
+    [Test]
+    public async Task PendingReconnection_DoesNotBlockDisplayingTheRenewedIdentity()
+    {
+        var pending = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var repository = new Mock<IApplicationSettingsRepository>();
+        repository.Setup(r => r.UpdateCurrentApplicationSettings(It.IsAny<Action<ApplicationSettings>>(), true))
+            .Returns((Action<ApplicationSettings> update, bool save) => { update(_settings); return _settings; });
+        var connection = new Mock<IConnectionService>();
+        connection.SetupGet(c => c.CurrentConnectionStatus).Returns(ConnectionStatuses.Connected);
+        connection.Setup(c => c.StartConnectionAsync()).Returns(pending.Task);
+        var environment = new EnvironmentService(Mock.Of<IMsixPfnParser>());
+        var manager = new PublicKeysManager(repository.Object, connection.Object, NullLogger<PublicKeysManager>.Instance,
+            environment, new AuthenticationTokensRepository(),
+            new Lazy<ByteSync.Interfaces.Services.Sessions.ISessionService>(() => Mock.Of<ByteSync.Interfaces.Services.Sessions.ISessionService>()),
+            Mock.Of<ByteSync.Interfaces.Repositories.ICloudSessionConnectionRepository>());
+
+        await manager.InitializeRsaAndTrustedPublicKeys().WaitAsync(TimeSpan.FromSeconds(5));
+
+        pending.Task.IsCompleted.Should().BeFalse();
+        environment.Identity.Should().Be(AuthenticationProtocol.GetIdentity(_settings.DecodedRsaPublicKey!));
+        connection.Verify(c => c.StartConnectionAsync(), Times.Once());
+        pending.SetResult();
+    }
+
     [Test]
     public void EnvironmentInitialization_PreservesTheStoredReadableIdAndExistingKeys()
     {

@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Common.Business.Auth;
 using ByteSync.Interfaces.Services.Communications;
@@ -24,6 +24,13 @@ public class AuthenticationTokensRepository : IAuthenticationTokensRepository
         }
     }
         
+    public async Task Clear()
+    {
+        await _semaphore.WaitAsync();
+        try { _tokens = null; }
+        finally { _semaphore.Release(); }
+    }
+
     public async Task Store(AuthenticationTokens authenticationTokens)
     {
         var clone = authenticationTokens.Clone() as AuthenticationTokens;

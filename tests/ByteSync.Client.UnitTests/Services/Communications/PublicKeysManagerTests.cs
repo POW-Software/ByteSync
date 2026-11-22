@@ -53,10 +53,47 @@ public class PublicKeysManagerTests : AbstractTester
         _publicKeysManager = new PublicKeysManager(
             _applicationSettingsRepository.Object,
             _connectionService.Object,
-            _logger.Object
+            _logger.Object,
+            Mock.Of<ByteSync.Interfaces.Controls.Applications.IEnvironmentService>(),
+            Mock.Of<IAuthenticationTokensRepository>(),
+            new Lazy<ByteSync.Interfaces.Services.Sessions.ISessionService>(() => Mock.Of<ByteSync.Interfaces.Services.Sessions.ISessionService>()),
+            Mock.Of<ByteSync.Interfaces.Repositories.ICloudSessionConnectionRepository>()
         );
     }
     
+    [Test]
+    public void RenewCommand_IsDisabledDuringSessionsAndConnectionAttempts()
+    {
+        var manager = new Mock<ByteSync.Interfaces.Controls.Communications.IPublicKeysManager>();
+        manager.Setup(m => m.GetMyPublicKeyInfo()).Returns(new PublicKeyInfo { PublicKey = [1, 2, 3] });
+        using var sessions = new System.Reactive.Subjects.BehaviorSubject<ByteSync.Common.Business.Sessions.AbstractSession?>(null);
+        using var sessionStates = new System.Reactive.Subjects.BehaviorSubject<ByteSync.Business.Sessions.SessionConnectionStatus>(ByteSync.Business.Sessions.SessionConnectionStatus.NoSession);
+        using var connectionStates = new System.Reactive.Subjects.BehaviorSubject<ByteSync.Business.Communications.ConnectionStatuses>(ByteSync.Business.Communications.ConnectionStatuses.Connected);
+        var session = new Mock<ByteSync.Interfaces.Services.Sessions.ISessionService>();
+        session.SetupGet(s => s.SessionObservable).Returns(sessions);
+        var sessionConnection = new Mock<ByteSync.Interfaces.Repositories.ICloudSessionConnectionRepository>();
+        sessionConnection.SetupGet(s => s.ConnectionStatusObservable).Returns(sessionStates);
+        var connection = new Mock<IConnectionService>();
+        connection.SetupGet(c => c.ConnectionStatus).Returns(connectionStates);
+        var viewModel = new ByteSync.ViewModels.TrustedNetworks.TrustedNetworkViewModel(manager.Object,
+            _applicationSettingsRepository.Object, new ByteSync.ViewModels.TrustedNetworks.TrustedPublicKeysViewModel(),
+            Mock.Of<ByteSync.Interfaces.Dialogs.IMessageBoxViewModelFactory>(), session.Object, sessionConnection.Object, connection.Object);
+        var enabled = false;
+        using var subscription = viewModel.RenewPublicKeyCommand.CanExecute.Subscribe(v => enabled = v);
+
+        enabled.Should().BeTrue();
+        sessionStates.OnNext(ByteSync.Business.Sessions.SessionConnectionStatus.JoiningSession);
+        enabled.Should().BeFalse();
+        sessionStates.OnNext(ByteSync.Business.Sessions.SessionConnectionStatus.NoSession);
+        sessions.OnNext(new ByteSync.Common.Business.Sessions.Cloud.CloudSession("session", "instance"));
+        enabled.Should().BeFalse();
+        sessions.OnNext(null);
+        connectionStates.OnNext(ByteSync.Business.Communications.ConnectionStatuses.Connecting);
+        enabled.Should().BeFalse();
+        connectionStates.OnNext(ByteSync.Business.Communications.ConnectionStatuses.Connected);
+        enabled.Should().BeTrue();
+    }
+
     [Test]
     public void GetMyPublicKeyInfo_ShouldIncludeProtocolVersion()
     {
