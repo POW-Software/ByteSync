@@ -1,4 +1,4 @@
-﻿namespace ByteSync.Common.Business.Sessions.Cloud.Connections;
+namespace ByteSync.Common.Business.Sessions.Cloud.Connections;
 
 public class PublicKeyValidationParameters
 {
@@ -10,6 +10,9 @@ public class PublicKeyValidationParameters
     public string SessionId { get; set; }
     
     public string IssuerClientId { get; set; }
+    public string IssuerClientInstanceId { get; set; }
+    public string IssuerIdentity { get; set; }
+    public string ExchangeId { get; set; }
     
     public string OtherPartyClientInstanceId { get; set; }
     

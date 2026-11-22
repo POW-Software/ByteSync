@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Threading;
 using ByteSync.Business.Communications.PublicKeysTrusting;
 using ByteSync.Common.Business.EndPoints;
@@ -39,15 +39,12 @@ public class TrustProcessPublicKeysRepository : BaseRepository<TrustProcessPubli
                 .FullyTrustedPublicKeyCheckDatas.Any(pk => pk.IssuerClientInstanceId.Equals(memberInstanceId)));
     }
 
-    public async Task<PeerTrustProcessData> ResetPeerTrustProcessData(string sessionId, string otherPartyClientId)
+    public async Task<PeerTrustProcessData> ResetPeerTrustProcessData(string sessionId, PublicKeyCheckData peer)
     {
         return await GetAsync(sessionId, data =>
         {
-            var peerTrustProcessData = new PeerTrustProcessData(otherPartyClientId);
-            
-            data.AddPeerTrustProcessData(peerTrustProcessData);
-
-            return peerTrustProcessData;
+            var peerTrustProcessData = new PeerTrustProcessData(peer);
+            return data.AddPeerTrustProcessData(peerTrustProcessData);
         });
     }
     
@@ -65,7 +62,7 @@ public class TrustProcessPublicKeysRepository : BaseRepository<TrustProcessPubli
     {
         await RunAsync(sessionId, data =>
         {
-            data.SetOtherPartyChecked(publicKeyValidationParameters.IssuerClientId, publicKeyValidationParameters.IsValidated);
+            data.SetOtherPartyChecked(publicKeyValidationParameters);
         });
     }
     

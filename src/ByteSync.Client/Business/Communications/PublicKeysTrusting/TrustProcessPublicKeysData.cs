@@ -1,6 +1,4 @@
-﻿using Serilog;
-
-namespace ByteSync.Business.Communications.PublicKeysTrusting;
+﻿namespace ByteSync.Business.Communications.PublicKeysTrusting;
 
 public class TrustProcessPublicKeysData
 {
@@ -23,26 +21,22 @@ public class TrustProcessPublicKeysData
     
     public SessionMemberTrustProcessData SessionMemberTrustProcessData { get; }
 
-    public void AddPeerTrustProcessData(PeerTrustProcessData peerTrustProcessData)
+    public PeerTrustProcessData AddPeerTrustProcessData(PeerTrustProcessData peer)
     {
-        if (PeerTrustProcessDatas.ContainsKey(peerTrustProcessData.OtherPartyClientId))
-        {
-            PeerTrustProcessDatas.Remove(peerTrustProcessData.OtherPartyClientId);
-        }
-        
-        PeerTrustProcessDatas.Add(peerTrustProcessData.OtherPartyClientId, peerTrustProcessData);
+        var instance = peer.OtherPartyClientInstanceId!;
+        if (PeerTrustProcessDatas.TryGetValue(instance, out var existing) &&
+            existing.OtherPartyIdentity == peer.OtherPartyIdentity && existing.ExchangeId == peer.ExchangeId)
+            return existing;
+        PeerTrustProcessDatas[instance] = peer;
+        return peer;
     }
 
-    public void SetOtherPartyChecked(string issuerClientId, bool isValidated)
+    public void SetOtherPartyChecked(ByteSync.Common.Business.Sessions.Cloud.Connections.PublicKeyValidationParameters parameters)
     {
-        PeerTrustProcessData? peerTrustProcessData;
-        if (PeerTrustProcessDatas.TryGetValue(issuerClientId, out peerTrustProcessData))
-        {
-            peerTrustProcessData.SetOtherPartyChecked(isValidated);
-        }
-        else
-        {
-            Log.Warning("Can not find PeerTrustProcessData with ClientId {issuerClientId}", issuerClientId);
-        }
+        if (parameters.IssuerClientInstanceId != null &&
+            PeerTrustProcessDatas.TryGetValue(parameters.IssuerClientInstanceId, out var peer) &&
+            peer.OtherPartyIdentity == parameters.IssuerIdentity && peer.ExchangeId == parameters.ExchangeId &&
+            !peer.OtherPartyHasFinished())
+            peer.SetOtherPartyChecked(parameters.IsValidated);
     }
 }

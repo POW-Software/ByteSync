@@ -77,6 +77,36 @@ public class PublicKeysTrusterTests : AbstractTester
     
     
     [Test]
+    public async Task FinishedValidation_SendsTheExpectedExchangeAndRecipient()
+    {
+        var peer = new PublicKeyCheckData { IssuerClientInstanceId = "peer-instance", Salt = "exchange-salt",
+            IssuerPublicKeyInfo = new PublicKeyInfo { ClientId = "ABCD-EFG-HIJ", PublicKey = [1, 2, 3] } };
+        _publicKeysManager.Setup(m => m.GetMyPublicKeyInfo()).Returns(new PublicKeyInfo { ClientId = "KLMN-OPQ-RST" });
+        var pending = new ByteSync.Business.Communications.PublicKeysTrusting.PeerTrustProcessData("ABCD-EFG-HIJ");
+        var context = new ByteSync.Business.TrustDataParameters(1, 1, true, "session", pending);
+
+        await _publicKeysTruster.OnPublicKeyValidationFinished(peer, context, true);
+
+        _trustApiClient.Verify(a => a.InformPublicKeyValidationIsFinished(It.Is<PublicKeyValidationParameters>(p =>
+            p.SessionId == "session" && p.ExchangeId == peer.Salt && p.OtherPartyClientInstanceId == peer.IssuerClientInstanceId &&
+            p.OtherPartyPublicKey == peer.IssuerPublicKeyInfo.PublicKey && p.IsValidated), It.IsAny<CancellationToken>()), Times.Once);
+        pending.HasLocalValidatedPublicKey.Should().BeTrue();
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task ReceivedConfirmation_OnlyUpdatesItsIntendedRecipient(bool intended)
+    {
+        var parameters = new PublicKeyValidationParameters { SessionId = "session",
+            OtherPartyClientInstanceId = intended ? "TestClientInstanceId" : "other-instance" };
+
+        await _publicKeysTruster.OnPublicKeyValidationIsFinishedAsync(parameters);
+
+        _trustProcessPublicKeysRepository.Verify(r => r.SetOtherPartyChecked("session", parameters),
+            intended ? Times.Once() : Times.Never());
+    }
+
+    [Test]
     public async Task TrustCheck_SkipsOnlyInstancesOfTheCryptographicIdentity()
     {
         const string alias = "ABCD-EFG-HIJ";
@@ -191,7 +221,7 @@ public class PublicKeysTrusterTests : AbstractTester
             .ReturnsAsync(myPublicKeyCheckData);
         
         _trustProcessPublicKeysRepository
-            .Setup(r => r.ResetPeerTrustProcessData(sessionId, "JoinerClientId"))
+            .Setup(r => r.ResetPeerTrustProcessData(sessionId, joinerPublicKeyCheckData))
             .ReturnsAsync(peerTrustProcessData);
         
         var requestParameters = new RequestTrustProcessParameters(sessionId, joinerPublicKeyCheckData, joinerInstanceId);

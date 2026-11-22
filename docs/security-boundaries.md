@@ -197,6 +197,18 @@ Offline validation: solution build succeeded with zero errors. **1,816 tests pas
 
 Combined client/server coverage covers 20 of the 22 changed executable production lines (90.9%); the two bootstrap wiring lines were not executed. `AuthApiClient`, `AuthenticationChallengeService`, `CloudSessionProfileService` and the shared RSA fixture helper have 100% line coverage in these runs. This local change metric does not establish the PR-wide Sonar coverage gate. Evidence is under `artifacts/clientid-identity/`, including `validation.json`, TRX and coverage files. No Azure endpoint was contacted and Docker was not started. The same PR branch receives the correction with `[skip ci]` to avoid Azure/container workflows.
 
+## Authenticated trust confirmations (2026-11-22)
+
+Trust completion notifications no longer select a pending exchange by readable ClientId. The relay derives the issuer instance, full fingerprint and display alias from the authenticated client, replacing caller-supplied issuer metadata. It checks the current session epoch/protocol/state, sender membership or an unexpired join attempt, recipient eligibility, the recipient public key and a bounded nonempty exchange identifier before forwarding.
+
+Both client roles register the expected peer instance, canonical RSA fingerprint and the salt already shared by their public-key check exchange. A received confirmation must match all three values within the current session and target the local instance. Identical readable aliases, including distinct instances of one key, remain independent. The first confirmation consumes the pending response; duplicate registration of the same exchange preserves that state, while a new salt replaces the expected exchange and rejects older confirmations. The readable ClientId and existing saved peer trust remain unchanged.
+
+This update addresses P1 only. It does not change manual key renewal. The extended notification requires matched builds of this unreleased V3 PR; missing identity/exchange fields cannot use an alias fallback.
+
+Validation: the solution, including integration fixtures, builds with zero errors. **1,850 offline tests pass, zero failures**: 1,299 client, 431 server (excluding service-dependent repository/integration suites), 66 Functions and 54 Common. These are 34 additional cases compared with the preceding PR head. Twelve existing POSIX-only client cases did not execute on Windows. Coverage reaches 56 of 57 changed executable production lines (98.2%); the trust-confirmation handler has 100% line coverage. This does not establish the PR-wide Sonar gate. Integration/E2E services were not exercised. Restore used the local package cache; no Azure endpoint was contacted and Docker was not started.
+
+Evidence is retained locally under `artifacts/pr351-p1/` in the original checkout, including TRX, coverage and `validation.json`. The correction uses `[skip ci]` to avoid Azure/container workflows after pushing to the same PR.
+
 ## Future rollout proposal (not executed)
 
 1. Review this patch and approve the breaking protocol, restrictions and enrollment experience. Complete native multi-platform CI, isolated Redis/SignalR/storage end-to-end tests, load/abuse checks and the coverage gate. Confirm the Redis version before rollout. Back up local RSA/settings/trust/profile data through the existing supported process; do not collect private keys centrally.

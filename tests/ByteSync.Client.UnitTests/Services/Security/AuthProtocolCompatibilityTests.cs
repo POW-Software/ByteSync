@@ -43,6 +43,106 @@ public class AuthProtocolCompatibilityTests
     [TearDown]
     public void TearDown() => _settings.PrivateRsa.Dispose();
 
+    private static ByteSync.Common.Business.EndPoints.PublicKeyCheckData Peer(RSA key, string salt = "exchange-salt")
+    {
+        var publicKey = key.ExportRSAPublicKey();
+        var identity = AuthenticationProtocol.GetIdentity(publicKey);
+        return new() { IssuerPublicKeyInfo = new() { ClientId = "ABCD-EFG-HIJ", PublicKey = publicKey },
+            IssuerClientInstanceId = identity + "_" + Guid.NewGuid().ToString("D"), Salt = salt };
+    }
+
+    [TestCase("valid", true)]
+    [TestCase("alias-metadata", true)]
+    [TestCase("wrong-identity", false)]
+    [TestCase("wrong-instance", false)]
+    [TestCase("old-exchange", false)]
+    [TestCase("missing-instance", false)]
+    [TestCase("missing-identity", false)]
+    [TestCase("missing-exchange", false)]
+    public async Task TrustConfirmation_RequiresExpectedInstanceIdentityAndExchange(string scenario, bool accepted)
+    {
+        using var key = RSA.Create(2048);
+        var peer = Peer(key);
+        var repository = new TrustProcessPublicKeysRepository(NullLogger<TrustProcessPublicKeysRepository>.Instance);
+        await repository.Start("session");
+        var pending = await repository.ResetPeerTrustProcessData("session", peer);
+        var confirmation = new ByteSync.Common.Business.Sessions.Cloud.Connections.PublicKeyValidationParameters
+        {
+            IssuerClientId = peer.IssuerPublicKeyInfo.ClientId, IssuerClientInstanceId = peer.IssuerClientInstanceId,
+            IssuerIdentity = AuthenticationProtocol.GetIdentity(peer.IssuerPublicKeyInfo.PublicKey),
+            ExchangeId = peer.Salt, IsValidated = true
+        };
+        switch (scenario)
+        {
+            case "alias-metadata": confirmation.IssuerClientId = "different-readable-alias"; break;
+            case "wrong-identity": confirmation.IssuerIdentity = new string('A', 64); break;
+            case "wrong-instance": confirmation.IssuerClientInstanceId = confirmation.IssuerIdentity + "_" + Guid.NewGuid().ToString("D"); break;
+            case "old-exchange": confirmation.ExchangeId = "old-salt"; break;
+            case "missing-instance": confirmation.IssuerClientInstanceId = null!; break;
+            case "missing-identity": confirmation.IssuerIdentity = null!; break;
+            case "missing-exchange": confirmation.ExchangeId = null!; break;
+        }
+
+        await repository.SetOtherPartyChecked("session", confirmation);
+
+        pending.HasOtherPartyValidatedPublicKey.Should().Be(accepted);
+        pending.OtherPartyHasFinished().Should().Be(accepted);
+    }
+
+    [TestCase(false)]
+    [TestCase(true)]
+    public async Task CollidingAliases_AndReplayedConfirmations_CannotCompleteAnotherExchange(bool sameKey)
+    {
+        using var firstKey = RSA.Create(2048);
+        using var secondKey = RSA.Create(2048);
+        var first = Peer(firstKey);
+        var second = Peer(sameKey ? firstKey : secondKey);
+        var repository = new TrustProcessPublicKeysRepository(NullLogger<TrustProcessPublicKeysRepository>.Instance);
+        await repository.Start("session");
+        var firstPending = await repository.ResetPeerTrustProcessData("session", first);
+        var secondPending = await repository.ResetPeerTrustProcessData("session", second);
+        var message = new ByteSync.Common.Business.Sessions.Cloud.Connections.PublicKeyValidationParameters
+        {
+            IssuerClientId = first.IssuerPublicKeyInfo.ClientId, IssuerClientInstanceId = first.IssuerClientInstanceId,
+            IssuerIdentity = AuthenticationProtocol.GetIdentity(first.IssuerPublicKeyInfo.PublicKey), ExchangeId = first.Salt, IsValidated = false
+        };
+
+        await repository.SetOtherPartyChecked("session", message);
+        var duplicate = await repository.ResetPeerTrustProcessData("session", first);
+        message.IsValidated = true;
+        await repository.SetOtherPartyChecked("session", message);
+        firstPending.HasOtherPartyValidatedPublicKey.Should().BeFalse();
+        firstPending.OtherPartyHasFinished().Should().BeTrue();
+        duplicate.Should().BeSameAs(firstPending);
+        secondPending.OtherPartyHasFinished().Should().BeFalse();
+        first.Salt = "new-exchange";
+        var replacement = await repository.ResetPeerTrustProcessData("session", first);
+        await repository.SetOtherPartyChecked("session", message);
+        replacement.OtherPartyHasFinished().Should().BeFalse();
+        message.ExchangeId = first.Salt;
+        await repository.SetOtherPartyChecked("session", message);
+        replacement.HasOtherPartyValidatedPublicKey.Should().BeTrue();
+        secondPending.HasOtherPartyValidatedPublicKey.Should().BeFalse();
+        var wrongSession = () => repository.SetOtherPartyChecked("other-session", message);
+        await wrongSession.Should().ThrowAsync<ArgumentOutOfRangeException>();
+    }
+
+    [TestCase("instance")]
+    [TestCase("salt")]
+    public async Task InvalidTrustExchange_CannotBeRegistered(string field)
+    {
+        using var key = RSA.Create(2048);
+        var peer = Peer(key);
+        if (field == "instance") peer.IssuerClientInstanceId = "ABCD-EFG-HIJ_legacy";
+        else peer.Salt = "";
+        var repository = new TrustProcessPublicKeysRepository(NullLogger<TrustProcessPublicKeysRepository>.Instance);
+        await repository.Start("session");
+
+        var act = () => repository.ResetPeerTrustProcessData("session", peer);
+
+        await act.Should().ThrowAsync<ArgumentException>();
+    }
+
     [Test]
     public void EnvironmentInitialization_PreservesTheStoredReadableIdAndExistingKeys()
     {
